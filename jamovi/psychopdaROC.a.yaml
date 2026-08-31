@@ -276,7 +276,7 @@ options:
             Random seed for reproducibility of bootstrap and permutation tests.
 
     - name: usePriorPrev
-      title: Use prior prevalence
+      title: Prior prevalence
       type: Bool
       default: false
       description:
@@ -391,7 +391,7 @@ options:
             Display standard error bands on ROC curves (when LOESS smoothing is applied).
 
     - name: smoothing
-      title: Apply LOESS smoothing
+      title: LOESS smoothing
       type: Bool
       default: false
       description:
@@ -434,7 +434,7 @@ options:
             Label curves directly on the plot instead of using a legend.
 
     - name: interactiveROC
-      title: Create interactive plot
+      title: Interactive plot
       type: Bool
       default: false
       description:

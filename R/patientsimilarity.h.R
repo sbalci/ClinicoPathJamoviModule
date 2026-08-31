@@ -298,8 +298,6 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "survival",
                     "dbscan",
                     "cluster",
-                    "survival",
-                    "plotly",
                     "survminer"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -316,14 +314,13 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="instructions",
                 title="Instructions",
-                visible="(vars)",
                 refs=list(
                     "ClinicoPathJamoviModule")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="summaryText",
                 title="Analysis Summary",
-                visible=TRUE))
+                visible="(vars)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="projectionPlot",
@@ -331,7 +328,7 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 width=700,
                 height=600,
                 renderFun=".projectionPlot",
-                visible=TRUE,
+                visible="(vars)",
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
@@ -341,7 +338,7 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$add(jmvcore::Image$new(
                 options=options,
                 name="projection3D",
-                title="Interactive 3D Projection",
+                title="3D Projection - Pairwise Views",
                 width=800,
                 height=700,
                 renderFun=".projection3D",
@@ -550,7 +547,7 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="interpretation",
                 title="Interpretation Guide",
-                visible=TRUE,
+                visible="(vars)",
                 refs=list(
                     "ClinicoPathJamoviModule")))}))
 
@@ -631,8 +628,8 @@ patientsimilarityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   improve visualization quality.
 #' @param showLoadings Show how original variables contribute to each
 #'   dimension. Only available for PCA and MDS.
-#' @param show3DPlot Generate interactive 3D plot using plotly (if
-#'   dimensions=3).
+#' @param show3DPlot Show the three pairwise 2D views of a 3D projection (Dim
+#'   1 vs 2, Dim 1 vs 3, Dim 2 vs 3). Requires dimensions = 3.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr

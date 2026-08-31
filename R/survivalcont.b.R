@@ -4030,6 +4030,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                     # Fit survival model
                     fit <- survival::survfit(surv_formula, data = plot_data)
+                    # survminer re-parses fit$call$formula; passing the formula through a variable
+                    # leaves a bare symbol there and ggsurvplot dies with
+                    # "object of type 'symbol' is not subsettable".
+                    fit$call$formula <- surv_formula
 
                     # Create survival plot
                     surv_plot <- .quietly(survminer::ggsurvplot(
@@ -4532,6 +4536,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Fit survival model
                 fit <- survival::survfit(myformula, data = res.cat)
+                # survminer re-parses fit$call$formula; passing the formula through a variable
+                # leaves a bare symbol there and ggsurvplot dies with
+                # "object of type 'symbol' is not subsettable".
+                fit$call$formula <- myformula
 
                 tryCatch({
                     # Create log-log plot using survminer

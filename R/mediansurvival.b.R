@@ -101,8 +101,11 @@ mediansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         
         .performSingleGroup = function(data) {
             # Fit single group survival model
-            surv_obj <- Surv(data$time, data$event)
-            km_fit <- survfit(surv_obj ~ 1)
+            # survminer re-evaluates fit$call$formula in its own environment, so the
+            # formula must be inline over columns of `data` - the same frame handed to
+            # ggsurvplot(data=). A recorded call naming a method-local Surv object dies
+            # with "object 'surv_obj' not found" once this frame is gone.
+            km_fit <- survfit(Surv(time, event) ~ 1, data = data)
             
             # Extract median with confidence intervals
             median_surv <- private$.extractMedianSurvival(km_fit)
@@ -117,8 +120,11 @@ mediansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         
         .performGroupComparison = function(data) {
             # Fit grouped survival model
-            surv_obj <- Surv(data$time, data$event)
-            km_fit <- survfit(surv_obj ~ group, data = data)
+            # survminer re-evaluates fit$call$formula in its own environment, so the
+            # formula must be inline over columns of `data` - the same frame handed to
+            # ggsurvplot(data=). A recorded call naming a method-local Surv object dies
+            # with "object 'surv_obj' not found" once this frame is gone.
+            km_fit <- survfit(Surv(time, event) ~ group, data = data)
             
             # Extract median survival for each group
             median_surv <- private$.extractGroupedMedianSurvival(km_fit, data)

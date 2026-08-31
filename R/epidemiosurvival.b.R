@@ -294,7 +294,12 @@ epidemiosurvivalClass <- R6::R6Class(
 
                 # Fit survival curves by exposure
                 if (length(unique(data$exposure)) > 1) {
-                    km_fit <- survival::survfit(surv_obj ~ exposure, data = data, weights = data$weights)
+                    # survminer re-evaluates fit$call$formula when the plot is drawn, long
+                    # after this frame is gone; spell the formula over columns of `data`
+                    # (the same frame passed to ggsurvplot(data =)) so it needs no
+                    # captured environment.
+                    km_fit <- survival::survfit(survival::Surv(time, event) ~ exposure,
+                                                data = data, weights = data$weights)
 
                     # Extract survival estimates by group
                     private$.extractSurvivalEstimates(km_fit, data)
@@ -306,8 +311,9 @@ epidemiosurvivalClass <- R6::R6Class(
                     private$.extractHazardRatios(cox_model, data)
 
                 } else {
-                    # Single group analysis
-                    km_fit <- survival::survfit(surv_obj ~ 1, data = data, weights = data$weights)
+                    # Single group analysis (same reason as above: inline formula)
+                    km_fit <- survival::survfit(survival::Surv(time, event) ~ 1,
+                                                data = data, weights = data$weights)
                     private$.extractSingleGroupEstimates(km_fit, data)
                 }
 

@@ -206,7 +206,7 @@ options:
             (e.g., G1 → G2 → G3 for tumor grades).
 
     - name: kripp
-      title: "Calculate Krippendorff's alpha"
+      title: "Krippendorff's alpha"
       type: Bool
       default: false
       description:
@@ -248,7 +248,7 @@ options:
             Show educational guide explaining when to use Krippendorff's Alpha including handling missing data and data type selection.
 
     - name: gwet
-      title: "Calculate Gwet's AC1/AC2"
+      title: "Gwet's AC1/AC2"
       type: Bool
       default: false
       description:
@@ -281,7 +281,7 @@ options:
             Show educational guide explaining when Gwet's AC is preferred over Cohen's kappa, especially for high agreement rates.
 
     - name: pabak
-      title: "Calculate PABAK & prevalence/Bias indices"
+      title: "PABAK & prevalence/bias indices"
       type: Bool
       default: false
       description:
@@ -300,7 +300,7 @@ options:
             Show educational guide explaining PABAK, the kappa paradox, and when prevalence/bias adjustment is needed.
 
     - name: icc
-      title: "Calculate ICC (continuous data)"
+      title: "ICC (continuous data)"
       type: Bool
       default: false
       description:
@@ -342,7 +342,7 @@ options:
             Mixed: raters are fixed. Single: reliability of individual rater. Average (k): reliability of mean rating.
 
     - name: meanPearson
-      title: "Calculate mean Pearson correlation (linear association)"
+      title: "Mean Pearson correlation (linear association)"
       type: Bool
       default: false
       description:
@@ -434,7 +434,7 @@ options:
             Show educational guide and clinical use cases for Total Deviation Index before running analysis.
 
     - name: iota
-      title: "Calculate iota coefficient (multivariate agreement)"
+      title: "Iota coefficient (multivariate agreement)"
       type: Bool
       default: false
       description:
@@ -464,7 +464,7 @@ options:
             Show educational guide explaining the Iota coefficient for multivariate agreement assessment.
 
     - name: finn
-      title: "Calculate Finn coefficient (variance-based agreement)"
+      title: "Finn coefficient (variance-based agreement)"
       type: Bool
       default: false
       description:
@@ -508,7 +508,7 @@ options:
             Show educational guide explaining the Finn coefficient and variance-based agreement measurement.
 
     - name: lightKappa
-      title: "Calculate light's kappa (3+ raters)"
+      title: "Light's kappa (3+ raters)"
       type: Bool
       default: false
       description:
@@ -526,7 +526,7 @@ options:
             Show educational guide explaining when Light's Kappa is preferred for 3+ rater studies.
 
     - name: kendallW
-      title: "Calculate Kendall's W (concordance for rankings)"
+      title: "Kendall's W (concordance for rankings)"
       type: Bool
       default: false
       description:
@@ -545,7 +545,7 @@ options:
             Show educational guide explaining Kendall's W for ordinal concordance and ranking agreement.
 
     - name: robinsonA
-      title: "Calculate Robinson's A (ordinal agreement index)"
+      title: "Robinson's A (ordinal agreement index)"
       type: Bool
       default: false
       description:
@@ -566,7 +566,7 @@ options:
             Show educational guide and clinical use cases for Robinson's A before running analysis.
 
     - name: meanSpearman
-      title: "Calculate mean Spearman rho (average rank correlation)"
+      title: "Mean Spearman rho (average rank correlation)"
       type: Bool
       default: false
       description:
@@ -699,7 +699,7 @@ options:
             Show educational guide and clinical use cases for Inter/Intra-Rater Reliability before running analysis.
 
     - name: pairwiseKappa
-      title: "Calculate pairwise kappa (vs reference)"
+      title: "Pairwise kappa (vs reference)"
       type: Bool
       default: false
       description:
@@ -1074,7 +1074,7 @@ options:
             Example: If categories are "Benign" and "Malignant", enter "Malignant".
 
     - name: specificAllCategories
-      title: "Calculate for all categories"
+      title: "All-category estimates"
       type: Bool
       default: true
       description:
@@ -1085,7 +1085,7 @@ options:
             and which may need improved training or criteria clarification.
 
     - name: specificConfidenceIntervals
-      title: "Include confidence intervals"
+      title: "Confidence intervals"
       type: Bool
       default: true
       description:
@@ -1178,7 +1178,7 @@ options:
 
     # Case Agreement Categorization (Consolidated Feature)
     - name: loaVariable
-      title: "Create case agreement categorization"
+      title: "Case agreement categorization"
       type: Bool
       default: false
       description:
@@ -1638,7 +1638,7 @@ options:
     # ============================================================
 
     - name: agreementSampleSize
-      title: Calculate sample size for agreement study
+      title: Agreement study sample size
       type: Bool
       default: false
       description:
@@ -1739,4 +1739,3 @@ options:
 
 
 ...
-

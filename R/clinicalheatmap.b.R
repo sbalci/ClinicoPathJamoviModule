@@ -1477,8 +1477,12 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         # Perform survival analysis
-                        surv_obj <- survival::Surv(surv_data[[surv_time_var]], surv_data$event)
-                        fit <- survival::survfit(surv_obj ~ cluster, data = surv_data)
+                        # survminer re-evaluates fit$call$formula in the plot renderer, where the
+                        # method-local frame is long gone, so the formula is written inline over
+                        # plain numeric columns of the data frame kept in the plot state. A Surv()
+                        # matrix column is deliberately NOT stored: plot state is serialized.
+                        surv_data$surv_time <- as.numeric(surv_data[[surv_time_var]])
+                        fit <- survival::survfit(survival::Surv(surv_time, event) ~ cluster, data = surv_data)
 
                         # Log-rank test
                         # Guard against too few events per cluster
@@ -1497,7 +1501,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
                             ))
                             return(invisible(NULL))
                         }
-                        log_rank <- survival::survdiff(surv_obj ~ cluster, data = surv_data)
+                        log_rank <- survival::survdiff(survival::Surv(surv_time, event) ~ cluster, data = surv_data)
 
                         # Populate results
                         self$results$clusterSurvival$logRankTest$addRow(rowKey = 1, values = list(

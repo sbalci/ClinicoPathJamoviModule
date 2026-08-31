@@ -10,9 +10,11 @@ items:
       type: Preformatted
       clearWith:
           - vars
+          - distr
+          - decimal_places
 
     - name:  todo
-      title: To Do
+      title: Data Information
       type:  Html
       clearWith:
           - vars
@@ -37,16 +39,18 @@ items:
     - name:  clinicalInterpretation
       title: 'Clinical Interpretation'
       type:  Html
-      visible: (vars)
+      visible: (length(vars) > 0 && show_guidance)
       clearWith:
           - vars
+          - show_guidance
 
     - name:  aboutAnalysis
       title: 'About This Analysis'
       type:  Html
-      visible: true
+      visible: (show_guidance)
       clearWith:
           - vars
+          - show_guidance
 
     - name:  outlierReport
       title: 'Outlier Detection Results'
@@ -58,7 +62,7 @@ items:
           - decimal_places
 
     - name:  reportSentences
-      title: 'Copy-Ready Clinical Summary'
+      title: 'Draft Statistical Summary'
       type:  Html
       visible: (report_sentences)
       clearWith:
@@ -70,21 +74,16 @@ items:
     - name:  glossary
       title: 'Statistical Glossary'
       type:  Html
-      visible: true
+      visible: (show_guidance)
       clearWith:
           - vars
           - distr
           - outliers
-
-    # - name: rCode
-    #   title: Reproducible R Code
-    #   type: Html
-    #   visible: (showRCode)
-
-
+          - show_guidance
 
 refs:
     - gtExtras
+    - moments
     - ClinicoPathJamoviModule
 
 ...

@@ -49,7 +49,7 @@ children:
             format: number
             enable: (use_landmark)
   - type: CollapseBox
-    label: Data Quality Options
+    label: Data Quality & Statistics
     collapsed: true
     children:
       - type: CheckBox
@@ -62,14 +62,13 @@ children:
         format: number
         suffix: x 99th %ile
         enable: (remove_extreme)
-      - type: CheckBox
-        name: include_quality_metrics
-        label: Data quality assessment
       - type: TextBox
         name: confidence_level
         format: number
         suffix: '%'
-        enable: (include_quality_metrics)
+      - type: CheckBox
+        name: include_quality_metrics
+        label: Data quality assessment
   - type: CollapseBox
     label: Output Options
     collapsed: true

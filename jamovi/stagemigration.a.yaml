@@ -102,24 +102,6 @@ options:
         The level indicating event occurrence when using factor variables.
 
     # Clinical Analysis Presets (New Feature)
-    - name: clinicalPreset
-      title: 'Clinical Analysis Preset'
-      type: List
-      options:
-        - title: " Routine Clinical Validation (Basic + Key Metrics)"
-          name: routine_clinical
-        - title: " Research Study (Standard + Advanced Statistics)"  
-          name: research_study
-        - title: " Publication Manuscript (All Methods + Visualizations)"
-          name: publication_ready
-        - title: " Custom Analysis (Manual Configuration)"
-          name: custom
-      default: routine_clinical
-      description: >-
-        Choose a preset tailored to your clinical workflow. 'Routine Clinical' provides essential 
-        validation metrics for daily practice. 'Research Study' adds advanced statistics for 
-        academic research. 'Publication Ready' includes all methods and visualizations for manuscripts.
-        Choose 'Custom' to manually configure all options.
 
     - name: enableGuidedMode
       title: ' Guided Analysis Mode'
@@ -182,26 +164,6 @@ options:
 
     # Analysis Complexity Mode (Progressive Disclosure)
     # TODO: Wire to .b.R - Map quick/standard/comprehensive to sets of enabled analysis toggles
-    - name: complexityMode
-      title: 'Analysis Complexity Mode'
-      type: List
-      options:
-        - title: "Quick Clinical Check (5-10 min)"
-          name: quick
-        - title: "Standard Analysis (30-60 min)"
-          name: standard
-        - title: "Comprehensive Analysis (1-2 hours)"
-          name: comprehensive
-        - title: "Custom Configuration"
-          name: custom
-      default: quick
-      description: >-
-        Controls UI complexity and feature availability. Quick mode shows essential
-        outputs only (migration matrix, C-index, simple recommendation). Standard adds
-        common validation metrics (NRI, survival curves, Will Rogers). Comprehensive
-        enables all methods (bootstrap, ROC, DCA). Custom allows manual control of all options.
-
-    # Analysis Type and Core Options
     - name: analysisType
       title: 'Analysis Scope'
       type: List

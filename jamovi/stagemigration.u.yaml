@@ -44,21 +44,6 @@ children:
     collapsed: false
     children:
       - type: Label
-        label: Analysis Mode
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: ComboBox
-                name: complexityMode
-                label: Complexity Mode
-              - type: Label
-                label: 'Quick: Matrix + C-index (5-10 min)'
-              - type: Label
-                label: 'Standard: + NRI, curves, tests (15-20 min)'
-              - type: Label
-                label: 'Comprehensive: + Bootstrap, ROC, DCA (30+ min)'
-      - type: Label
         label: Clinical Context
         children:
           - type: LayoutBox
@@ -80,9 +65,6 @@ children:
           - type: LayoutBox
             margin: large
             children:
-              - type: ComboBox
-                name: clinicalPreset
-                label: Clinical Preset
               - type: ComboBox
                 name: analysisType
                 label: Analysis Type

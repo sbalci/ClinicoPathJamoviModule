@@ -4,7 +4,7 @@ title: Odds Ratio Table and Plot
 menuGroup: SurvivalT
 menuSubgroup: General Statistics
 menuSubtitle: 'Odds Ratio for Binary Outcomes'
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -102,9 +102,11 @@ options:
               detection and displays the selected level for verification.
           R: >
               Specify which level of the diagnostic predictor represents the positive case.
+              Because a Level option cannot declare a default, this is a required argument of
+              the R function: pass predictorLevel = NULL when no diagnostic predictor is used.
 
     - name: usePenalized
-      title: Use Firth penalized logistic regression
+      title: Firth penalized logistic regression
       type: Bool
       default: false
       description:

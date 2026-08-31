@@ -1107,7 +1107,11 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
             tryCatch({
                 dd <- rms::datadist(prepared$predictors)
-                options(datadist = "dd")
+                # Pass the datadist OBJECT, not a string naming it: rms::Design()
+                # does eval(as.name(getOption("datadist"))) from its own frame, which
+                # never sees this method-local, so the string form failed every fit
+                # with "dataset dd not found for options(datadist=)".
+                options(datadist = dd)
                 on.exit(options(datadist = NULL), add = TRUE)
 
                 if (prepared$model_type == "logistic") {
@@ -1121,8 +1125,14 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                     fit <- rms::lrm(y ~ ., data = df_rms)
                 } else {
                     df_rms <- data.frame(y = prepared$y, time = prepared$time, prepared$predictors)
-                    surv_obj <- survival::Surv(df_rms$time, df_rms$y)
-                    fit <- rms::cph(surv_obj ~ . - y - time, data = df_rms)
+                    # Name the predictors explicitly and inline the Surv(): rms::cph()
+                    # cannot expand "." (nor resolve a method-local surv_obj) from its
+                    # own frame, so this branch always errored out.
+                    pred_terms <- setdiff(names(df_rms), c("y", "time"))
+                    fit <- rms::cph(.asSurvivalFormula(paste(
+                        "survival::Surv(time, y) ~",
+                        paste(jmvcore::composeTerms(as.list(pred_terms)), collapse = " + "))),
+                        data = df_rms)
                 }
 
                 fun_arg <- switch(prepared$model_type,

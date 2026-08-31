@@ -65,7 +65,7 @@ children:
             children:
               - type: CheckBox
                 name: clinicalDecisionRule
-                label: Include clinical decision rule
+                label: Clinical decision rule
               - type: VariablesListBox
                 name: decisionRuleVar
                 isTarget: true
@@ -90,7 +90,7 @@ children:
         children:
           - type: CheckBox
             name: showTable
-            label: Show results table
+            label: Results table
           - type: TextBox
             name: selectedThresholds
             format: string
@@ -118,11 +118,11 @@ children:
             enable: (showPlot || confidenceIntervals || showNetBenefitCI)
           - type: CheckBox
             name: showReferenceLinesLabels
-            label: Show reference line labels
+            label: Reference line labels
             enable: (showPlot || confidenceIntervals || showNetBenefitCI)
           - type: CheckBox
             name: highlightRange
-            label: Highlight clinical range
+            label: Clinical range highlight
             enable: (showPlot || confidenceIntervals || showNetBenefitCI)
           - type: TextBox
             name: highlightMin
@@ -156,7 +156,7 @@ children:
         children:
           - type: CheckBox
             name: costBenefitAnalysis
-            label: Enable cost-benefit analysis
+            label: Exploratory monetary payoff
           - type: TextBox
             name: testCost
             format: number
@@ -208,14 +208,14 @@ children:
         children:
           - type: CheckBox
             name: calculateClinicalImpact
-            label: Calculate impact metrics
+            label: Clinical impact metrics
           - type: TextBox
             name: populationSize
             format: number
             label: Population size
           - type: CheckBox
             name: showInterventionAvoided
-            label: Show interventions avoided
+            label: Net interventions avoided
           - type: CheckBox
             name: resourceUtilization
             label: Resource utilization
@@ -229,7 +229,7 @@ children:
         children:
           - type: CheckBox
             name: confidenceIntervals
-            label: Calculate CIs
+            label: Bootstrap confidence intervals
           - type: TextBox
             name: bootReps
             format: number

@@ -18,14 +18,13 @@ items:
     - name: instructions
       title: Instructions
       type: Html
-      visible: (vars)
       refs:
         - ClinicoPathJamoviModule
 
     - name: summaryText
       title: Analysis Summary
       type: Preformatted
-      visible: true
+      visible: (vars)
 
     - name: projectionPlot
       title: ''
@@ -33,7 +32,7 @@ items:
       width: 700
       height: 600
       renderFun: .projectionPlot
-      visible: true
+      visible: (vars)
       requiresData: true
       clearWith:
         - vars
@@ -42,7 +41,7 @@ items:
         - colorBy
 
     - name: projection3D
-      title: Interactive 3D Projection
+      title: 3D Projection - Pairwise Views
       type: Image
       width: 800
       height: 700
@@ -230,7 +229,7 @@ items:
     - name: interpretation
       title: Interpretation Guide
       type: Html
-      visible: true
+      visible: (vars)
       refs:
         - ClinicoPathJamoviModule
 
@@ -242,7 +241,5 @@ refs:
     - survival
     - dbscan
     - cluster
-    - survival
-    - plotly
     - survminer
 ...

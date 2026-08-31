@@ -155,6 +155,30 @@ crosstable2Class <- if (requireNamespace('jmvcore'))
                             na_to_p = FALSE,
                             cont = self$options$cont,
                             cont_nonpara = NULL,
+                            # cont_cut = 5 is finalfit's default and is KEPT DELIBERATELY here.
+                            # Do not "sweep" it to 0.
+                            #
+                            # finalfit runs, on its own copy of the data,
+                            #   cont_distinct = select(explanatory) %>% summarise_if(is.numeric, n_distinct) %>% keep(~ .x < cont_cut)
+                            #   .data = mutate_at(.data, cont_distinct, as.factor)
+                            # so a numeric explanatory with fewer than 5 distinct values (n_distinct
+                            # counts NA) is summarised as a category and its p-value comes from
+                            # p_cat (chisq/fisher) instead of p_cont_para (aov). Verified against
+                            # finalfit 1.1.0: explanatory_type is read AFTER that mutate, so it is
+                            # what picks the test branch.
+                            #
+                            # In multisurvival/survivalcont/oddsratio the same rewrite is a BUG and is
+                            # disabled with cont_cut = 0, because those analyses also fit the same
+                            # column with coxph/glm/lrm, which do not apply the rule -- one selection,
+                            # two different models. This analysis fits NO model. It is a purely
+                            # descriptive Table One, so there is nothing to disagree with, and the
+                            # conversion is what a clinician wants: on the bundled histopathology data
+                            # the columns it touches are Grade, Anti-X/Anti-Y intensity (1/2/3) and the
+                            # 0/1 markers -- categorical variables stored as numbers. At cont_cut = 5
+                            # Grade prints 25 (31.2) / 27 (33.8) / 28 (35.0), chisq p = 0.529; at
+                            # cont_cut = 0 it collapses to a meaningless "Mean (SD) 2.1 (0.8)", aov
+                            # p = 0.409. Genuine factors and numerics with >= 5 distinct values (Age,
+                            # OverallTime, TStage) are byte-identical either way.
                             cont_cut = 5,
                             cont_range = TRUE,
                             p_cont_para = "aov",

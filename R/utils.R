@@ -19,7 +19,15 @@ utils::globalVariables(c(
     "label",
     "lo_y",
     "type",
-    "x"
+    "x",
+    # aes() columns of the Firth forest plot in R/oddsratio.b.R (.firthOrPlot)
+    "level",
+    "lower",
+    "n_show",
+    "or_text",
+    "upper",
+    "var_show",
+    "y"
 ))
 
 #' Run third-party code without leaking package chatter into the results

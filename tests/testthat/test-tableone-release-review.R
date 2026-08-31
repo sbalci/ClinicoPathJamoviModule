@@ -51,13 +51,11 @@ test_that("janitor skips continuous variables instead of listing every value", {
 
   out <- t4(tableone(data = tableone_test, vars = c("Age", "TumorSize"), sty = "t4"))
   expect_match(out, "Not tabulated")
-  expect_match(out, "distinct values")
+  expect_match(out, "not categorical")
   expect_false(grepl("[0-9]\\.[0-9]{6,}", out))
 })
 
-test_that("a low-cardinality numeric variable is still tabulated by janitor", {
-  # The skip is on distinct values, not on storage type: an integer score with a
-  # handful of levels is exactly what a frequency table is for.
+test_that("janitor requires explicit categorical typing for numeric codes", {
   skip_if_not_installed("janitor")
   data(tableone_test, package = "ClinicoPath")
   d <- tableone_test
@@ -65,7 +63,68 @@ test_that("a low-cardinality numeric variable is still tabulated by janitor", {
 
   out <- t4(tableone(data = d, vars = "score", sty = "t4"))
   expect_match(out, "score")
+  expect_match(out, "Not tabulated")
+  expect_match(out, "factor()", fixed = TRUE)
+
+  d$score <- ordered(d$score, levels = 1:5)
+  out <- t4(tableone(data = d, vars = "score", sty = "t4"))
   expect_false(grepl("Not tabulated", out))
+  expect_match(out, "20.0%", fixed = TRUE)
+})
+
+test_that("small continuous samples are never inferred to be categories", {
+  d <- data.frame(Age = c(seq(30, 40), NA_real_),
+                  Sex = factor(rep(c("F", "M"), 6)))
+  res <- tableone(data = d, vars = c("Age", "Sex"), sty = "t4")
+  out <- as.character(res$tablestyle4$content)
+  expect_match(out, "Age (not categorical", fixed = TRUE)
+  expect_false(grepl("Frequency Table for 'Age'", out, fixed = TRUE))
+  expect_match(out, "Frequency Table for 'Sex'", fixed = TRUE)
+})
+
+test_that("omitted janitor measurements cannot exclude cases or enter report text", {
+  d <- data.frame(Age = c(30, NA_real_, 40, NA_real_),
+                  Sex = factor(c("F", "F", "M", "M")))
+  res <- tableone(data = d, vars = c("Age", "Sex"), sty = "t4", excl = TRUE,
+                  showSummary = TRUE, showReportSentence = TRUE)
+  expect_match(res$summary$content, "4 cases with 1 selected variables", fixed = TRUE)
+  expect_match(res$summary$content, "4 cases (no exclusions applied)", fixed = TRUE)
+  expect_match(res$reportSentence$content, "Variables included Sex.", fixed = TRUE)
+  expect_false(grepl("Variables included Age", res$reportSentence$content, fixed = TRUE))
+})
+
+test_that("listwise deletion reports one denominator for every included variable", {
+  d <- data.frame(Age = c(30, 40, NA_real_, 60, 70, 80),
+                  Sex = factor(c("F", NA, "M", "F", "M", "M")))
+  for (style in c("t1", "t2", "t3")) {
+    res <- tableone(data = d, vars = c("Age", "Sex"), sty = style, excl = TRUE,
+                    showSummary = TRUE, showReportSentence = TRUE)
+    expect_match(res$summary$content, "Final N = 4", fixed = TRUE, info = style)
+    expect_match(res$summary$content, "same complete-case denominator", fixed = TRUE)
+    expect_false(grepl("Per-variable denominators may differ", res$summary$content,
+                       fixed = TRUE))
+    expect_match(res$reportSentence$content, "4 patients with complete data", fixed = TRUE)
+  }
+})
+
+test_that("janitor retains categorical, logical and missing-value frequencies", {
+  d <- data.frame(Group = factor(c("A", "A", "B", NA)),
+                  Flag = c(TRUE, FALSE, TRUE, NA))
+  res <- tableone(data = d, vars = c("Group", "Flag"), sty = "t4")
+  out <- t4(res)
+  expect_match(out, "50.0%", fixed = TRUE)
+  expect_match(out, "66.7%", fixed = TRUE)
+  expect_match(out, "Valid Percent", fixed = TRUE)
+  expect_match(out, "Flag", fixed = TRUE)
+  expect_false(grepl("Not tabulated", out, fixed = TRUE))
+})
+
+test_that("the About panel states the overall-only scope and binary display rule", {
+  d <- data.frame(Sex = factor(c("Female", "Male")))
+  res <- tableone(data = d, vars = "Sex", showAbout = TRUE)
+  expect_match(res$about$content, "overall cohort", fixed = TRUE)
+  expect_match(res$about$content, "does not stratify", fixed = TRUE)
+  expect_match(res$about$content, "second level of a binary factor", fixed = TRUE)
 })
 
 test_that("an all-missing variable is named rather than silently dropped", {

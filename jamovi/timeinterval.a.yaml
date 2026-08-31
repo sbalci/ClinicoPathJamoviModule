@@ -4,7 +4,7 @@ title: Comprehensive Time Interval Calculator
 menuGroup: SurvivalT
 menuSubgroup: Data Preparation
 menuSubtitle: Advanced time interval analysis with quality assessment
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -60,7 +60,10 @@ options:
       description:
           R: >
             Column containing start dates (e.g., diagnosis date, study entry, treatment start).
-            Supports various date formats including text and numeric representations.
+            Accepts text dates and numeric packed dates (YYYYMMDD, YYMMDD). Spreadsheet
+            day-count serial numbers (Excel day counts such as 42370) are not dates and are
+            rejected, because parsing them gives follow-up times wrong by decades; re-export
+            that column as text in YYYY-MM-DD form.
 
     - name: fu_date
       title: End Date Variable  
@@ -75,7 +78,8 @@ options:
       description:
           R: >
             Column containing end dates (e.g., follow-up date, event date, study exit).
-            Must be in the same format as the start date variable.
+            Must be in the same format as the start date variable. Spreadsheet day-count
+            serial numbers are rejected for the same reason as the start date column.
 
     # === DATE FORMAT CONFIGURATION ===
     - name: time_format
@@ -127,13 +131,13 @@ options:
       type: List
       options:
         - name: standardized
-          title: Standardized (30.44-day months, 365.25-day years)
+          title: Standardized (30.4375-day months, 365.25-day years)
         - name: calendar
           title: Calendar-aware (actual month lengths)
       default: standardized
       description:
           R: >
-            Controls how months/years are computed. Standardized uses fixed lengths (30.44 days per
+            Controls how months/years are computed. Standardized uses fixed lengths (30.4375 days per
             month, 365.25 days per year) suited for person-time denominators. Calendar-aware respects
             actual month lengths (28 - 31 days) when converting intervals to months/years.
 
@@ -168,13 +172,15 @@ options:
             Recommended for data quality assurance.
 
     - name: remove_extreme
-      title: Flag extreme values
+      title: Remove extreme values
       type: Bool
       default: false
       description:
           R: >
-            Identify and flag potentially extreme time intervals for quality review.
-            Uses statistical outlier detection methods.
+            Exclude time intervals above (multiplier x 99th percentile) from the analysis.
+            These rows are dropped from every statistic, including the mean and the total
+            person-time, not merely flagged. The Data Quality Assessment panel reports how
+            many were removed. Leave off to keep all intervals and only see the count.
 
     - name: extreme_multiplier
       title: Extreme Threshold Multiplier
@@ -185,8 +191,9 @@ options:
       description:
           R: >
             Multiplier for 99th percentile to define extreme values.
-            Default 2.0 means values >2x the 99th percentile are flagged.
-            Higher values are more conservative (fewer flagged values).
+            Default 2.0 means intervals longer than 2x the 99th percentile are removed
+            when 'Remove extreme values' is on. Higher values are more conservative
+            (fewer intervals removed). Has no effect when the 99th percentile is zero.
 
     # === OUTPUT OPTIONS ===
     - name: add_times
@@ -249,8 +256,10 @@ options:
       description:
           R: >
             Timezone for datetime parsing. 'System Default' uses your computer's timezone.
-            'UTC' interprets datetimes as Coordinated Universal Time. Ensures consistent
-            time interval calculations across different systems and time zones.
+            'UTC' interprets datetimes as Coordinated Universal Time. This applies only to the
+            'YYYY-MM-DD HH:MM:SS' format, the only one that carries a time of day; date-only
+            formats produce calendar dates that have no timezone, so the setting has no effect
+            on them.
 
 
 ...

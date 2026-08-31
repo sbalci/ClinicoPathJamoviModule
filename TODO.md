@@ -3,7 +3,7 @@
 ## Descriptives
 
 - reportcat
-summarydata
+- summarydata
 tableone
 
 ## Data Quality
@@ -81,11 +81,11 @@ survivalcont
 
 datetimeconverter
 outcomeorganizer
-timeinterval
+timeinterval  <!-- DONE 2026-08-30: /check-function-full audit + fixes. Excel-serial rejection, landmark relabelling, remove_extreme honesty, CI clamp, severity-ordered notices, dark-theme panels. 200 assertions pass; see NEWS.md and tests/testthat/test-timeinterval-audit-fixes.R -->
 
 ## General Statistics
 
-oddsratio
+- oddsratio
 
 # meddecide
 

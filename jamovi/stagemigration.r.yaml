@@ -26,7 +26,6 @@ items:
           - survivalTime
           - event
           - eventLevel
-          - clinicalPreset
           - analysisType
 
     # Guided Mode Progress Indicator (New Feature)
@@ -350,6 +349,46 @@ items:
             title: "Interpretation"
             type: text
 
+    # IDI Components (asymptotic inference + discrimination slopes)
+    - name: idiComponents
+      title: IDI Components and Discrimination Slopes
+      type: Table
+      visible: (calculateIDI)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - calculateIDI
+          - nriTimePoints
+      columns:
+          - name: Metric
+            title: "Metric"
+            type: text
+          - name: Value
+            title: "Value"
+            type: number
+          - name: Standard_Error
+            title: "SE"
+            type: number
+            format: zto
+          - name: CI_Lower
+            title: "95% CI Lower"
+            type: number
+            format: zto
+          - name: CI_Upper
+            title: "95% CI Upper"
+            type: number
+            format: zto
+          - name: P_Value
+            title: "p-value"
+            type: number
+            format: zto,pvalue
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
     # Multifactorial Analysis Results Explanation
     - name: multifactorialAnalysisExplanation
       title: Understanding Multifactorial Stage Migration Analysis
@@ -603,6 +642,132 @@ items:
       clearWith:
           - enableMultifactorialAnalysis
           - stratifiedAnalysis
+
+    # Personalized Risk Prediction Summary (multifactorial, comprehensive)
+    - name: personalizedRiskSummary
+      title: Personalized Risk Prediction Summary
+      type: Table
+      visible: (enableMultifactorialAnalysis && multifactorialComparisonType:comprehensive)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - multifactorialComparisonType
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - continuousCovariates
+          - categoricalCovariates
+          - nriTimePoints
+      columns:
+          - name: TimePoint
+            title: "Time Point (months)"
+            type: number
+          - name: Mean_Risk_Old
+            title: "Mean Risk (Original)"
+            type: number
+            format: zto
+          - name: Mean_Risk_New
+            title: "Mean Risk (New)"
+            type: number
+            format: zto
+          - name: Mean_Risk_Difference
+            title: "Mean Risk Difference"
+            type: number
+            format: zto
+          - name: Percent_Upstaged
+            title: "Upstaged (%)"
+            type: number
+          - name: Percent_Downstaged
+            title: "Downstaged (%)"
+            type: number
+          - name: Percent_No_Change
+            title: "No Change (%)"
+            type: number
+          - name: Percent_Large_Change
+            title: "Large Risk Change (%)"
+            type: number
+
+    # Multifactorial Model Diagnostics
+    - name: multifactorialModelDiagnostics
+      title: Multifactorial Model Diagnostics
+      type: Table
+      visible: (enableMultifactorialAnalysis && multifactorialComparisonType:comprehensive)
+      clearWith:
+          - enableMultifactorialAnalysis
+          - multifactorialComparisonType
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - continuousCovariates
+          - categoricalCovariates
+      columns:
+          - name: Model
+            title: "Model"
+            type: text
+          - name: 'N'
+            title: "N"
+            type: integer
+          - name: C_Index
+            title: "C-Index"
+            type: number
+            format: zto
+          - name: Significant_Coefficients
+            title: "Significant Coefficients"
+            type: text
+          - name: Outliers
+            title: "Outliers"
+            type: integer
+          - name: PH_Global_p
+            title: "PH Global p"
+            type: number
+            format: zto,pvalue
+          - name: PH_Assumption
+            title: "PH Assumption"
+            type: text
+
+    # Multivariable Decision Curve Analysis Summary
+    - name: multivariableDCASummary
+      title: Multivariable Decision Curve Analysis
+      type: Table
+      visible: (enableMultifactorialAnalysis && performDCA && (multifactorialComparisonType:comprehensive || multifactorialComparisonType:adjusted_cindex))
+      clearWith:
+          - enableMultifactorialAnalysis
+          - multifactorialComparisonType
+          - performDCA
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - continuousCovariates
+          - categoricalCovariates
+          - nriTimePoints
+      columns:
+          - name: Time_Point
+            title: "Time Point (months)"
+            type: number
+          - name: Model
+            title: "Model"
+            type: text
+          - name: Optimal_Threshold_Min
+            title: "Optimal Threshold (min)"
+            type: number
+            format: zto
+          - name: Optimal_Threshold_Max
+            title: "Optimal Threshold (max)"
+            type: number
+            format: zto
+          - name: Max_Net_Benefit
+            title: "Max Net Benefit"
+            type: number
+            format: zto
+          - name: Threshold_At_Max
+            title: "Threshold at Max Net Benefit"
+            type: number
+            format: zto
 
     # Time-dependent ROC Analysis
     - name: rocAnalysis
@@ -1721,6 +1886,32 @@ items:
             title: "Interpretation"
             type: text
 
+    # Enhanced Model Diagnostics (Phase 2)
+    - name: enhancedModelDiagnostics
+      title: Model Diagnostics Comparison
+      type: Table
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
+      columns:
+          - name: Diagnostic
+            title: "Diagnostic"
+            type: text
+          - name: Original_System
+            title: "Original System"
+            type: text
+          - name: New_System
+            title: "New System"
+            type: text
+          - name: Interpretation
+            title: "Interpretation"
+            type: text
+
     # Decision Curve Analysis
     - name: decisionCurveAnalysis
       title: Decision Curve Analysis
@@ -2000,6 +2191,19 @@ items:
           - name: Major_Flows
             title: "Major Migration Flows"
             type: text
+
+    # Clinical Decision Support and Publication Report
+    - name: clinicalDecisionSupportReport
+      title: Clinical Decision Support and Publication Report
+      type: Html
+      visible: (advancedMigrationAnalysis)
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - advancedMigrationAnalysis
 
     # Abbreviation Glossary
     - name: abbreviationGlossary
@@ -3884,9 +4088,11 @@ items:
       visible: (performConcordanceProbabilityAnalysis)
       clearWith:
         - oldStage
+        - newStage
         - event
         - survivalTime
         - performConcordanceProbabilityAnalysis
+        - concordanceProbabilityCompareStages
         - concordanceProbabilityMethods
         - concordanceProbabilityWeighting
       columns:
@@ -3906,9 +4112,11 @@ items:
       visible: (performConcordanceProbabilityAnalysis)
       clearWith:
         - oldStage
+        - newStage
         - event
         - survivalTime
         - performConcordanceProbabilityAnalysis
+        - concordanceProbabilityCompareStages
         - concordanceProbabilityMethods
         - concordanceProbabilityBootstrap
       columns:

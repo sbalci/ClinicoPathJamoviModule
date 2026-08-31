@@ -36,8 +36,9 @@ example1 <- tableone(
 )
 
 # This produces a basic descriptive table showing:
-# - Age: Mean ± SD, Median [IQR]
-# - Sex: N (%) for each category
+# - Age: Mean (SD); use nonnormal = TRUE for median (Q1, Q3)
+# - Sex: N (%) for the named second level of this binary factor
+# The table describes the overall cohort, without group comparisons or p-values.
 
 print(example1)
 
@@ -195,7 +196,7 @@ example7a <- tableone(
 )
 
 print(example7a)
-# Will show: N, N-miss, and statistics on available data
+# Will show: overall N, a missing-percentage column, and available-case statistics
 
 # Option B: Exclude missing values
 example7b <- tableone(

@@ -50,6 +50,7 @@ items:
       type: Output
       measureType: continuous
       clearWith:
+          - add_times
           - dx_date
           - fu_date
           - time_format

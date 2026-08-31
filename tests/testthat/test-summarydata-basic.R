@@ -48,12 +48,10 @@ test_that("summarydata handles required arguments correctly", {
 })
 
 test_that("summarydata requires variables to be specified", {
-  # Running with no variables should still work but show welcome message
-  # jmvcore's select() builds a zero-column frame from an empty variable list and
-  # dies in row.names<- before any module code runs. This is a jmvcore-level
-  # limitation of the R wrapper (an analysis with `default: NULL` on its Variables
-  # option, e.g. agreement(), fails identically), NOT specific to summarydata.
-  # The "no variables selected" welcome panel is reachable in the jamovi GUI only.
+  # The source schema requires vars for R calls. Until generated bindings are
+  # refreshed, an explicit NULL reaches jmvcore's zero-column select path and
+  # fails before the backend. The jamovi UI can still show its welcome panel
+  # before a variable is selected.
   expect_error(
     summarydata(data = summarydata_test, vars = NULL),
     "row.names"
@@ -255,10 +253,8 @@ test_that("summarydata works with data from RDA", {
 # ═══════════════════════════════════════════════════════════
 
 test_that("summarydata handles empty variable list gracefully", {
-  # The welcome message is what the GUI shows. Through the R wrapper, jmvcore's
-  # select() builds a zero-column frame from an empty list and fails in
-  # row.names<- before .run() is entered - a jmvcore-level limitation shared by
-  # every analysis in the module, not something summarydata can catch.
+  # An empty selection is not a valid R call. The GUI handles its initial empty
+  # selection through the backend welcome state.
   expect_error(
     summarydata(data = summarydata_test, vars = character(0)),
     "row.names"

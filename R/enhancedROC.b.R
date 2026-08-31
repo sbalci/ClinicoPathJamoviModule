@@ -150,24 +150,9 @@ enhancedROCClass <- R6::R6Class(
             )
         },
 
-        # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-        # Closed by the 1.0.4 release review (2026-08-10); left here so the audit trail is legible:
-        #   [CLINICAL-SAFETY] AUC < 0.5 / AUC < 0.7 - DONE. One guard covers both: below 0.7 raises a
-        #     notice, escalated to ERROR below 0.5 with "verify ROC direction is correct". See the
-        #     "Low AUC notice" block in .run().
-        #   [hygiene/jmvcore] bare stop() in helpers - DONE, 0 remain (all are jmvcore::reject).
-        #   [integration] 173 declared outputs vs 60 setters - DONE as a finding: 20 declared options
-        #     are not implemented, and all 20 DO have live UI controls, so a user can tick e.g.
-        #     "Harrell's C-index" and receive nothing. A WARNING notice now says so explicitly.
-        #   [statistical-validation] - DONE, /release-review-function enhancedROC: AUC and CIs checked
-        #     against pROC, and cross-checked against psychopdaROC on the same columns. Note pROC's
-        #     direction="auto" uses the MEDIAN rule, not AUC maximisation, so the reported AUC is
-        #     NOT floored at 0.5 - it is, however, biased upward on a null marker.
-        #   [testing] - DONE, tests/testthat/test-enhancedROC-release-review.R.
-        # Still open:
-        #   [hygiene/notices] 0 jmvcore::Notice uses. Note that Notice objects are not serialisable
-        #     here (see CLAUDE.md); the HTML-item pattern used by .addNotice is the supported route.
-        #   [i18n] 143 .() wraps but NO .po catalog - bootstrap jamovi/i18n/ first; wraps are dormant
+        # Unsupported advanced options remain in the R API for compatibility but are not
+        # exposed as jamovi controls. If selected programmatically, .run() names them in a
+        # warning instead of implying that an uncomputed analysis succeeded.
 
         .init = function() {
             # Initialize error handling

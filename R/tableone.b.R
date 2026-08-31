@@ -155,6 +155,38 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 return(invisible(NULL))
             }
 
+            # Decide which variables can be tabulated BEFORE listwise deletion and
+            # supplementary reporting. Missingness in an omitted measurement must
+            # not remove cases from a categorical frequency table.
+            frequency_skipped <- list()
+            if (identical(self$options$sty, "t4")) {
+                frequency_vars <- character()
+                for (var in selected_vars) {
+                    value <- self$data[[var]]
+                    n_distinct <- length(unique(value[!is.na(value)]))
+                    reason <- if (!is.factor(value) && !is.character(value) &&
+                                  !is.logical(value)) {
+                        .("not categorical; set category codes to Nominal or Ordinal, or use factor() in R")
+                    } else if (n_distinct > 20) {
+                        sprintf(.("%d distinct values; maximum 20 categories"), n_distinct)
+                    } else NULL
+                    if (is.null(reason)) {
+                        frequency_vars <- c(frequency_vars, var)
+                    } else {
+                        frequency_skipped[[length(frequency_skipped) + 1L]] <-
+                            sprintf("%s (%s)", htmltools::htmlEscape(var),
+                                    htmltools::htmlEscape(reason))
+                    }
+                }
+                selected_vars <- frequency_vars
+                if (length(selected_vars) == 0L) {
+                    self$results$tablestyle4$setContent(
+                        private$.frequencySkipHtml(frequency_skipped))
+                    private$.setAboutContent()
+                    return(invisible(NULL))
+                }
+            }
+
             # jmvcore::select() restores the original column names on the way out
             # (colnames(data) <- names(out)) and jamovi has already validated every
             # entry of `vars` against the dataset, so names(data) is exactly
@@ -349,7 +381,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 # Wrap entire janitor operation in tryCatch for error handling
                 result <- tryCatch({
                     # Variables too granular to tabulate; reported after the loop.
-                    skipped_vars <- list()
+                    skipped_vars <- frequency_skipped
 
                     table_list <- lapply(seq_along(selected_vars), function(i) {
                     var <- selected_vars[i]
@@ -379,22 +411,6 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                             skipped_vars[[length(skipped_vars) + 1]] <<-
                                 sprintf("%s (%s)", htmltools::htmlEscape(var),
                                         .("no recorded values"))
-                            return(NULL)
-                        }
-
-                        # A frequency table needs a manageable number of distinct
-                        # values. On a continuous variable janitor tabulates EVERY
-                        # observed value: 50 patients produced 50 rows labelled
-                        # "41.9504137110896", which is unreadable and tells the
-                        # reader nothing. The option's own description says this
-                        # style is for categorical variables. Judge by distinct-value
-                        # count rather than by type, so a numeric score with a few
-                        # levels (a 1-5 grade) is still tabulated.
-                        n_distinct <- length(unique(data[[var]][recorded]))
-                        if (n_distinct > 20) {
-                            skipped_vars[[length(skipped_vars) + 1]] <<-
-                                sprintf("%s (%d distinct values)",
-                                        htmltools::htmlEscape(var), n_distinct)
                             return(NULL)
                         }
 
@@ -490,20 +506,13 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                             "</em></p>")
 
                     if (length(skipped_vars) > 0) {
-                        body <- paste0(
-                            body,
-                            "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;border-left:4px solid #ffc107;",
-                            "padding:10px;margin:10px 0;'><b>",
-                            .("Not tabulated"), ":</b> ",
-                            paste(unlist(skipped_vars), collapse = "; "),
-                            ". ", .("A frequency table needs a limited set of recorded categories: too many distinct values gives roughly one row per case, and a variable with no recorded values has nothing to count. Continuous variables are summarised by the tableone, gtsummary or arsenal style instead."),
-                            "</div>")
+                        body <- paste0(body, private$.frequencySkipHtml(skipped_vars))
                     }
                     if (!nzchar(trimws(gsub("<[^>]*>", "", body))))
                         body <- paste0(
                             "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;border-left:4px solid #ffc107;",
                             "padding:10px;margin:10px 0;'>",
-                            .("None of the selected variables has few enough distinct values for a frequency table. Choose the tableone, gtsummary or arsenal style instead."),
+                            .("No selected categorical variable could be tabulated. Choose the tableone, gtsummary or arsenal style for numeric measurements."),
                             "</div>")
                     body
                 }, error = function(e) {
@@ -525,11 +534,22 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
         # When jamovi supports Notice serialization, these can be migrated to
         # Notice objects with appropriate NoticeType.
 
+        .frequencySkipHtml = function(skipped_vars) {
+            paste0(
+                "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;",
+                "border-left:4px solid #ffc107;padding:10px;margin:10px 0;'><b>",
+                .("Not tabulated"), ":</b> ",
+                paste(unlist(skipped_vars), collapse = "; "), ". ",
+                .("Janitor tabulates categorical, ordinal, text and logical variables with at most 20 recorded categories. Numeric measurements are not converted to categories automatically. Use another style for measurements; set numeric category codes to Nominal or Ordinal in jamovi, or convert them with factor() in R. Omitted variables do not enter missing-value exclusion or the analysis summary."),
+                "</div>")
+        },
+
         .buildWelcomeMessage = function() {
             "
             <br><strong>Welcome to the ClinicoPath Table One Generator</strong>
             <br><br>
             <strong>Instructions:</strong>
+            <p>This analysis describes the overall cohort only. It does not compare groups or compute p-values, confidence intervals or standardized mean differences.</p>
             <ul>
                 <li>Select the <em>Variables</em> to include in the Table One. (Numeric, Ordinal, or Categorical)</li>
                 <li>Choose a <em>Table Style</em> for the output format.</li>
@@ -587,7 +607,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             about_text <- "
             <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
                 <h4>About Table One</h4>
-                <p><strong>Purpose:</strong> Table One is a standardized descriptive table used in medical research to summarize baseline characteristics and demographic information of study participants.</p>
+                <p><strong>Purpose:</strong> Table One summarizes characteristics of the overall cohort. This analysis does not stratify by group or compute p-values, confidence intervals or standardized mean differences. A row is treated as one case; verify that repeated records are not being counted as separate patients.</p>
                 
                 <p><strong>When to use:</strong></p>
                 <ul>
@@ -609,10 +629,10 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     <li><strong>tableone:</strong> continuous variables as mean (SD), or as median [Q1, Q3] if you tick <em>Report continuous variables as median (Q1, Q3)</em>; categorical variables as N (percent). Missingness is shown as a percentage column.</li>
                     <li><strong>gtsummary:</strong> continuous variables as median (Q1, Q3); categorical variables as N (percent); missing counts on an <em>Unknown</em> row.</li>
                     <li><strong>arsenal:</strong> continuous variables as mean (SD) with the range; categorical variables as N (percent); missing counts on an <em>N-Miss</em> row.</li>
-                    <li><strong>janitor:</strong> counts and percentages only, one frequency table per variable, for variables with a limited number of categories. Missing values get their own row, with a Percent column computed over all cases and a Valid Percent column computed over the cases with a recorded value.</li>
+                    <li><strong>janitor:</strong> counts and percentages for categorical, ordinal, text and logical variables with at most 20 recorded categories. Numeric measurements are skipped even in small samples; convert numeric category codes to Nominal or Ordinal (or factor() in R) explicitly. Missing values get their own row, with Percent computed over all cases and Valid Percent over recorded cases.</li>
                 </ul>
 
-                <p><strong>Reading the percentages:</strong> in the tableone, gtsummary and arsenal styles the percentages for a categorical variable are computed among the cases with a recorded value for that variable, not among all cases; the missing count is reported separately on its own column or row. A variable with 50 of 100 values missing and 15 cases in a level is therefore shown as 15 (30.0), not 15 (15.0).</p>
+                <p><strong>Reading the percentages:</strong> in the tableone, gtsummary and arsenal styles categorical percentages use cases with a recorded value, not all cases. Missingness is reported separately (a percentage column in tableone; counts in gtsummary and arsenal). A variable with 50 of 100 values missing and 15 cases in a level is shown as 15 (30.0), not 15 (15.0). The tableone style displays only the second level of a binary factor, with that level named in the row; gtsummary can also display dichotomous variables on a single row.</p>
 
                 <p><strong>Numbers used as category codes:</strong> a numeric variable with fewer than 10 distinct values is summarised as mean (SD) by the tableone and arsenal styles but as N (percent) per level by the gtsummary style, so the style you pick changes how such a variable is treated. Convert it to a nominal or ordinal variable in the data tab if the numbers are codes rather than measurements.</p>
             </div>"
@@ -681,7 +701,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                            "</strong></p>",
                            "<p style='color: inherit; background-color: rgba(255, 202, 33, 0.23); padding: 8px; border-radius: 4px;'>",
                            "<em>Note: Listwise deletion was applied. The table below shows statistics for the ",
-                           n_final, " complete cases only. Per-variable denominators may differ if variables have different missing patterns.</em></p>")
+                           n_final, " complete cases only. All displayed variables use the same complete-case denominator.</em></p>")
                 } else {
                     paste0("<p><strong>Analysis sample:</strong> ", n_final, " cases (no exclusions applied)</p>",
                            if (has_missing) {

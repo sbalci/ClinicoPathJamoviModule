@@ -126,15 +126,16 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Odds Ratio Table and Plot",
                 refs=list(
                     "finalfit",
+                    "logistf",
+                    "epiR",
                     "rms",
-                    "Hmisc",
-                    "survival",
                     "survivaltutorial",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
                 title="To Do",
+                visible="(length(explanatory) == 0 || length(outcome) == 0 || length(outcomeLevel) == 0)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -163,6 +164,7 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="text",
                 title="Odds Ratio Table",
+                visible="(length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -172,6 +174,7 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="text2",
                 title="Model Performance Metrics",
+                visible="(length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -185,6 +188,7 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plot",
                 requiresData=TRUE,
+                visible="(length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -267,7 +271,7 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "oddsratio",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = oddsratioResults$new(options=options),
                 data = data,
@@ -294,7 +298,9 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param diagnosticPredictor Specify the predictor to drive likelihood
 #'   ratios; must be binary. Defaults to the first explanatory variable.
 #' @param predictorLevel Specify which level of the diagnostic predictor
-#'   represents the positive case.
+#'   represents the positive case. Because a Level option cannot declare a
+#'   default, this is a required argument of the R function: pass predictorLevel
+#'   = NULL when no diagnostic predictor is used.
 #' @param usePenalized Use Firth penalized likelihood logistic regression.
 #'   This is recommended when there is separation (zero cells), small sample
 #'   sizes, or low events-per-variable.

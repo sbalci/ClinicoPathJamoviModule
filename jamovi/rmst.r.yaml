@@ -71,12 +71,14 @@ items:
       type: Image
       visible: (show_rmst_plot)
       requiresData: true
+      renderFun: .plotRMST
 
     - name: tauAnalysisPlot
       title: "Tau Sensitivity Analysis"
       type: Image
       visible: (show_tau_analysis)
       requiresData: true
+      renderFun: .plotTauAnalysis
 
     - name: tauAnalysisTable
       title: "Tau Sensitivity Results"

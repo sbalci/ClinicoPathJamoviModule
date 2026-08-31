@@ -244,6 +244,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
             .eventRecode = NULL,
             # TRUE below 10 events: descriptive output runs, models suppressed.
             .lowEventCount = FALSE,
+            # Number of distinct values when .cleandata() had to coerce a numeric
+            # explanatory to a factor (finalfit's own < 5 rule); NULL otherwise.
+            .explanatoryCoercedLevels = NULL,
 
             # HTML notice helper (avoids the protobuf serialization error caused by
             # passing jmvcore::Notice objects to self$results$insert / $add).
@@ -1084,6 +1087,43 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # naOmit ----
 
                 cleanData <- jmvcore::naOmit(cleanData)
+
+                # One coding of the explanatory variable for EVERY engine ----
+                #
+                # finalfit's default is cont_cut = 5: on its own copy of the data
+                # it silently mutate_at's any NUMERIC explanatory with fewer than
+                # 5 distinct values to a FACTOR before fitting, so the Cox table
+                # came back level-wise (Grade 2 vs 1, Grade 3 vs 1). Nothing else
+                # in this analysis applies that rule -- survival::coxph for the
+                # convergence probe and for the stratified re-fit, survival::cox.zph
+                # for the proportional-hazards test, and the age-adjusted models all
+                # saw the untouched numeric column and fitted a single per-one-unit
+                # linear trend. One user selection therefore produced two different
+                # estimands in the same report: 1.02 / 1.12 per level in the Cox
+                # table beside 1.06 per unit in the age-adjusted table, and a
+                # cox.zph line with df = 1 testing a model the table never showed.
+                # Worse, the stratified overwrite matches finalfit's rows by
+                # <term name minus variable name>, which is "" for a numeric term,
+                # so it never fired: a Sex-stratified request printed the
+                # UNSTRATIFIED hazard ratios under a "NOT stratified" disclaimer.
+                #
+                # Apply finalfit's own rule ONCE, here, on the same data finalfit
+                # would see (post-naOmit), so every engine fits the same column.
+                # The test is deliberately identical to finalfit's -- strictly
+                # fewer than 5 distinct values -- so a genuinely continuous
+                # explanatory is left untouched and behaves exactly as before.
+                # The finalfit call in .cox() then passes cont_cut = 0 so it can
+                # never re-derive a coding of its own.
+                private$.explanatoryCoercedLevels <- NULL
+                if (!is.null(name3explanatory) &&
+                    name3explanatory %in% names(cleanData) &&
+                    is.numeric(cleanData[[name3explanatory]]) &&
+                    dplyr::n_distinct(cleanData[[name3explanatory]]) < 5) {
+                    private$.explanatoryCoercedLevels <-
+                        dplyr::n_distinct(cleanData[[name3explanatory]])
+                    cleanData[[name3explanatory]] <-
+                        as.factor(cleanData[[name3explanatory]])
+                }
 
 
                 # Prepare Data For Plots ----
@@ -1939,12 +1979,29 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Always use unstratified factors for finalfit to prevent 'not found' or C-stack errors
                 explanatory_formula <- myfactor
 
+                # cont_cut = 0 is load-bearing: it stops finalfit re-deriving a
+                # coding of its own. .cleandata() has already applied finalfit's
+                # own < 5 distinct values rule to the shared column, so every
+                # engine below (the convergence probe, the stratified re-fit,
+                # cox.zph, the age-adjusted models) fits exactly this coding.
                 tCox <- suppressWarnings(finalfit::finalfit(
                     .data = mydata,
                     dependent = myformula,
                     explanatory = explanatory_formula,
-                    metrics = TRUE
+                    metrics = TRUE,
+                    cont_cut = 0
                 ))
+
+                # setNote unconditionally (NULL clears) so the note cannot survive
+                # a switch to a different explanatory variable.
+                self$results$coxTable$setNote(
+                    "coerced_to_factor",
+                    if (is.null(private$.explanatoryCoercedLevels)) NULL else sprintf(
+                        "%s was supplied as a numeric column with only %d distinct values, so it is analysed as a categorical variable throughout: every hazard ratio compares one level with the reference level, not a one-unit increase. To model it as a linear trend instead, use Survival Analysis for Continuous Variable.",
+                        self$options$explanatory,
+                        private$.explanatoryCoercedLevels
+                    )
+                )
 
                 # Cox model convergence check
                 tryCatch({

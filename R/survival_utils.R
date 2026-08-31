@@ -598,7 +598,11 @@
   }
 
   formula_string <- paste0(lhs, " ~ ", rhs)
-  return(.asSurvivalFormula(formula_string))
+  # Forward OUR caller's frame. Omitting `env=` makes `.asSurvivalFormula()`
+  # default to parent.frame() = this builder's frame, which holds only
+  # time_var/escaped_* and no data -- so cox.zph() and anything else that
+  # re-evaluates the model call fails with "object 'mydata' not found".
+  return(.asSurvivalFormula(formula_string, env = parent.frame()))
 }
 
 #' Format a follow-up time for display in an interval label

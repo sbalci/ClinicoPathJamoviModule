@@ -29,11 +29,16 @@ timeinterval(
 calculation.}
 
 \item{dx_date}{Column containing start dates (e.g., diagnosis date, study
-entry, treatment start). Supports various date formats including text and
-numeric representations.}
+entry, treatment start). Accepts text dates and numeric packed dates
+(YYYYMMDD, YYMMDD). Spreadsheet day-count serial numbers (Excel day counts
+such as 42370) are not dates and are rejected, because parsing them gives
+follow-up times wrong by decades; re-export that column as text in
+YYYY-MM-DD form.}
 
 \item{fu_date}{Column containing end dates (e.g., follow-up date, event
-date, study exit). Must be in the same format as the start date variable.}
+date, study exit). Must be in the same format as the start date variable.
+Spreadsheet day-count serial numbers are rejected for the same reason as
+the start date column.}
 
 \item{time_format}{Date format specification. 'Auto-detect' attempts to
 identify the format automatically. Manual selection ensures accurate
@@ -44,7 +49,7 @@ calculations and  statistical summaries. Choose based on study duration and
 event frequency.}
 
 \item{time_basis}{Controls how months/years are computed. Standardized uses
-fixed lengths (30.44 days per month, 365.25 days per year) suited for
+fixed lengths (30.4375 days per month, 365.25 days per year) suited for
 person-time denominators. Calendar-aware respects actual month lengths (28
 \itemize{
 \item 31 days) when converting intervals to months/years.
@@ -61,12 +66,17 @@ analysis.}
 \item{remove_negative}{Automatically exclude negative time intervals (end
 date before start date). Recommended for data quality assurance.}
 
-\item{remove_extreme}{Identify and flag potentially extreme time intervals
-for quality review. Uses statistical outlier detection methods.}
+\item{remove_extreme}{Exclude time intervals above (multiplier x 99th
+percentile) from the analysis. These rows are dropped from every statistic,
+including the mean and the total person-time, not merely flagged. The Data
+Quality Assessment panel reports how many were removed. Leave off to keep
+all intervals and only see the count.}
 
 \item{extreme_multiplier}{Multiplier for 99th percentile to define extreme
-values. Default 2.0 means values >2x the 99th percentile are flagged.
-Higher values are more conservative (fewer flagged values).}
+values. Default 2.0 means intervals longer than 2x the 99th percentile are
+removed when 'Remove extreme values' is on. Higher values are more
+conservative (fewer intervals removed). Has no effect when the 99th
+percentile is zero.}
 
 \item{add_times}{Appends calculated time intervals as a new variable for
 downstream analysis. Useful for subsequent survival analysis or person-time
@@ -88,8 +98,9 @@ incidence rate, landmark analysis, etc.) to help interpret results.}
 
 \item{timezone}{Timezone for datetime parsing. 'System Default' uses your
 computer's timezone. 'UTC' interprets datetimes as Coordinated Universal
-Time. Ensures consistent time interval calculations across different
-systems and time zones.}
+Time. This applies only to the 'YYYY-MM-DD HH:MM:SS' format, the only one
+that carries a time of day; date-only formats produce calendar dates that
+have no timezone, so the setting has no effect on them.}
 }
 \value{
 A results object containing:

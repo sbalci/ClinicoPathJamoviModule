@@ -434,40 +434,6 @@ making it easy to compare the magnitude of between-stage separation in each syst
 
 ---
 
-## 10. Clinical Presets
-
-For users who do not want to manually configure dozens of options, the module
-provides clinical presets that activate sensible combinations:
-
-```{r preset-research}
-stagemigration(
-  data = combined_data,
-  oldStage = "old_stage",
-  newStage = "new_stage",
-  survivalTime = "survival_time",
-  event = "event",
-  eventLevel = "1",
-  clinicalPreset = "research_study"
-)
-```
-
-| Preset | What It Enables | Best For |
-|--------|----------------|----------|
-| `routine_clinical` | Migration matrix, C-index, basic recommendation | Daily clinical validation |
-| `research_study` | + NRI, survival curves, Will Rogers, bootstrap | Academic research projects |
-| `publication_ready` | All methods + all visualizations | Manuscript preparation |
-| `custom` | Manual control of every option | Advanced users |
-
-The `complexityMode` option works similarly but controls UI complexity in the
-jamovi interface:
-
-- **quick**: Essential outputs only (5-10 min analysis)
-- **standard**: Common validation metrics (30-60 min)
-- **comprehensive**: All methods enabled (1-2 hours for large datasets)
-- **custom**: Full manual control
-
----
-
 ## 11. Cancer-Type-Specific Analysis
 
 Different cancer types have different expected migration patterns and clinically
@@ -775,8 +741,6 @@ analysis.
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `analysisType` | List | `comprehensive` | Scope: basic / standard / comprehensive / publication |
-| `clinicalPreset` | List | `routine_clinical` | Preset configuration: routine / research / publication / custom |
-| `complexityMode` | List | `quick` | UI complexity: quick / standard / comprehensive / custom |
 | `confidenceLevel` | Number | `0.95` | Confidence level for CIs and tests (0.80-0.99) |
 | `cancerType` | List | `general` | Cancer type for tailored thresholds |
 
@@ -911,9 +875,6 @@ For a complete staging validation study, we recommend:
    discrimination translates to better clinical decisions
 6. **Generate the report**: Use `generateExecutiveSummary` and
    `generateCopyReadyReport` to produce manuscript-ready output
-
-Or simply use `clinicalPreset = "publication_ready"` to enable all of the above in
-one step.
 
 ---
 

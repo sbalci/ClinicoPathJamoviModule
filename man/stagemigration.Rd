@@ -11,14 +11,12 @@ stagemigration(
   survivalTime = NULL,
   event = NULL,
   eventLevel,
-  clinicalPreset = "routine_clinical",
   enableGuidedMode = FALSE,
   generateCopyReadyReport = FALSE,
   enableAccessibilityFeatures = FALSE,
   preferredLanguage = "en",
   enableProgressIndicators = FALSE,
   optimizeForLargeDatasets = FALSE,
-  complexityMode = "quick",
   analysisType = "comprehensive",
   confidenceLevel = 0.95,
   calculateNRI = FALSE,
@@ -281,12 +279,6 @@ disease being studied.}
 \item{eventLevel}{The level indicating event occurrence when using factor
 variables.}
 
-\item{clinicalPreset}{Choose a preset tailored to your clinical workflow.
-'Routine Clinical' provides essential  validation metrics for daily
-practice. 'Research Study' adds advanced statistics for  academic research.
-'Publication Ready' includes all methods and visualizations for
-manuscripts. Choose 'Custom' to manually configure all options.}
-
 \item{enableGuidedMode}{Enable step-by-step guidance for clinical users.
 Provides contextual help,  assumption checking, and clinical interpretation
 assistance throughout the analysis. Highly recommended for users new to
@@ -314,12 +306,6 @@ Helps users track analysis progress.}
 large datasets (>10,000 patients).  Uses chunked processing and optimized
 algorithms to reduce memory usage  and improve performance while
 maintaining statistical accuracy.}
-
-\item{complexityMode}{Controls UI complexity and feature availability.
-Quick mode shows essential outputs only (migration matrix, C-index, simple
-recommendation). Standard adds common validation metrics (NRI, survival
-curves, Will Rogers). Comprehensive enables all methods (bootstrap, ROC,
-DCA). Custom allows manual control of all options.}
 
 \item{analysisType}{Determines the scope of statistical analysis performed.
 Comprehensive analysis includes all available methods for thorough staging
@@ -1301,6 +1287,7 @@ A results object containing:
 \code{results$nriResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$idiResultsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$idiResults} \tab \tab \tab \tab \tab a table \cr
+\code{results$idiComponents} \tab \tab \tab \tab \tab a table \cr
 \code{results$multifactorialAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$multifactorialResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$multifactorialResultsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -1314,6 +1301,9 @@ A results object containing:
 \code{results$interactionTestsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$stratifiedAnalysisTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$stratifiedAnalysisExplanation} \tab \tab \tab \tab \tab a html \cr
+\code{results$personalizedRiskSummary} \tab \tab \tab \tab \tab a table \cr
+\code{results$multifactorialModelDiagnostics} \tab \tab \tab \tab \tab a table \cr
+\code{results$multivariableDCASummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$rocAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$integratedAUCAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$dcaResultsExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -1365,6 +1355,7 @@ A results object containing:
 \code{results$enhancedPseudoR2} \tab \tab \tab \tab \tab a table \cr
 \code{results$enhancedReclassificationMetrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$proportionalHazardsTest} \tab \tab \tab \tab \tab a table \cr
+\code{results$enhancedModelDiagnostics} \tab \tab \tab \tab \tab a table \cr
 \code{results$decisionCurveAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$survivalCurvesExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$survivalCurves} \tab \tab \tab \tab \tab an image \cr
@@ -1376,6 +1367,7 @@ A results object containing:
 \code{results$enhancedMigrationPatternAnalysis} \tab \tab \tab \tab \tab a table \cr
 \code{results$landmarkAnalysisResults} \tab \tab \tab \tab \tab a table \cr
 \code{results$advancedMigrationHeatmapStats} \tab \tab \tab \tab \tab a table \cr
+\code{results$clinicalDecisionSupportReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$abbreviationGlossary} \tab \tab \tab \tab \tab a html \cr
 \code{results$crossValidationExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$crossValidationResults} \tab \tab \tab \tab \tab a table \cr

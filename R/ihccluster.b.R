@@ -3268,8 +3268,11 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
 
-                survTime <- self$data[[self$options$survivalTime]]
-                survEvent <- self$data[[self$options$survivalEvent]]
+                # Take the survival columns from the prepared df so they stay
+                # aligned with clusters (self$data may hold dropped cases)
+                df <- analysisState$df
+                survTime <- df[[self$options$survivalTime]]
+                survEvent <- df[[self$options$survivalEvent]]
 
                 if (is.null(survTime) || is.null(survEvent)) {
                     return()
@@ -3284,12 +3287,16 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
 
-                surv_obj <- survival::Surv(survTime, survEvent)
-                fit <- survival::survfit(surv_obj ~ clusters)
+                # The Surv() term is written inline over columns of plot_data
+                # rather than through a local variable: survminer re-evaluates
+                # fit$call$formula when plotting, and that local is gone by then
+                plot_data <- data.frame(time = survTime, event = survEvent, cluster = clusters)
+                fit <- survival::survfit(survival::Surv(time, event) ~ cluster, data = plot_data)
 
                 # Plot using survminer if available, otherwise base R
                 if (requireNamespace("survminer", quietly = TRUE)) {
                     p <- survminer::ggsurvplot(fit,
+                        data = plot_data,
                         pval = TRUE,
                         conf.int = TRUE,
                         risk.table = TRUE,

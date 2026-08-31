@@ -482,22 +482,17 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Enhanced visR wrapper functions with j-prefix to avoid namespace conflicts
         .jestimate_KM_enhanced = function(data, formula) {
             
-            # Enhanced wrapper for visR::estimate_KM with better integration
-            if (requireNamespace('visR', quietly = TRUE)) {
-                # Use visR's estimate_KM for better integration
-                tryCatch({
-                    km_fit <- visR::estimate_KM(data = data, strata = all.vars(formula)[-c(1,2)])
-                    return(km_fit)
-                }, error = function(e) {
-                    # Fallback to standard survival if visR fails
-                    km_fit <- survival::survfit(formula, data = data)
-                    return(km_fit)
-                })
-            } else {
-                # Standard survival analysis
-                km_fit <- survival::survfit(formula, data = data)
-                return(km_fit)
-            }
+            # visR::estimate_KM() is deliberately NOT used here. Called without formula= it
+            # falls back to visR's CDISC ADaM column contract and always stop()s on this
+            # module's prepared frame ("Following columns are missing from `data`: CNSR
+            # AVAL"), so the branch only ever cost a thrown-and-caught error per run.
+            # (It is also deprecated as of visR 0.4.0.)
+            km_fit <- survival::survfit(formula, data = data)
+            # survminer re-parses fit$call$formula; passing the formula through a
+            # variable leaves a bare symbol there and ggsurvplot dies with
+            # "object of type 'symbol' is not subsettable".
+            km_fit$call$formula <- formula
+            return(km_fit)
         },
         
         .jvisr_plot_enhanced = function(km_fit, data) {

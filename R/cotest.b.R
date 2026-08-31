@@ -17,26 +17,9 @@ cotestClass <- if (requireNamespace("jmvcore"))
             .nomogramCache = NULL,
             .lastNomogramParams = NULL,
             .notices = NULL,
-            # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-            #   [i18n] 0 .() wraps across 187 prose-like string literals. STILL OPEN, and the
-            #     earlier justification recorded here was WRONG: it claimed no .b.R in this module
-            #     uses .(). In fact 60-63 do, led by waterfall.b.R (372 wraps), and both
-            #     menuSubgroup siblings (decisioncalculator, sequentialtests) already have Turkish
-            #     plans under i18n-plans/. The sinks are 9 jmvcore::reject(), 18 .addNotice(),
-            #     1 setNote, 6 setContent HTML documents, 16 addFootnote and the scenario labels.
-            #     -> /prepare-translation cotest. Do not re-justify skipping this from that comment.
-            #
-            #   Closed 2026-08-26 by /check-function-full:
-            #   [hygiene/notices] invalid inputs rendering silently as NaN - degenerate likelihood
-            #     ratios now return NA/Inf/0 with a specific notice each; out-of-range inputs
-            #     jmvcore::reject() (and the reject() call that printed a literal "{}" is fixed).
-            #   [hygiene/notices] independence assumption only in the HTML body - the Test
-            #     Dependence panel is now written in BOTH branches and always states which model
-            #     was fitted.
-            #   [statistical-validation] post-test probabilities were re-derived against an
-            #     independent 2x2 enumeration + Bayes reference across independence, rho in
-            #     [-1, 1], prevalence 0.002-0.60 and near-perfect tests: max abs diff 1.1e-17.
-            #     Regression coverage in tests/testthat/test-cotest-release-review.R.
+            # Translation coverage of the long educational HTML remains incomplete; keep
+            # statistical formulas and notices covered by test-cotest-release-review.R while
+            # migrating prose as complete messages rather than sentence fragments.
             .init = function() {
                 # Add welcome instructions
                 instructions <- '

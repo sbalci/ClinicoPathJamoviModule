@@ -4,7 +4,14 @@
 \alias{computeNRI}
 \title{Compute Net Reclassification Index (NRI)}
 \usage{
-computeNRI(new_values, ref_values, actual, direction = ">=", thresholds = NULL)
+computeNRI(
+  new_values,
+  ref_values,
+  actual,
+  direction = ">=",
+  thresholds = NULL,
+  warn = TRUE
+)
 }
 \arguments{
 \item{new_values}{Test values for new test}

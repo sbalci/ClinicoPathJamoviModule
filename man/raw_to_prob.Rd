@@ -4,7 +4,7 @@
 \alias{raw_to_prob}
 \title{Convert raw test values to predicted probabilities using ROC curve}
 \usage{
-raw_to_prob(values, actual, direction = ">=")
+raw_to_prob(values, actual, direction = ">=", warn = TRUE)
 }
 \arguments{
 \item{values}{Raw test values}
@@ -12,6 +12,10 @@ raw_to_prob(values, actual, direction = ">=")
 \item{actual}{Binary outcomes (0/1)}
 
 \item{direction}{Direction of test (">=" or "<=")}
+
+\item{warn}{Logical; emit a consolidated warning when logistic calibration
+shows separation, non-convergence, or fitting failure. Bootstrap callers
+set this to \code{FALSE} and report one aggregate diagnostic instead.}
 }
 \value{
 Vector of predicted probabilities

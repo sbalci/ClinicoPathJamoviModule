@@ -73,7 +73,7 @@ test_that("summarydata - Outlier detection", {
     results <- summarydata(data = test_data, vars = "biomarker2", outliers = TRUE)
     outlier_report <- as.character(results$outlierReport$content)
 
-    expect_match(outlier_report, "5 outlier(s) detected", fixed = TRUE)
+    expect_match(outlier_report, "5 observation(s) flagged", fixed = TRUE)
     # values are now formatted at the user's decimal_places (default 2) so that
     # they match the precision of every other number in the output
     expect_match(outlier_report, "50.00, 52.00, 55.00, 58.00, 60.00", fixed = TRUE)
@@ -93,9 +93,12 @@ test_that("summarydata - non-numeric and all-missing selections", {
     d$non_numeric <- "a"
     expect_error(summarydata(data = d, vars = "non_numeric"), "numeric variable")
 
-    # A numeric all-NA column does reach the backend, which names it and stops.
+    # A numeric all-NA column reaches the backend, which reports one plain-text
+    # notice and leaves the data-information panel empty.
     res_na <- summarydata(data = test_data, vars = "all_na")
-    expect_match(as.character(res_na$todo$content), "only missing values")
+    expect_match(as.character(res_na$notices$content),
+                 "every value in it is missing", fixed = TRUE)
+    expect_equal(as.character(res_na$todo$content), "")
     expect_equal(as.character(res_na$text$content), "")
 })
 

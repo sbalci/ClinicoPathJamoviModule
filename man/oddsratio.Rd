@@ -32,7 +32,9 @@ specified.}
 ratios; must be binary. Defaults to the first explanatory variable.}
 
 \item{predictorLevel}{Specify which level of the diagnostic predictor
-represents the positive case.}
+represents the positive case. Because a Level option cannot declare a
+default, this is a required argument of the R function: pass predictorLevel
+= NULL when no diagnostic predictor is used.}
 
 \item{usePenalized}{Use Firth penalized likelihood logistic regression.
 This is recommended when there is separation (zero cells), small sample

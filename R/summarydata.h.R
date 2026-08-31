@@ -10,7 +10,8 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             distr = FALSE,
             decimal_places = 2,
             outliers = FALSE,
-            report_sentences = FALSE, ...) {
+            report_sentences = FALSE,
+            show_guidance = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -24,8 +25,7 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"),
-                default=NULL)
+                    "numeric"))
             private$..distr <- jmvcore::OptionBool$new(
                 "distr",
                 distr,
@@ -44,25 +44,32 @@ summarydataOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "report_sentences",
                 report_sentences,
                 default=FALSE)
+            private$..show_guidance <- jmvcore::OptionBool$new(
+                "show_guidance",
+                show_guidance,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..distr)
             self$.addOption(private$..decimal_places)
             self$.addOption(private$..outliers)
             self$.addOption(private$..report_sentences)
+            self$.addOption(private$..show_guidance)
         }),
     active = list(
         vars = function() private$..vars$value,
         distr = function() private$..distr$value,
         decimal_places = function() private$..decimal_places$value,
         outliers = function() private$..outliers$value,
-        report_sentences = function() private$..report_sentences$value),
+        report_sentences = function() private$..report_sentences$value,
+        show_guidance = function() private$..show_guidance$value),
     private = list(
         ..vars = NA,
         ..distr = NA,
         ..decimal_places = NA,
         ..outliers = NA,
-        ..report_sentences = NA)
+        ..report_sentences = NA,
+        ..show_guidance = NA)
 )
 
 summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -87,17 +94,19 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 title="Summary of Continuous Variables",
                 refs=list(
                     "gtExtras",
+                    "moments",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
                 title="Important Information",
                 clearWith=list(
-                    "vars")))
+                    "vars",
+                    "decimal_places")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="To Do",
+                title="Data Information",
                 clearWith=list(
                     "vars")))
             self$add(jmvcore::Html$new(
@@ -121,16 +130,18 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="clinicalInterpretation",
                 title="Clinical Interpretation",
-                visible="(vars)",
+                visible="(length(vars) > 0 && show_guidance)",
                 clearWith=list(
-                    "vars")))
+                    "vars",
+                    "show_guidance")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
-                visible=TRUE,
+                visible="(show_guidance)",
                 clearWith=list(
-                    "vars")))
+                    "vars",
+                    "show_guidance")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="outlierReport",
@@ -143,7 +154,7 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSentences",
-                title="Copy-Ready Clinical Summary",
+                title="Draft Statistical Summary",
                 visible="(report_sentences)",
                 clearWith=list(
                     "vars",
@@ -154,11 +165,12 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="glossary",
                 title="Statistical Glossary",
-                visible=TRUE,
+                visible="(show_guidance)",
                 clearWith=list(
                     "vars",
                     "distr",
-                    "outliers")))}))
+                    "outliers",
+                    "show_guidance")))}))
 
 summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "summarydataBase",
@@ -200,19 +212,28 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' summarydata(data = histopathology, vars = "Age", distr = TRUE)
 #'}
 #' @param data The data as a data frame.
-#' @param vars a string naming the variables from \code{data} that contains
-#'   the continuous values used for the report
+#' @param vars A character vector naming the numeric variables from
+#'   \code{data} to summarize. This argument is required when calling the
+#'   analysis from R; in jamovi, select one or more variables in the options
+#'   panel.
 #' @param distr If TRUE, additional distribution diagnostics (Shapiro-Wilk
 #'   test, skewness, and kurtosis) will be computed and explained.
 #' @param decimal_places Number of decimal places to display for statistical
 #'   measures. Default of 2 aligns with standard laboratory reporting. Governs
 #'   the text summary, the skewness and kurtosis values, the visual summary
-#'   table, the outlier report and the copy-ready clinical summary. P-values are
+#'   table, the outlier report and the draft statistical summary. P-values are
 #'   always shown to 3 decimal places.
-#' @param outliers If TRUE, detect and report potential outliers using IQR
-#'   method. Helpful for quality control and identifying data entry errors.
-#' @param report_sentences If TRUE, generate copy-ready clinical report
-#'   sentences for direct use in medical documentation.
+#' @param outliers If TRUE, flag observations outside the 1.5 x IQR fences as
+#'   potential outliers. Helpful for quality control and identifying possible
+#'   data entry errors or genuine extreme values that need contextual review.
+#' @param report_sentences If TRUE, generate draft statistical sentences that
+#'   include sample size and missingness. Add measurement units, the study
+#'   population, the time point, and missing-data handling before using the text
+#'   in a manuscript or clinical document.
+#' @param show_guidance If TRUE, show the clinical interpretation guide,
+#'   methodological explanation, and statistical glossary. These panels provide
+#'   general educational guidance and do not establish clinical reference
+#'   intervals.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
@@ -229,11 +250,12 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 summarydata <- function(
     data,
-    vars = NULL,
+    vars,
     distr = FALSE,
     decimal_places = 2,
     outliers = FALSE,
-    report_sentences = FALSE) {
+    report_sentences = FALSE,
+    show_guidance = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("summarydata requires jmvcore to be installed (restart may be required)")
@@ -250,7 +272,8 @@ summarydata <- function(
         distr = distr,
         decimal_places = decimal_places,
         outliers = outliers,
-        report_sentences = report_sentences)
+        report_sentences = report_sentences,
+        show_guidance = show_guidance)
 
     analysis <- summarydataClass$new(
         options = options,

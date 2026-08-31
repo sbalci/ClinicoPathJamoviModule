@@ -157,6 +157,39 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             if (nrow(mydata) == 0) {
                 jmvcore::reject('No complete cases available for analysis')
             }
+
+            # Coerce a low-cardinality numeric explanatory variable to a factor,
+            # once, here, so that EVERY consumer downstream sees the same coding.
+            #
+            # `explanatory` is declared `permitted: [factor]` in the .a.yaml, so a
+            # numeric column can only arrive through the R API (jmvcore does not
+            # enforce `permitted` at runtime). Everything this analysis draws is
+            # group-based: cmprsk::cuminc() is called with `group = mydata[[
+            # myexplanatory]]` and produces one cumulative-incidence curve per
+            # distinct value, and Gray's test compares those groups. Leaving the
+            # column numeric for the regression while the curve beside it splits
+            # on the same raw values put a per-one-unit-increase hazard ratio on
+            # the same page as three separate curves -- one selection described
+            # two different ways, with nothing saying so.
+            #
+            # This is the rule R/survival.b.R uses, and it is deliberately NOT the
+            # rule R/oddsratio.b.R, R/survivalcont.b.R and R/multisurvival.b.R use:
+            # those reach a numeric through a slot whose `permitted` actually says
+            # `numeric` (oddsratio's `explanatory`, the others' `contexpl`), where
+            # a linear trend is what the analyst asked for. Here it is not.
+            explanatory_coerced_levels <- NULL
+            if (!is.null(myexplanatory) && myexplanatory != "" &&
+                is.numeric(mydata[[myexplanatory]]) &&
+                dplyr::n_distinct(mydata[[myexplanatory]]) < 5) {
+                explanatory_coerced_levels <- dplyr::n_distinct(mydata[[myexplanatory]])
+                # as.factor() drops the "label" attribute, and finalfit prints that
+                # label as the term name -- without this the table reads
+                # "grade: 1" (the janitor-cleaned name) instead of "Grade: 1".
+                expl_label <- attr(mydata[[myexplanatory]], "label", exact = TRUE)
+                mydata[[myexplanatory]] <- as.factor(mydata[[myexplanatory]])
+                if (!is.null(expl_label))
+                    attr(mydata[[myexplanatory]], "label") <- expl_label
+            }
             
             # Perform analysis based on type
             private$.performAnalysis(mydata, mytime, myoutcome, myexplanatory, analysistype, dod, dooc, awd, awod)
@@ -191,8 +224,38 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             tryCatch({
                 # Handle case where no explanatory variable is provided
                 if (!is.null(myexplanatory) && myexplanatory != "") {
+                    # cont_cut = 0 is load-bearing.
+                    #
+                    # finalfit's default is cont_cut = 5. Before fitting, finalfit runs
+                    #   cont_distinct = select(contains(explanatory)) %>%
+                    #                   summarise_if(is.numeric, n_distinct) %>%
+                    #                   keep(~ .x < cont_cut)
+                    #   .data = mutate_at(.data, cont_distinct, as.factor)
+                    # on its OWN copy of the frame, so any numeric explanatory variable
+                    # with fewer than 5 distinct values -- a grade 1/2/3, a T stage 1-4,
+                    # a 0/1 marker -- is silently promoted to a FACTOR and reported as
+                    # per-level hazard ratios.
+                    #
+                    # Nothing else in this analysis applies that rule. The competing
+                    # risks branch fits finalfit::crrmulti(), which has no cont_cut
+                    # formal; the Fine-Gray branch calls cmprsk::crr() on the raw
+                    # numeric column ("Continuous predictor (per unit increase)"); and
+                    # cmprsk::cuminc() groups on the raw column too. Selecting Grade
+                    # therefore produced HR 1.19 / 1.07 against a reference level under
+                    # Overall (1.15 / 1.28 under Cause Specific), but a single
+                    # per-one-unit HR of 1.11
+                    # under Competing Risk -- a different estimand from one variable
+                    # selection, with no indication in the report that the model had
+                    # been changed. cont_cut = 0 makes keep(~ .x < 0) match nothing, so
+                    # finalfit fits exactly the specification the user declared, and the
+                    # HR now reproduces coxph() to the digit (1.03).
+                    #
+                    # It also neutralises the substring match in that select(contains(...)):
+                    # a column merely CONTAINING the explanatory name could otherwise be
+                    # dragged in and factorised. Do not "tidy away" this argument.
                     result <- mydata %>%
-                        finalfit::finalfit(dependent_os, myexplanatory, add_dependent_label = FALSE)
+                        finalfit::finalfit(dependent_os, myexplanatory, add_dependent_label = FALSE,
+                                           cont_cut = 0)
                 } else {
                     # Simple survival without groups
                     surv_obj <- survival::Surv(mydata[[mytime]], mydata$status_os)
@@ -231,8 +294,13 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             tryCatch({
                 # Handle case where no explanatory variable is provided
                 if (!is.null(myexplanatory) && myexplanatory != "") {
+                    # cont_cut = 0: see the full explanation at the matching call in
+                    # .overallSurvival(). finalfit's default silently converts a numeric
+                    # explanatory variable with fewer than 5 distinct values to a factor
+                    # before fitting; no other model path in this analysis does that.
                     result <- mydata %>%
-                        finalfit::finalfit(dependent_dss, myexplanatory, add_dependent_label = FALSE)
+                        finalfit::finalfit(dependent_dss, myexplanatory, add_dependent_label = FALSE,
+                                           cont_cut = 0)
                 } else {
                     # Simple survival without groups
                     surv_obj <- survival::Surv(mydata[[mytime]], mydata$status_dss)
@@ -874,8 +942,17 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                             if (!is.null(parsed) && !is.na(parsed$hr)) {
                                 # Determine the term name
                                 if (!is.na(label) && label != "." && label != "") {
-                                    # This row has a proper label
-                                    if (!is.na(levels) && levels != "" && levels != "." && levels != label) {
+                                    # This row has a proper label.
+                                    #
+                                    # For a numeric explanatory variable finalfit puts its
+                                    # DESCRIPTIVE statistic in the levels column -- "Mean (SD)"
+                                    # or "Median (IQR)" -- not a factor level. Pasting it on
+                                    # would print "Grade: Mean (SD)" in a column headed
+                                    # "Variable", which reads like a level of Grade. The HR is
+                                    # per one-unit increase, so the bare variable name is the
+                                    # correct term (and is what coxph() calls it).
+                                    if (!is.na(levels) && levels != "" && levels != "." && levels != label &&
+                                        !(levels %in% c("Mean (SD)", "Median (IQR)"))) {
                                         term_name <- paste0(label, ": ", levels)
                                     } else {
                                         term_name <- label
@@ -1154,6 +1231,51 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 "analog of the log-rank test, NOT a test of cause-specific hazards.</li>",
                 "</ul>"
             )
+
+            # Disclose how a numeric explanatory variable was coded.
+            #
+            # `explanatory` is declared `permitted: [factor]`, so in the jamovi GUI
+            # this block is inert; it fires for R-API, vignette and testthat
+            # callers, which jmvcore does NOT hold to `permitted`. Two different
+            # things can happen to such a column and the user must be told which:
+            #   * fewer than 5 distinct values -> coerced to a factor in the data
+            #     prep, so every table and every curve splits the same way;
+            #   * 5 or more -> left numeric, so the regression reports a per-unit
+            #     trend while cmprsk::cuminc() still draws one curve per distinct
+            #     value. That combination is not something this analysis can
+            #     present coherently, so it is called out as a warning.
+            expl <- self$options$explanatory
+            if (!is.null(expl) && nzchar(expl) && expl %in% names(self$data)) {
+                expl_col <- self$data[[expl]]
+                if (is.numeric(expl_col)) {
+                    n_distinct <- length(unique(expl_col[!is.na(expl_col)]))
+                    assumptions_html <- paste0(
+                        assumptions_html,
+                        if (n_distinct < 5) paste0(
+                            "<p><b>Numeric variable treated as categorical:</b> ",
+                            htmltools::htmlEscape(expl),
+                            " is stored as a number but takes only ", n_distinct,
+                            " distinct values, so it has been treated as a grouping ",
+                            "variable: each hazard ratio compares one value with the ",
+                            "reference value, and the cumulative-incidence curves and ",
+                            "Gray's test split the same way. To model it as a linear ",
+                            "trend instead, use an analysis that accepts a continuous ",
+                            "predictor.</p>"
+                        ) else paste0(
+                            "<p><b>Check this variable's type:</b> ",
+                            htmltools::htmlEscape(expl),
+                            " is numeric with ", n_distinct, " distinct values. The ",
+                            "regression reports a hazard ratio per one-unit increase, ",
+                            "but the cumulative-incidence curves and Gray's test group ",
+                            "on its raw values, so the two describe it differently. ",
+                            "This analysis expects a grouping variable; convert it to a ",
+                            "small number of categories, or use an analysis built for a ",
+                            "continuous predictor.</p>"
+                        )
+                    )
+                }
+            }
+
             self$results$assumptions$setContent(assumptions_html)
         },
         

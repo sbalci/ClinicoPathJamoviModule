@@ -137,6 +137,63 @@ test_that("meddecide updater manifest includes all translation catalogs", {
   expect_true(isTRUE(config$modes$copy_i18n_files))
 })
 
+test_that("meddecide Boolean controls use state labels rather than action labels", {
+  root <- audit_source_root()
+  analyses <- c(
+    "agreement", "cotest", "decision", "decisioncalculator",
+    "decisioncombine", "decisioncompare", "decisioncurve", "enhancedROC",
+    "kappaSizeCI", "kappaSizeFixedN", "kappaSizePower", "lassologistic",
+    "nogoldstandard", "psychopdaROC", "sequentialtests"
+  )
+  action_label <- paste0(
+    "^(Show|Enable|Include|Export|Generate|Calculate|Highlight|Detect|Use|",
+    "Apply|Add|Create|Perform)\\b"
+  )
+
+  option_violations <- character(0)
+  ui_violations <- character(0)
+  inspect_ui <- function(node, analysis) {
+    if (!is.list(node))
+      return(invisible(NULL))
+    if (
+      identical(node$type, "CheckBox") &&
+      !is.null(node$label) &&
+      grepl(action_label, node$label)
+    ) {
+      ui_violations <<- c(
+        ui_violations,
+        paste(analysis, node$name, node$label, sep = ": ")
+      )
+    }
+    invisible(lapply(node, inspect_ui, analysis = analysis))
+  }
+
+  for (analysis in analyses) {
+    options <- yaml::read_yaml(
+      file.path(root, "jamovi", paste0(analysis, ".a.yaml"))
+    )$options
+    for (option in options) {
+      if (
+        identical(option$type, "Bool") &&
+        grepl(action_label, option$title)
+      ) {
+        option_violations <- c(
+          option_violations,
+          paste(analysis, option$name, option$title, sep = ": ")
+        )
+      }
+    }
+
+    ui <- yaml::read_yaml(
+      file.path(root, "jamovi", paste0(analysis, ".u.yaml"))
+    )
+    inspect_ui(ui, analysis)
+  }
+
+  expect_identical(option_violations, character(0))
+  expect_identical(ui_violations, character(0))
+})
+
 test_that("IDI and NRI consolidate unstable calibration warnings", {
   actual <- rep(c(0, 1), each = 20)
   reference <- c(seq(-20, -1), seq(1, 20))

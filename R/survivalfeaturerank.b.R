@@ -636,6 +636,10 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
             # Create survival formula and fit
             surv_formula <- as.formula(paste("survival::Surv(survtime, event) ~", jmvcore::composeTerm(feature_name)))
             fit <- survival::survfit(surv_formula, data = plot_data)
+            # survminer re-parses fit$call$formula; passing the formula through a
+            # variable leaves a bare symbol there and ggsurvplot dies with
+            # "object of type 'symbol' is not subsettable".
+            fit$call$formula <- surv_formula
 
             # Create plot
             plot <- survminer::ggsurvplot(

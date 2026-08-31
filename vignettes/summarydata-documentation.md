@@ -1,107 +1,79 @@
 # Summary of Continuous Variables - Developer Documentation
 
-## 1. Overview
+## Overview
 
 - **Function**: `summarydata`
-- **Title**: Summary of Continuous Variables
-- **Module**: `ExplorationT`
-- **Files**:
-  - `jamovi/summarydata.u.yaml` - User Interface Definition
-  - `jamovi/summarydata.a.yaml` - Options & Schema Definition
-  - `jamovi/summarydata.r.yaml` - Results Layout & Tables
-  - `R/summarydata.b.R` - Backend Implementation
-- **Summary**: This module generates descriptive statistics for continuous variables. It provides both a textual summary and a visually appealing summary table. Optionally, you can enable distribution diagnostics to examine normality, skewness, and kurtosis.
+- **Menu group**: `ExplorationT`
+- **Purpose**: summarize one or more numeric variables with descriptive
+  statistics, an HTML visual-summary table, optional distribution diagnostics,
+  optional IQR outlier flags, and draft reporting sentences.
+- **Backend**: `R/summarydata.b.R`
+- **Schemas**: `jamovi/summarydata.a.yaml`, `jamovi/summarydata.u.yaml`, and
+  `jamovi/summarydata.r.yaml`
 
-## 1a. Changelog
+All statistics are computed separately for each variable from its available
+observations. The analysis does not impute missing values and does not restrict
+all variables to a common complete-case sample.
 
-- **Date**: 2026-08-29
-- **Summary**: Comprehensive documentation suite created & verified against active schemas and backend implementation.
+## Options
 
-## 2. Options Reference (`.a.yaml`)
-
-| Option | Type | Default | Description |
+| Option | Type | Default | Behaviour |
 | :--- | :--- | :--- | :--- |
-| `data` | `Data` | `NULL` |  |
-| `vars` | `Variables` | `NULL` | Variables |
-| `distr` | `Bool` | `FALSE` | Distribution diagnostics |
-| `decimal_places` | `Integer` | `2` | Decimal places |
-| `outliers` | `Bool` | `FALSE` | Outlier detection |
-| `report_sentences` | `Bool` | `FALSE` | Report sentences |
+| `data` | `Data` | required | Input data frame. |
+| `vars` | `Variables` | required in R | Numeric columns to summarize. The jamovi UI may initially have no selection and displays instructions. |
+| `distr` | `Bool` | `FALSE` | Adds Shapiro-Wilk, skewness, and kurtosis diagnostics. |
+| `decimal_places` | `Integer` | `2` | Uses 0-5 decimals for displayed statistics; Shapiro-Wilk p-values use 3 decimals. |
+| `outliers` | `Bool` | `FALSE` | Flags observations outside the 1.5 x IQR fences. |
+| `report_sentences` | `Bool` | `FALSE` | Produces draft statistical sentences with available and missing counts. |
 
-## 3. Results Definition (`.r.yaml`)
+## Results
 
-| Output ID | Type | Title | Description |
+| Output ID | Type | Title | Content |
 | :--- | :--- | :--- | :--- |
-| `notices` | `Preformatted` | `Important Information` |  |
-| `todo` | `Html` | `To Do` |  |
-| `text` | `Html` | `` |  |
-| `text1` | `Html` | `Continuous Data Plots` |  |
-| `clinicalInterpretation` | `Html` | `Clinical Interpretation` |  |
-| `aboutAnalysis` | `Html` | `About This Analysis` |  |
-| `outlierReport` | `Html` | `Outlier Detection Results` |  |
-| `reportSentences` | `Html` | `Copy-Ready Clinical Summary` |  |
-| `glossary` | `Html` | `Statistical Glossary` |  |
+| `notices` | `Preformatted` | Important Information | Plain-text data-quality and rendering notices. |
+| `todo` | `Html` | Data Information | Welcome instructions or excluded-variable information. |
+| `text` | `Html` | untitled | Per-variable descriptive and optional distribution text. |
+| `text1` | `Html` | Continuous Data Plots | `gtExtras::gt_plt_summary()` output; a disclosed numeric fallback is used if inline plots cannot render. |
+| `clinicalInterpretation` | `Html` | Clinical Interpretation | Missingness overview, uses, and scope limitations. |
+| `aboutAnalysis` | `Html` | About This Analysis | Capabilities and interpretation cautions. |
+| `outlierReport` | `Html` | Outlier Detection Results | IQR fences and flagged values. |
+| `reportSentences` | `Html` | Draft Statistical Summary | Draft prose requiring units and study context before reuse. |
+| `glossary` | `Html` | Statistical Glossary | Definitions and interpretation cautions. |
 
-## 4. Architecture & Data Flow Diagram
+## Data flow
 
 ```mermaid
-flowchart TD
-  subgraph UI[jamovi UI / .u.yaml]
-    U1[User Input & Variables]
-    U2[Analysis Settings & Controls]
-  end
-
-  subgraph Opts[Options Schema / .a.yaml]
-    O1[Options Parsing & Types]
-    O2[Default Value Validation]
-  end
-
-  subgraph Backend[Backend Logic / R/summarydata.b.R]
-    B1[Input Validation & Data Sanitization]
-    B2[Statistical Computation Engine]
-    B3[Result Objects Formatting]
-  end
-
-  subgraph Res[Results Schema / .r.yaml]
-    R1[Summary & Statistics Tables]
-    R2[Visual Plots & Graphics]
-    R3[Clinical Interpretation & Notices]
-  end
-
-  U1 --> O1
-  U2 --> O2
-  O1 --> B1
-  O2 --> B1
-  B1 --> B2
-  B2 --> B3
-  B3 --> R1
-  B3 --> R2
-  B3 --> R3
+flowchart LR
+  UI[Variable and option selection] --> V[Validate numeric, nonempty variables]
+  V -->|invalid| N[Plain-text notice and exclusion]
+  V -->|valid| S[Per-variable available-case summaries]
+  S --> H[Text and HTML visual summary]
+  S --> D[Optional Shapiro-Wilk, skewness, kurtosis]
+  S --> O[Optional 1.5 x IQR flags]
+  S --> R[Optional draft statistical sentences]
+  H --> Q[Clinical interpretation and scope notes]
+  D --> Q
+  O --> Q
+  R --> Q
 ```
 
-## 5. Execution Sequence
+## Statistical and clinical boundaries
 
-```mermaid
-sequenceDiagram
-  autonumber
-  actor User as Clinician / Analyst
-  participant UI as jamovi Interface
-  participant Backend as R Backend (summarydataClass)
-  participant Engine as Statistical Packages
-  participant Results as Results View
+- The displayed SD is the sample standard deviation from R's `sd()`.
+- Shapiro-Wilk is run only for 3-5000 non-missing, nonconstant values. A
+  non-significant result does not establish normality.
+- IQR fences are screening rules for potential outliers, not expected or
+  clinical reference ranges. Flagged observations require contextual review.
+- This descriptive analysis does not establish clinical reference intervals or
+  verify assumptions for a later statistical model.
+- If rows are repeated specimens, blocks, cores, or visits, results are row-level
+  unless the user first aggregates to the intended unit of analysis.
 
-  User->>UI: Selects variables and options
-  UI->>Backend: Dispatches .run() with options payload
-  Backend->>Backend: Validates observations & factor levels
-  Backend->>Engine: Computes statistical models / visual layers
-  Engine-->>Backend: Returns model estimates & graphics
-  Backend->>Results: Populates tables, charts, and notices
-  Results-->>User: Displays formatted tables & interactive plots
-```
+## Maintenance notes
 
-## 6. Change Impact & Safety Guidelines
-
-- **Data Filtering**: Ensure observations with missing values are handled gracefully according to analysis options.
-- **Formula Conflicts**: Use isolated environment calls or base formula methods when interacting with `ggstatsplot` or formula parsers.
-- **Safe Deparsing**: Use `deparse(val)` in syntax generation (`asSource()`) to escape column names with spaces or special symbols.
-
+- Keep option names identical across the three YAML schemas and the backend.
+- Escape variable names before inserting them into HTML.
+- Result items persist between jamovi reruns; clear selection-dependent content
+  on every early-return path.
+- Treat `R/summarydata.h.R` and `man/summarydata.Rd` as generated files. Update
+  source schemas/backend and regenerate them through the repository build flow.

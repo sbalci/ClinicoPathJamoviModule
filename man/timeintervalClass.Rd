@@ -4,7 +4,9 @@
 \alias{timeintervalClass}
 \title{Comprehensive Time Interval Calculator for Survival Analysis}
 \value{
-List containing calculated intervals, filtered data, quality metrics, and metadata
+A \code{timeintervalResults} object: a jamovi results group holding the summary,
+person-time, quality-assessment and glossary panels plus the optional calculated-time
+output column. Not a plain list.
 }
 \description{
 Advanced time interval calculation tool designed for survival analysis, epidemiological

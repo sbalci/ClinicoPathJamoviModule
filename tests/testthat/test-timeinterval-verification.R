@@ -106,10 +106,18 @@ test_that("the mean confidence interval matches stats::t.test", {
     x <- c(3, 7, 11, 15, 20)
     for (lvl in c(90, 95, 99)) {
         got <- h$p$.calculateCI(mean(x), stats::sd(x), length(x), lvl)
-        ref <- stats::t.test(x, conf.level = lvl / 100)$conf.int
-        expect_equal(got$lower, ref[1], tolerance = 1e-10)
+        ref <- as.numeric(stats::t.test(x, conf.level = lvl / 100)$conf.int)
+        # the untruncated limits must still be exactly the t interval
+        expect_equal(got$raw_lower, ref[1], tolerance = 1e-10)
         expect_equal(got$upper, ref[2], tolerance = 1e-10)
+        # the REPORTED lower limit is that interval intersected with [0, Inf):
+        # a mean duration cannot be negative, and intersecting a CI with a set
+        # that contains the true value with probability 1 preserves coverage
+        expect_equal(got$lower, max(ref[1], 0), tolerance = 1e-10)
+        expect_identical(got$truncated, ref[1] < 0)
     }
+    # at 99% this sample's Wald limit is negative, so the clamp must engage
+    expect_true(h$p$.calculateCI(mean(x), stats::sd(x), length(x), 99)$truncated)
     expect_true(is.na(h$p$.calculateCI(5, NA, 1, 95)$lower))   # n = 1 is not estimable
 })
 
@@ -120,7 +128,10 @@ test_that("negative intervals are refused by default with an actionable message"
                 output_unit = "months", remove_negative = FALSE)
     msg <- strip_html(r$r$messages$content)
     expect_match(msg, "Negative time intervals detected")
-    expect_match(msg, "Remove Negative Intervals")
+    # the message must name the checkbox that actually exists in the UI --
+    # it used to say "Remove Negative Intervals", which is not a real label
+    expect_match(msg, "Negative-interval exclusion")
+    expect_match(msg, "1 of 2 rows")                      # count AND denominator
     expect_match(msg, "2020-01-01")                       # names the offending row
     # and no partial summary is emitted alongside the refusal
     expect_false(nzchar(trimws(strip_html(r$r$summary$content))))

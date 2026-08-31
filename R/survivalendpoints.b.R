@@ -1001,8 +1001,9 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             }
 
             # Fit survival models
-            surv_obj <- survival::Surv(plot_data$time, plot_data$event)
-            km_fit <- survival::survfit(surv_obj ~ endpoint, data = plot_data)
+            # Inline formula over plot_data columns so survminer can re-evaluate
+            # fit$call$formula in its own frame (a Surv() local is not visible there)
+            km_fit <- survival::survfit(survival::Surv(time, event) ~ endpoint, data = plot_data)
 
             # Create plot
             time_unit <- switch(self$options$timeUnit,

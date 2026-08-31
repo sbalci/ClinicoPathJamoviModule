@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.8.03
+version: 1.0.8.04
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-08-29'
+date: '2026-08-30'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their

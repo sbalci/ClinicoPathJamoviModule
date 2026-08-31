@@ -486,7 +486,7 @@ test_that("tableone handles missing data in all variables", {
 test_that("janitor style explains why continuous variables are not tabulated", {
   # janitor (t4) tabulates one row per distinct value, so on a continuous
   # variable it produced a row per patient labelled "41.9504137110896". It now
-  # skips variables with more than 20 distinct values and says which, rather
+  # skips numeric measurements and says which, rather
   # than emitting an unreadable table (or, previously, signalling a condition).
   res <- tableone(
     data = tableone_test,
@@ -495,7 +495,7 @@ test_that("janitor style explains why continuous variables are not tabulated", {
   )
   txt <- gsub("<[^>]*>", " ", as.character(res$tablestyle4$content))
   expect_match(txt, "Not tabulated")
-  expect_match(txt, "distinct values")
+  expect_match(txt, "not categorical")
 })
 
 test_that("all styles handle single variable", {

@@ -6,18 +6,21 @@
 \usage{
 summarydata(
   data,
-  vars = NULL,
+  vars,
   distr = FALSE,
   decimal_places = 2,
   outliers = FALSE,
-  report_sentences = FALSE
+  report_sentences = FALSE,
+  show_guidance = FALSE
 )
 }
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{vars}{a string naming the variables from \code{data} that contains
-the continuous values used for the report}
+\item{vars}{A character vector naming the numeric variables from
+\code{data} to summarize. This argument is required when calling the
+analysis from R; in jamovi, select one or more variables in the options
+panel.}
 
 \item{distr}{If TRUE, additional distribution diagnostics (Shapiro-Wilk
 test, skewness, and kurtosis) will be computed and explained.}
@@ -25,14 +28,22 @@ test, skewness, and kurtosis) will be computed and explained.}
 \item{decimal_places}{Number of decimal places to display for statistical
 measures. Default of 2 aligns with standard laboratory reporting. Governs
 the text summary, the skewness and kurtosis values, the visual summary
-table, the outlier report and the copy-ready clinical summary. P-values are
+table, the outlier report and the draft statistical summary. P-values are
 always shown to 3 decimal places.}
 
-\item{outliers}{If TRUE, detect and report potential outliers using IQR
-method. Helpful for quality control and identifying data entry errors.}
+\item{outliers}{If TRUE, flag observations outside the 1.5 x IQR fences as
+potential outliers. Helpful for quality control and identifying possible
+data entry errors or genuine extreme values that need contextual review.}
 
-\item{report_sentences}{If TRUE, generate copy-ready clinical report
-sentences for direct use in medical documentation.}
+\item{report_sentences}{If TRUE, generate draft statistical sentences that
+include sample size and missingness. Add measurement units, the study
+population, the time point, and missing-data handling before using the text
+in a manuscript or clinical document.}
+
+\item{show_guidance}{If TRUE, show the clinical interpretation guide,
+methodological explanation, and statistical glossary. These panels provide
+general educational guidance and do not establish clinical reference
+intervals.}
 }
 \value{
 A results object containing:

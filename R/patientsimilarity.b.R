@@ -53,6 +53,16 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
         # Store projection results
         .projectionData = NULL,
 
+        # Row indices of self$data that survived complete-case filtering AND outlier
+        # removal. Every downstream consumer (plots, exports, cluster tables) reads this
+        # one index; recomputing complete.cases() locally silently misaligns rows against
+        # the projection whenever removeOutliers dropped further rows.
+        .keepIdx = NULL,
+
+        # Survival frame assembled once in .performSurvivalAnalysis and reused by
+        # .survivalPlot - renderers must not re-derive it from self$data.
+        .survData = NULL,
+
         # Notice collection helpers. A single Preformatted (plain-text) output item:
         # avoids BOTH the jmvcore::Notice serialization error from
         # self$results$insert(999, Notice) AND any HTML in notices (project convention:
@@ -89,16 +99,35 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
 
-        .escapeVar = function(x) {
-            # Safely escape variable names for data.frame access
-            if (is.null(x) || length(x) == 0) return(NULL)
-            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-        },
-
         # Initialize ----
         .init = function() {
 
-            if (!is.null(self$options$vars) && length(self$options$vars) > 0) {
+            # The element is unconditionally visible (no `visible:` in .r.yaml): a
+            # leading-`!` visible expression such as `(!vars)` is SILENTLY always-visible
+            # (jmvcore's Options$eval routing regex is "^\\([\\$A-Za-z].*\\)$", so `(!vars)`
+            # never matches, is returned as a raw string, and length(string) > 0 == TRUE).
+            # So the backend picks the content instead: welcome block before any variable
+            # is chosen, method guide afterwards.
+            if (is.null(self$options$vars) || length(self$options$vars) == 0) {
+                html <- "<div style='background-color: rgba(33, 149, 188, 0.1); color: inherit; padding: 12px; border-radius: 5px;'>
+                        <p><b>Welcome to Patient Similarity Clustering</b></p>
+                        <p>This analysis projects high-dimensional patient data into 2D/3D space
+                        to reveal natural patient groupings.</p>
+                        <p><b>To get started:</b></p>
+                        <ol>
+                        <li>Assign at least <b>2 continuous or ordinal variables</b> to
+                        <b>Variables for Similarity Analysis</b> (e.g. age, tumor size, grade, Ki-67).</li>
+                        <li>Pick a <b>Dimensionality Reduction Method</b> (PCA, t-SNE, UMAP or MDS).</li>
+                        <li>Optionally set <b>Color Points By</b> to a grouping variable to see whether a
+                        known label lines up with the discovered structure.</li>
+                        <li>Optionally tick <b>Perform Cluster Analysis</b>, and
+                        <b>Compare Survival Across Clusters</b> if you have follow-up time and an event variable.</li>
+                        </ol>
+                        <p>Missing values are handled by complete-case filtering, so variables with heavy
+                        missingness will shrink the analysed sample.</p>
+                        </div>"
+                self$results$instructions$setContent(html)
+            } else {
                 html <- "<p><b>Patient Similarity Clustering</b></p>
                         <p>This analysis projects high-dimensional patient data into 2D/3D space
                         to reveal natural patient groupings.</p>
@@ -109,6 +138,30 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                         <li><b>MDS:</b> Classical scaling, preserves pairwise distances</li>
                         </ul>"
                 self$results$instructions$setContent(html)
+            }
+
+            # Row sets of varianceTable and loadingsTable are fixed by the options alone,
+            # so create them here and fill them with setRow() in .run(): the tables render
+            # at their final size instead of appearing empty and restructuring every run.
+            # The guard mirrors .run()'s validation exactly - an invalid option combination
+            # produces no projection, hence no rows.
+            vars <- self$options$vars
+            n_dims <- as.numeric(self$options$dimensions)
+
+            if (length(vars) >= 2 && length(vars) >= n_dims) {
+
+                if (self$options$method == "pca") {
+                    for (i in seq_len(n_dims))
+                        self$results$varianceTable$addRow(
+                            rowKey = i, values = list(component = paste0("PC", i)))
+                }
+
+                # Only PCA and MDS produce loadings.
+                if (self$options$showLoadings && self$options$method %in% c("pca", "mds")) {
+                    for (i in seq_along(vars))
+                        self$results$loadingsTable$addRow(
+                            rowKey = vars[[i]], values = list(variable = vars[[i]]))
+                }
             }
         },
 
@@ -121,10 +174,22 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             # `.projectionPlot`/`.projection3D`/`.survivalPlot` rendering a prior run's stale
             # projection alongside fresh notice text.
             private$.projectionData <- NULL
+            private$.keepIdx <- NULL
+            private$.survData <- NULL
 
             # Check for required inputs
-            if (is.null(self$options$vars) || length(self$options$vars) == 0) {
+            n_dims <- as.numeric(self$options$dimensions)
+
+            if (is.null(self$options$vars) || length(self$options$vars) < 2) {
                 private$.addNotice('ERROR', 'Variables Required', 'Please select at least 2 variables for similarity analysis.')
+                return()
+            }
+
+            # A p-variable dataset yields at most p dimensions; asking for more indexes
+            # past the end of the PCA/MDS coordinate matrix and aborts with a cryptic
+            # subscript error.
+            if (length(self$options$vars) < n_dims) {
+                private$.addNotice('ERROR', 'Too Few Variables for Requested Dimensions', sprintf('A %d-dimensional projection needs at least %d variables; %d selected. Select more variables or switch to a 2D projection.', n_dims, n_dims, length(self$options$vars)))
                 return()
             }
 
@@ -160,6 +225,10 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             # Clustering if requested
             if (self$options$performClustering) {
                 projection$clusters <- private$.performClustering(projection, prep_data$original_data)
+                # Re-store. R copied `projection` at the assignment above, so without this
+                # the cluster vector never reaches .projectionPlot / .survivalPlot and the
+                # KM plot silently renders nothing.
+                private$.projectionData <- projection
             }
 
             # Survival analysis if requested
@@ -190,9 +259,11 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 # Convert to numeric if needed
                 data <- as.data.frame(lapply(data, jmvcore::toNumeric))
 
-                # Remove rows with missing values
-                complete_idx <- complete.cases(data)
-                data <- data[complete_idx, ]
+                # Remove rows with missing values. `keep` carries the surviving row numbers
+                # of self$data all the way through outlier removal so every consumer can
+                # realign to the original dataset.
+                keep <- which(complete.cases(data))
+                data <- data[keep, , drop = FALSE]
 
                 # Check sample size
                 if (nrow(data) < 5) {
@@ -206,7 +277,32 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
                 # Remove outliers if requested
                 if (self$options$removeOutliers) {
-                    data <- private$.removeOutliers(data)
+                    ok <- private$.outlierKeep(data)
+                    n_dropped <- sum(!ok)
+                    keep <- keep[ok]
+                    data <- data[ok, , drop = FALSE]
+
+                    if (n_dropped > 0) {
+                        private$.addNotice('WARNING', 'Outliers Removed', sprintf('%d observation(s) outside 1.5 x IQR on at least one variable were removed before projection.', n_dropped))
+                    }
+
+                    if (nrow(data) < 5) {
+                        private$.addNotice('ERROR', 'Insufficient Data After Outlier Removal', sprintf('Only %d observation(s) remain after outlier removal. At least 5 are required. Turn off outlier removal or widen your selection.', nrow(data)))
+                        return(NULL)
+                    }
+                }
+
+                # A constant column makes scale() emit NaN and every projection method fail
+                # with an opaque numerical error, so drop it explicitly and say so.
+                col_sd <- vapply(data, stats::sd, numeric(1), na.rm = TRUE)
+                constant <- !is.finite(col_sd) | col_sd == 0
+                if (any(constant)) {
+                    if (sum(!constant) < 2) {
+                        private$.addNotice('ERROR', 'No Variation in Data', 'Fewer than 2 of the selected variables vary across the retained observations, so patient similarity cannot be computed.')
+                        return(NULL)
+                    }
+                    private$.addNotice('WARNING', 'Constant Variables Dropped', sprintf('Variable(s) with no variation were excluded from the projection: %s.', paste(names(data)[constant], collapse = ', ')))
+                    data <- data[, !constant, drop = FALSE]
                 }
 
                 # Scale if requested
@@ -216,18 +312,14 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     scaled_data <- as.matrix(data)
                 }
 
-                # Store original data with complete rows
-                original_data <- self$data[complete_idx, ]
-
-                # Debug
-                # message(paste("PrepareData: Original data info"))
-                # message(colnames(original_data))
-                # if ("time" %in% names(original_data)) message(paste("NAs in time:", sum(is.na(original_data$time))))
+                # Store original data for exactly the rows that reached the projection
+                original_data <- self$data[keep, , drop = FALSE]
+                private$.keepIdx <- keep
 
                 list(
                     scaled_data = scaled_data,
                     original_data = original_data,
-                    complete_idx = complete_idx
+                    keep = keep
                 )
 
             }, error = function(e) {
@@ -236,17 +328,19 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             })
         },
 
-        .removeOutliers = function(data) {
-            # Simple IQR-based outlier removal
+        # Returns a logical mask over the rows of `data` (TRUE = keep) rather than the
+        # subset itself, so the caller can carry the original row numbers forward.
+        .outlierKeep = function(data) {
+            ok <- rep(TRUE, nrow(data))
             for (col in names(data)) {
-                Q1 <- quantile(data[[col]], 0.25, na.rm = TRUE)
-                Q3 <- quantile(data[[col]], 0.75, na.rm = TRUE)
+                Q1 <- stats::quantile(data[[col]], 0.25, na.rm = TRUE)
+                Q3 <- stats::quantile(data[[col]], 0.75, na.rm = TRUE)
                 IQR_val <- Q3 - Q1
                 lower <- Q1 - 1.5 * IQR_val
                 upper <- Q3 + 1.5 * IQR_val
-                data[[col]][data[[col]] < lower | data[[col]] > upper] <- NA
+                ok <- ok & !is.na(data[[col]]) & data[[col]] >= lower & data[[col]] <= upper
             }
-            data[complete.cases(data), ]
+            ok
         },
 
         # Projection methods ----
@@ -287,10 +381,11 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             variance <- summary(pca_result)$importance[2, 1:n_dims]
             cumulative <- summary(pca_result)$importance[3, 1:n_dims]
 
-            # Populate variance table
+            # Fill the rows created in .init() - by position, so the rowKey type can never
+            # drift. addRow() here would stack a duplicate set on every re-run.
             var_table <- self$results$varianceTable
             for (i in 1:n_dims) {
-                var_table$addRow(rowKey = i, values = list(
+                var_table$setRow(rowNo = i, values = list(
                     component = paste0("PC", i),
                     variance = variance[i],
                     cumulative = cumulative[i]
@@ -320,7 +415,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 new_perp <- floor((nrow(data) - 1) / 3)
                 if (new_perp < 1) new_perp <- 1
 
-                private$.addNotice('WARNING', 'Perplexity Adjusted', sprintf('t-SNE Perplexity (%d) is too high for sample size (n=%d). Automatically adjusted to %d. For optimal results, use perplexity < n/3.',
+                private$.addNotice('WARNING', 'Perplexity Adjusted', sprintf('t-SNE Perplexity (%g) is too high for sample size (n=%d). Automatically adjusted to %g. For optimal results, use perplexity < n/3.',
                     self$options$perplexity, nrow(data), new_perp))
 
                 perplexity <- new_perp
@@ -385,24 +480,40 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
         },
 
         .populateLoadings = function(loadings) {
+            # Rows were created in .init(), one per selected variable, keyed by variable
+            # name. .prepareData() may have dropped constant variables, so iterate over the
+            # option list (never over `loadings`) - every setRow() then hits a key that
+            # exists, and a dropped variable keeps an explicitly empty row instead of
+            # silently vanishing; the "Constant Variables Dropped" notice names it.
             load_table <- self$results$loadingsTable
+            vars <- self$options$vars
+            idx <- match(vars, rownames(loadings))
 
-            for (i in seq_len(nrow(loadings))) {
+            for (i in seq_along(vars)) {
+                j <- idx[i]
                 values <- list(
-                    variable = rownames(loadings)[i],
-                    dim1 = loadings[i, 1],
-                    dim2 = loadings[i, 2]
+                    dim1 = if (is.na(j)) NA_real_ else loadings[j, 1],
+                    dim2 = if (is.na(j)) NA_real_ else loadings[j, 2]
                 )
 
                 if (ncol(loadings) >= 3) {
-                    values$dim3 <- loadings[i, 3]
+                    values$dim3 <- if (is.na(j)) NA_real_ else loadings[j, 3]
                 }
 
-                load_table$addRow(rowKey = i, values = values)
+                load_table$setRow(rowKey = vars[[i]], values = values)
             }
         },
 
         # Clustering ----
+
+        # DBSCAN reports unassigned points as cluster 0; they are noise, not a subgroup.
+        .clusterLabel = function(cl) {
+            if (self$options$clusterMethod == "dbscan" && as.numeric(cl) == 0)
+                "Noise (unassigned)"
+            else
+                paste0("Cluster ", cl)
+        },
+
         .performClustering = function(projection, original_data) {
 
             coords <- projection$coords
@@ -439,12 +550,12 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 )
 
                 # Summary table
-                cluster_counts <- table(clusters)
                 cluster_summary <- self$results$clusterSummary
+                cluster_summary$deleteRows()
 
                 for (cl in sort(unique(clusters))) {
                     cluster_summary$addRow(rowKey = cl, values = list(
-                        cluster = paste0("Cluster ", cl),
+                        cluster = private$.clusterLabel(cl),
                         n = sum(clusters == cl),
                         percentage = sum(clusters == cl) / length(clusters)
                     ))
@@ -467,7 +578,9 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                         sil <- cluster::silhouette(clusters, dist(coords))
                         sil_score <- mean(sil[, 3])
 
-                        self$results$clusterQuality$addRow(rowKey = 1, values = list(
+                        # rows: 1 in the .r.yaml already created row "1"; addRow(rowKey = 1)
+                        # would append a second, blank-topped row (rowKeys are type-strict).
+                        self$results$clusterQuality$setRow(rowNo = 1, values = list(
                             metric = "Silhouette Score",
                             value = sil_score
                         ))
@@ -476,21 +589,14 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
                 # Export if requested
                 if (self$options$exportClusters &&
-                    self$results$exportClusters$isNotFilled()) {
-                    row_nums <- seq_len(self$data$rowCount)
-                    cluster_export <- rep(NA, length(row_nums))
-                    # Use the correct complete_idx from prep_data (stored in private) or recalculate
-                    # We need to access the complete_idx used for the protection.
-                    # It was returned by .prepareData. We should pass it or store it.
-                    # Or just recalculate here for safety as shown in existing code but using consistent logic.
-                    complete_idx <- complete.cases(self$data[, self$options$vars, drop = FALSE])
-                    
-                    # Ensure clusters length matches complete cases
-                    if(length(clusters) == sum(complete_idx)) {
-                        cluster_export[complete_idx] <- clusters
-                        self$results$exportClusters$setRowNums(row_nums)
-                        self$results$exportClusters$setValues(cluster_export)
-                    }
+                    self$results$exportClusters$isNotFilled() &&
+                    length(clusters) == length(private$.keepIdx)) {
+                    # self$data is a plain data.frame - it has no $rowCount. Row identity is
+                    # carried by rownames(), which is what every other export in this module uses.
+                    cluster_export <- rep(NA_integer_, nrow(self$data))
+                    cluster_export[private$.keepIdx] <- as.integer(clusters)
+                    self$results$exportClusters$setRowNums(rownames(self$data))
+                    self$results$exportClusters$setValues(cluster_export)
                 }
 
             }, error = function(e) {
@@ -502,6 +608,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
         .clusterCharacteristics = function(clusters, original_data) {
             char_table <- self$results$clusterCharacteristics
+            char_table$deleteRows()
 
             # Get mean values for each cluster
             for (var in self$options$vars) {
@@ -520,7 +627,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     if (!col_name %in% names(char_table$columns)) {
                         char_table$addColumn(
                             name = col_name,
-                            title = paste0("Cluster ", cl),
+                            title = private$.clusterLabel(cl),
                             type = "text"
                         )
                     }
@@ -533,6 +640,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
         .clusterOutcomes = function(clusters, original_data) {
             outcome_table <- self$results$clusterOutcomes
+            outcome_table$deleteRows()
             outcome_var <- original_data[[self$options$colorBy]]
 
             for (cl in sort(unique(clusters))) {
@@ -550,7 +658,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 }
 
                 outcome_table$addRow(rowKey = cl, values = list(
-                    cluster = paste0("Cluster ", cl),
+                    cluster = private$.clusterLabel(cl),
                     outcome_summary = summary_text
                 ))
             }
@@ -568,11 +676,19 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 return()
             }
 
+            event_var <- original_data[[self$options$survivalEvent]]
+            event_level <- self$options$survivalEventLevel
+
+            # A factor event with no level chosen makes `event_var == event_level` return
+            # logical(0), which propagates as a size-0 recycling error rather than advice.
+            if (is.factor(event_var) && (is.null(event_level) || !nzchar(event_level))) {
+                private$.addNotice('ERROR', 'Event Level Required', 'Select which level of the survival event variable represents the event (for example "1" or "Dead") in the Survival Analysis panel.')
+                return()
+            }
+
             tryCatch({
 
                 survtime <- jmvcore::toNumeric(original_data[[self$options$survivalTime]])
-                event_var <- original_data[[self$options$survivalEvent]]
-                event_level <- self$options$survivalEventLevel
 
                 if (is.factor(event_var)) {
                     event <- as.numeric(event_var == event_level)
@@ -580,138 +696,195 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     event <- jmvcore::toNumeric(event_var)
                 }
 
-                # Check for missing survival data
-                if (any(is.na(survtime)) || any(is.na(event))) {
-                    n_missing <- sum(is.na(survtime) | is.na(event))
-                    private$.addNotice('WARNING', 'Survival Missing Values', sprintf('Survival analysis: %d observation(s) with missing time or event values were excluded from the analysis.', n_missing))
+                clusters <- projection$clusters
+
+                # Drop incomplete survival rows explicitly; survfit/survdiff would drop them
+                # silently and the per-cluster Ns would then disagree with the KM curves.
+                usable <- !is.na(survtime) & !is.na(event) & !is.na(clusters)
+                if (sum(!usable) > 0) {
+                    private$.addNotice('WARNING', 'Survival Missing Values', sprintf('Survival analysis: %d observation(s) with missing time or event values were excluded from the analysis.', sum(!usable)))
                 }
 
-                clusters <- projection$clusters
+                if (sum(usable) < 2 || length(unique(clusters[usable])) < 2) {
+                    private$.addNotice('WARNING', 'Survival Comparison Not Possible', 'At least two clusters with complete survival data are needed to compare survival. Adjust the clustering settings or check the survival variables.')
+                    return()
+                }
+
+                surv_df <- data.frame(
+                    survtime = survtime[usable],
+                    event    = event[usable],
+                    clusters = factor(clusters[usable])
+                )
+
+                # Cached for .survivalPlot - the renderer must not re-derive these rows.
+                private$.survData <- surv_df
 
                 # Populate survival heading
                 self$results$survivalHeading$setContent(
                     "<h3>Survival Analysis by Cluster</h3><p>Comparing survival outcomes across discovered patient subgroups.</p>"
                 )
 
-                # Survival summary
-                surv_table <- self$results$survivalTable
+                # Kaplan-Meier fit: the median must come from the KM estimator, not from the
+                # median observed time among patients who had the event (which ignores
+                # censoring entirely and is biased downwards).
+                fit <- survival::survfit(
+                    survival::Surv(survtime, event) ~ clusters, data = surv_df)
+                # Always a matrix here: the guard above ensures >= 2 retained clusters.
+                fit_table <- summary(fit)$table
 
-                for (cl in sort(unique(clusters))) {
-                    cluster_surv <- survtime[clusters == cl]
-                    cluster_event <- event[clusters == cl]
+                surv_table <- self$results$survivalTable
+                surv_table$deleteRows()
+
+                for (cl in levels(surv_df$clusters)) {
+                    key <- paste0("clusters=", cl)
+                    idx <- match(key, rownames(fit_table))
 
                     surv_table$addRow(rowKey = cl, values = list(
-                        cluster = paste0("Cluster ", cl),
-                        n = length(cluster_surv),
-                        events = sum(cluster_event, na.rm = TRUE),
-                        median_survival = median(cluster_surv[cluster_event == 1], na.rm = TRUE)
+                        cluster = private$.clusterLabel(cl),
+                        n = sum(surv_df$clusters == cl),
+                        events = sum(surv_df$event[surv_df$clusters == cl]),
+                        median_survival = if (is.na(idx)) NA_real_
+                                          else unname(fit_table[idx, "median"])
                     ))
                 }
 
                 # Log-rank test
-                surv_obj <- survival::Surv(survtime, event)
-                logrank <- survival::survdiff(surv_obj ~ clusters)
+                logrank <- survival::survdiff(
+                    survival::Surv(survtime, event) ~ clusters, data = surv_df)
 
-                self$results$survivalComparison$addRow(rowKey = 1, values = list(
+                lr_df <- length(logrank$n) - 1
+                self$results$survivalComparison$setRow(rowNo = 1, values = list(
                     chisq = logrank$chisq,
-                    df = length(logrank$n) - 1,
-                    pvalue = 1 - pchisq(logrank$chisq, length(logrank$n) - 1)
+                    df = lr_df,
+                    pvalue = stats::pchisq(logrank$chisq, lr_df, lower.tail = FALSE)
                 ))
 
             }, error = function(e) {
-                message(paste("Error in survival analysis:", e$message))
+                # message() never reaches a jamovi user; route the failure to the notice pane.
+                private$.addNotice('WARNING', 'Survival Analysis Error', paste('Survival analysis could not be completed:', conditionMessage(e), 'Check that the time variable is numeric and the event variable is coded consistently.'))
             })
         },
 
         # Plotting ----
-        .projectionPlot = function(image, ggtheme, theme, ...) {
 
-            if (is.null(private$.projectionData)) {
-                return()
-            }
+        # Builds the coordinate frame every renderer shares: dimension columns plus the
+        # optional Color / Cluster aesthetics, all indexed by private$.keepIdx so the
+        # rows line up with the projection even after outlier removal.
+        .plotFrame = function() {
 
             projection <- private$.projectionData
+            if (is.null(projection) || is.null(projection$coords))
+                return(NULL)
+
             coords <- as.data.frame(projection$coords)
+            if (ncol(coords) < 2)
+                return(NULL)
 
-            n_dims <- ncol(coords)
+            colnames(coords) <- paste0("Dim", seq_len(ncol(coords)))
 
-            if (n_dims == 2) {
-                colnames(coords) <- c("Dim1", "Dim2")
+            keep <- private$.keepIdx
+            if (!is.null(self$options$colorBy) &&
+                !is.null(keep) && length(keep) == nrow(coords)) {
+                coords$Color <- self$data[[self$options$colorBy]][keep]
+            }
+
+            if (!is.null(projection$clusters) &&
+                length(projection$clusters) == nrow(coords)) {
+                coords$Cluster <- factor(vapply(projection$clusters,
+                                                private$.clusterLabel, character(1)))
+            }
+
+            coords
+        },
+
+        .projectionPlot = function(image, ggtheme, theme, ...) {
+
+            coords <- private$.plotFrame()
+            if (is.null(coords))
+                return(FALSE)
+
+            projection <- private$.projectionData
+
+            # A 3D projection still gets a 2D main plot of the first two dimensions;
+            # returning early here left the panel blank whenever dimensions = 3.
+            if ("Color" %in% names(coords)) {
+                p <- ggplot(coords, aes(x = Dim1, y = Dim2, color = Color)) +
+                    labs(color = self$options$colorBy)
+            } else if ("Cluster" %in% names(coords)) {
+                p <- ggplot(coords, aes(x = Dim1, y = Dim2, color = Cluster))
             } else {
-                colnames(coords) <- c("Dim1", "Dim2", "Dim3")
+                p <- ggplot(coords, aes(x = Dim1, y = Dim2))
             }
 
-            # Add color variable if specified
-            if (!is.null(self$options$colorBy)) {
-                # Get complete cases
-                complete_idx <- complete.cases(self$data[, self$options$vars, drop = FALSE])
-                color_var <- self$data[[self$options$colorBy]][complete_idx]
-                coords$Color <- color_var
-            }
+            if ("Color" %in% names(coords) && "Cluster" %in% names(coords))
+                p <- p + geom_point(aes(shape = Cluster), size = 2, alpha = 0.6)
+            else
+                p <- p + geom_point(size = 2, alpha = 0.6)
 
-            # Add clusters if available
-            if (!is.null(projection$clusters)) {
-                coords$Cluster <- factor(projection$clusters)
-            }
+            p <- p +
+                labs(
+                    title = paste0("Patient Similarity - ", projection$method),
+                    x = "Dimension 1",
+                    y = "Dimension 2"
+                ) +
+                ggtheme +
+                theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 
-            # Create plot
-            if (n_dims == 2) {
-                if (!is.null(self$options$colorBy)) {
-                    p <- ggplot(coords, aes(x = Dim1, y = Dim2, color = Color)) +
-                        geom_point(size = 2, alpha = 0.6)
-                } else if (!is.null(projection$clusters)) {
-                    p <- ggplot(coords, aes(x = Dim1, y = Dim2, color = Cluster)) +
-                        geom_point(size = 2, alpha = 0.6)
-                } else {
-                    p <- ggplot(coords, aes(x = Dim1, y = Dim2)) +
-                        geom_point(size = 2, alpha = 0.6)
-                }
-
-                p <- p +
-                    labs(
-                        title = paste0("Patient Similarity - ", projection$method),
-                        x = "Dimension 1",
-                        y = "Dimension 2"
-                    ) +
-                    theme_minimal() +
-                    theme(plot.title = element_text(hjust = 0.5, face = "bold"))
-
-                print(p)
-                TRUE
-            }
+            print(p)
+            TRUE
         },
 
         .projection3D = function(image, ggtheme, theme, ...) {
 
-            if (is.null(private$.projectionData)) {
+            if (as.numeric(self$options$dimensions) != 3)
                 return(FALSE)
-            }
 
-            if (as.numeric(self$options$dimensions) != 3) {
+            coords <- private$.plotFrame()
+            if (is.null(coords) || !"Dim3" %in% names(coords))
                 return(FALSE)
+
+            # jamovi Image items paint onto a graphics device; a plotly htmlwidget writes
+            # nothing to one (and print() on it tries to open a browser), so the three
+            # pairwise views of the 3D projection are drawn as a faceted ggplot instead.
+            views <- list(
+                c("Dim1", "Dim2"),
+                c("Dim1", "Dim3"),
+                c("Dim2", "Dim3")
+            )
+
+            panels <- lapply(views, function(v) {
+                d <- data.frame(
+                    x = coords[[v[1]]],
+                    y = coords[[v[2]]],
+                    panel = paste0(sub("Dim", "Dimension ", v[1]), " vs ",
+                                   sub("Dim", "Dimension ", v[2])),
+                    stringsAsFactors = FALSE
+                )
+                if ("Color" %in% names(coords))   d$Color <- coords$Color
+                if ("Cluster" %in% names(coords)) d$Cluster <- coords$Cluster
+                d
+            })
+            pairs_df <- do.call(rbind, panels)
+
+            if ("Color" %in% names(pairs_df)) {
+                p <- ggplot(pairs_df, aes(x = x, y = y, color = Color)) +
+                    labs(color = self$options$colorBy)
+            } else if ("Cluster" %in% names(pairs_df)) {
+                p <- ggplot(pairs_df, aes(x = x, y = y, color = Cluster))
+            } else {
+                p <- ggplot(pairs_df, aes(x = x, y = y))
             }
 
-            if (!requireNamespace("plotly", quietly = TRUE)) {
-                message("Package 'plotly' required for 3D plots")
-                return(FALSE)
-            }
-
-            projection <- private$.projectionData
-            coords <- as.data.frame(projection$coords)
-            colnames(coords) <- c("Dim1", "Dim2", "Dim3")
-
-            # Add color
-            if (!is.null(self$options$colorBy)) {
-                complete_idx <- complete.cases(self$data[, self$options$vars, drop = FALSE])
-                coords$Color <- self$data[[self$options$colorBy]][complete_idx]
-            }
-
-            # Create 3D plot
-            p <- plotly::plot_ly(coords, x = ~Dim1, y = ~Dim2, z = ~Dim3,
-                               color = if (!is.null(self$options$colorBy)) ~Color else NULL,
-                               type = "scatter3d", mode = "markers")
-
-            p <- plotly::layout(p, title = paste0("3D Projection - ", projection$method))
+            p <- p +
+                geom_point(size = 1.8, alpha = 0.6) +
+                facet_wrap(~ panel, scales = "free", nrow = 2) +
+                labs(
+                    title = paste0("3D Projection - ", private$.projectionData$method),
+                    x = NULL,
+                    y = NULL
+                ) +
+                ggtheme +
+                theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 
             print(p)
             TRUE
@@ -719,46 +892,34 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
         .survivalPlot = function(image, ggtheme, theme, ...) {
 
-            if (!self$options$survivalAnalysis) {
+            # .survData is populated only when .performSurvivalAnalysis succeeded, so this
+            # single guard also covers "clustering off", "survival off" and early aborts.
+            surv_df <- private$.survData
+            if (is.null(surv_df) || nrow(surv_df) == 0)
                 return(FALSE)
-            }
 
-            if (is.null(private$.projectionData$clusters)) {
-                return(FALSE)
-            }
-
-            # Get data
-            complete_idx <- complete.cases(self$data[, self$options$vars, drop = FALSE])
-            original_data <- self$data[complete_idx, ]
-
-            survtime <- jmvcore::toNumeric(original_data[[self$options$survivalTime]])
-            event_var <- original_data[[self$options$survivalEvent]]
-            event_level <- self$options$survivalEventLevel
-
-            if (is.factor(event_var)) {
-                event <- as.numeric(event_var == event_level)
-            } else {
-                event <- jmvcore::toNumeric(event_var)
-            }
-
-            clusters <- private$.projectionData$clusters
-
-            # Create survival object
             # Bare `Surv` (not `survival::Surv`) is globally allow-listed by jmvcore::asFormula.
             # `.asSurvivalFormula` is the project wrapper around jmvcore::asFormula with the
             # survival helper allow-list applied. `survtime`/`event`/`clusters` are internal
-            # local variables, not user column names - composeTerm not needed.
+            # column names of surv_df, not user column names - composeTerm not needed.
             surv_formula <- .asSurvivalFormula("Surv(survtime, event) ~ clusters")
-            fit <- survival::survfit(surv_formula)
+            fit <- survival::survfit(surv_formula, data = surv_df)
+            # survminer re-parses fit$call$formula; passing the formula through a variable
+            # leaves a bare symbol there and ggsurvplot dies with
+            # "object of type 'symbol' is not subsettable".
+            fit$call$formula <- surv_formula
 
-            # Plot
             plot <- survminer::ggsurvplot(
                 fit,
-                data = data.frame(survtime, event, clusters),
+                data = surv_df,
                 pval = TRUE,
                 risk.table = TRUE,
+                legend.labs = vapply(levels(surv_df$clusters), private$.clusterLabel, character(1)),
                 title = "Survival by Discovered Cluster",
-                ggtheme = theme_minimal()
+                ggtheme = ggtheme,
+                # Without this the risk table inherits jamovi's 16pt ggtheme and renders
+                # as an empty strip at the default image size.
+                tables.theme = survminer::theme_cleantable()
             )
 
             print(plot)
@@ -846,15 +1007,12 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             n_dims <- ncol(coords)
 
             # Create export data for all rows
-            row_nums <- seq_len(self$data$rowCount)
-            complete_idx <- complete.cases(self$data[, self$options$vars, drop = FALSE])
-
             # Export first dimension only (jamovi Output supports single column)
             # For multi-column export, use Output objects for each dimension separately in .a.yaml/.r.yaml
-            coord_export <- rep(NA, length(row_nums))
-            coord_export[complete_idx] <- coords[, 1]  # Dim 1 only
+            coord_export <- rep(NA_real_, nrow(self$data))
+            coord_export[private$.keepIdx] <- coords[, 1]  # Dim 1 only
 
-            self$results$exportCoordinates$setRowNums(row_nums)
+            self$results$exportCoordinates$setRowNums(rownames(self$data))
             self$results$exportCoordinates$setValues(coord_export)
 
             # Inform user if >1 dimension

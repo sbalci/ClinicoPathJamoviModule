@@ -909,10 +909,8 @@ A results object containing:
 \code{results$stuartMaxwellExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$pairwiseKappaExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$allPairsKappaHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$allPairsKappaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$allPairsKappaExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$itemModalAgreementHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$itemModalAgreementTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$itemModalAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$hierarchicalHeading} \tab \tab \tab \tab \tab a preformatted \cr

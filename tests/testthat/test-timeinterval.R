@@ -225,10 +225,10 @@ test_that("timeinterval works with data quality options", {
 
 test_that("timeinterval works with clinical trial test data", {
   
-  skip_if_not(file.exists("data/timeinterval_clinical_trial.rda"), 
+  skip_if_not(file.exists(testthat::test_path("..", "..", "data", "timeinterval_clinical_trial.rda")), 
               "Clinical trial test data not available")
   
-  load("data/timeinterval_clinical_trial.rda")
+  load(testthat::test_path("..", "..", "data", "timeinterval_clinical_trial.rda"))
   
   expect_error({
     result <- timeinterval(
@@ -240,15 +240,15 @@ test_that("timeinterval works with clinical trial test data", {
     )
   }, NA)
   
-  expect_s3_class(result, "timeintervalClass")
+  expect_s3_class(result, "timeintervalResults")
 })
 
 test_that("timeinterval works with European dates test data", {
   
-  skip_if_not(file.exists("data/timeinterval_european_dates.rda"),
+  skip_if_not(file.exists(testthat::test_path("..", "..", "data", "timeinterval_european_dates.rda")),
               "European dates test data not available")
   
-  load("data/timeinterval_european_dates.rda")
+  load(testthat::test_path("..", "..", "data", "timeinterval_european_dates.rda"))
   
   expect_error({
     result <- timeinterval(
@@ -260,21 +260,21 @@ test_that("timeinterval works with European dates test data", {
     )
   }, NA)
   
-  expect_s3_class(result, "timeintervalClass")
+  expect_s3_class(result, "timeintervalResults")
 })
 
 test_that("timeinterval works with landmark analysis test data", {
   
-  skip_if_not(file.exists("data/timeinterval_landmark.rda"),
+  skip_if_not(file.exists(testthat::test_path("..", "..", "data", "timeinterval_landmark.rda")),
               "Landmark test data not available")
   
-  load("data/timeinterval_landmark.rda")
+  load(testthat::test_path("..", "..", "data", "timeinterval_landmark.rda"))
   
   expect_error({
     result <- timeinterval(
       data = timeinterval_landmark,
-      dx_date = "diagnosis_date",
-      fu_date = "last_contact_date",
+      dx_date = "enrollment_date",
+      fu_date = "last_contact",
       time_format = "ymd",
       output_unit = "months",
       use_landmark = TRUE,
@@ -282,7 +282,7 @@ test_that("timeinterval works with landmark analysis test data", {
     )
   }, NA)
   
-  expect_s3_class(result, "timeintervalClass")
+  expect_s3_class(result, "timeintervalResults")
 })
 
 # =============================================================================

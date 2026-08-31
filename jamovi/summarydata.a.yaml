@@ -3,7 +3,7 @@ name: summarydata
 title: Summary of Continuous Variables
 menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Descriptives
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -36,15 +36,11 @@ options:
       type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]
-      # .run() has a dedicated `length(self$options$vars) == 0` branch that shows
-      # the welcome panel, so NULL is a supported state. Without an explicit
-      # default the compiler makes `vars` a REQUIRED argument of the public
-      # wrapper, and summarydata(data = df) errors instead of showing that panel.
-      default: NULL
       description:
           R: >
-            a string naming the variables from `data` that contains the
-            continuous values used for the report
+            A character vector naming the numeric variables from `data` to
+            summarize. This argument is required when calling the analysis
+            from R; in jamovi, select one or more variables in the options panel.
 
 
     - name: distr
@@ -67,8 +63,9 @@ options:
           Number of decimal places to display for statistical measures.
           Default of 2 aligns with standard laboratory reporting.
           Governs the text summary, the skewness and kurtosis values, the
-          visual summary table, the outlier report and the copy-ready clinical
-          summary. P-values are always shown to 3 decimal places.
+          visual summary table, the outlier report and the draft statistical
+          summary. P-values are normally shown to 3 decimal places; additional
+          digits are retained near 0.05 when needed to preserve the test decision.
 
     - name: outliers
       title: "Outlier detection"
@@ -76,24 +73,30 @@ options:
       default: false
       description:
         R: >
-          If TRUE, detect and report potential outliers using IQR method.
-          Helpful for quality control and identifying data entry errors.
+          If TRUE, flag observations outside the 1.5 x IQR fences as potential
+          outliers. Helpful for quality control and identifying possible data
+          entry errors or genuine extreme values that need contextual review.
 
     - name: report_sentences
-      title: "Report sentences"
+      title: "Draft report sentences"
       type: Bool
       default: false
       description:
         R: >
-          If TRUE, generate copy-ready clinical report sentences
-          for direct use in medical documentation.
+          If TRUE, generate draft statistical sentences that include sample
+          size and missingness. Add measurement units, the study population,
+          the time point, and missing-data handling before using the text in a
+          manuscript or clinical document.
 
-#
-#     - name: grvar
-#       title: 'Group'
-#       type: Variable
-#       suggested: [ ordinal, nominal ]
-#       permitted: [ factor ]
+    - name: show_guidance
+      title: "Interpretation guidance and glossary"
+      type: Bool
+      default: false
+      description:
+        R: >
+          If TRUE, show the clinical interpretation guide, methodological
+          explanation, and statistical glossary. These panels provide general
+          educational guidance and do not establish clinical reference intervals.
 
 
 ...

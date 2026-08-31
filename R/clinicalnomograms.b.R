@@ -423,7 +423,10 @@ clinicalnomogramsClass <- R6::R6Class(
                 # Setup datadist for rms models
                 if (requireNamespace('rms', quietly = TRUE)) {
                     private$dd <- rms::datadist(data)
-                    options(datadist = "private$dd")
+                    # Pass the datadist OBJECT: rms::Design() resolves the option with
+                    # eval(as.name(...)) in its own frame, where "private$dd" is not a
+                    # name at all, so every cph()/lrm()/ols() fit below failed.
+                    options(datadist = private$dd)
                 }
                 
                 if (nomogram_type == "survival_nomogram") {
@@ -1364,8 +1367,8 @@ clinicalnomogramsClass <- R6::R6Class(
         .performModelValidation = function(data, model) {
             tryCatch({
                 if (requireNamespace("rms", quietly = TRUE)) {
-                    # Setup datadist for validation
-                    options(datadist = "private$dd")
+                    # Setup datadist for validation (object, not its name -- see .fitFinalModel)
+                    options(datadist = private$dd)
                     
                     # Internal validation using bootstrap
                     v <- .quietly(rms::validate(model, method = "boot", B = self$options$bootstrap_samples))

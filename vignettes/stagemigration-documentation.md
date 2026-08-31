@@ -68,11 +68,9 @@ Controls the overall analysis scope and clinical context.
 
 | UI Control | Option | Type | Default |
 |------------|--------|------|---------|
-| Complexity Mode | `complexityMode` | List | `quick` |
 | Cancer Type | `cancerType` | List | `general` |
 | Report Language | `preferredLanguage` | List | `en` |
 | Confidence Level | `confidenceLevel` | Number | `0.95` |
-| Clinical Preset | `clinicalPreset` | List | `routine_clinical` |
 | Analysis Type | `analysisType` | List | `comprehensive` |
 | Use Optimism Correction | `useOptimismCorrection` | Bool | `false` |
 
@@ -245,9 +243,7 @@ This section contains 7 sub-modules, several marked **[Experimental]**:
 
 | Name | Type | Default | Values |
 |------|------|---------|--------|
-| `complexityMode` | List | `quick` | quick, standard, comprehensive |
 | `analysisType` | List | `comprehensive` | basic, standard, comprehensive |
-| `clinicalPreset` | List | `routine_clinical` | routine_clinical, publication_ready, quick_screen, custom |
 | `cancerType` | List | `general` | general, lung, breast, colorectal, + others |
 | `confidenceLevel` | Number | `0.95` | 0.80--0.99 |
 | `preferredLanguage` | List | `en` | en, tr, de, fr, es |
@@ -432,18 +428,17 @@ Main execution entry point. Orchestrates the full pipeline:
 
 1. **Guard** - checks core variables, shows welcome if missing
 2. **Validate dependencies** - `private$.validateOptionDependencies()`
-3. **Apply clinical preset** - `private$.applyClinicalPreset()`
-4. **Validate data** - `private$.validateData()` (delegates to `stagemigration_validateData()`)
-5. **Clinical safety check** - warns if <10, <20, or <50 events
-6. **Memory optimization** - `private$.optimizeMemoryUsage(data)`
-7. **Core analyses** (always run):
+3. **Validate data** - `private$.validateData()` (delegates to `stagemigration_validateData()`)
+4. **Clinical safety check** - warns if <10, <20, or <50 events
+5. **Memory optimization** - `private$.optimizeMemoryUsage(data)`
+6. **Core analyses** (always run):
    - `.calculateBasicMigration(data)` - migration matrix, rates, upstaging/downstaging
    - `.calculateAdvancedMetrics(data)` - C-index, Cox models (delegated to helpers)
-8. **Conditional analyses** (gated by options):
+7. **Conditional analyses** (gated by options):
    - Cross-validation, NRI, IDI, ROC, calibration, DCA, bootstrap, homogeneity, Will Rogers, multifactorial, competing risks, clinical interpretation
-9. **Populate results** - `private$.populateResults(all_results, data)`
-10. **Copy-ready report** - `private$.generateCopyReadyReport(all_results)`
-11. **Guided mode completion** - progress indicator
+8. **Populate results** - `private$.populateResults(all_results, data)`
+9. **Copy-ready report** - `private$.generateCopyReadyReport(all_results)`
+10. **Guided mode completion** - progress indicator
 
 ### 4.2 Data Pipeline
 
@@ -452,9 +447,6 @@ Delegates to `stagemigration_validateData()` in `stagemigration-validation.R`. C
 
 #### `.validateOptionDependencies()` (line 735)
 Checks that dependent options make sense (e.g., ROC comparison plot requires ROC analysis enabled). Returns a list with `has_issues` and `has_warnings` flags.
-
-#### `.applyClinicalPreset()` (line 386)
-Maps the `clinicalPreset` selection to a set of analysis defaults. Presets: `routine_clinical`, `publication_ready`, `quick_screen`, `custom`.
 
 #### `.optimizeMemoryUsage()` (line 600)
 Optional memory optimization for large datasets when `optimizeForLargeDatasets` is `true`.
@@ -806,15 +798,12 @@ flowchart TD
     end
 
     subgraph Config["Configuration"]
-        C1[complexityMode]
-        C2[clinicalPreset]
         C3[analysisType]
     end
 
     subgraph Pipeline[".run() Pipeline"]
         P1[Guard: check core vars]
         P2[validateOptionDependencies]
-        P3[applyClinicalPreset]
         P4[validateData → event_binary]
         P5[Clinical safety check: event count]
         P6[optimizeMemoryUsage]
@@ -843,8 +832,8 @@ flowchart TD
     end
 
     Input --> P1
-    Config --> P3
-    P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7 --> P8
+    Config --> P4
+    P1 --> P2 --> P4 --> P5 --> P6 --> P7 --> P8
     P8 --> Conditional
     Conditional --> P9 --> P10 --> P11
 ```
@@ -870,7 +859,6 @@ sequenceDiagram
     U->>R: Click "Run"
     R->>R: Check core variables
     R->>R: validateOptionDependencies()
-    R->>R: applyClinicalPreset()
     R->>V: validateData()
     V-->>R: data + event_binary
 
@@ -912,8 +900,6 @@ sequenceDiagram
 | Change | Impact | Files |
 |--------|--------|-------|
 | Change `analysisType` values | Gate logic in `.run()`, lines ~3060-3200 | `.a.yaml`, `.b.R` |
-| Add new `clinicalPreset` | `.applyClinicalPreset()` (line 386) | `.a.yaml`, `.u.yaml`, `.b.R` |
-| Change `complexityMode` levels | `.run()` gate logic, UI labels | `.a.yaml`, `.u.yaml`, `.b.R` |
 | Add a new analysis toggle | Add option in `.a.yaml`, UI control in `.u.yaml`, output in `.r.yaml`, gate + method in `.b.R`, populate method | All 4 files |
 
 ### Adding a New Output Table

@@ -451,74 +451,6 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             # NEW MODULAR HELPER FUNCTIONS FOR ENHANCED FUNCTIONALITY
 
-            .applyClinicalPreset = function() {
-                # Apply clinical preset configuration to analysis options
-                # This simplifies the UI for clinical users while maintaining full functionality
-                preset <- self$options$clinicalPreset %||% "routine_clinical"
-
-                if (is.null(preset) || preset == "custom") {
-                    return(NULL) # Use manual settings
-                }
-
-                # Advisory note: presets currently provide guidance; verify outputs align with your intent
-                self$results$migrationOverview$setNote(
-                    "clinicalPreset",
-                    glue::glue("Clinical preset '{preset}' selected. Presets are advisory; please confirm displayed tables/plots and advanced options match your scenario.")
-                )
-
-                # Define preset configurations
-                preset_configs <- list(
-                    routine_clinical = list(
-                        showMigrationOverview = TRUE,
-                        showMigrationMatrix = TRUE,
-                        showStageDistribution = TRUE,
-                        showStatisticalComparison = TRUE,
-                        calculateNRI = TRUE,
-                        calculateIDI = FALSE,
-                        performBootstrap = FALSE,
-                        performROCAnalysis = FALSE,
-                        showExplanations = TRUE,
-                        generateCopyReadyReport = TRUE,
-                        analysis_scope = "Clinical validation with essential metrics for daily practice"
-                    ),
-                    research_study = list(
-                        showMigrationOverview = TRUE,
-                        showMigrationMatrix = TRUE,
-                        showStageDistribution = TRUE,
-                        showStatisticalComparison = TRUE,
-                        showConcordanceComparison = TRUE,
-                        calculateNRI = TRUE,
-                        calculateIDI = TRUE,
-                        performBootstrap = TRUE,
-                        performROCAnalysis = TRUE,
-                        performDCA = TRUE,
-                        showExplanations = TRUE,
-                        generateCopyReadyReport = TRUE,
-                        analysis_scope = "Research study with advanced statistical validation"
-                    ),
-                    publication_ready = list(
-                        showMigrationOverview = TRUE,
-                        showMigrationMatrix = TRUE,
-                        showStageDistribution = TRUE,
-                        showStatisticalComparison = TRUE,
-                        showConcordanceComparison = TRUE,
-                        calculateNRI = TRUE,
-                        calculateIDI = TRUE,
-                        performBootstrap = TRUE,
-                        performROCAnalysis = TRUE,
-                        performDCA = TRUE,
-                        performCalibration = TRUE,
-                        showMigrationHeatmap = TRUE,
-                        showROCComparison = TRUE,
-                        showSurvivalCurves = TRUE,
-                        showExplanations = TRUE,
-                        generateCopyReadyReport = TRUE,
-                        analysis_scope = "Publication-ready analysis with all methods and visualizations"
-                    )
-                )
-
-                return(preset_configs[[preset]])
-            },
             .generateGuidedModeProgress = function(current_step = 1, total_steps = 5) {
                 # Generate guided mode progress indicator
                 if (!self$options$enableGuidedMode) {
@@ -571,7 +503,6 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 lang <- self$options$preferredLanguage %||% "en"
-                preset <- self$options$clinicalPreset %||% "routine_clinical"
 
                 # Localized text templates
                 text_templates <- list(
@@ -623,7 +554,17 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     '<p style="line-height: 1.6; color: #333;">',
                     "We performed a comprehensive TNM stage migration analysis comparing the original and revised staging systems. ",
                     "Statistical validation included migration matrix analysis, concordance assessment, and bootstrap validation. ",
-                    if (preset == "publication_ready") "Advanced methods included time-dependent ROC analysis, decision curve analysis, and Will Rogers phenomenon evaluation. " else "",
+                    # Name only the advanced methods that were actually enabled for this run.
+                    # (This used to key off clinicalPreset, which configured nothing, so the
+                    # sentence could claim analyses that never ran.)
+                    local({
+                        adv <- c(
+                            if (isTRUE(self$options$performROCAnalysis)) "time-dependent ROC analysis",
+                            if (isTRUE(self$options$performDCA)) "decision curve analysis",
+                            if (isTRUE(self$options$advancedMigrationAnalysis)) "Will Rogers phenomenon evaluation"
+                        )
+                        if (length(adv) == 0) "" else paste0("Advanced methods included ", paste(adv, collapse = ", "), ". ")
+                    }),
                     "</p>",
                     "</div>",
                     '<div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">',
@@ -3076,6 +3017,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             c_index = 0.02,
                             nri = 0.20
                         )
+                        guidance$is_generic <- TRUE
                     }
                 )
 
@@ -3123,14 +3065,6 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # ENHANCED FUNCTIONALITY - Apply clinical preset and guided mode
                 private$.showProgressIndicator("Initializing analysis configuration", 1, 5)
 
-                # Apply clinical preset configuration
-                preset_config <- private$.applyClinicalPreset()
-                if (!is.null(preset_config) && self$options$clinicalPreset != "custom") {
-                    # Apply preset but don't override explicit user choices
-                    # This provides smart defaults while preserving user customization
-                    message(paste("Applying clinical preset:", self$options$clinicalPreset))
-                    message(paste("Analysis scope:", preset_config$analysis_scope))
-                }
 
                 # Validate and prepare data
                 private$.showProgressIndicator("Validating and preparing data", 2, 5)
@@ -3797,9 +3731,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         private$.setExplanationContent("idiResultsExplanation", idi_explanation_html)
                     }
 
-                    # Populate IDI results table
-                    if (!is.null(all_results$idi_results)) {
-                        private$.populateIDIResults(all_results$idi_results)
+                    # Populate IDI components table (asymptotic inference + discrimination slopes)
+                    if (!is.null(all_results$idi_analysis)) {
+                        private$.populateIDIResults(all_results$idi_analysis)
                     }
 
                     private$.populateIDIAnalysis(all_results$idi_analysis)
@@ -4218,7 +4152,26 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Perform advanced migration analyses
                     private$.performAdvancedMigrationAnalysis(all_results)
 
-                    # SME, RMST, Competing Risks population moved inside .performAdvancedMigrationAnalysis
+                    # SME and RMST population moved inside .performAdvancedMigrationAnalysis
+                }
+
+                # Competing risks: .r.yaml gates competingRisksExplanation /
+                # competingRisksEventDistribution / competingRisksComparison on
+                # (performCompetingRisks) ALONE, so this must not sit inside the
+                # advancedMigrationAnalysis branch above. `data` here is the validated
+                # frame, so it already carries event_binary and the competingEventVar column.
+                if (isTRUE(self$options$performCompetingRisks)) {
+                    tryCatch(
+                        {
+                            competing_results <- private$.performCompetingRisksAnalysis(
+                                data, self$options$oldStage, self$options$newStage,
+                                self$options$survivalTime, "event_binary",
+                                self$options$competingEventVar
+                            )
+                            private$.populateCompetingRisksAnalysis(competing_results)
+                        },
+                        error = function(e) {}
+                    )
                 }
 
 
@@ -5720,6 +5673,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             },
             .populateClinicalInterpretation = function(interpretation) {
                 table <- self$results$clinicalInterpretation
+                table$deleteRows()
 
                 # Overall Assessment
                 overall <- interpretation$overall_assessment
@@ -5753,6 +5707,89 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     Interpretation = rec$rationale,
                     Recommendation = paste("Confidence:", rec$confidence)
                 ))
+
+                # Caveats raised by .generateRecommendation()
+                caveats <- rec$considerations
+                for (caveat_key in names(caveats)) {
+                    caveat_label <- switch(caveat_key,
+                        high_migration = "Migration Rate",
+                        sample_size = "Sample Size",
+                        optimism = "Optimism",
+                        will_rogers = "Will Rogers Phenomenon",
+                        caveat_key
+                    )
+                    table$addRow(rowKey = paste0("caveat_", caveat_key), values = list(
+                        Metric = "Caveat",
+                        Value = caveat_label,
+                        Interpretation = caveats[[caveat_key]],
+                        Recommendation = ""
+                    ))
+                }
+
+                # Cancer-type specific guidance (present only when cancerType != "general")
+                cancer_guidance <- interpretation$cancer_specific
+                if (!is.null(cancer_guidance)) {
+                    cancer_label <- switch(self$options$cancerType,
+                        lung = "Lung Cancer",
+                        breast = "Breast Cancer",
+                        colorectal = "Colorectal Cancer",
+                        prostate = "Prostate Cancer",
+                        headneck = "Head and Neck Cancer",
+                        melanoma = "Melanoma",
+                        other = "Other Solid Tumor",
+                        self$options$cancerType
+                    )
+                    is_generic <- isTRUE(cancer_guidance$is_generic)
+
+                    thresholds <- cancer_guidance$recommended_thresholds
+                    if (!is.null(thresholds)) {
+                        table$addRow(rowKey = "cancer_thresholds", values = list(
+                            Metric = if (is_generic) "Default Thresholds" else "Cancer-Specific Thresholds",
+                            Value = sprintf(
+                                "C-index >= %.3f; NRI >= %.2f",
+                                thresholds$c_index, thresholds$nri
+                            ),
+                            Interpretation = if (is_generic) {
+                                sprintf(
+                                    "Generic defaults: no %s-specific threshold values are curated in this module",
+                                    cancer_label
+                                )
+                            } else {
+                                sprintf(
+                                    "Literature-based thresholds for a clinically meaningful improvement in %s",
+                                    cancer_label
+                                )
+                            },
+                            Recommendation = sprintf(
+                                "This analysis used C-index >= %.3f; NRI >= %.2f",
+                                self$options$clinicalSignificanceThreshold,
+                                self$options$nriClinicalThreshold
+                            )
+                        ))
+                    }
+
+                    cancer_points <- cancer_guidance$specific_considerations
+                    consideration_label <- if (is_generic) {
+                        "General Considerations"
+                    } else {
+                        paste(cancer_label, "Considerations")
+                    }
+                    for (i in seq_along(cancer_points)) {
+                        table$addRow(rowKey = paste0("cancer_consideration_", i), values = list(
+                            Metric = if (i == 1L) consideration_label else "",
+                            Value = "",
+                            Interpretation = cancer_points[i],
+                            Recommendation = ""
+                        ))
+                    }
+
+                    if (is_generic) {
+                        table$setNote("cancerGeneric", sprintf(
+                            "Cancer-specific guidance has not been curated for %s; general staging-validation guidance and default thresholds are shown.",
+                            cancer_label
+                        ))
+                    }
+                }
             },
             .populateLikelihoodTests = function(advanced_results) {
                 if (is.null(advanced_results$lr_test)) {
@@ -6056,6 +6093,10 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if ("stageMigrationEffect" %in% names(self$results)) {
                     table <- self$results$stageMigrationEffect
                     if (!is.null(table) && !is.null(sme_results$calculations)) {
+                        # clearWith lists only 6 of 238 options; without this the rows double
+                        # every time an option outside that list is changed.
+                        table$deleteRows()
+
                         # Add results for each timepoint
                         for (timepoint in names(sme_results$calculations)) {
                             calc <- sme_results$calculations[[timepoint]]
@@ -6080,6 +6121,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if ("stageMigrationEffectAssessment" %in% names(self$results)) {
                     assessment_table <- self$results$stageMigrationEffectAssessment
                     if (!is.null(assessment_table) && !is.null(sme_results$overall_assessment)) {
+                        assessment_table$deleteRows()
                         overall <- sme_results$overall_assessment
 
                         # Add overall metrics
@@ -6162,6 +6204,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if ("rmstByStage" %in% names(self$results)) {
                     table <- self$results$rmstByStage
                     if (!is.null(table) && !is.null(rmst_results$comparison)) {
+                        table$deleteRows()
                         # Add old system results
                         if (!is.null(rmst_results$comparison$old_system$rmst_by_stage)) {
                             for (stage_name in names(rmst_results$comparison$old_system$rmst_by_stage)) {
@@ -6215,6 +6258,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if ("rmstComparison" %in% names(self$results)) {
                     comparison_table <- self$results$rmstComparison
                     if (!is.null(comparison_table) && !is.null(rmst_results$comparison$overall_assessment)) {
+                        comparison_table$deleteRows()
                         overall <- rmst_results$comparison$overall_assessment
 
                         # Add discrimination metrics
@@ -6288,6 +6332,19 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Populate event distribution table
                 if ("competingRisksEventDistribution" %in% names(self$results)) {
                     table <- self$results$competingRisksEventDistribution
+                    if (!is.null(table)) {
+                        table$deleteRows()
+                        if (!is.null(competing_results$error)) {
+                            table$setNote("cr_status", as.character(competing_results$error))
+                        } else if (is.null(competing_results$old_system_summary) &&
+                            !is.null(competing_results$event_setup)) {
+                            table$setNote("cr_status", paste0(
+                                "Event setup: ", competing_results$event_setup$method,
+                                if (!is.null(competing_results$event_setup$note)) paste0(". ", competing_results$event_setup$note) else "",
+                                if (!is.null(competing_results$event_setup$recommendation)) paste0(". ", competing_results$event_setup$recommendation) else ""
+                            ))
+                        }
+                    }
                     if (!is.null(table) && !is.null(competing_results$old_system_summary)) {
                         # Add old system results
                         for (stage_name in names(competing_results$old_system_summary)) {
@@ -6344,6 +6401,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Populate competing risks comparison table
                 if ("competingRisksComparison" %in% names(self$results)) {
                     comparison_table <- self$results$competingRisksComparison
+                    if (!is.null(comparison_table)) {
+                        comparison_table$deleteRows()
+                    }
                     if (!is.null(comparison_table) && !is.null(competing_results$comparison)) {
                         overall_comp <- competing_results$comparison$overall_comparison
                         disc_assess <- competing_results$comparison$discrimination_assessment
@@ -6445,15 +6505,18 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
 
-                table <- self$results$idiResults
+                table <- self$results$idiComponents
                 if (is.null(table)) {
                     return()
                 }
+                # addRow() appends blindly and clearWith cannot cover every option;
+                # clear first so a re-run cannot duplicate these rows
+                table$deleteRows()
 
 
                 # Add overall IDI result
                 table$addRow(rowKey = "overall", values = list(
-                    Metric = "IDI (Integrated Discrimination Improvement)",
+                    Metric = "IDI - asymptotic SE, 95% CI and p-value",
                     Value = private$.safeAtomic(idi_results$idi, "numeric", NA),
                     Standard_Error = private$.safeAtomic(idi_results$idi_se, "numeric", NA),
                     CI_Lower = private$.safeAtomic(idi_results$idi_ci_lower, "numeric", NA),
@@ -6485,16 +6548,19 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Add sample size information
                 table$addRow(rowKey = "sample_info", values = list(
-                    Metric = "Sample Size (Events / Non-events)",
-                    Value = paste0(idi_results$n_events, " / ", idi_results$n_non_events),
+                    Metric = "Events (n)",
+                    Value = private$.safeAtomic(idi_results$n_events, "numeric", NA),
                     Standard_Error = NA,
                     CI_Lower = NA,
                     CI_Upper = NA,
                     P_Value = NA,
-                    Interpretation = "Higher sample sizes provide more reliable estimates"
+                    Interpretation = paste0(
+                        "Non-events: ", private$.safeAtomic(idi_results$n_non_events, "numeric", NA),
+                        ". Larger event counts give more reliable IDI estimates."
+                    )
                 ))
 
-                table$setNote("interpretation", "IDI measures the improvement in model's ability to discriminate between patients with and without events. Positive values indicate the new staging system has better discrimination.")
+                table$setNote("interpretation", "IDI measures the improvement in model's ability to discriminate between patients with and without events. Positive values indicate the new staging system has better discrimination.\n\nInference here is asymptotic (delta-method) and is always available. The Integrated Discrimination Improvement (IDI) table above reports the bootstrap percentile CI and p-value, which are only populated when Bootstrap Validation is enabled; the two p-values may differ slightly.")
             },
             .interpretIDI = function(idi_value, p_value) {
                 if (is.na(idi_value)) {
@@ -7078,10 +7144,27 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             return()
                         }
 
+                        # Phase-1 helpers below reference the literal column "event_binary"
+                        # (Will Rogers evidence, landmark, homogeneity, SME, RMST, competing
+                        # risks, time-varying). self$data[all_vars] carries only the raw option
+                        # columns, so derive it here or every one of them errors out. Reuse the
+                        # SAME helper .validateData() uses, so the event coding here cannot
+                        # diverge from the coding every other table in this analysis reports on.
+                        if (!"event_binary" %in% names(data) &&
+                            !is.null(self$options$event) &&
+                            self$options$event %in% names(data)) {
+                            event_binary_result <- stagemigration_createEventBinary(
+                                data[[self$options$event]], self$options$eventLevel
+                            )
+                            if (!is.null(event_binary_result$binary)) {
+                                data$event_binary <- event_binary_result$binary
+                            }
+                        }
+
                         # Perform individual analyses
                         tryCatch(
                             {
-                                private$.checkMonotonicity(data)
+                                all_results$monotonicity <- private$.checkMonotonicity(data)
                             },
                             error = function(e) {}
                         )
@@ -7108,7 +7191,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         tryCatch(
                             {
-                                private$.analyzeWillRogers(data, all_results)
+                                all_results$wr_overall_assessment <- private$.analyzeWillRogers(data, all_results)
                             },
                             error = function(e) {}
                         )
@@ -7116,11 +7199,18 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # ========== PHASE 1 ADVANCED ENHANCEMENTS ==========
 
                         # Advanced Will Rogers Evidence Assessment Framework
-                        tryCatch(
+                        all_results <- tryCatch(
                             {
-                                private$.performAdvancedWillRogersAssessment(data, all_results)
+                                # Complete cases only for this criterion: the simulation does
+                                # sum(old != new) and mean(event_binary) with no na.rm, so one
+                                # missing value turns the whole row into "ERROR". Scoped to this
+                                # call so the migration tables above keep their current inputs.
+                                wr_vars <- c(self$options$oldStage, self$options$newStage,
+                                             self$options$survivalTime, "event_binary")
+                                wr_data <- data[stats::complete.cases(data[, wr_vars, drop = FALSE]), , drop = FALSE]
+                                private$.performAdvancedWillRogersAssessment(wr_data, all_results)
                             },
-                            error = function(e) {}
+                            error = function(e) all_results
                         )
 
                         # Enhanced Migration Heatmap Data Generation
@@ -7151,7 +7241,11 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 landmark_results <- private$.performLandmarkAnalysis(
                                     data, self$options$survivalTime, "event_binary", landmark_times
                                 )
-                                if (!is.null(landmark_results) && !is.null(landmark_results$error)) {
+                                # Inverted guard: this stored the result only when it FAILED
+                                # (every sibling below uses is.null(...$error)). Harmless while
+                                # the call always errored; now that event_binary exists it would
+                                # discard every successful landmark analysis.
+                                if (!is.null(landmark_results) && is.null(landmark_results$error)) {
                                     all_results$landmark_analysis <- landmark_results
                                 }
                             },
@@ -7213,6 +7307,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     )
                                     if (!is.null(rmst_results) && is.null(rmst_results$error)) {
                                         all_results$rmst_analysis <- rmst_results
+                                        # Populate immediately since all_results changes don't persist
+                                        private$.populateRMSTAnalysis(rmst_results)
                                     }
                                 },
                                 error = function(e) {}
@@ -7263,6 +7359,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     )
                                     if (!is.null(model_diagnostics) && is.null(model_diagnostics$error)) {
                                         all_results$enhanced_diagnostics <- model_diagnostics
+                                        # Populate immediately: all_results changes do not persist to the caller
+                                        private$.populateEnhancedModelDiagnostics(model_diagnostics)
                                     }
                                 } else {}
                             },
@@ -7310,7 +7408,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         tryCatch(
                             {
-                                private$.testProportionalHazardsAssumption(data, all_results)
+                                all_results <- private$.testProportionalHazardsAssumption(data, all_results)
                             },
                             error = function(e) {}
                         )
@@ -7903,6 +8001,17 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 },
                                 error = function(e) {}
                             )
+
+                            # Render the clinical decision support + publication report payloads
+                            tryCatch(
+                                {
+                                    private$.populateClinicalDecisionSupportReport(
+                                        all_results$clinical_decision_support,
+                                        all_results$publication_report
+                                    )
+                                },
+                                error = function(e) {}
+                            )
                         }
                     },
                     error = function(e) {
@@ -7941,6 +8050,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Add results to table
                         table$addRow(rowKey = "old_system", values = old_monotonicity)
                         table$addRow(rowKey = "new_system", values = new_monotonicity)
+
+                        # Return the assessments so the comparative dashboard can reuse them
+                        list(old = old_monotonicity, new = new_monotonicity)
                     },
                     error = function(e) {
                         table$addRow(rowKey = "error", values = list(
@@ -7950,6 +8062,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             Details = paste("Monotonicity check failed:", e$message),
                             Score = NA
                         ))
+                        NULL
                     }
                 )
             },
@@ -8046,6 +8159,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Add overall assessment
                         overall_assessment <- private$.assessOverallWillRogers(data)
                         table$addRow(rowKey = "overall", values = overall_assessment)
+
+                        # Return the overall assessment so the comparative dashboard can reuse it
+                        overall_assessment
                     },
                     error = function(e) {
                         table$addRow(rowKey = "error", values = list(
@@ -8056,6 +8172,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             Will_Rogers_Evidence = "Calculation failed",
                             Clinical_Impact = paste("Error:", e$message)
                         ))
+                        NULL
                     }
                 )
             },
@@ -9490,10 +9607,10 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Test proportional hazards assumption using Schoenfeld residuals
                 table <- self$results$proportionalHazardsTest
                 if (is.null(table)) {
-                    return()
+                    return(all_results)
                 }
 
-                tryCatch(
+                all_results <- tryCatch(
                     {
                         # Ensure event_binary column exists
                         if (!"event_binary" %in% names(data)) {
@@ -9551,6 +9668,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 new_test = new_test
                             )
                         }
+
+                        all_results
                     },
                     error = function(e) {
                         table$addRow(rowKey = "error", values = list(
@@ -9561,8 +9680,12 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             Assumption_Status = "Test Failed",
                             Interpretation = paste("Proportional hazards test failed:", e$message)
                         ))
+
+                        all_results
                     }
                 )
+
+                return(all_results)
             },
             .performSchoenfeld = function(cox_model, system_name) {
                 # Perform Schoenfeld residuals test for a single Cox model
@@ -13633,6 +13756,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .populateCalibrationAnalysis = function(calibration_results) {
                 # Populate calibration analysis table
                 table <- self$results$calibrationAnalysis
+                table$deleteRows()
 
                 if (is.null(calibration_results)) {
                     table$setNote("note", "Calibration analysis could not be completed. Check if Cox models were successfully fitted.")
@@ -13703,6 +13827,35 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         C_Slope_CI_Upper = new_spline$rcs_calibration$ci_upper,
                         Interpretation = paste("Flexible spline calibration:", new_spline$rcs_calibration$interpretation)
                     ))
+                }
+
+                # Add Lowess (flexible smoothing) calibration rows
+                for (side in c("old", "new")) {
+                    spline_res <- if (side == "old") old_spline else new_spline
+                    lowess_res <- spline_res$lowess_calibration
+                    if (is.null(lowess_res) || !isTRUE(lowess_res$available)) next
+
+                    lowess_interp <- gsub("spline-based", "Lowess-based", lowess_res$interpretation, fixed = TRUE)
+                    lowess_interp <- gsub("Spline calibration analysis completed", "Lowess calibration analysis completed", lowess_interp, fixed = TRUE)
+                    if (!is.null(lowess_res$r_squared) && !is.na(lowess_res$r_squared)) {
+                        lowess_interp <- paste0(lowess_interp, "; R-squared = ", round(lowess_res$r_squared, 3))
+                    }
+
+                    table$addRow(rowKey = paste0(side, "_lowess"), values = list(
+                        Model = if (side == "old") "Original - Lowess Calibration" else "New - Lowess Calibration",
+                        Hosmer_Lemeshow_Chi2 = NA,
+                        Hosmer_Lemeshow_df = NA,
+                        Hosmer_Lemeshow_p = NA,
+                        Calibration_Slope = lowess_res$slope,
+                        Calibration_Intercept = NA,
+                        C_Slope_CI_Lower = NA,
+                        C_Slope_CI_Upper = NA,
+                        Interpretation = lowess_interp
+                    ))
+                }
+
+                if (isTRUE(old_spline$lowess_calibration$available) || isTRUE(new_spline$lowess_calibration$available)) {
+                    table$setNote("lowess_note", "Lowess calibration slope is estimated from the smoothed predicted-vs-observed curve over the middle 50% of the predicted-risk range. H-L test, calibration intercept and slope confidence intervals are not defined for this method.")
                 }
 
                 # Add a note about spline calibration if available
@@ -14201,30 +14354,31 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 next
                             }
 
-                            # Calculate survival probabilities for each model at time point
-                            old_survprob <- tryCatch(
-                                {
-                                    summary(survfit(old_model), times = time_point, extend = TRUE)$surv
-                                },
-                                error = function(e) NULL
-                            )
-
-                            new_survprob <- tryCatch(
-                                {
-                                    summary(survfit(new_model), times = time_point, extend = TRUE)$surv
-                                },
-                                error = function(e) NULL
-                            )
-
-                            baseline_survprob <- NULL
-                            if (!is.null(baseline_model)) {
-                                baseline_survprob <- tryCatch(
-                                    {
-                                        summary(survfit(baseline_model), times = time_point, extend = TRUE)$surv
-                                    },
+                            # Calculate PER-PATIENT survival probabilities at this time point.
+                            # survfit(model) with no newdata returns a single curve at the mean
+                            # covariate values, so $surv was length 1 while actual_events below is
+                            # length nrow(covariate_data) -- .calculateNRIComponents then died with
+                            # "all arguments must have the same length" and adjusted NRI never ran.
+                            # NRI is a per-patient reclassification measure, so predict for every
+                            # patient. $surv comes back as a times x subjects matrix; flatten it.
+                            n_obs <- nrow(covariate_data)
+                            survprob_at <- function(model) {
+                                if (is.null(model)) {
+                                    return(NULL)
+                                }
+                                out <- tryCatch(
+                                    as.vector(summary(
+                                        survfit(model, newdata = covariate_data),
+                                        times = time_point, extend = TRUE
+                                    )$surv),
                                     error = function(e) NULL
                                 )
+                                if (is.null(out) || length(out) != n_obs) NULL else out
                             }
+
+                            old_survprob <- survprob_at(old_model)
+                            new_survprob <- survprob_at(new_model)
+                            baseline_survprob <- survprob_at(baseline_model)
 
                             if (is.null(old_survprob) || is.null(new_survprob)) {
                                 nri_results[[paste0("time_", time_point)]] <- list(
@@ -14738,10 +14892,18 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             if (!is.null(old_survfit)) {
                                 old_survival_probs <- tryCatch(
                                     {
-                                        summary(old_survfit, times = time_point, extend = TRUE)$surv
+                                        # For a multi-subject survfit.coxph, $surv is a
+                                        # length(times) x n_subjects MATRIX, not a vector.
+                                        # Left as a 1 x n matrix it makes the later
+                                        # patient_predictions[[col]] <- ... assignment fail with
+                                        # "replacement has 1 row, data has n".
+                                        as.vector(summary(old_survfit, times = time_point, extend = TRUE)$surv)
                                     },
-                                    error = function(e) rep(NA, n_patients)
+                                    error = function(e) rep(NA_real_, n_patients)
                                 )
+                            }
+                            if (length(old_survival_probs) != n_patients) {
+                                old_survival_probs <- rep(NA_real_, n_patients)
                             }
 
                             if (is.null(old_survival_probs)) {
@@ -14760,10 +14922,18 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             if (!is.null(new_survfit)) {
                                 new_survival_probs <- tryCatch(
                                     {
-                                        summary(new_survfit, times = time_point, extend = TRUE)$surv
+                                        # For a multi-subject survfit.coxph, $surv is a
+                                        # length(times) x n_subjects MATRIX, not a vector.
+                                        # Left as a 1 x n matrix it makes the later
+                                        # patient_predictions[[col]] <- ... assignment fail with
+                                        # "replacement has 1 row, data has n".
+                                        as.vector(summary(new_survfit, times = time_point, extend = TRUE)$surv)
                                     },
-                                    error = function(e) rep(NA, n_patients)
+                                    error = function(e) rep(NA_real_, n_patients)
                                 )
+                            }
+                            if (length(new_survival_probs) != n_patients) {
+                                new_survival_probs <- rep(NA_real_, n_patients)
                             }
 
                             if (is.null(new_survival_probs)) {
@@ -15795,11 +15965,18 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         n_stable <- length(stepwise_info$stable_variables)
                         n_high_stability <- length(stepwise_info$high_stability_variables)
 
+                        # rowKeys are re-added every run; clear first so the fixed summary rows
+                        # below cannot accumulate when clearWith does not fire.
+                        table$deleteRows()
+
+                        n_boot_ok <- stepwise_info$n_bootstrap_successful
+                        mean_boot_aic <- stepwise_info$bootstrap_performance$mean_aic
+
                         table$addRow(rowKey = "summary", values = list(
                             Variable = "Bootstrap Model Selection Summary",
-                            Step = "Final",
+                            Step = if (!is.null(n_boot_ok)) paste0(n_boot_ok, " resamples") else "Final",
                             Action = paste0(n_stable, " stable vars (", n_high_stability, " high stability)"),
-                            AIC = round(mean(stepwise_info$bootstrap_performance$aic_values, na.rm = TRUE), 1),
+                            AIC = if (!is.null(mean_boot_aic) && is.finite(mean_boot_aic)) round(mean_boot_aic, 1) else NA,
                             p_value = ""
                         ))
 
@@ -15855,6 +16032,56 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 Action = action,
                                 AIC = aic_value,
                                 p_value = p_value_text
+                            ))
+                        }
+
+                        # Surface the refit stable model, the full-data stepwise reference model
+                        # and the staging-system stability comparison computed by
+                        # .performBootstrapModelSelection() but previously never displayed.
+                        stable_perf <- stepwise_info$stable_model_performance
+                        if (!is.null(stable_perf)) {
+                            table$addRow(rowKey = "stable_model", values = list(
+                                Variable = "Refit model on stable variables",
+                                Step = "Final",
+                                Action = paste0(
+                                    "C-index ", round(stable_perf$c_index, 3),
+                                    " (SE ", round(stable_perf$c_index_se, 3), "), BIC ",
+                                    round(stable_perf$bic, 1)
+                                ),
+                                AIC = round(stable_perf$aic, 1),
+                                p_value = ""
+                            ))
+                        }
+
+                        trad_model <- stepwise_info$traditional_stepwise_model
+                        if (!is.null(trad_model)) {
+                            trad_vars <- tryCatch(
+                                attr(stats::terms(trad_model), "term.labels"),
+                                error = function(e) character(0)
+                            )
+                            table$addRow(rowKey = "traditional_stepwise", values = list(
+                                Variable = "Traditional stepwise (full data)",
+                                Step = "Reference",
+                                Action = if (length(trad_vars) > 0) {
+                                    paste("Retained:", paste(trad_vars, collapse = ", "))
+                                } else {
+                                    "Retained: none"
+                                },
+                                AIC = round(AIC(trad_model), 1),
+                                p_value = ""
+                            ))
+                        }
+
+                        staging_cmp <- stepwise_info$staging_comparison
+                        if (!is.null(staging_cmp)) {
+                            old_freq_pct <- round(as.numeric(stepwise_info$old_stage_frequency) * 100, 1)
+                            new_freq_pct <- round(as.numeric(stepwise_info$new_stage_frequency) * 100, 1)
+                            table$addRow(rowKey = "staging_comparison", values = list(
+                                Variable = "Staging system stability",
+                                Step = paste0("Original ", old_freq_pct, "% vs New ", new_freq_pct, "%"),
+                                Action = paste0("More stably selected: ", staging_cmp$preference),
+                                AIC = NA,
+                                p_value = ""
                             ))
                         }
                     } else if (!is.null(stepwise_info$step_history) && length(stepwise_info$step_history) > 0) {
@@ -16115,6 +16342,155 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
                 }
 
+                # 7. Populate personalized risk prediction summary
+                personalized <- multifactorial_results$personalized_predictions
+                if (!is.null(personalized) && !is.null(personalized$error)) {
+                    # Say WHY the table is empty rather than rendering a blank pane.
+                    self$results$personalizedRiskSummary$setNote(
+                        "unavailable",
+                        paste0("Personalized risk predictions unavailable: ", personalized$error)
+                    )
+                }
+                if (!is.null(personalized) && is.null(personalized$error) &&
+                    length(personalized$summary_stats) > 0) {
+                    table <- self$results$personalizedRiskSummary
+                    table$deleteRows()
+
+                    for (time_key in names(personalized$summary_stats)) {
+                        stats_row <- personalized$summary_stats[[time_key]]
+
+                        table$addRow(rowKey = time_key, values = list(
+                            TimePoint = stats_row$time_point,
+                            Mean_Risk_Old = stats_row$mean_old_risk,
+                            Mean_Risk_New = stats_row$mean_new_risk,
+                            Mean_Risk_Difference = stats_row$mean_risk_difference,
+                            Percent_Upstaged = stats_row$percent_upstaged,
+                            Percent_Downstaged = stats_row$percent_downstaged,
+                            Percent_No_Change = stats_row$percent_no_change,
+                            Percent_Large_Change = stats_row$percent_significant_change
+                        ))
+                    }
+
+                    table$setNote("personalized", paste0(
+                        "Individual absolute risk predictions from Cox models (staging system + covariates) for ",
+                        personalized$n_patients,
+                        " patients. Risk categories: Low 0-10%, Moderate 10-30%, High 30-50%, Very High above 50%. ",
+                        "Large risk change = absolute change in predicted risk above 10 percentage points."
+                    ))
+                }
+
+                # 8. Populate multifactorial model diagnostics
+                diagnostics <- multifactorial_results$model_diagnostics
+                if (!is.null(diagnostics) && is.null(diagnostics$error)) {
+                    table <- self$results$multifactorialModelDiagnostics
+                    table$deleteRows()
+
+                    assumptions <- diagnostics$model_assumptions
+                    diag_sources <- list(
+                        old_model = list(
+                            diag = diagnostics$old_model_diagnostics,
+                            ph = if (is.null(assumptions)) NULL else assumptions$proportional_hazards_old
+                        ),
+                        new_model = list(
+                            diag = diagnostics$new_model_diagnostics,
+                            ph = if (is.null(assumptions)) NULL else assumptions$proportional_hazards_new
+                        )
+                    )
+
+                    for (source_key in names(diag_sources)) {
+                        model_diag <- diag_sources[[source_key]]$diag
+                        ph_diag <- diag_sources[[source_key]]$ph
+
+                        if (is.null(model_diag) || !is.null(model_diag$error)) {
+                            next
+                        }
+
+                        ph_status <- if (is.null(ph_diag)) {
+                            "Not assessed"
+                        } else if (isTRUE(ph_diag$assumption_violated)) {
+                            paste0("Violated (worst: ", ph_diag$worst_violator, ")")
+                        } else {
+                            "Satisfied"
+                        }
+
+                        table$addRow(rowKey = source_key, values = list(
+                            Model = model_diag$model_name,
+                            N = model_diag$sample_size,
+                            C_Index = unname(model_diag$concordance),
+                            Significant_Coefficients = paste0(
+                                length(model_diag$significant_variables), " / ", model_diag$total_variables
+                            ),
+                            Outliers = model_diag$deviance_residuals$outliers,
+                            PH_Global_p = if (is.null(ph_diag)) NA_real_ else unname(ph_diag$global_p),
+                            PH_Assumption = ph_status
+                        ))
+                    }
+
+                    diag_notes <- character(0)
+                    if (!is.null(diagnostics$outlier_analysis) &&
+                        !is.null(diagnostics$outlier_analysis$interpretation)) {
+                        diag_notes <- c(diag_notes, diagnostics$outlier_analysis$interpretation)
+                    }
+                    if (!is.null(assumptions) && !is.null(assumptions$comparison)) {
+                        diag_notes <- c(diag_notes, assumptions$comparison$interpretation)
+                    }
+
+                    table$setNote("diagnostics", paste0(
+                        "Significant coefficients counted at p below 0.05. Outliers = patients with an absolute ",
+                        "deviance residual above 2.5. Proportional hazards assessed with the global cox.zph test ",
+                        "(p below 0.05 indicates a violation).",
+                        if (length(diag_notes) > 0) paste0(" ", paste(diag_notes, collapse = ". "), ".") else ""
+                    ))
+                }
+
+                # 9. Populate multivariable decision curve analysis summary
+                mv_dca <- multifactorial_results$multivariable_dca
+                if (!is.null(mv_dca) && is.null(mv_dca$error) && length(mv_dca) > 0) {
+                    table <- self$results$multivariableDCASummary
+                    table$deleteRows()
+
+                    dca_model_labels <- c(
+                        baseline = "Baseline (Covariates Only)",
+                        old_staging = "Original Staging + Covariates",
+                        new_staging = "New Staging + Covariates",
+                        full_model = "Both Staging Systems + Covariates"
+                    )
+
+                    for (time_key in names(mv_dca)) {
+                        time_entry <- mv_dca[[time_key]]
+
+                        if (is.null(time_entry) || !is.null(time_entry$error) ||
+                            is.null(time_entry$optimal_ranges)) {
+                            next
+                        }
+
+                        for (model_key in names(time_entry$optimal_ranges)) {
+                            range_info <- time_entry$optimal_ranges[[model_key]]
+                            model_label <- if (model_key %in% names(dca_model_labels)) {
+                                unname(dca_model_labels[[model_key]])
+                            } else {
+                                model_key
+                            }
+
+                            table$addRow(rowKey = paste0(time_key, "_", model_key), values = list(
+                                Time_Point = time_entry$time_point,
+                                Model = model_label,
+                                Optimal_Threshold_Min = range_info$optimal_min,
+                                Optimal_Threshold_Max = range_info$optimal_max,
+                                Max_Net_Benefit = range_info$max_net_benefit,
+                                Threshold_At_Max = range_info$max_nb_threshold
+                            ))
+                        }
+                    }
+
+                    table$setNote("mvdca", paste0(
+                        "Net benefit compares each multivariable model against treat-all and treat-none strategies ",
+                        "across threshold probabilities from 0.01 to 0.99. The optimal threshold range is where the ",
+                        "model outperforms both default strategies. Events are counted as observed by the time point, ",
+                        "so patients censored before that time are treated as event-free."
+                    ))
+                }
+
                 # Add summary note about the analysis
                 if (self$options$showMultifactorialTables) {
                     summary_note <- paste(
@@ -16366,6 +16742,10 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     {
                         evidence_summary <- all_results$will_rogers_evidence_summary
 
+                        # rows: 0 + addRow(): jamovi does not clear the table between runs
+                        # unless a clearWith option changed, so re-running appends duplicates.
+                        table$deleteRows()
+
                         # Add explanatory text
                         if (isTRUE(self$options$showExplanations)) {
                             explanation_html <- '
@@ -16412,6 +16792,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         recommendation <- all_results$will_rogers_recommendation
+
+                        # rows: 0 + addRow(): clear first or a re-run appends duplicate rows.
+                        table$deleteRows()
 
                         # Overall recommendation
                         table$addRow(rowKey = "overall", values = list(
@@ -16961,8 +17344,66 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Extract monotonicity data for dashboard
                 tryCatch(
                     {
-                        # Monotonicity analysis requires actual results extraction
-                        # Return template structure for future implementation
+                        # Monotonicity assessments stored by .checkMonotonicity()
+                        mono <- all_results[["monotonicity"]]
+
+                        if (!is.null(mono) && !is.null(mono$old) && !is.null(mono$new)) {
+                            old_score <- suppressWarnings(as.numeric(mono$old$Score))
+                            new_score <- suppressWarnings(as.numeric(mono$new$Score))
+                            old_viol <- suppressWarnings(as.numeric(mono$old$Violations))
+                            new_viol <- suppressWarnings(as.numeric(mono$new$Violations))
+
+                            if (length(old_score) == 1 && length(new_score) == 1 &&
+                                !is.na(old_score) && !is.na(new_score)) {
+                                score_diff <- new_score - old_score
+
+                                improvement <- if (score_diff > 0) {
+                                    sprintf("%+.2f (fewer ordering violations)", score_diff)
+                                } else if (score_diff < 0) {
+                                    sprintf("%+.2f (more ordering violations)", score_diff)
+                                } else {
+                                    "No change"
+                                }
+
+                                significance <- sprintf(
+                                    "Violations: Old=%s, New=%s",
+                                    if (length(old_viol) == 1 && !is.na(old_viol)) as.character(old_viol) else "NA",
+                                    if (length(new_viol) == 1 && !is.na(new_viol)) as.character(new_viol) else "NA"
+                                )
+
+                                relevance <- if (length(new_viol) == 1 && !is.na(new_viol) && new_viol == 0) {
+                                    "Perfect stage ordering"
+                                } else if (new_score >= 0.75) {
+                                    "Mostly ordered"
+                                } else {
+                                    "Ordering concerns"
+                                }
+
+                                recommendation <- if (length(new_viol) == 1 && !is.na(new_viol) && new_viol == 0 &&
+                                    length(old_viol) == 1 && !is.na(old_viol) && old_viol == 0) {
+                                    "Both systems order stages monotonically"
+                                } else if (score_diff > 0) {
+                                    "New staging improves stage ordering"
+                                } else if (score_diff < 0) {
+                                    "New staging degrades stage ordering; review violating stages"
+                                } else {
+                                    "Check monotonicity analysis table for violating stages"
+                                }
+
+                                return(list(
+                                    Analysis_Category = "Validation",
+                                    Metric = "Monotonicity Score",
+                                    Original_System = sprintf("%.2f", old_score),
+                                    New_System = sprintf("%.2f", new_score),
+                                    Improvement = improvement,
+                                    Statistical_Significance = significance,
+                                    Clinical_Relevance = relevance,
+                                    Recommendation = recommendation
+                                ))
+                            }
+                        }
+
+                        # Fallback when the monotonicity check did not run or failed
                         return(list(
                             Analysis_Category = "Validation",
                             Metric = "Monotonicity Score",
@@ -16983,6 +17424,84 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Extract Will Rogers data for dashboard
                 tryCatch(
                     {
+                        # Overall assessment row stored by .analyzeWillRogers(); its field
+                        # names mirror the willRogersAnalysis table columns, so
+                        # Survival_Change_Old holds the migration rate and Count the number
+                        # of migrated patients.
+                        overall <- all_results[["wr_overall_assessment"]]
+
+                        # Stage-level log-rank results stored by .calculateBasicWillRogersData()
+                        stage_results <- all_results[["will_rogers"]]
+
+                        sig_stages <- 0
+                        tested_stages <- 0
+                        if (!is.null(stage_results) && length(stage_results) > 0) {
+                            for (res in stage_results) {
+                                p_val <- suppressWarnings(as.numeric(res$p_value))
+                                if (length(p_val) == 1 && !is.na(p_val)) {
+                                    tested_stages <- tested_stages + 1
+                                    if (p_val < 0.05) {
+                                        sig_stages <- sig_stages + 1
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!is.null(overall) || tested_stages > 0) {
+                            migration_rate <- suppressWarnings(as.numeric(overall$Survival_Change_Old))
+                            migrated_n <- suppressWarnings(as.numeric(overall$Count))
+                            if (length(migration_rate) != 1) migration_rate <- NA_real_
+                            if (length(migrated_n) != 1) migrated_n <- NA_real_
+
+                            evidence <- if (!is.null(overall$Will_Rogers_Evidence)) {
+                                as.character(overall$Will_Rogers_Evidence)
+                            } else {
+                                "Stage-specific comparison only"
+                            }
+
+                            improvement <- if (!is.na(migrated_n) && !is.na(migration_rate)) {
+                                sprintf("%d migrated (%.1f%%)", as.integer(migrated_n), migration_rate * 100)
+                            } else {
+                                "N/A"
+                            }
+
+                            significance <- if (tested_stages > 0) {
+                                sprintf("%d of %d stages with log-rank p<0.05", sig_stages, tested_stages)
+                            } else {
+                                "Enable Will Rogers Phenomenon Analysis for stage log-rank tests"
+                            }
+
+                            relevance <- if (sig_stages > 0) {
+                                "Stage-specific bias detected"
+                            } else if (!is.na(migration_rate) && migration_rate > 0.2) {
+                                "High migration - bias possible"
+                            } else if (!is.na(migration_rate) && migration_rate > 0.1) {
+                                "Moderate migration"
+                            } else {
+                                "Minimal bias concern"
+                            }
+
+                            recommendation <- if (sig_stages > 0) {
+                                "Survival differs between migrated and unchanged patients; interpret stage-specific gains with caution"
+                            } else if (!is.null(overall$Clinical_Impact)) {
+                                as.character(overall$Clinical_Impact)
+                            } else {
+                                "Check Will Rogers analysis table"
+                            }
+
+                            return(list(
+                                Analysis_Category = "Bias Assessment",
+                                Metric = "Will Rogers Evidence",
+                                Original_System = "N/A",
+                                New_System = evidence,
+                                Improvement = improvement,
+                                Statistical_Significance = significance,
+                                Clinical_Relevance = relevance,
+                                Recommendation = recommendation
+                            ))
+                        }
+
+                        # Fallback when the Will Rogers analysis did not run or failed
                         return(list(
                             Analysis_Category = "Bias Assessment",
                             Metric = "Will Rogers Evidence",
@@ -19776,9 +20295,13 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .performInfluenceAnalysis = function(old_model, new_model, data) {
                 tryCatch(
                     {
-                        # Calculate dfbetas for influence analysis
-                        old_dfbetas <- tryCatch(dfbetas(old_model), error = function(e) NULL)
-                        new_dfbetas <- tryCatch(dfbetas(new_model), error = function(e) NULL)
+                        # Calculate dfbetas for influence analysis.
+                        # stats::dfbetas has no coxph method (it dispatches only for lm/glm), so
+                        # dfbetas(cox_model) always errored and this whole analysis returned all-NULL.
+                        # survival exposes them through residuals(); as.matrix keeps the
+                        # single-coefficient case (two-level staging) a matrix for apply().
+                        old_dfbetas <- tryCatch(as.matrix(residuals(old_model, type = "dfbetas")), error = function(e) NULL)
+                        new_dfbetas <- tryCatch(as.matrix(residuals(new_model, type = "dfbetas")), error = function(e) NULL)
 
                         influence_results <- list(
                             old_model_influence = NULL,
@@ -19788,34 +20311,34 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Analyze influence for old model
                         if (!is.null(old_dfbetas)) {
-                            influence_threshold <- 2 / sqrt(nrow(data))
+                            influence_threshold <- 2 / sqrt(nrow(old_dfbetas))
                             old_influential <- apply(abs(old_dfbetas) > influence_threshold, 1, any)
 
                             influence_results$old_model_influence <- list(
                                 influential_observations = which(old_influential),
                                 n_influential = sum(old_influential),
-                                percentage_influential = round(sum(old_influential) / nrow(data) * 100, 2),
+                                percentage_influential = round(sum(old_influential) / nrow(old_dfbetas) * 100, 2),
                                 max_influence = max(abs(old_dfbetas), na.rm = TRUE)
                             )
                         }
 
                         # Analyze influence for new model
                         if (!is.null(new_dfbetas)) {
-                            influence_threshold <- 2 / sqrt(nrow(data))
+                            influence_threshold <- 2 / sqrt(nrow(new_dfbetas))
                             new_influential <- apply(abs(new_dfbetas) > influence_threshold, 1, any)
 
                             influence_results$new_model_influence <- list(
                                 influential_observations = which(new_influential),
                                 n_influential = sum(new_influential),
-                                percentage_influential = round(sum(new_influential) / nrow(data) * 100, 2),
+                                percentage_influential = round(sum(new_influential) / nrow(new_dfbetas) * 100, 2),
                                 max_influence = max(abs(new_dfbetas), na.rm = TRUE)
                             )
                         }
 
                         # Compare influence between models
                         if (!is.null(old_dfbetas) && !is.null(new_dfbetas)) {
-                            old_infl_obs <- which(apply(abs(old_dfbetas) > 2 / sqrt(nrow(data)), 1, any))
-                            new_infl_obs <- which(apply(abs(new_dfbetas) > 2 / sqrt(nrow(data)), 1, any))
+                            old_infl_obs <- which(apply(abs(old_dfbetas) > 2 / sqrt(nrow(old_dfbetas)), 1, any))
+                            new_infl_obs <- which(apply(abs(new_dfbetas) > 2 / sqrt(nrow(new_dfbetas)), 1, any))
 
                             influence_results$comparative_influence <- list(
                                 improvement = length(old_infl_obs) - length(new_infl_obs),
@@ -19902,10 +20425,14 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         all_results$will_rogers_evidence_summary <- evidence_summary
                         all_results$will_rogers_recommendation <- recommendation
 
-                        return(TRUE)
+                        # R is copy-on-modify: return the MUTATED list so the caller can
+                        # reassign it, otherwise .populateWillRogers* below see NULL.
+                        return(all_results)
                     },
                     error = function(e) {
-                        return(FALSE)
+                        # Return all_results UNCHANGED so a failure here cannot wipe
+                        # everything accumulated by earlier analyses.
+                        all_results
                     }
                 )
             },
@@ -20151,7 +20678,12 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Extract C-index improvement from results
                         c_improvement <- NULL
 
-                        if (!is.null(all_results$concordance_old) && !is.null(all_results$concordance_new)) {
+                        if (!is.null(all_results$advanced_metrics) &&
+                            !is.null(all_results$advanced_metrics$c_improvement) &&
+                            !is.na(all_results$advanced_metrics$c_improvement)) {
+                            # Real C-index improvement from .calculateAdvancedMetrics (line 3186)
+                            c_improvement <- as.numeric(all_results$advanced_metrics$c_improvement)
+                        } else if (!is.null(all_results$concordance_old) && !is.null(all_results$concordance_new)) {
                             c_improvement <- all_results$concordance_new - all_results$concordance_old
                         } else if (!is.null(all_results$statistical_comparison)) {
                             # Try to extract from statistical comparison table
@@ -20306,8 +20838,11 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     rate_param <- 1 / mean(stage_times) # Exponential rate parameter
                                     event_rate <- mean(stage_data[[event_var]])
                                 } else {
-                                    rate_param <- 0.01 # Default rate
-                                    event_rate <- 0.5 # Default event rate
+                                    # Too few events to estimate a rate. Skip the stage rather
+                                    # than fabricating one - the length(stage_params) < 2 guard
+                                    # below then reports "UNABLE" instead of a verdict built on
+                                    # made-up parameters.
+                                    next
                                 }
 
                                 stage_params[[as.character(stage)]] <- list(
@@ -20974,6 +21509,115 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         return(list(error = paste("Model diagnostics failed:", e$message)))
                     }
                 )
+            },
+
+            # Populate the Phase 2 enhanced model diagnostics table
+            .populateEnhancedModelDiagnostics = function(diagnostics_results) {
+                if (is.null(diagnostics_results) || !is.null(diagnostics_results$error)) {
+                    return()
+                }
+                table <- self$results$enhancedModelDiagnostics
+                if (is.null(table)) {
+                    return()
+                }
+                # clearWith lists only 6 of 238 options; without this the rows double
+                # every time an option outside that list is changed.
+                table$deleteRows()
+
+                fmtNum <- function(value, digits = 3) {
+                    v <- private$.safeAtomic(value, "numeric", NA)
+                    if (is.na(v)) "Not available" else formatC(v, format = "f", digits = digits)
+                }
+                fmtP <- function(value) {
+                    v <- private$.safeAtomic(value, "numeric", NA)
+                    if (is.na(v)) {
+                        "Not available"
+                    } else if (v < 0.001) {
+                        "<0.001"
+                    } else {
+                        formatC(v, format = "f", digits = 3)
+                    }
+                }
+                fmtInt <- function(value) {
+                    v <- private$.safeAtomic(value, "integer", NA)
+                    if (is.na(v)) "Not available" else as.character(v)
+                }
+                addDiag <- function(rowKey, label, old_value, new_value, interpretation) {
+                    table$addRow(rowKey = rowKey, values = list(
+                        Diagnostic = label,
+                        Original_System = old_value,
+                        New_System = new_value,
+                        Interpretation = interpretation
+                    ))
+                }
+
+                gof_old <- diagnostics_results$goodness_of_fit$old_system
+                gof_new <- diagnostics_results$goodness_of_fit$new_system
+                res_old <- diagnostics_results$residuals$old_system$statistics
+                res_new <- diagnostics_results$residuals$new_system$statistics
+                ph_old <- diagnostics_results$assumptions$old_system$proportional_hazards
+                ph_new <- diagnostics_results$assumptions$new_system$proportional_hazards
+
+                addDiag(
+                    "gof_deviance", "Model deviance (-2 log L)",
+                    fmtNum(gof_old$deviance, 1), fmtNum(gof_new$deviance, 1),
+                    "Lower deviance indicates a better fit to the observed survival data"
+                )
+                addDiag(
+                    "gof_global", "Global likelihood ratio test (p)",
+                    fmtP(gof_old$global_p_value), fmtP(gof_new$global_p_value),
+                    "Tests whether the staging system carries any prognostic information"
+                )
+                addDiag(
+                    "gof_concordance", "Concordance (SE)",
+                    paste0(fmtNum(gof_old$concordance), " (", fmtNum(gof_old$concordance_se), ")"),
+                    paste0(fmtNum(gof_new$concordance), " (", fmtNum(gof_new$concordance_se), ")"),
+                    "Model-based discrimination reported with its standard error"
+                )
+                addDiag(
+                    "ph_assumption", "Proportional hazards test (global p)",
+                    fmtP(ph_old$p_value), fmtP(ph_new$p_value),
+                    "p < 0.05 indicates the proportional hazards assumption is violated"
+                )
+                addDiag(
+                    "resid_outliers", "Deviance residual outliers (|r| > 2)",
+                    fmtInt(res_old$n_outliers), fmtInt(res_new$n_outliers),
+                    "Patients whose observed survival is poorly explained by the model"
+                )
+                addDiag(
+                    "resid_martingale", "Martingale residual mean (variance)",
+                    paste0(fmtNum(res_old$martingale_mean), " (", fmtNum(res_old$martingale_var), ")"),
+                    paste0(fmtNum(res_new$martingale_mean), " (", fmtNum(res_new$martingale_var), ")"),
+                    "Mean should be near 0; a large variance suggests unmodelled structure"
+                )
+
+                infl <- diagnostics_results$influence
+                if (!is.null(infl) && is.null(infl$error)) {
+                    addDiag(
+                        "influential_obs", "Influential observations (n, %)",
+                        if (is.null(infl$old_model_influence)) {
+                            "Not available"
+                        } else {
+                            paste0(
+                                infl$old_model_influence$n_influential, " (",
+                                fmtNum(infl$old_model_influence$percentage_influential, 1), "%)"
+                            )
+                        },
+                        if (is.null(infl$new_model_influence)) {
+                            "Not available"
+                        } else {
+                            paste0(
+                                infl$new_model_influence$n_influential, " (",
+                                fmtNum(infl$new_model_influence$percentage_influential, 1), "%)"
+                            )
+                        },
+                        if (is.null(infl$comparative_influence)) {
+                            "dfbeta-based influence diagnostics"
+                        } else {
+                            infl$comparative_influence$interpretation
+                        }
+                    )
+                }
             },
 
             # Calculate model residuals
@@ -21794,13 +22438,24 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 note = "Using user-specified competing events structure"
                             )
 
-                            data$primary_event <- data[[event_var]]
-                            data$competing_event <- data[[competing_event_var]]
+                            data$primary_event <- suppressWarnings(as.numeric(as.character(data[[event_var]])))
+                            competing_raw <- suppressWarnings(as.numeric(as.character(data[[competing_event_var]])))
+                            if (all(is.na(competing_raw)) || !all(stats::na.omit(competing_raw) %in% c(0, 1))) {
+                                return(list(
+                                    error = paste0(
+                                        "Competing event variable '", competing_event_var,
+                                        "' must be coded 0 (no competing event) / 1 (competing event)."
+                                    ),
+                                    recommendation = "Recode the competing event variable as 0/1 and re-run the analysis."
+                                ))
+                            }
+                            competing_raw[is.na(competing_raw)] <- 0
+                            data$competing_event <- competing_raw
                         }
 
                         # Check if cmprsk package is available (conceptually)
                         # In practice, this would require package installation
-                        cmprsk_available <- FALSE # Placeholder for package availability check
+                        cmprsk_available <- requireNamespace("cmprsk", quietly = TRUE)
 
                         if (!cmprsk_available) {
                             competing_results$package_note <- list(
@@ -22437,6 +23092,96 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # ==================================================================================
 
             # Clinical Decision Support System
+            # Render clinical decision support + publication report as one HTML report
+            .populateClinicalDecisionSupportReport = function(clinical_support, publication_report) {
+                item <- self$results$clinicalDecisionSupportReport
+                if (is.null(item)) {
+                    return()
+                }
+
+                esc <- function(x) {
+                    x <- as.character(x)
+                    x <- gsub("&", "&amp;", x, fixed = TRUE)
+                    x <- gsub("<", "&lt;", x, fixed = TRUE)
+                    gsub(">", "&gt;", x, fixed = TRUE)
+                }
+                bullets <- function(x) {
+                    paste0("<ul style=\"margin-left: 20px;\">", paste0("<li>", esc(x), "</li>", collapse = ""), "</ul>")
+                }
+
+                html <- character(0)
+
+                if (!is.null(publication_report) && is.null(publication_report$error)) {
+                    if (!is.null(publication_report$executive_summary) && nzchar(publication_report$executive_summary)) {
+                        html <- c(html, "<h5>Executive Summary</h5><p>", esc(publication_report$executive_summary), "</p>")
+                    }
+                    if (length(publication_report$key_findings) > 0) {
+                        html <- c(html, "<h5>Key Findings</h5>", bullets(publication_report$key_findings))
+                    }
+                    if (!is.null(publication_report$methods_summary)) {
+                        html <- c(html, "<h5>Methods Summary</h5><p>", esc(publication_report$methods_summary), "</p>")
+                    }
+                }
+
+                guidance <- clinical_support$implementation_guidance
+                if (!is.null(guidance) && is.null(guidance$error)) {
+                    html <- c(html, "<h5>Implementation Guidance</h5>")
+                    if (!is.null(guidance$overall_recommendation)) {
+                        html <- c(
+                            html, "<p><b>Recommendation:</b> ", esc(guidance$overall_recommendation),
+                            " (priority: ", esc(guidance$implementation_priority), ")</p>"
+                        )
+                    }
+                    if (length(guidance$implementation_steps) > 0) {
+                        html <- c(html, "<p><b>Suggested implementation steps</b></p>", bullets(guidance$implementation_steps))
+                    }
+                    if (length(guidance$quality_assurance) > 0) {
+                        html <- c(html, "<p><b>Quality assurance</b></p>", bullets(guidance$quality_assurance))
+                    }
+                }
+
+                strat <- clinical_support$risk_stratification
+                if (!is.null(strat) && is.null(strat$error) && !is.null(strat$statistics)) {
+                    s <- strat$statistics
+                    rate_txt <- if (!is.null(s$reclassification_rate) && is.finite(s$reclassification_rate)) {
+                        sprintf("%.1f%%", s$reclassification_rate * 100)
+                    } else {
+                        "not estimable"
+                    }
+                    html <- c(
+                        html, "<h5>Risk Stratification (tertiles of the Cox risk score)</h5>",
+                        bullets(c(
+                            paste0("Patients classified: ", s$total_patients),
+                            paste0("Moved to a higher risk tertile: ", s$upclassified),
+                            paste0("Moved to a lower risk tertile: ", s$downclassified),
+                            paste0("Unchanged risk tertile: ", s$unchanged),
+                            paste0("Reclassification rate: ", rate_txt)
+                        ))
+                    )
+                }
+
+                alerts <- clinical_support$clinical_alerts
+                if (!is.null(alerts) && is.null(alerts$error) && length(alerts) > 0) {
+                    html <- c(html, "<h5>Clinical Alerts</h5>")
+                    for (a in alerts) {
+                        html <- c(
+                            html, "<p><b>", esc(a$title), "</b> \u{2014} ", esc(a$message),
+                            "<br><i>Recommendation:</i> ", esc(a$recommendation), "</p>"
+                        )
+                    }
+                }
+
+                if (length(html) == 0) {
+                    html <- "<p><i>No clinical decision support output could be generated for this dataset.</i></p>"
+                }
+
+                item$setContent(paste0(
+                    '<div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">',
+                    '<h4 style="margin-top: 0;">Clinical Decision Support and Publication Report</h4>',
+                    paste(html, collapse = ""),
+                    "</div>"
+                ))
+            },
             .performClinicalDecisionSupport = function(data, all_results) {
                 tryCatch(
                     {
@@ -22487,13 +23232,15 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         old_risk_categories <- cut(old_risk,
                             breaks = quantile(old_risk, c(0, 0.33, 0.67, 1), na.rm = TRUE),
                             labels = c("Low", "Moderate", "High"),
-                            include.lowest = TRUE
+                            include.lowest = TRUE,
+                            ordered_result = TRUE
                         )
 
                         new_risk_categories <- cut(new_risk,
                             breaks = quantile(new_risk, c(0, 0.33, 0.67, 1), na.rm = TRUE),
                             labels = c("Low", "Moderate", "High"),
-                            include.lowest = TRUE
+                            include.lowest = TRUE,
+                            ordered_result = TRUE
                         )
 
                         # Cross-tabulate risk categories
@@ -22531,7 +23278,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         alerts <- list()
 
                         # Will Rogers phenomenon alert
-                        if (!is.null(all_results$will_rogers_assessment)) {
+                        if (!is.null(all_results$will_rogers) && length(all_results$will_rogers) > 0) {
                             alerts$will_rogers <- list(
                                 level = "info",
                                 title = "Will Rogers Phenomenon Assessment",
@@ -22556,8 +23303,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Statistical significance vs clinical significance alert
                         if (!is.null(all_results$advanced_metrics)) {
-                            c_diff <- all_results$advanced_metrics$new_cindex - all_results$advanced_metrics$old_cindex
-                            if (c_diff > 0 && c_diff < 0.02) {
+                            c_diff <- all_results$advanced_metrics$c_improvement
+                            if (!is.null(c_diff) && !is.na(c_diff) && c_diff > 0 && c_diff < 0.02) {
                                 alerts$clinical_significance <- list(
                                     level = "info",
                                     title = "Marginal Clinical Improvement",
@@ -22583,9 +23330,12 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Overall recommendation
                         if (!is.null(all_results$advanced_metrics)) {
-                            c_improvement <- all_results$advanced_metrics$new_cindex - all_results$advanced_metrics$old_cindex
+                            c_improvement <- all_results$advanced_metrics$c_improvement
 
-                            if (c_improvement > 0.05) {
+                            if (is.null(c_improvement) || is.na(c_improvement)) {
+                                guidance$overall_recommendation <- "Discrimination comparison unavailable; evidence for adoption could not be graded"
+                                guidance$implementation_priority <- "Undetermined"
+                            } else if (c_improvement > 0.05) {
                                 guidance$overall_recommendation <- "Strong evidence supports adopting the new staging system"
                                 guidance$implementation_priority <- "High"
                             } else if (c_improvement > 0.02) {
@@ -22657,17 +23407,18 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .extractKeyFindings = function(all_results) {
                 findings <- character(0)
 
-                if (!is.null(all_results$basic_results)) {
-                    migration_rate <- all_results$basic_results$overall_migration_rate * 100
+                if (!is.null(all_results$basic_migration)) {
+                    migration_rate <- all_results$basic_migration$migration_rate * 100
                     findings <- c(
                         findings,
                         paste("Overall migration rate:", round(migration_rate, 1), "%")
                     )
                 }
 
-                if (!is.null(all_results$advanced_metrics)) {
-                    c_old <- round(all_results$advanced_metrics$old_cindex, 3)
-                    c_new <- round(all_results$advanced_metrics$new_cindex, 3)
+                if (!is.null(all_results$advanced_metrics$old_concordance) &&
+                    !is.null(all_results$advanced_metrics$new_concordance)) {
+                    c_old <- round(all_results$advanced_metrics$old_concordance$concordance, 3)
+                    c_new <- round(all_results$advanced_metrics$new_concordance$concordance, 3)
                     c_diff <- round(c_new - c_old, 3)
 
                     findings <- c(
@@ -22685,9 +23436,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     {
                         summary_parts <- character(0)
 
-                        if (!is.null(all_results$basic_results)) {
-                            n_patients <- all_results$basic_results$total_patients
-                            migration_rate <- round(all_results$basic_results$overall_migration_rate * 100, 1)
+                        if (!is.null(all_results$basic_migration)) {
+                            n_patients <- all_results$basic_migration$total_patients
+                            migration_rate <- round(all_results$basic_migration$migration_rate * 100, 1)
 
                             summary_parts <- c(
                                 summary_parts,
@@ -22695,8 +23446,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             )
                         }
 
-                        if (!is.null(all_results$advanced_metrics)) {
-                            c_improvement <- round(all_results$advanced_metrics$new_cindex - all_results$advanced_metrics$old_cindex, 3)
+                        if (!is.null(all_results$advanced_metrics$c_improvement) &&
+                            !is.na(all_results$advanced_metrics$c_improvement)) {
+                            c_improvement <- round(all_results$advanced_metrics$c_improvement, 3)
 
                             if (c_improvement > 0.02) {
                                 summary_parts <- c(
@@ -23899,10 +24651,25 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             feature_types[covariate_indices] <- "Covariate"
                         }
 
+                        # Per-feature interaction score: mean absolute correlation between
+                        # this feature's SHAP values and every other feature's SHAP values
+                        # (same pairwise definition used by .performSHAPInteractionAnalysis).
+                        # NA when undefined (single feature, or a constant SHAP column).
+                        interaction_scores <- rep(NA_real_, length(feature_names))
+                        if (length(feature_names) > 1) {
+                            shap_cor <- suppressWarnings(stats::cor(shap_values, use = "pairwise.complete.obs"))
+                            if (is.matrix(shap_cor) && nrow(shap_cor) == length(feature_names)) {
+                                diag(shap_cor) <- NA_real_
+                                interaction_scores <- apply(abs(shap_cor), 2, mean, na.rm = TRUE)
+                                interaction_scores[!is.finite(interaction_scores)] <- NA_real_
+                            }
+                        }
+
                         # Create global importance results
                         global_results <- data.frame(
                             feature = feature_names,
                             mean_abs_shap = mean_abs_shap,
+                            interaction_score = interaction_scores,
                             rank = feature_ranks,
                             direction = feature_directions,
                             type = feature_types,
@@ -24258,7 +25025,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 Feature_Type = row_data$type,
                                 Clinical_Impact = clinical_impact,
                                 Direction = row_data$direction,
-                                Interaction_Score = 0.0, # Placeholder
+                                Interaction_Score = if (!is.null(row_data$interaction_score)) row_data$interaction_score else NA_real_,
                                 Stability = stability
                             ))
                         }
@@ -24330,8 +25097,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         for (i in seq_len(nrow(interactions))) {
                             row_data <- interactions[i, ]
 
-                            # Calculate population frequency (simplified)
-                            population_freq <- runif(1, 10, 90) # Placeholder
+                            # Population frequency of a feature PAIR is not identifiable
+                            # from the SHAP decomposition alone, so emit NA (jamovi renders
+                            # a blank cell) instead of a fabricated number.
 
                             table$addRow(rowKey = paste0("interaction_", i), values = list(
                                 Feature_1 = row_data$feature_1,
@@ -24340,11 +25108,11 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 Interaction_Rank = row_data$rank,
                                 Clinical_Relevance = row_data$clinical_relevance,
                                 Effect_Direction = row_data$effect_direction,
-                                Population_Frequency = population_freq
+                                Population_Frequency = NA_real_
                             ))
                         }
 
-                        table$setNote("interpretation", "Feature interactions ranked by strength. Synergistic interactions amplify effects, antagonistic interactions counteract each other.")
+                        table$setNote("interpretation", "Feature interactions ranked by strength. Synergistic interactions amplify effects, antagonistic interactions counteract each other. Frequency (%) is left blank: the population frequency of a feature pair is not estimable from the SHAP decomposition.")
                     },
                     error = function(e) {
                         table <- self$results$shapInteractions
@@ -28523,12 +29291,16 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         # Validate required variables
-                        time_var <- jmvcore::toB64(self$options$survivalTime)
-                        event_var <- jmvcore::toB64(self$options$event)
-                        stage_var <- jmvcore::toB64(self$options$oldStage)
+                        # `data` here is self$data[all_vars] (see .performAdvancedMigrationAnalysis),
+                        # whose columns carry the RAW variable names - never toB64() names.
+                        time_var <- self$options$survivalTime
+                        event_var <- self$options$event
+                        stage_var <- self$options$oldStage
 
-                        if (!time_var %in% names(data) || !event_var %in% names(data)) {
-                            stop("Time and event variables are required for concordance probability analysis.")
+                        if (is.null(time_var) || is.null(event_var) || is.null(stage_var) ||
+                            !time_var %in% names(data) || !event_var %in% names(data) ||
+                            !stage_var %in% names(data)) {
+                            stop("Time, event and stage variables are required for concordance probability analysis.")
                         }
 
                         # Prepare survival data
@@ -28539,12 +29311,23 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Create survival object
                         surv_obj <- survival::Surv(time = time, event = event)
 
-                        # Remove missing values
-                        complete_cases <- complete.cases(time, event, stage)
+                        # Comparison (new) staging system, used only when stage comparison is requested
+                        new_stage_var <- self$options$newStage
+                        use_new_stage <- isTRUE(self$options$concordanceProbabilityCompareStages) &&
+                            !is.null(new_stage_var) && new_stage_var %in% names(data)
+                        new_stage_raw <- if (use_new_stage) as.factor(data[[new_stage_var]]) else NULL
+
+                        # Remove missing values (both staging systems must be observed when comparing)
+                        complete_cases <- if (use_new_stage) {
+                            complete.cases(time, event, stage, new_stage_raw)
+                        } else {
+                            complete.cases(time, event, stage)
+                        }
                         surv_obj <- surv_obj[complete_cases]
                         stage <- stage[complete_cases]
                         time <- time[complete_cases]
                         event <- event[complete_cases]
+                        new_stage <- if (use_new_stage) droplevels(new_stage_raw[complete_cases]) else NULL
 
 
                         results <- list()
@@ -28604,7 +29387,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         results$overview <- overview_data
 
                         # Concordance probability estimates
-                        concordance_estimates <- private$.calculateConcordanceProbabilities(surv_obj, stage, time, event)
+                        concordance_estimates <- private$.calculateConcordanceProbabilities(surv_obj, stage, time, event, new_stage)
                         private$.populateConcordanceProbabilityEstimates(concordance_estimates)
                         results$estimates <- concordance_estimates
 
@@ -28646,7 +29429,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
                 )
             },
-            .calculateConcordanceProbabilities = function(surv_obj, stage, time, event) {
+            .calculateConcordanceProbabilities = function(surv_obj, stage, time, event, new_stage = NULL) {
                 tryCatch(
                     {
                         results <- list()
@@ -28658,11 +29441,11 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         stage_systems <- list("Current Staging" = stage)
 
                         # If we have a comparison staging system, add it
-                        if (!is.null(self$options$newStage) &&
-                            jmvcore::toB64(self$options$newStage) %in% names(data)) {
-                            new_stage_var <- jmvcore::toB64(self$options$newStage)
-                            new_stage <- as.factor(data[[new_stage_var]][complete.cases(time, event, stage)])
-                            stage_systems[["New Staging"]] <- new_stage
+                        if (!is.null(new_stage) && length(new_stage) == length(stage)) {
+                            new_stage <- droplevels(as.factor(new_stage))
+                            if (nlevels(new_stage) > 1) {
+                                stage_systems[["New Staging"]] <- new_stage
+                            }
                         }
 
                         for (system_name in names(stage_systems)) {
@@ -30117,6 +30900,13 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         old_icc <- old_var_cluster / (old_var_cluster + (pi^2 / 3))
                         new_icc <- new_var_cluster / (new_var_cluster + (pi^2 / 3))
 
+                        # Cluster-adjusted C-index from the mixed-effects linear predictors.
+                        # reverse = TRUE is required for a Surv ~ linear-predictor formula:
+                        # a higher linear predictor means a higher hazard, i.e. shorter survival.
+                        surv_obj_all <- survival::Surv(complete_data[[time_var]], complete_data[[event_var]])
+                        old_cindex <- tryCatch(survival::concordance(surv_obj_all ~ predict(model_old), reverse = TRUE)$concordance, error = function(e) NA_real_)
+                        new_cindex <- tryCatch(survival::concordance(surv_obj_all ~ predict(model_new), reverse = TRUE)$concordance, error = function(e) NA_real_)
+
                         # Overview results
                         overview_results[[1]] <- list(
                             Analysis = "Frailty Models Overview",
@@ -30140,7 +30930,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             BIC = round(old_bic, 1),
                             FrailtyVariance = round(old_var_cluster, 4),
                             HeterogeneityTest = ifelse(old_var_cluster > 0, "Significant", "Non-significant"),
-                            ConcordanceIndex = "TBD",
+                            ConcordanceIndex = old_cindex,
                             Improvement = "Baseline"
                         )
 
@@ -30152,7 +30942,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             BIC = round(new_bic, 1),
                             FrailtyVariance = round(new_var_cluster, 4),
                             HeterogeneityTest = ifelse(new_var_cluster > 0, "Significant", "Non-significant"),
-                            ConcordanceIndex = "TBD",
+                            ConcordanceIndex = new_cindex,
                             Improvement = ifelse(new_aic < old_aic, "Improved", "No improvement")
                         )
 
@@ -30191,15 +30981,48 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 # Calculate cluster-specific metrics
                                 event_rate <- (sum(cluster_data[[event_var]]) / nrow(cluster_data)) * 100
 
+                                # Cluster-specific discrimination: paired C-index comparison within this cluster.
+                                # survival::concordance(fit_old, fit_new) returns the joint covariance of the two
+                                # concordances, so the difference and its (correlated) standard error are exact.
+                                cluster_cindex <- tryCatch(
+                                    {
+                                        cd <- cluster_data
+                                        cd[[old_stage_var]] <- droplevels(cd[[old_stage_var]])
+                                        cd[[new_stage_var]] <- droplevels(cd[[new_stage_var]])
+                                        if (nlevels(cd[[old_stage_var]]) < 2 || nlevels(cd[[new_stage_var]]) < 2 || sum(cd[[event_var]], na.rm = TRUE) < 2) {
+                                            stop("insufficient variation within cluster")
+                                        }
+                                        fit_old <- survival::coxph(as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage_var, "`", sep = "")), data = cd)
+                                        fit_new <- survival::coxph(as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage_var, "`", sep = "")), data = cd)
+                                        cc <- survival::concordance(fit_old, fit_new)
+                                        contrast <- c(-1, 1)
+                                        c_diff <- as.numeric(sum(contrast * cc$concordance))
+                                        c_se <- sqrt(as.numeric(contrast %*% stats::vcov(cc) %*% contrast))
+                                        list(
+                                            old = as.numeric(cc$concordance[1]),
+                                            new = as.numeric(cc$concordance[2]),
+                                            diff = c_diff,
+                                            p = if (is.finite(c_se) && c_se > 0) 2 * stats::pnorm(-abs(c_diff / c_se)) else NA_real_
+                                        )
+                                    },
+                                    error = function(e) list(old = NA_real_, new = NA_real_, diff = NA_real_, p = NA_real_)
+                                )
+
+                                # Cluster random effect (log-hazard scale) from the fitted new-staging frailty model
+                                cluster_effect <- tryCatch(
+                                    as.numeric(coxme::ranef(model_new)[[1]][[as.character(cluster_levels[i])]]),
+                                    error = function(e) NA_real_
+                                )
+
                                 cluster_results[[length(cluster_results) + 1]] <- list(
                                     Cluster = as.character(cluster_levels[i]),
                                     ClusterSize = nrow(cluster_data),
                                     EventRate = round(event_rate, 1),
-                                    OldStaging_Cindex = "TBD",
-                                    NewStaging_Cindex = "TBD",
-                                    CindexImprovement = "TBD",
-                                    PValue = "TBD",
-                                    ClusterEffect = "TBD",
+                                    OldStaging_Cindex = cluster_cindex$old,
+                                    NewStaging_Cindex = cluster_cindex$new,
+                                    CindexImprovement = cluster_cindex$diff,
+                                    PValue = if (is.na(cluster_cindex$p)) "Not estimable" else if (cluster_cindex$p < 0.001) "<0.001" else format(round(cluster_cindex$p, 3), nsmall = 3),
+                                    ClusterEffect = cluster_effect,
                                     Consistency = ifelse(event_rate > 30, "High risk", ifelse(event_rate > 15, "Moderate risk", "Low risk"))
                                 )
                             }
@@ -30365,6 +31188,11 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         model_old <- coxph(surv_formula_old, data = complete_data)
                         model_new <- coxph(surv_formula_new, data = complete_data)
 
+                        # Frailty variance (theta) from the penalized coxph frailty() fits
+                        theta_old <- tryCatch(as.numeric(model_old$history[[1]]$theta), error = function(e) NA_real_)
+                        theta_new <- tryCatch(as.numeric(model_new$history[[1]]$theta), error = function(e) NA_real_)
+                        simplified_theta <- if (all(is.na(c(theta_old, theta_new)))) NA_real_ else mean(c(theta_old, theta_new), na.rm = TRUE)
+
                         # Basic comparison
                         overview_results <- list(list(
                             Analysis = "Simplified Frailty Analysis",
@@ -30372,8 +31200,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ClusterCount = length(unique(complete_data[[cluster_var]])),
                             AverageClusterSize = round(nrow(complete_data) / length(unique(complete_data[[cluster_var]])), 1),
                             TotalObservations = nrow(complete_data),
-                            FrailtyVariance = "See model output",
-                            ICC = "TBD",
+                            FrailtyVariance = simplified_theta,
+                            ICC = simplified_theta / (simplified_theta + (pi^2 / 3)),
                             Interpretation = "Basic frailty analysis completed"
                         ))
 
@@ -30747,6 +31575,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Time-varying analysis if requested
                         if (self$options$clinicalUtilityTimeVarying) {
                             time_points <- c(12, 24, 36, 48, 60, 72)
+                            prev_max_nb <- NULL
 
                             for (tp in time_points) {
                                 if (tp > max(complete_data[[time_var]], na.rm = TRUE)) next
@@ -30755,24 +31584,69 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 events_at_tp <- sum(complete_data[[event_var]] == 1 & complete_data[[time_var]] <= tp)
                                 event_rate_tp <- events_at_tp / nrow(complete_data)
 
-                                # Find optimal threshold (simplified approach)
-                                optimal_threshold <- thresholds[which.max(sapply(thresholds, function(t) {
+                                # Net benefit across the threshold grid at this time point
+                                event_at_tp <- complete_data[[event_var]] == 1 & complete_data[[time_var]] <= tp
+                                nb_at_tp <- sapply(thresholds, function(t) {
                                     high_risk <- risk_probs_new >= t
-                                    tp_val <- sum(high_risk & complete_data[[event_var]] == 1 & complete_data[[time_var]] <= tp)
-                                    fp_val <- sum(high_risk & !(complete_data[[event_var]] == 1 & complete_data[[time_var]] <= tp))
-                                    return((tp_val / nrow(complete_data)) - (fp_val / nrow(complete_data)) * (t / (1 - t)))
-                                }))]
+                                    tp_val <- sum(high_risk & event_at_tp)
+                                    fp_val <- sum(high_risk & !event_at_tp)
+                                    (tp_val / nrow(complete_data)) - (fp_val / nrow(complete_data)) * (t / (1 - t))
+                                })
+                                best_idx <- which.max(nb_at_tp)
+                                if (length(best_idx) == 0) next
+                                optimal_threshold <- thresholds[best_idx]
+                                max_net_benefit <- nb_at_tp[best_idx]
+
+                                # Classification metrics at the optimal threshold, using the
+                                # same definitions as the fixed-time-point comparison above
+                                opt_high_risk <- risk_probs_new >= optimal_threshold
+                                opt_tp <- sum(opt_high_risk & event_at_tp)
+                                opt_fp <- sum(opt_high_risk & !event_at_tp)
+                                opt_tn <- sum(!opt_high_risk & !event_at_tp)
+                                opt_fn <- sum(!opt_high_risk & event_at_tp)
+                                opt_sens <- if ((opt_tp + opt_fn) > 0) opt_tp / (opt_tp + opt_fn) else NA_real_
+                                opt_spec <- if ((opt_tn + opt_fp) > 0) opt_tn / (opt_tn + opt_fp) else NA_real_
+
+                                # Clinical Utility Index and NNT at the optimal threshold.
+                                # Prevalence here is the observed event rate at this time
+                                # point (the value reported in the Prevalence column).
+                                cui_tp <- (opt_sens * event_rate_tp + opt_spec * (1 - event_rate_tp)) * max_net_benefit
+                                arr_tp <- event_rate_tp - event_rate_tp * treatment_effect
+                                nnt_tp <- if (!is.na(opt_sens) && arr_tp > 0 && opt_sens > 0) 1 / (arr_tp * opt_sens) else NA_real_
+
+                                # Trend is the change in maximum net benefit versus the
+                                # previous time point, not a function of the time value
+                                utility_trend <- if (is.null(prev_max_nb)) {
+                                    "Reference"
+                                } else if (max_net_benefit > prev_max_nb + 1e-4) {
+                                    "Increasing"
+                                } else if (max_net_benefit < prev_max_nb - 1e-4) {
+                                    "Decreasing"
+                                } else {
+                                    "Stable"
+                                }
+                                prev_max_nb <- max_net_benefit
+
+                                # Is a model-guided decision worth making at this horizon?
+                                # Compare against treat-all and treat-none at the optimal
+                                # threshold (same net benefit definition used above).
+                                nb_treat_all_tp <- event_rate_tp - (1 - event_rate_tp) * (optimal_threshold / (1 - optimal_threshold))
+                                decision_timing <- if (is.finite(max_net_benefit) && max_net_benefit > max(nb_treat_all_tp, 0)) {
+                                    "Supported decision horizon"
+                                } else {
+                                    "No advantage over treat-all/treat-none"
+                                }
 
                                 timevarying_results[[length(timevarying_results) + 1]] <- list(
                                     TimePoint = tp,
-                                    StagingSystem = "Original Staging",
+                                    StagingSystem = "New Staging",
                                     Prevalence = round(event_rate_tp, 3),
                                     OptimalThreshold = round(optimal_threshold * 100, 1),
-                                    MaxNetBenefit = "TBD",
-                                    ClinicalUtilityIndex = "TBD",
-                                    NNT_Optimal = "TBD",
-                                    UtilityTrend = ifelse(tp <= 36, "Increasing", ifelse(tp <= 60, "Stable", "Decreasing")),
-                                    DecisionTiming = ifelse(tp <= 24, "Early intervention", ifelse(tp <= 60, "Standard timing", "Late intervention"))
+                                    MaxNetBenefit = round(max_net_benefit, 4),
+                                    ClinicalUtilityIndex = round(cui_tp, 3),
+                                    NNT_Optimal = round(nnt_tp, 1),
+                                    UtilityTrend = utility_trend,
+                                    DecisionTiming = decision_timing
                                 )
                             }
                         }

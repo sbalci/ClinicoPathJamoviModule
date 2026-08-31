@@ -121,7 +121,7 @@ options:
       description: 'Number of bootstrap samples for confidence intervals'
 
     - name: useBootstrap
-      title: "Use bootstrap"
+      title: "Bootstrap confidence intervals"
       type: Bool
       default: false
       description: 'Use bootstrap methods for confidence intervals'
@@ -299,7 +299,7 @@ options:
 
     # Imbalance Detection Options
     - name: detectImbalance
-      title: "Detect class imbalance"
+      title: "Class imbalance detection"
       type: Bool
       default: false
       description: 'Automatically detect class imbalance and recommend PRC when appropriate'
@@ -334,7 +334,7 @@ options:
       description: 'Disease prevalence to assume when computing predictive values. Used only when "Use observed prevalence" is unticked - set it to the prevalence of the population the test will actually be used in, which for a screening setting is usually far lower than in a case-control sample.'
 
     - name: useObservedPrevalence
-      title: "Use observed prevalence"
+      title: "Observed prevalence"
       type: Bool
       default: true
       description: 'Compute PPV, NPV and the clinical impact metrics at the prevalence observed in these data (the default). Untick it to assume a different prevalence instead - appropriate when the sample is enriched for cases and does not reflect the population the test will be used in. The prevalence actually used is printed in the results.'

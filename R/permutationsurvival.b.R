@@ -459,23 +459,17 @@ permutationsurvivalClass <- R6::R6Class(
                 return()
             }
 
-            # Create survival plot
-            fit <- survival::survfit(surv ~ group, data = data)
-
-            plot <- survminer::ggsurvplot(
-                fit,
-                data = data,
-                title = "Survival Curves Comparison",
-                xlab = "Time",
-                ylab = "Survival Probability",
-                legend.title = "Group",
-                conf.int = TRUE,
-                ggtheme = ggplot2::theme_minimal(),
-                palette = c("#E7B800", "#2E9FDF", "#00AFBB", "#FC4E07")
-            )
-
+            # Carry only plain columns in the state: a ggsurvplot object drags
+            # its plot_env (megabytes) into every save, and a Surv matrix column
+            # does not survive serialization cleanly. The Surv object, the fit
+            # and the plot are rebuilt in .plotSurvival().
             image <- self$results$survivalPlot
-            image$setState(plot)
+            image$setState(data.frame(
+                time = as.numeric(data$time),
+                event = as.numeric(data$event),
+                group = factor(data$group),
+                stringsAsFactors = FALSE
+            ))
         },
         .createPermutationDistributionPlot = function(results) {
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
@@ -539,10 +533,27 @@ permutationsurvivalClass <- R6::R6Class(
             image$setState(plot)
         },
         .plotSurvival = function(image, ggtheme, theme, ...) {
-            if (is.null(image$state)) {
+            plotData <- image$state
+            if (is.null(plotData)) {
                 return(FALSE)
             }
-            print(image$state)
+
+            plotData$surv <- survival::Surv(plotData$time, plotData$event)
+            fit <- survival::survfit(surv ~ group, data = plotData)
+
+            plot <- survminer::ggsurvplot(
+                fit,
+                data = plotData,
+                title = "Survival Curves Comparison",
+                xlab = "Time",
+                ylab = "Survival Probability",
+                legend.title = "Group",
+                conf.int = TRUE,
+                ggtheme = ggplot2::theme_minimal(),
+                palette = c("#E7B800", "#2E9FDF", "#00AFBB", "#FC4E07")
+            )
+
+            print(plot)
             TRUE
         },
         .plotPermutationDistribution = function(image, ggtheme, theme, ...) {

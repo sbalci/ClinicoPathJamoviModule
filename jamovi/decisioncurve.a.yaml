@@ -119,7 +119,7 @@ options:
             Step size between threshold probabilities.
 
     - name: showTable
-      title: Show Results Table
+      title: Results Table
       type: Bool
       default: true
       description:
@@ -135,7 +135,7 @@ options:
             Comma-separated list of threshold probabilities to display in table.
 
     - name: showPlot
-      title: Show Decision Curve Plot
+      title: Decision Curve Plot
       type: Bool
       default: true
       description:
@@ -158,7 +158,7 @@ options:
             Style of the decision curve plot.
 
     - name: showReferenceLinesLabels
-      title: Show Reference Line Labels
+      title: Reference Line Labels
       type: Bool
       default: false
       description:
@@ -166,7 +166,7 @@ options:
             Show labels for "Treat All" and "Treat None" reference lines.
 
     - name: highlightRange
-      title: Highlight Clinical Range
+      title: Clinical Range Highlight
       type: Bool
       default: false
       description:
@@ -194,7 +194,7 @@ options:
             Maximum threshold for highlighted range.
 
     - name: calculateClinicalImpact
-      title: Calculate Clinical Impact
+      title: Clinical Impact
       type: Bool
       default: false
       description:
@@ -347,7 +347,7 @@ options:
             size at the selected threshold probabilities.
 
     - name: showNetBenefitCI
-      title: Show Net Benefit Confidence Intervals
+      title: Net Benefit Confidence Intervals
       type: Bool
       default: false
       description:

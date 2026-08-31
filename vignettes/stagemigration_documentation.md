@@ -33,9 +33,7 @@ The function spans 40+ statistical methods organized across 25+ analysis modules
 
 | Feature | YAML Argument (.a.yaml) | UI Label | Results Section (.r.yaml) | R Method (.b.R) |
 |---------|------------------------|----------|--------------------------|-----------------|
-| Analysis preset | `clinicalPreset` (List: routine_clinical, research_study, publication_ready, custom) | Clinical Analysis Preset | `migrationOverview` (note) | `.applyClinicalPreset()` |
 | Cancer type | `cancerType` (List: general, lung, breast, colorectal, prostate, headneck, melanoma, other) | Cancer Type (Optional) | `clinicalInterpretation`, `landmarkAnalysisResults` | Cancer-specific thresholds and landmark times |
-| Complexity mode | `complexityMode` (List: quick, standard, comprehensive, custom) | Analysis Complexity Mode | Controls progressive disclosure | TODO: Wire to .b.R |
 | Analysis scope | `analysisType` (List: basic, standard, comprehensive, publication) | Analysis Scope | Controls which modules execute | `.run()` flow control |
 | Confidence level | `confidenceLevel` (Number, 0.80-0.99, default 0.95) | Confidence Level | All CI calculations | `.ciProbs()` |
 | Guided mode | `enableGuidedMode` (Bool) | Guided Analysis Mode | `guidedModeProgress` (Html) | `.generateGuidedModeProgress()` |

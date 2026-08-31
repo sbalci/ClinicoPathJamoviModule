@@ -234,7 +234,7 @@ test_that("bootstrap validation runs", {
 # 6. CLINICAL PRESETS
 # ═══════════════════════════════════════════════════════════════════════
 
-test_that("routine clinical preset works", {
+test_that("runs with default options (was: routine clinical preset)", {
   skip_on_cran()
   df <- make_stage_data()
 
@@ -244,8 +244,7 @@ test_that("routine clinical preset works", {
     newStage = "new_stage",
     survivalTime = "time",
     event = "status",
-    eventLevel = "1",
-    clinicalPreset = "routine_clinical"
+    eventLevel = "1"
   )
 
   expect_true(inherits(result, "jmvcoreClass"))
@@ -398,4 +397,48 @@ test_that("stagemigration runs comprehensive analysis", {
   )
 
   expect_true(inherits(result, "jmvcoreClass"))
+})
+
+test_that("the removed clinical-preset option is gone from the schema", {
+  # clinicalPreset was removed: all four presets were a no-op. .run() called
+  # .applyClinicalPreset(), assigned the returned config to `preset_config`,
+  # message()d two of its fields and never applied any of them to an option --
+  # so "Routine Clinical" and "Publication Manuscript" produced byte-identical
+  # analyses, while the migrationOverview note told the user a preset had been
+  # applied. It also drove a sentence in the copy-ready clinical report that
+  # claimed "Advanced methods included time-dependent ROC analysis, decision
+  # curve analysis..." purely from the preset label, regardless of whether
+  # those analyses had run. That sentence now keys off the real options.
+  # Guard the removal so the dead option cannot quietly return.
+  a_yaml <- readLines(test_path("..", "..", "jamovi", "stagemigration.a.yaml"), warn = FALSE)
+  u_yaml <- readLines(test_path("..", "..", "jamovi", "stagemigration.u.yaml"), warn = FALSE)
+  r_yaml <- readLines(test_path("..", "..", "jamovi", "stagemigration.r.yaml"), warn = FALSE)
+  expect_false(any(grepl("clinicalPreset", a_yaml, fixed = TRUE)))
+  expect_false(any(grepl("clinicalPreset", u_yaml, fixed = TRUE)))
+  expect_false(any(grepl("clinicalPreset", r_yaml, fixed = TRUE)))
+
+  # complexityMode had the same defect and was removed with it: a ComboBox in
+  # the UI that the backend read zero times, while the docs claimed it changed
+  # analysis scope and runtime ("5-10 min" / "1-2 hours").
+  expect_false(any(grepl("complexityMode", a_yaml, fixed = TRUE)))
+  expect_false(any(grepl("complexityMode", u_yaml, fixed = TRUE)))
+
+  # The .b.R must not read it any more either (comments may still mention it).
+  b_src <- readLines(test_path("..", "..", "R", "stagemigration.b.R"), warn = FALSE)
+  code <- b_src[!grepl("^\\s*#", b_src)]
+  expect_false(any(grepl("clinicalPreset", code, fixed = TRUE)))
+  expect_false(any(grepl("applyClinicalPreset", code, fixed = TRUE)))
+
+  # The R wrapper lives in the GENERATED R/stagemigration.h.R, which still
+  # declares the option until someone runs jmvtools::prepare(). Skip rather
+  # than fail while the generated header is stale.
+  h_src <- readLines(test_path("..", "..", "R", "stagemigration.h.R"), warn = FALSE)
+  skip_if(any(grepl("clinicalPreset", h_src, fixed = TRUE)),
+          "R/stagemigration.h.R is stale - run jmvtools::prepare()")
+  expect_error(
+    stagemigration(data = stagemigration_lung_cancer, oldStage = "old_stage",
+                   newStage = "new_stage", survivalTime = "survival_time",
+                   event = "event", eventLevel = "1",
+                   clinicalPreset = "routine_clinical"),
+    "unused argument")
 })

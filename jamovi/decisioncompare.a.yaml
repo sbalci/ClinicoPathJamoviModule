@@ -325,7 +325,7 @@ options:
             name for compatibility with saved analyses.
 
     - name: useOpaCriterion
-      title: Apply minimum OPA criterion
+      title: Minimum OPA criterion
       type: Bool
       default: false
       description:

@@ -1392,7 +1392,6 @@ importFrom(utils,
   combn,
   data,
   head,
-  packageVersion,
   sessionInfo,
   tail
 )

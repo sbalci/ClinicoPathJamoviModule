@@ -8,6 +8,7 @@ items:
     - name:  todo
       title: To Do
       type:  Html
+      visible: (length(explanatory) == 0 || length(outcome) == 0 || length(outcomeLevel) == 0)
       clearWith:
           - explanatory
           - outcome
@@ -37,6 +38,7 @@ items:
     - name:  text
       title: Odds Ratio Table
       type:  Html
+      visible: (length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)
       clearWith:
           - explanatory
           - outcome
@@ -46,6 +48,7 @@ items:
     - name:  text2
       title: Model Performance Metrics
       type:  Html
+      visible: (length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)
       clearWith:
           - explanatory
           - outcome
@@ -61,6 +64,7 @@ items:
       height: 450
       renderFun: .plot
       requiresData: true
+      visible: (length(explanatory) > 0 && length(outcome) > 0 && length(outcomeLevel) > 0)
       clearWith:
           - explanatory
           - outcome
@@ -140,9 +144,9 @@ items:
 
 refs:
     - finalfit
+    - logistf
+    - epiR
     - rms
-    - Hmisc
-    - survival
     - survivaltutorial
     - ClinicoPathJamoviModule
 

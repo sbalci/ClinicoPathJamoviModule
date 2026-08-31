@@ -100,19 +100,9 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 self$results$notices$setContent(paste(blocks, collapse = "\n"))
             },
 
-            # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-            #   [SECURITY/C1-HIGH] FIXED 2026-05-14 - formula now built with jmvcore::composeTerms +
-            #     jmvcore::asFormula (allow-list parse-time guard) at .runLCA (~L642), replacing
-            #     the former stats::as.formula(paste(...)) string-built formula. The old
-            #     .escapeVariableNames helper has been removed; only the asFormula path remains.
-            #   [CLINICAL-SAFETY] add STRONG_WARNING when LCA convergence < ~25% of n_starts in .runLCA
-            #   [CLINICAL-SAFETY] add STRONG_WARNING when total cases < 100 (Hui-Walter assumption)
-            #   [hygiene/notices] custom private$.addNotice parallels jmvcore::Notice - consolidate
-            #   [hygiene/jmvcore] FIXED 2026-05-29 - 9 stop(.()) → jmvcore::reject(.()) migrations at L359/L364/L382/L387/L400/L405/L414/L638/L718
-            #   [hygiene/jmvcore] FIXED - all na.omit() on jamovi-attributed frames migrated to jmvcore::naOmit (L411)
-            #   [statistical-validation] /review-function nogoldstandard - Hui-Walter + Joseph-Gyorkos parity
-            #   [i18n] 95 .() wraps but no .po catalog; bootstrap jamovi/i18n/
-            #   [testing] no tests/testthat/test-nogoldstandard.R
+            # The Preformatted notice accumulator is deliberate: dynamic Notice objects are
+            # not serializable in this result tree. LCA identifiability, small-sample,
+            # conditional-independence and multi-start convergence cautions are regression-tested.
 
             .init = function() {
                 # Reset notices for new analysis

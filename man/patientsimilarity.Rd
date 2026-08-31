@@ -104,8 +104,8 @@ improve visualization quality.}
 \item{showLoadings}{Show how original variables contribute to each
 dimension. Only available for PCA and MDS.}
 
-\item{show3DPlot}{Generate interactive 3D plot using plotly (if
-dimensions=3).}
+\item{show3DPlot}{Show the three pairwise 2D views of a 3D projection (Dim
+1 vs 2, Dim 1 vs 3, Dim 2 vs 3). Requires dimensions = 3.}
 }
 \value{
 A results object containing:

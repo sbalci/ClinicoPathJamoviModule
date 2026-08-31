@@ -1420,10 +1420,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         stuartMaxwellExplanation = function() private$.items[["stuartMaxwellExplanation"]],
         pairwiseKappaTable = function() private$.items[["pairwiseKappaTable"]],
         pairwiseKappaExplanation = function() private$.items[["pairwiseKappaExplanation"]],
-        allPairsKappaHeading = function() private$.items[["allPairsKappaHeading"]],
         allPairsKappaTable = function() private$.items[["allPairsKappaTable"]],
         allPairsKappaExplanation = function() private$.items[["allPairsKappaExplanation"]],
-        itemModalAgreementHeading = function() private$.items[["itemModalAgreementHeading"]],
         itemModalAgreementTable = function() private$.items[["itemModalAgreementTable"]],
         itemModalAgreementExplanation = function() private$.items[["itemModalAgreementExplanation"]],
         hierarchicalHeading = function() private$.items[["hierarchicalHeading"]],
@@ -2178,14 +2176,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showPairwiseKappaGuide)",
                 clearWith=list(
                     "showPairwiseKappaGuide")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="allPairsKappaHeading",
-                title="All-Pairs Cohen's Kappa",
-                visible="(allPairsKappa || showAllPairsKappaGuide)",
-                clearWith=list(
-                    "allPairsKappa",
-                    "showAllPairsKappaGuide")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="allPairsKappaTable",
@@ -2256,14 +2246,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showAllPairsKappaGuide)",
                 clearWith=list(
                     "showAllPairsKappaGuide")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="itemModalAgreementHeading",
-                title="Per-Category Item-Modal Agreement",
-                visible="(itemModalCategoryAgreement || showItemModalGuide)",
-                clearWith=list(
-                    "itemModalCategoryAgreement",
-                    "showItemModalGuide")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="itemModalAgreementTable",
@@ -4495,10 +4477,8 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$stuartMaxwellExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$pairwiseKappaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pairwiseKappaExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$allPairsKappaHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$allPairsKappaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$allPairsKappaExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$itemModalAgreementHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$itemModalAgreementTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$itemModalAgreementExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$hierarchicalHeading} \tab \tab \tab \tab \tab a preformatted \cr

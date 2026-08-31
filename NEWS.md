@@ -1,5 +1,114 @@
 # ClinicoPath News
 
+## Unreleased - `timeinterval` misreported follow-up and person-time (2026-08-30)
+
+- **`timeinterval`: spreadsheet date serials silently produced decade-long follow-up.** A date
+  column exported from Excel as plain numbers (42370, 42371, ...) was auto-detected as `mdy`,
+  which happily split the digits, so a cohort with 12 months of follow-up reported a mean of
+  **792 months and 15843 person-months**. The only warning was that the dates were "in the
+  future". A numeric date column whose values are five digits is now refused before any parser
+  sees it, with a message naming the cause and the fix. Digit width is what actually separates the
+  two encodings: every day-count serial for a realistic year is five digits (1927-06-01 = 10014,
+  2143-06-01 = 88907), while every packed calendar integer is six or eight (`YYYYMMDD`, `YYMMDD`,
+  `MMDDYY`, `DDMMYY`), and those still parse normally. Five-digit values are genuinely ambiguous --
+  `20115` is both a serial and `YMMDD` 2002-01-15 -- so they are refused rather than guessed, since
+  guessing wrong is exactly the silent two-orders-of-magnitude error being prevented. Text and
+  factor columns are never examined, so a stray numeric missing-code such as `99999` among real
+  dates cannot trigger it.
+- **`timeinterval`: landmark analysis re-zeroed the clock without saying so.** The landmark is
+  subtracted from every retained interval, which is correct, but every label still read
+  "follow-up" and "Total person-time". A cohort with 12 months of follow-up and a 6-month
+  landmark reported "mean follow-up 6.0 months", and the copy-ready clinical sentence -- written
+  to be pasted into a manuscript -- said "Follow-up data were available for 30 participants (mean
+  6.0 months)". Every duration is now labelled post-landmark, the completion notice states that
+  the landmark was subtracted, and the pasteable sentence describes the landmark design. **No
+  number changed**; output with no landmark is unchanged.
+- **`timeinterval`: "Flag extreme values" removed rows.** The option deleted intervals above
+  `multiplier x 99th percentile` from every statistic, cutting total person-time by 41% in
+  testing, while the checkbox and the help text promised only flagging. Renamed to "Remove
+  extreme values", the description now says what it does, and a warning fires when rows are
+  actually dropped, because person-time is an incidence-rate denominator.
+- `timeinterval`: a confidence interval for mean follow-up could be reported as
+  `95% CI: -0.04 to 0.12`. The interval is now intersected with `[0, Inf)` -- coverage is
+  unchanged, since a mean duration cannot be negative -- and the computed limit is disclosed in a
+  footnote whenever the clamp fires, because a Wald limit below zero signals that the normal
+  approximation fits these data poorly.
+- `timeinterval`: the CI on the mean no longer requires "Data quality assessment" to be switched
+  on; it is an ordinary descriptive statistic. The Data Quality Options panel is now
+  "Data Quality & Statistics".
+- `timeinterval`: `n = 1` produced no warning at all (the guard read `n < 10 && n > 1`) beside a
+  summary reporting "Standard deviation: NA". It now raises a strong warning.
+- `timeinterval`: when a landmark or the quality filters excluded every observation, the results
+  pane blamed the date format and emitted no message. It now names the actual cause.
+- `timeinterval`: messages render most-severe-first. Previously insertion order put the green
+  "Analysis completed" banner above a strong warning raised later.
+- `timeinterval`: new notices for a single variable selected as both start and end date (every
+  interval is zero, so person-time is zero), for selecting UTC on a date-only format (the setting
+  is inert outside `ymdhms`), and for any interval beyond 50 years. A cohort where 20% or more of
+  intervals are zero-length no longer scores "Overall Quality: Good".
+- `timeinterval`: panels are cleared at the start of each run, so a stale summary no longer
+  lingers beside "Getting Started" after a variable is deselected. Thirteen headings that
+  hardcoded dark text on a translucent panel are now readable in jamovi's dark theme.
+- `timeinterval`: the standardized month is stated as 30.4375 days (= 365.25/12) everywhere; the
+  option title previously said 30.44 while the code and caveats said 30.4375.
+- `rmst`: the generated header was missing `renderFun` for the RMST and tau-sensitivity plots, so
+  neither could render. Resolved by regeneration.
+
+## Unreleased - `survival` / `competingsurvival` numeric-predictor coding (2026-08-30)
+
+- **`survival`: stratified Cox was not stratified.** When a stratification variable was selected the
+  hazard-ratio table was computed from an unstratified model while the output described it as
+  stratified. The model now matches the label, and the proportional-hazards test is run against the
+  model actually shown. Hazard ratios change for any saved analysis that used stratification.
+- **`survival` and `competingsurvival`: a numeric explanatory variable with fewer than 5 distinct
+  values is now treated as a grouping variable throughout.** Both analyses declare `explanatory` as
+  `permitted: [factor]`, and everything they draw is group-based - Kaplan-Meier curves, the log-rank
+  test, cumulative-incidence curves and Gray's test all split on the raw values. Previously
+  `finalfit` applied its own conversion inside the regression only, so the table and the curve beside
+  it could describe the same variable two different ways. The coding is now decided once, in the
+  shared data preparation, and the analysis says which coding it used. Estimates are unchanged for
+  genuine factors and for numeric variables with 5 or more distinct values.
+  This deliberately differs from `oddsratio`, `survivalcont` and `multisurvival`, where the numeric
+  arrives in a slot whose `permitted` really is `numeric` and a linear trend is what was asked for.
+- `competingsurvival`: a continuous predictor's row in the Variable column now reads `Age` rather
+  than `Age: Mean (SD)`, which looked like a level of Age. No estimate changes.
+- `crosstable`: the notice about number-coded categories now states `finalfit`'s rule correctly -
+  it counts missing as a distinct value, so a four-value score with any missing data is treated as
+  continuous there.
+
+## Unreleased - `oddsratio` model-specification repair (2026-08-30)
+
+- **Behaviour change: odds ratios move for low-cardinality numeric predictors.** `finalfit`
+  silently converted any numeric explanatory variable with fewer than 5 distinct values into a
+  factor before fitting, while the Firth path (`logistf`) and the prediction nomogram (`rms::lrm`)
+  fitted the same column linearly. One selection therefore produced up to four different model
+  specifications, and ticking "Firth penalized logistic regression" respecified the model rather
+  than only changing the estimator. Numeric variables are now entered exactly as typed
+  (`cont_cut = 0`), so the odds ratios, AIC and C-statistic reported for such predictors differ
+  from previously saved analyses. To restore level-wise estimates, set the variable's measure type
+  to Nominal or Ordinal. An information notice now names every variable entered as a linear trend
+  and its number of distinct values.
+- A numeric predictor with exactly two distinct values is coerced to a two-level factor. This is
+  the same model either way, so no estimate changes, but the per-level n (%) cross-tab is retained
+  instead of a meaningless "Mean (SD)" summary for a 0/1 marker.
+- **Forest plot data loss fixed.** `finalfit::or_plot()` built its label rows at the default
+  `cont_cut = 5` but fitted its own model on the raw column, so for a low-cardinality numeric the
+  `fit_id` join matched nothing: the plot drew one labelled row per level with no estimate, plus an
+  unlabelled row carrying the only odds ratio. The factorlist is now precomputed to match the fit.
+- The results-table header shows the outcome name as selected ("Dependent: Disease Status") rather
+  than the internally cleaned name ("Dependent: disease_status"). Two notices that named a cleaned
+  variable were corrected the same way.
+- The diagnostic 2x2 is laid out positive-first with the positive row and column marked, so its
+  cells read TP, FP, FN, TN in the same order as the counts printed beneath it, and the panel now
+  states its own denominator alongside the regression's.
+- A numeric predictor entered as a trend now warns when a value is carried by fewer than 5
+  observations, matching the sparse-category warning factors already received.
+- Third-party progress messages from `pROC` and `MASS` (`Setting levels:`, `Setting direction:`,
+  `Waiting for profiling to be done...`) no longer reach the Analysis Notes panel. Substantive
+  warnings, including `glm.fit: fitted probabilities numerically 0 or 1 occurred`, still do.
+- Added `logistf` and `epiR` to the analysis references, and documented that `predictorLevel` is a
+  required argument of the R function (pass `NULL` when no diagnostic predictor is used).
+
 ## Unreleased — `decisioncompare` aligned-population repair (2026-08-27)
 
 - Indeterminate results now remain in full-length, row-aligned recoded vectors. Per-test

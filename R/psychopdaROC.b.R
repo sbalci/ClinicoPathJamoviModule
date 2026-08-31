@@ -1904,32 +1904,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # INITIALIZATION METHOD
       # ============================================================================
 
-      # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-      # Closed by the 1.0.4 release review (2026-08-10); left here so the audit trail is legible:
-      #   [CLINICAL-SAFETY] AUC < 0.5 - DONE. A prominent note on the AUC tables explains that a
-      #     sub-0.5 AUC almost always means the marker is read the wrong way round, and names the
-      #     Classification Direction setting to change. A Notice banner is not reachable from that
-      #     point in the flow, so the note is attached to the table instead.
-      #   [CLINICAL-SAFETY] AUC < 0.7 - DONE via the graded interpretation bands (~L395-L425).
-      #   [CLINICAL-SAFETY] .detectInverted flipping silently - DONE. The primary path
-      #     (.enhancedDelongTest) never flips: it passes the user's direction to pROC and reports
-      #     the honest AUC. The .deLongTest fallback must flip to compare on a common direction, so
-      #     it now RETURNS the flipped names and the render path prints them; the old warning()
-      #     never reached a jamovi user. Measured: a marker read 0.206 in the AUC table and 0.794
-      #     in the DeLong output with nothing on screen to explain it.
-      #   [CLINICAL-SAFETY] DeLong sample-size warning - DONE, in the render path so it covers both
-      #     the pROC path and the fallback; fires below 10 cases in either class.
-      #   [hygiene/jmvcore] bare stop() - DONE, 0 remain (all are jmvcore::reject).
-      #   [statistical-validation] - DONE, /release-review-function psychopdaROC: AUC, CIs and
-      #     cutpoints checked against pROC and cutpointr, and cross-checked against enhancedROC.
-      #   [testing] - DONE, tests/testthat/test-psychopdaROC-release-review.R.
-      # Still open:
-      #   [hygiene/notices] 0 jmvcore::Notice uses in 5,601 LOC. Note that Notice objects are not
-      #     serialisable here (see CLAUDE.md); the HTML-item pattern is the supported route.
-      #   [integration] 158 declared outputs vs 59 setters (2.7x) - verify DeLong/IDI/NRI/
-      #     meta-analysis flag combinations via /check-function-full psychopdaROC
-      #   [i18n] only 26 .() wraps in 5,601 LOC; bootstrap jamovi/i18n/ then /prepare-translation
-      #   [architecture] 5,601 LOC on the edge of unmaintainable - consider per-feature helper files
+      # Maintenance note: keep feature-specific calculations behind private helpers and add
+      # parity coverage before extracting them from this large class. AUC, DeLong, cutpoint,
+      # IDI/NRI and optional-plot paths have dedicated release-review tests.
 
       # Initialize the analysis
       .init = function() {

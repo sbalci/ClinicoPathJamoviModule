@@ -747,9 +747,6 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(paste0(warn, info))
         },
 
-        # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-        #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation kappasizeci
-
         .run = function() {
             # Input validation
             validation_errors <- private$.validateInputs()

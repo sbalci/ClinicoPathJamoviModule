@@ -568,12 +568,12 @@ msgid ""
 "follow-up.{cinote}"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "{count} observation(s) flagged (values: {values})."
+msgstr "{count} gözlem işaretlendi (değerler: {values})."
+
 #: R/reportcat.b.R
 msgid "{count} of these levels have no observations."
-msgstr ""
-
-#: R/summarydata.b.R
-msgid "{count} outlier(s) detected (values: {values})."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -609,6 +609,10 @@ msgid ""
 "depends on the outcome and the context, and cannot be read off R-squared "
 "alone."
 msgstr ""
+
+#: R/summarydata.b.R
+msgid "{level}: {title}: {content}"
+msgstr "{level}: {title}: {content}"
 
 #: R/reportcat.b.R
 msgid "{level}: n = {n}, {percent} of valid cases."
@@ -710,6 +714,10 @@ msgstr ""
 msgid "{response} Rate (%)"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "{title}: {content}"
+msgstr "{title}: {content}"
+
 #: R/nogoldstandard.b.R
 msgid ""
 "{unstable} of {starts} attempted starts failed, reached the iteration limit, "
@@ -719,21 +727,35 @@ msgid ""
 "not report the estimates without additional model checks."
 msgstr ""
 
+#: R/summarydata.b.R
+msgid ""
+"{variable} has {missing} missing values among {total} records ({percent}%); "
+"estimates use the {available} available observations and may not represent "
+"the full dataset. Review the missing-data mechanism before interpretation."
+msgstr "{variable} değişkeninde {total} kaydın {missing} tanesi eksiktir ({percent}%); tahminler mevcut {available} gözlem kullanılarak hesaplanmıştır ve veri kümesinin tamamını temsil etmeyebilir. Yorumlamadan önce eksik veri mekanizmasını inceleyin."
+
 #: R/decisioncombine.b.R
 msgid "{variable} has {n} levels"
 msgstr ""
 
 #: R/summarydata.b.R
 msgid ""
+"{variable} has only {available} non-missing observation(s); descriptive "
+"estimates are unstable, normality cannot be assessed, and the output should "
+"not be used for clinical inference."
+msgstr "{variable} değişkeninde yalnızca {available} eksik olmayan gözlem vardır; tanımlayıcı tahminler kararsızdır, normallik değerlendirilemez ve çıktı klinik çıkarım için kullanılmamalıdır."
+
+#: R/summarydata.b.R
+msgid ""
 "{variable} was excluded from the summary because every value in it is "
 "missing. Check the import and any active row filter for this column."
-msgstr ""
+msgstr "{variable} değişkenindeki tüm değerler eksik olduğu için değişken özetten çıkarıldı. Bu sütun için veri aktarımını ve etkin satır filtrelerini kontrol edin."
 
 #: R/summarydata.b.R
 msgid ""
 "{variable} was excluded from the summary because it is not a numeric column. "
 "Change its measure type to continuous, or remove it from the Variables list."
-msgstr ""
+msgstr "{variable} sayısal bir sütun olmadığı için özetten çıkarıldı. Ölçüm türünü sürekli olarak değiştirin veya değişkeni Değişkenler listesinden kaldırın."
 
 #: ggprism/options/pvalue_format/stars.title
 msgid "*** / ** / *"
@@ -2154,19 +2176,25 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "<br><em>Distribution diagnostics for {variable}:</em> {assessment}"
-msgstr ""
+msgstr "<br><em>{variable} için dağılım tanıları:</em> {assessment}"
 
 #: R/summarydata.b.R
 msgid ""
 "<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value "
 "&lt; 0.001; skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"
-msgstr ""
+msgstr "<br><em>{variable} için dağılım tanıları:</em> Shapiro-Wilk p-değeri &lt; 0.001; çarpıklık = {skewness}; basıklık = {kurtosis}. {assessment}"
 
 #: R/summarydata.b.R
 msgid ""
 "<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value = "
 "{p}; skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"
-msgstr ""
+msgstr "<br><em>{variable} için dağılım tanıları:</em> Shapiro-Wilk p-değeri = {p}; çarpıklık = {skewness}; basıklık = {kurtosis}. {assessment}"
+
+#: R/summarydata.b.R
+msgid ""
+"<br><em>Distribution diagnostics for {variable}:</em> skewness = {skewness}; "
+"kurtosis = {kurtosis}. {assessment}"
+msgstr "<br><em>{variable} için dağılım tanıları:</em> çarpıklık = {skewness}; basıklık = {kurtosis}. {assessment}"
 
 #: R/jjwithinstats.b.R
 msgid "<br><hr>"
@@ -3194,6 +3222,10 @@ msgid ""
 "%s), suggesting it may be a hub or central player.</p>"
 msgstr ""
 
+#: R/swimmerplot.b.R
+msgid "<p><strong>Error:</strong> {message}</p>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid ""
 "<p><strong>Grouping:</strong> %d nodes were categorized into %d distinct "
@@ -3539,14 +3571,14 @@ msgstr ""
 msgid ""
 "<strong>{variable}</strong> (N = {n}, missing = {missing}): Mean {mean} (SD "
 "{sd}). Median: {median} (minimum: {minimum}; maximum: {maximum})."
-msgstr ""
+msgstr "<strong>{variable}</strong> (N = {n}, eksik = {missing}): Ortalama {mean} (SS {sd}). Medyan: {median} (minimum: {minimum}; maksimum: {maximum})."
 
 #: R/summarydata.b.R
 msgid ""
 "<strong>{variable}</strong> (N = {n}, missing = {missing}): Mean {mean} (SD "
 "not defined for a single observation). Median: {median} (minimum: {minimum}; "
 "maximum: {maximum})."
-msgstr ""
+msgstr "<strong>{variable}</strong> (N = {n}, eksik = {missing}): Ortalama {mean} (tek bir gözlem için SS tanımsızdır). Medyan: {median} (minimum: {minimum}; maksimum: {maximum})."
 
 #: R/jjwithinstats.b.R
 msgid "<strong>Analysis:</strong> %s with %d measurements per subject"
@@ -4335,6 +4367,14 @@ msgstr ""
 msgid "3D"
 msgstr ""
 
+#: patientsimilarity/options/show3DPlot.title
+msgid "3D Pairwise Projection Views"
+msgstr ""
+
+#: patientsimilarity/results/projection3D.title
+msgid "3D Projection - Pairwise Views"
+msgstr ""
+
 #: roc2d/options/plot_2d_roc_surface.title
 #: trichotomousroc/results/surface3DPlot.title
 #: vusanalysis/results/surface3DPlot.title
@@ -4798,6 +4838,7 @@ msgstr ""
 #: stagemigration/results/concordanceComparison.columns.title
 #: stagemigration/results/nriResults.columns.title
 #: stagemigration/results/idiResults.columns.title
+#: stagemigration/results/idiComponents.columns.title
 #: stagemigration/results/multifactorialResults.columns.title
 #: stagemigration/results/adjustedCIndexComparison.columns.title
 #: stagemigration/results/integratedAUCAnalysis.columns.title
@@ -4960,6 +5001,7 @@ msgstr ""
 #: stagemigration/results/concordanceComparison.columns.title
 #: stagemigration/results/nriResults.columns.title
 #: stagemigration/results/idiResults.columns.title
+#: stagemigration/results/idiComponents.columns.title
 #: stagemigration/results/multifactorialResults.columns.title
 #: stagemigration/results/adjustedCIndexComparison.columns.title
 #: stagemigration/results/integratedAUCAnalysis.columns.title
@@ -5226,10 +5268,6 @@ msgid ""
 "LR+, LR-, the diagnostic odds ratio and their confidence intervals only; "
 "sensitivity, specificity, PPV and NPV on the same rows use the observed "
 "counts."
-msgstr ""
-
-#: R/summarydata.b.R
-msgid "A high missing-data rate may affect interpretation."
 msgstr ""
 
 #: R/survival.b.R
@@ -5827,7 +5865,7 @@ msgstr ""
 #: venn/results/aboutAnalysis.title
 #: waterfall/results/aboutAnalysis.title
 msgid "About This Analysis"
-msgstr ""
+msgstr "Bu Analiz Hakkında"
 
 #: agreement/options/showAbout.title
 #: checkdata/options/showAbout.title
@@ -7408,7 +7446,7 @@ msgstr ""
 
 #: summarydata/ui[2].label
 msgid "Additional Outputs"
-msgstr ""
+msgstr "Ek Çıktılar"
 
 #: referenceintervals/options/additional_factors.title
 #: referenceintervals/ui[0][4].label
@@ -9377,6 +9415,10 @@ msgstr ""
 msgid "Agreement Statistics (Cohen's Kappa)"
 msgstr ""
 
+#: agreement/options/agreementSampleSize.title
+msgid "Agreement study sample size"
+msgstr ""
+
 #: pathagreement/options/agreementTrendAnalysis.title
 #: pathagreement/results/agreementTrendTable.title
 msgid "Agreement Trend Analysis"
@@ -9970,6 +10012,10 @@ msgstr ""
 msgid "All Zero Counts"
 msgstr ""
 
+#: agreement/options/specificAllCategories.title
+msgid "All-category estimates"
+msgstr ""
+
 #: advancedtrials/options/biomarker_strategy/all_comers.title
 msgid "All-Comers Design"
 msgstr ""
@@ -9994,10 +10040,6 @@ msgstr ""
 #: package/analyses/comprehensiveSurvivalPower.menuSubtitle
 #: comprehensiveSurvivalPower/options.menuSubtitle
 msgid "All-in-one expert tool - All methods & study types"
-msgstr ""
-
-#: agreement/results/allPairsKappaHeading.title
-msgid "All-Pairs Cohen's Kappa"
 msgstr ""
 
 #: agreement/options/allPairsKappa.title
@@ -10596,10 +10638,6 @@ msgid ""
 "quantity."
 msgstr ""
 
-#: stagemigration/options/complexityMode.title
-msgid "Analysis Complexity Mode"
-msgstr ""
-
 #: stagemigration/results/competingRisksSummary.columns.title
 #: stagemigration/results/multiStateSummary.columns.title
 #: stagemigration/results/forestStagingComparisonTable.columns.title
@@ -10822,10 +10860,6 @@ msgstr ""
 msgid "Analysis Method Details"
 msgstr ""
 
-#: stagemigration/ui[1][0].label
-msgid "Analysis Mode"
-msgstr ""
-
 #: R/advancedraincloud.b.R
 #: R/lassocox.b.R
 #: advancedraincloud/results/analysisNotes.title
@@ -10842,7 +10876,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Analysis of {nvars} continuous variable(s) from {nobs} records"
-msgstr ""
+msgstr "{nobs} kayıttaki {nvars} sürekli değişkenin analizi"
 
 #: R/survivalcont.b.R
 msgid "Analysis of {variable} could not determine hazard ratio."
@@ -11310,7 +11344,7 @@ msgstr ""
 #: simpleSurvivalPower/options/analysis_type.title
 #: simpleSurvivalPower/results/power_summary.columns.title
 #: singlearm/ui[2][1].label
-#: stagemigration/ui[1][2][0]/analysisType.label
+#: stagemigration/ui[1][1][0]/analysisType.label
 #: stagemigration/ui[9][5]/shapAnalysisType.label
 #: stagemigration/results/concordanceProbabilityRobustness.columns.title
 #: stagemigration/results/winRatioSensitivityResults.columns.title
@@ -12036,10 +12070,6 @@ msgstr ""
 msgid "Apply left-alignment typical of Economist style."
 msgstr ""
 
-#: psychopdaROC/options/smoothing.title
-msgid "Apply LOESS smoothing"
-msgstr ""
-
 #: jjoncoplot/options/log10TransformTMB.description.jamovi
 msgid ""
 "Apply log10 transformation to TMB values (recommended for datasets with "
@@ -12054,10 +12084,6 @@ msgstr ""
 
 #: jsjplot/options/transform_axis.description.jamovi
 msgid "Apply mathematical transformation to axis."
-msgstr ""
-
-#: decisioncompare/options/useOpaCriterion.title
-msgid "Apply minimum OPA criterion"
 msgstr ""
 
 #: stagemigration/options/useOptimismCorrection.title
@@ -13548,6 +13574,14 @@ msgstr ""
 msgid "Automatic by Variable Type"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Automatic detection - first match ({language})"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Automatic detection ({language})"
+msgstr ""
+
 #: datevalidator/options/correction_method/datefixr.title
 msgid "Automatic Detection (datefixR)"
 msgstr ""
@@ -13588,6 +13622,10 @@ msgstr ""
 #: package/analyses/esquisseauto.menuSubtitle
 #: esquisseauto/options.menuSubtitle
 msgid "Automatic plot selection using esquisse"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Automatic Predictor Level Detection"
 msgstr ""
 
 #: treeadvanced/options/auto_prune.title
@@ -13809,7 +13847,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Average missing data: {pct}%"
-msgstr ""
+msgstr "Ortalama eksik veri: {pct}%"
 
 #: decisioncurve/results/weightedAUCTable.columns.title
 msgid "Average Net Benefit"
@@ -13857,7 +13895,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Average value of all observations. Sensitive to outliers."
-msgstr ""
+msgstr "Tüm gözlemlerin ortalama değeri. Aykırı değerlerden etkilenir."
 
 #: jjwithinstats/options/centralityplotting.title
 msgid "Average values"
@@ -14469,6 +14507,13 @@ msgstr ""
 #: costeffectiveness/results/sensitivityAnalysis.columns.title
 #: decisiongraph/results/sensitivityTable.columns.title
 msgid "Base Value"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Based on {n} observations with both the outcome and this predictor recorded; "
+"the regression model above uses {nmodel} rows. The two sets need not be the "
+"same patients."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -16512,7 +16557,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Biomarker characterization studies"
-msgstr ""
+msgstr "Biyobelirteç karakterizasyon çalışmaları"
 
 #: R/venn.b.R
 msgid "Biomarker co-expression patterns"
@@ -16583,7 +16628,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Biomarker distribution assessment"
-msgstr ""
+msgstr "Biyobelirteç dağılımının değerlendirilmesi"
 
 #: biomarkerdiscovery/results/biomarker_distribution_plot.title
 msgid "Biomarker Distribution by Outcome"
@@ -17351,6 +17396,8 @@ msgstr ""
 
 #: agreement/options/bootstrap.title
 #: agreement/options/bootstrapCI.title
+#: decisioncurve/ui[7][0]/confidenceIntervals.label
+#: enhancedROC/options/useBootstrap.title
 #: psychopdaROC/options/bootstrapCI.title
 #: psychopdaROC/ui[8][1]/bootstrapCI.label
 msgid "Bootstrap confidence intervals"
@@ -17838,6 +17885,12 @@ msgstr ""
 
 #: jjtreemap/options/borderWidth.title
 msgid "Border Width"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Borderline events-per-variable (EPV ≈ {epv}). Interpret odds ratios with "
+"caution."
 msgstr ""
 
 #: jjtreemap/ui[1][1].label
@@ -18674,6 +18727,7 @@ msgstr ""
 #: spatialbayesiansurvival/results/spatialValidation.columns.title
 #: stagemigration/results/concordanceComparison.columns.title
 #: stagemigration/results/multifactorialResults.columns.title
+#: stagemigration/results/multifactorialModelDiagnostics.columns.title
 #: stagemigration/results/forestModelPerformance.columns.title
 #: survivalbart/results/crossValidationResults.columns.title
 msgid "C-Index"
@@ -18928,16 +18982,8 @@ msgstr ""
 msgid "Calculate calibration slope, intercept, and calibration-in-the-large"
 msgstr ""
 
-#: decisioncurve/ui[7][0]/confidenceIntervals.label
-msgid "Calculate CIs"
-msgstr ""
-
 #: effectsize/options/measures_cliff_delta.description
 msgid "Calculate Cliff's delta for ordinal data"
-msgstr ""
-
-#: decisioncurve/options/calculateClinicalImpact.title
-msgid "Calculate Clinical Impact"
 msgstr ""
 
 #: enhancedROC/options/clinicalImpact.description
@@ -19112,16 +19158,8 @@ msgstr ""
 msgid "Calculate Expected Values"
 msgstr ""
 
-#: agreement/options/finn.title
-msgid "Calculate Finn coefficient (variance-based agreement)"
-msgstr ""
-
 #: jiwillsurvive/options/derive_followup.description.jamovi
 msgid "Calculate follow-up time from start and end dates."
-msgstr ""
-
-#: agreement/options/specificAllCategories.title
-msgid "Calculate for all categories"
 msgstr ""
 
 #: effectsize/options/measures_glass_delta.description
@@ -19130,10 +19168,6 @@ msgstr ""
 
 #: concordanceindex/options/goodman_kruskal_gamma.title
 msgid "Calculate Goodman-Kruskal Gamma"
-msgstr ""
-
-#: agreement/options/gwet.title
-msgid "Calculate Gwet's AC1/AC2"
 msgstr ""
 
 #: ihcbasic/options/computeHScore.title
@@ -19152,20 +19186,12 @@ msgstr ""
 msgid "Calculate Hedges' g effect size (bias-corrected)"
 msgstr ""
 
-#: agreement/options/icc.title
-msgid "Calculate ICC (continuous data)"
-msgstr ""
-
 #: costeffectiveness/options/calculate_icer.title
 msgid "Calculate ICER"
 msgstr ""
 
 #: multiplexanalysis/options/immune_contexture.title
 msgid "Calculate Immune Contexture Score"
-msgstr ""
-
-#: decisioncurve/ui[6][0]/calculateClinicalImpact.label
-msgid "Calculate impact metrics"
 msgstr ""
 
 #: bayesdca/options/calculateIC.title
@@ -19208,24 +19234,8 @@ msgstr ""
 msgid "Calculate Intracluster Correlation"
 msgstr ""
 
-#: agreement/options/iota.title
-msgid "Calculate iota coefficient (multivariate agreement)"
-msgstr ""
-
-#: agreement/options/kendallW.title
-msgid "Calculate Kendall's W (concordance for rankings)"
-msgstr ""
-
 #: entropyanalysis/options/calculate_kl_divergence.title
 msgid "Calculate KL Divergence"
-msgstr ""
-
-#: agreement/options/kripp.title
-msgid "Calculate Krippendorff's alpha"
-msgstr ""
-
-#: agreement/options/lightKappa.title
-msgid "Calculate light's kappa (3+ raters)"
 msgstr ""
 
 #: methodcomparison/options/concordance_correlation.description
@@ -19250,14 +19260,6 @@ msgstr ""
 
 #: ihccluster/ui[3]/calculateRatios.label
 msgid "Calculate marker ratios (e.g., CD4/CD8)"
-msgstr ""
-
-#: agreement/options/meanPearson.title
-msgid "Calculate mean Pearson correlation (linear association)"
-msgstr ""
-
-#: agreement/options/meanSpearman.title
-msgid "Calculate mean Spearman rho (average rank correlation)"
 msgstr ""
 
 #: multiclassroc/options/calculate_micro_auc.title
@@ -19350,14 +19352,6 @@ msgstr ""
 
 #: venn/options/calculateOverlap.description.jamovi
 msgid "Calculate overlap intersections."
-msgstr ""
-
-#: agreement/options/pabak.title
-msgid "Calculate PABAK & prevalence/Bias indices"
-msgstr ""
-
-#: agreement/options/pairwiseKappa.title
-msgid "Calculate pairwise kappa (vs reference)"
 msgstr ""
 
 #: enhancedROC/options/partialAuc.description
@@ -19506,10 +19500,6 @@ msgstr ""
 msgid "Calculate RMST Metrics"
 msgstr ""
 
-#: agreement/options/robinsonA.title
-msgid "Calculate Robinson's A (ordinal agreement index)"
-msgstr ""
-
 #: enhancedROC/options/convexHull.description
 msgid "Calculate ROC convex hull (optimal achievable performance)"
 msgstr ""
@@ -19517,10 +19507,6 @@ msgstr ""
 #: simpleSurvivalPower/options/analysis_type/sample_size.title
 #: survivalPower/options/analysis_type/sample_size.title
 msgid "Calculate Sample Size"
-msgstr ""
-
-#: agreement/options/agreementSampleSize.title
-msgid "Calculate sample size for agreement study"
 msgstr ""
 
 #: package/analyses/samplingerror.menuSubtitle
@@ -20141,7 +20127,7 @@ msgstr ""
 msgid "Cancer Staging System"
 msgstr ""
 
-#: stagemigration/ui[1][1][0]/cancerType.label
+#: stagemigration/ui[1][0][0]/cancerType.label
 msgid "Cancer Type"
 msgstr ""
 
@@ -20280,6 +20266,10 @@ msgstr ""
 #: ihcdiagnostic/results/differentialResults.columns.title
 #: tumorbudding/results/perCaseTable.columns.title
 msgid "Case"
+msgstr ""
+
+#: agreement/options/loaVariable.title
+msgid "Case agreement categorization"
 msgstr ""
 
 #: agreement/results/caseClusterTable.title
@@ -22053,6 +22043,10 @@ msgid ""
 "with a false negative"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Check that the positive outcome level is correct for your study"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "Check that the variable name is correct in your dataset"
 msgstr ""
@@ -22362,15 +22356,6 @@ msgid ""
 "Choose a preset optimized for your data type. Each preset automatically "
 "configures  statistical methods and display options appropriate for that "
 "clinical context."
-msgstr ""
-
-#: stagemigration/options/clinicalPreset.description
-msgid ""
-"Choose a preset tailored to your clinical workflow. 'Routine Clinical' "
-"provides essential  validation metrics for daily practice. 'Research Study' "
-"adds advanced statistics for  academic research. 'Publication Ready' "
-"includes all methods and visualizations for manuscripts. Choose 'Custom' to "
-"manually configure all options."
 msgstr ""
 
 #: jjsegmentedtotalbar/ui[3][0][1].label
@@ -23221,6 +23206,10 @@ msgstr ""
 msgid "Class Imbalance Detection"
 msgstr ""
 
+#: enhancedROC/options/detectImbalance.title
+msgid "Class imbalance detection"
+msgstr ""
+
 #: enhancedROC/results/results/imbalanceMetrics.title
 msgid "Class Imbalance Metrics"
 msgstr ""
@@ -23670,7 +23659,6 @@ msgstr ""
 #: jjpiestats/options/clinicalpreset.title
 #: jjsegmentedtotalbar/options/analysis_preset.title
 #: jjwithinstats/options/clinicalpreset.title
-#: stagemigration/options/clinicalPreset.title
 msgid "Clinical Analysis Preset"
 msgstr ""
 
@@ -23754,7 +23742,7 @@ msgstr ""
 #: R/reportcat.b.R
 #: R/summarydata.b.R
 msgid "Clinical Applications"
-msgstr ""
+msgstr "Klinik Uygulamalar"
 
 #: pcaloadingtest/results/clinicalGuide.title
 msgid "Clinical Applications & Interpretation Guide"
@@ -23851,7 +23839,7 @@ msgstr ""
 #: pathologyagreement/ui[1][0][0].label
 #: pathsampling/ui[2][0][0].label
 #: segmentationmetrics/ui/clinicalContext.label
-#: stagemigration/ui[1][1].label
+#: stagemigration/ui[1][0].label
 #: treeadvanced/ui[4].label
 #: treemedical/ui[3].label
 #: trichotomousroc/options/clinical_context.title
@@ -24007,6 +23995,10 @@ msgstr ""
 msgid "Clinical Decision Rule"
 msgstr ""
 
+#: decisioncurve/ui[1][1][0]/clinicalDecisionRule.label
+msgid "Clinical decision rule"
+msgstr ""
+
 #: decisioncurve/options/decisionRuleVar.title
 msgid "Clinical Decision Rule (binary)"
 msgstr ""
@@ -24041,6 +24033,10 @@ msgstr ""
 #: treeensemble/options.menuSubgroup
 #: treemedical/options.menuSubgroup
 msgid "Clinical Decision Support"
+msgstr ""
+
+#: stagemigration/results/clinicalDecisionSupportReport.title
+msgid "Clinical Decision Support and Publication Report"
 msgstr ""
 
 #: digitalvalidation/options/decision_threshold1.title
@@ -24212,8 +24208,9 @@ msgstr ""
 
 #: biomarkerdiscovery/results/decision_curve_results.columns.title
 #: clinicalvalidationinteractive/results/clinicalGuidelines.columns.title
+#: decisioncurve/options/calculateClinicalImpact.title
 #: decisioncurve/ui[6].label
-#: enhancedROC/ui[9].label
+#: enhancedROC/ui[11].label
 #: ihcheterogeneity/results/samplingbiastable.columns.title
 #: imagingcorrelation/results/concordanceTable.columns.title
 #: labinterpret/results/medicationEffectsTable.columns.title
@@ -24247,6 +24244,10 @@ msgstr ""
 #: enhancedROC/results/results/clinicalImpactTable.title
 #: survivalmodelvalidation/options/clinical_impact_metrics.title
 msgid "Clinical Impact Metrics"
+msgstr ""
+
+#: decisioncurve/ui[6][0]/calculateClinicalImpact.label
+msgid "Clinical impact metrics"
 msgstr ""
 
 #: trichotomousroc/results/clinicalImpactTable.title
@@ -24559,7 +24560,7 @@ msgstr ""
 #: stagemigration/options/showClinicalInterpretation.title
 #: treatmentoptim/options/clinical_interpretation.title
 msgid "Clinical Interpretation Guide"
-msgstr ""
+msgstr "Klinik Yorumlama Rehberi"
 
 #: decision/options/showClinicalInterpretation.title
 #: decision/ui[4]/showClinicalInterpretation.label
@@ -24674,7 +24675,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Clinical Note"
-msgstr ""
+msgstr "Klinik Not"
 
 #: progressionsurvival/results/progression_patterns.columns.title
 #: treatmentoptim/results/doseOptimization.columns.title
@@ -24766,7 +24767,6 @@ msgstr ""
 #: jviolin/options/clinicalPreset.title
 #: modelbuilder/options/clinicalPreset.title
 #: riverplot/options/clinicalPreset.title
-#: stagemigration/ui[1][2][0]/clinicalPreset.label
 msgid "Clinical Preset"
 msgstr ""
 
@@ -24830,6 +24830,14 @@ msgstr ""
 
 #: likelihoodratio/options/prevalenceRange/clinical.title
 msgid "Clinical range (5 percent to 50 percent)"
+msgstr ""
+
+#: decisioncurve/options/highlightRange.title
+msgid "Clinical Range Highlight"
+msgstr ""
+
+#: decisioncurve/ui[3][0]/highlightRange.label
+msgid "Clinical range highlight"
 msgstr ""
 
 #: adaptivetrialdesign/results/dmbRecommendations.columns.title
@@ -25688,7 +25696,7 @@ msgstr ""
 #: toolssummary/options.menuSubgroup
 #: treatmenteffects/options.menuSubgroup
 msgid "ClinicoPath Descriptives"
-msgstr ""
+msgstr "ClinicoPath Tanımlayıcı İstatistikler"
 
 #: package/analyses/continuousrelationship.menuSubgroup
 #: continuousrelationship/options.menuSubgroup
@@ -27327,6 +27335,12 @@ msgstr ""
 msgid ""
 "Column '{column}' contains only missing values; cannot calculate time "
 "intervals."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Column '{column}' holds five-digit numbers such as {value}, which cannot be "
+"read as dates unambiguously."
 msgstr ""
 
 #: ihccluster/options/heatmapScale/column.title
@@ -29191,10 +29205,6 @@ msgstr ""
 msgid "Complexity metrics for factor variables including entropy and diversity"
 msgstr ""
 
-#: stagemigration/ui[1][0][0]/complexityMode.label
-msgid "Complexity Mode"
-msgstr ""
-
 #: rpasurvival/options/cp.title
 #: rpasurvival/ui[1][0][3].label
 msgid "Complexity Parameter"
@@ -29471,10 +29481,6 @@ msgstr ""
 #: spatialautocorrelation/options/autocorr_method/comprehensive.title
 #: stagemigration/options/shapAnalysisType/comprehensive.title
 msgid "Comprehensive Analysis"
-msgstr ""
-
-#: stagemigration/options/complexityMode/comprehensive.title
-msgid "Comprehensive Analysis (1-2 hours)"
 msgstr ""
 
 #: stagemigration/options/analysisType/comprehensive.title
@@ -30187,7 +30193,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Comprehensive statistics for numeric variables"
-msgstr ""
+msgstr "Sayısal değişkenler için kapsamlı istatistikler"
 
 #: causespecifichazards/results/model_summary.description
 msgid "Comprehensive summary and interpretation of cause-specific hazards analysis"
@@ -30340,10 +30346,6 @@ msgstr ""
 
 #: R/lassocox.b.R
 msgid "Comprehensive visualizations"
-msgstr ""
-
-#: stagemigration/ui[1][0][0][3].label
-msgid "Comprehensive: + Bootstrap, ROC, DCA (30+ min)"
 msgstr ""
 
 #: dynamicprediction/results/modelComparison.columns.title
@@ -31127,6 +31129,7 @@ msgstr "Güven Aralığı Türü"
 msgid "Confidence Intervals"
 msgstr ""
 
+#: agreement/options/specificConfidenceIntervals.title
 #: contTables/options/ci.title
 #: enhancedcorrelation/options/ci.title
 #: enhancedcorrelation/ui[1][1]/ci.label
@@ -31453,7 +31456,7 @@ msgstr ""
 msgid "Confidence level (%)"
 msgstr ""
 
-#: stagemigration/ui[1][1][0]/confidenceLevel.label
+#: stagemigration/ui[1][0][0]/confidenceLevel.label
 #: stagemigration/ui[6][3][0]/cifConfidenceLevel.label
 msgid "Confidence Level (%)"
 msgstr ""
@@ -32092,7 +32095,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Consider data transformations if distributions are highly skewed"
-msgstr ""
+msgstr "Dağılımlar ileri derecede çarpıksa veri dönüşümlerini değerlendirin"
 
 #: R/riverplot.b.R
 msgid "Consider developing standardized protocols for this dominant care pathway."
@@ -32308,6 +32311,10 @@ msgstr ""
 msgid "Contingency Table Analysis"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Contingency Table:"
+msgstr ""
+
 #: package/analyses/contTables.title
 #: contTables/options.title
 #: contTables/ui.title
@@ -32404,7 +32411,7 @@ msgstr ""
 #: summarydata/results/text1.title
 #: summarydata2/results/text1.title
 msgid "Continuous Data Plots"
-msgstr ""
+msgstr "Sürekli Veri Grafikleri"
 
 #: gsdesign/ui[4].label
 msgid "Continuous Endpoint"
@@ -32912,15 +32919,6 @@ msgstr ""
 msgid "Controls tree pruning - lower values create more complex trees."
 msgstr ""
 
-#: stagemigration/options/complexityMode.description
-msgid ""
-"Controls UI complexity and feature availability. Quick mode shows essential "
-"outputs only (migration matrix, C-index, simple recommendation). Standard "
-"adds common validation metrics (NRI, survival curves, Will Rogers). "
-"Comprehensive enables all methods (bootstrap, ROC, DCA). Custom allows "
-"manual control of all options."
-msgstr ""
-
 #: spatialanalysis/ui[2][2].label
 msgid ""
 "Controls which analyses are included (basic: core stats only, comprehensive: "
@@ -33095,12 +33093,6 @@ msgstr ""
 msgid "Copy the text above and modify as needed for your manuscript or report."
 msgstr ""
 
-#: R/summarydata.b.R
-msgid ""
-"Copy the text above for use in clinical reports, research manuscripts, or "
-"medical documentation."
-msgstr ""
-
 #: R/reportcat.b.R
 msgid "Copy these sentences directly into clinical reports or manuscripts."
 msgstr ""
@@ -33128,10 +33120,8 @@ msgid "Copy-ready clinical report sentences for publications and reports"
 msgstr ""
 
 #: R/reportcat.b.R
-#: R/summarydata.b.R
 #: reportcat/results/reportSentences.title
 #: stagemigration/results/copyReadyReport.title
-#: summarydata/results/reportSentences.title
 #: venn/results/reportSentences.title
 msgid "Copy-Ready Clinical Summary"
 msgstr ""
@@ -33260,6 +33250,13 @@ msgstr ""
 
 #: costeffectiveness/options/effectiveness_type/binary.title
 msgid "Correct Diagnoses (Binary Outcome)"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Correct the dates at source, or tick 'Negative-interval exclusion' under "
+"Data Quality & Statistics to drop these rows from every statistic including "
+"person-time."
 msgstr ""
 
 #: clinicalscore/results/validationTable.columns.title
@@ -34085,6 +34082,10 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "Could not find the outcome variable."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Could not map some explanatory variables after cleaning: {variables}."
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -34971,10 +34972,6 @@ msgstr ""
 msgid "Create calibration assessment plots"
 msgstr ""
 
-#: agreement/options/loaVariable.title
-msgid "Create case agreement categorization"
-msgstr ""
-
 #: coefplot/options/compare_models.description
 msgid ""
 "Create comparison plots for multiple model specifications. Useful for "
@@ -35027,10 +35024,6 @@ msgstr ""
 
 #: enhancedtwowayfrequency/options/heatmapPlot.description
 msgid "Create heatmap visualization of frequency table"
-msgstr ""
-
-#: psychopdaROC/options/interactiveROC.title
-msgid "Create interactive plot"
 msgstr ""
 
 #: clinicalnomograms/options/interactive_nomogram.description.ui
@@ -36796,10 +36789,6 @@ msgstr ""
 msgid "Custom Analysis"
 msgstr ""
 
-#: stagemigration/options/clinicalPreset/custom.title
-msgid "Custom Analysis (Manual Configuration)"
-msgstr ""
-
 #: modelbuilder/options/clinicalPreset/none.title
 msgid "Custom Analysis (no preset)"
 msgstr ""
@@ -36934,7 +36923,6 @@ msgstr ""
 #: clinicalvalidationinteractive/options/clinical_preset/custom.title
 #: enhancedROC/options/clinicalPresets/custom.title
 #: jjsegmentedtotalbar/options/analysis_preset/custom.title
-#: stagemigration/options/complexityMode/custom.title
 msgid "Custom Configuration"
 msgstr ""
 
@@ -38008,10 +37996,6 @@ msgstr ""
 msgid "Data Completeness"
 msgstr ""
 
-#: R/summarydata.b.R
-msgid "Data completeness is excellent."
-msgstr ""
-
 #: R/riverplot.b.R
 msgid "Data completeness: %.1f%% - %d rows have missing values in strata variables"
 msgstr ""
@@ -38147,8 +38131,9 @@ msgid "Data Handling Notes:"
 msgstr ""
 
 #: mendelianrandomization/results/dataInfo.title
+#: summarydata/results/todo.title
 msgid "Data Information"
-msgstr ""
+msgstr "Veri Bilgisi"
 
 #: fragilityindex/options/dataFormat.title
 msgid "Data Input"
@@ -38333,11 +38318,15 @@ msgstr ""
 msgid "Data Quality & Statistical Considerations"
 msgstr ""
 
+#: timeinterval/ui[3].label
+msgid "Data Quality & Statistics"
+msgstr ""
+
 #: R/summarydata.b.R
 msgid ""
 "Data quality alert: Some variables contain infinite or extreme values that "
 "may require investigation."
-msgstr ""
+msgstr "Veri kalitesi uyarısı: Bazı değişkenler inceleme gerektirebilecek sonsuz veya uç değerler içeriyor."
 
 #: R/linechart.b.R
 msgid "Data Quality Alerts:"
@@ -38355,7 +38344,7 @@ msgstr ""
 #: patientreported/results/data_quality_results.title
 #: timeinterval/results/qualityAssessment.title
 msgid "Data Quality Assessment"
-msgstr ""
+msgstr "Veri Kalitesi Değerlendirmesi"
 
 #: clinicaldataintegration/options/qualityCheck.title
 #: datetimeconverter/options/show_quality_metrics.title
@@ -38383,10 +38372,6 @@ msgstr ""
 
 #: enhancedfrequency/results/results/dataQualityReport.description
 msgid "Data quality metrics and recommendations"
-msgstr ""
-
-#: timeinterval/ui[3].label
-msgid "Data Quality Options"
 msgstr ""
 
 #: batcheffect/results/summary.title
@@ -38722,7 +38707,7 @@ msgstr ""
 #: enhancedfrequency/options/showDatasetOverview.title
 #: enhancedfrequency/results/results/datasetOverview.title
 msgid "Dataset Overview"
-msgstr ""
+msgstr "Veri Kümesine Genel Bakış"
 
 #: autoeda/options/analysis_type/overview.title
 msgid "Dataset Overview (introduce)"
@@ -38735,7 +38720,7 @@ msgstr ""
 #: R/summarydata.b.R
 #: biomarkerdiscovery/results/data_summary.title
 msgid "Dataset Summary"
-msgstr ""
+msgstr "Veri Kümesi Özeti"
 
 #: eurostatmap/results/info.columns.title
 msgid "Dataset Title"
@@ -38784,15 +38769,6 @@ msgstr ""
 msgid ""
 "Date parsing failed for column '{column}' using format '{format}'. Example "
 "values: {examples}"
-msgstr ""
-
-#: R/timeinterval.b.R
-msgid ""
-"Date parsing failed. All values became NA using format '{format}'.\n"
-"Please verify:\n"
-"- Date format setting matches your data\n"
-"- Date columns contain valid date values\n"
-"- Dates are not stored as numeric codes without proper formatting"
 msgstr ""
 
 #: groupsummary/results/dateInfo.title
@@ -39157,7 +39133,7 @@ msgstr ""
 
 #: summarydata/options/decimal_places.title
 msgid "Decimal places"
-msgstr ""
+msgstr "Ondalık basamak sayısı"
 
 #: jjbarstats/ui[3][1][0]/digitsperc.label
 msgid "Decimal places (percentages)"
@@ -39341,6 +39317,10 @@ msgstr ""
 
 #: decisioncurve/ui[3][0]/showPlot.label
 msgid "Decision curve plot"
+msgstr ""
+
+#: decisioncurve/options/showPlot.title
+msgid "Decision Curve Plot"
 msgstr ""
 
 #: survivalmodelvalidation/results/decisionCurvePlot.description
@@ -39682,6 +39662,10 @@ msgstr ""
 
 #: tidyplots/options/legendPosition/default.title
 msgid "Default (Right)"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Default (second factor level)"
 msgstr ""
 
 #: hullplot/options/plot_theme/minimal.title
@@ -40514,7 +40498,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Descriptive statistics: mean, median, standard deviation, min/max"
-msgstr ""
+msgstr "Tanımlayıcı istatistikler: ortalama, medyan, standart sapma, minimum/maksimum"
 
 #: decisioncompare/results/clinicalReport.title
 msgid "Descriptive Summary & Report Templates"
@@ -40900,10 +40884,6 @@ msgstr ""
 msgid "Details"
 msgstr ""
 
-#: enhancedROC/options/detectImbalance.title
-msgid "Detect class imbalance"
-msgstr ""
-
 #: hullplot/ui[4][0]/outlier_detection.label
 msgid "Detect outliers within groups (IQR method)"
 msgstr ""
@@ -41263,6 +41243,7 @@ msgstr ""
 #: enhancedtwowayfrequency/results/diagnostics.columns.title
 #: jforestmodel/results/model_diagnostics.columns.title
 #: mixedcox/results/diagnosticsTable.columns.title
+#: stagemigration/results/enhancedModelDiagnostics.columns.title
 #: treatmenteffects/results/model_diagnostics.columns.title
 #: treatmentswitching/results/diagnosticsTable.columns.title
 msgid "Diagnostic"
@@ -41390,8 +41371,31 @@ msgstr ""
 msgid "Diagnostic metrics"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic metrics for '{variable}' require paired complete observations "
+"with exactly two observed predictor levels and two observed outcome levels. "
+"The prediction nomogram is unaffected."
+msgstr ""
+
 #: ihccluster/results/diagnosticGlossary.title
 msgid "Diagnostic Metrics Glossary"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic metrics were not calculated because a valid paired 2\\u{00D7}2 "
+"table could not be formed."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Diagnostic metrics were not calculated because no diagnostic predictor was "
+"available."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Diagnostic Metrics:"
 msgstr ""
 
 #: differentialdiagnosis/results/modelPerformance.title
@@ -41529,6 +41533,10 @@ msgstr ""
 
 #: oddsratio/options/diagnosticPredictor.title
 msgid "Diagnostic Predictor (for LRs)"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Diagnostic predictor label matches multiple variables; using '{variable}'."
 msgstr ""
 
 #: differentialdiagnosis/options/diagnostic_probability.title
@@ -41671,6 +41679,10 @@ msgstr ""
 
 #: oddsratio/results/diagnosticMetrics.title
 msgid "Diagnostic Test Performance"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Diagnostic test performance metrics"
 msgstr ""
 
 #: likelihoodratio/options/testVariable.description
@@ -41893,7 +41905,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Difference between maximum and minimum values."
-msgstr ""
+msgstr "Maksimum ve minimum değerler arasındaki fark."
 
 #: R/nonparametric.b.R
 msgid "difference between paired observations"
@@ -41942,6 +41954,10 @@ msgstr ""
 
 #: decisioncompare/results/diffTable.title
 msgid "Differences with 95% Confidence Intervals"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Different languages/coding may require manual specification"
 msgstr ""
 
 #: decisiongraph/ui[6][2]/nodeShapes.label
@@ -43806,7 +43822,7 @@ msgstr ""
 #: treemedical/ui[4].label
 #: weightedlogrank/ui[4].label
 msgid "Display Options"
-msgstr ""
+msgstr "Görüntüleme Seçenekleri"
 
 #: cotest/ui[5].label
 msgid "Display options"
@@ -44644,11 +44660,11 @@ msgstr ""
 #: generalizedroc/results/diagnosticsTable.title
 #: summarydata2/options/distr.title
 msgid "Distribution Diagnostics"
-msgstr ""
+msgstr "Dağılım Tanıları"
 
 #: summarydata/options/distr.title
 msgid "Distribution diagnostics"
-msgstr ""
+msgstr "Dağılım tanıları"
 
 #: conditionalgee/options/distribution_family.title
 msgid "Distribution Family"
@@ -45271,6 +45287,10 @@ msgstr ""
 msgid "Downsample Majority"
 msgstr ""
 
+#: stagemigration/results/personalizedRiskSummary.columns.title
+msgid "Downstaged (%)"
+msgstr ""
+
 #: imagingcorrelation/results/stagingCorrelationTable.columns.title
 msgid "Downstaging Rate"
 msgstr ""
@@ -45282,6 +45302,15 @@ msgstr ""
 #: screeningevaluation/results/detection_rates.columns.title
 msgid "DR 95% CI Upper"
 msgstr ""
+
+#: summarydata/options/report_sentences.title
+msgid "Draft report sentences"
+msgstr "Taslak rapor cümleleri"
+
+#: R/summarydata.b.R
+#: summarydata/results/reportSentences.title
+msgid "Draft Statistical Summary"
+msgstr "Taslak İstatistiksel Özet"
 
 #: package/analyses/competingsurvival.menuSubgroup
 #: package/analyses/oneSurvival.menuSubgroup
@@ -45727,6 +45756,10 @@ msgstr ""
 #: R/swimmerplot_html.R
 msgid "Each row represents one patient episode or treatment course"
 msgstr ""
+
+#: R/summarydata.b.R
+msgid "Each selected variable has no more than 5% missing values."
+msgstr "Seçilen her değişkende eksik değer oranı en fazla %5'tir."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -46818,7 +46851,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Enable 'Distribution Diagnostics' for normality assessment"
-msgstr ""
+msgstr "Normallik değerlendirmesi için 'Dağılım Tanıları'nı etkinleştirin"
 
 #: R/riverplot.b.R
 msgid "Enable 'Reorder Edges' to reduce visual crossing complexity"
@@ -46914,10 +46947,6 @@ msgstr ""
 msgid "Enable Consensus Scoring"
 msgstr ""
 
-#: decisioncurve/ui[4][0]/costBenefitAnalysis.label
-msgid "Enable cost-benefit analysis"
-msgstr ""
-
 #: stagemigration/ui[5][0].label
 msgid "Enable Covariate Adjustment"
 msgstr ""
@@ -46968,6 +46997,10 @@ msgstr ""
 #: decisiongraph/options/separateDiscountRates.description.ui
 msgid "Enable different discount rates for costs versus health outcomes (QALYs)."
 msgstr ""
+
+#: R/summarydata.b.R
+msgid "Enable Distribution diagnostics to inspect normality, skewness, and kurtosis."
+msgstr "Normallik, çarpıklık ve basıklığı incelemek için Dağılım tanılarını etkinleştirin."
 
 #: deeplearningprediction/options/early_stopping.title
 msgid "Enable Early Stopping"
@@ -48075,6 +48108,15 @@ msgstr ""
 msgid "Entered as continuous:"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"Entered as continuous: {variables}. Each is modelled as one odds ratio per "
+"one-unit increase, which assumes a constant step in log odds between "
+"consecutive values. To estimate a separate odds ratio for each level "
+"instead, change the variable's measure type to Nominal or Ordinal in the "
+"data setup."
+msgstr ""
+
 #: bayesianclinical/options/prior_type/enthusiastic.title
 #: bayesiandiagnostic/options/prior_type/enthusiastic.title
 msgid "Enthusiastic Priors"
@@ -48521,14 +48563,16 @@ msgstr ""
 msgid "ER/PR (Breast Cancer) - H-score >=100 recommended"
 msgstr ""
 
+#: R/oddsratio.b.R
 #: R/reportcat.b.R
 #: crosstable/results/errorNotice.title
 msgid "Error"
 msgstr ""
 
 #: R/decisioncalculator.b.R
+#: R/summarydata.b.R
 msgid "ERROR"
-msgstr ""
+msgstr "HATA"
 
 #: samplingerror/results/errorComponents.columns.title
 msgid "Error (%)"
@@ -48788,7 +48832,6 @@ msgstr ""
 #: R/lassocox.b.R
 #: R/linechart.b.R
 #: R/riverplot.b.R
-#: R/swimmerplot.b.R
 msgid "Error:"
 msgstr ""
 
@@ -50304,7 +50347,7 @@ msgid ""
 "Every statistic here is computed per row. If the dataset holds several rows "
 "per patient (one per block, core or visit), aggregate to one row per patient "
 "before reading these numbers as patient-level results."
-msgstr ""
+msgstr "Buradaki her istatistik satır başına hesaplanır. Veri kümesinde hasta başına birden fazla satır varsa (örneğin blok, kor veya ziyaret başına bir satır), bu sayıları hasta düzeyinde yorumlamadan önce verileri hasta başına tek satır olacak şekilde birleştirin."
 
 #: R/tableone.b.R
 msgid ""
@@ -50348,7 +50391,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "evidence of departure from normality"
-msgstr ""
+msgstr "normallikten sapma lehine kanıt"
 
 #: differentialdiagnosis/results/clinicalContext.columns.title
 msgid "Evidence Quality"
@@ -50637,6 +50680,7 @@ msgstr ""
 "değildir"
 
 #: R/swimmerplot_html.R
+#: R/timeinterval.b.R
 msgid "Examples:"
 msgstr ""
 
@@ -51272,10 +51316,6 @@ msgstr ""
 msgid "Expected R"
 msgstr ""
 
-#: R/summarydata.b.R
-msgid "Expected range: {lower} to {upper}"
-msgstr ""
-
 #: friedmantest/results/rankAnalysis.columns.title
 #: pagetrendtest/results/trendOrdering.columns.title
 #: pagetrendtest/results/rankAnalysis.columns.title
@@ -51592,6 +51632,45 @@ msgstr ""
 msgid "Explanatory Variable"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Explanatory variable '{variable}' contains infinite values."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Explanatory variable '{variable}' contains no non-missing values."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Explanatory variable '{variable}' has {n} categories with fewer than 5 "
+"observations. Consider combining categories."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Explanatory variable '{variable}' has {n} levels. Consider grouping "
+"categories or using as continuous if ordinal."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Explanatory variable '{variable}' has no variation (all values are the "
+"same). It will not contribute to the model."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Explanatory variable '{variable}' is entered as continuous and has {n} "
+"value(s) carried by fewer than 5 observations; those rows have high leverage "
+"on the fitted trend."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Explanatory variable '{variable}' may contain extreme outliers ({n} "
+"potential outliers)."
+msgstr ""
+
 #: R/survival.b.R
 msgid ""
 "Explanatory variable is required. Please select a categorical variable to "
@@ -51770,7 +51849,11 @@ msgstr ""
 #: vartree/options.menuGroup
 #: venn/options.menuGroup
 msgid "ExplorationT"
-msgstr ""
+msgstr "KeşifT"
+
+#: R/summarydata.b.R
+msgid "Exploratory assessment of distributional features"
+msgstr "Dağılım özelliklerinin keşifsel değerlendirmesi"
 
 #: decisioncurve/results/modelComparisonEnhanced.description
 msgid ""
@@ -51798,6 +51881,10 @@ msgstr ""
 
 #: decisioncurve/options/costBenefitAnalysis.title
 msgid "Exploratory Monetary Payoff"
+msgstr ""
+
+#: decisioncurve/ui[4][0]/costBenefitAnalysis.label
+msgid "Exploratory monetary payoff"
 msgstr ""
 
 #: decisioncurve/results/costBenefitTable.title
@@ -53627,7 +53714,7 @@ msgstr ""
 msgid ""
 "Fewer than 4 non-missing observations, so the IQR fences could not be "
 "computed."
-msgstr ""
+msgstr "Eksik olmayan gözlem sayısı 4'ten az olduğu için AAD sınırları hesaplanamadı."
 
 #: clinicaldataintegration/options/exportFormat/fhir.title
 msgid "FHIR R4"
@@ -54003,6 +54090,10 @@ msgstr ""
 msgid "Finn Coefficient"
 msgstr ""
 
+#: agreement/options/finn.title
+msgid "Finn coefficient (variance-based agreement)"
+msgstr ""
+
 #: agreement/ui[7].label
 msgid "Finn Coefficient [Categorical] (Variance-Based)"
 msgstr ""
@@ -54031,7 +54122,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "First and third quartiles (25th and 75th percentiles)."
-msgstr ""
+msgstr "Birinci ve üçüncü çeyrekler (25. ve 75. yüzdelikler)."
 
 #: irecist/options/baselineReference/baseline.title
 msgid "First assessment"
@@ -54151,6 +54242,13 @@ msgstr ""
 msgid "Firth p"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"Firth penalized likelihood logistic regression used to reduce bias and "
+"handle potential separation."
+msgstr ""
+
+#: oddsratio/options/usePenalized.title
 #: oddsratio/ui[1]/usePenalized.label
 msgid "Firth penalized logistic regression"
 msgstr ""
@@ -54357,6 +54455,13 @@ msgstr ""
 msgid "Fitted Values and Residuals"
 msgstr ""
 
+#: R/timeinterval.b.R
+msgid ""
+"Fix the source data: format the column as a date before exporting (in Excel: "
+"Format Cells > Date), or convert it to text in YYYY-MM-DD form, then "
+"re-import."
+msgstr ""
+
 #: jjarcdiagram/options/nodeSize/fixed.title
 #: jjarcdiagram/options/arcWidth/fixed.title
 msgid "Fixed"
@@ -54530,10 +54635,6 @@ msgstr ""
 
 #: ihccluster/ui[7]/flagOutliers.label
 msgid "Flag atypical cases (low silhouette scores)"
-msgstr ""
-
-#: timeinterval/options/remove_extreme.title
-msgid "Flag extreme values"
 msgstr ""
 
 #: pathagreement/options/tie_breaking/arbitration.title
@@ -55186,18 +55287,21 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid ""
-"For {variable}, analysis of {n} observations showed a mean of {mean} (SD "
-"{sd}); median {median} (range {min} to {max})."
-msgstr ""
+"For {variable}, {n} of {total} records had non-missing values ({missing} "
+"missing); the mean was {mean} (SD {sd}) and the median was {median} "
+"(observed range {min} to {max})."
+msgstr "{variable} için {total} kaydın {n} tanesinde eksik olmayan değer vardı ({missing} eksik); ortalama {mean} (SS {sd}), medyan {median} idi (gözlenen aralık {min} ile {max})."
+
+#: R/summarydata.b.R
+msgid ""
+"For {variable}, 1 of {total} records had a non-missing value ({missing} "
+"missing); the available observation was {value}."
+msgstr "{variable} için {total} kaydın 1 tanesinde eksik olmayan değer vardı ({missing} eksik); mevcut gözlem {value} idi."
 
 #: R/reportcat.b.R
 msgid ""
 "For {variable}, the most common category was '{category}' (n = {n} of "
 "{valid} valid cases, {percent})."
-msgstr ""
-
-#: R/summarydata.b.R
-msgid "For {variable}, the single available observation was {value}."
 msgstr ""
 
 #: decisioncompare/results/mcnemarTable.notes.note
@@ -59758,6 +59862,13 @@ msgstr ""
 msgid "gtsummary (Publication-ready descriptives)"
 msgstr ""
 
+#: R/timeinterval.b.R
+msgid ""
+"Guessed as a packed date instead, the same digits give a different year, so "
+"the time intervals and the person-time would be wrong by decades without any "
+"visible sign."
+msgstr ""
+
 #: cotest/options/showGuidance.title
 #: cotest/ui[5][0]/showGuidance.label
 msgid "Guidance and explanations"
@@ -59802,6 +59913,10 @@ msgstr ""
 
 #: measurementuncertainty/options/uncertainty_method/gum_approach.title
 msgid "GUM Approach (ISO Guide)"
+msgstr ""
+
+#: agreement/options/gwet.title
+msgid "Gwet's AC1/AC2"
 msgstr ""
 
 #: pathagreement/ui[5][0]/gwetAC.label
@@ -61223,6 +61338,10 @@ msgstr ""
 msgid "High missing data rates (over 20%) require careful interpretation"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "High missingness"
+msgstr "Yüksek eksiklik oranı"
+
 #: likelihoodratio/options/prevalenceRange/high.title
 msgid "High prevalence (20 percent to 80 percent)"
 msgstr ""
@@ -61480,14 +61599,6 @@ msgstr ""
 
 #: economistplots/options/show_quartiles.description.jamovi
 msgid "Highlight 25th, 50th, and 75th percentiles."
-msgstr ""
-
-#: decisioncurve/options/highlightRange.title
-msgid "Highlight Clinical Range"
-msgstr ""
-
-#: decisioncurve/ui[3][0]/highlightRange.label
-msgid "Highlight clinical range"
 msgstr ""
 
 #: dendrogram/options/highlightClusters.title
@@ -62184,6 +62295,7 @@ msgstr ""
 msgid "How to Use This Analysis"
 msgstr ""
 
+#: R/oddsratio.b.R
 #: R/venn.b.R
 msgid "How to Use:"
 msgstr ""
@@ -62597,6 +62709,10 @@ msgstr ""
 #: mixedmodelanova/results/icc_table.columns.title
 #: pathagreement/results/iccTable.columns.title
 msgid "ICC"
+msgstr ""
+
+#: agreement/options/icc.title
+msgid "ICC (continuous data)"
 msgstr ""
 
 #: agreement/ui[11].label
@@ -63025,8 +63141,16 @@ msgstr ""
 msgid "IDI Calculation Type"
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid "IDI caution for {variable}: {details}"
+msgstr ""
+
 #: reclassmetrics/results/idiComponents.title
 msgid "IDI Components"
+msgstr ""
+
+#: stagemigration/results/idiComponents.title
+msgid "IDI Components and Discrimination Slopes"
 msgstr ""
 
 #: idi/results/decomposition.title
@@ -63040,6 +63164,12 @@ msgstr ""
 
 #: idi/results/decomposition.columns.title
 msgid "IDI Events"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"IDI for {variable} was not computed because fewer than 10 complete cases "
+"were available."
 msgstr ""
 
 #: idi/options/idi_competing_risks.title
@@ -63100,6 +63230,12 @@ msgid ""
 "you can verify how the outcome levels were mapped. It covers every row of "
 "the dataset; a row whose original outcome was missing or was mapped to no "
 "category stays empty."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"If incorrect, use the 'Positive Outcome Level' dropdown to specify the "
+"correct level"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -63956,7 +64092,7 @@ msgstr ""
 #: waterfall/results/notices.title
 #: waterfallrecist/results/notices.title
 msgid "Important Information"
-msgstr ""
+msgstr "Önemli Bilgi"
 
 #: package/analyses/brierscore.description
 #: brierscore/options.description.main
@@ -63990,6 +64126,14 @@ msgstr ""
 #: continuousrelationship/results/warningMessage.title
 #: venn/results/validationWarnings.title
 msgid "Important Warnings"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Important:"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Important: Please Verify These Interpretations"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -64250,10 +64394,6 @@ msgstr ""
 msgid "Include Classification and Regression Trees (CART) algorithm."
 msgstr ""
 
-#: decisioncurve/ui[1][1][0]/clinicalDecisionRule.label
-msgid "Include clinical decision rule"
-msgstr ""
-
 #: clinicalcalculators/options/include_interpretation.title
 #: consortdiagram/options/include_interpretation.title
 msgid "Include Clinical Interpretation"
@@ -64322,10 +64462,6 @@ msgstr ""
 #: parametricfrailty/ui[2][0][0]/include_ci.label
 #: summarydata2/options/include_confidence.title
 msgid "Include Confidence Intervals"
-msgstr ""
-
-#: agreement/options/specificConfidenceIntervals.title
-msgid "Include confidence intervals"
 msgstr ""
 
 #: clinicalnomograms/options/confidence_intervals.description.ui
@@ -65531,6 +65667,10 @@ msgstr ""
 msgid "infinite"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "infinite (zero false results in this cell)"
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid "Infinite Positive Likelihood Ratio"
 msgstr ""
@@ -65621,6 +65761,7 @@ msgstr ""
 msgid "Info Loss vs Full Model (%)"
 msgstr ""
 
+#: R/oddsratio.b.R
 #: multisurvival/results/infoMessages.title
 #: oddsratio/results/infoMessages.title
 #: outcomeorganizer/results/infoMessages.title
@@ -65706,7 +65847,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Initial data exploration and quality assessment"
-msgstr ""
+msgstr "İlk veri keşfi ve kalite değerlendirmesi"
 
 #: R/sequentialtests.b.R
 msgid "Initial Population"
@@ -66370,14 +66511,6 @@ msgstr ""
 msgid "Interactions"
 msgstr ""
 
-#: patientsimilarity/options/show3DPlot.title
-msgid "Interactive 3D Plot"
-msgstr ""
-
-#: patientsimilarity/results/projection3D.title
-msgid "Interactive 3D Projection"
-msgstr ""
-
 #: package/analyses/clinicaldashboard.title
 #: package/analyses/clinicaldashboard.menuTitle
 #: clinicaldashboard/options.title
@@ -66431,6 +66564,7 @@ msgid ""
 "and effect sizes. Optional grouped analysis for complex study designs."
 msgstr ""
 
+#: psychopdaROC/options/interactiveROC.title
 #: psychopdaROC/ui[7][0][0][1]/interactiveROC.label
 msgid "Interactive plot"
 msgstr ""
@@ -66613,7 +66747,7 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 #: clinicalnomograms/options/validation_method.title
-#: enhancedROC/ui[11][0][0][0].label
+#: enhancedROC/ui[14][0][0][0].label
 #: jointmodeling/options/internal_validation.title
 #: timedependent/options/internal_validation.title
 msgid "Internal Validation"
@@ -66914,6 +67048,7 @@ msgstr ""
 #: spikeslabpriors/results/predictionPerformance.columns.title
 #: stagemigration/results/statisticalComparison.columns.title
 #: stagemigration/results/idiResults.columns.title
+#: stagemigration/results/idiComponents.columns.title
 #: stagemigration/results/interactionTests.columns.title
 #: stagemigration/results/integratedAUCAnalysis.columns.title
 #: stagemigration/results/pseudoR2Results.columns.title
@@ -66924,6 +67059,7 @@ msgstr ""
 #: stagemigration/results/calibrationAnalysis.columns.title
 #: stagemigration/results/enhancedPseudoR2.columns.title
 #: stagemigration/results/proportionalHazardsTest.columns.title
+#: stagemigration/results/enhancedModelDiagnostics.columns.title
 #: stagemigration/results/decisionCurveAnalysis.columns.title
 #: stagemigration/results/stageMigrationEffect.columns.title
 #: stagemigration/results/cutpointValidation.columns.title
@@ -66994,6 +67130,10 @@ msgstr ""
 #: bayesianci/results/comparisonTable.columns.title
 msgid "Interpretation Difference"
 msgstr ""
+
+#: summarydata/options/show_guidance.title
+msgid "Interpretation guidance and glossary"
+msgstr "Yorumlama rehberi ve sözlük"
 
 #: advancedbarplot/results/interpretation_guide.title
 #: causalmediation/results/interpretation.title
@@ -67481,7 +67621,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Investigate outliers before proceeding with inferential statistics"
-msgstr ""
+msgstr "Çıkarımsal istatistiklere geçmeden önce aykırı değerleri inceleyin"
 
 #: riverplot/options/nodeStyle/invisible.title
 msgid "Invisible (hidden nodes)"
@@ -67489,6 +67629,10 @@ msgstr ""
 
 #: agreement/results/iotaTable.columns.title
 msgid "Iota"
+msgstr ""
+
+#: agreement/options/iota.title
+msgid "Iota coefficient (multivariate agreement)"
 msgstr ""
 
 #: agreement/ui[15].label
@@ -67553,6 +67697,10 @@ msgstr ""
 msgid "IQR"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "IQR fences: {lower} to {upper}"
+msgstr "AAD sınırları: {lower} ile {upper}"
+
 #: enhancedtables/options/stats_continuous/both.title
 msgctxt "IQR"
 msgid "Mean ± SD, Median"
@@ -67570,7 +67718,7 @@ msgstr ""
 #: raincloud/options/outlier_method/iqr.title
 #: robustcorrelation/options/outlier_method/iqr.title
 msgid "IQR Method"
-msgstr ""
+msgstr "AAD Yöntemi"
 
 #: nonparametric/options/outlier_method/iqr.title
 #: segmentationmetrics/options/outlier_method/iqr.title
@@ -68580,6 +68728,10 @@ msgstr ""
 msgid "Kendall's Tau-B"
 msgstr ""
 
+#: agreement/options/kendallW.title
+msgid "Kendall's W (concordance for rankings)"
+msgstr ""
+
 #: nonparametric/options/effect_size_method/kendall_w.title
 msgid "Kendall's W (concordance)"
 msgstr ""
@@ -68691,7 +68843,7 @@ msgstr "Temel Kavramlar"
 
 #: R/summarydata.b.R
 msgid "Key considerations"
-msgstr ""
+msgstr "Temel noktalar"
 
 #: R/jjridges.b.R
 msgid "Key Considerations:"
@@ -68943,6 +69095,10 @@ msgstr ""
 msgid "Krippendorff's Alpha"
 msgstr ""
 
+#: agreement/options/kripp.title
+msgid "Krippendorff's alpha"
+msgstr ""
+
 #: pathagreement/options/multiraterMethod/krippendorff.title
 msgid "Krippendorff's Alpha (any number)"
 msgstr ""
@@ -69016,7 +69172,7 @@ msgstr ""
 #: jsummarytools/results/descriptive_stats.columns.title
 #: timeupdatesurvival/results/residualAnalysis.columns.title
 msgid "Kurtosis"
-msgstr ""
+msgstr "Basıklık"
 
 #: pagetrendtest/results/pageTrendTest.columns.title
 msgid "L Statistic"
@@ -69270,10 +69426,6 @@ msgstr ""
 #: qualitycontrol/ui.title
 #: qualitycontrol/results.title
 msgid "Laboratory Quality Control Statistics"
-msgstr ""
-
-#: R/summarydata.b.R
-msgid "Laboratory reference range studies"
 msgstr ""
 
 #: package/analyses/labinterpret.title
@@ -69679,6 +69831,12 @@ msgstr ""
 msgid "Large (4-8)"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"Large amount of missing data: {percent}% of rows will be removed ({removed} "
+"out of {total} rows)."
+msgstr ""
+
 #: R/decision.b.R
 msgid "Large and often conclusive decrease in probability of disease"
 msgstr ""
@@ -69741,6 +69899,10 @@ msgstr ""
 msgid ""
 "Large overlaps may reflect high positivity rates rather than a shared "
 "mechanism; test association formally before interpreting them"
+msgstr ""
+
+#: stagemigration/results/personalizedRiskSummary.columns.title
+msgid "Large Risk Change (%)"
 msgstr ""
 
 #: residualcancerburden/options/mMetSize.title
@@ -70536,12 +70698,6 @@ msgstr ""
 msgid "Levels (in order)"
 msgstr ""
 
-#: R/oddsratio.b.R
-msgid ""
-"levels. For odds ratio analysis, the outcome must be binary (exactly 2 "
-"levels). Consider creating a binary variable or using multinomial regression."
-msgstr ""
-
 #: grafify/options/comparison_method/levelwise.title
 msgid "Levelwise Comparisons"
 msgstr ""
@@ -70612,6 +70768,10 @@ msgstr ""
 
 #: cohenskappa/options/multi_rater_method/light.title
 msgid "Light Kappa (Average pairwise)"
+msgstr ""
+
+#: agreement/options/lightKappa.title
+msgid "Light's kappa (3+ raters)"
 msgstr ""
 
 #: agreement/ui[4].label
@@ -70707,6 +70867,10 @@ msgstr ""
 #: likelihoodratio/results/likelihoodRatios.title
 #: screeningevaluation/options/likelihood_ratios.title
 msgid "Likelihood Ratios"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Likelihood ratios"
 msgstr ""
 
 #: package/analyses/likelihoodratio.menuSubtitle
@@ -71494,6 +71658,7 @@ msgstr ""
 msgid "LOESS Smoothing"
 msgstr ""
 
+#: psychopdaROC/options/smoothing.title
 #: psychopdaROC/ui[7][0][0][1]/smoothing.label
 msgid "LOESS smoothing"
 msgstr ""
@@ -72250,6 +72415,12 @@ msgstr ""
 msgid ""
 "Low events per variable (EPV = %.1f, %d events / %d predictors). Minimum 10 "
 "recommended; model may be overfit."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Low events-per-variable (EPV ≈ {epv}). Odds ratios may be unstable; consider "
+"penalized/Firth logistic regression."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -73978,7 +74149,7 @@ msgstr ""
 #: toolssummary/results/numericStats.columns.title
 #: vusanalysis/results/classBreakdown.columns.title
 msgid "Max"
-msgstr ""
+msgstr "Maks"
 
 #: ihcthreshold/results/thresholdComparison.columns.title
 msgid "Max %"
@@ -74048,6 +74219,7 @@ msgstr ""
 msgid "Max Foci per Sample (optional)"
 msgstr ""
 
+#: stagemigration/results/multivariableDCASummary.columns.title
 #: survivalvalidation/results/modelComparison.columns.title
 #: timedependentdca/results/summaryTable.columns.title
 msgid "Max Net Benefit"
@@ -74848,7 +75020,7 @@ msgstr ""
 #: timeupdatesurvival/results/residualAnalysis.columns.title
 #: toolssummary/results/numericStats.columns.title
 msgid "Mean"
-msgstr ""
+msgstr "Ortalama"
 
 #: crosstable/options/cont/mean.title
 #: crosstable2/options/cont/mean.title
@@ -75134,6 +75306,10 @@ msgstr ""
 msgid "Mean over {b} resamples"
 msgstr ""
 
+#: agreement/options/meanPearson.title
+msgid "Mean Pearson correlation (linear association)"
+msgstr ""
+
 #: agreement/results/meanPearsonTable.title
 msgid "Mean Pearson Correlation (Linear Association) Results"
 msgstr ""
@@ -75200,6 +75376,18 @@ msgstr ""
 msgid "Mean Risk"
 msgstr ""
 
+#: stagemigration/results/personalizedRiskSummary.columns.title
+msgid "Mean Risk (New)"
+msgstr ""
+
+#: stagemigration/results/personalizedRiskSummary.columns.title
+msgid "Mean Risk (Original)"
+msgstr ""
+
+#: stagemigration/results/personalizedRiskSummary.columns.title
+msgid "Mean Risk Difference"
+msgstr ""
+
 #: clinicalprediction/results/risk_stratification.columns.title
 msgid "Mean Risk Score"
 msgstr ""
@@ -75234,6 +75422,10 @@ msgstr ""
 
 #: markovmultistate/results/meanSojournTimes.title
 msgid "Mean Sojourn Times"
+msgstr ""
+
+#: agreement/options/meanSpearman.title
+msgid "Mean Spearman rho (average rank correlation)"
 msgstr ""
 
 #: agreement/results/meanSpearmanTable.title
@@ -75389,7 +75581,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Measure of variability around the mean."
-msgstr ""
+msgstr "Ortalama çevresindeki değişkenliğin ölçüsüdür."
 
 #: clinicalalerts/results/detailedAlerts.columns.title
 msgid "Measured Value"
@@ -75468,7 +75660,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Measures asymmetry. 0 = symmetric, &gt;0 = right-skewed, &lt;0 = left-skewed."
-msgstr ""
+msgstr "Asimetriyi ölçer. 0 = simetrik, &gt;0 = sağa çarpık, &lt;0 = sola çarpık."
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -75487,7 +75679,7 @@ msgstr ""
 msgid ""
 "Measures tail heaviness. 3 = normal, &gt;3 = heavy tails, &lt;3 = light "
 "tails."
-msgstr ""
+msgstr "Kuyruk ağırlığını ölçer. 3 = normal, &gt;3 = ağır kuyruklar, &lt;3 = hafif kuyruklar."
 
 #: treatmentoptim/results/drugInteractions.columns.title
 msgid "Mechanism"
@@ -75511,6 +75703,7 @@ msgstr ""
 #: package/analyses/hierarchicalbayes.menuSubgroup
 #: package/analyses/enhancedROC.menuGroup
 #: package/analyses/lassologistic.menuGroup
+#: agreement/options.menuGroup
 #: betabinomialdiagnostic/options.menuSubgroup
 #: cotest/options.menuGroup
 #: decision/options.menuGroup
@@ -75648,7 +75841,6 @@ msgstr ""
 #: package/analyses/clinicalscore.menuGroup
 #: package/analyses/mageeequation.menuGroup
 #: package/analyses/latentbiomarker.menuGroup
-#: agreement/options.menuGroup
 #: clinicalscore/options.menuGroup
 #: latentbiomarker/options.menuGroup
 #: leaveonecenterout/options.menuGroup
@@ -75705,7 +75897,7 @@ msgstr ""
 #: survivalcont/results/medianTable.columns.title
 #: toolssummary/results/numericStats.columns.title
 msgid "Median"
-msgstr ""
+msgstr "Medyan"
 
 #: crosstable/options/cont/median.title
 #: crosstable2/options/cont/median.title
@@ -77237,6 +77429,10 @@ msgstr ""
 msgid "Method:"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Method: {method}"
+msgstr ""
+
 #: R/jjcorrmat.b.R
 msgid "Method: %s"
 msgstr ""
@@ -77454,6 +77650,7 @@ msgstr ""
 #: sparsegrouplasso/results/summary.columns.title
 #: sparsegrouplasso/results/performance.columns.title
 #: stagemigration/results/statisticalComparison.columns.title
+#: stagemigration/results/idiComponents.columns.title
 #: stagemigration/results/integratedAUCAnalysis.columns.title
 #: stagemigration/results/bootstrapResults.columns.title
 #: stagemigration/results/clinicalInterpretation.columns.title
@@ -77624,7 +77821,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Middle value when data is ordered. Less affected by outliers."
-msgstr ""
+msgstr "Veriler sıralandığında ortadaki değerdir. Aykırı değerlerden daha az etkilenir."
 
 #: epidemiosurvival/options/par_method/miettinen.title
 msgid "Miettinen's Method"
@@ -77832,7 +78029,7 @@ msgstr ""
 #: toolssummary/results/numericStats.columns.title
 #: vusanalysis/results/classBreakdown.columns.title
 msgid "Min"
-msgstr ""
+msgstr "Min"
 
 #: ihcthreshold/results/thresholdComparison.columns.title
 msgid "Min %"
@@ -78367,6 +78564,10 @@ msgstr ""
 msgid "Minimum number of samples required to split a node."
 msgstr ""
 
+#: decisioncompare/options/useOpaCriterion.title
+msgid "Minimum OPA criterion"
+msgstr ""
+
 #: survivalcont/options/cutoff_method/minpval.title
 msgid "Minimum P-value"
 msgstr ""
@@ -78689,7 +78890,7 @@ msgstr ""
 #: parallelplot/results/summary.columns.title
 #: toolssummary/results/summary.columns.title
 msgid "Missing"
-msgstr ""
+msgstr "Eksik"
 
 #: R/advancedraincloud.b.R
 msgid "Missing (%)"
@@ -78925,6 +79126,12 @@ msgstr ""
 msgid "Missing data: {n} of {total} cases ({percent}%)."
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"Missing data: {percent}% of rows will be removed ({removed} out of {total} "
+"rows)."
+msgstr ""
+
 #: datevalidator/options/day_impute.title
 msgid "Missing Day Imputation"
 msgstr ""
@@ -78954,6 +79161,13 @@ msgstr ""
 
 #: enhancedfrequency/results/results/variableSummary.columns.title
 msgid "Missing N"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Missing observations are removed only for variables used by each "
+"calculation. Variable names with spaces or special characters are handled "
+"automatically and restored in the output."
 msgstr ""
 
 #: featurequality/results/missing_data_analysis.columns.title
@@ -79431,6 +79645,8 @@ msgstr ""
 #: splinehazard/results/modelSummary.columns.title
 #: stagemigration/results/concordanceComparison.columns.title
 #: stagemigration/results/multifactorialResults.columns.title
+#: stagemigration/results/multifactorialModelDiagnostics.columns.title
+#: stagemigration/results/multivariableDCASummary.columns.title
 #: stagemigration/results/calibrationAnalysis.columns.title
 #: stratifiedparametric/results/modelComparisonTable.columns.title
 #: survival/results/rcsTestTable.columns.title
@@ -79924,6 +80140,10 @@ msgstr ""
 msgid "Model Diagnostics (check model assumptions and fit quality)"
 msgstr ""
 
+#: stagemigration/results/enhancedModelDiagnostics.title
+msgid "Model Diagnostics Comparison"
+msgstr ""
+
 #: multisurvival/ui[5][0][0][4].label
 msgid "Model Discrimination"
 msgstr ""
@@ -80100,6 +80320,10 @@ msgstr ""
 
 #: ncvregcox/results/model_interpretation.title
 msgid "Model Interpretation and Clinical Insights"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Model Metrics:"
 msgstr ""
 
 #: modelperformance/ui[2]/model1name.label
@@ -81144,7 +81368,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Most incomplete variable: {variable}, {pct}% missing"
-msgstr ""
+msgstr "En fazla eksik değeri olan değişken: {variable}, %{pct} eksik"
 
 #: R/nogoldstandard.b.R
 msgid "Most latent-class starts did not converge"
@@ -81601,6 +81825,10 @@ msgstr ""
 msgid "Multifactorial Comparison Type"
 msgstr ""
 
+#: stagemigration/results/multifactorialModelDiagnostics.title
+msgid "Multifactorial Model Diagnostics"
+msgstr ""
+
 #: stagemigration/results/multifactorialResults.title
 msgid "Multifactorial Model Results"
 msgstr ""
@@ -81997,6 +82225,10 @@ msgstr ""
 msgid "Multivariable Cox-regression, Adjusted Survival"
 msgstr ""
 
+#: stagemigration/results/multivariableDCASummary.title
+msgid "Multivariable Decision Curve Analysis"
+msgstr ""
+
 #: multisurvival/results/text.title
 msgid "Multivariable Survival"
 msgstr ""
@@ -82133,7 +82365,7 @@ msgstr ""
 #: R/reportcat.b.R
 #: R/summarydata.b.R
 msgid "N"
-msgstr ""
+msgstr "N"
 
 #: enhancedtables/options/stats_categorical/n_percent.title
 #: gtsummary/options/statistics/n_percent.title
@@ -82990,6 +83222,10 @@ msgstr ""
 msgid "Negative LR"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Negative LR: {value}"
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid "Negative Path"
 msgstr ""
@@ -83063,11 +83299,8 @@ msgstr ""
 
 #: R/timeinterval.b.R
 msgid ""
-"Negative time intervals detected (end date before start date) in {count} "
-"rows.\n"
-"Please correct the dates or enable 'Remove Negative Intervals'.\n"
-"Examples:\n"
-"{examples}"
+"Negative time intervals detected (end date before start date) in {count} of "
+"{total} rows ({pct}%)."
 msgstr ""
 
 #: R/linechart.b.R
@@ -83289,6 +83522,10 @@ msgstr ""
 msgid "Net benefit confidence intervals"
 msgstr ""
 
+#: decisioncurve/options/showNetBenefitCI.title
+msgid "Net Benefit Confidence Intervals"
+msgstr ""
+
 #: stagemigration/results/clinicalUtilityNetBenefit.columns.title
 msgid "Net Benefit Difference"
 msgstr ""
@@ -83356,6 +83593,10 @@ msgstr ""
 
 #: decisioncurve/options/showInterventionAvoided.title
 msgid "Net Interventions Avoided"
+msgstr ""
+
+#: decisioncurve/ui[6][0]/showInterventionAvoided.label
+msgid "Net interventions avoided"
 msgstr ""
 
 #: decisioncurve/results/interventionsAvoidedPlot.title
@@ -83696,6 +83937,7 @@ msgstr ""
 #: stagemigration/results/integratedAUCAnalysis.columns.title
 #: stagemigration/results/pseudoR2Results.columns.title
 #: stagemigration/results/enhancedPseudoR2.columns.title
+#: stagemigration/results/enhancedModelDiagnostics.columns.title
 #: stagemigration/results/comparativeAnalysisDashboard.columns.title
 #: stagemigration/results/competingRisksSummary.columns.title
 #: stagemigration/results/multiStateComparison.columns.title
@@ -83925,6 +84167,10 @@ msgstr ""
 msgid "No categorical variables found."
 msgstr ""
 
+#: stagemigration/results/personalizedRiskSummary.columns.title
+msgid "No Change (%)"
+msgstr ""
+
 #: patientreported/options/change_analysis/none.title
 msgid "No Change Analysis"
 msgstr ""
@@ -84120,6 +84366,12 @@ msgid ""
 "does not substitute for the usual range, duplicate, and missingness checks."
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"No diagnostic predictor is available. Diagnostic metrics were skipped; the "
+"prediction nomogram can still be generated from the regression model."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "NO EVALUABLE PATIENTS"
 msgstr ""
@@ -84155,7 +84407,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "no evidence of departure from normality"
-msgstr ""
+msgstr "normallikten sapma lehine kanıt yok"
 
 #: R/lassocox.b.R
 msgid ""
@@ -84262,6 +84514,10 @@ msgid ""
 "chi-square results in the summary table."
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "No observations were flagged beyond the IQR fences ({lower} to {upper})."
+msgstr "AAD sınırlarının ötesinde hiçbir gözlem işaretlenmedi ({lower} ile {upper})."
+
 #: R/decisioncombine.b.R
 msgid ""
 "No observations were found for pattern \"{pattern}\". This combination was "
@@ -84279,10 +84535,6 @@ msgstr ""
 #: qualitycontrol/options/outlier_detection/none.title
 #: referenceintervals/options/outlier_detection/none.title
 msgid "No Outlier Detection"
-msgstr ""
-
-#: R/summarydata.b.R
-msgid "No outliers detected (expected range {lower} to {upper})."
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -85566,14 +85818,14 @@ msgstr ""
 msgid ""
 "Normality was not assessed: the Shapiro-Wilk test could not be computed for "
 "this variable. Inspect the distribution visually instead."
-msgstr ""
+msgstr "Normallik değerlendirilmedi: Shapiro-Wilk testi bu değişken için hesaplanamadı. Bunun yerine dağılımı görsel olarak inceleyin."
 
 #: R/summarydata.b.R
 msgid ""
 "Normality was not assessed: the Shapiro-Wilk test needs between 3 and 5000 "
 "non-missing observations, and this variable has {n}. Inspect the "
 "distribution visually instead."
-msgstr ""
+msgstr "Normallik değerlendirilmedi: Shapiro-Wilk testi 3 ile 5000 arasında eksik olmayan gözlem gerektirir ve bu değişkende {n} gözlem vardır. Bunun yerine dağılımı görsel olarak inceleyin."
 
 #: agreement/options/confusionNormalize.title
 msgid "Normalization"
@@ -85909,6 +86161,10 @@ msgstr ""
 msgid "Note"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "NOTE"
+msgstr "NOT"
+
 #: R/checkdata.b.R
 msgid "NOTE ON THE CLINICAL PENALTY"
 msgstr ""
@@ -86069,6 +86325,10 @@ msgstr "Notlar"
 msgid "Nothing to summarise"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Notice"
+msgstr ""
+
 #: bayesianci/results/notices.title
 #: bayesianmetaanalysis/results/notices.title
 #: decisioncombine/results/notices.title
@@ -86184,6 +86444,10 @@ msgstr ""
 msgid "NRI by Event Status"
 msgstr ""
 
+#: R/psychopdaROC.b.R
+msgid "NRI caution for {variable}: {details}"
+msgstr ""
+
 #: stagemigration/options/nriClinicalThreshold.title
 msgid "NRI Clinical Threshold"
 msgstr ""
@@ -86202,6 +86466,12 @@ msgstr ""
 
 #: netreclassification/results/decomposition.title
 msgid "NRI Decomposition"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid ""
+"NRI for {variable} was not computed because fewer than 10 complete cases "
+"were available."
 msgstr ""
 
 #: psychopdaROC/options/nriThresholds.title
@@ -87900,6 +88170,10 @@ msgstr ""
 msgid "Observed Power"
 msgstr ""
 
+#: enhancedROC/options/useObservedPrevalence.title
+msgid "Observed prevalence"
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid "Observed Proportion"
 msgstr ""
@@ -88039,6 +88313,10 @@ msgstr ""
 msgid "Odds Ratio (OR):"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Odds ratio analysis completed successfully."
+msgstr ""
+
 #: package/analyses/oddsratio.menuSubtitle
 #: oddsratio/options.menuSubtitle
 msgid "Odds Ratio for Binary Outcomes"
@@ -88054,6 +88332,10 @@ msgstr ""
 #: oddsratio/ui.title
 #: oddsratio/results.title
 msgid "Odds Ratio Table and Plot"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Odds ratios interpretation"
 msgstr ""
 
 #: flexmultistate/options/time_scale/odds.title
@@ -88939,6 +89221,14 @@ msgstr "Optimal eşik"
 msgid "Optimal Threshold (%)"
 msgstr ""
 
+#: stagemigration/results/multivariableDCASummary.columns.title
+msgid "Optimal Threshold (max)"
+msgstr ""
+
+#: stagemigration/results/multivariableDCASummary.columns.title
+msgid "Optimal Threshold (min)"
+msgstr ""
+
 #: bayesiandiagnostic/options/threshold_analysis.title
 #: bayesiandiagnostic/results/thresholdAnalysis.title
 #: generalizedroc/results/thresholdTable.title
@@ -89257,7 +89547,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Optional normality testing and distribution diagnostics"
-msgstr ""
+msgstr "İsteğe bağlı normallik testi ve dağılım tanıları"
 
 #: R/lassocox.b.R
 msgid "Optional Package Not Installed"
@@ -89618,6 +89908,12 @@ msgstr ""
 msgid "Ordered factor"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"Ordered factor '{variable}' will be treated as nominal (unordered) for "
+"modeling and output."
+msgstr ""
+
 #: R/vartree.b.R
 msgid "Ordered progression of variable values (order matters)"
 msgstr ""
@@ -89919,6 +90215,7 @@ msgstr ""
 #: stagemigration/results/integratedAUCAnalysis.columns.title
 #: stagemigration/results/pseudoR2Results.columns.title
 #: stagemigration/results/enhancedPseudoR2.columns.title
+#: stagemigration/results/enhancedModelDiagnostics.columns.title
 #: stagemigration/results/comparativeAnalysisDashboard.columns.title
 #: stagemigration/results/competingRisksSummary.columns.title
 #: stagemigration/results/multiStateComparison.columns.title
@@ -90213,10 +90510,20 @@ msgstr ""
 msgid "Outcome is not binary after filtering."
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"Outcome label matches multiple variables after cleaning; using '{variable}'. "
+"Please verify selection."
+msgstr ""
+
 #: greyzoneroc/ui/outcomeLevel.label
 #: stratifiedparametric/options/outcomeLevel.title
 msgid "Outcome Level"
 msgstr "Sonuç düzeyi"
+
+#: R/oddsratio.b.R
+msgid "Outcome level modeled as the event: '{level}'."
+msgstr ""
 
 #: R/lassologistic.b.R
 msgid "outcome level not modelled"
@@ -90446,13 +90753,28 @@ msgid "Outcome variable for regression modeling"
 msgstr ""
 
 #: R/oddsratio.b.R
-msgid "Outcome variable has"
+msgid ""
+"Outcome variable has {n} levels. For odds ratio analysis, the outcome must "
+"be binary (exactly 2 levels). Consider creating a binary variable or using "
+"multinomial regression."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Outcome variable has very few observations in one category ({minCount} out "
+"of {totalCount}). Results may be unreliable."
 msgstr ""
 
 #: R/survival.b.R
 msgid ""
 "Outcome variable is required. Please select a variable that indicates "
 "whether an event occurred (e.g., death, recurrence)."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Outcome variable is severely imbalanced ({percent} in minority class). "
+"Consider using specialized methods for imbalanced data."
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -90483,6 +90805,16 @@ msgstr ""
 
 #: surveysurvival/ui[5][1].label
 msgid "Outcome Variable Output"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Outcome variable releveled: '{level}' is now modeled as the positive outcome "
+"(event)."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Outcome variable summary: {counts}"
 msgstr ""
 
 #: clinicaldashboard/options/outcomeVars.title
@@ -90576,14 +90908,14 @@ msgstr ""
 #: robustcorrelation/ui[3].label
 #: segmentationmetrics/options/outlier_detection.title
 msgid "Outlier Detection"
-msgstr ""
+msgstr "Aykırı Değer Saptama"
 
 #: clinicaldataintegration/options/outlierDetection.title
 #: clinicaldataintegration/ui[1][1]/outlierDetection.label
 #: hullplot/options/outlier_detection.title
 #: summarydata/options/outliers.title
 msgid "Outlier detection"
-msgstr ""
+msgstr "Aykırı değer saptama"
 
 #: checkdata/results/noOutliers.title
 #: checkdata/results/outliers.title
@@ -90628,7 +90960,7 @@ msgstr ""
 #: robustcorrelation/results/outlier_table.title
 #: summarydata/results/outlierReport.title
 msgid "Outlier Detection Results"
-msgstr ""
+msgstr "Aykırı Değer Saptama Sonuçları"
 
 #: package/analyses/outlierdetection.description
 #: outlierdetection/options.description.main
@@ -90732,6 +91064,7 @@ msgstr ""
 #: batcheffect/results/feature_quality.columns.title
 #: clinicaldataintegration/results/qualityAssessment.columns.title
 #: nonparametric/results/descriptives.columns.title
+#: stagemigration/results/multifactorialModelDiagnostics.columns.title
 msgid "Outliers"
 msgstr ""
 
@@ -90743,12 +91076,6 @@ msgstr ""
 msgid "Outliers Baseline"
 msgstr ""
 
-#: R/summarydata.b.R
-msgid ""
-"Outliers detected using IQR method (values beyond Q1-1.5\\u{D7}IQR or "
-"Q3+1.5\\u{D7}IQR):"
-msgstr ""
-
 #: checkdata/results/outlierMethodSummary.columns.title
 msgid "Outliers Found"
 msgstr ""
@@ -90757,7 +91084,7 @@ msgstr ""
 msgid ""
 "Outliers may indicate data entry errors, measurement issues, or genuine "
 "extreme values. Review outliers in clinical context before exclusion."
-msgstr ""
+msgstr "Aykırı değerler veri giriş hatalarını, ölçüm sorunlarını veya gerçek uç değerleri gösterebilir. Dışlamadan önce aykırı değerleri klinik bağlamda inceleyin."
 
 #: idi/results/outlierAnalysis.columns.title
 msgid "Outliers New Model"
@@ -91686,6 +92013,7 @@ msgstr ""
 #: stagemigration/results/concordanceComparison.columns.title
 #: stagemigration/results/nriResults.columns.title
 #: stagemigration/results/idiResults.columns.title
+#: stagemigration/results/idiComponents.columns.title
 #: stagemigration/results/adjustedCIndexComparison.columns.title
 #: stagemigration/results/nestedModelTests.columns.title
 #: stagemigration/results/stepwiseResults.columns.title
@@ -92187,6 +92515,10 @@ msgstr ""
 msgid "PABAK & Prevalence/Bias Indices"
 msgstr ""
 
+#: agreement/options/pabak.title
+msgid "PABAK & prevalence/bias indices"
+msgstr ""
+
 #: pathagreement/options/pabak.title
 msgid "PABAK Analysis"
 msgstr ""
@@ -92531,6 +92863,10 @@ msgstr ""
 
 #: agreement/results/pairwiseKappaTable.title
 msgid "Pairwise Kappa (Each Rater vs Reference)"
+msgstr ""
+
+#: agreement/options/pairwiseKappa.title
+msgid "Pairwise kappa (vs reference)"
 msgstr ""
 
 #: agreement/ui[24].label
@@ -94623,10 +94959,6 @@ msgstr ""
 msgid "Per-Case Hotspot Counts"
 msgstr ""
 
-#: agreement/results/itemModalAgreementHeading.title
-msgid "Per-Category Item-Modal Agreement"
-msgstr ""
-
 #: agreement/options/itemModalCategoryAgreement.title
 msgid "Per-category item-modal agreement"
 msgstr ""
@@ -96467,6 +96799,10 @@ msgstr ""
 msgid "Person-Years"
 msgstr ""
 
+#: stagemigration/results/personalizedRiskSummary.title
+msgid "Personalized Risk Prediction Summary"
+msgstr ""
+
 #: treatmentoptim/results/treatmentSelection.title
 msgid "Personalized Treatment Selection"
 msgstr ""
@@ -96514,7 +96850,12 @@ msgid "PFS Time"
 msgstr ""
 
 #: pheval/results/stratifiedResults.columns.title
+#: stagemigration/results/multifactorialModelDiagnostics.columns.title
 msgid "PH Assumption"
+msgstr ""
+
+#: stagemigration/results/multifactorialModelDiagnostics.columns.title
+msgid "PH Global p"
 msgstr ""
 
 #: treatmentoptim/results/pharmacokineticModel.title
@@ -96951,14 +97292,30 @@ msgid ""
 "outcome variable."
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Please select the positive outcome level. Available levels: {levels}"
+msgstr ""
+
 #: R/reportcat.b.R
 msgid "Please select the Variables you wish to analyze."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Please select which level of your outcome variable represents the 'positive' "
+"case (e.g., 'Dead', 'Event', 'Yes', 'Positive')."
 msgstr ""
 
 #: R/decisiongraph.b.R
 msgid ""
 "Please specify decision variables, probabilities, costs, or utilities to "
 "create a decision tree."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Please verify that '{level}' is the correct positive level. If this is "
+"wrong, diagnostic metrics will be inverted."
 msgstr ""
 
 #: R/linechart.b.R
@@ -97652,7 +98009,7 @@ msgstr ""
 msgid "Plot Selection"
 msgstr ""
 
-#: enhancedROC/ui[10].label
+#: enhancedROC/ui[13].label
 #: factoranalysis/ui[5].label
 msgid "Plot Settings"
 msgstr ""
@@ -98998,6 +99355,10 @@ msgstr ""
 msgid "Positive LR"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Positive LR: {value}"
+msgstr ""
+
 #: pathsampling/options/positiveLymphNodes.title
 #: pathsampling/ui[8][1][0][1].label
 msgid "Positive Lymph Nodes"
@@ -99027,6 +99388,14 @@ msgstr ""
 #: modelval/options/outcomePositive.title
 #: modelval/ui/variablesupplier[0]/outcomePositive.label
 msgid "Positive Outcome Level"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Positive Outcome Level Required"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Positive outcome level:"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -99074,6 +99443,10 @@ msgid ""
 "Positive Predictive Value: Probability of disease given a positive test. "
 "This IS the post-test probability of disease. Depends on prevalence, "
 "sensitivity and specificity."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Positive predictor level:"
 msgstr ""
 
 #: ihcscoring/results/multiplecutoffs/cutoffresults.columns.title
@@ -99182,6 +99555,12 @@ msgstr ""
 #: R/lassologistic.b.R
 msgid "Possible Overfitting"
 msgstr "Olası Aşırı Uyum"
+
+#: R/oddsratio.b.R
+msgid ""
+"Possible separation detected for '{variable}' (zero cells in 2x2 table). "
+"Consider penalized/Firth logistic regression."
+msgstr ""
 
 #: R/multisurvival.b.R
 msgid "Possible solutions:"
@@ -99568,6 +99947,12 @@ msgid ""
 "Potential non-linear relationship detected. Consider polynomial or spline "
 "fitting."
 msgstr ""
+
+#: R/summarydata.b.R
+msgid ""
+"Potential outliers flagged using the IQR method (values beyond "
+"Q1-1.5\\u{D7}IQR or Q3+1.5\\u{D7}IQR):"
+msgstr "AAD yöntemiyle işaretlenen potansiyel aykırı değerler (Q1-1.5×AAD veya Q3+1.5×AAD sınırlarının ötesindeki değerler):"
 
 #: R/lassocox.b.R
 msgid "Potential predictors for selection (2 or more variables)"
@@ -100789,8 +101174,20 @@ msgstr ""
 msgid "Prediction nomogram and diagnostic metrics"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"Prediction nomogram could not be generated due to model fitting issues; see "
+"the Nomogram panel for details. The odds ratio analysis completed "
+"successfully, and the nomogram is an unvalidated visualization whose failure "
+"does not alter the fitted odds-ratio table."
+msgstr ""
+
 #: oddsratio/results/nomogram.title
 msgid "Prediction Nomogram Details"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Prediction nomogram not generated."
 msgstr ""
 
 #: spikeslabpriors/results/predictionPerformance.title
@@ -101134,6 +101531,10 @@ msgstr ""
 msgid "Predictor Distribution by Class"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Predictor Level Modeling:"
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid "predictor missing"
 msgstr ""
@@ -101364,6 +101765,18 @@ msgstr ""
 msgid "Prefix for saved factor score variables"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid ""
+"Preliminary distribution review before a dedicated reference-interval "
+"analysis"
+msgstr "Özel bir referans aralığı analizinden önce ön dağılım incelemesi"
+
+#: R/summarydata.b.R
+msgid ""
+"Preliminary exploration when planning a dedicated laboratory "
+"reference-interval study"
+msgstr "Özel bir laboratuvar referans aralığı çalışması planlanırken ön keşif"
+
 #: epidemiosurvival/options/case_cohort_method/prentice.title
 msgid "Prentice Method"
 msgstr ""
@@ -101374,7 +101787,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Preparation for statistical modeling"
-msgstr ""
+msgstr "İstatistiksel modellemeye hazırlık"
 
 #: R/jjpiestats.b.R
 msgid "Preparation time"
@@ -101423,7 +101836,7 @@ msgstr ""
 msgid "Preset Overrides"
 msgstr ""
 
-#: stagemigration/ui[1][2].label
+#: stagemigration/ui[1][1].label
 msgid "Presets & Settings"
 msgstr ""
 
@@ -101929,6 +102342,10 @@ msgstr ""
 #: psychopdaROC/options/priorPrecision.title
 #: psychopdaROC/ui[11][0]/priorPrecision.label
 msgid "Prior Precision"
+msgstr ""
+
+#: psychopdaROC/options/usePriorPrev.title
+msgid "Prior prevalence"
 msgstr ""
 
 #: psychopdaROC/options/priorPrev.title
@@ -103598,10 +104015,6 @@ msgstr ""
 msgid "Publication Bias Tests"
 msgstr ""
 
-#: stagemigration/options/clinicalPreset/publication_ready.title
-msgid "Publication Manuscript (All Methods + Visualizations)"
-msgstr ""
-
 #: studydiagram/options/color_scheme/minimal.title
 msgid "Publication Minimal"
 msgstr ""
@@ -103897,12 +104310,12 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Q1, Q3"
-msgstr ""
+msgstr "Q1, Q3"
 
 #: R/summarydata.b.R
 #: featurequality/results/distribution_analysis.columns.title
 msgid "Q25"
-msgstr ""
+msgstr "Q25"
 
 #: clinicaldashboard/results/outcomeStats.columns.title
 #: friedmantest/results/descriptiveStats.columns.title
@@ -103922,7 +104335,7 @@ msgstr ""
 #: R/summarydata.b.R
 #: featurequality/results/distribution_analysis.columns.title
 msgid "Q75"
-msgstr ""
+msgstr "Q75"
 
 #: qualityoflife/options/qaly_calculation.title
 msgid "QALY Calculation"
@@ -104132,7 +104545,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Quality control and outlier detection"
-msgstr ""
+msgstr "Kalite kontrolü ve aykırı değer saptama"
 
 #: ihcscoring/options/quality_control.title
 #: multiplexanalysis/results/qualitycontrol.title
@@ -104494,10 +104907,6 @@ msgstr ""
 msgid "Questionnaire/Survey"
 msgstr ""
 
-#: stagemigration/options/complexityMode/quick.title
-msgid "Quick Clinical Check (5-10 min)"
-msgstr ""
-
 #: jjbarstats/ui[0].label
 #: jjpiestats/ui[0].label
 msgid "Quick Clinical Setup"
@@ -104526,10 +104935,6 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "Quick Tips:"
-msgstr ""
-
-#: stagemigration/ui[1][0][0][1].label
-msgid "Quick: Matrix + C-index (5-10 min)"
 msgstr ""
 
 #: ggprism/options/prism_palette/quiet.title
@@ -105168,7 +105573,7 @@ msgstr ""
 #: ihccluster/results/ratioClassificationTable.columns.title
 #: qualityoflife/results/health_utilities_summary.columns.title
 msgid "Range"
-msgstr ""
+msgstr "Aralık"
 
 #: groupedbar/options/sortorder/range.title
 msgid "Range (Max-Min)"
@@ -106000,6 +106405,10 @@ msgstr ""
 msgid "Re-run the analysis"
 msgstr ""
 
+#: R/timeinterval.b.R
+msgid "Read as a spreadsheet day count, {value} is {date}."
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid ""
 "Read the nomogram by drawing a line from the pre-test probability on the "
@@ -106784,6 +107193,14 @@ msgstr ""
 msgid "Reference Line Label"
 msgstr ""
 
+#: decisioncurve/options/showReferenceLinesLabels.title
+msgid "Reference Line Labels"
+msgstr ""
+
+#: decisioncurve/ui[3][0]/showReferenceLinesLabels.label
+msgid "Reference line labels"
+msgstr ""
+
 #: jforester/options/reference_line.title
 #: jforestmodel/options/reference_value.title
 #: jjdotplotstats/options/testvalue.title
@@ -106919,10 +107336,6 @@ msgstr ""
 
 #: labinterpret/options/reference_source.title
 msgid "Reference Range Source"
-msgstr ""
-
-#: R/summarydata.b.R
-msgid "Reference range validation"
 msgstr ""
 
 #: labinterpret/options/reference_visualization.title
@@ -107788,6 +108201,10 @@ msgstr ""
 msgid "Remove Collinear Variables"
 msgstr ""
 
+#: timeinterval/options/remove_extreme.title
+msgid "Remove extreme values"
+msgstr ""
+
 #: haralicktexture/options/feature_selection/correlation_filter.title
 msgid "Remove Highly Correlated (r>0.9)"
 msgstr ""
@@ -108032,7 +108449,7 @@ msgstr ""
 msgid "Report continuous variables as median (Q1, Q3) (tableone style)"
 msgstr ""
 
-#: stagemigration/ui[1][1][0]/preferredLanguage.label
+#: stagemigration/ui[1][0][0]/preferredLanguage.label
 msgid "Report Language"
 msgstr ""
 
@@ -108069,7 +108486,6 @@ msgid "Report Sentences"
 msgstr ""
 
 #: chisqposttest/options/copyReadySentences.title
-#: summarydata/options/report_sentences.title
 #: venn/options/reportSentences.title
 msgid "Report sentences"
 msgstr ""
@@ -108384,10 +108800,6 @@ msgstr ""
 
 #: costeffectiveness/results/evppiTable.columns.title
 msgid "Research Priority"
-msgstr ""
-
-#: stagemigration/options/clinicalPreset/research_study.title
-msgid "Research Study (Standard + Advanced Statistics)"
 msgstr ""
 
 #: enhancedtables/options/table_type/tableone.title
@@ -109173,6 +109585,14 @@ msgstr ""
 
 #: lassologistic/options/showSummary.title
 msgid "Results summary"
+msgstr ""
+
+#: decisioncurve/options/showTable.title
+msgid "Results Table"
+msgstr ""
+
+#: decisioncurve/ui[2][0]/showTable.label
+msgid "Results table"
 msgstr ""
 
 #: distributionfit/ui[4][0].label
@@ -110220,6 +110640,10 @@ msgstr ""
 msgid "RMST(PFS)"
 msgstr ""
 
+#: agreement/options/robinsonA.title
+msgid "Robinson's A (ordinal agreement index)"
+msgstr ""
+
 #: agreement/results/robinsonATable.title
 msgid "Robinson's A (Ordinal Agreement Index) Results"
 msgstr ""
@@ -110948,10 +111372,6 @@ msgstr ""
 msgid "Rounding and repeated values are expected in clinical measurement"
 msgstr ""
 
-#: stagemigration/options/clinicalPreset/routine_clinical.title
-msgid "Routine Clinical Validation (Basic + Key Metrics)"
-msgstr ""
-
 #: R/benford.b.R
 #: checkdata/results/outliers.columns.title
 #: contTables/options/pcRow.title
@@ -111584,6 +112004,12 @@ msgstr ""
 #: simpleSurvivalPower/results/competing_risks_table.columns.title
 #: survivalPower/results/competing_risks_table.columns.title
 msgid "Sample Size Impact"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Sample size is small relative to number of explanatory variables. Risk of "
+"overfitting or convergence issues."
 msgstr ""
 
 #: diagnosticsamplesize/results/sample_size_statement.title
@@ -112440,6 +112866,10 @@ msgstr ""
 msgid "Scientific Visualization with Grafify"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Scope limitation"
+msgstr "Kapsam sınırlaması"
+
 #: R/nogoldstandard.b.R
 msgid "Scope warning:"
 msgstr ""
@@ -112821,7 +113251,7 @@ msgstr ""
 #: toolssummary/results/numericStats.columns.title
 #: treatmentmeta/results/bayesian_results.columns.title
 msgid "SD"
-msgstr ""
+msgstr "SS"
 
 #: recist/results/stratifiedTable.columns.title
 msgid "SD (%)"
@@ -113007,6 +113437,7 @@ msgstr ""
 #: smoothtimevary/results/effectsTable.columns.title
 #: splinehazard/results/parametersTable.columns.title
 #: stagemigration/results/concordanceComparison.columns.title
+#: stagemigration/results/idiComponents.columns.title
 #: stagemigration/results/multifactorialResults.columns.title
 #: stagemigration/results/adjustedCIndexComparison.columns.title
 #: stagemigration/results/stageSpecificCIndex.columns.title
@@ -113534,6 +113965,14 @@ msgstr ""
 msgid "Select numeric variable for segment values."
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"Select one binary outcome, identify its positive/event level, and add one or "
+"more categorical or continuous explanatory variables. The analysis reports "
+"logistic-regression odds ratios with confidence intervals and a matching "
+"forest plot."
+msgstr ""
+
 #: decisioncombine/options/filterStatistic.description.ui
 msgid ""
 "Select one metric, or use the plot-specific default metric set. The bar "
@@ -114010,6 +114449,12 @@ msgstr ""
 
 #: bayesianma/results/selectedModel.title
 msgid "Selected Model Details"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Selected positive outcome level '{level}' not found in data. Available "
+"levels: {levels}"
 msgstr ""
 
 #: decisioncurve/options/selectedThresholds.title
@@ -114493,6 +114938,10 @@ msgstr ""
 msgid "Sensitivity Analysis: PPV/NPV vs Prevalence"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Sensitivity and specificity"
+msgstr ""
+
 #: enhancedROC/results/results/cutoffAnalysisPlot.description
 msgid "Sensitivity and specificity across cutoff values"
 msgstr ""
@@ -114626,6 +115075,10 @@ msgstr ""
 #: package/analyses/decisioncalculator.menuSubtitle
 #: decisioncalculator/options.menuSubtitle
 msgid "Sensitivity, Specificity, PPV, NPV, ..."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Sensitivity: {value}"
 msgstr ""
 
 #: decisionpanel/ui[2][0][1].label
@@ -115326,7 +115779,7 @@ msgstr ""
 #: R/summarydata.b.R
 #: featurequality/options/normality_method/shapiro.title
 msgid "Shapiro-Wilk Test"
-msgstr ""
+msgstr "Shapiro-Wilk Testi"
 
 #: R/raincloud.b.R
 msgid ""
@@ -116233,10 +116686,6 @@ msgstr ""
 msgid "Show Decision Analysis"
 msgstr ""
 
-#: decisioncurve/options/showPlot.title
-msgid "Show Decision Curve Plot"
-msgstr ""
-
 #: enhancedROC/options/decisionImpactTable.description
 msgid "Show decision impact at various thresholds"
 msgstr ""
@@ -116985,10 +117434,6 @@ msgstr ""
 msgid "Show intersections with zero size"
 msgstr ""
 
-#: decisioncurve/ui[6][0]/showInterventionAvoided.label
-msgid "Show interventions avoided"
-msgstr ""
-
 #: mixedmodelanova/options/show_icc.title
 msgid "Show Intraclass Correlation (ICC)"
 msgstr ""
@@ -117413,10 +117858,6 @@ msgstr ""
 #: modelval/options/showNetBenefit.title
 #: modelval/ui[3][0]/showNetBenefit.label
 msgid "Show Net Benefit (DCA)"
-msgstr ""
-
-#: decisioncurve/options/showNetBenefitCI.title
-msgid "Show Net Benefit Confidence Intervals"
 msgstr ""
 
 #: bayesiannetworkma/options/show_network_summary.title
@@ -117970,14 +118411,6 @@ msgstr ""
 msgid "Show Reference Line"
 msgstr ""
 
-#: decisioncurve/options/showReferenceLinesLabels.title
-msgid "Show Reference Line Labels"
-msgstr ""
-
-#: decisioncurve/ui[3][0]/showReferenceLinesLabels.label
-msgid "Show reference line labels"
-msgstr ""
-
 #: tidyplots/options/showReferenceLines.title
 msgid "Show Reference Lines"
 msgstr ""
@@ -118057,13 +118490,8 @@ msgid "Show Results Summary"
 msgstr ""
 
 #: conditionalsurvival/options/showTable.title
-#: decisioncurve/options/showTable.title
 #: timeupdatedsurvival/options/showTable.title
 msgid "Show Results Table"
-msgstr ""
-
-#: decisioncurve/ui[2][0]/showTable.label
-msgid "Show results table"
 msgstr ""
 
 #: fragilityindex/options/showTrajectory.title
@@ -119321,6 +119749,10 @@ msgstr ""
 msgid "significant"
 msgstr ""
 
+#: stagemigration/results/multifactorialModelDiagnostics.columns.title
+msgid "Significant Coefficients"
+msgstr ""
+
 #: R/jjcorrmat.b.R
 msgid "Significant correlations (%s-adjusted p &lt; %s)"
 msgstr ""
@@ -119933,7 +120365,7 @@ msgstr ""
 #: jsummarytools/results/descriptive_stats.columns.title
 #: timeupdatesurvival/results/residualAnalysis.columns.title
 msgid "Skewness"
-msgstr ""
+msgstr "Çarpıklık"
 
 #: featurequality/options/skewness_analysis.title
 msgid "Skewness & Kurtosis Analysis"
@@ -120097,6 +120529,12 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "Small sample size (n=%d) may limit statistical power."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Small sample size after removing missing data: {n} observations. Results may "
+"be unreliable."
 msgstr ""
 
 #: R/benford.b.R
@@ -121484,6 +121922,10 @@ msgstr ""
 msgid "Specificity Range (for high-specificity applications)"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Specificity: {value}"
+msgstr ""
+
 #: decisionpanel/ui[2][0][2].label
 msgid "Specificity: Prioritize avoiding false positives (confirmatory)"
 msgstr ""
@@ -121508,6 +121950,12 @@ msgstr ""
 msgid ""
 "Specified event level '%s' not found in the outcome variable. Observed "
 "values: %s."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Specified positive outcome level '{level}' not found in outcome variable. "
+"Available levels: {levels}"
 msgstr ""
 
 #: jjhistostats/options/test.value.description.ui
@@ -122021,6 +122469,13 @@ msgstr ""
 msgid "Splitting Rule"
 msgstr ""
 
+#: R/timeinterval.b.R
+msgid ""
+"Spreadsheets and statistics packages store a date as a count of days since "
+"an epoch, and exporting the column as plain numbers loses the date "
+"formatting."
+msgstr ""
+
 #: bayesiannetworkma/options/network_layout/spring.title
 #: grafify/options/color_palette/spring.title
 msgid "Spring"
@@ -122478,10 +122933,6 @@ msgstr ""
 msgid "Standard (with reference lines)"
 msgstr ""
 
-#: stagemigration/options/complexityMode/standard.title
-msgid "Standard Analysis (30-60 min)"
-msgstr ""
-
 #: deeplearningprediction/options/prediction_type/classification.title
 msgid "Standard Classification"
 msgstr ""
@@ -122520,7 +122971,7 @@ msgstr ""
 #: R/summarydata.b.R
 #: grafify/options/error_type/sd.title
 msgid "Standard Deviation (SD)"
-msgstr ""
+msgstr "Standart Sapma (SS)"
 
 #: tidydensity/options/normal_sd.title
 msgid "Standard Deviation (σ)"
@@ -122677,10 +123128,6 @@ msgstr ""
 msgid "Standard Z-score"
 msgstr ""
 
-#: stagemigration/ui[1][0][0][2].label
-msgid "Standard: + NRI, curves, tests (15-20 min)"
-msgstr ""
-
 #: pathologyagreement/options/ba_method.description.ui
 msgid ""
 "Standard: Fixed limits of agreement (mean +/- 1.96*SD). Assumes constant "
@@ -122763,7 +123210,7 @@ msgid "Standardize variables (z-score)"
 msgstr ""
 
 #: timeinterval/options/time_basis/standardized.title
-msgid "Standardized (30.44-day months, 365.25-day years)"
+msgid "Standardized (30.4375-day months, 365.25-day years)"
 msgstr ""
 
 #: package/analyses/gcomputation.menuSubtitle
@@ -123321,10 +123768,6 @@ msgstr ""
 msgid "Statistical Approach"
 msgstr ""
 
-#: R/summarydata.b.R
-msgid "Statistical assumption verification"
-msgstr ""
-
 #: clinicaltrialdesign/results/assumptions_check.title
 #: jjbetweenstats/results/assumptions.title
 #: jjcorrmat/results/assumptions.title
@@ -123536,7 +123979,7 @@ msgstr ""
 #: summarydata/results/glossary.title
 #: venn/results/glossary.title
 msgid "Statistical Glossary"
-msgstr ""
+msgstr "İstatistik Sözlüğü"
 
 #: chisqposttest/options/showGlossary.title
 #: ihcheterogeneity/options/showGlossary.title
@@ -123890,7 +124333,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Statistical Terminology"
-msgstr ""
+msgstr "İstatistik Terimleri"
 
 #: R/swimmerplot_html.R
 #: R/waterfall.b.R
@@ -125122,7 +125565,12 @@ msgid ""
 msgstr ""
 
 #: R/decisioncalculator.b.R
+#: R/summarydata.b.R
 msgid "STRONG WARNING"
+msgstr "GÜÇLÜ UYARI"
+
+#: R/oddsratio.b.R
+msgid "Strong warning"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -126101,7 +126549,7 @@ msgstr ""
 #: summarydata/results.title
 #: summarydata2/results.title
 msgid "Summary of Continuous Variables"
-msgstr ""
+msgstr "Sürekli Değişkenlerin Özeti"
 
 #: jcorrelation/results/summary.description
 msgid "summary of correlation analysis"
@@ -130133,7 +130581,7 @@ msgid ""
 "normality, it only means no departure was detected. The test is sensitive to "
 "sample size, flagging trivial departures in large samples and missing real "
 "ones in small samples, so pair it with a visual check of the distribution."
-msgstr ""
+msgstr "Verilerin normal dağılımdan sapıp sapmadığını sınar. Küçük bir p-değeri (p &lt;= 0.05) sapma lehine kanıttır; daha büyük bir p-değeri normalliği kanıtlamaz, yalnızca bir sapmanın saptanmadığını gösterir. Test örneklem büyüklüğüne duyarlıdır: büyük örneklemlerde önemsiz sapmaları işaretleyebilir, küçük örneklemlerde gerçek sapmaları kaçırabilir. Bu nedenle testi dağılımın görsel incelemesiyle birlikte değerlendirin."
 
 #: package/analyses/benford.description
 #: benford/options.description.main
@@ -130214,6 +130662,12 @@ msgstr ""
 
 #: R/jjpubr.b.R
 msgid "The 'ggpubr' package is required. Install with: install.packages('ggpubr')"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"The 'logistf' package is required for Firth penalized regression but is not "
+"installed. Falling back to standard logistic regression."
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -130613,17 +131067,17 @@ msgstr ""
 msgid ""
 "The data are consistent with a normal distribution (the test did not detect "
 "a departure, which is not the same as establishing normality)."
-msgstr ""
+msgstr "Veriler normal dağılımla uyumludur (test bir sapma saptamamıştır; bu, normalliğin kanıtlandığı anlamına gelmez)."
 
 #: R/summarydata.b.R
 msgid "The data are constant and have no variance."
-msgstr ""
+msgstr "Veriler sabittir ve varyans yoktur."
 
 #: R/summarydata.b.R
 msgid ""
 "The data are not consistent with a normal distribution; inspect the "
 "distribution visually and use appropriate tests."
-msgstr ""
+msgstr "Veriler normal dağılımla uyumlu değildir; dağılımı görsel olarak inceleyin ve uygun testleri kullanın."
 
 #: jjoncoplot/options/data.description.jamovi
 msgid "The data as a data frame containing mutation information."
@@ -130723,7 +131177,7 @@ msgstr ""
 msgid ""
 "The dataset has no rows. If a row filter is active, check that it does not "
 "exclude every case."
-msgstr ""
+msgstr "Veri kümesinde satır yoktur. Etkin bir satır filtresi varsa tüm olguları dışlamadığını kontrol edin."
 
 #: R/benford.b.R
 msgid ""
@@ -130774,9 +131228,10 @@ msgstr ""
 #: R/summarydata.b.R
 msgid ""
 "The decimal places option governs the text summary, the skewness and "
-"kurtosis values, the visual summary table, the outlier report and the "
-"copy-ready clinical summary. P-values are always shown to 3 decimal places."
-msgstr ""
+"kurtosis values, the visual summary table, the outlier report and the draft "
+"statistical summary. P-values are normally shown to 3 decimal places, with "
+"additional digits near 0.05 when needed to preserve the test decision."
+msgstr "Ondalık basamak seçeneği metin özetini, çarpıklık ve basıklık değerlerini, görsel özet tablosunu, aykırı değer raporunu ve taslak istatistiksel özeti belirler. P-değerleri normalde 3 ondalık basamakla gösterilir; test kararını korumak gerektiğinde 0,05 yakınında ek basamaklar kullanılır."
 
 #: R/kappaSizePower.b.R
 msgid ""
@@ -131008,6 +131463,12 @@ msgid ""
 "(control better than treatment)."
 msgstr ""
 
+#: R/summarydata.b.R
+msgid ""
+"The high missing-data rate may affect interpretation; review the "
+"missing-data mechanism."
+msgstr "Yüksek eksik veri oranı yorumlamayı etkileyebilir; eksik veri mekanizmasını inceleyin."
+
 #: R/outlierdetection.b.R
 msgid ""
 "The highest density interval cannot be estimated at a confidence level of "
@@ -131036,6 +131497,13 @@ msgid ""
 "apply. Check the positive level selected for the reference standard and for "
 "each test before interpreting this ranking."
 msgstr ""
+
+#: R/summarydata.b.R
+msgid ""
+"The inline distribution plots could not be rendered, so a numeric summary "
+"table is shown instead. The descriptive estimates remain available; review "
+"the text summary for the same values."
+msgstr "Satır içi dağılım grafikleri oluşturulamadığı için bunun yerine sayısal bir özet tablosu gösteriliyor. Tanımlayıcı tahminler kullanılabilir durumdadır; aynı değerler için metin özetini inceleyin."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -131081,6 +131549,10 @@ msgid ""
 "warning, not a clinical adequacy threshold; precision also depends on class "
 "balance, response patterns, and the number of tests. Inspect bootstrap "
 "intervals and convergence, and consider collecting more observations."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "The level '{level}' is used as the positive/exposure category as specified."
 msgstr ""
 
 #: venn/options/var1true.description.jamovi
@@ -131380,6 +131852,24 @@ msgstr ""
 msgid "The observed results involve a trade-off between sensitivity and specificity."
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"The odds ratio could not be estimated for: {variables}. The confidence "
+"interval is unbounded, which means the data separate the outcome perfectly "
+"(or nearly so) for that variable and the maximum-likelihood estimate does "
+"not exist. The cell is shown as 'not estimable' rather than as the arbitrary "
+"large number the fitting algorithm stopped at. Enable Firth penalized "
+"logistic regression to obtain a finite estimate, or combine sparse "
+"categories. Note that the forest plot below is drawn by finalfit from the "
+"same unpenalized fit and will still show the unbounded estimate."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"The odds-ratio model uses Firth penalized likelihood, whereas the available "
+"nomogram implementation uses ordinary maximum-likelihood logistic regression."
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid "The optimal cutoff divides patients into high-risk vs low-risk groups"
 msgstr ""
@@ -131505,6 +131995,10 @@ msgid ""
 "probability, so the plot is omitted. Check the test coding."
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "The positive predictor level was automatically detected as: '{level}'"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "The positive-response probability and NPV are fixed at 100% by construction "
@@ -131522,6 +132016,13 @@ msgid ""
 "The pre-study probability that the tested relationships are true. In "
 "exploratory research fields, this may be 10 percent or lower. In "
 "confirmatory research with strong theoretical basis, it may be higher."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"The prediction nomogram was not generated because Firth penalized regression "
+"is selected. Diagnostic metrics, when available, remain unadjusted 2x2 "
+"estimates."
 msgstr ""
 
 #: kappaSizeFixedN/options/kappa0.description.ui
@@ -131749,6 +132250,12 @@ msgstr ""
 msgid "The selected outcome could not be mapped after variable-name normalization."
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"The selected positive predictor level '{level}' is not present among paired "
+"complete observations. Available levels: {levels}."
+msgstr ""
+
 #: R/nonparametric.b.R
 msgid ""
 "The selected post-hoc method (%s) is not yet implemented; pairwise Wilcoxon "
@@ -131820,11 +132327,11 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "The Shapiro-Wilk test showed {verdict} (p &lt; 0.001)."
-msgstr ""
+msgstr "Shapiro-Wilk testi {verdict} gösterdi (p &lt; 0.001)."
 
 #: R/summarydata.b.R
 msgid "The Shapiro-Wilk test showed {verdict} (p = {p})."
-msgstr ""
+msgstr "Shapiro-Wilk testi {verdict} gösterdi (p = {p})."
 
 #: R/kappaSizePower.b.R
 msgid ""
@@ -132275,6 +132782,13 @@ msgid ""
 "selected."
 msgstr ""
 
+#: R/timeinterval.b.R
+msgid ""
+"These rows cannot be analysed: a negative interval subtracts from total "
+"person-time and would corrupt any incidence rate computed from that "
+"denominator."
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid ""
 "These rows have a 2-by-2 cell count below 5 (smallest cell {minimum}): "
@@ -132290,12 +132804,18 @@ msgstr ""
 msgid ""
 "These statistics help assess data distribution, identify unusual values, and "
 "guide appropriate statistical analyses."
-msgstr ""
+msgstr "Bu istatistikler veri dağılımını değerlendirmeye, olağandışı değerleri belirlemeye ve uygun istatistiksel analizleri yönlendirmeye yardımcı olur."
 
 #: R/reportcat.b.R
 msgid ""
 "These summaries are suitable for baseline characteristics tables, data "
 "quality assessment, and descriptive analysis in clinical research."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"These unadjusted diagnostic metrics depend on these interpretations being "
+"correct"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -132315,12 +132835,13 @@ msgid ""
 "measurements: %s. The table styles do not agree on how to handle them: "
 "gtsummary summarises them as counts and percentages and tests them with a "
 "chi-square or Fisher's exact test, finalfit does the same only when the "
-"column has fewer than 5 distinct values, and arsenal, NEJM, Lancet and Hmisc "
-"treat any numeric column as continuous and test the codes with ANOVA or "
-"Kruskal-Wallis. The p-value for these variables can therefore change when "
-"you switch style, with nothing else changed. To get the same handling in "
-"every style, set their measure type to Nominal or Ordinal in the data; leave "
-"them Continuous if they really are measurements."
+"column has fewer than 5 distinct values counting missing as one of them, so "
+"a four-value score with any missing data is treated as continuous there, and "
+"arsenal, NEJM, Lancet and Hmisc treat any numeric column as continuous and "
+"test the codes with ANOVA or Kruskal-Wallis. The p-value for these variables "
+"can therefore change when you switch style, with nothing else changed. To "
+"get the same handling in every style, set their measure type to Nominal or "
+"Ordinal in the data; leave them Continuous if they really are measurements."
 msgstr ""
 
 #: R/crosstable.b.R
@@ -132562,6 +133083,13 @@ msgid ""
 "patients you actually have."
 msgstr ""
 
+#: R/summarydata.b.R
+msgid ""
+"This descriptive analysis does not establish or verify clinical reference "
+"intervals and does not by itself verify the assumptions of a later "
+"statistical model."
+msgstr "Bu tanımlayıcı analiz klinik referans aralıklarını oluşturmaz veya doğrulamaz ve daha sonraki bir istatistiksel modelin varsayımlarını tek başına doğrulamaz."
+
 #: R/venn.b.R
 msgid ""
 "This figure covers those two sets only; the other %d selected variable(s) "
@@ -132695,6 +133223,10 @@ msgid ""
 "intervals."
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "This is required for correct calculation of:"
+msgstr ""
+
 #: R/kappaSizeFixedN.b.R
 msgid ""
 "This is the bound the study reaches if the agreement it observes lands "
@@ -132808,7 +133340,7 @@ msgid ""
 "It provides both a textual summary and a visually appealing summary table.\n"
 "Optionally, you can enable distribution diagnostics to examine normality, "
 "skewness, and kurtosis."
-msgstr ""
+msgstr "Bu modül sürekli değişkenler için tanımlayıcı istatistikler üretir.\nHem metinsel bir özet hem de görsel olarak zengin bir özet tablosu sunar.\nİsteğe bağlı olarak normallik, çarpıklık ve basıklığı incelemek için dağılım tanılarını etkinleştirebilirsiniz."
 
 #: package/analyses/dataquality.description
 #: dataquality/options.description.main
@@ -132966,6 +133498,12 @@ msgid ""
 "percentages, missing value patterns, and data quality metrics."
 msgstr ""
 
+#: R/summarydata.b.R
+msgid ""
+"This tool generates descriptive statistics for numeric variables. Select one "
+"or more continuous variables from the options panel."
+msgstr "Bu araç sayısal değişkenler için tanımlayıcı istatistikler üretir. Seçenekler panelinden bir veya daha fazla sürekli değişken seçin."
+
 #: R/chisqposttest.b.R
 msgid ""
 "This tool performs a Chi-Square test followed by pairwise post-hoc tests for "
@@ -133076,6 +133614,10 @@ msgstr ""
 
 #: ihcthreshold/results/plot.title
 msgid "Threshold Analysis Plot"
+msgstr ""
+
+#: stagemigration/results/multivariableDCASummary.columns.title
+msgid "Threshold at Max Net Benefit"
 msgstr ""
 
 #: ihcpredict/options/lowConfidenceThreshold.description
@@ -133825,6 +134367,8 @@ msgstr ""
 #: reclassmetrics/ui[2][0]/timePoint.label
 #: stagemigration/ui[7][1][0]/clinicalUtilityTimePoint.label
 #: stagemigration/results/nriResults.columns.title
+#: stagemigration/results/personalizedRiskSummary.columns.title
+#: stagemigration/results/multivariableDCASummary.columns.title
 #: stagemigration/results/rocAnalysis.columns.title
 #: stagemigration/results/decisionCurveAnalysis.columns.title
 #: stagemigration/results/concordanceProbabilityTimeDependentComplex.columns.title
@@ -135314,7 +135858,6 @@ msgstr ""
 #: semimarkov/results/todo.title
 #: singlearm/results/todo.title
 #: statsplot2/results/todo.title
-#: summarydata/results/todo.title
 #: summarydata2/results/todo.title
 #: surveysurvival/results/todo.title
 #: survival/results/todo.title
@@ -136128,6 +136671,10 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid "TP, FP, TN, and FN must be finite numbers. Check the input values."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "TP: {tp}, FP: {fp}, FN: {fn}, TN: {tn}"
 msgstr ""
 
 #: R/swimmerplot_html.R
@@ -138139,7 +138686,7 @@ msgstr ""
 #: toolssummary/results/summary.columns.title
 #: waterfallrecist/results/lesionTable.columns.title
 msgid "Type"
-msgstr ""
+msgstr "Tür"
 
 #: measurementuncertainty/options/type_a_components.title
 msgid "Type A Uncertainty Components"
@@ -138617,6 +139164,14 @@ msgstr ""
 msgid "Unable to test normality of residuals."
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"Unadjusted 2\\u{00D7}2 estimates. Clopper-Pearson exact intervals for "
+"sensitivity and specificity; log method (Simel et al. 1991) for the "
+"likelihood ratios. Computed as in epiR::epi.tests() with its default "
+"settings."
+msgstr ""
+
 #: advancedtrials/results/multiplicity_adjustment.columns.title
 msgid "Unadjusted Alpha"
 msgstr ""
@@ -138764,6 +139319,18 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "undefined"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "undefined (no informative cells)"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "undefined (no negative cases)"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "undefined (no positive cases)"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -139957,6 +140524,10 @@ msgstr ""
 msgid "UpSetR plot"
 msgstr ""
 
+#: stagemigration/results/personalizedRiskSummary.columns.title
+msgid "Upstaged (%)"
+msgstr ""
+
 #: imagingcorrelation/results/stagingCorrelationTable.columns.title
 msgid "Upstaging Rate"
 msgstr ""
@@ -139971,7 +140542,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Usage"
-msgstr ""
+msgstr "Kullanım"
 
 #: datevalidator/results/interpretation.title
 #: missingdata/results/interpretation.title
@@ -140073,10 +140644,6 @@ msgstr ""
 #: enhancedtwowayfrequency/options/robustErrorHandling.description
 #: partialcorrelation/options/robustErrorHandling.description
 msgid "Use BlueSky-style error handling with graceful degradation"
-msgstr ""
-
-#: enhancedROC/options/useBootstrap.title
-msgid "Use bootstrap"
 msgstr ""
 
 #: aivalidation/ui/bootstrapOptions/bootstrapCI.label
@@ -140255,10 +140822,6 @@ msgstr ""
 msgid "Use first occurring mode"
 msgstr ""
 
-#: oddsratio/options/usePenalized.title
-msgid "Use Firth penalized logistic regression"
-msgstr ""
-
 #: R/decisiongraph.b.R
 msgid "Use for: Economic evaluation comparing treatments"
 msgstr ""
@@ -140410,11 +140973,7 @@ msgstr ""
 msgid "Use non-parametric methods"
 msgstr ""
 
-#: enhancedROC/options/useObservedPrevalence.title
-msgid "Use observed prevalence"
-msgstr ""
-
-#: stagemigration/ui[1][2][0]/useOptimismCorrection.label
+#: stagemigration/ui[1][1][0]/useOptimismCorrection.label
 msgid "Use Optimism Correction"
 msgstr ""
 
@@ -140485,10 +141044,6 @@ msgstr ""
 
 #: deeplearningprediction/options/pretrained_weights.title
 msgid "Use Pretrained Weights"
-msgstr ""
-
-#: psychopdaROC/options/usePriorPrev.title
-msgid "Use prior prevalence"
 msgstr ""
 
 #: survivalbart/options/probit_link.title
@@ -140603,8 +141158,16 @@ msgstr ""
 msgid "Use Surrogate Splits"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "Use the 'Predictor Positive Level' option to set this manually."
+msgstr ""
+
 #: R/reportcat.b.R
 msgid "Use the copy-ready sentences for clinical reports if needed"
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid "Use the dropdown menu below the outcome variable to make your selection."
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -140625,6 +141188,13 @@ msgid ""
 "ceiling effect (100 percent bounds). Provides more realistic uncertainty "
 "estimates."
 msgstr ""
+
+#: R/summarydata.b.R
+msgid ""
+"Use this text as a draft only. Add the measurement units, study population, "
+"time point, and missing-data handling before using it in a manuscript or "
+"clinical document."
+msgstr "Bu metni yalnızca taslak olarak kullanın. Bir makalede veya klinik belgede kullanmadan önce ölçüm birimlerini, çalışma popülasyonunu, zaman noktasını ve eksik veri işleme yöntemini ekleyin."
 
 #: R/multisurvival.b.R
 msgid ""
@@ -140741,6 +141311,10 @@ msgstr ""
 msgid "User-Selected Domains"
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid "User-specified"
+msgstr ""
+
 #: likelihoodratio/options/cutpointMethod/manual.title
 msgid "User-specified cutpoint"
 msgstr ""
@@ -140769,6 +141343,31 @@ msgstr ""
 msgid "Uses majority vote of available tests as pseudo-gold standard."
 msgstr ""
 
+#: R/oddsratio.b.R
+msgid ""
+"Using '{variable}' (first explanatory variable) for diagnostic metrics. To "
+"use a different variable, specify it in the 'Diagnostic Predictor' box."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Using '{variable}' (from model) for diagnostic metrics (sensitivity, "
+"specificity, likelihood ratios)."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Using '{variable}' for diagnostic metrics (sensitivity, specificity, "
+"likelihood ratios)."
+msgstr ""
+
+#: R/oddsratio.b.R
+msgid ""
+"Using '{variable}' for diagnostic metrics. Note: This variable is NOT in the "
+"logistic regression model. Diagnostic metrics are calculated independently "
+"of the odds ratio model."
+msgstr ""
+
 #: mixedcox/options/tint.title
 #: surveysurvival/options/tint.title
 msgid "Using Dates to Calculate Survival Time"
@@ -140787,6 +141386,14 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 msgid "Using standard geom fallback due to high data complexity."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Usual causes are that the start and end date columns are swapped, or that "
+"the date format was mis-detected - a wrong day/month order flips only the "
+"rows whose day-of-month is 12 or less, which is why a few rows can be "
+"negative while the rest look correct."
 msgstr ""
 
 #: datevalidator/options/timezone.default
@@ -140944,7 +141551,7 @@ msgstr ""
 msgid "Validation"
 msgstr ""
 
-#: enhancedROC/ui[11].label
+#: enhancedROC/ui[14].label
 msgid "Validation & Model Performance"
 msgstr ""
 
@@ -141421,6 +142028,7 @@ msgstr ""
 #: stagemigration/results/migrationOverview.columns.title
 #: stagemigration/results/migrationSummary.columns.title
 #: stagemigration/results/statisticalComparison.columns.title
+#: stagemigration/results/idiComponents.columns.title
 #: stagemigration/results/clinicalInterpretation.columns.title
 #: stagemigration/results/enhancedReclassificationMetrics.columns.title
 #: stagemigration/results/stageMigrationEffectAssessment.columns.title
@@ -141630,8 +142238,10 @@ msgid "Values >= this are classified as High"
 msgstr ""
 
 #: R/summarydata.b.R
-msgid "Values beyond Q1-1.5\\u{D7}IQR or Q3+1.5\\u{D7}IQR are considered outliers."
-msgstr ""
+msgid ""
+"Values beyond Q1-1.5\\u{D7}IQR or Q3+1.5\\u{D7}IQR are flagged as potential "
+"outliers for investigation."
+msgstr "Q1-1.5×AAD veya Q3+1.5×AAD sınırlarının ötesindeki değerler inceleme amacıyla potansiyel aykırı değer olarak işaretlenir."
 
 #: R/jjcorrmat.b.R
 msgid ""
@@ -141827,7 +142437,7 @@ msgstr ""
 #: variablebiplot/results/contributionTable.columns.title
 #: venn/results/summary.columns.title
 msgid "Variable"
-msgstr ""
+msgstr "Değişken"
 
 #: R/nogoldstandard.b.R
 msgid "Variable '{}' must be a factor"
@@ -142095,7 +142705,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Variable excluded"
-msgstr ""
+msgstr "Değişken dışlandı"
 
 #: multisurvival/options/adjexplanatory.title
 msgid "Variable for Adjusted Curve"
@@ -142614,7 +143224,7 @@ msgstr ""
 #: vartree/options/vars.title
 #: venn/ui[0].label
 msgid "Variables"
-msgstr ""
+msgstr "Değişkenler"
 
 #: adaptivelasso/results/cvResults.columns.title
 msgid "Variables (1SE)"
@@ -143373,6 +143983,10 @@ msgstr ""
 msgid "VERY SMALL SAMPLE"
 msgstr ""
 
+#: R/summarydata.b.R
+msgid "Very small sample"
+msgstr "Çok küçük örneklem"
+
 #: R/riverplot.b.R
 msgid ""
 "Very small sample size (<30) may not provide reliable flow patterns for "
@@ -143720,8 +144334,12 @@ msgid "Visual style"
 msgstr ""
 
 #: R/summarydata.b.R
+msgid "Visual summary simplified"
+msgstr "Görsel özet sadeleştirildi"
+
+#: R/summarydata.b.R
 msgid "Visual summary tables with distribution plots"
-msgstr ""
+msgstr "Dağılım grafikleri içeren görsel özet tabloları"
 
 #: enhancedfactorvariable/options/plotTheme.description
 msgid "Visual theme for factor analysis plots"
@@ -144125,6 +144743,7 @@ msgid "Warmup/Burn-in Iterations"
 msgstr ""
 
 #: R/enhancedROC.b.R
+#: R/oddsratio.b.R
 #: R/reportcat.b.R
 msgid "Warning"
 msgstr ""
@@ -144134,8 +144753,9 @@ msgid "warning"
 msgstr ""
 
 #: R/decisioncalculator.b.R
+#: R/summarydata.b.R
 msgid "WARNING"
-msgstr ""
+msgstr "UYARI"
 
 #: jointmodeling/results/warnings.title
 msgid "Warning Messages"
@@ -144867,6 +145487,7 @@ msgid "Welcome screen shown when no variables selected"
 msgstr ""
 
 #: R/jjpiestats.b.R
+#: R/oddsratio.b.R
 #: R/reportcat.b.R
 msgid "Welcome to ClinicoPath"
 msgstr ""
@@ -144874,6 +145495,10 @@ msgstr ""
 #: R/chisqposttest.b.R
 msgid "Welcome to ClinicoPath Chi-Square Post-Hoc Tests"
 msgstr ""
+
+#: R/summarydata.b.R
+msgid "Welcome to ClinicoPath Descriptives!"
+msgstr "ClinicoPath Tanımlayıcı İstatistikler'e Hoş Geldiniz!"
 
 #: R/waterfall.b.R
 msgid "Welcome to ClinicoPath Treatment Response Analysis"
@@ -144995,7 +145620,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "What this analysis provides"
-msgstr ""
+msgstr "Bu analiz ne sağlar"
 
 #: R/benford.b.R
 msgid "WHAT THIS LIST IS:"
@@ -145226,7 +145851,7 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "When to use this analysis"
-msgstr ""
+msgstr "Bu analiz ne zaman kullanılmalı"
 
 #: R/waterfall.b.R
 msgid "When to Use This Analysis:"
@@ -147158,3 +147783,11 @@ msgstr ""
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
 msgstr ""
+
+#: R/summarydata.b.R
+msgid "Multiple distribution diagnostics"
+msgstr "Çoklu dağılım tanılamaları"
+
+#: R/summarydata.b.R
+msgid "A separate Shapiro-Wilk test is reported for each variable without multiplicity adjustment. Treat these as exploratory distribution checks, not confirmatory hypothesis tests, and interpret them with the visual summaries."
+msgstr "Her değişken için çokluk düzeltmesi uygulanmadan ayrı bir Shapiro-Wilk testi raporlanır. Bunları doğrulayıcı hipotez testleri olarak değil, keşifsel dağılım kontrolleri olarak ele alın ve görsel özetlerle birlikte yorumlayın."

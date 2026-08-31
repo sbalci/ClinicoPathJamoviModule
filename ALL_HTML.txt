@@ -1,0 +1,330 @@
+<div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable releveled: 'Present' is now modeled as the positive outcome (event).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome level modeled as the event: 'Present'.</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable summary: Absent = 143, Present = 106</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Missing data: 0.8% of rows will be removed (2 out of 250 rows).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Using 'Sex' for diagnostic metrics (sensitivity, specificity, likelihood ratios).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Odds ratio analysis completed successfully.</div><table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Dependent: lvi </th>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> Absent </th>
+   <th style="text-align:right;"> Present </th>
+   <th style="text-align:right;"> OR (univariable) </th>
+   <th style="text-align:right;"> OR (multivariable) </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Sex </td>
+   <td style="text-align:left;"> Female </td>
+   <td style="text-align:right;"> 70 (57.9) </td>
+   <td style="text-align:right;"> 51 (42.1) </td>
+   <td style="text-align:right;"> - </td>
+   <td style="text-align:right;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Male </td>
+   <td style="text-align:right;"> 73 (57.5) </td>
+   <td style="text-align:right;"> 54 (42.5) </td>
+   <td style="text-align:right;"> 1.02 (0.61-1.68, p=0.953) </td>
+   <td style="text-align:right;"> 1.02 (0.61-1.68, p=0.953) </td>
+  </tr>
+</tbody>
+</table><br><b>Model Metrics:</b> Number in dataframe = 248, Number in model = 248, Missing = 0, AIC = 342, C-statistic = 0.502, H&amp;L = Chi-sq(8) 0.00 (p=1.000)<br>
+            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 149, 188, 0.1); border-left: 4px solid #17a2b8; color: inherit;">
+                <h4 style="margin-top: 0; color: inherit;">Understanding Odds Ratio Analysis</h4>
+                <p><strong>Odds Ratio (OR):</strong> Measures the strength of association between risk factors and binary outcomes.</p>
+                <ul>
+                    <li><strong>Interpretation:</strong> OR > 1 indicates increased odds, OR < 1 indicates decreased odds</li>
+                    <li><strong>Magnitude:</strong> Distance from 1.0 indicates strength of association</li>
+                    <li><strong>Confidence Intervals:</strong> Quantify uncertainty around each estimated odds ratio</li>
+                    <li><strong>Case-Control Studies:</strong> Primary measure for retrospective study designs</li>
+                </ul>
+                <p><em>Clinical interpretation:</em> An OR of 2.0 means the odds of the outcome are twice as high in the exposed group.</p>
+            </div>
+            
+            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; color: inherit;">
+                <h4 style="margin-top: 0; color: inherit;">Understanding Odds Ratio vs Risk Ratio</h4>
+                <p><strong>Odds Ratio (OR):</strong> The measure calculated by this analysis.</p>
+                <ul>
+                    <li><strong>Definition:</strong> Ratio of the odds of outcome in exposed vs unexposed groups</li>
+                    <li><strong>Formula:</strong> OR = (a/b) / (c/d) where a,b,c,d are from 2×2 contingency table</li>
+                    <li><strong>Interpretation:</strong> OR = 2.0 means the odds of outcome are twice as high in exposed group</li>
+                    <li><strong>Use case:</strong> Logistic regression, case-control studies, cross-sectional studies</li>
+                </ul>
+                <p><strong>Risk Ratio (RR) - NOT calculated by this function:</strong></p>
+                <ul>
+                    <li><strong>Definition:</strong> Ratio of risks (proportions) between exposed and unexposed groups</li>
+                    <li><strong>Use case:</strong> Cohort studies, randomized trials with follow-up data</li>
+                    <li><strong>Note:</strong> OR approaches RR as outcome risk becomes low; the degree of approximation also depends on baseline risk and effect size</li>
+                </ul>
+                <p><em>Clinical note:</em> This analysis provides Odds Ratios from logistic regression. For Risk Ratios, use cohort analysis tools.</p>
+            </div>
+            
+            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; color: inherit;">
+                <h4 style="margin-top: 0; color: inherit;">Understanding Diagnostic Test Performance</h4>
+                <p><strong>Diagnostic Metrics Calculated:</strong> This analysis evaluates how well a binary predictor distinguishes between outcome states.</p>
+                <ul>
+                    <li><strong>Sensitivity (True Positive Rate):</strong> Proportion of actual positives correctly identified
+                        <ul style="margin-top: 5px;">
+                            <li>Formula: TP / (TP + FN)</li>
+                            <li>Example: If sensitivity = 80%, the test detects 80% of cases with the outcome</li>
+                        </ul>
+                    </li>
+                    <li><strong>Specificity (True Negative Rate):</strong> Proportion of actual negatives correctly identified
+                        <ul style="margin-top: 5px;">
+                            <li>Formula: TN / (TN + FP)</li>
+                            <li>Example: If specificity = 90%, the test correctly identifies 90% of cases without the outcome</li>
+                        </ul>
+                    </li>
+                    <li><strong>Positive Likelihood Ratio (LR+):</strong> How much a positive test increases the odds
+                        <ul style="margin-top: 5px;">
+                            <li>Formula: Sensitivity / (1 - Specificity)</li>
+                            <li>LR+ > 10: Strong evidence for diagnosis</li>
+                            <li>LR+ = 5-10: Moderate evidence</li>
+                            <li>LR+ = 2-5: Weak evidence</li>
+                        </ul>
+                    </li>
+                    <li><strong>Negative Likelihood Ratio (LR-):</strong> How much a negative test decreases the odds
+                        <ul style="margin-top: 5px;">
+                            <li>Formula: (1 - Sensitivity) / Specificity</li>
+                            <li>LR- < 0.1: Strong evidence against diagnosis</li>
+                            <li>LR- = 0.1-0.2: Moderate evidence</li>
+                            <li>LR- = 0.2-0.5: Weak evidence</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p><small>The LR magnitude bands above are rough interpretive guides, not universal clinical decision thresholds.</small></p>
+                <p><strong>Note:</strong> PPV and NPV are NOT calculated by this function as they depend on disease prevalence in your specific population.</p>
+                <p><em>Clinical application:</em> These unadjusted metrics help evaluate a binary test or biomarker. The prediction nomogram is a separate multivariable model display and does not convert likelihood ratios into post-test probabilities.</p>
+            </div>
+            <br><div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'><h4 style='margin-top: 0; color: inherit;'> Automatic Predictor Level Detection</h4><p><strong>The positive predictor level was automatically detected as: 'Male'</strong></p><p>Method: Default (second factor level)</p><p style='color: inherit;'><strong>Important:</strong> Please verify that 'Male' is the correct positive level. If this is wrong, diagnostic metrics will be inverted.</p><p>Use the 'Predictor Positive Level' option to set this manually.</p></div><div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'><b>Diagnostic Metrics:</b><br>Sensitivity: 51.4% (95% CI 41.5-61.3%)<br>Specificity: 49.0% (95% CI 40.5-57.4%)<br>Positive LR: 1.01 (95% CI 0.79-1.29)<br>Negative LR: 0.99 (95% CI 0.77-1.28)<br><small style='opacity: 0.75; color: inherit;'>Unadjusted 2×2 estimates. Clopper-Pearson exact intervals for sensitivity and specificity; log method (Simel et al. 1991) for the likelihood ratios. Computed as in epiR::epi.tests() with its default settings.</small></div><div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'><b> Important: Please Verify These Interpretations</b><br><small><b>Positive outcome level:</b> 'Present' <span style='opacity: 0.75; color: inherit;'>(User-specified)</span><br><b>Positive predictor level:</b> 'Male' <span style='opacity: 0.75; color: inherit;'>(Default (second factor level))</span><br><br><b> Contingency Table:</b><br><table style='border-collapse: collapse; margin: 5px 0;'><tr><th style='border: 1px solid #ddd; padding: 5px;'></th><th style='border: 1px solid #ddd; padding: 5px;'>Absent</th><th style='border: 1px solid #ddd; padding: 5px;'>Present</th></tr><tr><td style='border: 1px solid #ddd; padding: 5px;'><b>Female</b></td><td style='border: 1px solid #ddd; padding: 5px;'>70</td><td style='border: 1px solid #ddd; padding: 5px;'>51</td></tr><tr><td style='border: 1px solid #ddd; padding: 5px;'><b>Male</b></td><td style='border: 1px solid #ddd; padding: 5px;'>73</td><td style='border: 1px solid #ddd; padding: 5px;'>54</td></tr></table>TP: 54, FP: 73, FN: 51, TN: 70<br><br><b> How to Use:</b><br>1. Check that the positive outcome level is correct for your study<br>2. If incorrect, use the 'Positive Outcome Level' dropdown to specify the correct level<br>3. These unadjusted diagnostic metrics depend on these interpretations being correct<br>4. Different languages/coding may require manual specification</small></div><br><div style="background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">Nomogram Information</h4><p>The nomogram plot above provides a visual tool for prediction based on the maximum-likelihood logistic regression model.</p><p><strong>Components:</strong></p><ul style="margin: 5px 0; padding-left: 20px;"><li><strong>Points:</strong> Top scale showing point values for each predictor</li><li><strong>Predictor Scales:</strong> Individual scales for each variable in the model</li><li><strong>Total Points:</strong> Sum of all individual predictor points</li><li><strong>Predicted Probability:</strong> Bottom scale showing the predicted outcome probability</li></ul><p><strong>Validation note:</strong> This display does not establish calibration, discrimination, or external validity. Validate the fitted model before clinical use.</p></div>
+            <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;">
+                <h4 style="margin-top: 0; color: inherit;">Understanding Prediction and Diagnostic Outputs</h4>
+
+                <p><strong>Prediction nomogram:</strong> The plotted nomogram assigns points to all explanatory variables in the maximum-likelihood logistic regression model and maps total points to predicted outcome probability. It is not a Fagan nomogram and does not display pre-test-to-post-test probability conversion.</p>
+
+                <h5 style="color: inherit;">Prediction Nomogram Components:</h5>
+                <ul>
+                    <li><strong>Points:</strong> Contribution assigned to each predictor value</li>
+                    <li><strong>Total Points:</strong> Sum of predictor contributions</li>
+                    <li><strong>Predicted Probability:</strong> Model-based probability corresponding to total points</li>
+                </ul>
+
+                <p><strong>Important:</strong> The plot is a visual representation of the fitted model, not evidence of calibration, discrimination, transportability, or clinical utility. Internal and external validation are required before clinical use. It is not generated when Firth regression is selected because that would mix different estimation methods.</p>
+
+                <hr style="margin: 15px 0; border: none; border-top: 1px solid #f5c6cb;">
+
+                <h5 style="color: inherit; margin-top: 15px;">What is a Diagnostic Predictor?</h5>
+
+                <p><strong>The diagnostic predictor is the single binary variable you want to evaluate as a diagnostic test.</strong></p>
+
+                <div style="background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
+                    <strong>Example:</strong> If you select "LVI" (Lymphovascular Invasion: Absent/Present) as the diagnostic predictor,
+                    the diagnostic table answers: <em>"How well does LVI alone distinguish the selected outcome states?"</em>
+                </div>
+
+                <p><strong>Requirements:</strong></p>
+                <ul>
+                    <li> Must be <strong>binary</strong> (exactly 2 levels): Yes/No, Present/Absent, Positive/Negative</li>
+                    <li> Examples: Sex (Male/Female), LVI (Absent/Present), Treatment (Control/Treated)</li>
+                    <li> Cannot use continuous variables: Age, Tumor Size (infinite possible values)</li>
+                    <li> Cannot use multi-category: Grade 1/2/3, Stage I/II/III/IV</li>
+                </ul>
+
+                <p><strong>Why Binary Only?</strong></p>
+                <p>Diagnostic test performance metrics (sensitivity, specificity, likelihood ratios) are calculated from a 2×2 contingency table:</p>
+
+                <table style="border-collapse: collapse; margin: 10px 0; font-size: 0.9em;">
+                    <tr><th style="border: 1px solid #ddd; padding: 5px;"></th>
+                        <th style="border: 1px solid #ddd; padding: 5px;">Outcome +</th>
+                        <th style="border: 1px solid #ddd; padding: 5px;">Outcome -</th></tr>
+                    <tr><td style="border: 1px solid #ddd; padding: 5px;">Test +</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">True Positive</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">False Positive</td></tr>
+                    <tr><td style="border: 1px solid #ddd; padding: 5px;">Test -</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">False Negative</td>
+                        <td style="border: 1px solid #ddd; padding: 5px;">True Negative</td></tr>
+                </table>
+
+                <p><small><em>Sensitivity = TP/(TP+FN), Specificity = TN/(TN+FP), LR+ = Sensitivity/(1-Specificity)</em></small></p>
+
+                <p><strong>Selection Guidelines:</strong></p>
+                <ul>
+                    <li><strong>Not specified:</strong> Uses first explanatory variable automatically</li>
+                    <li><strong>In your regression model:</strong> Diagnostic metrics are still unadjusted and use only its paired 2×2 table</li>
+                    <li><strong>Not in your model:</strong> Evaluates it independently using paired complete outcome/test observations</li>
+                </ul>
+
+                <div style="background-color: rgba(33, 163, 188, 0.21); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;">
+                    <strong> Clinical Tip:</strong> If your first variable is continuous (e.g., Age), you must manually select
+                    a binary diagnostic predictor to obtain sensitivity, specificity, and likelihood ratios. The prediction nomogram can still be generated from the regression variables.
+                </div>
+            </div>
+            <br><b>Positive Outcome Level Required</b><br><br>Please select which level of your outcome variable represents the 'positive' case (e.g., 'Dead', 'Event', 'Yes', 'Positive').<br><br>This is required for correct calculation of:<br>• Odds ratios interpretation<br>• Likelihood ratios<br>• Sensitivity and specificity<br>• Diagnostic test performance metrics<br><br>Use the dropdown menu below the outcome variable to make your selection.<div style="margin: 10px 0; padding: 10px; border-left: 4px solid #f0ad4e; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Warning:</strong> Diagnostic metrics for 'three' require paired complete observations with exactly two observed predictor levels and two observed outcome levels. The prediction nomogram is unaffected.</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable releveled: 'Present' is now modeled as the positive outcome (event).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome level modeled as the event: 'Present'.</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable summary: Absent = 143, Present = 106</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Missing data: 0.8% of rows will be removed (2 out of 250 rows).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Using 'three' (from model) for diagnostic metrics (sensitivity, specificity, likelihood ratios).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Odds ratio analysis completed successfully.</div><table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Dependent: lvi </th>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> Absent </th>
+   <th style="text-align:right;"> Present </th>
+   <th style="text-align:right;"> OR (univariable) </th>
+   <th style="text-align:right;"> OR (multivariable) </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Sex </td>
+   <td style="text-align:left;"> Female </td>
+   <td style="text-align:right;"> 70 (57.9) </td>
+   <td style="text-align:right;"> 51 (42.1) </td>
+   <td style="text-align:right;"> - </td>
+   <td style="text-align:right;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Male </td>
+   <td style="text-align:right;"> 73 (57.5) </td>
+   <td style="text-align:right;"> 54 (42.5) </td>
+   <td style="text-align:right;"> 1.02 (0.61-1.68, p=0.953) </td>
+   <td style="text-align:right;"> 1.01 (0.61-1.68, p=0.968) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> three </td>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:right;"> 54 (58.7) </td>
+   <td style="text-align:right;"> 38 (41.3) </td>
+   <td style="text-align:right;"> - </td>
+   <td style="text-align:right;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:right;"> 38 (62.3) </td>
+   <td style="text-align:right;"> 23 (37.7) </td>
+   <td style="text-align:right;"> 0.86 (0.44-1.67, p=0.656) </td>
+   <td style="text-align:right;"> 0.86 (0.44-1.67, p=0.656) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> c </td>
+   <td style="text-align:right;"> 51 (53.7) </td>
+   <td style="text-align:right;"> 44 (46.3) </td>
+   <td style="text-align:right;"> 1.23 (0.69-2.19, p=0.490) </td>
+   <td style="text-align:right;"> 1.23 (0.69-2.19, p=0.491) </td>
+  </tr>
+</tbody>
+</table><br><b>Model Metrics:</b> Number in dataframe = 248, Number in model = 248, Missing = 0, AIC = 344.8, C-statistic = 0.535, H&amp;L = Chi-sq(8) NaN (p=NaN)<br><p>Diagnostic metrics were not calculated because a valid paired 2×2 table could not be formed.</p><div style="background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">Nomogram Information</h4><p>The nomogram plot above provides a visual tool for prediction based on the maximum-likelihood logistic regression model.</p><p><strong>Components:</strong></p><ul style="margin: 5px 0; padding-left: 20px;"><li><strong>Points:</strong> Top scale showing point values for each predictor</li><li><strong>Predictor Scales:</strong> Individual scales for each variable in the model</li><li><strong>Total Points:</strong> Sum of all individual predictor points</li><li><strong>Predicted Probability:</strong> Bottom scale showing the predicted outcome probability</li></ul><p><strong>Validation note:</strong> This display does not establish calibration, discrimination, or external validity. Validate the fitted model before clinical use.</p></div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #f0ad4e; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Warning:</strong> The selected positive predictor level 'NOPE' is not present among paired complete observations. Available levels: Female, Male.</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable releveled: 'Present' is now modeled as the positive outcome (event).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome level modeled as the event: 'Present'.</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable summary: Absent = 143, Present = 106</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Missing data: 0.8% of rows will be removed (2 out of 250 rows).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Using 'Sex' for diagnostic metrics (sensitivity, specificity, likelihood ratios).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Odds ratio analysis completed successfully.</div><table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Dependent: lvi </th>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> Absent </th>
+   <th style="text-align:right;"> Present </th>
+   <th style="text-align:right;"> OR (univariable) </th>
+   <th style="text-align:right;"> OR (multivariable) </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Sex </td>
+   <td style="text-align:left;"> Female </td>
+   <td style="text-align:right;"> 70 (57.9) </td>
+   <td style="text-align:right;"> 51 (42.1) </td>
+   <td style="text-align:right;"> - </td>
+   <td style="text-align:right;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Male </td>
+   <td style="text-align:right;"> 73 (57.5) </td>
+   <td style="text-align:right;"> 54 (42.5) </td>
+   <td style="text-align:right;"> 1.02 (0.61-1.68, p=0.953) </td>
+   <td style="text-align:right;"> 1.02 (0.61-1.68, p=0.953) </td>
+  </tr>
+</tbody>
+</table><br><b>Model Metrics:</b> Number in dataframe = 248, Number in model = 248, Missing = 0, AIC = 342, C-statistic = 0.502, H&amp;L = Chi-sq(8) 0.00 (p=1.000)<br><p>The selected positive predictor level 'NOPE' is not present among paired complete observations. Available levels: Female, Male.</p><div style="background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">Nomogram Information</h4><p>The nomogram plot above provides a visual tool for prediction based on the maximum-likelihood logistic regression model.</p><p><strong>Components:</strong></p><ul style="margin: 5px 0; padding-left: 20px;"><li><strong>Points:</strong> Top scale showing point values for each predictor</li><li><strong>Predictor Scales:</strong> Individual scales for each variable in the model</li><li><strong>Total Points:</strong> Sum of all individual predictor points</li><li><strong>Predicted Probability:</strong> Bottom scale showing the predicted outcome probability</li></ul><p><strong>Validation note:</strong> This display does not establish calibration, discrimination, or external validity. Validate the fitted model before clinical use.</p></div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable releveled: 'Present' is now modeled as the positive outcome (event).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome level modeled as the event: 'Present'.</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable summary: Absent = 143, Present = 106</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Missing data: 0.8% of rows will be removed (2 out of 250 rows).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Using 'Sex' for diagnostic metrics (sensitivity, specificity, likelihood ratios).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Odds ratio analysis completed successfully.</div><table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Dependent: lvi </th>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> Absent </th>
+   <th style="text-align:right;"> Present </th>
+   <th style="text-align:right;"> OR (univariable) </th>
+   <th style="text-align:right;"> OR (multivariable) </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Sex </td>
+   <td style="text-align:left;"> Female </td>
+   <td style="text-align:right;"> 70 (57.9) </td>
+   <td style="text-align:right;"> 51 (42.1) </td>
+   <td style="text-align:right;"> - </td>
+   <td style="text-align:right;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Male </td>
+   <td style="text-align:right;"> 73 (57.5) </td>
+   <td style="text-align:right;"> 54 (42.5) </td>
+   <td style="text-align:right;"> 1.02 (0.61-1.68, p=0.953) </td>
+   <td style="text-align:right;"> 1.02 (0.61-1.68, p=0.953) </td>
+  </tr>
+</tbody>
+</table><br><b>Model Metrics:</b> Number in dataframe = 248, Number in model = 248, Missing = 0, AIC = 342, C-statistic = 0.502, H&amp;L = Chi-sq(8) 0.00 (p=1.000)<br><br><div style='background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #0c5460; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'><b>Predictor Level Modeling:</b><br>The level 'Male' is used as the positive/exposure category as specified.</div><div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'><b>Diagnostic Metrics:</b><br>Sensitivity: 51.4% (95% CI 41.5-61.3%)<br>Specificity: 49.0% (95% CI 40.5-57.4%)<br>Positive LR: 1.01 (95% CI 0.79-1.29)<br>Negative LR: 0.99 (95% CI 0.77-1.28)<br><small style='opacity: 0.75; color: inherit;'>Unadjusted 2×2 estimates. Clopper-Pearson exact intervals for sensitivity and specificity; log method (Simel et al. 1991) for the likelihood ratios. Computed as in epiR::epi.tests() with its default settings.</small></div><div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'><b> Important: Please Verify These Interpretations</b><br><small><b>Positive outcome level:</b> 'Present' <span style='opacity: 0.75; color: inherit;'>(User-specified)</span><br><b>Positive predictor level:</b> 'Male' <span style='opacity: 0.75; color: inherit;'>(User-specified)</span><br><br><b> Contingency Table:</b><br><table style='border-collapse: collapse; margin: 5px 0;'><tr><th style='border: 1px solid #ddd; padding: 5px;'></th><th style='border: 1px solid #ddd; padding: 5px;'>Absent</th><th style='border: 1px solid #ddd; padding: 5px;'>Present</th></tr><tr><td style='border: 1px solid #ddd; padding: 5px;'><b>Female</b></td><td style='border: 1px solid #ddd; padding: 5px;'>70</td><td style='border: 1px solid #ddd; padding: 5px;'>51</td></tr><tr><td style='border: 1px solid #ddd; padding: 5px;'><b>Male</b></td><td style='border: 1px solid #ddd; padding: 5px;'>73</td><td style='border: 1px solid #ddd; padding: 5px;'>54</td></tr></table>TP: 54, FP: 73, FN: 51, TN: 70<br><br><b> How to Use:</b><br>1. Check that the positive outcome level is correct for your study<br>2. If incorrect, use the 'Positive Outcome Level' dropdown to specify the correct level<br>3. These unadjusted diagnostic metrics depend on these interpretations being correct<br>4. Different languages/coding may require manual specification</small></div><br><div style="background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">Nomogram Information</h4><p>The nomogram plot above provides a visual tool for prediction based on the maximum-likelihood logistic regression model.</p><p><strong>Components:</strong></p><ul style="margin: 5px 0; padding-left: 20px;"><li><strong>Points:</strong> Top scale showing point values for each predictor</li><li><strong>Predictor Scales:</strong> Individual scales for each variable in the model</li><li><strong>Total Points:</strong> Sum of all individual predictor points</li><li><strong>Predicted Probability:</strong> Bottom scale showing the predicted outcome probability</li></ul><p><strong>Validation note:</strong> This display does not establish calibration, discrimination, or external validity. Validate the fitted model before clinical use.</p></div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #f0ad4e; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Warning:</strong> The prediction nomogram was not generated because Firth penalized regression is selected. Diagnostic metrics, when available, remain unadjusted 2x2 estimates.</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable releveled: 'Present' is now modeled as the positive outcome (event).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome level modeled as the event: 'Present'.</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable summary: Absent = 143, Present = 106</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Missing data: 0.8% of rows will be removed (2 out of 250 rows).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Firth penalized likelihood logistic regression used to reduce bias and handle potential separation.</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Using 'Sex' for diagnostic metrics (sensitivity, specificity, likelihood ratios).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Odds ratio analysis completed successfully.</div><table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Dependent: lvi </th>
+   <th style="text-align:left;">  </th>
+   <th style="text-align:right;"> Absent </th>
+   <th style="text-align:right;"> Present </th>
+   <th style="text-align:right;"> OR (univariable, Firth) </th>
+   <th style="text-align:right;"> OR (multivariable, Firth) </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Sex </td>
+   <td style="text-align:left;"> Female </td>
+   <td style="text-align:right;"> 70 (57.9) </td>
+   <td style="text-align:right;"> 51 (42.1) </td>
+   <td style="text-align:right;"> - </td>
+   <td style="text-align:right;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> Male </td>
+   <td style="text-align:right;"> 73 (57.5) </td>
+   <td style="text-align:right;"> 54 (42.5) </td>
+   <td style="text-align:right;"> 1.02 (0.61-1.68, p=0.953) </td>
+   <td style="text-align:right;"> 1.02 (0.61-1.68, p=0.953) </td>
+  </tr>
+</tbody>
+</table><br><b>Model Metrics:</b> Observations: 248 Firth penalized log-likelihood: -165.57 Penalized AIC: 335.1 (-2 x penalized log-likelihood + 2 x 2 parameters). This AIC is computed from the penalized (Firth) likelihood. Compare it only with other Firth models fitted to these same observations, not with the maximum-likelihood AIC of an unpenalized fit. Penalized likelihood-ratio test vs null model: chi-square = 0.003 on 1 df, p=0.953.<br><br><div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'><h4 style='margin-top: 0; color: inherit;'> Automatic Predictor Level Detection</h4><p><strong>The positive predictor level was automatically detected as: 'Male'</strong></p><p>Method: Default (second factor level)</p><p style='color: inherit;'><strong>Important:</strong> Please verify that 'Male' is the correct positive level. If this is wrong, diagnostic metrics will be inverted.</p><p>Use the 'Predictor Positive Level' option to set this manually.</p></div><div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'><b>Diagnostic Metrics:</b><br>Sensitivity: 51.4% (95% CI 41.5-61.3%)<br>Specificity: 49.0% (95% CI 40.5-57.4%)<br>Positive LR: 1.01 (95% CI 0.79-1.29)<br>Negative LR: 0.99 (95% CI 0.77-1.28)<br><small style='opacity: 0.75; color: inherit;'>Unadjusted 2×2 estimates. Clopper-Pearson exact intervals for sensitivity and specificity; log method (Simel et al. 1991) for the likelihood ratios. Computed as in epiR::epi.tests() with its default settings.</small></div><div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'><b> Important: Please Verify These Interpretations</b><br><small><b>Positive outcome level:</b> 'Present' <span style='opacity: 0.75; color: inherit;'>(User-specified)</span><br><b>Positive predictor level:</b> 'Male' <span style='opacity: 0.75; color: inherit;'>(Default (second factor level))</span><br><br><b> Contingency Table:</b><br><table style='border-collapse: collapse; margin: 5px 0;'><tr><th style='border: 1px solid #ddd; padding: 5px;'></th><th style='border: 1px solid #ddd; padding: 5px;'>Absent</th><th style='border: 1px solid #ddd; padding: 5px;'>Present</th></tr><tr><td style='border: 1px solid #ddd; padding: 5px;'><b>Female</b></td><td style='border: 1px solid #ddd; padding: 5px;'>70</td><td style='border: 1px solid #ddd; padding: 5px;'>51</td></tr><tr><td style='border: 1px solid #ddd; padding: 5px;'><b>Male</b></td><td style='border: 1px solid #ddd; padding: 5px;'>73</td><td style='border: 1px solid #ddd; padding: 5px;'>54</td></tr></table>TP: 54, FP: 73, FN: 51, TN: 70<br><br><b> How to Use:</b><br>1. Check that the positive outcome level is correct for your study<br>2. If incorrect, use the 'Positive Outcome Level' dropdown to specify the correct level<br>3. These unadjusted diagnostic metrics depend on these interpretations being correct<br>4. Different languages/coding may require manual specification</small></div><br><p><strong>Prediction nomogram not generated.</strong> The odds-ratio model uses Firth penalized likelihood, whereas the available nomogram implementation uses ordinary maximum-likelihood logistic regression.</p><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable releveled: '1' is now modeled as the positive outcome (event).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome level modeled as the event: '1'.</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Outcome variable summary: 0 = 152, 1 = 98</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Using 'New Test' for diagnostic metrics (sensitivity, specificity, likelihood ratios).</div><div style="margin: 10px 0; padding: 10px; border-left: 4px solid #5bc0de; background-color: rgba(138, 155, 172, 0.06); color: inherit;"><strong>Information:</strong> Odds ratio analysis completed successfully.</div><table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Dependent: golden_standart </th>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> 0 </th>
+   <th style="text-align:right;"> 1 </th>
+   <th style="text-align:right;"> OR (univariable) </th>
+   <th style="text-align:right;"> OR (multivariable) </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> New Test </td>
+   <td style="text-align:left;"> 0 </td>
+   <td style="text-align:right;"> 115 (80.4) </td>
+   <td style="text-align:right;"> 28 (19.6) </td>
+   <td style="text-align:right;"> - </td>
+   <td style="text-align:right;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;">  </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:right;"> 37 (34.6) </td>
+   <td style="text-align:right;"> 70 (65.4) </td>
+   <td style="text-align:right;"> 7.77 (4.43-13.99, p&lt;0.001) </td>
+   <td style="text-align:right;"> 7.77 (4.43-13.99, p&lt;0.001) </td>
+  </tr>
+</tbody>
+</table><br><b>Model Metrics:</b> Number in dataframe = 250, Number in model = 250, Missing = 0, AIC = 283.4, C-statistic = 0.735, H&amp;L = Chi-sq(8) 0.00 (p=1.000)<br><br><div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'><h4 style='margin-top: 0; color: inherit;'> Automatic Predictor Level Detection</h4><p><strong>The positive predictor level was automatically detected as: '1'</strong></p><p>Method: Automatic detection (en)</p><p style='color: inherit;'><strong>Important:</strong> Please verify that '1' is the correct positive level. If this is wrong, diagnostic metrics will be inverted.</p><p>Use the 'Predictor Positive Level' option to set this manually.</p></div><div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'><b>Diagnostic Metrics:</b><br>Sensitivity: 71.4% (95% CI 61.4-80.1%)<br>Specificity: 75.7% (95% CI 68.0-82.2%)<br>Positive LR: 2.93 (95% CI 2.16-3.99)<br>Negative LR: 0.38 (95% CI 0.27-0.52)<br><small style='opacity: 0.75; color: inherit;'>Unadjusted 2×2 estimates. Clopper-Pearson exact intervals for sensitivity and specificity; log method (Simel et al. 1991) for the likelihood ratios. Computed as in epiR::epi.tests() with its default settings.</small></div><div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'><b> Important: Please Verify These Interpretations</b><br><small><b>Positive outcome level:</b> '1' <span style='opacity: 0.75; color: inherit;'>(User-specified)</span><br><b>Positive predictor level:</b> '1' <span style='opacity: 0.75; color: inherit;'>(Automatic detection (en))</span><br><br><b> Contingency Table:</b><br><table style='border-collapse: collapse; margin: 5px 0;'><tr><th style='border: 1px solid #ddd; padding: 5px;'></th><th style='border: 1px solid #ddd; padding: 5px;'>0</th><th style='border: 1px solid #ddd; padding: 5px;'>1</th></tr><tr><td style='border: 1px solid #ddd; padding: 5px;'><b>0</b></td><td style='border: 1px solid #ddd; padding: 5px;'>115</td><td style='border: 1px solid #ddd; padding: 5px;'>28</td></tr><tr><td style='border: 1px solid #ddd; padding: 5px;'><b>1</b></td><td style='border: 1px solid #ddd; padding: 5px;'>37</td><td style='border: 1px solid #ddd; padding: 5px;'>70</td></tr></table>TP: 70, FP: 37, FN: 28, TN: 115<br><br><b> How to Use:</b><br>1. Check that the positive outcome level is correct for your study<br>2. If incorrect, use the 'Positive Outcome Level' dropdown to specify the correct level<br>3. These unadjusted diagnostic metrics depend on these interpretations being correct<br>4. Different languages/coding may require manual specification</small></div><br><div style="background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;"><h4 style="color: inherit; margin-top: 0;">Nomogram Information</h4><p>The nomogram plot above provides a visual tool for prediction based on the maximum-likelihood logistic regression model.</p><p><strong>Components:</strong></p><ul style="margin: 5px 0; padding-left: 20px;"><li><strong>Points:</strong> Top scale showing point values for each predictor</li><li><strong>Predictor Scales:</strong> Individual scales for each variable in the model</li><li><strong>Total Points:</strong> Sum of all individual predictor points</li><li><strong>Predicted Probability:</strong> Bottom scale showing the predicted outcome probability</li></ul><p><strong>Validation note:</strong> This display does not establish calibration, discrimination, or external validity. Validate the fitted model before clinical use.</p></div>

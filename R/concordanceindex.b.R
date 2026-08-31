@@ -907,8 +907,13 @@ concordanceindexClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
 
                 # Fit Kaplan-Meier
-                surv_obj <- survival::Surv(time_var, event_var)
-                km_fit <- survival::survfit(surv_obj ~ risk_group)
+                # Inline formula over columns of plot_data so survminer can
+                # re-evaluate fit$call$formula in its own frame
+                plot_data <- data.frame(time_var, event_var, risk_group)
+                km_fit <- survival::survfit(
+                    survival::Surv(time_var, event_var) ~ risk_group,
+                    data = plot_data
+                )
 
                 # Plot using survminer if available, otherwise base plot
                 tryCatch(
@@ -916,7 +921,7 @@ concordanceindexClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         if (requireNamespace("survminer", quietly = TRUE)) {
                             p <- survminer::ggsurvplot(
                                 km_fit,
-                                data = data.frame(time_var, event_var, risk_group),
+                                data = plot_data,
                                 risk.table = FALSE,
                                 pval = TRUE,
                                 conf.int = TRUE,

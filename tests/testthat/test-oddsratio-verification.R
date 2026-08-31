@@ -12,9 +12,21 @@ or_text <- function(res) {
     gsub("[[:space:]]+", " ",
          gsub("<[^>]*>", " ", paste(as.character(res$text$content), collapse = " ")))
 }
+# finalfit's p-value convention is "p<0.001" below the threshold, and kable
+# HTML-escapes the "<" to "&lt;". Matching only "p=" silently DROPPED every
+# strongly-significant row, which is exactly the row a reader cares about most.
+OR_CELL_RE <- "[0-9]+\\.[0-9]{2} \\([0-9.]+-[0-9.]+, p(=[0-9.]+|(&lt;|<)[0-9.]+)\\)"
 or_cells <- function(res) {
-    regmatches(or_text(res),
-               gregexpr("[0-9]+\\.[0-9]{2} \\([0-9.]+-[0-9.]+, p=[0-9.]+\\)", or_text(res)))[[1]]
+    regmatches(or_text(res), gregexpr(OR_CELL_RE, or_text(res)))[[1]]
+}
+# Cells of one named OR column only. The table is rendered row-major, so the
+# univariable and multivariable cells of a row alternate; `which` picks the
+# 1st or 2nd of each pair.
+or_cells_col <- function(res, which = c("univariable", "multivariable")) {
+    which <- match.arg(which)
+    cells <- or_cells(res)
+    if (length(cells) == 0) return(cells)
+    cells[seq(if (which == "univariable") 1 else 2, length(cells), by = 2)]
 }
 or_nums <- function(cell) as.numeric(regmatches(cell, gregexpr("[0-9]+\\.[0-9]+", cell))[[1]])
 diag_text <- function(res) {
@@ -86,21 +98,38 @@ test_that("Firth penalized odds ratios match logistf", {
                              outcome = "dead", outcomeLevel = "Dead",
                              predictorLevel = NULL, usePenalized = TRUE))
 
-    fr <- logistf::logistf(dead ~ grade + stage, data = df)
-    keep <- names(stats::coef(fr)) != "(Intercept)"
-    want <- data.frame(or = exp(stats::coef(fr))[keep],
-                       lo = exp(fr$ci.lower)[keep],
-                       hi = exp(fr$ci.upper)[keep],
-                       p  = fr$prob[keep])
-
-    got <- do.call(rbind, lapply(or_cells(res), or_nums))
-    expect_equal(nrow(got), nrow(want))
-    for (i in seq_len(nrow(want))) {
-        hit <- which(abs(got[, 1] - want$or[i]) < 0.006 &
-                     abs(got[, 2] - want$lo[i]) < 0.006 &
-                     abs(got[, 3] - want$hi[i]) < 0.006)
-        expect_gt(length(hit), 0, label = paste("Firth row", rownames(want)[i]))
+    # The penalized table mirrors the maximum-likelihood table's structure: a
+    # reference row per factor (rendered "-", so not an OR cell) plus BOTH a
+    # univariable and a multivariable Firth column. Each column is checked
+    # against its own logistf fit -- a multivariable-only check would let a
+    # wrong univariable column through unnoticed.
+    fit_nums <- function(fit) {
+        keep <- names(stats::coef(fit)) != "(Intercept)"
+        data.frame(or = exp(stats::coef(fit))[keep],
+                   lo = exp(fit$ci.lower)[keep],
+                   hi = exp(fit$ci.upper)[keep])
     }
+
+    want_multi <- fit_nums(logistf::logistf(dead ~ grade + stage, data = df))
+    want_uni   <- do.call(rbind, lapply(c("grade", "stage"), function(v)
+        fit_nums(logistf::logistf(stats::as.formula(paste("dead ~", v)), data = df))))
+
+    for (col in c("univariable", "multivariable")) {
+        want <- if (col == "univariable") want_uni else want_multi
+        got  <- do.call(rbind, lapply(or_cells_col(res, col), or_nums))
+        expect_equal(nrow(got), nrow(want), label = paste("Firth", col, "cell count"))
+        for (i in seq_len(nrow(want))) {
+            hit <- which(abs(got[, 1] - want$or[i]) < 0.006 &
+                         abs(got[, 2] - want$lo[i]) < 0.006 &
+                         abs(got[, 3] - want$hi[i]) < 0.006)
+            expect_gt(length(hit), 0,
+                      label = paste("Firth", col, "row", rownames(want)[i]))
+        }
+    }
+
+    # Reference rows must be present and rendered as "-", not as a spurious OR.
+    expect_true(grepl("High", or_text(res)))
+    expect_true(grepl("\\bI\\b", or_text(res)))
 })
 
 test_that("diagnostic metrics and their CIs match epiR::epi.tests", {

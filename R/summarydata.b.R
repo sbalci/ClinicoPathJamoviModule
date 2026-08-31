@@ -4,11 +4,10 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom magrittr %>%
-#' @importFrom gt gt tab_header fmt_number cols_label md cell_fill cells_column_labels cell_text tab_style opt_stylize tab_options
+#' @importFrom gt gt tab_header fmt_number cols_label md cells_column_labels cell_text tab_style opt_stylize tab_options
 #' @importFrom gtExtras gt_plt_summary
 #' @importFrom htmltools HTML
 #' @importFrom moments kurtosis skewness
-#' @importFrom utils packageVersion
 #' @noRd
 NULL
 
@@ -22,7 +21,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         # item: avoids BOTH the jmvcore::Notice serialization error raised by
         # self$results$insert(999, Notice) AND any HTML in notices (project
         # convention: notice content is plain text). Data-quality problems such
-        # as a dropped variable belong here, not in a box titled "To Do".
+        # as a dropped variable belong here, not in the introductory data panel.
         .noticeList = list(),
 
         .addNotice = function(type, title, content) {
@@ -46,15 +45,28 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 return()
             }
             blocks <- vapply(private$.noticeList, function(notice) {
-                prefix <- switch(notice$type,
-                    ERROR          = "ERROR: ",
-                    STRONG_WARNING = "WARNING: ",
-                    WARNING        = "WARNING: ",
-                    INFO           = "NOTE: ",
+                level <- switch(notice$type,
+                    ERROR          = .("ERROR"),
+                    STRONG_WARNING = .("STRONG WARNING"),
+                    WARNING        = .("WARNING"),
+                    INFO           = .("NOTE"),
                     "")
-                paste0(prefix, notice$title, "\n", notice$content)
+                if (nzchar(level)) {
+                    .fmt(
+                        .("{level}: {title}: {content}"),
+                        level = level,
+                        title = notice$title,
+                        content = notice$content
+                    )
+                } else {
+                    .fmt(
+                        .("{title}: {content}"),
+                        title = notice$title,
+                        content = notice$content
+                    )
+                }
             }, character(1))
-            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+            self$results$notices$setContent(paste(blocks, collapse = "\n"))
         },
 
         # Blank every result item whose content depends on the variable
@@ -76,18 +88,19 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         private$.renderNotices()
         # Check if variables have been selected. If not, display a welcoming message with instructions.
         if (length(self$options$vars) == 0) {
-            intro_msg <- "
-          <h3>Welcome to ClinicoPath Descriptives!</h3>
-          <p>This tool helps you generate descriptive statistics for your numeric variables.
-          Please select one or more continuous variables from the options panel.</p>
-          <p>If you want to inspect distribution characteristics, enable the 'Distribution Diagnostics' option.</p>"
+            intro_msg <- paste0(
+                "<h3>", .("Welcome to ClinicoPath Descriptives!"), "</h3>",
+                "<p>", .("This tool generates descriptive statistics for numeric variables. Select one or more continuous variables from the options panel."), "</p>",
+                "<p>", .("Enable Distribution diagnostics to inspect normality, skewness, and kurtosis."), "</p>"
+            )
             self$results$todo$setContent(intro_msg)
-            # Both of these are `visible: true` in the .r.yaml, so before any
-            # variable is chosen the user saw two empty boxes titled "About This
-            # Analysis" and "Statistical Glossary". Their content is static, and
-            # the welcome state is exactly when it is most useful.
-            self$results$aboutAnalysis$setContent(private$.generateAboutContent())
-            self$results$glossary$setContent(private$.generateGlossary())
+            if (self$options$show_guidance) {
+                self$results$aboutAnalysis$setContent(private$.generateAboutContent())
+                self$results$glossary$setContent(private$.generateGlossary())
+            } else {
+                self$results$aboutAnalysis$setContent("")
+                self$results$glossary$setContent("")
+            }
             private$.clearComputedOutputs()
             return()
         } else {
@@ -104,21 +117,17 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
 
             # Remove non-numeric variables and variables with all NAs
             vars_to_remove <- c()
-            warning_msgs <- c()
-
             # Everything downstream of this loop assumes var_list holds numeric
             # columns with at least one non-missing value. Do not relax it.
             for (var in vars) {
                 if (!is.numeric(self$data[[var]])) {
                     vars_to_remove <- c(vars_to_remove, var)
-                    warning_msgs <- c(warning_msgs, paste0("Variable '", htmltools::htmlEscape(var), "' is not numeric"))
                     private$.addNotice("STRONG_WARNING", .("Variable excluded"),
                         .fmt(
                             .("{variable} was excluded from the summary because it is not a numeric column. Change its measure type to continuous, or remove it from the Variables list."),
                             variable = var))
                 } else if (all(is.na(self$data[[var]]))) {
                     vars_to_remove <- c(vars_to_remove, var)
-                    warning_msgs <- c(warning_msgs, paste0("Variable '", htmltools::htmlEscape(var), "' contains only missing values"))
                     private$.addNotice("STRONG_WARNING", .("Variable excluded"),
                         .fmt(
                             .("{variable} was excluded from the summary because every value in it is missing. Check the import and any active row filter for this column."),
@@ -126,23 +135,63 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 }
             }
 
-            if (length(warning_msgs) > 0) {
-                self$results$todo$setContent(paste0("<div style='color: inherit; background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 4px;'>",
-                    paste(warning_msgs, collapse="<br>"),
-                    "</div>"))
-            }
-
             vars <- setdiff(vars, vars_to_remove)
 
             if (length(vars) == 0) {
-                # Same reason as the welcome branch: aboutAnalysis and glossary
-                # are `visible: true`, so leaving them unset shows two empty
-                # titled boxes, and the numbers from the previous selection would
-                # otherwise stay on screen with nothing marking them stale.
-                self$results$aboutAnalysis$setContent(private$.generateAboutContent())
-                self$results$glossary$setContent(private$.generateGlossary())
+                if (self$options$show_guidance) {
+                    self$results$aboutAnalysis$setContent(private$.generateAboutContent())
+                    self$results$glossary$setContent(private$.generateGlossary())
+                } else {
+                    self$results$aboutAnalysis$setContent("")
+                    self$results$glossary$setContent("")
+                }
                 private$.clearComputedOutputs()
                 return()
+            }
+
+            if (self$options$distr && length(vars) > 1) {
+                private$.addNotice(
+                    "INFO",
+                    .("Multiple distribution diagnostics"),
+                    .("A separate Shapiro-Wilk test is reported for each variable without multiplicity adjustment. Treat these as exploratory distribution checks, not confirmatory hypothesis tests, and interpret them with the visual summaries.")
+                )
+            }
+
+            # Summaries use each variable's own non-missing observations rather
+            # than a common complete-case subset. Surface conditions that make
+            # those variable-specific estimates especially easy to overinterpret.
+            for (var in vars) {
+                n_total <- length(self$data[[var]])
+                n_valid <- sum(!is.na(self$data[[var]]))
+                n_missing <- n_total - n_valid
+                missing_pct <- if (n_total > 0) 100 * n_missing / n_total else 0
+
+                if (missing_pct > 20) {
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        .("High missingness"),
+                        private$.fmtVar(
+                            .("{variable} has {missing} missing values among {total} records ({percent}%); estimates use the {available} available observations and may not represent the full dataset. Review the missing-data mechanism before interpretation."),
+                            var,
+                            missing = n_missing,
+                            total = n_total,
+                            percent = formatC(missing_pct, format = "f", digits = 1),
+                            available = n_valid
+                        )
+                    )
+                }
+
+                if (n_valid < 3) {
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        .("Very small sample"),
+                        private$.fmtVar(
+                            .("{variable} has only {available} non-missing observation(s); descriptive estimates are unstable, normality cannot be assessed, and the output should not be used for clinical inference."),
+                            var,
+                            available = n_valid
+                        )
+                    )
+                }
             }
 
             # Retrieve the data and construct the list of variables.
@@ -223,17 +272,33 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     # Skewness and kurtosis were hard-coded to 2 decimals, so a
                     # user who set "Decimal places" to 4 read "Mean 0.2574 +/-
                     # 2.1460 ... skewness = 1.24" - two precisions in one line.
-                    skew_val <- private$.fmtNum(moments::skewness(numeric_data, na.rm = TRUE))
-                    kurt_val <- private$.fmtNum(moments::kurtosis(numeric_data, na.rm = TRUE))
+                    skew_num <- moments::skewness(numeric_data, na.rm = TRUE)
+                    kurt_num <- moments::kurtosis(numeric_data, na.rm = TRUE)
+                    skew_val <- private$.fmtNum(skew_num)
+                    kurt_val <- private$.fmtNum(kurt_num)
+                    moments_available <- length(valid_data) >= 3 &&
+                        n_unique > 1 && is.finite(skew_num) && is.finite(kurt_num)
 
                     if (is.na(p_val)) {
-                        # Normality was not assessed (constant data or n outside 3-5000);
-                        # show only the assessment, not NA/NaN diagnostics.
-                        dist_text <- private$.fmtVar(
-                            .("<br><em>Distribution diagnostics for {variable}:</em> {assessment}"),
-                            myvar,
-                            assessment = distribution_assessment
-                        )
+                        # Shapiro-Wilk eligibility is independent of whether the
+                        # descriptive moments can be computed. For n > 5000, retain
+                        # skewness and kurtosis while explaining why Shapiro-Wilk is
+                        # unavailable. Suppress only genuinely undefined moments.
+                        if (moments_available) {
+                            dist_text <- private$.fmtVar(
+                                .("<br><em>Distribution diagnostics for {variable}:</em> skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"),
+                                myvar,
+                                skewness = skew_val,
+                                kurtosis = kurt_val,
+                                assessment = distribution_assessment
+                            )
+                        } else {
+                            dist_text <- private$.fmtVar(
+                                .("<br><em>Distribution diagnostics for {variable}:</em> {assessment}"),
+                                myvar,
+                                assessment = distribution_assessment
+                            )
+                        }
                     } else if (p_val < 0.001) {
                         # .fmtP() carries the relation for a p below the reporting
                         # bound, so a template that also supplies "=" rendered
@@ -316,8 +381,15 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
 
                 # Use gtExtras with default styling as intended
                 private$.checkpoint()
+                dp <- self$options$decimal_places
                 summary_table <- clean_data %>%
-                    gtExtras::gt_plt_summary()
+                    gtExtras::gt_plt_summary() %>%
+                    # gt_plt_summary() has no precision argument and otherwise
+                    # fixes these displayed statistics at one decimal place.
+                    gt::fmt_number(
+                        columns = c("Mean", "Median", "SD"),
+                        decimals = dp
+                    )
 
                 # Convert to HTML with improved compatibility
                 html_result <- tryCatch({
@@ -329,44 +401,58 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                         as.character(summary_table)
                     }, error = function(e3) {
                         # Final fallback: use custom method
+                        private$.addNotice(
+                            "WARNING",
+                            .("Visual summary simplified"),
+                            .("The inline distribution plots could not be rendered, so a numeric summary table is shown instead. The descriptive estimates remain available; review the text summary for the same values."))
                         as.character(private$.gtExtras_style_fallback(dataset, var_list))
                     })
                 })
 
-                htmltools::HTML(html_result)
+                htmltools::HTML(private$.themeSafeGtHtml(html_result))
             }, error = function(e) {
-                # If gtExtras fails, use the comprehensive fallback without error message
-                # This is a design choice to avoid alarming users when the fallback works perfectly
+                # Preserve numerical output when gtExtras cannot render, but
+                # disclose that the requested inline plots are absent.
+                private$.addNotice(
+                    "WARNING",
+                    .("Visual summary simplified"),
+                    .("The inline distribution plots could not be rendered, so a numeric summary table is shown instead. The descriptive estimates remain available; review the text summary for the same values."))
                 simple_table <- private$.gtExtras_style_fallback(dataset, var_list)
-                htmltools::HTML(as.character(simple_table))
+                htmltools::HTML(
+                    private$.themeSafeGtHtml(as.character(simple_table)))
             })
             
             
             self$results$text1$setContent(plot_dataset)
             
-            # Generate clinical interpretation content
-            clinical_interpretation <- private$.generateClinicalInterpretation(var_list, dataset)
-            self$results$clinicalInterpretation$setContent(clinical_interpretation)
-            
-            # Generate about analysis content
-            about_content <- private$.generateAboutContent()
-            self$results$aboutAnalysis$setContent(about_content)
+            # Educational material is optional so routine descriptive output stays
+            # compact. One switch controls the three related guidance panels.
+            if (self$options$show_guidance) {
+                self$results$clinicalInterpretation$setContent(
+                    private$.generateClinicalInterpretation(var_list, dataset))
+                self$results$aboutAnalysis$setContent(private$.generateAboutContent())
+                self$results$glossary$setContent(private$.generateGlossary())
+            } else {
+                self$results$clinicalInterpretation$setContent("")
+                self$results$aboutAnalysis$setContent("")
+                self$results$glossary$setContent("")
+            }
             
             # Generate outlier detection report if enabled
             if (self$options$outliers) {
                 outlier_report <- private$.generateOutlierReport(var_list, dataset)
                 self$results$outlierReport$setContent(outlier_report)
+            } else {
+                self$results$outlierReport$setContent("")
             }
             
             # Generate report sentences if enabled
             if (self$options$report_sentences) {
                 report_sentences <- private$.generateReportSentences(var_list, dataset)
                 self$results$reportSentences$setContent(report_sentences)
+            } else {
+                self$results$reportSentences$setContent("")
             }
-            
-            # Generate statistical glossary
-            glossary_content <- private$.generateGlossary()
-            self$results$glossary$setContent(glossary_content)
         }
         },
         # Compute (and cache per run) the Shapiro-Wilk test for a numeric vector.
@@ -401,8 +487,12 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         },
 
         # A p-value is never zero. round(2.8e-12, 3) is 0, which printed as
-        # "Shapiro-Wilk p-value = 0" - and that went into a copy-ready manuscript
-        # sentence. Report the conventional bound instead.
+        # "Shapiro-Wilk p-value = 0" - and that went into a draft manuscript
+        # sentence. Report the conventional bound instead. Near 0.05, retain
+        # enough decimals to keep the displayed p-value on the same side of the
+        # decision threshold as the exact value; otherwise p = 0.0501 displayed
+        # as 0.050 while the accompanying verdict correctly said no departure
+        # was detected.
         # Both call sites write into Html result items, so the "<" is emitted as an
         # entity. (A literal "< 0.001" does in fact render: an HTML tokenizer only
         # opens a tag when "<" is followed by a letter, "!", "/" or "?", so "< " is
@@ -411,13 +501,18 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         .fmtP = function(p) {
             if (length(p) != 1 || is.na(p)) return(NA_character_)
             if (p < 0.001) return("&lt; 0.001")
-            formatC(p, format = "f", digits = 3)
+
+            digits <- 3L
+            while (p != 0.05 && digits < 15L && round(p, digits) == 0.05)
+                digits <- digits + 1L
+
+            formatC(p, format = "f", digits = digits)
         },
 
         # Single source of truth for the normality verdict.
         #
         # The diagnostics text used to test the ROUNDED p (round(p, 3) > 0.05) and
-        # the copy-ready sentence the UNROUNDED one, so a variable with p = 0.0501
+        # the draft sentence the UNROUNDED one, so a variable with p = 0.0501
         # was declared "not consistent with a normal distribution" in one panel and
         # "showed normal distribution" in the other, both printing "p = 0.05".
         # Comparison is on the exact p; only the display is rounded.
@@ -449,6 +544,35 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 private$.shapiroCache[[key]] <- list(value = result)
             result
         },
+        # gt emits a self-contained white table with fixed dark text. That is
+        # readable in light mode but becomes a conspicuous light-theme island in
+        # jamovi dark mode. Make only the neutral canvas and default body text
+        # inherit the host theme; keep deliberate saturated chart colours intact.
+        .themeSafeGtHtml = function(html) {
+            html <- as.character(html)
+            html <- gsub(
+                "background-color:\\s*#FFFFFF",
+                "background-color: transparent",
+                html,
+                ignore.case = TRUE,
+                perl = TRUE
+            )
+            html <- gsub(
+                "background-color:\\s*#F8F9FA",
+                "background-color: rgba(127, 127, 127, 0.08)",
+                html,
+                ignore.case = TRUE,
+                perl = TRUE
+            )
+            gsub(
+                "(?<!-)color:\\s*#333333",
+                "color: inherit",
+                html,
+                ignore.case = TRUE,
+                perl = TRUE
+            )
+        },
+
         # Fallback with gtExtras-style appearance
         .gtExtras_style_fallback = function(dataset, var_list) {
             # var_list arrives already filtered to numeric columns by .run(); the
@@ -523,10 +647,6 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     Max = .("Max")
                 ) %>%
                 gt::tab_style(
-                    style = gt::cell_fill(color = "#f8f9fa"),
-                    locations = gt::cells_column_labels()
-                ) %>%
-                gt::tab_style(
                     style = gt::cell_text(weight = "bold"),
                     locations = gt::cells_column_labels()
                 ) %>%
@@ -538,7 +658,9 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 )
             
             # Convert to HTML
-            return(htmltools::HTML(as.character(gt::as_raw_html(gt_table))))
+            html <- private$.themeSafeGtHtml(
+                as.character(gt::as_raw_html(gt_table)))
+            return(htmltools::HTML(html))
         },
 
         # Generate clinical interpretation for continuous variables
@@ -580,23 +702,27 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 "<p><strong>", .("Data Quality Assessment"), ":</strong></p>",
                 "<ul style='margin: 5px 0 10px 20px;'>",
                 "<li>", .fmt(.("Average missing data: {pct}%"), pct = avg_missing), "</li>",
-                if (n_vars > 1) paste0("<li>", private$.fmtVar(
+                if (worst_missing > 0) paste0("<li>", private$.fmtVar(
                     .("Most incomplete variable: {variable}, {pct}% missing"),
                     worst_var, pct = worst_missing), "</li>") else "",
                 # Fixed dark hex foregrounds (#d32f2f, #388e3c) fell below 4.5:1 on
                 # jamovi's dark theme - and these are the data-quality lines. Weight
                 # carries the emphasis instead, and the colour follows the theme.
-                if (worst_missing > 20) paste0("<li style='color: inherit; font-weight: 600;'>", .("A high missing-data rate may affect interpretation."), "</li>") else "",
-                if (worst_missing <= 5) paste0("<li style='color: inherit; font-weight: 600;'>", .("Data completeness is excellent."), "</li>") else "",
+                if (worst_missing > 20) paste0("<li style='color: inherit; font-weight: 600;'>", .("The high missing-data rate may affect interpretation; review the missing-data mechanism."), "</li>") else "",
+                if (worst_missing <= 5) paste0("<li style='color: inherit; font-weight: 600;'>", .("Each selected variable has no more than 5% missing values."), "</li>") else "",
                 "</ul>",
                 
                 "<p><strong>", .("Clinical Applications"), ":</strong></p>",
                 "<ul style='margin: 5px 0 10px 20px;'>",
                 "<li>", .("Biomarker distribution assessment"), "</li>",
-                "<li>", .("Reference range validation"), "</li>",
+                "<li>", .("Preliminary distribution review before a dedicated reference-interval analysis"), "</li>",
                 "<li>", .("Quality control and outlier detection"), "</li>",
-                "<li>", .("Statistical assumption verification"), "</li>",
+                "<li>", .("Exploratory assessment of distributional features"), "</li>",
                 "</ul>",
+
+                "<p><strong>", .("Scope limitation"), ":</strong> ",
+                .("This descriptive analysis does not establish or verify clinical reference intervals and does not by itself verify the assumptions of a later statistical model."),
+                "</p>",
                 
                 # Backstop only: jmvcore's OptionVariables carries rejectInf = TRUE,
                 # so a column holding Inf is rejected before .run() is reached.
@@ -629,7 +755,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 "<li>", .("Initial data exploration and quality assessment"), "</li>",
                 "<li>", .("Biomarker characterization studies"), "</li>",
                 "<li>", .("Preparation for statistical modeling"), "</li>",
-                "<li>", .("Laboratory reference range studies"), "</li>",
+                "<li>", .("Preliminary exploration when planning a dedicated laboratory reference-interval study"), "</li>",
                 "</ul>",
                 
                 "<p><strong>", .("Key considerations"), ":</strong></p>",
@@ -638,7 +764,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 "<li>", .("Consider data transformations if distributions are highly skewed"), "</li>",
                 "<li>", .("Investigate outliers before proceeding with inferential statistics"), "</li>",
                 "<li>", .("Every statistic here is computed per row. If the dataset holds several rows per patient (one per block, core or visit), aggregate to one row per patient before reading these numbers as patient-level results."), "</li>",
-                "<li>", .("The decimal places option governs the text summary, the skewness and kurtosis values, the visual summary table, the outlier report and the copy-ready clinical summary. P-values are always shown to 3 decimal places."), "</li>",
+                "<li>", .("The decimal places option governs the text summary, the skewness and kurtosis values, the visual summary table, the outlier report and the draft statistical summary. P-values are normally shown to 3 decimal places, with additional digits near 0.05 when needed to preserve the test decision."), "</li>",
                 "</ul>",
                 
                 "</div>"
@@ -698,7 +824,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             report_html <- paste0(
                 "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: inherit;'>", .("Outlier Detection Results"), "</h4>",
-                "<p>", .("Outliers detected using IQR method (values beyond Q1-1.5\u{D7}IQR or Q3+1.5\u{D7}IQR):"), "</p>"
+                "<p>", .("Potential outliers flagged using the IQR method (values beyond Q1-1.5\u{D7}IQR or Q3+1.5\u{D7}IQR):"), "</p>"
             )
             
             for (var in variables) {
@@ -717,18 +843,18 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     report_html <- paste0(report_html,
                         "<p><strong>", safe_var, ":</strong> ",
                         .fmt(
-                            .("No outliers detected (expected range {lower} to {upper})."),
+                            .("No observations were flagged beyond the IQR fences ({lower} to {upper})."),
                             lower = result$lower_bound, upper = result$upper_bound), "</p>")
                 } else {
                     report_html <- paste0(report_html,
                         "<p><strong>", safe_var, ":</strong> ",
                         .fmt(
-                            .("{count} outlier(s) detected (values: {values})."),
+                            .("{count} observation(s) flagged (values: {values})."),
                             count = length(result$outliers),
                             values = paste(private$.fmtNum(result$values), collapse = ", ")),
                         "<br><span style='color: inherit; font-size: 0.9em;'>",
                         .fmt(
-                            .("Expected range: {lower} to {upper}"),
+                            .("IQR fences: {lower} to {upper}"),
                             lower = result$lower_bound, upper = result$upper_bound),
                         "</span></p>")
                 }
@@ -744,7 +870,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             return(report_html)
         },
         
-        # Generate copy-ready report sentences
+        # Generate draft report sentences
         .generateReportSentences = function(variables, dataset) {
             if (length(variables) == 0) return("")
             
@@ -777,14 +903,21 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 # A bare "+/-" is ambiguous between SD and SEM, which differ by a
                 # factor of sqrt(n); this is text the user is invited to paste into
                 # a manuscript, so the dispersion measure is named.
+                n_total <- length(var_data)
+                n_missing <- n_total - n
+
                 sentence <- if (n < 2) {
                     private$.fmtVar(
-                        .("For {variable}, the single available observation was {value}."),
-                        var, value = mean_val)
+                        .("For {variable}, 1 of {total} records had a non-missing value ({missing} missing); the available observation was {value}."),
+                        var,
+                        total = n_total,
+                        missing = n_missing,
+                        value = mean_val)
                 } else {
                     private$.fmtVar(
-                        .("For {variable}, analysis of {n} observations showed a mean of {mean} (SD {sd}); median {median} (range {min} to {max})."),
+                        .("For {variable}, {n} of {total} records had non-missing values ({missing} missing); the mean was {mean} (SD {sd}) and the median was {median} (observed range {min} to {max})."),
                         var, n = n,
+                        total = n_total, missing = n_missing,
                         mean = mean_val, sd = sd_val, median = median_val,
                         min = min_val, max = max_val)
                 }
@@ -809,7 +942,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     if (!is.null(verdict)) {
                         # .fmtP() carries the relation below the reporting bound, so
                         # the template must not also supply "="; it rendered
-                        # "(p = < 0.001)" in the one block labelled copy-ready.
+                        # "(p = < 0.001)" in the draft-reporting block.
                         sw_sentence <- if (sw_test$p.value < 0.001)
                             .fmt(
                                 .("The Shapiro-Wilk test showed {verdict} (p &lt; 0.001)."),
@@ -828,7 +961,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             
             report_html <- paste0(
                 "<div style='padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; margin: 10px 0; border-radius: 4px; color: inherit;'>",
-                "<h4 style='margin-top: 0; color: inherit;'>", .("Copy-Ready Clinical Summary"), "</h4>",
+                "<h4 style='margin-top: 0; color: inherit;'>", .("Draft Statistical Summary"), "</h4>",
                 # An opaque white background with no foreground colour rendered
                 # this box - the very text the user is invited to read and copy -
                 # as light-on-white under jamovi's dark theme. A neutral
@@ -838,7 +971,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 "</div>",
                 "<p style='margin-top: 10px; font-size: 0.9em; color: inherit;'>",
                 "<strong>", .("Usage"), ":</strong> ",
-                .("Copy the text above for use in clinical reports, research manuscripts, or medical documentation."),
+                .("Use this text as a draft only. Add the measurement units, study population, time point, and missing-data handling before using it in a manuscript or clinical document."),
                 "</p></div>"
             )
             
@@ -877,7 +1010,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     paste0(
                         "<div style='margin-bottom: 10px; padding-top: 10px; border-top: 1px solid #d1d5db;'>",
                         "<strong>", .("Outlier Detection"), ":</strong><br>",
-                        "<strong>", .("IQR Method"), ":</strong> ", .("Values beyond Q1-1.5\u{D7}IQR or Q3+1.5\u{D7}IQR are considered outliers."), "<br>",
+                        "<strong>", .("IQR Method"), ":</strong> ", .("Values beyond Q1-1.5\u{D7}IQR or Q3+1.5\u{D7}IQR are flagged as potential outliers for investigation."), "<br>",
                         "<strong>", .("Q1, Q3"), ":</strong> ", .("First and third quartiles (25th and 75th percentiles)."), "<br>",
                         "</div>"
                     )
@@ -890,8 +1023,4 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             
             return(glossary_html)
         }
-
-        # NOTE: R code generation feature deferred to future release
-        # See SUMMARYDATA_FIXES.md for details
-        # Implementation can be restored from git history if needed
     ))

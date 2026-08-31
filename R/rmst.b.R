@@ -371,12 +371,41 @@ rmstClass <- R6::R6Class(
                 return()
             }
             
-            # Create survival plot with RMST areas
-            fit <- survival::survfit(surv ~ group, data = data)
+            # Store only the plain inputs the renderer needs. A ggsurvplot
+            # object is ~17 MB (its plot_env captures the R6 method frame) and
+            # would be carried by every run and every .omv save.
+            image <- self$results$rmstPlot
+            image$setState(list(
+                data = data.frame(
+                    time = data$time,
+                    event = data$event,
+                    group = data$group
+                ),
+                tau = tau
+            ))
+        },
+        
+        .plotRMST = function(image, ggtheme, theme, ...) {
+            
+            state <- image$state
+            if (is.null(state)) return(FALSE)
+            
+            if (!requireNamespace("ggplot2", quietly = TRUE) ||
+                !requireNamespace("survminer", quietly = TRUE)) {
+                return(FALSE)
+            }
+            
+            plotData <- state$data
+            tau <- state$tau
+            
+            # Formula inlined over columns of the data frame handed to
+            # ggsurvplot(data=), so survminer's own eval() of fit$call$formula
+            # resolves in its frame.
+            fit <- survival::survfit(survival::Surv(time, event) ~ group, data = plotData)
             
             plot <- survminer::ggsurvplot(
                 fit,
-                data = data,
+                data = plotData,
                 title = glue::glue("Survival Curves with RMST (tau = {round(tau, 2)})"),
                 xlab = "Time",
                 ylab = "Survival Probability",
@@ -393,9 +422,8 @@ rmstClass <- R6::R6Class(
                 ggplot2::annotate("text", x = tau, y = 0.1, label = glue::glue("tau = {round(tau, 2)}"), 
                                  color = "red", hjust = -0.1)
             
-            # Create and save plot
-            image <- self$results$rmstPlot
-            image$setState(plot)
+            print(plot)
+            TRUE
         },
         
         .createTauAnalysis = function(data) {
@@ -447,22 +475,34 @@ rmstClass <- R6::R6Class(
                     ))
                 }
                 
-                # Create sensitivity plot
-                plot <- ggplot2::ggplot(sensitivity_results, ggplot2::aes(x = tau, y = rmst_diff)) +
-                    ggplot2::geom_line(color = "blue", size = 1) +
-                    ggplot2::geom_ribbon(ggplot2::aes(ymin = ci_lower, ymax = ci_upper), 
-                                        alpha = 0.2, fill = "blue") +
-                    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-                    ggplot2::labs(
-                        title = "RMST Difference Sensitivity Analysis",
-                        x = "Tau (Restriction Time)",
-                        y = "RMST Difference"
-                    ) +
-                    ggplot2::theme_minimal()
-                
+                # Store the plain data frame; the ggplot is built in the
+                # renderer (a stored ggplot drags its plot_env, ~17 MB here).
                 image <- self$results$tauAnalysisPlot
-                image$setState(plot)
+                image$setState(sensitivity_results)
             }
+        },
+        
+        .plotTauAnalysis = function(image, ggtheme, theme, ...) {
+            
+            sensitivity_results <- image$state
+            if (is.null(sensitivity_results)) return(FALSE)
+            
+            if (!requireNamespace("ggplot2", quietly = TRUE)) return(FALSE)
+            
+            plot <- ggplot2::ggplot(sensitivity_results, ggplot2::aes(x = tau, y = rmst_diff)) +
+                ggplot2::geom_line(color = "blue", size = 1) +
+                ggplot2::geom_ribbon(ggplot2::aes(ymin = ci_lower, ymax = ci_upper), 
+                                    alpha = 0.2, fill = "blue") +
+                ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+                ggplot2::labs(
+                    title = "RMST Difference Sensitivity Analysis",
+                    x = "Tau (Restriction Time)",
+                    y = "RMST Difference"
+                ) +
+                ggplot2::theme_minimal()
+            
+            print(plot)
+            TRUE
         },
         
         .generateSummary = function(rmst_results, tau) {

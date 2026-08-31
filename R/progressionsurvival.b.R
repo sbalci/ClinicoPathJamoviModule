@@ -292,15 +292,15 @@ progressionsurvivalClass <- R6::R6Class(
 
             tryCatch(
                 {
-                    # Create survival object
-                    surv_obj <- Surv(data$time, data$pfs_event)
-
-                    # Fit Kaplan-Meier curves
+                    # Fit Kaplan-Meier curves. The Surv() term is written inline
+                    # rather than through a local variable: survminer re-parses
+                    # fit$call$formula when plotting, and that local is long gone
+                    # by then, so ggsurvplot died with "object 'surv_obj' not found".
                     if (!is.null(self$options$treatment_var) && "treatment" %in% names(data)) {
-                        km_fit <- survfit(surv_obj ~ treatment, data = data)
+                        km_fit <- survfit(Surv(time, pfs_event) ~ treatment, data = data)
                         groups <- levels(data$treatment)
                     } else {
-                        km_fit <- survfit(surv_obj ~ 1, data = data)
+                        km_fit <- survfit(Surv(time, pfs_event) ~ 1, data = data)
                         groups <- "Overall"
                     }
 

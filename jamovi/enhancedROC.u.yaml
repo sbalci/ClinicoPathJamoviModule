@@ -179,6 +179,13 @@ children:
               - type: ComboBox
                 name: comparisonMethod
                 enable: (pairwiseComparisons)
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: bootstrapCutoffCI
+              - type: CheckBox
+                name: bootstrapPartialAUC
   - type: CollapseBox
     label: Advanced ROC Options
     collapsed: true
@@ -261,6 +268,11 @@ children:
                   - type: CheckBox
                     name: calibrationMetrics
                     enable: (calibrationAnalysis)
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: CheckBox
+                    name: splineCalibration
           - type: LayoutBox
             cell:
               column: 1
@@ -289,6 +301,17 @@ children:
           - type: ComboBox
             name: multiClassStrategy
             enable: (multiClassROC)
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: splineKnots
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: multiClassAveraging
   - type: CollapseBox
     label: Clinical Impact
     collapsed: true
@@ -308,6 +331,29 @@ children:
           - type: CheckBox
             name: decisionImpactTable
             enable: (clinicalImpact)
+          - type: CheckBox
+            name: harrellCIndex
+          - type: CheckBox
+            name: unoCStatistic
+          - type: CheckBox
+            name: incidentDynamic
+          - type: CheckBox
+            name: cumulativeDynamic
+          - type: CheckBox
+            name: competingRisksConcordance
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: eoRatio
+      - type: CheckBox
+        name: namDagostino
+      - type: CheckBox
+        name: greenwoodNam
+      - type: CheckBox
+        name: calibrationBelt
+      - type: CheckBox
+        name: calibrationDensity
   - type: CollapseBox
     label: Plot Settings
     collapsed: true
@@ -343,3 +389,18 @@ children:
                   - type: ComboBox
                     name: validationMethod
                     enable: (internalValidation)
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: CheckBox
+                    name: optimismCorrection
+                  - type: CheckBox
+                    name: externalValidation
+                  - type: CheckBox
+                    name: decisionImpactCurves
+                  - type: CheckBox
+                    name: netBenefitRegression
+                  - type: CheckBox
+                    name: modelUpdating
+                  - type: CheckBox
+                    name: transportability

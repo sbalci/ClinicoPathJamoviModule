@@ -180,13 +180,20 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 return()
             }
             
-            # Prepare survival object
-            surv_obj <- survival::Surv(data[[time_col]], data[[event_col]])
+            # Survival term written over columns of `data`, not over a local
+            # Surv() object: survminer re-evaluates fit$call$formula in its own
+            # frame, where a `surv_obj` local is long gone
+            # ("object 'surv_obj' not found").
+            surv_term <- paste0("survival::Surv(", jmvcore::composeTerm(time_col),
+                                ", ", jmvcore::composeTerm(event_col), ")")
             
             # Fit survival model
             if (!is.null(group_col) && group_col %in% names(data)) {
-                formula <- jmvcore::asFormula(paste("surv_obj ~", jmvcore::composeTerm(group_col)))
+                formula <- jmvcore::asFormula(paste(surv_term, "~", jmvcore::composeTerm(group_col)))
                 fit <- survival::survfit(formula, data = data, conf.int = self$options$confidence_level)
+                # survfit's match.call() records the bare symbol `formula`; survminer
+                # subsets it ("object of type 'symbol' is not subsettable").
+                fit$call$formula <- formula
 
                 # Log-rank test
                 if (self$options$show_statistics) {
@@ -194,7 +201,9 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                     private$.outputLogRankTest(logrank_test)
                 }
             } else {
-                fit <- survival::survfit(surv_obj ~ 1, data = data, conf.int = self$options$confidence_level)
+                formula <- jmvcore::asFormula(paste(surv_term, "~ 1"))
+                fit <- survival::survfit(formula, data = data, conf.int = self$options$confidence_level)
+                fit$call$formula <- formula
             }
 
             # Create survival plot
@@ -230,16 +239,19 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 return()
             }
             
-            # Prepare survival object
-            surv_obj <- survival::Surv(data[[time_col]], data[[event_col]])
+            # Survival term written over columns of `data` (see .runSurvivalModel)
+            surv_term <- paste0("survival::Surv(", jmvcore::composeTerm(time_col),
+                                ", ", jmvcore::composeTerm(event_col), ")")
             
             # Fit survival model
             if (!is.null(group_col) && group_col %in% names(data)) {
-                formula <- jmvcore::asFormula(paste("surv_obj ~", jmvcore::composeTerm(group_col)))
-                fit <- survival::survfit(formula, data = data, conf.int = self$options$confidence_level)
+                formula <- jmvcore::asFormula(paste(surv_term, "~", jmvcore::composeTerm(group_col)))
             } else {
-                fit <- survival::survfit(surv_obj ~ 1, data = data, conf.int = self$options$confidence_level)
+                formula <- jmvcore::asFormula(paste(surv_term, "~ 1"))
             }
+            fit <- survival::survfit(formula, data = data, conf.int = self$options$confidence_level)
+            # survminer subsets fit$call$formula, which survfit records as a bare symbol
+            fit$call$formula <- formula
 
             # Create KM plot with classic styling
             private$.createKMPlot(fit, data)
@@ -333,7 +345,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 }
                 
                 # Create the plot
-                p <- do.call(survminer::ggsurvplot, c(list(fit), plot_config))
+                p <- do.call(survminer::ggsurvplot, c(list(fit, data = data), plot_config))
                 
                 # Customize based on style
                 if (self$options$plot_style != "iwillsurvive") {

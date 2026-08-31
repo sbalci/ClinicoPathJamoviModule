@@ -389,11 +389,10 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (nrow(survData) == 0)
                 return(FALSE)
 
-            # Create survival object
-            surv_obj <- survival::Surv(time = survData$maxTime, event = survData$event)
-
             # Create survival fit by initial stage
-            fit_stage <- survival::survfit(surv_obj ~ initialStage, data = survData)
+            # Formula inlined over columns of survData so survminer can re-evaluate
+            # it in its own frame (a Surv() local is not visible there)
+            fit_stage <- survival::survfit(survival::Surv(maxTime, event) ~ initialStage, data = survData)
             
             # Create enhanced survival plot
             p1 <- survminer::ggsurvplot(
@@ -415,7 +414,7 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             )
 
             # Create survival fit by final treatment
-            fit_treatment <- survival::survfit(surv_obj ~ finalTreatment, data = survData)
+            fit_treatment <- survival::survfit(survival::Surv(maxTime, event) ~ finalTreatment, data = survData)
             
             p2 <- survminer::ggsurvplot(
                 fit_treatment,

@@ -285,13 +285,15 @@ rmstResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="rmstPlot",
                 title="Survival Curves with RMST Areas",
                 visible="(show_rmst_plot)",
-                requiresData=TRUE))
+                requiresData=TRUE,
+                renderFun=".plotRMST"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="tauAnalysisPlot",
                 title="Tau Sensitivity Analysis",
                 visible="(show_tau_analysis)",
-                requiresData=TRUE))
+                requiresData=TRUE,
+                renderFun=".plotTauAnalysis"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="tauAnalysisTable",

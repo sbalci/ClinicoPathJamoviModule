@@ -65,7 +65,7 @@
 
 ### Test 2.3: Publication Ready Mode
 - **Data:** `stagemigration_breast_cancer.rda`
-- **Options:** `analysisType = "publication"`, `clinicalPreset = "publication_ready"`
+- **Options:** `analysisType = "publication"`
 - **Expected:** All standard tables, visualizations (heatmap, ROC, survival curves), and copy-ready report populate. Outputs are suitable for manuscript figures and tables.
 - **Pass:** [ ]
 
@@ -283,61 +283,39 @@
 
 ---
 
-## 11. Clinical Presets (3 tests)
+## 11. Edge Cases (6 tests)
 
-### Test 11.1: Routine Clinical Preset
-- **Data:** `stagemigration_combined.rda`
-- **Options:** `clinicalPreset = "routine_clinical"`, all core variables assigned
-- **Expected:** Migration overview, migration matrix, stage distribution, statistical comparison, and NRI tables visible. No bootstrap, ROC, or DCA. Explanations enabled. Note on `migrationOverview` confirms preset.
-- **Pass:** [ ]
-
-### Test 11.2: Research Study Preset
-- **Data:** `stagemigration_lung_cancer.rda`
-- **Options:** `clinicalPreset = "research_study"`, all core variables assigned
-- **Expected:** All tables from routine_clinical plus concordance comparison, IDI, bootstrap, ROC, and DCA tables. Copy-ready report generated.
-- **Pass:** [ ]
-
-### Test 11.3: Custom Preset Override
-- **Data:** `stagemigration_combined.rda`
-- **Options:** `clinicalPreset = "custom"`, manually enable only `showMigrationMatrix = TRUE`, `calculateNRI = TRUE`
-- **Expected:** Only migration matrix and NRI tables visible. No other tables or presets applied.
-- **Pass:** [ ]
-
----
-
-## 12. Edge Cases (6 tests)
-
-### Test 12.1: Small Sample (N < 50)
+### Test 11.1: Small Sample (N < 50)
 - **Data:** `stagemigration_small_sample.rda`
 - **Options:** Comprehensive analysis with bootstrap
 - **Expected:** Analysis completes without crashing. Sample size warnings in output. Bootstrap may show lower success rate. NRI/IDI may show wide CIs or NA values for time points with insufficient events.
 - **Pass:** [ ]
 
-### Test 12.2: All Censored (No Events)
+### Test 11.2: All Censored (No Events)
 - **Data:** Create test data with event = 0 for all patients, or use `stagemigration_problematic.rda` if it contains this scenario
 - **Options:** Basic analysis
 - **Expected:** Graceful error message: "Insufficient events for survival analysis" or similar. No R crash. Welcome message or validation error displayed.
 - **Pass:** [ ]
 
-### Test 12.3: Identical Staging (old_stage == new_stage)
+### Test 11.3: Identical Staging (old_stage == new_stage)
 - **Data:** `stagemigration_combined.rda` with new_stage manually set equal to old_stage (or test subset)
 - **Options:** `showMigrationOverview = TRUE`, `showMigrationMatrix = TRUE`
 - **Expected:** Migration rate = 0%. All patients on diagonal. C-index difference = 0. NRI = 0. No division-by-zero errors.
 - **Pass:** [ ]
 
-### Test 12.4: Single Stage Level
+### Test 11.4: Single Stage Level
 - **Data:** Create or filter data where all patients are Stage I in both systems
 - **Options:** Basic analysis
 - **Expected:** Graceful error: "Staging variables must have 2+ levels" or equivalent. Migration matrix is 1x1. Cox model cannot be fitted (handled gracefully).
 - **Pass:** [ ]
 
-### Test 12.5: Large Dataset Performance
+### Test 11.5: Large Dataset Performance
 - **Data:** `stagemigration_large_performance.rda` (10000+ obs)
 - **Options:** `analysisType = "comprehensive"`, `optimizeForLargeDatasets = TRUE`
 - **Expected:** Analysis completes within 5 minutes. Memory optimization kicks in (integer conversion, factor compression). No out-of-memory errors. All tables populate correctly.
 - **Pass:** [ ]
 
-### Test 12.6: Missing Data Handling
+### Test 11.6: Missing Data Handling
 - **Data:** `stagemigration_problematic.rda`
 - **Options:** Comprehensive analysis
 - **Expected:** Missing values are removed (complete case analysis). Validation warnings shown for each variable with missing data. Sample size in output reflects complete cases only. No silent data loss.
@@ -345,21 +323,21 @@
 
 ---
 
-## 13. Display Options (3 tests)
+## 12. Display Options (3 tests)
 
-### Test 13.1: Explanations Toggle
+### Test 12.1: Explanations Toggle
 - **Data:** `stagemigration_combined.rda`
 - **Options:** `showExplanations = TRUE`, enable several analysis modules
 - **Expected:** Explanation Html items visible where defined (bootstrap, Will Rogers, DCA, calibration, clinical interpretation, etc.). Explanations are informative and accurate.
 - **Pass:** [ ]
 
-### Test 13.2: Abbreviation Glossary
+### Test 12.2: Abbreviation Glossary
 - **Data:** `stagemigration_combined.rda`
 - **Options:** `showAbbreviationGlossary = TRUE`
 - **Expected:** `abbreviationGlossary` Html item renders with comprehensive list of abbreviations (NRI, IDI, DCA, C-index, HR, CI, KM, ROC, AUC, RMST, CIF, etc.).
 - **Pass:** [ ]
 
-### Test 13.3: Copy-Ready Report with Turkish Language
+### Test 12.3: Copy-Ready Report with Turkish Language
 - **Data:** `stagemigration_combined.rda`
 - **Options:** `generateCopyReadyReport = TRUE`, `preferredLanguage = "tr"`
 - **Expected:** `copyReadyReport` Html renders with Turkish headers (Klinik Ozet, Yontem, Temel Bulgular, Klinik Degerlendirme, Oneri). Scientific terms remain in English/international format.
@@ -379,14 +357,12 @@ Below is every option defined in `stagemigration.a.yaml` with its test coverage 
 - [ ] `eventLevel` - Test 1.1
 
 ### Clinical Presets & Configuration
-- [ ] `clinicalPreset` - Tests 11.1, 11.2, 11.3
 - [ ] `enableGuidedMode` - Manual test needed
-- [ ] `generateCopyReadyReport` - Test 13.3
+- [ ] `generateCopyReadyReport` - Test 12.3
 - [ ] `enableAccessibilityFeatures` - Manual test needed (TODO: Wire to .b.R)
-- [ ] `preferredLanguage` - Test 13.3
+- [ ] `preferredLanguage` - Test 12.3
 - [ ] `enableProgressIndicators` - Manual test needed
-- [ ] `optimizeForLargeDatasets` - Test 12.5
-- [ ] `complexityMode` - Manual test needed (TODO: Wire to .b.R)
+- [ ] `optimizeForLargeDatasets` - Test 11.5
 - [ ] `analysisType` - Tests 2.1, 2.2, 2.3
 - [ ] `confidenceLevel` - Manual test: change to 0.90 and verify CI widths
 
@@ -453,8 +429,8 @@ Below is every option defined in `stagemigration.a.yaml` with its test coverage 
 - [ ] `generateExecutiveSummary` - Manual test: enable and verify `executiveSummary`
 - [ ] `cancerType` - Tests 5.2, 6.3
 - [ ] `useOptimismCorrection` - Test 7.4
-- [ ] `showExplanations` - Test 13.1
-- [ ] `showAbbreviationGlossary` - Test 13.2
+- [ ] `showExplanations` - Test 12.1
+- [ ] `showAbbreviationGlossary` - Test 12.2
 
 ### Stage Migration Effect & RMST
 - [ ] `calculateSME` - Manual test: enable and verify `stageMigrationEffect` and `stageMigrationEffectAssessment`
