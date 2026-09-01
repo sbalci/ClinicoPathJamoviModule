@@ -16,7 +16,6 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             remove_negative = FALSE,
             remove_extreme = FALSE,
             extreme_multiplier = 2,
-            add_times = FALSE,
             include_quality_metrics = FALSE,
             confidence_level = 95,
             show_summary = FALSE,
@@ -101,10 +100,8 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 default=2,
                 min=1.5,
                 max=5)
-            private$..add_times <- jmvcore::OptionBool$new(
-                "add_times",
-                add_times,
-                default=FALSE)
+            private$..calculated_time <- jmvcore::OptionOutput$new(
+                "calculated_time")
             private$..include_quality_metrics <- jmvcore::OptionBool$new(
                 "include_quality_metrics",
                 include_quality_metrics,
@@ -141,7 +138,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..remove_negative)
             self$.addOption(private$..remove_extreme)
             self$.addOption(private$..extreme_multiplier)
-            self$.addOption(private$..add_times)
+            self$.addOption(private$..calculated_time)
             self$.addOption(private$..include_quality_metrics)
             self$.addOption(private$..confidence_level)
             self$.addOption(private$..show_summary)
@@ -159,7 +156,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         remove_negative = function() private$..remove_negative$value,
         remove_extreme = function() private$..remove_extreme$value,
         extreme_multiplier = function() private$..extreme_multiplier$value,
-        add_times = function() private$..add_times$value,
+        calculated_time = function() private$..calculated_time$value,
         include_quality_metrics = function() private$..include_quality_metrics$value,
         confidence_level = function() private$..confidence_level$value,
         show_summary = function() private$..show_summary$value,
@@ -176,7 +173,7 @@ timeintervalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..remove_negative = NA,
         ..remove_extreme = NA,
         ..extreme_multiplier = NA,
-        ..add_times = NA,
+        ..calculated_time = NA,
         ..include_quality_metrics = NA,
         ..confidence_level = NA,
         ..show_summary = NA,
@@ -252,9 +249,11 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="calculated_time",
                 title="Calculated Time Intervals",
+                varTitle="Calculated Time Interval",
+                varDescription="Time interval calculated from the start and end date variables",
                 measureType="continuous",
                 clearWith=list(
-                    "add_times",
+                    "calculated_time",
                     "dx_date",
                     "fu_date",
                     "time_format",
@@ -285,7 +284,7 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'auto')
+                weightsSupport = 'none')
         }))
 
 #' Comprehensive Time Interval Calculator
@@ -319,11 +318,15 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   person-time denominators. Calendar-aware respects actual month lengths (28
 #'   - 31 days) when converting intervals to months/years.
 #' @param use_landmark Enables conditional analysis from a specific time
-#'   point. Useful for  studying outcomes after a landmark time (e.g., 6-month
-#'   survivors only).
+#'   point. Useful for  studying outcomes conditional on having been followed to
+#'   a landmark time (for example, only participants with at least 6 months of
+#'   follow-up).
 #' @param landmark_time Time point for landmark analysis in the specified
-#'   output units.  Only participants surviving past this time are included in
-#'   analysis.
+#'   output units.  Only participants whose follow-up reaches this time are
+#'   included. This analysis has no event indicator, so it selects on LENGTH OF
+#'   FOLLOW-UP, not on survival: a participant excluded here may have died early
+#'   or may simply have been enrolled recently, and this analysis cannot tell
+#'   the two apart.
 #' @param remove_negative Automatically exclude negative time intervals (end
 #'   date before start date). Recommended for data quality assurance.
 #' @param remove_extreme Exclude time intervals above (multiplier x 99th
@@ -336,9 +339,6 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   removed when 'Remove extreme values' is on. Higher values are more
 #'   conservative (fewer intervals removed). Has no effect when the 99th
 #'   percentile is zero.
-#' @param add_times Appends calculated time intervals as a new variable for
-#'   downstream analysis. Useful for subsequent survival analysis or person-time
-#'   calculations.
 #' @param include_quality_metrics Provides comprehensive data quality
 #'   assessment including missing values, negative intervals, and distribution
 #'   statistics.
@@ -353,7 +353,11 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   computer's timezone. 'UTC' interprets datetimes as Coordinated Universal
 #'   Time. This applies only to the 'YYYY-MM-DD HH:MM:SS' format, the only one
 #'   that carries a time of day; date-only formats produce calendar dates that
-#'   have no timezone, so the setting has no effect on them.
+#'   have no timezone, so the setting has no effect on them. Note that it
+#'   changes the reported DURATIONS as well as the parsing: a zone with daylight
+#'   saving gains or loses an hour at each transition, so an interval spanning
+#'   one comes out an hour short under 'System Default' and exact under 'UTC'.
+#'   Choose UTC if you need durations unaffected by daylight saving.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$messages} \tab \tab \tab \tab \tab a html \cr
@@ -381,7 +385,6 @@ timeinterval <- function(
     remove_negative = FALSE,
     remove_extreme = FALSE,
     extreme_multiplier = 2,
-    add_times = FALSE,
     include_quality_metrics = FALSE,
     confidence_level = 95,
     show_summary = FALSE,
@@ -411,7 +414,6 @@ timeinterval <- function(
         remove_negative = remove_negative,
         remove_extreme = remove_extreme,
         extreme_multiplier = extreme_multiplier,
-        add_times = add_times,
         include_quality_metrics = include_quality_metrics,
         confidence_level = confidence_level,
         show_summary = show_summary,

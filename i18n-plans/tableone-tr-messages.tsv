@@ -1,0 +1,148 @@
+English	Turkish
+Missing (NA)	Eksik (NA)
+Total (all cases)	Toplam (tüm olgular)
+When a summary label conflicts with a recorded category, the summary row uses Missing (NA) or Total (all cases), with a numeric suffix if needed. Recorded category labels and counts are unchanged.	Bir özet etiketi kaydedilmiş bir kategoriyle çakışırsa özet satırında Eksik (NA) veya Toplam (tüm olgular) kullanılır; gerekirse sonuna bir sayı eklenir. Kaydedilmiş kategori etiketleri ve sayıları değişmez.
+{n} cases ({percent}%) excluded due to missing values. Final N = {retained}	Eksik değerler nedeniyle {n} olgu (%{percent}) dışlandı. Son N = {retained}
+{n} cases (no exclusions applied)	{n} olgu (dışlama uygulanmadı)
+{n} cases with {variables} selected variable	{n} olgu ve seçilen {variables} değişken
+{n} cases with {variables} selected variables	{n} olgu ve seçilen {variables} değişken
+{n} distinct values; maximum 20 categories	{n} farklı değer; en fazla 20 kategori
+{percent}% of cases have at least one missing value	Olguların %{percent} kadarında en az bir eksik değer var
+{variables}, and {n} other variable	{variables} ve diğer {n} değişken
+{variables}, and {n} other variables	{variables} ve diğer {n} değişken
+A gtsummary row labeled flag = TRUE with 0 (0%) means no recorded value was TRUE; it does not mean there were no observations. Check which category the row label names before interpreting a percentage.	gtsummary çıktısında flag = TRUE etiketli satırda 0 (%0) görülmesi, kaydedilmiş hiçbir değerin TRUE olmadığı anlamına gelir; hiç gözlem olmadığı anlamına gelmez. Yüzdeyi yorumlamadan önce satır etiketinin hangi kategoriyi belirttiğini kontrol edin.
+A row is treated as one case. Repeated records are not deduplicated. Frequency weights, when supplied, represent replicated rows, not verified unique patients or a complex survey design.	Her satır bir olgu olarak değerlendirilir. Yinelenen kayıtlar tekilleştirilmez. Frekans ağırlıkları kullanıldığında bunlar doğrulanmış benzersiz hastaları veya karmaşık bir örnekleme tasarımını değil, çoğaltılmış satırları temsil eder.
+About Table One	Tablo Bir Hakkında
+About this analysis	Bu analiz hakkında
+About This Analysis	Bu Analiz Hakkında
+About this analysis (educational content)	Bu analiz hakkında (eğitici içerik)
+Actual NA factor levels are treated as missing before exclusion and tabulation. Literal text categories such as NA and Unknown remain categories. Listwise deletion uses only included variables; no imputation is performed.	Gerçek NA faktör düzeyleri, dışlama ve tablolamadan önce eksik kabul edilir. NA ve Unknown gibi metin kategorileri kategori olarak korunur. Tam olgu analizi yalnızca dahil edilen değişkenleri kullanır; eksik değer ataması yapılmaz.
+Actual NA factor levels were treated as missing before exclusion and tabulation: {variables}. Literal text categories such as NA or Unknown are unchanged.	Gerçek NA faktör düzeyleri, dışlama ve tablolamadan önce eksik kabul edildi: {variables}. NA veya Unknown gibi metin kategorileri değiştirilmedi.
+Analysis sample	Analiz örneklemi
+Analysis Summary	Analiz Özeti
+Analysis summary	Analiz özeti
+Analysis summary (sample size, missing data report)	Analiz özeti (örneklem büyüklüğü, eksik veri raporu)
+arsenal (Comprehensive descriptive table)	arsenal (Kapsamlı betimsel tablo)
+Arsenal reports mean (SD); gtsummary may report N (percent) per level. Convert the variable to nominal or ordinal if the numbers are category codes rather than measurements.	Arsenal ortalama (SS) bildirir; gtsummary her düzey için N (yüzde) bildirebilir. Sayılar ölçüm değil kategori koduysa değişkeni nominal veya ordinal olarak tanımlayın.
+arsenal: continuous variables as mean (SD) with the range; categorical variables as N (percent); missing counts on an N-Miss row.	arsenal: sürekli değişkenler ortalama (SS) ve aralık; kategorik değişkenler N (yüzde) olarak gösterilir. Eksik değer sayıları N-Miss satırında yer alır.
+Case exclusion	Olgu dışlama
+Cases in the table	Tablodaki olgular
+Categorical	Kategorik
+Check that your data file is properly imported.	Veri dosyanızın doğru içe aktarıldığını kontrol edin.
+Choose a table style for the output format.	Çıktı biçimi için bir tablo stili seçin.
+Choose the descriptive format. 'tableone' shows mean (SD), or median (Q1, Q3) when requested; 'gtsummary' shows median (Q1, Q3); 'arsenal' shows mean (SD) and range. 'janitor' tabulates categorical variables with at most 20 recorded categories and skips numeric measurements. Set numeric category codes to Nominal or Ordinal first. Unused factor levels are hidden in janitor; dichotomous gtsummary labels name the counted level.	Betimsel biçimi seçin. 'tableone' ortalama (SS) veya istendiğinde medyan (Q1, Q3); 'gtsummary' medyan (Q1, Q3); 'arsenal' ortalama (SS) ve aralık gösterir. 'janitor' en fazla 20 gözlenen kategorisi olan kategorik değişkenleri tablolar, sayısal ölçümleri atlar. Sayısal kategori kodlarını önce Nominal veya Ordinal yapın. Janitor kullanılmayan faktör düzeylerini gizler; gtsummary ikili değişken etiketlerinde sayılan düzeyi belirtir.
+ClinicoPath Descriptives	ClinicoPath Tanımlayıcı İstatistikler
+Complete cases (original)	Tam olgular (başlangıç)
+Complete cases in the source data	Kaynak verideki tam olgular
+Complete data were available for all cases.	Tüm olguların verileri tamdı.
+Continuous variables are shown as mean (SD); categorical variables as N (percent of cases with a recorded value for that variable).	Sürekli değişkenler ortalama (SS); kategorik değişkenler N (ilgili değişken için değeri kaydedilmiş olguların yüzdesi) olarak gösterilir.
+Continuous variables are shown as median (Q1, Q3); categorical variables as N (percent of cases with a recorded value for that variable).	Sürekli değişkenler medyan (Q1, Q3); kategorik değişkenler N (ilgili değişken için değeri kaydedilmiş olguların yüzdesi) olarak gösterilir.
+Control which supplementary outputs are displayed:	Gösterilecek ek çıktıları seçin:
+Copy to Manuscript	Makaleye Kopyala
+Copy-Ready Report Sentence	Kopyalanabilir Rapor Cümlesi
+Copy-ready report sentence (for manuscripts)	Kopyalanabilir rapor cümlesi (makaleler için)
+Copy-ready report text	Kopyalanabilir rapor metni
+Data Quality & Assumptions	Veri Kalitesi ve Varsayımlar
+Data Quality Check	Veri Kalitesi Kontrolü
+Date, date-time, duration and custom scalar storage classes are omitted before exclusion. Matrix, array and list columns are rejected before R data selection. Convert unsupported inputs to explicitly defined scalar measurements or categories first.	Tarih, tarih-saat, süre ve özel skaler veri sınıfları dışlamadan önce atlanır. Matris, dizi ve liste sütunları R veri seçimi öncesinde reddedilir. Desteklenmeyen girdileri önce açıkça tanımlanmış skaler ölçümlere veya kategorilere dönüştürün.
+Descriptive Table (arsenal)	Betimsel Tablo (arsenal)
+Display analysis summary with sample size and missing data information.	Örneklem büyüklüğü ve eksik veri bilgileriyle analiz özetini göster.
+Display educational information about Table One analysis.	Tablo Bir analizi hakkında eğitici bilgileri göster.
+Display ready-to-copy text for your manuscript.	Makaleniz için kopyalanabilir metni göster.
+Error creating arsenal table: {error}. Check that categorical variables are factors and numeric variables contain valid numbers.	Arsenal tablosu oluşturulamadı: {error}. Kategorik değişkenlerin faktör, sayısal değişkenlerin geçerli sayılar içerdiğini kontrol edin.
+Error creating frequency tables with janitor: {error}. Check that categorical variables have valid data.	Janitor frekans tabloları oluşturulamadı: {error}. Kategorik değişkenlerin geçerli veri içerdiğini kontrol edin.
+Error creating gtsummary table: {error}. Check that variables have valid data and appropriate types.	Gtsummary tablosu oluşturulamadı: {error}. Değişkenlerin geçerli veri ve uygun türler içerdiğini kontrol edin.
+Error creating Table One: {error}. Check that variables have valid data and appropriate types. Categorical variables should be factors. Numeric variables should contain valid numbers.	Tablo Bir oluşturulamadı: {error}. Değişkenlerin geçerli veri ve uygun türler içerdiğini kontrol edin. Kategorik değişkenler faktör, sayısal değişkenler geçerli sayılar içermelidir.
+Every value of this variable is missing, so it cannot be summarised and does not appear in the table below.	Bu değişkenin tüm değerleri eksik olduğundan özetlenemez ve aşağıdaki tabloda yer almaz.
+Example interpretation	Yorumlama örneği
+Exclude cases missing any included variable. This is listwise deletion, not imputation; all retained variables use the same complete-case denominator.	Dahil edilen herhangi bir değişkeninde eksik değer bulunan olguları dışla. Bu işlem eksik değer ataması değil, tam olgu analizidir; korunan tüm değişkenler aynı tam olgu paydasını kullanır.
+Excluding missing values left no cases: each of the {n} cases has at least one missing value among the selected variables. Untick Missing-value exclusion (NA), or select fewer variables.	Eksik değerler dışlandığında olgu kalmadı: {n} olgunun her birinde seçilen değişkenlerden en az biri eksik. Eksik değer dışlama (NA) seçeneğini kaldırın veya daha az değişken seçin.
+ExplorationT	KeşifT
+Formatting changed missing values; no table or report was produced.	Biçimlendirme eksik değerleri değiştirdi; tablo veya rapor üretilmedi.
+Frequency Table for '{variable}'	'{variable}' için Frekans Tablosu
+Frequency Tables (janitor)	Frekans Tabloları (janitor)
+Generate an overall-cohort descriptive Table One for clinicopathological research. Four output styles are available. This analysis does not stratify by group or compute p-values, confidence intervals or standardized mean differences. Each row is treated as one case; check for repeated records before interpreting counts as patients.	Klinikopatolojik araştırmalar için tüm kohortu özetleyen betimsel bir Tablo Bir oluşturur. Dört çıktı stili sunulur. Bu analiz gruplara göre tabakalama yapmaz; p-değeri, güven aralığı veya standartlaştırılmış ortalama farkı hesaplamaz. Her satır bir olgu sayılır; sayıları hasta sayısı olarak yorumlamadan önce yinelenen kayıtları kontrol edin.
+gtsummary (Publication-ready descriptives)	gtsummary (Yayına hazır betimsel istatistikler)
+gtsummary: continuous variables as median (Q1, Q3); categorical variables as N (percent); missing counts on an Unknown row. Dichotomous row labels name the counted level, such as TRUE, 1 or yes.	gtsummary: sürekli değişkenler medyan (Q1, Q3); kategorik değişkenler N (yüzde) olarak gösterilir. Eksik sayıları Unknown satırında yer alır. İkili değişken satır etiketleri TRUE, 1 veya yes gibi sayılan düzeyi belirtir.
+High missing data rate in original dataset: {missing} cases have at least one missing value. More than half of cases are incomplete. Results may not represent the full sample. Report missing-data patterns and review the missing-data strategy; this analysis does not impute values.	Başlangıç verisinde yüksek eksiklik oranı: {missing} olguda en az bir eksik değer var. Olguların yarısından fazlası eksik. Sonuçlar tüm örneklemi temsil etmeyebilir. Eksik veri örüntülerini bildirin ve eksik veri stratejisini gözden geçirin; bu analiz eksik değer ataması yapmaz.
+If 50 of 100 values are missing and 15 recorded values are category A, tableone, gtsummary and arsenal report A as 15 (30%). Janitor reports Percent as 15% and Valid Percent as 30%. Missingness is reported separately.	100 değerin 50'si eksik ve kaydedilmiş değerlerin 15'i A kategorisindeyse tableone, gtsummary ve arsenal A'yı 15 (%30) olarak bildirir. Janitor Yüzdeyi %15, Geçerli Yüzdeyi %30 olarak bildirir. Eksiklik ayrıca gösterilir.
+If needed, enable missing-value exclusion (NA). Exclusion may remove entire cases.	Gerekiyorsa eksik değer dışlama (NA) seçeneğini etkinleştirin. Dışlama olguların tümünü kaldırabilir.
+Input and missing-data policy	Girdi ve eksik veri politikası
+Instructions	Yönergeler
+Insufficient data for Table One analysis. Check for missing values. Try selecting different variables or disabling missing-value exclusion.	Tablo Bir analizi için yetersiz veri. Eksik değerleri kontrol edin. Farklı değişkenler seçmeyi veya eksik değer dışlamayı kapatmayı deneyin.
+Invalid table style selected. Choose tableone, gtsummary, arsenal or janitor.	Geçersiz tablo stili. Tableone, gtsummary, arsenal veya janitor seçin.
+janitor (Simple frequency tables)	janitor (Basit frekans tabloları)
+Janitor tabulates categorical, ordinal, text and logical variables with at most 20 recorded categories. Numeric measurements are not converted to categories automatically. Use another style for measurements; set numeric category codes to Nominal or Ordinal in jamovi, or convert them with factor() in R. Omitted variables do not enter missing-value exclusion or the analysis summary.	Janitor en fazla 20 gözlenen kategorisi olan kategorik, ordinal, metin ve mantıksal değişkenleri tablolar. Sayısal ölçümler otomatik olarak kategoriye dönüştürülmez. Ölçümler için başka bir stil kullanın; sayısal kategori kodlarını jamovi'de Nominal veya Ordinal yapın ya da R'de factor() ile dönüştürün. Atlanan değişkenler eksik değer dışlamaya veya analiz özetine girmez.
+janitor: counts and percentages for categorical, ordinal, text and logical variables with at most 20 recorded categories. Unused factor levels are not displayed. Numeric measurements are skipped; convert numeric category codes to factors explicitly. Percent uses all cases; Valid Percent uses recorded cases.	janitor: en fazla 20 gözlenen kategorisi olan kategorik, ordinal, metin ve mantıksal değişkenler için sayı ve yüzdeler. Kullanılmayan faktör düzeyleri gösterilmez. Sayısal ölçümler atlanır; sayısal kategori kodlarını açıkça faktöre dönüştürün. Yüzde tüm olguları, Geçerli Yüzde değeri kaydedilmiş olguları kullanır.
+Large case loss due to missing data: {excluded} cases excluded; {n} retained. Results may not represent the full sample. Review the missing-data strategy and consider a sensitivity analysis.	Eksik veri nedeniyle yüksek olgu kaybı: {excluded} olgu dışlandı; {n} olgu korundu. Sonuçlar tüm örneklemi temsil etmeyebilir. Eksik veri stratejisini gözden geçirin ve duyarlılık analizi düşünün.
+Logical	Mantıksal
+Minimal missing data were detected ({percent} of cases with at least one missing value).	Çok az eksik veri saptandı (olguların {percent} kadarında en az bir eksik değer).
+Missing = percentage of cases with a missing value for that variable.	Missing = ilgili değişkeninde eksik değer bulunan olguların yüzdesi.
+Missing data (original)	Eksik veri (başlangıç)
+Missing-value exclusion (NA)	Eksik değer dışlama (NA)
+Moderate missing data in original dataset: {missing} cases have at least one missing value. Report missing-data patterns and compare complete with incomplete cases. This analysis does not impute values.	Başlangıç verisinde orta düzeyde eksiklik: {missing} olguda en az bir eksik değer var. Eksik veri örüntülerini bildirin ve tam olgularla eksik olguları karşılaştırın. Bu analiz eksik değer ataması yapmaz.
+Moderate missing data were observed ({percent} of cases incomplete).	Orta düzeyde eksik veri gözlendi (olguların {percent} kadarı eksik).
+N and Percent count all cases, including the missing (NA) row. Valid Percent, present only for variables that have missing values, counts only the cases with a recorded value.	N ve Yüzde, eksik (NA) satırı dahil tüm olguları sayar. Yalnızca eksik değeri olan değişkenlerde gösterilen Geçerli Yüzde, değeri kaydedilmiş olguları kullanır.
+No cases left	Olgu kalmadı
+No Data Available	Veri Yok
+no recorded values	kaydedilmiş değer yok
+No selected categorical variable could be tabulated. Choose the tableone, gtsummary or arsenal style for numeric measurements.	Seçilen kategorik değişkenlerden hiçbiri tablolanamadı. Sayısal ölçümler için tableone, gtsummary veya arsenal stilini seçin.
+No selected variable has recorded values in a supported storage type. Select at least one numeric, categorical, text or logical variable with recorded values.	Seçilen değişkenlerin hiçbirinde desteklenen bir veri türünde kaydedilmiş değer yok. Kaydedilmiş değerleri olan en az bir sayısal, kategorik, metin veya mantıksal değişken seçin.
+None of the sample-size, missing-data or case-loss thresholds this analysis checks was crossed. These are descriptive screening heuristics, not validated clinical cutoffs or tests of statistical assumptions.	Bu analizin kontrol ettiği örneklem büyüklüğü, eksik veri veya olgu kaybı eşiklerinden hiçbiri aşılmadı. Bunlar betimsel ön inceleme kurallarıdır; doğrulanmış klinik eşikler veya istatistiksel varsayım testleri değildir.
+not categorical; set category codes to Nominal or Ordinal, or use factor() in R	kategorik değil; kategori kodlarını Nominal veya Ordinal yapın ya da R'de factor() kullanın
+Not included	Dahil edilmedi
+Not tabulated	Tablolanmadı
+Notable case loss: {excluded} cases excluded; {n} retained. Compare excluded with included cases to assess potential bias.	Dikkate değer olgu kaybı: {excluded} olgu dışlandı; {n} olgu korundu. Olası yanlılığı değerlendirmek için dışlanan ve dahil edilen olguları karşılaştırın.
+Note: Listwise deletion was applied. The table below shows statistics for the {n} complete cases only. All displayed variables use the same complete-case denominator.	Not: Tam olgu analizi uygulandı. Aşağıdaki tablo yalnızca verileri tam olan {n} olgunun istatistiklerini gösterir. Gösterilen tüm değişkenler aynı tam olgu paydasını kullanır.
+Note: Missing values are present but NOT excluded. Different variables may have different sample sizes (denominators) in the table below. Consider enabling missing-value exclusion for consistent denominators.	Not: Eksik değerler var ancak dışlanmadı. Aşağıdaki tabloda farklı değişkenlerin örneklem büyüklükleri (paydaları) farklı olabilir. Tutarlı paydalar için eksik değer dışlamayı etkinleştirmeyi düşünün.
+Nothing to summarise	Özetlenecek veri yok
+Numeric	Sayısal
+Numeric variables with fewer than 10 distinct values may be reported as categories by gtsummary but as measurements by tableone and arsenal. Set category codes to Nominal or Ordinal in jamovi, or factor() in R.	10'dan az farklı değeri olan sayısal değişkenler gtsummary tarafından kategori, tableone ve arsenal tarafından ölçüm olarak bildirilebilir. Kategori kodlarını jamovi'de Nominal veya Ordinal olarak ayarlayın ya da R'de factor() kullanın.
+Original dataset	Başlangıç veri kümesi
+Other	Diğer
+Output Options	Çıktı Seçenekleri
+Output styles	Çıktı stilleri
+Percent	Yüzde
+Please cite the packages and jamovi as referenced below.	Lütfen aşağıda belirtilen paketlere ve jamovi'ye atıf yapın.
+Please load a dataset before using Table One.	Tablo Bir'i kullanmadan önce lütfen bir veri kümesi yükleyin.
+Recommendations	Öneriler
+Report continuous variables as median (Q1, Q3)	Sürekli değişkenleri medyan (Q1, Q3) olarak bildir
+Report continuous variables as median (Q1, Q3) (tableone style)	Sürekli değişkenleri medyan (Q1, Q3) olarak bildir (tableone stili)
+Select and copy the text above for your manuscript. Counts refer to rows, not verified unique patients; repeated records are not deduplicated. Edit as needed for your specific reporting requirements.	Yukarıdaki metni seçip makalenize kopyalayın. Sayılar doğrulanmış benzersiz hastaları değil, satırları ifade eder; yinelenen kayıtlar tekilleştirilmez. Kendi raporlama gereksinimlerinize göre düzenleyin.
+Select numeric, ordinal, categorical, text or logical variables to include in Table One.	Tablo Bir'e dahil edilecek sayısal, ordinal, kategorik, metin veya mantıksal değişkenleri seçin.
+Select numeric, ordinal, categorical, text or logical variables. Unsupported storage types and all-missing variables are omitted before missing-value exclusion.	Sayısal, ordinal, kategorik, metin veya mantıksal değişkenleri seçin. Desteklenmeyen veri türleri ve tüm değerleri eksik değişkenler, eksik değer dışlamadan önce atlanır.
+Small final sample size (N = {n}). Each case represents more than 3 percentage points of the total. Percentages in sparse categories can be unstable and individual cases may be identifiable. Report counts alongside percentages.	Son örneklem büyüklüğü küçük (N = {n}). Her olgu toplamın 3 yüzde puanından fazlasını temsil eder. Seyrek kategorilerde yüzdeler kararsız olabilir ve bireysel olgular tanınabilir. Yüzdelerle birlikte sayıları da bildirin.
+Some frequency tables could not be produced. Review the Not tabulated details below. Supplementary summaries and copy-ready text are withheld because the output is incomplete.	Bazı frekans tabloları üretilemedi. Aşağıdaki Tablolanmadı ayrıntılarını inceleyin. Çıktı tamamlanmadığından ek özetler ve kopyalanabilir metin gösterilmedi.
+Substantial missing data were present ({percent} of cases with at least one missing value).	Önemli ölçüde eksik veri vardı (olguların {percent} kadarında en az bir eksik değer).
+Summarise continuous variables as median (Q1, Q3) rather than mean (SD). Use for skewed measurements. Applies to the 'tableone' style only.	Sürekli değişkenleri ortalama (SS) yerine medyan (Q1, Q3) olarak özetle. Çarpık dağılımlı ölçümlerde kullanın. Yalnızca 'tableone' stili için geçerlidir.
+Summary	Özet
+Summary Table (gtsummary)	Özet Tablo (gtsummary)
+Table One	Tablo Bir
+Table One Output (tableone)	Tablo Bir Çıktısı (tableone)
+Table One summarizes baseline characteristics of {n} case. Variables included {variables}. {missing}	Tablo Bir, {n} olgunun başlangıç özelliklerini özetlemektedir. Dahil edilen değişkenler: {variables}. {missing}
+Table One summarizes baseline characteristics of {n} cases. Variables included {variables}. {missing}	Tablo Bir, {n} olgunun başlangıç özelliklerini özetlemektedir. Dahil edilen değişkenler: {variables}. {missing}
+Table One summarizes baseline characteristics of the {n} case with complete data for all listed variables (of {screened} screened). Variables included {variables}. {missing}	Tablo Bir, taranan {screened} olgudan listelenen tüm değişkenleri tam olan {n} olgunun başlangıç özelliklerini özetlemektedir. Dahil edilen değişkenler: {variables}. {missing}
+Table One summarizes baseline characteristics of the {n} cases with complete data for all listed variables (of {screened} screened). Variables included {variables}. {missing}	Tablo Bir, taranan {screened} olgudan listelenen tüm değişkenleri tam olan {n} olgunun başlangıç özelliklerini özetlemektedir. Dahil edilen değişkenler: {variables}. {missing}
+Table One summarizes characteristics of the overall cohort, such as demographics, tumor grade and laboratory measurements. It does not stratify by group or compute p-values, confidence intervals or standardized mean differences.	Tablo Bir, demografik özellikler, tümör derecesi ve laboratuvar ölçümleri gibi tüm kohortun özelliklerini özetler. Gruplara göre tabakalama yapmaz; p-değeri, güven aralığı veya standartlaştırılmış ortalama farkı hesaplamaz.
+Table style	Tablo stili
+tableone (Standard medical format)	tableone (Standart tıbbi biçim)
+tableone: continuous variables as mean (SD), or median (Q1, Q3) when requested; categorical variables as N (percent). Missingness is shown as a percentage column. Only the second level of a binary factor is displayed, with that level named.	tableone: sürekli değişkenler ortalama (SS) veya istendiğinde medyan (Q1, Q3); kategorik değişkenler N (yüzde) olarak gösterilir. Eksiklik bir yüzde sütununda gösterilir. İkili faktörün yalnızca ikinci düzeyi, düzey adıyla birlikte gösterilir.
+The dataset for analysis.	Analiz için veri kümesi.
+The Table One summary was computed but could not be formatted for display: {error}. Try another table style, or deselect variables with unusual storage types.	Tablo Bir özeti hesaplandı ancak görüntüleme için biçimlendirilemedi: {error}. Başka bir tablo stili deneyin veya alışılmadık veri türleri olan değişkenleri kaldırın.
+The tableone median option is disabled: numeric measurements are reported as mean (SD) in that style.	Tableone medyan seçeneği kapalı: bu stilde sayısal ölçümler ortalama (SS) olarak bildirilir.
+The tableone median option is enabled: numeric measurements are reported as median (Q1, Q3) in that style.	Tableone medyan seçeneği açık: bu stilde sayısal ölçümler medyan (Q1, Q3) olarak bildirilir.
+These are descriptive screening heuristics, not validated clinical cutoffs or tests of statistical assumptions.	Bunlar betimsel ön inceleme kurallarıdır; doğrulanmış klinik eşikler veya istatistiksel varsayım testleri değildir.
+This analysis describes the overall cohort only. It does not compare groups or compute p-values, confidence intervals or standardized mean differences.	Bu analiz yalnızca tüm kohortu betimler. Grupları karşılaştırmaz; p-değeri, güven aralığı veya standartlaştırılmış ortalama farkı hesaplamaz.
+This Table One summarizes baseline characteristics commonly reported in clinical research manuscripts.	Bu Tablo Bir, klinik araştırma makalelerinde sıklıkla bildirilen başlangıç özelliklerini özetler.
+Unsupported non-scalar columns: {variables}. Matrix, array and list columns cannot be summarized. Select scalar columns or explicitly extract the intended measurements first.	Desteklenmeyen skaler olmayan sütunlar: {variables}. Matris, dizi ve liste sütunları özetlenemez. Skaler sütunları seçin veya amaçlanan ölçümleri önce açıkça çıkarın.
+Unsupported storage type. Use numeric measurements, factors (including ordered factors), text or logical variables. Convert dates or time intervals to explicitly defined measurements before analysis. Omitted variables do not enter missing-value exclusion or supplementary summaries.	Desteklenmeyen veri türü. Sayısal ölçüm, faktör (sıralı faktörler dahil), metin veya mantıksal değişken kullanın. Tarihleri veya zaman aralıklarını analizden önce açıkça tanımlanmış ölçümlere dönüştürün. Atlanan değişkenler eksik değer dışlamaya veya ek özetlere girmez.
+Unused factor levels are not displayed.	Kullanılmayan faktör düzeyleri gösterilmez.
+Valid Percent	Geçerli Yüzde
+Variable '{variable}' has many unique text values. Consider grouping categories.	'{variable}' değişkeninde çok sayıda benzersiz metin değeri var. Kategorileri gruplamayı düşünün.
+Variable '{variable}' is stored as a number but has only {n} distinct values.	'{variable}' değişkeni sayısal saklanıyor ancak yalnızca {n} farklı değeri var.
+Variable types	Değişken türleri
+Variables	Değişkenler
+Variables with >20% missing: {variables}	%20'den fazla eksik değeri olan değişkenler: {variables}
+Very small final sample size (N = {n}). With fewer than 10 cases, one case represents more than 10 percentage points of the total. Summaries can be sensitive to individual observations. Report counts and consider the risk of identifying individuals. This analysis is descriptive only; no test or confidence interval is computed.	Son örneklem büyüklüğü çok küçük (N = {n}). 10'dan az olguda tek bir olgu toplamın 10 yüzde puanından fazlasını temsil eder. Özetler tekil gözlemlerden etkilenebilir. Sayıları bildirin ve bireylerin tanınma riskini değerlendirin. Bu analiz yalnızca betimseldir; test veya güven aralığı hesaplanmaz.
+Warnings	Uyarılar
+Welcome to the ClinicoPath Table One Generator	ClinicoPath Tablo Bir Oluşturucuya Hoş Geldiniz

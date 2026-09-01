@@ -16,6 +16,11 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # being silently binarised back to cause-specific.
         .causeFactor = NULL,
 
+        # Truncated follow-up produced by administrative censoring, carried out of
+        # .organizeOutcomes() so .run() can write it to its own output column.
+        # NULL whenever the cut-off was not actually applied.
+        .adminTime = NULL,
+
         # Notice management helpers ----
         # Notices render to dedicated Html outputs (errors / strongWarnings /
         # warnings / infoMessages) to avoid the protobuf serialization error
@@ -42,6 +47,20 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .addHtmlMessage = function(type, title, message) {
+            # The switch below matched "strongWarning" while every caller in this file
+            # wrote "strong_warning", so both of them -- the date-serial no-op and the
+            # "this cut-off would delete every event" refusal, the two loudest things
+            # this analysis can say -- fell through to the default and rendered as an
+            # ordinary amber warning. switch() has no unmatched-value signal, so it was
+            # silent. Normalise here rather than at the call sites: it is one place, and
+            # it cannot drift back the next time someone writes the name from memory.
+            type <- switch(gsub("[^a-z]", "", tolower(type)),
+                "error" = "error",
+                "strongwarning" = "strongWarning",
+                "warning" = "warning",
+                "info" = "info",
+                "infomessage" = "info",
+                "warning")
             output_name <- switch(type,
                 "error" = "errors",
                 "strongWarning" = "strongWarnings",
@@ -358,6 +377,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # a patient ID / interval / admin-date variable is missing or no duplicate
             # IDs exist). Prevents the report from overstating what was done.
             applied <- list(hierarchy = FALSE, interval = FALSE, admin = FALSE)
+            private$.adminTime <- NULL   # per-run reset; only set when the cut-off truly applies
 
             # Create a new outcome variable based on the analysis type
             if (!multievent) {
@@ -435,11 +455,38 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     mydata[["myoutcome"]] <- composite
 
                     diagnostics[[paste0(analysistype, "_handling")]] <- sprintf(
-                        "%s: events include recurrence/progression and death (%d events, %d censored, %d missing).",
+                        "%s: events include recurrence/progression and death (%d events, %d censored, %d missing). This analysis produces the STATUS only - it has no recurrence-time variable and therefore cannot compute time to FIRST event.",
                         toupper(analysistype),
                         sum(composite == 1, na.rm = TRUE),
                         sum(composite == 0, na.rm = TRUE),
                         sum(is.na(composite)))
+
+                    # THE TIME IS THE USER'S PROBLEM, AND THEY HAVE TO BE TOLD.
+                    # A composite endpoint is time-to-FIRST-event, but this analysis
+                    # has only one time variable (followupTime, for censoring) and no
+                    # recurrence/progression date at all, so it cannot take the
+                    # minimum. It ORs the indicators and hands back a status. Pair
+                    # that status with the death/last-contact time -- the obvious
+                    # thing to do -- and a patient who recurred at 6 months and died
+                    # at 40 is recorded as having an event at 40. Recurrence-free
+                    # survival is then overstated for exactly the patients the
+                    # endpoint exists to count. Nothing on screen said so.
+                    n_composite <- sum(composite == 1, na.rm = TRUE)
+                    if (n_composite > 0) {
+                        private$.addHtmlMessage(
+                            "warning",
+                            sprintf("%s status produced - pair it with time to FIRST event",
+                                    toupper(analysistype)),
+                            sprintf(paste0(
+                                "The composite status marks %d patient(s) as having had recurrence/progression ",
+                                "or death. This analysis writes the STATUS only: it has no recurrence or ",
+                                "progression date, so it cannot work out which event came first or when. ",
+                                "Pairing this status with a death or last-contact time overstates %s for every ",
+                                "patient whose recurrence preceded their death or censoring - their event is ",
+                                "recorded at the later time. Supply time to first event yourself, as the ",
+                                "minimum of the recurrence date and the death/last-contact date."),
+                                n_composite, toupper(analysistype)))
+                    }
 
                     # The shared coder built the indicator from the outcome alone
                     # and labelled it "overall survival". The composite is a
@@ -542,6 +589,25 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 } else if (analysistype == 'multistate') {
 
+                    # DUPLICATE ASSIGNMENT. This is the only multi-event path that
+                    # does not go through .defineEventIndicator(), so it did not get
+                    # that function's duplicate check (R/survival_utils.R). The four
+                    # writes below are sequential, so assigning one level to two state
+                    # slots silently lets the LAST write win and the patient lands in
+                    # the wrong state -- with the Summary then printing two
+                    # contradictory lines about the same level. `unmapped` cannot
+                    # catch it: a duplicated level IS mapped, just twice. The same
+                    # configuration under `compete` is correctly rejected.
+                    .slots <- list(awod = awod, awd = awd, dod = dod, dooc = dooc)
+                    .filled <- unlist(.slots[vapply(.slots,
+                                       function(b) !is.null(b) && length(b) > 0, logical(1))],
+                                      use.names = FALSE)
+                    .dupes <- unique(.filled[duplicated(.filled)])
+                    if (length(.dupes) > 0)
+                        jmvcore::reject(.fmt(
+                            .("Each outcome level may be assigned to only one state. Assigned to more than one: {levels}."),
+                            levels = paste(.dupes, collapse = ", ")))
+
                     unmapped <- setdiff(as.character(unique(outcome1[!is.na(outcome1)])),
                                         as.character(c(dod, dooc, awd, awod)))
                     if (length(unmapped) > 0)
@@ -579,11 +645,33 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         dod = dod, dooc = dooc, awd = awd, awod = awod,
                         available = paste(unique(outcome1[!is.na(outcome1)]), collapse = ", ")))
                 } else if (n_recoded < length(outcome1) * 0.5) {
-                    # Warn if more than 50% are NA (likely wrong level selection)
-                    warning('More than 50% of outcomes are NA after recoding (',
-                            round((1 - n_recoded/length(outcome1)) * 100, 1),
-                            '%). This suggests your selected levels may not fully match your data. ',
-                            'Check that all four level selections are correct.')
+                    # LOSING HALF THE COHORT NEEDS A NOTICE, NOT A warning().
+                    # An unrecoded row becomes NA and jmvcore::naOmit() then deletes
+                    # it, so the denominator shrinks without the numbers ever saying
+                    # so. The two places this was reported both fail the user: R
+                    # warnings land in the undifferentiated "Analysis Notes" panel
+                    # among package chatter, and `diagnostics$recoding_warning` goes
+                    # to a Diagnostics table that is OFF BY DEFAULT.
+                    pct_lost <- round((1 - n_recoded / length(outcome1)) * 100, 1)
+                    # Blaming the level selections here would be wrong: both
+                    # multi-event coders reject an unassigned level outright, so by
+                    # the time execution reaches this line every OBSERVED level is
+                    # mapped and the loss is missing data in the outcome column.
+                    private$.addHtmlMessage(
+                        "strong_warning",
+                        "Most rows have no usable outcome",
+                        sprintf(paste0(
+                            "Only %d of %d row(s) (%.1f%%) have an outcome value; the other %.1f%% are ",
+                            "missing in the outcome variable and are dropped from every number below, ",
+                            "so the denominator is smaller than your dataset and any percentage is over ",
+                            "the survivors of that filtering. The levels you assigned (%s) cover every ",
+                            "value that IS present, so this is missing data rather than a mis-selected ",
+                            "level. Check that the outcome column is complete before reporting these numbers."),
+                            n_recoded, length(outcome1),
+                            n_recoded / length(outcome1) * 100, pct_lost,
+                            paste(unique(c(private$.lvlOrUnset(dod), private$.lvlOrUnset(dooc),
+                                           private$.lvlOrUnset(awd), private$.lvlOrUnset(awod))),
+                                  collapse = ", ")))
                     diagnostics$recoding_warning <- sprintf("Only %d/%d (%.1f%%) outcomes successfully recoded",
                                                              n_recoded, length(outcome1),
                                                              n_recoded/length(outcome1) * 100)
@@ -593,6 +681,16 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (self$options$useHierarchy) {
                     # If multiple events could be coded for the same patient, apply hierarchy
                     highest_priority <- self$options$eventPriority
+                    # `min: 1` in the .a.yaml is enforced by the GUI and by the
+                    # generated wrapper, but NOT by Options$new(), so a programmatic
+                    # caller can still pass 0 -- which makes "censored" outrank every
+                    # event and erases them all. The .a.yaml text promises this is
+                    # impossible; make that true wherever the value arrives from.
+                    if (!is.null(highest_priority) && isTRUE(highest_priority < 1)) {
+                        jmvcore::reject(.fmt(
+                            .("Priority Event Type must be 1 or greater (it is {value}). Code 0 is the censored/baseline code, so giving it priority would make censoring outrank every event and remove them all."),
+                            value = highest_priority))
+                    }
                     if (!is.null(id_var) && !is.null(highest_priority)) {
                         # Validate that there are actually duplicate IDs
                         duplicate_ids <- mydata %>%
@@ -626,6 +724,59 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             has_time <- !is.null(fu_var_h) && length(fu_var_h) > 0 &&
                                         fu_var_h[1] %in% names(mydata)
 
+                            # A priority code that the recode never produced makes the
+                            # hierarchy a no-op -- every branch below falls through to
+                            # "keep myoutcome" -- while the diagnostic still reported
+                            # "Event hierarchy applied (priority: N)". Say so instead.
+                            # The option is a free integer, so this is easy to hit:
+                            # overall survival codes only 0/1, and a user who typed 2
+                            # thinking of competing risks gets silence.
+                            present_codes <- sort(unique(stats::na.omit(mydata[["myoutcome"]])))
+
+                            # THE SAME REFUSAL THE ADMIN-CENSORING PATH MAKES.
+                            # The recode below writes literal 0 to every non-priority
+                            # row (`TRUE ~ 0`). Under the multistate coding 0 is
+                            # "Alive without disease" -- a clinical state, not a
+                            # censoring indicator -- so a patient who was Alive WITH
+                            # disease is silently rewritten as disease-free, and a
+                            # competing event (2) recorded before the priority event
+                            # is erased. Measured: rows (AWD, DOD) for one patient at
+                            # priority 2 came out 0, 2 -- the disease state gone.
+                            # The administrative-censoring block refuses exactly this
+                            # a few hundred lines below; the hierarchy had no such
+                            # guard, which is the inconsistency this closes.
+                            if (identical(self$options$analysistype, "multistate")) {
+                                diagnostics$hierarchy <- paste0(
+                                    "Event hierarchy NOT applied: the multistate coding has no censored code ",
+                                    "(0 means 'alive without disease', a state rather than a censoring indicator), ",
+                                    "so collapsing a patient's non-priority rows to 0 would relabel them into the ",
+                                    "baseline state rather than censor them. No record was changed.")
+                                private$.addHtmlMessage(
+                                    "warning",
+                                    "Event hierarchy not applied",
+                                    paste0(
+                                        "The multistate coding has no censored code - 0 means 'alive without ",
+                                        "disease', a clinical state - so collapsing repeated records to 0 would ",
+                                        "erase real disease states rather than censor them. Nothing was changed. ",
+                                        "Reduce the data to one row per patient before this analysis, or use an ",
+                                        "analysis type whose 0 code means censored."))
+                                applied$hierarchy <- FALSE
+                            } else if (!(highest_priority %in% present_codes) &&
+                                       length(present_codes) > 0) {
+                                diagnostics$hierarchy <- sprintf(
+                                    "Event hierarchy NOT applied: the priority event code %s does not occur in the recoded outcome, which contains only %s. No record was changed. Set Priority Event Type to one of the codes actually produced by this analysis type.",
+                                    highest_priority, paste(present_codes, collapse = ", "))
+                                private$.addHtmlMessage(
+                                    "warning",
+                                    "Event hierarchy not applied",
+                                    sprintf(paste0(
+                                        "The priority event code %s does not occur in the recoded outcome ",
+                                        "(the codes produced here are %s), so the event hierarchy changed nothing. ",
+                                        "Set Priority Event Type to one of those codes."),
+                                        highest_priority, paste(present_codes, collapse = ", ")))
+                                applied$hierarchy <- FALSE
+                            } else
+
                             if (has_time) {
                                 mydata[[".hier_t"]] <- jmvcore::toNumeric(mydata[[fu_var_h[1]]])
                                 mydata <- mydata %>%
@@ -636,7 +787,19 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                         myoutcome = dplyr::case_when(
                                             !is.finite(.first_pri)          ~ myoutcome,
                                             .hier_t == .first_pri           ~ highest_priority,
-                                            TRUE                            ~ 0
+                                            # `TRUE ~ 0` here overwrote EVERY other row,
+                                            # earlier ones included -- so a competing
+                                            # event (code 2) recorded BEFORE the priority
+                                            # event was erased to censored, and under a
+                                            # competing-risks coding that is a
+                                            # substantive statistical error, not a
+                                            # bookkeeping one. It also made the notice
+                                            # below ("their later rows were censored")
+                                            # false. Censor only what actually comes
+                                            # after the retained event; leave earlier
+                                            # records as they were coded.
+                                            .hier_t > .first_pri            ~ 0,
+                                            TRUE                            ~ myoutcome
                                         )
                                     ) %>%
                                     dplyr::ungroup() %>%
@@ -667,6 +830,17 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # fed into a survival model, would move the event
                             # earlier in time. Anyone using long-format data needs
                             # to know that before they trust the output.
+                            # Only report success when the priority code actually
+                            # exists; otherwise the guard above already explained why
+                            # nothing happened, and this would overwrite it.
+                            # BRACED deliberately: without the braces this guarded only
+                            # the diagnostics assignment, and the two .addHtmlMessage()
+                            # calls below still told the user the priority code "has
+                            # been written to EVERY one of their rows" on a run where
+                            # the hierarchy provably changed nothing.
+                            hierarchy_ran <- !identical(self$options$analysistype, "multistate") &&
+                                             highest_priority %in% present_codes
+                            if (hierarchy_ran) {
                             diagnostics$hierarchy <- sprintf(
                                 "Event hierarchy applied (priority: %s) to %d patient(s) with multiple records.",
                                 highest_priority, n_affected)
@@ -702,7 +876,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     "patient (keeping the earliest priority event and its date) ",
                                     "before using this option."),
                                     n_affected, highest_priority))
-                            applied$hierarchy <- TRUE
+                            }
+                            applied$hierarchy <- hierarchy_ran
                         }
                     }
                 }
@@ -712,6 +887,23 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             all_labels_cache <- labelled::var_label(mydata)
 
             # Apply interval censoring if specified
+            # A ticked checkbox whose partner variable is missing produced output
+            # byte-identical to leaving it unticked, with no notice and no diagnostic
+            # row -- the guard sat on the whole block, so nothing ran at all.
+            if (self$options$intervalCensoring &&
+                (is.null(self$options$intervalStart) || is.null(self$options$intervalEnd))) {
+                diagnostics$interval_censoring <- paste0(
+                    "Interval censoring NOT applied: both an Interval Start and an Interval End ",
+                    "variable are required, and at least one was not selected.")
+                private$.addHtmlMessage(
+                    "warning",
+                    "Interval censoring not applied",
+                    paste0(
+                        "Interval censoring is switched on but needs BOTH an Interval Start and an ",
+                        "Interval End variable; at least one is not selected, so nothing was done ",
+                        "and these results are identical to leaving it switched off."))
+            }
+
             if (self$options$intervalCensoring && !is.null(self$options$intervalStart) && !is.null(self$options$intervalEnd)) {
                 # Get interval variables from cached labels
                 start_var <- names(all_labels_cache)[all_labels_cache == self$options$intervalStart]
@@ -721,6 +913,29 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Add interval variables to output for use with survival::Surv()
                     mydata[["interval_L"]] <- mydata[[start_var[1]]]
                     mydata[["interval_R"]] <- mydata[[end_var[1]]]
+
+                    # An interval must run forwards. Surv(type="interval2") requires
+                    # left <= right; hand it an inverted pair and it errors, or worse
+                    # silently produces a nonsense interval. Nothing checked this, so
+                    # a swapped pair of columns was reported as "Interval endpoints
+                    # prepared" and the Summary claimed interval censoring was in use.
+                    # `jmvcore::toNumeric()` alone made this check DEAD CODE for
+                    # the columns most likely to be used here. intervalStart and
+                    # intervalEnd carry no `permitted:`, so unlike followupTime they
+                    # accept a date or a text column -- and toNumeric is a no-op on
+                    # both, so `.il`/`.ir` came back all-NA, `.inv` was 0, and a
+                    # swapped pair of date columns was reported as "Interval
+                    # endpoints prepared" with no warning at all.
+                    .l_s <- private$.timeScale(mydata[["interval_L"]])
+                    .r_s <- private$.timeScale(mydata[["interval_R"]])
+                    .il <- .l_s$v
+                    .ir <- .r_s$v
+                    .inv <- sum(!is.na(.il) & !is.na(.ir) & .il > .ir)
+                    # A date start against a numeric end is not an interval, and
+                    # comparing them says nothing -- the same cross-scale problem the
+                    # administrative cut-off refuses on.
+                    .kind_mismatch <- !identical(.l_s$kind, .r_s$kind) ||
+                                      .l_s$kind == "unreadable"
                     # type = "interval2" takes exactly two endpoints and infers
                     # the censoring type from them (NA on the left = left-censored,
                     # NA on the right = right-censored, equal = exact). Passing a
@@ -737,9 +952,50 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "Surv(<start>, <end>, type='interval2') with your two interval columns; ",
                         "note interval2 takes two time arguments and no event argument.")
                     applied$interval <- TRUE
+
+                    if (.kind_mismatch) {
+                        diagnostics$interval_censoring <- sprintf(
+                            paste0("Interval censoring NOT prepared: the interval start is a %s and the interval end is a %s, ",
+                                   "so they are not on the same scale and the interval cannot be checked or used. ",
+                                   "Supply both endpoints as the same kind of column, in the same units and from the same origin."),
+                            .l_s$kind, .r_s$kind)
+                        private$.addHtmlMessage(
+                            "warning",
+                            "Interval endpoints not on the same scale",
+                            paste0(diagnostics$interval_censoring,
+                                   " These results are identical to leaving interval censoring switched off."))
+                        applied$interval <- FALSE
+                    } else if (.inv > 0) {
+                        diagnostics$interval_censoring <- sprintf(
+                            "Interval censoring: %d row(s) have a start later than their end, so the interval runs backwards. Surv(type='interval2') requires start <= end. Check that the two columns are the right way round.",
+                            .inv)
+                        private$.addHtmlMessage(
+                            "warning",
+                            "Interval endpoints run backwards",
+                            sprintf(paste0(
+                                "%d row(s) have an interval start later than their interval end. ",
+                                "An interval must run forwards - Surv(type='interval2') requires ",
+                                "start <= end - so these rows cannot be used as they stand. Check ",
+                                "that the Interval Start and Interval End variables are not swapped."),
+                                .inv))
+                        applied$interval <- FALSE
+                    }
                 } else {
                     diagnostics$interval_censoring <- "Interval censoring: variables not found in dataset"
                 }
+            }
+
+            # Same silent no-op as interval censoring above.
+            if (self$options$adminCensoring && is.null(self$options$adminDate)) {
+                diagnostics$admin_censoring <- paste0(
+                    "Administrative censoring NOT applied: no cut-off date variable was selected.")
+                private$.addHtmlMessage(
+                    "warning",
+                    "Administrative censoring not applied",
+                    paste0(
+                        "Administrative censoring is switched on but no cut-off date variable is ",
+                        "selected, so nothing was truncated and no event status was reset - these ",
+                        "results are identical to leaving it switched off."))
             }
 
             # Handle administrative censoring if specified
@@ -764,29 +1020,261 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     fu_var <- labelled_data$followup_var
 
                     if (!is.null(fu_var) && length(fu_var) > 0 && fu_var[1] %in% names(mydata)) {
-                        fu   <- jmvcore::toNumeric(mydata[[fu_var[1]]])
-                        cut  <- jmvcore::toNumeric(mydata[["admin_censor_date"]])
-                        keep <- !is.na(fu) & !is.na(cut)
+                        # as.numeric() explicitly, not jmvcore::toNumeric() alone:
+                        # toNumeric is a NO-OP on a Date/character column (it only
+                        # unwraps a `values` attribute), so `cut` stayed a Date here and
+                        # every later arithmetic comparison silently coerced it to a day
+                        # count. Coercing up front makes the scale explicit, which is
+                        # what the mismatch guard below has to reason about.
+                        # COMPARABLE SCALES, DECIDED BY TYPE -- NOT BY MAGNITUDE.
+                        # `fu > cut` only means anything if both sides are on the same
+                        # scale, and the two ways to get this wrong are both real:
+                        # a DURATION against a DATE (a date as a number is a day count
+                        # since 1970 -- 18992 for 2021-12-31 -- so "59 months > 18992"
+                        # is never TRUE and the cut-off silently never fires), and a
+                        # FACTOR column, where as.numeric() returns LEVEL INDICES
+                        # (1, 2, 3...) rather than anything temporal, truncating every
+                        # follow-up to a tiny integer.
+                        #
+                        # A magnitude heuristic cannot separate these. It was tried --
+                        # "refuse when the cut-off is more than 10x the largest
+                        # follow-up" -- and it fails in BOTH directions: follow-up in
+                        # DAYS against a date is only a 5x ratio, so a real mismatch
+                        # passed; while a surgical registry whose per-patient
+                        # administrative window is legitimately in the same units was
+                        # refused with a message telling the user to do what they had
+                        # already done. Classify the columns instead.
+                        fu_s  <- private$.timeScale(mydata[[fu_var[1]]])
+                        # A NEGATIVE FOLLOW-UP IS NOT A TIME.
+                        # pmin() happily carries -5 through, and this analysis WRITES
+                        # THAT COLUMN BACK, so the negative value lands in the
+                        # spreadsheet ready to be handed to Surv() -- which rejects
+                        # negative times outright. A zero survives Surv() but
+                        # contributes no person-time and usually means a missing date
+                        # was read as the origin rather than a same-day event.
+                        # Nothing looked at this, so both passed silently.
+                        .fu_raw <- fu_s$v
+                        n_neg  <- sum(!is.na(.fu_raw) & .fu_raw < 0)
+                        n_zero <- sum(!is.na(.fu_raw) & .fu_raw == 0)
+                        if (n_neg > 0 || n_zero > 0)
+                            private$.addHtmlMessage(
+                                "warning",
+                                "Follow-up times are not all positive",
+                                paste0(
+                                    if (n_neg > 0) sprintf(
+                                        "%d patient(s) have a NEGATIVE follow-up time, which cannot be a duration - survival functions reject it. This usually means the start and end dates are the wrong way round. ",
+                                        n_neg) else "",
+                                    if (n_zero > 0) sprintf(
+                                        "%d patient(s) have a follow-up time of zero, which contributes no person-time; check whether a missing date was read as the origin. ",
+                                        n_zero) else "",
+                                    "These rows are truncated and written back unchanged in sign - fix them in the data before running a survival model."))
+                        cut_s <- private$.timeScale(mydata[["admin_censor_date"]])
+                        fu    <- fu_s$v
+                        cut   <- cut_s$v
+                        keep  <- !is.na(fu) & !is.na(cut)
 
-                        n_trunc <- sum(keep & fu > cut)
-                        n_reset <- sum(keep & fu > cut & !is.na(mydata[["myoutcome"]]) &
-                                       mydata[["myoutcome"]] > 0)
+                        scale_mismatch <- !identical(fu_s$kind, cut_s$kind) ||
+                                          fu_s$kind == "unreadable"
+                        # Nothing to compare is not success. With no row carrying both
+                        # a follow-up and a cut-off, every guard below is vacuous and
+                        # pmin() would leave the follow-up untouched while the analysis
+                        # reported the cut-off as applied.
+                        no_overlap <- sum(keep) == 0
 
-                        mydata[["admin_time"]] <- fu
-                        mydata[["admin_time"]][keep] <- pmin(fu[keep], cut[keep])
-                        # Anyone whose event happened after the cut-off is
-                        # censored at the cut-off, not counted as an event.
-                        mydata[["myoutcome"]][keep & fu > cut] <- 0
+                        # GUARD 2 -- A CENSORED CODE MUST EXIST.
+                        # Censoring writes 0, but under the multistate coding 0 is
+                        # "Alive without disease", a real clinical state, not censored.
+                        # Applying it there RELABELS patients into the baseline state
+                        # instead of censoring them, which is worse than not applying it.
+                        multistate_coding <- identical(self$options$analysistype, "multistate")
 
-                        diagnostics$admin_censoring <- sprintf(
-                            "Administrative censoring applied at the supplied cut-off: follow-up truncated for %d patient(s); %d event(s) occurring after the cut-off were reset to censored.",
-                            n_trunc, n_reset)
-                        applied$admin <- TRUE
+                        if (scale_mismatch || no_overlap) {
+                            diagnostics$admin_censoring <- if (no_overlap)
+                                paste0("Administrative cut-off NOT applied: no row has both a follow-up time and a cut-off value, so there was nothing to compare.")
+                            else if (fu_s$kind == "unreadable" || cut_s$kind == "unreadable")
+                                paste0("Administrative cut-off NOT applied: the ",
+                                       if (fu_s$kind == "unreadable") "follow-up time" else "cut-off",
+                                       " column could not be read as a number or a date.")
+                            # "Supply both as dates" was impossible advice: the
+                            # Follow-up Time field is `permitted: [numeric]`, so jamovi
+                            # will not let a date column be dropped into it at all. The
+                            # only route the GUI actually offers is to make the CUT-OFF
+                            # a duration on the follow-up's own scale, so say that.
+                            else sprintf(
+                                paste0("Administrative cut-off NOT applied: the follow-up time is a %s and the cut-off is a %s, so they are not on the same scale and cannot be compared. ",
+                                       "The Follow-up Time field accepts numeric columns only, so express the cut-off the same way - as a duration in the same units and from the same origin as the follow-up time (for a date cut-off, that is the number of %s between each patient's start date and the cut-off date)."),
+                                fu_s$kind, cut_s$kind,
+                                if (identical(fu_s$kind, "number")) "time units" else "days")
+                            private$.addHtmlMessage(
+                                "warning",
+                                "Administrative censoring not applied",
+                                paste0(diagnostics$admin_censoring,
+                                       " These results are identical to leaving administrative censoring switched off."))
+                            applied$admin <- FALSE
+                        } else if (multistate_coding) {
+                            diagnostics$admin_censoring <- paste0(
+                                "Administrative cut-off NOT applied: the multistate coding has no censored code ",
+                                "(0 means 'alive without disease', a state rather than a censoring indicator), so censoring ",
+                                "at the cut-off would relabel patients into the baseline state instead of censoring them. ",
+                                "Apply the cut-off with an analysis type that has a censored code, or truncate follow-up before this analysis.")
+                            private$.addHtmlMessage(
+                                "warning",
+                                "Administrative censoring not applied",
+                                paste0(
+                                    "The multistate coding has no censored code - 0 means 'alive without ",
+                                    "disease', a clinical state rather than a censoring indicator - so ",
+                                    "censoring at the cut-off would relabel patients into the baseline ",
+                                    "state instead of censoring them. Nothing was changed. Use an analysis ",
+                                    "type that has a censored code, or truncate follow-up before this analysis."))
+                            applied$admin <- FALSE
+                        } else {
+                            n_trunc <- sum(keep & fu > cut)
+                            n_reset <- sum(keep & fu > cut & !is.na(mydata[["myoutcome"]]) &
+                                           mydata[["myoutcome"]] > 0)
+                            n_events_before <- sum(!is.na(mydata[["myoutcome"]]) &
+                                                   mydata[["myoutcome"]] > 0)
+
+                            # JUDGE BY CONSEQUENCE, BECAUSE UNITS CANNOT BE INFERRED.
+                            # The type check above only separates a date from a number.
+                            # It cannot help for the combination the GUI actually
+                            # delivers: followupTime is `permitted: [numeric]`, so it
+                            # is ALWAYS a number, and a numeric cut-off is a number
+                            # too. Follow-up in days against a cut-off typed in months
+                            # therefore passes every structural check while deleting
+                            # every event -- measured: 25 deaths removed, 40 patients
+                            # all truncated to 36, and a green "completed successfully"
+                            # notice. A date serial imported as a number (44561) is the
+                            # mirror case: nothing is truncated and the analysis still
+                            # reports the cut-off as applied.
+                            #
+                            # No heuristic can recover the units, so refuse on the two
+                            # outcomes that cannot be a real cut-off:
+                            #   * it removes EVERY event -- a cut-off that leaves no
+                            #     event is a unit error, not an analysis;
+                            #   * it truncates EVERY patient -- the cut-off precedes
+                            #     the whole cohort's follow-up.
+                            # Anything short of that is applied, but never silently:
+                            # the impact is stated in a visible notice, not only in a
+                            # Diagnostics table that is off by default.
+                            # ROWS THE CUT-OFF COULD NOT REACH ARE NOT "UNAFFECTED".
+                            # `keep` drops any row missing a follow-up time or a
+                            # cut-off, and those rows keep their full follow-up AND
+                            # their event. That is a PARTIAL application of the cut-off:
+                            # some patients are censored at it and some are not, which
+                            # is exactly the immortal-time bias administrative censoring
+                            # exists to remove. Every count below is over `keep` too, so
+                            # the notice read "truncated for 3 of 37" and never
+                            # mentioned the other 13 -- the user could not tell from any
+                            # output that the cut-off had been applied to only part of
+                            # the cohort.
+                            n_exempt <- sum(!keep)
+                            exempt_note <- if (n_exempt > 0) sprintf(
+                                paste0(" %d patient(s) were left untouched because they have no follow-up time or no cut-off value; ",
+                                       "they keep their full follow-up and their original event status, so the cut-off applies to only part of the cohort. ",
+                                       "Supply the missing values, or exclude those rows, before comparing groups."),
+                                n_exempt) else ""
+
+                            wipes_all_events <- n_events_before > 0 && n_reset == n_events_before
+                            truncates_everyone <- sum(keep) > 0 && n_trunc == sum(keep)
+                            # The mirror case: nothing is beyond the cut-off, so it did
+                            # nothing. Legitimate when the cut-off genuinely follows the
+                            # whole cohort -- but indistinguishable from a date serial
+                            # imported as a plain number (44561 against months of
+                            # follow-up), and in BOTH cases claiming "applied" is false
+                            # and writing a column titled "Follow-up Truncated at
+                            # Administrative Cut-off" that holds untruncated values is
+                            # worse than false. Report it as a no-op either way.
+                            truncates_nobody <- sum(keep) > 0 && n_trunc == 0
+
+                            if (truncates_nobody) {
+                                looks_like_serial <- stats::median(cut[keep], na.rm = TRUE) > 10000 &&
+                                                     max(fu[keep], na.rm = TRUE) < 1000
+                                diagnostics$admin_censoring <- paste0(
+                                    "Administrative cut-off had no effect: no patient's follow-up extends beyond it, ",
+                                    "so nothing was truncated and no event status was reset.",
+                                    if (looks_like_serial)
+                                        sprintf(" The cut-off reads %s while follow-up reaches only %s - that is what a date looks like once it has been imported as a plain number, and it is almost certainly not in the same units as the follow-up time.",
+                                                base::format(stats::median(cut[keep], na.rm = TRUE)),
+                                                base::format(max(fu[keep], na.rm = TRUE)))
+                                    else "")
+                                private$.addHtmlMessage(
+                                    if (looks_like_serial) "strong_warning" else "info",
+                                    "Administrative censoring had no effect",
+                                    paste0(diagnostics$admin_censoring,
+                                           " No truncated follow-up column was written, because it would be identical to your original follow-up."))
+                                applied$admin <- FALSE
+                            } else if (wipes_all_events || truncates_everyone) {
+                                diagnostics$admin_censoring <- sprintf(
+                                    paste0("Administrative cut-off NOT applied: at this cut-off %s, which cannot be right. ",
+                                           "The follow-up time and the cut-off are almost certainly in different units - ",
+                                           "follow-up runs from %s to %s and the cut-off is %s. ",
+                                           "Express the cut-off in the same units as the follow-up time, measured from the same origin."),
+                                    if (wipes_all_events)
+                                        sprintf("every one of the %d events would be reset to censored", n_events_before)
+                                    else sprintf("all %d patients would be truncated", n_trunc),
+                                    base::format(min(fu[keep], na.rm = TRUE)),
+                                    base::format(max(fu[keep], na.rm = TRUE)),
+                                    base::format(stats::median(cut[keep], na.rm = TRUE)))
+                                private$.addHtmlMessage(
+                                    "strong_warning",
+                                    "Administrative censoring not applied",
+                                    paste0(diagnostics$admin_censoring,
+                                           " Nothing was changed; these results are identical to leaving administrative censoring switched off."))
+                                applied$admin <- FALSE
+                            } else {
+
+                            mydata[["admin_time"]] <- fu
+                            mydata[["admin_time"]][keep] <- pmin(fu[keep], cut[keep])
+                            # Anyone whose event happened after the cut-off is
+                            # censored at the cut-off, not counted as an event.
+                            mydata[["myoutcome"]][keep & fu > cut] <- 0
+
+                            # The TRUNCATED TIME has to travel with the censored status.
+                            # This analysis exports only the status column, so pairing it
+                            # with the user's ORIGINAL follow-up gives a censored patient
+                            # their full untruncated time -- person-time inflated and the
+                            # event removed, which biases survival upward exactly where
+                            # the cut-off was supposed to protect it. Carried out of the
+                            # recoder so .run() can hand it to the second output column.
+                            private$.adminTime <- mydata[["admin_time"]]
+
+                            diagnostics$admin_censoring <- paste0(sprintf(
+                                "Administrative censoring applied at the supplied cut-off: follow-up truncated for %d patient(s); %d event(s) occurring after the cut-off were reset to censored. Use the truncated follow-up time this analysis writes back, not the original follow-up column.",
+                                n_trunc, n_reset), exempt_note)
+                            # Say it where the user will see it. Deleting events from a
+                            # survival dataset must never be reported only in a panel
+                            # that defaults to off.
+                            private$.addHtmlMessage(
+                                "warning",
+                                "Administrative censoring applied",
+                                paste0(sprintf(paste0(
+                                    "Follow-up was truncated for %d of %d patient(s) and %d of %d event(s) ",
+                                    "occurring after the cut-off were reset to censored. Check that the cut-off ",
+                                    "is in the same units as the follow-up time before using these numbers, and ",
+                                    "pair the recoded outcome with the truncated follow-up column this analysis ",
+                                    "writes back, not with your original follow-up column."),
+                                    n_trunc, sum(keep), n_reset, n_events_before),
+                                    exempt_note))
+                            applied$admin <- TRUE
+                            }
+                        }
                     } else {
                         diagnostics$admin_censoring <- paste0(
                             "Administrative cut-off date read, but NOT applied: no Follow-up Time ",
                             "variable was selected, so no follow-up was truncated and no event ",
                             "status was reset. Select a Follow-up Time variable to apply it here.")
+                        # A ticked checkbox that does nothing must not be visible only in
+                        # a Diagnostics table that is off by default: the output is
+                        # byte-identical to leaving the box unticked, so the user has no
+                        # way to tell the cut-off was ignored.
+                        private$.addHtmlMessage(
+                            "warning",
+                            "Administrative censoring not applied",
+                            paste0(
+                                "A cut-off date was supplied but no Follow-up Time variable was selected, ",
+                                "so nothing was truncated and no event status was reset - these results are ",
+                                "identical to leaving administrative censoring switched off. ",
+                                "Select a Follow-up Time variable, measured in the same units as the cut-off."))
                         applied$admin <- FALSE
                     }
                 } else {
@@ -805,8 +1293,84 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
         },
 
-        .getOutcomeLabel = function(value, analysistype, multievent) {
+        # `codes_present` is the set of values the recode ACTUALLY produced. It
+        # decides the label width; the options only choose the wording.
+        #
+        # Was: the branch was chosen from the `multievent` and `analysistype`
+        # OPTIONS alone. The Censored/Event/Competing hand-off path fires with
+        # multievent = FALSE, so re-running this analysis on the very column it
+        # exports fell into the 2-level branch and labelled every competing event
+        # "Unknown (2)" -- while the Summary asserted "Alive (other levels): coded
+        # as 0". The file already knows to do this: its own comment at the export
+        # path says "ask the returned VECTOR, not the options branch". That fix
+        # reached `private$.causeFactor` and never reached the display.
+        # A TIME COLUMN'S SCALE, DECIDED BY TYPE -- NOT BY MAGNITUDE.
+        # Two callers need this: administrative censoring (comparing a follow-up
+        # against a cut-off) and the interval-censoring endpoint check. Both were
+        # written with `jmvcore::toNumeric()`, which is a NO-OP on a Date, a factor
+        # or a character column -- it only unwraps a `values` attribute -- so a date
+        # column silently became a day count and a text column silently became all-NA,
+        # which turned the interval "runs backwards" check into dead code.
+        #
+        # `as.numeric()` on a FACTOR is the mirror trap: it returns LEVEL INDICES
+        # (1, 2, 3...), not anything temporal.
+        #
+        # A magnitude heuristic cannot separate these. It was tried -- "refuse when
+        # the cut-off is more than 10x the largest follow-up" -- and it fails in BOTH
+        # directions: follow-up in DAYS against a date is only a 5x ratio, so a real
+        # mismatch passed; while a registry whose administrative window is legitimately
+        # in the same units was refused with a message telling the user to do what they
+        # had already done. Classify the column instead, and return the kind alongside
+        # the values so the caller can refuse a comparison across two different kinds.
+        # An unset Level option is NULL; naming it "(not set)" beats printing an
+        # empty pair of quotes in a message whose whole job is to say which
+        # selection is wrong.
+        .lvlOrUnset = function(x) if (is.null(x) || !length(x) || !nzchar(x)) "(not set)" else as.character(x),
+
+        .timeScale = function(x) {
+            if (inherits(x, "Date"))
+                return(list(v = as.numeric(x), kind = "date"))
+            if (inherits(x, "POSIXct") || inherits(x, "POSIXlt")) {
+                # as.Date() on a POSIXct defaults to tz = "UTC", NOT the timestamp's
+                # own zone, so an evening timestamp west of Greenwich rolls forward a
+                # day: 2021-12-31 23:00 New York becomes 2022-01-01. A cut-off off by
+                # one day silently moves every patient recorded that evening across it.
+                tz <- attr(x, "tzone")
+                tz <- if (is.null(tz) || !nzchar(tz[1])) Sys.timezone() else tz[1]
+                if (is.na(tz)) tz <- "UTC"
+                return(list(v = as.numeric(as.Date(x, tz = tz)), kind = "date"))
+            }
+            if (is.factor(x)) x <- as.character(x)
+            if (is.character(x)) {
+                n <- suppressWarnings(as.numeric(x))
+                if (any(!is.na(n))) return(list(v = n, kind = "number"))
+                # tryCatch, not suppressWarnings: as.Date.character ERRORS
+                # ("character string is not in a standard unambiguous format")
+                # when no format matches -- it does not return NA. Without this a
+                # text column such as "N/A" or "31 Dec 2021" killed the whole
+                # analysis, taking the recoded outcome with it, and the
+                # "unreadable" branch below was dead code.
+                d <- tryCatch(suppressWarnings(as.Date(x)),
+                              error = function(e) rep(as.Date(NA), length(x)))
+                if (any(!is.na(d))) return(list(v = as.numeric(d), kind = "date"))
+                return(list(v = rep(NA_real_, length(x)), kind = "unreadable"))
+            }
+            list(v = suppressWarnings(as.numeric(jmvcore::toNumeric(x))), kind = "number")
+        },
+
+        .getOutcomeLabel = function(value, analysistype, multievent, codes_present = NULL) {
             val_str <- as.character(value)
+
+            # A 2-level branch cannot describe a vector containing 2 or 3, whatever
+            # the options say. Widen on the evidence.
+            if (!is.null(codes_present)) {
+                mx <- suppressWarnings(max(as.numeric(codes_present), na.rm = TRUE))
+                if (is.finite(mx) && mx > 1) {
+                    multievent <- TRUE
+                    if (!analysistype %in% c('multistate', 'compete'))
+                        analysistype <- if (mx >= 3) 'multistate' else 'compete'
+                }
+            }
 
             if (multievent && analysistype == 'multistate') {
                 switch(val_str,
@@ -844,7 +1408,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <dd>Analysis accounting for multiple types of events (e.g., disease death vs. other death). Competing events prevent the event of interest from occurring.</dd>
 
                 <dt><b>Recurrence-Free Survival (RFS)</b></dt>
-                <dd>Time to disease recurrence or death from disease. Used for cancers after curative treatment.</dd>
+                <dd>Time to disease recurrence or death. Used for cancers after curative treatment. Note that RFS is sometimes defined as counting only death <i>from disease</i>; this analysis counts death from <b>any</b> cause, because RFS runs on a single event level and the cause of death is not available to it. If you need other-cause deaths treated separately, use Cause-Specific Survival or Competing Risks with Multiple Event Levels.</dd>
 
                 <dt><b>Progression-Free Survival (PFS)</b></dt>
                 <dd>Time to disease progression or death from any cause. Common endpoint in oncology trials.</dd>
@@ -943,12 +1507,26 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 outcome1 <- mydata[[outcome_var]]
                 unique_outcomes <- unique(outcome1[!is.na(outcome1)])
 
-                # Check which level selections are missing
+                # REQUIRE AT LEAST ONE ASSIGNMENT, NOT ALL FOUR.
+                # This used to block the run unless all four slots were filled, which
+                # is a UI-slot check rather than a data check: a perfectly ordinary
+                # 3-state registry outcome (Alive / Dead of disease / Dead of other
+                # causes) has no fourth level to assign, so competing-risks and
+                # cause-specific survival could not be run on it at all without
+                # inventing a category. The shared coder .defineEventIndicator()
+                # (R/survival_utils.R:126-208) already states the real contract --
+                # at least one bucket filled, and every OBSERVED level assigned to
+                # exactly one bucket -- and its own comment records that an empty
+                # category "is perfectly normal and must not error". Defer to it:
+                # it also produces the better message, naming the unmapped levels.
+                assigned <- list(dod = self$options$dod, dooc = self$options$dooc,
+                                 awd = self$options$awd, awod = self$options$awod)
+                n_assigned <- sum(vapply(assigned,
+                                         function(b) !is.null(b) && length(b) > 0, logical(1)))
                 missing_levels <- character(0)
-                if (is.null(self$options$dod)) missing_levels <- c(missing_levels, "Dead of Disease")
-                if (is.null(self$options$dooc)) missing_levels <- c(missing_levels, "Dead of Other Causes")
-                if (is.null(self$options$awd)) missing_levels <- c(missing_levels, "Alive with Disease")
-                if (is.null(self$options$awod)) missing_levels <- c(missing_levels, "Alive without Disease")
+                if (n_assigned == 0)
+                    missing_levels <- c("Dead of Disease", "Dead of Other Causes",
+                                        "Alive with Disease", "Alive without Disease")
 
                 if (length(missing_levels) > 0) {
                     # Add informative notice about available levels
@@ -958,9 +1536,11 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # Add strong warning about missing selections
                     private$.addNotice(jmvcore::NoticeType$STRONG_WARNING,
-                        paste0("Multiple Event Types analysis requires all four outcome level selections. ",
-                               "Missing: ", paste(missing_levels, collapse = ", "), ". ",
-                               "Please select the appropriate level from your outcome values for each category."))
+                        paste0("Multiple Event Types is enabled but no outcome level has been assigned to a category. ",
+                               "Assign each level of your outcome variable to one of: ",
+                               paste(missing_levels, collapse = ", "), ". ",
+                               "A category with no patients in this cohort is fine and can be left empty - ",
+                               "what matters is that every level present in the data is assigned somewhere."))
 
                     # Add guidance notice
                     private$.addNotice(jmvcore::NoticeType$INFO,
@@ -1028,6 +1608,23 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             esc_outcomeLevel <- htmltools::htmlEscape(.lvl(self$options$outcomeLevel))
             esc_recurrenceLevel <- htmltools::htmlEscape(.lvl(self$options$recurrenceLevel))
 
+            # THE SUMMARY MUST FOLLOW THE CODING TOO.
+            # `codes_present` reached the output table, the plot and the copy-ready
+            # text, but not this pane -- which has no `visible:` gate and is therefore
+            # the one every user sees. On the hand-off path (.defineEventIndicator
+            # returns 0/1/2 for a Censored/Event/Competing column regardless of
+            # analysistype) it asserted "Alive (other levels): coded as 0" for a
+            # vector containing 2s, and recommended Kaplan-Meier and Cox for a status
+            # those functions cannot take.
+            #
+            # Computed HERE, above the branch, for two reasons: the recommendations
+            # block further down reads it on every path (defining it inside one branch
+            # made every other path die with "object 'handoff_coded' not found"), and
+            # `codes_present` is defined ~100 lines later, so borrowing that instead
+            # parses cleanly and then fails at runtime the same way.
+            .codes_here <- unique(stats::na.omit(mydata[["myoutcome"]]))
+            handoff_coded <- length(.codes_here) > 0 && any(!.codes_here %in% c(0, 1))
+
             if (self$options$multievent) {
                 if (analysistype == 'os') {
                     summary_text <- glue::glue(
@@ -1083,7 +1680,19 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                 }
             } else {
-                if (analysistype == 'os') {
+                if (handoff_coded) {
+                    summary_text <- glue::glue(
+                        "
+                        <br><b>Competing-Risks Coding Detected</b><br>
+                        The outcome supplied is already a multi-state coding, so it was recoded to:<br>
+                        - Censored: coded as 0<br>
+                        - Event of interest ({esc_outcomeLevel}): coded as 1<br>
+                        - Competing event: coded as 2<br>
+                        <br>
+                        <i>This is NOT a two-level survival indicator. Kaplan-Meier and Cox treat any non-zero status as the same event, so use a competing-risks method (cumulative incidence, Fine-Gray) instead.</i>
+                        "
+                    )
+                } else if (analysistype == 'os') {
                     summary_text <- glue::glue(
                         "
                         <br><b>Overall Survival (OS) Analysis</b><br>
@@ -1143,7 +1752,13 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (isTRUE(applied$interval)) {
-                summary_text <- paste(summary_text, "<br><b>Interval Censoring:</b> Events are known to occur within time intervals rather than at exact times.<br>")
+                # The Diagnostics table already says the endpoint columns are not
+                # written back, but it is OFF BY DEFAULT. This pane is always visible,
+                # so on its own it read as "interval-censored data has been prepared
+                # for you" when the only column this analysis exports is the recoded
+                # outcome -- and pairing that outcome with an exact follow-up time is
+                # precisely the analysis interval censoring exists to avoid.
+                summary_text <- paste(summary_text, "<br><b>Interval Censoring:</b> Events are known to occur within time intervals rather than at exact times. Your two interval columns were checked but are <b>not</b> written back - this analysis exports only the recoded outcome - so build the response yourself with Surv(&lt;start&gt;, &lt;end&gt;, type='interval2') using your original interval columns.<br>")
             }
 
             if (isTRUE(applied$admin)) {
@@ -1153,7 +1768,14 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add recommendations for appropriate analyses
             summary_text <- paste(summary_text, "<br><b>Recommended Analysis Approaches:</b><br>")
 
-            if (analysistype == 'os') {
+            # Recommend for the coding that was PRODUCED, not the option that was
+            # chosen. On the hand-off path a 0/1/2 status came out under
+            # analysistype = "os" and this block told the reader to run Kaplan-Meier
+            # and Cox -- which treat any non-zero status as the same event, silently
+            # merging competing deaths into the event of interest.
+            if (handoff_coded) {
+                summary_text <- paste(summary_text, "- Cumulative incidence function (competing risks)<br>- Fine-Gray subdistribution hazard model<br>- Do NOT use Kaplan-Meier or Cox on this status: they treat every non-zero code as the same event, merging the competing events into the event of interest<br>")
+            } else if (analysistype == 'os') {
                 summary_text <- paste(summary_text, "- Kaplan-Meier method for univariate analysis<br>- Cox proportional hazards for multivariable analysis<br>")
             } else if (analysistype == 'cause') {
                 summary_text <- paste(summary_text, "- Cause-specific hazard models (standard Cox regression)<br>- Cumulative incidence function with competing risks<br>")
@@ -1162,9 +1784,15 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (analysistype == 'multistate') {
                 summary_text <- paste(summary_text, "- A per-patient state code (0 = disease-free, 1 = disease, 2 = death from disease, 3 = death from other causes)<br>- Note: fitting a multistate or illness-death model requires transition times and a subject identifier in long format, which this analysis does not export<br>")
             } else if (analysistype %in% c('rfs', 'pfs', 'dfs')) {
-                summary_text <- paste(summary_text, "- Standard survival analysis (Kaplan-Meier, Cox)<br>- Consider competing risks if appropriate<br>")
+                summary_text <- paste(summary_text,
+                    if (is.null(self$options$recurrence))
+                        "- NOTE: no recurrence/progression variable was supplied, so the composite endpoint was NOT built and this status is a death-only indicator. Supply the recurrence variable, or report this as overall survival<br>"
+                    else "- Standard survival analysis (Kaplan-Meier, Cox)<br>- Consider competing risks if appropriate<br>")
             } else if (analysistype == 'ttp') {
-                summary_text <- paste(summary_text, "- Standard survival analysis with death as censoring<br>- Consider sensitivity analysis treating death as competing risk<br>")
+                summary_text <- paste(summary_text,
+                    if (is.null(self$options$recurrence))
+                        "- NOTE: no recurrence/progression variable was supplied, so progression could not be identified and this status is a death-only indicator - the opposite of time to progression, which censors death. Supply the recurrence variable<br>"
+                    else "- Standard survival analysis with death as censoring<br>- Consider sensitivity analysis treating death as competing risk<br>")
             }
 
             # Summary now only contains analysis description (validation moved to Notices)
@@ -1176,16 +1804,28 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # so enabling the visualization without the table crashed with
             # "object 'outcome_counts' not found".
             outcome_counts <- table(mydata$myoutcome)
+            # The codes the recode ACTUALLY produced. Every label and every
+            # 'is this multi-state' decision below keys off this, not off the
+            # options -- the two disagree whenever the hand-off path fires.
+            codes_present <- names(outcome_counts)
 
             # Add data table if requested
             if (self$options$outputTable) {
                 outcome_table <- self$results$outputTable
+                # Both of these tables are `rows: 0` and are filled with addRow()
+                # in .run(). addRow() does NOT check for a duplicate rowKey, so a
+                # re-run that clearWith did not clear appends a second set and the
+                # table dies with "duplicate 'row.names' are not allowed". A complete
+                # clearWith (now in the .r.yaml) is the primary fix; clearing here
+                # is the belt-and-braces half, because the row set depends on the
+                # DATA (one row per distinct outcome code), not only on options.
+                outcome_table$deleteRows()
 
                 # Add rows for each unique outcome value
                 for (i in seq_along(outcome_counts)) {
                     value <- names(outcome_counts)[i]
                     count <- outcome_counts[i]
-                    label <- private$.getOutcomeLabel(value, analysistype, self$options$multievent)
+                    label <- private$.getOutcomeLabel(value, analysistype, self$options$multievent, codes_present)
 
                     outcome_table$addRow(rowKey=i, values=list(
                         outcome = value,
@@ -1199,6 +1839,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add diagnostics table if requested
             if (self$options$diagnostics && length(diagnostics) > 0) {
                 diagnostics_table <- self$results$diagnosticsTable
+                diagnostics_table$deleteRows()   # see the note on outputTable above
 
                 # Add each diagnostic as a row
                 i <- 1
@@ -1215,10 +1856,15 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$visualization) {
                 # Store outcome distribution data for the visualization
                 image <- self$results$outcomeViz
+                # codes_present travels with the state: the renderer decides its
+                # labels from the codes the recode actually produced, exactly as the
+                # table and the summary do. Without it the plot kept the old
+                # options-driven labelling and disagreed with the table beside it.
                 image$setState(list(
                     "table" = outcome_counts,
                     "analysis_type" = analysistype,
-                    "multi_event" = self$options$multievent
+                    "multi_event" = self$options$multievent,
+                    "codes_present" = codes_present
                 ))
             }
 
@@ -1239,7 +1885,31 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # silently becomes censored -- quietly turning a competing-risks
             # analysis back into a cause-specific one. The labelled form is the
             # representation those analyses already recognise ("Event" %in% levels).
+            # The truncated follow-up time, written only when the cut-off actually
+            # applied. Gated on isNotFilled() alone, never on self$options$addAdminTime:
+            # an Output option is not an argument of the generated R wrapper, so it is
+            # permanently FALSE from the R API and gating on it would make the column
+            # unreachable headless. jamovi already gates delivery via Output$enabled.
+            if (!is.null(private$.adminTime) &&
+                self$results$addAdminTime$isNotFilled()) {
+                self$results$addAdminTime$setRowNums(df_outcome$row_names)
+                self$results$addAdminTime$setValues(as.numeric(private$.adminTime))
+            }
+
             if (self$options$addOutcome) {
+                # The .r.yaml varTitle is a STATIC string. It used to interpolate
+                # `{analysistype}`, which substitutes the List option's raw KEY, so
+                # the column landed in the user's spreadsheet called "Recoded Outcome
+                # for os Survival Analysis". Name it properly here, where the human
+                # label is available.
+                self$results$addOutcome$setTitle(sprintf(
+                    "Recoded Outcome (%s)",
+                    switch(analysistype,
+                           os = "overall survival", cause = "cause-specific survival",
+                           compete = "competing risks", rfs = "recurrence-free survival",
+                           pfs = "progression-free survival", dfs = "disease-free survival",
+                           ttp = "time to progression", multistate = "multistate",
+                           analysistype)))
                 self$results$addOutcome$setRowNums(df_outcome$row_names)
                 # Rebuild the labels from the FINAL status vector.
                 #
@@ -1307,7 +1977,35 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
 
                 # Event description based on analysis type
-                event_desc <- if (analysistype == "os") "death from any cause"
+                # These describe what the coding MEANS, so they must follow what was
+                # actually coded, not the analysis type alone. Two ways they diverge,
+                # both silent before:
+                #  * the composite branches (rfs/pfs/dfs, ttp) are skipped when no
+                #    recurrence variable is supplied, leaving a plain death
+                #    indicator that this text still called "recurrence/progression
+                #    or death";
+                #  * the Censored/Event/Competing hand-off path produces a 3-level
+                #    coding under analysistype "os", which this text described as a
+                #    two-level all-cause outcome and left the competing events out
+                #    of the narrative entirely.
+                composite_built <- analysistype %in% c("rfs", "pfs", "dfs", "ttp") &&
+                                   !is.null(self$options$recurrence)
+                multi_coded <- any(!codes_present %in% c("0", "1"))
+
+                # Multistate has no "event" in the two-group sense at all: 0/1/2/3 are
+                # four clinical STATES, and counting myoutcome == 1 makes every
+                # "alive with disease" patient an event. The chain had no multistate
+                # arm, so it fell through to the placeholder "the selected event type"
+                # and produced a headline sentence that was simply wrong.
+                event_desc <- if (analysistype == "multistate")
+                        "transition to the disease state (1); this is a multistate coding with four states, not a single event indicator - the per-state breakdown below is the meaningful summary"
+                    else if (analysistype %in% c("rfs", "pfs", "dfs") && !composite_built)
+                        "death (no recurrence variable was supplied, so the composite endpoint was not built and this is a death-only indicator)"
+                    else if (analysistype == "ttp" && !composite_built)
+                        "death (no recurrence variable was supplied, so progression could not be identified and this is a death-only indicator)"
+                    else if (analysistype == "os" && multi_coded)
+                        "the event of interest (coded 1); this outcome also carries competing states, listed below"
+                    else if (analysistype == "os") "death from any cause"
                     else if (analysistype == "cause") "death from the disease of interest"
                     else if (analysistype == "compete") "disease-specific death (competing events coded as 2)"
                     else if (analysistype %in% c("rfs", "pfs", "dfs")) "recurrence/progression or death"
@@ -1315,7 +2013,18 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     else "the selected event type"
 
                 # Censor description
-                censor_desc <- if (analysistype == "ttp") "patients who died without progression or remain event-free"
+                # Was hard-coded to "patients who remain alive or event-free" for every
+                # type but TTP. Under cause-specific and competing risks the 0 group is
+                # NOT event-free: it contains patients who died of something else, and
+                # calling them event-free in a manuscript sentence is a factual error.
+                censor_desc <- if (analysistype == "ttp" && composite_built)
+                        "patients who died without progression or remain event-free"
+                    else if (analysistype == "cause")
+                        "patients who were alive at last contact or died of another cause (both censored for this endpoint)"
+                    else if (analysistype == "compete")
+                        "patients alive at last contact; deaths from other causes are coded 2 as competing events, not censored"
+                    else if (analysistype == "multistate")
+                        "patients in the baseline state (0), alive without disease"
                     else "patients who remain alive or event-free"
 
                 # Calculate frequencies. The denominator must be ALL non-missing coded
@@ -1324,8 +2033,14 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # so using n_events + n_censored silently drops the competing/other-cause
                 # states and reports percentages against a wrong total. For binary OS
                 # coding this is identical to the previous denominator.
+                # Under multistate, code 1 is "alive with disease" -- a state, not an
+                # event -- so this count is not an event count and must not be
+                # presented as one. The per-state breakdown below carries the real
+                # information; the headline numbers are labelled accordingly.
                 n_events <- sum(mydata$myoutcome == 1, na.rm = TRUE)
                 n_censored <- sum(mydata$myoutcome == 0, na.rm = TRUE)
+                count_noun <- if (analysistype == "multistate")
+                    "patients in the disease state" else "events"
                 total_n <- sum(!is.na(mydata$myoutcome))
                 event_pct <- if (total_n > 0) round(n_events / total_n * 100, 1) else 0
                 censor_pct <- if (total_n > 0) round(n_censored / total_n * 100, 1) else 0
@@ -1334,13 +2049,16 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # breakdown so the copy-ready text does not imply the non-event group
                 # accounts for every remaining patient.
                 state_breakdown <- ""
-                if (analysistype %in% c("compete", "multistate")) {
+                # Fire on what was CODED, not on the option: a 3-level coding needs its
+                # state breakdown however the analysis type is labelled.
+                if (analysistype %in% c("compete", "multistate") ||
+                    any(!codes_present %in% c("0", "1"))) {
                     state_tab <- table(mydata$myoutcome)
                     state_lines <- vapply(names(state_tab), function(v) {
                         cnt <- as.integer(state_tab[[v]])
                         pct <- if (total_n > 0) round(cnt / total_n * 100, 1) else 0
                         sprintf("%s: %d (%.1f%%)",
-                                htmltools::htmlEscape(private$.getOutcomeLabel(v, analysistype, self$options$multievent)),
+                                htmltools::htmlEscape(private$.getOutcomeLabel(v, analysistype, self$options$multievent, codes_present)),
                                 cnt, pct)
                     }, character(1))
                     state_breakdown <- paste0(
@@ -1353,15 +2071,15 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
                     <b> Copy-Ready Report Text:</b><br><br>
                     The outcome variable '<b>%s</b>' was recoded for <b>%s</b> analysis.
-                    Events (coded as 1) represent %s.
-                    Non-events (coded as 0) represent %s.
-                    The recoded variable '<b>myoutcome</b>' contains <b>%d events (%.1f%%)</b> and <b>%d non-events (%.1f%%)</b> out of %d coded records.%s
+                    Code 1 represents %s.
+                    Code 0 represents %s.
+                    The recoded variable '<b>myoutcome</b>' contains <b>%d %s (%.1f%%)</b> and <b>%d coded 0 (%.1f%%)</b> out of %d coded records.%s
                     </div>",
                     htmltools::htmlEscape(self$options$outcome),
                     analysis_type_labels[[analysistype]],
                     event_desc,
                     censor_desc,
-                    n_events, event_pct,
+                    n_events, count_noun, event_pct,
                     n_censored, censor_pct,
                     total_n,
                     state_breakdown
@@ -1399,7 +2117,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Add proper labels based on analysis type using private method
                 plot_df$Label <- sapply(plot_df$Outcome, function(val) {
-                    private$.getOutcomeLabel(val, plotData$analysis_type, plotData$multi_event)
+                    private$.getOutcomeLabel(val, plotData$analysis_type, plotData$multi_event, plotData$codes_present)
                 })
 
                 # Color-blind safe palette

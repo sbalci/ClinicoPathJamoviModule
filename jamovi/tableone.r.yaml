@@ -9,6 +9,17 @@ items:
     type: Html
     # Displays welcome and instruction text when no variables are selected.
 
+  - name: assumptions
+    title: "Data Quality & Assumptions"
+    type: Html
+    visible: (vars)
+    clearWith:
+      - vars
+      - excl
+      - sty
+      - nonnormal
+    # Surface case-loss and missingness guidance before tables and report text.
+
   - name: tablestyle1
     title: "Table One Output (tableone)"
     type: Preformatted
@@ -49,12 +60,13 @@ items:
 
 
   - name: reportSentence
-    title: " Copy to Manuscript"
+    title: "Copy to Manuscript"
     type: Html
     visible: (showReportSentence)
     clearWith:
       - vars
       - excl
+      - sty
     refs: ClinicoPathJamoviModule
 
   - name: summary
@@ -64,6 +76,7 @@ items:
     clearWith:
       - vars
       - excl
+      - sty
     # Clinical summary and data quality information
 
   - name: about
@@ -73,18 +86,6 @@ items:
     clearWith:
       - vars
     # Educational content about Table One
-
-  - name: assumptions
-    title: "Data Quality & Assumptions"
-    type: Html
-    visible: (vars)
-    clearWith:
-      - vars
-      - excl
-    # Data quality warnings and statistical assumptions
-
-
-
 
 refs:
     - ClinicoPathJamoviModule

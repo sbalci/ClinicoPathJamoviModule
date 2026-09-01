@@ -1183,9 +1183,11 @@ options:
       default: false
       description:
           R: >
-            Calculate agreement level for each case and add as new computed column.
-            Choose between Simple (3 categories) or Detailed (5 categories) classification.
-            Useful for identifying difficult cases and quality control.
+            Calculate the agreement level for each case. Choose between Simple
+            (3 categories) or Detailed (5 categories) classification. Useful for
+            identifying difficult cases and quality control. To also add the result
+            to the dataset as a new column, enable the separate output variable
+            'Add case agreement categorization to data'.
 
     - name: detailLevel
       title: "Detail Level"
@@ -1270,6 +1272,23 @@ options:
           R: >
             Display summary table showing distribution of cases across LoA categories
             with counts and percentages. Useful for quality control reporting.
+
+    # type: Output, not Bool. jmvcore's Output result item resolves its gating
+    # option by the RESULT ITEM'S OWN NAME (Output$enabled reads
+    # options$get(private$.name)), and Output$asProtoBuf() emits nothing when that
+    # is FALSE. `loaVariable` gates the COMPUTATION (and loaTable/loaDetailTable);
+    # this option gates DELIVERY of the column, exactly like consensusVar above.
+    # The name must stay equal to the .r.yaml item name. No `default:` -- the
+    # compiler's optionify() emits only the bare name for an Output option.
+    - name: loaOutput
+      title: "Add case agreement categorization to data"
+      type: Output
+      description:
+          R: >
+            Adds the per-case agreement category as a new computed column in the dataset.
+            Requires 'Case agreement categorization' to be enabled, which performs the
+            calculation. This is a jamovi output variable driven by the Output control in
+            the analysis panel; it is not an argument of the R function.
 
     # ---- Rater Profile Plots ----
 

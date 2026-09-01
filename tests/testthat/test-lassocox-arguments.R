@@ -30,7 +30,15 @@ load_lung_cancer <- function() {
   }
   env <- new.env()
   load(data_path, envir = env)
-  env$lassocox_lung_cancer
+  d <- env$lassocox_lung_cancer
+  # The bundled stress fixture has only two censored rows. Simulate a separate
+  # independently censored endpoint for option-combination tests of valid fits.
+  withr::local_seed(713)
+  event_time <- rexp(nrow(d), exp(0.03 * (d$age - 60)) / 10)
+  censor_time <- rexp(nrow(d), 0.06)
+  d$follow_up_months <- pmin(event_time, censor_time)
+  d$progression <- factor(ifelse(event_time <= censor_time, "Yes", "No"))
+  d
 }
 
 # Common argument set for lung cancer data
@@ -40,6 +48,7 @@ lung_base_args <- function(data) {
     elapsedtime = "follow_up_months",
     outcome = "progression",
     outcomeLevel = "Yes",
+    censorLevel = "No",
     explanatory = c("age", "gender", "smoking_status", "histology",
                      "stage", "tumor_size_cm", "ecog_performance_status",
                      "hemoglobin_g_dl", "wbc_count_k_ul",
@@ -62,8 +71,7 @@ test_that("lassocox works with all CV fold values (3, 5, 10)", {
   for (nf in c(3, 5, 10)) {
     args <- lung_base_args(data)
     args$nfolds <- nf
-    expect_no_error(do.call(lassocox, args),
-                    info = paste("nfolds =", nf))
+    expect_no_error(do.call(lassocox, args))
   }
 })
 
@@ -74,8 +82,7 @@ test_that("lassocox standardize on/off both work", {
   for (std in c(TRUE, FALSE)) {
     args <- lung_base_args(data)
     args$standardize <- std
-    expect_no_error(do.call(lassocox, args),
-                    info = paste("standardize =", std))
+    expect_no_error(do.call(lassocox, args))
   }
 })
 
@@ -86,8 +93,7 @@ test_that("lassocox suitabilityCheck toggle works", {
   for (sc in c(TRUE, FALSE)) {
     args <- lung_base_args(data)
     args$suitabilityCheck <- sc
-    expect_no_error(do.call(lassocox, args),
-                    info = paste("suitabilityCheck =", sc))
+    expect_no_error(do.call(lassocox, args))
   }
 })
 
@@ -100,18 +106,17 @@ test_that("lassocox plot toggles work independently", {
   expect_no_error(do.call(lassocox, args))
 
   # Each plot on individually
-  for (plot_opt in c("cv_plot", "coef_plot", "survival_plot")) {
+  for (plot_opt in c("cv_plot", "coef_plot", "survival_plot", "path_plot")) {
     test_args <- args
     test_args[[plot_opt]] <- TRUE
-    expect_no_error(do.call(lassocox, test_args),
-                    info = paste(plot_opt, "= TRUE"))
+    expect_no_error(do.call(lassocox, test_args))
   }
 
   # All plots on
   args$cv_plot <- TRUE
   args$coef_plot <- TRUE
   args$survival_plot <- TRUE
-  expect_no_error(do.call(lassocox, args), info = "all plots on")
+  expect_no_error(do.call(lassocox, args))
 })
 
 test_that("lassocox explanatory output toggles work", {
@@ -121,11 +126,10 @@ test_that("lassocox explanatory output toggles work", {
 
   # Test each explanatory output option
   for (opt in c("showExplanations", "showMethodologyNotes",
-                "includeClinicalGuidance")) {
+                "includeClinicalGuidance", "showEncoding", "showReproducibility", "showRCode")) {
     test_args <- args
     test_args[[opt]] <- TRUE
-    expect_no_error(do.call(lassocox, test_args),
-                    info = paste(opt, "= TRUE"))
+    expect_no_error(do.call(lassocox, test_args))
   }
 })
 
@@ -136,7 +140,7 @@ test_that("lassocox showSummary works", {
   args$showSummary <- TRUE
 
   result <- do.call(lassocox, args)
-  expect_true(!is.null(result$results$summaryText))
+  expect_true(!is.null(result$summaryText))
 })
 
 test_that("lassocox showVariableImportance works", {
@@ -146,7 +150,7 @@ test_that("lassocox showVariableImportance works", {
   args$showVariableImportance <- TRUE
 
   result <- do.call(lassocox, args)
-  expect_true(!is.null(result$results$variableImportance))
+  expect_true(!is.null(result$variableImportance))
 })
 
 test_that("lassocox showModelComparison works", {
@@ -156,7 +160,7 @@ test_that("lassocox showModelComparison works", {
   args$showModelComparison <- TRUE
 
   result <- do.call(lassocox, args)
-  expect_true(!is.null(result$results$modelComparison))
+  expect_true(!is.null(result$modelComparison))
 })
 
 test_that("lassocox handles factor vs character explanatory variables", {
@@ -169,7 +173,7 @@ test_that("lassocox handles factor vs character explanatory variables", {
   data_factor$stage <- as.factor(data_factor$stage)
 
   args <- lung_base_args(data_factor)
-  expect_no_error(do.call(lassocox, args), info = "factor variables")
+  expect_no_error(do.call(lassocox, args))
 
   # Convert to character
   data_char <- data
@@ -177,7 +181,7 @@ test_that("lassocox handles factor vs character explanatory variables", {
   data_char$stage <- as.character(data_char$stage)
 
   args <- lung_base_args(data_char)
-  expect_no_error(do.call(lassocox, args), info = "character variables")
+  expect_no_error(do.call(lassocox, args))
 })
 
 test_that("lassocox handles continuous-only explanatory variables", {
@@ -193,10 +197,10 @@ test_that("lassocox handles continuous-only explanatory variables", {
                      "wbc_count_k_ul", "platelet_count_k_ul",
                      "creatinine_mg_dl"),
     cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-    censorLevel = NULL
+    censorLevel = "No"
   )
 
-  expect_true(!is.null(result$results))
+  expect_true(result$modelSummary$rowCount > 0)
 })
 
 test_that("lassocox handles factor-only explanatory variables", {
@@ -211,10 +215,10 @@ test_that("lassocox handles factor-only explanatory variables", {
     explanatory = c("gender", "smoking_status", "histology", "stage",
                      "ecog_performance_status", "treatment_type"),
     cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-    censorLevel = NULL
+    censorLevel = "No"
   )
 
-  expect_true(!is.null(result$results))
+  expect_true(result$modelSummary$rowCount > 0)
 })
 
 test_that("lassocox random_seed produces reproducible results", {
@@ -230,7 +234,7 @@ test_that("lassocox random_seed produces reproducible results", {
   # Results should be identical with same seed
   # (compare coefficient table contents)
   expect_equal(
-    result1$results$coefficients$asDF(),
-    result2$results$coefficients$asDF()
+    as.data.frame(result1$coefficients),
+    as.data.frame(result2$coefficients)
   )
 })

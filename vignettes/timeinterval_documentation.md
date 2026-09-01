@@ -18,7 +18,7 @@
 | `remove_negative` | UI Control `remove_negative` | `self$options$remove_negative` | Output item / Table |
 | `remove_extreme` | UI Control `remove_extreme` | `self$options$remove_extreme` | Output item / Table |
 | `extreme_multiplier` | UI Control `extreme_multiplier` | `self$options$extreme_multiplier` | Output item / Table |
-| `add_times` | UI Control `add_times` | `self$options$add_times` | Output item / Table |
+| `calculated_time` | UI Control `calculated_time` (`type: Output`) | `self$results$calculated_time$isNotFilled()` | Output item `calculated_time` |
 | `include_quality_metrics` | UI Control `include_quality_metrics` | `self$options$include_quality_metrics` | Output item / Table |
 | `confidence_level` | UI Control `confidence_level` | `self$options$confidence_level` | Output item / Table |
 | `show_summary` | UI Control `show_summary` | `self$options$show_summary` | Output item / Table |

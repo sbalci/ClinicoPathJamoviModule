@@ -490,7 +490,6 @@ timeinterval(
   dx_date = 'enrollment_date',
   fu_date = 'followup_date',
   output_unit = 'months',
-  add_times = TRUE,
   confidence_level = 95
 )
 

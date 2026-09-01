@@ -31,6 +31,58 @@ run_lassocox <- function(df, ...) {
     )
 }
 
+lassocox_source_file <- function(...) {
+    relative <- file.path(...)
+    candidates <- c(
+        relative,
+        file.path("..", "..", relative),
+        system.file(..., package = "ClinicoPath")
+    )
+    hit <- candidates[nzchar(candidates) & file.exists(candidates)]
+    if (length(hit) == 0L)
+        skip(paste("Source artifact not available:", relative))
+    hit[[1L]]
+}
+
+collect_lassocox_calls <- function(expr) {
+    calls <- list()
+    walk <- function(node) {
+        if (!is.call(node))
+            return(invisible(NULL))
+        if (identical(node[[1L]], as.name("lassocox")))
+            calls[[length(calls) + 1L]] <<- node
+        for (part in as.list(node)[-1L])
+            walk(part)
+        invisible(NULL)
+    }
+    for (node in expr)
+        walk(node)
+    calls
+}
+
+
+test_that("the bundled breast-cancer dataset exposes its documented object name", {
+    path <- lassocox_source_file("data", "lassocox_breast_cancer.rda")
+    env <- new.env(parent = emptyenv())
+    loaded <- load(path, envir = env)
+
+    expect_identical(loaded, "lassocox_breast_cancer")
+    expect_s3_class(env$lassocox_breast_cancer, "data.frame")
+    expect_identical(levels(env$lassocox_breast_cancer$death), c("Alive", "Dead"))
+})
+
+
+test_that("every shipped R example specifies event and censor levels", {
+    path <- lassocox_source_file("inst", "examples", "lassocox_example.R")
+    calls <- collect_lassocox_calls(parse(path))
+
+    expect_gt(length(calls), 0L)
+    argument_names <- lapply(calls, function(call) names(as.list(call))[-1L])
+    expect_true(all(vapply(argument_names, function(x) {
+        all(c("outcomeLevel", "censorLevel") %in% x)
+    }, logical(1))))
+})
+
 
 test_that("the model comparison table computes real numbers", {
     skip_if_not_installed("ClinicoPath")
@@ -73,20 +125,14 @@ test_that("the lambda rule reported is the rule that actually ran", {
     skip_if_not_installed("ClinicoPath")
     skip_if_not_installed("glmnet")
 
-    # When the 1-SE rule retains nothing the backend silently refits at lambda.min.
-    # Every summary surface used to keep reporting the requested rule.
+    # The requested rule is preserved, including when it selects an empty model.
     res <- run_lassocox(lassocox_testdata(), lambda = "lambda.1se", showSummary = TRUE)
     summary_tab <- as.data.frame(res$modelSummary)
 
     expect_true("Penalty Selected By" %in% summary_tab$statistic)
     rule <- summary_tab$value[summary_tab$statistic == "Penalty Selected By"]
-    expect_true(nzchar(rule))
-
-    # If the fallback fired, the row must say so rather than claiming lambda.1se.
-    if (grepl("lambda.min", rule)) {
-        expect_match(rule, "retained no variables")
-        expect_match(as.character(res$summaryText$content), "lambda.min was used instead")
-    }
+    expect_equal(rule, "lambda.1se")
+    expect_false(grepl("lambda.min was used instead", as.character(res$summaryText$content), fixed = TRUE))
 })
 
 
@@ -105,35 +151,31 @@ test_that("bootstrap-free results are reproducible at a fixed seed", {
 })
 
 
-test_that("the apparent-performance caveat survives a missing C-index", {
+test_that("the apparent-performance caveat explains tuning and selection", {
     skip_if_not_installed("ClinicoPath")
     skip_if_not_installed("glmnet")
 
     res <- run_lassocox(lassocox_testdata(), lambda = "lambda.min")
     notes <- res$performance$notes
 
-    # The caveat used to sit inside the C-index branch, so when concordance failed the
-    # two most optimistic numbers on screen - the log-rank p and the group hazard ratio -
-    # were left with nothing qualifying them.
     expect_true("apparent" %in% names(notes))
-    expect_match(notes[["apparent"]], "apparent \\(training\\) performance")
-    expect_match(notes[["apparent"]], "median split")
+    expect_match(notes[["apparent"]]$note, "apparent \\(training\\) performance")
+    expect_match(notes[["apparent"]]$note, "preprocessing, penalty selection, and model fitting")
 })
 
 
-test_that("the selected-variables note names every column the refit touches", {
+test_that("the coefficient table identifies the penalized estimator", {
     skip_if_not_installed("ClinicoPath")
     skip_if_not_installed("glmnet")
 
     res <- run_lassocox(lassocox_testdata(), lambda = "lambda.min")
     notes <- res$coefficients$notes
 
-    if ("refit" %in% names(notes)) {
-        # Coefficient and Hazard Ratio come from the refit too, while Importance is the
-        # absolute penalized coefficient - two estimators in adjacent cells of one row.
-        for (col in c("Coefficient", "Hazard Ratio", "Importance"))
-            expect_match(notes[["refit"]], col, fixed = TRUE)
-    }
+    expect_true("penalized" %in% names(notes))
+    expect_match(notes[["penalized"]]$note, "from the penalized LASSO Cox fit", fixed = TRUE)
+    expect_match(notes[["penalized"]]$note, "intentionally not reported", fixed = TRUE)
+    tab <- as.data.frame(res$coefficients)
+    expect_equal(tab$hazardRatio, exp(tab$coefficient))
 })
 
 test_that("the risk-group survival plot renders a readable number-at-risk table at the declared image size", {
@@ -148,13 +190,18 @@ test_that("the risk-group survival plot renders a readable number-at-risk table 
     expect_false(is.null(img$state))
 
     png_file <- tempfile(fileext = ".png")
+    on.exit(unlink(png_file), add = TRUE)
     grDevices::png(png_file, width = 600, height = 400)
     on.exit(grDevices::dev.off(), add = TRUE)
     ok <- img$.render()
     expect_true(ok)
 
-    # .survivalPlot prints and returns TRUE, so assert on the source: the risk table
-    # must NOT inherit jamovi's 16-pt ggtheme (tables.theme defaults to ggtheme).
-    src <- paste(deparse(ClinicoPath:::lassocoxClass$private_methods$.survivalPlot), collapse = "\n")
-    expect_match(src, "tables.theme = survminer::theme_cleantable()", fixed = TRUE)
+    # Inspect rendered content; layout geometry is covered in the audit regressions.
+    grid::grid.force()
+    grobs <- grid::grid.ls(print = FALSE)$name
+    labels <- unlist(lapply(grobs[grepl("text", grobs)], function(name) {
+        item <- grid::grid.get(name)
+        if (inherits(item, "text")) as.character(item$label) else character()
+    }))
+    expect_true(all(c("Number at risk", "110") %in% labels))
 })

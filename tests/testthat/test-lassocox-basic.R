@@ -22,12 +22,12 @@ skip_lassocox_deps <- function() {
 }
 
 load_breast_cancer <- function() {
-  data_path <- system.file("data", "lassocox_breast_cancer.rda",
-                           package = "ClinicoPath")
-  if (data_path == "") {
-    # Fallback for development: load from local data/
-    data_path <- file.path("../../data", "lassocox_breast_cancer.rda")
-  }
+  candidates <- c(
+    file.path("data", "lassocox_breast_cancer.rda"),
+    file.path("..", "..", "data", "lassocox_breast_cancer.rda"),
+    system.file("data", "lassocox_breast_cancer.rda", package = "ClinicoPath")
+  )
+  data_path <- candidates[nzchar(candidates) & file.exists(candidates)][1]
   if (file.exists(data_path)) {
     env <- new.env()
     load(data_path, envir = env)
@@ -37,11 +37,12 @@ load_breast_cancer <- function() {
 }
 
 load_small_cohort <- function() {
-  data_path <- system.file("data", "lassocox_small_cohort.rda",
-                           package = "ClinicoPath")
-  if (data_path == "") {
-    data_path <- file.path("../../data", "lassocox_small_cohort.rda")
-  }
+  candidates <- c(
+    file.path("data", "lassocox_small_cohort.rda"),
+    file.path("..", "..", "data", "lassocox_small_cohort.rda"),
+    system.file("data", "lassocox_small_cohort.rda", package = "ClinicoPath")
+  )
+  data_path <- candidates[nzchar(candidates) & file.exists(candidates)][1]
   if (file.exists(data_path)) {
     env <- new.env()
     load(data_path, envir = env)
@@ -56,7 +57,7 @@ load_small_cohort <- function() {
 
 test_that("lassocox function exists in ClinicoPath namespace", {
   skip_lassocox_deps()
-  expect_true(exists("lassocoxClass"))
+  expect_true(is.function(lassocox))
 })
 
 test_that("lassocox runs with breast cancer dataset (standard scenario)", {
@@ -72,7 +73,7 @@ test_that("lassocox runs with breast cancer dataset (standard scenario)", {
       explanatory = c("age", "tumor_size_cm", "grade", "stage",
                        "lymph_nodes_positive", "ki67_percent",
                        "er_status", "her2_status", "lvi"),
-                       censorLevel = NULL
+      censorLevel = "Alive"
     )
   })
 })
@@ -89,7 +90,7 @@ test_that("lassocox runs with small cohort dataset (minimal viable)", {
       outcomeLevel = "Yes",
       explanatory = c("age", "gender", "biomarker_a", "biomarker_b",
                        "biomarker_c", "treatment_group", "severity_score"),
-                       censorLevel = NULL
+      censorLevel = "No"
     )
   })
 })
@@ -108,24 +109,24 @@ test_that("lassocox produces expected output items", {
     cv_plot = FALSE,
     coef_plot = FALSE,
     survival_plot = FALSE,
-    censorLevel = NULL
+    censorLevel = "Alive"
   )
 
   # Should have results object
 
-  expect_true(!is.null(result$results))
+  expect_true(result$modelSummary$rowCount > 0)
 
   # Model summary table should exist
-  expect_true(!is.null(result$results$modelSummary))
+  expect_true(!is.null(result$modelSummary))
 
   # Coefficients table should exist
-  expect_true(!is.null(result$results$coefficients))
+  expect_true(!is.null(result$coefficients))
 
   # Performance table should exist
-  expect_true(!is.null(result$results$performance))
+  expect_true(!is.null(result$performance))
 })
 
-test_that("lassocox with lambda.min vs lambda.1se produces different models", {
+test_that("lassocox with lambda.min vs lambda.1se both produce usable model summaries", {
   skip_lassocox_deps()
   data <- load_breast_cancer()
 
@@ -133,7 +134,7 @@ test_that("lassocox with lambda.min vs lambda.1se produces different models", {
                          "lymph_nodes_positive", "ki67_percent",
                          "er_status", "her2_status")
 
-  result_min <- lassocox(
+  result_min <- do.call(lassocox, list(
     data = data,
     elapsedtime = "survival_months",
     outcome = "death",
@@ -141,10 +142,10 @@ test_that("lassocox with lambda.min vs lambda.1se produces different models", {
     explanatory = explanatory_vars,
     lambda = "lambda.min",
     cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-    censorLevel = NULL
-  )
+    censorLevel = "Alive"
+  ))
 
-  result_1se <- lassocox(
+  result_1se <- do.call(lassocox, list(
     data = data,
     elapsedtime = "survival_months",
     outcome = "death",
@@ -152,10 +153,10 @@ test_that("lassocox with lambda.min vs lambda.1se produces different models", {
     explanatory = explanatory_vars,
     lambda = "lambda.1se",
     cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-    censorLevel = NULL
-  )
+    censorLevel = "Alive"
+  ))
 
   # Both should complete without error
-  expect_true(!is.null(result_min$results))
-  expect_true(!is.null(result_1se$results))
+  expect_true(result_min$modelSummary$rowCount > 0)
+  expect_true(result_1se$modelSummary$rowCount > 0)
 })

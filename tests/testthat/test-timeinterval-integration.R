@@ -17,7 +17,6 @@ test_that("timeinterval complete trial analysis workflow", {
     fu_date = "followup_date",
     time_format = "ymd",
     output_unit = "months",
-    add_times = TRUE,
     include_quality_metrics = TRUE,
     confidence_level = 95,
     show_summary = TRUE
@@ -85,7 +84,6 @@ test_that("timeinterval person-time calculation workflow", {
     fu_date = "followup_date",
     output_unit = "months",
     time_basis = "standardized",
-    add_times = TRUE,
     include_quality_metrics = TRUE
   )
   expect_no_error(result)
@@ -118,8 +116,7 @@ test_that("timeinterval progressive analysis workflow", {
     use_landmark = TRUE,
     landmark_time = 6,
     remove_negative = TRUE,
-    include_quality_metrics = TRUE,
-    add_times = TRUE
+    include_quality_metrics = TRUE
   )
   expect_no_error(result3)
 })

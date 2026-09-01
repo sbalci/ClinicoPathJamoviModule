@@ -1,5 +1,658 @@
 # ClinicoPath News
 
+## Unreleased — Continuous-Predictor Survival 1.0.8 (module 1.0.8.05)
+
+- Align the analysis title across the option, result, UI, generated help, and
+  module metadata definitions.
+- Keep survival-plot and log-log explanations hidden unless their corresponding
+  plots can be produced.
+- Replace four abbreviated Boolean constants in table-population paths with
+  explicit `TRUE` values after the scoped static-analysis review.
+- Make small minimum-P candidate spaces exhaustive and large searches sample
+  1,000 unique, seed-reproducible combinations; enforce minimum group size
+  during optimization and disclose when the solution is approximate.
+- Remove a false multiple-comparisons warning based on the number of plots and
+  stop reporting a single-split maxstat p-value as adjustment for a
+  multiple-cutoff procedure.
+- Correct the RMST horizon and marker-group descriptions, warn about sparse Cox
+  strata, add checkpoints to cutoff searches, reduce serialized plot and
+  residual state, and apply censor-mark and median-line controls to the
+  multiple-cutoff survival plot.
+
+## Unreleased — LASSO Cox 0.0.6 (module 1.0.8.04)
+
+- Suppress numeric unpenalized-comparison results when a Cox refit warns, fails
+  to converge cleanly, or returns non-finite estimates; unavailable refits also
+  cannot produce a proportional-hazards verdict.
+- Render correlated predictor names safely with one complete translatable message,
+  and judge a single candidate predictor by the width of its encoded design.
+- Display sample-size adequacy as undetermined, vectorize within-factor correlation
+  masking, clean obsolete LASSO translation references, and add regressions for each
+  repaired path. Apparent performance remains explicitly unvalidated.
+
+## Unreleased — LASSO Cox 0.0.5 (module 1.0.8.04)
+
+- Fix predictor-name collisions in optional Cox comparisons and diagnostics.
+- Keep 30-path legends usable at the declared image size, wrap coefficient
+  subtitles, and label fitted hazard directions explicitly.
+- Report all removed constants consistently, including columns that become
+  constant after complete-case filtering; prioritize model stability warnings.
+- Clear stale results and notes on reruns, preserve caveats during save/load, and
+  use declarative plot visibility with fixed summary rows initialized before fitting.
+- Translate educational explanations and current LASSO messages into Turkish,
+  repair outdated regressions, and test actual framework serialization, saved-score
+  alignment, required dependencies, and optional survival-plot fallback.
+- Consolidate duplicate guides. This repair does not add model validation or
+  external prediction, and apparent performance remains labeled accordingly.
+
+## Unreleased — LASSO Cox 0.0.4 (module 1.0.8.04)
+
+- Reject time/outcome variables used as predictors, infinite predictor values,
+  entirely missing predictors, and nonpositive follow-up times before fitting.
+- **Encoding change:** nominal and ordered factors now use explicit treatment
+  indicators with the first observed factor level as reference. Global/custom
+  contrasts and implicit ordinal polynomial contrasts are no longer used.
+- Add optional coefficient paths, predictor encoding, exact lambda/seed/fold
+  provenance, and executable upstream `glmnet` R code. Tables and scores now use
+  the selected model from the same CV path. Distinguish original predictors from
+  encoded columns and limit pairwise-correlation diagnostics to 500 columns.
+- Add reference, leakage, encoding, missing-row, empty-model, and R-export tests;
+  repair outdated LASSO test fixtures and result access. Performance remains
+  apparent; these changes do not add internal or external model validation.
+
+## Unreleased — Table One 1.0.9 (module 1.0.8.04)
+
+- Fixed janitor tables failing when a factor contains a category named `Total`.
+- Distinguished recorded `NA`, `Unknown` and `N-Miss` categories from missing
+  summary rows. Conflicting totals use `Total (all cases)`; a numeric suffix
+  handles collisions with fallback labels. Data, counts and statistical defaults
+  are unchanged. Added Turkish labels and About guidance.
+- Added reserved-label and file-backed framework save/load regressions. Recorded
+  the jmvcore plain-text HTML-export limitation separately from desktop export QA.
+
+## Unreleased - `datetimeconverter` code review 1.0.9 (2026-09-01)
+
+Everything here produces a plausible wrong date rather than a visible failure, which
+is why none of it was caught by the 233-assertion suite that was green throughout.
+
+- **Excel times were a minute early on 11% of timestamps.** A serial's fraction is a
+  binary double, so 00:05 is stored as 45000.003472222219 and `* 86400` landed on
+  00:04:59.999999 - one minute low once the minute was extracted, with the second
+  coming back as 59.999999 against a description promising 0-59. Measured 160 of 1440
+  minutes wrong, on all three Excel paths. Hours were never wrong, which is why it
+  survived casual testing. Now rounded to the second, as readxl and openxlsx do.
+- **The Timezone option did nothing for POSIXct columns, while the summary asserted it
+  had been applied.** `as_datetime()` preserves the incoming zone, so a multi-centre
+  study standardised to UTC got local-clock hours - and at day boundaries the wrong
+  DATE - under a label reading "Timezone: UTC". Now re-expressed with `with_tz()`, and
+  the Format panel names the zone the components were read in. The default is unchanged.
+- **Two-digit years before 1969 landed a century in the future.** lubridate pivots
+  00-68 to 20xx with no way to change it, so a `dd/mm/yy` date-of-birth column put 167
+  of 200 births in 2035-2068, each off by exactly 36525 days - reported as 100% success
+  and graded "Excellent". New **Two-digit years** option: the standard pivot stays the
+  default, and *Always in the past* moves any date that would fall after today back one
+  century (167/200 wrong becomes 0/200). Four-digit-year columns are never touched. The
+  future-date notice now escalates to a strong warning, names the century pivot, and
+  points at the option, instead of suggesting "planned follow-up dates".
+- **Month-coarsened registry columns were read year-first, every row.** The year-span
+  tie-break only fires when the wrong reading scatters the years, which needs a wide
+  day-of-month; a column where the day is always the 1st (or always the 15th) has none,
+  so `01/05/19` became 2001-05-19. Converting a surgery column and a follow-up column
+  separately turned a true median follow-up of 963 days into 6796. Nobody writes
+  `yyyy/mm/dd` with a two-digit year, so a two-digit first field before a `/` or `.`
+  now excludes year-first readings outright. Dash-delimited `yy-mm-dd` - genuine
+  year-first quarterly and annual keys - is deliberately untouched.
+- **Parse rate was presented as data quality.** `success_rate` only measures whether
+  lubridate returned a non-NA value, so a column read in the wrong format scores 100%
+  and is graded "Excellent" beside the warning saying its dates are ambiguous. Relabelled
+  "Parse rate", and the grade is withheld whenever a notice is questioning the dates.
+- **The copy-ready sentence was arithmetically false.** With 50 valid rows and 50 missing
+  it read "50/100 (100%)" and "from 100 datetime values ... 100% successful parsing":
+  the rate is over non-missing values but was printed against the row count. One
+  denominator now, with the missing count stated separately. The quality table's
+  percentage column had the same split and summed to 250%.
+- **Row highlighting in the quality table never worked** - the colour literals carried
+  their own quotes into an already-quoted style attribute, so the declaration was
+  discarded. Fixed, and moved to translucent tints rather than restoring three opaque
+  light rows.
+- **A format matching exactly 80% converted nothing.** The acceptance test was a strict
+  `> 0.8`, and 40 is the sample cap, so 32/40 valid dates were discarded with "could not
+  reliably detect". Now `>=`, and the failure message names the closest candidate and
+  its rate.
+- **The preview Status column was blank** - an earlier non-ASCII sweep removed the tick
+  and cross and left the coloured spans behind. Now reads OK / Failed, which also stops
+  the verdict depending on colour alone.
+- **Dark theme**: both preview tables painted opaque light rows whose cells inherited the
+  theme's text colour (light-on-white), and five hardcoded accent colours failed contrast
+  on a dark ground - including the failed-values list, which is data rather than
+  decoration. All fills are now translucent and the text inherits.
+- **Week number is not the ISO week**, and the caveat existed only on the R help page.
+  The control now says so, and the glossary gained Week number and Excel serial date
+  entries. The Excel epoch caveat and the two-digit-year pivot are in the caveats panel.
+- **The backend is now translatable.** It had zero `.()` coverage: all 15 notice titles
+  and every message were English-only and absent from the catalog. All are wrapped, with
+  `{}` placeholders through `.fmt()`, and `catalog.pot` now carries them. Rendered
+  English is unchanged - verified across every notice path.
+- UI labels name the thing rather than the action ("Year", not "Add Year to Data"; the
+  column heading already supplies the verb), individual controls are sentence case, and
+  the Timezone section heading is no longer a full explanatory sentence.
+- Smaller: `stop(paste(...))` -> `stop(..., x)`; two dead locals removed;
+  `unix_epoch_ms` gained a human label and the always-UTC note; a duplicated CSS
+  declaration dropped; the notice severity lookup normalises its key so a mis-spelled
+  severity cannot silently render as an informational box.
+- **Caught by adversarially verifying these fixes, before they shipped:**
+  - a rule demoting year-first readings of slash/dot dates was written to rescue
+    month-coarsened registry columns, and **reverted**: `yy/mm/dd` and `dd/mm/yy` are
+    the same six-digit string, so it fixed one half and broke the other by the same
+    margin (net negative over a 144-family grid). `01/05/19` genuinely is ambiguous, so
+    the analysis now says so instead of guessing - and the ambiguity message shows both
+    readings with a value from the user's own column ("YYYY-MM-DD gives 2001-11-14 while
+    DD-MM-YYYY gives 2014-11-01 for the value 01/11/14"), rather than asserting a
+    "day/month order" problem when the disagreement is year-versus-day.
+  - the new Two-digit years option was missing from every `clearWith`, so the panels
+    updated when it changed while the written-back column kept the old dates - two
+    result items contradicting, with the durable one wrong. It is now in all 20,
+    including the 13 output columns.
+  - `two_digit_year = 'past'` was a silent no-op whenever any single value contained a
+    four-digit run, including free text like "unknown (2019 chart)" that never parses.
+    It now says so and names the offending value.
+  - the "Implausible Dates Detected" warning was raised on the pre-correction dates and
+    never retracted, so the module corrected the dates and then went on saying they were
+    wrong - and withheld the quality grade on that basis.
+  - the grade suppression and the century escalation both keyed on English literals that
+    had just been wrapped in `.()`; they would have silently stopped working the day a
+    translator filled in `tr.po`. Notices now carry a machine-readable class.
+  - two placeholders were written `{a_date}` / `{read_as}`: jmvcore's placeholder regex
+    forbids underscores, so they shipped as literal braces with no warning. A test now
+    fails on any underscored placeholder.
+  - a private field set only on the text-parsing branch was never reset, so a later run
+    on a POSIXct column inherited it; and `.resolveTimezone()`, now called from two
+    places, raised its warning twice. Notices are deduped and the field is reset.
+  - the notices renderer was the last place painting opaque light cards; it now uses
+    translucent tints with inherited text like every other panel.
+- **Release-review pass, closing the last open findings:**
+  - a forced Excel/Unix format was reported as "ignored because data were already stored
+    as datetimes" in the same pane as "Forced Excel serial interpretation". The selection
+    was honoured and the input was not a datetime; the note is now limited to genuine
+    POSIXct/Date columns.
+  - the Unix path had no magnitude guard at all, so the commonest numeric misclick -
+    Excel serials fed to Unix epoch - collapsed every value into a single day in 1970
+    with nothing but "Conversion Completed". It now warns like the Excel branch does.
+  - the last three user-visible strings (pre-1900 dates, >100-year span, text-format-on-
+    numeric-column) were still untranslated; they fed a notice, so they count.
+  - the remaining dark accent colours on translucent panels are gone; the only hardcoded
+    colours left are white on an opaque dark table header, legible in both themes. The
+    preview verdict no longer depends on hue - "OK"/"Failed" are words.
+- Test suite 238 -> 384 assertions. The new blocks pin behaviour the old suite never
+  asserted: an extracted time component from an Excel serial, a timezone VALUE, a
+  weeknum, the summary percentages, and - deliberately - the *limits* of what format
+  detection can know, so a future "improvement" that trades one silent error for another
+  fails a test rather than shipping.
+
+## Unreleased - `datetimeconverter` deep audit 1.0.8 (2026-08-31)
+
+A date converter's failure mode is a plausible wrong date, so most of these were
+silent. Found by a full audit; each fix was adversarially reviewed before landing,
+and three of the reviews caught a defect in the proposed fix itself.
+
+- **Mac Excel 1904 files were silently wrong by 1462 days (~4 years), with no way to
+  correct them.** `excel_like` is tested first and matches every all-non-negative
+  serial set, so the `excel_1904_like` branch was reachable only when a NEGATIVE value
+  was present: a genuine 1904 file was read on the 1900 origin (serial 42798 became
+  2017-03-04 instead of 2021-03-05) and labelled "1900 system", and the format list
+  offered no 1904 variant. The two epochs are numerically indistinguishable, so the fix
+  is disclosure plus an explicit override, not a cleverer heuristic: a new
+  **Excel Serial (Days since 1904, legacy Mac)** format, an INFO notice on the auto path
+  that quotes a real serial from the data under both readings, and the dead branch
+  removed. Five downstream allowlists had to learn the new value or it would have been
+  half-wired (the pre-existing `excel_serial_1904` hint was already missing from two of
+  them, so that branch had also been mislabelling the timezone).
+- **Negative values no longer void an Excel column.** They were the only route into the
+  1904 branch, so one `-99` missing-data sentinel decided the epoch for every row; with
+  that branch gone they would instead have pushed the column out of `excel_like`
+  entirely and NA'd every valid serial. They are now masked to missing and the rest
+  converts normally.
+- **Two-digit-year day-first columns were always read as year-first.** `sort()` is
+  stable, so ties were broken by position in the candidate list, where `ymd` precedes
+  `dmy`; every `dd/mm/yy` column is a 100%-vs-100% tie, so `05/03/21` became 2005-03-21
+  instead of 2021-03-05 - measured wrong 300/300 at every sample size. Tied candidates
+  whose parsed years span more than 20 are now demoted, which is what reading a
+  day-of-month as a year looks like. Measured 0/200 -> 199/200 correct at n=20.
+  Deliberately demote-only: the tempting "prefer the narrowest span" rule is really
+  "the field that varies least is the year" and turns `16-01-01` into 2001-01-16 for
+  quarterly, annual and month-start columns written `yy-mm-dd`. A remaining gap is
+  documented in the code: a day-first column whose day-of-month is itself clustered has
+  no wide reading to demote and is still read as `ymd` - it does raise the ambiguity
+  warning.
+- **Small numeric columns became dates in 1900 with no warning.** `excel_like` accepts
+  `[0, 600000]` and the misuse check only looked for years before 1900, future dates and
+  spans over 100 years, so serials 2 to ~55000 landed in 1900-2050 unremarked: an age,
+  count, score or days-of-follow-up column silently became a date. A column whose
+  largest value converts to 1927 or earlier now says so. Genuine clinical serials
+  (20000+, i.e. 1954 onward) are untouched.
+- **All 13 written-back columns were dead outside the GUI.** Each was gated on
+  `self$options$<name>`, and an `Output` option is not an argument of the generated R
+  wrapper, so it is permanently FALSE from the R API. Now gated on `isNotFilled()` alone
+  - jamovi already withholds delivery via `Output$enabled`. The availability check uses
+  exact `components[["day"]]` indexing, not `components$day`, which partial-matches
+  `dayname` and would have written weekday indices into a column labelled "Day of month".
+- **Selecting a numeric format on a text column died with a raw R error**
+  (`Error in private$.getParser`), the commonest wrong-column mis-click. It now explains
+  itself and returns no dates.
+- `timezone` added to the `clearWith` of every panel that displays parsed values (it
+  changes the values, not just the wording), `preview_rows` to the preview table, and
+  self-referential entries removed from the Output items.
+- Smaller repairs: the unreachable day/month pair list removed (ranking by success rate
+  already covers more than it did); a docstring that promised a `ymd` fallback the code
+  never had; `.parseDatetime` indented like every other method; a stray leading space in
+  every notice title; and a hardcoded grey that was marginal in jamovi's dark theme.
+- **Caught by adversarially verifying the fixes above, before they shipped:**
+  - the negative-value mask added for the Excel epoch also ran on the Unix path, where
+    a negative epoch second is a perfectly valid instant. Every date before 1970 became
+    missing - half a date-of-birth column - and the module then advised "try a different
+    datetime format" when the selected format was the correct one. The mask is now
+    Excel-only; the auto path never needed it, since Unix detection requires >= 1e9.
+  - the "may not be dates" rule had only a lower bound, so a platelet-count column
+    converted to the year 2310 while the headline notice reassured the reader that the
+    values *were* Excel serials. It is now two-sided, and the epoch notice no longer
+    leads on a column the warning has just doubted.
+  - a run that produced no notices left the *previous* run's notices on screen, because
+    the renderer bare-returned on an empty list instead of clearing.
+  - `.formatLabel` turned out to be a sixth format allowlist the 1904 sweep had missed.
+  - character row names silently became `NA` row numbers (`setRowNums` does a bare
+    `as.integer`); reachable only from the R API, but a silent mis-mapping.
+- Added `tests/testthat/test-datetimeconverter-audit-fixes.R` (102 assertions). Several
+  pin the ABSENCE of a regression a plausible version of the fix would have introduced,
+  and one finally compares the Excel conversion against the 40 stated expected dates in
+  the bundled fixture - a ground truth no existing test had ever asserted against. The
+  tie-break's measured small-sample limit is pinned too, so a future threshold change is
+  a decision rather than an accident.
+
+### Also in this pass
+
+- `outcomeorganizer`: the references added in the previous entry were partly misplaced -
+  `refs:` is not permitted on a `type: Output` item and `jmvtools::prepare()` refuses to
+  compile the module with one. Moved onto the Html item that explains the coding.
+
+## Unreleased - `outcomeorganizer` release review 1.0.8 (2026-08-31)
+
+Release-readiness pass. The theme running through these is that the always-visible
+Summary and notices described a different analysis from the one that ran, and the
+panel that told the truth (Diagnostics) is off by default.
+
+- **CRASH FIXED: every analysis type but one failed to produce a Summary.**
+  `handoff_coded` was computed inside a single branch of the Summary's `if`/`else`
+  and read unconditionally by the recommendations block below it, so the other
+  branches died with `object 'handoff_coded' not found`. Hoisted above the branch.
+- **The administrative cut-off was applied to only part of the cohort, silently.**
+  Rows missing a follow-up time or a cut-off value were dropped from the comparison,
+  keeping their full follow-up *and* their event while everyone else was censored -
+  the immortal-time bias the cut-off exists to remove. Every count was computed over
+  the comparable rows, so the notice read "truncated for 3 of 6" and never mentioned
+  the other 4. The exempt count and its consequence are now stated in the notice.
+- **`eventPriority` of 0 erased every event.** `min: 1` is enforced by the GUI and
+  the generated wrapper but not by `Options$new()`, and 0 is the censored code, so
+  giving it priority made censoring outrank every event. Now refused in the backend
+  too, which is what the option's own help text already promised.
+- **A mostly-missing outcome column was reported only in places the reader does not
+  look.** An R `warning()` (which lands in the undifferentiated Analysis Notes panel)
+  plus a Diagnostics row that is off by default. Losing two thirds of the cohort now
+  raises a strong warning naming the shrunken denominator. Its wording no longer
+  blames the level selections: both multi-event coders reject an unassigned level
+  outright, so the only way to reach it is genuine missing data.
+- **The scale-mismatch refusal prescribed something jamovi forbids.** It said "Supply
+  both as dates"; `followupTime` is `permitted: [numeric]`, so a date column cannot be
+  dropped into it at all. It now describes the only route the GUI offers.
+- **Interval-censoring's "runs backwards" check was dead code for date columns.** It
+  coerced with `jmvcore::toNumeric()`, a no-op on Date and character, and
+  `intervalStart`/`intervalEnd` carry no `permitted:` - exactly those columns can be
+  selected. A swapped pair of date columns was reported as "endpoints prepared".
+  Endpoints on two different scales are now refused as well.
+- **A POSIXct cut-off moved by a day.** `as.Date()` on a POSIXct defaults to UTC
+  rather than the timestamp's own zone, so an evening timestamp west of Greenwich
+  rolled forward and carried every patient recorded that evening across the cut-off.
+- **Negative and zero follow-up times passed through into the column this analysis
+  writes back**, where `Surv()` rejects them. Now reported.
+- **The Summary implied interval-censored data had been prepared for the user.** The
+  endpoint columns are not written back - the single Output slot carries the recoded
+  outcome - which only the Diagnostics table said. The Summary now says it and names
+  the `Surv(..., type = 'interval2')` call to build.
+- **Strong warnings were rendered as ordinary warnings.** `.addHtmlMessage` matched
+  `"strongWarning"` while every caller wrote `"strong_warning"`; `switch()` has no
+  unmatched-value signal, so the two loudest messages this analysis can emit fell
+  through silently. Severity names are now normalised in one place.
+- The glossary defined RFS as recurrence or death *from disease*, while RFS runs only
+  on a single event level, where the cause of death is not available to it - it counts
+  death from any cause. Corrected, with a pointer to Cause-Specific/Competing Risks.
+- Added references to the Summary, glossary, copy-ready text and exported column
+  (Austin/Lee/Fine 2016, Aalen-Johansen 1978, `cmprsk`, `mstate`, `survival`) - the
+  analysis produces a coding whose interpretation depends on the competing-risks
+  literature it never cited.
+- `.timeScale()` promoted from a local closure to a private method, so the type
+  classification is shared by administrative censoring and interval censoring rather
+  than being correct in one and absent in the other.
+- Added `tests/testthat/test-outcomeorganizer-release-review.R` (44 assertions)
+  covering each of the above.
+
+## Unreleased - `outcomeorganizer` review follow-ups (2026-08-31)
+
+Found by a review pass over the changes above. Two were regressions introduced by those changes.
+
+- **REGRESSION FIXED: a factor cut-off column truncated every follow-up to a level index.** The
+  `as.numeric()` added to the administrative-censoring path reasoned only about Date columns; on a
+  FACTOR column it returned level indices (1, 2, 3...), so every follow-up was truncated to a tiny
+  integer and every later event reset to censored.
+- **REGRESSION FIXED: the scale guard was wrong in both directions.** Refusing when the cut-off
+  exceeded ten times the largest follow-up let a real mismatch through (follow-up in DAYS against a
+  date is only a 5x ratio) and wrongly refused a legitimate cohort whose administrative window was
+  already in the same units -- telling the user to do what they had done. Magnitude cannot separate
+  a duration from a date; the columns are now classified by type (Date/POSIXct, number, or
+  unreadable), with a further guard for the case where no row carries both values.
+- **`outcomeorganizer`: the event hierarchy relabelled multistate patients instead of censoring
+  them.** It wrote literal 0 to every non-priority row, but under the multistate coding 0 is "alive
+  without disease" -- so a patient recorded as alive WITH disease was silently rewritten as
+  disease-free, and a competing event recorded before the priority event was erased. The
+  administrative-censoring path already refused exactly this; the hierarchy now does too.
+- **`outcomeorganizer`: one outcome level could be assigned to two multistate slots.** The
+  multistate branch is the only multi-event path that does not go through the shared recoder, so it
+  never got that function's duplicate check; the four state writes are sequential, the last won, and
+  the Summary printed two contradictory lines about the same level. Now rejected, as the equivalent
+  competing-risks configuration already was.
+- **`outcomeorganizer`: the copy-ready manuscript text was wrong for three analysis types.** It had
+  no multistate branch at all, so it fell through to the placeholder "the selected event type" and
+  counted every "alive with disease" patient as an event; and the censored-group description was
+  hard-coded to "patients who remain alive or event-free" for every type but time-to-progression --
+  under cause-specific survival that group contains patients who died of another cause, and under
+  competing risks those are coded 2, not censored. Each type now describes its own coding.
+- `outcomeorganizer`: an interval whose start falls after its end was accepted and reported as
+  applied; `Surv(type='interval2')` requires start <= end. Now refused, naming the row count.
+- `outcomeorganizer`: ticking interval or administrative censoring without its accompanying
+  variable was a completely silent no-op -- the guard sat on the whole block, so no notice fired and
+  no diagnostic row was written. Both now say so.
+- `outcomeorganizer`: the event-hierarchy "priority code not found" warning fired on a legitimate
+  cohort that simply contained no such event; the distribution plot kept the old options-driven
+  labels and disagreed with the table beside it; `addAdminTime` carried a 7-option `clearWith`
+  subset while its siblings carried the full list.
+- `outcomeorganizer`: three option titles lost a redundant leading "Use ", matching the labels their
+  UI controls already showed. ("Remove" and "Add" are kept elsewhere in this module -- those verbs
+  warn that data is deleted or created.)
+
+## Unreleased - `outcomeorganizer`: the analysis describing itself wrongly (2026-08-31)
+
+- **`outcomeorganizer`: re-running it on the column it exports itself mislabelled every competing
+  event.** `.getOutcomeLabel()` chose its 2-level or 3-level wording from the `multievent` and
+  `analysistype` OPTIONS rather than from the status vector actually produced. The
+  Censored/Event/Competing hand-off path fires with `multievent = FALSE`, so competing events came
+  out as "Unknown (2)", vanished from the report denominator, and the Summary asserted
+  "Alive (other levels): coded as 0" for a coding that had three states. The file's own comment
+  already said "ask the returned VECTOR, not the options branch" -- that fix had reached the export
+  path and never reached the display. All label and state-breakdown decisions now key off the codes
+  the recode produced.
+- **`outcomeorganizer`: the copy-ready report text described an endpoint that had not been built.**
+  The recurrence-free / progression-free / time-to-progression branches are skipped when no
+  recurrence variable is supplied, leaving a plain death indicator -- which the narrative still
+  called "recurrence/progression or death". It now says a death-only indicator was produced and why.
+- **`outcomeorganizer`: composite endpoints ship a status with no time to first event.** RFS/PFS/DFS
+  OR the recurrence and death indicators, but the analysis has no recurrence-date option and cannot
+  take the minimum. Pair that status with a death or last-contact time -- the obvious thing to do --
+  and a patient who recurred at 6 months and died at 40 is recorded as having an event at 40,
+  overstating recurrence-free survival for exactly the patients the endpoint exists to count.
+  Nothing said so; a warning now does, and names the fix.
+- `outcomeorganizer`: six result items omitted `clearWith` options that change their content, so
+  panels went stale and the two `rows: 0` tables accumulated duplicate rowKeys across re-runs -- a
+  hard "duplicate 'row.names' are not allowed" error. The lists are complete and both tables now
+  clear before repopulating.
+- `outcomeorganizer`: ticking administrative censoring without a follow-up time, or with mismatched
+  scales, produced output byte-identical to leaving it off, with the explanation only in a
+  Diagnostics table that is off by default. All three refusal paths now raise a visible warning.
+- `outcomeorganizer`: the appended column was named "Recoded Outcome for os Survival Analysis" --
+  the raw option key. It is now "Recoded Outcome (overall survival)".
+- `outcomeorganizer`: the event-hierarchy controls were enabled on Patient ID alone, though the
+  backend runs the hierarchy only for multi-event analyses.
+- `tests`: `helper-outcomeorganizer.R` now resolves the analysis from either an installed/loaded
+  package or sourced `.h.R`/`.b.R` files, so the suite runs in seconds during development instead of
+  requiring a full `devtools::load_all()`. Ten previously unrunnable blocks in
+  `test-outcomeorganizer-basic.R` now execute.
+
+## Unreleased - `outcomeorganizer`: administrative censoring never fired (2026-08-31)
+
+- **`outcomeorganizer`: administrative censoring silently did nothing, while reporting that it had.**
+  The cut-off test compared a follow-up DURATION with an administrative DATE. A date coerced to a
+  number is a day count since 1970 -- 18992 for 2021-12-31 -- so "59 months > 18992" is never true:
+  the cut-off never fired, no event was ever reset, and yet the Summary told the user
+  "Observations are censored at a specified administrative date". Measured on a 30-patient cohort:
+  all 15 deaths retained as events, with the honest count ("0 patient(s)") visible only in a
+  Diagnostics table that is off by default. Mismatched scales are now refused with a message that
+  names both numbers, and the "applied" flag reflects what actually happened.
+- **`outcomeorganizer`: the truncated follow-up time was computed and thrown away.** Administrative
+  censoring worked out the truncated time and then exported only the status column, so a censored
+  patient was paired with their ORIGINAL untruncated follow-up -- inflating person-time and removing
+  the event, biasing survival upward in exactly the rows the cut-off existed to protect. A second
+  output column now carries the truncated time alongside the recoded status.
+- **`outcomeorganizer`: administrative censoring corrupted multistate codings.** Censoring wrote 0
+  unconditionally, but under the multistate scheme 0 means "alive without disease" -- a clinical
+  state, not a censoring indicator -- so the cut-off RELABELLED patients into the baseline state
+  instead of censoring them. It now declines to run against a coding that has no censored code, and
+  says why.
+- **`outcomeorganizer`: a standard three-state registry outcome could not be analysed at all.** The
+  run was blocked unless all four of Dead of Disease / Dead of Other Causes / Alive with Disease /
+  Alive without Disease were assigned -- a UI-slot check rather than a data check. An ordinary
+  Alive / Dead-of-disease / Dead-of-other-causes column has no fourth level, so competing-risks and
+  cause-specific survival were unreachable without inventing a category. The gate now matches the
+  contract the shared recoder already enforced: at least one category assigned, and every level
+  present in the data assigned somewhere. An empty category is normal and no longer an error.
+- **`outcomeorganizer`: `Priority Event Type` accepted 0, which erased every event.** 0 is the
+  censored/baseline code, so giving it priority made "censored" outrank every event. It now has a
+  minimum of 1. Separately, a priority code that the recode never produces is a no-op that used to
+  be reported as "Event hierarchy applied (priority: 7) to 5 patient(s)"; it now says the code does
+  not occur, lists the codes that do, and no longer claims success.
+
+## Unreleased - module-wide: output columns that were never delivered (2026-08-31)
+
+The `timeinterval` fix below turned out to be one instance of a bug class affecting six analyses.
+`jmvcore::Output$enabled` resolves its gating option by **the result item's own name**, and
+`Output$asProtoBuf()` emits nothing when that is FALSE -- so a results-schema `type: Output` item
+with no `type: Output` option of the same name is dead: computed, stored, `isFilled()` TRUE, and
+never delivered. Nothing raises. `Options$get()` returns NULL for an unknown name silently,
+`enabled` falls through NULL to FALSE, and `setValues()` succeeds regardless, which is why every
+existing test passed throughout. `tools/check_output_items_wired.py` now gates the whole module.
+
+- **`agreement`: "Case agreement categorization" added no column, and said in writing that it had.**
+  The `loaOutput` item had no matching option, so the per-case agreement categories were computed
+  and discarded -- while a "Computed Variables Added:" panel named the variable as though it were
+  in the dataset. Now wired, with the panel honest: it claims the column only when the analysis
+  both computed it and was asked to deliver it. This is the only affected analysis in a production
+  menu. The correctly-wired sibling `consensusVar` was 300 lines away in the same file.
+- **`survival`: "Export Estimated Survival" added no column, beside a paragraph saying it had.**
+  A name drift -- the option and the UI control agreed on `export_survival_data`, only the results
+  item had become `survivalExport`. Two sibling controls in the same Export Settings box worked,
+  so the failure was directly A/B visible, and an HTML summary reported "Exported ... for N
+  observations to the data sheet" while nothing appeared.
+- **`survival`: the exported survival probability was wrong for every group but the first.**
+  Found only because wiring the column up made it visible. With an explanatory variable the fit is
+  stratified, so `summary(km_fit, times = t)$surv` returns one value per stratum; the code took
+  `[1]`, handing every patient the *first* group's Kaplan-Meier probability. Measured on a
+  two-group fixture, 28 of 30 second-group rows carried the wrong number. Each case now gets the
+  estimate from its own group's curve at its own follow-up time -- verified against independently
+  fitted per-group models, exact on every row -- and where no curve can be matched the cell is left
+  blank rather than filled with a plausible wrong value. The per-row `survfit` summary loop became
+  a single call. The option description no longer promises confidence intervals and risk tables
+  that were never exported.
+- **`classicalSurvivalPower`: ticking either export box destroyed the entire result pane.**
+  `Output$set()` declares output columns and requires `titles`; it was being called as if it were a
+  value setter, so it threw, and the enclosing `tryCatch` overwrote the finished power analysis with
+  a red error line. The feature was also unimplementable as designed -- the analysis reads no
+  dataset, so there are no rows for a column, and neither payload is column-shaped. Both items were
+  removed and the two checkboxes now describe what they actually do (render an on-screen summary).
+  A separate fatal `visible:` expression that made the analysis error out before `.run()` was fixed
+  as a precondition, and Lachin-Foulkes now rejects the two calculation types it cannot perform
+  instead of silently producing nothing.
+- **`mixedcox`, `surveysurvival`: dead schema removed.** Five `type: Output` items copied from
+  `survival.r.yaml` and never wired to anything -- zero backend references between them. `mixedcox`
+  also lost two "Output Variables" checkboxes that dispatched into an empty stub, along with the
+  stub; the capability is now absent from the UI rather than present and inert.
+- **`latentbiomarker`: saving factor scores crashed, then misassigned them.** The write used
+  jmvcore's `index` argument (which selects the output item, not rows) and died with "no such index
+  at level 2". With that repaired, the row mapping treated `rownames()` as positions -- under a row
+  filter, 133 of 143 factor scores landed on other patients' rows. Both fixed, with a regression
+  test.
+- **`datetimeconverter`, `latentbiomarker`: column names could ship as literal `${ option_name }`.**
+  `jmvcore::format`'s placeholder regex excludes underscores, so an interpolated `varTitle` naming
+  an underscored option is never substituted and reaches the user's dataset verbatim.
+  `latentbiomarker` was doing exactly that; `datetimeconverter` was rescued at runtime by a
+  `setTitle()` pass but carried 24 misleading templates. The new gate checks for this too.
+
+## Unreleased - `timeinterval` date-order defects (2026-08-31)
+
+The two release blockers. Both silently inflated the person-time denominator, which is this
+analysis's stated purpose.
+
+- **BLOCKER: two-digit-year columns were read as `ymd` and were always wrong.** The detector
+  broke ties by the order of its candidate list, and `ymd` was first -- so for any `DD/MM/YY`
+  column with years up to 2031 it always won, reading the DAY as the year ("22/09/18" became
+  2022-09-18 instead of 2018-09-22). Measured on a 30-row cohort: mean follow-up **3775 days
+  against a true 493**, and the refusal message's own advice ("tick Remove negative intervals")
+  produced exactly that. Ties are now broken by which format places the dates in the narrowest
+  range of years, because a clinical cohort spans a few years and reading a day-of-month as a
+  year scatters them across thirty. Same cohort now: mean 493, total 14790 person-days -- exact.
+- **BLOCKER: rows typed in the opposite day/month order were invisible.** A registry column typed
+  `DD/MM/YYYY` in which some rows were entered `MM/DD/YYYY` parses without error, stays positive,
+  sits inside the extreme-value threshold and under the 50-year backstop -- so nothing saw it.
+  Measured on a 20-row cohort: person-time **40.9% high**, quality panel "Good", the only banner
+  a green "Analysis completed", and a copy-ready manuscript sentence carrying the number.
+
+  Two changes, sized to what is actually detectable. Simulating 200 cohorts with 15% of rows
+  mis-typed showed 13% are already rejected for negative intervals and 82% already trip the
+  missing-data warning (a mis-typed row whose day exceeds 12 cannot be parsed at all), leaving
+  **4.5% genuinely silent**. So: (a) a strong warning when the ambiguous rows' follow-up differs
+  from the rows that can only be read one way -- day-of-month has nothing to do with follow-up
+  length, so a difference is evidence; tested at 0/400 false positives on clean cohorts; and
+  (b) because the residue is one or two rows in fifty and no test can separate that from chance,
+  the Data Quality panel now simply states the exposure: how many rows could have been typed
+  either way, how much person-time rides on them, and that no check on the page can verify them.
+  Disclosed rather than guessed at.
+- **`timeinterval`: the Clinical Summary is withheld while the dates are under suspicion.** It
+  exists to be pasted into a manuscript, which is the worst possible destination for a number the
+  analysis has just warned may be wrong -- the sentence travels beyond the results window and the
+  warning does not follow it. Suppressed when rows look mis-typed, or when a systematic (>=10%)
+  negative-interval fault was filtered away rather than corrected at source.
+- `timeinterval`: landmark analysis switched on with a landmark of 0 excluded nobody and shortened
+  nothing, silently. It now says so.
+- `timeinterval`: the negative-interval refusal offered two causes, neither of which was the one
+  many laboratory systems produce -- a start column carrying a time of day against an end column
+  recorded at midnight, which makes every same-day follow-up negative by less than a day.
+- `timeinterval`: the Timezone option's help said it affected parsing only. It also changes the
+  reported durations: an interval spanning a daylight-saving transition comes out an hour short
+  under "System Default" and exact under "UTC". Now documented.
+- `timeinterval`: "1 participants" on the single-observation path.
+
+## Unreleased - `timeinterval` release review: claims corrected (2026-08-31)
+
+Findings from a pre-release red-team pass. **Two date-parsing blockers remain open and are
+documented in `TODO-timeinterval-release.md`** -- a minority of wrong-order rows in one date
+column, and two-digit-year columns, both of which inflate the person-time denominator with no
+warning. The analysis should not be presented as a validated person-time denominator until
+those are closed. What follows is what was fixed.
+
+- **`timeinterval`: the glossary told clinicians landmark analysis selects "6-month survivors".**
+  It does not, and cannot: this analysis has no event indicator, so it selects on **length of
+  follow-up**. A participant excluded by the landmark may have died early or may simply have been
+  enrolled recently, and nothing here can tell the two apart -- which the analysis's own landmark
+  warning states, so the results window contradicted itself, with the false claim in the panel
+  written to be quoted. The same claim shipped in `jamovi/timeinterval.a.yaml` and therefore in
+  `man/timeinterval.Rd`. All corrected.
+- **`timeinterval`: the always-visible person-time panel listed "Censoring: Accounts for
+  participants leaving the study early".** It does not account for censoring -- it sums
+  `end - start` for everyone. Reworded to say what person-time here actually is, and to point
+  at a survival analysis for the event-status handling this tool cannot do.
+- **`timeinterval`: "serves as the denominator for calculating incidence rates" was printed
+  unconditionally** -- including for a cohort whose total person-time was exactly zero, which
+  is an instruction to divide by zero, and on the same page as a strong warning saying a
+  systematic date fault had just been filtered out. The sentence is now withheld at zero
+  person-time and qualified when a systematic negative-interval fault was filtered away.
+- **`timeinterval`: the date-format ambiguity note was discarded on every rejected run.**
+  `.detectDateFormat()` computes it before any rejection, but it was emitted after `.run()`'s
+  early return -- so "ymd and dmy both fit these dates equally well; I used ymd", the single
+  most actionable sentence available, vanished exactly when the user needed it. Now raised on
+  the error path too, below the error itself.
+- **`timeinterval`: the column written back to the spreadsheet is landmark-rebased and did not
+  say so.** With a landmark active every value is the landmark shorter than the interval its
+  name promises, on a reduced cohort -- and the column is advertised for downstream survival
+  analysis, where pairing a rebased time variable with an unrebased event indicator is an
+  invisible error. The Caveats panel explained it but is off by default. The column title now
+  reads e.g. `Calculated Time (months, from 12 months landmark)`.
+- `timeinterval`: analysis `version` bumped 1.0.8 -> 1.0.9, so the umbrella copy and the
+  shipped submodule copies cannot claim the same number while behaving differently.
+
+## Unreleased - `timeinterval` never delivered its calculated-time column (2026-08-31)
+
+- **BREAKING CHANGE. `timeinterval`: "Add calculated times to dataset" produced nothing at all.**
+  The results schema declared the output column as `calculated_time`, but the option driving it
+  was a `Bool` called `add_times`. `jmvcore::Output$enabled` resolves its gating option by the
+  *result item's own name* (`options$get(private$.name)`), and `Output$asProtoBuf()` wraps the
+  entire payload in `if (self$enabled)` -- so the intervals were computed, written, and then
+  silently discarded before they ever reached jamovi. Ticking the checkbox appended no column,
+  with no error anywhere. The option is now `calculated_time` with `type: Output`, matching the
+  result item and the canonical pattern used by `survival` and `categorize`.
+  **Migration:** `add_times` is no longer an argument of `timeinterval()`; passing it is now an
+  `unused argument` error. An `Output` option is never a wrapper argument -- the column is driven
+  by the Output control in the analysis panel, and from the R API the values remain reachable on
+  the result object. Saved `.omv` files that had the box ticked come back with the new control
+  unset. As a side effect of introducing an `Output` option the analysis no longer honours jamovi
+  row weights (`weightsSupport` becomes `none`), which is correct for a date subtraction.
+- **`timeinterval`: the appended column had no name.** With no `varTitle`, jamovi labelled it with
+  the literal string `Output`. It is now `Calculated Time (months)` / `(days)` / `(years)`,
+  naming the unit at runtime -- an unlabelled time column landing in a survival dataset is exactly
+  how unit mix-ups happen. The unit cannot go in `varTitle` itself: `jmvcore::format`'s placeholder
+  regex excludes underscores, so a `${ output_unit }` would ship to the user verbatim as the
+  column name. A new gate, `tools/check_output_items_wired.py`, now checks both mistakes across
+  every analysis in the module.
+- **`timeinterval`: the summary claimed "Missing values: 0" directly below a banner reporting ten
+  missing intervals.** Landmark analysis drops rows with no interval, so the post-landmark count
+  was structurally zero. The summary now reports the true count, says those rows are excluded from
+  the observation count above, and the landmark line separates follow-up shorter than the landmark
+  from missing follow-up -- a split the backend already computed and then threw away.
+- **`timeinterval`: removing negative intervals was silent.** End-before-start rows are impossible,
+  not merely unusual, and dropping them shrinks the person-time denominator -- yet the only
+  feedback was a green "Analysis completed" banner, while the far softer extreme-value filter
+  raised a warning of its own. A warning now fires at any count, naming the date format actually
+  used (a mis-detected day/month order flips only the rows whose day-of-month is 12 or less), and
+  escalates to a strong warning at 10%, where the fault is systematic and the *retained* rows are
+  also in doubt.
+- **`timeinterval`: a landmark is now sanity-checked against the follow-up actually observed.**
+  Rather than warning on an attrition percentage -- a 12-month landmark, the commonest choice in
+  oncology, excludes 59.7% of this package's own `histopathology` cohort, and a banner that fires
+  on a correct analysis only teaches users to ignore banners -- the warning fires when the landmark
+  falls past the median interval, and explains that the person-time is the denominator for the
+  landmark-conditional question only. It deliberately does not invoke guarantee-time bias:
+  landmarking is the remedy for that bias, not a cause of it, as the module's own glossary says.
+  A second notice catches the mirror error: a landmark that excludes nobody while still shortening
+  every interval, which is the signature of entering a value meant as months while the output unit
+  is days.
+- **`timeinterval`: spreadsheet date serials are now caught in text and factor columns too.** The
+  guard was numeric-only, so a serial column re-exported as text fell through to two dead-end
+  messages that both told the user to pick a date format manually -- when no format on the list can
+  parse `42370`. Text columns are tested on the string, never by coercion, so a stray numeric
+  missing-code among real dates still cannot trigger it. The message also no longer presents one
+  epoch's reading as *the* reading: spreadsheets count from 1899-12-30, SAS and Stata from
+  1960-01-01 and R from 1970-01-01, and all three land in the same five-digit band.
+- `timeinterval`: the Data Quality Assessment panel now splits missing values by column ("Start
+  dates missing or unreadable" / "End dates missing or unreadable"). Both counts were already
+  computed and never displayed, and they are the only surface anywhere in the analysis that
+  exposes dates that were present but unparseable -- parsing tolerates up to 20% failure per
+  column. A dead `negative` field, provably always zero, was removed.
+- `timeinterval`: **the negative-interval checkbox now reads "Remove negative intervals" in the
+  analysis panel**, matching the name the option has always had in the R documentation. It was
+  labelled "Negative-interval exclusion" in the UI while the option was titled "Remove negative
+  intervals" everywhere else -- one option under two names, with the panel showing the vaguer of
+  the two and two error messages telling the user to tick a control by a name that did not appear
+  on screen. The verb is deliberate: this filter deletes rows from every statistic including the
+  person-time denominator, the same reason "Flag extreme values" became "Remove extreme values".
+- `timeinterval`: option labels are sentence case, "Include data quality assessment" loses the
+  redundant verb, and "Confidence Level ( percent)" becomes "Confidence level (%)" -- the spelled-out
+  workaround was never needed in a `title:` (a literal `%` only breaks an `.a.yaml` *description*,
+  and 15 other analyses already use "(%)" in a title).
+
 ## Unreleased - `timeinterval` misreported follow-up and person-time (2026-08-30)
 
 - **`timeinterval`: spreadsheet date serials silently produced decade-long follow-up.** A date

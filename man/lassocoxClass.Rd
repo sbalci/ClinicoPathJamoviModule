@@ -26,7 +26,19 @@ Key features:
 \item Risk score calculation and stratification
 \item Apparent development-sample discrimination
 \item Exploratory survival-curve visualization by a development-sample median split
+\item Optional coefficient paths, encoding tables, fold provenance, and upstream R code
 }
+
+Nominal and ordered factors use explicit treatment indicators, with the first
+observed level in the factor order as reference. Global or custom contrasts are
+not used. Ordered factors are not assumed to follow polynomial trends. Original
+predictors and encoded columns are counted separately. Nonpositive follow-up
+times, infinite predictor values, and predictors containing only missing values
+are rejected. Time and outcome variables cannot also be predictors.
+
+The optional R code refits the same development data using upstream glmnet;
+it is not external validation or an absolute-risk calculator. Pairwise correlation
+diagnostics are skipped above 500 encoded columns, without changing the model.
 
 The function uses the glmnet package for efficient computation and supports both
 lambda.min (minimum cross-validation error) and lambda.1se (1 standard error rule)

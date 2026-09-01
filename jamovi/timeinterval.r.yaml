@@ -45,12 +45,19 @@ items:
       type: Html
       visible: (show_glossary)
 
+    # varTitle/varDescription are STATIC. Do NOT copy survival.r.yaml's
+    # `${ dxdate }` idiom here: jmvcore::format's placeholder regex is
+    # \{ *[A-Za-z][A-Za-z0-9]* *\} -- no underscore -- and every option name in this
+    # analysis is underscored, so `${ dx_date }` would ship to jamovi verbatim as
+    # the column name. The output unit is applied at runtime with setTitle() instead.
     - name: calculated_time
       title: Calculated Time Intervals
       type: Output
+      varTitle: Calculated Time Interval
+      varDescription: Time interval calculated from the start and end date variables
       measureType: continuous
       clearWith:
-          - add_times
+          - calculated_time
           - dx_date
           - fu_date
           - time_format

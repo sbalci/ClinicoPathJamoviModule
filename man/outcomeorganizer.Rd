@@ -75,8 +75,12 @@ disease.}
 \item{useHierarchy}{If true, applies a hierarchy when multiple events occur
 for the same patient.}
 
-\item{eventPriority}{The event code (e.g., 1, 2) that takes precedence when
-multiple events occur.}
+\item{eventPriority}{The event code (1, 2, ...) that takes precedence when
+a patient has several records. Minimum 1: code 0 is the censored/baseline
+code, and giving it priority would make "censored" outrank every event and
+silently erase them all. If the code entered here never occurs in the
+recoded outcome the hierarchy cannot act, and the analysis says so rather
+than reporting that it was applied.}
 
 \item{intervalCensoring}{If true, prepares data for interval-censored
 analysis where exact event times are unknown.}
@@ -122,6 +126,7 @@ A results object containing:
 \code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 \code{results$addOutcome} \tab \tab \tab \tab \tab an output \cr
+\code{results$addAdminTime} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

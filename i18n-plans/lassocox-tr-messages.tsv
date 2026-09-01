@@ -1,0 +1,335 @@
+English msgid	Turkish msgstr
+1-SE rule	1-SE kuralı
+Absolute event probabilities require a baseline survival estimate and evaluation at clinically relevant time horizons; the exported linear predictor alone is insufficient.	Mutlak olay olasılıkları, başlangıç sağkalım tahminini ve klinik açıdan anlamlı zaman ufuklarında değerlendirmeyi gerektirir; dışa aktarılan doğrusal yordayıcı tek başına yeterli değildir.
+Add Risk Score to Data	Risk skorunu veriye ekle
+Analysis Error	Analiz hatası
+Analysis Notes	Analiz notları
+Apparent AIC	Görünür AIC
+Apparent C-index	Görünür C-indeksi
+Apparent Development Performance	Geliştirme verisindeki görünür performans
+Apparent Log-Likelihood	Görünür log-olabilirlik
+At least 2 explanatory variables are required for Lasso regression.	LASSO regresyonu için en az 2 açıklayıcı değişken gereklidir.
+At least two non-constant encoded predictor columns are required by this LASSO engine.	Bu LASSO motoru en az iki sabit olmayan kodlanmış yordayıcı sütunu gerektirir.
+At most 30 paths are shown, ranked by summed absolute coefficients across the path. All retained columns remain in fitting; trace rank is not clinical importance.	Yol boyunca mutlak katsayı toplamına göre sıralanan en fazla 30 yol gösterilir. Korunan tüm sütunlar modelde kalır; çizgi sırası klinik önem belirtmez.
+Bar colors indicate higher or lower fitted hazard. Ordering uses |coefficient| times the column standard deviation; raw bar lengths use original units.	Çubuk renkleri daha yüksek veya düşük tahmini hazardı gösterir. Sıralama |katsayı| ile sütunun standart sapımının çarpımına dayanır; çubuk uzunlukları özgün birimleri kullanır.
+Blue: lambda.min, Green: lambda.1se	Mavi: lambda.min, yeşil: lambda.1se
+Both optional comparison rows are unpenalized development-data fits. Their AIC values are not a formal selection-adjusted model comparison.	İsteğe bağlı iki karşılaştırma satırı da geliştirme verisinde kurulan cezasız modellerdir. AIC değerleri, seçimi dikkate alan biçimsel bir model karşılaştırması değildir.
+Both rows are unpenalized Cox fits on the same development data. The first is fitted only after those columns were selected by LASSO; it is not the penalized model. C-index, log-likelihood, and AIC are apparent and selection-biased. In particular, the AIC values must not be used as a formal model-selection comparison because the candidate model was chosen from these same data.	İki satır da aynı geliştirme verisinde kurulan cezasız Cox modelleridir. İlk model yalnızca LASSO ile seçilen sütunlarla yeniden kurulur; cezalı model değildir. C-indeksi, log-olabilirlik ve AIC görünür değerlerdir ve seçim yanlılığı içerir. Aday model aynı veriden seçildiği için AIC değerleri biçimsel model seçimi amacıyla kullanılmamalıdır.
+Candidate predictors	Aday yordayıcılar
+Cannot determine censored level: all observed levels equal the event level.	Sansür düzeyi belirlenemedi: gözlenen tüm düzeyler olay düzeyine eşit.
+Cannot form stratified cross-validation folds: at least 3 folds require at least 3 events and 3 censored observations. Found {nEvents} events and {nCensored} censored observations.	Tabakalı çapraz doğrulama katları oluşturulamıyor: en az 3 kat için en az 3 olay ve 3 sansürlü gözlem gerekir. {nEvents} olay ve {nCensored} sansürlü gözlem bulundu.
+Categorical predictors are expanded into indicator columns and those columns are selected separately; this is not grouped selection of the whole factor.	Kategorik yordayıcılar gösterge sütunlarına açılır ve bu sütunlar ayrı ayrı seçilir; faktörün tamamı grup olarak seçilmez.
+Categorical predictors are represented by indicator columns and LASSO selects those columns individually rather than selecting each factor as a group. Factor(s): {vars}.	Kategorik yordayıcılar gösterge sütunlarıyla temsil edilir. LASSO, faktörü grup olarak değil sütunları ayrı ayrı seçer. Faktörler: {vars}.
+Censored Level Used	Kullanılan sansür düzeyi
+Censored level	Sansür düzeyi
+Censoring Rate	Sansür oranı
+Check	Kontrol
+Clinical Interpretation Guidance	Klinik yorumlama rehberi
+Clinical guidance	Klinik rehberlik
+Clinical interpretation and validation	Klinik yorumlama ve doğrulama
+Coding	Kodlama
+Coefficient Paths	Katsayı yolları
+Coefficient Plot	Katsayı grafiği
+Coefficient and Hazard Ratio are from the penalized LASSO Cox fit at the selected lambda. Conventional p-values and confidence intervals are intentionally not reported because same-data post-selection inference would not account for variable and penalty selection.	Katsayı ve hazard oranı, seçilen lambda değerindeki cezalı LASSO Cox modeline aittir. Aynı veride seçim sonrası yapılan çıkarım, değişken ve ceza seçimini hesaba katmadığından geleneksel p-değerleri ve güven aralıkları özellikle raporlanmaz.
+Coefficient paths	Katsayı yolları
+Coefficient summary	Katsayı özeti
+Coefficients are on the original variable scale.	Katsayılar özgün değişken ölçeğindedir.
+Column Selection Proportion	Sütun seçilme oranı
+Comparison Level	Karşılaştırma düzeyi
+Complete data with no constant predictors.	Veriler tamdır ve sabit yordayıcı yoktur.
+Complete-case analysis excluded {n} rows ({pct}%). Even a small excluded fraction can bias results when missingness is informative.	Tam olgu analizi {n} satırı (%{pct}) dışladı. Eksiklik bilgilendirici olduğunda küçük bir dışlama oranı bile sonuçları yanlılaştırabilir.
+Consider an analysis that supports grouped or elastic-net penalties when correlated predictors should be retained together; ordinary LASSO may select only one member of a correlated set.	İlişkili yordayıcıların birlikte korunması gerekiyorsa grup cezası veya elastic net destekleyen bir analiz düşününüz; standart LASSO ilişkili bir kümenin yalnızca bir üyesini seçebilir.
+Could not assess	Değerlendirilemedi
+Could not compute	Hesaplanamadı
+Could not create event/censor-stratified cross-validation folds. Reduce the requested folds or provide more outcome observations.	Olay ve sansüre göre tabakalı çapraz doğrulama katları oluşturulamadı. İstenen kat sayısını azaltınız veya daha fazla sonlanım gözlemi sağlayınız.
+Cross-Validation Plot	Çapraz doğrulama grafiği
+Cross-validation	Çapraz doğrulama
+Cross-validation Plot	Çapraz doğrulama grafiği
+Cross-validation failed. Check data quality and sample size.	Çapraz doğrulama başarısız oldu. Veri kalitesini ve örneklem büyüklüğünü kontrol ediniz.
+Cross-validation folds are stratified by event status and use the recorded random seed. Fold counts may be reduced to retain both outcome states in each fold.	Çapraz doğrulama katları olay durumuna göre tabakalanır ve kaydedilen rastgelelik tohumunu kullanır. Her katta iki sonlanım durumunu da korumak için kat sayısı azaltılabilir.
+Cross-validation plot	Çapraz doğrulama grafiği
+Dashed blue: lambda.min; dotted orange: lambda.1se	Kesikli mavi: lambda.min; noktalı turuncu: lambda.1se
+Data Quality	Veri kalitesi
+Data Suitability Assessment	Veri Uygunluk Değerlendirmesi
+Data is usable but review the flagged items.	Veriler kullanılabilir, ancak işaretlenen noktaları inceleyiniz.
+Data suitability	Veri uygunluğu
+Data suitability assessment	Veri uygunluğu değerlendirmesi
+Design matrix contains infinite values. Check for extreme outliers.	Tasarım matrisi sonsuz değerler içeriyor. Aşırı uç değerleri kontrol ediniz.
+Detail	Ayrıntı
+Development data only; optimism not corrected	Yalnızca geliştirme verisi; iyimserlik düzeltilmedi
+Development risk score	Geliştirme risk skoru
+Development risk-group curves	Geliştirme risk grubu eğrileri
+Do not use selected variables, apparent discrimination or development-sample risk groups to choose treatment or surveillance intervals.	Tedavi veya izlem aralıklarını belirlemek için seçilen değişkenleri, görünür ayırt etme başarısını veya geliştirme örneklemindeki risk gruplarını kullanmayınız.
+Effect	Etki
+Encoded Column	Kodlanmış sütun
+Encoded Predictor Columns	Kodlanmış yordayıcı sütunları
+Encoded predictors contain non-finite values.	Kodlanmış yordayıcılar sonlu olmayan değerler içeriyor.
+Error bars show cross-validation standard errors. The blue line marks lambda.min and the green line marks lambda.1se.	Hata çubukları çapraz doğrulama standart hatalarını gösterir. Mavi çizgi lambda.min, yeşil çizgi lambda.1se değerini belirtir.
+Error creating design matrix: {msg}. Check factor coding and missing values.	Tasarım matrisi oluşturulurken hata: {msg}. Faktör kodlamasını ve eksik değerleri kontrol ediniz.
+"Error creating survival plot:
+{msg}
+
+Please check your data and model parameters."	Sağkalım grafiği oluşturulurken hata: {msg}. Verilerinizi ve model parametrelerini kontrol ediniz.
+Error in cross-validation: {msg}	Çapraz doğrulama hatası: {msg}
+Error:	Hata:
+Event Level Used	Kullanılan olay düzeyi
+Event Rate	Olay oranı
+Event and censoring observations are both represented; adequacy still depends on absolute counts and model complexity.	Hem olay hem sansürlü gözlemler vardır; yeterlilik yine de mutlak sayılara ve model karmaşıklığına bağlıdır.
+Event level	Olay düzeyi
+Event level and censored level must be different.	Olay düzeyi ve sansür düzeyi farklı olmalıdır.
+Events-Per-Variable	Değişken başına olay
+Excluded {n} row(s) with missing values in time/outcome/predictors (complete-case analysis).	Zaman, sonlanım veya yordayıcılarda eksik değer bulunan {n} satır dışlandı (tam olgu analizi).
+Explanatory output	Açıklayıcı çıktılar
+Exploratory Cox comparisons	Keşifsel Cox karşılaştırmaları
+Exploratory Development-Sample Risk Groups	Geliştirme örnekleminde keşifsel risk grupları
+Exploratory Development-Sample Risk-Group Curves	Geliştirme örnekleminde keşifsel risk grubu eğrileri
+Exploratory Unpenalized Refit Comparison	Keşifsel cezasız yeniden kurulum karşılaştırması
+Extreme outcome imbalance provides limited information for one outcome state and may destabilize cross-validation.	Aşırı sonlanım dengesizliği, sonlanım durumlarından biri için sınırlı bilgi sağlar ve çapraz doğrulamayı kararsızlaştırabilir.
+Factor variable '{var}' has insufficient variation in complete cases.	'{var}' faktörü tam olgularda yeterli değişkenlik göstermiyor.
+Fits a cross-validated LASSO-penalized Cox model for exploratory model development. Apparent performance requires internal and external validation before clinical use.	Keşifsel model geliştirme için çapraz doğrulamalı, LASSO cezalı Cox modeli kurar. Görünür performans, klinik kullanımdan önce iç ve dış doğrulama gerektirir.
+Fold {fold}: events / censored	Kat {fold}: olay / sansürlü
+Folds depend on complete-case row order and event coding. Reproducing a fit requires the same data, coding, row order, options, and compatible software versions. Lambda tuning is not full-process model validation.	Katlar tam olgu satır sırasına ve olay kodlamasına bağlıdır. Modeli yeniden üretmek için aynı veri, kodlama, satır sırası, seçenekler ve uyumlu yazılım sürümleri gerekir. Lambda ayarı, tüm modelleme sürecinin doğrulanması değildir.
+Follow-up time	İzlem süresi
+For numeric outcomes, Censored Level must be one of the observed outcome values.	Sayısal sonlanımlarda sansür düzeyi gözlenen sonlanım değerlerinden biri olmalıdır.
+For numeric outcomes, Event Level must be one of the observed outcome values.	Sayısal sonlanımlarda olay düzeyi gözlenen sonlanım değerlerinden biri olmalıdır.
+High Risk	Yüksek risk
+High collinearity. Strongly recommend Elastic Net or Ridge regression.	Yüksek çoklu bağlantı. Elastic net veya ridge regresyonu önemle önerilir.
+High-dimensional setting where an unpenalized full Cox model is unlikely to be stable. Penalization is appropriate, but rigorous internal validation remains necessary.	Yüksek boyutlu bu durumda tüm değişkenleri içeren cezasız Cox modelinin kararlı olması beklenmez. Cezalandırma uygundur, ancak titiz iç doğrulama yine gereklidir.
+Higher event information per encoded candidate column. This descriptive ratio is not a sample-size guarantee and does not establish stable selection.	Kodlanmış aday sütun başına daha fazla olay bilgisi vardır. Bu betimsel oran örneklem büyüklüğü garantisi değildir ve kararlı seçimi kanıtlamaz.
+Higher fitted hazard	Daha yüksek tahmini hazard
+If imputation or cutoffs are developed, learn them only in the development training splits and apply the frozen definitions to validation patients.	Atama yöntemleri veya eşik değerleri geliştiriliyorsa bunları yalnızca geliştirme eğitim bölümlerinde öğreniniz ve sabitlenmiş tanımları doğrulama hastalarına uygulayınız.
+If using multiple imputation, repeat imputation and all preprocessing inside each resampling training split; imputing once before validation leaks information.	Çoklu atama kullanılıyorsa her yeniden örnekleme eğitim bölümünde atamayı ve tüm ön işlemleri tekrarlayınız; doğrulamadan önce bir kez atama yapmak bilgi sızıntısına yol açar.
+Increasing lambda shrinks coefficients toward zero. A coefficient of zero is a selection result in these data, not proof that a predictor is clinically irrelevant.	Lambda arttıkça katsayılar sıfıra yaklaşır. Sıfır katsayı, bu verideki bir seçim sonucudur; yordayıcının klinik açıdan önemsiz olduğunu kanıtlamaz.
+Internal standardization	Model içi standartlaştırma
+Internal standardization was used for penalized fitting; glmnet back-transforms displayed coefficients to the original design-column scale.	Cezalı model kurulumunda iç standartlaştırma kullanıldı; glmnet gösterilen katsayıları özgün tasarım sütunu ölçeğine geri dönüştürür.
+Internal validation must repeat preprocessing, lambda selection and fitting within each resample. Independently evaluate a frozen model in external data.	İç doğrulama, her yeniden örneklemede ön işleme, lambda seçimi ve model kurulumunu tekrarlamalıdır. Sabitlenmiş bir modeli dış veride bağımsız olarak değerlendiriniz.
+Interpretation	Yorum
+Invalid survival object. Check time and status variables.	Geçersiz sağkalım nesnesi. Zaman ve durum değişkenlerini kontrol ediniz.
+Item	Öğe
+LASSO Cox	LASSO Cox
+LASSO Cox Methodology Notes	LASSO Cox yöntem notları
+LASSO Cox methodology	LASSO Cox yöntemi
+LASSO Cox regression combines the proportional-hazards model with an L1 penalty to estimate a sparse development model.	LASSO Cox regresyonu, seyrek bir geliştirme modeli tahmin etmek için orantılı hazard modelini L1 cezasıyla birleştirir.
+LASSO Cox regression was performed on {nObs} observations ({nEvents} events) with {nTotal} encoded predictor columns using {lambdaMethod} for lambda selection.	LASSO Cox regresyonu, lambda seçimi için {lambdaMethod} kullanılarak {nTotal} kodlanmış yordayıcı sütunuyla {nObs} gözlemde ({nEvents} olay) yapıldı.
+Lambda rule	Lambda kuralı
+Lambda selection	Lambda seçimi
+Lambda selection rule	Lambda seçim kuralı
+Lasso-Cox Regression	LASSO-Cox regresyonu
+Limited event information per encoded candidate column. Penalization enables fitting but does not make selection or performance reliable.	Kodlanmış aday sütun başına olay bilgisi sınırlıdır. Cezalandırma model kurulmasını sağlar, ancak seçimi veya performansı güvenilir kılmaz.
+Log Lambda	Log lambda
+Log lambda	Log lambda
+Low Risk	Düşük risk
+Low-dimensional with ample events. LASSO is valid but standard Cox regression may suffice.	Boyut düşüktür ve olay sayısı fazladır. LASSO geçerlidir, ancak standart Cox regresyonu yeterli olabilir.
+Lower fitted hazard	Daha düşük tahmini hazard
+Magnitude Rank	Büyüklük sırası
+Method explanations	Yöntem açıklamaları
+Methodology notes	Yöntem notları
+Metric	Ölçüt
+Minimum CV error	En düşük çapraz doğrulama hatası
+Missing Dependencies	Eksik bağımlılıklar
+Model Summary	Model özeti
+Model Type	Model türü
+Model options	Model seçenekleri
+Model stability warnings	Model kararlılığı uyarıları
+Moderate collinearity. LASSO may select one of several correlated columns, and that choice can be unstable. Consider Elastic Net if retaining correlated predictors is important.	Orta düzeyde çoklu bağlantı. LASSO ilişkili sütunlardan birini seçebilir ve bu seçim kararsız olabilir. İlişkili yordayıcıların korunması önemliyse elastic net düşününüz.
+Moderate dimensionality. Consider standard Cox regression (Multivariable Survival in ClinicoPath) as an alternative.	Orta düzeyde boyutluluk. Alternatif olarak standart Cox regresyonunu (ClinicoPath içinde Çok Değişkenli Sağkalım) düşününüz.
+Multicollinearity	Çoklu bağlantı
+N Variables	Değişken sayısı
+N/A (single column)	Uygulanamaz (tek sütun)
+Near-perfect collinearity detected. Remove redundant variables before analysis.	Neredeyse tam çoklu bağlantı saptandı. Analizden önce gereksiz tekrar içeren değişkenleri çıkarınız.
+No	Hayır
+"No complete survival data available.
+
+This can occur when:
+• There are missing values in time or outcome variables
+• Risk score calculation failed
+• Data filtering removed all observations"	Tam sağkalım verisi yok. Zaman veya sonlanım değerleri eksik olabilir, risk skoru hesaplaması başarısız olmuş olabilir ya da veri süzme tüm gözlemleri dışlamış olabilir.
+No concern was identified by these limited checks; formal sample-size planning and validation are still required.	Bu sınırlı kontrollerde sorun belirlenmedi; biçimsel örneklem büyüklüğü planlaması ve doğrulama yine gereklidir.
+No evidence of non-proportional hazards in an exploratory unpenalized refit of the selected encoded columns. Limited power and post-selection use mean that this does not prove the assumption.	Seçilen kodlanmış sütunlarla yapılan keşifsel cezasız yeniden kurulumda orantılı hazard ihlaline dair bulgu yoktur. Gücün sınırlı olması ve seçim sonrası kullanım, varsayımın kanıtlandığı anlamına gelmez.
+No issues	Sorun yok
+No log-rank p-value or group hazard ratio is reported for this same-data split. Uniform scores cannot form two risk groups.	Aynı veride oluşturulan bu ayrım için log-rank p-değeri veya grup hazard oranı raporlanmaz. Tekdüze skorlarla iki risk grubu oluşturulamaz.
+No major concern was identified by these limited checks; standard Cox may also be appropriate.	Bu sınırlı kontrollerde önemli bir sorun belirlenmedi; standart Cox da uygun olabilir.
+No pairwise correlation reaches the warning threshold; this does not rule out multivariable linear dependencies.	Hiçbir ikili korelasyon uyarı eşiğine ulaşmıyor; bu durum çok değişkenli doğrusal bağımlılıkları dışlamaz.
+No universal C-index or events-per-variable threshold establishes calibration, transportability or clinical utility.	Evrensel bir C-indeksi veya değişken başına olay eşiği; kalibrasyonu, taşınabilirliği veya klinik yararı kanıtlamaz.
+No valid explanatory variables remain after removing constant predictors.	Sabit yordayıcılar çıkarıldıktan sonra geçerli açıklayıcı değişken kalmadı.
+"No variable-based risk scores are available because the selected rule retained no predictors.
+
+The empty model is a valid result. Choose another lambda rule only as a prespecified modeling decision and report that choice transparently."	Seçilen kural hiçbir yordayıcıyı korumadığı için değişkene dayalı risk skorları yoktur. Boş model geçerli bir sonuçtur. Farklı bir lambda kuralını yalnızca önceden belirlenmiş bir modelleme kararı olarak seçiniz ve bu seçimi açıkça raporlayınız.
+No variables selected	Değişken seçilmedi
+Nominal and ordered factors use treatment indicators. The first observed factor level is the reference, and indicators are selected separately rather than as a group.	Nominal ve sıralı faktörler referans kategoriye dayalı gösterge kodlaması kullanır. İlk gözlenen faktör düzeyi referanstır; göstergeler grup olarak değil ayrı ayrı seçilir.
+None	Yok
+Nonzero columns in the full model	Tam modelde sıfır olmayan sütunlar
+Nonzero-column counts appear above the separate coefficient-path plot, not above this CV plot. Lambda tuning does not provide an independent performance estimate.	Sıfır olmayan sütun sayıları bu çapraz doğrulama grafiğinde değil, ayrı katsayı yolu grafiğinin üstünde gösterilir. Lambda ayarı bağımsız performans tahmini sağlamaz.
+Not assessable (empty model)	Değerlendirilemez (boş model)
+Not available	Mevcut değil
+Not computed	Hesaplanmadı
+Number at risk	Risk altındaki sayı
+Number of CV folds	Çapraz doğrulama katı sayısı
+Number of Events	Olay sayısı
+Numeric outcome must have exactly 2 observed values. Found {n} value(s): {values}. For competing events, construct an explicit binary cause-specific status in which the event of interest is 1 and every non-event observation is 0; do not omit other event types.	Sayısal sonlanım tam olarak 2 gözlenen değer içermelidir. {n} değer bulundu: {values}. Yarışan olaylar için ilgilenilen olayın 1, olay dışındaki tüm gözlemlerin 0 olduğu açık bir ikili nedene özgü durum oluşturunuz; diğer olay türlerini dışlamayınız.
+Numeric: one-unit increase	Sayısal: bir birim artış
+Only one non-constant explanatory variable remains; LASSO selection is limited.	Sabit olmayan yalnızca bir açıklayıcı değişken kaldı; LASSO seçimi sınırlıdır.
+Only one predictor column; collinearity not applicable.	Yalnızca bir yordayıcı sütunu vardır; çoklu bağlantı değerlendirmesi uygulanamaz.
+Only {nEvents} events and {nCensored} censored observations are available. Cross-validation and selected coefficients may be highly unstable; no fixed event count guarantees reliable prediction modeling.	Yalnızca {nEvents} olay ve {nCensored} sansürlü gözlem vardır. Çapraz doğrulama ve seçilen katsayılar çok kararsız olabilir; sabit bir olay sayısı güvenilir tahmin modellemesini garanti etmez.
+Optimal Lambda	En uygun lambda
+Ordered factor: treatment indicators	Sıralı faktör: referans kategori göstergeleri
+Ordered factors use categorical treatment coding, not polynomial trends: {vars}. The first observed level in the factor order is the reference.	Sıralı faktörlerde polinom eğilimler yerine kategorik referans kodlaması kullanılır: {vars}. Faktör sırasındaki ilk gözlenen düzey referanstır.
+Original Candidate Predictors	Özgün aday yordayıcılar
+Original Predictor	Özgün yordayıcı
+Outcome	Sonlanım
+Outcome imbalance may make folds and performance estimates unstable; inspect absolute event and censoring counts.	Sonlanım dengesizliği katları ve performans tahminlerini kararsızlaştırabilir; mutlak olay ve sansürlü gözlem sayılarını inceleyiniz.
+Outcome is not binary after complete-case filtering. Check event level and missing-data pattern.	Tam olgu süzmesinden sonra sonlanım ikili değildir. Olay düzeyini ve eksik veri örüntüsünü kontrol ediniz.
+Outcome variable must have exactly 2 observed values. Found {n} level(s): {levels}. For competing events, construct an explicit binary cause-specific status in which the event of interest is 1 and every non-event observation is 0; do not omit other event types.	Sonlanım değişkeni tam olarak 2 gözlenen değer içermelidir. {n} düzey bulundu: {levels}. Yarışan olaylar için ilgilenilen olayın 1, olay dışındaki tüm gözlemlerin 0 olduğu açık bir ikili nedene özgü durum oluşturunuz; diğer olay türlerini dışlamayınız.
+Output options	Çıktı seçenekleri
+Overall:	Genel:
+Pairwise Correlations	İkili korelasyonlar
+Pairwise correlation diagnostics are limited to 500 encoded columns to bound memory and computation. The fitted model still uses every retained column.	Bellek ve hesaplama yükünü sınırlamak için ikili korelasyon tanılaması 500 kodlanmış sütunla sınırlıdır. Kurulan model, korunan tüm sütunları kullanmaya devam eder.
+Partial Likelihood Deviance	Kısmi olabilirlik sapması
+Path Inclusion Proportion	Yolda yer alma oranı
+Penalized Coefficient	Cezalı katsayı
+Penalized Coefficients at Selected Lambda	Seçilen lambdadaki cezalı katsayılar
+Penalized Cox Regression	Cezalı Cox regresyonu
+Penalized Hazard Ratio	Cezalı hazard oranı
+Penalized coefficient	Cezalı katsayı
+Penalized coefficients at the selected lambda, on the original predictor scale.	Seçilen lambda değerindeki cezalı katsayılar, özgün yordayıcı ölçeğindedir.
+Penalized hazard ratios describe fitted relative hazards, not event probabilities or causal effects. Ordinary post-selection p-values and confidence intervals are not reported.	Cezalı hazard oranları, olay olasılıklarını veya nedensel etkileri değil tahmini göreli hazardları tanımlar. Seçim sonrası olağan p-değerleri ve güven aralıkları raporlanmaz.
+Penalized regression is a reasonable candidate approach for this data dimension; this check does not establish sample-size adequacy.	Bu veri boyutu için cezalı regresyon makul bir aday yaklaşımdır; bu kontrol örneklem büyüklüğünün yeterliliğini kanıtlamaz.
+Penalty Selected By	Ceza seçim yöntemi
+Please check your data and variable selections.	Verilerinizi ve değişken seçimlerinizi kontrol ediniz.
+Plots	Grafikler
+Post-LASSO Cox refit: {message}	LASSO sonrası Cox yeniden kurulumu: {message}
+Predictor Encoding	Yordayıcı kodlaması
+Predictor encoding	Yordayıcı kodlaması
+Predictor variance cannot be represented numerically. Rescale extreme numeric values before fitting.	Yordayıcı varyansı sayısal olarak temsil edilemiyor. Modeli kurmadan önce aşırı büyük sayısal değerleri yeniden ölçeklendiriniz.
+Predictors contain infinite values: {vars}. Correct these values before fitting; these predictors have not been removed as constant.	Yordayıcılar sonsuz değerler içeriyor: {vars}. Modeli kurmadan önce bu değerleri düzeltiniz; bu yordayıcılar sabit olarak çıkarılmadı.
+Predictors contain only missing values: {vars}. Supply data or explicitly remove these predictors.	Yordayıcılar yalnızca eksik değerler içeriyor: {vars}. Veri sağlayınız veya bu yordayıcıları açıkça çıkarınız.
+Predictors were standardized internally within glmnet fitting for the penalty calculation. glmnet back-transforms the displayed coefficients to the original design-column scale; indicator-column hazard ratios therefore compare that category with its reference category. Indicators are still penalized and selected separately rather than as a grouped factor.	Ceza hesabı için yordayıcılar glmnet içinde standartlaştırıldı. glmnet gösterilen katsayıları özgün tasarım sütunu ölçeğine geri dönüştürür; gösterge sütunlarının hazard oranları ilgili kategoriyi referans kategoriyle karşılaştırır. Göstergeler yine grup olarak değil ayrı ayrı cezalandırılır ve seçilir.
+Proportional Hazards	Orantılı hazardlar
+R version	R sürümü
+Random seed	Rastgelelik tohumu
+Recommendations:	Öneriler:
+Reduce candidate parameters using subject-matter knowledge or collect more outcome information; penalization alone cannot repair very limited information.	Alan bilgisine dayanarak aday parametreleri azaltınız veya daha fazla sonlanım bilgisi toplayınız; cezalandırma tek başına çok sınırlı bilgiyi telafi edemez.
+Reduced the number of CV folds from {requested} to {used} so every fold contains event and censored observations.	Her katta olay ve sansürlü gözlem bulunması için çapraz doğrulama katı sayısı {requested} değerinden {used} değerine düşürüldü.
+Reference Level	Referans düzey
+Regularization Need	Düzenlileştirme gereksinimi
+Removed constant candidate predictors: {vars}.	Çıkarılan sabit aday yordayıcılar: {vars}.
+Removed constant design columns	Çıkarılan sabit tasarım sütunları
+Removed constant explanatory variables: {vars}	Çıkarılan sabit açıklayıcı değişkenler: {vars}
+Removed constant predictors	Çıkarılan sabit yordayıcılar
+Removed design columns constant in complete cases: {vars}.	Tam olgularda sabit olan tasarım sütunları çıkarıldı: {vars}.
+Removed encoded columns constant in complete cases: {vars}.	Tam olgularda sabit olan kodlanmış sütunlar çıkarıldı: {vars}.
+Report the endpoint, candidate parameters, exclusions, coding, penalty rule, folds, software versions, and validation limitations.	Sonlanımı, aday parametreleri, dışlamaları, kodlamayı, ceza kuralını, katları, yazılım sürümlerini ve doğrulama sınırlılıklarını raporlayınız.
+Reproducibility Details	Yeniden üretilebilirlik ayrıntıları
+Reproducibility details	Yeniden üretilebilirlik ayrıntıları
+Reproducible R Code	Yeniden üretilebilir R kodu
+Reproducible R code	Yeniden üretilebilir R kodu
+Required packages 'glmnet' and 'survival' not available	Gerekli 'glmnet' ve 'survival' paketleri mevcut değil
+Required packages are unavailable: {packages}. Reinstall or update the module before running this analysis.	Gerekli paketler mevcut değil: {packages}. Analizi çalıştırmadan önce modülü yeniden kurunuz veya güncelleyiniz.
+Results Summary	Sonuç özeti
+Results summary	Sonuç özeti
+Review the proportional-hazards diagnostic. When violation is suspected, investigate time-dependent effects or a prespecified alternative survival model; when unavailable, do not assume PH holds.	Orantılı hazard tanılamasını inceleyiniz. İhlalden şüpheleniliyorsa zamana bağlı etkileri veya önceden belirlenmiş alternatif bir sağkalım modelini araştırınız; tanılama yapılamıyorsa varsayımın sağlandığını kabul etmeyiniz.
+Risk Group	Risk grubu
+Risk scores are uniform, so no risk-group curve can be formed. This is expected for an empty model or when all fitted linear predictors are identical.	Risk skorları tekdüze olduğu için risk grubu eğrisi oluşturulamıyor. Boş modelde veya tüm doğrusal yordayıcılar aynı olduğunda bu beklenen bir durumdur.
+Rows Excluded (Missing Data)	Dışlanan satırlar (eksik veri)
+Rows missing time, outcome or a retained predictor are excluded. Infinite values and entirely missing predictors are rejected; constant predictors are reported and removed.	Zamanı, sonlanımı veya korunan bir yordayıcısı eksik olan satırlar dışlanır. Sonsuz değerler ve tümü eksik yordayıcılar reddedilir; sabit yordayıcılar raporlanarak çıkarılır.
+Sample Size	Örneklem büyüklüğü
+Sample-size adequacy cannot be determined from total n or a universal EPV cutoff. Use a prediction-model sample-size calculation based on outcome frequency, candidate parameters, anticipated model fit, and target optimism.	Örneklem yeterliliği yalnızca toplam n veya evrensel bir değişken başına olay eşiğiyle belirlenemez. Sonlanım sıklığına, aday parametrelere, beklenen model uyumuna ve hedef iyimserliğe dayalı bir tahmin modeli örneklem büyüklüğü hesabı kullanınız.
+Save variables	Değişkenleri kaydet
+Saved scores align with the original rows; excluded observations receive missing values. A valid empty model produces zero scores.	Kaydedilen skorlar özgün satırlarla hizalıdır; dışlanan gözlemler eksik değer alır. Geçerli bir boş model sıfır skorlar üretir.
+Scale-Adjusted Magnitude |beta| x SD	Ölçeğe göre düzeltilmiş büyüklük |beta| x SS
+Scale-adjusted magnitude is |coefficient| multiplied by the complete-case SD of each encoded design column. It is descriptive, not causal importance or selection stability. Path inclusion proportion is the fraction of the fitted lambda path with a nonzero coefficient, not a bootstrap selection frequency.	Ölçeğe göre düzeltilmiş büyüklük, |katsayı| ile her kodlanmış tasarım sütununun tam olgulardaki standart sapımının çarpımıdır. Betimseldir; nedensel önem veya seçim kararlılığı değildir. Yolda yer alma oranı, katsayının sıfır olmadığı lambda yolu kesridir; bootstrap seçim sıklığı değildir.
+Scale-adjusted magnitude is |coefficient| multiplied by the complete-case SD of that encoded design column. It describes a one-SD change in the fitted linear predictor, not causal importance or selection stability; for a factor indicator it is not the category-versus-reference hazard ratio.	Ölçeğe göre düzeltilmiş büyüklük, |katsayı| ile ilgili kodlanmış tasarım sütununun tam olgulardaki standart sapımının çarpımıdır. Doğrusal yordayıcıdaki bir standart sapımlık değişimi tanımlar; nedensel önem veya seçim kararlılığı değildir. Faktör göstergelerinde kategori ile referans arasındaki hazard oranı değildir.
+Scale-adjusted magnitude is |coefficient| multiplied by the encoded-column standard deviation. Path inclusion is not bootstrap selection frequency or evidence of stability.	Ölçeğe göre düzeltilmiş büyüklük, |katsayı| ile kodlanmış sütunun standart sapımının çarpımıdır. Yolda yer alma, bootstrap seçim sıklığı veya kararlılık kanıtı değildir.
+Seed	Tohum
+Select strictly positive follow-up time, a binary outcome with event and censored levels, and at least two candidate predictors.	Kesinlikle pozitif izlem süresi, olay ve sansür düzeyleri tanımlanmış ikili bir sonlanım ve en az iki aday yordayıcı seçiniz.
+Selected	Seçildi
+Selected Original Predictors	Seçilen özgün yordayıcılar
+Selected Predictor Columns	Seçilen yordayıcı sütunları
+Selected Variables and Coefficients	Seçilen değişkenler ve katsayılar
+Selected censored level ('{level}') is not present in observed outcome data.	Seçilen sansür düzeyi ('{level}') gözlenen sonlanım verisinde yoktur.
+Selected event level ('{level}') is not present in observed outcome data.	Seçilen olay düzeyi ('{level}') gözlenen sonlanım verisinde yoktur.
+Selected lambda	Seçilen lambda
+Selected-refit test p = %.3f	Seçilen değişkenlerle yeniden kurulum testi p = %.3f
+Showing {shown} of {total} paths on the original scale, ranked by summed absolute coefficients (not clinical importance). Long legend labels are abbreviated.	Özgün ölçekte {total} yolun {shown} tanesi gösteriliyor; sıralama klinik öneme değil mutlak katsayı toplamına göredir. Uzun gösterge etiketleri kısaltılmıştır.
+Some issues require attention before relying on these results.	Bu sonuçlara güvenmeden önce bazı sorunların ele alınması gerekir.
+Some rows could not be computed ({detail}). Empty cells mean the model could not be fitted, not that it performed poorly.	Bazı satırlar hesaplanamadı ({detail}). Boş hücreler modelin kötü performansını değil, modelin kurulamadığını belirtir.
+Sparse Cox model development with cross-validated L1 penalization.	Çapraz doğrulamalı L1 cezasıyla seyrek Cox modeli geliştirme.
+Standard Cox (all variables)	Standart Cox (tüm değişkenler)
+Standard Cox on all variables: {message}	Tüm değişkenlerle standart Cox: {message}
+Statistic	İstatistik
+Status	Durum
+Stratified CV Folds Used	Kullanılan tabakalı çapraz doğrulama katları
+Stratified cross-validation requires at least 3 events and 3 censored observations. Found {nEvents} events and {nCensored} censored observations. This is a computational minimum, not evidence that the sample is adequate for prediction modeling.	Tabakalı çapraz doğrulama en az 3 olay ve 3 sansürlü gözlem gerektirir. {nEvents} olay ve {nCensored} sansürlü gözlem bulundu. Bu hesaplama açısından asgari koşuldur; örneklemin tahmin modellemesine yeterli olduğunu kanıtlamaz.
+Survival Probability	Sağkalım olasılığı
+Survival curves split the development sample at its median score. This data-dependent split is descriptive and is not a validated clinical cutoff.	Sağkalım eğrileri geliştirme örneklemini medyan skoruna göre ayırır. Veriye bağlı bu ayrım betimseldir ve doğrulanmış klinik eşik değildir.
+"Survival data not available.
+
+Please check that:
+• Time and outcome variables are properly selected
+• Data contains valid survival information"	Sağkalım verisi mevcut değil. Zaman ve sonlanım değişkenlerinin doğru seçildiğini ve verinin geçerli sağkalım bilgisi içerdiğini kontrol ediniz.
+SurvivalT	SağkalımT
+The 1-SE rule selects the most regularized value within one standard error of the minimum and may select no predictors.	1-SE kuralı, minimumun bir standart hatası içinde kalan en fazla düzenlileştirilmiş değeri seçer ve hiçbir yordayıcıyı seçmeyebilir.
+The PH diagnostic uses an exploratory unpenalized refit of selected columns. It is not a test of post-selection inference for the penalized estimator.	Orantılı hazard tanılaması, seçilen sütunlarla yapılan keşifsel cezasız yeniden kuruluma dayanır. Cezalı tahminleyici için seçim sonrası çıkarım testi değildir.
+The apparent development-sample C-index was {cindex}.	Geliştirme örneklemindeki görünür C-indeksi {cindex} idi.
+The coefficient summary is a horizontal bar plot: the horizontal axis shows penalized coefficients and the vertical axis shows selected encoded columns.	Katsayı özeti yatay çubuk grafiğidir: yatay eksen cezalı katsayıları, dikey eksen seçilen kodlanmış sütunları gösterir.
+The correlation summary could not be computed. This is an unavailable diagnostic, not evidence that collinearity is absent.	Korelasyon özeti hesaplanamadı. Bu, tanılamanın mevcut olmadığını gösterir; çoklu bağlantının olmadığını kanıtlamaz.
+The displayed C-index is apparent development performance. Validate the entire modeling process before considering clinical use.	Gösterilen C-indeksi geliştirme verisindeki görünür performanstır. Klinik kullanımı düşünmeden önce tüm modelleme sürecini doğrulayınız.
+The exploratory selected-variable refit shows evidence of non-proportional hazards. The Cox effect estimates and selection may be misspecified; investigate time-varying effects or a prespecified alternative model.	Seçilen değişkenlerle yapılan keşifsel yeniden kurulumda orantılı hazard ihlali bulguları vardır. Cox etki tahminleri ve seçim yanlış belirlenmiş olabilir; zamana bağlı etkileri veya önceden belirlenmiş alternatif bir modeli araştırınız.
+The first observed level in the supplied factor order is the reference; character levels are sorted. Global and custom contrasts are overridden. Indicators are penalized and selected separately, not as whole factors.	Verilen faktör sırasındaki ilk gözlenen düzey referanstır; karakter düzeyleri sıralanır. Genel ve özel kontrast ayarları geçersiz kılınır. Göstergeler tüm faktör olarak değil ayrı ayrı cezalandırılır ve seçilir.
+The horizontal axis is log lambda; the vertical axis is cross-validated partial-likelihood deviance. Lower deviance is better for this tuning criterion.	Yatay eksen log lambda, dikey eksen çapraz doğrulamalı kısmi olabilirlik sapmasıdır. Bu ayarlama ölçütünde daha düşük sapma daha iyidir.
+The minimum-error and 1-SE rules are tuning choices. An empty model selected by the requested rule is preserved.	Minimum hata ve 1-SE kuralları ayarlama seçenekleridir. İstenen kuralın seçtiği boş model korunur.
+The model selected {nSelected} of {nTotal} encoded columns: {varList}.	Model {nTotal} kodlanmış sütunun {nSelected} tanesini seçti: {varList}.
+The path legend uses a compact layout and abbreviates long names. Predictor encoding lists the complete design-column names.	Yol göstergesi sıkıştırılmış bir düzen kullanır ve uzun adları kısaltır. Yordayıcı kodlaması tablosu tasarım sütunlarının tam adlarını listeler.
+The score is the sum of encoded predictor values multiplied by their penalized coefficients. Higher scores indicate higher fitted hazard.	Skor, kodlanmış yordayıcı değerleriyle cezalı katsayılarının çarpımlarının toplamıdır. Daha yüksek skor, daha yüksek tahmini hazardı gösterir.
+The selected cross-validation rule did not produce a valid positive lambda.	Seçilen çapraz doğrulama kuralı geçerli pozitif bir lambda üretmedi.
+The selected cross-validation rule produced a valid empty model. No less-penalized model was substituted.	Seçilen çapraz doğrulama kuralı geçerli bir boş model üretti. Yerine daha az cezalandırılmış bir model kullanılmadı.
+The selected lambda and the full-data coefficients come from the same fitted path, with Breslow handling of tied event times.	Seçilen lambda ve tam verideki katsayılar aynı model yolundan gelir; eşit olay zamanları Breslow yöntemiyle ele alınır.
+The selected lambda retained no predictor columns, so there is no fitted predictor effect for a Schoenfeld-residual diagnostic.	Seçilen lambda hiçbir yordayıcı sütununu korumadı; dolayısıyla Schoenfeld artıkları tanılaması için tahmin edilmiş bir yordayıcı etkisi yoktur.
+The selected rule retained no predictor columns; this valid empty model was preserved.	Seçilen kural hiçbir yordayıcı sütununu korumadı; bu geçerli boş model korundu.
+The selected-variable Schoenfeld-residual diagnostic could not be computed. This is an unavailable diagnostic, not evidence that proportional hazards holds.	Seçilen değişkenlerle Schoenfeld artıkları tanılaması hesaplanamadı. Bu, tanılamanın mevcut olmadığını gösterir; orantılı hazard varsayımının sağlandığını kanıtlamaz.
+The separate coefficient-path plot shows coefficients against log lambda, with full-model nonzero counts on its upper axis.	Ayrı katsayı yolu grafiği katsayıları log lambdaya karşı gösterir; üst eksende tam modeldeki sıfır olmayan sütun sayıları yer alır.
+The {rule} rule retained no predictor columns. The valid empty model has been preserved; choose a different lambda rule only as a prespecified modeling decision, not because the empty result is inconvenient.	{rule} kuralı hiçbir yordayıcı sütununu korumadı. Geçerli boş model korundu; farklı bir lambda kuralını boş sonucu beğenmediğiniz için değil yalnızca önceden belirlenmiş bir modelleme kararı olarak seçiniz.
+There are {nEvents} events for {nColumns} encoded predictor columns. Regularization permits fitting in this setting but does not guarantee stable selection or performance; use resampling that repeats the entire modeling process.	{nColumns} kodlanmış yordayıcı sütunu için {nEvents} olay vardır. Düzenlileştirme model kurulmasını sağlar, ancak kararlı seçimi veya performansı garanti etmez; tüm modelleme sürecini tekrarlayan yeniden örnekleme kullanınız.
+These curves do not estimate an individual patient's absolute risk. External use requires a frozen prediction model and independent validation.	Bu eğriler tek bir hastanın mutlak riskini tahmin etmez. Dış kullanım için sabitlenmiş bir tahmin modeli ve bağımsız doğrulama gerekir.
+This C-index is apparent (training) performance from the same patients used for preprocessing, penalty selection, and model fitting. Its uncertainty does not include the modeling process. Use bootstrap optimism correction or nested cross-validation that repeats all preprocessing and tuning, followed by external validation before clinical use.	Bu C-indeksi ön işleme, ceza seçimi ve model kurulumu için kullanılan aynı hastalardaki görünür (eğitim) performanstır. Belirsizliği modelleme sürecini içermez. Klinik kullanımdan önce tüm ön işleme ve ayarlamayı tekrarlayan bootstrap iyimserlik düzeltmesi veya iç içe çapraz doğrulama, ardından dış doğrulama kullanınız.
+This analysis fits a sparse development model. Its apparent performance and median-split survival curves require validation before clinical use.	Bu analiz seyrek bir geliştirme modeli kurar. Görünür performansı ve medyana göre ayrılan sağkalım eğrileri klinik kullanımdan önce doğrulama gerektirir.
+This assessment is advisory and cannot establish model adequacy. The analysis proceeds regardless of the verdict. Green = no issue detected by this limited check, Yellow = proceed with caution, Red = results may be highly unstable or misspecified.	Bu değerlendirme yol göstericidir ve model yeterliliğini kanıtlayamaz. Sonuç ne olursa olsun analiz devam eder. Yeşil: sınırlı kontrolde sorun saptanmadı; sarı: dikkatli ilerleyiniz; kırmızı: sonuçlar çok kararsız veya yanlış belirlenmiş olabilir.
+This output is for model development only. Use bootstrap optimism correction or nested cross-validation that repeats preprocessing and tuning, followed by external validation, before considering clinical use.	Bu çıktı yalnızca model geliştirme içindir. Klinik kullanımı düşünmeden önce ön işleme ve ayarlamayı tekrarlayan bootstrap iyimserlik düzeltmesi veya iç içe çapraz doğrulama, ardından dış doğrulama kullanınız.
+Tie handling	Eşit zamanların ele alınışı
+Time	Zaman
+Time and outcome cannot also be predictors: {vars}. Use predictors available at the intended prediction time.	Zaman ve sonlanım aynı zamanda yordayıcı olamaz: {vars}. Hedeflenen tahmin anında mevcut olan yordayıcıları kullanınız.
+Time and outcome must be different variables.	Zaman ve sonlanım farklı değişkenler olmalıdır.
+Time variable contains negative values. This Cox engine requires strictly positive follow-up times.	Zaman değişkeni negatif değerler içeriyor. Bu Cox motoru kesinlikle pozitif izlem süreleri gerektirir.
+Time variable contains non-finite values after filtering. Please correct the input.	Süzme sonrasında zaman değişkeninde sonlu olmayan değerler var. Girdiyi düzeltiniz.
+Time variable contains zero values. This Cox engine requires strictly positive follow-up times. Check the time origin and measurement resolution; times have not been automatically adjusted.	Zaman değişkeni sıfır değerler içeriyor. Bu Cox motoru kesinlikle pozitif izlem süreleri gerektirir. Zaman başlangıcını ve ölçüm çözünürlüğünü kontrol ediniz; süreler otomatik olarak değiştirilmedi.
+To Do	Yapılacaklar
+Too few complete cases for analysis ({n}). Need at least 10 complete observations.	Analiz için çok az tam olgu var ({n}). En az 10 tam gözlem gerekir.
+Top pairs:	Öne çıkan çiftler:
+Treatment indicators	Referans kategori göstergeleri
+Unable to create two risk groups from risk scores.	Risk skorlarından iki risk grubu oluşturulamadı.
+Understanding Cross-Validation Plot	Çapraz doğrulama grafiğini anlama
+Understanding LASSO Cox Regression	LASSO Cox regresyonunu anlama
+Understanding LASSO Cox regression	LASSO Cox regresyonunu anlama
+Understanding Risk Scores and Survival Curves	Risk skorlarını ve sağkalım eğrilerini anlama
+Understanding coefficients and paths	Katsayıları ve yolları anlama
+Understanding risk scores and survival curves	Risk skorlarını ve sağkalım eğrilerini anlama
+Understanding the Coefficient Summary Plot	Katsayı özeti grafiğini anlama
+Understanding the cross-validation plot	Çapraz doğrulama grafiğini anlama
+Unpenalized refit after LASSO selection	LASSO seçimi sonrası cezasız yeniden kurulum
+Use <strong>Multivariable Survival</strong> in ClinicoPath for standard Cox regression with fewer predictors.	Daha az yordayıcıyla standart Cox regresyonu için ClinicoPath içindeki <strong>Çok Değişkenli Sağkalım</strong> analizini kullanınız.
+Value	Değer
+Variable	Değişken
+Variable Importance Analysis	Değişken önemi analizi
+Variable importance	Değişken önemi
+Variables	Değişkenler
+Very low event information per encoded candidate column. Expect unstable selection and optimistic apparent performance; consider reducing prespecified candidates or collecting more outcome information.	Kodlanmış aday sütun başına olay bilgisi çok düşüktür. Kararsız seçim ve iyimser görünür performans beklenir; önceden belirlenen adayları azaltmayı veya daha fazla sonlanım bilgisi toplamayı düşününüz.
+Welcome to Lasso-Cox Regression	LASSO-Cox regresyonuna hoş geldiniz
+With very small samples, consider univariable analyses or use <strong>Survival Analysis</strong> in ClinicoPath.	Çok küçük örneklemlerde tek değişkenli analizleri veya ClinicoPath içindeki <strong>Sağkalım Analizi</strong> seçeneğini düşününüz.
+Yes	Evet
+glmnet standardizes within each training fit when requested. Displayed coefficients are returned on the original predictor scale.	İstendiğinde glmnet her eğitim modeli içinde standartlaştırma yapar. Gösterilen katsayılar özgün yordayıcı ölçeğine geri dönüştürülür.
+glmnet version	glmnet sürümü
+none	yok
+not available	mevcut değil
+survival version	survival sürümü
+survminer is unavailable. Survival curves use the base-R fallback without a risk table.	survminer mevcut değil. Sağkalım eğrileri risk tablosu olmadan temel R grafiğiyle gösterilir.
+{n} rows excluded; {constants} constant predictors or columns removed	{n} satır dışlandı; {constants} sabit yordayıcı veya sütun çıkarıldı

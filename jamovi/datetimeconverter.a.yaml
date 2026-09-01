@@ -1,10 +1,10 @@
 ---
 name: datetimeconverter
 title: DateTime Converter
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: Data Preparation
 menuSubtitle: Convert datetime and extract components
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -67,6 +67,8 @@ options:
           title: Auto-detect Format
         - name: excel_serial
           title: Excel Serial (Days since 1900)
+        - name: excel_serial_1904
+          title: Excel Serial (Days since 1904, legacy Mac)
         - name: unix_epoch
           title: Unix Epoch (Seconds since 1970)
         - name: ymdhms
@@ -100,7 +102,28 @@ options:
             and warns when day-first and month-first parsing both succeed but disagree; manual selection
             ensures accurate parsing for specific datetime formats. Excel serial numbers use the 1899-12-30
             origin, which is exact for dates from 1900-03-01 onward (Excel's 1900 system wrongly counts a
-            29 February 1900).
+            29 February 1900). A serial number does not record which epoch produced it, so auto-detection
+            assumes the 1900 system (the default in Windows Excel and in Mac Excel 2011 and later) and
+            discloses that assumption. Choose 'excel_serial_1904' for files exported from Mac Excel 2008
+            or earlier; the same number is 1462 days later under that system.
+
+    - name: two_digit_year
+      title: Two-digit years
+      type: List
+      options:
+        - name: standard
+          title: 1969-2068 (standard pivot)
+        - name: past
+          title: Always in the past
+      default: standard
+      description:
+          R: >
+            How to read a two-digit year. The standard pivot maps 00-68 to 2000-2068 and
+            69-99 to 1969-1999, so a date of birth written 14/04/55 becomes 1955 but
+            04/12/37 becomes 2037 rather than 1937. Choose 'Always in the past' for
+            columns that cannot contain future dates - dates of birth, diagnosis dates,
+            specimen dates - and any date that would land after today is moved back one
+            century. Columns with four-digit years are unaffected by this setting.
 
     - name: timezone
       title: Timezone
@@ -126,7 +149,7 @@ options:
 
     # === EXTRACTION OPTIONS (for preview) ===
     - name: extract_year
-      title: Extract year
+      title: Year
       type: Bool
       default: false
       description:
@@ -134,7 +157,7 @@ options:
             Extract and display year component in preview table.
 
     - name: extract_month
-      title: Extract month
+      title: Month
       type: Bool
       default: false
       description:
@@ -142,7 +165,7 @@ options:
             Extract and display month component in preview table.
 
     - name: extract_monthname
-      title: Extract month name
+      title: Month name
       type: Bool
       default: false
       description:
@@ -150,7 +173,7 @@ options:
             Extract and display month name in preview table.
 
     - name: extract_day
-      title: Extract day
+      title: Day
       type: Bool
       default: false
       description:
@@ -158,7 +181,7 @@ options:
             Extract and display day component in preview table.
 
     - name: extract_hour
-      title: Extract hour
+      title: Hour
       type: Bool
       default: false
       description:
@@ -166,7 +189,7 @@ options:
             Extract and display hour component in preview table.
 
     - name: extract_minute
-      title: Extract minute
+      title: Minute
       type: Bool
       default: false
       description:
@@ -174,7 +197,7 @@ options:
             Extract and display minute component in preview table.
 
     - name: extract_second
-      title: Extract second
+      title: Second
       type: Bool
       default: false
       description:
@@ -182,7 +205,7 @@ options:
             Extract and display second component in preview table.
 
     - name: extract_dayname
-      title: Extract day name
+      title: Day name
       type: Bool
       default: false
       description:
@@ -190,7 +213,7 @@ options:
             Extract and display day name in preview table.
 
     - name: extract_weeknum
-      title: Extract week number
+      title: Week number (Jan-1 blocks, not ISO)
       type: Bool
       default: false
       description:
@@ -201,7 +224,7 @@ options:
             ISO week 53 of 2020.
 
     - name: extract_quarter
-      title: Extract quarter
+      title: Quarter
       type: Bool
       default: false
       description:
@@ -209,7 +232,7 @@ options:
             Extract and display quarter in preview table.
 
     - name: extract_dayofyear
-      title: Extract day of year
+      title: Day of year
       type: Bool
       default: false
       description:
@@ -255,14 +278,14 @@ options:
 
     # === OUTPUT OPTIONS (add to data) ===
     - name: corrected_datetime_char
-      title: Add Corrected DateTime (Text)
+      title: Corrected datetime (text)
       type: Output
       description:
           R: >
             Appends the corrected datetime as a human-readable text variable.
 
     - name: corrected_datetime_numeric
-      title: Add Corrected DateTime (Numeric)
+      title: Corrected datetime (numeric)
       type: Output
       description:
           R: >
@@ -277,63 +300,63 @@ options:
 
     # === COMPONENT EXTRACTION ===
     - name: year_out
-      title: Add Year to Data
+      title: Year
       type: Output
       description:
           R: >
             Add extracted year component (YYYY format, e.g., 2024) as new column to data.
 
     - name: month_out
-      title: Extract Month Number
+      title: Month number
       type: Output
       description:
           R: >
             Extract month as numeric value (1-12).
 
     - name: monthname_out
-      title: Extract month name
+      title: Month name
       type: Output
       description:
           R: >
             Extract month as text name (January, February, etc.).
 
     - name: day_out
-      title: Extract Day of Month
+      title: Day of month
       type: Output
       description:
           R: >
             Extract day of month (1-31).
 
     - name: hour_out
-      title: Extract hour
+      title: Hour
       type: Output
       description:
           R: >
             Extract hour component (0-23, 24-hour format).
 
     - name: minute_out
-      title: Extract minute
+      title: Minute
       type: Output
       description:
           R: >
             Extract minute component (0-59).
 
     - name: second_out
-      title: Extract second
+      title: Second
       type: Output
       description:
           R: >
             Extract second component (0-59).
 
     - name: dayname_out
-      title: Extract day name
+      title: Day name
       type: Output
       description:
           R: >
             Extract day of week as text name (Monday, Tuesday, etc.).
 
     - name: weeknum_out
-      title: Extract week number
+      title: Week number (Jan-1 blocks, not ISO)
       type: Output
       description:
           R: >
@@ -344,14 +367,14 @@ options:
             Use ISO or epi weeks if your reporting standard requires them.
 
     - name: quarter_out
-      title: Extract quarter
+      title: Quarter
       type: Output
       description:
           R: >
             Extract quarter of the year (1-4).
 
     - name: dayofyear_out
-      title: Extract day of year
+      title: Day of year
       type: Output
       description:
           R: >

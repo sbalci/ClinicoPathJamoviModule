@@ -8,6 +8,7 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         initialize = function(
             datetime_var = NULL,
             datetime_format = "auto",
+            two_digit_year = "standard",
             timezone = "system",
             preview_rows = 20,
             extract_year = FALSE,
@@ -48,6 +49,7 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=list(
                     "auto",
                     "excel_serial",
+                    "excel_serial_1904",
                     "unix_epoch",
                     "ymdhms",
                     "ymd",
@@ -62,6 +64,13 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "myd",
                     "dym"),
                 default="auto")
+            private$..two_digit_year <- jmvcore::OptionList$new(
+                "two_digit_year",
+                two_digit_year,
+                options=list(
+                    "standard",
+                    "past"),
+                default="standard")
             private$..timezone <- jmvcore::OptionString$new(
                 "timezone",
                 timezone,
@@ -161,6 +170,7 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 
             self$.addOption(private$..datetime_var)
             self$.addOption(private$..datetime_format)
+            self$.addOption(private$..two_digit_year)
             self$.addOption(private$..timezone)
             self$.addOption(private$..preview_rows)
             self$.addOption(private$..extract_year)
@@ -195,6 +205,7 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     active = list(
         datetime_var = function() private$..datetime_var$value,
         datetime_format = function() private$..datetime_format$value,
+        two_digit_year = function() private$..two_digit_year$value,
         timezone = function() private$..timezone$value,
         preview_rows = function() private$..preview_rows$value,
         extract_year = function() private$..extract_year$value,
@@ -228,6 +239,7 @@ datetimeconverterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     private = list(
         ..datetime_var = NA,
         ..datetime_format = NA,
+        ..two_digit_year = NA,
         ..timezone = NA,
         ..preview_rows = NA,
         ..extract_year = NA,
@@ -304,7 +316,9 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 title="Important Information",
                 clearWith=list(
                     "datetime_var",
-                    "datetime_format")))
+                    "datetime_format",
+                    "timezone",
+                    "two_digit_year")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -315,28 +329,32 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 title="Format Detection",
                 clearWith=list(
                     "datetime_var",
-                    "datetime_format")))
+                    "datetime_format",
+                    "timezone",
+                    "two_digit_year")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="qualityMetrics",
                 title="Quality Assessment",
                 clearWith=list(
                     "datetime_var",
-                    "datetime_format")))
+                    "datetime_format",
+                    "timezone",
+                    "two_digit_year")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="previewTable",
                 title="Conversion Preview",
                 clearWith=list(
                     "datetime_var",
-                    "datetime_format")))
+                    "datetime_format",
+                    "timezone",
+                    "two_digit_year",
+                    "preview_rows")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="componentPreview",
-                title="Extracted Components Preview",
-                clearWith=list(
-                    "datetime_var",
-                    "datetime_format")))
+                title="Extracted Components Preview"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="qualityAssessment",
@@ -372,140 +390,151 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 clearWith=list(
                     "datetime_var",
                     "timezone",
+                    "two_digit_year",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="corrected_datetime_numeric",
                 title="Corrected DateTime (Numeric)",
-                varTitle="`Corrected DateTime Numeric - from ${ datetime_var }`",
-                varDescription="`DateTime variable ${ datetime_var } as Unix epoch seconds for calculations`",
+                varTitle="Corrected DateTime (Numeric)",
+                varDescription="DateTime variable converted to Unix epoch seconds for calculations",
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
+                    "two_digit_year",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="year_out",
                 title="Year",
-                varTitle="`Year - from ${ datetime_var }`",
-                varDescription="`Extracted year component from ${ datetime_var }`",
+                varTitle="Year",
+                varDescription="Year component extracted from the datetime variable",
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
+                    "two_digit_year",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="month_out",
                 title="Month",
-                varTitle="`Month - from ${ datetime_var }`",
-                varDescription="`Extracted month component (1-12) from ${ datetime_var }`",
+                varTitle="Month",
+                varDescription="Month component (1-12) extracted from the datetime variable",
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
-                    "datetime_format",
-                    "month_out")))
+                    "two_digit_year",
+                    "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="monthname_out",
                 title="Month Name",
-                varTitle="`Month Name - from ${ datetime_var }`",
-                varDescription="`Extracted month name from ${ datetime_var }`",
+                varTitle="Month Name",
+                varDescription="Month name extracted from the datetime variable",
                 measureType="nominal",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
-                    "datetime_format",
-                    "monthname_out")))
+                    "two_digit_year",
+                    "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="day_out",
                 title="Day",
-                varTitle="`Day - from ${ datetime_var }`",
-                varDescription="`Extracted day of month (1-31) from ${ datetime_var }`",
+                varTitle="Day",
+                varDescription="Day of month (1-31) extracted from the datetime variable",
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
+                    "two_digit_year",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="hour_out",
                 title="Hour",
-                varTitle="`Hour - from ${ datetime_var }`",
-                varDescription="`Extracted hour component (0-23) from ${ datetime_var }`",
+                varTitle="Hour",
+                varDescription="Hour component (0-23) extracted from the datetime variable",
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
+                    "two_digit_year",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="minute_out",
                 title="Minute",
-                varTitle="`Minute - from ${ datetime_var }`",
-                varDescription="`Extracted minute component (0-59) from ${ datetime_var }`",
+                varTitle="Minute",
+                varDescription="Minute component (0-59) extracted from the datetime variable",
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
+                    "two_digit_year",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="second_out",
                 title="Second",
-                varTitle="`Second - from ${ datetime_var }`",
-                varDescription="`Extracted second component (0-59) from ${ datetime_var }`",
+                varTitle="Second",
+                varDescription="Second component (0-59) extracted from the datetime variable",
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
+                    "two_digit_year",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="dayname_out",
                 title="Day Name",
-                varTitle="`Day Name - from ${ datetime_var }`",
-                varDescription="`Extracted day of week name from ${ datetime_var }`",
+                varTitle="Day Name",
+                varDescription="Day of week name extracted from the datetime variable",
                 measureType="nominal",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
+                    "two_digit_year",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="weeknum_out",
                 title="Week Number",
-                varTitle="`Week Number - from ${ datetime_var }`",
-                varDescription="`Extracted week number of year (1-53) from ${ datetime_var }`",
+                varTitle="Week Number",
+                varDescription="Week number of year (1-53) extracted from the datetime variable",
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
+                    "two_digit_year",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="quarter_out",
                 title="Quarter",
-                varTitle="`Quarter - from ${ datetime_var }`",
-                varDescription="`Extracted quarter (1-4) from ${ datetime_var }`",
+                varTitle="Quarter",
+                varDescription="Quarter (1-4) extracted from the datetime variable",
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
+                    "two_digit_year",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="dayofyear_out",
                 title="Day of Year",
-                varTitle="`Day of Year - from ${ datetime_var }`",
-                varDescription="`Extracted day of year (1-366) from ${ datetime_var }`",
+                varTitle="Day of Year",
+                varDescription="Day of year (1-366) extracted from the datetime variable",
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
                     "timezone",
+                    "two_digit_year",
                     "datetime_format")))}))
 
 datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -516,7 +545,7 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "datetimeconverter",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = datetimeconverterResults$new(options=options),
                 data = data,
@@ -546,7 +575,19 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   month-first parsing both succeed but disagree; manual selection ensures
 #'   accurate parsing for specific datetime formats. Excel serial numbers use
 #'   the 1899-12-30 origin, which is exact for dates from 1900-03-01 onward
-#'   (Excel's 1900 system wrongly counts a 29 February 1900).
+#'   (Excel's 1900 system wrongly counts a 29 February 1900). A serial number
+#'   does not record which epoch produced it, so auto-detection assumes the 1900
+#'   system (the default in Windows Excel and in Mac Excel 2011 and later) and
+#'   discloses that assumption. Choose 'excel_serial_1904' for files exported
+#'   from Mac Excel 2008 or earlier; the same number is 1462 days later under
+#'   that system.
+#' @param two_digit_year How to read a two-digit year. The standard pivot maps
+#'   00-68 to 2000-2068 and 69-99 to 1969-1999, so a date of birth written
+#'   14/04/55 becomes 1955 but 04/12/37 becomes 2037 rather than 1937. Choose
+#'   'Always in the past' for columns that cannot contain future dates - dates
+#'   of birth, diagnosis dates, specimen dates - and any date that would land
+#'   after today is moved back one century. Columns with four-digit years are
+#'   unaffected by this setting.
 #' @param timezone Timezone for datetime parsing. Provide an Olson identifier
 #'   such as "Europe/Istanbul", "America/New_York", "UTC", or "system" to use
 #'   the local machine timezone. Excel serial and Unix epoch conversions always
@@ -611,6 +652,7 @@ datetimeconverter <- function(
     data,
     datetime_var = NULL,
     datetime_format = "auto",
+    two_digit_year = "standard",
     timezone = "system",
     preview_rows = 20,
     extract_year = FALSE,
@@ -642,6 +684,7 @@ datetimeconverter <- function(
     options <- datetimeconverterOptions$new(
         datetime_var = datetime_var,
         datetime_format = datetime_format,
+        two_digit_year = two_digit_year,
         timezone = timezone,
         preview_rows = preview_rows,
         extract_year = extract_year,

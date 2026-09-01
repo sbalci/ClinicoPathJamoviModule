@@ -393,3 +393,113 @@ test_that("Integration: histopathology dataset end-to-end", {
     expect_gt(nrow(res$coxTable$asDF), 0)
     expect_gt(nrow(res$loadingsTable$asDF), 0)
 })
+
+test_that("save_factor_scores delivers a filled column titled with factor_score_name", {
+    # Output options are filtered out of the public R wrapper's signature, so the
+    # only way to exercise this path is to drive the Options/Class pair directly,
+    # the way jamovi does. Regression for two defects:
+    #   1. setValues(index = seq_len(n)) -> "no such index at level 2" (index is
+    #      the output ITEM index, not row numbers).
+    #   2. varTitle '`{factor_score_name}`' shipped literally, because
+    #      jmvcore::format's placeholder regex excludes underscores.
+    skip_if_not_installed("lavaan")
+    set.seed(42); n <- 200
+    f <- rnorm(n)
+    df <- data.frame(
+        i1 = f + rnorm(n, 0, 0.5), i2 = f + rnorm(n, 0, 0.5),
+        i3 = f + rnorm(n, 0, 0.5), i4 = f + rnorm(n, 0, 0.5),
+        t  = rexp(n, exp(0.3 * f)), e = rbinom(n, 1, 0.7)
+    )
+
+    opts <- ClinicoPath:::latentbiomarkerOptions$new(
+        dep_time = "t", dep_event = "e", event_level = "1",
+        indicators = c("i1", "i2", "i3", "i4"),
+        factor_score_name = "my_signature",
+        reflective_confirmed = TRUE,
+        show_plot_km = FALSE, show_plot_loadings = FALSE, show_plot_path = FALSE
+    )
+    # The wire shape jamovi sends when the user ticks the Output control.
+    opts$.__enclos_env__$private$..save_factor_scores$value <-
+        list(value = TRUE, vars = list("save_factor_scores"), synced = TRUE)
+
+    analysis <- ClinicoPath:::latentbiomarkerClass$new(options = opts, data = df)
+    expect_no_error(analysis$run())
+
+    out <- analysis$results$save_factor_scores
+    # $enabled is the only reliable assertion: it gates the whole outputs payload.
+    expect_true(out$enabled)
+    expect_true(out$isFilled())
+    expect_equal(out$.__enclos_env__$private$.titles[[1]], "my_signature")
+})
+
+test_that("save_factor_scores writes each score onto its own patient row", {
+    # Regression for the row-misalignment path that only became reachable once
+    # setValues() stopped crashing. jamovi keeps the ORIGINAL dataset row numbers
+    # as row names when a row filter is active, so rownames(self$data) is NOT
+    # seq_len(nrow(self$data)) and as.integer(rownames(df)) is not a position.
+    skip_if_not_installed("lavaan")
+    set.seed(42); N <- 300
+    f <- rnorm(N)
+    full <- data.frame(
+        i1 = f + rnorm(N, 0, 0.5), i2 = f + rnorm(N, 0, 0.5),
+        i3 = f + rnorm(N, 0, 0.5),
+        t  = rexp(N, exp(0.3 * f)), e = rbinom(N, 1, 0.7)
+    )
+    # A jamovi row filter keeping the odd rows: rownames become 1, 3, 5, ... 299.
+    df <- full[seq(1, N, by = 2), , drop = FALSE]
+    # NAs punched into the middle so complete.cases() leaves a NON-CONTIGUOUS set.
+    df$i2[c(11, 12, 40, 41, 42, 90, 120)] <- NA
+
+    opts <- ClinicoPath:::latentbiomarkerOptions$new(
+        dep_time = "t", dep_event = "e", event_level = "1",
+        indicators = c("i1", "i2", "i3"),
+        factor_score_name = "my_signature",
+        reflective_confirmed = TRUE,
+        show_plot_km = FALSE, show_plot_loadings = FALSE,
+        show_plot_path = FALSE, show_diagnostics = FALSE
+    )
+    opts$.__enclos_env__$private$..save_factor_scores$value <-
+        list(value = TRUE, vars = list("save_factor_scores"), synced = TRUE)
+    opts$.__enclos_env__$private$.env[["save_factor_scores"]] <-
+        opts$.__enclos_env__$private$..save_factor_scores$value
+
+    analysis <- ClinicoPath:::latentbiomarkerClass$new(options = opts, data = df)
+    expect_no_error(analysis$run())
+
+    out <- analysis$results$save_factor_scores
+    expect_true(out$enabled)
+    expect_equal(out$.__enclos_env__$private$.titles[[1]], "my_signature")
+
+    rowNums <- out$.__enclos_env__$private$.rowNums
+    values  <- out$.__enclos_env__$private$.values[[1]]
+    # (rowNums[i], values[i]) is the pair jamovi writes into the spreadsheet.
+    expect_equal(rowNums, as.integer(rownames(df)))
+
+    analysed <- as.integer(rownames(
+        jmvcore::naOmit(df[, c("t", "e", "i1", "i2", "i3"), drop = FALSE])))
+    scores <- as.numeric(analysis$.__enclos_env__$private$.fitState$factor_scores)
+
+    # Each score must land on the row it was computed from -- not one row over.
+    expect_equal(rowNums[!is.na(values)], analysed)
+    expect_equal(values[!is.na(values)], scores)
+    # Rows dropped by complete.cases() must stay blank, never inherit a neighbour.
+    expect_true(all(is.na(values[!(rowNums %in% analysed)])))
+})
+
+test_that("save_factor_scores clearWith covers every option that changes the scores", {
+    # The .b.R write is gated on isNotFilled(). Output$fromProtoBuf only resets
+    # the stale flag when an option listed in clearWith changed, so any
+    # score-affecting option missing here leaves a STALE column in the user's
+    # spreadsheet while the on-screen tables show the new fit.
+    opts <- ClinicoPath:::latentbiomarkerOptions$new(
+        dep_time = "t", dep_event = "e", event_level = "1",
+        indicators = c("i1", "i2", "i3"), reflective_confirmed = TRUE)
+    res <- ClinicoPath:::latentbiomarkerResults$new(options = opts)
+    clearWith <- unlist(res$save_factor_scores$.__enclos_env__$private$.clearWith)
+
+    expect_setequal(
+        c("save_factor_scores", "factor_score_name", "reflective_confirmed",
+          "dep_time", "dep_event", "indicators", "adjusters", "indicator_types",
+          "factor_score_method", "standardize_scores"),
+        clearWith)
+})

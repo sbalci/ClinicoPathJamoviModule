@@ -36,7 +36,13 @@ children:
     margin: large
     children:
       - type: Label
-        label: Timezone (Olson identifier, e.g., Europe/Istanbul; use 'system' for local time)
+        label: Two-digit years
+        children:
+          - type: ComboBox
+            name: two_digit_year
+
+      - type: Label
+        label: Timezone
         children:
           - type: TextBox
             name: timezone
@@ -45,7 +51,7 @@ children:
     margin: large
     children:
       - type: Label
-        label: Add Corrected DateTime to Data
+        label: Corrected datetime
         children:
           - type: Output
             name: corrected_datetime_char
@@ -66,7 +72,7 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: Extract (Preview)
+                label: Preview
                 fitToGrid: true
                 children:
                   - type: CheckBox
@@ -88,24 +94,24 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: Add to Data
+                label: Add to data
                 children:
                   - type: Output
                     name: year_out
                     enable: (extract_year)
-                    label: Add Year to Data
+                    label: Year
                   - type: Output
                     name: month_out
                     enable: (extract_month)
-                    label: Add Month Number to Data
+                    label: Month (number)
                   - type: Output
                     name: monthname_out
                     enable: (extract_monthname)
-                    label: Add Month Name to Data
+                    label: Month (name)
                   - type: Output
                     name: day_out
                     enable: (extract_day)
-                    label: Add Day of Month to Data
+                    label: Day of month
   - type: CollapseBox
     label: Time Components
     collapsed: true
@@ -121,7 +127,7 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: Extract (Preview)
+                label: Preview
                 children:
                   - type: CheckBox
                     name: extract_hour
@@ -139,20 +145,20 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: Add to Data
+                label: Add to data
                 children:
                   - type: Output
                     name: hour_out
                     enable: (extract_hour)
-                    label: Add Hour to Data
+                    label: Hour
                   - type: Output
                     name: minute_out
                     enable: (extract_minute)
-                    label: Add Minute to Data
+                    label: Minute
                   - type: Output
                     name: second_out
                     enable: (extract_second)
-                    label: Add Second to Data
+                    label: Second
 
   - type: CollapseBox
     label: Other Components
@@ -169,14 +175,14 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: Extract (Preview)
+                label: Preview
                 children:
                   - type: CheckBox
                     name: extract_dayname
                     label: Day name (e.g., Monday)
                   - type: CheckBox
                     name: extract_weeknum
-                    label: Week number (1-53)
+                    label: Week number (Jan-1 blocks, not ISO)
                   - type: CheckBox
                     name: extract_quarter
                     label: Quarter (1-4)
@@ -190,24 +196,24 @@ children:
             stretchFactor: 1
             children:
               - type: Label
-                label: Add to Data
+                label: Add to data
                 children:
                   - type: Output
                     name: dayname_out
                     enable: (extract_dayname)
-                    label: Add Day Name to Data
+                    label: Day name
                   - type: Output
                     name: weeknum_out
                     enable: (extract_weeknum)
-                    label: Add Week Number to Data
+                    label: Week number
                   - type: Output
                     name: quarter_out
                     enable: (extract_quarter)
-                    label: Add Quarter to Data
+                    label: Quarter
                   - type: Output
                     name: dayofyear_out
                     enable: (extract_dayofyear)
-                    label: Add Day of Year to Data
+                    label: Day of year
 
   - type: CollapseBox
     label: Output Options

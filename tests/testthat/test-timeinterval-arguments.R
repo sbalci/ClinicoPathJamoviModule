@@ -86,7 +86,6 @@ test_that("timeinterval maximal option combination", {
     remove_negative = TRUE,
     remove_extreme = TRUE,
     extreme_multiplier = 2.0,
-    add_times = TRUE,
     include_quality_metrics = TRUE,
     confidence_level = 95,
     show_summary = TRUE,

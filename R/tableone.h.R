@@ -85,14 +85,14 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        assumptions = function() private$.items[["assumptions"]],
         tablestyle1 = function() private$.items[["tablestyle1"]],
         tablestyle2 = function() private$.items[["tablestyle2"]],
         tablestyle3 = function() private$.items[["tablestyle3"]],
         tablestyle4 = function() private$.items[["tablestyle4"]],
         reportSentence = function() private$.items[["reportSentence"]],
         summary = function() private$.items[["summary"]],
-        about = function() private$.items[["about"]],
-        assumptions = function() private$.items[["assumptions"]]),
+        about = function() private$.items[["about"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -111,6 +111,16 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="Instructions"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="assumptions",
+                title="Data Quality & Assumptions",
+                visible="(vars)",
+                clearWith=list(
+                    "vars",
+                    "excl",
+                    "sty",
+                    "nonnormal")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="tablestyle1",
@@ -151,11 +161,12 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSentence",
-                title=" Copy to Manuscript",
+                title="Copy to Manuscript",
                 visible="(showReportSentence)",
                 clearWith=list(
                     "vars",
-                    "excl"),
+                    "excl",
+                    "sty"),
                 refs="ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -164,22 +175,15 @@ tableoneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showSummary)",
                 clearWith=list(
                     "vars",
-                    "excl")))
+                    "excl",
+                    "sty")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
                 title="About This Analysis",
                 visible="(showAbout)",
                 clearWith=list(
-                    "vars")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="assumptions",
-                title="Data Quality & Assumptions",
-                visible="(vars)",
-                clearWith=list(
-                    "vars",
-                    "excl")))}))
+                    "vars")))}))
 
 tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "tableoneBase",
@@ -189,7 +193,7 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "tableone",
-                version = c(1,0,7),
+                version = c(1,0,9),
                 options = options,
                 results = tableoneResults$new(options=options),
                 data = data,
@@ -204,9 +208,11 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Table One
 #'
-#' This function generates a "Table One", a descriptive summary table 
-#' frequently used in  clinicopathological research manuscripts. It supports 
-#' multiple output styles for flexible formatting.
+#' Generate an overall-cohort descriptive Table One for clinicopathological 
+#' research. Four output styles are available. This analysis does not stratify 
+#' by group or compute p-values, confidence intervals or standardized mean 
+#' differences. Each row is treated as one case; check for repeated records 
+#' before interpreting counts as patients.
 #' 
 #'
 #' @examples
@@ -228,18 +234,34 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   sty = "t1",
 #'   nonnormal = TRUE)
 #'}
-#' @param data The input data as a data frame.
+#' @param data The input data as a data frame with scalar columns. Selected
+#'   matrix, array and list columns are rejected before data selection.
+#'   Frequency weights, when supplied by jamovi, represent replicated rows
+#'   rather than unique patients or a complex survey design.
 #' @param vars A set of variable names from \code{data} to include in the
-#'   Table One. Supports numeric, ordinal, and categorical variables.
-#' @param sty Specify the output style for the descriptive table. 'tableone'
-#'   reports continuous variables as mean (SD) - or as median (Q1, Q3) when
-#'   nonnormal is TRUE - and categorical variables as N (percent). 'gtsummary'
-#'   reports continuous variables as median (Q1, Q3). 'arsenal' reports mean
-#'   (SD) together with the range. 'janitor' produces one frequency table of
-#'   counts and percentages per variable, for variables with a limited number of
-#'   categories.
-#' @param excl Boolean option to exclude missing values (NA) from the
-#'   analysis. Note: Exclusion may remove entire cases.
+#'   Table One. Supports numeric and integer measurements, factors (including
+#'   ordered factors), character and logical variables. Date, date-time,
+#'   duration and other custom storage classes are omitted with an explanation
+#'   before missing-value exclusion. Convert these to explicitly defined numeric
+#'   measurements or factors first. An empty selection displays instructions.
+#'   Actual NA factor levels are normalized to missing values before exclusion
+#'   and tabulation; literal text categories such as NA or Unknown remain
+#'   unchanged.
+#' @param sty Specify the descriptive table style. 'tableone' reports mean
+#'   (SD), or median (Q1, Q3) when nonnormal is TRUE, and categorical N
+#'   (percent); only the second level of binary factors is displayed.
+#'   'gtsummary' reports median (Q1, Q3) for continuous variables and may treat
+#'   numeric variables with fewer than 10 distinct values as categorical.
+#'   'arsenal' reports mean (SD) and range. 'janitor' tabulates factors,
+#'   characters and logicals with at most 20 recorded categories; numeric
+#'   measurements are skipped. Convert numeric category codes with factor()
+#'   before using janitor. Omitted variables do not enter listwise exclusion or
+#'   supplementary summaries. Dichotomous gtsummary rows explicitly name the
+#'   counted level. Janitor does not display unused factor levels.
+#' @param excl Exclude every case missing any variable included in the
+#'   selected table style (listwise deletion). All retained variables then use
+#'   the same complete-case denominator. All-missing and otherwise omitted
+#'   variables do not cause case exclusion. No imputation is performed.
 #' @param showSummary Show detailed summary including sample size, missing
 #'   data patterns, and data quality metrics.
 #' @param showAbout Show educational content explaining Table One, when to use
@@ -254,6 +276,7 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
@@ -261,7 +284,6 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

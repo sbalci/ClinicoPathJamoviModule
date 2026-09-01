@@ -8,6 +8,44 @@
 # outcomeorganizer has six of them, so tests use this helper to pass NULL for the
 # mappings a given analysis type does not need, without changing the analysis
 # definition jamovi itself uses. Mirrors helper-survival.R / helper-multisurvival.R.
+
+# ---------------------------------------------------------------------------
+# Resolving the analysis: installed package OR sourced files
+# ---------------------------------------------------------------------------
+# Two ways to run this suite, and they suit different jobs:
+#
+#   devtools::load_all()  -- what tests/testthat.R and R CMD check use. Registers
+#       the namespace, so `data(x, package = "ClinicoPath")` resolves and nothing
+#       skips. Correct, and the gate before shipping. Costs ~20-25 minutes here.
+#
+#   source("R/<fn>.h.R"); source("R/<fn>.b.R")  -- ~2 seconds, for iteration.
+#       Needs jmvcore + R6 loaded, plus whatever the backend itself uses
+#       (magrittr/dplyr/rlang for this one), `. <- jmvcore::.` for translation,
+#       R/utils.R for .fmt(), and any shared helper the backend sources
+#       (R/survival_utils.R here). It reads the .h.R FROM DISK, so a stale .h.R
+#       silently exercises the old option table -- regenerate or hand-patch it
+#       before trusting a green run.
+#
+# `.oo_fn()` below accepts either, so the same test file runs under both without
+# editing. Prefer the sourced path while iterating and load_all() before shipping.
+.oo_fn <- function(what = "outcomeorganizer") {
+    if (requireNamespace("ClinicoPath", quietly = TRUE) &&
+        !is.null(.getNamespace_safe("ClinicoPath")) &&
+        exists(what, envir = asNamespace("ClinicoPath"), inherits = FALSE))
+        return(get(what, envir = asNamespace("ClinicoPath")))
+    # sourced-files fallback
+    if (exists(what, envir = globalenv(), inherits = TRUE))
+        return(get(what, envir = globalenv()))
+    testthat::skip(paste0(
+        "ClinicoPath is not installed and ", what, " has not been sourced. ",
+        "Run devtools::load_all(), or source R/utils.R + R/outcomeorganizer.h.R + ",
+        "R/outcomeorganizer.b.R first."))
+}
+
+.getNamespace_safe <- function(pkg) {
+    tryCatch(asNamespace(pkg), error = function(e) NULL)
+}
+
 run_outcomeorganizer <- function(...) {
   args <- list(...)
   for (level_option in c("outcomeLevel", "recurrenceLevel",
@@ -15,5 +53,22 @@ run_outcomeorganizer <- function(...) {
     if (!level_option %in% names(args))
       args[level_option] <- list(NULL)
   }
-  do.call(ClinicoPath::outcomeorganizer, args)
+  do.call(.oo_fn("outcomeorganizer"), args)
+}
+
+# Drive the analysis object directly, so private helpers stay reachable. This is
+# the only way to inspect the recoding itself (`.organizeOutcomes()` returns the
+# diagnostics list and the coded vector, neither of which reaches a result item).
+run_outcomeorganizer_obj <- function(data, ...) {
+  args <- list(...)
+  for (level_option in c("outcomeLevel", "recurrenceLevel",
+                         "dod", "dooc", "awd", "awod")) {
+    if (!level_option %in% names(args))
+      args[level_option] <- list(NULL)
+  }
+  o <- do.call(.oo_fn("outcomeorganizerOptions")$new, args)
+  a <- .oo_fn("outcomeorganizerClass")$new(options = o, data = data)
+  f <- tempfile(); sink(f); on.exit(sink(), add = TRUE)
+  suppressWarnings(try(a$run(), silent = TRUE))
+  a
 }

@@ -4,7 +4,13 @@
 
 - reportcat
 - summarydata
-tableone
+- tableone
+
+- [ ] Table One: address jmvcore 2.7.38 `Html$asString()` retaining styled HTML
+  tags in t2/t4 plain-text R exports. Keep styled HTML intact; assess an upstream
+  text-export fix rather than changing the shared converter in this scoped repair.
+  Verify desktop clipboard/Word/PDF separately. See
+  `quality-reports/tableone-release-review-followup-2026-08-31.md`.
 
 ## Data Quality
 
@@ -75,17 +81,22 @@ jjarcdiagram
 multisurvival
 singlearm
 survival
-survivalcont
+- survivalcont
 
 ## Data Preparation
 
-datetimeconverter
-outcomeorganizer
-timeinterval  <!-- DONE 2026-08-30: /check-function-full audit + fixes. Excel-serial rejection, landmark relabelling, remove_extreme honesty, CI clamp, severity-ordered notices, dark-theme panels. 200 assertions pass; see NEWS.md and tests/testthat/test-timeinterval-audit-fixes.R -->
+- datetimeconverter
+- outcomeorganizer
+- timeinterval
 
 ## General Statistics
 
 - oddsratio
+
+## Penalized Cox-Regression 
+
+- lassocox 
+
 
 # meddecide
 

@@ -14528,7 +14528,11 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         return(nri_results)
                     },
                     error = function(e) {
-                        message("Error in adjusted NRI calculation: ", e$message)
+                        # Include the failing call: this handler wraps ~250 lines, so a
+                        # bare message gives no way to locate the fault.
+                        where <- tryCatch(paste(deparse(conditionCall(e)), collapse = " "),
+                            error = function(e2) "<unknown>")
+                        message("Error in adjusted NRI calculation: ", e$message, " [at: ", where, "]")
                         return(list(error = e$message))
                     }
                 )
@@ -15294,6 +15298,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Calculate NRI for events (those who actually had events)
                 event_table <- reclassification_table[, , "TRUE"]
+                up_events <- 0
+                down_events <- 0
                 if (length(event_table) == 0) {
                     nri_events <- 0
                     n_events <- 0
@@ -15301,9 +15307,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Events moved up (improved classification) vs moved down
                     total_events <- sum(event_table)
                     if (total_events > 0) {
-                        moved_up <- sum(event_table[lower.tri(event_table)]) # Below diagonal
-                        moved_down <- sum(event_table[upper.tri(event_table)]) # Above diagonal
-                        nri_events <- (moved_up - moved_down) / total_events
+                        up_events <- sum(event_table[lower.tri(event_table)]) # Below diagonal
+                        down_events <- sum(event_table[upper.tri(event_table)]) # Above diagonal
+                        nri_events <- (up_events - down_events) / total_events
                     } else {
                         nri_events <- 0
                     }
@@ -15312,6 +15318,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Calculate NRI for non-events (those who did not have events)
                 nonevent_table <- reclassification_table[, , "FALSE"]
+                up_nonevents <- 0
+                down_nonevents <- 0
                 if (length(nonevent_table) == 0) {
                     nri_nonevents <- 0
                     n_nonevents <- 0
@@ -15319,9 +15327,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Non-events moved down (improved classification) vs moved up
                     total_nonevents <- sum(nonevent_table)
                     if (total_nonevents > 0) {
-                        moved_up <- sum(nonevent_table[lower.tri(nonevent_table)]) # Below diagonal (bad for non-events)
-                        moved_down <- sum(nonevent_table[upper.tri(nonevent_table)]) # Above diagonal (good for non-events)
-                        nri_nonevents <- (moved_down - moved_up) / total_nonevents
+                        up_nonevents <- sum(nonevent_table[lower.tri(nonevent_table)]) # Below diagonal (bad for non-events)
+                        down_nonevents <- sum(nonevent_table[upper.tri(nonevent_table)]) # Above diagonal (good for non-events)
+                        nri_nonevents <- (down_nonevents - up_nonevents) / total_nonevents
                     } else {
                         nri_nonevents <- 0
                     }
@@ -15331,9 +15339,26 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Overall NRI
                 overall_nri <- nri_events + nri_nonevents
 
-                # Calculate standard errors (approximate)
-                se_events <- if (n_events > 0) sqrt(nri_events * (1 - nri_events) / n_events) else 0
-                se_nonevents <- if (n_nonevents > 0) sqrt(nri_nonevents * (1 - nri_nonevents) / n_nonevents) else 0
+                # Standard errors. NRI is a DIFFERENCE of two proportions from the same
+                # multinomial sample, so its range is [-1, 1] and the binomial form
+                # sqrt(p(1-p)/n) does not apply: for a negative NRI it takes sqrt() of a
+                # negative number and yields NaN (which then made `if (se > 0)` throw
+                # "missing value where TRUE/FALSE needed"), and for a positive NRI it
+                # silently UNDER-estimates the SE, giving CIs that are too narrow and
+                # p-values that are too small. Use the standard variance of a difference
+                # of proportions (Pencina et al. 2008):
+                #   Var = (p_up + p_down - (p_up - p_down)^2) / n
+                .nriSE <- function(up, down, n) {
+                    if (!isTRUE(n > 0)) {
+                        return(0)
+                    }
+                    p_up <- up / n
+                    p_down <- down / n
+                    v <- (p_up + p_down - (p_up - p_down)^2) / n
+                    if (is.finite(v) && v > 0) sqrt(v) else 0
+                }
+                se_events <- .nriSE(up_events, down_events, n_events)
+                se_nonevents <- .nriSE(up_nonevents, down_nonevents, n_nonevents)
                 se_overall <- sqrt(se_events^2 + se_nonevents^2)
 
                 # 95% Confidence intervals
@@ -15342,13 +15367,14 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 ci_overall <- overall_nri + c(-1.96, 1.96) * se_overall
 
                 # Z-scores and p-values
-                z_events <- if (se_events > 0) nri_events / se_events else 0
-                z_nonevents <- if (se_nonevents > 0) nri_nonevents / se_nonevents else 0
-                z_overall <- if (se_overall > 0) overall_nri / se_overall else 0
+                # isTRUE() so a NaN/NA can never reach if() as a bare condition again.
+                z_events <- if (isTRUE(se_events > 0)) nri_events / se_events else 0
+                z_nonevents <- if (isTRUE(se_nonevents > 0)) nri_nonevents / se_nonevents else 0
+                z_overall <- if (isTRUE(se_overall > 0)) overall_nri / se_overall else 0
 
-                p_events <- if (abs(z_events) > 0) 2 * (1 - pnorm(abs(z_events))) else 1
-                p_nonevents <- if (abs(z_nonevents) > 0) 2 * (1 - pnorm(abs(z_nonevents))) else 1
-                p_overall <- if (abs(z_overall) > 0) 2 * (1 - pnorm(abs(z_overall))) else 1
+                p_events <- if (isTRUE(abs(z_events) > 0)) 2 * (1 - pnorm(abs(z_events))) else 1
+                p_nonevents <- if (isTRUE(abs(z_nonevents) > 0)) 2 * (1 - pnorm(abs(z_nonevents))) else 1
+                p_overall <- if (isTRUE(abs(z_overall) > 0)) 2 * (1 - pnorm(abs(z_overall))) else 1
 
                 return(list(
                     nri_events = nri_events,

@@ -25,16 +25,16 @@
 | `dx_date` | `Variable` | `NULL` | Start Date Variable |
 | `fu_date` | `Variable` | `NULL` | End Date Variable |
 | `time_format` | `List` | `auto` | Date Format |
-| `output_unit` | `List` | `months` | Time Unit for Results |
+| `output_unit` | `List` | `months` | Time unit for results |
 | `time_basis` | `List` | `standardized` | Time Basis |
 | `use_landmark` | `Bool` | `FALSE` | Landmark analysis |
 | `landmark_time` | `Number` | `6` | Landmark Time Point |
 | `remove_negative` | `Bool` | `FALSE` | Remove negative intervals |
 | `remove_extreme` | `Bool` | `FALSE` | Flag extreme values |
-| `extreme_multiplier` | `Number` | `2` | Extreme Threshold Multiplier |
-| `add_times` | `Bool` | `FALSE` | Add calculated times to dataset |
-| `include_quality_metrics` | `Bool` | `FALSE` | Include data quality assessment |
-| `confidence_level` | `Number` | `95` | Confidence Level ( percent) |
+| `extreme_multiplier` | `Number` | `2` | Extreme threshold multiplier |
+| `calculated_time` | `Output` | (n/a) | Add calculated times to dataset. A jamovi output variable driven by the Output control; not an argument of the R function. |
+| `include_quality_metrics` | `Bool` | `FALSE` | Data quality assessment |
+| `confidence_level` | `Number` | `95` | Confidence level (%) |
 | `show_summary` | `Bool` | `FALSE` | Natural-language summary |
 | `show_glossary` | `Bool` | `FALSE` | Glossary of terms |
 | `timezone` | `List` | `system` | Timezone |

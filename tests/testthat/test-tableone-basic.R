@@ -143,21 +143,8 @@ test_that("tableone handles invalid variable names", {
 })
 
 test_that("tableone handles empty variable selection", {
-  # No variables selected - should handle gracefully
-  # (May show instructions or error depending on implementation)
-  expect_condition(
-    tableone(
-      data = tableone_test,
-      vars = NULL
-    )
-  )
-
-  expect_condition(
-    tableone(
-      data = tableone_test,
-      vars = character(0)
-    )
-  )
+  expect_match(tableone(data = tableone_test, vars = NULL)$todo$content, "Welcome")
+  expect_match(tableone(data = tableone_test, vars = character(0))$todo$content, "Welcome")
 })
 
 # ═══════════════════════════════════════════════════════════

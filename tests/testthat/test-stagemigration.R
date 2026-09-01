@@ -1,4 +1,11 @@
 # ═══════════════════════════════════════════════════════════════════════
+# NOTE: these tests were skip_on_cran()-gated and had never actually run.
+# When first executed they failed 14/18 for two reasons that predate any
+# behaviour change: (1) every assertion checked inherits(result, "jmvcoreClass"),
+# a class that does not exist in jmvcore at all, so it could never be TRUE --
+# stagemigration() returns analysis$results, a "stagemigrationResults" object;
+# (2) one test passed bootstrapReps = 50, which the .a.yaml rejects (min 100).
+# Run them with NOT_CRAN=true.
 # Comprehensive Tests: stagemigration (TNM Stage Migration Analysis)
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -64,7 +71,7 @@ test_that("stagemigration runs with minimal required variables", {
     eventLevel = "1"
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 test_that("stagemigration produces migration matrix", {
@@ -102,7 +109,7 @@ test_that("stagemigration runs with basic analysis type", {
     analysisType = "basic"
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 test_that("stagemigration runs with standard analysis type", {
@@ -119,7 +126,7 @@ test_that("stagemigration runs with standard analysis type", {
     analysisType = "standard"
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -140,7 +147,7 @@ test_that("NRI calculation runs when enabled", {
     calculateNRI = TRUE
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 test_that("IDI calculation runs when enabled", {
@@ -157,7 +164,7 @@ test_that("IDI calculation runs when enabled", {
     calculateIDI = TRUE
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 test_that("C-index comparison runs", {
@@ -205,7 +212,7 @@ test_that("Will Rogers analysis detects stage migration", {
     showWillRogersAnalysis = TRUE
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -224,10 +231,10 @@ test_that("bootstrap validation runs", {
     event = "status",
     eventLevel = "1",
     performBootstrap = TRUE,
-    bootstrapReps = 50
+    bootstrapReps = 100
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -247,7 +254,7 @@ test_that("runs with default options (was: routine clinical preset)", {
     eventLevel = "1"
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -299,8 +306,8 @@ test_that("confidence level is respected", {
     confidenceLevel = 0.90
   )
 
-  expect_true(inherits(result_95, "jmvcoreClass"))
-  expect_true(inherits(result_90, "jmvcoreClass"))
+  expect_true(inherits(result_95, "stagemigrationResults"))
+  expect_true(inherits(result_90, "stagemigrationResults"))
 })
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -320,7 +327,7 @@ test_that("stagemigration handles 2-stage system", {
     eventLevel = "1"
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 test_that("stagemigration handles 4-stage system", {
@@ -336,7 +343,7 @@ test_that("stagemigration handles 4-stage system", {
     eventLevel = "1"
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 test_that("stagemigration handles no migration (identical staging)", {
@@ -353,7 +360,7 @@ test_that("stagemigration handles no migration (identical staging)", {
     eventLevel = "1"
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 test_that("stagemigration handles high censoring rate", {
@@ -369,7 +376,7 @@ test_that("stagemigration handles high censoring rate", {
     eventLevel = "1"
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -396,7 +403,7 @@ test_that("stagemigration runs comprehensive analysis", {
     confidenceLevel = 0.95
   )
 
-  expect_true(inherits(result, "jmvcoreClass"))
+  expect_true(inherits(result, "stagemigrationResults"))
 })
 
 test_that("the removed clinical-preset option is gone from the schema", {

@@ -701,6 +701,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showLoaTable",
                 showLoaTable,
                 default=TRUE)
+            private$..loaOutput <- jmvcore::OptionOutput$new(
+                "loaOutput")
             private$..raterProfiles <- jmvcore::OptionBool$new(
                 "raterProfiles",
                 raterProfiles,
@@ -1034,6 +1036,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..loaLowThreshold)
             self$.addOption(private$..loaVariableName)
             self$.addOption(private$..showLoaTable)
+            self$.addOption(private$..loaOutput)
             self$.addOption(private$..raterProfiles)
             self$.addOption(private$..raterProfileType)
             self$.addOption(private$..raterProfileShowPoints)
@@ -1187,6 +1190,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         loaLowThreshold = function() private$..loaLowThreshold$value,
         loaVariableName = function() private$..loaVariableName$value,
         showLoaTable = function() private$..showLoaTable$value,
+        loaOutput = function() private$..loaOutput$value,
         raterProfiles = function() private$..raterProfiles$value,
         raterProfileType = function() private$..raterProfileType$value,
         raterProfileShowPoints = function() private$..raterProfileShowPoints$value,
@@ -1339,6 +1343,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..loaLowThreshold = NA,
         ..loaVariableName = NA,
         ..showLoaTable = NA,
+        ..loaOutput = NA,
         ..raterProfiles = NA,
         ..raterProfileType = NA,
         ..raterProfileShowPoints = NA,
@@ -3412,10 +3417,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="computedVariablesHeading",
                 title="Computed Variables",
-                visible="(length(consensusVar) > 0 || loaVariable)",
+                visible="(consensusVar || (loaVariable && loaOutput))",
                 clearWith=list(
                     "consensusVar",
-                    "loaVariable")))
+                    "loaVariable",
+                    "loaOutput")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="consensusTable",
@@ -3515,10 +3521,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="computedVariablesInfo",
                 title="Computed Variables Added to Dataset",
-                visible="(length(consensusVar) > 0 || loaVariable)",
+                visible="(consensusVar || (loaVariable && loaOutput))",
                 clearWith=list(
                     "consensusVar",
-                    "loaVariable")))
+                    "loaVariable",
+                    "loaOutput")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="consensusVar",
@@ -3545,7 +3552,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "loaThresholds",
                     "loaHighThreshold",
                     "loaLowThreshold",
-                    "loaVariableName")))
+                    "loaVariableName",
+                    "loaVariable")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="raterProfilePlot",
@@ -4283,10 +4291,11 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   consensus threshold (e.g., 2-2 split with 4 raters). Exclude = set
 #'   consensus to NA for tied cases. First = use first category that appears.
 #'   Lowest/Highest = use min/max of tied categories.
-#' @param loaVariable Calculate agreement level for each case and add as new
-#'   computed column. Choose between Simple (3 categories) or Detailed (5
-#'   categories) classification. Useful for identifying difficult cases and
-#'   quality control.
+#' @param loaVariable Calculate the agreement level for each case. Choose
+#'   between Simple (3 categories) or Detailed (5 categories) classification.
+#'   Useful for identifying difficult cases and quality control. To also add the
+#'   result to the dataset as a new column, enable the separate output variable
+#'   'Add case agreement categorization to data'.
 #' @param detailLevel Simple mode: All Agreed (100 percent), Majority Agreed
 #'   (>=threshold percent), No Agreement (<threshold percent). Detailed mode:
 #'   Absolute (100 percent), High, Moderate, Low, Poor (based on

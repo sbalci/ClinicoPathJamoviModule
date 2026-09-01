@@ -18,6 +18,17 @@ items:
           - dooc
           - awd
           - awod
+          - recurrence
+          - recurrenceLevel
+          - useHierarchy
+          - eventPriority
+          - patientID
+          - intervalCensoring
+          - intervalStart
+          - intervalEnd
+          - adminCensoring
+          - adminDate
+          - followupTime
 
     - name:  todo
       title: To Do
@@ -55,11 +66,16 @@ items:
       visible: false
 
     - name:  summary
+      refs:
+          - AustinLeeFine2016
+          - survival
+          - cmprsk
+          - mstate
+
       title: Summary of Outcome Recoding
       type:  Html
       clearWith:
           - outcome
-          - patientID
           - outcomeLevel
           - multievent
           - analysistype
@@ -71,8 +87,13 @@ items:
           - recurrenceLevel
           - useHierarchy
           - eventPriority
+          - patientID
           - intervalCensoring
+          - intervalStart
+          - intervalEnd
           - adminCensoring
+          - adminDate
+          - followupTime
 
     - name: outputTable
       title: 'Recoded Outcome Summary'
@@ -94,7 +115,6 @@ items:
           type: number
       clearWith:
           - outcome
-          - patientID
           - outcomeLevel
           - multievent
           - analysistype
@@ -106,6 +126,13 @@ items:
           - recurrenceLevel
           - useHierarchy
           - eventPriority
+          - patientID
+          - intervalCensoring
+          - intervalStart
+          - intervalEnd
+          - adminCensoring
+          - adminDate
+          - followupTime
 
     - name: diagnosticsTable
       title: 'Diagnostic Information'
@@ -121,7 +148,6 @@ items:
           type: text
       clearWith:
           - outcome
-          - patientID
           - outcomeLevel
           - multievent
           - analysistype
@@ -133,11 +159,13 @@ items:
           - recurrenceLevel
           - useHierarchy
           - eventPriority
+          - patientID
           - intervalCensoring
           - intervalStart
           - intervalEnd
           - adminCensoring
           - adminDate
+          - followupTime
 
     - name: outcomeViz
       title: 'Outcome Distribution'
@@ -148,22 +176,6 @@ items:
       visible: (visualization)
       clearWith:
           - outcome
-          - patientID
-          - outcomeLevel
-          - multievent
-          - analysistype
-          - dod
-          - dooc
-          - awd
-          - awod
-
-    - name: naturalSummary
-      title: 'Natural Language Summary (Copy-Ready)'
-      type: Html
-      visible: (showNaturalSummary)
-      clearWith:
-          - outcome
-          - patientID
           - outcomeLevel
           - multievent
           - analysistype
@@ -173,16 +185,58 @@ items:
           - awod
           - recurrence
           - recurrenceLevel
+          - useHierarchy
+          - eventPriority
+          - patientID
+          - intervalCensoring
+          - intervalStart
+          - intervalEnd
+          - adminCensoring
+          - adminDate
+          - followupTime
+
+    - name: naturalSummary
+      refs:
+          - AustinLeeFine2016
+
+      title: 'Natural Language Summary (Copy-Ready)'
+      type: Html
+      visible: (showNaturalSummary)
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - recurrence
+          - recurrenceLevel
+          - useHierarchy
+          - eventPriority
+          - patientID
+          - intervalCensoring
+          - intervalStart
+          - intervalEnd
+          - adminCensoring
+          - adminDate
+          - followupTime
 
     - name: glossary
+      refs:
+          - AustinLeeFine2016
+          - AalenJohansen1978
+
       title: 'Survival Analysis Glossary'
       type: Html
       visible: (showGlossary)
 
     - name: addOutcome
+
       title: Add Recoded Outcome to Data
       type: Output
-      varTitle: '`Recoded Outcome for {analysistype} Survival Analysis`'
+      varTitle: 'Recoded Outcome'
       varDescription: 'Outcome variable recoded for survival analysis based on selected analysis type'
       measureType: nominal
       clearWith:
@@ -204,6 +258,36 @@ items:
           # Both of these change the exported values: adminCensoring is a no-op
           # without a follow-up time, and the cut-off date decides which rows
           # are truncated back to censored.
+          - adminDate
+          - followupTime
+
+    # Paired with the addAdminTime option of the SAME NAME -- jmvcore's Output
+    # resolves its gating option by the result item's own name, and emits nothing
+    # when it cannot find one.
+    - name: addAdminTime
+      title: Add Truncated Follow-up Time to Data
+      type: Output
+      varTitle: 'Follow-up Truncated at Administrative Cut-off'
+      varDescription: 'Follow-up time truncated at the administrative censoring cut-off; pair this with the recoded outcome, not the original follow-up column'
+      measureType: continuous
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - recurrence
+          - recurrenceLevel
+          - useHierarchy
+          - eventPriority
+          - patientID
+          - intervalCensoring
+          - intervalStart
+          - intervalEnd
+          - adminCensoring
           - adminDate
           - followupTime
 

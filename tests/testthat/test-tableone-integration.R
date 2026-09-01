@@ -4,7 +4,6 @@
 
 
 test_that("NA handling reports original missingness when excl=TRUE", {
-  skip_if_not_installed('jmvReadWrite')
     skip_if_not_installed("ClinicoPath")
     skip_if_not_installed("tableone")
 
@@ -234,11 +233,6 @@ test_that("Empty dataset is handled gracefully", {
 test_that("No variables selected shows welcome message", {
     skip_if_not_installed("ClinicoPath")
 
-    # Note: Testing vars=NULL directly causes jmvcore internal error
-    # This is expected behavior - users must select at least one variable
-    # The welcome message displays in the UI when no vars are selected
-    # This test documents the expected error behavior
-
     # Create test data
     set.seed(555)
     testData <- data.frame(
@@ -246,19 +240,9 @@ test_that("No variables selected shows welcome message", {
         var2 = rnorm(50)
     )
 
-    # Run with no variables - should error at jmvcore level
-    expect_error(
-        tableone(
-            data = testData,
-            vars = NULL,
-            sty = "t1",
-            excl = FALSE
-        ),
-        regexp = "names|attribute"
-    )
-
-    # In actual jamovi UI, welcome message displays when vars is empty
-    # The .b.R code handles this at line 35 (if NULL vars)
+    result <- tableone(data = testData, vars = NULL, sty = "t1", excl = FALSE)
+    expect_match(result$todo$content, "Welcome")
+    expect_identical(result$tablestyle1$content, "")
 })
 
 

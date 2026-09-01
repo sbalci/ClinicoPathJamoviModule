@@ -157,14 +157,99 @@ test_that("Regression: minimum group size is enforced by every multiple cut-off 
     }
   }
 
-  # Dropping a cut-point must be reported, not silent.
+  # The minimum-p search now applies the size constraint while optimizing, so a
+  # feasible requested partition is not selected first and reduced afterwards.
   res <- run_survivalcont(
     data = df, elapsedtime = "time", outcome = "status", contexpl = "marker",
     multiple_cutoffs = TRUE, cutoff_method = "minpval", num_cutoffs = "three",
     min_group_size = min_pct
   )
-  expect_match(strip_survivalcont_html(res$warnings$content),
-               "minimum group size", fixed = TRUE)
+  expect_equal(nrow(res$multipleCutTable$asDF), 3L)
+  expect_false(grepl("Cut-offs reduced to respect minimum group size",
+                     strip_survivalcont_html(res$warnings$content), fixed = TRUE))
+})
+
+test_that("Regression: minimum-p search is exhaustive when the candidate space is small", {
+  marker <- rep(1:10, each = 8)
+  df <- data.frame(
+    time = 110 - 7 * marker + rep(seq_len(8), 10),
+    status = 1L,
+    marker = marker
+  )
+  min_pct <- 10
+  num_cuts <- 2L
+
+  analysis <- run_survivalcont_jamovi(
+    data = df, elapsedtime = "time", outcome = "status", contexpl = "marker",
+    multiple_cutoffs = TRUE, cutoff_method = "minpval", num_cutoffs = "two",
+    min_group_size = min_pct, seed = 37
+  )
+  observed <- analysis$.__enclos_env__$private$.minPvalueCutoffs(
+    df, "time", "status", "marker", num_cuts
+  )
+
+  lo <- unname(stats::quantile(marker, min_pct / 100))
+  hi <- unname(stats::quantile(marker, 1 - min_pct / 100))
+  valid <- sort(unique(marker))
+  valid <- valid[valid >= lo & valid <= hi]
+  candidates <- utils::combn(valid, num_cuts, simplify = FALSE)
+  min_n <- ceiling(nrow(df) * min_pct / 100)
+  scores <- vapply(candidates, function(cuts) {
+    groups <- cut(marker, breaks = c(-Inf, cuts, Inf))
+    if (any(as.integer(table(groups)) < min_n)) return(Inf)
+    fit <- survival::survdiff(survival::Surv(time, status) ~ groups, data = df)
+    1 - stats::pchisq(fit$chisq, df = length(fit$n) - 1L)
+  }, numeric(1))
+  expected <- candidates[[which.min(scores)]]
+
+  expect_equal(observed, expected)
+})
+
+test_that("Regression: large minimum-p searches are reproducible and disclosed", {
+  df <- make_survivalcont_cohort()
+  run_once <- function() run_survivalcont(
+    data = df, elapsedtime = "time", outcome = "status", contexpl = "marker",
+    multiple_cutoffs = TRUE, cutoff_method = "minpval", num_cutoffs = "two",
+    min_group_size = 10, seed = 812
+  )
+
+  first <- run_once()
+  second <- run_once()
+  expect_equal(first$multipleCutTable$asDF$cutpoint_value,
+               second$multipleCutTable$asDF$cutpoint_value)
+  expect_match(strip_survivalcont_html(first$infoMessages$content),
+               "1000 unique combinations", fixed = TRUE)
+  expect_match(strip_survivalcont_html(first$infoMessages$content),
+               "solution is approximate", fixed = TRUE)
+})
+
+test_that("Regression: recursive cut-offs follow sequential survminer splits", {
+  skip_if_not_installed("survminer")
+  df <- make_survivalcont_cohort()
+  analysis <- run_survivalcont_jamovi(
+    data = df, elapsedtime = "time", outcome = "status", contexpl = "marker",
+    multiple_cutoffs = TRUE, cutoff_method = "recursive", num_cutoffs = "two",
+    min_group_size = 10
+  )
+  observed <- analysis$.__enclos_env__$private$.recursiveCutoffs(
+    df, "time", "status", "marker", 2L
+  )
+
+  expected <- numeric(2)
+  current <- df
+  for (i in seq_len(2)) {
+    split <- suppressMessages(survminer::surv_cutpoint(
+      current, time = "time", event = "status", variables = "marker",
+      minprop = 0.10
+    ))
+    expected[i] <- summary(split)$cutpoint
+    if (i < 2L) {
+      margin <- 0.1 * stats::sd(current$marker)
+      current <- current[abs(current$marker - expected[i]) > margin, ]
+    }
+  }
+
+  expect_equal(observed, sort(expected))
 })
 
 test_that("Regression: asSource() emits each option once and produces runnable R", {
@@ -294,6 +379,60 @@ test_that("Regression: plot axis extents follow the selected time unit", {
   }
 })
 
+test_that("Regression: multiple-cutoff plot state is compact and still renders", {
+  df <- make_survivalcont_cohort(160)
+  analysis <- run_survivalcont_jamovi(
+    data = df, elapsedtime = "time", outcome = "status", contexpl = "marker",
+    multiple_cutoffs = TRUE, cutoff_method = "quantile", num_cutoffs = "two",
+    sc = TRUE
+  )
+  analysis$run()
+
+  cutoff_state <- analysis$results$plotMultipleCutoffs$state
+  survival_state <- analysis$results$plotMultipleSurvival$state
+  expect_named(cutoff_state, c("values", "cutoff_values", "method"))
+  expect_named(survival_state, c("time", "outcome", "risk_groups", "method"))
+  forbidden <- c("results", "multicut_results", "original_data")
+  expect_false(any(forbidden %in% names(cutoff_state)))
+  expect_false(any(forbidden %in% names(survival_state)))
+
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_no_error(analysis$.__enclos_env__$private$.plotMultipleCutoffs(
+    analysis$results$plotMultipleCutoffs, NULL, NULL
+  ))
+  expect_no_error(analysis$.__enclos_env__$private$.plotMultipleSurvival(
+    analysis$results$plotMultipleSurvival, NULL, NULL
+  ))
+})
+
+test_that("Regression: multiple-cutoff survival plot honors censor and median-line controls", {
+  df <- make_survivalcont_cohort(160)
+  analysis <- run_survivalcont_jamovi(
+    data = df, elapsedtime = "time", outcome = "status", contexpl = "marker",
+    multiple_cutoffs = TRUE, cutoff_method = "quantile", num_cutoffs = "two",
+    sc = TRUE, censored = TRUE, medianline = "hv"
+  )
+  analysis$run()
+
+  captured <- new.env(parent = emptyenv())
+  testthat::local_mocked_bindings(
+    ggsurvplot = function(...) {
+      captured$args <- list(...)
+      structure(list(), class = "ggsurvplot")
+    },
+    .package = "survminer"
+  )
+
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_true(analysis$.__enclos_env__$private$.plotMultipleSurvival(
+    analysis$results$plotMultipleSurvival, NULL, NULL
+  ))
+  expect_true(captured$args$censor)
+  expect_identical(captured$args$surv.median.line, "hv")
+})
+
 test_that("Regression: a reduced single cut-off keeps marker-value labels", {
   # Minimum-group-size enforcement can leave one cut-off. .createRiskGroups had
   # no length-1 branch, so it fell through to the generic cut() fallback and
@@ -384,6 +523,15 @@ test_that("Regression: misuse warnings reach the user instead of the hidden todo
   )
   expect_match(strip_survivalcont_html(res$warnings$content), "overfitting", fixed = TRUE)
   expect_false(grepl("overfitting", paste(res$todo$content, collapse = ""), fixed = TRUE))
+
+  # Plot selection is descriptive output, not a family of hypothesis tests.
+  plots <- run_survivalcont(
+    data = df, elapsedtime = "time", outcome = "status", contexpl = "marker",
+    findcut = TRUE, sc = TRUE, kmunicate = TRUE, ce = TRUE, ch = TRUE,
+    loglog = TRUE
+  )
+  expect_false(grepl("multiple comparisons",
+                     strip_survivalcont_html(plots$warnings$content), fixed = TRUE))
 })
 
 test_that("Regression: unusable date and stratification inputs are diagnosed, not absorbed", {
@@ -425,6 +573,22 @@ test_that("Regression: unusable date and stratification inputs are diagnosed, no
   )
   expect_equal(res$stratifiedCoxTable$rowCount, 0L)
   expect_match(res$stratifiedCoxTable$notes$toomany$note, "Not fitted", fixed = TRUE)
+
+  # A small/event-poor stratum is allowed but explicitly disclosed.
+  sparse_strata <- transform(
+    continuous_strata,
+    site = factor(c(rep("small", 5), rep("large", n - 5)))
+  )
+  sparse_strata$status[seq_len(5)] <- c(1, 0, 0, 0, 0)
+  res <- run_survivalcont(
+    data = sparse_strata, elapsedtime = "time", outcome = "status",
+    contexpl = "marker", stratified_cox = TRUE, strata_variable = "site"
+  )
+  expect_gt(res$stratifiedCoxTable$rowCount, 0L)
+  expect_match(res$stratifiedCoxTable$notes$sparse$note,
+               "small (n=5, events=1)", fixed = TRUE)
+  expect_match(strip_survivalcont_html(res$warnings$content),
+               "Sparse strata in stratified Cox model", fixed = TRUE)
 })
 
 test_that("Regression: labels and narratives stay consistent with the tables beside them", {

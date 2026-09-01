@@ -152,7 +152,7 @@
 | `rmstExplanation` | `Html` | `Understanding Restricted Mean Survival Time (RMST)` |  |
 | `residualDiagnosticsExplanation` | `Html` | `Understanding Cox Model Residual Diagnostics` |  |
 | `residualsTable` | `Table` | `Cox Model Residuals` |  |
-| `survivalExport` | `Output` | `Export Survival Data` |  |
+| `export_survival_data` | `Output` | `Export Survival Data` | KM survival probability at each case's own follow-up time |
 | `survivalExportSummary` | `Html` | `Export Summary` |  |
 | `pairwiseComparisonHeading` | `Preformatted` | `Pairwise Comparison Analysis` |  |
 | `pairwiseTable` | `Table` | ``Pairwise Comparison Table - ${explanatory}`` |  |

@@ -16,6 +16,7 @@ It offers several output styles using different packages (tableone, gtsummary, a
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
+    \item \href{#method-tableoneClass-init}{\code{tableoneClass$init()}}
     \item \href{#method-tableoneClass-asSource}{\code{tableoneClass$asSource()}}
     \item \href{#method-tableoneClass-clone}{\code{tableoneClass$clone()}}
   }
@@ -39,7 +40,6 @@ It offers several output styles using different packages (tableone, gtsummary, a
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="addAddon"><a href='../../jmvcore/html/Analysis.html#method-Analysis-addAddon'><code>jmvcore::Analysis$addAddon()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="postInit"><a href='../../jmvcore/html/Analysis.html#method-Analysis-postInit'><code>jmvcore::Analysis$postInit()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="print"><a href='../../jmvcore/html/Analysis.html#method-Analysis-print'><code>jmvcore::Analysis$print()</code></a></span></li>
@@ -52,6 +52,25 @@ It offers several output styles using different packages (tableone, gtsummary, a
   <li><code>tableoneBase$initialize()</code></li>
 </ul>
 </details>}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-tableoneClass-init"></a>}}
+\if{latex}{\out{\hypertarget{method-tableoneClass-init}{}}}
+\subsection{\code{tableoneClass$init()}}{
+  Initialize the analysis, validating original R column shapes and empty selections.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{tableoneClass$init(noThrow = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{noThrow}}{Whether initialization errors are stored in the results.}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-tableoneClass-asSource"></a>}}
 \if{latex}{\out{\hypertarget{method-tableoneClass-asSource}{}}}

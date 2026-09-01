@@ -1,0 +1,8 @@
+{
+  "lambda_diff": 0,
+  "coefficient_max_diff": 0,
+  "score_max_diff": 0,
+  "c_index": 0.724276467524738,
+  "manual_c": 0.72427646752474,
+  "c_difference": 1.99840144432528e-15
+}

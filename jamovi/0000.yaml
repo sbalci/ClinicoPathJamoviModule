@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.8.04
+version: 1.0.8.05
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-08-30'
+date: '2026-09-01'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -22,9 +22,11 @@ analyses:
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One
     description: >
-      This function generates a "Table One", a descriptive summary table
-      frequently used in  clinicopathological research manuscripts. It supports
-      multiple output styles for flexible formatting.
+      Generate an overall-cohort descriptive Table One for clinicopathological
+      research. Four output styles are available. This analysis does not
+      stratify by group or compute p-values, confidence intervals or
+      standardized mean differences. Each row is treated as one case; check for
+      repeated records before interpreting counts as patients.
     ribbon: analyses
     category: analyses
   - title: Summary of Continuous Variables
@@ -1028,7 +1030,7 @@ analyses:
   - title: Single Arm Survival
     name: singlearm
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Single Arm Survival
     menuSubtitle: Survival for whole group, no explanatory factor
@@ -1056,19 +1058,19 @@ analyses:
       do not establish causality.
     ribbon: analyses
     category: analyses
-  - title: Survival Analysis for Continuous Variable
+  - title: Survival Analysis for Continuous Explanatory Variable
     name: survivalcont
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
-    menuTitle: Survival Analysis for Continuous Variable
+    menuTitle: Survival Analysis for Continuous Explanatory Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
     ribbon: analyses
     category: analyses
   - title: Multivariable Survival Analysis
     name: multisurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: ClinicoPath Survival
     menuTitle: Multivariable Survival Analysis
     menuSubtitle: Multivariable Cox-regression, Adjusted Survival
@@ -1103,7 +1105,7 @@ analyses:
   - title: Odds Ratio Table and Plot
     name: oddsratio
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: General Statistics
     menuTitle: Odds Ratio Table and Plot
     menuSubtitle: Odds Ratio for Binary Outcomes
@@ -1115,7 +1117,7 @@ analyses:
   - title: Comprehensive Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuTitle: Comprehensive Time Interval Calculator
     menuSubgroup: Data Preparation
     menuSubtitle: Advanced time interval analysis with quality assessment
@@ -1154,7 +1156,7 @@ analyses:
   - title: DateTime Converter
     name: datetimeconverter
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: Data Preparation
     menuTitle: DateTime Converter
     menuSubtitle: Convert datetime and extract components
@@ -1210,7 +1212,7 @@ analyses:
   - title: Outcome Organizer for Survival Analysis
     name: outcomeorganizer
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuTitle: Outcome Organizer for Survival Analysis
     menuSubgroup: Data Preparation
     menuSubtitle: Comprehensive Outcome Preparation for Survival Analysis
@@ -1314,7 +1316,7 @@ analyses:
   - title: Lasso-Cox Regression
     name: lassocox
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: Penalized Cox Regression
     menuTitle: LASSO Cox
     menuSubtitle: Sparse Cox model development with cross-validated L1 penalization.

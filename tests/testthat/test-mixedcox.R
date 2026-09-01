@@ -62,8 +62,6 @@ test_that('mixedcox analysis works', {
     show_cluster_summary = FALSE,
     showSummaries = FALSE,
     showExplanations = FALSE,
-    addClusterEffects = FALSE,
-    addFittedValues = FALSE,
     outcomeLevel = NULL
     )
   })

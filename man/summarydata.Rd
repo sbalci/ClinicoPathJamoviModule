@@ -29,7 +29,8 @@ test, skewness, and kurtosis) will be computed and explained.}
 measures. Default of 2 aligns with standard laboratory reporting. Governs
 the text summary, the skewness and kurtosis values, the visual summary
 table, the outlier report and the draft statistical summary. P-values are
-always shown to 3 decimal places.}
+normally shown to 3 decimal places; additional digits are retained near
+0.05 when needed to preserve the test decision.}
 
 \item{outliers}{If TRUE, flag observations outside the 1.5 x IQR fences as
 potential outliers. Helpful for quality control and identifying possible

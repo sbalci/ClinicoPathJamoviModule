@@ -52,9 +52,16 @@ children:
     label: Data Quality & Statistics
     collapsed: true
     children:
+      # Label matches the .a.yaml title. It used to read "Negative-interval
+      # exclusion" while the .a.yaml said "Remove negative intervals" -- one
+      # option under two names, with the GUI showing the vaguer one and two
+      # backend messages quoting it. The verb stays: this filter deletes rows
+      # from every statistic including the person-time denominator, and saying
+      # so is the point (the sibling "Remove extreme values" was renamed from
+      # "Flag extreme values" for exactly that reason).
       - type: CheckBox
         name: remove_negative
-        label: Negative-interval exclusion
+        label: Remove negative intervals
       - type: CheckBox
         name: remove_extreme
       - type: TextBox
@@ -73,9 +80,12 @@ children:
     label: Output Options
     collapsed: true
     children:
-      - type: CheckBox
-        name: add_times
-        label: Calculated-time variables
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Output
+            name: calculated_time
+            label: Add calculated times to dataset
       - type: CheckBox
         name: show_summary
   - type: LayoutBox

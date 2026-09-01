@@ -565,6 +565,8 @@ items:
       - indicator_types
 ```
 
+> SUPERSEDED (2026-08-31): the varTitle placeholder above does NOT interpolate -- jmvcore::format's placeholder regex excludes underscores, so the literal `{factor_score_name}` shipped as the column name; keep `varTitle` static and set the user's column name at runtime with `self$results$save_factor_scores$setTitle(col_name)` in `.b.R`.
+
 - [ ] **Step 1.4: Write skeletal `R/latentbiomarker.b.R`**
 
 ```r

@@ -286,14 +286,3 @@ children:
                 name: showExplanations
               - type: CheckBox
                 name: showSummaries
-      - type: Label
-        label: Output Variables
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: addClusterEffects
-                enable: (random_effects_prediction)
-              - type: CheckBox
-                name: addFittedValues

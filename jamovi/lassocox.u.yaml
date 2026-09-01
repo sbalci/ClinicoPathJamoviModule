@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Time Elapsed
+        label: Follow-up time
         children:
           - type: VariablesListBox
             name: elapsedtime
@@ -29,25 +29,25 @@ children:
             name: censorLevel
             enable: (outcome)
       - type: TargetLayoutBox
-        label: Explanatory Variables
+        label: Candidate predictors
         children:
           - type: VariablesListBox
             name: explanatory
             isTarget: true
   - type: CollapseBox
-    label: Data Suitability
+    label: Data suitability
     collapsed: false
     stretchFactor: 1
     children:
       - type: CheckBox
         name: suitabilityCheck
   - type: CollapseBox
-    label: Model Options
+    label: Model options
     collapsed: true
     stretchFactor: 1
     children:
       - type: Label
-        label: Lambda Selection
+        label: Lambda selection
         children:
           - type: ComboBox
             name: lambda
@@ -69,19 +69,27 @@ children:
       - type: CheckBox
         name: coef_plot
       - type: CheckBox
+        name: path_plot
+      - type: CheckBox
         name: survival_plot
   - type: CollapseBox
-    label: Output Options
+    label: Output options
     collapsed: true
     stretchFactor: 1
     children:
+      - type: CheckBox
+        name: showEncoding
+      - type: CheckBox
+        name: showReproducibility
+      - type: CheckBox
+        name: showRCode
       - type: Label
-        label: Save Variables
+        label: Save variables
         children:
           - type: Output
             name: riskScore
   - type: CollapseBox
-    label: Explanatory Output
+    label: Explanatory output
     collapsed: true
     stretchFactor: 1
     children:
@@ -109,4 +117,3 @@ children:
             name: random_seed
             format: number
             width: large
-

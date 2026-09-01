@@ -1,0 +1,91 @@
+{
+  "tests": [
+    {
+      "file": "test-lassocox-arguments.R",
+      "blocks": 12,
+      "passed": 27,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "test-lassocox-audit-fixes.R",
+      "blocks": 9,
+      "passed": 98,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "test-lassocox-basic.R",
+      "blocks": 5,
+      "passed": 9,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "test-lassocox-edge-cases.R",
+      "blocks": 12,
+      "passed": 55,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "test-lassocox-integration.R",
+      "blocks": 8,
+      "passed": 74,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "test-lassocox-release-fixes.R",
+      "blocks": 7,
+      "passed": 23,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "test-lassocox-safety-provenance.R",
+      "blocks": 6,
+      "passed": 66,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "test-lassocox.R",
+      "blocks": 27,
+      "passed": 71,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "total_passed": 423,
+  "total_blocks": 86,
+  "rendering_contract": {
+    "assertions": 6,
+    "blocks": 4
+  },
+  "ui": "placeholder present = false; errors = undefined",
+  "translations": 320,
+  "source_md5": {
+    "R/lassocox.b.R": "ed3e0268e8d1cd271ac5261cdb242f3d",
+    "R/lassocox.h.R": "01f52f91b073319e72374898932ce66b",
+    "jamovi/lassocox.a.yaml": "81bf19fe249f4580f00280c5eec28789",
+    "jamovi/lassocox.r.yaml": "c620068b400b8ea43e5aea983e67fa76",
+    "jamovi/lassocox.u.yaml": "870362d1a14094955fa897e57d5b98d0",
+    "tests/testthat/test-lassocox-arguments.R": "0be158ad7c58c02f22bc661c8a1ee6b7",
+    "tests/testthat/test-lassocox-audit-fixes.R": "e8700bcb2d6d45bb82dceb4e45732ef4",
+    "tests/testthat/test-lassocox-basic.R": "7786ef2d183f2ba455904082f1290213",
+    "tests/testthat/test-lassocox-edge-cases.R": "dbdb554630fb01572a9462b658704e97",
+    "tests/testthat/test-lassocox-integration.R": "82170b26276936a41cd34ea35a45ecfd",
+    "tests/testthat/test-lassocox-release-fixes.R": "2e267a1408801dbf9287240b0665e13c",
+    "tests/testthat/test-lassocox-safety-provenance.R": "b56a4c43c6329a557bdcf53c4ae2ce9c",
+    "tests/testthat/test-lassocox.R": "066e17e0db553153b3d60863e359667d"
+  }
+}

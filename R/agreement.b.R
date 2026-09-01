@@ -8536,7 +8536,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                if (self$options$loaVariable) {
+                # Both gates required: loaVariable performs the calculation, loaOutput
+                # delivers the column. Either one alone means nothing was added.
+                if (self$options$loaVariable && self$options$loaOutput) {
                     var_name <- self$options$loaVariableName
                     detail_mode <- self$options$detailLevel
 
@@ -8739,14 +8741,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     ))
                 }
 
-                # Add LoA variable to dataset
-                if (self$options$loaVariable) {
+                # Add LoA variable to dataset. Gated on the `loaOutput` Output option,
+                # NOT on loaVariable: jmvcore's Output$enabled resolves by the result
+                # item's own name, so anything else leaves the column computed and
+                # silently discarded. Mirrors consensusVar above.
+                if (self$options$loaOutput) {
                     self$results$loaOutput$setRowNums(1:n_cases)
                     self$results$loaOutput$setValues(loa_categories)
                 }
 
                 # Update computed variables info
-                if (self$options$consensusVar || self$options$loaVariable) {
+                if (self$options$consensusVar || self$options$loaOutput) {
                     private$.updateComputedVariablesInfo()
                 }
             },
@@ -11706,9 +11711,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 private$.checkpoint()
 
                 # Consensus Variable Calculation (if requested) ----
-                if (self$options$consensusVar || self$options$loaVariable) {
-                    self$results$computedVariablesHeading$setVisible(TRUE)
-                }
+                # No setVisible() here: the declarative `visible:` expression in
+                # agreement.r.yaml gates computedVariablesHeading.
                 if (self$options$consensusVar) {
                     private$.createConsensusVariable(ratings)
                 }

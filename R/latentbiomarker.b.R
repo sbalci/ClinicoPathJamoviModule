@@ -672,20 +672,34 @@ latentbiomarkerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (self$options$save_factor_scores) {
                 col_name <- opt$factor_score_name
                 if (is.null(col_name) || !nzchar(col_name)) col_name <- "biomarker_factor"
-                full_n <- nrow(self$data)
-                full_vec <- rep(NA_real_, full_n)
-                idx <- as.integer(rownames(df))
-                # idx may be NA when rownames are not integers; guard:
-                if (!all(is.na(idx)) && max(idx, na.rm = TRUE) <= full_n) {
-                    full_vec[idx] <- factor_scores
-                } else {
-                    # Fallback: write only first length(factor_scores) rows
-                    full_vec[seq_along(factor_scores)] <- factor_scores
+                # setTitle() sits OUTSIDE the isNotFilled() guard on purpose: the
+                # .r.yaml varTitle must stay static (jmvcore::format's placeholder
+                # regex excludes underscores, so '{factor_score_name}' would ship
+                # verbatim), so the column name only ever comes from here. A re-run
+                # that skips the data write must still restore the user's name.
+                self$results$save_factor_scores$setTitle(col_name)
+                if (self$results$save_factor_scores$isNotFilled()) {
+                    # rownames() are original-dataset row LABELS, not positions:
+                    # jamovi keeps the pre-filter row numbers as row names, so
+                    # as.integer(rownames(df)) is a valid index into self$data only
+                    # when no row filter is active. match() maps each analysed row
+                    # to its position in the full-length vector that setRowNums()
+                    # is paired with.
+                    row_labels <- rownames(self$data)
+                    full_vec <- rep(NA_real_, length(row_labels))
+                    full_vec[match(rownames(df), row_labels)] <- factor_scores
+                    # setRowNums() coerces with as.integer(). jamovi always labels
+                    # rows by their original row number, but a data frame handed in
+                    # from the R API may carry text labels, which would coerce to NA
+                    # and emit a stray "NAs introduced by coercion" analysis note.
+                    row_nums <- suppressWarnings(as.integer(row_labels))
+                    if (anyNA(row_nums)) row_nums <- seq_along(row_labels)
+                    # jmvcore's `index` arg selects the OUTPUT ITEM, not the rows --
+                    # passing row numbers there crashes with "no such index at level 2".
+                    # Row alignment is done with setRowNums().
+                    self$results$save_factor_scores$setRowNums(row_nums)
+                    self$results$save_factor_scores$setValues(full_vec)
                 }
-                self$results$save_factor_scores$setValues(
-                    index  = seq_len(full_n),
-                    values = full_vec
-                )
             }
 
             # ---- R code export (Task 11) ----

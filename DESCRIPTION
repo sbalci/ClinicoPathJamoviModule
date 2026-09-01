@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 1.0.8.04
-Date: 2026-08-30
+Version: 1.0.8.05
+Date: 2026-09-01
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre", "cph"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: Provides a comprehensive jamovi module designed specifically
@@ -56,7 +56,7 @@ Imports: aftgee, anytime, arsenal, assertions, BART, base64enc, BayesFactor, bay
     JMbayes2, jmvcore, joineR, jsonlite, jtools, kableExtra, kappaSize,
     Kendall, kernlab, KernSmooth, kknn, klaR, KMunicate, knitr, labelled,
     lavaan, leaps, lm.beta, lme4, lmerTest, lmtest, locfit, logistf,
-    lubridate, mada, magick, magrittr, MASS, maxstat, MBESS, mboost, MCMCglmm,
+    lubridate, mada, magick, magrittr, MASS, Matrix, maxstat, MBESS, mboost, MCMCglmm,
     mediation, MendelianRandomization, meta, metaBMA, metafor, methods, mgcv,
     mice, mixOmics, mlr3, mlr3learners, mlr3measures, mlr3pipelines, mlr3viz,
     moments, msm, mstate, multcomp, mutationtypes, mvtnorm, naivebayes,
@@ -274,6 +274,7 @@ Collate:
     'data_singlearm_docs.R'
     'data_survivalcont_docs.R'
     'data_swimmer_unified_docs.R'
+    'data_tableone_docs.R'
     'data_tidyplots_docs.R'
     'data_timeinterval_docs.R'
     'data_timeroc_docs.R'

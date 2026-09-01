@@ -19,6 +19,10 @@ lassocox(
   cv_plot = TRUE,
   coef_plot = TRUE,
   survival_plot = TRUE,
+  path_plot = FALSE,
+  showEncoding = FALSE,
+  showReproducibility = FALSE,
+  showRCode = FALSE,
   showSummary = FALSE,
   showExplanations = FALSE,
   showMethodologyNotes = FALSE,
@@ -30,8 +34,10 @@ lassocox(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{elapsedtime}{The numeric variable representing follow-up time until
-the event or last observation.}
+\item{elapsedtime}{The strictly positive numeric follow-up time until the
+event or last observation. Zero or negative times must be resolved from the
+time origin and measurement resolution; they are not automatically
+adjusted.}
 
 \item{outcome}{Binary event indicator variable (event vs censored). Can be
 factor or numeric with exactly two observed values.}
@@ -48,9 +54,12 @@ outcome are excluded; additional observed event types cause the analysis to
 stop and must be recoded explicitly for a cause-specific analysis.}
 
 \item{explanatory}{Variables to be considered for selection in the
-Lasso-Cox regression. Constant variables are removed before fitting.
-Categorical predictors are expanded into indicator columns, which LASSO
-selects individually rather than as a grouped factor.}
+Lasso-Cox regression. Time and outcome cannot also be predictors. Infinite
+values and entirely missing predictors are rejected. Constant variables are
+removed before fitting. Categorical predictors are expanded into treatment
+indicator columns, including ordered factors; the first observed factor
+level is the reference. Global/custom contrasts are not used. LASSO selects
+columns individually rather than as a grouped factor.}
 
 \item{lambda}{Cross-validation rule used to select lambda. A valid empty
 model selected by the 1-SE rule is preserved and is not replaced by
@@ -84,6 +93,21 @@ coefficients at the chosen lambda value.}
 splitting the development sample at its median fitted score. The split is
 not a validated clinical cutoff and no group-comparison p-value is
 reported.}
+
+\item{path_plot}{Plot coefficients across the fitted log-lambda path with
+both CV choices and counts of nonzero columns. For readability, at most 30
+paths are displayed, ranked by their summed absolute coefficients across
+the path.}
+
+\item{showEncoding}{Display the original predictor, design column, coding,
+reference level, and selection status.}
+
+\item{showReproducibility}{Display exact lambda choices, seed, event/censor
+fold counts, and software versions.}
+
+\item{showRCode}{Generate upstream glmnet R code to refit the same
+development data with the recorded encoding and stratified CV seed. This is
+not external validation.}
 
 \item{showSummary}{Display a natural-language development summary that
 labels discrimination as apparent and states the required validation.}
@@ -120,6 +144,10 @@ A results object containing:
 \code{results$coef_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$survival_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$riskScore} \tab \tab \tab \tab \tab an output \cr
+\code{results$path_plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$encoding} \tab \tab \tab \tab \tab a table \cr
+\code{results$reproducibility} \tab \tab \tab \tab \tab a table \cr
+\code{results$rCode} \tab \tab \tab \tab \tab a html \cr
 \code{results$summaryText} \tab \tab \tab \tab \tab a html \cr
 \code{results$lassoExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$methodologyNotes} \tab \tab \tab \tab \tab a html \cr

@@ -1,24 +1,28 @@
-# Table One - Feature Mapping Specification
+# Table One — feature map
 
-## Feature-to-Code Mapping
+Detailed behavior is in [the developer documentation](tableone-documentation.md).
 
-- **Analysis Function**: `tableone`
-- **Module**: `ExplorationT`
+| Input | UI | Backend | Results affected |
+| --- | --- | --- | --- |
+| `data` | Active dataset, no separate control | `self$data` | All data-dependent output |
+| `vars` | VariablesListBox | `.prepareVariables()` and `.prepareCohort()` | Table, omission notices, quality, summary, report |
+| `sty` | ComboBox | `.renderTable()`; t4 eligibility before exclusion | One of `tablestyle1`–`tablestyle4`; cohort-dependent supplementary output |
+| `excl` | CheckBox | `.prepareCohort()` calls `jmvcore::naOmit()` after eligibility | Table, quality, summary, report |
+| `nonnormal` | CheckBox, t1 only | `print.TableOne(nonnormal = names(data))` | `tablestyle1`; guidance |
+| `showSummary` | CheckBox | `.generateSummary()` | `summary`, declaratively visible |
+| `showAbout` | CheckBox | `.setAboutContent()`, only when requested | `about`, declaratively visible |
+| `showReportSentence` | CheckBox | `.setReportSentence()` after rendering | `reportSentence`, declaratively visible |
 
-| Feature / Option | UI Binding | Backend Handler | Target Result Item |
-| :--- | :--- | :--- | :--- |
-| `data` | UI Control `data` | `self$options$data` | Output item / Table |
-| `vars` | UI Control `vars` | `self$options$vars` | Output item / Table |
-| `sty` | UI Control `sty` | `self$options$sty` | Output item / Table |
-| `excl` | UI Control `excl` | `self$options$excl` | Output item / Table |
-| `showSummary` | UI Control `showSummary` | `self$options$showSummary` | Output item / Table |
-| `showAbout` | UI Control `showAbout` | `self$options$showAbout` | Output item / Table |
-| `showReportSentence` | UI Control `showReportSentence` | `self$options$showReportSentence` | Output item / Table |
-| `nonnormal` | UI Control `nonnormal` | `self$options$nonnormal` | Output item / Table |
+Other handlers: `.clearOutputs()` prevents restored output from surviving early
+returns; `.checkDataQuality()` populates `assumptions` before the tables in the
+result layout; `.normalizeArsenalHtml()` protects text export; `.sourcifyOption()`
+and `asSource()` generate reproducible R calls. There are no plot, model or
+stratification handlers.
 
-## Verification Checklist
-
-- [x] All options defined in `.a.yaml` have matching UI bindings in `.u.yaml`.
-- [x] Backend `R/tableone.b.R` references all declared options safely.
-- [x] Results definitions in `.r.yaml` correspond to populated output containers.
-
+`init()` rejects selected matrix/array/list columns before framework flattening.
+`.prepareVariables()` normalizes actual NA factor levels before cohort selection.
+`.htmlSafeTableData()` preserves factor codes and missingness while escaping
+labels; arsenal rendering checks that missingness is unchanged. Janitor hides
+unused levels, and gtsummary labels the counted dichotomous level.
+`.formatText()` supports translated named placeholders without interpreting
+braces or backslashes supplied in variable names.

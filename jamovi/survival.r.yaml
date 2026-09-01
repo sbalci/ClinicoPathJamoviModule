@@ -865,11 +865,11 @@ items:
         - outcome
         - outcomeLevel
 
-    - name: survivalExport
+    - name: export_survival_data
       title: 'Export Survival Data'
       type: Output
-      varTitle: 'Survival Estimates Export'
-      varDescription: 'Detailed survival estimates for external analysis'
+      varTitle: 'KM Survival Probability'
+      varDescription: "Kaplan-Meier survival probability at each case's own follow-up time, from that case's own group curve when an explanatory variable is set"
       clearWith:
         - export_survival_data
         - explanatory

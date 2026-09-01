@@ -121,7 +121,8 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..eventPriority <- jmvcore::OptionInteger$new(
                 "eventPriority",
                 eventPriority,
-                default=1)
+                default=1,
+                min=1)
             private$..intervalCensoring <- jmvcore::OptionBool$new(
                 "intervalCensoring",
                 intervalCensoring,
@@ -164,6 +165,8 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 default=FALSE)
             private$..addOutcome <- jmvcore::OptionOutput$new(
                 "addOutcome")
+            private$..addAdminTime <- jmvcore::OptionOutput$new(
+                "addAdminTime")
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..outcomeLevel)
@@ -190,6 +193,7 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..showNaturalSummary)
             self$.addOption(private$..showGlossary)
             self$.addOption(private$..addOutcome)
+            self$.addOption(private$..addAdminTime)
         }),
     active = list(
         outcome = function() private$..outcome$value,
@@ -216,7 +220,8 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         visualization = function() private$..visualization$value,
         showNaturalSummary = function() private$..showNaturalSummary$value,
         showGlossary = function() private$..showGlossary$value,
-        addOutcome = function() private$..addOutcome$value),
+        addOutcome = function() private$..addOutcome$value,
+        addAdminTime = function() private$..addAdminTime$value),
     private = list(
         ..outcome = NA,
         ..outcomeLevel = NA,
@@ -242,7 +247,8 @@ outcomeorganizerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..visualization = NA,
         ..showNaturalSummary = NA,
         ..showGlossary = NA,
-        ..addOutcome = NA)
+        ..addOutcome = NA,
+        ..addAdminTime = NA)
 )
 
 outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -261,7 +267,8 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         outcomeViz = function() private$.items[["outcomeViz"]],
         naturalSummary = function() private$.items[["naturalSummary"]],
         glossary = function() private$.items[["glossary"]],
-        addOutcome = function() private$.items[["addOutcome"]]),
+        addOutcome = function() private$.items[["addOutcome"]],
+        addAdminTime = function() private$.items[["addAdminTime"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -293,7 +300,18 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "dod",
                     "dooc",
                     "awd",
-                    "awod")))
+                    "awod",
+                    "recurrence",
+                    "recurrenceLevel",
+                    "useHierarchy",
+                    "eventPriority",
+                    "patientID",
+                    "intervalCensoring",
+                    "intervalStart",
+                    "intervalEnd",
+                    "adminCensoring",
+                    "adminDate",
+                    "followupTime")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -332,10 +350,14 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
+                refs=list(
+                    "AustinLeeFine2016",
+                    "survival",
+                    "cmprsk",
+                    "mstate"),
                 title="Summary of Outcome Recoding",
                 clearWith=list(
                     "outcome",
-                    "patientID",
                     "outcomeLevel",
                     "multievent",
                     "analysistype",
@@ -347,8 +369,13 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "recurrenceLevel",
                     "useHierarchy",
                     "eventPriority",
+                    "patientID",
                     "intervalCensoring",
-                    "adminCensoring")))
+                    "intervalStart",
+                    "intervalEnd",
+                    "adminCensoring",
+                    "adminDate",
+                    "followupTime")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="outputTable",
@@ -374,7 +401,6 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `type`="number")),
                 clearWith=list(
                     "outcome",
-                    "patientID",
                     "outcomeLevel",
                     "multievent",
                     "analysistype",
@@ -385,7 +411,14 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "recurrence",
                     "recurrenceLevel",
                     "useHierarchy",
-                    "eventPriority")))
+                    "eventPriority",
+                    "patientID",
+                    "intervalCensoring",
+                    "intervalStart",
+                    "intervalEnd",
+                    "adminCensoring",
+                    "adminDate",
+                    "followupTime")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="diagnosticsTable",
@@ -403,7 +436,6 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `type`="text")),
                 clearWith=list(
                     "outcome",
-                    "patientID",
                     "outcomeLevel",
                     "multievent",
                     "analysistype",
@@ -415,11 +447,13 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "recurrenceLevel",
                     "useHierarchy",
                     "eventPriority",
+                    "patientID",
                     "intervalCensoring",
                     "intervalStart",
                     "intervalEnd",
                     "adminCensoring",
-                    "adminDate")))
+                    "adminDate",
+                    "followupTime")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="outcomeViz",
@@ -430,22 +464,6 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 visible="(visualization)",
                 clearWith=list(
                     "outcome",
-                    "patientID",
-                    "outcomeLevel",
-                    "multievent",
-                    "analysistype",
-                    "dod",
-                    "dooc",
-                    "awd",
-                    "awod")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="naturalSummary",
-                title="Natural Language Summary (Copy-Ready)",
-                visible="(showNaturalSummary)",
-                clearWith=list(
-                    "outcome",
-                    "patientID",
                     "outcomeLevel",
                     "multievent",
                     "analysistype",
@@ -454,17 +472,56 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "awd",
                     "awod",
                     "recurrence",
-                    "recurrenceLevel")))
+                    "recurrenceLevel",
+                    "useHierarchy",
+                    "eventPriority",
+                    "patientID",
+                    "intervalCensoring",
+                    "intervalStart",
+                    "intervalEnd",
+                    "adminCensoring",
+                    "adminDate",
+                    "followupTime")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="naturalSummary",
+                refs=list(
+                    "AustinLeeFine2016"),
+                title="Natural Language Summary (Copy-Ready)",
+                visible="(showNaturalSummary)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "recurrence",
+                    "recurrenceLevel",
+                    "useHierarchy",
+                    "eventPriority",
+                    "patientID",
+                    "intervalCensoring",
+                    "intervalStart",
+                    "intervalEnd",
+                    "adminCensoring",
+                    "adminDate",
+                    "followupTime")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="glossary",
+                refs=list(
+                    "AustinLeeFine2016",
+                    "AalenJohansen1978"),
                 title="Survival Analysis Glossary",
                 visible="(showGlossary)"))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="addOutcome",
                 title="Add Recoded Outcome to Data",
-                varTitle="`Recoded Outcome for {analysistype} Survival Analysis`",
+                varTitle="Recoded Outcome",
                 varDescription="Outcome variable recoded for survival analysis based on selected analysis type",
                 measureType="nominal",
                 clearWith=list(
@@ -484,6 +541,33 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "intervalCensoring",
                     "adminCensoring",
                     "adminDate",
+                    "followupTime")))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="addAdminTime",
+                title="Add Truncated Follow-up Time to Data",
+                varTitle="Follow-up Truncated at Administrative Cut-off",
+                varDescription="Follow-up time truncated at the administrative censoring cut-off; pair this with the recoded outcome, not the original follow-up column",
+                measureType="continuous",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "recurrence",
+                    "recurrenceLevel",
+                    "useHierarchy",
+                    "eventPriority",
+                    "patientID",
+                    "intervalCensoring",
+                    "intervalStart",
+                    "intervalEnd",
+                    "adminCensoring",
+                    "adminDate",
                     "followupTime")))}))
 
 outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -494,7 +578,7 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "outcomeorganizer",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = outcomeorganizerResults$new(options=options),
                 data = data,
@@ -540,8 +624,12 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param awod The level representing patients who are alive and disease-free.
 #' @param useHierarchy If true, applies a hierarchy when multiple events occur
 #'   for the same patient.
-#' @param eventPriority The event code (e.g., 1, 2) that takes precedence when
-#'   multiple events occur.
+#' @param eventPriority The event code (1, 2, ...) that takes precedence when
+#'   a patient has several records. Minimum 1: code 0 is the censored/baseline
+#'   code, and giving it priority would make "censored" outrank every event and
+#'   silently erase them all. If the code entered here never occurs in the
+#'   recoded outcome the hierarchy cannot act, and the analysis says so rather
+#'   than reporting that it was applied.
 #' @param intervalCensoring If true, prepares data for interval-censored
 #'   analysis where exact event times are unknown.
 #' @param intervalStart Variable containing the start of the interval when the
@@ -575,6 +663,7 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   \code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$addOutcome} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$addAdminTime} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

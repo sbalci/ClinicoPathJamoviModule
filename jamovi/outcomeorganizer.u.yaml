@@ -93,15 +93,20 @@ children:
       - type: LayoutBox
         margin: large
         children:
+          # The backend runs the hierarchy only inside the multi-event branch, so
+          # enabling it on patientID alone let a user tick a control that could not
+          # act. Both operands are paren-wrapped in one expression: a jamovi
+          # `enable:` that is not paren-wrapped is an inert literal and the control
+          # is always enabled.
           - type: CheckBox
             name: useHierarchy
             label: Event hierarchy (long-format data only)
-            enable: (patientID)
+            enable: (patientID && multievent)
             children:
               - type: TextBox
                 name: eventPriority
                 format: number
-                enable: (useHierarchy && patientID)
+                enable: (useHierarchy && patientID && multievent)
 
   - type: CollapseBox
     label: Censoring Options
@@ -170,3 +175,6 @@ children:
             name: showGlossary
           - type: Output
             name: addOutcome
+          - type: Output
+            name: addAdminTime
+            enable: (adminCensoring)

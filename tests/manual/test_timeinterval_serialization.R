@@ -125,7 +125,6 @@ tryCatch({
         fu_date = "followup_date",
         time_format = "ymd",
         output_unit = "years",
-        add_times = TRUE,
         remove_negative = TRUE
     )
     cat("✓ TEST 6 PASSED: Add times successful\n\n")

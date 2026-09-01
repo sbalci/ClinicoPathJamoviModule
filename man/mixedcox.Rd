@@ -43,9 +43,7 @@ mixedcox(
   show_model_comparison = TRUE,
   show_cluster_summary = FALSE,
   showSummaries = FALSE,
-  showExplanations = FALSE,
-  addClusterEffects = FALSE,
-  addFittedValues = FALSE
+  showExplanations = FALSE
 )
 }
 \arguments{
@@ -158,12 +156,6 @@ and plots for interpretation of mixed-effects Cox regression results.}
 
 \item{showExplanations}{Display detailed explanations of mixed-effects Cox
 regression methods and interpretation guidelines.}
-
-\item{addClusterEffects}{Add predicted random effects (BLUPs) as new
-variables to dataset.}
-
-\item{addFittedValues}{Add fitted values from mixed-effects model to
-dataset.}
 }
 \value{
 A results object containing:
@@ -190,9 +182,6 @@ A results object containing:
 \code{results$iccExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelSelectionExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-\code{results$clusterEffectsOutput} \tab \tab \tab \tab \tab an output \cr
-\code{results$fittedValuesOutput} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

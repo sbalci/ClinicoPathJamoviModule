@@ -517,6 +517,14 @@ test_that("all styles handle data with no complete cases", {
   for (style in c("t1", "t2", "t3", "t4")) {
     result <- tableone(data = test_data, vars = c("Age", "Sex"), sty = style,
                        excl = TRUE)
-    expect_match(result$todo$content, "No cases left", info = style)
+    if (style == "t4") {
+      # Age is not a frequency variable and must not drive case exclusion.
+      expect_false(grepl("No cases left", result$todo$content, fixed = TRUE))
+      expect_match(result$tablestyle4$content, "Age (not categorical", fixed = TRUE)
+      text <- gsub("<[^>]*>", " ", result$tablestyle4$content)
+      expect_match(text, "Total\\s+5\\s+100.0%")
+    } else {
+      expect_match(result$todo$content, "No cases left", info = style)
+    }
   }
 })

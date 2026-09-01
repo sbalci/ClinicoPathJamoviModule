@@ -8,6 +8,7 @@ datetimeconverter(
   data,
   datetime_var = NULL,
   datetime_format = "auto",
+  two_digit_year = "standard",
   timezone = "system",
   preview_rows = 20,
   extract_year = FALSE,
@@ -40,7 +41,20 @@ attempts to identify the format automatically and warns when day-first and
 month-first parsing both succeed but disagree; manual selection ensures
 accurate parsing for specific datetime formats. Excel serial numbers use
 the 1899-12-30 origin, which is exact for dates from 1900-03-01 onward
-(Excel's 1900 system wrongly counts a 29 February 1900).}
+(Excel's 1900 system wrongly counts a 29 February 1900). A serial number
+does not record which epoch produced it, so auto-detection assumes the 1900
+system (the default in Windows Excel and in Mac Excel 2011 and later) and
+discloses that assumption. Choose 'excel_serial_1904' for files exported
+from Mac Excel 2008 or earlier; the same number is 1462 days later under
+that system.}
+
+\item{two_digit_year}{How to read a two-digit year. The standard pivot maps
+00-68 to 2000-2068 and 69-99 to 1969-1999, so a date of birth written
+14/04/55 becomes 1955 but 04/12/37 becomes 2037 rather than 1937. Choose
+'Always in the past' for columns that cannot contain future dates - dates
+of birth, diagnosis dates, specimen dates - and any date that would land
+after today is moved back one century. Columns with four-digit years are
+unaffected by this setting.}
 
 \item{timezone}{Timezone for datetime parsing. Provide an Olson identifier
 such as "Europe/Istanbul", "America/New_York", "UTC", or "system" to use

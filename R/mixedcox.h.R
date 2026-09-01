@@ -43,9 +43,7 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             show_model_comparison = TRUE,
             show_cluster_summary = FALSE,
             showSummaries = FALSE,
-            showExplanations = FALSE,
-            addClusterEffects = FALSE,
-            addFittedValues = FALSE, ...) {
+            showExplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -267,14 +265,6 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showExplanations",
                 showExplanations,
                 default=FALSE)
-            private$..addClusterEffects <- jmvcore::OptionBool$new(
-                "addClusterEffects",
-                addClusterEffects,
-                default=FALSE)
-            private$..addFittedValues <- jmvcore::OptionBool$new(
-                "addFittedValues",
-                addFittedValues,
-                default=FALSE)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -314,8 +304,6 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..show_cluster_summary)
             self$.addOption(private$..showSummaries)
             self$.addOption(private$..showExplanations)
-            self$.addOption(private$..addClusterEffects)
-            self$.addOption(private$..addFittedValues)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -355,9 +343,7 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         show_model_comparison = function() private$..show_model_comparison$value,
         show_cluster_summary = function() private$..show_cluster_summary$value,
         showSummaries = function() private$..showSummaries$value,
-        showExplanations = function() private$..showExplanations$value,
-        addClusterEffects = function() private$..addClusterEffects$value,
-        addFittedValues = function() private$..addFittedValues$value),
+        showExplanations = function() private$..showExplanations$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -396,9 +382,7 @@ mixedcoxOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..show_model_comparison = NA,
         ..show_cluster_summary = NA,
         ..showSummaries = NA,
-        ..showExplanations = NA,
-        ..addClusterEffects = NA,
-        ..addFittedValues = NA)
+        ..showExplanations = NA)
 )
 
 mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -426,10 +410,7 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         randomEffectsExplanation = function() private$.items[["randomEffectsExplanation"]],
         iccExplanation = function() private$.items[["iccExplanation"]],
         modelSelectionExplanation = function() private$.items[["modelSelectionExplanation"]],
-        bootstrapTable = function() private$.items[["bootstrapTable"]],
-        calculatedtime = function() private$.items[["calculatedtime"]],
-        clusterEffectsOutput = function() private$.items[["clusterEffectsOutput"]],
-        fittedValuesOutput = function() private$.items[["fittedValuesOutput"]]),
+        bootstrapTable = function() private$.items[["bootstrapTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -821,37 +802,7 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number")),
                 clearWith=list(
                     "bootstrap_variance",
-                    "bootstrap_samples")))
-            self$add(jmvcore::Output$new(
-                options=options,
-                name="calculatedtime",
-                title="Add Calculated Time to Data",
-                varTitle="`Calculated Time in Mixed Cox Function - from ${ dxdate } to { fudate }`",
-                varDescription="Calculated Time from given Dates in Mixed-Effects Cox Regression",
-                clearWith=list(
-                    "tint",
-                    "dxdate",
-                    "fudate")))
-            self$add(jmvcore::Output$new(
-                options=options,
-                name="clusterEffectsOutput",
-                title="Add Cluster Effects to Data",
-                varTitle="`Cluster Random Effects (BLUPs)`",
-                varDescription="Predicted random effects (BLUPs) for each cluster",
-                clearWith=list(
-                    "addClusterEffects",
-                    "cluster_var",
-                    "random_effects")))
-            self$add(jmvcore::Output$new(
-                options=options,
-                name="fittedValuesOutput",
-                title="Add Fitted Values to Data",
-                varTitle="`Mixed Cox Fitted Values`",
-                varDescription="Fitted values from mixed-effects Cox regression",
-                clearWith=list(
-                    "addFittedValues",
-                    "cluster_var",
-                    "fixed_effects")))}))
+                    "bootstrap_samples")))}))
 
 mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "mixedcoxBase",
@@ -953,10 +904,6 @@ mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   and plots for interpretation of mixed-effects Cox regression results.
 #' @param showExplanations Display detailed explanations of mixed-effects Cox
 #'   regression methods and interpretation guidelines.
-#' @param addClusterEffects Add predicted random effects (BLUPs) as new
-#'   variables to dataset.
-#' @param addFittedValues Add fitted values from mixed-effects model to
-#'   dataset.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -981,9 +928,6 @@ mixedcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$iccExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSelectionExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$clusterEffectsOutput} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$fittedValuesOutput} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1032,9 +976,7 @@ mixedcox <- function(
     show_model_comparison = TRUE,
     show_cluster_summary = FALSE,
     showSummaries = FALSE,
-    showExplanations = FALSE,
-    addClusterEffects = FALSE,
-    addFittedValues = FALSE) {
+    showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("mixedcox requires jmvcore to be installed (restart may be required)")
@@ -1103,9 +1045,7 @@ mixedcox <- function(
         show_model_comparison = show_model_comparison,
         show_cluster_summary = show_cluster_summary,
         showSummaries = showSummaries,
-        showExplanations = showExplanations,
-        addClusterEffects = addClusterEffects,
-        addFittedValues = addFittedValues)
+        showExplanations = showExplanations)
 
     analysis <- mixedcoxClass$new(
         options = options,

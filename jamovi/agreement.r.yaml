@@ -1715,10 +1715,11 @@ items:
     - name: computedVariablesHeading
       title: Computed Variables
       type:  Preformatted
-      visible: (length(consensusVar) > 0 || loaVariable)
+      visible: (consensusVar || (loaVariable && loaOutput))
       clearWith:
           - consensusVar
           - loaVariable
+          - loaOutput
 
     - name: consensusTable
       title: "Consensus Variable Summary"
@@ -1805,10 +1806,11 @@ items:
     - name: computedVariablesInfo
       title: "Computed Variables Added to Dataset"
       type: Html
-      visible: (length(consensusVar) > 0 || loaVariable)
+      visible: (consensusVar || (loaVariable && loaOutput))
       clearWith:
           - consensusVar
           - loaVariable
+          - loaOutput
 
     # Output Variables (Computed Columns Added to Dataset)
     - name: consensusVar
@@ -1837,6 +1839,7 @@ items:
           - loaHighThreshold
           - loaLowThreshold
           - loaVariableName
+          - loaVariable
 
     # ---- Rater Profile Plots ----
 

@@ -114,15 +114,6 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                             private$.generate_interpretation()
                         }
 
-                        # Handle exports
-                        if (self$options$export_results) {
-                            private$.export_results()
-                        }
-
-                        if (self$options$export_power_curve) {
-                            private$.export_power_curve()
-                        }
-
                         if (self$options$export_results || self$options$export_power_curve) {
                             private$.generate_export_summary()
                         }
@@ -133,6 +124,19 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                             htmltools::htmlEscape(conditionMessage(e))
                         )
                         self$results$power_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                        # `export_summary` is declaratively visible whenever either
+                        # export option is on, and .generate_export_summary() sits
+                        # inside this tryCatch -- so a failed calculation used to
+                        # leave a titled, completely empty "Reporting Summary" pane
+                        # sitting under the error. Say why it is empty instead.
+                        if (self$options$export_results || self$options$export_power_curve) {
+                            self$results$export_summary$setContent(paste0(
+                                "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 15px; ",
+                                "border-radius: 5px; margin: 10px 0; color: inherit;'>",
+                                "<h4>Reporting Summary</h4>",
+                                "<p>Nothing to summarise: the power calculation did not complete. ",
+                                "See the message above.</p></div>"))
+                        }
                     }
                 )
             },
@@ -240,6 +244,19 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                         result_object = result,
                         note = "Power estimated based on sample size ratio"
                     )
+                } else {
+                    # gsDesign::nSurvival only answers sample size / power for the
+                    # full Lachin-Foulkes design. 'events' and 'hazard_ratio' have no
+                    # branch here and used to fall through, leaving every pane blank.
+                    calc_label <- switch(calc_type,
+                        events = .("Number of Events Required"),
+                        hazard_ratio = .("Hazard Ratio Detection"),
+                        calc_type
+                    )
+                    jmvcore::reject(.fmt(
+                        .("The Lachin-Foulkes method cannot perform the '{calculation}' calculation. Select the Schoenfeld (events-based) method for this calculation type, or keep Lachin-Foulkes and choose 'Sample Size from Power' or 'Power from Sample Size' instead."),
+                        calculation = calc_label
+                    ))
                 }
             },
             .calculate_schoenfeld = function() {
@@ -738,77 +755,45 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     )
                 )
             },
-            .export_results = function() {
-                if (is.null(private$.results_data)) {
-                    return()
-                }
-
-                # Create comprehensive results data frame
-                results_df <- data.frame(
-                    Method = private$.results_data$method,
-                    Calculation_Type = private$.results_data$calculation,
-                    Sample_Size = private$.results_data$sample_size %||% NA,
-                    Events_Required = private$.results_data$events %||% NA,
-                    Statistical_Power = round(private$.results_data$power, 4),
-                    Hazard_Ratio = round(private$.results_data$hazard_ratio, 4),
-                    Control_Hazard_Rate = private$.results_data$control_hazard %||% NA,
-                    Treatment_Hazard_Rate = private$.results_data$treatment_hazard %||% NA,
-                    Study_Duration = private$.results_data$study_duration %||% NA,
-                    Accrual_Duration = private$.results_data$accrual_duration %||% NA,
-                    Type_I_Error_Alpha = private$.results_data$alpha,
-                    Type_II_Error_Beta = round(private$.results_data$beta, 4),
-                    Allocation_Ratio = private$.results_data$allocation_ratio %||% NA,
-                    Analysis_Date = Sys.Date(),
-                    stringsAsFactors = FALSE
-                )
-
-                # Remove NA columns for cleaner export
-                results_df <- results_df[, !apply(is.na(results_df), 2, all)]
-
-                self$results$exported_results$set(results_df)
-            },
-            .export_power_curve = function() {
-                power_data <- private$.generate_power_curve_data()
-
-                if (!is.null(power_data) && nrow(power_data) > 0) {
-                    # Add metadata columns
-                    power_data$Method <- private$.results_data$method
-                    power_data$Hazard_Ratio <- private$.results_data$hazard_ratio
-                    power_data$Alpha <- self$options$alpha
-                    power_data$Beta <- self$options$beta
-                    power_data$Allocation_Ratio <- self$options$allocation_ratio
-                    power_data$Analysis_Date <- Sys.Date()
-
-                    # Round for cleaner export
-                    power_data$power <- round(power_data$power, 4)
-                    power_data$sample_size <- round(power_data$sample_size)
-
-                    self$results$exported_power_curve$set(power_data)
-                }
-            },
             .generate_export_summary = function() {
+                # On-screen reporting summary. This analysis has no dataset and adds
+                # no variables to it; nothing is written back to the data.
                 summary_html <- "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>"
-                summary_html <- paste0(summary_html, "<h4>Export Summary</h4>")
+                summary_html <- paste0(summary_html, "<h4>Reporting Summary</h4>")
 
                 if (self$options$export_results) {
-                    results_count <- if (!is.null(private$.results_data)) 1 else 0
-                    summary_html <- paste0(summary_html, "<p> <strong>Power Analysis Results:</strong> ", results_count, " record exported</p>")
-                    summary_html <- paste0(summary_html, "<p style='margin-left: 20px; color: #666;'>Contains: sample size, power, hazard ratios, study parameters</p>")
+                    if (!is.null(private$.results_data)) {
+                        summary_html <- paste0(summary_html, "<p><strong>Power analysis result:</strong> computed</p>")
+                        # 'Power Analysis Results' is only populated when show_summary is on.
+                        detail <- if (isTRUE(self$options$show_summary)) {
+                            "Covers sample size, power, hazard ratios and study parameters; see 'Power Analysis Results' above."
+                        } else {
+                            "Covers sample size, power, hazard ratios and study parameters; tick 'Show Study Design Summary' to display them."
+                        }
+                        summary_html <- paste0(summary_html, "<p style='margin-left: 20px; opacity: 0.75;'>", detail, "</p>")
+                    } else {
+                        summary_html <- paste0(summary_html, "<p><strong>Power analysis result:</strong> not available</p>")
+                    }
                 }
 
                 if (self$options$export_power_curve) {
                     power_data <- private$.generate_power_curve_data()
                     curve_count <- if (!is.null(power_data)) nrow(power_data) else 0
-                    summary_html <- paste0(summary_html, "<p> <strong>Power Curve Data:</strong> ", curve_count, " data points exported</p>")
-                    summary_html <- paste0(summary_html, "<p style='margin-left: 20px; color: #666;'>Contains: sample size vs power relationships for external plotting</p>")
+                    summary_html <- paste0(summary_html, "<p><strong>Power curve:</strong> ", curve_count, " points computed</p>")
+                    # The 'Power Curve Analysis' pane is only shown when show_power_plot is on.
+                    detail <- if (isTRUE(self$options$show_power_plot)) {
+                        "Sample size versus power, plotted in 'Power Curve Analysis' above."
+                    } else {
+                        "Sample size versus power; tick 'Show Power Curve Plot' to display the curve."
+                    }
+                    summary_html <- paste0(summary_html, "<p style='margin-left: 20px; opacity: 0.75;'>", detail, "</p>")
                 }
 
-                summary_html <- paste0(summary_html, "<h5>Usage Instructions:</h5>")
+                summary_html <- paste0(summary_html, "<h5>Using these results:</h5>")
                 summary_html <- paste0(summary_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
-                summary_html <- paste0(summary_html, "<li>Exported data appears in your dataset as new variables</li>")
-                summary_html <- paste0(summary_html, "<li>Use 'Data' > 'Export' to save as CSV/Excel for external analysis</li>")
-                summary_html <- paste0(summary_html, "<li>Power curve data can be used for custom plotting in R/Python</li>")
-                summary_html <- paste0(summary_html, "<li>Results data is suitable for protocol documents and reports</li>")
+                summary_html <- paste0(summary_html, "<li>These are on-screen results only; this analysis does not add variables to your dataset.</li>")
+                summary_html <- paste0(summary_html, "<li>To save these results, open jamovi's main menu and choose Export, then pick PDF or HTML as the format.</li>")
+                summary_html <- paste0(summary_html, "<li>Copy the reported figures into protocol, grant or report documents.</li>")
                 summary_html <- paste0(summary_html, "</ul>")
 
                 summary_html <- paste0(summary_html, "</div>")

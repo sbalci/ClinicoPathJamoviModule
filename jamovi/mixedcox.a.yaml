@@ -436,22 +436,4 @@ options:
         Display detailed explanations of mixed-effects Cox regression methods
         and interpretation guidelines.
 
-# Output Variables ----
-
-    - name: addClusterEffects
-      title: Add Cluster Effects to Data
-      type: Bool
-      default: false
-      description:
-        R: >
-          Add predicted random effects (BLUPs) as new variables to dataset.
-
-    - name: addFittedValues
-      title: Add Fitted Values to Data
-      type: Bool
-      default: false
-      description:
-        R: >
-          Add fitted values from mixed-effects model to dataset.
-
 ...

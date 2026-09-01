@@ -1,7 +1,7 @@
 ---
 name: timeinterval
 title: Comprehensive Time Interval Calculator
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: Data Preparation
 menuSubtitle: Advanced time interval analysis with quality assessment
 version: '1.0.8'
@@ -83,7 +83,7 @@ options:
 
     # === DATE FORMAT CONFIGURATION ===
     - name: time_format
-      title: Date Format
+      title: Date format
       type: List
       options:
         - name: auto
@@ -109,7 +109,7 @@ options:
             Manual selection ensures accurate parsing for specific date formats.
 
     - name: output_unit
-      title: Time Unit for Results
+      title: Time unit for results
       type: List
       options:
         - name: days
@@ -127,7 +127,7 @@ options:
             statistical summaries. Choose based on study duration and event frequency.
 
     - name: time_basis
-      title: Time Basis
+      title: Time basis
       type: List
       options:
         - name: standardized
@@ -149,17 +149,21 @@ options:
       description:
           R: >
             Enables conditional analysis from a specific time point. Useful for 
-            studying outcomes after a landmark time (e.g., 6-month survivors only).
+            studying outcomes conditional on having been followed to a landmark time (for
+            example, only participants with at least 6 months of follow-up).
 
     - name: landmark_time
-      title: Landmark Time Point
+      title: Landmark time point
       type: Number
       default: 6
       min: 0
       description:
           R: >
             Time point for landmark analysis in the specified output units. 
-            Only participants surviving past this time are included in analysis.
+            Only participants whose follow-up reaches this time are included. This analysis has
+            no event indicator, so it selects on LENGTH OF FOLLOW-UP, not on survival: a
+            participant excluded here may have died early or may simply have been enrolled
+            recently, and this analysis cannot tell the two apart.
 
     # === DATA QUALITY OPTIONS ===
     - name: remove_negative
@@ -183,7 +187,7 @@ options:
             many were removed. Leave off to keep all intervals and only see the count.
 
     - name: extreme_multiplier
-      title: Extreme Threshold Multiplier
+      title: Extreme threshold multiplier
       type: Number
       default: 2.0
       min: 1.5
@@ -196,17 +200,25 @@ options:
             (fewer intervals removed). Has no effect when the 99th percentile is zero.
 
     # === OUTPUT OPTIONS ===
-    - name: add_times
+    # type: Output, not Bool. jmvcore's Output result item resolves its gating
+    # option by the RESULT ITEM'S OWN NAME (Output$enabled reads
+    # options$get(private$.name)), and Output$asProtoBuf() emits nothing when that
+    # is FALSE. A Bool called something else therefore left the column computed and
+    # silently discarded. The name must stay equal to the .r.yaml item name.
+    # No `default:` -- the compiler's optionify() emits only the bare name for an
+    # Output option and discards every other property, so a default would be inert.
+    - name: calculated_time
       title: Add calculated times to dataset
-      type: Bool
-      default: false
+      type: Output
       description:
           R: >
-            Appends calculated time intervals as a new variable for downstream analysis.
-            Useful for subsequent survival analysis or person-time calculations.
+            Appends the calculated time intervals to the dataset as a new variable for
+            downstream analysis (for example a subsequent survival analysis or a
+            person-time calculation). This is a jamovi output variable driven by the
+            Output control in the analysis panel; it is not an argument of the R function.
 
     - name: include_quality_metrics
-      title: Include data quality assessment
+      title: Data quality assessment
       type: Bool
       default: false
       description:
@@ -215,7 +227,7 @@ options:
             negative intervals, and distribution statistics.
 
     - name: confidence_level
-      title: Confidence Level ( percent)
+      title: Confidence level (%)
       type: Number
       default: 95
       min: 90
@@ -259,7 +271,10 @@ options:
             'UTC' interprets datetimes as Coordinated Universal Time. This applies only to the
             'YYYY-MM-DD HH:MM:SS' format, the only one that carries a time of day; date-only
             formats produce calendar dates that have no timezone, so the setting has no effect
-            on them.
+            on them. Note that it changes the reported DURATIONS as well as the parsing: a zone
+            with daylight saving gains or loses an hour at each transition, so an interval
+            spanning one comes out an hour short under 'System Default' and exact under 'UTC'.
+            Choose UTC if you need durations unaffected by daylight saving.
 
 
 ...

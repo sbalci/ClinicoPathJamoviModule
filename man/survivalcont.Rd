@@ -2,7 +2,7 @@
 % Please edit documentation in R/survivalcont.h.R
 \name{survivalcont}
 \alias{survivalcont}
-\title{Survival Analysis for Continuous Variable}
+\title{Survival Analysis for Continuous Explanatory Variable}
 \usage{
 survivalcont(
   data,
@@ -169,9 +169,13 @@ groups); the observed survival ordering must be read from the results and
 is not assumed in advance.}
 
 \item{cutoff_method}{Method for finding multiple cut-offs. Quantile-based
-uses tertiles/quartiles, Recursive finds sequential optimal points,
-Tree-based uses survival trees, Minimum P-value finds points that minimize
-log-rank p-values.}
+uses equally spaced quantiles. Recursive repeatedly finds an optimal split
+after excluding observations close to earlier splits. Tree-based uses
+survival-tree splits. Minimum P-value exhaustively searches up to 1000
+admissible combinations; for larger candidate spaces it evaluates 1000
+unique combinations selected reproducibly from the Random seed. All
+data-derived cut-offs and their group comparisons are exploratory and
+require external validation.}
 
 \item{min_group_size}{Minimum percentage of patients required in each group
 created by cut-offs. Prevents creating groups with insufficient sample
@@ -212,8 +216,9 @@ with a single cut-off, the displayed groups are compared descriptively at a
 common observed horizon.}
 
 \item{rmst_tau}{Specify the time horizon for RMST calculation. If left as
-0, will use 75th percentile  of observed survival times. This represents
-the maximum follow-up time for RMST calculation.}
+0, uses the 75th percentile of observed survival times, bounded by the
+maximum follow-up supported in every displayed group. This is a common
+descriptive horizon, not the maximum observed follow-up.}
 
 \item{residual_diagnostics}{Enable Cox model residual diagnostics including
 case-level Martingale, Deviance, and Score residuals plus event-time
@@ -242,8 +247,8 @@ and plots. These summaries provide plain-language interpretations of the
 statistical results. Turn off to reduce visual clutter when summaries are
 not needed.}
 
-\item{seed}{Random seed for Monte Carlo components of minimum-p-value and
-selection-adjusted cut-point calculations.}
+\item{seed}{Random seed used to select candidate combinations when the
+minimum-P-value search space is too large for exhaustive evaluation.}
 }
 \value{
 A results object containing:
@@ -310,5 +315,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$coxTable)}
 }
 \description{
-Survival Analysis for Continuous Variable
+Survival Analysis for Continuous Explanatory Variable
 }

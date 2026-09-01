@@ -3,6 +3,30 @@
 
 library(testthat)
 
+test_that("publication and comprehensive styles retain verified statistics", {
+  d <- data.frame(x = c(1:19, 100),
+                  g = factor(c(rep("A", 10), rep("B", 8), NA, NA)))
+  plain <- function(content) {
+    gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(content)))
+  }
+  # Mean = 290/20; sample SD = sqrt(sum((x - 14.5)^2)/19).
+  # gtsummary uses type-2 quartiles (5.5, 10.5, 15.5), displayed
+  # at its default precision as 6, 11, 16 for integer measurements.
+  publication <- tableone(d, c("x", "g"), sty = "t2")
+  p <- plain(publication$tablestyle2$content)
+  expect_match(p, "N = 20", fixed = TRUE)
+  expect_match(p, "11 (6, 16)", fixed = TRUE)
+  expect_match(p, "B 8 (44%)", fixed = TRUE)
+  expect_match(p, "Unknown 2", fixed = TRUE)
+
+  comprehensive <- tableone(d, c("x", "g"), sty = "t3")
+  a <- plain(comprehensive$tablestyle3$content)
+  expect_match(a, "Overall (N=20)", fixed = TRUE)
+  expect_match(a, "14.5 (20.9)", fixed = TRUE)
+  expect_match(a, "1.0 - 100.0", fixed = TRUE)
+  expect_match(a, "8 (44.4%)", fixed = TRUE)
+})
+
 t1 <- function(res) gsub("[[:space:]]+", " ",
                          as.character(res$tablestyle1$content))
 t4 <- function(res) gsub("[[:space:]]+", " ",
@@ -87,7 +111,7 @@ test_that("omitted janitor measurements cannot exclude cases or enter report tex
                   Sex = factor(c("F", "F", "M", "M")))
   res <- tableone(data = d, vars = c("Age", "Sex"), sty = "t4", excl = TRUE,
                   showSummary = TRUE, showReportSentence = TRUE)
-  expect_match(res$summary$content, "4 cases with 1 selected variables", fixed = TRUE)
+  expect_match(res$summary$content, "4 cases with 1 selected variable", fixed = TRUE)
   expect_match(res$summary$content, "4 cases (no exclusions applied)", fixed = TRUE)
   expect_match(res$reportSentence$content, "Variables included Sex.", fixed = TRUE)
   expect_false(grepl("Variables included Age", res$reportSentence$content, fixed = TRUE))
@@ -103,7 +127,7 @@ test_that("listwise deletion reports one denominator for every included variable
     expect_match(res$summary$content, "same complete-case denominator", fixed = TRUE)
     expect_false(grepl("Per-variable denominators may differ", res$summary$content,
                        fixed = TRUE))
-    expect_match(res$reportSentence$content, "4 patients with complete data", fixed = TRUE)
+    expect_match(res$reportSentence$content, "4 cases with complete data", fixed = TRUE)
   }
 })
 

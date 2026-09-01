@@ -198,11 +198,11 @@ describe("lassocox Model Fitting", {
     
     # Test glmnet fitting
     expect_no_error({
-      cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = 5)
+      cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", nfolds = 5)
     })
     
     expect_no_error({
-      final_model <- glmnet::glmnet(x = X, y = y, family = "cox", lambda = cv_fit$lambda.1se)
+      final_model <- glmnet::glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", lambda = cv_fit$lambda.1se)
     })
   })
   
@@ -221,11 +221,11 @@ describe("lassocox Model Fitting", {
     
     # Should handle p > n scenario
     expect_no_error({
-      cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = 3)
+      cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", nfolds = 3)
     })
     
     # Should perform variable selection
-    final_model <- glmnet::glmnet(x = X, y = y, family = "cox", lambda = cv_fit$lambda.1se)
+    final_model <- glmnet::glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", lambda = cv_fit$lambda.1se)
     coef_matrix <- as.matrix(coef(final_model))
     selected_vars <- which(coef_matrix != 0)
     
@@ -250,7 +250,7 @@ describe("lassocox Model Fitting", {
     for (nfolds in c(3, 5, 10)) {
       actual_folds <- min(nfolds, nrow(X) %/% 3)
       expect_no_error({
-        cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = actual_folds)
+        cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", nfolds = actual_folds)
       })
       
       # Should have lambda values
@@ -277,8 +277,8 @@ describe("lassocox Performance Metrics", {
     y <- survival::Surv(time, status)
     
     # Fit model and get risk scores
-    cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = 5)
-    final_model <- glmnet::glmnet(x = X, y = y, family = "cox", lambda = cv_fit$lambda.1se)
+    cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", nfolds = 5)
+    final_model <- glmnet::glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", lambda = cv_fit$lambda.1se)
     risk_scores <- predict(final_model, newx = X, type = "link")
     
     # Calculate C-index
@@ -353,8 +353,8 @@ describe("lassocox Variable Selection", {
     y <- survival::Surv(time, status)
     
     # Fit Lasso model
-    cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = 5)
-    final_model <- glmnet::glmnet(x = X, y = y, family = "cox", lambda = cv_fit$lambda.min)
+    cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", nfolds = 5)
+    final_model <- glmnet::glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", lambda = cv_fit$lambda.min)
     
     coef_matrix <- as.matrix(coef(final_model))
     selected_vars <- which(coef_matrix != 0)
@@ -382,17 +382,17 @@ describe("lassocox Variable Selection", {
     X <- as.matrix(data[, paste0("var", 1:8)])
     y <- survival::Surv(time, status)
     
-    cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = 5)
+    cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", nfolds = 5)
     
     # Test lambda.min selection
     lambda_min <- cv_fit$lambda.min
-    model_min <- glmnet::glmnet(x = X, y = y, family = "cox", lambda = lambda_min)
+    model_min <- glmnet::glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", lambda = lambda_min)
     coef_min <- as.matrix(coef(model_min))
     selected_min <- sum(coef_min != 0)
     
     # Test lambda.1se selection  
     lambda_1se <- cv_fit$lambda.1se
-    model_1se <- glmnet::glmnet(x = X, y = y, family = "cox", lambda = lambda_1se)
+    model_1se <- glmnet::glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", lambda = lambda_1se)
     coef_1se <- as.matrix(coef(model_1se))
     selected_1se <- sum(coef_1se != 0)
     
@@ -448,7 +448,7 @@ describe("lassocox Edge Cases", {
     expect_true(nfolds >= 3)
     
     expect_no_error({
-      cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = nfolds)
+      cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", nfolds = nfolds)
     })
   })
   
@@ -478,7 +478,7 @@ describe("lassocox Edge Cases", {
     y <- survival::Surv(time, status)
     
     expect_no_error({
-      cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = 5)
+      cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", nfolds = 5)
     })
   })
   
@@ -508,7 +508,7 @@ describe("lassocox Edge Cases", {
     y <- survival::Surv(time, status)
     
     expect_no_error({
-      cv_fit <- glmnet::cv.glmnet(x = X_scaled, y = y, family = "cox", nfolds = 5)
+      cv_fit <- glmnet::cv.glmnet(x = X_scaled, y = y, family = "cox", cox.ties = "breslow", nfolds = 5)
     })
   })
 })
@@ -530,10 +530,10 @@ describe("lassocox Integration", {
     
     # Run multiple times with same seed
     set.seed(12345)
-    cv_fit1 <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = 5)
+    cv_fit1 <- glmnet::cv.glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", nfolds = 5)
     
     set.seed(12345)
-    cv_fit2 <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = 5)
+    cv_fit2 <- glmnet::cv.glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", nfolds = 5)
     
     # Should get same results with same seed
     expect_equal(cv_fit1$lambda.min, cv_fit2$lambda.min)
@@ -553,8 +553,8 @@ describe("lassocox Integration", {
     y <- survival::Surv(time, status)
     
     # Fit complete model
-    cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = 5)
-    final_model <- glmnet::glmnet(x = X, y = y, family = "cox", lambda = cv_fit$lambda.1se)
+    cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", nfolds = 5)
+    final_model <- glmnet::glmnet(x = X, y = y, family = "cox", cox.ties = "breslow", lambda = cv_fit$lambda.1se)
     
     # Get model components
     coef_matrix <- as.matrix(coef(final_model))
@@ -578,71 +578,44 @@ describe("lassocox Integration", {
 # Interpretation and output tests
 describe("lassocox Output Interpretation", {
   
-  test_that("lassocox C-index interpretation is correct", {
-    skip_if_not_installed("glmnet")
-    skip_if_not_installed("survival")
-    skip_if_not_installed("jmvcore")
-    
-    # Call the module's OWN method. This block used to define a local copy of the
-    # interpretation function and assert the copy against itself, so it exercised no
-    # ClinicoPath code at all and could not fail if the real thresholds changed.
+  test_that("lassocox labels discrimination as apparent without clinical cutoffs", {
     skip_if_not_installed("ClinicoPath")
-    interpret_cindex <- function(cindex)
-      ClinicoPath:::lassocoxClass$private_methods$.interpretCindex(cindex)
-    
-    expect_equal(interpret_cindex(0.5), "Poor discrimination")
-    expect_equal(interpret_cindex(0.65), "Fair discrimination")
-    expect_equal(interpret_cindex(0.75), "Good discrimination")
-    expect_equal(interpret_cindex(0.85), "Excellent discrimination")
-    expect_equal(interpret_cindex(NA), "Not available")
+    d <- create_survival_data(n = 100, p = 5)
+    r <- ClinicoPath::lassocox(data = d, elapsedtime = "time", outcome = "status",
+      outcomeLevel = "event", censorLevel = "censored", explanatory = paste0("var", 1:5),
+      showSummary = TRUE, includeClinicalGuidance = TRUE)
+    expect_gt(r$modelSummary$rowCount, 0)
+    expect_equal(as.data.frame(r$performance)$metric, "Apparent C-index")
+    expect_match(r$clinicalGuidance$content, "No universal C-index")
+    expect_false(grepl("Excellent discrimination|Good discrimination", r$summaryText$content))
   })
-  
-  test_that("lassocox hazard ratio interpretation is correct", {
-    skip_if_not_installed("glmnet")
-    skip_if_not_installed("survival")
-    skip_if_not_installed("jmvcore")
-    
-    # Same tautology as above - call the real method.
+
+  test_that("lassocox explains penalized hazard ratios without causal claims", {
     skip_if_not_installed("ClinicoPath")
-    interpret_hr <- function(hr)
-      ClinicoPath:::lassocoxClass$private_methods$.interpretHazardRatio(hr)
-    
-    expect_equal(interpret_hr(1.2), "Weak risk stratification")
-    expect_equal(interpret_hr(2.0), "Moderate risk stratification")
-    expect_equal(interpret_hr(3.5), "Strong risk stratification")
-    expect_equal(interpret_hr(NA), "Not available")
+    d <- create_survival_data(n = 100, p = 5)
+    r <- ClinicoPath::lassocox(data = d, elapsedtime = "time", outcome = "status",
+      outcomeLevel = "event", censorLevel = "censored", explanatory = paste0("var", 1:5),
+      showExplanations = TRUE)
+    expect_gt(r$modelSummary$rowCount, 0)
+    expect_match(r$lassoExplanation$content, "not event probabilities or causal effects")
+    expect_match(r$lassoExplanation$content, "post-selection p-values")
   })
-  
-  test_that("lassocox produces reasonable coefficient values", {
-    skip_if_not_installed("glmnet")
-    skip_if_not_installed("survival")
-    skip_if_not_installed("jmvcore")
-    
-    data <- create_survival_data(n = 100, p = 5)
-    
-    time <- data$time
-    status <- as.numeric(data$status == "event")
-    X <- as.matrix(data[, paste0("var", 1:5)])
-    y <- survival::Surv(time, status)
-    
-    cv_fit <- glmnet::cv.glmnet(x = X, y = y, family = "cox", nfolds = 5)
-    final_model <- glmnet::glmnet(x = X, y = y, family = "cox", lambda = cv_fit$lambda.1se)
-    
-    coef_matrix <- as.matrix(coef(final_model))
-    selected_vars <- which(coef_matrix != 0)
-    
-    if (length(selected_vars) > 0) {
-      coef_values <- coef_matrix[selected_vars, 1]
-      
-      # Coefficients should be finite
-      expect_true(all(is.finite(coef_values)))
-      
-      # Hazard ratios should be positive
-      hr_values <- exp(coef_values)
-      expect_true(all(hr_values > 0))
-      
-      # For reasonable data, coefficients shouldn't be extreme
-      expect_true(all(abs(coef_values) < 10))
+
+  test_that("lassocox reports finite coefficients or an explicit empty model", {
+    skip_if_not_installed("ClinicoPath")
+    d <- create_survival_data(n = 100, p = 5)
+    r <- ClinicoPath::lassocox(data = d, elapsedtime = "time", outcome = "status",
+      outcomeLevel = "event", censorLevel = "censored", explanatory = paste0("var", 1:5))
+    expect_gt(r$modelSummary$rowCount, 0)
+    tab <- as.data.frame(r$coefficients)
+    selected <- !is.na(tab$coefficient)
+    if (any(selected)) {
+      expect_true(all(is.finite(tab$coefficient[selected])))
+      expect_equal(tab$hazardRatio[selected], exp(tab$coefficient[selected]))
+    } else {
+      expect_equal(tab$variable, "No variables selected")
+      expect_match(r$todo$content, "valid empty model has been preserved")
+      expect_equal(as.numeric(as.data.frame(r$performance)$value), 0.5)
     }
   })
 })

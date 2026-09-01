@@ -1,10 +1,10 @@
 ---
 name:  outcomeorganizer
 title: Outcome Organizer for Survival Analysis
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: Data Preparation
 menuSubtitle: 'Comprehensive Outcome Preparation for Survival Analysis'
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -194,7 +194,7 @@ options:
             The level representing patients who are alive and disease-free.
 
     - name: useHierarchy
-      title: "Use event hierarchy"
+      title: "Event hierarchy"
       type: Bool
       default: false
       description:
@@ -205,12 +205,17 @@ options:
       title: "Priority Event Type"
       type: Integer
       default: 1
+      min: 1
       description:
           R: >
-            The event code (e.g., 1, 2) that takes precedence when multiple events occur.
+            The event code (1, 2, ...) that takes precedence when a patient has several records.
+            Minimum 1: code 0 is the censored/baseline code, and giving it priority would make
+            "censored" outrank every event and silently erase them all. If the code entered here
+            never occurs in the recoded outcome the hierarchy cannot act, and the analysis says so
+            rather than reporting that it was applied.
 
     - name: intervalCensoring
-      title: "Use interval censoring"
+      title: "Interval censoring"
       type: Bool
       default: false
       description:
@@ -234,7 +239,7 @@ options:
             Variable containing the end of the interval when the event might have occurred.
 
     - name: adminCensoring
-      title: "Use administrative censoring"
+      title: "Administrative censoring"
       type: Bool
       default: false
       description:
@@ -295,4 +300,19 @@ options:
       description:
           R: >
             Adds the recoded outcome variable to the dataset, which can be used in subsequent analyses.
+
+    # Administrative censoring truncates follow-up, and the truncated time has to
+    # travel with the censored status. Exporting only the status leaves a censored
+    # patient paired with their ORIGINAL untruncated follow-up, which inflates
+    # person-time and removes the event -- biasing survival upward in exactly the
+    # rows the cut-off was meant to protect. A second Output carries the time.
+    - name: addAdminTime
+      title: Add Truncated Follow-up Time to Data
+      type: Output
+      description:
+          R: >
+            Adds the administratively truncated follow-up time to the dataset. Only produced when
+            administrative censoring is actually applied. Pair this column with the recoded outcome
+            rather than the original follow-up time: a patient censored at the cut-off must
+            contribute follow-up only up to that cut-off.
 ...

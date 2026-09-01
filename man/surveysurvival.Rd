@@ -148,8 +148,6 @@ A results object containing:
 \code{results$kmWeightedExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$coxWeightedExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$populationInferenceExplanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-\code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

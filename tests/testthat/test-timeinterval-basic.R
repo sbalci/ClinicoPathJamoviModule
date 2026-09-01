@@ -139,7 +139,6 @@ test_that("timeinterval options and flags run smoothly", {
     data = timeinterval_test,
     dx_date = "diagnosis_date",
     fu_date = "followup_date",
-    add_times = TRUE,
     include_quality_metrics = TRUE,
     confidence_level = 95,
     show_summary = TRUE,

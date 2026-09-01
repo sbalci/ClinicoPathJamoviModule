@@ -4,7 +4,7 @@ title: Survival Analysis
 menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Univariate Survival Analysis, Cox, Kaplan-Meier, 1,3,5-yr'
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -560,8 +560,10 @@ options:
       title: "Export Estimated Survival"
       type: Output
       description: >-
-        Export detailed survival estimates for external analysis, including survival
-        probabilities, confidence intervals, and risk tables at multiple time points.
+        Add the Kaplan-Meier survival probability at each case's own follow-up time
+        as a new column in the dataset. With an explanatory variable the probability
+        is taken from that case's own group curve. One value per case; confidence
+        intervals and risk tables are shown in the results panels, not exported.
 
     - name: loglog
       title: "Log-log plot"

@@ -784,7 +784,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         rmstExplanation = function() private$.items[["rmstExplanation"]],
         residualDiagnosticsExplanation = function() private$.items[["residualDiagnosticsExplanation"]],
         residualsTable = function() private$.items[["residualsTable"]],
-        survivalExport = function() private$.items[["survivalExport"]],
+        export_survival_data = function() private$.items[["export_survival_data"]],
         survivalExportSummary = function() private$.items[["survivalExportSummary"]],
         pairwiseComparisonHeading = function() private$.items[["pairwiseComparisonHeading"]],
         pairwiseTable = function() private$.items[["pairwiseTable"]],
@@ -1659,10 +1659,10 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcomeLevel")))
             self$add(jmvcore::Output$new(
                 options=options,
-                name="survivalExport",
+                name="export_survival_data",
                 title="Export Survival Data",
-                varTitle="Survival Estimates Export",
-                varDescription="Detailed survival estimates for external analysis",
+                varTitle="KM Survival Probability",
+                varDescription="Kaplan-Meier survival probability at each case's own follow-up time, from that case's own group curve when an explanatory variable is set",
                 clearWith=list(
                     "export_survival_data",
                     "explanatory",
@@ -2325,7 +2325,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survival",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = survivalResults$new(options=options),
                 data = data,
@@ -2576,7 +2576,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$residualsTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$survivalExport} \tab \tab \tab \tab \tab an output \cr
+#'   \code{results$export_survival_data} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$survivalExportSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$pairwiseComparisonHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr

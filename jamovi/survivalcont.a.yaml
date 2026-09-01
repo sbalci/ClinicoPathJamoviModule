@@ -1,10 +1,10 @@
 ---
 name:  survivalcont
-title: Survival Analysis for Continuous Variable
-menuGroup: SurvivalT
+title: Survival Analysis for Continuous Explanatory Variable
+menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Cut-off & Univariate Survival Analysis'
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 options:
@@ -16,7 +16,7 @@ options:
             The data as a data frame.
 
     - name: elapsedtime
-      title: 'Time Elapsed'
+      title: 'Time elapsed'
       type: Variable
       default: null
       suggested: [ continuous ]
@@ -37,7 +37,7 @@ options:
         and want to calculate the time elapsed between them.
 
     - name: dxdate
-      title: 'Diagnosis Date'
+      title: 'Diagnosis date'
       type: Variable
       default: null
       suggested: [ continuous, nominal ]
@@ -48,7 +48,7 @@ options:
         (3) Numeric datetime values from R. Time intervals calculated as difference from follow-up date.
 
     - name: fudate
-      title: 'Follow-up Date'
+      title: 'Follow-up date'
       type: Variable
       default: null
       suggested: [ continuous, nominal ]
@@ -59,14 +59,14 @@ options:
         (3) Numeric datetime values from R. Must be in same format as diagnosis date.
 
     - name: calculatedtime
-      title: Add Calculated Time to Data
+      title: Calculated survival time
       type: Output
       description: >-
         If you enable this option, the calculated time-to-event or follow-up duration will be
         added to your data as a new variable.
 
     - name: contexpl
-      title: Continuous Explanatory Variable
+      title: Continuous explanatory variable
       type: Variable
       default: null
       suggested: [ continuous ]
@@ -84,29 +84,29 @@ options:
         The outcome variable to be used in the analysis.
 
     - name: outcomeLevel
-      title: Event Level
+      title: Event level
       type: Level
       variable: (outcome)
       description: >-
         The level of the outcome variable that represents the event of interest.
 
     - name: dod
-      title: Dead of Disease
+      title: Dead of disease
       type: Level
       variable: (outcome)
       allowNone: true
     - name: dooc
-      title: Dead of Other
+      title: Dead of other causes
       type: Level
       variable: (outcome)
       allowNone: true
     - name: awd
-      title: Alive w Disease
+      title: Alive with disease
       type: Level
       variable: (outcome)
       allowNone: true
     - name: awod
-      title: Alive w/o Disease
+      title: Alive without disease
       type: Level
       variable: (outcome)
       allowNone: true
@@ -116,7 +116,7 @@ options:
         "Alive w Disease" in a survival analysis of cancer patients.
 
     - name: analysistype
-      title: 'Survival Type'
+      title: 'Survival type'
       type: List
       options:
         - title: Overall
@@ -136,7 +136,7 @@ options:
         continuous cut-off function; select it to receive guidance to a competing-risk analysis.
 
     - name: outcomeredefined
-      title: Add Redefined Outcome to Data
+      title: Redefined survival outcome
       type: Output
       description: >-
         If you enable this option, the redefined outcome variable will be added to your data
@@ -145,7 +145,7 @@ options:
         competing event.
 
     - name: cutp
-      title: Survival Estimate Time Points
+      title: Survival estimate time points
       type: String
       default: '12, 36, 60'
       description: >-
@@ -157,7 +157,7 @@ options:
 
 
     - name: timetypedata
-      title: 'Time Type in Data (e.g., YYYY-MM-DD)'
+      title: 'Input time type (e.g., YYYY-MM-DD)'
       type: List
       options:
         - title: ymdhms
@@ -180,7 +180,7 @@ options:
 
 
     - name: timetypeoutput
-      title: Time Type in Output
+      title: Output time unit
       type: List
       options:
         - title: days
@@ -203,7 +203,7 @@ options:
         Enable this option to perform landmark survival analysis at a specified time point.
 
     - name: landmark
-      title: Landmark Time
+      title: Landmark time
       type: Integer
       default: 3
       description: >-
@@ -248,7 +248,7 @@ options:
 
 
     - name: endplot
-      title: Plot End Time
+      title: Plot end time
       type: Integer
       default: 60
       description: >-
@@ -274,7 +274,7 @@ options:
         to customize the range of the y-axis.
 
     - name: byplot
-      title: Time Interval
+      title: Time interval
       type: Integer
       default: 12
       description: >-
@@ -305,7 +305,7 @@ options:
         cut-offs are exploratory and require external validation.
 
     - name: num_cutoffs
-      title: Number of Cut-offs
+      title: Number of cut-offs
       type: List
       options:
         - title: "2 Cut-offs (3 Groups)"
@@ -321,7 +321,7 @@ options:
         be read from the results and is not assumed in advance.
 
     - name: cutoff_method
-      title: Multiple Cut-off Method
+      title: Multiple cut-off method
       type: List
       options:
         - title: "Quantile-Based"
@@ -334,12 +334,15 @@ options:
           name: minpval
       default: quantile
       description: >-
-        Method for finding multiple cut-offs. Quantile-based uses tertiles/quartiles,
-        Recursive finds sequential optimal points, Tree-based uses survival trees,
-        Minimum P-value finds points that minimize log-rank p-values.
+        Method for finding multiple cut-offs. Quantile-based uses equally spaced quantiles.
+        Recursive repeatedly finds an optimal split after excluding observations close to
+        earlier splits. Tree-based uses survival-tree splits. Minimum P-value exhaustively
+        searches up to 1000 admissible combinations; for larger candidate spaces it evaluates
+        1000 unique combinations selected reproducibly from the Random seed. All data-derived
+        cut-offs and their group comparisons are exploratory and require external validation.
 
     - name: min_group_size
-      title: Minimum Group Size ( percent)
+      title: Minimum group size (%)
       type: Number
       min: 5
       max: 30
@@ -349,7 +352,7 @@ options:
         Prevents creating groups with insufficient sample sizes for reliable analysis.
         
     - name: calculatedcutoff
-      title: Add Calculated Cut-off Group to Data
+      title: Calculated cut-off marker group
       type: Output
       description: >-
         If you enable this option, the calculated cut-off group will be added to your data as a new variable. This variable will have
@@ -357,11 +360,12 @@ options:
         statistic. This option is only available if you enable the "Find Cut-off for Continuous Explanatory Variable" option.
 
     - name: calculatedmulticut
-      title: Add Multiple Cut-off Groups to Data
+      title: Multiple cut-off marker groups
       type: Output
       description: >-
         If you enable this option, the multiple cut-off groups will be added to your data as a new variable.
-        This creates stratified risk groups (Low, Medium, High, etc.) based on the multiple optimal cut-off points.
+        Adds ordered marker-value groups based on the reported multiple cut-off points. Group
+        names describe marker values and do not assume which group has higher clinical risk.
         Only available when "Find Multiple Cut-offs" option is enabled.
 
 
@@ -383,7 +387,7 @@ options:
         in the plots.
 
     - name: risktable
-      title: Risktable
+      title: Risk table
       type: Bool
       default: false
       description: >-
@@ -398,7 +402,7 @@ options:
         Enable this option to display censored observations in the survival plots.
 
     - name: medianline
-      title: medianline
+      title: Median survival line
       type: List
       options:
         - title: none
@@ -418,7 +422,7 @@ options:
 
 
     - name: person_time
-      title: "Calculate person-time metrics"
+      title: "Person-time metrics"
       type: Bool
       default: false
       description: >-
@@ -427,7 +431,7 @@ options:
         rate of events per unit of time in your study population.
 
     - name: time_intervals
-      title: "Time Interval Stratification"
+      title: "Time interval stratification"
       type: String
       default: '12, 36, 60'
       description: >-
@@ -436,7 +440,7 @@ options:
         "12, 36, 60" will create intervals 0-12, 12-36, 36-60, and 60+.
 
     - name: rate_multiplier
-      title: "Rate Multiplier"
+      title: "Rate multiplier"
       type: Integer
       default: 100
       description: >-
@@ -453,12 +457,13 @@ options:
         are compared descriptively at a common observed horizon.
 
     - name: rmst_tau
-      title: "RMST Time Horizon (τ)"
+      title: "RMST time horizon (τ)"
       type: Number
       default: 0
       description: >-
-        Specify the time horizon for RMST calculation. If left as 0, will use 75th percentile 
-        of observed survival times. This represents the maximum follow-up time for RMST calculation.
+        Specify the time horizon for RMST calculation. If left as 0, uses the 75th percentile
+        of observed survival times, bounded by the maximum follow-up supported in every displayed
+        group. This is a common descriptive horizon, not the maximum observed follow-up.
 
     - name: residual_diagnostics
       title: "Residual diagnostics"
@@ -478,7 +483,7 @@ options:
         across strata while maintaining proportional hazards within strata.
 
     - name: strata_variable
-      title: "Stratification Variable"
+      title: "Stratification variable"
       type: Variable
       default: null
       suggested: [ nominal, ordinal ]
@@ -515,12 +520,12 @@ options:
         results. Turn off to reduce visual clutter when summaries are not needed.
 
     - name: seed
-      title: "Random Seed"
+      title: "Random seed"
       type: Integer
       default: 12345
       description: >-
-        Random seed for Monte Carlo components of minimum-p-value and
-        selection-adjusted cut-point calculations.
+        Random seed used to select candidate combinations when the minimum-P-value
+        search space is too large for exhaustive evaluation.
 
 
 

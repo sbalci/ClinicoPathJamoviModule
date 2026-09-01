@@ -130,7 +130,7 @@ test_that("negative intervals are refused by default with an actionable message"
     expect_match(msg, "Negative time intervals detected")
     # the message must name the checkbox that actually exists in the UI --
     # it used to say "Remove Negative Intervals", which is not a real label
-    expect_match(msg, "Negative-interval exclusion")
+    expect_match(msg, "Remove negative intervals")   # must quote the control label the GUI shows
     expect_match(msg, "1 of 2 rows")                      # count AND denominator
     expect_match(msg, "2020-01-01")                       # names the offending row
     # and no partial summary is emitted alongside the refusal

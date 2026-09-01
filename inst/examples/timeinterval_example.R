@@ -101,7 +101,6 @@ timeinterval(
   dx_date = "enrollment_date",
   fu_date = "followup_date",
   output_unit = "months",
-  add_times = TRUE,
   include_quality_metrics = TRUE,
   confidence_level = 95,
   show_summary = TRUE
@@ -136,7 +135,6 @@ timeinterval(
   fu_date = "followup_date",
   output_unit = "months",
   time_basis = "standardized",
-  add_times = TRUE,
   show_summary = TRUE,
   show_glossary = TRUE
 )
@@ -154,7 +152,6 @@ timeinterval(
   remove_negative = TRUE,
   remove_extreme = TRUE,
   extreme_multiplier = 2.0,
-  add_times = TRUE,
   include_quality_metrics = TRUE,
   confidence_level = 95,
   show_summary = TRUE,

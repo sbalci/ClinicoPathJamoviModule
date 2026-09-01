@@ -548,17 +548,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             .detectCommonMisuses = function() {
                 warnings <- c()
 
-                # Detect multiple testing without correction
-                plot_count <- sum(c(
-                    self$options$sc, self$options$kmunicate, self$options$ce,
-                    self$options$ch, self$options$loglog
-                ))
-                if (plot_count > 3) {
-                    warnings <- c(warnings, .(
-                        "Multiple analysis outputs selected. Consider adjusting for multiple comparisons if making statistical inferences from multiple tests."
-                    ))
-                }
-
                 # Detect inappropriate cut-off hunting
                 # (num_cutoffs is capped at "four" in the UI, so the historical
                 # "many cut-offs (>5)" warning branch could never fire; removed.)
@@ -1732,16 +1721,19 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         private$.multicutRan <- TRUE
                         private$.multipleCutoffTables(multicut_results)
 
-                        # Store data for plots
+                        # Persist only the vectors each renderer needs. Storing the
+                        # complete clean-data/results object twice made saved .omv files
+                        # unnecessarily large and duplicated fitted survfit objects.
                         self$results$plotMultipleCutoffs$setState(list(
-                            multicut_results = multicut_results,
-                            results = results
+                            values = results$cleanData[[results$name3contexpl]],
+                            cutoff_values = multicut_results$cutoff_values,
+                            method = multicut_results$method
                         ))
-                        # plotMultipleSurvival (.plotMultipleSurvival) reads its own state,
-                        # so it must be set here or the plot renders only the placeholder.
                         self$results$plotMultipleSurvival$setState(list(
-                            multicut_results = multicut_results,
-                            results = results
+                            time = results$cleanData[[results$name1time]],
+                            outcome = results$cleanData[[results$analysis_outcome]],
+                            risk_groups = multicut_results$risk_groups,
+                            method = multicut_results$method
                         ))
 
                         # Add multiple cutoff groups to data
@@ -1904,8 +1896,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 plotData2 <- list(
                     cutoffdata = cutoffdata,
-                    results = results,
-                    multicut_results = multicut_results
+                    results = list(
+                        name1time = results$name1time,
+                        analysis_outcome = results$analysis_outcome,
+                        name3contexpl = results$name3contexpl
+                    )
                     # ,
                     # not_continue_analysis = not_continue_analysis
                     )
@@ -2208,7 +2203,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     "HR_multivariable"
                 )
 
-                for (i in seq_along(data_frame[, 1, drop = T])) {
+                for (i in seq_along(data_frame[, 1, drop = TRUE])) {
                     coxTable$addRow(rowKey = i, values = c(data_frame[i, ]))
                 }
 
@@ -2359,7 +2354,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 rescutTable$setNote("multiplicity", "Warning: The optimal cut-off maximizes separation; associated p-values are exploratory and should be validated in independent data.")
 
                 data_frame <- rescut_summary
-                for (i in seq_along(data_frame[, 1, drop = T])) {
+                for (i in seq_along(data_frame[, 1, drop = TRUE])) {
                     rescutTable$addRow(rowKey = i, values = c(data_frame[i, ]))
                 }
             }
@@ -2462,7 +2457,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 medianTable$deleteRows()
                 private$.landmarkNote(self$results$medianTable, results)
                 data_frame <- results2table
-                for (i in seq_along(data_frame[, 1, drop = T])) {
+                for (i in seq_along(data_frame[, 1, drop = TRUE])) {
                     medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
                 }
 
@@ -2625,7 +2620,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 private$.landmarkNote(self$results$survTable, results)
 
 
-                for (i in seq_along(data_frame[, 1, drop = T])) {
+                for (i in seq_along(data_frame[, 1, drop = TRUE])) {
                     survTable$addRow(rowKey = i, values = c(data_frame[i, ]))
                 }
 
@@ -3396,7 +3391,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 cutoffs <- numeric(num_cuts)
                 current_data <- mydata
 
-                for (i in 1:num_cuts) {
+                for (i in seq_len(num_cuts)) {
+                    private$.performCheckpoint(i, frequency = 1)
                     fit_err <- tryCatch({
                         res.cut <- .quietly(survminer::surv_cutpoint(
                             current_data,
@@ -3424,6 +3420,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         remaining_cuts <- num_cuts - i + 1
                         fallback_cuts <- private$.quantileCutoffs(current_data[[mycontexpl]], remaining_cuts)
                         cutoffs[i:num_cuts] <- fallback_cuts
+                        private$.addHtmlMessage(
+                            "warning",
+                            .("Recursive cut-off search incomplete"),
+                            .("A recursive optimal split could not be estimated. Quantile-based cut-points were used for the remaining groups.")
+                        )
+                        break
                     }
                 }
 
@@ -3573,12 +3575,56 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     return(private$.quantileCutoffs(cont_var, num_cuts))
                 }
 
-                # Test multiple combinations of cutoffs
-                best_pval <- 1
-                best_cuts <- numeric(num_cuts)
+                # Enumerate every combination when the candidate space is small.
+                # For larger spaces, evaluate 1000 UNIQUE combinations selected with
+                # the user-controlled seed. The previous loop sampled independently,
+                # repeated combinations, and could miss the optimum even when fewer
+                # than 1000 combinations existed.
+                total_combinations <- choose(length(valid_cuts), num_cuts)
+                exhaustive <- is.finite(total_combinations) && total_combinations <= 1000
+                if (exhaustive) {
+                    candidate_sets <- utils::combn(
+                        valid_cuts,
+                        num_cuts,
+                        simplify = FALSE
+                    )
+                } else {
+                    target <- 1000L
+                    candidate_sets <- vector("list", target)
+                    seen <- new.env(hash = TRUE, parent = emptyenv())
+                    n_found <- 0L
+                    attempts <- 0L
+                    max_attempts <- 100000L
 
-                # Sample cutoff combinations to avoid computational explosion
-                n_samples <- min(1000, choose(length(valid_cuts), num_cuts))
+                    while (n_found < target && attempts < max_attempts) {
+                        attempts <- attempts + 1L
+                        idx <- sort(sample.int(length(valid_cuts), num_cuts))
+                        key <- paste(idx, collapse = ",")
+                        if (!exists(key, envir = seen, inherits = FALSE)) {
+                            n_found <- n_found + 1L
+                            candidate_sets[[n_found]] <- valid_cuts[idx]
+                            assign(key, TRUE, envir = seen)
+                        }
+                        private$.performCheckpoint(attempts, frequency = 250)
+                    }
+                    candidate_sets <- candidate_sets[seq_len(n_found)]
+
+                    private$.addHtmlMessage(
+                        "info",
+                        .("Approximate minimum p-value search"),
+                        sprintf(
+                            .("The candidate space contains %s cut-off combinations. A reproducible random sample of %d unique combinations was evaluated using seed %d. The reported solution is approximate and must be validated independently."),
+                            format(total_combinations, scientific = total_combinations >= 1e6,
+                                   digits = 4, trim = TRUE),
+                            length(candidate_sets),
+                            seed_val
+                        )
+                    )
+                }
+
+                best_pval <- Inf
+                best_cuts <- NULL
+                min_n <- ceiling(length(cont_var) * min_prop)
 
                 # Hoist the iteration-invariant formula and base data frame out of the loop;
                 # only the grouping vector changes each iteration.
@@ -3589,32 +3635,42 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 test_data <- mydata
 
                 tryCatch({
-                    for (i in 1:n_samples) {
-                        test_cuts <- sort(sample(valid_cuts, num_cuts))
+                    for (i in seq_along(candidate_sets)) {
+                        private$.performCheckpoint(i, frequency = 25)
+                        test_cuts <- sort(candidate_sets[[i]])
                         test_groups <- private$.createRiskGroups(cont_var, test_cuts)
+
+                        # Enforce the requested group-size constraint during the
+                        # optimization. Removing a selected cut-point afterwards can
+                        # produce a grouping that was never optimized.
+                        group_sizes <- as.integer(table(test_groups))
+                        if (length(group_sizes) != num_cuts + 1L ||
+                            any(group_sizes < min_n)) {
+                            next
+                        }
 
                         # Calculate log-rank test p-value
                         test_data$test_groups <- test_groups
 
-                        logrank_test <- survival::survdiff(formula, data = test_data)
-                        pval <- 1 - pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1)
+                        pval <- tryCatch({
+                            logrank_test <- survival::survdiff(formula, data = test_data)
+                            1 - stats::pchisq(
+                                logrank_test$chisq,
+                                df = length(logrank_test$n) - 1
+                            )
+                        }, error = function(e) NA_real_)
 
-                        if (pval < best_pval) {
+                        if (is.finite(pval) && pval < best_pval) {
                             best_pval <- pval
                             best_cuts <- test_cuts
                         }
                     }
 
-                    # best_cuts starts as numeric(num_cuts), i.e. all zeros. If no
-                    # sampled split ever beat p = 1 (possible when the log-rank
-                    # statistic is degenerate) those zeros would be returned as
-                    # cut-points and every patient placed in one group.
-                    if (!any(best_cuts != 0)) {
+                    if (is.null(best_cuts)) {
                         private$.addHtmlMessage(
                             "warning",
-                            "Minimum p-value search found no split",
-                            paste0("No sampled combination of cut-points separated survival at all. ",
-                                   "Quantile-based cut-points are shown instead."))
+                            .("Minimum p-value search found no admissible split"),
+                            .("No evaluated combination both satisfied the minimum group-size requirement and produced a finite log-rank statistic. Quantile-based cut-points are shown instead."))
                         return(private$.quantileCutoffs(cont_var, num_cuts))
                     }
 
@@ -3780,58 +3836,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                              " (df = ", length(logrank_test$n) - 1, "), p = ",
                                              ifelse(overall_pval < 0.001, "< 0.001", round(overall_pval, 3)))
 
-                        # Selection-adjusted p-value.
-                        #
-                        # The log-rank p above is computed on the SAME data the
-                        # cut-points were chosen from, so it is not a valid test
-                        # of anything -- it is the maximum of many statistics
-                        # reported as if it were one pre-specified test. The
-                        # previous text went further and asserted the cut-points
-                        # "significantly differentiate survival". Report the
-                        # maximally-selected-rank-statistic p instead, which is
-                        # the null distribution the search actually implies, and
-                        # demote the naive value to exploratory.
-                        adj_text <- tryCatch({
-                            if (!requireNamespace("maxstat", quietly = TRUE)) {
-                                "Selection-adjusted p-value unavailable (package 'maxstat' not installed)."
-                            } else {
-                                seed_val <- self$options$seed
-                                if (is.null(seed_val)) seed_val <- 12345
-                                withr::local_seed(seed_val)
-                                # pmethod: "Lau94" is a Bonferroni-type UPPER BOUND, not a
-                                # probability -- it routinely returns values above 1
-                                # (observed 2.65 where the exact method gives 0.70), and it
-                                # does so precisely on non-significant results, i.e. exactly
-                                # when the clinician is deciding whether a cut-point is real.
-                                # "condMC" is the exact conditional Monte-Carlo p-value.
-                                mt_fml <- .asSurvivalFormula(paste0(
-                                    "survival::Surv(", private$.escapeVariableNames(mytime), ", ",
-                                    private$.escapeVariableNames(myoutcome), ") ~ ",
-                                    private$.escapeVariableNames(mycontexpl)))
-                                mt <- maxstat::maxstat.test(
-                                    mt_fml, data = mydata, smethod = "LogRank",
-                                    pmethod = "condMC", B = 9999)
-                                adj_p <- min(1, mt$p.value)   # belt and braces
-                                paste0("Selection-adjusted p for the single best split of ",
-                                       mycontexpl, " (maximally selected rank statistic, ",
-                                       "exact conditional Monte-Carlo) = ",
-                                       ifelse(adj_p < 0.001, "< 0.001", round(adj_p, 3)),
-                                       ". It accounts for a cut-point having been chosen to ",
-                                       "maximise separation in these data. Note it refers to ",
-                                       "ONE optimal split, not to the ", length(multicut_results$cutoff_values),
-                                       " cut-points in the table above, and it does not depend ",
-                                       "on which cut-off method was used.")
-                            }
-                        }, error = function(e)
-                            "Selection-adjusted p-value could not be computed for this variable.")
+                        interpretation <- .("The log-rank p above is EXPLORATORY: the cut-points were selected from these same data, so it is the largest of many statistics reported as a single test and is optimistic. No selection-adjusted p-value is reported: a single-split maximally selected-rank test does not adjust a multiple-cutoff procedure. Validate every cut-point in independent data before clinical use.")
 
-                        interpretation <- paste0(
-                            "The log-rank p above is EXPLORATORY: the cut-points were selected from ",
-                            "these same data, so it is the largest of many statistics reported as a ",
-                            "single test and is optimistic. Validate any cut-point in independent data ",
-                            "before clinical use.")
-
-                        full_text <- paste(logrank_text, adj_text, interpretation, sep = "\n\n")
+                        full_text <- paste(logrank_text, interpretation, sep = "\n\n")
 
                         # Store in a text result (we'll need to check what text output is available)
                         # For now, let's use a preformatted result
@@ -3927,7 +3934,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Get the stored multiple cutoffs results
                 plotData <- image$state
-                if (is.null(plotData) || is.null(plotData$multicut_results)) {
+                if (is.null(plotData) || is.null(plotData$cutoff_values) ||
+                    is.null(plotData$values)) {
                     # Create fallback visualization
                     plot <- ggplot2::ggplot() +
                         ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5,
@@ -3940,22 +3948,23 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 tryCatch({
-                    multicut_results <- plotData$multicut_results
-                    results <- plotData$results
-
-                    # Get the continuous variable data
-                    cont_var <- results$cleanData[[results$name3contexpl]]
-                    cutoff_values <- multicut_results$cutoff_values
+                    cont_var <- plotData$values
+                    cutoff_values <- plotData$cutoff_values
 
                     # Create histogram with cutoff lines
                     hist_data <- data.frame(values = cont_var)
 
                     plot <- ggplot2::ggplot(hist_data, ggplot2::aes(x = values)) +
                         ggplot2::geom_histogram(bins = 30, alpha = 0.7, fill = "lightblue", color = "black") +
-                        ggplot2::geom_vline(xintercept = cutoff_values, color = "red", linetype = "dashed", size = 1) +
+                        ggplot2::geom_vline(
+                            xintercept = cutoff_values,
+                            color = "red",
+                            linetype = "dashed",
+                            linewidth = 1
+                        ) +
                         ggplot2::labs(
                             title = paste0("Multiple Cut-offs for ", self$options$contexpl),
-                            subtitle = paste0("Method: ", multicut_results$method,
+                            subtitle = paste0("Method: ", plotData$method,
                                             " | Number of cut-offs: ", length(cutoff_values)),
                             x = self$options$contexpl,
                             y = "Frequency"
@@ -4000,7 +4009,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Get the stored multiple cutoffs results
                 plotData <- image$state
-                if (is.null(plotData) || is.null(plotData$multicut_results)) {
+                if (is.null(plotData) || is.null(plotData$time) ||
+                    is.null(plotData$outcome) || is.null(plotData$risk_groups)) {
                     plot <- ggplot2::ggplot() +
                         ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5,
                                                       label = "Multiple Cutoffs Survival Plot\nRun analysis to see visualization"),
@@ -4012,20 +4022,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 tryCatch({
-                    multicut_results <- plotData$multicut_results
-                    results <- plotData$results
-
-                    # Create data with risk groups
-                    plot_data <- results$cleanData
-                    plot_data$risk_groups <- multicut_results$risk_groups
-
-                    mytime <- results$name1time
-                    myoutcome <- results$analysis_outcome
+                    plot_data <- data.frame(
+                        .time = plotData$time,
+                        .outcome = plotData$outcome,
+                        risk_groups = plotData$risk_groups
+                    )
 
                     # Create survival formula
-                    escaped_time <- private$.escapeVariableNames(mytime)
-                    escaped_outcome <- private$.escapeVariableNames(myoutcome)
-                    formula_str <- paste0('survival::Surv(', escaped_time, ',', escaped_outcome, ') ~ risk_groups')
+                    formula_str <- "survival::Surv(.time, .outcome) ~ risk_groups"
                     surv_formula <- .asSurvivalFormula(formula_str)
 
                     # Fit survival model
@@ -4040,12 +4044,15 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         fit,
                         data = plot_data,
                         title = paste0("Survival Curves - Multiple Cut-offs for ", self$options$contexpl),
-                        subtitle = paste0("Method: ", multicut_results$method, " | Groups: ", length(levels(multicut_results$risk_groups))),
+                        subtitle = paste0("Method: ", plotData$method,
+                                          " | Groups: ", length(levels(plotData$risk_groups))),
                         xlab = private$.timeAxisLabel(),
                         ylab = "Survival Probability",
-                        legend.title = "Risk Groups",
+                        legend.title = .("Marker groups"),
                         risk.table = self$options$risktable,
                         conf.int = self$options$ci95,
+                        censor = self$options$censored,
+                        surv.median.line = self$options$medianline,
                         pval = TRUE,
                         pval.coord = c(0.1, 0.1),
                         break.time.by = private$.plotBy(),
@@ -4371,8 +4378,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     residuals_state <- list(
                         martingale = martingale_resid,
                         deviance = deviance_resid,
-                        fitted = cox_model$linear.predictors,
-                        data = data_to_use
+                        fitted = cox_model$linear.predictors
                     )
                     private$residuals_data <- residuals_state
                     self$results$residualsPlot$setState(residuals_state)
@@ -4461,6 +4467,42 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                "in Multivariable Survival Analysis instead."),
                         strata_var, n_strata, nrow(mydata), nrow(mydata) / n_strata))
                     return()
+                }
+
+                # A model can technically fit with a stratum containing almost no
+                # patients or events, but that stratum contributes little or no
+                # information and can make the pooled coefficient unstable. Disclose
+                # this before showing a precise-looking hazard ratio.
+                stratum_n <- table(mydata[[".strata"]])
+                stratum_events <- tapply(
+                    mydata[[myoutcome]] == 1,
+                    mydata[[".strata"]],
+                    sum,
+                    na.rm = TRUE
+                )
+                sparse <- names(stratum_n)[
+                    as.integer(stratum_n) < 10L |
+                    as.integer(stratum_events[names(stratum_n)]) < 3L
+                ]
+                if (length(sparse) > 0L) {
+                    sparse_details <- vapply(sparse, function(level) {
+                        sprintf(
+                            "%s (n=%d, events=%d)",
+                            level,
+                            stratum_n[[level]],
+                            stratum_events[[level]]
+                        )
+                    }, character(1))
+                    sparse_message <- sprintf(
+                        .("Sparse strata detected: %s. Strata with fewer than 10 patients or 3 events provide limited information; interpret the pooled hazard ratio and proportional-hazards assessment cautiously."),
+                        paste(sparse_details, collapse = "; ")
+                    )
+                    tbl$setNote("sparse", sparse_message)
+                    private$.addHtmlMessage(
+                        "warning",
+                        .("Sparse strata in stratified Cox model"),
+                        sparse_message
+                    )
                 }
 
                 contexpl <- results$name3contexpl
@@ -5106,16 +5148,18 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 return(TRUE)
             },
 
-            # Memory monitoring for large datasets
+            # Large-data warning
             .checkMemoryUsage = function(data, warn_threshold = 50000) {
                 n_rows <- nrow(data)
 
                 if (n_rows > warn_threshold) {
-                    # Large dataset detected - memory monitoring
                     private$.addHtmlMessage(
                         type = "info",
-                        title = "Large Dataset Detected",
-                        message = sprintf('Dataset contains %d rows. Analysis may take longer than usual. Memory usage is being monitored to ensure stable performance.', n_rows)
+                        title = .("Large dataset detected"),
+                        message = sprintf(
+                            .("Dataset contains %d rows. Analysis may take longer than usual, especially with data-driven cut-off searches and diagnostic plots."),
+                            n_rows
+                        )
                     )
                 }
 

@@ -12,8 +12,7 @@ library(ClinicoPath)
 # Example 1: Breast Cancer -- Standard Clinicopathological Variables
 # ===============================================================
 # Classic scenario: moderate number of predictors, well-established
-# risk factors. LASSO identifies which pathological features are
-# most prognostic after regularization.
+# risk factors. LASSO estimates a sparse set of retained predictor columns.
 
 data(lassocox_breast_cancer, package = "ClinicoPath")
 
@@ -22,6 +21,7 @@ result_breast <- lassocox(
   elapsedtime = "survival_months",
   outcome = "death",
   outcomeLevel = "Dead",
+  censorLevel = "Alive",
   explanatory = c("age", "tumor_size_cm", "grade", "stage",
                    "lymph_nodes_positive", "er_status", "pr_status",
                    "her2_status", "ki67_percent", "histology", "lvi",
@@ -34,18 +34,16 @@ result_breast <- lassocox(
   survival_plot = TRUE
 )
 
-# Clinical Interpretation:
-# - Grade, lymph node count, and tumor size are typically retained
-# - ER/PR status provides protective signal (negative coefficient)
-# - Ki-67 captures proliferative activity
-# - The 1SE rule provides a more parsimonious model than lambda.min
+# Inspect the retained columns and penalized coefficients; the selected set is
+# data-dependent. The 1-SE rule is the more penalized of the two tuning rules.
 
 
 # ===============================================================
-# Example 2: Lung Cancer -- Clinical Trial with Missing Data
+# Example 2: Lung Cancer -- Input Validation
 # ===============================================================
-# Real-world scenario: mixed continuous/categorical predictors,
-# some missing values in lab results and tumor measurements.
+# This stress fixture contains follow-up values rounded to zero and only two
+# censored observations. The analysis should return an actionable validation
+# message instead of silently changing times or fitting an unstable model.
 
 data(lassocox_lung_cancer, package = "ClinicoPath")
 
@@ -54,6 +52,7 @@ result_lung <- lassocox(
   elapsedtime = "follow_up_months",
   outcome = "progression",
   outcomeLevel = "Yes",
+  censorLevel = "No",
   explanatory = c("age", "gender", "smoking_status", "histology",
                    "stage", "tumor_size_cm", "ecog_performance_status",
                    "hemoglobin_g_dl", "wbc_count_k_ul",
@@ -61,16 +60,12 @@ result_lung <- lassocox(
                    "treatment_type"),
   lambda = "lambda.min",
   nfolds = 10,
-  standardize = TRUE,
-  showVariableImportance = TRUE,
-  showModelComparison = TRUE
+  standardize = TRUE
 )
 
-# Clinical Interpretation:
-# - Stage and ECOG performance status are strong prognostic factors
-# - Smoking status contributes independently
-# - lambda.min retains more variables; useful for exploratory analysis
-# - Model comparison shows LASSO vs standard Cox trade-offs
+# Expected result: a message asking the analyst to check the time origin and
+# measurement resolution. Correct the source data using subject-matter knowledge
+# before fitting; do not add an arbitrary constant automatically.
 
 
 # ===============================================================
@@ -86,6 +81,7 @@ result_cvd <- lassocox(
   elapsedtime = "time_to_event_months",
   outcome = "cv_event",
   outcomeLevel = "Event",
+  censorLevel = "No Event",
   explanatory = c("age_years", "gender", "bmi_kg_m2",
                    "systolic_bp_mmhg", "diastolic_bp_mmhg",
                    "total_cholesterol_mg_dl",
@@ -101,18 +97,16 @@ result_cvd <- lassocox(
   includeClinicalGuidance = TRUE
 )
 
-# Clinical Interpretation:
-# - Age, diabetes, and hypertension are typically selected
-# - Among lipid measures, LASSO picks the most informative (often HDL)
-# - Medication use (ACE inhibitor, statin) may appear as protective factors
-# - BP measures are correlated; usually one is retained
+# Correlated columns can compete under an L1 penalty, so retained columns may
+# change with the data and fold assignment. Do not interpret medication
+# coefficients causally.
 
 
 # ===============================================================
-# Example 4: Small Cohort -- Testing Robustness
+# Example 4: Small Cohort -- Input Validation
 # ===============================================================
-# Challenge: Limited sample (n=75), potential for instability.
-# Reduced CV folds ensure reliable cross-validation.
+# This stress fixture also contains follow-up values rounded to zero. It
+# demonstrates the same strictly-positive-time validation in a small cohort.
 
 data(lassocox_small_cohort, package = "ClinicoPath")
 
@@ -121,6 +115,7 @@ result_small <- lassocox(
   elapsedtime = "time_months",
   outcome = "event_occurred",
   outcomeLevel = "Yes",
+  censorLevel = "No",
   explanatory = c("age", "gender", "biomarker_a", "biomarker_b",
                    "biomarker_c", "treatment_group", "severity_score"),
   lambda = "lambda.1se",
@@ -130,24 +125,23 @@ result_small <- lassocox(
   showMethodologyNotes = TRUE
 )
 
-# Clinical Interpretation:
-# - With small n, the suitability assessment may flag EPV concerns
-# - Results should be interpreted cautiously and validated externally
-# - The 1SE rule is especially important here to avoid overfitting
-# - Biomarker A and B have true effects; C is noise
+# Expected result: a strictly-positive-time validation message. After a
+# defensible correction to the source data, a small development sample still
+# requires cautious interpretation and validation of the full modeling process.
 
 
 # ===============================================================
 # Example 5: Exploring Variable Importance
 # ===============================================================
-# Use variable importance analysis to understand which predictors
-# are most stable across the regularization path.
+# Use coefficient descriptives to inspect scale-adjusted magnitude and the
+# proportion of the fitted lambda path on which each retained column is nonzero.
 
 result_importance <- lassocox(
   data = lassocox_breast_cancer,
   elapsedtime = "survival_months",
   outcome = "death",
   outcomeLevel = "Dead",
+  censorLevel = "Alive",
   explanatory = c("age", "tumor_size_cm", "grade", "stage",
                    "lymph_nodes_positive", "er_status",
                    "her2_status", "ki67_percent", "lvi",
@@ -159,9 +153,5 @@ result_importance <- lassocox(
   survival_plot = TRUE
 )
 
-# Clinical Interpretation:
-# - Variables with high importance scores enter the model early
-#   on the regularization path and persist across lambda values
-# - High path inclusion proportion = stable selection
-# - Model comparison: LASSO should match or exceed standard Cox
-#   with fewer variables, indicating regularization benefit
+# Path inclusion is not resampling-based selection frequency or evidence of
+# stability. The model-comparison statistics are apparent and selection-biased.

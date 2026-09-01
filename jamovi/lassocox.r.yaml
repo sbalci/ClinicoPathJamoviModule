@@ -37,6 +37,7 @@ items:
     - name: modelSummary
       title: Model Summary
       type: Table
+      visible: (length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       rows: 0
       columns:
         - name: statistic
@@ -59,6 +60,7 @@ items:
     - name: coefficients
       title: Penalized Coefficients at Selected Lambda
       type: Table
+      visible: (length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       rows: 0
       columns:
         - name: variable
@@ -90,6 +92,7 @@ items:
     - name: performance
       title: Apparent Development Performance
       type: Table
+      visible: (length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       rows: 0
       columns:
         - name: metric
@@ -119,7 +122,7 @@ items:
       width: 600
       height: 400
       requiresData: true
-      visible: (cv_plot)
+      visible: (cv_plot && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       refs: glmnet
       clearWith:
           - outcome
@@ -139,7 +142,7 @@ items:
       width: 600
       height: 400
       requiresData: true
-      visible: (coef_plot)
+      visible: (coef_plot && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       refs: glmnet
       clearWith:
           - outcome
@@ -159,7 +162,7 @@ items:
       width: 600
       height: 400
       requiresData: true
-      visible: (survival_plot)
+      visible: (survival_plot && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
       refs: survminer
       clearWith:
           - outcome
@@ -188,6 +191,63 @@ items:
           - nfolds
           - standardize
           - random_seed
+
+    - name: path_plot
+      title: Coefficient Paths
+      type: Image
+      renderFun: .pathPlot
+      width: 750
+      height: 500
+      requiresData: true
+      visible: (path_plot && length(elapsedtime) > 0 && length(outcome) > 0 && length(explanatory) > 0)
+      refs: glmnet
+      clearWith: [outcome, outcomeLevel, censorLevel, elapsedtime, explanatory, lambda, nfolds, standardize, random_seed, path_plot]
+
+    - name: encoding
+      title: Predictor Encoding
+      type: Table
+      rows: 0
+      visible: (showEncoding)
+      columns:
+        - name: variable
+          title: Original Predictor
+          type: text
+        - name: column
+          title: Encoded Column
+          type: text
+        - name: coding
+          title: Coding
+          type: text
+        - name: reference
+          title: Reference Level
+          type: text
+        - name: level
+          title: Comparison Level
+          type: text
+        - name: selected
+          title: Selected
+          type: text
+      clearWith: [outcome, outcomeLevel, censorLevel, elapsedtime, explanatory, lambda, nfolds, standardize, random_seed, showEncoding]
+
+    - name: reproducibility
+      title: Reproducibility Details
+      type: Table
+      rows: 0
+      visible: (showReproducibility)
+      columns:
+        - name: item
+          title: Item
+          type: text
+        - name: value
+          title: Value
+          type: text
+      clearWith: [outcome, outcomeLevel, censorLevel, elapsedtime, explanatory, lambda, nfolds, standardize, random_seed, showReproducibility]
+
+    - name: rCode
+      title: Reproducible R Code
+      type: Html
+      visible: (showRCode)
+      clearWith: [outcome, outcomeLevel, censorLevel, elapsedtime, explanatory, lambda, nfolds, standardize, random_seed, showRCode]
 
     # Natural-language Summary
     - name: summaryText

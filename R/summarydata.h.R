@@ -102,6 +102,7 @@ summarydataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 title="Important Information",
                 clearWith=list(
                     "vars",
+                    "distr",
                     "decimal_places")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -180,7 +181,7 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "summarydata",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = summarydataResults$new(options=options),
                 data = data,
@@ -222,7 +223,8 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   measures. Default of 2 aligns with standard laboratory reporting. Governs
 #'   the text summary, the skewness and kurtosis values, the visual summary
 #'   table, the outlier report and the draft statistical summary. P-values are
-#'   always shown to 3 decimal places.
+#'   normally shown to 3 decimal places; additional digits are retained near
+#'   0.05 when needed to preserve the test decision.
 #' @param outliers If TRUE, flag observations outside the 1.5 x IQR fences as
 #'   potential outliers. Helpful for quality control and identifying possible
 #'   data entry errors or genuine extreme values that need contextual review.

@@ -1,11 +1,11 @@
 ---
 name: lassocox
 title: Lasso-Cox Regression
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: Penalized Cox Regression
 menuTitle: LASSO Cox
 menuSubtitle: Sparse Cox model development with cross-validated L1 penalization.
-version: '0.0.3'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -27,14 +27,16 @@ options:
           R: The data as a data frame.
 
     - name: elapsedtime
-      title: 'Time Elapsed'
+      title: Follow-up time
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
       default: NULL
       description:
         R: >
-          The numeric variable representing follow-up time until the event or last observation.
+          The strictly positive numeric follow-up time until the event or last observation.
+          Zero or negative times must be resolved from the time origin and measurement
+          resolution; they are not automatically adjusted.
 
     - name: outcome
       title: 'Outcome'
@@ -48,7 +50,7 @@ options:
           numeric with exactly two observed values.
 
     - name: outcomeLevel
-      title: Event Level
+      title: Event level
       type: Level
       variable: (outcome)
       description:
@@ -58,7 +60,7 @@ options:
           outcomes, the larger observed value is used (or 1 for 0/1 coding).
 
     - name: censorLevel
-      title: Censored Level
+      title: Censored level
       type: Level
       variable: (outcome)
       description:
@@ -70,7 +72,7 @@ options:
           recoded explicitly for a cause-specific analysis.
 
     - name: explanatory
-      title: Explanatory Variables
+      title: Candidate predictors
       type: Variables
       suggested: [ nominal, ordinal, continuous ]
       permitted: [ factor, numeric ]
@@ -78,17 +80,20 @@ options:
       description:
         R: >
           Variables to be considered for selection in the Lasso-Cox regression.
+          Time and outcome cannot also be predictors. Infinite values and
+          entirely missing predictors are rejected.
           Constant variables are removed before fitting. Categorical predictors are
-          expanded into indicator columns, which LASSO selects individually rather
-          than as a grouped factor.
+          expanded into treatment indicator columns, including ordered factors;
+          the first observed factor level is the reference. Global/custom contrasts
+          are not used. LASSO selects columns individually rather than as a grouped factor.
       
     - name: lambda
-      title: Lambda Selection Method
+      title: Lambda selection rule
       type: List
       options:
-        - title: Minimum CV Error
+        - title: Minimum CV error
           name: lambda.min
-        - title: 1SE Rule
+        - title: 1-SE rule
           name: lambda.1se
       default: lambda.1se
       description:
@@ -97,7 +102,7 @@ options:
           by the 1-SE rule is preserved and is not replaced by lambda.min.
 
     - name: nfolds
-      title: Number of CV Folds
+      title: Number of CV folds
       type: Integer
       default: 10
       min: 3
@@ -108,7 +113,7 @@ options:
           three of each outcome state are required.
 
     - name: random_seed
-      title: Random Seed
+      title: Random seed
       type: Integer
       default: 123456
       min: 1
@@ -118,7 +123,7 @@ options:
           Random seed for reproducible cross-validation fold assignment.
       
     - name: standardize
-      title: Standardize Variables
+      title: Internal standardization
       type: Bool
       default: true
       description:
@@ -130,7 +135,7 @@ options:
           selected separately rather than as a grouped factor.
 
     - name: suitabilityCheck
-      title: Data Suitability Assessment
+      title: Data suitability assessment
       type: Bool
       default: true
       description:
@@ -140,7 +145,7 @@ options:
           diagnostic for an unpenalized refit of the selected encoded columns.
 
     - name: cv_plot
-      title: Cross-validation Plot
+      title: Cross-validation plot
       type: Bool
       default: true
       description:
@@ -148,7 +153,7 @@ options:
           Whether to show the cross-validation plot.
 
     - name: coef_plot
-      title: Coefficient Plot
+      title: Coefficient summary
       type: Bool
       default: true
       description:
@@ -157,7 +162,7 @@ options:
           chosen lambda value.
 
     - name: survival_plot
-      title: Risk Group Survival Plot
+      title: Development risk-group curves
       type: Bool
       default: true
       description:
@@ -166,8 +171,41 @@ options:
           sample at its median fitted score. The split is not a validated clinical
           cutoff and no group-comparison p-value is reported.
 
+    - name: path_plot
+      title: Coefficient paths
+      type: Bool
+      default: false
+      description:
+        R: >
+          Plot coefficients across the fitted log-lambda path with both CV choices
+          and counts of nonzero columns. For readability, at most 30 paths are
+          displayed, ranked by their summed absolute coefficients across the path.
+
+    - name: showEncoding
+      title: Predictor encoding
+      type: Bool
+      default: false
+      description:
+        R: Display the original predictor, design column, coding, reference level, and selection status.
+
+    - name: showReproducibility
+      title: Reproducibility details
+      type: Bool
+      default: false
+      description:
+        R: Display exact lambda choices, seed, event/censor fold counts, and software versions.
+
+    - name: showRCode
+      title: Reproducible R code
+      type: Bool
+      default: false
+      description:
+        R: >
+          Generate upstream glmnet R code to refit the same development data with
+          the recorded encoding and stratified CV seed. This is not external validation.
+
     - name: riskScore
-      title: Add Risk Score to Data
+      title: Development risk score
       type: Output
       description:
         R: >
@@ -176,7 +214,7 @@ options:
 
     # Explanatory Output Options
     - name: showSummary
-      title: Show Results Summary
+      title: Results summary
       type: Bool
       default: false
       description:
@@ -185,7 +223,7 @@ options:
           as apparent and states the required validation.
 
     - name: showExplanations
-      title: Show Method Explanations
+      title: Method explanations
       type: Bool
       default: false
       description:
@@ -194,7 +232,7 @@ options:
           including regularization concepts and interpretation guidance.
 
     - name: showMethodologyNotes
-      title: Detailed Methodology Notes
+      title: Methodology notes
       type: Bool
       default: false
       description:
@@ -203,7 +241,7 @@ options:
           cross-validation, and variable selection process.
 
     - name: includeClinicalGuidance
-      title: Clinical Interpretation Guidance
+      title: Clinical guidance
       type: Bool
       default: false
       description:
@@ -213,7 +251,7 @@ options:
           patient-level decisions.
 
     - name: showVariableImportance
-      title: Variable Importance Analysis
+      title: Variable importance
       type: Bool
       default: false
       description:
@@ -222,7 +260,7 @@ options:
           Path inclusion is not a bootstrap selection frequency or stability measure.
 
     - name: showModelComparison
-      title: Exploratory Unpenalized Refit Comparison
+      title: Exploratory Cox comparisons
       type: Bool
       default: false
       description:

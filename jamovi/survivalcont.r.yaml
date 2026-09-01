@@ -1045,13 +1045,13 @@ items:
     - name:  survivalPlotsHeading3
       title: Survival Plots Explanations
       type:  Preformatted
-      visible: ((sc || ce || ch || kmunicate) && showExplanations)
+      visible: (((sc && (findcut || multiple_cutoffs)) || (findcut && (ce || ch || kmunicate))) && showExplanations)
 
     # Survival Plots Explanation
     - name: survivalPlotsExplanation
       title: Understanding Survival Curves and Plots
       type: Html
-      visible: ((sc || ce || ch || kmunicate) && showExplanations)
+      visible: (((sc && (findcut || multiple_cutoffs)) || (findcut && (ce || ch || kmunicate))) && showExplanations)
       clearWith:
           - sc
           - ce
@@ -1111,7 +1111,7 @@ items:
     - name: loglogPlotExplanation
       title: 'Understanding Log-Log Plots for Proportional Hazards Assessment'
       type: Html
-      visible: (loglog && showExplanations)
+      visible: (findcut && loglog && showExplanations)
       clearWith:
           - loglog
           - contexpl
@@ -1551,8 +1551,8 @@ items:
       title: Add Multiple Cut-off Groups to Data
       type: Output
       measureType: nominal
-      varTitle: '`Multiple Cut-off Risk Groups - from ${ contexpl }`'
-      varDescription: Multiple Cut-off Risk Groups from given Cut-offs in Continuous Survival Function
+      varTitle: '`Multiple Cut-off Marker Groups - from ${ contexpl }`'
+      varDescription: Ordered marker-value groups from the reported cut-offs in Continuous Survival Analysis
       clearWith:
           - multiple_cutoffs
           - num_cutoffs

@@ -390,7 +390,7 @@ A results object containing:
 \code{results$rmstExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$residualDiagnosticsExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$residualsTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$survivalExport} \tab \tab \tab \tab \tab an output \cr
+\code{results$export_survival_data} \tab \tab \tab \tab \tab an output \cr
 \code{results$survivalExportSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$pairwiseComparisonHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$pairwiseTable} \tab \tab \tab \tab \tab a table \cr

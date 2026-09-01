@@ -4,12 +4,16 @@ title: DateTime Converter
 jrs:   '1.1'
 
 items:
+    # timezone belongs in every clearWith below: it changes the PARSED VALUE,
+    # not just the wording (a date with no time is midnight in the selected zone).
     - name: notices
       title: Important Information
       type: Html
       clearWith:
          - datetime_var
          - datetime_format
+         - timezone
+         - two_digit_year
 
     - name: welcome
       title: 'Getting Started'
@@ -21,6 +25,8 @@ items:
       clearWith:
          - datetime_var
          - datetime_format
+         - timezone
+         - two_digit_year
 
     - name: qualityMetrics
       title: 'Quality Assessment'
@@ -28,6 +34,8 @@ items:
       clearWith:
          - datetime_var
          - datetime_format
+         - timezone
+         - two_digit_year
 
     - name: previewTable
       title: 'Conversion Preview'
@@ -35,13 +43,22 @@ items:
       clearWith:
          - datetime_var
          - datetime_format
+         - timezone
+         - two_digit_year
+         - preview_rows
 
+    # No clearWith on purpose: jmvcore's default is "*" (clear on any option change).
+    # This panel's real dependency set is datetime_var, datetime_format, timezone,
+    # preview_rows and all 22 extract_*/*_out toggles -- 26 of the 30 options -- so an
+    # explicit list would be longer than the default and easy to leave incomplete again.
     - name: componentPreview
       title: 'Extracted Components Preview'
       type: Html
-      clearWith:
-         - datetime_var
-         - datetime_format
+
+    # qualityAssessment and nlSummary carry no clearWith on purpose: jmvcore defaults to
+    # "*", which is already the widest (and therefore safest) setting. Both are derived
+    # from the parse plus most of the option set, so narrowing them would only risk
+    # reintroducing the staleness the lists above had.
 
     - name: qualityAssessment
       title: 'Data Quality Assessment'
@@ -68,6 +85,11 @@ items:
       type: Html
       visible: (show_glossary)
 
+    # varTitle/varDescription below are STATIC. Do NOT reintroduce survival.r.yaml's
+    # `${ dxdate }` idiom: jmvcore::format's placeholder regex is
+    # \{ *[A-Za-z][A-Za-z0-9]* *\} -- no underscore -- so `${ datetime_var }` would ship
+    # to jamovi verbatim as the column name. The source variable is appended at runtime
+    # by private$.updateOutputTitles() in R/datetimeconverter.b.R.
     - name: corrected_datetime_char
       title: Corrected DateTime (Text)
       type: Output
@@ -77,160 +99,154 @@ items:
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
 
     - name: corrected_datetime_numeric
       title: Corrected DateTime (Numeric)
       type: Output
-      varTitle: '`Corrected DateTime Numeric - from ${ datetime_var }`'
-      varDescription: '`DateTime variable ${ datetime_var } as Unix epoch seconds for calculations`'
+      varTitle: 'Corrected DateTime (Numeric)'
+      varDescription: 'DateTime variable converted to Unix epoch seconds for calculations'
       measureType: continuous
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
 
     - name: year_out
       title: Year
       type: Output
-      varTitle: '`Year - from ${ datetime_var }`'
-      varDescription: '`Extracted year component from ${ datetime_var }`'
+      varTitle: 'Year'
+      varDescription: 'Year component extracted from the datetime variable'
       measureType: continuous
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
 
     - name: month_out
       title: Month
       type: Output
-      # varTitle: '`jmvcore::format("Month - from { datetime_var }", datetime_var=self$options$datetime_var)`'
-      varTitle: '`Month - from ${ datetime_var }`'
-      varDescription: '`Extracted month component (1-12) from ${ datetime_var }`'
+      varTitle: 'Month'
+      varDescription: 'Month component (1-12) extracted from the datetime variable'
       measureType: continuous
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
-          - month_out
-
-
-
-    # - name: calculatedtime
-    #   title: Add Calculated Time to Data
-    #   type: Output
-    #   varTitle: '`Calculated Time - from ${ dxdate } to { fudate }`'
-    #   varDescription: '`Calculated Time from Given Dates - from ${ dxdate } to { fudate } in Survival Analysis`'
-    #   measureType: continuous
-    #   clearWith:
-    #       - tint
-    #       - dxdate
-    #       - fudate
-    #       - elapsedtime
-    #       - calculatedtime
-
 
 
 
     - name: monthname_out
       title: Month Name
       type: Output
-      varTitle: '`Month Name - from ${ datetime_var }`'
-      varDescription: '`Extracted month name from ${ datetime_var }`'
+      varTitle: 'Month Name'
+      varDescription: 'Month name extracted from the datetime variable'
       measureType: nominal
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
-          - monthname_out
 
     - name: day_out
       title: Day
       type: Output
-      varTitle: '`Day - from ${ datetime_var }`'
-      varDescription: '`Extracted day of month (1-31) from ${ datetime_var }`'
+      varTitle: 'Day'
+      varDescription: 'Day of month (1-31) extracted from the datetime variable'
       measureType: continuous
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
 
 
     - name: hour_out
       title: Hour
       type: Output
-      varTitle: '`Hour - from ${ datetime_var }`'
-      varDescription: '`Extracted hour component (0-23) from ${ datetime_var }`'
+      varTitle: 'Hour'
+      varDescription: 'Hour component (0-23) extracted from the datetime variable'
       measureType: continuous
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
 
     - name: minute_out
       title: Minute
       type: Output
-      varTitle: '`Minute - from ${ datetime_var }`'
-      varDescription: '`Extracted minute component (0-59) from ${ datetime_var }`'
+      varTitle: 'Minute'
+      varDescription: 'Minute component (0-59) extracted from the datetime variable'
       measureType: continuous
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
 
     - name: second_out
       title: Second
       type: Output
-      varTitle: '`Second - from ${ datetime_var }`'
-      varDescription: '`Extracted second component (0-59) from ${ datetime_var }`'
+      varTitle: 'Second'
+      varDescription: 'Second component (0-59) extracted from the datetime variable'
       measureType: continuous
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
 
     - name: dayname_out
       title: Day Name
       type: Output
-      varTitle: '`Day Name - from ${ datetime_var }`'
-      varDescription: '`Extracted day of week name from ${ datetime_var }`'
+      varTitle: 'Day Name'
+      varDescription: 'Day of week name extracted from the datetime variable'
       measureType: nominal
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
 
     - name: weeknum_out
       title: Week Number
       type: Output
-      varTitle: '`Week Number - from ${ datetime_var }`'
-      varDescription: '`Extracted week number of year (1-53) from ${ datetime_var }`'
+      varTitle: 'Week Number'
+      varDescription: 'Week number of year (1-53) extracted from the datetime variable'
       measureType: continuous
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
 
     - name: quarter_out
       title: Quarter
       type: Output
-      varTitle: '`Quarter - from ${ datetime_var }`'
-      varDescription: '`Extracted quarter (1-4) from ${ datetime_var }`'
+      varTitle: 'Quarter'
+      varDescription: 'Quarter (1-4) extracted from the datetime variable'
       measureType: continuous
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
 
     - name: dayofyear_out
       title: Day of Year
       type: Output
-      varTitle: '`Day of Year - from ${ datetime_var }`'
-      varDescription: '`Extracted day of year (1-366) from ${ datetime_var }`'
+      varTitle: 'Day of Year'
+      varDescription: 'Day of year (1-366) extracted from the datetime variable'
       measureType: continuous
       clearWith:
           - datetime_var
           - timezone
+          - two_digit_year
           - datetime_format
 
 refs:

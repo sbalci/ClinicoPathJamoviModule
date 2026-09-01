@@ -27,6 +27,7 @@ children:
       - type: CheckBox
         name: nonnormal
         label: "Report continuous variables as median (Q1, Q3) (tableone style)"
+        enable: (sty:t1)
       - type: CheckBox
         name: excl
         label: "Missing-value exclusion (NA)"

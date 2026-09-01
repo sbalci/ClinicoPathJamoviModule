@@ -16,7 +16,6 @@ timeinterval(
   remove_negative = FALSE,
   remove_extreme = FALSE,
   extreme_multiplier = 2,
-  add_times = FALSE,
   include_quality_metrics = FALSE,
   confidence_level = 95,
   show_summary = FALSE,
@@ -56,12 +55,16 @@ person-time denominators. Calendar-aware respects actual month lengths (28
 }}
 
 \item{use_landmark}{Enables conditional analysis from a specific time
-point. Useful for  studying outcomes after a landmark time (e.g., 6-month
-survivors only).}
+point. Useful for  studying outcomes conditional on having been followed to
+a landmark time (for example, only participants with at least 6 months of
+follow-up).}
 
 \item{landmark_time}{Time point for landmark analysis in the specified
-output units.  Only participants surviving past this time are included in
-analysis.}
+output units.  Only participants whose follow-up reaches this time are
+included. This analysis has no event indicator, so it selects on LENGTH OF
+FOLLOW-UP, not on survival: a participant excluded here may have died early
+or may simply have been enrolled recently, and this analysis cannot tell
+the two apart.}
 
 \item{remove_negative}{Automatically exclude negative time intervals (end
 date before start date). Recommended for data quality assurance.}
@@ -77,10 +80,6 @@ values. Default 2.0 means intervals longer than 2x the 99th percentile are
 removed when 'Remove extreme values' is on. Higher values are more
 conservative (fewer intervals removed). Has no effect when the 99th
 percentile is zero.}
-
-\item{add_times}{Appends calculated time intervals as a new variable for
-downstream analysis. Useful for subsequent survival analysis or person-time
-calculations.}
 
 \item{include_quality_metrics}{Provides comprehensive data quality
 assessment including missing values, negative intervals, and distribution
@@ -100,7 +99,11 @@ incidence rate, landmark analysis, etc.) to help interpret results.}
 computer's timezone. 'UTC' interprets datetimes as Coordinated Universal
 Time. This applies only to the 'YYYY-MM-DD HH:MM:SS' format, the only one
 that carries a time of day; date-only formats produce calendar dates that
-have no timezone, so the setting has no effect on them.}
+have no timezone, so the setting has no effect on them. Note that it
+changes the reported DURATIONS as well as the parsing: a zone with daylight
+saving gains or loses an hour at each transition, so an interval spanning
+one comes out an hour short under 'System Default' and exact under 'UTC'.
+Choose UTC if you need durations unaffected by daylight saving.}
 }
 \value{
 A results object containing:

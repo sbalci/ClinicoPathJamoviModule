@@ -266,17 +266,17 @@ options:
         jamovi: Specify sample size range for power curves (e.g., '50,500' or 'auto').
 
     - name: export_results
-      title: "Export Results to Data"
+      title: "Summarise Results for Reporting"
       type: Bool
       default: false
       description:
-        R: Whether to export detailed results for external analysis.
-        jamovi: Export comprehensive power analysis results to dataset for further analysis.
+        R: Whether to show an on-screen summary of the computed power analysis result.
+        jamovi: Show an on-screen summary of the power analysis result, for copying into a protocol or report.
 
     - name: export_power_curve
-      title: "Export Power Curve Data"
+      title: "Summarise Power Curve for Reporting"
       type: Bool
       default: false
       description:
-        R: Whether to export power curve data points.
-        jamovi: Export power curve data for external plotting and analysis.
+        R: Whether to show an on-screen summary of the power curve that was computed.
+        jamovi: Show an on-screen summary of the power curve, for copying into a protocol or report.

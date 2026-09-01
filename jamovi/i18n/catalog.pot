@@ -568,8 +568,40 @@ msgid ""
 "follow-up.{cinote}"
 msgstr ""
 
+#: R/timeinterval.b.R
+msgid ""
+"{count} date values are in the future. Review date columns for data entry "
+"errors or incorrect date formats."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"{count} date(s) are in the future. Verify this is intentional (for example "
+"planned follow-up dates)."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"{count} date(s) fall before 1900, which usually means the format was read "
+"wrongly or the source has data-entry errors."
+msgstr ""
+
 #: R/summarydata.b.R
 msgid "{count} observation(s) flagged (values: {values})."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"{count} observations ({pct}%) have missing time intervals. Investigate "
+"missing date values as this may affect study conclusions."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"{count} of {total} dates ({pct}%) are in the future, and this column has "
+"two-digit years: a year such as 55 is read as 2055, not 1955. If these dates "
+"cannot be in the future - dates of birth, diagnosis or specimen dates - set "
+"Two-digit years to 'Always in the past'."
 msgstr ""
 
 #: R/reportcat.b.R
@@ -660,8 +692,28 @@ msgstr ""
 msgid "{n} cases ({pct} of errors) - Test misses actual disease"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "{n} cases ({percent}%) excluded due to missing values. Final N = {retained}"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "{n} cases (no exclusions applied)"
+msgstr ""
+
 #: R/decision.b.R
 msgid "{n} cases analyzed"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "{n} cases with {variables} selected variable"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "{n} cases with {variables} selected variables"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "{n} distinct values; maximum 20 categories"
 msgstr ""
 
 #: R/reportcat.b.R
@@ -674,6 +726,10 @@ msgstr ""
 
 #: R/reportcat.b.R
 msgid "{n} rows"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "{n} rows excluded; {constants} constant predictors or columns removed"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -704,6 +760,18 @@ msgstr ""
 
 #: R/jjsyndromicplot.b.R
 msgid "{pc} has no loadings above cutoff"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"{pct}% of intervals are zero-length (start and end date on the same day). "
+"These contribute nothing to total person-time, so the denominator here is "
+"smaller than the number of participants suggests. Check whether unfilled "
+"follow-up dates were defaulted to the start date."
+msgstr ""
+
+#: R/tableone.b.R
+msgid "{percent}% of cases have at least one missing value"
 msgstr ""
 
 #: R/linechart.b.R
@@ -755,6 +823,14 @@ msgstr ""
 msgid ""
 "{variable} was excluded from the summary because it is not a numeric column. "
 "Change its measure type to continuous, or remove it from the Variables list."
+msgstr ""
+
+#: R/tableone.b.R
+msgid "{variables}, and {n} other variable"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "{variables}, and {n} other variables"
 msgstr ""
 
 #: ggprism/options/pvalue_format/stars.title
@@ -1191,31 +1267,12 @@ msgid ""
 "reference rule."
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "%.1f%% missing (%d rows excluded)"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid ""
-"%.1f%% missing data (%d rows excluded). If multiple imputation is used, "
-"estimate imputation and preprocessing separately within each resampling "
-"training split."
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "%.1f%% missing, %d constant"
-msgstr ""
-
 #: R/lassologistic.b.R
 msgid "%.3f (CI not estimable)"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "%d case(s) with an incomplete set of measurements were excluded."
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "%d constant predictor column(s) detected."
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -2310,12 +2367,6 @@ msgstr ""
 msgid ""
 "<br>You have selected to use a correlation matrix to compare continuous "
 "variables.<br><hr>"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid ""
-"<code>survminer</code> is not installed. Survival curves will use a base-R "
-"fallback."
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -3913,6 +3964,10 @@ msgstr ""
 msgid "1-SE Rule"
 msgstr ""
 
+#: lassocox/options/lambda/lambda.1se.title
+msgid "1-SE rule"
+msgstr ""
+
 #: highdimcox/options/cv_method/cv_1se.title
 msgid "1-SE Rule CV"
 msgstr ""
@@ -4162,6 +4217,10 @@ msgstr ""
 msgid "18,65"
 msgstr ""
 
+#: datetimeconverter/options/two_digit_year/standard.title
+msgid "1969-2068 (standard pivot)"
+msgstr ""
+
 #: epidemiosurvival/options/calendar_periods.default
 msgid "1990-1999,2000-2009,2010-2019"
 msgstr ""
@@ -4171,7 +4230,6 @@ msgstr ""
 msgid "1SE CV Error"
 msgstr ""
 
-#: lassocox/options/lambda/lambda.1se.title
 #: leaveonecenterout/options/lambdaMethod/lambda.1se.title
 msgid "1SE Rule"
 msgstr ""
@@ -5211,14 +5269,6 @@ msgid ""
 "model (e.g., Healthy, Sick, Dead)."
 msgstr ""
 
-#: R/tableone.b.R
-msgid ""
-"A frequency table needs a limited set of recorded categories: too many "
-"distinct values gives roughly one row per case, and a variable with no "
-"recorded values has nothing to count. Continuous variables are summarised by "
-"the tableone, gtsummary or arsenal style instead."
-msgstr ""
-
 #: R/multisurvival.b.R
 msgid ""
 "A further {rows} row(s){events} were excluded from the model because the "
@@ -5240,6 +5290,13 @@ msgstr ""
 msgid ""
 "A group comparison needs at least two observations in every group. The "
 "following groups have fewer: {groups}."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"A gtsummary row labeled flag = TRUE with 0 (0%) means no recorded value was "
+"TRUE; it does not mean there were no observations. Check which category the "
+"row label names before interpreting a percentage."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -5416,6 +5473,12 @@ msgid ""
 "Variable."
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid ""
+"A recursive optimal split could not be estimated. Quantile-based cut-points "
+"were used for the remaining groups."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "A residual above %.2f (the 5%% point of chi-squared on 1 degree of freedom) "
@@ -5424,10 +5487,24 @@ msgid ""
 "no multiplicity adjustment is applied."
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"A row is treated as one case. Repeated records are not deduplicated. "
+"Frequency weights, when supplied, represent replicated rows, not verified "
+"unique patients or a complex survey design."
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid ""
 "a sensitivity of 1.000 here means the model calls every case positive, not "
 "that it is a sensitive test"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid ""
+"A separate Shapiro-Wilk test is reported for each variable without "
+"multiplicity adjustment. Treat these as exploratory distribution checks, not "
+"confirmatory hypothesis tests, and interpret them with the visual summaries."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -5570,6 +5647,21 @@ msgstr ""
 
 #: contTables/results/chiSq.description
 msgid "a table of χ² test results"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"A text date format is selected but this column is numeric. • Choose Excel "
+"Serial or Unix Epoch if these really are serial numbers, or select a text "
+"date column instead."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"A third cause makes every row negative by less than a day: a start column "
+"carrying a time of day against an end column recorded at midnight, which is "
+"what many laboratory systems export - check the Examples below for a time "
+"component on one side only."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -5827,6 +5919,10 @@ msgstr ""
 msgid "About Swimmer Plot Analysis"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "About Table One"
+msgstr ""
+
 #: R/summarydata.b.R
 #: agreement/results/about.title
 #: checkdata/results/aboutAnalysis.title
@@ -5933,6 +6029,13 @@ msgstr ""
 
 #: epidemiosurvival/results/survival_disparities_table.columns.title
 msgid "Absolute Difference (%)"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Absolute event probabilities require a baseline survival estimate and "
+"evaluation at clinically relevant time horizons; the exported linear "
+"predictor alone is insufficient."
 msgstr ""
 
 #: stagemigration/results/willRogersStageDetail.columns.title
@@ -6408,6 +6511,21 @@ msgstr ""
 msgid "Actual measurements from samples (for empirical calculation)."
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Actual NA factor levels are treated as missing before exclusion and "
+"tabulation. Literal text categories such as NA and Unknown remain "
+"categories. Listwise deletion uses only included variables; no imputation is "
+"performed."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Actual NA factor levels were treated as missing before exclusion and "
+"tabulation: {variables}. Literal text categories such as NA or Unknown are "
+"unchanged."
+msgstr ""
+
 #: mageeequation/options/actualRS.title
 msgid "Actual Oncotype DX RS (if available)"
 msgstr ""
@@ -6661,7 +6779,6 @@ msgstr ""
 msgid "Add Budding Grade to Data"
 msgstr ""
 
-#: survivalcont/options/calculatedcutoff.title
 #: survivalcont/results/calculatedcutoff.title
 msgid "Add Calculated Cut-off Group to Data"
 msgstr ""
@@ -6674,26 +6791,28 @@ msgstr ""
 msgid "Add Calculated Risk Score to Data"
 msgstr ""
 
-#: mixedcox/results/calculatedtime.title
 #: multisurvival/options/calculatedtime.title
 #: multisurvival/results/calculatedtime.title
 #: singlearm/options/calculatedtime.title
 #: singlearm/results/calculatedtime.title
-#: surveysurvival/results/calculatedtime.title
 #: survival/options/calculatedtime.title
 #: survival/ui[7][0][0]/calculatedtime.label
 #: survival/results/calculatedtime.title
-#: survivalcont/options/calculatedtime.title
 #: survivalcont/results/calculatedtime.title
 msgid "Add Calculated Time to Data"
 msgstr ""
 
-#: timeinterval/options/add_times.title
+#: timeinterval/options/calculated_time.title
+#: timeinterval/ui[4][0]/calculated_time.label
 msgid "Add calculated times to dataset"
 msgstr ""
 
 #: agreement/results/loaOutput.title
 msgid "Add Case Agreement Categorization to Data"
+msgstr ""
+
+#: agreement/options/loaOutput.title
+msgid "Add case agreement categorization to data"
 msgstr ""
 
 #: waterfall/options/showClinicalSignificance.description.jamovi
@@ -6702,11 +6821,6 @@ msgid ""
 "(low), 15-30 percent (moderate), >30 percent (promising) • DCR "
 "interpretations with clinical relevance • Sample size adequacy assessment "
 "Helps interpret results in clinical context"
-msgstr ""
-
-#: mixedcox/options/addClusterEffects.title
-#: mixedcox/results/clusterEffectsOutput.title
-msgid "Add Cluster Effects to Data"
 msgstr ""
 
 #: jsjplot/options/show_values.description.jamovi
@@ -6742,18 +6856,6 @@ msgstr ""
 msgid "Add Consensus Variable to Data"
 msgstr ""
 
-#: datetimeconverter/options/corrected_datetime_numeric.title
-msgid "Add Corrected DateTime (Numeric)"
-msgstr ""
-
-#: datetimeconverter/options/corrected_datetime_char.title
-msgid "Add Corrected DateTime (Text)"
-msgstr ""
-
-#: datetimeconverter/ui[4][0].label
-msgid "Add Corrected DateTime to Data"
-msgstr ""
-
 #: jjpubr/ui[3]/addCorr.label
 msgid "Add correlation"
 msgstr ""
@@ -6786,18 +6888,6 @@ msgstr ""
 
 #: jjridges/options/add_points.title
 msgid "Add data points"
-msgstr ""
-
-#: datetimeconverter/ui[7][0][1][0]/dayname_out.label
-msgid "Add Day Name to Data"
-msgstr ""
-
-#: datetimeconverter/ui[5][0][1][0]/day_out.label
-msgid "Add Day of Month to Data"
-msgstr ""
-
-#: datetimeconverter/ui[7][0][1][0]/dayofyear_out.label
-msgid "Add Day of Year to Data"
 msgstr ""
 
 #: decisioncompare/options/fnote.description.ui
@@ -6849,11 +6939,6 @@ msgstr ""
 msgid "Add error bars to show data variability."
 msgstr ""
 
-#: mixedcox/options/addFittedValues.title
-#: mixedcox/results/fittedValuesOutput.title
-msgid "Add Fitted Values to Data"
-msgstr ""
-
 #: jjhistostats/options/addGGPubrPlot.title
 msgid "Add ggpubr histogram"
 msgstr ""
@@ -6885,10 +6970,6 @@ msgstr ""
 
 #: jviolin/options/point_jitter.description
 msgid "Add horizontal jitter to prevent point overlap"
-msgstr ""
-
-#: datetimeconverter/ui[6][0][1][0]/hour_out.label
-msgid "Add Hour to Data"
 msgstr ""
 
 #: jviolin/options/add_points.description
@@ -7001,24 +7082,11 @@ msgstr ""
 msgid "Add Mid Points"
 msgstr ""
 
-#: datetimeconverter/ui[6][0][1][0]/minute_out.label
-msgid "Add Minute to Data"
-msgstr ""
-
-#: datetimeconverter/ui[5][0][1][0]/monthname_out.label
-msgid "Add Month Name to Data"
-msgstr ""
-
-#: datetimeconverter/ui[5][0][1][0]/month_out.label
-msgid "Add Month Number to Data"
-msgstr ""
-
 #: ctdnadynamics/options/addStatusToData.title
 #: ctdnadynamics/results/addStatusToData.title
 msgid "Add MRD Status to Data"
 msgstr ""
 
-#: survivalcont/options/calculatedmulticut.title
 #: survivalcont/results/calculatedmulticut.title
 msgid "Add Multiple Cut-off Groups to Data"
 msgstr ""
@@ -7088,10 +7156,6 @@ msgstr ""
 msgid "Add Q-values (FDR)"
 msgstr ""
 
-#: datetimeconverter/ui[7][0][1][0]/quarter_out.label
-msgid "Add Quarter to Data"
-msgstr ""
-
 #: jsjplot/options/show_data.description.jamovi
 msgid "Add raw data points to the plot."
 msgstr ""
@@ -7125,11 +7189,9 @@ msgstr ""
 #: multisurvival/results/outcomeredefined.title
 #: singlearm/options/outcomeredefined.title
 #: singlearm/results/outcomeredefined.title
-#: surveysurvival/results/outcomeredefined.title
 #: survival/options/outcomeredefined.title
 #: survival/ui[7][0][0]/outcomeredefined.label
 #: survival/results/outcomeredefined.title
-#: survivalcont/options/outcomeredefined.title
 #: survivalcont/results/outcomeredefined.title
 msgid "Add Redefined Outcome to Data"
 msgstr ""
@@ -7155,7 +7217,6 @@ msgstr ""
 msgid "Add Risk Group to Data"
 msgstr ""
 
-#: lassocox/options/riskScore.title
 #: lassocox/results/riskScore.title
 #: multisurvival/options/addRiskScore.title
 msgid "Add Risk Score to Data"
@@ -7169,10 +7230,6 @@ msgstr ""
 #: rpasurvival/options/riskgroupvar.title
 #: rpasurvival/results/riskgroupvar.title
 msgid "Add RPA Risk Group to Data"
-msgstr ""
-
-#: datetimeconverter/ui[6][0][1][0]/second_out.label
-msgid "Add Second to Data"
 msgstr ""
 
 #: hematologicindices/options/addIndexToData.title
@@ -7268,6 +7325,14 @@ msgstr ""
 msgid "Add the downloaded Eurostat data to jamovi's data spreadsheet."
 msgstr ""
 
+#: survival/options/export_survival_data.description
+msgid ""
+"Add the Kaplan-Meier survival probability at each case's own follow-up time "
+"as a new column in the dataset. With an explanatory variable the probability "
+"is taken from that case's own group curve. One value per case; confidence "
+"intervals and risk tables are shown in the results panels, not exported."
+msgstr ""
+
 #: categorize/options/addtodata.description.jamovi
 msgid "Add the new categorized variable directly to the dataset."
 msgstr ""
@@ -7291,7 +7356,7 @@ msgstr ""
 #: datetimeconverter/ui[5][0][1][0].label
 #: datetimeconverter/ui[6][0][1][0].label
 #: datetimeconverter/ui[7][0][1][0].label
-msgid "Add to Data"
+msgid "Add to data"
 msgstr ""
 
 #: advancedbarplot/options/add_trend_line.title
@@ -7303,6 +7368,11 @@ msgstr ""
 msgid "Add trend line to show patterns."
 msgstr ""
 
+#: outcomeorganizer/options/addAdminTime.title
+#: outcomeorganizer/results/addAdminTime.title
+msgid "Add Truncated Follow-up Time to Data"
+msgstr ""
+
 #: jjpubr/options/addMean.description.ui
 msgid "Add vertical line at mean"
 msgstr ""
@@ -7311,21 +7381,12 @@ msgstr ""
 msgid "Add vertical line at median"
 msgstr ""
 
-#: datetimeconverter/ui[7][0][1][0]/weeknum_out.label
-msgid "Add Week Number to Data"
-msgstr ""
-
 #: tidyplots/options/pointWhiteBorder.title
 msgid "Add White Border to Points"
 msgstr ""
 
 #: jjsegmentedtotalbar/options/add_outline.description.jamovi
 msgid "Add white borders around each segment for clarity."
-msgstr ""
-
-#: datetimeconverter/options/year_out.title
-#: datetimeconverter/ui[5][0][1][0]/year_out.label
-msgid "Add Year to Data"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -8039,6 +8100,7 @@ msgstr ""
 msgid "Administrative Censoring"
 msgstr ""
 
+#: outcomeorganizer/options/adminCensoring.title
 #: outcomeorganizer/ui[4][1]/adminCensoring.label
 msgid "Administrative censoring"
 msgstr ""
@@ -9699,7 +9761,6 @@ msgstr ""
 #: multisurvival/options/awd.title
 #: singlearm/options/awd.title
 #: survival/options/awd.title
-#: survivalcont/options/awd.title
 msgid "Alive w Disease"
 msgstr ""
 
@@ -9707,7 +9768,6 @@ msgstr ""
 #: multisurvival/options/awod.title
 #: singlearm/options/awod.title
 #: survival/options/awod.title
-#: survivalcont/options/awod.title
 msgid "Alive w/o Disease"
 msgstr ""
 
@@ -9717,10 +9777,18 @@ msgstr ""
 msgid "Alive with Disease"
 msgstr ""
 
+#: survivalcont/options/awd.title
+msgid "Alive with disease"
+msgstr ""
+
 #: outcomeorganizer/options/awod.title
 #: survival/ui[2][0][0][1][0]/awod.label
 #: survivalcont/ui[3][0][0][1][0]/awod.label
 msgid "Alive without Disease"
+msgstr ""
+
+#: survivalcont/options/awod.title
+msgid "Alive without disease"
 msgstr ""
 
 #: survivalcont/results/coxTable.columns.title
@@ -9843,6 +9911,13 @@ msgstr ""
 msgid ""
 "All observations share a single X value (%s). A line chart needs at least "
 "two distinct X positions; no trend can be shown or estimated from one."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"All observations were removed by the data quality filters ({n} rows). Switch "
+"the filters off to inspect the raw intervals; if every interval was "
+"negative, the start and end date columns are probably swapped."
 msgstr ""
 
 #: psychopdaROC/options/allObserved.title
@@ -9979,6 +10054,22 @@ msgstr ""
 msgid ""
 "All values for cut-off \"{cutoff}\" must be non-negative finite numbers "
 "(TP={tp}, FP={fp}, TN={tn}, FN={fn})."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"All values in {name} are missing (NA). • Please select a column with valid "
+"datetime entries before proceeding."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"All values in the selected variable are missing (NA). • Select a different "
+"variable or check your data source."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "All Values Missing"
 msgstr ""
 
 #: extratrees/options/mtry/all.title
@@ -10357,6 +10448,10 @@ msgstr ""
 msgid "Always Fisher's exact"
 msgstr ""
 
+#: datetimeconverter/options/two_digit_year/past.title
+msgid "Always in the past"
+msgstr ""
+
 #: R/riverplot.b.R
 msgid ""
 "Always interpret flow analysis results within the context of clinical "
@@ -10365,6 +10460,10 @@ msgstr ""
 
 #: epidemiosurvival/options/cohort_design/ambidirectional.title
 msgid "Ambidirectional Cohort"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Ambiguous Format Detected"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -10615,6 +10714,21 @@ msgstr ""
 
 #: R/survivalcont.b.R
 msgid "Analysis completed for {variable}."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Analysis completed using {n} observations that reached the {landmark} "
+"landmark. All reported times are measured FROM the landmark, not from the "
+"start date ({amount} was subtracted from every interval): mean post-landmark "
+"follow-up {mean} {unit}, total post-landmark person-time {total} "
+"person-{unit}."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Analysis completed using {n} observations with mean follow-up {mean} {unit} "
+"(total person-time: {total} person-{unit})."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -11080,6 +11194,10 @@ msgstr ""
 msgid "Analysis Results"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Analysis sample"
+msgstr ""
+
 #: ihcheterogeneity/results/poweranalysistable.columns.title
 msgid "Analysis Scenario"
 msgstr ""
@@ -11171,6 +11289,7 @@ msgstr ""
 #: R/enhancedROC.b.R
 #: R/linechart.b.R
 #: R/nonparametric.b.R
+#: R/tableone.b.R
 #: aalenhazard/results/analysisSummary.title
 #: bayesdca/results/summary.title
 #: benford/results/summary.title
@@ -11940,10 +12059,6 @@ msgstr ""
 msgid "Apparent Development Performance"
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "Apparent development-sample discrimination (C-index)"
-msgstr ""
-
 #: lassocox/results/modelComparison.columns.title
 msgid "Apparent Log-Likelihood"
 msgstr ""
@@ -12149,6 +12264,10 @@ msgstr ""
 msgid "Applying clinical preset:"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Approximate minimum p-value search"
+msgstr ""
+
 #: permutationsurvival/options/permutation_method/approximate.title
 msgid "Approximate permutation (Monte Carlo)"
 msgstr ""
@@ -12323,6 +12442,19 @@ msgstr ""
 
 #: tableone/options/sty/t3.title
 msgid "arsenal (Comprehensive descriptive table)"
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Arsenal reports mean (SD); gtsummary may report N (percent) per level. "
+"Convert the variable to nominal or ordinal if the numbers are category codes "
+"rather than measurements."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"arsenal: continuous variables as mean (SD) with the range; categorical "
+"variables as N (percent); missing counts on an N-Miss row."
 msgstr ""
 
 #: clinmon/options/abp.title
@@ -12813,10 +12945,6 @@ msgstr ""
 msgid "At least 2 complete observations are required for lollipop chart analysis."
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "At least 2 explanatory variables are required for Lasso regression."
-msgstr ""
-
 #: R/lassologistic.b.R
 msgid "At least 2 explanatory variables are required for LASSO regression."
 msgstr ""
@@ -12889,12 +13017,25 @@ msgid ""
 "just-identified, so goodness-of-fit statistics cannot test its assumptions."
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"At least two non-constant encoded predictor columns are required by this "
+"LASSO engine."
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid "At least two predictors are required"
 msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid "At least two tests with positive levels must be specified"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"At most 30 paths are shown, ranked by summed absolute coefficients across "
+"the path. All retained columns remain in fitting; trace rank is not clinical "
+"importance."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -12934,6 +13075,15 @@ msgid ""
 "count is {min} and {below} of {total} cells are below 5. The calculation "
 "rests on a large-sample chi-square approximation, so the bound shown is less "
 "dependable here."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"At this share the fault is systematic rather than sporadic: the rows that "
+"were kept came from the same two columns and the same parsing, so they "
+"cannot be assumed correct merely because their interval came out positive - "
+"check the date columns and the Date Format setting before using any number "
+"on this page."
 msgstr ""
 
 #: populationhealth/results/predictiveModelingTable.columns.title
@@ -13347,6 +13497,14 @@ msgstr ""
 
 #: R/checkdata.b.R
 msgid "auto-detected from the data range"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Auto-detection is ambiguous: {formats} all parse these dates equally well "
+"({pct}% success). The '{format}' format was used, because it places these "
+"dates in the narrowest range of years - please verify it matches your data "
+"or select the format manually."
 msgstr ""
 
 #: clinicalvalidationinteractive/options/auto_optimize_threshold.title
@@ -14294,6 +14452,13 @@ msgstr ""
 
 #: agepyramid/options/ggcharts_colors.title
 msgid "Bar colors"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Bar colors indicate higher or lower fitted hazard. Ordering uses "
+"|coefficient| times the column standard deviation; raw bar lengths use "
+"original units."
 msgstr ""
 
 #: R/venn.b.R
@@ -16342,10 +16507,6 @@ msgstr ""
 msgid "Binary outcome variable (disease/event vs. no disease/no event)."
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "Binary outcome variable (event/censored status)"
-msgstr ""
-
 #: modelval/options/outcome.description
 msgid "Binary outcome variable (observed events: yes/no)."
 msgstr ""
@@ -17964,6 +18125,12 @@ msgstr ""
 msgid "Both Models"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Both optional comparison rows are unpenalized development-data fits. Their "
+"AIC values are not a formal selection-adjusted model comparison."
+msgstr ""
+
 #: R/misclassificationbias.b.R
 msgid ""
 "Both outcome and exposure must have at least 2 levels. Check your variable "
@@ -19351,7 +19518,6 @@ msgstr ""
 #: multisurvival/options/person_time.title
 #: singlearm/options/person_time.title
 #: survival/options/person_time.title
-#: survivalcont/options/person_time.title
 msgid "Calculate person-time metrics"
 msgstr ""
 
@@ -19641,6 +19807,10 @@ msgstr ""
 msgid "Calculate:"
 msgstr ""
 
+#: survivalcont/options/calculatedcutoff.title
+msgid "Calculated cut-off marker group"
+msgstr ""
+
 #: ihcscoring/results/scorestable.description
 msgid "Calculated H-scores, Allred scores, and binary classifications"
 msgstr ""
@@ -19648,6 +19818,10 @@ msgstr ""
 #: multisurvival/ui[2][2].label
 #: singlearm/ui[2][2].label
 msgid "Calculated Outcome to Data"
+msgstr ""
+
+#: survivalcont/options/calculatedtime.title
+msgid "Calculated survival time"
 msgstr ""
 
 #: timeinterval/results/calculated_time.title
@@ -19675,10 +19849,6 @@ msgstr ""
 #: simpleSurvivalPower/results/power_summary.columns.title
 #: survivalPower/results/power_summary.columns.title
 msgid "Calculated Value"
-msgstr ""
-
-#: timeinterval/ui[4]/add_times.label
-msgid "Calculated-time variables"
 msgstr ""
 
 #: package/analyses/clinmon.description
@@ -20068,10 +20238,6 @@ msgstr ""
 msgid "Caliper Width"
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "Can reduce overfitting through regularization"
-msgstr ""
-
 #: dendrogram/options/distanceMethod/canberra.title
 msgid "Canberra"
 msgstr ""
@@ -20115,6 +20281,11 @@ msgstr ""
 
 #: stagemigration/options/competingEventLevels.default
 msgid "cancer_death, other_death, censored"
+msgstr ""
+
+#: lassocox/options/explanatory.title
+#: lassocox/ui[0][2].label
+msgid "Candidate predictors"
 msgstr ""
 
 #: tidyplots/options/colorScheme/candy.title
@@ -20293,6 +20464,10 @@ msgstr ""
 
 #: pathagreement/results/difficultyPlot.title
 msgid "Case Difficulty Distribution"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Case exclusion"
 msgstr ""
 
 #: R/decision.b.R
@@ -20528,6 +20703,10 @@ msgstr ""
 msgid "Cases in Subcohort"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Cases in the table"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "Cases meeting the reference rule"
 msgstr ""
@@ -20568,6 +20747,7 @@ msgstr ""
 msgid "Cassettes Examined"
 msgstr ""
 
+#: R/tableone.b.R
 #: package/analyses/jjtreemap.menuSubgroup
 #: jjtreemap/options.menuSubgroup
 msgid "Categorical"
@@ -21400,12 +21580,19 @@ msgstr ""
 #: grouplasso/options/censorLevel.title
 #: highdimcox/options/censorLevel.title
 #: highdimcox/ui[1][0]/censorLevel.label
-#: lassocox/options/censorLevel.title
 #: ncvregcox/options/censorLevel.title
 #: pcacox/options/censorLevel.title
 #: plscox/options/censorLevel.title
 #: sparsegrouplasso/options/censorLevel.title
 msgid "Censored Level"
+msgstr ""
+
+#: lassocox/options/censorLevel.title
+msgid "Censored level"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Censored Level Used"
 msgstr ""
 
 #: singlearm/ui[3][1][0]/censored.label
@@ -22029,6 +22216,10 @@ msgstr ""
 msgid "Check that time variables contain valid numeric or date values"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Check that your data file is properly imported."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Check that your outcome variable has both positive and negative cases."
 msgstr ""
@@ -22038,10 +22229,6 @@ msgid ""
 "Check the digit distribution for a localized cause such as systematic "
 "rounding, preferred values, or a subset of records entered differently, and "
 "review data collection and entry procedures for that subset."
-msgstr ""
-
-#: tableone/options/excl.description.jamovi
-msgid "Check to exclude missing values."
 msgstr ""
 
 #: clinicaldataintegration/results/consistencyChecks.columns.title
@@ -22332,6 +22519,10 @@ msgid ""
 "clinical context."
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Choose a table style for the output format."
+msgstr ""
+
 #: jjsegmentedtotalbar/ui[3][0][1].label
 msgid "Choose a template for common clinical analyses."
 msgstr ""
@@ -22585,11 +22776,12 @@ msgstr ""
 
 #: tableone/options/sty.description.jamovi
 msgid ""
-"Choose the descriptive table format. 'tableone' shows mean (SD) for "
-"continuous variables - or median (Q1, Q3) if you tick that option - and N "
-"(percent) for categories; 'gtsummary' shows median (Q1, Q3) with "
-"publication-ready formatting; 'arsenal' shows mean (SD) with the range; "
-"'janitor' shows frequency counts and percentages only."
+"Choose the descriptive format. 'tableone' shows mean (SD), or median (Q1, "
+"Q3) when requested; 'gtsummary' shows median (Q1, Q3); 'arsenal' shows mean "
+"(SD) and range. 'janitor' tabulates categorical variables with at most 20 "
+"recorded categories and skips numeric measurements. Set numeric category "
+"codes to Nominal or Ordinal first. Unused factor levels are hidden in "
+"janitor; dichotomous gtsummary labels name the counted level."
 msgstr ""
 
 #: R/decision.b.R
@@ -24138,6 +24330,7 @@ msgstr ""
 
 #: jjbarstats/ui[0]/showexplanations.label
 #: jjpiestats/ui[0]/showexplanations.label
+#: lassocox/options/includeClinicalGuidance.title
 msgid "Clinical guidance"
 msgstr ""
 
@@ -24502,7 +24695,10 @@ msgstr ""
 msgid "Clinical Interpretation and Recommendations"
 msgstr ""
 
-#: lassocox/options/includeClinicalGuidance.title
+#: R/lassocox.b.R
+msgid "Clinical interpretation and validation"
+msgstr ""
+
 #: lassocox/results/clinicalGuidance.title
 #: lassologistic/results/clinicalGuidance.title
 #: qtwist/options/showClinicalGuidance.title
@@ -26478,6 +26674,10 @@ msgstr ""
 msgid "Cochran's Q Test Results"
 msgstr ""
 
+#: lassocox/results/encoding.columns.title
+msgid "Coding"
+msgstr ""
+
 #: adaptivelasso/results/coefficients.columns.title
 #: agreement/results/gwetTable.columns.title
 #: bayesiandiagnostic/results/covariateEffects.columns.title
@@ -26597,12 +26797,16 @@ msgid "Coefficient Path"
 msgstr ""
 
 #: adaptivelasso/results/pathPlot.title
+#: lassocox/results/path_plot.title
 msgid "Coefficient Paths"
+msgstr ""
+
+#: lassocox/options/path_plot.title
+msgid "Coefficient paths"
 msgstr ""
 
 #: coefplot/results/coefficient_plot.title
 #: jsjplot/options/analysis_type/coefficient_plot.title
-#: lassocox/options/coef_plot.title
 #: lassocox/results/coef_plot.title
 #: lassologistic/results/coef_plot.title
 msgid "Coefficient Plot"
@@ -26626,6 +26830,10 @@ msgstr ""
 
 #: biomarkerdiscovery/results/stability_analysis_results.columns.title
 msgid "Coefficient Stability"
+msgstr ""
+
+#: lassocox/options/coef_plot.title
+msgid "Coefficient summary"
 msgstr ""
 
 #: coefplot/results/coefficient_table.title
@@ -27390,6 +27598,10 @@ msgstr ""
 
 #: jsummarytools/options/cross_proportions/col.title
 msgid "Column Proportions"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Column Selection Proportion"
 msgstr ""
 
 #: enhancedtwowayfrequency/options/colVar.title
@@ -28527,6 +28739,10 @@ msgstr ""
 msgid "Comparison Groups (x-axis)"
 msgstr ""
 
+#: lassocox/results/encoding.columns.title
+msgid "Comparison Level"
+msgstr ""
+
 #: enhancedROC/options/comparisonMethod.title
 #: methodcomparison/options/comparison_method.title
 #: patientreported/options/comparison_method.title
@@ -28953,8 +29169,16 @@ msgstr ""
 msgid "Complete Cases"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Complete cases (original)"
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid "Complete cases analysed"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Complete cases in the source data"
 msgstr ""
 
 #: brierscore/options/missing_handling/complete.title
@@ -28986,6 +29210,10 @@ msgstr ""
 #: R/advancedraincloud.b.R
 #: R/riverplot.b.R
 msgid "Complete cases:"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Complete data were available for all cases."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -29060,6 +29288,12 @@ msgstr ""
 msgid "Complete Values"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Complete-case analysis excluded {n} rows ({pct}%). Even a small excluded "
+"fraction can bias results when missingness is informative."
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid ""
 "Complete-case analysis uses {used} of {total} cases ({percent}%) for the "
@@ -29073,12 +29307,6 @@ msgstr ""
 msgid ""
 "Complete-case analysis uses {used} of {total} cases. Consider investigating "
 "patterns of missingness."
-msgstr ""
-
-#: R/lassocox.b.R
-msgid ""
-"Complete-case analysis was used. Even a small excluded fraction can bias "
-"results when missingness is informative."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -30318,10 +30546,6 @@ msgid ""
 "Essential for developing reliable prognostic models."
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "Comprehensive visualizations"
-msgstr ""
-
 #: dynamicprediction/results/modelComparison.columns.title
 msgid "Computation Time (s)"
 msgstr ""
@@ -31415,14 +31639,11 @@ msgstr ""
 msgid "Confidence level"
 msgstr ""
 
-#: timeinterval/options/confidence_level.title
-msgid "Confidence Level ( percent)"
-msgstr ""
-
 #: diagnosticmeta/ui[1][1][0]/confidence_level.label
 #: excessmortality/ui[1][1]/confidenceLevel.label
 #: flexiblerelativesurvival/ui[1][2]/confidenceLevel.label
 #: precisionrecall/ui[2][3]/ciWidth.label
+#: timeinterval/options/confidence_level.title
 msgid "Confidence level (%)"
 msgstr ""
 
@@ -32396,9 +32617,12 @@ msgstr ""
 #: multisurvival/ui[0][3].label
 #: surveysurvival/options/contexpl.title
 #: surveysurvival/ui[0][4].label
-#: survivalcont/options/contexpl.title
 #: survivalcont/ui[0][2].label
 msgid "Continuous Explanatory Variable"
+msgstr ""
+
+#: survivalcont/options/contexpl.title
+msgid "Continuous explanatory variable"
 msgstr ""
 
 #: comprehensiveSurvivalPower/options/statistical_method/continuous_exposure.title
@@ -32995,6 +33219,10 @@ msgstr ""
 msgid "Convergence tolerance for optimization"
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid "Conversion Completed"
+msgstr ""
+
 #: datetimeconverter/results/previewTable.title
 msgid "Conversion Preview"
 msgstr ""
@@ -33118,6 +33346,7 @@ msgstr ""
 msgid "Copy-ready report"
 msgstr ""
 
+#: R/tableone.b.R
 #: vartree/results/reportSentence.title
 msgid "Copy-Ready Report Sentence"
 msgstr ""
@@ -33216,8 +33445,8 @@ msgstr ""
 
 #: R/timeinterval.b.R
 msgid ""
-"Correct the dates at source, or tick 'Negative-interval exclusion' under "
-"Data Quality & Statistics to drop these rows from every statistic including "
+"Correct the dates at source, or tick 'Remove negative intervals' under Data "
+"Quality & Statistics to drop these rows from every statistic including "
 "person-time."
 msgstr ""
 
@@ -33238,12 +33467,24 @@ msgstr ""
 msgid "Corrected AUC"
 msgstr ""
 
+#: datetimeconverter/ui[4][0].label
+msgid "Corrected datetime"
+msgstr ""
+
 #: datetimeconverter/results/corrected_datetime_numeric.title
 msgid "Corrected DateTime (Numeric)"
 msgstr ""
 
+#: datetimeconverter/options/corrected_datetime_numeric.title
+msgid "Corrected datetime (numeric)"
+msgstr ""
+
 #: datetimeconverter/results/corrected_datetime_char.title
 msgid "Corrected DateTime (Text)"
+msgstr ""
+
+#: datetimeconverter/options/corrected_datetime_char.title
+msgid "Corrected datetime (text)"
 msgstr ""
 
 #: patientreported/results/item_reliability.columns.title
@@ -34050,6 +34291,14 @@ msgstr ""
 msgid "Could not map some explanatory variables after cleaning: {variables}."
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid ""
+"Could not reliably detect the datetime format. • The closest match was "
+"{fmt}, which read only {pct}% of the sampled values - below the 80% needed "
+"to proceed. • No dates were converted. Choose the format explicitly (for "
+"example DD-MM-YYYY or MM-DD-YYYY), or check the column for mixed formats."
+msgstr ""
+
 #: R/clinicalscore.b.R
 #: R/mageeequation.b.R
 #: R/reportcat.b.R
@@ -34118,6 +34367,13 @@ msgstr ""
 
 #: bayesianci/options/outcome_type/count.title
 msgid "Count/Poisson"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Counted from the spreadsheet epoch, {value} would be {date}; SAS and Stata "
+"count from 1960-01-01 and R from 1970-01-01, so the same digits mean a date "
+"decades apart depending on which program wrote them."
 msgstr ""
 
 #: gcomputation/results/plot.title
@@ -34716,6 +34972,18 @@ msgstr ""
 #: coxdiagnostics/ui.title
 #: coxdiagnostics/results.title
 msgid "Cox Proportional Hazards Model Diagnostics"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Cox refit did not converge cleanly: {message}"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Cox refit returned a non-finite log-likelihood."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Cox refit returned non-finite coefficient estimates."
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -35594,6 +35862,13 @@ msgstr ""
 msgid "Critical: %.0f%% of cells have expected counts < 1"
 msgstr ""
 
+#: R/timeinterval.b.R
+msgid ""
+"Critically small sample (n={n}). Statistical summaries are unreliable with "
+"fewer than 10 observations. Results should be considered exploratory only. "
+"Minimum n=20 recommended for basic descriptive analysis."
+msgstr ""
+
 #: enhancedROC/results/results/crocAnalysisTable.title
 msgid "CROC (Concentrated ROC) Analysis"
 msgstr ""
@@ -35811,16 +36086,19 @@ msgstr ""
 msgid "Cross-Validation Folds"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Cross-validation folds are stratified by event status and use the recorded "
+"random seed. Fold counts may be reduced to retain both outcome states in "
+"each fold."
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid "Cross-validation folds reduced"
 msgstr ""
 
 #: R/lassologistic.b.R
 msgid "Cross-Validation for LASSO Logistic Regression"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "Cross-validation for optimal tuning parameter"
 msgstr ""
 
 #: aivalidation/options/crossValidation.title
@@ -35859,12 +36137,12 @@ msgstr ""
 msgid "Cross-Validation Plot"
 msgstr ""
 
-#: lassocox/options/cv_plot.title
 #: lassocox/results/cv_plot.title
 #: lassologistic/results/cv_plot.title
 msgid "Cross-validation Plot"
 msgstr ""
 
+#: lassocox/options/cv_plot.title
 #: lassologistic/options/cv_plot.title
 msgid "Cross-validation plot"
 msgstr ""
@@ -37926,6 +38204,10 @@ msgstr ""
 msgid "Dashed"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Dashed blue: lambda.min; dotted orange: lambda.1se"
+msgstr ""
+
 #: tumorgrowth/ui[0].label
 msgid "Data"
 msgstr ""
@@ -38068,6 +38350,10 @@ msgstr ""
 
 #: R/swimmerplot_html.R
 msgid "Data Formats Supported:"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Data frame is empty; ensure your dataset has at least one row."
 msgstr ""
 
 #: jsummarytools/options/analysis_type/dfsummary.title
@@ -38271,6 +38557,7 @@ msgstr ""
 msgid "Data Quality"
 msgstr ""
 
+#: R/tableone.b.R
 #: reportcat/results/assumptions.title
 #: tableone/results/assumptions.title
 msgid "Data Quality & Assumptions"
@@ -38310,12 +38597,17 @@ msgstr ""
 
 #: clinicaldataintegration/options/qualityCheck.title
 #: datetimeconverter/options/show_quality_metrics.title
+#: timeinterval/options/include_quality_metrics.title
 #: timeinterval/ui[3]/include_quality_metrics.label
 msgid "Data quality assessment"
 msgstr ""
 
 #: enhancedfrequency/results/results/dataQualityPlot.title
 msgid "Data Quality Assessment Plot"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Data Quality Check"
 msgstr ""
 
 #: qualityoflife/results/quality_control_results.title
@@ -38434,13 +38726,16 @@ msgstr ""
 #: R/lassologistic.b.R
 #: grouplasso/ui[1].label
 #: highdimcox/ui[2].label
-#: lassocox/ui[1].label
 #: lassologistic/ui[1].label
 #: ncvregcox/ui[1].label
 #: pcacox/ui[1].label
 #: plscox/ui[1].label
 #: sparsegrouplasso/ui[1].label
 msgid "Data Suitability"
+msgstr ""
+
+#: lassocox/ui[1].label
+msgid "Data suitability"
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -38454,7 +38749,6 @@ msgstr ""
 #: grouplasso/results/suitabilityReport.title
 #: highdimcox/options/suitabilityCheck.title
 #: highdimcox/results/suitabilityReport.title
-#: lassocox/options/suitabilityCheck.title
 #: lassocox/results/suitabilityReport.title
 #: lassologistic/results/suitabilityReport.title
 #: ncvregcox/options/suitabilityCheck.title
@@ -38468,6 +38762,7 @@ msgstr ""
 msgid "Data Suitability Assessment"
 msgstr ""
 
+#: lassocox/options/suitabilityCheck.title
 #: lassologistic/options/suitabilityCheck.title
 msgid "Data suitability assessment"
 msgstr ""
@@ -38625,6 +38920,12 @@ msgstr ""
 msgid "Dataset containing variables for regression modeling"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid ""
+"Dataset contains %d rows. Analysis may take longer than usual, especially "
+"with data-driven cut-off searches and diagnostic plots."
+msgstr ""
+
 #: jsummarytools/options/data.description
 msgid "Dataset for descriptive analysis"
 msgstr ""
@@ -38701,8 +39002,11 @@ msgid "Date Components"
 msgstr ""
 
 #: groupsummary/options/dateFormat.title
-#: timeinterval/options/time_format.title
 msgid "Date Format"
+msgstr ""
+
+#: timeinterval/options/time_format.title
+msgid "Date format"
 msgstr ""
 
 #: timeinterval/ui[1].label
@@ -38756,6 +39060,14 @@ msgstr ""
 msgid "Date Variables"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Date, date-time, duration and custom scalar storage classes are omitted "
+"before exclusion. Matrix, array and list columns are rejected before R data "
+"selection. Convert unsupported inputs to explicitly defined scalar "
+"measurements or categories first."
+msgstr ""
+
 #: datevalidator/results/correction_table.title
 msgid "Date/DateTime Validation Results Summary"
 msgstr ""
@@ -38792,8 +39104,20 @@ msgstr ""
 msgid "Dates"
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid "Dates Read Into The Wrong Century"
+msgstr ""
+
 #: R/swimmerplot.b.R
 msgid "dates with format"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"DateTime conversion completed. • Processed {rows} rows from variable {name}. "
+"• Successfully parsed {parsed} of {nonmissing} non-missing values ({pct}%). "
+"• Added {added} component column(s) to the dataset. • Review the preview "
+"tables before proceeding with analysis."
 msgstr ""
 
 #: package/analyses/datetimeconverter.title
@@ -38808,11 +39132,19 @@ msgstr ""
 msgid "DateTime Format"
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid ""
+"DateTime Format is set to a numeric format ({fmt}) but this column does not "
+"hold numeric serial values, so nothing could be converted. • Choose a text "
+"format such as YYYY-MM-DD or DD-MM-YYYY, or select Auto-detect."
+msgstr ""
+
 #: datetimeconverter/options/datetime_var.title
 #: datetimeconverter/ui[0][0].label
 msgid "DateTime Variable"
 msgstr ""
 
+#: datetimeconverter/options/extract_day.title
 #: datetimeconverter/results/day_out.title
 msgid "Day"
 msgstr ""
@@ -38821,16 +39153,30 @@ msgstr ""
 msgid "Day Name"
 msgstr ""
 
+#: datetimeconverter/options/extract_dayname.title
+#: datetimeconverter/options/dayname_out.title
+#: datetimeconverter/ui[7][0][1][0]/dayname_out.label
+msgid "Day name"
+msgstr ""
+
 #: datetimeconverter/ui[7][0][0][0]/extract_dayname.label
 msgid "Day name (e.g., Monday)"
 msgstr ""
 
+#: datetimeconverter/options/day_out.title
 #: datetimeconverter/ui[5][0][0][0]/extract_day.label
+#: datetimeconverter/ui[5][0][1][0]/day_out.label
 msgid "Day of month"
 msgstr ""
 
 #: datetimeconverter/results/dayofyear_out.title
 msgid "Day of Year"
+msgstr ""
+
+#: datetimeconverter/options/extract_dayofyear.title
+#: datetimeconverter/options/dayofyear_out.title
+#: datetimeconverter/ui[7][0][1][0]/dayofyear_out.label
+msgid "Day of year"
 msgstr ""
 
 #: datetimeconverter/ui[7][0][0][0]/extract_dayofyear.label
@@ -38969,16 +39315,18 @@ msgstr ""
 #: singlearm/options/dod.title
 #: survival/options/dod.title
 #: survival/ui[2][0][0][1][0]/dod.label
-#: survivalcont/options/dod.title
 #: survivalcont/ui[3][0][0][1][0]/dod.label
 msgid "Dead of Disease"
+msgstr ""
+
+#: survivalcont/options/dod.title
+msgid "Dead of disease"
 msgstr ""
 
 #: competingsurvival/options/dooc.title
 #: multisurvival/options/dooc.title
 #: singlearm/options/dooc.title
 #: survival/options/dooc.title
-#: survivalcont/options/dooc.title
 msgid "Dead of Other"
 msgstr ""
 
@@ -38986,6 +39334,10 @@ msgstr ""
 #: survival/ui[2][0][0][1][0]/dooc.label
 #: survivalcont/ui[3][0][0][1][0]/dooc.label
 msgid "Dead of Other Causes"
+msgstr ""
+
+#: survivalcont/options/dooc.title
+msgid "Dead of other causes"
 msgstr ""
 
 #: stagemigration/options/absorptionStates.default
@@ -40724,7 +41076,6 @@ msgstr ""
 msgid "Detailed methodology and interpretation guidance"
 msgstr ""
 
-#: lassocox/options/showMethodologyNotes.title
 #: simonmakuch/ui[9][0][0]/showMethodologyNotes.label
 msgid "Detailed Methodology Notes"
 msgstr ""
@@ -40870,6 +41221,12 @@ msgstr ""
 msgid "Detected Joinpoints"
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid ""
+"Detected parsed dates outside plausible range (<1900 or >1 year in future). "
+"Review preview to confirm correct parsing."
+msgstr ""
+
 #: featurequality/results/outlier_analysis.columns.title
 #: outlierdetection/ui[1].label
 msgid "Detection Method"
@@ -40994,6 +41351,14 @@ msgstr ""
 
 #: brierscore/options/development_period.title
 msgid "Development Period End Date"
+msgstr ""
+
+#: lassocox/options/riskScore.title
+msgid "Development risk score"
+msgstr ""
+
+#: lassocox/options/survival_plot.title
+msgid "Development risk-group curves"
 msgstr ""
 
 #: bayesianma/results/selectedModel.columns.title
@@ -41171,9 +41536,12 @@ msgstr ""
 #: surveysurvival/ui[2][0][0][1][0][0].label
 #: survival/options/dxdate.title
 #: survival/ui[1][0][0][1][0][0].label
-#: survivalcont/options/dxdate.title
 #: survivalcont/ui[2][0][0][1][0][0].label
 msgid "Diagnosis Date"
+msgstr ""
+
+#: survivalcont/options/dxdate.title
+msgid "Diagnosis date"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -44871,6 +45239,12 @@ msgstr ""
 msgid "dmy"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Do not use selected variables, apparent discrimination or development-sample "
+"risk groups to choose treatment or surveillance intervals."
+msgstr ""
+
 #: biomarkerdiscovery/results/regulatory_summary.columns.title
 #: clinicalprediction/results/regulatory_summary.columns.title
 #: mantelhaenszel/ui[4].label
@@ -45666,6 +46040,12 @@ msgstr ""
 
 #: R/vartree.b.R
 msgid "Each node shows counts and percentages for variable combinations"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Each outcome level may be assigned to only one state. Assigned to more than "
+"one: {levels}."
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -46794,6 +47174,10 @@ msgstr ""
 msgid "empty category-segment pairs. This may indicate sparse data."
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid "Empty Dataset"
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Enable 'Adaptive Styling' for automatic visual optimization"
 msgstr ""
@@ -47259,8 +47643,26 @@ msgid ""
 "target lesion"
 msgstr ""
 
+#: lassocox/results/encoding.columns.title
+msgid "Encoded Column"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Encoded Predictor Columns"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Encoded predictors contain non-finite values."
+msgstr ""
+
 #: swimmerplot/results/timelineData.columns.title
 msgid "End"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"End date column contains only missing values; cannot calculate time "
+"intervals."
 msgstr ""
 
 #: jiwillsurvive/options/end_date_var.title
@@ -48518,6 +48920,7 @@ msgstr ""
 
 #: R/oddsratio.b.R
 #: R/reportcat.b.R
+#: R/timeinterval.b.R
 #: crosstable/results/errorNotice.title
 msgid "Error"
 msgstr ""
@@ -48563,6 +48966,12 @@ msgstr ""
 msgid "Error Bars"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Error bars show cross-validation standard errors. The blue line marks "
+"lambda.min and the green line marks lambda.1se."
+msgstr ""
+
 #: adaptivelasso/results/stabilityResults.columns.title
 msgid "Error Bound"
 msgstr ""
@@ -48595,8 +49004,26 @@ msgstr ""
 msgid "Error Components Breakdown"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Error creating arsenal table: {error}. Check that categorical variables are "
+"factors and numeric variables contain valid numbers."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid "Error creating design matrix: {msg}. Check factor coding and missing values."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Error creating frequency tables with janitor: {error}. Check that "
+"categorical variables have valid data."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Error creating gtsummary table: {error}. Check that variables have valid "
+"data and appropriate types."
 msgstr ""
 
 #: R/survival.b.R
@@ -48615,6 +49042,13 @@ msgid ""
 "Please check your data and model parameters."
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Error creating Table One: {error}. Check that variables have valid data and "
+"appropriate types. Categorical variables should be factors. Numeric "
+"variables should contain valid numbers."
+msgstr ""
+
 #: agreement/results/maxwellREHeading.title
 msgid "Error Decomposition & Reliability"
 msgstr ""
@@ -48624,16 +49058,8 @@ msgstr ""
 msgid "Error Distribution"
 msgstr ""
 
-#: R/survival.b.R
-msgid "Error exporting survival data: {message}"
-msgstr ""
-
 #: R/decision.b.R
 msgid "Error extracting confusion matrix values: {msg}"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "Error fitting final model: {msg}"
 msgstr ""
 
 #: R/oddsratio.b.R
@@ -48710,6 +49136,13 @@ msgstr ""
 
 #: R/timeinterval.b.R
 msgid "Error parsing dates with format {format}: {message}"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Error parsing datetimes with format {fmt}. • Parser error: {msg} • Try "
+"selecting a different format. • Check that your data matches the selected "
+"format."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -49441,6 +49874,10 @@ msgstr ""
 msgid "Event Frequency in Sample (\\ percent)"
 msgstr ""
 
+#: outcomeorganizer/options/useHierarchy.title
+msgid "Event hierarchy"
+msgstr ""
+
 #: outcomeorganizer/ui[3][1]/useHierarchy.label
 msgid "Event hierarchy (long-format data only)"
 msgstr ""
@@ -49589,7 +50026,6 @@ msgstr ""
 #: hematologicindices/ui[1]/eventLevel.label
 #: highdimcox/options/outcomeLevel.title
 #: highdimcox/ui[1][0]/outcomeLevel.label
-#: lassocox/options/outcomeLevel.title
 #: lassologistic/options/outcomeLevel.title
 #: leaveonecenterout/options/outcomeLevel.title
 #: lymphnoderatio/options/eventLevel.title
@@ -49626,7 +50062,6 @@ msgstr ""
 #: stratifiedparametric/ui[1][0][0]/outcomeLevel.label
 #: surveysurvival/options/outcomeLevel.title
 #: survival/options/outcomeLevel.title
-#: survivalcont/options/outcomeLevel.title
 #: survivalfeaturerank/options/eventLevel.title
 #: timeroc/options/outcomeLevel.title
 #: timevarycox/options/outcomeLevel.title
@@ -49636,8 +50071,10 @@ msgstr ""
 msgid "Event Level"
 msgstr ""
 
+#: lassocox/options/outcomeLevel.title
 #: latentbiomarker/options/event_level.title
 #: latentbiomarker/ui[0][1]/event_level.label
+#: survivalcont/options/outcomeLevel.title
 msgid "Event level"
 msgstr ""
 
@@ -50283,12 +50720,6 @@ msgid ""
 "from the stratification list, or add a covariate that is not stratified."
 msgstr ""
 
-#: R/tableone.b.R
-msgid ""
-"Every selected variable is missing for all cases, so there is nothing to "
-"tabulate. Select at least one variable that has recorded values."
-msgstr ""
-
 #: R/reportcat.b.R
 msgid ""
 "Every selected variable was empty or all-missing, so there is nothing to "
@@ -50590,6 +51021,10 @@ msgstr ""
 msgid "Example data format:"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Example interpretation"
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "Example Interpretation:"
 msgstr ""
@@ -50646,6 +51081,24 @@ msgstr ""
 
 #: datetimeconverter/options/datetime_format/excel_serial.title
 msgid "Excel Serial (Days since 1900)"
+msgstr ""
+
+#: datetimeconverter/options/datetime_format/excel_serial_1904.title
+msgid "Excel Serial (Days since 1904, legacy Mac)"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Excel serial numbers do not record which epoch they came from, so the 1900 "
+"system was assumed. • Serial {serial} was read as {readAs}; under the legacy "
+"Mac 1904 system the same number is {alt} (a difference of 1462 days, about 4 "
+"years). • The 1900 system is correct for Windows Excel and for Mac Excel "
+"2011 and later. • If this file came from Mac Excel 2008 or earlier, set "
+"DateTime Format to Excel Serial (Days since 1904, legacy Mac)."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Excel Serial Origin Assumed (1900 System)"
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -50765,6 +51218,12 @@ msgstr ""
 
 #: jjsyndromicplot/options/missing/listwise.title
 msgid "Exclude cases listwise"
+msgstr ""
+
+#: tableone/options/excl.description.jamovi
+msgid ""
+"Exclude cases missing any included variable. This is listwise deletion, not "
+"imputation; all retained variables use the same complete-case denominator."
 msgstr ""
 
 #: coxdiagnostics/options/exclude_missing.description.jamovi
@@ -50906,7 +51365,7 @@ msgstr ""
 
 #: R/tableone.b.R
 msgid ""
-"Excluding missing values left no cases: each of the %d cases has at least "
+"Excluding missing values left no cases: each of the {n} cases has at least "
 "one missing value among the selected variables. Untick Missing-value "
 "exclusion (NA), or select fewer variables."
 msgstr ""
@@ -51563,10 +52022,13 @@ msgstr ""
 
 #: clinicalscore/ui[5].label
 #: firthregression/ui[7].label
-#: lassocox/ui[5].label
 #: lassologistic/ui[7].label
 #: nogoldstandard/ui[3].label
 msgid "Explanatory Output"
+msgstr ""
+
+#: lassocox/ui[5].label
+msgid "Explanatory output"
 msgstr ""
 
 #: emfrailty/options/showSummaries.title
@@ -51632,15 +52094,12 @@ msgstr ""
 msgid "explanatory variable(s) and the time-to-event outcome"
 msgstr ""
 
-#: R/lassocox.b.R
 #: R/lassologistic.b.R
 #: causespecifichazards/options/covariates.title
 #: directregression/options/explanatory.title
 #: directregression/ui[0][2].label
 #: generalpseudo/options/explanatory.title
 #: generalpseudo/ui[0][2].label
-#: lassocox/options/explanatory.title
-#: lassocox/ui[0][2].label
 #: lassologistic/options/explanatory.title
 #: lassologistic/ui[0][1].label
 #: multisurvival/options/explanatory.title
@@ -51812,6 +52271,10 @@ msgid ""
 "selected range"
 msgstr ""
 
+#: lassocox/options/showModelComparison.title
+msgid "Exploratory Cox comparisons"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "Exploratory description of agreement with a majority-vote rule using three "
@@ -51850,11 +52313,6 @@ msgstr ""
 msgid "Exploratory Piecewise Hazard-Rate Analysis"
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "Exploratory survival curves from a development-sample median split"
-msgstr ""
-
-#: lassocox/options/showModelComparison.title
 #: lassocox/results/modelComparison.title
 msgid "Exploratory Unpenalized Refit Comparison"
 msgstr ""
@@ -51999,10 +52457,6 @@ msgid ""
 "analysis"
 msgstr ""
 
-#: classicalSurvivalPower/options/export_results.description.jamovi
-msgid "Export comprehensive power analysis results to dataset for further analysis."
-msgstr ""
-
 #: survivalmodelvalidation/options/export_validation_report.description.ui
 msgid "Export comprehensive validation report"
 msgstr ""
@@ -52030,12 +52484,6 @@ msgstr ""
 
 #: assayoptimization/options/export_design.title
 msgid "Export Design Matrix"
-msgstr ""
-
-#: survival/options/export_survival_data.description
-msgid ""
-"Export detailed survival estimates for external analysis, including survival "
-"probabilities, confidence intervals, and risk tables at multiple time points."
 msgstr ""
 
 #: ggprism/options/export_dpi.title
@@ -52121,19 +52569,6 @@ msgstr ""
 msgid "Export Pattern Data"
 msgstr ""
 
-#: classicalSurvivalPower/results/exported_results.title
-msgid "Export Power Analysis Results"
-msgstr ""
-
-#: classicalSurvivalPower/options/export_power_curve.title
-#: classicalSurvivalPower/results/exported_power_curve.title
-msgid "Export Power Curve Data"
-msgstr ""
-
-#: classicalSurvivalPower/options/export_power_curve.description.jamovi
-msgid "Export power curve data for external plotting and analysis."
-msgstr ""
-
 #: clinicalprediction/options/export_predictions.title
 #: timedependent/options/export_predictions.title
 msgid "Export Predictions"
@@ -52189,10 +52624,6 @@ msgstr ""
 msgid "Export Results for External Use"
 msgstr ""
 
-#: classicalSurvivalPower/options/export_results.title
-msgid "Export Results to Data"
-msgstr ""
-
 #: conditionalgee/options/exportResults.title
 #: jointfrailty/options/exportResults.title
 #: marginalrecurrent/options/exportResults.title
@@ -52227,7 +52658,6 @@ msgstr ""
 msgid "Export Study Design Summary"
 msgstr ""
 
-#: classicalSurvivalPower/results/export_summary.title
 #: clinicaldataintegration/results/exportSummary.title
 #: survival/results/survivalExportSummary.title
 msgid "Export Summary"
@@ -52245,7 +52675,7 @@ msgstr ""
 msgid "Export summary statistics"
 msgstr ""
 
-#: survival/results/survivalExport.title
+#: survival/results/export_survival_data.title
 msgid "Export Survival Data"
 msgstr ""
 
@@ -52503,78 +52933,12 @@ msgstr ""
 msgid "Extra Trees (Extreme Randomization)"
 msgstr ""
 
-#: datetimeconverter/ui[5][0][0][0].label
-#: datetimeconverter/ui[6][0][0][0].label
-#: datetimeconverter/ui[7][0][0][0].label
-msgid "Extract (Preview)"
-msgstr ""
-
 #: jextractggstats/options/extract_components.title
 msgid "Extract Components"
 msgstr ""
 
-#: datetimeconverter/options/extract_day.title
-msgid "Extract day"
-msgstr ""
-
-#: datetimeconverter/options/extract_dayname.title
-#: datetimeconverter/options/dayname_out.title
-msgid "Extract day name"
-msgstr ""
-
-#: datetimeconverter/options/day_out.title
-msgid "Extract Day of Month"
-msgstr ""
-
-#: datetimeconverter/options/extract_dayofyear.title
-#: datetimeconverter/options/dayofyear_out.title
-msgid "Extract day of year"
-msgstr ""
-
-#: datetimeconverter/options/extract_hour.title
-#: datetimeconverter/options/hour_out.title
-msgid "Extract hour"
-msgstr ""
-
-#: datetimeconverter/options/extract_minute.title
-#: datetimeconverter/options/minute_out.title
-msgid "Extract minute"
-msgstr ""
-
-#: datetimeconverter/options/extract_month.title
-msgid "Extract month"
-msgstr ""
-
-#: datetimeconverter/options/extract_monthname.title
-#: datetimeconverter/options/monthname_out.title
-msgid "Extract month name"
-msgstr ""
-
-#: datetimeconverter/options/month_out.title
-msgid "Extract Month Number"
-msgstr ""
-
-#: datetimeconverter/options/extract_quarter.title
-#: datetimeconverter/options/quarter_out.title
-msgid "Extract quarter"
-msgstr ""
-
 #: pathagreement/options/useMetadataRows.title
 msgid "Extract Rater Characteristics from Metadata Rows"
-msgstr ""
-
-#: datetimeconverter/options/extract_second.title
-#: datetimeconverter/options/second_out.title
-msgid "Extract second"
-msgstr ""
-
-#: datetimeconverter/options/extract_weeknum.title
-#: datetimeconverter/options/weeknum_out.title
-msgid "Extract week number"
-msgstr ""
-
-#: datetimeconverter/options/extract_year.title
-msgid "Extract year"
 msgstr ""
 
 #: factoranalysis/results/results/communalitiesTable.columns.title
@@ -52656,7 +53020,7 @@ msgid ""
 msgstr ""
 
 #: timeinterval/options/extreme_multiplier.title
-msgid "Extreme Threshold Multiplier"
+msgid "Extreme threshold multiplier"
 msgstr ""
 
 #: transformationmodels/options/distribution/extreme.title
@@ -52677,6 +53041,16 @@ msgstr ""
 
 #: treatmenteffects/results/weight_summary.columns.title
 msgid "Extreme Weights (>10)"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Extreme-value removal dropped {count} of the longest interval(s) (above "
+"{threshold} {unit}) from the analysis. These rows are excluded from the "
+"mean, the median and the total person-time, so the person-time denominator "
+"here is smaller than the follow-up actually observed. Long follow-up is not "
+"automatically an error: check the removed rows before using this person-time "
+"for an incidence rate."
 msgstr ""
 
 #: stagemigration/options/forestModelType/extraTrees.title
@@ -55004,6 +55378,17 @@ msgstr ""
 msgid "Fold"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Fold {fold}: events / censored"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Folds depend on complete-case row order and event coding. Reproducing a fit "
+"requires the same data, coding, row order, options, and compatible software "
+"versions. Lambda tuning is not full-process model validation."
+msgstr ""
+
 #: vartree/options/follow.title
 #: vartree/ui[0][4].label
 msgid "Follow below"
@@ -55046,9 +55431,12 @@ msgstr ""
 #: surveysurvival/ui[2][0][0][1][0][1].label
 #: survival/options/fudate.title
 #: survival/ui[1][0][0][1][0][1].label
-#: survivalcont/options/fudate.title
 #: survivalcont/ui[2][0][0][1][0][1].label
 msgid "Follow-up Date"
+msgstr ""
+
+#: survivalcont/options/fudate.title
+msgid "Follow-up date"
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -55126,6 +55514,11 @@ msgstr ""
 #: relativesurvival/options/time.title
 #: relativesurvival/ui[0][0].label
 msgid "Follow-up Time"
+msgstr ""
+
+#: lassocox/options/elapsedtime.title
+#: lassocox/ui[0][0].label
+msgid "Follow-up time"
 msgstr ""
 
 #: relativesurvival/options/time.description.ui
@@ -55696,6 +56089,10 @@ msgstr ""
 msgid "Format Detection"
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid "Format Detection Failed"
+msgstr ""
+
 #: enhancedtwowayfrequency/options/percentageDisplay.description
 msgid "Format for displaying percentage values"
 msgstr ""
@@ -55740,6 +56137,10 @@ msgstr ""
 
 #: ihcscoring/results/exportdata.description
 msgid "Formatted results for external analysis or reporting"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Formatting changed missing values; no table or report was produced."
 msgstr ""
 
 #: enhancedfrequency/ui[2].label
@@ -56126,6 +56527,10 @@ msgstr ""
 #: jsjplot/options/analysis_type/frequency_table.title
 #: jsummarytools/results/frequency_table.title
 msgid "Frequency Table"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Frequency Table for '{variable}'"
 msgstr ""
 
 #: pathagreement/options/sft.title
@@ -57218,6 +57623,16 @@ msgstr ""
 msgid "Generate advanced PSA outputs (CEAC, EVPI, net benefit distributions)."
 msgstr ""
 
+#: package/analyses/tableone.description
+#: tableone/options.description.main
+msgid ""
+"Generate an overall-cohort descriptive Table One for clinicopathological "
+"research. Four output styles are available. This analysis does not stratify "
+"by group or compute p-values, confidence intervals or standardized mean "
+"differences. Each row is treated as one case; check for repeated records "
+"before interpreting counts as patients."
+msgstr ""
+
 #: deeplearningprediction/options/attention_maps.title
 msgid "Generate Attention Maps"
 msgstr ""
@@ -58148,6 +58563,16 @@ msgstr ""
 #: jggstats/options/family.title
 #: jsjplot/options/family.title
 msgid "GLM Family"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"glmnet standardizes within each training fit when requested. Displayed "
+"coefficients are returned on the original predictor scale."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "glmnet version"
 msgstr ""
 
 #: jggheatmap/options/scaling/global.title
@@ -59797,6 +60222,13 @@ msgstr ""
 msgid "gtsummary (Publication-ready descriptives)"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"gtsummary: continuous variables as median (Q1, Q3); categorical variables as "
+"N (percent); missing counts on an Unknown row. Dichotomous row labels name "
+"the counted level, such as TRUE, 1 or yes."
+msgstr ""
+
 #: R/timeinterval.b.R
 msgid ""
 "Guessed as a packed date instead, the same digits give a different year, so "
@@ -60017,10 +60449,6 @@ msgstr ""
 
 #: pathagreement/ui[4][0]/tie_breaking.label
 msgid "Handle Ties By"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "Handles high-dimensional data (p >= n scenarios)"
 msgstr ""
 
 #: package/analyses/highdimcox.menuSubtitle
@@ -60363,6 +60791,7 @@ msgstr ""
 msgid "Hazard Ratio Curve (Spline Effect)"
 msgstr ""
 
+#: R/classicalSurvivalPower.b.R
 #: classicalSurvivalPower/options/calculation_type/hazard_ratio.title
 msgid "Hazard Ratio Detection"
 msgstr ""
@@ -61269,6 +61698,14 @@ msgstr ""
 msgid "High imbalance"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"High missing data rate in original dataset: {missing} cases have at least "
+"one missing value. More than half of cases are incomplete. Results may not "
+"represent the full sample. Report missing-data patterns and review the "
+"missing-data strategy; this analysis does not impute values."
+msgstr ""
+
 #: R/reportcat.b.R
 msgid "High missing data rates (over 20%) require careful interpretation"
 msgstr ""
@@ -61443,6 +61880,10 @@ msgstr ""
 msgid ""
 "Higher event information per encoded candidate column. This descriptive "
 "ratio is not a sample-size guarantee and does not establish stable selection."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Higher fitted hazard"
 msgstr ""
 
 #: stagemigration/options/wrSecondaryDirection/higher.title
@@ -62019,6 +62460,9 @@ msgstr ""
 msgid "Hotspot Type"
 msgstr ""
 
+#: datetimeconverter/options/extract_hour.title
+#: datetimeconverter/options/hour_out.title
+#: datetimeconverter/ui[6][0][1][0]/hour_out.label
 #: datetimeconverter/results/hour_out.title
 msgid "Hour"
 msgstr ""
@@ -63133,6 +63577,13 @@ msgid ""
 "reference-negative observations, with TP=90 and TN=80, then FN=10 and FP=20."
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"If 50 of 100 values are missing and 15 recorded values are category A, "
+"tableone, gtsummary and arsenal report A as 15 (30%). Janitor reports "
+"Percent as 15% and Valid Percent as 30%. Missingness is reported separately."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid ""
 "If a treatment provides 2 QALYs worth $50,000 each but costs $80,000, NMB = "
@@ -63167,10 +63618,22 @@ msgid ""
 "category stays empty."
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"If imputation or cutoffs are developed, learn them only in the development "
+"training splits and apply the frozen definitions to validation patients."
+msgstr ""
+
 #: R/oddsratio.b.R
 msgid ""
 "If incorrect, use the 'Positive Outcome Level' dropdown to specify the "
 "correct level"
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"If needed, enable missing-value exclusion (NA). Exclusion may remove entire "
+"cases."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -63229,9 +63692,10 @@ msgstr ""
 #: survivalcont/options/calculatedmulticut.description
 msgid ""
 "If you enable this option, the multiple cut-off groups will be added to your "
-"data as a new variable. This creates stratified risk groups (Low, Medium, "
-"High, etc.) based on the multiple optimal cut-off points. Only available "
-"when \"Find Multiple Cut-offs\" option is enabled."
+"data as a new variable. Adds ordered marker-value groups based on the "
+"reported multiple cut-off points. Group names describe marker values and do "
+"not assume which group has higher clinical risk. Only available when \"Find "
+"Multiple Cut-offs\" option is enabled."
 msgstr ""
 
 #: survivalcont/options/outcomeredefined.description
@@ -63736,6 +64200,10 @@ msgstr ""
 
 #: checkdata/options/unitSystem/imperial.title
 msgid "Imperial/US units"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Implausible Dates Detected"
 msgstr ""
 
 #: stagemigration/results/willRogersClinicalRecommendation.columns.title
@@ -64449,10 +64917,6 @@ msgstr ""
 msgid "Include Cure Fraction"
 msgstr ""
 
-#: timeinterval/options/include_quality_metrics.title
-msgid "Include data quality assessment"
-msgstr ""
-
 #: enhancedfrequency/options/dataQualityAssessment.description
 msgid "Include data quality metrics and recommendations"
 msgstr ""
@@ -65056,6 +65520,13 @@ msgstr ""
 #: generalizedroc/options/tram_constraints/increasing.title
 #: jjsyndromicplot/options/varorder/increasing.title
 msgid "Increasing"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Increasing lambda shrinks coefficients toward zero. A coefficient of zero is "
+"a selection result in these data, not proof that a predictor is clinically "
+"irrelevant."
 msgstr ""
 
 #: pagetrendtest/options/trend_direction/increasing.title
@@ -65673,6 +66144,7 @@ msgid "Influx/Outflux Analysis"
 msgstr ""
 
 #: R/jjpiestats.b.R
+#: R/timeinterval.b.R
 msgid "Info"
 msgstr ""
 
@@ -65822,6 +66294,10 @@ msgstr ""
 msgid "Inner CV Folds"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Input and missing-data policy"
+msgstr ""
+
 #: measurementuncertainty/options/distribution_types.title
 msgid "Input Distribution Types"
 msgstr ""
@@ -65844,6 +66320,10 @@ msgstr ""
 #: survival/ui[1][0][0][2][0]/timetypedata.label
 #: survivalcont/ui[2][0][0][2][0]/timetypedata.label
 msgid "Input time type"
+msgstr ""
+
+#: survivalcont/options/timetypedata.title
+msgid "Input time type (e.g., YYYY-MM-DD)"
 msgstr ""
 
 #: survivalendpoints/options/inputType.title
@@ -65906,6 +66386,7 @@ msgid "Institutional Ranges"
 msgstr ""
 
 #: R/reportcat.b.R
+#: R/tableone.b.R
 #: adaptivelasso/results/instructions.title
 #: advancedbarplot/results/instructions.title
 #: advancedraincloud/results/todo.title
@@ -66157,6 +66638,12 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Insufficient data for residual normality testing."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Insufficient data for Table One analysis. Check for missing values. Try "
+"selecting different variables or disabling missing-value exclusion."
 msgstr ""
 
 #: R/decision.b.R
@@ -66669,9 +67156,8 @@ msgid "Internal Node:"
 msgstr ""
 
 #: R/lassocox.b.R
-msgid ""
-"Internal standardization was used for fitting; displayed coefficients are "
-"back-transformed to the original design-column scale."
+#: lassocox/options/standardize.title
+msgid "Internal standardization"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -66696,6 +67182,12 @@ msgstr ""
 #: predmodel/options/validationMethod.description
 #: survivalcalibration/options/validationMethod.description
 msgid "Internal validation method to assess model performance."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Internal validation must repeat preprocessing, lambda selection and fitting "
+"within each resample. Independently evaluate a frozen model in external data."
 msgstr ""
 
 #: package/analyses/leaveonecenterout.menuSubtitle
@@ -67215,6 +67707,7 @@ msgstr ""
 msgid "Interval Cancers"
 msgstr ""
 
+#: outcomeorganizer/options/intervalCensoring.title
 #: outcomeorganizer/ui[4][0]/intervalCensoring.label
 msgid "Interval censoring"
 msgstr ""
@@ -67467,6 +67960,14 @@ msgstr ""
 
 #: R/lassocox.b.R
 msgid "Invalid survival object. Check time and status variables."
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Invalid table style selected. Choose tableone, gtsummary, arsenal or janitor."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Invalid Timezone"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -67805,6 +68306,7 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 #: jggheatmap/results/clustertab.columns.title
+#: lassocox/results/reproducibility.columns.title
 #: patientreported/results/item_statistics.columns.title
 #: patientreported/results/item_reliability.columns.title
 #: patientreported/results/factor_loadings.columns.title
@@ -67992,6 +68494,25 @@ msgstr ""
 
 #: tableone/options/sty/t4.title
 msgid "janitor (Simple frequency tables)"
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Janitor tabulates categorical, ordinal, text and logical variables with at "
+"most 20 recorded categories. Numeric measurements are not converted to "
+"categories automatically. Use another style for measurements; set numeric "
+"category codes to Nominal or Ordinal in jamovi, or convert them with "
+"factor() in R. Omitted variables do not enter missing-value exclusion or the "
+"analysis summary."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"janitor: counts and percentages for categorical, ordinal, text and logical "
+"variables with at most 20 recorded categories. Unused factor levels are not "
+"displayed. Numeric measurements are skipped; convert numeric category codes "
+"to factors explicitly. Percent uses all cases; Valid Percent uses recorded "
+"cases."
 msgstr ""
 
 #: relativesurvival/options/ratetable/japan.title
@@ -68770,10 +69291,6 @@ msgstr ""
 msgid "Key features:"
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "Key Features:"
-msgstr ""
-
 #: biomarkerdiscovery/results/clinical_interpretation.columns.title
 #: qualityoflife/results/clinical_interpretation_summary.columns.title
 #: stagemigration/results/multiStateSummary.columns.title
@@ -69477,7 +69994,10 @@ msgstr ""
 msgid "Lambda Range Minimum"
 msgstr ""
 
-#: lassocox/ui[2][0].label
+#: R/lassocox.b.R
+msgid "Lambda rule"
+msgstr ""
+
 #: lassologistic/ui[2][1].label
 #: leaveonecenterout/options/lambdaMethod.title
 #: ncvregcox/options/lambda_type.title
@@ -69485,12 +70005,16 @@ msgid "Lambda Selection"
 msgstr ""
 
 #: R/lassologistic.b.R
+#: lassocox/ui[2][0].label
 msgid "Lambda selection"
 msgstr ""
 
-#: lassocox/options/lambda.title
 #: lassologistic/options/lambda.title
 msgid "Lambda Selection Method"
+msgstr ""
+
+#: lassocox/options/lambda.title
+msgid "Lambda selection rule"
 msgstr ""
 
 #: adaptivelasso/options/lambda_sequence.title
@@ -69558,6 +70082,13 @@ msgstr ""
 
 #: timeinterval/options/use_landmark.title
 msgid "Landmark analysis"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Landmark analysis excluded every participant: none of the {n} observations "
+"reached the {amount} landmark. Lower the landmark time or switch landmark "
+"analysis off."
 msgstr ""
 
 #: package/analyses/landmarkanalysis.description
@@ -69651,7 +70182,6 @@ msgstr ""
 #: singlearm/ui[1][1].label
 #: survival/options/landmark.title
 #: survival/ui[1][1][0]/uselandmark/landmark.label
-#: survivalcont/options/landmark.title
 #: survivalcont/ui[2][2][0]/uselandmark/landmark.label
 #: timedependent/results/landmark_results.columns.title
 msgid "Landmark Time"
@@ -69660,6 +70190,7 @@ msgstr ""
 #: multisurvival/ui[1][1][0]/uselandmark.label
 #: singlearm/ui[1][1][0]/uselandmark.label
 #: survival/ui[1][1][0]/uselandmark.label
+#: survivalcont/options/landmark.title
 #: survivalcont/ui[2][2][0]/uselandmark.label
 msgid "Landmark time"
 msgstr ""
@@ -69679,8 +70210,11 @@ msgid "Landmark time must be a non-negative number"
 msgstr ""
 
 #: ihcsurvival/options/landmarkTime.title
-#: timeinterval/options/landmark_time.title
 msgid "Landmark Time Point"
+msgstr ""
+
+#: timeinterval/options/landmark_time.title
+msgid "Landmark time point"
 msgstr ""
 
 #: landmarkanalysis/options/landmark_times.title
@@ -69762,6 +70296,13 @@ msgstr ""
 msgid "Large and often conclusive increase in probability of disease"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Large case loss due to missing data: {excluded} cases excluded; {n} "
+"retained. Results may not represent the full sample. Review the missing-data "
+"strategy and consider a sensitivity analysis."
+msgstr ""
+
 #: R/crosstable.b.R
 msgid "Large dataset - the table may take a while to appear"
 msgstr ""
@@ -69770,6 +70311,10 @@ msgstr ""
 msgid ""
 "Large dataset (n>10,000): Consider sampling for better performance, or use "
 "diagnostic mode carefully."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Large dataset detected"
 msgstr ""
 
 #: R/decision.b.R
@@ -69862,14 +70407,25 @@ msgstr ""
 msgid "LASSO Cox"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "LASSO Cox methodology"
+msgstr ""
+
 #: lassocox/results/methodologyNotes.title
 msgid "LASSO Cox Methodology Notes"
 msgstr ""
 
 #: R/lassocox.b.R
 msgid ""
+"LASSO Cox regression combines the proportional-hazards model with an L1 "
+"penalty to estimate a sparse development model."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
 "LASSO Cox regression was performed on {nObs} observations ({nEvents} events) "
-"with {nTotal} candidate predictors using {lambdaMethod} for lambda selection."
+"with {nTotal} encoded predictor columns using {lambdaMethod} for lambda "
+"selection."
 msgstr ""
 
 #: package/analyses/lassologistic.menuTitle
@@ -71610,6 +72166,10 @@ msgstr ""
 msgid "Log Lambda"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Log lambda"
+msgstr ""
+
 #: bayesianma/results/selectedModel.columns.title
 #: continuousrelationship/results/modelFit.columns.title
 msgid "Log Likelihood"
@@ -71961,6 +72521,10 @@ msgstr ""
 msgid "Logarithmic (log t)"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Logical"
+msgstr ""
+
 #: R/clinicalscore.b.R
 #: survivalbart/options/prior_distribution/logistic.title
 #: tidydensity/options/distribution_type/logistic.title
@@ -72111,6 +72675,17 @@ msgstr ""
 
 #: R/waterfallrecist.b.R
 msgid "longest diameter in mm; short axis for lymph nodes"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Longest interval in the data is {years} years ({value} {unit}, before any "
+"landmark or filter). Intervals beyond 50 years exceed the follow-up of "
+"essentially every clinical cohort, and usually mean the dates were parsed "
+"with the wrong format rather than observed. Check the Date Format setting "
+"and the raw date columns before reporting this person-time. If the intervals "
+"are genuinely this long (a lifetime cohort, or an age computed from date of "
+"birth), this message can be ignored."
 msgstr ""
 
 #: spatialbayesiansurvival/options/spatial_coords.description
@@ -72301,6 +72876,16 @@ msgstr ""
 msgid "Low Cutoff (<=)"
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid ""
+"Low datetime parsing success rate: {pct}% • Only {parsed} of {total} "
+"non-missing values were successfully parsed. • This may indicate incorrect "
+"format selection or data quality issues. • Try a different datetime format, "
+"review the failed samples in the Quality Assessment panel, and check the "
+"data source for systematic errors. • Clinical analysis may be unreliable "
+"below 70% success."
+msgstr ""
+
 #: differentialdiagnosis/results/sensitivityAnalysis.columns.title
 msgid "Low Estimate"
 msgstr ""
@@ -72368,6 +72953,10 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 msgid "Low Observations Per Variable"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Low Parsing Success Rate"
 msgstr ""
 
 #: R/kappaSizePower.b.R
@@ -72724,6 +73313,10 @@ msgstr ""
 #: hierarchicalbayes/results/correlationAnalysis.columns.title
 #: hierarchicalbayes/results/metaRegressionResults.columns.title
 msgid "Lower CrI"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Lower fitted hazard"
 msgstr ""
 
 #: greyzoneroc/options/lower_grey_boundary.title
@@ -73394,6 +73987,12 @@ msgstr ""
 msgid "Manual Cutpoint Value"
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid ""
+"Manual format selection ({fmt}) was ignored because the column is already "
+"stored as datetime values."
+msgstr ""
+
 #: esquisseauto/options/manualGeom.title
 msgid "Manual Geom Selection"
 msgstr ""
@@ -73728,6 +74327,10 @@ msgstr ""
 #: survivalcont/results/multipleMedianTable.columns.title
 #: survivalcont/results/multipleSurvTable.columns.title
 msgid "Marker Group"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Marker groups"
 msgstr ""
 
 #: ihccluster/results/markerImportance.title
@@ -76139,6 +76742,7 @@ msgid ""
 msgstr ""
 
 #: survival/ui[4][1][0]/medianline.label
+#: survivalcont/options/medianline.title
 #: survivalcont/ui[4][1][0]/medianline.label
 msgid "Median survival line"
 msgstr ""
@@ -76280,7 +76884,6 @@ msgstr ""
 
 #: multisurvival/options/medianline.title
 #: survival/options/medianline.title
-#: survivalcont/options/medianline.title
 msgid "medianline"
 msgstr ""
 
@@ -76929,6 +77532,7 @@ msgstr ""
 msgid "Method Explanations"
 msgstr ""
 
+#: lassocox/options/showExplanations.title
 #: lassologistic/options/showExplanations.title
 msgid "Method explanations"
 msgstr ""
@@ -77066,10 +77670,13 @@ msgstr ""
 
 #: survivalcont/options/cutoff_method.description
 msgid ""
-"Method for finding multiple cut-offs. Quantile-based uses "
-"tertiles/quartiles, Recursive finds sequential optimal points, Tree-based "
-"uses survival trees, Minimum P-value finds points that minimize log-rank "
-"p-values."
+"Method for finding multiple cut-offs. Quantile-based uses equally spaced "
+"quantiles. Recursive repeatedly finds an optimal split after excluding "
+"observations close to earlier splits. Tree-based uses survival-tree splits. "
+"Minimum P-value exhaustively searches up to 1000 admissible combinations; "
+"for larger candidate spaces it evaluates 1000 unique combinations selected "
+"reproducibly from the Random seed. All data-derived cut-offs and their group "
+"comparisons are exploratory and require external validation."
 msgstr ""
 
 #: clinicalnomograms/options/missing_data_handling.description.ui
@@ -77448,6 +78055,10 @@ msgstr ""
 #: stagemigration/ui[22][0][0]/showMethodologyNotes.label
 #: stagemigration/results/methodologyNotes.title
 msgid "Methodology Notes"
+msgstr ""
+
+#: lassocox/options/showMethodologyNotes.title
+msgid "Methodology notes"
 msgstr ""
 
 #: R/kappaSizeFixedN.b.R
@@ -78103,6 +78714,12 @@ msgstr ""
 msgid "Minimal increase in probability of disease"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Minimal missing data were detected ({percent} of cases with at least one "
+"missing value)."
+msgstr ""
+
 #: R/vartree.b.R
 msgid ""
 "Minimal style applied: one flat tone per level instead of a gradient, no "
@@ -78297,11 +78914,14 @@ msgstr ""
 
 #: R/lassologistic.b.R
 #: highdimcox/options/cv_method/cv_min.title
-#: lassocox/options/lambda/lambda.min.title
 #: lassologistic/options/lambda/lambda.min.title
 #: leaveonecenterout/options/lambdaMethod/lambda.min.title
 #: ncvregcox/options/lambda_type/min.title
 msgid "Minimum CV Error"
+msgstr ""
+
+#: lassocox/options/lambda/lambda.min.title
+msgid "Minimum CV error"
 msgstr ""
 
 #: pheval/results/powerAnalysis.columns.title
@@ -78341,12 +78961,12 @@ msgstr ""
 msgid "Minimum Group Size"
 msgstr ""
 
-#: survivalcont/options/min_group_size.title
-msgid "Minimum Group Size ( percent)"
-msgstr ""
-
 #: survivalcont/ui[1][1][0]/min_group_size.label
 msgid "Minimum Group Size (%)"
+msgstr ""
+
+#: survivalcont/options/min_group_size.title
+msgid "Minimum group size (%)"
 msgstr ""
 
 #: digitalvalidation/options/custom_icc_threshold.title
@@ -78491,6 +79111,10 @@ msgstr ""
 
 #: stagemigration/options/cutpointMethod/minpvalue.title
 msgid "Minimum p-value Approach"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Minimum p-value search found no admissible split"
 msgstr ""
 
 #: missingdataexplorer/options/min_pattern_freq.title
@@ -78721,6 +79345,9 @@ msgstr ""
 msgid "MinPts:"
 msgstr ""
 
+#: datetimeconverter/options/extract_minute.title
+#: datetimeconverter/options/minute_out.title
+#: datetimeconverter/ui[6][0][1][0]/minute_out.label
 #: datetimeconverter/results/minute_out.title
 msgid "Minute"
 msgstr ""
@@ -78821,6 +79448,10 @@ msgstr ""
 msgid "Missing (n)"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Missing (NA)"
+msgstr ""
+
 #: batcheffect/results/feature_quality.columns.title
 #: clinicalheatmap/results/dataSummary/missingData.columns.title
 #: enhancedfactorvariable/results/results/nominalSummary.columns.title
@@ -78857,6 +79488,10 @@ msgstr ""
 #: jjsyndromicplot/ui[1][0][0]/missing.label
 #: segmentationmetrics/ui/advancedOptions/missing_handling.label
 msgid "Missing Data"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Missing data (original)"
 msgstr ""
 
 #: qualityoflife/ui[2][0].label
@@ -80276,7 +80911,6 @@ msgstr ""
 #: flexcomprisk/ui[1].label
 #: geemodel/ui[2].label
 #: hierarchicalpathology/ui[1][0][0].label
-#: lassocox/ui[2].label
 #: lassologistic/ui[2].label
 #: leaveonecenterout/ui[1].label
 #: mixedcox/ui[2].label
@@ -80288,6 +80922,10 @@ msgstr ""
 #: timeupdatedsurvival/ui[1][0].label
 #: timevarycox/ui[1].label
 msgid "Model Options"
+msgstr ""
+
+#: lassocox/ui[2].label
+msgid "Model options"
 msgstr ""
 
 #: clinicalprediction/results/overview.title
@@ -80547,6 +81185,10 @@ msgstr ""
 
 #: clinicalprediction/results/stability_plot.title
 msgid "Model Stability Visualization"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Model stability warnings"
 msgstr ""
 
 #: jsjplot/results/statistics.title
@@ -80810,6 +81452,14 @@ msgid ""
 "correlated predictors is important."
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid ""
+"Moderate datetime parsing success rate: {pct}% • {parsed} of {total} "
+"non-missing values were successfully parsed. • Review the failed samples in "
+"the Quality Assessment panel. • Consider specifying the format manually if "
+"auto-detection is incorrect."
+msgstr ""
+
 #: R/decision.b.R
 msgid "Moderate decrease in probability of disease"
 msgstr ""
@@ -80871,8 +81521,23 @@ msgstr ""
 msgid "Moderate increase in probability of disease"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Moderate missing data in original dataset: {missing} cases have at least one "
+"missing value. Report missing-data patterns and compare complete with "
+"incomplete cases. This analysis does not impute values."
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Moderate missing data were observed ({percent} of cases incomplete)."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Moderate optimization potential; consider threshold tuning"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Moderate Parsing Success Rate"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -81125,20 +81790,32 @@ msgstr ""
 msgid "Monte-Carlo permutation (X-tile-style)"
 msgstr ""
 
+#: datetimeconverter/options/extract_month.title
 #: datetimeconverter/results/month_out.title
 msgid "Month"
 msgstr ""
 
 #: datetimeconverter/ui[5][0][0][0]/extract_monthname.label
+#: datetimeconverter/ui[5][0][1][0]/monthname_out.label
 msgid "Month (name)"
 msgstr ""
 
 #: datetimeconverter/ui[5][0][0][0]/extract_month.label
+#: datetimeconverter/ui[5][0][1][0]/month_out.label
 msgid "Month (number)"
 msgstr ""
 
 #: datetimeconverter/results/monthname_out.title
 msgid "Month Name"
+msgstr ""
+
+#: datetimeconverter/options/extract_monthname.title
+#: datetimeconverter/options/monthname_out.title
+msgid "Month name"
+msgstr ""
+
+#: datetimeconverter/options/month_out.title
+msgid "Month number"
 msgstr ""
 
 #: mixedcox/options/timetypedata/mdy.title
@@ -81858,10 +82535,11 @@ msgstr ""
 msgid "Multiple cut-off evaluation"
 msgstr ""
 
-#: survivalcont/options/cutoff_method.title
-msgid "Multiple Cut-off Method"
+#: survivalcont/options/calculatedmulticut.title
+msgid "Multiple cut-off marker groups"
 msgstr ""
 
+#: survivalcont/options/cutoff_method.title
 #: survivalcont/ui[1][1][0]/cutoff_method.label
 msgid "Multiple cut-off method"
 msgstr ""
@@ -81872,6 +82550,10 @@ msgstr ""
 
 #: survivalcont/ui[1][1][0]/multiple_cutoffs.label
 msgid "Multiple cut-offs"
+msgstr ""
+
+#: R/summarydata.b.R
+msgid "Multiple distribution diagnostics"
 msgstr ""
 
 #: jjbetweenstats/ui[1][3].label
@@ -83242,10 +83924,6 @@ msgstr ""
 msgid "Negative values = tumor shrinkage (improvement)"
 msgstr ""
 
-#: timeinterval/ui[3]/remove_negative.label
-msgid "Negative-interval exclusion"
-msgstr ""
-
 #: nogoldstandard/results/test_metrics.columns.superTitle
 msgid "Negative-Response Probability"
 msgstr ""
@@ -83996,6 +84674,7 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 #: R/jjarcdiagram.b.R
+#: R/lassocox.b.R
 #: enhancedcrosstable/options/showNA/no.title
 #: gtsummary/options/includeMissing/no.title
 msgid "No"
@@ -84160,10 +84839,6 @@ msgid ""
 "planning and validation are still required."
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "No concerning collinearity detected."
-msgstr ""
-
 #: R/singlearm.b.R
 msgid ""
 "No confidence interval is computed for the cumulative-incidence median. "
@@ -84242,6 +84917,10 @@ msgstr ""
 msgid "No data are available. Load data before running the analysis."
 msgstr ""
 
+#: R/tableone.b.R
+msgid "No Data Available"
+msgstr ""
+
 #: R/decision.b.R
 #: R/jjridges.b.R
 msgid "No data available for analysis"
@@ -84297,6 +84976,13 @@ msgstr ""
 msgid ""
 "No evaluable patients: response rates cannot be reported. See the Important "
 "Information panel for why patients were not evaluable."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"No evaluated combination both satisfied the minimum group-size requirement "
+"and produced a finite log-rank statistic. Quantile-based cut-points are "
+"shown instead."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -84389,6 +85075,12 @@ msgstr ""
 
 #: R/lassocox.b.R
 msgid ""
+"No log-rank p-value or group hazard ratio is reported for this same-data "
+"split. Uniform scores cannot form two risk groups."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
 "No major concern was identified by these limited checks; standard Cox may "
 "also be appropriate."
 msgstr ""
@@ -84462,6 +85154,12 @@ msgstr ""
 msgid ""
 "No paired/subject variable specified. Using positional pairing (row order). "
 "Add a subject ID variable for correct paired analysis."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"No pairwise correlation reaches the warning threshold; this does not rule "
+"out multivariable linear dependencies."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -84554,6 +85252,19 @@ msgstr ""
 msgid ""
 "No scoring system could be built: the model selected zero predictors at the "
 "chosen lambda, so there are no coefficients to convert into points. %s"
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"No selected categorical variable could be tabulated. Choose the tableone, "
+"gtsummary or arsenal style for numeric measurements."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"No selected variable has recorded values in a supported storage type. Select "
+"at least one numeric, categorical, text or logical variable with recorded "
+"values."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -84666,6 +85377,12 @@ msgstr ""
 msgid "No Transformation"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"No universal C-index or events-per-variable threshold establishes "
+"calibration, transportability or clinical utility."
+msgstr ""
+
 #: treatmentswitching/options/censoringAssumption/no_unmeasured_confounding.title
 msgid "No Unmeasured Confounding"
 msgstr ""
@@ -84717,6 +85434,10 @@ msgstr ""
 msgid "No valid dates found for format detection in either column"
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid "No Valid Datetime Values Found"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid "No valid explanatory variables remain after removing constant predictors."
 msgstr ""
@@ -84733,18 +85454,16 @@ msgid ""
 "insufficient data in subtables or table structure."
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "No valid predictors after removing degenerate design-matrix columns."
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "No valid predictors remaining after model-matrix encoding."
-msgstr ""
-
 #: R/timeinterval.b.R
 msgid ""
 "No valid time intervals could be calculated; please verify start/end dates "
 "and selected format."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"No valid time intervals could be calculated. Check that the date format "
+"setting matches the data and that both date columns contain readable dates."
 msgstr ""
 
 #: R/reportcat.b.R
@@ -84892,6 +85611,13 @@ msgstr ""
 
 #: pathagreement/ui[5][0]/krippMethod/nominal.title
 msgid "Nominal (unordered categories)"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Nominal and ordered factors use treatment indicators. The first observed "
+"factor level is the reference, and indicators are selected separately rather "
+"than as a group."
 msgstr ""
 
 #: gsdesign/results/boundaryTable.columns.title
@@ -85307,6 +86033,7 @@ msgstr ""
 msgid "Non-terminal node that splits into further branches"
 msgstr ""
 
+#: R/lassocox.b.R
 #: R/lassologistic.b.R
 #: advancedbarplot/options/error_bars/none.title
 #: advancedbarplot/options/legend_position/none.title
@@ -85473,8 +86200,9 @@ msgstr ""
 
 #: R/tableone.b.R
 msgid ""
-"None of the selected variables has few enough distinct values for a "
-"frequency table. Choose the tableone, gtsummary or arsenal style instead."
+"None of the sample-size, missing-data or case-loss thresholds this analysis "
+"checks was crossed. These are descriptive screening heuristics, not "
+"validated clinical cutoffs or tests of statistical assumptions."
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -85564,6 +86292,17 @@ msgstr ""
 
 #: curemodels/ui[6].label
 msgid "Nonparametric Model Options (npcure)"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Nonzero columns in the full model"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Nonzero-column counts appear above the separate coefficient-path plot, not "
+"above this CV plot. Lambda tuning does not provide an independent "
+"performance estimate."
 msgstr ""
 
 #: qualityoflife/options/scoring_algorithm/norm_based.title
@@ -85797,6 +86536,7 @@ msgstr ""
 msgid "NOT assessed (enable Decision Curve Analysis)"
 msgstr ""
 
+#: R/lassocox.b.R
 #: R/lassologistic.b.R
 #: R/linechart.b.R
 #: R/waterfall.b.R
@@ -85829,6 +86569,12 @@ msgstr ""
 msgid "not calculated (needs both sensitivity and specificity)"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"not categorical; set category codes to Nominal or Ordinal, or use factor() "
+"in R"
+msgstr ""
+
 #: R/benford.b.R
 msgid "Not classified"
 msgstr ""
@@ -85839,6 +86585,10 @@ msgid ""
 "freedom, so it reproduces every observed table exactly and no residual can "
 "detect conditional dependence. Add a fourth test if you need to check this "
 "assumption."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Not computed"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -86061,6 +86811,12 @@ msgid ""
 "cubic splines for flexible calibration curves"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Notable case loss: {excluded} cases excluded; {n} retained. Compare excluded "
+"with included cases to assess potential bias."
+msgstr ""
+
 #: R/jjcorrmat.b.R
 msgid "Notable Correlations:"
 msgstr ""
@@ -86136,6 +86892,20 @@ msgstr ""
 msgid ""
 "Note: Ideally, 100-1000+ observations are recommended for reliable Benford's "
 "Law analysis."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Note: Listwise deletion was applied. The table below shows statistics for "
+"the {n} complete cases only. All displayed variables use the same "
+"complete-case denominator."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Note: Missing values are present but NOT excluded. Different variables may "
+"have different sample sizes (denominators) in the table below. Consider "
+"enabling missing-value exclusion for consistent denominators."
 msgstr ""
 
 #: R/jjbetweenstats.b.R
@@ -86486,6 +87256,10 @@ msgstr ""
 #: survival/results/survTable.columns.title
 #: survivalcont/results/survTable.columns.title
 msgid "Number at Risk"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Number at risk"
 msgstr ""
 
 #: survivalcont/ui[4][1][0]/risktable.label
@@ -86853,18 +87627,18 @@ msgid "Number of cross-validation folds"
 msgstr ""
 
 #: survivalcont/options/num_cutoffs.title
-msgid "Number of Cut-offs"
-msgstr ""
-
 #: survivalcont/ui[1][1][0]/num_cutoffs.label
 msgid "Number of cut-offs"
 msgstr ""
 
 #: highdimcox/ui[3][0]/cv_folds.label
-#: lassocox/options/nfolds.title
 #: lassologistic/options/nfolds.title
 #: treemedical/options/cv_folds.title
 msgid "Number of CV Folds"
+msgstr ""
+
+#: lassocox/options/nfolds.title
+msgid "Number of CV folds"
 msgstr ""
 
 #: qualitycontrol/options/replicate_days.title
@@ -86937,6 +87711,7 @@ msgstr ""
 msgid "Number of events or cases (optional)"
 msgstr ""
 
+#: R/classicalSurvivalPower.b.R
 #: classicalSurvivalPower/options/calculation_type/events.title
 #: comprehensiveSurvivalPower/options/calculation_type/events.title
 msgid "Number of Events Required"
@@ -87703,6 +88478,7 @@ msgstr ""
 msgid "Numerator marker for ratio calculation"
 msgstr ""
 
+#: R/tableone.b.R
 #: jjcoefstats/options/pValueDisplay/numeric.title
 msgid "Numeric"
 msgstr ""
@@ -87718,6 +88494,18 @@ msgstr ""
 #: directbinomial/options/eventOfInterest.description
 #: flexcomprisk/options/eventOfInterest.description
 msgid "Numeric code for the event of interest (primary event)"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Numeric Column May Not Be Dates"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Numeric Column May Not Be Unix Timestamps"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Numeric Format Selected For A Text Column"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -87774,6 +88562,17 @@ msgstr ""
 
 #: R/crosstable.b.R
 msgid "Numeric variables that look like coded categories"
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Numeric variables with fewer than 10 distinct values may be reported as "
+"categories by gtsummary but as measurements by tableone and arsenal. Set "
+"category codes to Nominal or Ordinal in jamovi, or factor() in R."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Numeric: one-unit increase"
 msgstr ""
 
 #: stereology/options/calculateNa.description
@@ -88768,10 +89567,12 @@ msgstr ""
 msgid "Only one group - nothing to compare"
 msgstr ""
 
-#: R/lassocox.b.R
+#: R/timeinterval.b.R
 msgid ""
-"Only one non-constant explanatory variable remains; LASSO selection is "
-"limited."
+"Only one interval could be calculated. No spread can be estimated from a "
+"single observation, so the standard deviation and the confidence interval "
+"are reported as NA, and the mean, median and range are all that one value. "
+"This is not a basis for any statistical statement."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -89460,10 +90261,6 @@ msgstr ""
 msgid "Optional normality testing and distribution diagnostics"
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "Optional Package Not Installed"
-msgstr ""
-
 #: jjsegmentedtotalbar/ui[0][3]/facet_var.label
 msgid "Optional Panels (e.g., by Site)"
 msgstr ""
@@ -89825,6 +90622,16 @@ msgid ""
 "modeling and output."
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Ordered factor: treatment indicators"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Ordered factors use categorical treatment coding, not polynomial trends: "
+"{vars}. The first observed level in the factor order is the reference."
+msgstr ""
+
 #: R/vartree.b.R
 msgid "Ordered progression of variable values (order matters)"
 msgstr ""
@@ -90009,6 +90816,10 @@ msgstr ""
 msgid "Original C-index"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Original Candidate Predictors"
+msgstr ""
+
 #: stagemigration/results/cifSummary.columns.title
 msgid "Original CIF (%)"
 msgstr ""
@@ -90032,6 +90843,10 @@ msgstr ""
 
 #: decisioncompare/options/od.title
 msgid "Original data"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Original dataset"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -90097,6 +90912,10 @@ msgstr ""
 
 #: lollipop/options/sortBy/original.title
 msgid "Original Order"
+msgstr ""
+
+#: lassocox/results/encoding.columns.title
+msgid "Original Predictor"
 msgstr ""
 
 #: stagemigration/results/transitionProbabilities.columns.title
@@ -90218,6 +91037,7 @@ msgstr ""
 msgid "OS Time"
 msgstr ""
 
+#: R/tableone.b.R
 #: enhancedfactorvariable/options/rareFactorLabel.default
 #: enhancedfrequency/options/rareCategoryLabel.default
 #: ihcthreshold/options/tissueType/other.title
@@ -90301,7 +91121,6 @@ msgid "Outbreak Investigation Type"
 msgstr ""
 
 #: R/clinicalscore.b.R
-#: R/lassocox.b.R
 #: bayesdca/ui[0][0].label
 #: clinicaldashboard/results/outcomeStats.columns.title
 #: competingsurvival/options/outcome.title
@@ -91110,7 +91929,6 @@ msgstr ""
 #: joinpoint/ui[2].label
 #: jrecode/ui[4].label
 #: jwaffle/ui[3].label
-#: lassocox/ui[4].label
 #: lassologistic/ui[6].label
 #: leaveonecenterout/ui[2].label
 #: lymphnoderatio/ui[2].label
@@ -91149,6 +91967,10 @@ msgstr ""
 msgid "Output Options"
 msgstr ""
 
+#: lassocox/ui[4].label
+msgid "Output options"
+msgstr ""
+
 #: chisqposttest/ui[3].label
 msgid "Output Panels"
 msgstr ""
@@ -91159,6 +91981,10 @@ msgstr ""
 
 #: jsummarytools/options/output_style.title
 msgid "Output Style"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Output styles"
 msgstr ""
 
 #: outcomeorganizer/options/outputTable.title
@@ -91194,12 +92020,12 @@ msgstr ""
 msgid "Output time type"
 msgstr ""
 
-#: datevalidator/options/timezone.title
-msgid "Output Timezone"
+#: survivalcont/options/timetypeoutput.title
+msgid "Output time unit"
 msgstr ""
 
-#: mixedcox/ui[7][3].label
-msgid "Output Variables"
+#: datevalidator/options/timezone.title
+msgid "Output Timezone"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -92730,6 +93556,13 @@ msgstr ""
 msgid "Pairwise Correction Method"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Pairwise correlation diagnostics are limited to 500 encoded columns to bound "
+"memory and computation. The fitted model still uses every retained column."
+msgstr ""
+
+#: R/lassocox.b.R
 #: jcorrelation/results/tests.title
 msgid "Pairwise Correlations"
 msgstr ""
@@ -93375,6 +94208,10 @@ msgid ""
 "Parametric: Use for normally distributed continuous data. Nonparametric: "
 "Best for skewed data or ordinal scales. Robust: Good when outliers are "
 "present. Bayesian: Provides strength of evidence"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Parsing Error"
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -94687,6 +95524,12 @@ msgstr ""
 msgid "Penalized Coefficients at Selected Lambda"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Penalized coefficients at the selected lambda, on the original predictor "
+"scale."
+msgstr ""
+
 #: spatialbayesiansurvival/options/spatial_precision_prior/pc_prior.title
 msgid "Penalized Complexity"
 msgstr ""
@@ -94761,7 +95604,10 @@ msgid "Penalized Hazard Ratio"
 msgstr ""
 
 #: R/lassocox.b.R
-msgid "Penalized LASSO coefficients at the selected lambda."
+msgid ""
+"Penalized hazard ratios describe fitted relative hazards, not event "
+"probabilities or causal effects. Ordinary post-selection p-values and "
+"confidence intervals are not reported."
 msgstr ""
 
 #: frailtysurvival/options/estimation_method/penalized_likelihood.title
@@ -94925,6 +95771,7 @@ msgstr ""
 msgid "Per-Stratum Standardized Ratios"
 msgstr ""
 
+#: R/tableone.b.R
 #: decisioncombine/results/goldFreqTable.columns.title
 #: dendrogram/results/clusterSummary.columns.title
 #: ihccluster/results/ratioClassificationTable.columns.title
@@ -96642,6 +97489,7 @@ msgstr ""
 
 #: multisurvival/ui[10][0]/person_time.label
 #: singlearm/ui[5][0]/person_time.label
+#: survivalcont/options/person_time.title
 msgid "Person-time metrics"
 msgstr ""
 
@@ -97147,6 +97995,10 @@ msgstr ""
 msgid "Please cite jamovi and the packages as given below."
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Please cite the packages and jamovi as referenced below."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "Please correct these issues before proceeding with analysis."
 msgstr ""
@@ -97163,6 +98015,10 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "Please install with:"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Please load a dataset before using Table One."
 msgstr ""
 
 #: R/waterfallrecist.b.R
@@ -97452,10 +98308,13 @@ msgstr ""
 #: surveysurvival/options/endplot.title
 #: survival/options/endplot.title
 #: survival/ui[4][2][0]/endplot.label
-#: survivalcont/options/endplot.title
 #: survivalcont/ui[4][1][0]/endplot.label
 #: survivalfeaturerank/options/endplot.title
 msgid "Plot End Time"
+msgstr ""
+
+#: survivalcont/options/endplot.title
+msgid "Plot end time"
 msgstr ""
 
 #: survivalfeaturerank/ui[3][0][0].label
@@ -99591,6 +100450,10 @@ msgstr ""
 msgid "Post-Intervention Value"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Post-LASSO Cox refit: {message}"
+msgstr ""
+
 #: consortdiagram/options/allocation_exclusions.title
 #: consortdiagram/ui[1][1][2].label
 msgid "Post-Randomization Exclusions"
@@ -99845,6 +100708,10 @@ msgstr ""
 msgid "Potential care bottleneck identified at '%s' stage."
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid "Potential Data Quality Issues"
+msgstr ""
+
 #: patientreported/results/response_patterns.columns.title
 msgid "Potential Issue"
 msgstr ""
@@ -99859,10 +100726,6 @@ msgstr ""
 msgid ""
 "Potential outliers flagged using the IQR method (values beyond "
 "Q1-1.5\\u{D7}IQR or Q3+1.5\\u{D7}IQR):"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "Potential predictors for selection (2 or more variables)"
 msgstr ""
 
 #: sigmametrics/results/costOfQuality.columns.title
@@ -101434,6 +102297,14 @@ msgstr ""
 msgid "Predictor Distribution by Class"
 msgstr ""
 
+#: lassocox/options/showEncoding.title
+msgid "Predictor encoding"
+msgstr ""
+
+#: lassocox/results/encoding.title
+msgid "Predictor Encoding"
+msgstr ""
+
 #: R/oddsratio.b.R
 msgid "Predictor Level Modeling:"
 msgstr ""
@@ -101560,6 +102431,12 @@ msgstr ""
 msgid "Predictor variables for model fitting."
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Predictor variance cannot be represented numerically. Rescale extreme "
+"numeric values before fitting."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Predictor Warning"
 msgstr ""
@@ -101580,6 +102457,18 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 msgid "Predictors"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Predictors contain infinite values: {vars}. Correct these values before "
+"fitting; these predictors have not been removed as constant."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Predictors contain only missing values: {vars}. Supply data or explicitly "
+"remove these predictors."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -101909,6 +102798,12 @@ msgstr ""
 
 #: populationhealth/options/population_type/preventive_care.title
 msgid "Preventive Care Population"
+msgstr ""
+
+#: datetimeconverter/ui[5][0][0][0].label
+#: datetimeconverter/ui[6][0][0][0].label
+#: datetimeconverter/ui[7][0][0][0].label
+msgid "Preview"
 msgstr ""
 
 #: datetimeconverter/ui[2][0].label
@@ -102397,6 +103292,13 @@ msgstr ""
 
 #: outcomeorganizer/options/eventPriority.title
 msgid "Priority Event Type"
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"Priority Event Type must be 1 or greater (it is {value}). Code 0 is the "
+"censored/baseline code, so giving it priority would make censoring outrank "
+"every event and remove them all."
 msgstr ""
 
 #: clinicalalerts/results/alertSummary.columns.title
@@ -103568,10 +104470,6 @@ msgstr ""
 
 #: stagemigration/options/cancerType/prostate.title
 msgid "Prostate Cancer"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "Protective"
 msgstr ""
 
 #: biomarkerdiscovery/options/data_type/proteomics.title
@@ -104747,6 +105645,9 @@ msgstr ""
 msgid "Quantity"
 msgstr ""
 
+#: datetimeconverter/options/extract_quarter.title
+#: datetimeconverter/options/quarter_out.title
+#: datetimeconverter/ui[7][0][1][0]/quarter_out.label
 #: datetimeconverter/results/quarter_out.title
 msgid "Quarter"
 msgstr ""
@@ -104886,6 +105787,10 @@ msgstr ""
 
 #: functionalsampling/results/randomness_test.columns.title
 msgid "R Statistic"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "R version"
 msgstr ""
 
 #: bayesianci/results/convergenceDiagnostics.columns.title
@@ -105287,7 +106192,6 @@ msgstr ""
 #: ihcadvanced/options/randomSeed.title
 #: ihccluster/options/seed.title
 #: illnessdeath/options/random_seed.title
-#: lassocox/options/random_seed.title
 #: lassologistic/options/random_seed.title
 #: leaveonecenterout/options/random_seed.title
 #: likelihoodratio/options/randomSeed.title
@@ -105316,7 +106220,6 @@ msgstr ""
 #: survival/options/seed.title
 #: survival/ui[3][2][0]/seed.label
 #: survivalbart/options/random_seed.title
-#: survivalcont/options/seed.title
 #: survivalcont/ui[8][0][0]/seed.label
 #: timedependentdca/options/random_seed.title
 #: trichotomousroc/options/random_seed.title
@@ -105325,11 +106228,14 @@ msgstr ""
 msgid "Random Seed"
 msgstr ""
 
+#: R/lassocox.b.R
 #: decisioncurve/ui[7][0]/seed.label
+#: lassocox/options/random_seed.title
 #: lassocox/ui[6][0].label
 #: nogoldstandard/ui[2][0]/seed.label
 #: outlierdetection/options/seed.title
 #: statsplot2/ui[2][0]/seed.label
+#: survivalcont/options/seed.title
 #: waterfall/options/seed.title
 #: waterfall/ui[2][1][1]/seed.label
 msgid "Random seed"
@@ -105352,14 +106258,14 @@ msgstr ""
 msgid "Random seed for bootstrap sampling (for reproducibility)."
 msgstr ""
 
-#: survivalcont/options/seed.description
-msgid ""
-"Random seed for Monte Carlo components of minimum-p-value and "
-"selection-adjusted cut-point calculations."
-msgstr ""
-
 #: likelihoodratio/options/randomSeed.description
 msgid "Random seed for reproducible bootstrap results"
+msgstr ""
+
+#: survivalcont/options/seed.description
+msgid ""
+"Random seed used to select candidate combinations when the minimum-P-value "
+"search space is too large for exhaustive evaluation."
 msgstr ""
 
 #: adaptivetrialdesign/options/seed_value.title
@@ -105883,9 +106789,12 @@ msgstr ""
 #: singlearm/options/rate_multiplier.title
 #: survival/options/rate_multiplier.title
 #: survival/ui[6][0][0]/rate_multiplier.label
-#: survivalcont/options/rate_multiplier.title
 #: survivalcont/ui[7][0][0]/rate_multiplier.label
 msgid "Rate Multiplier"
+msgstr ""
+
+#: survivalcont/options/rate_multiplier.title
+msgid "Rate multiplier"
 msgstr ""
 
 #: populationhealth/results/temporalTrendsTable.columns.title
@@ -106301,10 +107210,6 @@ msgstr ""
 msgid "Re-run the analysis"
 msgstr ""
 
-#: R/timeinterval.b.R
-msgid "Read as a spreadsheet day count, {value} is {date}."
-msgstr ""
-
 #: R/decisioncalculator.b.R
 msgid ""
 "Read the nomogram by drawing a line from the pre-test probability on the "
@@ -106681,6 +107586,7 @@ msgid "Recommendation:"
 msgstr ""
 
 #: R/decisiongraph.b.R
+#: R/tableone.b.R
 #: adaptivetrialdesign/results/regulatoryConsiderations.columns.title
 #: biomarkerdiscovery/results/generalizability_assessment.columns.title
 #: biomarkerdiscovery/results/regulatory_summary.columns.title
@@ -106854,6 +107760,10 @@ msgstr ""
 msgid "Recurrent Risk"
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid "Recursive cut-off search incomplete"
+msgstr ""
+
 #: dynamiccoeff/options/updating_method/recursive.title
 msgid "Recursive Estimation"
 msgstr ""
@@ -106918,6 +107828,10 @@ msgstr ""
 
 #: survivalcont/ui[3][0][0]/outcomeredefined.label
 msgid "Redefined Outcome Preview"
+msgstr ""
+
+#: survivalcont/options/outcomeredefined.title
+msgid "Redefined survival outcome"
 msgstr ""
 
 #: clinicalheatmap/options/colorPalette/Reds.title
@@ -107068,6 +107982,7 @@ msgstr ""
 
 #: door/options/refLevel.title
 #: door/ui[1]/refLevel.label
+#: lassocox/results/encoding.columns.title
 msgid "Reference Level"
 msgstr ""
 
@@ -108122,6 +109037,7 @@ msgid "Remove Low Variance Features"
 msgstr ""
 
 #: timeinterval/options/remove_negative.title
+#: timeinterval/ui[3]/remove_negative.label
 msgid "Remove negative intervals"
 msgstr ""
 
@@ -108203,11 +109119,45 @@ msgid "Removed {n} row(s) with missing diagnostic data"
 msgstr ""
 
 #: R/lassocox.b.R
+msgid "Removed constant candidate predictors: {vars}."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Removed constant design columns"
+msgstr ""
+
+#: R/lassocox.b.R
 msgid "Removed constant explanatory variables: {vars}"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Removed constant predictors"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Removed design columns constant in complete cases: {vars}."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Removed encoded columns constant in complete cases: {vars}."
 msgstr ""
 
 #: R/vartree.b.R
 msgid "Removing branches below certain conditions to simplify tree"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Removing negative intervals dropped {count} of {total} rows ({pct}%) whose "
+"end date fell before their start date. A negative interval is not an unusual "
+"measurement but an impossible one: at least one of the two dates in each of "
+"those rows is wrong. Those rows are dropped from the mean, the median and "
+"the total person-time, so the person-time denominator reported here covers "
+"fewer participants than you supplied. These dates were read with the "
+"\"{format}\" format; the usual causes are the start and end date columns "
+"being swapped for those rows, or a mis-detected day/month order, which flips "
+"only the rows whose day-of-month is 12 or less. Correct the dates at source "
+"rather than leaving them to this filter before reporting this person-time."
 msgstr ""
 
 #: riverplot/options/reorderEdges.title
@@ -108398,6 +109348,12 @@ msgstr ""
 msgid "Report Summary (Copy-Ready)"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Report the endpoint, candidate parameters, exclusions, coding, penalty rule, "
+"folds, software versions, and validation limitations."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "Report these estimates alongside the number at risk and the follow-up "
@@ -108439,6 +109395,10 @@ msgstr ""
 msgid "Reporting Options"
 msgstr ""
 
+#: classicalSurvivalPower/results/export_summary.title
+msgid "Reporting Summary"
+msgstr ""
+
 #: synopticcompleteness/results/byGroupTable.columns.title
 msgid "Reports"
 msgstr ""
@@ -108469,6 +109429,14 @@ msgstr ""
 msgid "Reproducibility Assessment"
 msgstr ""
 
+#: lassocox/options/showReproducibility.title
+msgid "Reproducibility details"
+msgstr ""
+
+#: lassocox/results/reproducibility.title
+msgid "Reproducibility Details"
+msgstr ""
+
 #: ihcheterogeneity/results/reproducibilitytable.columns.title
 msgid "Reproducibility Metric"
 msgstr ""
@@ -108476,9 +109444,14 @@ msgstr ""
 #: bbcplots/results/export_code.title
 #: economistplots/results/r_code_output.title
 #: ggprism/results/export_code.title
+#: lassocox/results/rCode.title
 #: latentbiomarker/results/rCode.title
 #: variablebiplot/results/rCode.title
 msgid "Reproducible R Code"
+msgstr ""
+
+#: lassocox/options/showRCode.title
+msgid "Reproducible R code"
 msgstr ""
 
 #: agepyramid/options/age_groups/reproductive.title
@@ -108539,7 +109512,6 @@ msgstr ""
 msgid "Required for spider plots (e.g., months from baseline)"
 msgstr ""
 
-#: R/lassocox.b.R
 #: R/lassologistic.b.R
 #: R/lollipop.b.R
 msgid "Required inputs:"
@@ -108573,6 +109545,12 @@ msgstr ""
 
 #: R/lassocox.b.R
 msgid "Required packages 'glmnet' and 'survival' not available"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Required packages are unavailable: {packages}. Reinstall or update the "
+"module before running this analysis."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -109471,6 +110449,7 @@ msgstr ""
 msgid "Results Summary"
 msgstr ""
 
+#: lassocox/options/showSummary.title
 #: lassologistic/options/showSummary.title
 msgid "Results summary"
 msgstr ""
@@ -109933,7 +110912,6 @@ msgstr ""
 msgid "Risk Distribution Summary"
 msgstr ""
 
-#: R/lassocox.b.R
 #: modelbuilder/results/riskScoreTable.columns.title
 msgid "Risk Factor"
 msgstr ""
@@ -110044,7 +111022,6 @@ msgstr ""
 msgid "Risk Group Survival Curves"
 msgstr ""
 
-#: lassocox/options/survival_plot.title
 #: multisurvival/results/riskGroupPlot.title
 msgid "Risk Group Survival Plot"
 msgstr ""
@@ -110136,10 +111113,6 @@ msgstr ""
 #: multisurvival/results/riskScoreHeading.title
 #: pcacox/results/riskScore.title
 msgid "Risk Score Analysis"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "Risk score calculation for model development"
 msgstr ""
 
 #: clinicalcalculators/options/calculator_type/risk_score.title
@@ -110256,6 +111229,7 @@ msgstr ""
 
 #: singlearm/ui[3][1][0]/risktable.label
 #: survival/ui[4][1][0]/risktable.label
+#: survivalcont/options/risktable.title
 msgid "Risk table"
 msgstr ""
 
@@ -110314,7 +111288,6 @@ msgstr ""
 #: multisurvival/options/risktable.title
 #: singlearm/options/risktable.title
 #: survival/options/risktable.title
-#: survivalcont/options/risktable.title
 msgid "Risktable"
 msgstr ""
 
@@ -110517,7 +111490,7 @@ msgid "RMST Time Horizon"
 msgstr ""
 
 #: survivalcont/options/rmst_tau.title
-msgid "RMST Time Horizon (τ)"
+msgid "RMST time horizon (τ)"
 msgstr ""
 
 #: qtwist/results/rmstComponents.columns.title
@@ -111403,6 +112376,13 @@ msgstr ""
 
 #: R/swimmerplot.b.R
 msgid "Rows excluded from analysis"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Rows missing time, outcome or a retained predictor are excluded. Infinite "
+"values and entirely missing predictors are rejected; constant predictors are "
+"reported and removed."
 msgstr ""
 
 #: outlierdetection/options/sampleSize.title
@@ -112316,9 +113296,18 @@ msgstr ""
 msgid "Save Utility Scores"
 msgstr ""
 
-#: lassocox/ui[4][0].label
 #: lassologistic/ui[6][0].label
 msgid "Save Variables"
+msgstr ""
+
+#: lassocox/ui[4][3].label
+msgid "Save variables"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Saved scores align with the original rows; excluded observations receive "
+"missing values. A valid empty model produces zero scores."
 msgstr ""
 
 #: ncvregcox/options/penalty/SCAD.title
@@ -112479,6 +113468,13 @@ msgid ""
 "of that encoded design column. It describes a one-SD change in the fitted "
 "linear predictor, not causal importance or selection stability; for a factor "
 "indicator it is not the category-versus-reference hazard ratio."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Scale-adjusted magnitude is |coefficient| multiplied by the encoded-column "
+"standard deviation. Path inclusion is not bootstrap selection frequency or "
+"evidence of stability."
 msgstr ""
 
 #: recurrentsurvival/options/reReg_model/sc_XCYH.title
@@ -113422,6 +114418,9 @@ msgstr ""
 msgid "Seaside"
 msgstr ""
 
+#: datetimeconverter/options/extract_second.title
+#: datetimeconverter/options/second_out.title
+#: datetimeconverter/ui[6][0][1][0]/second_out.label
 #: datetimeconverter/results/second_out.title
 msgid "Second"
 msgstr ""
@@ -113742,6 +114741,13 @@ msgstr ""
 msgid "Select Analysis Type"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Select and copy the text above for your manuscript. Counts refer to rows, "
+"not verified unique patients; repeated records are not deduplicated. Edit as "
+"needed for your specific reporting requirements."
+msgstr ""
+
 #: bbcplots/options/bbc_colors.description.ui
 msgid "Select BBC standard colors or create custom color schemes."
 msgstr ""
@@ -113845,6 +114851,19 @@ msgstr ""
 msgid "Select numeric variable for segment values."
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Select numeric, ordinal, categorical, text or logical variables to include "
+"in Table One."
+msgstr ""
+
+#: tableone/options/vars.description.jamovi
+msgid ""
+"Select numeric, ordinal, categorical, text or logical variables. Unsupported "
+"storage types and all-missing variables are omitted before missing-value "
+"exclusion."
+msgstr ""
+
 #: R/oddsratio.b.R
 msgid ""
 "Select one binary outcome, identify its positive/event level, and add one or "
@@ -113897,6 +114916,13 @@ msgstr ""
 
 #: multisurvival/ui[7][0][1].label
 msgid "Select Stratification Variables"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Select strictly positive follow-up time, a binary outcome with event and "
+"censored levels, and predictors that yield at least two usable encoded "
+"columns."
 msgstr ""
 
 #: R/decision.b.R
@@ -114160,10 +115186,6 @@ msgstr ""
 msgid "Select the typeface for chart text elements."
 msgstr ""
 
-#: tableone/options/vars.description.jamovi
-msgid "Select the variables to include in the table."
-msgstr ""
-
 #: bbcplots/options/chart_type.description.jamovi
 msgid "Select the visualization type for your data."
 msgstr ""
@@ -114271,6 +115293,7 @@ msgstr ""
 #: grouplasso/results/groupSummary.columns.title
 #: grouplasso/results/coefficients.columns.title
 #: ihccluster/results/silhouetteStats.columns.title
+#: lassocox/results/encoding.columns.title
 #: mixedeffectscox/results/modelComparison.columns.title
 #: pcacox/results/pcaSummary.columns.title
 #: plscox/results/componentSelection.columns.title
@@ -114323,6 +115346,10 @@ msgstr ""
 msgid "Selected Lambda"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Selected lambda"
+msgstr ""
+
 #: ihcadvanced/results/markerOptimization.columns.title
 msgid "Selected Markers"
 msgstr ""
@@ -114331,10 +115358,18 @@ msgstr ""
 msgid "Selected Model Details"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Selected Original Predictors"
+msgstr ""
+
 #: R/oddsratio.b.R
 msgid ""
 "Selected positive outcome level '{level}' not found in data. Available "
 "levels: {levels}"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Selected Predictor Columns"
 msgstr ""
 
 #: decisioncurve/options/selectedThresholds.title
@@ -114345,11 +115380,17 @@ msgstr ""
 msgid "Selected Value"
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid ""
+"Selected variable {name} was not found in the dataset. • The column may have "
+"been renamed or removed. • Please select a different variable from the left "
+"panel. • Available variables: {available}"
+msgstr ""
+
 #: R/oddsratio.b.R
 msgid "Selected variable(s) not found in the data: {variables}."
 msgstr ""
 
-#: R/lassocox.b.R
 #: highdimcox/results/selectedVariables.title
 #: lassologistic/results/coefficients.title
 #: ncvregcox/results/selected_variables.title
@@ -114414,10 +115455,6 @@ msgstr ""
 #: highdimcox/results/stabilityResults.columns.title
 #: sparsegrouplasso/results/stabilityResults.columns.title
 msgid "Selection Probability"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "Selection Proportion"
 msgstr ""
 
 #: biomarkerdiscovery/results/feature_selection_summary.columns.title
@@ -115876,6 +116913,18 @@ msgstr ""
 
 #: ihcpredict/options/showAlternatives.title
 msgid "Show Alternative Diagnoses"
+msgstr ""
+
+#: classicalSurvivalPower/options/export_results.description.jamovi
+msgid ""
+"Show an on-screen summary of the power analysis result, for copying into a "
+"protocol or report."
+msgstr ""
+
+#: classicalSurvivalPower/options/export_power_curve.description.jamovi
+msgid ""
+"Show an on-screen summary of the power curve, for copying into a protocol or "
+"report."
 msgstr ""
 
 #: mixedcox/options/showExplanations.title
@@ -117504,7 +118553,6 @@ msgid "Show Method Comparison"
 msgstr ""
 
 #: clinicalscore/options/showExplanations.title
-#: lassocox/options/showExplanations.title
 #: nonparametric/options/show_explanations.title
 #: nonparametric/ui[10][0]/show_explanations.label
 #: simonmakuch/ui[9][0][0]/showExplanations.label
@@ -118363,10 +119411,6 @@ msgstr ""
 #: nonparametric/options/show_interpretation.title
 #: nonparametric/ui[10][0]/show_interpretation.label
 msgid "Show Result Interpretation"
-msgstr ""
-
-#: lassocox/options/showSummary.title
-msgid "Show Results Summary"
 msgstr ""
 
 #: conditionalsurvival/options/showTable.title
@@ -119265,6 +120309,13 @@ msgstr ""
 #: partialcorrelation/options/showZeroOrder.title
 #: partialcorrelation/ui[1][2]/showZeroOrder.label
 msgid "Show zero-order correlations"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"Showing {shown} of {total} paths on the original scale, ranked by summed "
+"absolute coefficients (not clinical importance). Long legend labels are "
+"abbreviated."
 msgstr ""
 
 #: R/decision.b.R
@@ -120361,6 +121412,14 @@ msgid ""
 "detect)"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Small final sample size (N = {n}). Each case represents more than 3 "
+"percentage points of the total. Percentages in sparse categories can be "
+"unstable and individual cases may be identifiable. Report counts alongside "
+"percentages."
+msgstr ""
+
 #: R/kappaSizePower.b.R
 msgid "Small kappa difference."
 msgstr ""
@@ -120401,6 +121460,13 @@ msgstr ""
 msgid ""
 "Small sample size (n<50): Results provide preliminary evidence but should be "
 "confirmed in larger studies."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Small sample size (n={n}). Confidence intervals may be very wide and "
+"unreliable with fewer than 20 observations. Consider collecting more data or "
+"interpreting results cautiously."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -120816,6 +121882,13 @@ msgstr ""
 msgid "Some censoring values not recognised"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Some frequency tables could not be produced. Review the Not tabulated "
+"details below. Supplementary summaries and copy-ready text are withheld "
+"because the output is incomplete."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "Some groups have zero observations"
 msgstr ""
@@ -120834,6 +121907,23 @@ msgstr ""
 msgid ""
 "Some rows could not be computed ({detail}). Empty cells mean the model could "
 "not be fitted, not that it performed poorly."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Some rows may have been entered with the day and month the other way round "
+"from the rest of this column. {count} of {total} rows read as a valid date "
+"under both \"{format}\" and \"{swapped}\"; the other {others} can only be "
+"read as \"{format}\", which is how the format was chosen. Those two groups "
+"should have the same follow-up on average, because the day of the month has "
+"nothing to do with how long a patient is followed - but here the ambiguous "
+"rows run at a median of {medianamb} days against {medianref} days for the "
+"rest (rank-sum p = {p}), which is what a mis-typed day/month order looks "
+"like. Check rows {rows} first: the largest of them spans {examplechosen} "
+"days as read and {exampleswapped} days with the day and month swapped. Dates "
+"typed in two different orders in one column parse without error and stay "
+"positive, so nothing else on this page can see them, and the total "
+"person-time is wrong by however much those rows are wrong."
 msgstr ""
 
 #: R/jjsegmentedtotalbar.b.R
@@ -121092,10 +122182,6 @@ msgstr ""
 msgid "Sparse Cell Counts"
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "Sparse coefficient estimation"
-msgstr ""
-
 #: package/analyses/lassocox.menuSubtitle
 #: lassocox/options.menuSubtitle
 msgid "Sparse Cox model development with cross-validated L1 penalization."
@@ -121140,6 +122226,17 @@ msgstr ""
 
 #: plscox/options/sparse_pls.title
 msgid "Sparse PLS"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"Sparse strata detected: %s. Strata with fewer than 10 patients or 3 events "
+"provide limited information; interpret the pooled hazard ratio and "
+"proportional-hazards assessment cautiously."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "Sparse strata in stratified Cox model"
 msgstr ""
 
 #: survivalbart/options/sparse_prior.title
@@ -121944,9 +123041,10 @@ msgstr ""
 
 #: survivalcont/options/rmst_tau.description
 msgid ""
-"Specify the time horizon for RMST calculation. If left as 0, will use 75th "
-"percentile  of observed survival times. This represents the maximum "
-"follow-up time for RMST calculation."
+"Specify the time horizon for RMST calculation. If left as 0, uses the 75th "
+"percentile of observed survival times, bounded by the maximum follow-up "
+"supported in every displayed group. This is a common descriptive horizon, "
+"not the maximum observed follow-up."
 msgstr ""
 
 #: multisurvival/options/time_intervals.description
@@ -122837,6 +123935,10 @@ msgstr ""
 msgid "Standard Cox (all variables)"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Standard Cox on all variables: {message}"
+msgstr ""
+
 #: R/lollipop.b.R
 #: advancedbarplot/options/error_bars/sd.title
 #: ggprism/options/error_bars/sd.title
@@ -123070,7 +124172,6 @@ msgid "Standardize predictors before PCA"
 msgstr ""
 
 #: grouplasso/options/standardize.title
-#: lassocox/options/standardize.title
 #: ncvregcox/options/standardize.title
 #: patientsimilarity/options/scaleVars.title
 #: sparsegrouplasso/options/standardize_vars.title
@@ -123237,6 +124338,12 @@ msgstr ""
 
 #: swimmerplot/results/timelineData.columns.title
 msgid "Start"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"Start date column contains only missing values; cannot calculate time "
+"intervals."
 msgstr ""
 
 #: jiwillsurvive/options/start_date_var.title
@@ -125017,7 +126124,6 @@ msgstr ""
 #: survival/ui[3][0][0][4][0].label
 #: survivalbart/options/strata.title
 #: survivalbart/ui[0][3].label
-#: survivalcont/options/strata_variable.title
 #: survivalcont/ui[6][0][0][2][0].label
 #: survivalmodelvalidation/options/stratification_var.title
 #: survivalmodelvalidation/ui[0][4].label
@@ -125027,6 +126133,10 @@ msgstr ""
 #: vusanalysis/options/stratify_by.title
 #: vusanalysis/ui[14][0].label
 msgid "Stratification Variable"
+msgstr ""
+
+#: survivalcont/options/strata_variable.title
+msgid "Stratification variable"
 msgstr ""
 
 #: clinicalprediction/options/stratify_var.title
@@ -125451,6 +126561,10 @@ msgstr ""
 
 #: R/oddsratio.b.R
 msgid "Strong warning"
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "Strong Warning"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -126160,6 +127274,12 @@ msgstr ""
 msgid "Substantial"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Substantial missing data were present ({percent} of cases with at least one "
+"missing value)."
+msgstr ""
+
 #: advancedbarplot/options/subtitle_text.title
 #: jjtreemap/ui[2][0][0]/subtitle.label
 msgid "Subtitle"
@@ -126303,6 +127423,14 @@ msgstr ""
 msgid ""
 "Summarise continuous variables as median (Q1, Q3) rather than mean (SD). Use "
 "for skewed measurements. Applies to the 'tableone' style only."
+msgstr ""
+
+#: classicalSurvivalPower/options/export_power_curve.title
+msgid "Summarise Power Curve for Reporting"
+msgstr ""
+
+#: classicalSurvivalPower/options/export_results.title
+msgid "Summarise Results for Reporting"
 msgstr ""
 
 #: agreement/results/summary.title
@@ -126861,10 +127989,6 @@ msgid ""
 "(exponential assumption). Other choices are not yet implemented."
 msgstr ""
 
-#: R/lassocox.b.R
-msgid "Supports model development; it does not establish clinical utility"
-msgstr ""
-
 #: pheval/options/test_supremum.title
 #: pheval/ui[2][0]/test_supremum.label
 msgid "Supremum Test"
@@ -126982,14 +128106,30 @@ msgstr ""
 msgid "Survey-Weighted Survival Summary"
 msgstr ""
 
+#: package/analyses/singlearm.menuGroup
+#: package/analyses/survival.menuGroup
+#: package/analyses/multisurvival.menuGroup
+#: package/analyses/oddsratio.menuGroup
+#: package/analyses/timeinterval.menuGroup
+#: package/analyses/datetimeconverter.menuGroup
+#: package/analyses/outcomeorganizer.menuGroup
+#: package/analyses/lassocox.menuGroup
+#: datetimeconverter/options.menuGroup
 #: jiwillsurvive/results/survivalTable.columns.title
 #: jiwillsurvive/results/kmTable.columns.title
+#: lassocox/options.menuGroup
 #: marginalrecurrent/results/survivalFunction.columns.title
+#: multisurvival/options.menuGroup
+#: oddsratio/options.menuGroup
+#: outcomeorganizer/options.menuGroup
 #: semimarkov/results/reliabilityAnalysis.columns.title
 #: simonmakuch/results/survivalEstimates.columns.title
+#: singlearm/options.menuGroup
+#: survival/options.menuGroup
 #: survival/results/survTable.columns.title
 #: survivalcont/results/survTable.columns.title
 #: survivalcont/results/multipleSurvTable.columns.title
+#: timeinterval/options.menuGroup
 msgid "Survival"
 msgstr ""
 
@@ -127101,18 +128241,12 @@ msgstr ""
 msgid "Survival Analysis by Clusters"
 msgstr ""
 
-#: survivalcont/ui.title
-msgid "Survival Analysis for Continuous Explanatory"
-msgstr ""
-
-#: survivalcont/results.title
-msgid "Survival Analysis for Continuous Explanatory Variable"
-msgstr ""
-
 #: package/analyses/survivalcont.title
 #: package/analyses/survivalcont.menuTitle
 #: survivalcont/options.title
-msgid "Survival Analysis for Continuous Variable"
+#: survivalcont/ui.title
+#: survivalcont/results.title
+msgid "Survival Analysis for Continuous Explanatory Variable"
 msgstr ""
 
 #: outcomeorganizer/results/glossary.title
@@ -127278,6 +128412,12 @@ msgstr ""
 msgid "Survival Curves Plot"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Survival curves split the development sample at its median score. This "
+"data-dependent split is descriptive and is not a validated clinical cutoff."
+msgstr ""
+
 #: concordanceindex/results/riskGroupKMPlot.description
 msgid "Survival curves stratified by predictor quantiles"
 msgstr ""
@@ -127347,7 +128487,7 @@ msgid "Survival Endpoints"
 msgstr ""
 
 #: survivalcont/options/cutp.title
-msgid "Survival Estimate Time Points"
+msgid "Survival estimate time points"
 msgstr ""
 
 #: progressionsurvival/results/survival_estimates.title
@@ -127787,8 +128927,11 @@ msgstr ""
 #: multisurvival/options/analysistype.title
 #: singlearm/options/analysistype.title
 #: survival/options/analysistype.title
-#: survivalcont/options/analysistype.title
 msgid "Survival Type"
+msgstr ""
+
+#: survivalcont/options/analysistype.title
+msgid "Survival type"
 msgstr ""
 
 #: conditionalinference/ui[0][0].label
@@ -127802,16 +128945,16 @@ msgstr ""
 msgid "Survival Variables (Cox Model)"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "survival version"
+msgstr ""
+
 #: pcacox/options/survival_weighting.title
 msgid "Survival-Based Weighting"
 msgstr ""
 
 #: ihcsurvival/ui[1][0][0]/prognosticClustering.label
 msgid "Survival-optimized patient grouping (groups patients by survival risk)"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "Survival/follow-up time (continuous, positive values)"
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -127956,16 +129099,8 @@ msgstr ""
 msgid "SurvivalExtraD"
 msgstr ""
 
-#: package/analyses/singlearm.menuGroup
-#: package/analyses/survival.menuGroup
 #: package/analyses/survivalcont.menuGroup
-#: package/analyses/multisurvival.menuGroup
-#: package/analyses/oddsratio.menuGroup
-#: package/analyses/timeinterval.menuGroup
-#: package/analyses/datetimeconverter.menuGroup
-#: package/analyses/outcomeorganizer.menuGroup
 #: package/analyses/competingsurvival.menuGroup
-#: package/analyses/lassocox.menuGroup
 #: package/analyses/timeroc.menuGroup
 #: package/analyses/relativesurvival.menuGroup
 #: package/analyses/highdimcox.menuGroup
@@ -127987,34 +129122,32 @@ msgstr ""
 #: adaptivelasso/options.menuGroup
 #: competingsurvival/options.menuGroup
 #: conditionalsurvival/options.menuGroup
-#: datetimeconverter/options.menuGroup
 #: datevalidator/options.menuGroup
 #: firthregression/options.menuGroup
 #: groomecompare/options.menuGroup
 #: grouplasso/options.menuGroup
 #: highdimcox/options.menuGroup
-#: lassocox/options.menuGroup
 #: lassointro/options.menuGroup
-#: multisurvival/options.menuGroup
 #: ncvregcox/options.menuGroup
-#: oddsratio/options.menuGroup
-#: outcomeorganizer/options.menuGroup
 #: pcacox/options.menuGroup
 #: plscox/options.menuGroup
 #: relativesurvival/options.menuGroup
 #: rpasurvival/options.menuGroup
-#: singlearm/options.menuGroup
 #: sparsegrouplasso/options.menuGroup
-#: survival/options.menuGroup
 #: survivalPower/options.menuGroup
 #: survivalcont/options.menuGroup
-#: timeinterval/options.menuGroup
 #: timeroc/options.menuGroup
 msgid "SurvivalT"
 msgstr ""
 
 #: multisurvival/options/sty/t3.title
 msgid "survminer forestplot"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"survminer is unavailable. Survival curves use the base-R fallback without a "
+"risk table."
 msgstr ""
 
 #: stereology/results/groupComparison.columns.title
@@ -128411,6 +129544,40 @@ msgstr ""
 msgid "Table One Output (tableone)"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Table One summarizes baseline characteristics of {n} case. Variables "
+"included {variables}. {missing}"
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Table One summarizes baseline characteristics of {n} cases. Variables "
+"included {variables}. {missing}"
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Table One summarizes baseline characteristics of the {n} case with complete "
+"data for all listed variables (of {screened} screened). Variables included "
+"{variables}. {missing}"
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Table One summarizes baseline characteristics of the {n} cases with complete "
+"data for all listed variables (of {screened} screened). Variables included "
+"{variables}. {missing}"
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Table One summarizes characteristics of the overall cohort, such as "
+"demographics, tumor grade and laboratory measurements. It does not stratify "
+"by group or compute p-values, confidence intervals or standardized mean "
+"differences."
+msgstr ""
+
 #: jvisr/options/analysis_type/tableone.title
 msgid "Table One Summary"
 msgstr ""
@@ -128468,6 +129635,14 @@ msgstr ""
 
 #: tableone/options/sty/t1.title
 msgid "tableone (Standard medical format)"
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"tableone: continuous variables as mean (SD), or median (Q1, Q3) when "
+"requested; categorical variables as N (percent). Missingness is shown as a "
+"percentage column. Only the second level of a binary factor is displayed, "
+"with that level named."
 msgstr ""
 
 #: adaptivelasso/ui[5].label
@@ -130577,6 +131752,33 @@ msgstr ""
 msgid "The {} was conducted to compare groups."
 msgstr ""
 
+#: R/timeinterval.b.R
+msgid ""
+"The {landmark} landmark excluded no participants, because it is only "
+"{share}% of the median follow-up in these data ({median} {unit}). It still "
+"subtracted {amount} from every interval, so every duration and the total "
+"person-time below are that much smaller than the follow-up observed. Check "
+"that the landmark is expressed in the same unit as the results ({unit}): "
+"entering a value meant as months while the output unit is days is the usual "
+"cause."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"The {landmark} landmark is later than the median follow-up in these data "
+"({median} {unit}), so more than half the cohort could not reach it and "
+"{excluded} of {total} observations were excluded. What remains is a subgroup "
+"defined by having been followed to the landmark, and the total person-time "
+"above is the denominator for that subgroup only: a rate computed from it "
+"answers \"among those still under observation at {amount}, how often did "
+"events occur\", not the same question for the cohort you enrolled. This "
+"analysis has no event indicator, so it cannot tell you whether the excluded "
+"participants had short follow-up because they died early or simply because "
+"they were enrolled recently - check that before interpreting the selection. "
+"Report the landmark, the number excluded and the reason alongside any rate "
+"taken from this analysis."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "The {rule} rule retained no predictor columns. The valid empty model has "
@@ -130606,6 +131808,12 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "The %s variance estimate was negative and has been truncated to zero."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"The 1-SE rule selects the most regularized value within one standard error "
+"of the minimum and may select no predictors."
 msgstr ""
 
 #: R/benford.b.R
@@ -130673,10 +131881,6 @@ msgstr ""
 
 #: R/swimmerplot_html.R
 msgid "The analysis will be re-run with your settings."
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "The analysis will provide:"
 msgstr ""
 
 #: advancedSurvivalPower/options/loss_followup.description
@@ -130770,6 +131974,13 @@ msgid ""
 "less extreme prevalence, or raise the significance level."
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid ""
+"The candidate space contains %s cut-off combinations. A reproducible random "
+"sample of %d unique combinations was evaluated using seed %d. The reported "
+"solution is approximate and must be validated independently."
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid ""
 "The candidate-rule ranking is a descriptive argmax over observed Youden's J "
@@ -130809,6 +132020,12 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "The Clinical Application Metrics table reports the PPV at %s."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"The coefficient summary is a horizontal bar plot: the horizontal axis shows "
+"penalized coefficients and the vertical axis shows selected encoded columns."
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -130856,6 +132073,12 @@ msgstr ""
 
 #: effectsize/options/dep.description
 msgid "The continuous outcome variable"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"The converted dates span more than 100 years, which usually means the column "
+"mixes two date formats."
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -131114,6 +132337,12 @@ msgid ""
 "new, faster, or less expensive test compared to the gold standard."
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"The displayed C-index is apparent development performance. Validate the "
+"entire modeling process before considering clinical use."
+msgstr ""
+
 #: R/decision.b.R
 msgid ""
 "The displayed confidence intervals (95% CI) are calculated from your study "
@@ -131182,6 +132411,13 @@ msgid ""
 "silently invert calibration and AUC interpretation."
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"The first observed level in the supplied factor order is the reference; "
+"character levels are sorted. Global and custom contrasts are overridden. "
+"Indicators are penalized and selected separately, not as whole factors."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "The fitted high-positive class contains {proportion}% of analyzed cases. "
@@ -131225,14 +132461,6 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "The following patients lack baseline (time = 0) measurements:"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid ""
-"The following required packages are not installed: {pkgs}\n"
-"\n"
-"Please install them using:\n"
-"{cmd}"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -131357,6 +132585,13 @@ msgid ""
 "each test before interpreting this ranking."
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"The horizontal axis is log lambda; the vertical axis is cross-validated "
+"partial-likelihood deviance. Lower deviance is better for this tuning "
+"criterion."
+msgstr ""
+
 #: R/summarydata.b.R
 msgid ""
 "The inline distribution plots could not be rendered, so a numeric summary "
@@ -131379,6 +132614,14 @@ msgstr ""
 
 #: R/singlearm.b.R
 msgid "The KMunicate plot"
+msgstr ""
+
+#: R/classicalSurvivalPower.b.R
+msgid ""
+"The Lachin-Foulkes method cannot perform the '{calculation}' calculation. "
+"Select the Schoenfeld (events-based) method for this calculation type, or "
+"keep Lachin-Foulkes and choose 'Sample Size from Power' or 'Power from "
+"Sample Size' instead."
 msgstr ""
 
 #: singlearm/options/landmark.description
@@ -131485,6 +132728,15 @@ msgstr ""
 msgid "The linear relationship assumption appears reasonable."
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid ""
+"The log-rank p above is EXPLORATORY: the cut-points were selected from these "
+"same data, so it is the largest of many statistics reported as a single test "
+"and is optimistic. No selection-adjusted p-value is reported: a single-split "
+"maximally selected-rank test does not adjust a multiple-cutoff procedure. "
+"Validate every cut-point in independent data before clinical use."
+msgstr ""
+
 #: simonmakuch/options/timeDepVariable.description
 msgid ""
 "The main time-dependent variable of interest (e.g., treatment status, "
@@ -131573,6 +132825,12 @@ msgid ""
 "KMunicate-style plot manages its own y-axis."
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"The minimum-error and 1-SE rules are tuning choices. An empty model selected "
+"by the requested rule is preserved."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "The model assumes conditional independence within each latent class. A large "
@@ -131605,7 +132863,7 @@ msgid ""
 msgstr ""
 
 #: R/lassocox.b.R
-msgid "The model selected {nSelected} of {nTotal} variables: {varList}."
+msgid "The model selected {nSelected} of {nTotal} encoded columns: {varList}."
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -131790,6 +133048,12 @@ msgid ""
 "analysis."
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"The path legend uses a compact layout and abbreviates long names. Predictor "
+"encoding lists the complete design-column names."
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid ""
 "The pattern-type and statistic filters affect the plots only. The "
@@ -131817,6 +133081,12 @@ msgstr ""
 msgid ""
 "The period over which participants are recruited, in years. Only used for "
 "complex designs."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"The PH diagnostic uses an exploratory unpenalized refit of selected columns. "
+"It is not a test of post-selection inference for the penalized estimator."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -131921,6 +133191,10 @@ msgstr ""
 msgid ""
 "The probability that a patient will move from one health state to another "
 "during a specific time period."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "The proportional-hazards diagnostic did not complete cleanly: {message}"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -132039,6 +133313,13 @@ msgstr ""
 msgid "the same hazard"
 msgstr ""
 
+#: R/timeinterval.b.R
+msgid ""
+"The same variable ({variable}) is selected as both the start and the end "
+"date, so every interval is exactly zero and the total person-time is zero. "
+"Select the follow-up or event date as the End Date Variable."
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid "the sample mean"
 msgstr ""
@@ -132060,6 +133341,12 @@ msgid ""
 "study-specific statistical analysis plan."
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"The score is the sum of encoded predictor values multiplied by their "
+"penalized coefficients. Higher scores indicate higher fitted hazard."
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid ""
 "The score-to-risk lookup table maps each possible total score to the "
@@ -132074,6 +133361,12 @@ msgstr ""
 msgid ""
 "The selected cross-validation rule produced a valid empty model. No "
 "less-penalized model was substituted."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"The selected lambda and the full-data coefficients come from the same fitted "
+"path, with Breslow handling of tied event times."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -132145,6 +133438,12 @@ msgid ""
 "The sensitivity and specificity quoted at the selected cutpoint are a "
 "separate matter: those are optimistic, because that cutpoint was searched "
 "for on these same data."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"The separate coefficient-path plot shows coefficients against log lambda, "
+"with full-model nonzero counts on its upper axis."
 msgstr ""
 
 #: R/linechart.b.R
@@ -132249,6 +133548,25 @@ msgid ""
 "coding for response categories. Milestone markers show key events, and "
 "summary statistics provide overall study metrics including person-time "
 "analysis and response rates."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"The Table One summary was computed but could not be formatted for display: "
+"{error}. Try another table style, or deselect variables with unusual storage "
+"types."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"The tableone median option is disabled: numeric measurements are reported as "
+"mean (SD) in that style."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"The tableone median option is enabled: numeric measurements are reported as "
+"median (Q1, Q3) in that style."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -132374,6 +133692,13 @@ msgstr ""
 msgid ""
 "The user-supplied population prevalence is used, not the prevalence observed "
 "in this sample."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"The UTC timezone setting applies only to the \"YYYY-MM-DD HH:MM:SS\" format, "
+"the only one carrying a time of day. These dates were read as \"{format}\", "
+"so they are calendar days and the timezone has no effect on the intervals."
 msgstr ""
 
 #: eurostatmap/options/geo_var.description.jamovi
@@ -132546,6 +133871,12 @@ msgid ""
 "group."
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"These are descriptive screening heuristics, not validated clinical cutoffs "
+"or tests of statistical assumptions."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "These are fixed-prior penalized-EM point estimates, not posterior summaries. "
@@ -132572,6 +133903,12 @@ msgid ""
 "These cases carry a level that codes missingness rather than a result. They "
 "are excluded rather than counted as negative, which would have biased "
 "sensitivity and specificity."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"These curves do not estimate an individual patient's absolute risk. External "
+"use requires a frozen prediction model and independent validation."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -132764,6 +134101,12 @@ msgid ""
 "assessment."
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"This analysis describes the overall cohort only. It does not compare groups "
+"or compute p-values, confidence intervals or standardized mean differences."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "This analysis estimates latent-class parameters or describes agreement with "
@@ -132793,6 +134136,12 @@ msgid ""
 "group's total. The '%s' category showed the most balanced distribution "
 "across all segments, indicating relatively equal representation of different "
 "outcomes within that group."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"This analysis fits a sparse development model. Its apparent performance and "
+"median-split survival curves require validation before clinical use."
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -132828,12 +134177,6 @@ msgstr ""
 msgid ""
 "This analysis needs ONE ROW PER LESION PER VISIT. Assign these four "
 "variables to begin:"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid ""
-"This analysis performs variable selection in survival analysis using the "
-"Lasso penalty."
 msgstr ""
 
 #: R/markovmultistate.b.R
@@ -132875,8 +134218,9 @@ msgstr ""
 msgid ""
 "This assessment is advisory and cannot establish model adequacy. The "
 "analysis proceeds regardless of the verdict. Green = no issue detected by "
-"this limited check, Yellow = proceed with caution, Red = results may be "
-"highly unstable or misspecified."
+"this limited check, Gray = adequacy not determined by this diagnostic, "
+"Yellow = proceed with caution, Red = results may be highly unstable or "
+"misspecified."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -132893,6 +134237,51 @@ msgid ""
 "does not include the modeling process. Use bootstrap optimism correction or "
 "nested cross-validation that repeats all preprocessing and tuning, followed "
 "by external validation before clinical use."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"This column can be read two ways and both fit: {a} and {b} each parsed more "
+"than 80% of the values but produced different dates. • {a} was used. • Check "
+"the preview, and set DateTime Format explicitly if that reading is wrong."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"This column can be read two ways and both fit: {a} gives {aDate} while {b} "
+"gives {bDate} for the value {value}. • {a} was used. • Check the preview, "
+"and set DateTime Format explicitly if that reading is wrong."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"This column was converted as Excel serial dates, but its largest value "
+"({value}) converts to {date}, so every converted date falls in {year} or "
+"earlier. • Genuine Excel dates from clinical spreadsheets are normally "
+"between 20000 and 50000 (1954 to 2036). • If this column holds measurements "
+"- age, counts, scores, lab values, days of follow-up - the converted dates "
+"are meaningless; select a real date column instead. • If these really are "
+"early dates, no action is needed."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"This column was converted as Excel serial dates, but its smallest value "
+"({value}) converts to {date}, so every converted date falls on or after "
+"{year}. • Genuine Excel dates from clinical spreadsheets are normally "
+"between 20000 and 50000 (1954 to 2036). • If this column holds measurements "
+"- platelet counts, lab values, scores - the converted dates are meaningless; "
+"select a real date column instead. • If these really are dates that far "
+"ahead, no action is needed."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"This column was converted as Unix epoch seconds, but its {which} value "
+"({value}) converts to {date}. • Epoch seconds for a realistic clinical date "
+"are roughly 1e8 to 4e9 (1973 to 2096). • If these are Excel serial numbers, "
+"choose an Excel Serial format instead; if they are measurements, select a "
+"real date column."
 msgstr ""
 
 #: R/checkdata.b.R
@@ -132944,14 +134333,6 @@ msgid ""
 "standard. It calculates sensitivity, specificity, predictive values, and "
 "likelihood ratios. Reference standards can be imperfect, so disagreement may "
 "reflect error in either method."
-msgstr ""
-
-#: package/analyses/tableone.description
-#: tableone/options.description.main
-msgid ""
-"This function generates a \"Table One\", a descriptive summary table "
-"frequently used in  clinicopathological research manuscripts. It supports "
-"multiple output styles for flexible formatting."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -133289,6 +134670,12 @@ msgid ""
 "This table lists every observed test value as a candidate cutpoint, not only "
 "the selected one; the bias above applies to whichever row you report as the "
 "cutpoint."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"This Table One summarizes baseline characteristics commonly reported in "
+"clinical research manuscripts."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -133682,6 +135069,10 @@ msgstr ""
 msgid "Tie Handling"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Tie handling"
+msgstr ""
+
 #: concordanceindex/options/handle_ties.title
 #: plscox/options/tie_method.title
 #: vusanalysis/options/handle_ties.title
@@ -133892,6 +135283,16 @@ msgstr ""
 msgid "Time Aggregation"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Time and outcome cannot also be predictors: {vars}. Use predictors available "
+"at the intended prediction time."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Time and outcome must be different variables."
+msgstr ""
+
 #: hiddenmarkov/options/time.description
 msgid "Time at which state was observed"
 msgstr ""
@@ -133905,7 +135306,7 @@ msgid "Time Axis Label"
 msgstr ""
 
 #: timeinterval/options/time_basis.title
-msgid "Time Basis"
+msgid "Time basis"
 msgstr ""
 
 #: ctdnadynamics/options/timeBetween.title
@@ -133943,9 +135344,6 @@ msgstr ""
 msgid "Time Display Mode"
 msgstr ""
 
-#: R/lassocox.b.R
-#: lassocox/options/elapsedtime.title
-#: lassocox/ui[0][0].label
 #: mixedcox/options/elapsedtime.title
 #: mixedcox/ui[0][0].label
 #: multisurvival/options/elapsedtime.title
@@ -133956,11 +135354,14 @@ msgstr ""
 #: surveysurvival/ui[0][0].label
 #: survival/options/elapsedtime.title
 #: survival/ui[0][0].label
-#: survivalcont/options/elapsedtime.title
 #: survivalcont/ui[0][0].label
 #: timeroc/options/elapsedtime.title
 #: timeroc/ui[0][0].label
 msgid "Time Elapsed"
+msgstr ""
+
+#: survivalcont/options/elapsedtime.title
+msgid "Time elapsed"
 msgstr ""
 
 #: qualityoflife/results/health_economics_summary.columns.title
@@ -134052,11 +135453,14 @@ msgstr ""
 #: survival/options/byplot.title
 #: survival/ui[4][2][0]/byplot.label
 #: survival/results/personTimeTable.columns.title
-#: survivalcont/options/byplot.title
 #: survivalcont/ui[4][1][0]/byplot.label
 #: survivalcont/results/personTimeTable.columns.title
 #: survivalfeaturerank/options/byplot.title
 msgid "Time Interval"
+msgstr ""
+
+#: survivalcont/options/byplot.title
+msgid "Time interval"
 msgstr ""
 
 #: survival/ui[1][0].label
@@ -134067,8 +135471,11 @@ msgstr ""
 #: multisurvival/options/time_intervals.title
 #: singlearm/options/time_intervals.title
 #: survival/options/time_intervals.title
-#: survivalcont/options/time_intervals.title
 msgid "Time Interval Stratification"
+msgstr ""
+
+#: survivalcont/options/time_intervals.title
+msgid "Time interval stratification"
 msgstr ""
 
 #: survivalfeaturerank/ui[3][1][0].label
@@ -134597,7 +136004,6 @@ msgstr ""
 #: multisurvival/options/timetypedata.title
 #: singlearm/options/timetypedata.title
 #: survival/options/timetypedata.title
-#: survivalcont/options/timetypedata.title
 msgid "Time Type in Data (e.g., YYYY-MM-DD)"
 msgstr ""
 
@@ -134605,7 +136011,6 @@ msgstr ""
 #: multisurvival/options/timetypeoutput.title
 #: surveysurvival/options/timetypeoutput.title
 #: survival/options/timetypeoutput.title
-#: survivalcont/options/timetypeoutput.title
 msgid "Time Type in Output"
 msgstr ""
 
@@ -134626,7 +136031,7 @@ msgid "Time Unit for Display"
 msgstr ""
 
 #: timeinterval/options/output_unit.title
-msgid "Time Unit for Results"
+msgid "Time unit for results"
 msgstr ""
 
 #: survivalcont/ui[2][1].label
@@ -134877,7 +136282,9 @@ msgid "Time Variable Completeness (before exclusions)"
 msgstr ""
 
 #: R/lassocox.b.R
-msgid "Time variable contains negative values. Survival times must be non-negative."
+msgid ""
+"Time variable contains negative values. This Cox engine requires strictly "
+"positive follow-up times."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -134888,8 +136295,9 @@ msgstr ""
 
 #: R/lassocox.b.R
 msgid ""
-"Time variable contains zero values. Consider adding a small constant if "
-"convergence issues occur."
+"Time variable contains zero values. This Cox engine requires strictly "
+"positive follow-up times. Check the time origin and measurement resolution; "
+"times have not been automatically adjusted."
 msgstr ""
 
 #: jjcoefstats/options/survivalTime.description
@@ -135474,14 +136882,15 @@ msgid "Times New Roman"
 msgstr ""
 
 #: datetimeconverter/options/timezone.title
+#: datetimeconverter/ui[3][1].label
 #: timeinterval/options/timezone.title
 msgid "Timezone"
 msgstr ""
 
-#: datetimeconverter/ui[3][0].label
+#: R/datetimeconverter.b.R
 msgid ""
-"Timezone (Olson identifier, e.g., Europe/Istanbul; use 'system' for local "
-"time)"
+"Timezone {requested} is not a recognised Olson timezone. Falling back to the "
+"system default ({fallback})."
 msgstr ""
 
 #: comprehensiveSurvivalPower/results/sequentialDesign.columns.title
@@ -135845,6 +137254,10 @@ msgstr ""
 msgid "Top Contributors to Label:"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Top correlated encoded-column pairs: {pairs}."
+msgstr ""
+
 #: enhancedfactorvariable/results/results/topFactorsPlot.title
 msgid "Top Factor Levels Analysis"
 msgstr ""
@@ -135900,10 +137313,6 @@ msgstr ""
 
 #: tidyplots/options/paddingTop.title
 msgid "Top Padding (0-1)"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "Top pairs:"
 msgstr ""
 
 #: clinicalprediction/results/individual_explanations.columns.title
@@ -135992,6 +137401,10 @@ msgstr ""
 msgid ""
 "Total\n"
 "n={n}"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Total (all cases)"
 msgstr ""
 
 #: outbreakanalysis/results/descriptive_summary.columns.title
@@ -136402,10 +137815,6 @@ msgstr ""
 
 #: psychopdaROC/options/metric/total_utility.title
 msgid "Total utility"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "Total Variables"
 msgstr ""
 
 #: agreement/results/maxwellRETable.columns.title
@@ -137263,6 +138672,10 @@ msgstr ""
 
 #: progressionsurvival/results/biomarker_interaction_table.columns.title
 msgid "Treatment HR"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Treatment indicators"
 msgstr ""
 
 #: treatmentswitching/options/treatmentLag.title
@@ -138384,6 +139797,29 @@ msgid ""
 "insights"
 msgstr ""
 
+#: datetimeconverter/options/two_digit_year.title
+#: datetimeconverter/ui[3][0].label
+msgid "Two-digit years"
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Two-digit years is set to 'Always in the past', but {count} value(s) in this "
+"column contain a four-digit year (first: {example}), so the column is not a "
+"two-digit-year column and nothing was changed. • Remove or correct those "
+"values if the rest of the column really does use two-digit years."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid ""
+"Two-digit years: {count} date(s) would have fallen in the future and were "
+"moved back one century."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "Two-digit-year Correction Not Applied"
+msgstr ""
+
 #: package/analyses/roc2d.title
 #: package/analyses/roc2d.menuTitle
 #: roc2d/options.title
@@ -139218,6 +140654,10 @@ msgstr ""
 msgid "Understanding Clustering in Survival Analysis"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Understanding coefficients and paths"
+msgstr ""
+
 #: stagemigration/results/competingRisksExplanation.title
 msgid "Understanding Competing Risks Analysis"
 msgstr ""
@@ -139305,6 +140745,10 @@ msgstr ""
 
 #: lassocox/results/lassoExplanation.title
 msgid "Understanding LASSO Cox Regression"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Understanding LASSO Cox regression"
 msgstr ""
 
 #: stagemigration/results/likelihoodTestsExplanation.title
@@ -139431,6 +140875,10 @@ msgstr ""
 msgid "Understanding Risk Scores and Survival Curves"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Understanding risk scores and survival curves"
+msgstr ""
+
 #: survivalcont/results/rmstExplanation.title
 msgid "Understanding RMST Analysis"
 msgstr ""
@@ -139533,6 +140981,10 @@ msgstr ""
 
 #: stagemigration/results/dashboardExplanation.title
 msgid "Understanding the Comparative Analysis Dashboard"
+msgstr ""
+
+#: R/lassocox.b.R
+msgid "Understanding the cross-validation plot"
 msgstr ""
 
 #: stagemigration/results/executiveSummaryExplanation.title
@@ -139906,12 +141358,31 @@ msgstr ""
 msgid "Unsupported date format: {format}"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Unsupported non-scalar columns: {variables}. Matrix, array and list columns "
+"cannot be summarized. Select scalar columns or explicitly extract the "
+"intended measurements first."
+msgstr ""
+
 #: R/timeinterval.b.R
 msgid "Unsupported output unit for calendar-based calculation"
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Unsupported storage type. Use numeric measurements, factors (including "
+"ordered factors), text or logical variables. Convert dates or time intervals "
+"to explicitly defined measurements before analysis. Omitted variables do not "
+"enter missing-value exclusion or supplementary summaries."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "Unsupported time type format: {format}. Supported formats are: {supported}"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Unused factor levels are not displayed."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -140425,10 +141896,6 @@ msgstr ""
 msgid "Use a group variable to compare biomarker-defined cohorts"
 msgstr ""
 
-#: outcomeorganizer/options/adminCensoring.title
-msgid "Use administrative censoring"
-msgstr ""
-
 #: haralicktexture/options/feature_selection/all.title
 msgid "Use All Features"
 msgstr ""
@@ -140608,10 +142075,6 @@ msgstr ""
 msgid "Use Edge Gradients"
 msgstr ""
 
-#: outcomeorganizer/options/useHierarchy.title
-msgid "Use event hierarchy"
-msgstr ""
-
 #: pathagreement/ui[1][2]/exct.label
 msgid "Use Exact Method (more accurate, slower)"
 msgstr ""
@@ -140700,10 +142163,6 @@ msgstr ""
 
 #: continuousmarkov/options/initial_values.title
 msgid "Use Initial Values"
-msgstr ""
-
-#: outcomeorganizer/options/intervalCensoring.title
-msgid "Use interval censoring"
 msgstr ""
 
 #: pseudosurvival/options/weighted_analysis.description.ui
@@ -141323,6 +142782,10 @@ msgstr ""
 msgid "valid observations"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Valid Percent"
+msgstr ""
+
 #: vartree/options/vp.title
 msgid "Valid percentages"
 msgstr ""
@@ -141753,6 +143216,7 @@ msgstr ""
 #: labcontrolcharts/results/qcStatistics.columns.title
 #: lassocox/results/modelSummary.columns.title
 #: lassocox/results/performance.columns.title
+#: lassocox/results/reproducibility.columns.title
 #: lassologistic/results/modelSummary.columns.title
 #: lassologistic/results/performance.columns.title
 #: lassologistic/results/scoringPerformance.columns.title
@@ -142315,6 +143779,16 @@ msgid ""
 "2 categories."
 msgstr ""
 
+#: R/tableone.b.R
+msgid ""
+"Variable '{variable}' has many unique text values. Consider grouping "
+"categories."
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Variable '{variable}' is stored as a number but has only {n} distinct values."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid ""
 "Variable '%s' has %d categories: Too many categories may create cluttered "
@@ -142645,6 +144119,9 @@ msgid "Variable Importance"
 msgstr ""
 
 #: lassocox/options/showVariableImportance.title
+msgid "Variable importance"
+msgstr ""
+
 #: lassocox/results/variableImportance.title
 #: lassologistic/results/variableImportance.title
 #: ncvregcox/options/variable_importance.title
@@ -142774,6 +144251,10 @@ msgstr ""
 msgid "Variable names"
 msgstr ""
 
+#: R/datetimeconverter.b.R
+msgid "Variable Not Found"
+msgstr ""
+
 #: jjsyndromicplot/options/varorder.title
 #: jjsyndromicplot/ui[3][0][1]/varorder.label
 msgid "Variable Ordering"
@@ -142831,10 +144312,6 @@ msgstr ""
 
 #: bayesianma/options/variable_selection_threshold.title
 msgid "Variable Selection Threshold"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid "Variable selection with Lasso regularization"
 msgstr ""
 
 #: multisurvival/ui[7][0]/use_stratify.label
@@ -142956,6 +144433,10 @@ msgstr ""
 
 #: sparsegrouplasso/options/group_definition/variable_type.title
 msgid "Variable Type-Based"
+msgstr ""
+
+#: R/tableone.b.R
+msgid "Variable types"
 msgstr ""
 
 #: clinicalcalculators/options/units_specification.title
@@ -143402,6 +144883,10 @@ msgstr ""
 msgid "Variables used in the original survival model"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Variables with >20% missing: {variables}"
+msgstr ""
+
 #: R/reportcat.b.R
 msgid "Variables with more than 20 categories may need recoding for analysis"
 msgstr ""
@@ -143803,6 +145288,15 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Very small effect size"
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"Very small final sample size (N = {n}). With fewer than 10 cases, one case "
+"represents more than 10 percentage points of the total. Summaries can be "
+"sensitive to individual observations. Report counts and consider the risk of "
+"identifying individuals. This analysis is descriptive only; no test or "
+"confidence interval is computed."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -144571,6 +146065,7 @@ msgstr ""
 #: R/enhancedROC.b.R
 #: R/oddsratio.b.R
 #: R/reportcat.b.R
+#: R/timeinterval.b.R
 msgid "Warning"
 msgstr ""
 
@@ -144706,6 +146201,7 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 #: R/jjpiestats.b.R
+#: R/tableone.b.R
 #: bayesiandiagnostic/results/convergenceDiagnostics.columns.title
 #: classification/results/warnings.title
 #: continuousmarkov/results/warnings.title
@@ -144826,8 +146322,14 @@ msgstr ""
 msgid "Week Number"
 msgstr ""
 
+#: datetimeconverter/ui[7][0][1][0]/weeknum_out.label
+msgid "Week number"
+msgstr ""
+
+#: datetimeconverter/options/extract_weeknum.title
+#: datetimeconverter/options/weeknum_out.title
 #: datetimeconverter/ui[7][0][0][0]/extract_weeknum.label
-msgid "Week number (1-53)"
+msgid "Week number (Jan-1 blocks, not ISO)"
 msgstr ""
 
 #: groupsummary/options/timeAggregation/week.title
@@ -145354,6 +146856,10 @@ msgstr ""
 msgid "Welcome to the Advanced Ridge Plot analysis!"
 msgstr ""
 
+#: R/tableone.b.R
+msgid "Welcome to the ClinicoPath Table One Generator"
+msgstr ""
+
 #: R/vartree.b.R
 msgid "Welcome to Variable Tree Analysis"
 msgstr ""
@@ -145480,6 +146986,13 @@ msgstr ""
 msgid ""
 "When {variable} increases by 1 unit, the instantaneous hazard rate of the "
 "event is multiplied by {hr} (a hazard ratio, not a risk ratio)."
+msgstr ""
+
+#: R/tableone.b.R
+msgid ""
+"When a summary label conflicts with a recorded category, the summary row "
+"uses Missing (NA) or Total (all cases), with a numeric suffix if needed. "
+"Recorded category labels and counts are unchanged."
 msgstr ""
 
 #: decisioncompare/options/excludeIndeterminate.description.ui
@@ -146983,6 +148496,9 @@ msgstr ""
 msgid "ydm"
 msgstr ""
 
+#: datetimeconverter/options/extract_year.title
+#: datetimeconverter/options/year_out.title
+#: datetimeconverter/ui[5][0][1][0]/year_out.label
 #: datetimeconverter/results/year_out.title
 #: eurostatmap/options/year.title
 #: treatmentmeta/results/individual_studies.columns.title
@@ -147065,6 +148581,7 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 #: R/jjarcdiagram.b.R
+#: R/lassocox.b.R
 msgid "Yes"
 msgstr ""
 
@@ -147603,12 +149120,4 @@ msgstr ""
 
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
-msgstr ""
-
-#: R/summarydata.b.R
-msgid "Multiple distribution diagnostics"
-msgstr ""
-
-#: R/summarydata.b.R
-msgid "A separate Shapiro-Wilk test is reported for each variable without multiplicity adjustment. Treat these as exploratory distribution checks, not confirmatory hypothesis tests, and interpret them with the visual summaries."
 msgstr ""

@@ -1,0 +1,113 @@
+{
+  "lambda": {
+    "changed_outputs": ["suitabilityReport", "modelSummary", "coefficients", "performance", "coef_plot", "survival_plot", "riskScore"],
+    "rows": 14,
+    "error": false
+  },
+  "nfolds": {
+    "changed_outputs": ["modelSummary", "coefficients", "performance", "cv_plot", "coef_plot", "survival_plot", "riskScore"],
+    "rows": 14,
+    "error": false
+  },
+  "random_seed": {
+    "changed_outputs": ["suitabilityReport", "modelSummary", "coefficients", "performance", "cv_plot", "coef_plot", "survival_plot", "riskScore"],
+    "rows": 14,
+    "error": false
+  },
+  "standardize": {
+    "changed_outputs": ["suitabilityReport", "modelSummary", "coefficients", "performance", "cv_plot", "coef_plot", "survival_plot", "riskScore"],
+    "rows": 14,
+    "error": false
+  },
+  "suitabilityCheck": {
+    "changed_outputs": "suitabilityReport",
+    "rows": 14,
+    "error": false
+  },
+  "cv_plot": {
+    "changed_outputs": "cv_plot",
+    "rows": 14,
+    "error": false
+  },
+  "coef_plot": {
+    "changed_outputs": "coef_plot",
+    "rows": 14,
+    "error": false
+  },
+  "survival_plot": {
+    "changed_outputs": "survival_plot",
+    "rows": 14,
+    "error": false
+  },
+  "path_plot": {
+    "changed_outputs": "path_plot",
+    "rows": 14,
+    "error": false
+  },
+  "showEncoding": {
+    "changed_outputs": "encoding",
+    "rows": 14,
+    "error": false
+  },
+  "showReproducibility": {
+    "changed_outputs": "reproducibility",
+    "rows": 14,
+    "error": false
+  },
+  "showRCode": {
+    "changed_outputs": "rCode",
+    "rows": 14,
+    "error": false
+  },
+  "showSummary": {
+    "changed_outputs": "summaryText",
+    "rows": 14,
+    "error": false
+  },
+  "showExplanations": {
+    "changed_outputs": ["lassoExplanation", "regularizationPathExplanation", "crossValidationExplanation", "riskScoreExplanation"],
+    "rows": 14,
+    "error": false
+  },
+  "showMethodologyNotes": {
+    "changed_outputs": "methodologyNotes",
+    "rows": 14,
+    "error": false
+  },
+  "includeClinicalGuidance": {
+    "changed_outputs": "clinicalGuidance",
+    "rows": 14,
+    "error": false
+  },
+  "showVariableImportance": {
+    "changed_outputs": "variableImportance",
+    "rows": 14,
+    "error": false
+  },
+  "showModelComparison": {
+    "changed_outputs": "modelComparison",
+    "rows": 14,
+    "error": false
+  },
+  "elapsedtime": {
+    "changed_outputs": "survival_plot",
+    "rows": 14,
+    "error": false
+  },
+  "outcome": {
+    "changed_outputs": ["todo", "suitabilityReport", "modelSummary", "coefficients", "performance", "cv_plot", "coef_plot", "survival_plot", "riskScore"],
+    "rows": 14,
+    "error": false
+  },
+  "explanatory": {
+    "changed_outputs": ["todo", "suitabilityReport", "modelSummary", "coefficients", "performance", "cv_plot", "coef_plot", "survival_plot", "riskScore"],
+    "rows": 14,
+    "error": false
+  },
+  "event_censor_reversed": {
+    "changed_outputs": ["todo", "suitabilityReport", "modelSummary", "coefficients", "performance", "cv_plot", "coef_plot", "survival_plot", "riskScore"]
+  },
+  "data": {
+    "changed_outputs": ["suitabilityReport", "modelSummary", "coefficients", "performance", "cv_plot", "coef_plot", "survival_plot", "riskScore"]
+  }
+}

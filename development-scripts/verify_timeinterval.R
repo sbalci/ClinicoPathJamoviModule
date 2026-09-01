@@ -114,7 +114,6 @@ options <- list(
     remove_negative = FALSE,
     remove_extreme = FALSE,
     extreme_multiplier = 2.0,
-    add_times = TRUE,
     include_quality_metrics = TRUE,
     confidence_level = 95,
     show_summary = TRUE,

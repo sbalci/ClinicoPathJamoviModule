@@ -527,6 +527,9 @@ children:
           - type: CheckBox
             name: showLoaTable
             enable: (loaVariable)
+          - type: Output
+            name: loaOutput
+            enable: (loaVariable)
   - type: CollapseBox
     label: Specific Agreement Indices [Categorical] (Category-Focused)
     collapsed: true

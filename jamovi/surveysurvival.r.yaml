@@ -395,27 +395,6 @@ items:
         - weights
         - design_type
 
-    # Time Variables Output
-    - name: calculatedtime
-      title: Add Calculated Time to Data
-      type: Output
-      varTitle: '`Calculated Time in Survey Survival Function - from ${ dxdate } to { fudate }`'
-      varDescription: Calculated Time from given Dates in Survey-Weighted Survival Analysis
-      clearWith:
-          - tint
-          - dxdate
-          - fudate
-
-    # Redefined Outcome Output
-    - name: outcomeredefined
-      title: Add Redefined Outcome to Data
-      type: Output
-      varTitle: '`Redefined Outcome in Survey Survival Function - from ${ outcome }`'
-      varDescription: Redefined Outcome for Survey-Weighted Survival Analysis
-      clearWith:
-          - outcome
-          - outcomeLevel
-
 refs:
     - survey
     - survival

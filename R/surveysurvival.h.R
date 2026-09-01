@@ -341,9 +341,7 @@ surveysurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         surveyDesignExplanation = function() private$.items[["surveyDesignExplanation"]],
         kmWeightedExplanation = function() private$.items[["kmWeightedExplanation"]],
         coxWeightedExplanation = function() private$.items[["coxWeightedExplanation"]],
-        populationInferenceExplanation = function() private$.items[["populationInferenceExplanation"]],
-        calculatedtime = function() private$.items[["calculatedtime"]],
-        outcomeredefined = function() private$.items[["outcomeredefined"]]),
+        populationInferenceExplanation = function() private$.items[["populationInferenceExplanation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -762,26 +760,7 @@ surveysurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "population_totals",
                     "weights",
-                    "design_type")))
-            self$add(jmvcore::Output$new(
-                options=options,
-                name="calculatedtime",
-                title="Add Calculated Time to Data",
-                varTitle="`Calculated Time in Survey Survival Function - from ${ dxdate } to { fudate }`",
-                varDescription="Calculated Time from given Dates in Survey-Weighted Survival Analysis",
-                clearWith=list(
-                    "tint",
-                    "dxdate",
-                    "fudate")))
-            self$add(jmvcore::Output$new(
-                options=options,
-                name="outcomeredefined",
-                title="Add Redefined Outcome to Data",
-                varTitle="`Redefined Outcome in Survey Survival Function - from ${ outcome }`",
-                varDescription="Redefined Outcome for Survey-Weighted Survival Analysis",
-                clearWith=list(
-                    "outcome",
-                    "outcomeLevel")))}))
+                    "design_type")))}))
 
 surveysurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "surveysurvivalBase",
@@ -895,8 +874,6 @@ surveysurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$kmWeightedExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coxWeightedExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$populationInferenceExplanation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
-#'   \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

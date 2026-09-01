@@ -6,7 +6,7 @@
 #' @return A results object; see the Value section of the generated tableone() documentation.
 #'
 #' @importFrom R6 R6Class
-#' @importFrom jmvcore select naOmit constructFormula
+#' @importFrom jmvcore . select naOmit constructFormula
 #' @importFrom tableone CreateTableOne
 #' @importFrom gtsummary tbl_summary as_kable_extra
 #' @importFrom arsenal tableby
@@ -20,6 +20,45 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
     "tableoneClass",
     inherit = tableoneBase,
     private = list(
+        .categoryLabels = function(data) {
+            unlist(lapply(data, function(value) {
+                if (is.factor(value)) levels(value)
+                else if (is.character(value)) value
+                else character()
+            }), use.names = FALSE)
+        },
+
+        .uniqueSummaryLabel = function(label, existing) {
+            candidate <- label
+            suffix <- 1L
+            while (candidate %in% existing) {
+                candidate <- paste0(label, " (", suffix, ")")
+                suffix <- suffix + 1L
+            }
+            candidate
+        },
+
+        .formatText = function(template, ...) {
+            # Substitute only template tokens, never braces/backslashes in user
+            # values: jmvcore::format recursively scans inserted values.
+            values <- list(...)
+            matches <- gregexpr("\\{[A-Za-z][A-Za-z0-9]*\\}", template)[[1]]
+            if (matches[1] == -1L)
+                return(template)
+            widths <- attr(matches, "match.length")
+            pieces <- character()
+            start <- 1L
+            for (i in seq_along(matches)) {
+                end <- matches[i] + widths[i] - 1L
+                key <- substr(template, matches[i] + 1L, end - 1L)
+                stopifnot(key %in% names(values), length(values[[key]]) == 1L)
+                pieces <- c(pieces, substr(template, start, matches[i] - 1L),
+                            as.character(values[[key]]))
+                start <- end + 1L
+            }
+            paste0(c(pieces, substring(template, start)), collapse = "")
+        },
+
         .htmlSafeTableData = function(data) {
             escape <- function(value) {
                 as.character(htmltools::htmlEscape(as.character(value)))
@@ -28,7 +67,9 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             for (i in seq_along(data)) {
                 value <- data[[i]]
                 if (is.factor(value)) {
-                    levels(value) <- escape(levels(value))
+                    # Escaping must not change codes or missingness (levels<-
+                    # removes actual NA levels, unlike attribute assignment).
+                    attr(value, "levels") <- escape(levels(value))
                 } else if (is.character(value)) {
                     value[] <- escape(value)
                 }
@@ -73,42 +114,63 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # - NoticeType$STRONG_WARNING for data quality issues
             # - NoticeType$WARNING for recommendations
             # - NoticeType$INFO for confirmations
-            # TODO (forward-looking): no `.()` wrapping in this file - HTML
-            # messages, table titles ("Data Quality Check", "Analysis
-            # Summary"), and report-sentence text are English-only. The
-            # function is otherwise architecturally clean (good checkpoint
-            # coverage, htmlEscape usage, asSource method). Address in a
-            # /prepare-translation pass.
-            # Check that the input data has at least one complete row.
+            # Restored Html content survives clearWith invalidation. Clear it
+            # explicitly, including optional outputs, before any early return.
+            private$.clearOutputs()
+            private$.setAboutContent()
+
+            # Check that the input data has at least one row.
             if (is.null(self$data) || nrow(self$data) == 0) {
-                self$results$todo$setContent("
-                    <br><strong>No Data Available</strong>
-                    <br><br>
-                    <ul>
-                        <li>Please load a dataset before using Table One.</li>
-                        <li>Check that your data file is properly imported.</li>
-                    </ul>
-                ")
-                private$.setAboutContent()
+                self$results$todo$setContent(paste0(
+                    "<br><strong>", .("No Data Available"), "</strong><ul><li>",
+                    .("Please load a dataset before using Table One."), "</li><li>",
+                    .("Check that your data file is properly imported."), "</li></ul>"))
                 return(invisible(NULL))
             }
 
             # If no variables are selected, show a welcome/instructions message.
-            if (is.null(self$options$vars)) {
+            if (length(self$options$vars) == 0L) {
                 self$results$todo$setContent(private$.buildWelcomeMessage())
-                private$.setAboutContent()
                 return(invisible(NULL))  # Stop further processing until variables are selected.
             } else {
                 # Clear the instructions message once variables are selected.
                 self$results$todo$setContent("")
             }
 
-            # Prepare the data using user-selected variables.
-            selected_vars <- self$options$vars  # Improved variable naming.
-
-            # Checkpoint before data preparation (potentially expensive for large datasets)
             private$.checkpoint()
+            selection <- private$.prepareVariables(self$options$vars)
+            if (is.null(selection))
+                return(invisible(NULL))
+            cohort <- private$.prepareCohort(selection$vars, selection$todo_html)
+            if (is.null(cohort))
+                return(invisible(NULL))
 
+            # Only publish reports after the selected engine renders successfully.
+            if (private$.renderTable(cohort$data, selection$vars,
+                                     selection$frequency_skipped)) {
+                private$.populateReports(cohort, selection$vars)
+            }
+        },
+
+        .prepareVariables = function(selected_vars) {
+            # Normalize actual NA factor levels before any engine or exclusion.
+            # levels<- removes the NA level and marks its entries as missing;
+            # literal text levels "NA"/"Unknown" and unused levels are preserved.
+            normalized_vars <- Filter(function(v) {
+                value <- self$data[[v]]
+                is.factor(value) && anyNA(levels(value))
+            }, selected_vars)
+            for (v in normalized_vars) {
+                value <- self$data[[v]]
+                levels(value) <- levels(value)
+                private$.data[[v]] <- value
+            }
+            todo_html <- if (length(normalized_vars) > 0L) paste0(
+                "<p>", private$.formatText(
+                    .("Actual NA factor levels were treated as missing before exclusion and tabulation: {variables}. Literal text categories such as NA or Unknown are unchanged."),
+                    variables = paste(htmltools::htmlEscape(normalized_vars), collapse = "; ")),
+                "</p>") else ""
+            self$results$todo$setContent(todo_html)
             # A variable that is entirely NA is dropped before it ever reaches the
             # table, and the only trace was an R console warning that a jamovi user
             # never sees: they selected 8 variables, got 7 rows, and nothing said
@@ -121,7 +183,6 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 !is.null(col) && length(col) > 0L && all(is.na(col))
             }, selected_vars)
 
-            todo_html <- ""
             if (length(all_na_vars) > 0) {
                 # Drop them here, not just report them. The claim made below - that
                 # the variable does not appear in the table - was only true for the
@@ -131,7 +192,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 # for every style, and stops one never-collected lab value from
                 # wiping out every other row via listwise deletion below.
                 selected_vars <- setdiff(selected_vars, all_na_vars)
-                todo_html <- paste0(
+                todo_html <- paste0(todo_html,
                     "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;border-left:4px solid #ffc107;",
                     "padding:10px;margin:10px 0;'><b>",
                     .("Not included"), ":</b> ",
@@ -143,15 +204,37 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 self$results$todo$setContent(todo_html)
             }
 
+            # Validate storage classes before exclusion. Dates/time durations and
+            # custom storage classes have incompatible meanings across engines.
+            supported_classes <- c("numeric", "integer", "factor", "ordered",
+                                   "character", "logical")
+            unsupported_vars <- Filter(function(v) {
+                value <- self$data[[v]]
+                !is.null(dim(value)) || !all(class(value) %in% supported_classes)
+            }, selected_vars)
+            if (length(unsupported_vars) > 0L) {
+                selected_vars <- setdiff(selected_vars, unsupported_vars)
+                details <- vapply(unsupported_vars, function(v) {
+                    paste0(v, " (", paste(class(self$data[[v]]), collapse = "/"), ")")
+                }, character(1))
+                todo_html <- paste0(todo_html,
+                    "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;",
+                    "border-left:4px solid #ffc107;padding:10px;margin:10px 0;'><b>",
+                    .("Not included"), ":</b> ",
+                    paste(htmltools::htmlEscape(details), collapse = "; "), ". ",
+                    .("Unsupported storage type. Use numeric measurements, factors (including ordered factors), text or logical variables. Convert dates or time intervals to explicitly defined measurements before analysis. Omitted variables do not enter missing-value exclusion or supplementary summaries."),
+                    "</div>")
+                self$results$todo$setContent(todo_html)
+            }
+
             if (length(selected_vars) == 0) {
                 self$results$todo$setContent(paste0(
                     todo_html,
                     "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;border-left:4px solid #ffc107;",
                     "padding:10px;margin:10px 0;'><b>",
                     .("Nothing to summarise"), ":</b> ",
-                    .("Every selected variable is missing for all cases, so there is nothing to tabulate. Select at least one variable that has recorded values."),
+                    .("No selected variable has recorded values in a supported storage type. Select at least one numeric, categorical, text or logical variable with recorded values."),
                     "</div>"))
-                private$.setAboutContent()
                 return(invisible(NULL))
             }
 
@@ -168,7 +251,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                                   !is.logical(value)) {
                         .("not categorical; set category codes to Nominal or Ordinal, or use factor() in R")
                     } else if (n_distinct > 20) {
-                        sprintf(.("%d distinct values; maximum 20 categories"), n_distinct)
+                        private$.formatText(.("{n} distinct values; maximum 20 categories"), n = n_distinct)
                     } else NULL
                     if (is.null(reason)) {
                         frequency_vars <- c(frequency_vars, var)
@@ -182,11 +265,15 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 if (length(selected_vars) == 0L) {
                     self$results$tablestyle4$setContent(
                         private$.frequencySkipHtml(frequency_skipped))
-                    private$.setAboutContent()
                     return(invisible(NULL))
                 }
             }
 
+            list(vars = selected_vars, todo_html = todo_html,
+                 frequency_skipped = frequency_skipped)
+        },
+
+        .prepareCohort = function(selected_vars, todo_html) {
             # jmvcore::select() restores the original column names on the way out
             # (colnames(data) <- names(out)) and jamovi has already validated every
             # entry of `vars` against the dataset, so names(data) is exactly
@@ -217,16 +304,21 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;border-left:4px solid #ffc107;",
                     "padding:10px;margin:10px 0;'><b>",
                     .("No cases left"), ":</b> ",
-                    sprintf(.("Excluding missing values left no cases: each of the %d cases has at least one missing value among the selected variables. Untick Missing-value exclusion (NA), or select fewer variables."),
-                            original_n),
+                    private$.formatText(.("Excluding missing values left no cases: each of the {n} cases has at least one missing value among the selected variables. Untick Missing-value exclusion (NA), or select fewer variables."),
+                                        n = original_n),
                     "</div>"))
-                private$.setAboutContent()
                 return(invisible(NULL))
             }
 
-            # Retrieve the table style selected by the user.
-            table_style <- self$options$sty
+            list(data = data, original_data = original_data,
+                 original_complete = original_complete, excluded_n = excluded_n)
+        },
 
+        .populateReports = function(cohort, selected_vars) {
+            data <- cohort$data
+            original_data <- cohort$original_data
+            original_complete <- cohort$original_complete
+            excluded_n <- cohort$excluded_n
             # Visibility of summary / about / reportSentence is declared in
             # jamovi/tableone.r.yaml as visible: (showSummary) etc. Calling
             # setVisible() here would overwrite that expression with a literal
@@ -239,15 +331,23 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 private$.generateSummary(data, selected_vars, original_data, excluded_n, original_complete)
             }
 
-            if (isTRUE(self$options$showAbout)) {
-                private$.setAboutContent()
-            }
-
             if (isTRUE(self$options$showReportSentence)) {
                 private$.setReportSentence(data, selected_vars, original_data, excluded_n, original_complete)
             }
 
             private$.checkDataQuality(data, selected_vars, original_data, original_complete)
+        },
+
+        .clearOutputs = function() {
+            for (name in c("todo", "tablestyle1", "tablestyle2", "tablestyle3",
+                           "tablestyle4", "reportSentence", "summary", "about",
+                           "assumptions")) {
+                self$results[[name]]$setContent("")
+            }
+        },
+
+        .renderTable = function(data, selected_vars, frequency_skipped) {
+            table_style <- self$options$sty
 
             # Generate the table based on the chosen style.
             if (table_style == "t1") {
@@ -259,9 +359,11 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     tableone::CreateTableOne(data = data)
                 }, error = function(e) {
                     if (grepl("insufficient", tolower(e$message))) {
-                        private$.rejectPlain("Insufficient data for Table One analysis. Ensure you have at least 2 complete cases and check for missing values. Try selecting different variables or disabling 'Exclude Missing Values'.")
+                        private$.rejectPlain(.("Insufficient data for Table One analysis. Check for missing values. Try selecting different variables or disabling missing-value exclusion."))
                     } else {
-                        private$.rejectPlain(paste0("Error creating Table One: ", sub("\\.+$", "", e$message), ". Check that variables have valid data and appropriate types. Categorical variables should be factors. Numeric variables should contain valid numbers."))
+                        private$.rejectPlain(private$.formatText(
+                            .("Error creating Table One: {error}. Check that variables have valid data and appropriate types. Categorical variables should be factors. Numeric variables should contain valid numbers."),
+                            error = sub("\\.+$", "", conditionMessage(e))))
                     }
                 })
 
@@ -295,10 +397,9 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 # The old fallback handed the raw TableOne LIST to a Preformatted
                 # output, which renders as garbage. Say what failed instead.
                 if (is.null(rendered))
-                    private$.rejectPlain(paste0(
-                        "The Table One summary was computed but could not be formatted for display: ",
-                        sub("\\.+$", "", render_error),
-                        ". Try another table style, or deselect variables with unusual storage types (dates, list columns)."))
+                    private$.rejectPlain(private$.formatText(
+                        .("The Table One summary was computed but could not be formatted for display: {error}. Try another table style, or deselect variables with unusual storage types."),
+                        error = sub("\\.+$", "", render_error)))
 
                 # The "Missing" column that missing = TRUE adds holds PERCENTAGES,
                 # not counts, and carries no unit on screen - readers transcribe
@@ -334,10 +435,28 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     # Ki-67 cut-off level "<20%" reached the reader as the literal
                     # text "&lt;20%". The arsenal path below still needs the call:
                     # arsenal's summary(text = "html") emits levels verbatim.
-                    tbl <- gtsummary::tbl_summary(data = data)
+                    categories <- private$.categoryLabels(data)
+                    missing_label <- if ("Unknown" %in% categories)
+                        private$.uniqueSummaryLabel(.("Missing (NA)"), categories)
+                    else "Unknown"
+                    tbl <- gtsummary::tbl_summary(data = data, missing_text = missing_label)
+                    # Single-row dichotomous summaries must name the counted
+                    # level, including TRUE when every observed value is FALSE.
+                    counted <- tbl$inputs$value
+                    tbl <- gtsummary::modify_table_body(tbl, function(body) {
+                        rows <- which(body$var_type == "dichotomous" &
+                                      body$row_type == "label")
+                        for (i in rows) {
+                            value <- counted[[body$variable[i]]]
+                            body$label[i] <- paste0(body$label[i], " = ", as.character(value))
+                        }
+                        body
+                    })
                     gtsummary::as_kable_extra(tbl)
                 }, error = function(e) {
-                    private$.rejectPlain(paste0("Error creating gtsummary table: ", e$message, ". Check that variables have valid data and appropriate types. gtsummary requires properly formatted variables for summarization."))
+                    private$.rejectPlain(private$.formatText(
+                        .("Error creating gtsummary table: {error}. Check that variables have valid data and appropriate types."),
+                        error = conditionMessage(e)))
                 })
 
                 # Checkpoint after expensive operation to allow UI update
@@ -353,8 +472,17 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 formula_obj <- jmvcore::asFormula(paste('~', formula_str))
                 mytable <- tryCatch({
                     arsenal_data <- private$.htmlSafeTableData(data)
+                    if (!identical(is.na(arsenal_data), is.na(data)))
+                        stop(.("Formatting changed missing values; no table or report was produced."))
+                    categories <- private$.categoryLabels(data)
+                    stats_labels <- list()
+                    if ("N-Miss" %in% categories) {
+                        stats_labels$Nmiss <- private$.uniqueSummaryLabel(
+                            .("Missing (NA)"), categories)
+                    }
                     tab <- arsenal::tableby(formula = formula_obj,
                                             data = arsenal_data,
+                                            stats.labels = stats_labels,
                                             total = TRUE,
                                             digits = 1,
                                             digits.count = 0,
@@ -366,12 +494,14 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     )
                     paste(capture.output(tab_summary), collapse = "\n")
                 }, error = function(e) {
-                    private$.rejectPlain(paste0("Error creating arsenal table: ", e$message, ". Arsenal requires properly formatted variables. Check that categorical variables are factors and numeric variables contain valid numbers."))
+                    private$.rejectPlain(private$.formatText(
+                        .("Error creating arsenal table: {error}. Check that categorical variables are factors and numeric variables contain valid numbers."),
+                        error = conditionMessage(e)))
                 })
 
                 # Checkpoint after expensive operation to allow UI update
                 private$.checkpoint()
-                self$results$tablestyle3$setContent(mytable)
+                self$results$tablestyle3$setContent(private$.normalizeArsenalHtml(mytable))
 
             } else if (table_style == "t4") {
                 # --- Using janitor package for frequency tables with improved spacing & styling ---
@@ -379,6 +509,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 private$.checkpoint()
 
                 # Wrap entire janitor operation in tryCatch for error handling
+                frequency_failed <- FALSE
                 result <- tryCatch({
                     # Variables too granular to tabulate; reported after the loop.
                     skipped_vars <- frequency_skipped
@@ -415,18 +546,26 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                         }
 
                         # Create tabyl table using actual column name
-                        table <- janitor::tabyl(data, !!rlang::sym(var))
+                        table <- janitor::tabyl(data, !!rlang::sym(var),
+                                                show_missing_levels = FALSE)
+
+                        # Display labels must not collide with real categories.
+                        # Character conversion also prevents adorn_totals from
+                        # adding a duplicate factor level named Total.
+                        table[[1]] <- as.character(table[[1]])
+                        if ("NA" %in% table[[1]]) {
+                            missing_label <- private$.uniqueSummaryLabel(
+                                .("Missing (NA)"), table[[1]])
+                            table[[1]][is.na(table[[1]])] <- missing_label
+                        }
+                        total_label <- if ("Total" %in% table[[1]])
+                            private$.uniqueSummaryLabel(.("Total (all cases)"), table[[1]])
+                        else "Total"
+                        table <- janitor::adorn_totals(table, "row", name = total_label)
                         
-                        # Add totals
-                        table <- janitor::adorn_totals(table, "row")
-                        
-                        # Add percentage formatting - but handle the case where it might fail
-                        table <- tryCatch({
-                            janitor::adorn_pct_formatting(table)
-                        }, error = function(e) {
-                            # If pct formatting fails, just return the table with totals
-                            table
-                        })
+                        # Do not label raw fractions as percentages if formatting
+                        # fails; the visible failure panel below names the variable.
+                        table <- janitor::adorn_pct_formatting(table)
 
                         # Get the actual column names to handle different janitor output formats
                         col_names <- names(table)
@@ -437,17 +576,18 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                             names(table)[2] <- "N"
                         }
                         if (length(col_names) >= 3) {
-                            names(table)[3] <- "Percent"
+                            names(table)[3] <- .("Percent")
                         }
                         # janitor only emits valid_percent when the column has at
                         # least one NA, so a complete variable yields 3 columns and
                         # this rename is correctly skipped.
                         if (length(col_names) >= 4) {
-                            names(table)[4] <- "Valid Percent"
+                            names(table)[4] <- .("Valid Percent")
                         }
                         
                         table
                     }, error = function(e) {
+                        frequency_failed <<- TRUE
                         # Record the failure and carry on with the other variables
                         # rather than aborting the whole analysis. The reason is
                         # reported in the "Not tabulated" panel below.
@@ -467,7 +607,9 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     # Add a header for clarity for each variable's table, plus a top margin.
                     # Use escaped variable name for safe HTML rendering
                     safe_var_name <- htmltools::htmlEscape(var)
-                    header <- paste0("<h4 style='margin-top:20px;'>Frequency Table for '", safe_var_name, "'</h4>")
+                    header <- paste0("<h4 style='margin-top:20px;'>",
+                        private$.formatText(.("Frequency Table for '{variable}'"),
+                                            variable = safe_var_name), "</h4>")
 
                     # Convert to an HTML table with columns centered from the second column onward:
                     # The first column (variable level) is left-aligned, and columns 2-4 are centered.
@@ -503,6 +645,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                         body <- paste0(body,
                             "<p style='font-size:12px;'><em>",
                             .("N and Percent count all cases, including the missing (NA) row. Valid Percent, present only for variables that have missing values, counts only the cases with a recorded value."),
+                            " ", .("Unused factor levels are not displayed."),
                             "</em></p>")
 
                     if (length(skipped_vars) > 0) {
@@ -516,16 +659,36 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                             "</div>")
                     body
                 }, error = function(e) {
-                    private$.rejectPlain(paste0("Error creating frequency tables with janitor: ", e$message, ". Check that variables have valid data. Janitor works best with categorical or discrete variables."))
+                    private$.rejectPlain(private$.formatText(
+                        .("Error creating frequency tables with janitor: {error}. Check that categorical variables have valid data."),
+                        error = conditionMessage(e)))
                 })
 
                 # Checkpoint after expensive operation to allow UI update
                 private$.checkpoint()
                 self$results$tablestyle4$setContent(result)
+                if (frequency_failed) {
+                    self$results$todo$setContent(paste0(
+                        self$results$todo$content,
+                        "<p><strong>",
+                        .("Some frequency tables could not be produced. Review the Not tabulated details below. Supplementary summaries and copy-ready text are withheld because the output is incomplete."),
+                        "</strong></p>"))
+                    return(FALSE)
+                }
             } else {
-                private$.rejectPlain("Invalid table style selected. Please choose a valid table style from the options (tableone, gtsummary, arsenal, janitor).")
+                private$.rejectPlain(.("Invalid table style selected. Choose tableone, gtsummary, arsenal or janitor."))
             }
-        }, # End of .run function.
+            TRUE
+        },
+
+        .normalizeArsenalHtml = function(html) {
+            # Replace only renderer-generated whitespace; never decode &lt; or
+            # &amp;, which protect user-provided labels. Plain cell tags also
+            # let jmvcore's text exporter recognise arsenal's table cells.
+            # Assemble an input-only entity pattern; never emit a named entity.
+            html <- gsub(paste0("&", "nbsp;"), "\u00a0", html, fixed = TRUE)
+            gsub("<(td|th)\\s[^>]*>", "<\\1>", html, perl = TRUE)
+        },
 
         # ========================================================================
         # HTML Builder Helper Functions
@@ -545,19 +708,16 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
         },
 
         .buildWelcomeMessage = function() {
-            "
-            <br><strong>Welcome to the ClinicoPath Table One Generator</strong>
-            <br><br>
-            <strong>Instructions:</strong>
-            <p>This analysis describes the overall cohort only. It does not compare groups or compute p-values, confidence intervals or standardized mean differences.</p>
-            <ul>
-                <li>Select the <em>Variables</em> to include in the Table One. (Numeric, Ordinal, or Categorical)</li>
-                <li>Choose a <em>Table Style</em> for the output format.</li>
-                <li>If needed, check the option to <em>Exclude Missing Values</em> (NA). (Exclusion may remove entire cases.)</li>
-            </ul>
-            <br>
-            Please ensure you cite the packages and jamovi as referenced below.
-            "
+            paste0(
+                "<br><strong>", .("Welcome to the ClinicoPath Table One Generator"),
+                "</strong><br><br><strong>", .("Instructions"), "</strong><p>",
+                .("This analysis describes the overall cohort only. It does not compare groups or compute p-values, confidence intervals or standardized mean differences."),
+                "</p><ul><li>",
+                .("Select numeric, ordinal, categorical, text or logical variables to include in Table One."),
+                "</li><li>", .("Choose a table style for the output format."),
+                "</li><li>", .("If needed, enable missing-value exclusion (NA). Exclusion may remove entire cases."),
+                "</li></ul><p>", .("Please cite the packages and jamovi as referenced below."),
+                "</p>")
         },
 
         .buildDataQualityHtml = function(warnings, recommendations) {
@@ -567,75 +727,75 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 return("")
             }
 
-            html <- paste0(
-                "<div style='background-color: rgba(255, 211, 33, 0.16); padding: 15px; border-left: 4px solid #ffa500; margin: 10px 0; color: inherit;'>",
-                "<h4>Data Quality & Assumptions</h4>"
-            )
+            html <- paste0("<section><h4>", .("Data Quality & Assumptions"), "</h4>")
 
             if (length(warnings) > 0) {
                 html <- paste0(html,
-                    "<p><strong>Warnings:</strong></p><ul>",
+                    "<div style='background:rgba(220,53,69,0.12);border-left:4px solid #dc3545;padding:12px;color:inherit;'>",
+                    "<p><strong>", .("Warnings"), ":</strong></p><ul>",
                     paste0("<li>", warnings, "</li>", collapse = ""),
-                    "</ul>"
+                    "</ul></div>"
                 )
             }
 
             if (length(recommendations) > 0) {
                 html <- paste0(html,
-                    "<p><strong>Recommendations:</strong></p><ul>",
+                    "<div style='background:rgba(255,193,7,0.12);border-left:4px solid #ffc107;padding:12px;color:inherit;'>",
+                    "<p><strong>", .("Recommendations"), ":</strong></p><ul>",
                     paste0("<li>", recommendations, "</li>", collapse = ""),
-                    "</ul>"
+                    "</ul></div>"
                 )
             }
 
-            paste0(html, "</div>")
+            paste0(html, "<p><em>",
+                   .("These are descriptive screening heuristics, not validated clinical cutoffs or tests of statistical assumptions."),
+                   "</em></p></section>")
         },
 
         .buildDataQualityOkHtml = function(n_final, missing_pct_original) {
             # Build HTML for successful data quality check
             paste0(
                 "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-left: 4px solid #4caf50; margin: 10px 0; color: inherit;'>",
-                "<h4>Data Quality Check</h4>",
-                "<p><strong>Cases in the table:</strong> N = ", n_final, "</p>",
-                "<p><strong>Complete cases in the source data:</strong> ", round(100 - missing_pct_original, 1), "%</p>",
-                "<p><em>None of the sample-size, missing-data or case-loss thresholds this analysis checks was crossed.</em></p>",
+                "<h4>", .("Data Quality Check"), "</h4><p><strong>",
+                .("Cases in the table"), ":</strong> N = ", n_final, "</p>",
+                "<p><strong>", .("Complete cases in the source data"), ":</strong> ",
+                round(100 - missing_pct_original, 1), "%</p>",
+                "<p><em>",
+                .("None of the sample-size, missing-data or case-loss thresholds this analysis checks was crossed. These are descriptive screening heuristics, not validated clinical cutoffs or tests of statistical assumptions."),
+                "</em></p>",
                 "</div>"
             )
         },
         
         .setAboutContent = function() {
-            about_text <- "
-            <div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>
-                <h4>About Table One</h4>
-                <p><strong>Purpose:</strong> Table One summarizes characteristics of the overall cohort. This analysis does not stratify by group or compute p-values, confidence intervals or standardized mean differences. A row is treated as one case; verify that repeated records are not being counted as separate patients.</p>
-                
-                <p><strong>When to use:</strong></p>
-                <ul>
-                    <li>Describing patient demographics and clinical characteristics</li>
-                    <li>Summarizing baseline features of your study population</li>
-                    <li>Presenting lab values, vital signs, or biomarker data</li>
-                    <li>Creating manuscript-ready descriptive summary tables</li>
-                </ul>
-                
-                <p><strong>Variable types:</strong></p>
-                <ul>
-                    <li><em>Continuous:</em> Age, weight, lab values. How they are summarised depends on the style you pick - see below.</li>
-                    <li><em>Categorical:</em> Sex, diagnosis, treatment groups (shown as N (%))</li>
-                    <li><em>Ordinal:</em> Tumor grade, ECOG status (shown as N (%) by level)</li>
-                </ul>
-                
-                <p><strong>Output styles:</strong></p>
-                <ul>
-                    <li><strong>tableone:</strong> continuous variables as mean (SD), or as median [Q1, Q3] if you tick <em>Report continuous variables as median (Q1, Q3)</em>; categorical variables as N (percent). Missingness is shown as a percentage column.</li>
-                    <li><strong>gtsummary:</strong> continuous variables as median (Q1, Q3); categorical variables as N (percent); missing counts on an <em>Unknown</em> row.</li>
-                    <li><strong>arsenal:</strong> continuous variables as mean (SD) with the range; categorical variables as N (percent); missing counts on an <em>N-Miss</em> row.</li>
-                    <li><strong>janitor:</strong> counts and percentages for categorical, ordinal, text and logical variables with at most 20 recorded categories. Numeric measurements are skipped even in small samples; convert numeric category codes to Nominal or Ordinal (or factor() in R) explicitly. Missing values get their own row, with Percent computed over all cases and Valid Percent over recorded cases.</li>
-                </ul>
-
-                <p><strong>Reading the percentages:</strong> in the tableone, gtsummary and arsenal styles categorical percentages use cases with a recorded value, not all cases. Missingness is reported separately (a percentage column in tableone; counts in gtsummary and arsenal). A variable with 50 of 100 values missing and 15 cases in a level is shown as 15 (30.0), not 15 (15.0). The tableone style displays only the second level of a binary factor, with that level named in the row; gtsummary can also display dichotomous variables on a single row.</p>
-
-                <p><strong>Numbers used as category codes:</strong> a numeric variable with fewer than 10 distinct values is summarised as mean (SD) by the tableone and arsenal styles but as N (percent) per level by the gtsummary style, so the style you pick changes how such a variable is treated. Convert it to a nominal or ordinal variable in the data tab if the numbers are codes rather than measurements.</p>
-            </div>"
+            if (!isTRUE(self$options$showAbout))
+                return(invisible(NULL))
+            about_text <- paste0(
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding:15px; color:inherit;'>",
+                "<h4>", .("About Table One"), "</h4><p>",
+                .("Table One summarizes characteristics of the overall cohort, such as demographics, tumor grade and laboratory measurements. It does not stratify by group or compute p-values, confidence intervals or standardized mean differences."),
+                "</p><p>", .("A row is treated as one case. Repeated records are not deduplicated. Frequency weights, when supplied, represent replicated rows, not verified unique patients or a complex survey design."),
+                "</p><h5>", .("Output styles"), "</h5><ul><li>",
+                .("tableone: continuous variables as mean (SD), or median (Q1, Q3) when requested; categorical variables as N (percent). Missingness is shown as a percentage column. Only the second level of a binary factor is displayed, with that level named."),
+                "</li><li>",
+                .("gtsummary: continuous variables as median (Q1, Q3); categorical variables as N (percent); missing counts on an Unknown row. Dichotomous row labels name the counted level, such as TRUE, 1 or yes."),
+                "</li><li>",
+                .("arsenal: continuous variables as mean (SD) with the range; categorical variables as N (percent); missing counts on an N-Miss row."),
+                "</li><li>",
+                .("janitor: counts and percentages for categorical, ordinal, text and logical variables with at most 20 recorded categories. Unused factor levels are not displayed. Numeric measurements are skipped; convert numeric category codes to factors explicitly. Percent uses all cases; Valid Percent uses recorded cases."),
+                "</li></ul><h5>", .("Example interpretation"), "</h5><p>",
+                .("If 50 of 100 values are missing and 15 recorded values are category A, tableone, gtsummary and arsenal report A as 15 (30%). Janitor reports Percent as 15% and Valid Percent as 30%. Missingness is reported separately."),
+                "</p><p>",
+                .("A gtsummary row labeled flag = TRUE with 0 (0%) means no recorded value was TRUE; it does not mean there were no observations. Check which category the row label names before interpreting a percentage."),
+                "</p><h5>", .("Input and missing-data policy"), "</h5><p>",
+                .("Actual NA factor levels are treated as missing before exclusion and tabulation. Literal text categories such as NA and Unknown remain categories. Listwise deletion uses only included variables; no imputation is performed."),
+                "</p><p>",
+                .("When a summary label conflicts with a recorded category, the summary row uses Missing (NA) or Total (all cases), with a numeric suffix if needed. Recorded category labels and counts are unchanged."),
+                "</p><p>",
+                .("Date, date-time, duration and custom scalar storage classes are omitted before exclusion. Matrix, array and list columns are rejected before R data selection. Convert unsupported inputs to explicitly defined scalar measurements or categories first."),
+                "</p><p>",
+                .("Numeric variables with fewer than 10 distinct values may be reported as categories by gtsummary but as measurements by tableone and arsenal. Set category codes to Nominal or Ordinal in jamovi, or factor() in R."),
+                "</p></div>")
             self$results$about$setContent(about_text)
         },
         
@@ -658,10 +818,10 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
 
             # Variable type analysis (on final data for consistency)
             var_types <- sapply(data, function(x) {
-                if (is.numeric(x)) "Numeric"
-                else if (is.factor(x)) "Categorical"
-                else if (is.logical(x)) "Logical"
-                else "Other"
+                if (is.numeric(x)) .("Numeric")
+                else if (is.factor(x) || is.character(x)) .("Categorical")
+                else if (is.logical(x)) .("Logical")
+                else .("Other")
             })
             type_summary <- table(var_types)
             type_text <- paste(names(type_summary), ":", type_summary, collapse = "; ")
@@ -675,49 +835,62 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # Build summary text with transparent reporting
             summary_text <- paste0(
                 "<div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
-                "<h4>Analysis Summary</h4>",
+                "<h4>", .("Analysis Summary"), "</h4>",
 
                 # Original dataset info
-                "<p><strong>Original dataset:</strong> ", n_original, " cases with ", n_vars, " selected variables</p>",
-                "<p><strong>Complete cases (original):</strong> ", n_complete_original, " (",
+                "<p><strong>", .("Original dataset"), ":</strong> ",
+                private$.formatText(
+                    if (n_vars == 1L) .("{n} cases with {variables} selected variable")
+                    else .("{n} cases with {variables} selected variables"),
+                    n = n_original, variables = n_vars), "</p>",
+                "<p><strong>", .("Complete cases (original)"), ":</strong> ", n_complete_original, " (",
                 round(100 * n_complete_original / n_original, 1), "%)</p>",
 
                 # Missing data transparency
                 if (has_missing) {
-                    paste0("<p><strong>Missing data (original):</strong> ", missing_pct_label,
-                           "% of cases have at least one missing value",
+                    paste0("<p><strong>", .("Missing data (original)"), ":</strong> ",
+                           private$.formatText(.("{percent}% of cases have at least one missing value"),
+                                               percent = missing_pct_label),
                            if (length(high_missing_vars_safe) > 0) {
-                               paste0(" <br><em>Variables with >20% missing: ",
-                                      paste(high_missing_vars_safe, collapse = ", "), "</em>")
+                               paste0(" <br><em>", private$.formatText(
+                                   .("Variables with >20% missing: {variables}"),
+                                   variables = paste(high_missing_vars_safe, collapse = ", ")),
+                                   "</em>")
                            } else "",
                            "</p>")
                 } else "",
 
                 # Exclusion warning if applicable
                 if (excluded_n > 0) {
-                    paste0("<p><strong>Case exclusion:</strong> ",
-                           excluded_n, " cases (", round(100 * excluded_n / n_original, 1),
-                           "%) excluded due to missing values. <strong>Final N = ", n_final,
-                           "</strong></p>",
+                    paste0("<p><strong>", .("Case exclusion"), ":</strong> ",
+                           private$.formatText(
+                               .("{n} cases ({percent}%) excluded due to missing values. Final N = {retained}"),
+                               n = excluded_n, percent = round(100 * excluded_n / n_original, 1),
+                               retained = n_final), "</p>",
                            "<p style='color: inherit; background-color: rgba(255, 202, 33, 0.23); padding: 8px; border-radius: 4px;'>",
-                           "<em>Note: Listwise deletion was applied. The table below shows statistics for the ",
-                           n_final, " complete cases only. All displayed variables use the same complete-case denominator.</em></p>")
+                           "<em>", private$.formatText(
+                               .("Note: Listwise deletion was applied. The table below shows statistics for the {n} complete cases only. All displayed variables use the same complete-case denominator."),
+                               n = n_final), "</em></p>")
                 } else {
-                    paste0("<p><strong>Analysis sample:</strong> ", n_final, " cases (no exclusions applied)</p>",
+                    paste0("<p><strong>", .("Analysis sample"), ":</strong> ",
+                           private$.formatText(.("{n} cases (no exclusions applied)"), n = n_final),
+                           "</p>",
                            if (has_missing) {
-                               "<p style='color: inherit; background-color: rgba(255, 202, 33, 0.23); padding: 8px; border-radius: 4px;'><em> Note: Missing values are present but NOT excluded. Different variables may have different sample sizes (denominators) in the table below. Consider enabling 'Exclude Missing Values' for consistent denominators.</em></p>"
+                               paste0("<p><em>",
+                                   .("Note: Missing values are present but NOT excluded. Different variables may have different sample sizes (denominators) in the table below. Consider enabling missing-value exclusion for consistent denominators."),
+                                   "</em></p>")
                            } else "")
                 },
 
-                "<p><strong>Variable types:</strong> ", type_text, "</p>",
-                "<p><em>This Table One summarizes baseline characteristics commonly reported in clinical research manuscripts.</em></p>",
+                "<p><strong>", .("Variable types"), ":</strong> ", type_text, "</p>",
+                "<p><em>", .("This Table One summarizes baseline characteristics commonly reported in clinical research manuscripts."), "</em></p>",
                 "</div>"
             )
             self$results$summary$setContent(summary_text)
         },
         
         .checkDataQuality = function(data, vars, original_data, n_complete = NULL) {
-            # NOTE: Data quality thresholds align with clinical research standards:
+            # Descriptive screening heuristics, not validated clinical cutoffs:
             # - STRONG_WARNING thresholds: N<10, missing>50%, exclusion>30%
             # - WARNING thresholds: N<30, missing>20%, exclusion>10%
             # These would map to NoticeType when Notice serialization is supported.
@@ -729,36 +902,42 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             warnings <- c()
             recommendations <- c()
 
-            # Check sample size (clinical thresholds)
+            # Check sample size (descriptive thresholds)
             if (n_final < 10) {
                 # STRONG_WARNING: Very small sample
-                warnings <- c(warnings, paste0("<strong>Very small final sample size (N = ", n_final, ").</strong> With fewer than 10 cases every observation shifts a category percentage by more than 10 points, and means and standard deviations are driven by single values. Listing the individual observations usually conveys more than a summary statistic. This analysis is descriptive only - no test or confidence interval is computed."))
+                warnings <- c(warnings, private$.formatText(.("Very small final sample size (N = {n}). With fewer than 10 cases, one case represents more than 10 percentage points of the total. Summaries can be sensitive to individual observations. Report counts and consider the risk of identifying individuals. This analysis is descriptive only; no test or confidence interval is computed."), n = n_final))
             } else if (n_final < 30) {
                 # WARNING: Small sample
-                recommendations <- c(recommendations, paste0("<em>Small final sample size (N = ", n_final, ").</em> Each case moves a category percentage by more than 3 points, so percentages in sparse categories are unstable and individual cases may be identifiable. Consider reporting counts alongside percentages."))
+                recommendations <- c(recommendations, private$.formatText(.("Small final sample size (N = {n}). Each case represents more than 3 percentage points of the total. Percentages in sparse categories can be unstable and individual cases may be identifiable. Report counts alongside percentages."), n = n_final))
             }
 
             # Check missing data from ORIGINAL dataset. The complete-case count is
             # computed once in .run() and passed in to avoid recomputing complete.cases().
             if (is.null(n_complete)) n_complete <- sum(complete.cases(original_data))
-            missing_pct_original <- round(100 * (1 - n_complete / n_original), 1)
-            if (missing_pct_original > 50) {
+            n_incomplete <- n_original - n_complete
+            missing_pct_original <- 100 * n_incomplete / n_original
+            missing_label <- sprintf("%.2f%% (%d/%d)", missing_pct_original,
+                                     n_incomplete, n_original)
+            if (n_incomplete > n_original * 0.5) {
                 # STRONG_WARNING: High missing data
-                warnings <- c(warnings, paste0("<strong> High missing data rate in original dataset (", missing_pct_original, "%).</strong> More than half of cases have at least one missing value. Results may not be representative of the full population. Consider data cleaning, imputation, or reporting missing data patterns."))
-            } else if (missing_pct_original > 20) {
+                warnings <- c(warnings, private$.formatText(.("High missing data rate in original dataset: {missing} cases have at least one missing value. More than half of cases are incomplete. Results may not represent the full sample. Report missing-data patterns and review the missing-data strategy; this analysis does not impute values."), missing = missing_label))
+            } else if (n_incomplete > n_original * 0.2) {
                 # WARNING: Moderate missing data
-                recommendations <- c(recommendations, paste0("<em>Moderate missing data in original dataset (", missing_pct_original, "%).</em> Consider reporting missing data patterns or using multiple imputation. Compare characteristics of complete vs. incomplete cases."))
+                recommendations <- c(recommendations, private$.formatText(.("Moderate missing data in original dataset: {missing} cases have at least one missing value. Report missing-data patterns and compare complete with incomplete cases. This analysis does not impute values."), missing = missing_label))
             }
 
             # Warn if large proportion excluded
             if (n_original > n_final) {
-                excluded_pct <- round(100 * (n_original - n_final) / n_original, 1)
-                if (excluded_pct > 30) {
+                n_excluded <- n_original - n_final
+                excluded_pct <- 100 * n_excluded / n_original
+                excluded_label <- sprintf("%.2f%% (%d/%d)", excluded_pct,
+                                          n_excluded, n_original)
+                if (n_excluded > n_original * 0.3) {
                     # STRONG_WARNING: Large exclusion
-                    warnings <- c(warnings, paste0("<strong> Large case loss due to missing data (", excluded_pct, "% excluded).</strong> Excluded: ", n_original - n_final, " cases | Retained: ", n_final, " cases. Results may not be representative of the full sample. Consider multiple imputation or sensitivity analyses."))
-                } else if (excluded_pct > 10) {
+                    warnings <- c(warnings, private$.formatText(.("Large case loss due to missing data: {excluded} cases excluded; {n} retained. Results may not represent the full sample. Review the missing-data strategy and consider a sensitivity analysis."), excluded = excluded_label, n = n_final))
+                } else if (n_excluded > n_original * 0.1) {
                     # WARNING: Notable exclusion
-                    recommendations <- c(recommendations, paste0("<em>Notable case loss (", excluded_pct, "% excluded).</em> Excluded: ", n_original - n_final, " cases | Retained: ", n_final, " cases. Compare characteristics of excluded vs. included cases to assess potential bias."))
+                    recommendations <- c(recommendations, private$.formatText(.("Notable case loss: {excluded} cases excluded; {n} retained. Compare excluded with included cases to assess potential bias."), excluded = excluded_label, n = n_final))
                 }
             }
 
@@ -776,12 +955,19 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     # yet the styles still disagree about how to summarise it.
                     if (is.numeric(var_data) && n_unique < 10 && n_valid > 10) {
                         # INFO: Variable type recommendation
-                        recommendations <- c(recommendations, sprintf("<em>Variable '%s' is stored as a number but has only %d distinct values.</em> The tableone and arsenal styles report its mean (SD); the gtsummary style reports N (percent) per level. Convert it to a nominal or ordinal variable in the data tab if the numbers are category codes rather than measurements.", htmltools::htmlEscape(var), n_unique))
+                        t1_summary <- if (isTRUE(self$options$nonnormal))
+                            .("The tableone median option is enabled: numeric measurements are reported as median (Q1, Q3) in that style.")
+                        else
+                            .("The tableone median option is disabled: numeric measurements are reported as mean (SD) in that style.")
+                        recommendations <- c(recommendations, paste(
+                            private$.formatText(.("Variable '{variable}' is stored as a number but has only {n} distinct values."), variable = htmltools::htmlEscape(var), n = n_unique),
+                            t1_summary,
+                            .("Arsenal reports mean (SD); gtsummary may report N (percent) per level. Convert the variable to nominal or ordinal if the numbers are category codes rather than measurements.")))
                     }
 
                     if (is.character(var_data) && n_unique > n_valid * 0.8) {
                         # INFO: Variable type recommendation
-                        recommendations <- c(recommendations, sprintf("<em>Variable '%s' has many unique text values.</em> Consider grouping categories.", htmltools::htmlEscape(var)))
+                        recommendations <- c(recommendations, private$.formatText(.("Variable '{variable}' has many unique text values. Consider grouping categories."), variable = htmltools::htmlEscape(var)))
                     }
                 }
             }
@@ -829,7 +1015,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # Base the completeness branch on the raw count, not the rounded percent,
             # so tiny-but-nonzero missingness is not reported as complete data.
             has_missing <- n_complete < n_original
-            missing_pct <- round(100 * (1 - n_complete / n_original), 1)
+            missing_pct <- 100 * (n_original - n_complete) / n_original
             # Report values that round to 0.0% but are non-zero as "<0.1%".
             missing_pct_str <- if (missing_pct < 0.1) "<0.1%" else sprintf("%.1f%%", missing_pct)
 
@@ -837,18 +1023,21 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             var_list <- if (n_vars <= 3) {
                 paste(vars, collapse = ", ")
             } else {
-                paste0(paste(head(vars, 3), collapse = ", "), ", and ", n_vars - 3, " other variable", if (n_vars - 3 > 1) "s" else "")
+                private$.formatText(
+                    if (n_vars == 4L) .("{variables}, and {n} other variable")
+                    else .("{variables}, and {n} other variables"),
+                    variables = paste(head(vars, 3), collapse = ", "), n = n_vars - 3L)
             }
 
             # Build missing data clause
             missing_clause <- if (!has_missing) {
-                "Complete data were available for all cases."
+                .("Complete data were available for all cases.")
             } else if (missing_pct < 5) {
-                sprintf("Minimal missing data were detected (%s of cases with at least one missing value).", missing_pct_str)
+                private$.formatText(.("Minimal missing data were detected ({percent} of cases with at least one missing value)."), percent = missing_pct_str)
             } else if (missing_pct < 20) {
-                sprintf("Moderate missing data were observed (%s of cases incomplete).", missing_pct_str)
+                private$.formatText(.("Moderate missing data were observed ({percent} of cases incomplete)."), percent = missing_pct_str)
             } else {
-                sprintf("Substantial missing data were present (%s of cases with at least one missing value).", missing_pct_str)
+                private$.formatText(.("Substantial missing data were present ({percent} of cases with at least one missing value)."), percent = missing_pct_str)
             }
 
             # This text is designed to be selected and pasted, and the leading
@@ -857,33 +1046,32 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # ANALYSED cohort, not the screened one, or it reports a number the
             # table below does not show.
             report_text <- if (excluded_n > 0) {
-                sprintf(
-                    "Table One summarizes baseline characteristics of the %d %s with complete data for all listed variables (of %d screened). Variables included %s. %s",
-                    n_final,
-                    if (n_final == 1) "patient" else "patients",
-                    n_original,
-                    var_list,
-                    missing_clause
-                )
+                private$.formatText(
+                    if (n_final == 1L)
+                        .("Table One summarizes baseline characteristics of the {n} case with complete data for all listed variables (of {screened} screened). Variables included {variables}. {missing}")
+                    else
+                        .("Table One summarizes baseline characteristics of the {n} cases with complete data for all listed variables (of {screened} screened). Variables included {variables}. {missing}"),
+                    n = n_final, screened = n_original, variables = var_list, missing = missing_clause)
             } else {
-                sprintf(
-                    "Table One summarizes baseline characteristics of %d %s. Variables included %s. %s",
-                    n_original,
-                    if (n_original == 1) "patient" else "patients",
-                    var_list,
-                    missing_clause
-                )
+                private$.formatText(
+                    if (n_original == 1L)
+                        .("Table One summarizes baseline characteristics of {n} case. Variables included {variables}. {missing}")
+                    else
+                        .("Table One summarizes baseline characteristics of {n} cases. Variables included {variables}. {missing}"),
+                    n = n_original, variables = var_list, missing = missing_clause)
             }
 
             # Format with copy button styling
             html_output <- paste0(
                 "<div style='background-color: rgba(33, 152, 255, 0.07); border: 2px solid #4682b4; border-radius: 5px; padding: 15px; margin: 10px 0; color: inherit;'>",
-                "<h4 style='margin-top: 0;'>Copy-Ready Report Sentence</h4>",
+                "<h4 style='margin-top: 0;'>", .("Copy-Ready Report Sentence"), "</h4>",
                 "<p style='font-family: Georgia, serif; font-size: 14px; line-height: 1.6;'>",
                 htmltools::htmlEscape(report_text),
                 "</p>",
                 "<p style='margin-bottom: 0; font-size: 12px; opacity: 0.8;'>",
-                "<em>Select and copy the text above for your manuscript. Edit as needed for your specific reporting requirements.</em>",
+                "<em>",
+                .("Select and copy the text above for your manuscript. Counts refer to rows, not verified unique patients; repeated records are not deduplicated. Edit as needed for your specific reporting requirements."),
+                "</em>",
                 "</p>",
                 "</div>"
             )
@@ -892,6 +1080,39 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
         }
   ), # End of private list.
   public = list(
+        #' @description Initialize the analysis, validating original R column shapes and empty selections.
+        #' @param noThrow Whether initialization errors are stored in the results.
+        init = function(noThrow = FALSE) {
+            # Validate original columns before jmvcore::select() can flatten a
+            # matrix/list and silently reinterpret its first component.
+            if (is.data.frame(private$.data) && private$.status == "none") {
+                selected <- intersect(self$options$vars, names(private$.data))
+                shaped <- Filter(function(v) {
+                    value <- private$.data[[v]]
+                    !is.null(dim(value)) || is.list(value)
+                }, selected)
+                if (length(shaped) > 0L) {
+                    private$.clearOutputs()
+                    message <- private$.formatText(
+                        .("Unsupported non-scalar columns: {variables}. Matrix, array and list columns cannot be summarized. Select scalar columns or explicitly extract the intended measurements first."),
+                        variables = paste(shaped, collapse = "; "))
+                    if (isTRUE(noThrow)) {
+                        self$setError(message)
+                        return(invisible(NULL))
+                    }
+                    private$.rejectPlain(message)
+                }
+            }
+            # jmvcore 2.7 select(df, character()) assigns nonempty row names
+            # to a zero-row frame. Only the no-selection R path needs this
+            # workaround; preserve the source frame for onboarding afterwards.
+            if (length(self$options$vars) == 0L && is.data.frame(private$.data)) {
+                source_data <- private$.data
+                private$.data <- source_data[FALSE, FALSE, drop = FALSE]
+                on.exit(private$.data <- source_data, add = TRUE)
+            }
+            super$init(noThrow = noThrow)
+        },
         #' @description
         #' Generate R source code for Table One analysis
         #' @return Character string with R syntax for reproducible analysis

@@ -3,7 +3,7 @@ name: tableone
 title: "Table One"
 menuGroup: ExplorationT
 menuSubgroup: "ClinicoPath Descriptives"
-version: '1.0.7'
+version: '1.0.9'
 jas: '1.2'
 
 description:
@@ -37,7 +37,7 @@ options:
     type: Data
     description:
       R: >
-        The input data as a data frame.
+        The input data as a data frame with scalar columns. Selected matrix, array and list columns are rejected before data selection. Frequency weights, when supplied by jamovi, represent replicated rows rather than unique patients or a complex survey design.
       jamovi: >
         The dataset for analysis.
         
@@ -53,9 +53,10 @@ options:
     default: NULL
     description:
       R: >
-        A set of variable names from `data` to include in the Table One. Supports numeric, ordinal, and categorical variables.
+        A set of variable names from `data` to include in the Table One. Supports numeric and integer measurements, factors (including ordered factors), character and logical variables. Date, date-time, duration and other custom storage classes are omitted with an explanation before missing-value exclusion. Convert these to explicitly defined numeric measurements or factors first. An empty selection displays instructions.
+        Actual NA factor levels are normalized to missing values before exclusion and tabulation; literal text categories such as NA or Unknown remain unchanged.
       jamovi: >
-        Select the variables to include in the table.
+        Select numeric, ordinal, categorical, text or logical variables. Unsupported storage types and all-missing variables are omitted before missing-value exclusion.
         
   - name: sty
     title: "Table style"
@@ -73,8 +74,10 @@ options:
     description:
       R: >
         Specify the descriptive table style. 'tableone' reports mean (SD), or median (Q1, Q3) when nonnormal is TRUE, and categorical N (percent); only the second level of binary factors is displayed. 'gtsummary' reports median (Q1, Q3) for continuous variables and may treat numeric variables with fewer than 10 distinct values as categorical. 'arsenal' reports mean (SD) and range. 'janitor' tabulates factors, characters and logicals with at most 20 recorded categories; numeric measurements are skipped. Convert numeric category codes with factor() before using janitor. Omitted variables do not enter listwise exclusion or supplementary summaries.
+        Dichotomous gtsummary rows explicitly name the counted level. Janitor does not display unused factor levels.
       jamovi: >
         Choose the descriptive format. 'tableone' shows mean (SD), or median (Q1, Q3) when requested; 'gtsummary' shows median (Q1, Q3); 'arsenal' shows mean (SD) and range. 'janitor' tabulates categorical variables with at most 20 recorded categories and skips numeric measurements. Set numeric category codes to Nominal or Ordinal first.
+        Unused factor levels are hidden in janitor; dichotomous gtsummary labels name the counted level.
         
   - name: excl
     title: "Missing-value exclusion (NA)"

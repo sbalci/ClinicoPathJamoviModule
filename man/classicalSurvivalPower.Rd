@@ -88,10 +88,11 @@ for Lachin-Foulkes method.}
 \item{power_plot_range}{Sample size range for power plots (format 'min,max'
 or 'auto').}
 
-\item{export_results}{Whether to export detailed results for external
-analysis.}
+\item{export_results}{Whether to show an on-screen summary of the computed
+power analysis result.}
 
-\item{export_power_curve}{Whether to export power curve data points.}
+\item{export_power_curve}{Whether to show an on-screen summary of the power
+curve that was computed.}
 }
 \value{
 A results object containing:
@@ -102,8 +103,6 @@ A results object containing:
 \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 \code{results$power_plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$timeline_plot} \tab \tab \tab \tab \tab an image \cr
-\code{results$exported_results} \tab \tab \tab \tab \tab an output \cr
-\code{results$exported_power_curve} \tab \tab \tab \tab \tab an output \cr
 \code{results$export_summary} \tab \tab \tab \tab \tab a html \cr
 }
 }

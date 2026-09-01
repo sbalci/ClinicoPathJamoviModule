@@ -1553,12 +1553,12 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="survivalPlotsHeading3",
                 title="Survival Plots Explanations",
-                visible="((sc || ce || ch || kmunicate) && showExplanations)"))
+                visible="(((sc && (findcut || multiple_cutoffs)) || (findcut && (ce || ch || kmunicate))) && showExplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="survivalPlotsExplanation",
                 title="Understanding Survival Curves and Plots",
-                visible="((sc || ce || ch || kmunicate) && showExplanations)",
+                visible="(((sc && (findcut || multiple_cutoffs)) || (findcut && (ce || ch || kmunicate))) && showExplanations)",
                 clearWith=list(
                     "sc",
                     "ce",
@@ -1606,7 +1606,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="loglogPlotExplanation",
                 title="Understanding Log-Log Plots for Proportional Hazards Assessment",
-                visible="(loglog && showExplanations)",
+                visible="(findcut && loglog && showExplanations)",
                 clearWith=list(
                     "loglog",
                     "contexpl",
@@ -2038,8 +2038,8 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="calculatedmulticut",
                 title="Add Multiple Cut-off Groups to Data",
                 measureType="nominal",
-                varTitle="`Multiple Cut-off Risk Groups - from ${ contexpl }`",
-                varDescription="Multiple Cut-off Risk Groups from given Cut-offs in Continuous Survival Function",
+                varTitle="`Multiple Cut-off Marker Groups - from ${ contexpl }`",
+                varDescription="Ordered marker-value groups from the reported cut-offs in Continuous Survival Analysis",
                 clearWith=list(
                     "multiple_cutoffs",
                     "num_cutoffs",
@@ -2084,7 +2084,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survivalcont",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = survivalcontResults$new(options=options),
                 data = data,
@@ -2097,7 +2097,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'none')
         }))
 
-#' Survival Analysis for Continuous Variable
+#' Survival Analysis for Continuous Explanatory Variable
 #'
 #' 
 #' @param data The data as a data frame.
@@ -2184,9 +2184,13 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   groups); the observed survival ordering must be read from the results and
 #'   is not assumed in advance.
 #' @param cutoff_method Method for finding multiple cut-offs. Quantile-based
-#'   uses tertiles/quartiles, Recursive finds sequential optimal points,
-#'   Tree-based uses survival trees, Minimum P-value finds points that minimize
-#'   log-rank p-values.
+#'   uses equally spaced quantiles. Recursive repeatedly finds an optimal split
+#'   after excluding observations close to earlier splits. Tree-based uses
+#'   survival-tree splits. Minimum P-value exhaustively searches up to 1000
+#'   admissible combinations; for larger candidate spaces it evaluates 1000
+#'   unique combinations selected reproducibly from the Random seed. All
+#'   data-derived cut-offs and their group comparisons are exploratory and
+#'   require external validation.
 #' @param min_group_size Minimum percentage of patients required in each group
 #'   created by cut-offs. Prevents creating groups with insufficient sample
 #'   sizes for reliable analysis.
@@ -2216,8 +2220,9 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   with a single cut-off, the displayed groups are compared descriptively at a
 #'   common observed horizon.
 #' @param rmst_tau Specify the time horizon for RMST calculation. If left as
-#'   0, will use 75th percentile  of observed survival times. This represents
-#'   the maximum follow-up time for RMST calculation.
+#'   0, uses the 75th percentile of observed survival times, bounded by the
+#'   maximum follow-up supported in every displayed group. This is a common
+#'   descriptive horizon, not the maximum observed follow-up.
 #' @param residual_diagnostics Enable Cox model residual diagnostics including
 #'   case-level Martingale, Deviance, and Score residuals plus event-time
 #'   Schoenfeld residuals. These are diagnostic aids; Schoenfeld residuals alone
@@ -2239,8 +2244,8 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   and plots. These summaries provide plain-language interpretations of the
 #'   statistical results. Turn off to reduce visual clutter when summaries are
 #'   not needed.
-#' @param seed Random seed for Monte Carlo components of minimum-p-value and
-#'   selection-adjusted cut-point calculations.
+#' @param seed Random seed used to select candidate combinations when the
+#'   minimum-P-value search space is too large for exhaustive evaluation.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr

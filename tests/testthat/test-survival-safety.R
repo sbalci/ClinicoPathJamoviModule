@@ -135,6 +135,30 @@ test_that("survival handles variable names with spaces", {
   expect_true(inherits(result, "R6"))
 })
 
+test_that("survival handles punctuation and Unicode in adjusted formulas", {
+  test_data <- survival_test
+  names(test_data)[names(test_data) == "elapsedtime"] <- "Follow-up time (months)"
+  names(test_data)[names(test_data) == "outcome"] <- "Olay durumu"
+  names(test_data)[names(test_data) == "treatment"] <- "Tedavi grubu - α"
+  names(test_data)[names(test_data) == "age"] <- "Yaş (yıl)"
+  names(test_data)[names(test_data) == "sex"] <- "Merkez / grup"
+
+  args <- surv_args(
+    data = test_data,
+    elapsedtime = "Follow-up time (months)",
+    outcome = "Olay durumu",
+    explanatory = "Tedavi grubu - α",
+    age_adjustment = TRUE,
+    age_variable = "Yaş (yıl)",
+    stratified_cox = TRUE,
+    strata_variable = "Merkez / grup"
+  )
+
+  result <- do.call(survival, args)
+  expect_true(inherits(result, "R6"))
+  expect_gt(result$ageAdjustedCoxTable$rowCount, 0)
+})
+
 # ─── Weighted Log-Rank Tests ─────────────────────────────
 
 test_that("survival weighted log-rank tests run correctly", {

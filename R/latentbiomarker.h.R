@@ -506,11 +506,20 @@ latentbiomarkerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Output$new(
                 options=options,
                 name="save_factor_scores",
-                varTitle="`{factor_score_name}`",
+                varTitle="Factor Score",
+                varDescription="Latent biomarker factor score estimated from the indicator variables",
                 measureType="continuous",
                 clearWith=list(
+                    "save_factor_scores",
+                    "factor_score_name",
+                    "reflective_confirmed",
+                    "dep_time",
+                    "dep_event",
                     "indicators",
-                    "indicator_types")))}))
+                    "adjusters",
+                    "indicator_types",
+                    "factor_score_method",
+                    "standardize_scores")))}))
 
 latentbiomarkerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "latentbiomarkerBase",

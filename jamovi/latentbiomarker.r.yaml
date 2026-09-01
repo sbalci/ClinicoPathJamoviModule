@@ -257,11 +257,27 @@ items:
         - indicators
         - adjusters
 
+    # varTitle is STATIC: jmvcore::format's placeholder regex is
+    # \{ *[A-Za-z][A-Za-z0-9]* *\} -- no underscore -- so `{factor_score_name}` shipped
+    # to jamovi verbatim as the column name. The user's chosen name is applied at
+    # runtime with setTitle() in R/latentbiomarker.b.R.
     - name: save_factor_scores
       type: Output
-      varTitle: '`{factor_score_name}`'
+      varTitle: 'Factor Score'
+      varDescription: 'Latent biomarker factor score estimated from the indicator variables'
       measureType: continuous
+      # clearWith must list EVERY option that changes the delivered values or the
+      # analysed row set: the .b.R write is gated on isNotFilled(), so an option
+      # missing here leaves a stale column in the user's spreadsheet.
       clearWith:
+        - save_factor_scores
+        - factor_score_name
+        - reflective_confirmed
+        - dep_time
+        - dep_event
         - indicators
+        - adjusters
         - indicator_types
+        - factor_score_method
+        - standardize_scores
 ...

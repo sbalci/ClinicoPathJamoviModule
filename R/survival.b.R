@@ -720,11 +720,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
                     }
                 }, error = function(e) {
-                    # Log error but don't break the analysis
-                    warning(.fmt(
-                        .("Table population failed: {message}"),
-                        message = conditionMessage(e)
-                    ))
+                    private$.addHtmlMessage(
+                        "warning",
+                        .("The result table was incomplete."),
+                        .fmt(
+                            .("A result table could not be populated completely: {message}"),
+                            message = conditionMessage(e)
+                        )
+                    )
                 })
             },
             
@@ -1184,37 +1187,26 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Reset notice outputs so notices don't accumulate across runs
                 private$.initializeMessageOutputs()
 
-                # Input Validation ----
-                validation_result <- tryCatch({
-                    private$.validateInputs()
-                    self$results$todo$setVisible(FALSE)
-                    TRUE
-                }, error = function(e) {
-                    # If validation fails, show todo and hide results
+                # Keep the onboarding panel for the initial no-variable state.
+                # Once variables have been supplied, let jmvcore::reject()
+                # propagate so jamovi can show its standard analysis-level error
+                # without collapsing or imperatively hiding the results pane.
+                missing_required_input <-
+                    is.null(self$options$outcome) ||
+                    is.null(self$options$explanatory) ||
+                    (is.null(self$options$elapsedtime) &&
+                        (!self$options$tint ||
+                            is.null(self$options$dxdate) ||
+                            is.null(self$options$fudate)))
+
+                if (missing_required_input) {
                     private$.todo()
-                    self$results$medianSummary$setVisible(FALSE)
-                    self$results$medianTable$setVisible(FALSE)
-                    self$results$coxSummary$setVisible(FALSE)
-                    self$results$coxTable$setVisible(FALSE)
-                    self$results$tCoxtext2$setVisible(FALSE)
-                    self$results$cox_ph$setVisible(FALSE)
-                    self$results$plot8$setVisible(FALSE)
-                    self$results$survTableSummary$setVisible(FALSE)
-                    self$results$survTable$setVisible(FALSE)
-                    self$results$pairwiseSummary$setVisible(FALSE)
-                    self$results$pairwiseTable$setVisible(FALSE)
-                    self$results$plot$setVisible(FALSE)
-                    self$results$plot2$setVisible(FALSE)
-                    self$results$plot3$setVisible(FALSE)
-                    self$results$plot6$setVisible(FALSE)
                     self$results$todo$setVisible(TRUE)
-                    FALSE
-                })
-                
-                # Return early if validation failed
-                if (validation_result != TRUE) {
                     return()
                 }
+
+                private$.validateInputs()
+                self$results$todo$setVisible(FALSE)
 
                 # Populate subtitle with explanatory variable
                 if (!is.null(self$options$explanatory)) {
@@ -1944,10 +1936,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             return()
                         }
                     } else {
-                        warning(.fmt(
-                            .("Stratification variable {variable} not found. Using standard Cox regression."),
-                            variable = strata_var
-                        ))
+                        self$results$coxTable$setNote(
+                            "strata_not_found",
+                            .fmt(
+                                .("Stratification variable {variable} was not found. Standard Cox regression was used."),
+                                variable = strata_var
+                            )
+                        )
                         strata_var <- NULL
                     }
                 }
@@ -2340,10 +2335,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return(residuals_df)
                     
                 }, error = function(e) {
-                    warning(.fmt(
-                        .("Error calculating residuals: {message}"),
-                        message = conditionMessage(e)
-                    ))
+                    self$results$residualsTable$setNote(
+                        "calculation_error",
+                        .fmt(
+                            .("Residual diagnostics could not be calculated: {message}"),
+                            message = conditionMessage(e)
+                        )
+                    )
                     return(NULL)
                 })
             }
@@ -2445,7 +2443,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             ,
             .exportSurvivalData = function(results) {
                 # Export Kaplan-Meier estimates for external analysis
-                if (!self$options$export_survival_data || !self$results$survivalExport$isNotFilled()) {
+                if (!self$options$export_survival_data || !self$results$export_survival_data$isNotFilled()) {
                     return()
                 }
                 
@@ -2463,42 +2461,87 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     km_fit <- survival::survfit(formula, data = mydata)
 
-                    # Generate time points for export (every unit from 0 to max time)
-                    max_time <- max(mydata[[mytime]], na.rm = TRUE)
-                    export_times <- seq(0, max_time, by = max(1, floor(max_time/100)))
-                    
-                    # Get survival estimates at specified times
-                    km_export <- summary(km_fit, times = export_times, extend = TRUE)
-                    # For each patient in cleanData, extract estimated KM survival probability at their observation time
-                    times <- mydata[[mytime]]
-                    surv_vals <- numeric(nrow(mydata))
-                    for (i in seq_len(nrow(mydata))) {
-                        s_sum <- tryCatch(summary(km_fit, times = times[i], extend = TRUE), error = function(e) NULL)
-                        if (is.null(s_sum) || is.null(s_sum$surv) || length(s_sum$surv) == 0) {
-                            surv_vals[i] <- NA_real_
+                    # Each patient gets the KM probability from THEIR OWN curve at
+                    # THEIR OWN follow-up time.
+                    #
+                    # The previous version called summary() once per row and took
+                    # $surv[1]. For a stratified fit that is wrong: with an
+                    # explanatory variable, summary(km_fit, times = t)$surv returns
+                    # ONE VALUE PER STRATUM in stratum order, so [1] handed every
+                    # patient the FIRST group's probability regardless of the group
+                    # they are actually in. Measured on a two-group fixture, 28 of 30
+                    # second-group rows carried the wrong number. The column was dead
+                    # (see the result-item/option name mismatch fixed alongside this),
+                    # so no user ever saw it -- but wiring the column up without
+                    # fixing this would have shipped a plausible wrong value into the
+                    # user's dataset. It was also O(n) survfit summaries; one call now.
+                    times  <- mydata[[mytime]]
+                    utimes <- sort(unique(times[!is.na(times)]))
+                    surv_vals <- rep(NA_real_, nrow(mydata))
+
+                    if (length(utimes) > 0) {
+                        s_all <- summary(km_fit, times = utimes, extend = TRUE)
+
+                        if (is.null(km_fit$strata) || is.null(s_all$strata)) {
+                            # Single curve: match on follow-up time alone.
+                            surv_vals <- s_all$surv[match(times, s_all$time)]
                         } else {
-                            surv_vals[i] <- round(s_sum$surv[1], 4)
+                            # Stratified: match on (stratum, time). The stratum is
+                            # identified by POSITION rather than by rebuilding the
+                            # "<term>=<level>" label, because the formula term has been
+                            # through .escapeVariableNames() and may be backtick-quoted.
+                            # survfit orders strata by the grouping factor's levels, so
+                            # level i corresponds to names(km_fit$strata)[i].
+                            grp  <- factor(mydata[[myfactor]])
+                            snam <- names(km_fit$strata)
+                            if (nlevels(grp) == length(snam)) {
+                                key_tab <- paste(as.character(s_all$strata), s_all$time, sep = "\r")
+                                key_pat <- paste(snam[as.integer(grp)], times, sep = "\r")
+                                surv_vals <- s_all$surv[match(key_pat, key_tab)]
+                            }
+                            # If the strata do not line up with the factor levels we
+                            # cannot say which curve belongs to which patient, so the
+                            # column stays NA. A blank cell is recoverable; a
+                            # confidently mislabelled survival probability is not.
                         }
                     }
+                    surv_vals <- round(as.numeric(surv_vals), 4)
 
                     # Add to data sheet as exportable Output column
-                    self$results$survivalExport$setRowNums(results$cleanData$row_names)
-                    self$results$survivalExport$setValues(surv_vals)
+                    self$results$export_survival_data$setRowNums(results$cleanData$row_names)
+                    self$results$export_survival_data$setValues(surv_vals)
+                    # No setTitle() here: unlike timeinterval's unit-dependent column,
+                    # this one has no dynamic part, so the static varTitle in the
+                    # .r.yaml is the single source of the column name.
 
-                    # Create summary for user
+                    # Create summary for user. Report how many rows actually carry a
+                    # value: a stratum that could not be matched leaves NA, and the
+                    # old wording claimed every observation was exported regardless.
+                    n_written <- sum(!is.na(surv_vals))
                     export_summary <- paste0(
                         "<h4>Survival Data Export Summary</h4>",
-                        "<p>Exported estimated Kaplan-Meier survival probabilities for ", nrow(mydata), " observations to the data sheet.</p>",
+                        "<p>Added the Kaplan-Meier survival probability at each case's own follow-up time",
+                        if (!is.null(myfactor)) ", taken from that case's own group curve" else "",
+                        " as a new column, for ", n_written, " of ", nrow(mydata), " observations.</p>",
+                        if (n_written < nrow(mydata))
+                            paste0("<p>", nrow(mydata) - n_written,
+                                   " row(s) are blank because no curve could be matched to them.</p>")
+                        else "",
                         "<p>Time range: ", round(min(times, na.rm=TRUE), 1), " to ", round(max(times, na.rm=TRUE), 1), " ", self$options$timetypeoutput, "</p>"
                     )
-                    
+
                     self$results$survivalExportSummary$setContent(export_summary)
-                    
+
                 }, error = function(e) {
-                    warning(.fmt(
-                        .("Error exporting survival data: {message}"),
-                        message = conditionMessage(e)
-                    ))
+                    # NOT warning(): jamovi shows R warnings only in the
+                    # undifferentiated Analysis Notes panel, mixed in with package
+                    # chatter, so a failed export used to look identical to a
+                    # successful one -- the checkbox stayed ticked and no column
+                    # appeared. This element is already visible: (export_survival_data).
+                    self$results$survivalExportSummary$setContent(paste0(
+                        "<h4>Survival Data Export Summary</h4>",
+                        "<p>The survival probabilities could not be exported, so no column was added: ",
+                        htmltools::htmlEscape(conditionMessage(e)), "</p>"))
                 })
             }
 
@@ -2933,21 +2976,21 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     "<p>The Fleming-Harrington family of weighted log-rank tests ",
                     "generalizes the standard log-rank test by applying different ",
                     "weights to events at different time points. The weighting is ",
-                    "controlled by the parameter <b>rho (&#961;)</b>:</p>",
+                    "controlled by the parameter <b>rho (\u{03c1})</b>:</p>",
                     "<table border='1' cellpadding='5' style='border-collapse:collapse;'>",
-                    "<tr><th>Test</th><th>&#961;</th><th>Weighting</th><th>Best For</th></tr>",
+                    "<tr><th>Test</th><th>\u{03c1}</th><th>Weighting</th><th>Best For</th></tr>",
                     "<tr><td>Log-Rank (standard)</td><td>0</td>",
                     "<td>Equal weight at all time points</td>",
                     "<td>General use; optimal under proportional hazards</td></tr>",
-                    "<tr><td>Fleming-Harrington (&#961;=0.5)</td><td>0.5</td>",
+                    "<tr><td>Fleming-Harrington (\u{03c1}=0.5)</td><td>0.5</td>",
                     "<td>Weights = S(t)<sup>0.5</sup> (moderate early emphasis)</td>",
                     "<td>Compromise between log-rank and Peto-Peto</td></tr>",
-                    "<tr><td>Peto-Peto (Fleming-Harrington &#961;=1)</td><td>1</td>",
+                    "<tr><td>Peto-Peto (Fleming-Harrington \u{03c1}=1)</td><td>1</td>",
                     "<td>Weights = S(t), the Kaplan-Meier estimate (early emphasis)</td>",
                     "<td>Detecting early differences; robust to late censoring</td></tr>",
                     "</table>",
                     "<p><i>Note: survival::survdiff() implements only the ",
-                    "Fleming-Harrington G-&#961; family. The Gehan-Breslow (weights = ",
+                    "Fleming-Harrington G-\u{03c1} family. The Gehan-Breslow (weights = ",
                     "number at risk) and Tarone-Ware (weights = sqrt of number at risk) ",
                     "tests use different weights and are not available via survdiff().</i></p>",
                     "<h4>When to Use Weighted Tests</h4>",
@@ -2956,14 +2999,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     "differences when survival curves cross. Weighted tests can detect ",
                     "early or late divergence that the standard test misses.</li>",
                     "<li><b>If early events matter more:</b> Use Peto-Peto ",
-                    "(&#961;=1) when early mortality is of primary clinical interest ",
+                    "(\u{03c1}=1) when early mortality is of primary clinical interest ",
                     "(e.g., perioperative outcomes, acute treatment toxicity).</li>",
                     "<li><b>Sensitivity analysis:</b> Running multiple weighted tests ",
                     "can reveal whether conclusions depend on the time horizon of interest.</li>",
                     "</ul>",
                     "<h4>Interpreting Discordant Results</h4>",
                     "<p>If the standard log-rank test is significant but ",
-                    "the Peto-Peto (&#961;=1) test is not (or vice versa), this suggests ",
+                    "the Peto-Peto (\u{03c1}=1) test is not (or vice versa), this suggests ",
                     "the survival difference is concentrated in a specific part of the ",
                     "curve. Reporting both tests provides a more complete picture of ",
                     "the survival comparison.</p>",
@@ -4014,7 +4057,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
                     TRUE
                 }, error = function(e) {
-                    warning(paste("Error creating PH test plot:", e$message))
+                    warning(.fmt(
+                        .("The proportional-hazards test plot could not be created: {message}"),
+                        message = conditionMessage(e)
+                    ))
                     FALSE
                 })
 
@@ -4862,11 +4908,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
                     }
                 }, error = function(e) {
-                    # Log warning but continue
-                    warning(.fmt(
-                        .("Could not access median survival data: {message}"),
-                        message = conditionMessage(e)
-                    ))
+                    private$.addHtmlMessage(
+                        "warning",
+                        .("Some clinical summary data were unavailable."),
+                        .fmt(
+                            .("Median survival data could not be added to the clinical summary: {message}"),
+                            message = conditionMessage(e)
+                        )
+                    )
                 })
                 
                 tryCatch({
@@ -4878,11 +4927,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
                     }
                 }, error = function(e) {
-                    # Log warning but continue
-                    warning(.fmt(
-                        .("Could not access Cox regression data: {message}"),
-                        message = conditionMessage(e)
-                    ))
+                    private$.addHtmlMessage(
+                        "warning",
+                        .("Some clinical summary data were unavailable."),
+                        .fmt(
+                            .("Cox regression data could not be added to the clinical summary: {message}"),
+                            message = conditionMessage(e)
+                        )
+                    )
                 })
                 
                 tryCatch({
@@ -4894,11 +4946,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
                     }
                 }, error = function(e) {
-                    # Log warning but continue
-                    warning(.fmt(
-                        .("Could not access survival probability data: {message}"),
-                        message = conditionMessage(e)
-                    ))
+                    private$.addHtmlMessage(
+                        "warning",
+                        .("Some clinical summary data were unavailable."),
+                        .fmt(
+                            .("Survival probability data could not be added to the clinical summary: {message}"),
+                            message = conditionMessage(e)
+                        )
+                    )
                 })
                 
                 # Generate clinical interpretations
@@ -5798,7 +5853,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         # Build formula with age strata
                         rhs <- paste0(myfactor, " + strata(age_group)")
                         if (!is.null(existing_strata_var)) {
-                            rhs <- paste0(rhs, " + strata(", existing_strata_var, ")")
+                            rhs <- paste0(
+                                rhs,
+                                " + strata(",
+                                jmvcore::composeTerm(existing_strata_var),
+                                ")"
+                            )
                             # Warn about cross-stratification
                             n_cross <- length(unique(interaction(mydata$age_group, mydata[[existing_strata_var]])))
                             n_events <- sum(mydata[[myoutcome]] == 1, na.rm = TRUE)
@@ -5821,7 +5881,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         safe_age_name <- jmvcore::composeTerm(age_col_name)
                         rhs_adjusted <- c(myfactor, safe_age_name)
                         if (!is.null(existing_strata_var)) {
-                            rhs_adjusted <- c(rhs_adjusted, paste0("strata(", existing_strata_var, ")"))
+                            rhs_adjusted <- c(
+                                rhs_adjusted,
+                                paste0(
+                                    "strata(",
+                                    jmvcore::composeTerm(existing_strata_var),
+                                    ")"
+                                )
+                            )
                         }
 
                         heading_text <- paste0(
@@ -5840,7 +5907,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     } else {
                         rhs_adj <- paste0(myfactor, " + ", jmvcore::composeTerm(age_col_name))
                         if (!is.null(existing_strata_var)) {
-                            rhs_adj <- paste0(rhs_adj, " + strata(", existing_strata_var, ")")
+                            rhs_adj <- paste0(
+                                rhs_adj,
+                                " + strata(",
+                                jmvcore::composeTerm(existing_strata_var),
+                                ")"
+                            )
                         }
                         formula_adj_str <- paste(surv_lhs, "~", rhs_adj)
                     }
@@ -6763,10 +6835,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 for (item in items) {
                     icon <- switch(item$status,
-                        "addressed" = "&#9989;",          # green check
-                        "partially_addressed" = "&#9888;", # warning
-                        "not_addressed" = "&#10060;",      # red X
-                        "user_action" = "&#9998;"          # pencil
+                        "addressed" = "\u{2705}",          # green check
+                        "partially_addressed" = "\u{26a0}", # warning
+                        "not_addressed" = "\u{274c}",      # red X
+                        "user_action" = "\u{270e}"          # pencil
                     )
                     bg <- switch(item$status,
                         "addressed" = "#e8f5e9",
@@ -6785,10 +6857,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 html_parts <- c(html_parts, "</table>")
                 html_parts <- c(html_parts, "<p><small>",
-                    "&#9989; = Addressed by current analysis | ",
-                    "&#9888; = Partially addressed | ",
-                    "&#10060; = Not yet addressed | ",
-                    "&#9998; = Requires user action in manuscript",
+                    "\u{2705} = Addressed by current analysis | ",
+                    "\u{26a0} = Partially addressed | ",
+                    "\u{274c} = Not yet addressed | ",
+                    "\u{270e} = Requires user action in manuscript",
                     "</small></p>")
 
                 self$results$remarkChecklist$setContent(paste(html_parts, collapse = "\n"))

@@ -156,7 +156,14 @@ test_that("ambiguous day/month order is chosen day-first AND flagged", {
     ptz <- attr(pv, "tzone"); if (is.null(ptz) || !nzchar(ptz)) ptz <- Sys.timezone()
     expect_equal(fmt(pv, "%Y-%m-%d", tz = ptz),
                  fmt(lubridate::dmy(df$d), "%Y-%m-%d"))
-    expect_match(strip_html(an$results$notices$content), "Ambiguous day/month order")
+    # The message now shows BOTH readings with a value from the data rather than
+    # asserting a day/month swap, which was the wrong axis whenever the disagreement
+    # was year-vs-day. The assertion still pins "this column was flagged as ambiguous".
+    n <- strip_html(an$results$notices$content)
+    expect_match(n, "Ambiguous Format Detected")
+    expect_match(n, "can be read two ways")
+    expect_match(n, "DD-MM-YYYY gives 2024-02-01")
+    expect_match(n, "MM-DD-YYYY gives 2024-01-02")
 })
 
 # ---------------------------------------------------------------- regressions

@@ -667,10 +667,11 @@ consensus threshold (e.g., 2-2 split with 4 raters). Exclude = set
 consensus to NA for tied cases. First = use first category that appears.
 Lowest/Highest = use min/max of tied categories.}
 
-\item{loaVariable}{Calculate agreement level for each case and add as new
-computed column. Choose between Simple (3 categories) or Detailed (5
-categories) classification. Useful for identifying difficult cases and
-quality control.}
+\item{loaVariable}{Calculate the agreement level for each case. Choose
+between Simple (3 categories) or Detailed (5 categories) classification.
+Useful for identifying difficult cases and quality control. To also add the
+result to the dataset as a new column, enable the separate output variable
+'Add case agreement categorization to data'.}
 
 \item{detailLevel}{Simple mode: All Agreed (100 percent), Majority Agreed
 (>=threshold percent), No Agreement (<threshold percent). Detailed mode:

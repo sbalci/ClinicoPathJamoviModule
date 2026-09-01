@@ -1,318 +1,132 @@
-# ===============================================================
-# Edge Cases and Error Handling Tests: lassocox
-# ===============================================================
-#
-# Tests data validation, missing data handling, extreme scenarios,
-# constant variables, all-censored data, single-variable, and
-# special character variable names.
-#
-# Uses both package datasets and inline helpers for pathological cases.
+# Exercise user-visible validation, not merely whether the R wrapper returns.
+lassocox_edge_data <- function(n = 80, seed = 123) {
+  withr::local_seed(seed)
+  x <- matrix(rnorm(n * 5), n, 5, dimnames = list(NULL, paste0("var", 1:5)))
+  event <- rexp(n, exp(.5 * x[, 1] - .3 * x[, 2]))
+  censor <- rexp(n, .3)
+  data.frame(time = pmin(event, censor),
+    status = factor(ifelse(event <= censor, "event", "censored")), x)
+}
 
-library(testthat)
-library(survival)
-
-# ---------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------
-skip_lassocox_deps <- function() {
-  skip_if_not_installed("jmvcore")
+lassocox_edge_run <- function(data, predictors = paste0("var", 1:5), ...) {
   skip_if_not_installed("glmnet")
-  skip_if_not_installed("survival")
+  args <- modifyList(list(elapsedtime = "time", outcome = "status",
+    outcomeLevel = "event", censorLevel = "censored", explanatory = predictors,
+    cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE), list(...))
+  opts <- do.call(getFromNamespace("lassocoxOptions", "ClinicoPath")$new, args)
+  a <- getFromNamespace("lassocoxClass", "ClinicoPath")$new(options = opts, data = data)
+  a$run()
+  a$results
 }
 
-load_small_cohort <- function() {
-  data_path <- file.path("../../data", "lassocox_small_cohort.rda")
-  if (!file.exists(data_path)) {
-    data_path <- system.file("data", "lassocox_small_cohort.rda",
-                             package = "ClinicoPath")
-  }
-  if (data_path == "" || !file.exists(data_path)) {
-    skip("lassocox_small_cohort.rda not found")
-  }
-  env <- new.env()
-  load(data_path, envir = env)
-  env$lassocox_small_cohort
+lassocox_edge_valid <- function(result) {
+  expect_gt(result$modelSummary$rowCount, 0)
+  expect_false(grepl("Analysis Error", result$todo$content, fixed = TRUE))
+  expect_true(all(is.finite(as.numeric(as.data.frame(result$performance)$value))))
 }
 
-create_minimal_survival <- function(n = 50, p = 5, seed = 123) {
-  set.seed(seed)
-  X <- matrix(rnorm(n * p), nrow = n, ncol = p)
-  colnames(X) <- paste0("var", 1:p)
-
-  true_coef <- c(0.5, -0.3, rep(0, p - 2))
-  lp <- X %*% true_coef
-  surv_t <- rexp(n, rate = exp(lp))
-  cens_t <- rexp(n, rate = 0.3)
-
-  time <- pmin(surv_t, cens_t)
-  status <- as.numeric(surv_t <= cens_t)
-
-  data.frame(
-    time = time,
-    status = factor(status, levels = c(0, 1), labels = c("censored", "event")),
-    as.data.frame(X)
-  )
+lassocox_edge_error <- function(result, message) {
+  expect_equal(result$modelSummary$rowCount, 0)
+  expect_match(result$todo$content, message)
+  expect_true(result$todo$visible)
+  expect_null(result$cv_plot$state)
 }
 
-# ---------------------------------------------------------------
-# Tests
-# ---------------------------------------------------------------
-
-test_that("lassocox handles missing data in predictors", {
-  skip_lassocox_deps()
-  data <- create_minimal_survival(n = 80)
-
-  # Inject ~15% missing in two predictors
-  data$var1[sample(80, 12)] <- NA
-  data$var3[sample(80, 10)] <- NA
-
-  # Should complete (function does complete-case analysis)
-  expect_no_error({
-    result <- lassocox(
-      data = data,
-      elapsedtime = "time",
-      outcome = "status",
-      outcomeLevel = "event",
-      explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-      censorLevel = NULL
-    )
-  })
+test_that("lassocox reports missing predictor rows and retained sample size", {
+  d <- lassocox_edge_data()
+  d$var1[1:12] <- NA_real_
+  d$var3[15:24] <- NA_real_
+  r <- lassocox_edge_run(d)
+  lassocox_edge_valid(r)
+  expect_match(r$todo$content, "Excluded 22 row")
+  tab <- as.data.frame(r$modelSummary)
+  expect_equal(tab$value[tab$statistic == "Sample Size"], "58")
 })
 
-test_that("lassocox handles all-censored data gracefully", {
-  skip_lassocox_deps()
-  data <- create_minimal_survival(n = 40)
-  data$status <- factor(rep("censored", 40), levels = c("censored", "event"))
-
-  # Should produce an error or informative notice (no events)
-  expect_error(
-    lassocox(
-      data = data,
-      elapsedtime = "time",
-      outcome = "status",
-      outcomeLevel = "event",
-      explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-      censorLevel = NULL
-    )
-  )
+test_that("lassocox rejects all-censored data visibly", {
+  d <- lassocox_edge_data()
+  d$status[] <- "censored"
+  lassocox_edge_error(lassocox_edge_run(d), "exactly 2 observed")
 })
 
-test_that("lassocox handles very few events", {
-  skip_lassocox_deps()
-  data <- create_minimal_survival(n = 40)
-  # Keep only 3 events
-  event_idx <- which(data$status == "event")
-  if (length(event_idx) > 3) {
-    data$status[event_idx[4:length(event_idx)]] <- "censored"
-  }
-
-  # Should either error with informative message or run with warning
-  expect_condition(
-    lassocox(
-      data = data,
-      elapsedtime = "time",
-      outcome = "status",
-      outcomeLevel = "event",
-      explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-      censorLevel = NULL
-    )
-  )
+test_that("lassocox warns about few events and reduces stratified folds", {
+  d <- lassocox_edge_data()
+  d$status[] <- "censored"
+  d$status[1:5] <- "event"
+  r <- lassocox_edge_run(d)
+  lassocox_edge_valid(r)
+  expect_match(r$todo$content, "Only 5 events")
+  expect_match(r$todo$content, "from 10 to 5")
 })
 
-test_that("lassocox handles constant predictor variables", {
-  skip_lassocox_deps()
-  data <- create_minimal_survival(n = 60)
-  data$var1 <- 5  # constant
-
-  # Should handle by dropping the constant variable
-  expect_no_error({
-    result <- lassocox(
-      data = data,
-      elapsedtime = "time",
-      outcome = "status",
-      outcomeLevel = "event",
-      explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-      censorLevel = NULL
-    )
-  })
+test_that("lassocox reports a constant numeric predictor without dropping the fit", {
+  d <- lassocox_edge_data()
+  d$var5 <- 1
+  r <- lassocox_edge_run(d)
+  lassocox_edge_valid(r)
+  expect_match(r$todo$content, "Removed constant explanatory variables: var5")
+  expect_match(r$suitabilityReport$content, "Removed constant candidate predictors: var5")
+  expect_false(grepl("Complete data with no constant predictors", r$suitabilityReport$content))
 })
 
-test_that("lassocox handles single-level factor variable", {
-  skip_lassocox_deps()
-  data <- create_minimal_survival(n = 60)
-  data$group <- factor(rep("A", 60))
-
-  # Should handle by dropping the single-level factor
-
-  expect_no_error({
-    result <- lassocox(
-      data = data,
-      elapsedtime = "time",
-      outcome = "status",
-      outcomeLevel = "event",
-      explanatory = c(paste0("var", 1:3), "group"),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-      censorLevel = NULL
-    )
-  })
+test_that("lassocox handles a single-level factor as an explicit constant", {
+  d <- lassocox_edge_data()
+  d$group <- factor(rep("one", nrow(d)))
+  r <- lassocox_edge_run(d, predictors = c(paste0("var", 1:3), "group"))
+  lassocox_edge_valid(r)
+  expect_match(r$todo$content, "Removed constant explanatory variables: group")
 })
 
-test_that("lassocox handles variables with very different scales", {
-  skip_lassocox_deps()
-  data <- create_minimal_survival(n = 80)
-
-  # Create extreme scale differences
-  data$var1 <- data$var1 * 1e6   # millions
-  data$var2 <- data$var2 / 1e6   # millionths
-
-  expect_no_error({
-    result <- lassocox(
-      data = data,
-      elapsedtime = "time",
-      outcome = "status",
-      outcomeLevel = "event",
-      explanatory = paste0("var", 1:5),
-      standardize = TRUE,
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-      censorLevel = NULL
-    )
-  })
+test_that("lassocox accepts predictor names containing spaces and punctuation", {
+  d <- lassocox_edge_data()
+  names(d)[3:4] <- c("Marker A (ng/ml)", "Gene-B")
+  r <- lassocox_edge_run(d, predictors = names(d)[3:7], showEncoding = TRUE)
+  lassocox_edge_valid(r)
+  expect_setequal(as.data.frame(r$encoding)$variable, names(d)[3:7])
 })
 
-test_that("lassocox small cohort dataset runs correctly", {
-  skip_lassocox_deps()
-  data <- load_small_cohort()
-
-  expect_no_error({
-    result <- lassocox(
-      data = data,
-      elapsedtime = "time_months",
-      outcome = "event_occurred",
-      outcomeLevel = "Yes",
-      explanatory = c("age", "gender", "biomarker_a",
-                       "biomarker_b", "biomarker_c",
-                       "treatment_group", "severity_score"),
-      nfolds = 5,
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-      censorLevel = NULL
-    )
-  })
+test_that("lassocox handles a finite large-scale predictor without erasing it", {
+  d <- lassocox_edge_data()
+  d$var1 <- d$var1 * 1e8
+  r <- lassocox_edge_run(d, showEncoding = TRUE)
+  lassocox_edge_valid(r)
+  expect_true("var1" %in% as.data.frame(r$encoding)$variable)
 })
 
-test_that("lassocox handles negative time values appropriately", {
-  skip_lassocox_deps()
-  data <- create_minimal_survival(n = 40)
-  data$time[1] <- -0.5
-
-  # Should error or handle the negative time
-  expect_error(
-    lassocox(
-      data = data,
-      elapsedtime = "time",
-      outcome = "status",
-      outcomeLevel = "event",
-      explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-      censorLevel = NULL
-    )
-  )
+test_that("lassocox rejects negative follow-up times visibly", {
+  d <- lassocox_edge_data()
+  d$time[1] <- -1
+  lassocox_edge_error(lassocox_edge_run(d), "negative values")
 })
 
-test_that("lassocox handles zero time values", {
-  skip_lassocox_deps()
-  data <- create_minimal_survival(n = 40)
-  data$time[1:3] <- 0
-
-  # Function should either handle or error informatively
-  expect_condition(
-    lassocox(
-      data = data,
-      elapsedtime = "time",
-      outcome = "status",
-      outcomeLevel = "event",
-      explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-      censorLevel = NULL
-    )
-  )
+test_that("lassocox rejects zero follow-up without automatic adjustment", {
+  d <- lassocox_edge_data()
+  d$time[1] <- 0
+  lassocox_edge_error(lassocox_edge_run(d), "not been automatically adjusted")
 })
 
-test_that("lassocox handles data with many missing rows", {
-  skip_lassocox_deps()
-  data <- create_minimal_survival(n = 100)
-
-  # Make 70% of rows have at least one NA
-  for (v in paste0("var", 1:5)) {
-    data[[v]][sample(100, 14)] <- NA
-  }
-
-  # Complete cases may be very few; should handle gracefully
-  n_complete <- sum(complete.cases(data))
-  if (n_complete >= 10) {
-    expect_no_error({
-      result <- lassocox(
-        data = data,
-        elapsedtime = "time",
-        outcome = "status",
-        outcomeLevel = "event",
-        explanatory = paste0("var", 1:5),
-        cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-        censorLevel = NULL
-      )
-    })
-  } else {
-    expect_error(
-      lassocox(
-        data = data,
-        elapsedtime = "time",
-        outcome = "status",
-        outcomeLevel = "event",
-        explanatory = paste0("var", 1:5),
-        cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-        censorLevel = NULL
-      )
-    )
-  }
+test_that("lassocox distinguishes usable missingness from too few complete rows", {
+  d <- lassocox_edge_data()
+  d$var1[1:40] <- NA_real_
+  lassocox_edge_valid(lassocox_edge_run(d))
+  d$var1[1:72] <- NA_real_
+  lassocox_edge_error(lassocox_edge_run(d), "Too few complete cases")
 })
 
-test_that("lassocox handles perfectly correlated predictors", {
-  skip_lassocox_deps()
-  data <- create_minimal_survival(n = 60)
-  data$var4 <- data$var1  # perfect copy
-  data$var5 <- data$var1 * 2 + 3  # linear transform
-
-  # LASSO should handle multicollinearity by selecting one
-  expect_no_error({
-    result <- lassocox(
-      data = data,
-      elapsedtime = "time",
-      outcome = "status",
-      outcomeLevel = "event",
-      explanatory = paste0("var", 1:5),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-      censorLevel = NULL
-    )
-  })
+test_that("lassocox retains a valid fit with perfectly correlated predictors", {
+  d <- lassocox_edge_data()
+  d$var4 <- d$var1
+  d$var5 <- 2 * d$var1 + 3
+  r <- lassocox_edge_run(d)
+  lassocox_edge_valid(r)
+  expect_match(r$suitabilityReport$content, "collinearity", ignore.case = TRUE)
+  # LASSO need not select exactly one representative of every correlated group.
 })
 
-test_that("lassocox handles two-predictor minimum", {
-  skip_lassocox_deps()
-  data <- create_minimal_survival(n = 60)
-
-  # Minimum 2 predictors required for LASSO
-  expect_no_error({
-    result <- lassocox(
-      data = data,
-      elapsedtime = "time",
-      outcome = "status",
-      outcomeLevel = "event",
-      explanatory = c("var1", "var2"),
-      cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE,
-      censorLevel = NULL
-    )
-  })
+test_that("lassocox supports the two-predictor minimum", {
+  d <- lassocox_edge_data()
+  r <- lassocox_edge_run(d, predictors = c("var1", "var2"))
+  lassocox_edge_valid(r)
+  tab <- as.data.frame(r$modelSummary)
+  expect_equal(tab$value[tab$statistic == "Encoded Predictor Columns"], "2")
 })

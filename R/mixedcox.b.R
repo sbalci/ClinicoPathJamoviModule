@@ -137,11 +137,6 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
         if (self$options$showExplanations) {
           private$.generateExplanations()
         }
-        
-        # Add output variables if requested
-        if (self$options$addClusterEffects || self$options$addFittedValues) {
-          private$.addOutputVariables(prepared_data)
-        }
       },
       
       # Input validation
@@ -613,21 +608,13 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
         )
         
         self$results$methodExplanation$setContent(explanation_text)
-      },
-      
-      # Add output variables to dataset
-      .addOutputVariables = function(prepared_data) {
-        # TODO (stub): `addClusterEffects` and `addFittedValues` options are advertised in the UI
-        # but this method is a no-op. Wire to `self$results$<outputVarName>$setValues(...)` with the
-        # cluster random effects from `coxme::ranef(private$.coxme_model)` (BLUPs by cluster, joined
-        # back to row order via `prepared_data$data[[cluster_var]]`) and linear predictors from
-        # `predict(private$.coxme_model, type = "lp")`. Also ensure the matching `Output` entries
-        # exist in `.r.yaml`. Until implemented, hide the toggles from `.u.yaml` to avoid silent
-        # no-op for users.
-        if (!is.null(private$.coxme_model)) {
-          # Add cluster effects and fitted values as output variables
-          # Implementation depends on jamovi output variable system
-        }
       }
+
+      # TODO: output variables (cluster BLUPs, fitted values) are not implemented.
+      # To add them: coxme::ranef(private$.coxme_model) joined back to row order via
+      # prepared_data$data[[cluster_var]], and predict(private$.coxme_model, type = "lp").
+      # Needs a `type: Output` option in .a.yaml + a matching item in .r.yaml + an Output
+      # control in .u.yaml, all sharing ONE name (jmvcore::Output$enabled resolves the
+      # gating option by the result item's own name). See jamovi/survival.* for the shape.
     )
   )
