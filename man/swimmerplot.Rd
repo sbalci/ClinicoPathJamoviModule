@@ -66,7 +66,8 @@ PD) to color lanes.}
 \item{censorVar}{Optional variable indicating censoring status for ongoing
 treatment arrows. Use 0/FALSE/"censored"/"alive" for ongoing patients
 (shows arrow), or 1/TRUE/"event"/"dead" for completed follow-up (no arrow).
-If not provided, arrows are drawn for patients at the latest time point.}
+Without a censoring variable no arrows are drawn and an information notice
+says so.}
 
 \item{groupVar}{Optional grouping variable for comparing response rates
 between patient groups (e.g., treatment arms, disease subtypes). When

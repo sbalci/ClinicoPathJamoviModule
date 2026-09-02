@@ -31,7 +31,7 @@ options:
           R: the data as a data frame
 
     - name: study
-      title: Study Identifier
+      title: Study identifier
       type: Variable
       default: NULL
       suggested:
@@ -135,7 +135,7 @@ options:
           R: Assess publication bias using Deeks' funnel plot test
 
     - name: confidence_level
-      title: Confidence Level
+      title: Confidence level
       type: Integer
       min: 50
       max: 99
@@ -144,25 +144,25 @@ options:
           R: Confidence level for meta-analysis results
 
     - name: method
-      title: Meta-Analysis Method
+      title: Meta-analysis method
       type: List
       options:
           - name: 'reml'
             title: REML (Recommended)
           - name: 'ml'
-            title: Maximum Likelihood
+            title: Maximum likelihood
           - name: 'fixed'
-            title: Fixed Effects
+            title: Fixed effects
           - name: 'mm'
             title: Method of Moments
           - name: 'vc'
-            title: Variance Components
+            title: Variance components
       default: reml
       description:
           R: Method for meta-analysis estimation (Note DerSimonian-Laird is not appropriate for bivariate diagnostic meta-analysis)
 
     - name: zero_cell_correction
-      title: Zero-Cell Correction Method
+      title: Zero-cell correction method
       type: List
       options:
           - name: 'none'
@@ -228,15 +228,15 @@ options:
           R: Display natural language summary of analysis results
 
     - name: color_palette
-      title: Plot Color Palette
+      title: Plot color palette
       type: List
       options:
           - name: 'standard'
-            title: Standard Colors
+            title: Standard colors
           - name: 'colorblind_safe'
             title: Color-Blind Safe
           - name: 'high_contrast'
-            title: High Contrast
+            title: High contrast
           - name: 'viridis'
             title: Viridis (Blue-Purple)
           - name: 'plasma'

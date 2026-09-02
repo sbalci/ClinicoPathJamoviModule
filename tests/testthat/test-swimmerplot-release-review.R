@@ -706,3 +706,23 @@ test_that("the summary export does not carry the same mean under two names", {
   expect_true("mean_duration" %in% m)
   expect_false("mean_follow_up" %in% m)
 })
+
+test_that("the large-data path returns the same group labels as the standard path", {
+  # Above 1000 rows the data.table path kept patient_group as a factor carrying
+  # NA-dropped levels, so table() in the group comparison had all-zero rows,
+  # a spurious low-cell warning and a degenerate Fisher table.
+  mk <- function(n) data.frame(
+    id = sprintf("P%04d", seq_len(n)), start = 0, end = rep(6:17, length.out = n),
+    resp = rep(c("CR", "PR", "SD", "PD"), length.out = n),
+    grp = factor(rep(c("A", "B"), length.out = n), levels = c("A", "B", "Z")),
+    stringsAsFactors = FALSE)
+  big <- suppressWarnings(swimmerplot(data = mk(1200), patientID = "id", startTime = "start",
+                                      endTime = "end", responseVar = "resp", groupVar = "grp"))
+  small <- suppressWarnings(swimmerplot(data = mk(120), patientID = "id", startTime = "start",
+                                        endTime = "end", responseVar = "resp", groupVar = "grp"))
+  lab_big <- big$groupComparisonTest$asDF$test_statistic
+  lab_small <- small$groupComparisonTest$asDF$test_statistic
+  expect_equal(length(lab_big), length(lab_small))
+  # both are 2x2 designs (level Z is unused), so both carry an odds ratio
+  expect_true(all(grepl("OR = ", lab_big, fixed = TRUE)))
+})

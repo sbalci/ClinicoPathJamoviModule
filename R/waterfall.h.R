@@ -521,11 +521,11 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text"),
                     list(
                         `name`="median_time", 
-                        `title`="Median Time to Response", 
+                        `title`="Median time to best response", 
                         `type`="text"),
                     list(
                         `name`="median_duration", 
-                        `title`="Median Duration", 
+                        `title`="Median time in response", 
                         `type`="text")),
                 clearWith=list(
                     "patientID",

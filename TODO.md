@@ -4383,3 +4383,21 @@ Still open (not blocking release):
 - [ ] `.a.yaml` R `usage:` block is fully commented out, so `man/multisurvival.Rd` ships no example.
 - [ ] `sty` still lists a commented-out ggstatsplot style (`t2`) and `.r.yaml` carries `# visible: (sty:t2)`; harmless.
 - [ ] Landmark keeps events at exactly the landmark time (`mytime >= landmark`, time 0 after shift); matches the Zabor tutorial, documented here only.
+
+## OncoPath release preparation (2026-09-02, from docs/audit/MODULE_AUDIT_REPORT_20260902-2017.md)
+
+- [x] waterfall: person-time column titles; bootstrap gate on evaluable n; disclaimer STRONG_WARNING; missing-inputs ERROR; multiplicity note; warning()/message() -> notices/caption; i18n leaks + fragments; a.yaml sentence-case titles; events.js timeVar override removed; showResponseDuration moved to Clinical Reporting box
+- [x] diagnosticmeta: NA column guard; funnel explanation; notices (missing inputs, zero cells under none, bivariate failure, Deeks k, AUC thresholds); I2 from metafor; dead %||%; r.yaml clearWith + dead schema; a.yaml titles; geom_errorbarh -> geom_errorbar(orientation="y"); i18n pass (197 strings)
+- [x] swimmerplot: fast-path as.character; head() instead of 1:min; debug_mode; censorVar description; clearWith; multiplicity note; warning() sites; raw-mode INFO; i18n; Export titles; wizard comment
+- [x] ihcheterogeneity: notices element + helpers; n<10 / ICC-not-estimable STRONG_WARNING; Levene wording; p=0 -> NA; Spearman inflation all rows; consistent observed r; psych_missing target; reject() .(); htmlEscape notes; interpretation clearWith; titles; tr.po 3 strings; i18n pass (264 strings)
+- [x] dark hard-coded text colours -> inherit (waterfall 10, ihc 10, swimmer 4)
+- [x] jmvtools::prepare() (0.7 min) + jmvtools::i18nUpdate(); devtools::document() run at the end
+- [x] Verify: all four release-review test files pass in the sourced harness (waterfall 111, swimmerplot 100, ihcheterogeneity 65, diagnosticmeta 65 expectations)
+- [x] Routed the 4 analyses back to menuGroup: OncoPath
+- [ ] USER: run `Rscript _updateModules.R` to push the fixed sources to ../OncoPath, then build/install and smoke-test the four analyses in jamovi
+- [ ] Not done (content work): fill the Turkish msgstr for the ~900 new msgids in jamovi/i18n/tr.po
+- [ ] Left as is (cosmetic): three vestigial bare `{ }` blocks in diagnosticmeta; `magrittr` in OncoPath Imports (pipes come through dplyr)
+
+### Working notes
+- `jmvtools::prepare(".")` took 0.7 min today (memory said 20-25 min); document() timing in scratchpad/document.log
+- Harness for tests without an installed package: source R/utils.R + <fn>.h.R + <fn>.b.R, gsub("ClinicoPath:::?", "") in the test file, setwd("tests/testthat") for relative data/yaml paths

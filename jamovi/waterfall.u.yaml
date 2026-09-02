@@ -36,8 +36,6 @@ children:
             name: timeVar
             maxItemCount: 1
             isTarget: true
-            events:
-              change: './waterfall.events::onChange_timeVar'
       - type: TargetLayoutBox
         label: Group Variable
         children:
@@ -154,11 +152,6 @@ children:
           - type: LayoutBox
             margin: large
             children:
-              - type: CheckBox
-                name: showResponseDuration
-          - type: LayoutBox
-            margin: large
-            children:
               - type: Label
                 label: Update Data
                 children:
@@ -211,3 +204,5 @@ children:
             name: showClinicalSignificance
           - type: CheckBox
             name: showConfidenceIntervals
+          - type: CheckBox
+            name: showResponseDuration

@@ -391,3 +391,20 @@ test_that("the SROC plot and the forest plot draw the same corrected study data"
   expect_equal(sroc_fp, forest_fp)
   expect_equal(sroc_fp, 0.5)
 })
+
+test_that("I-squared is the value metafor reports for the same REML fit", {
+  skip_if_not_installed("metafor")
+  het <- run_dm(heterogeneity_analysis = TRUE)$heterogeneity$asDF
+  d <- studies()
+  yi <- log(d$tp / d$fn); vi <- 1 / d$tp + 1 / d$fn
+  fit <- metafor::rma(yi = yi, vi = vi, method = "REML")
+  sens_row <- het[grepl("ensitivity", het$measure), ]
+  expect_equal(nrow(sens_row), 1L)
+  expect_equal(sens_row$i_squared, fit$I2, tolerance = 1e-6)
+})
+
+test_that("zero cells are disclosed as a notice even under the default (no) correction", {
+  d <- studies(); d$fp[1] <- 0
+  html <- run_dm(d)$notices$content
+  expect_match(html, "Zero cells present", fixed = TRUE)
+})

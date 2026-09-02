@@ -57,6 +57,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Render collected notices as HTML
         .renderNotices = function() {
           if (length(private$.noticeList) == 0) {
+            # Clear a panel left over from a previous run (e.g. the welcome path).
+            self$results$notices$setContent("")
             return()
           }
 
@@ -400,7 +402,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               # shapes to exactly nlev values; warn when levels exceed the pool.
               shape_pool <- c(16, 1, 17, 2, 15, 0)
               if (nlev > length(shape_pool)) {
-                message(sprintf(
+                private$.addNotice("INFO", .("Marker shapes reused"), sprintf(
                   .("Confirmation variable has %d levels; markers reuse shapes beyond %d distinct symbols."),
                   nlev, length(shape_pool)))
               }
@@ -473,8 +475,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             return(result)
           }, error = function(e) {
-            # Fall back to standard processing
-            warning("Large dataset optimization failed, falling back to standard processing: ", e$message)
+            # Fall back to standard processing; tell the user rather than
+            # leaving an R warning nobody sees.
+            private$.addNotice("WARNING", .("Large-dataset optimisation unavailable"), sprintf(
+              .("The optimised processing path failed (%s); the standard path was used instead, so results are unaffected."),
+              e$message))
             return(private$.processDataStandard(df, patientID, inputType, responseVar, timeVar, groupVar))
           })
         },
@@ -989,9 +994,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               "<br>- ", .("Track response progression over time"),
               "<br><br>", .("Recommended Data Format:"),
               "<br>PatientID  Time  Measurement",
-              "<br>PT1        0     50          (", .("baseline"), ")",
-              "<br>PT1        2     25          (2 ", .("months"), ")",
-              "<br>PT1        4     10          (4 ", .("months"), ")"
+              "<br>", .("PT1        0     50          (baseline)"),
+              "<br>", .("PT1        2     25          (2 months)"),
+              "<br>", .("PT1        4     10          (4 months)")
             ))
             data_valid <- FALSE
           } else {
@@ -1057,8 +1062,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   "<br>3. ", .("Remove patients without baseline from analysis"),
                   "<br><br>", .("Example data format with baseline:"),
                   "<br>PatientID  Time  Measurement",
-                  "<br>PT1        0     50          (", .("baseline required"), ")",
-                  "<br>PT1        2     25          (", .("follow-up"), ")"
+                  "<br>", .("PT1        0     50          (baseline required)"),
+                  "<br>", .("PT1        2     25          (follow-up)")
                 ))
                 data_valid <- FALSE
               }
@@ -1652,6 +1657,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ## Validate required inputs ----
         if (is.null(self$options$patientID) || is.null(self$options$responseVar)) {
+          private$.addNotice("ERROR", .("Variables required"),
+            .("Select a Patient ID and a Response Value variable to run the analysis."))
           if (!isTRUE(self$options$enableGuidedMode)) {
             todo <- paste0(todo,
                            paste0("<br><br>",
@@ -1723,12 +1730,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ## Continue with analysis if data is valid; abort only on critical errors ----
         if (!data_valid_flag) {
-          plain_message <- "Data validation failed."
+          plain_message <- .("Data validation failed.")
           if (length(validation_messages) > 0) {
             plain_message <- gsub("<[^>]+>", "", paste(validation_messages, collapse = " "))
             plain_message <- trimws(plain_message)
             if (plain_message == "") {
-              plain_message <- "Data validation failed."
+              plain_message <- .("Data validation failed.")
             }
           }
 
@@ -1812,8 +1819,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # (Deficiency (2) previously claimed progression was measured from
         # BASELINE; .progressionTimes has referenced the NADIR since the DoR fix,
         # so the text now names only the limitations that actually remain.)
+        # STRONG_WARNING, not ERROR: this is a permanent disclaimer on every
+        # successful run, and a red ERROR banner every time teaches users to
+        # ignore the real ones.
         private$.addNotice(
-          type = "ERROR",
+          type = "STRONG_WARNING",
           title = .("REGULATORY USE PROHIBITED"),
           content = .("This function is NOT validated for regulatory submissions, clinical trial endpoints, or companion diagnostic development. CRITICAL DEFICIENCIES: (1) Non-compliant RECIST v1.1 implementation (no target lesion summation, no new lesion detection, no confirmation requirement); (2) Progression for duration of response is referenced to the nadir, but the RECIST v1.1 requirement of an additional >=5 mm absolute increase is not applied, and new-lesion or non-target progression cannot be detected, so progression may still be under-detected; (3) Simplified best response = minimum value (may OVERCALL responses and MISS progressive disease). FDA/EMA GUIDANCE VIOLATION: This analysis does not meet requirements for biomarker companion diagnostic validation or pivotal trial endpoints. APPROVED USE ONLY: Exploratory visualization, pilot studies, hypothesis generation, educational demonstrations. For regulatory-grade RECIST assessment, use FDA-validated software (e.g., RECIST 1.1 certified platforms). Continuing with this analysis confirms understanding that results are EXPLORATORY ONLY and NOT for regulatory decision-making.")
         )
@@ -2160,7 +2170,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.na(tte_metrics$summary$median_time_to_response)) {
               add_metric_row(list(
                 metric = .("Median Time to First Response"),
-                value = sprintf("%.1f time units (n=%d responders)",
+                value = sprintf(.("%.1f time units (n=%d responders)"),
                                tte_metrics$summary$median_time_to_response,
                                tte_metrics$summary$n_responders)
               ))
@@ -2170,7 +2180,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.na(tte_metrics$summary$median_duration_of_response)) {
               add_metric_row(list(
                 metric = .("Median Duration of Response"),
-                value = sprintf("%.1f time units (n=%d with duration data)",
+                value = sprintf(.("%.1f time units (n=%d with duration data)"),
                                tte_metrics$summary$median_duration_of_response,
                                tte_metrics$summary$n_with_duration_data)
               ))
@@ -2276,7 +2286,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add total row
             self$results$personTimeTable$addRow(rowKey = nrow(person_time_metrics$by_category) + 1, values = list(
-              category = "Total",
+              category = .("Total"),
               patients = person_time_metrics$summary$total_patients,
               patient_pct = "100.0%",
               person_time = sprintf("%.1f", person_time_metrics$summary$total_person_time),
@@ -2561,7 +2571,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "</div>",
 
           "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; margin: 20px 0; color: inherit;'>",
-          "<h3 style='color: #856404; margin-top: 0;'>", .("When to Use This Analysis:"), "</h3>",
+          "<h3 style='color: inherit; margin-top: 0;'>", .("When to Use This Analysis:"), "</h3>",
           "<ul style='margin: 5px 0;'>",
           "<li>", .("Oncology clinical trials and treatment response studies"), "</li>",
           "<li>", .("Drug efficacy evaluation"), "</li>",
@@ -2571,7 +2581,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "</div>",
 
           "<div style='padding: 15px; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #0c5460; margin: 20px 0; color: inherit;'>",
-          "<h3 style='color: #0c5460; margin-top: 0;'>", .("Data Requirements:"), "</h3>",
+          "<h3 style='color: inherit; margin-top: 0;'>", .("Data Requirements:"), "</h3>",
           "<ul style='margin: 5px 0;'>",
           "<li><strong>", .("Patient ID:"), "</strong> ", .("Unique identifier for each patient"), "</li>",
           "<li><strong>", .("Response Data:"), "</strong> ", .("Either percentage changes from baseline or raw tumor measurements"), "</li>",
@@ -2580,7 +2590,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "</div>",
 
           "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; margin: 20px 0; color: inherit;'>",
-          "<h3 style='color: #721c24; margin-top: 0;'>", .("Key Assumptions & Limitations:"), "</h3>",
+          "<h3 style='color: inherit; margin-top: 0;'>", .("Key Assumptions & Limitations:"), "</h3>",
           "<ul style='margin: 5px 0;'>",
           "<li>", sprintf(.("RECIST v1.1 thresholds: CR \u{2264}-100%%, PR \u{2264}-30%%, PD \u{2265}+20%%")), "</li>",
           "<li>", .("For raw measurements, baseline assumed at time = 0"), "</li>",
@@ -2588,7 +2598,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<li>", .("Missing values are excluded from analysis"), "</li>",
           "</ul>",
 
-          "<p style='margin-top: 15px; font-style: italic; color: #721c24;'>",
+          "<p style='margin-top: 15px; font-style: italic; color: inherit;'>",
           "<strong>", .("Tip:"), "</strong> ",
           .("Start with percentage data if available, or use raw measurements with proper time variables for automatic calculation."),
           "</p>",
@@ -2852,7 +2862,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               "text",
               x = nrow(df),
               y = med,
-              label = sprintf("Median: %.1f%%", med),
+              label = sprintf(.("Median: %.1f%%"), med),
               hjust = 1,
               vjust = -0.5,
               size = 3
@@ -2860,7 +2870,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
 
         # Add confidence interval - FIXED: Bootstrap percentile CI for median
-        if (plotData$options$showCI && nrow(df) >= 10) {
+        ci_state <- new.env(parent = emptyenv())
+        if (plotData$options$showCI && sum(!is.na(df$response)) >= 10) {
           # REPLACED: t.test CI is inappropriate for skewed response data and computes CI for MEAN not MEDIAN
           # NEW: Bootstrap percentile CI for median (appropriate for skewed/ordinal data)
           tryCatch({
@@ -2893,7 +2904,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 x = 1,
                 y = max(df$response, na.rm=TRUE),
                 label = sprintf(
-                  "95%% CI (Median): [%.1f%%, %.1f%%]",
+                  .("95%% CI (Median): [%.1f%%, %.1f%%]"),
                   ci[1],
                   ci[2]
                 ),
@@ -2902,9 +2913,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 size = 3
               )
           }, error = function(e) {
-            # If bootstrap fails, fall back to no CI annotation
-            warning("Bootstrap CI calculation failed: ", e$message)
+            # No CI annotation; say so on the plot (notices are already rendered
+            # by the time a renderer runs, and jamovi hides warning()).
+            ci_state$failed <- TRUE
           })
+        }
+        if (isTRUE(ci_state$failed)) {
+          p <- p + ggplot2::labs(caption = .("Bootstrap CI for the median could not be computed."))
         }
 
         # Add theme
@@ -3332,7 +3347,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       .generateAboutAnalysis = function() {
         about_text <- paste0(
           "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border: 1px solid #d1ecf1; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-          "<h4 style='color: #0c5460; margin-top: 0;'>", .("What This Analysis Does"), "</h4>",
+          "<h4 style='color: inherit; margin-top: 0;'>", .("What This Analysis Does"), "</h4>",
 
           "<p>", .("The Treatment Response Analysis creates waterfall and spider plots using threshold-based response categories adapted from RECIST v1.1 (not a full RECIST v1.1 assessment)."), "</p>",
           
@@ -3466,7 +3481,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (is.null(metrics$n) || metrics$n == 0 || is.na(metrics$ORR)) {
           self$results$copyReadyReport$setContent(paste0(
             "<div style='background-color: rgba(33, 166, 255, 0.07); padding: 15px; border: 1px solid #0369a1; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-            "<h4 style='color: #0369a1; margin-top: 0;'>", .("Copy-Ready Report Sentences"), "</h4>",
+            "<h4 style='color: inherit; margin-top: 0;'>", .("Copy-Ready Report Sentences"), "</h4>",
             "<p>", .("No evaluable patients: response rates cannot be reported. See the Important Information panel for why patients were not evaluable."), "</p>",
             "</div>"))
           return()
@@ -3506,7 +3521,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Generate publication-ready sentences
         report_text <- paste0(
           "<div style='background-color: rgba(33, 166, 255, 0.07); padding: 15px; border: 1px solid #0369a1; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-          "<h4 style='color: #0369a1; margin-top: 0;'>", .("Copy-Ready Report Sentences"), "</h4>",
+          "<h4 style='color: inherit; margin-top: 0;'>", .("Copy-Ready Report Sentences"), "</h4>",
 
           "<div style='background-color: rgba(138, 155, 172, 0.08); padding: 10px; border-radius: 3px; margin: 10px 0; color: inherit;'>",
           "<h5>", .("Main Results:"), "</h5>",
@@ -3641,7 +3656,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               comparison = .("Objective Response Rate (ORR)"),
               # fisher.test() returns an odds ratio only for a 2x2 table; with
               # 3+ groups this printed "OR = NA".
-              test_statistic = paste0("Fisher's exact test",
+              test_statistic = paste0(.("Fisher's exact test"),
                   if (!is.null(orr_test$estimate)) sprintf(", OR = %.2f", orr_test$estimate) else ""),
               p_value = round(orr_test$p.value, 4),
               interpretation = orr_interpretation
@@ -3658,11 +3673,16 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$groupComparisonTest$addRow(rowKey = row_count, values = list(
               comparison = .("Disease Control Rate (DCR)"),
-              test_statistic = paste0("Fisher's exact test",
+              test_statistic = paste0(.("Fisher's exact test"),
                   if (!is.null(dcr_test$estimate)) sprintf(", OR = %.2f", dcr_test$estimate) else ""),
               p_value = round(dcr_test$p.value, 4),
               interpretation = dcr_interpretation
             ))
+          }
+
+          if (self$results$groupComparisonTest$rowCount > 1) {
+            self$results$groupComparisonTest$setNote("multiplicity",
+              .("Two Fisher's exact tests (ORR and DCR) are reported with unadjusted p-values; interpret them jointly rather than as independent evidence."))
           }
 
           # A skipped test used to leave a silent gap in the table.
@@ -3681,7 +3701,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       .generateClinicalGlossary = function() {
         glossary_text <- paste0(
           "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-          "<h4 style='color: #495057; margin-top: 0;'>", .("Clinical Terms & Definitions"), "</h4>",
+          "<h4 style='color: inherit; margin-top: 0;'>", .("Clinical Terms & Definitions"), "</h4>",
 
           "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px;'>",
 
@@ -3752,7 +3772,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         significance_text <- paste0(
           "<div style='background-color: rgba(251, 207, 33, 0.25); padding: 15px; border-left: 4px solid #f59e0b; margin: 10px 0; color: inherit;'>",
-          "<h4 style='color: #92400e; margin-top: 0;'>", .("Clinical Significance Assessment"), "</h4>",
+          "<h4 style='color: inherit; margin-top: 0;'>", .("Clinical Significance Assessment"), "</h4>",
 
           "<h5>", .("Response Rate Interpretation:"), "</h5>",
           "<ul>",
@@ -3787,7 +3807,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         guided_text <- paste0(
           "<div style='background-color: rgba(33, 225, 92, 0.07); padding: 15px; border: 1px solid #16a34a; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-          "<h4 style='color: #15803d; margin-top: 0;'>", .("Guided Analysis"), "</h4>",
+          "<h4 style='color: inherit; margin-top: 0;'>", .("Guided Analysis"), "</h4>",
 
           "<div style='margin: 15px 0;'>",
           "<h5>", .("Step-by-Step Progress:"), "</h5>",

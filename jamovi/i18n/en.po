@@ -1294,6 +1294,14 @@ msgid ""
 "narrow. Enable Bootstrap CI to obtain intervals."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "%.0f%% CV (threshold/2)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "%.0f%% CV threshold"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "%.0f%% intervals are bootstrap percentile intervals from %d resamples of the "
@@ -1306,12 +1314,45 @@ msgid ""
 "reference rule."
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "%.1f time units (n=%d responders)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "%.1f time units (n=%d with duration data)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgctxt "%.1f%%, %.1f%%"
+msgid "95%% CI (Median):"
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid "%.3f (CI not estimable)"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "%d case(s) with an incomplete set of measurements were excluded."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "%d cases analyzed with %d regional measurement each"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"%d cases analyzed with %d regional measurement each plus a reference "
+"measurement"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "%d cases analyzed with %d regional measurements each"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"%d cases analyzed with %d regional measurements each plus a reference "
+"measurement"
 msgstr ""
 
 #: R/singlearm.b.R
@@ -1492,6 +1533,12 @@ msgid ""
 "regions."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"%d of %d studies were excluded before analysis (%s). All results below are "
+"based on the remaining %d studies."
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid ""
 "%d of %d supplied rows (%.1f%%) were excluded before analysis because of "
@@ -1581,6 +1628,30 @@ msgid ""
 "analysed."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"%d study/studies contain a zero cell. A continuity correction of 0.5 was "
+"applied to all studies so the model could be fitted. Continuity corrections "
+"shift the pooled estimate; compare the alternatives under Zero Cell "
+"Correction to see how sensitive your result is."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"%d study/studies contain a zero cell. A continuity correction of 0.5 was "
+"applied to those studies only so the model could be fitted. Continuity "
+"corrections shift the pooled estimate; compare the alternatives under Zero "
+"Cell Correction to see how sensitive your result is."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"%d study/studies contain a zero cell. No user correction is selected, so "
+"mada's default single-study 0.5 correction is applied inside the models; "
+"choose a Zero-Cell Correction option to see how sensitive the pooled "
+"estimates are."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "%d time value%s infinite (Inf). Follow-up time must be a finite number; an "
@@ -1621,6 +1692,18 @@ msgstr ""
 msgid "%d with a missing start or end time"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "%d with missing counts"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "%d with negative counts"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "%d with no diseased or no non-diseased participants"
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "%d%% (%d of %d evaluable patients achieved complete or partial response)"
 msgstr ""
@@ -1633,6 +1716,40 @@ msgstr ""
 msgid "%s - see the main figure for the test statistic"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"%s (%s = %.2f) - Regional measurements are highly representative of one "
+"another."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"%s (%s = %.2f) - Regional measurements are highly representative of the "
+"reference region."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "%s (%s = %.2f) - Regional measurements may not fully represent one another."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"%s (%s = %.2f) - Regional measurements may not fully represent the reference "
+"region."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"%s (%s = %.2f) - Regional measurements show moderate agreement with one "
+"another."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"%s (%s = %.2f) - Regional measurements show moderate agreement with the "
+"reference region."
+msgstr ""
+
 #: R/jjcorrmat.b.R
 msgid "%s (%s = %s)"
 msgstr ""
@@ -1643,6 +1760,10 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 msgid "%s (continuous)"
+msgstr ""
+
+#: R/swimmerplot.b.R
+msgid "%s (cumulative)"
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -1704,6 +1825,10 @@ msgid ""
 "dependence-sensitive model or a study-specific sensitivity analysis."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "%s heterogeneity model failed: %s"
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "%s is not available for competing-risks analysis: it assumes a single event "
@@ -1730,11 +1855,19 @@ msgid ""
 "non-events). %d predictor(s) were retained: %s."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "%s meta-regression failed"
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "%s must be finite and zero or positive: %s ignored. Time is measured forward "
 "from the start of follow-up, so a negative or infinite time point is not "
 "valid."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "%s Positive LR %.2f and negative LR %.2f."
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -1766,6 +1899,10 @@ msgstr ""
 msgid "%s, analysed separately within each level of %s"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "%s: F(%d, %.0f) = %.2f, p = %.4g"
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid ""
 "%s: net benefit is computed on the direction the data support, which is the "
@@ -1775,6 +1912,18 @@ msgstr ""
 
 #: R/jjwithinstats.b.R
 msgid "%s: p = %s (n = %d subjects)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "%s: QM(%d) = %.2f, p = %.4g"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "%s%% confidence region (dashed)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "%s%% prediction region (dotted)"
 msgstr ""
 
 #: ggprism/ui[7][2][0].label
@@ -2102,14 +2251,23 @@ msgstr ""
 msgid "+ Enhanced Clinical Variables"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"+0.5 continuity correction applied to %d zero-cell study/studies (matching "
+"Deeks' test)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
 #: diagnosticmeta/options/zero_cell_correction/constant.title
 msgid "+0.5 to all cells of zero-cell studies"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: diagnosticmeta/options/zero_cell_correction/zero_cells.title
 msgid "+0.5 to the zero cells only"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: diagnosticmeta/options/zero_cell_correction/reciprocal_n.title
 msgid "+1/N to all cells (N = study size)"
 msgstr ""
@@ -2294,6 +2452,44 @@ msgstr ""
 
 #: R/survival.b.R
 msgid "<br><b>Landmark analysis at %s %s.</b>"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Overall Summary:</strong> performance is <em>asymmetric</em> "
+"- pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) fall in "
+"different performance bands."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%, "
+"<em>%s</em>) and pooled specificity (%.1f%%, <em>%s</em>) do not both reach "
+"the <em>good</em> band."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and "
+"pooled specificity (%.1f%%) both fall in the <em>excellent</em> band."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and "
+"pooled specificity (%.1f%%) both fall in the <em>good</em> band or above."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified "
+"as <em>%s</em> for confirmatory testing. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Your positive LR of %.2f</strong> provides <em>%s</em> "
+"evidence FOR disease when test is positive. "
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -2568,6 +2764,12 @@ msgid ""
 "border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'><h4 "
 "style='margin-top:0;'>Results Summary</h4><p>%s comparing %s across %d "
 "group(s) (n = %d). %s</p></div>"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<em>Note:</em> Zero-cell corrections can introduce bias, especially in large "
+"studies. Results should be interpreted with caution."
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -3743,18 +3945,74 @@ msgid ""
 "using appropriate methods for correlated data."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Interpretation:</strong> a negative result reduces, but does not "
+"remove, the possibility of disease at this sensitivity. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Interpretation:</strong> at this sensitivity a substantial "
+"proportion of diseased patients are expected to test negative. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Interpretation:</strong> at this specificity a large share of "
+"positive results are expected to be false positives. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Interpretation:</strong> at this specificity an appreciable share of "
+"positive results are expected to be false positives. "
+msgstr ""
+
 #: R/linechart.b.R
 msgid ""
 "<strong>Linearity:</strong> The relationship between variables is "
 "approximately linear."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "<strong>Method:</strong> %s"
+msgstr ""
+
 #: R/mageeequation.b.R
 msgid "<strong>Mitotic Score</strong> (1-3)"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Negative Likelihood Ratio:</strong> %.2f - A negative test is %.1fx "
+"more likely in healthy than disease"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Negative Likelihood Ratio:</strong> %.2f - Interpretation unstable "
+"(sensitivity [[APPROX]] 100%%)."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Negative Likelihood Ratio:</strong> Not estimable with the current "
+"data. LR- is (1 - sensitivity) / specificity, so it needs a pooled "
+"specificity above zero and finite pooled estimates; here the pooled "
+"specificity is 0 or an estimate did not converge. Read the pooled "
+"specificity and its confidence interval in the summary above to see which."
+msgstr ""
+
 #: R/linechart.b.R
 msgid "<strong>Normality:</strong> Residuals are approximately normally distributed."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Note:</strong> the confidence interval spans more than one "
+"performance category, so this classification is not firmly established by "
+"the pooled data. "
 msgstr ""
 
 #: R/mageeequation.b.R
@@ -3765,6 +4023,18 @@ msgstr ""
 msgid ""
 "<strong>Ordered X-variable:</strong> Time points or sequence should have "
 "meaningful order."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Positive Likelihood Ratio:</strong> %.2f - A positive test is %.1fx "
+"more likely in disease than healthy"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Positive Likelihood Ratio:</strong> Not estimable with the current "
+"data (specificity [[APPROX]] 100% or model unstable)."
 msgstr ""
 
 #: R/mageeequation.b.R
@@ -3793,6 +4063,41 @@ msgstr ""
 msgid ""
 "<strong>R² ≥ 0.50:</strong> Large effect - at least 50% of the variance "
 "accounted for"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "<strong>Studies corrected:</strong> %d of %d (%s)"
+msgstr ""
+
+#: R/swimmerplot.b.R
+msgid ""
+"<strong>Summary Statistics:</strong> Comprehensive summary metrics and "
+"clinical indicators"
+msgstr ""
+
+#: R/swimmerplot.b.R
+msgid ""
+"<strong>Timeline Data:</strong> Complete patient timeline dataset with "
+"processed variables"
+msgstr ""
+
+#: R/swimmerplot.b.R
+msgid ""
+"<strong>Usage:</strong> This text is formatted for direct use in manuscripts "
+"and clinical reports. Copy and paste into your document and adjust as needed "
+"for your specific requirements."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Your negative LR of %.2f</strong> provides <em>%s</em> evidence "
+"AGAINST disease when test is negative. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Your pooled sensitivity of %.1f%%%s</strong> is classified as "
+"<em>%s</em> for screening purposes. "
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -5331,6 +5636,12 @@ msgid ""
 "curved arcs connecting nodes."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"A continuity correction of 0.5 was applied to %d study/studies with a zero "
+"cell so the odds ratio was finite."
+msgstr ""
+
 #: R/benford.b.R
 msgid ""
 "A departure this small relative to the MAD cut-offs, yet detectable by the "
@@ -5343,6 +5654,12 @@ msgstr ""
 msgid ""
 "A distinct condition that describes a patient's health status in a Markov "
 "model (e.g., Healthy, Sick, Dead)."
+msgstr ""
+
+#: R/waterfall.b.R
+msgid ""
+"A Fisher's exact test was not run where every patient fell into the same "
+"class (e.g. no responders in any group), so there is no contrast to test."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -5471,8 +5788,24 @@ msgid ""
 "from {prevalence} to {posttest}."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "A negative result moderately decreases disease probability. "
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid "A negative result multiplies pre-test odds by {lr}."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"A negative result multiplies the pre-test odds by %.2fx; the post-test "
+"probability also depends on the pre-test probability. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"A negative result substantially decreases disease probability (divides "
+"pre-test odds by %.1fx). "
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -5579,8 +5912,24 @@ msgid ""
 "from {prevalence} to {posttest}."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"A positive result increases disease probability substantially (multiplies "
+"pre-test odds by %.1fx). "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "A positive result moderately increases disease probability. "
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid "A positive result multiplies pre-test odds by {lr}."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"A positive result multiplies the pre-test odds by %.2fx; the post-test "
+"probability also depends on the pre-test probability. "
 msgstr ""
 
 #: contTablesPaired/results/freqs.description
@@ -5835,6 +6184,13 @@ msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "A way to model how patients move between different health states over time"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"A zero-cell correction (%s) was applied to %d study/studies (%s). Corrected "
+"counts are used by all analyses and plots; the Individual Study Results "
+"table shows the raw counts."
 msgstr ""
 
 #: stereology/results/groupComparison.columns.title
@@ -7360,7 +7716,6 @@ msgstr ""
 msgid "Add Report Completeness to Data"
 msgstr ""
 
-#: waterfall/options/addResponseCategory.title
 #: waterfall/results/addResponseCategory.title
 msgid "Add Response Category to Data"
 msgstr ""
@@ -7696,9 +8051,12 @@ msgstr ""
 msgid "Additional random effects beyond frailty"
 msgstr ""
 
-#: ihcheterogeneity/options/biopsies.title
 #: ihcheterogeneity/ui[0][5].label
 msgid "Additional Regional Measurements"
+msgstr ""
+
+#: ihcheterogeneity/options/biopsies.title
+msgid "Additional regional measurements"
 msgstr ""
 
 #: condsurvival/options/prediction_times.title
@@ -7836,6 +8194,10 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "Adequate Information:"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Adequate power achieved"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -9512,6 +9874,24 @@ msgstr ""
 msgid "Agreement %"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Agreement %s was high in this dataset (%s above 0.75): the measurements gave "
+"similar values."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Agreement %s was low in this dataset (%s of 0.50 or below): the measurements "
+"differed substantially."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Agreement %s was moderate in this dataset (%s above 0.50 and up to 0.75): "
+"appreciable variability remained."
+msgstr ""
+
 #: pathagreement/results/overviewTable.title
 msgid "Agreement Analysis Summary"
 msgstr ""
@@ -9605,6 +9985,10 @@ msgstr ""
 msgid "Agreement Level"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Agreement Level:"
+msgstr ""
+
 #: agreement/options/ssMetric.title
 #: pathologyagreement/results/agreementtable.columns.title
 msgid "Agreement Metric"
@@ -9652,6 +10036,16 @@ msgstr ""
 msgid "Agreement study sample size"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Agreement thresholds (correlation \\u{2265} %s, CV \\u{2264} %s%%) may be "
+"met, but a clinically material systematic difference is present."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "AGREEMENT THRESHOLDS MET:"
+msgstr ""
+
 #: pathagreement/options/agreementTrendAnalysis.title
 #: pathagreement/results/agreementTrendTable.title
 msgid "Agreement Trend Analysis"
@@ -9679,6 +10073,18 @@ msgstr ""
 
 #: R/pathagreement.b.R
 msgid "Agreement was assessed using %s."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Agreement was assessed using Spearman rank correlation; an intraclass "
+"correlation coefficient could not be estimated from these data. "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Agreement was assessed using the intraclass correlation coefficient "
+"(ICC(2,1), absolute agreement) and Spearman rank correlation. "
 msgstr ""
 
 #: agreement/options/loaVariableName.default
@@ -11008,6 +11414,22 @@ msgstr ""
 msgid "Analysis could not be completed"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Analysis data is missing or empty"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Analysis data is missing or empty, so heterogeneity could not be assessed."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Analysis data is missing or empty, so meta-regression could not be run."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Analysis data is missing or empty, so publication bias could not be assessed."
+msgstr ""
+
 #: R/advancedraincloud.b.R
 msgid "Analysis dataset:"
 msgstr ""
@@ -11068,11 +11490,11 @@ msgid "Analysis explanations"
 msgstr ""
 
 #: haralicktexture/options/analysis_focus.title
-#: ihcheterogeneity/options/analysis_type.title
 #: multiplexanalysis/options/analysis_focus.title
 msgid "Analysis Focus"
 msgstr ""
 
+#: ihcheterogeneity/options/analysis_type.title
 #: ihcheterogeneity/ui[1]/analysis_type.label
 msgid "Analysis focus"
 msgstr ""
@@ -11617,6 +12039,10 @@ msgstr ""
 msgid "Analysis summary (sample size, missing data report)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Analysis Summary in Plain Language"
+msgstr ""
+
 #: ihcscoring/results/biomarkerspecific/biomarkerresults.description
 msgid "Analysis tailored to specific biomarker characteristics"
 msgstr ""
@@ -12045,7 +12471,7 @@ msgid "Annotation Tracks"
 msgstr ""
 
 #: waterfall/options/annotationVars.title
-msgid "Annotation Tracks (below the bars)"
+msgid "Annotation tracks (below the bars)"
 msgstr ""
 
 #: clinicalheatmap/options/annotationType.title
@@ -12613,6 +13039,10 @@ msgstr ""
 
 #: psychopdaROC/results/aucSummaryTable.title
 msgid "Area Under the ROC Curve"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Area under the SROC curve (AUC = 1/(1 + theta))"
 msgstr ""
 
 #: bbcplots/options/font_family/Arial.title
@@ -13183,6 +13613,13 @@ msgstr ""
 msgid "At least 2 groups required for ridge plot comparison"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"At least 2 regional measurements are required for inter-regional "
+"heterogeneity analysis. With a reference (whole section) measurement "
+"selected, a single regional measurement is sufficient."
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "At least 2 rows of data required"
 msgstr ""
@@ -13235,6 +13672,10 @@ msgstr ""
 msgid "At least one strata variable is required"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "At least three finite studies are required for %s meta-regression."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "At least three tests are required; the two-test model is not statistically "
@@ -13245,6 +13686,10 @@ msgstr ""
 msgid ""
 "At least three tests are required. With exactly three tests the model is "
 "just-identified, so goodness-of-fit statistics cannot test its assumptions."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "At least two finite studies are required for %s"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -14180,6 +14625,18 @@ msgstr ""
 msgid "Average Cluster Size"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Average correlation of %.2f suggests moderate relationships between %s."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Average correlation of %.2f suggests strong relationships between %s."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Average correlation of %.2f suggests weak relationships between %s."
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid ""
 "Average distance from a node to all other nodes in the network. Higher "
@@ -14750,8 +15207,11 @@ msgid "Bar Shape"
 msgstr ""
 
 #: advancedbarplot/options/transparency.title
-#: waterfall/options/barAlpha.title
 msgid "Bar Transparency"
+msgstr ""
+
+#: waterfall/options/barAlpha.title
+msgid "Bar transparency"
 msgstr ""
 
 #: tidyplots/options/barType.title
@@ -14761,11 +15221,11 @@ msgstr ""
 
 #: advancedbarplot/options/bar_width.title
 #: basegraphics/options/bar_width.title
-#: waterfall/options/barWidth.title
 msgid "Bar Width"
 msgstr ""
 
 #: jjsegmentedtotalbar/ui[8][0]/bar_width.label
+#: waterfall/options/barWidth.title
 msgid "Bar width"
 msgstr ""
 
@@ -14896,10 +15356,6 @@ msgstr ""
 #: R/singlearm.b.R
 #: R/survival.b.R
 msgid "Based on Kaplan-Meier estimates"
-msgstr ""
-
-#: R/waterfall.b.R
-msgid "baseline"
 msgstr ""
 
 #: precisionrecall/results/aucTable.columns.title
@@ -15057,10 +15513,6 @@ msgstr ""
 
 #: irecist/options/baselineReference.title
 msgid "Baseline Reference"
-msgstr ""
-
-#: R/waterfall.b.R
-msgid "baseline required"
 msgstr ""
 
 #: bayesiannetworkma/options/baseline_model.title
@@ -16320,6 +16772,26 @@ msgstr ""
 msgid "Between Groups Comparison"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "between regional measurements"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "between regions"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "between the regions and the reference measurement"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Between-Case Variance"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Between-Case Variance (Regional Means)"
+msgstr ""
+
 #: pathagreement/results/styleGroupSummary.columns.title
 msgid "Between-Group Agreement %"
 msgstr ""
@@ -16339,8 +16811,28 @@ msgstr ""
 msgid "Between-Study Heterogeneity Assessment"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"Between-study heterogeneity is substantial - the prediction interval spans a "
+"wide range of accuracy - so this pooled pair does not describe any single "
+"population or laboratory. Read the prediction region and the subgroup or "
+"meta-regression results rather than the pooled point."
+msgstr ""
+
 #: bayesiandiagnostic/results/heterogeneityPlot.title
 msgid "Between-Study Heterogeneity Visualization"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Between-study variance (tau^2)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Between-study variance components: tau-squared (logit sensitivity) = %.3f, "
+"tau-squared (logit false-positive rate) = %.3f; correlation between logit "
+"sensitivity and logit specificity = %.2f. A strongly negative correlation "
+"suggests a threshold effect (studies trading sensitivity for specificity)."
 msgstr ""
 
 #: subgroupforest/results/heterogeneity.title
@@ -16446,8 +16938,19 @@ msgstr ""
 msgid "Bias Adjustment"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: methodcomparison/results/biasAnalysis.title
 msgid "Bias Analysis"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Bias analysis requires a reference (whole section) measurement."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Bias analysis was not applicable because no reference measurement was "
+"supplied. "
 msgstr ""
 
 #: clinicalprediction/options/bias_analysis.title
@@ -16470,6 +16973,10 @@ msgstr ""
 
 #: idi/results/validationResults.columns.title
 msgid "Bias Correction"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Bias Correction:"
 msgstr ""
 
 #: simonmakuch/results/immortalTimeBias.columns.title
@@ -16510,6 +17017,10 @@ msgstr ""
 
 #: pathagreement/results/raterBiasTable.columns.title
 msgid "Bias Severity"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Bias testing could not be performed due to limited paired observations. "
 msgstr ""
 
 #: methodcomparison/results/biasAnalysis.columns.title
@@ -17193,6 +17704,10 @@ msgstr ""
 msgid "Biomarker Validation Study"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Biomarker Value"
+msgstr ""
+
 #: advancedtrials/options/biomarker_var.title
 #: advancedtrials/ui[0][3].label
 #: biomarkerresponse/options/biomarker.title
@@ -17277,6 +17792,26 @@ msgstr ""
 msgid "Biserial (binary-continuous)"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Bivariate analysis disabled by user option"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Bivariate analysis error: %s"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Bivariate analysis was not enabled. Enable bivariate analysis for pooled "
+"estimates."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Bivariate meta-analysis encountered an error. Check individual study results "
+"and data quality."
+msgstr ""
+
 #: diagnosticmeta/results/bivariateresults.title
 msgid "Bivariate Meta-Analysis Results"
 msgstr ""
@@ -17289,8 +17824,16 @@ msgstr ""
 msgid "Bivariate Model (Sens & Spec)"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Bivariate model failed"
+msgstr ""
+
 #: hierarchicalbayes/options/model_type/bivariate_normal.title
 msgid "Bivariate Normal Model"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Bivariate output missing"
 msgstr ""
 
 #: diagnosticmeta/options/bivariate_analysis.title
@@ -17716,6 +18259,10 @@ msgstr ""
 
 #: enhancedROC/options/bootstrapPartialAUC.title
 msgid "Bootstrap CI for partial AUC"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Bootstrap CI for the median could not be computed."
 msgstr ""
 
 #: treatmentswitching/results/bootstrapTable.columns.title
@@ -18865,6 +19412,10 @@ msgstr ""
 
 #: nonparametric/options/homogeneity_test/brown_forsythe.title
 msgid "Brown-Forsythe Test"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Brown-Forsythe test (spread of per-case CV)"
 msgstr ""
 
 #: causalmediation/options/hd_method/bslmm.title
@@ -20296,6 +20847,10 @@ msgstr ""
 msgid "Calendar-aware (actual month lengths)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Calibrate the regional measurement before using it in place of the %s."
+msgstr ""
+
 #: R/clinicalscore.b.R
 #: R/enhancedROC.b.R
 #: bayesianma/results/crossValidation.columns.title
@@ -20619,6 +21174,10 @@ msgstr ""
 msgid "Candy Bright (9 colors)"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Cannot access coefficients: %s"
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Cannot auto-detect data format: provide at least one strata variable"
 msgstr ""
@@ -20874,6 +21433,10 @@ msgstr ""
 
 #: ihcpredict/options/caseId.description
 msgid "Case identifier for tracking predictions"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Case Number"
 msgstr ""
 
 #: multifocalconcordance/results/caseLevelTable.columns.title
@@ -24016,6 +24579,10 @@ msgstr ""
 msgid "CLIA Requirements"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Click and drag to select text, then copy (Ctrl+C/Cmd+C) for use in reports."
+msgstr ""
+
 #: R/nonparametric.b.R
 msgid "Cliff's Delta"
 msgstr ""
@@ -24269,6 +24836,10 @@ msgstr ""
 
 #: sequentialtests/options/preset/stroke_emergency_parallel.title
 msgid "Clinical Assessment + CT (Illustrative)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Clinical Assessment:"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -24574,6 +25145,10 @@ msgstr ""
 
 #: treatmentoptim/results/drugInteractions.columns.title
 msgid "Clinical Effect"
+msgstr ""
+
+#: R/swimmerplot.b.R
+msgid "Clinical Events"
 msgstr ""
 
 #: stagemigration/results/clinicalUtilitySummary.columns.title
@@ -25128,6 +25703,7 @@ msgstr ""
 msgid "Clinical interpretation will be unreliable"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: R/swimmerplot_html.R
 #: R/waterfall.b.R
 msgid "Clinical Interpretation:"
@@ -27137,8 +27713,16 @@ msgstr ""
 msgid "Coefficient of Variation ( percent)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Coefficient of Variation (%)"
+msgstr ""
+
 #: ihcthreshold/options/optimizationMethod/cv.title
 msgid "Coefficient of Variation (CV)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Coefficient of variation across sampling methods per case"
 msgstr ""
 
 #: haralicktexture/results/variability.description
@@ -27391,7 +27975,7 @@ msgid "Color Blind Friendly"
 msgstr ""
 
 #: waterfall/options/colorBy.title
-msgid "Color By"
+msgid "Color by"
 msgstr ""
 
 #: dendrogram/options/colorGroups.title
@@ -27511,7 +28095,6 @@ msgstr ""
 #: linechart/options/colorPalette.title
 #: parallelplot/options/colorPalette.title
 #: raincloud/options/color_palette.title
-#: swimmerplot/options/colorPalette.title
 msgid "Color Palette"
 msgstr ""
 
@@ -27521,6 +28104,7 @@ msgstr ""
 #: jjridges/ui[4][0]/color_palette.label
 #: jjsegmentedtotalbar/ui[4][0]/color_palette.label
 #: raincloud/ui[3][0]/color_palette.label
+#: swimmerplot/options/colorPalette.title
 #: venn/options/colorPalette.title
 msgid "Color palette"
 msgstr ""
@@ -27638,7 +28222,6 @@ msgstr ""
 #: studydiagram/options/color_scheme.title
 #: tidyplots/options/colorScheme.title
 #: tidyplots/ui[8][0].label
-#: waterfall/options/colorScheme.title
 #: waterfallrecist/options/colorScheme.title
 msgid "Color Scheme"
 msgstr ""
@@ -27646,6 +28229,7 @@ msgstr ""
 #: finegray/ui[3][1][0]/colorScheme.label
 #: linechart/ui[3][1]/colorPalette.label
 #: lollipop/ui[2][0]/colorScheme.label
+#: waterfall/options/colorScheme.title
 msgid "Color scheme"
 msgstr ""
 
@@ -30155,6 +30739,12 @@ msgstr ""
 msgid "Comprehensive analysis summary and interpretation"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Comprehensive Analysis: All analysis modules (reproducibility, bias, "
+"variability, and power) have been enabled."
+msgstr ""
+
 #: package/analyses/methodvalidation.description
 #: methodvalidation/options.description.main
 msgid ""
@@ -31882,7 +32472,6 @@ msgstr ""
 #: coxrobust/options/confidence_level.title
 #: ctdnadynamics/options/conf_level.title
 #: decisioncurve/options/ciLevel.title
-#: diagnosticmeta/options/confidence_level.title
 #: differentialdiagnosis/options/confidence_level.title
 #: directbinomial/options/conf.title
 #: directregression/options/confidence_level.title
@@ -32060,6 +32649,7 @@ msgstr ""
 
 #: ciSingle/options/ciWidth.title
 #: decisioncurve/ui[7][0]/ciLevel.label
+#: diagnosticmeta/options/confidence_level.title
 #: enhancedcorrelation/options/ciWidth.title
 #: exacttests/options/ciWidth.title
 #: exacttests/ui[1][1]/ciWidth.label
@@ -32343,6 +32933,10 @@ msgid ""
 "correcting a value."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Confirm findings in independent dataset"
+msgstr ""
+
 #: R/waterfall.b.R
 msgid ""
 "Confirm percentage calculation method: ((current - baseline) / baseline) "
@@ -32373,9 +32967,12 @@ msgstr ""
 msgid "Confirmation Settings"
 msgstr ""
 
-#: waterfall/options/confirmationVar.title
 #: waterfall/ui[0][4].label
 msgid "Confirmation Status (optional)"
+msgstr ""
+
+#: waterfall/options/confirmationVar.title
+msgid "Confirmation status (optional)"
 msgstr ""
 
 #: irecist/results/pseudoprogressionTable.columns.title
@@ -32680,6 +33277,16 @@ msgstr ""
 msgid "Conservative/liberal reference standards"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Consider 2-3 additional samples to reduce variability (current CV = %s%%, "
+"threshold = %s%%)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Consider additional samples or sampling optimization."
+msgstr ""
+
 #: R/benford.b.R
 msgid "Consider alternative data quality checks for narrow-range data"
 msgstr ""
@@ -32760,6 +33367,10 @@ msgstr ""
 msgid ""
 "Consider if the study has sufficient power to detect clinically relevant "
 "differences."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Consider moderate sample increase"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -33770,6 +34381,7 @@ msgstr ""
 msgid "Copy-ready descriptive cohort summary"
 msgstr ""
 
+#: R/swimmerplot.b.R
 #: swimmerplot/results/copyReadyReport.title
 msgid "Copy-Ready Manuscript Text"
 msgstr ""
@@ -33809,6 +34421,7 @@ msgstr ""
 msgid "Copy-Ready Report Sentence:"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: R/waterfall.b.R
 #: ihcheterogeneity/results/report_sentences.title
 #: modelbuilder/results/reportSentences.title
@@ -34099,6 +34712,13 @@ msgstr ""
 msgid "Correlation and agreement statistics between scoring methods"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Correlation and CV cannot detect a constant offset, so the agreement "
+"thresholds below do not by themselves establish that regional measurements "
+"may substitute for the %s."
+msgstr ""
+
 #: ihcheterogeneity/results/reproducibilitytable.description
 msgid "Correlation and reliability metrics"
 msgstr ""
@@ -34143,6 +34763,10 @@ msgstr ""
 
 #: robustcorrelation/results/correlation_table.description
 msgid "Correlation coefficients and significance tests"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Correlation could not be estimated with the available data."
 msgstr ""
 
 #: R/linechart.b.R
@@ -34246,6 +34870,10 @@ msgstr ""
 
 #: jpps/options/correlation_method.description
 msgid "Correlation method for comparison"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Correlation metrics were not estimable with the available data. "
 msgstr ""
 
 #: conditionalgee/results/correlationStructure.title
@@ -34366,6 +34994,10 @@ msgstr ""
 
 #: biomarkerdiscovery/options/feature_selection_method/correlation_filter.title
 msgid "Correlation-based Filter"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Correlation:"
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -34711,6 +35343,14 @@ msgstr ""
 
 #: R/lassocox.b.R
 msgid "Could not compute"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Could not compute:"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Could not compute: insufficient data or computational error"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -37392,6 +38032,10 @@ msgstr ""
 msgid "Current Sample Size"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Current sampling appears adequate (CV = %s%% \\u{2264} %s%%)"
+msgstr ""
+
 #: sigmametrics/results/costOfQuality.columns.title
 msgid "Current Sigma Cost ($)"
 msgstr ""
@@ -37997,7 +38641,7 @@ msgid "Custom Rate Table"
 msgstr ""
 
 #: swimmerplot/options/customReferenceDate.title
-msgid "Custom Reference Date"
+msgid "Custom reference date"
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -38009,7 +38653,7 @@ msgid "Custom Reference Ranges"
 msgstr ""
 
 #: swimmerplot/options/customReferenceTime.title
-msgid "Custom Reference Time"
+msgid "Custom reference time"
 msgstr ""
 
 #: clinicalnomograms/options/reporting_guidelines/custom.title
@@ -38593,6 +39237,10 @@ msgstr ""
 msgid "CV Threshold for Acceptable Variability"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "CV: %s%%"
+msgstr ""
+
 #: decisiongraph/results/markovCohortTable.columns.title
 msgid "Cycle"
 msgstr ""
@@ -38874,6 +39522,10 @@ msgstr ""
 msgid "Data Handling Notes:"
 msgstr ""
 
+#: R/swimmerplot.b.R
+msgid "Data has been exported to the following outputs:"
+msgstr ""
+
 #: mendelianrandomization/results/dataInfo.title
 #: summarydata/results/todo.title
 msgid "Data Information"
@@ -38893,7 +39545,7 @@ msgid "Data Input Options:"
 msgstr ""
 
 #: waterfall/options/inputType.title
-msgid "Data Input Type"
+msgid "Data input type"
 msgstr ""
 
 #: survivalendpoints/ui[1].label
@@ -39134,6 +39786,7 @@ msgstr ""
 msgid "Data Quality Visualization"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: crosstable/results/dataQualityNotice.title
 #: studydiagram/results/warnings.title
 msgid "Data Quality Warnings"
@@ -39379,6 +40032,10 @@ msgstr ""
 msgid "Data validation error"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Data validation failed."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "Data Validation Issues"
 msgstr ""
@@ -39406,6 +40063,16 @@ msgstr ""
 
 #: reportcat/results/dataWarnings.title
 msgid "Data Warnings"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Data were insufficient to characterize sampling reliability."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Data were insufficient to evaluate overall sampling quality against "
+"predefined criteria. "
 msgstr ""
 
 #: autoeda/options/eda_engine/dataexplorer.title
@@ -39623,10 +40290,6 @@ msgstr ""
 
 #: R/datetimeconverter.b.R
 msgid "Dates Read Into The Wrong Century"
-msgstr ""
-
-#: R/swimmerplot.b.R
-msgid "dates with format"
 msgstr ""
 
 #: R/datetimeconverter.b.R
@@ -40398,6 +41061,29 @@ msgstr ""
 
 #: pagetrendtest/options/trend_direction/decreasing.title
 msgid "Decreasing Trend"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Deeks' Funnel Plot Asymmetry Test"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Deeks' Funnel Plot: Publication Bias Assessment"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Deeks' test is unreliable with fewer than 10 studies (k = %d here); treat "
+"the asymmetry result as descriptive only."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Deeks' test: log diagnostic odds ratio regressed on 1/sqrt(effective sample "
+"size), weighted by effective sample size; slope referred to t on %d df "
+"(Deeks, Macaskill & Irwig 2005). Asymmetry is not by itself evidence of "
+"publication bias - it can also arise from between-study heterogeneity or a "
+"threshold effect."
 msgstr ""
 
 #: explainableai/options/shap_method/deep_explainer.title
@@ -42145,6 +42831,10 @@ msgstr ""
 msgid "Diagnostic Accuracy Metrics (requires reference standard)"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Diagnostic accuracy parameter (theta)"
+msgstr ""
+
 #: screeningevaluation/results/diagnostic_accuracy_summary.title
 msgid "Diagnostic Accuracy Summary"
 msgstr ""
@@ -42275,6 +42965,7 @@ msgstr ""
 msgid "Diagnostic Network Diagram"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: bayesiandiagnostic/results/diagnosticOddsRatio.title
 #: decisioncalculator/results/advancedMetricsTable.columns.title
 #: likelihoodratio/options/showDiagnosticOdds.title
@@ -45613,6 +46304,10 @@ msgstr ""
 msgid "Distribution of DAB intensity levels"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Distribution of IHC biomarker values across tissue regions"
+msgstr ""
+
 #: deeplearningprediction/results/predictionDistributionPlot.description
 msgid "Distribution of prediction confidence scores"
 msgstr ""
@@ -46675,6 +47370,20 @@ msgid ""
 "calculated exactly from individual follow-up. Limits are Garwood Poisson 95% "
 "intervals conditional on the observed exposure. These are interval rates, "
 "not pointwise instantaneous hazards or Cox-model coefficients."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Each row is a separate univariate random-effects model on the logit of that "
+"measure. The I-squared is therefore the proportion of variance in THAT "
+"margin alone that is not attributable to sampling error; it does not "
+"describe the bivariate model and should not be read as an overall "
+"heterogeneity figure (Zwinderman & Bossuyt 2008). In diagnostic accuracy "
+"meta-analysis a high I-squared is expected whenever studies used different "
+"positivity thresholds - it signals a threshold effect to be modelled by the "
+"SROC curve, not necessarily a defect. Use the prediction interval and the "
+"SROC prediction region for a model-consistent statement of between-study "
+"variability."
 msgstr ""
 
 #: R/swimmerplot_html.R
@@ -48287,7 +48996,7 @@ msgid "End Run"
 msgstr ""
 
 #: swimmerplot/options/endTime.title
-msgid "End Time"
+msgid "End time"
 msgstr ""
 
 #: swimmerplot/ui[0][0][2].label
@@ -49700,6 +50409,10 @@ msgstr ""
 msgid "Error in difficulty analysis:"
 msgstr ""
 
+#: R/swimmerplot.b.R
+msgid "Error in enhanced plot: %s"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "Error in ggplot: {msg}"
 msgstr ""
@@ -49745,7 +50458,7 @@ msgid "Error occurred"
 msgstr ""
 
 #: R/swimmerplot.b.R
-msgid "Error parsing"
+msgid "Error parsing %s dates with format %s."
 msgstr ""
 
 #: R/timeinterval.b.R
@@ -49990,6 +50703,7 @@ msgid ""
 "covariate. Confidence intervals are those of that single prediction."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: advancedanova/results/dunnett.columns.title
 #: advancedimputation/results/pooledResults.columns.title
 #: agreement/results/mixedEffectsTable.columns.title
@@ -50927,9 +51641,12 @@ msgstr ""
 msgid "Event Time Distribution"
 msgstr ""
 
-#: swimmerplot/options/eventTimeVar.title
 #: swimmerplot/ui[3][1][1].label
 msgid "Event Time Variable"
+msgstr ""
+
+#: swimmerplot/options/eventTimeVar.title
+msgid "Event time variable"
 msgstr ""
 
 #: recurrentsurvival/results/event_timeline_plot.title
@@ -50955,9 +51672,12 @@ msgstr ""
 msgid "Event type"
 msgstr ""
 
-#: swimmerplot/options/eventVar.title
 #: swimmerplot/ui[3][1][0].label
 msgid "Event Type Variable"
+msgstr ""
+
+#: swimmerplot/options/eventVar.title
+msgid "Event type variable"
 msgstr ""
 
 #: directbinomial/options/event.description
@@ -51726,6 +52446,7 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 #: R/enhancedROC.b.R
+#: R/ihcheterogeneity.b.R
 #: R/lassologistic.b.R
 #: R/psychopdaROC.b.R
 #: R/riverplot.b.R
@@ -51981,6 +52702,19 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid "Excluded from analysis"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Excluded non-finite study rows from meta-regression (sensitivity: %d; "
+"specificity: %d). Choose a zero-cell correction to retain zero-cell studies."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Excluded non-finite study rows from univariate heterogeneity models "
+"(sensitivity: %d; specificity: %d). Choose a zero-cell correction to retain "
+"zero-cell studies."
 msgstr ""
 
 #: decisioncompare/results/comparisonTable.columns.title
@@ -53170,6 +53904,7 @@ msgstr ""
 msgid "Export Hazard Estimates"
 msgstr ""
 
+#: R/swimmerplot.b.R
 #: consortdiagram/results/exportInfo.title
 #: crosstablepivot/results/export_info.title
 #: gtsummary/results/export_info.title
@@ -53304,10 +54039,6 @@ msgstr ""
 msgid "Export Summary Statistics"
 msgstr ""
 
-#: swimmerplot/options/exportSummary.title
-msgid "Export summary statistics"
-msgstr ""
-
 #: survival/results/export_survival_data.title
 msgid "Export Survival Data"
 msgstr ""
@@ -53332,10 +54063,6 @@ msgstr ""
 
 #: swimmerplot/results/timelineData.title
 msgid "Export Timeline Data"
-msgstr ""
-
-#: swimmerplot/options/exportTimeline.title
-msgid "Export timeline data"
 msgstr ""
 
 #: crosstablepivot/options/export_excel.title
@@ -54243,6 +54970,10 @@ msgstr ""
 
 #: enhancedROC/results/results/clinicalImpactTable.columns.title
 msgid "False Positive Rate"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "False Positive Rate (1 - Specificity)"
 msgstr ""
 
 #: R/decision.b.R
@@ -55308,6 +56039,7 @@ msgstr ""
 msgid "Fisher's Exact Test"
 msgstr ""
 
+#: R/waterfall.b.R
 #: contTables/options/fisher.title
 #: contTables/results/chiSq.columns.content
 #: exacttests/options/testType/fisher.title
@@ -55490,13 +56222,16 @@ msgid "Fixed cutoff"
 msgstr ""
 
 #: bayesiandiagnostic/options/heterogeneity_model/fixed.title
-#: diagnosticmeta/options/method/fixed.title
 #: mendelianrandomization/options/ivw_model/fixed.title
 #: mixedeffectscox/options/fixed_effects.title
 #: mixedeffectscox/ui[0][2].label
 #: mixedmodelanova/results/fixed_effects.title
 #: ordinalmixedmodel/results/fixedEffects.title
 msgid "Fixed Effects"
+msgstr ""
+
+#: diagnosticmeta/options/method/fixed.title
+msgid "Fixed effects"
 msgstr ""
 
 #: mixedcox/options/fixed_effects.title
@@ -55612,8 +56347,18 @@ msgstr ""
 msgid "Fixed Width Around Threshold"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"Fixed-effect confidence intervals were computed from the fitted Reitsma "
+"covariance matrix."
+msgstr ""
+
 #: treatmentmeta/options/model_type/fixed.title
 msgid "Fixed-Effect Model"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "fixed-effects"
 msgstr ""
 
 #: metaanalysis/options/model_type/fixed_effects.title
@@ -56070,10 +56815,6 @@ msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "Follow the standard decision analysis workflow"
-msgstr ""
-
-#: R/waterfall.b.R
-msgid "follow-up"
 msgstr ""
 
 #: studydiagram/options/step4_label.default
@@ -56784,6 +57525,10 @@ msgstr ""
 #: jforestmodel/ui.title
 #: jforestmodel/results.title
 msgid "Forest Plot Visualization"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Forest Plot: Sensitivity and Specificity by Study"
 msgstr ""
 
 #: epidemiosurvival/options/forest_plots.title
@@ -59485,6 +60230,7 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 #: R/enhancedROC.b.R
+#: R/ihcheterogeneity.b.R
 #: R/lassologistic.b.R
 #: R/psychopdaROC.b.R
 #: R/riverplot.b.R
@@ -59510,6 +60256,14 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Good early retrieval performance"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Good reliability"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Good representativeness"
 msgstr ""
 
 #: segmentationmetrics/ui/qualityThresholds/dice_threshold_good.label
@@ -60228,6 +60982,12 @@ msgstr ""
 msgid "Group Comparison Tests"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid ""
+"Group comparison tests need at least two groups, each with at least one "
+"evaluable patient."
+msgstr ""
+
 #: advancedraincloud/results/comparisons.title
 #: patientreported/options/group_comparisons.title
 #: patientreported/ui[6][0].label
@@ -60510,11 +61270,14 @@ msgstr ""
 #: summarydata2/ui[3][0].label
 #: tidyplots/options/group.title
 #: tidyplots/ui[0][3].label
-#: waterfall/options/groupVar.title
 #: waterfall/ui[0][3].label
 #: weightedlogrank/options/explanatory.title
 #: weightedlogrank/ui[0][2].label
 msgid "Group Variable"
+msgstr ""
+
+#: waterfall/options/groupVar.title
+msgid "Group variable"
 msgstr ""
 
 #: competingsurvival/ui[0][2].label
@@ -60667,6 +61430,7 @@ msgstr ""
 #: clinicaldashboard/options/groupVar.title
 #: crosstable/options/group.title
 #: crosstable/ui[0][1].label
+#: swimmerplot/options/groupVar.title
 msgid "Grouping variable"
 msgstr ""
 
@@ -60728,7 +61492,6 @@ msgstr ""
 #: recist/options/groupVar.title
 #: rmstregression/options/group_var.title
 #: rmstregression/ui[0][2].label
-#: swimmerplot/options/groupVar.title
 #: toolssummary/options/groupVar.title
 #: toolssummary/ui[2][0].label
 #: variablebiplot/options/groupVar.title
@@ -62102,6 +62865,10 @@ msgstr ""
 msgid "Heterogeneity analysis"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Heterogeneity analysis error: %s"
+msgstr ""
+
 #: betabinomialdiagnostic/results/heterogeneityTests.title
 #: diagnosticmeta/results/heterogeneity.title
 #: emfrailty/results/heterogeneityAnalysis.title
@@ -62129,6 +62896,12 @@ msgstr ""
 
 #: ihcheterogeneity/results/spatialanalysistable.columns.title
 msgid "Heterogeneity Level"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Heterogeneity level grades the mean per-case CV against your %.0f%% "
+"threshold: Low at or below %.0f%%, Moderate up to %.0f%%, High above it."
 msgstr ""
 
 #: treatmentmeta/results/heterogeneity.columns.title
@@ -62400,8 +63173,26 @@ msgstr ""
 msgid "high"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "High"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "High (>%.0f%%)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"High (CV = %.1f%%, graded against your %.0f%% threshold) - This indicates "
+"substantial heterogeneity."
+msgstr ""
+
 #: treatmentoptim/options/evidence_level/high_moderate.title
 msgid "High & Moderate Quality"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "High between-case variance indicates true biological differences"
 msgstr ""
 
 #: clinicalcalculators/options/clinical_threshold_high.title
@@ -62416,11 +63207,14 @@ msgstr ""
 msgid "High Confidence Threshold"
 msgstr ""
 
-#: diagnosticmeta/options/color_palette/high_contrast.title
 #: ihccluster/options/colorPalette/high_contrast.title
 #: ihcpredict/options/colorPalette/high_contrast.title
 #: swimmerplot/options/colorPalette/contrast.title
 msgid "High Contrast"
+msgstr ""
+
+#: diagnosticmeta/options/color_palette/high_contrast.title
+msgid "High contrast"
 msgstr ""
 
 #: jjoncoplot/options/colorScheme/high_contrast.title
@@ -62498,6 +63292,18 @@ msgstr ""
 msgid "High missingness"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"High number of outliers detected (%s%%). Consider checking for measurement "
+"errors or data entry issues."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"High percentage of missing regional measurements (%s%%). This may affect "
+"reliability of heterogeneity assessment."
+msgstr ""
+
 #: likelihoodratio/options/prevalenceRange/high.title
 msgid "High prevalence (20 percent to 80 percent)"
 msgstr ""
@@ -62539,6 +63345,10 @@ msgstr ""
 msgid "High Risk Threshold"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "High sampling variability"
+msgstr ""
+
 #: agreement/options/loaHighThreshold.title
 msgid "High Threshold ( percent) - Detailed Mode"
 msgstr ""
@@ -62568,6 +63378,14 @@ msgstr ""
 
 #: jpps/options/custom_color_high.title
 msgid "High Value Color"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "High variability"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "High within-case variance suggests sampling heterogeneity"
 msgstr ""
 
 #: package/analyses/highdimcox.title
@@ -62686,6 +63504,14 @@ msgstr ""
 msgid "Higher is better"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Higher negative bias"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Higher positive bias"
+msgstr ""
+
 #: R/clinicalscore.b.R
 msgid "Higher positive scores indicate higher risk of the event (positive class)"
 msgstr ""
@@ -62694,6 +63520,10 @@ msgstr ""
 msgid ""
 "Higher QALYs indicate better health outcomes. Used to compare different "
 "treatments"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Higher reliability (+%.2f)"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -62722,6 +63552,10 @@ msgstr ""
 
 #: enhancedROC/options/direction/higher.title
 msgid "Higher values indicate positive outcome"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Higher variability (+%.1f%%)"
 msgstr ""
 
 #: mixedcox/ui[1][2][0][1][0].label
@@ -62843,6 +63677,10 @@ msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "highly connected"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Highly reproducible sampling"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -63021,6 +63859,16 @@ msgstr ""
 #: clinicalcalculators/options/validation_method/holdout.title
 #: clinicalprediction/options/validation_method/holdout.title
 msgid "Holdout Validation"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Holling proportional-hazards SROC model fitted with adjusted profile maximum "
+"likelihood. The p-value for theta tests H0: theta = 1 (accuracy no better "
+"than chance); theta < 1 indicates discrimination and theta near 0 a "
+"near-perfect test (AUC = 1/(1 + theta)). No p-value is shown for the "
+"between-study variance: a Wald test of a variance against zero is invalid at "
+"the boundary of its parameter space."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -63841,6 +64689,18 @@ msgstr ""
 msgid "I(X;Y)"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"I\\u{00b2} is not reported here: a univariate I\\u{00b2} ignores the "
+"within-study correlation between sensitivity and specificity and does not "
+"describe the bivariate model (Zwinderman & Bossuyt 2008). The Heterogeneity "
+"Assessment table reports Q, tau-squared and a univariate I\\u{00b2} computed "
+"SEPARATELY for sensitivity and for specificity - read those as descriptive "
+"summaries of each margin, not as the heterogeneity of the bivariate model. "
+"For a model-consistent statement of how much studies differ, use the "
+"prediction interval above and the prediction region on the SROC plot."
+msgstr ""
+
 #: bayesiandiagnostic/results/heterogeneityAssessment.columns.title
 #: betabinomialdiagnostic/results/heterogeneityTests.columns.title
 #: hierarchicalbayes/results/heterogeneityAssessment.columns.title
@@ -63934,6 +64794,10 @@ msgstr ""
 msgid "ICC Model"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "ICC not estimable"
+msgstr ""
+
 #: icccoeff/results/icc_results.title
 msgid "ICC Results"
 msgstr ""
@@ -63992,6 +64856,10 @@ msgstr ""
 msgid "ICC(1,k) - One-way random, average raters"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "ICC(2,1) - absolute agreement"
+msgstr ""
+
 #: icccoeff/options/icc_type/icc2_1.title
 msgid "ICC(2,1) - Two-way random, single measures"
 msgstr ""
@@ -64006,6 +64874,10 @@ msgstr ""
 
 #: agreement/options/iccType/icc2k.title
 msgid "ICC(2,k) - Two-way random, average raters"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "ICC(3,1) - consistency (bias-blind)"
 msgstr ""
 
 #: icccoeff/options/icc_type/icc3_1.title
@@ -64593,6 +65465,16 @@ msgstr ""
 #: ihcheterogeneity/ui.title
 #: ihcheterogeneity/results.title
 msgid "IHC Heterogeneity Analysis"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "IHC Heterogeneity Analysis Report"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"IHC heterogeneity analysis was performed on %d cases with %d regional "
+"measurements each. "
 msgstr ""
 
 #: package/analyses/ihcimmune.title
@@ -65494,6 +66376,30 @@ msgid ""
 "that cutpoint was searched for on these same data."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"In this dataset, measurement variability exceeded the CV threshold set for "
+"this analysis."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"In this dataset, measurement variability was well within the CV threshold "
+"set for this analysis."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"In this dataset, measurement variability was within, but close to, the CV "
+"threshold set for this analysis."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"In this dataset, the available data were insufficient to quantify "
+"measurement variability."
+msgstr ""
+
 #: ihcpredict/results/validationResults.columns.title
 msgid "In Training Set"
 msgstr ""
@@ -65518,6 +66424,10 @@ msgstr ""
 
 #: residualcancerburden/options/cis.title
 msgid "In-situ Fraction (%) (optional)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "INADEQUATE SAMPLING:"
 msgstr ""
 
 #: jjsegmentedtotalbar/ui[9][0]/plot_width.suffix
@@ -67474,16 +68384,40 @@ msgstr ""
 msgid "Insufficient data for correlation interpretation."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Insufficient data for inter-regional heterogeneity analysis. At least 5 "
+"complete cases with regional measurements are required."
+msgstr ""
+
 #: R/jointmodeling.b.R
 msgid "Insufficient data for joint modeling (minimum 50 observations required)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Insufficient data for meta-analysis. Found %d studies, need at least 3"
 msgstr ""
 
 #: R/jjsyndromicplot.b.R
 msgid "Insufficient data for PCA. Need at least 3 complete observations."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Insufficient data for proportional-hazards SROC analysis"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Insufficient data for reference-based heterogeneity analysis. At least 5 "
+"complete cases with reference and regional measurements are required."
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Insufficient data for residual normality testing."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Insufficient data for sampling recommendation"
 msgstr ""
 
 #: R/tableone.b.R
@@ -67494,6 +68428,10 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "Insufficient data to evaluate discriminatory power"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "INSUFFICIENT DATA:"
 msgstr ""
 
 #: R/decision.b.R
@@ -67684,6 +68622,10 @@ msgstr ""
 
 #: agreement/results/interIntraRaterInterTable.title
 msgid "Inter-Rater Reliability (Between Raters)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Inter-Regional Measurements"
 msgstr ""
 
 #: agreement/options/interIntraRater.title
@@ -67898,6 +68840,7 @@ msgstr ""
 msgid "Interactive web-based nomogram calculator"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: dynamicprediction/results/trajectoryParameters.columns.title
 #: mendelianrandomization/results/pleiotropyTable.columns.title
 #: methodcomparison/results/regressionComparison.columns.title
@@ -68486,6 +69429,10 @@ msgstr ""
 
 #: decision/results/misclassificationInterpretation.title
 msgid "Interpretation of Misclassified Cases"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Interpretation:"
 msgstr ""
 
 #: simonmakuch/results/simonMakuchPlotExplanation.title
@@ -70226,6 +71173,7 @@ msgstr ""
 msgid "Key Findings"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: R/jjcorrmat.b.R
 #: R/waterfall.b.R
 msgid "Key Findings:"
@@ -70508,6 +71456,14 @@ msgstr ""
 msgid "Kruskal-Wallis Test (2+ groups)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Kruskal-Wallis Test (Distribution)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Kruskal-Wallis Test (Per-Case Means)"
+msgstr ""
+
 #: R/nonparametric.b.R
 msgid ""
 "Kruskal-Wallis test is designed for 3+ groups, but only {} groups found. "
@@ -70643,10 +71599,6 @@ msgstr ""
 
 #: functionalsampling/options/rare_event.description
 msgid "Label identifying the rare event/cell type in the event_type variable."
-msgstr ""
-
-#: waterfall/options/labelOutliers.title
-msgid "Label large changes"
 msgstr ""
 
 #: jjtreemap/options/labelOverlap.title
@@ -71184,7 +72136,7 @@ msgid "Landmark Window Size"
 msgstr ""
 
 #: swimmerplot/options/laneWidth.title
-msgid "Lane Width"
+msgid "Lane width"
 msgstr ""
 
 #: frailtysurvival/options/estimation_method/laplace_approximation.title
@@ -71203,6 +72155,10 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "large"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Large (>15%)"
 msgstr ""
 
 #: curemodels/options/npcure_bandwidth/large.title
@@ -71267,6 +72223,10 @@ msgstr ""
 msgid "Large effect"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Large Effect (r=0.5)"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Large effect size"
 msgstr ""
@@ -71302,6 +72262,14 @@ msgstr ""
 
 #: stagemigration/results/personalizedRiskSummary.columns.title
 msgid "Large Risk Change (%)"
+msgstr ""
+
+#: waterfall/options/labelOutliers.title
+msgid "Large-change labels"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Large-dataset optimisation unavailable"
 msgstr ""
 
 #: residualcancerburden/options/mMetSize.title
@@ -72434,6 +73402,10 @@ msgstr ""
 msgid "Limited Information Maximum Likelihood"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Limited representativeness"
+msgstr ""
+
 #: R/survivalcont.b.R
 msgid ""
 "Limited variability in continuous explanatory variable. Consider treating as "
@@ -73115,6 +74087,10 @@ msgstr ""
 msgid "Log Cumulative Hazard"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Log Diagnostic Odds Ratio"
+msgstr ""
+
 #: bayesiandiagnostic/results/diagnosticOddsRatio.columns.title
 msgid "Log DOR Mean"
 msgstr ""
@@ -73794,6 +74770,20 @@ msgstr ""
 msgid "low"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Low"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Low (≤%.0f%%)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Low (CV = %.1f%%, graded against your %.0f%% threshold) - This indicates "
+"consistent measurements across regions."
+msgstr ""
+
 #: clinicalcalculators/options/clinical_threshold_low.title
 msgid "Low Clinical Threshold"
 msgstr ""
@@ -73906,6 +74896,14 @@ msgstr ""
 msgid "Low Risk Threshold"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Low sampling variability"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Low SROC AUC"
+msgstr ""
+
 #: agreement/options/loaLowThreshold.title
 msgid "Low Threshold ( percent) - Detailed Mode"
 msgstr ""
@@ -73919,6 +74917,10 @@ msgstr ""
 
 #: jpps/options/custom_color_low.title
 msgid "Low Value Color"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Low variability"
 msgstr ""
 
 #: batcheffect/options/variance_threshold.title
@@ -74276,6 +75278,10 @@ msgstr ""
 msgid "Lower PI"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Lower reliability (%.2f)"
+msgstr ""
+
 #: trichotomousroc/results/stratifiedAnalysisTable.columns.title
 msgid "Lower Threshold"
 msgstr ""
@@ -74303,6 +75309,10 @@ msgstr ""
 
 #: enhancedROC/options/direction/lower.title
 msgid "Lower values indicate positive outcome"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Lower variability (%.1f%%)"
 msgstr ""
 
 #: labcontrolcharts/results/controlLimits.columns.title
@@ -74581,6 +75591,10 @@ msgstr ""
 msgid "MAD: {mad} ({label})"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "mada package is not available"
+msgstr ""
+
 #: mageeequation/results/concordanceTable.columns.title
 #: nonparametricregression/results/crossValidation.columns.title
 msgid "MAE"
@@ -74706,6 +75720,10 @@ msgstr ""
 
 #: treatmentoptim/options/interaction_severity/major_critical.title
 msgid "Major & Critical Only"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Major contributor"
 msgstr ""
 
 #: stagemigration/results/advancedMigrationHeatmapStats.columns.title
@@ -75300,8 +76318,12 @@ msgstr ""
 msgid "Marker Selection Results"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Marker shapes reused"
+msgstr ""
+
 #: swimmerplot/options/markerSize.title
-msgid "Marker Size"
+msgid "Marker size"
 msgstr ""
 
 #: ihccluster/results/markerSummary.title
@@ -75939,7 +76961,6 @@ msgstr ""
 msgid "Maximum Lesions Per Organ"
 msgstr ""
 
-#: diagnosticmeta/options/method/ml.title
 #: factoranalysis/options/method/ml.title
 #: illnessdeath/options/estimation_method/ml.title
 #: markovmultistate/options/estimationMethod/ml.title
@@ -75948,9 +76969,14 @@ msgstr ""
 msgid "Maximum Likelihood"
 msgstr ""
 
+#: diagnosticmeta/options/method/ml.title
 #: polychoriccorr/options/method/ml.title
 #: transformationmodels/options/method/ml.title
 msgid "Maximum likelihood"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "maximum likelihood"
 msgstr ""
 
 #: jointmodeling/options/estimation_method/bayesian.title
@@ -76573,6 +77599,18 @@ msgstr ""
 msgid "Mean Before"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Mean Bias"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean Biomarker Value"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean biomarker values and variability by spatial region"
+msgstr ""
+
 #: dynamicprediction/results/modelComparison.columns.title
 msgid "Mean Brier Score"
 msgstr ""
@@ -76595,6 +77633,14 @@ msgstr ""
 msgid "Mean Clustering Index"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Mean Coefficient of Variation (%) - between regions"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean Coefficient of Variation (%) - region vs reference"
+msgstr ""
+
 #: ihccluster/results/reproducibilityStats.columns.title
 msgid "Mean Cohen Kappa"
 msgstr ""
@@ -76607,8 +77653,32 @@ msgstr ""
 msgid "Mean Confidence"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "mean correlation"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean correlation (ICC not estimable)"
+msgstr ""
+
 #: costeffectiveness/results/strategySummary.columns.title
 msgid "Mean Cost"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean CV (%)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean CV = %s%% (High variability)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean CV = %s%% (Low variability)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean CV = %s%% (Moderate variability)"
 msgstr ""
 
 #: treeadvanced/results/clinicalimportance.columns.title
@@ -76646,6 +77716,14 @@ msgstr ""
 
 #: subgroupforest/options/effectMeasure/md.title
 msgid "Mean Difference (MD) - for continuous"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean difference = %s (Not significant)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean difference = %s (Statistically significant)"
 msgstr ""
 
 #: tidyplots/options/meanType.title
@@ -76706,6 +77784,10 @@ msgstr ""
 msgid "Mean Index"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Mean Inter-Regional Correlation"
+msgstr ""
+
 #: stereology/results/descriptives.columns.title
 msgid "Mean Intersections"
 msgstr ""
@@ -76746,6 +77828,10 @@ msgstr ""
 
 #: tidydensity/options/lognormal_meanlog.title
 msgid "Mean of Log"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean of Regions vs Reference"
 msgstr ""
 
 #: lassologistic/options/scoreCutMethod/mean.title
@@ -76824,6 +77910,10 @@ msgstr ""
 
 #: lollipop/ui[1][1]/showMean.label
 msgid "Mean reference line"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Mean Regional-Reference Correlation"
 msgstr ""
 
 #: directregression/results/residualAnalysis.columns.title
@@ -77060,6 +78150,10 @@ msgstr ""
 
 #: patientreported/options/measurement_invariance.title
 msgid "Measurement Invariance"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Measurement Location"
 msgstr ""
 
 #: latentbiomarker/ui[1].label
@@ -77432,7 +78526,6 @@ msgid "Median Display Type"
 msgstr ""
 
 #: swimmerplot/options/referenceLines/median.title
-#: waterfall/results/personTimeTable.columns.title
 msgid "Median Duration"
 msgstr ""
 
@@ -77767,12 +78860,20 @@ msgstr ""
 msgid "Median Time (days)"
 msgstr ""
 
+#: waterfall/results/personTimeTable.columns.title
+msgid "Median time in response"
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Median Time in Response (first to last response visit)"
 msgstr ""
 
 #: R/waterfall.b.R
 msgid "Median Time to Best Response"
+msgstr ""
+
+#: waterfall/results/personTimeTable.columns.title
+msgid "Median time to best response"
 msgstr ""
 
 #: progressionsurvival/results/progression_patterns.columns.title
@@ -77811,10 +78912,6 @@ msgstr ""
 msgid "Median time to first response (TTR)"
 msgstr ""
 
-#: waterfall/results/personTimeTable.columns.title
-msgid "Median Time to Response"
-msgstr ""
-
 #: singlearm/results/medianHeading.title
 msgid "Median Time-to-Event Analysis"
 msgstr ""
@@ -77837,6 +78934,14 @@ msgstr ""
 
 #: R/lollipop.b.R
 msgid "Median Value"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "Median: %.1f%%"
+msgstr ""
+
+#: R/swimmerplot.b.R
+msgid "Median: %s"
 msgstr ""
 
 #: clinicalnomograms/options/missing_data_handling/median_mode.title
@@ -78009,6 +79114,10 @@ msgstr ""
 msgid "Medium effect"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Medium Effect (r=0.3)"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Medium effect size"
 msgstr ""
@@ -78149,17 +79258,23 @@ msgstr ""
 msgid "Meta-analysis Format Output"
 msgstr ""
 
-#: diagnosticmeta/options/method.title
 #: psychopdaROC/options/metaAnalysisMethod.title
 msgid "Meta-Analysis Method"
 msgstr ""
 
+#: diagnosticmeta/options/method.title
 #: psychopdaROC/ui[13][0]/metaAnalysisMethod.label
 msgid "Meta-analysis method"
 msgstr ""
 
 #: treatmentmeta/options/model_type.title
 msgid "Meta-Analysis Model"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Meta-analysis of %d diagnostic accuracy studies shows pooled sensitivity of "
+"%.1f%% and specificity of %.1f%%."
 msgstr ""
 
 #: psychopdaROC/ui[13][0]/metaAnalysis.label
@@ -78176,6 +79291,13 @@ msgstr ""
 
 #: effectsize/results/results/metaAnalysisFormat.title
 msgid "Meta-analysis Ready Output"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Meta-analysis requires at least 3 studies with complete data. Current "
+"studies: %d. Please add more studies or use individual study analysis "
+"instead."
 msgstr ""
 
 #: bayesiandiagnostic/results/metaAnalysisResults.title
@@ -78224,8 +79346,45 @@ msgstr ""
 msgid "Meta-Regression Covariates"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Meta-regression error: %s"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Meta-regression not run: %d studies cannot support a covariate contributing "
+"%d model parameter(s) - no residual degrees of freedom remain, so the model "
+"would fit perfectly and its confidence intervals would be meaningless. At "
+"least %d studies are needed for this covariate, and 10 per covariate is the "
+"usual recommendation."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Meta-regression not run: fewer than three studies remain after removing "
+"missing covariate values."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Meta-regression not run: the covariate takes the same value in every study, "
+"so it cannot explain any between-study variation."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Meta-regression on %d studies with a covariate contributing %d model "
+"parameter(s) (%d residual degrees of freedom). The usual recommendation is "
+"at least 10 studies per covariate, so estimates may be unstable and "
+"confidence intervals unreliable. Report this as exploratory only."
+msgstr ""
+
 #: metaanalysis/results/metaRegressionPlot.title
 msgid "Meta-Regression Plot"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Meta-regression requires a covariate"
 msgstr ""
 
 #: bayesiannetworkma/results/metaRegressionResults.title
@@ -78234,6 +79393,10 @@ msgstr ""
 #: metaanalysis/results/metaRegressionResults.title
 #: treatmentmeta/results/meta_regression.title
 msgid "Meta-Regression Results"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Meta-regression skipped"
 msgstr ""
 
 #: diagnosticmeta/ui[0][5][0].label
@@ -78276,6 +79439,7 @@ msgid ""
 "META_specialty   | GYN     | GYN     | GEN"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: advancedimputation/results/imputationMethodSummary.columns.title
 #: agreement/results/irrtable.columns.title
 #: agreement/results/krippTable.columns.title
@@ -78341,6 +79505,12 @@ msgstr ""
 #: treatmentswitching/results/methodComparisonTable.columns.title
 #: treatmentswitching/results/bootstrapTable.columns.title
 msgid "Method"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Method '%s' is not supported for bivariate diagnostic meta-analysis. Using "
+"REML instead."
 msgstr ""
 
 #: methodcomparison/results/outlierAnalysis.columns.title
@@ -78899,8 +80069,20 @@ msgstr ""
 msgid "Method Variables"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Method Variance"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Method variance reflects systematic differences between sampling approaches"
+msgstr ""
+
 #: methodvalidation/options/validation_type/verification.title
 msgid "Method Verification"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "method-of-moments"
 msgstr ""
 
 #: comprehensiveSurvivalPower/results/methodDetails.title
@@ -79048,6 +80230,10 @@ msgstr ""
 
 #: treatmentmeta/results/methods_section.title
 msgid "Methods Section Template"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Methods Section:"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -79490,6 +80676,10 @@ msgstr ""
 msgid "Milestone-based clinical pathway analysis"
 msgstr ""
 
+#: R/swimmerplot.b.R
+msgid "Milestones"
+msgstr ""
+
 #: R/swimmerplot_html.R
 msgid "Milestones:"
 msgstr ""
@@ -79625,6 +80815,10 @@ msgstr ""
 #: tinytable/options/style_borders/minimal.title
 #: vartree/options/style/minimal.title
 msgid "Minimal"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Minimal (<5%)"
 msgstr ""
 
 #: esquisseauto/options/plotTheme/minimal.title
@@ -79764,7 +80958,7 @@ msgid "Minimum 3-5 observations per group for reliable curves"
 msgstr ""
 
 #: ihcheterogeneity/options/correlation_threshold.title
-msgid "Minimum Acceptable Correlation"
+msgid "Minimum acceptable correlation"
 msgstr ""
 
 #: decisioncompare/ui[1]/niMargin.label
@@ -80142,7 +81336,7 @@ msgid "Minimum Required Specificity"
 msgstr ""
 
 #: waterfall/options/minResponseForLabel.title
-msgid "Minimum Response for Labels ( percent)"
+msgid "Minimum response for labels (percent)"
 msgstr ""
 
 #: waterfall/options/minResponseForLabel.description.jamovi
@@ -80285,6 +81479,14 @@ msgstr ""
 msgid ""
 "Minor allele frequency for SNP-based survival analysis. Common range: "
 "0.05-0.45."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Minor contributor"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Minor method differences"
 msgstr ""
 
 #: ggprism/options/prism_guides/minor.title
@@ -80700,6 +81902,10 @@ msgstr ""
 
 #: dataquality/options/plot_missing_patterns.title
 msgid "Missing patterns plot (vis_miss)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Missing required columns for proportional-hazards SROC analysis"
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -82417,8 +83623,23 @@ msgid "moderate"
 msgstr ""
 
 #: R/clinicalscore.b.R
+#: R/ihcheterogeneity.b.R
 #: R/pathagreement.b.R
 msgid "Moderate"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Moderate (%.0f-%.0f%%)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Moderate (5-15%)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Moderate (CV = %.1f%%, graded against your %.0f%% threshold) - This "
+"indicates moderate variation between regions."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -82430,6 +83651,10 @@ msgid ""
 "Moderate collinearity. LASSO may select one of several correlated columns, "
 "and that choice can be unstable. Consider Elastic Net if retaining "
 "correlated predictors is important."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Moderate contributor"
 msgstr ""
 
 #: R/datetimeconverter.b.R
@@ -82513,10 +83738,26 @@ msgstr ""
 msgid "Moderate Parsing Success Rate"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Moderate reliability"
+msgstr ""
+
 #: R/waterfall.b.R
 msgid ""
 "Moderate sample size: Results provide reasonable evidence for preliminary "
 "conclusions."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Moderate sampling variability"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "MODERATE SAMPLING:"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Moderate variability"
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -82529,6 +83770,10 @@ msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "moderately connected"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Moderately reproducible"
 msgstr ""
 
 #: metaanalysis/results/metaRegressionResults.columns.title
@@ -82661,6 +83906,10 @@ msgstr ""
 
 #: decisioncurve/options/benefitCorrectTreatment.title
 msgid "Monetary Value Assigned to a True Positive"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Monitor cases with CV > 30% for adequate sampling"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -82838,7 +84087,6 @@ msgstr ""
 msgid "Months"
 msgstr ""
 
-#: R/waterfall.b.R
 #: mixedcox/options/timetypeoutput/months.title
 #: multisurvival/options/timetypeoutput/months.title
 #: surveysurvival/options/timetypeoutput/months.title
@@ -84743,6 +85991,7 @@ msgstr ""
 msgid "Negative Level"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: decision/results/ratioTable.columns.title
 #: decisioncalculator/results/ratioTable.columns.title
 #: decisioncompare/results/comparisonTable.columns.title
@@ -84886,6 +86135,12 @@ msgstr ""
 msgid "Negative values = tumor shrinkage (improvement)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Negative values detected. Most IHC biomarkers should have non-negative "
+"values (e.g., Ki67 %, H-scores). Verify data coding."
+msgstr ""
+
 #: nogoldstandard/results/test_metrics.columns.superTitle
 msgid "Negative-Response Probability"
 msgstr ""
@@ -84901,6 +86156,10 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "negligible correlation"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Negligible method differences"
 msgstr ""
 
 #: spatialbayesiansurvival/options/neighborhood_threshold.title
@@ -85749,6 +87008,10 @@ msgstr ""
 msgid "No Clustering"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "No comparison available"
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid "No Complete Cases"
 msgstr ""
@@ -85961,6 +87224,12 @@ msgstr ""
 msgid ""
 "No diagnostic predictor is available. Diagnostic metrics were skipped; the "
 "prediction nomogram can still be generated from the regression model."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"No difference in the spread of per-case CVs between compartments was "
+"detected; this does not establish that they are the same"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -86304,8 +87573,18 @@ msgid ""
 "values."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "No significant asymmetry"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "No significant difference (p >= 0.05)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"No significant difference in per-case mean biomarker levels detected across "
+"compartments; this does not establish that the distributions are the same"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -86341,6 +87620,13 @@ msgstr ""
 #: simpleSurvivalPower/options/alpha_spending/none.title
 #: survivalPower/options/alpha_spending/none.title
 msgid "No Spending Function"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"No SROC curve: the fixed-effects model assumes no between-study "
+"heterogeneity, so the curve is undefined. The summary point and its "
+"confidence region are shown. Choose REML for the curve."
 msgstr ""
 
 #: R/nonparametric.b.R
@@ -86401,6 +87687,13 @@ msgid ""
 "No subjects remain after the landmark at %s %s: every subject's follow-up "
 "ended at or before that time (longest follow-up was %s %s). Choose a "
 "landmark inside the observed follow-up range."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"No systematic bias was detected between regional and reference measurements "
+"(p \\u{2265} 0.05); this does not establish that the two agree, as the test "
+"may lack power to detect a difference of relevant size. "
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -87597,12 +88890,24 @@ msgstr ""
 msgid "Normative Comparison"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "NOT ADEQUATE FOR SUBSTITUTION:"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Not an ICC - see note"
+msgstr ""
+
 #: R/benford.b.R
 msgid "Not assessable"
 msgstr ""
 
 #: R/lassocox.b.R
 msgid "Not assessable (empty model)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Not assessable (reference mean near zero)"
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -87626,12 +88931,28 @@ msgstr ""
 msgid "not available"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Not available - agreement could not be estimated with the provided data."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Not available - correlation metrics were not estimable."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Not available - insufficient data to estimate variability."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Not available (insufficient data)"
 msgstr ""
 
 #: R/benford.b.R
 msgid "not available for this digit setting"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Not available."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -87669,6 +88990,10 @@ msgid "not defined"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
+msgid "Not enough paired observations to test for systematic bias."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
 #: R/waterfall.b.R
 msgid "Not estimable"
 msgstr ""
@@ -87686,6 +89011,10 @@ msgstr ""
 
 #: R/raincloud.b.R
 msgid "not estimable (zero variance)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Not estimable: at least 3 studies with finite odds ratios are required"
 msgstr ""
 
 #: R/decision.b.R
@@ -87944,6 +89273,19 @@ msgstr ""
 msgid "Note:"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Note: 'psych' package not available. Install 'psych' for enhanced "
+"reliability metrics (ICC)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Note: 'psych' package not available. Using correlation-based approximation "
+"(r = %s, 95%% CI [%s, %s]) instead of ICC(2,1). Install 'psych' for exact "
+"ICC calculations."
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "Note: %d cell(s) have expected counts < 5"
 msgstr ""
@@ -87966,6 +89308,12 @@ msgstr ""
 
 #: aivalidation/ui/crossValidationOptions[3].label
 msgid "Note: Cross-validation provides more robust performance estimates"
+msgstr ""
+
+#: R/swimmerplot.b.R
+msgid ""
+"Note: Exported data can be accessed through the Output panel and used for "
+"external analysis."
 msgstr ""
 
 #: treeadvanced/ui[1][1][2].label
@@ -88019,6 +89367,19 @@ msgstr ""
 msgid ""
 "Note: Standard-geometry fallback used because the requested raincloud layer "
 "was incompatible with the data."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Note: Stratified sampling was reported. This analysis applies NO "
+"design-based adjustment: all estimates treat the measurements as a simple "
+"sample, so stratification effects (if any) remain in the results."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Note: Systematic sampling may introduce spatial bias in heterogeneity "
+"estimates. Consider correlation with tissue architecture patterns."
 msgstr ""
 
 #: R/jjbetweenstats.b.R
@@ -88120,6 +89481,7 @@ msgstr ""
 #: decisioncombine/results/notices.title
 #: diagnosticmeta/results/notices.title
 #: groomecompare/results/notices.title
+#: ihcheterogeneity/results/notices.title
 #: jjdotchart/results/notices.title
 #: jjdotplotstats/results/notices.title
 #: latentbiomarker/results/notices.title
@@ -89959,6 +91321,7 @@ msgstr ""
 msgid "Observed Effect"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: outbreakanalysis/results/power_analysis_results.columns.title
 msgid "Observed Effect Size"
 msgstr ""
@@ -90290,8 +91653,18 @@ msgstr ""
 msgid "Omitted Study"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Omnibus test of the covariate effect - %s."
+msgstr ""
+
 #: costeffectiveness/results/dominanceTable.columns.title
 msgid "On Efficient Frontier?"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"On the pooled estimate this test would detect about %.0f of 100 patients "
+"with disease, but the interval%s admits materially worse performance. "
 msgstr ""
 
 #: waterfall/options/ongoingVar.title
@@ -90467,6 +91840,12 @@ msgid ""
 "One curve is produced for the whole cohort, each patient at their own "
 "observed covariate values. <i>%s</i> is <b>not</b> varied, so this output "
 "does <b>not</b> compare its levels."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"One or more regional measurements show no variability (constant values). "
+"Check for data entry errors."
 msgstr ""
 
 #: clinicaltrialdesign/options/test_type/one_proportion.title
@@ -90679,6 +92058,12 @@ msgid ""
 "is not a clinical adequacy threshold."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Only %d cases are available. Reliability and variance estimates from fewer "
+"than 10 cases are imprecise; treat every coefficient below as provisional."
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid ""
 "Only %d cases in the smaller outcome class. Below about 10 per class the "
@@ -90701,6 +92086,10 @@ msgid ""
 "a large-sample approximation, so the p-value reported above is unreliable at "
 "this size. For the overall table, an exact test or a larger sample is needed "
 "before the p-value can be read at face value."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Only %d studies available. At least 3 studies are required for meta-analysis."
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -92222,6 +93611,10 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "Other covariates' effects"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "other regions"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -94242,6 +95635,17 @@ msgstr ""
 msgid "P-values for each coefficient."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"P-values on the sensitivity and specificity rows test the null hypothesis "
+"that the parameter equals 50% (no better than chance), not that the test "
+"meets any clinical threshold. They are significant for essentially any "
+"usable assay and should not be read as evidence of adequate accuracy - use "
+"the confidence and prediction intervals for that. Sensitivity and "
+"specificity rows are percentages; likelihood ratios and the diagnostic odds "
+"ratio are ratios."
+msgstr ""
+
 #: pathsampling/results/multifocalProbTable.columns.title
 msgid "P(>=1 lesion)"
 msgstr ""
@@ -96033,12 +97437,12 @@ msgstr ""
 
 #: bayesiandiagnostic/options/patient_id.title
 #: bayesiandiagnostic/ui[3][1].label
-#: waterfall/options/patientID.title
 msgid "Patient ID Variable"
 msgstr ""
 
 #: clinicaldashboard/options/patientId.title
 #: clinicaldataintegration/options/patientIdVar.title
+#: waterfall/options/patientID.title
 msgid "Patient ID variable"
 msgstr ""
 
@@ -96891,6 +98295,10 @@ msgstr ""
 msgid "Penalty type"
 msgstr ""
 
+#: R/swimmerplot.b.R
+msgid "per 100 %s"
+msgstr ""
+
 #: advancedtrials/results/sample_size_calculations.columns.title
 msgid "Per Arm Sample Size"
 msgstr ""
@@ -96970,6 +98378,18 @@ msgstr ""
 msgid "Per-Stratum Standardized Ratios"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"Per-study intervals are Wilson score confidence intervals at the %d%% level "
+"- the same intervals drawn on the forest plot."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Per-study intervals are Wilson score confidence intervals at the %d%% level, "
+"computed from the raw counts shown here."
+msgstr ""
+
 #: R/tableone.b.R
 #: decisioncombine/results/goldFreqTable.columns.title
 #: dendrogram/results/clusterSummary.columns.title
@@ -96986,6 +98406,10 @@ msgstr ""
 #: recist/results/summaryStats.columns.title
 #: venn/options/regionLabels/percent.title
 msgid "Percent"
+msgstr ""
+
+#: R/swimmerplot.b.R
+msgid "percent"
 msgstr ""
 
 #: hierarchicalpathology/results/variancecomponents.columns.title
@@ -99450,7 +100874,7 @@ msgid "Plot Coefficient Path"
 msgstr ""
 
 #: diagnosticmeta/options/color_palette.title
-msgid "Plot Color Palette"
+msgid "Plot color palette"
 msgstr ""
 
 #: jpps/options/color_scheme.title
@@ -99793,6 +101217,10 @@ msgstr ""
 
 #: hierarchicalbayes/options/sroc_curves.description.ui
 msgid "Plot hierarchical SROC curves"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Plot horizon shorter than follow-up"
 msgstr ""
 
 #: bayesianma/options/plot_inclusion_probs.title
@@ -100209,7 +101637,6 @@ msgstr ""
 #: multiclassdiagnostics/ui[1][2][0]/plotTheme.label
 #: progressionsurvival/options/plot_theme.title
 #: raincloud/options/plot_theme.title
-#: swimmerplot/options/plotTheme.title
 #: tidyplots/options/plotTheme.title
 #: tidyplots/ui[8][1].label
 msgid "Plot Theme"
@@ -100218,6 +101645,7 @@ msgstr ""
 #: linechart/ui[3][0]/theme.label
 #: lollipop/ui[2][0]/theme.label
 #: raincloud/ui[3][0]/plot_theme.label
+#: swimmerplot/options/plotTheme.title
 msgid "Plot theme"
 msgstr ""
 
@@ -100888,6 +102316,10 @@ msgstr ""
 msgid "Pooled Estimate"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "POOLED ESTIMATE"
+msgstr ""
+
 #: advancedimputation/results/pooledResults.title
 msgid "Pooled Parameter Estimates (Rubin's Rules)"
 msgstr ""
@@ -100906,10 +102338,12 @@ msgstr ""
 msgid "Pooled SE"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: betabinomialdiagnostic/results/subgroupAnalysis.columns.title
 msgid "Pooled Sensitivity"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: betabinomialdiagnostic/results/subgroupAnalysis.columns.title
 msgid "Pooled Specificity"
 msgstr ""
@@ -100920,6 +102354,7 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 #: R/enhancedROC.b.R
+#: R/ihcheterogeneity.b.R
 #: R/lassologistic.b.R
 #: R/pathagreement.b.R
 #: R/psychopdaROC.b.R
@@ -100948,6 +102383,10 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 msgid "Poor Model Fit"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Poor reliability"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -101375,6 +102814,7 @@ msgstr ""
 msgid "Positive Levels May Be Inverted"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: decision/results/ratioTable.columns.title
 #: decisioncalculator/results/ratioTable.columns.title
 #: decisioncompare/results/comparisonTable.columns.title
@@ -101662,6 +103102,10 @@ msgstr ""
 
 #: advancedtrials/results/adaptive_design_parameters.columns.title
 msgid "Post-Adaptation N"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Post-hoc (observed) power - not evidence of adequacy"
 msgstr ""
 
 #: geemodel/options/posthoc_adjust.title
@@ -102211,6 +103655,12 @@ msgstr ""
 
 #: assayoptimization/results/power_plot.title
 msgid "Power Analysis Visualization"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Power analysis was requested but requires a reference (whole section) "
+"measurement; it was skipped for this inter-regional design."
 msgstr ""
 
 #: psychopdaROC/ui[10].label
@@ -103165,6 +104615,15 @@ msgstr ""
 #: metaanalysis/results/overallResults.columns.title
 #: treatmentmeta/options/prediction_interval.title
 msgid "Prediction Interval"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Prediction interval for a future study (%d%%, t distribution on %d df): "
+"sensitivity %.1f%%-%.1f%%, specificity %.1f%%-%.1f%%. This is where a NEW "
+"study or laboratory is expected to fall and includes between-study "
+"heterogeneity; the confidence intervals above describe only how precisely "
+"the pooled average is estimated."
 msgstr ""
 
 #: bayesianclinical/options/prediction_intervals.title
@@ -104992,6 +106451,10 @@ msgstr ""
 msgid "Processed Data"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Processed data unavailable for proportional-hazards SROC analysis"
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Processing data"
 msgstr ""
@@ -105729,8 +107192,44 @@ msgstr ""
 msgid "Proportional-hazards SROC analysis"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Proportional-hazards SROC analysis error: %s"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Proportional-hazards SROC analysis requires at least 3 studies"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Proportional-hazards SROC coefficient format is not supported"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Proportional-hazards SROC coefficients are empty"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Proportional-hazards SROC fitting error: %s"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Proportional-hazards SROC fitting failed; check data quality"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Proportional-hazards SROC fitting failed: %s"
+msgstr ""
+
 #: diagnosticmeta/results/hsrocresults.title
 msgid "Proportional-Hazards SROC Model Results"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Proportional-hazards SROC summary contains no coefficients"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Proportional-hazards SROC summary error: %s"
 msgstr ""
 
 #: latentbiomarker/results/phTable.title
@@ -106056,6 +107555,26 @@ msgstr ""
 msgid "PT Target Value"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "PT1        0     50          (baseline required)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "PT1        0     50          (baseline)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "PT1        2     25          (2 months)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "PT1        2     25          (follow-up)"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "PT1        4     10          (4 months)"
+msgstr ""
+
 #: outbreakanalysis/results/public_health_summary.title
 msgid "Public Health Action Summary"
 msgstr ""
@@ -106101,6 +107620,10 @@ msgstr ""
 msgid "Publication Bias"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Publication bias analysis error: %s"
+msgstr ""
+
 #: bayesiandiagnostic/options/publication_bias.title
 #: bayesianmetaanalysis/options/publicationBias.title
 #: bayesianmetaanalysis/results/publicationBiasResults.title
@@ -106118,6 +107641,10 @@ msgstr ""
 
 #: diagnosticmeta/ui[1][0][0]/publication_bias.label
 msgid "Publication bias assessment (Deeks' test)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Publication bias caution"
 msgstr ""
 
 #: betabinomialdiagnostic/results/publicationBiasTests.title
@@ -106684,6 +108211,10 @@ msgstr ""
 msgid "Quality Control Thresholds"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Quality Control:"
+msgstr ""
+
 #: enhancedtwowayfrequency/results/diagnostics.columns.title
 #: ihccluster/results/outlierCases.columns.title
 #: ihcpredict/results/lowConfidenceCases.columns.title
@@ -106806,6 +108337,10 @@ msgstr ""
 
 #: segmentationmetrics/ui/qualityThresholds.label
 msgid "Quality Thresholds"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Quality thresholds were set at correlation \\u{2265}%s and CV \\u{2264}%s%%."
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -108487,6 +110022,12 @@ msgstr ""
 msgid "Raw p-value"
 msgstr ""
 
+#: R/swimmerplot.b.R
+msgid ""
+"Raw start and end values are taken as already expressed in %s; no conversion "
+"is applied."
+msgstr ""
+
 #: swimmerplot/options/timeType/raw.title
 msgid "Raw Values (numeric)"
 msgstr ""
@@ -108961,6 +110502,7 @@ msgstr ""
 
 #: R/benford.b.R
 #: R/chisqposttest.b.R
+#: R/ihcheterogeneity.b.R
 #: R/lassocox.b.R
 msgid "Recommendations:"
 msgstr ""
@@ -109251,6 +110793,7 @@ msgid "Redundant With"
 msgstr ""
 
 #: R/clinicalscore.b.R
+#: R/ihcheterogeneity.b.R
 #: R/linechart.b.R
 #: agreement/results/confusionMatrixTable.columns.title
 #: clinicalscore/results/methodComparison.columns.title
@@ -109393,10 +110936,13 @@ msgid "Reference Line Value (Optional)"
 msgstr ""
 
 #: jjdotplotstats/ui[2][0].label
-#: swimmerplot/options/referenceLines.title
 #: swimmerplot/ui[4][1][0].label
 #: tidyplots/ui[7].label
 msgid "Reference Lines"
+msgstr ""
+
+#: swimmerplot/options/referenceLines.title
+msgid "Reference lines"
 msgstr ""
 
 #: R/linechart.b.R
@@ -109723,6 +111269,14 @@ msgstr ""
 msgid "Regime Type"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Region %d"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Region %d vs Reference"
+msgstr ""
+
 #: ihcimmune/results/hotspotAnalysis.columns.title
 msgid "Region ID"
 msgstr ""
@@ -109761,6 +111315,10 @@ msgstr ""
 msgid "Region/Tissue ID (Optional)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "regional and reference measurements"
+msgstr ""
+
 #: populationhealth/options/geographic_level/regional.title
 msgid "Regional Level"
 msgstr ""
@@ -109785,12 +111343,70 @@ msgstr ""
 msgid "Regional Measurement 4 (Optional)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "regional measurements"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Regional measurements agree with the %s in this dataset (correlation "
+"\\u{2265} %s, CV \\u{2264} %s%%), and no material systematic bias was "
+"detected."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Regional measurements agree with the %s in this dataset (correlation "
+"\\u{2265} %s, CV \\u{2264} %s%%). Systematic bias could not be assessed in "
+"this run."
+msgstr ""
+
 #: ihcheterogeneity/results/biopsyplot.title
 msgid "Regional Measurements Comparison"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Regional measurements differ from the %s by %s on average (%s%% of the "
+"reference mean, p %s)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Regional measurements show moderate agreement with %s (thresholds: "
+"correlation \\u{2265} %s, CV \\u{2264} %s%%)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Regional measurements showed excellent correlation %s (r = %s). "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Regional measurements showed good correlation %s (r = %s). "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Regional measurements showed moderate correlation %s (r = %s). "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Regional measurements showed poor correlation %s (r = %s). "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Regional Method Variance"
+msgstr ""
+
 #: residualcancerburden/ui[1][1].label
 msgid "Regional Nodes"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Regional vs Reference Measurements"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Regions with fewer than 2 cases are not analysed: %s."
 msgstr ""
 
 #: epidemiosurvival/options/cohort_design/registry_based.title
@@ -110076,6 +111692,18 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "REGULATORY USE PROHIBITED"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Reitsma bivariate model, %s estimation."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Reitsma model failed - coefficient matrix missing"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Reitsma model returned unexpected coefficient structure"
 msgstr ""
 
 #: qtwist/results/statePartition.columns.title
@@ -110795,6 +112423,10 @@ msgstr ""
 msgid "Representative patients"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Representativeness:"
+msgstr ""
+
 #: permutationsurvival/ui[1][0][2].label
 #: treeadvanced/ui[6].label
 #: treemedical/ui[5].label
@@ -111381,13 +113013,20 @@ msgstr ""
 msgid "Response category above each bar"
 msgstr ""
 
+#: waterfall/options/addResponseCategory.title
+msgid "Response category column"
+msgstr ""
+
 #: waterfallrecist/results/recistSummary/responseDistribution.title
 msgid "Response Category Distribution"
 msgstr ""
 
-#: waterfall/options/responseCategoryVar.title
 #: waterfall/ui[0][6].label
 msgid "Response Category Override (optional)"
+msgstr ""
+
+#: waterfall/options/responseCategoryVar.title
+msgid "Response category override (optional)"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -111577,7 +113216,7 @@ msgid "Response Value (Raw or Percentage Measurement)"
 msgstr ""
 
 #: waterfall/options/responseVar.title
-msgid "Response Value (Raw or Percentage)"
+msgid "Response value (raw or percentage)"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -111835,6 +113474,10 @@ msgstr ""
 msgid "Results Section"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Results Section:"
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "Results should be interpreted with caution."
 msgstr ""
@@ -111994,6 +113637,10 @@ msgstr ""
 msgid "Review false positive cases to identify common characteristics"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Review sampling strategy and consider increased sampling."
+msgstr ""
+
 #: R/benford.b.R
 msgid "Review the MAD and chi-square results in the Analysis Summary"
 msgstr ""
@@ -112011,6 +113658,10 @@ msgstr ""
 
 #: R/reportcat.b.R
 msgid "Review the variable summaries and data quality metrics"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Review variance components table to understand sources of variability"
 msgstr ""
 
 #: treecompare/options/rf_mtry_method.title
@@ -113736,6 +115387,12 @@ msgstr ""
 msgid "Row ID"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"Row identifiers were not preserved during preprocessing, so the covariate "
+"could not be aligned with the filtered studies."
+msgstr ""
+
 #: jggheatmap/options/row_label_size.title
 msgid "Row Label Size"
 msgstr ""
@@ -113942,6 +115599,46 @@ msgstr ""
 msgid "Rule-based (optimal panels only)"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"Rule-in power is governed by the positive likelihood ratio rather than by "
+"specificity alone, and LR+ is not estimable here. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Rule-in power is governed by the positive likelihood ratio rather than by "
+"specificity alone; here LR+ = %.2f, which provides %s evidence for disease "
+"after a positive result. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Rule-in power is governed by the positive likelihood ratio rather than by "
+"specificity alone; here LR+ = %.2f, which raises the post-test odds "
+"substantially (the SpPin pattern). "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Rule-out power is governed by the negative likelihood ratio rather than by "
+"sensitivity alone, and LR- is not estimable here. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Rule-out power is governed by the negative likelihood ratio rather than by "
+"sensitivity alone; here LR- = %.2f, which lowers the post-test odds "
+"substantially (the SnNout pattern). "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Rule-out power is governed by the negative likelihood ratio rather than by "
+"sensitivity alone; here LR- = %.2f, which provides %s evidence against "
+"disease after a negative result. "
+msgstr ""
+
 #: psychopdaROC/options/run.title
 msgid "Run"
 msgstr ""
@@ -114133,6 +115830,7 @@ msgid "Sample Options"
 msgstr ""
 
 #: R/benford.b.R
+#: R/diagnosticmeta.b.R
 #: R/enhancedROC.b.R
 #: R/lassocox.b.R
 #: R/singlearm.b.R
@@ -114415,6 +116113,10 @@ msgstr ""
 msgid "Sample size:"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Sample Size:"
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid ""
 "Sample size: %d | Expected counts < 5: %d/%d cells | Expected counts < 1: %d "
@@ -114552,8 +116254,18 @@ msgstr ""
 msgid "Sampling Bias Analysis"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Sampling Bias:"
+msgstr ""
+
 #: effectsize/results/results/effectDistributionPlot.description
 msgid "Sampling distribution of effect sizes"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Sampling does not meet quality thresholds (correlation \\u{2265} %s, CV "
+"\\u{2264} %s%%)."
 msgstr ""
 
 #: package/analyses/samplingerror.title
@@ -114593,9 +116305,6 @@ msgid "Sampling Protocol Settings"
 msgstr ""
 
 #: ihcheterogeneity/options/sampling_strategy.title
-msgid "Sampling Strategy"
-msgstr ""
-
 #: ihcheterogeneity/ui[1]/sampling_strategy.label
 msgid "Sampling strategy"
 msgstr ""
@@ -114604,8 +116313,33 @@ msgstr ""
 msgid "Sampling Type (RF)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: ihcheterogeneity/results/variabilityplot.title
 msgid "Sampling Variability Analysis"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Sampling variability could not be estimated. "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Sampling variability was high (mean CV = %s%%). "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Sampling variability was low (mean CV = %s%%). "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Sampling variability was moderate (mean CV = %s%%). "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Sampling variability was quantified using the coefficient of variation (CV). "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Sampling Variability:"
 msgstr ""
 
 #: recurrentsurvival/options/reReg_se/sandwich.title
@@ -116199,6 +117933,10 @@ msgstr ""
 msgid "Select a numeric variable containing naturally occurring numbers"
 msgstr ""
 
+#: R/waterfall.b.R
+msgid "Select a Patient ID and a Response Value variable to run the analysis."
+msgstr ""
+
 #: decisioncompare/options/test2.description.ui
 msgid ""
 "Select a second diagnostic test to compare with Test 1. This enables "
@@ -116638,6 +118376,12 @@ msgid ""
 "follow-up times."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"Select the study identifier and the TP, FP, FN and TN count variables to run "
+"the meta-analysis."
+msgstr ""
+
 #: summarydata2/options/summary_format.description.jamovi
 msgid ""
 "Select the summary format style. summarytools options provide automated EDA "
@@ -117062,6 +118806,7 @@ msgstr ""
 #: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
+#: R/diagnosticmeta.b.R
 #: R/lassologistic.b.R
 #: R/sequentialtests.b.R
 #: aivalidation/results/performanceTable.columns.title
@@ -117130,6 +118875,10 @@ msgstr ""
 #: trichotomousroc/results/thresholdsTable.columns.title
 #: trichotomousroc/results/categorySensitivitiesTable.columns.title
 msgid "Sensitivity"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "sensitivity"
 msgstr ""
 
 #: R/misclassificationbias.b.R
@@ -122186,6 +123935,10 @@ msgstr ""
 msgid "significant"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Significant asymmetry detected"
+msgstr ""
+
 #: stagemigration/results/multifactorialModelDiagnostics.columns.title
 msgid "Significant Coefficients"
 msgstr ""
@@ -122210,14 +123963,28 @@ msgstr ""
 msgid "Significant difference (p < 0.05)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Significant difference in per-case mean biomarker levels across compartments"
+msgstr ""
+
 #: R/linechart.b.R
 msgid ""
 "Significant differences between groups were detected (p < 0.05). Post-hoc "
 "testing is recommended to identify specific group differences."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Significant increase in sampling recommended (current CV = %s%% > %s%% "
+"threshold)"
+msgstr ""
+
 #: causalmediation/results/hdMediatorsTable.title
 msgid "Significant Mediators (High-Dimensional)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Significant method differences"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -122274,8 +124041,20 @@ msgstr ""
 msgid "Silhouette Δ"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Similar bias"
+msgstr ""
+
 #: R/jjridges.b.R
 msgid "Similar distributions between groups; Separation = distinct patterns"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Similar to other compartments"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Similar variability"
 msgstr ""
 
 #: ihcbasic/options/distanceMetric.title
@@ -122907,6 +124686,10 @@ msgstr ""
 msgid "Small effect"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Small Effect (r=0.1)"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Small effect size"
 msgstr ""
@@ -122952,6 +124735,10 @@ msgstr ""
 msgid "SMALL SAMPLE"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Small sample"
+msgstr ""
+
 #: metaanalysis/options/small_sample_correction.title
 msgid "Small Sample Correction"
 msgstr ""
@@ -122985,6 +124772,12 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "Small sample size (n=%d) may limit statistical power."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Small sample size (n=%d) may reduce statistical power. Consider collecting "
+"more cases for reliable estimates."
 msgstr ""
 
 #: R/oddsratio.b.R
@@ -123475,7 +125268,7 @@ msgid "Sort bars by value or alphabetically."
 msgstr ""
 
 #: waterfall/options/sortBy.title
-msgid "Sort By"
+msgid "Sort by"
 msgstr ""
 
 #: reportcat2/options/sort_by_frequency.title
@@ -123499,7 +125292,7 @@ msgid "Sort by Value (Descending)"
 msgstr ""
 
 #: swimmerplot/options/sortVariable.title
-msgid "Sort By Variable"
+msgid "Sort by variable"
 msgstr ""
 
 #: swimmerplot/ui[5][1][0].label
@@ -123545,7 +125338,7 @@ msgid "Sort decreasing"
 msgstr ""
 
 #: waterfall/options/sortDirection.title
-msgid "Sort Direction"
+msgid "Sort direction"
 msgstr ""
 
 #: jsjplot/options/sort_estimates.title
@@ -123574,11 +125367,11 @@ msgstr ""
 
 #: jcomplexupset/options/sort_order.title
 #: lollipop/options/sortBy.title
-#: swimmerplot/options/sortOrder.title
 msgid "Sort Order"
 msgstr ""
 
 #: lollipop/ui[1][0]/sortBy.label
+#: swimmerplot/options/sortOrder.title
 msgid "Sort order"
 msgstr ""
 
@@ -123787,6 +125580,12 @@ msgstr ""
 msgid "Spatial Analysis"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Spatial analysis requires at least 2 spatial regions with 2 or more cases "
+"each; the Spatial Region ID variable supplies %d usable region(s)."
+msgstr ""
+
 #: outbreakanalysis/results/spatial_analysis_results.title
 msgid "Spatial Analysis Results"
 msgstr ""
@@ -123923,6 +125722,7 @@ msgstr ""
 msgid "Spatial Heterogeneity"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: ihcheterogeneity/results/spatialanalysistable.title
 msgid "Spatial Heterogeneity Analysis"
 msgstr ""
@@ -123933,6 +125733,10 @@ msgstr ""
 
 #: spatialanalysis/results/hotspots.description
 msgid "Spatial hotspot analysis using kernel density estimation"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Spatial ID variable '%s' not found in data."
 msgstr ""
 
 #: spatialbayesiansurvival/options/spatial_model.title
@@ -123998,6 +125802,7 @@ msgstr ""
 msgid "Spatial Regimes Identification"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: ihcheterogeneity/results/spatialanalysistable.columns.title
 msgid "Spatial Region"
 msgstr ""
@@ -124072,6 +125877,14 @@ msgstr ""
 
 #: R/linechart.b.R
 msgid "Spearman Correlation (Rank-based)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Spearman correlation = %s (Good agreement with %s at your %.2f threshold)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Spearman correlation = %s (Limited agreement with %s at your %.2f threshold)"
 msgstr ""
 
 #: pathologyagreement/options/correlation_method/spearman.title
@@ -124268,6 +126081,7 @@ msgstr ""
 #: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
+#: R/diagnosticmeta.b.R
 #: R/lassologistic.b.R
 #: R/sequentialtests.b.R
 #: aivalidation/results/performanceTable.columns.title
@@ -124335,6 +126149,10 @@ msgstr ""
 #: treecompare/results/comparison_table.columns.title
 #: trichotomousroc/results/thresholdsTable.columns.title
 msgid "Specificity"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "specificity"
 msgstr ""
 
 #: diagnosticmeta/results/individualstudies.columns.title
@@ -124656,11 +126474,11 @@ msgid "Spider Plot (Tumor Size Over Time)"
 msgstr ""
 
 #: waterfall/options/spiderColorBy.title
-msgid "Spider Plot Color By"
+msgid "Spider plot color by"
 msgstr ""
 
 #: waterfall/options/spiderColorScheme.title
-msgid "Spider Plot Color Scheme"
+msgid "Spider plot color scheme"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -124680,7 +126498,7 @@ msgid "Spider Plot Requirements and Guidelines"
 msgstr ""
 
 #: waterfall/options/timeUnitLabel.title
-msgid "Spider Plot Time Unit Label"
+msgid "Spider plot time unit label"
 msgstr ""
 
 #: waterfall/ui[3][1][0].label
@@ -125029,6 +126847,14 @@ msgstr ""
 
 #: latentbiomarker/results/fitTable.columns.title
 msgid "SRMR"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "SROC AUC below chance"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "SROC curve"
 msgstr ""
 
 #: diagnosticmeta/results/srocplot_explanation.title
@@ -125436,7 +127262,7 @@ msgid "Standard Coefficient"
 msgstr ""
 
 #: diagnosticmeta/options/color_palette/standard.title
-msgid "Standard Colors"
+msgid "Standard colors"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -125875,10 +127701,13 @@ msgstr ""
 
 #: multistatesurvival/options/time_start.title
 #: multistatesurvival/ui[0][1].label
-#: swimmerplot/options/startTime.title
 #: timedependent/options/start_time.title
 #: timedependent/ui/variablesupplier[1].label
 msgid "Start Time"
+msgstr ""
+
+#: swimmerplot/options/startTime.title
+msgid "Start time"
 msgstr ""
 
 #: swimmerplot/ui[0][0][1].label
@@ -126500,6 +128329,10 @@ msgstr ""
 #: nonparametric/results/tests.columns.title
 #: pathsampling/results/interpretText.title
 msgid "Statistical Interpretation"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Statistical Interpretation:"
 msgstr ""
 
 #: adaptivetrialdesign/results/designSummary.columns.title
@@ -128198,12 +130031,21 @@ msgstr ""
 msgid "Studies"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Studies (circles), pooled estimate (triangle)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Studies excluded"
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid ""
 "Studies with at least three tests whose errors are plausibly independent "
 "within each latent class."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: bayesiandiagnostic/results/metaAnalysisResults.columns.title
 #: bayesianmetaanalysis/results/studyEffects.columns.title
 #: betabinomialdiagnostic/results/studyLevelResults.columns.title
@@ -128278,6 +130120,7 @@ msgstr ""
 msgid "Study Design Summary"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: advancedSurvivalPower/ui[2][0]/study_design.label
 msgid "Study Design:"
 msgstr ""
@@ -128338,12 +130181,15 @@ msgstr ""
 #: bayesianmetaanalysis/ui[0][2].label
 #: bayesiannetworkma/options/study_id.title
 #: bayesiannetworkma/ui[0][0].label
-#: diagnosticmeta/options/study.title
 #: hierarchicalbayes/ui[0][1].label
 #: metaanalysis/options/study_id.title
 #: treatmentmeta/options/study_id.title
 #: treatmentmeta/ui[0][0].label
 msgid "Study Identifier"
+msgstr ""
+
+#: diagnosticmeta/options/study.title
+msgid "Study identifier"
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -128848,10 +130694,18 @@ msgstr ""
 msgid "Substantial"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Substantial between-study heterogeneity"
+msgstr ""
+
 #: R/tableone.b.R
 msgid ""
 "Substantial missing data were present ({percent} of cases with at least one "
 "missing value)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Substantial sample increase recommended"
 msgstr ""
 
 #: advancedbarplot/options/subtitle_text.title
@@ -128961,6 +130815,10 @@ msgstr ""
 
 #: tidyplots/ui[2][5].label
 msgid "Sum Display Type"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Sum of all variance components"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -129248,6 +131106,7 @@ msgstr ""
 msgid "Summary ROC Curves"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: diagnosticmeta/results/srocplot.title
 #: metaanalysis/results/srocPlot.title
 msgid "Summary ROC Plot"
@@ -129299,6 +131158,7 @@ msgstr ""
 
 #: advancedraincloud/options/show_statistics.title
 #: raincloud/options/show_statistics.title
+#: swimmerplot/options/exportSummary.title
 msgid "Summary statistics"
 msgstr ""
 
@@ -129694,6 +131554,7 @@ msgstr ""
 #: package/analyses/singlearm.menuGroup
 #: package/analyses/survival.menuGroup
 #: package/analyses/survivalcont.menuGroup
+#: package/analyses/multisurvival.menuGroup
 #: package/analyses/oddsratio.menuGroup
 #: package/analyses/timeinterval.menuGroup
 #: package/analyses/datetimeconverter.menuGroup
@@ -129704,6 +131565,7 @@ msgstr ""
 #: jiwillsurvive/results/kmTable.columns.title
 #: lassocox/options.menuGroup
 #: marginalrecurrent/results/survivalFunction.columns.title
+#: multisurvival/options.menuGroup
 #: oddsratio/options.menuGroup
 #: outcomeorganizer/options.menuGroup
 #: semimarkov/results/reliabilityAnalysis.columns.title
@@ -130301,6 +132163,13 @@ msgstr ""
 msgid "Survival Plots Explanations"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid ""
+"Survival plots stop at the Plot End Time ({end} {unit}) although follow-up "
+"extends to {max} {unit}. Increase Plot End Time under Plot Options to show "
+"the full curves; the tables are not affected."
+msgstr ""
+
 #: package/analyses/survivalPower.title
 #: survivalPower/options.title
 msgid "Survival Power Analysis"
@@ -130734,7 +132603,6 @@ msgstr ""
 msgid "SurvivalExtraD"
 msgstr ""
 
-#: package/analyses/multisurvival.menuGroup
 #: package/analyses/competingsurvival.menuGroup
 #: package/analyses/timeroc.menuGroup
 #: package/analyses/relativesurvival.menuGroup
@@ -130763,7 +132631,6 @@ msgstr ""
 #: grouplasso/options.menuGroup
 #: highdimcox/options.menuGroup
 #: lassointro/options.menuGroup
-#: multisurvival/options.menuGroup
 #: ncvregcox/options.menuGroup
 #: pcacox/options.menuGroup
 #: plscox/options.menuGroup
@@ -130833,6 +132700,10 @@ msgstr ""
 #: swimmerplot/ui.title
 #: swimmerplot/results.title
 msgid "Swimmer Plot"
+msgstr ""
+
+#: R/swimmerplot.b.R
+msgid "Swimmer Plot (Simplified)"
 msgstr ""
 
 #: irecist/results/swimmerPlot.title
@@ -131030,6 +132901,26 @@ msgstr ""
 
 #: ihcheterogeneity/results/samplingbiastable.description
 msgid "Systematic bias assessment between methods"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Systematic bias detected - consider calibration or bias correction"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Systematic bias was detected between regional and reference measurements (p "
+"= %s). "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "SYSTEMATIC BIAS:"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Systematic difference from the reference measurement was tested with a "
+"paired t-test. "
 msgstr ""
 
 #: package/analyses/decisioncombine.description
@@ -133328,6 +135219,16 @@ msgstr ""
 msgid "Texture Interpretation Guide"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"That figure is the mean Spearman correlation rather than an ICC, because an "
+"ICC could not be fitted to these data. A correlation only asks whether the "
+"regions rank the cases in the same order, so two regions that rank "
+"identically but differ by a constant offset still score close to 1; the note "
+"under the Reproducibility Assessment table explains why the ICC was not "
+"estimable."
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "The 'Exclude missing values' box has no effect"
 msgstr ""
@@ -133610,6 +135511,12 @@ msgid ""
 "are searched."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"The biopsy sampling approach met the predefined quality criteria "
+"(correlation and CV thresholds set in the analysis options). "
+msgstr ""
+
 #: ggprism/options/prism_palette/the_blues.title
 msgid "The Blues (9 colors)"
 msgstr ""
@@ -133776,6 +135683,12 @@ msgid ""
 "guessing."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"The correlation is estimated at the boundary (+/-1), which with few studies "
+"usually means it cannot be estimated reliably - do not over-interpret it."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "The correlation summary could not be computed. This is an unavailable "
@@ -133903,6 +135816,12 @@ msgstr ""
 msgid ""
 "The data-derived cut-off point for {variable} is {cutoff}; it separates "
 "lower and higher marker values in this dataset."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"The dataset contains no rows. Add data (or clear the active filter) and "
+"re-run."
 msgstr ""
 
 #: advancedbarplot/options/data.description.jamovi
@@ -134239,6 +136158,10 @@ msgstr ""
 msgid "The ggpubr plot could not be created: {error}"
 msgstr ""
 
+#: R/swimmerplot.b.R
+msgid "the ggswim package is not installed"
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid ""
 "The global test across all markers could not be computed (%s); its statistic "
@@ -134351,6 +136274,18 @@ msgid ""
 "<b>depends on</b> the other (effect modification)."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"The ICC reported here is the absolute-agreement form: it is the share of the "
+"total variation in scores that comes from genuine differences between cases "
+"rather than from which region was measured, and a consistent offset between "
+"regions counts against it. It is not the proportion of cases whose scores "
+"matched, and it depends on how spread out your cohort is - the same "
+"measurement error yields a lower ICC when the cases have a narrow range of "
+"values. The 95%% CI Lower and 95%% CI Upper columns of the Reproducibility "
+"Assessment table show how precisely these %d cases pin the figure down."
+msgstr ""
+
 #: R/summarydata.b.R
 msgid ""
 "The inline distribution plots could not be rendered, so a numeric summary "
@@ -134386,6 +136321,13 @@ msgid ""
 "a reliability coefficient."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"The intraclass correlation could not be estimated; the reproducibility table "
+"shows a mean Spearman correlation instead, which is blind to systematic "
+"offsets and is not a reliability coefficient."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid "The Kaplan-Meier survival plot"
 msgstr ""
@@ -134400,6 +136342,13 @@ msgid ""
 "draw individual censoring marks or median reference lines. Those two display "
 "options apply to the standard Kaplan-Meier and cumulative-event plots; the "
 "KMunicate risk panel reports censoring counts when it is shown."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"The Kruskal-Wallis test compares ONE summary value per case (the mean of "
+"that case's reference and regional measurements) across compartments, so "
+"each patient contributes a single independent observation."
 msgstr ""
 
 #: R/classicalSurvivalPower.b.R
@@ -134533,6 +136482,12 @@ msgid ""
 "Validate every cut-point in independent data before clinical use."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"The mada package is not available, so the proportional-hazards SROC model "
+"could not be fitted."
+msgstr ""
+
 #: simonmakuch/options/timeDepVariable.description
 msgid ""
 "The main time-dependent variable of interest (e.g., treatment status, "
@@ -134607,6 +136562,20 @@ msgid ""
 "whenever the competing event is frequent, since the cumulative incidence can "
 "plateau below 50%% however long follow-up continues; it is not a statement "
 "that outcomes were good"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "The metafor package is not available, so heterogeneity could not be assessed."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "The metafor package is not available, so meta-regression could not be run."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"The metafor package is not available, so publication bias could not be "
+"assessed."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -134803,6 +136772,12 @@ msgid ""
 "optimism-corrected estimate of discrimination."
 msgstr ""
 
+#: R/waterfall.b.R
+msgid ""
+"The optimised processing path failed (%s); the standard path was used "
+"instead, so results are unaffected."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "The optional descriptive cohort summary could not be generated. The "
@@ -134959,6 +136934,17 @@ msgstr ""
 msgid "The predicted risk is based on the total points from all variables"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"The prediction interval spans a wide range of accuracy (sensitivity "
+"%.0f%%-%.0f%%, specificity %.0f%%-%.0f%%). A single pooled sensitivity and "
+"specificity may not usefully describe this body of evidence: studies differ "
+"more than sampling error explains, commonly because of differing positivity "
+"thresholds, patient spectrum or reference standards. Prefer the SROC curve "
+"and the prediction region over the pooled point, and investigate the source "
+"of heterogeneity before applying these figures to your own practice."
+msgstr ""
+
 #: R/oddsratio.b.R
 msgid ""
 "The prediction nomogram was not generated because Firth penalized regression "
@@ -135027,6 +137013,18 @@ msgstr ""
 msgid "The proportional-hazards diagnostic did not complete cleanly: {message}"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"The proportional-hazards SROC AUC is %.2f (< 0.70), indicating poor overall "
+"discrimination."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"The proportional-hazards SROC AUC is %.2f, below 0.5: the pooled test "
+"performs worse than chance. Check the TP/FP/FN/TN column assignment."
+msgstr ""
+
 #: R/survival.b.R
 msgid "The proportional-hazards test plot could not be created: {message}"
 msgstr ""
@@ -135074,6 +137072,25 @@ msgstr ""
 msgid ""
 "The reference standard and tests must use different variables. Select a "
 "different variable for: {variables}."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"The Reitsma bivariate model could not be fitted (%s). Pooled sensitivity and "
+"specificity are unavailable; the SROC plot and summary fall back to "
+"descriptive output."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"The Reitsma model did not return coefficient estimates, so pooled "
+"sensitivity and specificity are unavailable."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"The Reitsma model did not return the expected coefficient estimates, so "
+"pooled sensitivity and specificity are unavailable."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -135182,6 +137199,17 @@ msgstr ""
 
 #: R/lassologistic.b.R
 msgid "the sample median"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "The sampling approach did not meet the predefined quality criteria. "
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"The sampling approach met the correlation and CV criteria only after "
+"relaxing them to correlation \\u{2265} (threshold - 0.20) and CV \\u{2264} "
+"(1.5 \\u{00D7} threshold). "
 msgstr ""
 
 #: R/jscattermore.b.R
@@ -135382,6 +137410,13 @@ msgid ""
 "(Required for Spider Plot)\" to enable it."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"The spread of per-case CVs differs between compartments (unequal variance of "
+"heterogeneity); this does not by itself mean one compartment is more "
+"heterogeneous on average"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "The standardised option averages predictions over all observed patients; the "
@@ -135402,6 +137437,13 @@ msgstr ""
 msgid ""
 "The study population should represent the intended-use population and "
 "relevant disease spectrum."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"The Summary ROC plot requires the bivariate random-effects (Reitsma) model. "
+"Enable 'Bivariate Analysis' to display the pooled summary point and study "
+"estimates."
 msgstr ""
 
 #: R/reportcat.b.R
@@ -135782,6 +137824,14 @@ msgid ""
 "only for variables in the model - not for anything unmeasured."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"These are pooled estimates from the included studies only; how far they "
+"carry to another setting depends on the prediction region and on how "
+"comparable the positivity thresholds, patient spectrum and reference "
+"standards are."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "These are read from the single interaction model by relevel-and-refit: the "
@@ -135793,6 +137843,13 @@ msgid ""
 "These are single-cohort estimates. Their practical meaning depends on "
 "intended use, error consequences, prevalence, patient spectrum, and "
 "reference-standard quality. This educational summary is not a clinical guide."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"These are summary statistics from this dataset alone; they are not an "
+"external validation and they do not describe agreement at the score "
+"thresholds used to classify cases."
 msgstr ""
 
 #: R/decision.b.R
@@ -136059,6 +138116,13 @@ msgstr ""
 msgid ""
 "This analysis fits a sparse development model. Its apparent performance and "
 "median-split survival curves require validation before clinical use."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"This analysis follows the biopsy simulation methodology from "
+"Zilenaite-Petrulaitiene et al. (2025) and international guidelines for "
+"diagnostic test evaluation in pathology."
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -136579,6 +138643,13 @@ msgid ""
 "external validation in the intended population."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"This number is a mean Spearman correlation, not an ICC, so the ICC "
+"reliability bands do not apply to it - see the note under the "
+"Reproducibility Assessment table."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "This output is for model development only. Use bootstrap optimism correction "
@@ -136684,6 +138755,12 @@ msgid ""
 "and lowers combined sensitivity: fewer false positives, more missed cases."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"This summary provides a simplified interpretation of the statistical results "
+"for clinical understanding."
+msgstr ""
+
 #: R/psychopdaROC.b.R
 msgid ""
 "This table lists every observed test value as a candidate cutpoint, not only "
@@ -136695,6 +138772,13 @@ msgstr ""
 msgid ""
 "This Table One summarizes baseline characteristics commonly reported in "
 "clinical research manuscripts."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"This table shows the RAW counts and the accuracy computed from them; the "
+"pooled analyses and the forest plot use the zero-cell-corrected counts, so "
+"values for corrected studies differ slightly."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -137213,6 +139297,7 @@ msgid "Tile (Heatmap)"
 msgstr ""
 
 #: R/lassocox.b.R
+#: R/swimmerplot.b.R
 #: causespecifichazards/results/cumulative_incidence_table.columns.title
 #: comparingSurvival/options/times.title
 #: comparingSurvival/ui[0][0].label
@@ -137372,7 +139457,7 @@ msgid ""
 msgstr ""
 
 #: swimmerplot/options/timeDisplay.title
-msgid "Time Display Mode"
+msgid "Time display mode"
 msgstr ""
 
 #: mixedcox/options/elapsedtime.title
@@ -137463,7 +139548,7 @@ msgid "Time Input Configuration"
 msgstr ""
 
 #: swimmerplot/options/timeType.title
-msgid "Time Input Type"
+msgid "Time input type"
 msgstr ""
 
 #: flexcomprisk/options/timeInteractions.title
@@ -138079,6 +140164,7 @@ msgstr ""
 msgid "Time Unit of the Analysis"
 msgstr ""
 
+#: R/swimmerplot.b.R
 #: comparingSurvival/options/timeunits.title
 #: oneSurvival/options/timeunits.title
 msgid "Time units"
@@ -138314,7 +140400,7 @@ msgid "Time Variable (optional)"
 msgstr ""
 
 #: waterfall/options/timeVar.title
-msgid "Time Variable (Required for Spider Plot)"
+msgid "Time variable (required for spider plot)"
 msgstr ""
 
 #: optimalcutpoint/ui[0][2].label
@@ -138892,6 +140978,10 @@ msgstr ""
 msgid "Timeline Analysis:"
 msgstr ""
 
+#: swimmerplot/options/exportTimeline.title
+msgid "Timeline data"
+msgstr ""
+
 #: R/swimmerplot_html.R
 msgid "Timeline display options"
 msgstr ""
@@ -139198,6 +141288,14 @@ msgstr ""
 msgid "To N+1 Samples"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"To perform meta-regression analysis, please select a covariate variable "
+"(e.g., study year, population type, method) that may explain heterogeneity "
+"between studies. The covariate should be a study-level characteristic that "
+"varies across included studies."
+msgstr ""
+
 #: psychopdaROC/ui[8][0]/partialAUCto.label
 msgid "To specificity"
 msgstr ""
@@ -139439,6 +141537,7 @@ msgstr ""
 #: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
 #: R/decisioncompare.b.R
+#: R/waterfall.b.R
 #: clinicaltrialdesign/results/sample_size_breakdown.columns.title
 #: contTables/options/pcTot.title
 #: decision/results/rawContingency.columns.title
@@ -139909,6 +142008,7 @@ msgstr ""
 msgid "Total utility"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
 #: agreement/results/maxwellRETable.columns.title
 msgid "Total Variance"
 msgstr ""
@@ -141837,6 +143937,13 @@ msgstr ""
 msgid "Two dash"
 msgstr ""
 
+#: R/swimmerplot.b.R
+#: R/waterfall.b.R
+msgid ""
+"Two Fisher's exact tests (ORR and DCR) are reported with unadjusted "
+"p-values; interpret them jointly rather than as independent evidence."
+msgstr ""
+
 #: multisurvival/options/numRiskGroups/two.title
 msgid "Two Groups"
 msgstr ""
@@ -141863,6 +143970,21 @@ msgstr ""
 
 #: effectsize/options/analysisType/two_sample.title
 msgid "Two Sample (Group Comparison)"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Two separate UNIVARIATE meta-regression models were fitted (logit "
+"sensitivity and logit specificity), not a joint bivariate meta-regression, "
+"using %s estimation with the Knapp-Hartung adjustment (test statistics are "
+"t, not z)."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Two separate UNIVARIATE meta-regression models were fitted (logit "
+"sensitivity and logit specificity), not a joint bivariate meta-regression, "
+"using %s estimation."
 msgstr ""
 
 #: package/analyses/cotest.menuSubtitle
@@ -142473,6 +144595,12 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "Unable to draw the PH plot (ggcoxzph): {error}"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Unable to evaluate sampling quality because correlation or variability "
+"estimates could not be computed."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -143321,6 +145449,10 @@ msgstr ""
 msgid "Univariate Analysis"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Univariate auxiliary models used %s estimation."
+msgstr ""
+
 #: superpc/options/screening_method/univariate_cox.title
 msgid "Univariate Cox Regression"
 msgstr ""
@@ -143590,7 +145722,7 @@ msgstr ""
 msgid "up to 1 diseased case in 5 missed in this sample"
 msgstr ""
 
-#: waterfall/ui[2][1][4][0].label
+#: waterfall/ui[2][1][3][0].label
 msgid "Update Data"
 msgstr ""
 
@@ -143999,6 +146131,10 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "Usage Note:"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Usage:"
 msgstr ""
 
 #: costeffectiveness/options/currency.default
@@ -145215,6 +147351,10 @@ msgstr ""
 msgid "Validation Type"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Validation:"
+msgstr ""
+
 #: patientreported/options/validity_analysis.title
 msgid "Validity Analysis"
 msgstr ""
@@ -145735,13 +147875,45 @@ msgstr ""
 msgid "Variability across spatial regions"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Variability Analysis Focus: This analysis emphasizes variance components and "
+"spatial heterogeneity assessment."
+msgstr ""
+
 #: haralicktexture/results/variability.title
 msgid "Variability Assessment"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Variability between measurements was high in this dataset (mean CV above "
+"your configured %.0f%% threshold)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Variability between measurements was low in this dataset (mean CV at or "
+"below %.0f%%, half your configured threshold)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Variability between measurements was moderate in this dataset (mean CV "
+"within your configured %.0f%% threshold)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Variability Level"
 msgstr ""
 
 #: ihcheterogeneity/options/show_variability_plots.title
 #: ihcheterogeneity/ui[3]/show_variability_plots.label
 msgid "Variability plots"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Variability:"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -146426,6 +148598,10 @@ msgstr ""
 msgid "Variable Ratio"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "Variable sampling"
+msgstr ""
+
 #: parallelplot/options/scaling.title
 #: plscox/options/scaling_method.title
 msgid "Variable Scaling"
@@ -146949,6 +149125,11 @@ msgstr ""
 msgid "Variables representing set membership (binary columns)"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+#: R/waterfall.b.R
+msgid "Variables required"
+msgstr ""
+
 #: adaptivelasso/results/selectionPath.columns.title
 #: grouplasso/results/pathSummary.columns.title
 #: ncvregcox/results/model_summary.columns.title
@@ -147147,12 +149328,15 @@ msgstr ""
 msgid "Variance component model could not be fitted to these data."
 msgstr ""
 
-#: diagnosticmeta/options/method/vc.title
 #: frailtysurvival/results/variance_components_table.title
 #: hierarchicalpathology/options/variance_components.title
 #: hierarchicalpathology/results/variancecomponents.title
 #: stagemigration/ui[8][12]/frailtyVarianceComponents.label
 msgid "Variance Components"
+msgstr ""
+
+#: diagnosticmeta/options/method/vc.title
+msgid "Variance components"
 msgstr ""
 
 #: frailtysurvival/options/variance_components.title
@@ -147242,6 +149426,10 @@ msgstr ""
 
 #: pcacox/options/component_selection/variance.title
 msgid "Variance threshold"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "variance-components"
 msgstr ""
 
 #: metaanalysis/options/variance.title
@@ -147408,6 +149596,13 @@ msgid ""
 "specified."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Very high biomarker values detected (max: %s). Verify if these are "
+"appropriate for your biomarker scale (e.g., percentages should be "
+"\\u{2264}100%%, H-scores \\u{2264}300)."
+msgstr ""
+
 #: R/decision.b.R
 msgid "Very high disease prevalence observed in this sample ({pct})"
 msgstr ""
@@ -147424,6 +149619,12 @@ msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Very high sensitivity range - critical for screening/case-finding"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Very high variability (CV > 50%%) detected in %d cases. This may indicate "
+"measurement inconsistencies or high biological heterogeneity."
 msgstr ""
 
 #: R/decision.b.R
@@ -148348,6 +150549,12 @@ msgid ""
 "Please verify data."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Warning: Unknown sampling strategy limits interpretation reliability. "
+"Consider documenting sampling methodology for future analyses."
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid ""
 "Warning: Very high apparent AUC with small sample size suggests possible "
@@ -148434,6 +150641,13 @@ msgstr ""
 
 #: advancedbarplot/options/pattern_type/wave.title
 msgid "Wave"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"We analyzed <strong>%d tissue samples</strong> to understand how well "
+"measurements from <strong>%d different regions</strong> represent biomarker "
+"expression."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -149514,6 +151728,10 @@ msgstr ""
 msgid "WHO/UN standard (0-4, 5-9, ... 85+)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "whole section"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "Whole-cohort expected survival"
 msgstr ""
@@ -149870,6 +152088,42 @@ msgstr ""
 msgid "Winter"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"With %.1f%% sensitivity, approximately %.0f out of 100 diseased patients "
+"will be correctly identified. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"With %.1f%% sensitivity, this test will detect %.0f out of 100 patients with "
+"disease, missing only %.0f. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"With %.1f%% sensitivity, up to %.0f out of 100 diseased patients may be "
+"missed. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"With %.1f%% specificity, approximately %.0f out of 100 healthy individuals "
+"will be correctly classified. "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"With %.1f%% specificity, only %.0f out of 100 healthy individuals will test "
+"positive (false alarms). "
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"With %.1f%% specificity, up to %.0f out of 100 healthy individuals may test "
+"positive. "
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "with %d event(s) and %d censored observation(s) among %d subjects (%.1f%% "
@@ -149923,6 +152177,13 @@ msgstr ""
 msgid ""
 "With only %d observations, results may be unstable. Consider %d+ "
 "observations for reliable ROC analysis."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"With only %d studies the test is underpowered (at least 10 are usually "
+"required), so a non-significant result does not establish that publication "
+"bias is absent."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -149994,6 +152255,10 @@ msgstr ""
 msgid "with weighted flow values"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid "with whole-section measurements"
+msgstr ""
+
 #: jjwithinstats/options/mytitle.default
 msgid "Within Group Comparison"
 msgstr ""
@@ -150004,6 +152269,10 @@ msgstr ""
 
 #: ihcadvanced/results/optimalKResults.columns.title
 msgid "Within SS"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-Case Variance (Sampling)"
 msgstr ""
 
 #: explainableai/results/globalexplanations/featureclusteringtable.columns.title
@@ -151169,10 +153438,21 @@ msgstr ""
 msgid "Z-value"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid ""
+"Zero cells detected; a continuity correction of 0.5 was applied to the "
+"affected studies (matching the bivariate model), so results should be "
+"interpreted cautiously."
+msgstr ""
+
 #: R/decision.b.R
 msgid ""
 "Zero cells detected; applied Haldane-Anscombe 0.5 continuity correction for "
 "LR/OR calculations (sensitivity/specificity still use observed counts)."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Zero cells present"
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -151203,8 +153483,23 @@ msgstr ""
 msgid "Zero-cell correction"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
+msgid "Zero-cell correction applied"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "Zero-Cell Correction Applied"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Zero-cell correction applied (%s) to %d of %d studies (%s). Results should "
+"be interpreted with caution as corrections can introduce bias, especially in "
+"large studies."
+msgstr ""
+
 #: diagnosticmeta/options/zero_cell_correction.title
-msgid "Zero-Cell Correction Method"
+msgid "Zero-cell correction method"
 msgstr ""
 
 #: hierarchicalbayes/options/model_type/zero_inflated.title

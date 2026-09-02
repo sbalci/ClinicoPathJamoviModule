@@ -233,6 +233,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     inherit = jmvcore::Group,
     active = list(
         welcome = function() private$.items[["welcome"]],
+        notices = function() private$.items[["notices"]],
         interpretation = function() private$.items[["interpretation"]],
         report_sentences = function() private$.items[["report_sentences"]],
         assumptions = function() private$.items[["assumptions"]],
@@ -264,6 +265,20 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title=""))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="notices",
+                title="Notices",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "analysis_type",
+                    "power_analysis")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="interpretation",
                 title="Clinical Interpretation and Analysis Summary",
                 visible=TRUE,
@@ -278,7 +293,8 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "cv_threshold",
                     "correlation_threshold",
                     "analysis_type",
-                    "sampling_strategy")))
+                    "sampling_strategy",
+                    "generate_recommendations")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="report_sentences",
@@ -744,6 +760,7 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab Welcome screen shown when no variables selected \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$report_sentences} \tab \tab \tab \tab \tab Pre-formatted sentences ready for clinical reports and publications \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab Analysis assumptions, data requirements, and methodological considerations \cr

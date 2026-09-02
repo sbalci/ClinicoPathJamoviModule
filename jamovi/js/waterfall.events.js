@@ -35,12 +35,6 @@ const events = {
             ui.spiderColorBy.setValue("group");
             ui.spiderColorScheme.setValue("colorful");
         }
-    },
-
-    // A time variable is what makes the spider plot possible.
-    onChange_timeVar: function(ui) {
-        if (ui.timeVar.value())
-            ui.showSpiderPlot.setValue(true);
     }
 };
 

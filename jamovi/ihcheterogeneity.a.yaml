@@ -76,7 +76,7 @@ options:
       default: NULL
 
     - name: biopsies
-      title: Additional Regional Measurements
+      title: Additional regional measurements
       type: Variables
       suggested:
         - continuous
@@ -118,7 +118,7 @@ options:
             Uses Levene's test for variance equality and Kruskal-Wallis for distributional differences.
 
     - name: analysis_type
-      title: Analysis Focus
+      title: Analysis focus
       type: List
       options:
         - name: reproducibility
@@ -136,7 +136,7 @@ options:
             supplied.)
 
     - name: sampling_strategy
-      title: Sampling Strategy
+      title: Sampling strategy
       type: List
       options:
         - name: random
@@ -166,7 +166,7 @@ options:
             Lower values indicate more stringent quality requirements.
 
     - name: correlation_threshold
-      title: Minimum Acceptable Correlation
+      title: Minimum acceptable correlation
       type: Number
       min: 0.50
       max: 0.99

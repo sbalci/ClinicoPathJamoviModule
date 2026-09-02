@@ -296,7 +296,16 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "true_positives",
                     "false_positives",
                     "false_negatives",
-                    "true_negatives")))
+                    "true_negatives",
+                    "zero_cell_correction",
+                    "method",
+                    "confidence_level",
+                    "meta_regression",
+                    "covariate",
+                    "publication_bias",
+                    "bivariate_analysis",
+                    "hsroc_analysis",
+                    "heterogeneity_analysis")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -524,7 +533,8 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "false_positives",
                     "false_negatives",
                     "true_negatives",
-                    "confidence_level"),
+                    "confidence_level",
+                    "zero_cell_correction"),
                 columns=list(
                     list(
                         `name`="study", 

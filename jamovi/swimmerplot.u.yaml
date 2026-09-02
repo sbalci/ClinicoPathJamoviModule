@@ -4,17 +4,6 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  # # === QUICK SETUP WIZARD ===
-  # - type: CollapseBox
-  #   label: "Quick Setup Wizard"
-  #   collapsed: false
-  #   children:
-  #     - type: LayoutBox
-  #       margin: large
-  #       children:
-  #         - type: Label
-  #           label: "Getting Started: Required Variables - Patient ID, Start Time, End Time. Optional Enhancements - Response Variable (for ORR/DCR), Censoring Variable (for median follow-up), Grouping Variable (for comparisons), Milestones (key clinical events), Event Markers (additional timeline events)."
-
   # === CORE DATA VARIABLES ===
   - type: CollapseBox
     label: "Core Data Variables"

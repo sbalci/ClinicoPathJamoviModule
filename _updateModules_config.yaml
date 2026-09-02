@@ -45,14 +45,14 @@
 # ==============================================
 
 
-new_version: "1.0.8.07"
+new_version: "1.0.8.08"
 new_date: "2026-09-02"
 quick: false
 TEST: false
 jjstatsplot: false
-jsurvival: true
+jsurvival: false
 ClinicoPathDescriptives: false
-OncoPath: true
+OncoPath: false
 meddecide: true
 
 

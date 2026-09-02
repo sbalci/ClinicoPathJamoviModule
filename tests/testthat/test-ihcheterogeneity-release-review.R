@@ -167,11 +167,13 @@ test_that("power analysis uses the number of complete pairs", {
     pt <- run_ihc(d, power_analysis = TRUE)$poweranalysistable$asDF
     small <- pt[pt$scenario == "Small Effect (r=0.1)", ]
 
-    # n must be the 20 complete pairs, not the 40 rows
+    # n must be the 20 complete pairs, not the 40 rows. The SE carries the
+    # 1.06 Spearman variance inflation on every row (the analysis tests
+    # Spearman correlations throughout), not only on the observed-effect row.
     z <- 0.5 * log(1.1 / 0.9)
+    se_z <- sqrt(1.06 / (20 - 3))
     expect_equal(small$power[1],
-                 pnorm(z / (1/sqrt(20 - 3)) - qnorm(0.975)) +
-                 pnorm(-z / (1/sqrt(20 - 3)) - qnorm(0.975)),
+                 pnorm(z / se_z - qnorm(0.975)) + pnorm(-z / se_z - qnorm(0.975)),
                  tolerance = 1e-6)
 
     # observed-effect power must not be sold as evidence of adequacy
@@ -340,4 +342,20 @@ test_that("the variability plot does not error when no case has two values to co
     grDevices::png(tempfile(fileext = ".png")); on.exit(grDevices::dev.off(), add = TRUE)
     expect_false(an$.__enclos_env__$private$.variabilityplot(
         an$results$variabilityplot, ggtheme = ggplot2::theme_minimal(), theme = list()))
+})
+
+test_that("a constant non-zero offset yields no p-value rather than p = 0", {
+    # .safePairedT returned p.value = 0 when every case showed the identical
+    # offset; a literal "p = 0.000" is not a valid p-value.
+    d <- clean_data(); d$b1 <- d$whole - 5; d$b2 <- d$whole - 5
+    tab <- run_ihc(d)$samplingbiastable$asDF
+    expect_true(all(is.na(tab$p_value)))
+    expect_true(all(abs(tab$mean_diff - (-5)) < 1e-9))
+})
+
+test_that("a small cohort raises a banner notice, not only a note below the tables", {
+    d <- clean_data()[1:7, ]
+    html <- run_ihc(d)$notices$content
+    expect_match(html, "Small sample", fixed = TRUE)
+    expect_match(html, "7 cases", fixed = TRUE)
 })

@@ -9,6 +9,20 @@ items:
       type: Html
       description: Welcome screen shown when no variables selected
 
+    - name: notices
+      title: Notices
+      type: Html
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - analysis_type
+        - power_analysis
+
     - name: interpretation
       title: Clinical Interpretation and Analysis Summary
       type: Html
@@ -25,6 +39,7 @@ items:
         - correlation_threshold
         - analysis_type
         - sampling_strategy
+        - generate_recommendations
 
     - name: report_sentences
       title: Copy-Ready Report Sentences

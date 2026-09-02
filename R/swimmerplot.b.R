@@ -151,7 +151,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
 
             # Check if data appears to be numeric when Date/Time is selected
-            sample_data <- as.character(dates[!is.na(dates)][1:min(5, sum(!is.na(dates)))])
+            sample_data <- as.character(utils::head(dates[!is.na(dates)], 5))
             is_numeric_like <- length(sample_data) > 0 && all(grepl("^-?\\d*\\.?\\d+$", sample_data))
 
             if (is_numeric_like) {
@@ -202,7 +202,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     value = na_value,
                     error = TRUE,
                     message = paste(
-                        .("Error parsing"), variable_type, .("dates with format"), format, ".",
+                        sprintf(.("Error parsing %s dates with format %s."), variable_type, format),
                         clinical_guidance
                     )
                 ))
@@ -357,6 +357,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
             
             # Enhanced time processing
+            if (self$options$timeType != "datetime") {
+                private$.addNotice("INFO", .("Time units"), sprintf(
+                    .("Raw start and end values are taken as already expressed in %s; no conversion is applied."),
+                    self$options$timeUnit))
+            }
             if (self$options$timeType == "datetime") {
                 start_parsed <- private$.parseDatesWithClinicalContext(
                     patient_data$start_time, 
@@ -1010,7 +1015,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     group_value <- NA
                     if ("patient_group" %in% names(.SD)) {
                         group_first <- patient_group[!is.na(patient_group)]
-                        if (length(group_first) > 0) group_value <- group_first[1]
+                        # as.character: the base path returns character, and a
+                        # factor here kept NA-dropped levels alive in the Fisher
+                        # contingency tables above 1000 rows.
+                        if (length(group_first) > 0) group_value <- as.character(group_first[1])
                     }
 
                     list(
@@ -1640,8 +1648,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
 
             # Validate and process data with comprehensive error handling
-            debug_mode <- isTRUE(getOption("swimmerplot.debug"))
-
             tryCatch({
                 validation_result <- private$.validateAndProcessData()
 
@@ -2065,14 +2071,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     name = .("Total Study Person-Time"),
                     value = round(stats$total_person_time, 2),
                     ci = NA_character_,
-                    unit = paste(self$options$timeUnit, "cumulative"),
+                    unit = sprintf(.("%s (cumulative)"), self$options$timeUnit),
                     interpretation = .("Total observation time across all patients")
                 ),
                 list(
                     name = .("Follow-up Density"),
                     value = if (isTRUE(stats$total_person_time > 0)) round(n_patients_summary / stats$total_person_time * 100, 3) else NA_real_,
                     ci = NA_character_,
-                    unit = paste0("per 100 ", self$options$timeUnit),
+                    unit = sprintf(.("per 100 %s"), self$options$timeUnit),
                     interpretation = .("Number of patients per 100 units of observation time (descriptive metric)")
                 )
             )
@@ -2135,14 +2141,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             name = .("Objective Response Rate (ORR)"),
                             value = if (!is.na(orr)) round(orr, 1) else NA_real_,
                             ci = orr_ci,
-                            unit = "percent",
+                            unit = .("percent"),
                             interpretation = .("Proportion with complete or partial response")
                         ),
                         list(
                             name = .("Disease Control Rate (DCR)"),
                             value = if (!is.na(dcr)) round(dcr, 1) else NA_real_,
                             ci = dcr_ci,
-                            unit = "percent",
+                            unit = .("percent"),
                             interpretation = .("Proportion with response or stable disease")
                         )
                     ))
@@ -2248,6 +2254,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 }
             }
 
+            if (self$results$groupComparisonTest$rowCount > 1) {
+                self$results$groupComparisonTest$setNote("multiplicity",
+                    .("Two Fisher's exact tests (ORR and DCR) are reported with unadjusted p-values; interpret them jointly rather than as independent evidence."))
+            }
+
             # Check for low cell counts in contingency tables
             min_cell_orr <- if (!is.null(orr_contingency)) min(orr_contingency) else NA
             min_cell_dcr <- if (!is.null(dcr_contingency)) min(dcr_contingency) else NA
@@ -2259,7 +2270,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # REPLACED Notice with HTML to prevent serialization errors
                 warning_html <- paste0(
                     "<div style='background-color: rgba(255, 202, 33, 0.23);border-left:4px solid #ffc107;padding:12px;margin:10px 0;font-family:Arial,sans-serif; color: inherit;'>",
-                    "<strong style='color:#856404;'>", .("Warning:"), "</strong> ",
+                    "<strong style='color: inherit;'>", .("Warning:"), "</strong> ",
                     sprintf(
                         .("Fisher exact test has cells with counts below 5 (minimum cell count = %d). The test remains valid, but interpret p-values cautiously with small cell counts. Consider grouping categories or collecting more data."),
                         min_cell),
@@ -2362,13 +2373,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (self$options$exportTimeline || self$options$exportSummary) {
                 export_info <- paste0(
                     "<div style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-                    "<h4>Export Information</h4>",
-                    "<p>Data has been exported to the following outputs:</p>",
+                    "<h4>", .("Export Information"), "</h4>",
+                    "<p>", .("Data has been exported to the following outputs:"), "</p>",
                     "<ul>",
-                    if (self$options$exportTimeline) "<li><strong>Timeline Data:</strong> Complete patient timeline dataset with processed variables</li>" else "",
-                    if (self$options$exportSummary) "<li><strong>Summary Statistics:</strong> Comprehensive summary metrics and clinical indicators</li>" else "",
+                    if (self$options$exportTimeline) paste0("<li>", .("<strong>Timeline Data:</strong> Complete patient timeline dataset with processed variables"), "</li>") else "",
+                    if (self$options$exportSummary) paste0("<li>", .("<strong>Summary Statistics:</strong> Comprehensive summary metrics and clinical indicators"), "</li>") else "",
                     "</ul>",
-                    "<p><em>Note: Exported data can be accessed through the Output panel and used for external analysis.</em></p>",
+                    "<p><em>", .("Note: Exported data can be accessed through the Output panel and used for external analysis."), "</em></p>",
                     "</div>"
                 )
                 self$results$exportInfo$setContent(export_info)
@@ -2422,8 +2433,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 return(TRUE)
                 
             }, error = function(e) {
-                warning(paste("Error creating plot:", e$message))
-                
+                # The fallback plot's subtitle carries e$message; jamovi does
+                # not surface warning(), so nothing else is needed here.
+
                 # Create fallback plot
                 # Name the argument: the signature is
                 # (patient_data, milestone_data, event_data, opts, stats, error_message)
@@ -2439,8 +2451,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .createGgswimPlot = function(patient_data, milestone_data, event_data, arrow_data, opts, stats) {
             # Check if ggswim is available
             if (!requireNamespace("ggswim", quietly = TRUE)) {
-                warning("ggswim package not available, using fallback visualization")
-                return(private$.createFallbackPlot(patient_data, milestone_data, event_data, opts, stats))
+                return(private$.createFallbackPlot(patient_data, milestone_data, event_data, opts, stats,
+                    error_message = .("the ggswim package is not installed")))
             }
 
             # Create base plot with swim lanes
@@ -2525,7 +2537,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 )
                 
                 p <- p + ggswim::scale_marker_discrete(
-                    name = "Clinical Events",
+                    name = .("Clinical Events"),
                     glyphs = clinical_glyphs,
                     colours = clinical_colors,
                     limits = unique_labels
@@ -2556,7 +2568,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     size = opts$markerSize + 1
                 ) +
                 ggplot2::scale_shape_manual(
-                    name = "Milestones",
+                    name = .("Milestones"),
                     values = milestone_shapes
                 )
             }
@@ -2643,7 +2655,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "text",
                         x = stats$median_duration,
                         y = 1,
-                        label = paste("Median:", round(stats$median_duration, 1)),
+                        label = sprintf(.("Median: %s"), round(stats$median_duration, 1)),
                         hjust = -0.1,
                         vjust = 0,
                         angle = 90,
@@ -2766,9 +2778,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             ggplot2::ggplot(patient_data, ggplot2::aes(x = start_time, y = patient_id)) +
                 ggplot2::geom_point(size = 2, color = "steelblue") +
                 ggplot2::labs(
-                    title = "Swimmer Plot (Simplified)",
-                    subtitle = paste("Error in enhanced plot:", error_message),
-                    x = "Time",
+                    title = .("Swimmer Plot (Simplified)"),
+                    subtitle = sprintf(.("Error in enhanced plot: %s"), error_message),
+                    x = .("Time"),
                     y = .("Patient ID")
                 ) +
                 ggplot2::theme_minimal()
@@ -2962,16 +2974,16 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             copy_ready_html <- paste0(
                 "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-left: 4px solid #28a745; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif; color: inherit;'>",
-                "<h3 style='color: #155724; margin-top: 0; display: flex; align-items: center;'>",
+                "<h3 style='color: inherit; margin-top: 0; display: flex; align-items: center;'>",
                 "<span style='margin-right: 8px;'></span>",
-                "Copy-Ready Manuscript Text",
+                .("Copy-Ready Manuscript Text"),
                 "</h3>",
                 "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 10px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>",
-                "<p style='margin: 0; line-height: 1.6; color: #333; font-size: 0.95em; text-align: justify;'>", full_text, "</p>",
+                "<p style='margin: 0; line-height: 1.6; color: inherit; font-size: 0.95em; text-align: justify;'>", full_text, "</p>",
                 "</div>",
                 "<div style='margin-top: 15px; padding: 10px; background-color: rgba(33, 163, 188, 0.21); border-radius: 4px; border: 1px dashed #0c5460; color: inherit;'>",
-                "<p style='margin: 0; font-size: 0.85em; color: #0c5460;'>",
-                "<strong>Usage:</strong> This text is formatted for direct use in manuscripts, clinical reports, and regulatory submissions. Copy and paste into your document and adjust as needed for your specific requirements.",
+                "<p style='margin: 0; font-size: 0.85em; color: inherit;'>",
+                .("<strong>Usage:</strong> This text is formatted for direct use in manuscripts and clinical reports. Copy and paste into your document and adjust as needed for your specific requirements."),
                 "</p>",
                 "</div>",
                 "</div>"

@@ -14,6 +14,12 @@ items:
           - responseVar
           - censorVar
           - timeUnit
+          - groupVar
+          - eventVar
+          - personTimeAnalysis
+          - responseAnalysis
+          - maxMilestones
+          - sortOrder
           # a type-mismatch ERROR raised under one input type must clear when
           # the user switches the type, not linger beside valid results
           - timeType
@@ -250,6 +256,7 @@ items:
           - timeType
           - timeUnit
           - timeDisplay
+          - dateFormat
 
     - name: summaryData
       title: "Export Summary Statistics"
@@ -272,6 +279,9 @@ items:
           - timeUnit
           - personTimeAnalysis
           - responseAnalysis
+          - timeType
+          - dateFormat
+          - timeDisplay
 
     - name: exportInfo
       title: "Export Information"
@@ -362,6 +372,9 @@ items:
           - startTime
           - endTime
           - responseVar
+          - timeType
+          - dateFormat
+          - timeDisplay
           # the manuscript text switches its follow-up estimator on the
           # censoring classification and its ORR/DCR sentence on responseAnalysis
           - censorVar

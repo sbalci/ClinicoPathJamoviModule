@@ -515,6 +515,12 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "responseVar",
                     "censorVar",
                     "timeUnit",
+                    "groupVar",
+                    "eventVar",
+                    "personTimeAnalysis",
+                    "responseAnalysis",
+                    "maxMilestones",
+                    "sortOrder",
                     "timeType",
                     "dateFormat")))
             self$add(jmvcore::Html$new(
@@ -758,7 +764,8 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "responseVar",
                     "timeType",
                     "timeUnit",
-                    "timeDisplay")))
+                    "timeDisplay",
+                    "dateFormat")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summaryData",
@@ -782,7 +789,10 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "responseVar",
                     "timeUnit",
                     "personTimeAnalysis",
-                    "responseAnalysis")))
+                    "responseAnalysis",
+                    "timeType",
+                    "dateFormat",
+                    "timeDisplay")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="exportInfo",
@@ -882,6 +892,9 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "startTime",
                     "endTime",
                     "responseVar",
+                    "timeType",
+                    "dateFormat",
+                    "timeDisplay",
                     "censorVar",
                     "responseAnalysis",
                     "timeUnit",
@@ -944,7 +957,8 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param censorVar Optional variable indicating censoring status for ongoing
 #'   treatment arrows. Use 0/FALSE/"censored"/"alive" for ongoing patients
 #'   (shows arrow), or 1/TRUE/"event"/"dead" for completed follow-up (no arrow).
-#'   If not provided, arrows are drawn for patients at the latest time point.
+#'   Without a censoring variable no arrows are drawn and an information notice
+#'   says so.
 #' @param groupVar Optional grouping variable for comparing response rates
 #'   between patient groups (e.g., treatment arms, disease subtypes). When
 #'   specified, Fisher's exact tests compare ORR and DCR between groups. Lane
