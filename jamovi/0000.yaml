@@ -66,10 +66,14 @@ analyses:
     ribbon: analyses
     category: analyses
     description: >
-      Tests whether the leading digits of a numeric variable follow Benford's
-      Law, using the MAD conformity classification, a chi-square goodness-of-fit
-      test and the Mantissa Arc Test. Intended as a screen for systematic
-      recording artefacts such as rounding or preferred values.
+      Compares the leading digits of a positive numeric variable against
+      Benford's Law, using a chi-square goodness-of-fit test, the Mantissa Arc
+      Test and Nigrini's MAD conformity classification. The MAD classification
+      is reported only when the sample is large enough for its cut-offs to
+      exceed sampling noise; otherwise the chi-square test carries the finding.
+      Benford's Law applies to data spanning at least two orders of magnitude.
+      The analysis reports whether a departure from the expected leading-digit
+      frequencies was detected; it does not identify a cause.
   - title: Age Pyramid
     name: agepyramid
     ns: ClinicoPath

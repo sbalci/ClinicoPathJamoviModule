@@ -312,6 +312,10 @@ children:
                 name: padjustmethod
                 enable: (pw)
                 label: P-value adjustment method
+              - type: ComboBox
+                name: survivalTestType
+                enable: (pw)
+                label: Pairwise test type
       - type: Label
         label: Weighted Log-Rank Tests
         children:
@@ -321,10 +325,6 @@ children:
               - type: CheckBox
                 name: weightedLogRank
                 label: Weighted log-rank tests
-              - type: ComboBox
-                name: survivalTestType
-                enable: (weightedLogRank)
-                label: Test type for pairwise comparisons
       - type: Label
         label: Restricted Mean Survival Time
         children:

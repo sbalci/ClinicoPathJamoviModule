@@ -177,20 +177,26 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Benford Analysis
 #'
-#' Tests whether the leading digits of a numeric variable follow Benford's 
-#' Law, using the MAD conformity classification, a chi-square goodness-of-fit 
-#' test and the Mantissa Arc Test. Intended as a screen for systematic 
-#' recording artefacts such as rounding or preferred values.
+#' Compares the leading digits of a positive numeric variable against 
+#' Benford's Law, using a chi-square goodness-of-fit test, the Mantissa Arc 
+#' Test and Nigrini's MAD conformity classification. The MAD classification is 
+#' reported only when the sample is large enough for its cut-offs to exceed 
+#' sampling noise; otherwise the chi-square test carries the finding. 
+#' Benford's Law applies to data spanning at least two orders of magnitude. 
+#' The analysis reports whether a departure from the expected leading-digit 
+#' frequencies was detected; it does not identify a cause.
 #' 
 #'
 #' @examples
 #' \donttest{
-#' # Leading-digit screen on follow-up times. These span only 1.3
-#' # orders of magnitude, so the analysis reports a narrow-range
-#' # warning: Benford's Law needs at least two decades.
+#' # Leading-digit screen on cardiac troponin: 400 patients,
+#' # 0.005 to 8.96 ng/mL, spanning 3.3 orders of magnitude. At the
+#' # default 2-digit setting Nigrini's MAD cut-off is not usable
+#' # below n = 5204, so the chi-square goodness-of-fit test carries
+#' # the finding here (p = 0.70; no departure detected).
 #' benford(
-#'     data = histopathology,
-#'     var = "OverallTime")
+#'     data = timeroc_cardiovascular_risk,
+#'     var = "troponin_level")
 #'}
 #' @param data The data as a data frame.
 #' @param var a string naming the variable from \code{data} that contains the

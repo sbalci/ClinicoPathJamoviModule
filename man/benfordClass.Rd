@@ -12,7 +12,7 @@ It returns the Benford's Law distribution and a list of potential suspects with 
 }
 \details{
 The Benford's Law analysis is a statistical test to determine if the distribution of the first digits of a numeric variable follows Benford's Law.
-This is commonly used in clinical research to detect data entry errors, fraud, or other quality issues.
+This is used in clinical research as a screen for systematic recording patterns such as rounding, preferred values, or truncation.
 The analysis returns structured results with clinical interpretation and actionable guidance.
 }
 \keyword{internal}

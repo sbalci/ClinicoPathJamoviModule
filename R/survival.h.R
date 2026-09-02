@@ -739,7 +739,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         eventRecodeInfo = function() private$.items[["eventRecodeInfo"]],
         subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
-        errors = function() private$.items[["errors"]],
         strongWarnings = function() private$.items[["strongWarnings"]],
         warnings = function() private$.items[["warnings"]],
         infoMessages = function() private$.items[["infoMessages"]],
@@ -841,7 +840,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="eventRecodeInfo",
                 title="Outcome Recode",
-                visible=TRUE,
+                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
                 clearWith=list(
                     "outcome",
                     "outcomeLevel",
@@ -854,7 +853,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="subtitle",
-                title="`Survival Analysis - ${explanatory}`"))
+                title="`Survival Analysis - ${explanatory}`",
+                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -868,11 +868,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="errors",
-                title="Critical Errors",
-                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="strongWarnings",
@@ -891,12 +886,13 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianSurvivalHeading",
-                title="Median Survival Analysis"))
+                title="Median Survival Analysis",
+                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianSummary",
                 title="`Median Survival Summary and Table - ${explanatory}`",
-                visible="(showSummaries)",
+                visible="(showSummaries && length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -905,46 +901,48 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
+                    "timetypeoutput",
                     "multievent")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="medianTable",
                 title="`Median Survival Table: Levels for ${explanatory}`",
+                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
                 rows=0,
                 columns=list(
                     list(
-                        `name`="factor", 
-                        `title`="Levels", 
+                        `name`="factor",
+                        `title`="Levels",
                         `type`="text"),
                     list(
-                        `name`="records", 
-                        `title`="Records", 
+                        `name`="records",
+                        `title`="Records",
                         `type`="integer"),
                     list(
-                        `name`="events", 
-                        `title`="Events", 
+                        `name`="events",
+                        `title`="Events",
                         `type`="integer"),
                     list(
-                        `name`="rmean", 
-                        `title`="rmean", 
+                        `name`="rmean",
+                        `title`="rmean",
                         `type`="number"),
                     list(
-                        `name`="se_rmean", 
-                        `title`="se_rmean", 
+                        `name`="se_rmean",
+                        `title`="se_rmean",
                         `type`="number"),
                     list(
-                        `name`="median", 
-                        `title`="Median", 
+                        `name`="median",
+                        `title`="Median",
                         `type`="number"),
                     list(
-                        `name`="x0_95lcl", 
-                        `title`="Lower", 
-                        `superTitle`="95% Confidence Interval", 
+                        `name`="x0_95lcl",
+                        `title`="Lower",
+                        `superTitle`="95% Confidence Interval",
                         `type`="number"),
                     list(
-                        `name`="x0_95ucl", 
-                        `title`="Upper", 
-                        `superTitle`="95% Confidence Interval", 
+                        `name`="x0_95ucl",
+                        `title`="Upper",
+                        `superTitle`="95% Confidence Interval",
                         `type`="number")),
                 clearWith=list(
                     "explanatory",
@@ -954,6 +952,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
+                    "timetypeoutput",
                     "multievent",
                     "analysistype",
                     "dod",
@@ -978,56 +977,75 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="coxRegressionHeading",
-                title="Cox Regression Analysis"))
+                title="Cox Regression Analysis",
+                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="coxSummary",
                 title="`Cox Regression Summary and Table - ${explanatory}`",
-                visible="(showSummaries)",
+                visible="(showSummaries && length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
                 clearWith=list(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
-                    "fudate",
-                    "dxdate",
                     "tint",
-                    "multievent")))
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="coxTable",
                 title="`Cox Table- ${explanatory}`",
+                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
                 rows=0,
                 columns=list(
                     list(
-                        `name`="Explanatory", 
-                        `title`="Explanatory", 
+                        `name`="Explanatory",
+                        `title`="Explanatory",
                         `type`="text"),
                     list(
-                        `name`="Levels", 
-                        `title`="Levels", 
+                        `name`="Levels",
+                        `title`="Levels",
                         `type`="text"),
                     list(
-                        `name`="all", 
-                        `title`="N", 
+                        `name`="all",
+                        `title`="N",
                         `type`="text"),
                     list(
-                        `name`="HR_univariable", 
-                        `title`="HR (Univariable)", 
+                        `name`="HR_univariable",
+                        `title`="HR (Univariable)",
                         `type`="text")),
                 clearWith=list(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
-                    "fudate",
-                    "dxdate",
                     "tint",
-                    "multievent")))
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tCoxtext2",
                 title="",
+                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
                 refs="finalfit",
                 clearWith=list(
                     "explanatory",
@@ -1037,7 +1055,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "timetypeoutput",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="coxRegressionHeading3",
@@ -1069,24 +1095,24 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="variable", 
-                        `title`="Variable", 
+                        `name`="variable",
+                        `title`="Variable",
                         `type`="text"),
                     list(
-                        `name`="levels", 
-                        `title`="Levels", 
+                        `name`="levels",
+                        `title`="Levels",
                         `type`="text"),
                     list(
-                        `name`="n", 
-                        `title`="N", 
+                        `name`="n",
+                        `title`="N",
                         `type`="text"),
                     list(
-                        `name`="hr_unadjusted", 
-                        `title`="HR (Unadjusted)", 
+                        `name`="hr_unadjusted",
+                        `title`="HR (Unadjusted)",
                         `type`="text"),
                     list(
-                        `name`="hr_age_adjusted", 
-                        `title`="HR (Age-Adjusted)", 
+                        `name`="hr_age_adjusted",
+                        `title`="HR (Age-Adjusted)",
                         `type`="text")),
                 clearWith=list(
                     "age_adjustment",
@@ -1094,7 +1120,19 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "elapsedtime")))
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ageInteractionTable",
@@ -1103,40 +1141,54 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="term", 
-                        `title`="Term", 
+                        `name`="term",
+                        `title`="Term",
                         `type`="text"),
                     list(
-                        `name`="coef", 
-                        `title`="Coefficient", 
-                        `type`="number", 
+                        `name`="coef",
+                        `title`="Coefficient",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="hr", 
-                        `title`="HR", 
-                        `type`="number", 
+                        `name`="hr",
+                        `title`="HR",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="se", 
-                        `title`="SE", 
-                        `type`="number", 
+                        `name`="se",
+                        `title`="SE",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="z", 
-                        `title`="z", 
-                        `type`="number", 
+                        `name`="z",
+                        `title`="z",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="pvalue", 
-                        `title`="p-value", 
-                        `type`="number", 
+                        `name`="pvalue",
+                        `title`="p-value",
+                        `type`="number",
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "age_adjustment",
                     "age_interaction",
                     "age_variable",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="ageAdjustedInterpretation",
@@ -1162,39 +1214,52 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="variable", 
-                        `title`="Variable", 
+                        `name`="variable",
+                        `title`="Variable",
                         `type`="text"),
                     list(
-                        `name`="levels", 
-                        `title`="Levels", 
+                        `name`="levels",
+                        `title`="Levels",
                         `type`="text"),
                     list(
-                        `name`="hr", 
-                        `title`="HR", 
-                        `type`="number", 
+                        `name`="hr",
+                        `title`="HR",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
-                        `type`="number", 
+                        `name`="ci_lower",
+                        `title`="95% CI Lower",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
-                        `type`="number", 
+                        `name`="ci_upper",
+                        `title`="95% CI Upper",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="pvalue", 
-                        `title`="p-value", 
-                        `type`="number", 
+                        `name`="pvalue",
+                        `title`="p-value",
+                        `type`="number",
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "age_time_scale",
                     "age_variable",
                     "explanatory",
                     "outcome",
-                    "elapsedtime")))
+                    "elapsedtime",
+                    "outcomeLevel",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="ageTimeScaleInterpretation",
@@ -1212,37 +1277,37 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="group", 
-                        `title`="Group", 
+                        `name`="group",
+                        `title`="Group",
                         `type`="text"),
                     list(
-                        `name`="observed", 
-                        `title`="Observed Deaths", 
+                        `name`="observed",
+                        `title`="Observed Deaths",
                         `type`="integer"),
                     list(
-                        `name`="expected", 
-                        `title`="Expected Deaths", 
-                        `type`="number", 
+                        `name`="expected",
+                        `title`="Expected Deaths",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="smr", 
-                        `title`="SMR / Standardized Rate", 
-                        `type`="number", 
+                        `name`="smr",
+                        `title`="SMR / Standardized Rate",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="smr_ci_lower", 
-                        `title`="SMR 95% CI Lower", 
-                        `type`="number", 
+                        `name`="smr_ci_lower",
+                        `title`="SMR 95% CI Lower",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="smr_ci_upper", 
-                        `title`="SMR 95% CI Upper", 
-                        `type`="number", 
+                        `name`="smr_ci_upper",
+                        `title`="SMR 95% CI Upper",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="pvalue", 
-                        `title`="p-value", 
-                        `type`="number", 
+                        `name`="pvalue",
+                        `title`="p-value",
+                        `type`="number",
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "age_standardization",
@@ -1250,7 +1315,21 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "age_variable",
                     "age_group_cutpoints",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="ageStandardizationInterpretation",
@@ -1278,7 +1357,19 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "elapsedtime",
                     "ci95",
                     "risktable",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="adjustedCurvesPlot",
@@ -1296,7 +1387,19 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcome",
                     "elapsedtime",
                     "ci95",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="remarkChecklist",
@@ -1321,7 +1424,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="phInterpretation",
@@ -1335,6 +1446,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
+                    "timetypeoutput",
                     "multievent")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -1356,16 +1468,25 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "timetypeoutput",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="survivalTablesHeading",
-                title="Survival Probability Tables"))
+                title="Survival Probability Tables",
+                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="survTableSummary",
                 title="`1, 3, 5-yr Survival Summary and Table  - ${explanatory}`",
-                visible="(showSummaries)",
+                visible="(showSummaries && length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
                 clearWith=list(
                     "explanatory",
                     "outcome",
@@ -1379,40 +1500,41 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="survTable",
                 title="`1, 3, 5 year Survival - ${explanatory}`",
+                visible="(length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))",
                 rows=0,
                 columns=list(
                     list(
-                        `name`="strata", 
-                        `title`="Levels", 
+                        `name`="strata",
+                        `title`="Levels",
                         `type`="text"),
                     list(
-                        `name`="time", 
-                        `title`="time", 
+                        `name`="time",
+                        `title`="time",
                         `type`="integer"),
                     list(
-                        `name`="n.risk", 
-                        `title`="Number at Risk", 
+                        `name`="n.risk",
+                        `title`="Number at Risk",
                         `type`="integer"),
                     list(
-                        `name`="n.event", 
-                        `title`="Number of Events", 
+                        `name`="n.event",
+                        `title`="Number of Events",
                         `type`="integer"),
                     list(
-                        `name`="surv", 
-                        `title`="Survival", 
-                        `type`="number", 
+                        `name`="surv",
+                        `title`="Survival",
+                        `type`="number",
                         `format`="pc"),
                     list(
-                        `name`="lower", 
-                        `title`="Lower", 
-                        `superTitle`="95% Confidence Interval", 
-                        `type`="number", 
+                        `name`="lower",
+                        `title`="Lower",
+                        `superTitle`="95% Confidence Interval",
+                        `type`="number",
                         `format`="pc"),
                     list(
-                        `name`="upper", 
-                        `title`="Upper", 
-                        `superTitle`="95% Confidence Interval", 
-                        `type`="number", 
+                        `name`="upper",
+                        `title`="Upper",
+                        `superTitle`="95% Confidence Interval",
+                        `type`="number",
                         `format`="pc")),
                 clearWith=list(
                     "explanatory",
@@ -1430,7 +1552,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awd",
                     "awod",
                     "uselandmark",
-                    "landmark")))
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="survivalTablesHeading3",
@@ -1457,34 +1580,34 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="interval", 
-                        `title`="Time Interval", 
+                        `name`="interval",
+                        `title`="Time Interval",
                         `type`="text"),
                     list(
-                        `name`="events", 
-                        `title`="Events", 
+                        `name`="events",
+                        `title`="Events",
                         `type`="integer"),
                     list(
-                        `name`="person_time", 
-                        `title`="Person-Time", 
-                        `type`="number", 
+                        `name`="person_time",
+                        `title`="Person-Time",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="rate", 
-                        `title`="Incidence Rate", 
-                        `type`="number", 
+                        `name`="rate",
+                        `title`="Incidence Rate",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="rate_ci_lower", 
-                        `title`="Lower", 
-                        `superTitle`="95% CI", 
-                        `type`="number", 
+                        `name`="rate_ci_lower",
+                        `title`="Lower",
+                        `superTitle`="95% CI",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="rate_ci_upper", 
-                        `title`="Upper", 
-                        `superTitle`="95% CI", 
-                        `type`="number", 
+                        `name`="rate_ci_upper",
+                        `title`="Upper",
+                        `superTitle`="95% CI",
+                        `type`="number",
                         `format`="zto")),
                 clearWith=list(
                     "outcome",
@@ -1504,7 +1627,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "awd",
                     "awod",
                     "uselandmark",
-                    "landmark")))
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="personTimeSummary",
@@ -1543,35 +1667,35 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="group", 
-                        `title`="Group", 
+                        `name`="group",
+                        `title`="Group",
                         `type`="text"),
                     list(
-                        `name`="rmst", 
-                        `title`="RMST", 
-                        `type`="number", 
+                        `name`="rmst",
+                        `title`="RMST",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="se", 
-                        `title`="SE", 
-                        `type`="number", 
+                        `name`="se",
+                        `title`="SE",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="ci_lower", 
-                        `title`="Lower", 
-                        `superTitle`="95% CI", 
-                        `type`="number", 
+                        `name`="ci_lower",
+                        `title`="Lower",
+                        `superTitle`="95% CI",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="ci_upper", 
-                        `title`="Upper", 
-                        `superTitle`="95% CI", 
-                        `type`="number", 
+                        `name`="ci_upper",
+                        `title`="Upper",
+                        `superTitle`="95% CI",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="tau", 
-                        `title`="Time Horizon (\u03C4)", 
-                        `type`="number", 
+                        `name`="tau",
+                        `title`="Time Horizon (\u03C4)",
+                        `type`="number",
                         `format`="zto")),
                 clearWith=list(
                     "rmst_analysis",
@@ -1590,7 +1714,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "uselandmark",
-                    "landmark")))
+                    "landmark",
+                    "timetypeoutput")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="rmstSummary",
@@ -1629,34 +1754,47 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="observation", 
-                        `title`="Observation", 
+                        `name`="observation",
+                        `title`="Observation",
                         `type`="integer"),
                     list(
-                        `name`="martingale", 
-                        `title`="Martingale", 
-                        `type`="number", 
+                        `name`="martingale",
+                        `title`="Martingale",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="deviance", 
-                        `title`="Deviance", 
-                        `type`="number", 
+                        `name`="deviance",
+                        `title`="Deviance",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="score", 
-                        `title`="Score", 
-                        `type`="number", 
+                        `name`="score",
+                        `title`="Score",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="schoenfeld", 
-                        `title`="Schoenfeld", 
-                        `type`="number", 
+                        `name`="schoenfeld",
+                        `title`="Schoenfeld",
+                        `type`="number",
                         `format`="zto")),
                 clearWith=list(
                     "residual_diagnostics",
                     "explanatory",
                     "outcome",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="export_survival_data",
@@ -1667,7 +1805,20 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "export_survival_data",
                     "explanatory",
                     "outcome",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="survivalExportSummary",
@@ -1677,7 +1828,20 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "export_survival_data",
                     "explanatory",
                     "outcome",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="pairwiseComparisonHeading",
@@ -1690,21 +1854,23 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="rowname", 
-                        `title`="Levels", 
+                        `name`="rowname",
+                        `title`="Levels",
                         `type`="text"),
                     list(
-                        `name`="name", 
-                        `title`="Levels", 
+                        `name`="name",
+                        `title`="Levels",
                         `type`="text"),
                     list(
-                        `name`="value", 
-                        `title`="p-value", 
-                        `type`="number", 
+                        `name`="value",
+                        `title`="p-value",
+                        `type`="number",
                         `format`="zto,pvalue")),
                 visible="(pw)",
                 clearWith=list(
                     "pw",
+                    "padjustmethod",
+                    "survivalTestType",
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
@@ -1712,7 +1878,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent"),
+                    "multievent",
+                    "timetypeoutput",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark"),
                 refs=list(
                     "padjust")))
             self$add(jmvcore::Preformatted$new(
@@ -1722,48 +1896,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(pw && showSummaries)",
                 clearWith=list(
                     "pw",
-                    "explanatory",
-                    "outcome",
-                    "outcomeLevel",
-                    "elapsedtime",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="weightedLogRankTable",
-                title="`Weighted Log-Rank Tests - ${explanatory}`",
-                rows=0,
-                columns=list(
-                    list(
-                        `name`="test", 
-                        `title`="Test", 
-                        `type`="text"),
-                    list(
-                        `name`="rho", 
-                        `title`="rho", 
-                        `type`="number"),
-                    list(
-                        `name`="chisq", 
-                        `title`="Chi-Square", 
-                        `type`="number"),
-                    list(
-                        `name`="df", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="pvalue", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="weighting", 
-                        `title`="Weighting", 
-                        `type`="text")),
-                visible="(weightedLogRank)",
-                clearWith=list(
-                    "weightedLogRank",
+                    "padjustmethod",
                     "survivalTestType",
                     "explanatory",
                     "outcome",
@@ -1772,7 +1905,65 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent"),
+                    "multievent",
+                    "timetypeoutput",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="weightedLogRankTable",
+                title="`Weighted Log-Rank Tests - ${explanatory}`",
+                rows=3,
+                columns=list(
+                    list(
+                        `name`="test",
+                        `title`="Test",
+                        `type`="text"),
+                    list(
+                        `name`="rho",
+                        `title`="rho",
+                        `type`="number"),
+                    list(
+                        `name`="chisq",
+                        `title`="Chi-Square",
+                        `type`="number"),
+                    list(
+                        `name`="df",
+                        `title`="df",
+                        `type`="integer"),
+                    list(
+                        `name`="pvalue",
+                        `title`="p-value",
+                        `type`="number",
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="weighting",
+                        `title`="Weighting",
+                        `type`="text")),
+                visible="(weightedLogRank)",
+                clearWith=list(
+                    "weightedLogRank",
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
+                    "multievent",
+                    "timetypeoutput",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark"),
                 refs=list(
                     "survival")))
             self$add(jmvcore::Html$new(
@@ -1782,7 +1973,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(weightedLogRank && showSummaries)",
                 clearWith=list(
                     "weightedLogRank",
-                    "survivalTestType",
                     "explanatory",
                     "outcome")))
             self$add(jmvcore::Image$new(
@@ -1812,7 +2002,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "tint",
                     "multievent",
                     "pplot",
-                    "medianline")))
+                    "medianline",
+                    "timetypeoutput",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -1838,7 +2036,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "timetypeoutput",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
@@ -1864,7 +2070,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "timetypeoutput",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot6",
@@ -1887,7 +2101,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent"),
+                    "multievent",
+                    "timetypeoutput",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark"),
                 refs=list(
                     "KMunicate",
                     "KMunicate2")))
@@ -1929,7 +2151,15 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "timetypeoutput",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="residualsPlot",
@@ -1943,7 +2173,20 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "residual_diagnostics",
                     "explanatory",
                     "outcome",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculatedtime",
@@ -1955,6 +2198,7 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "tint",
                     "dxdate",
                     "fudate",
+                    "timetypeoutput",
                     "elapsedtime",
                     "calculatedtime")))
             self$add(jmvcore::Output$new(
@@ -1968,7 +2212,12 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "analysistype",
                     "multievent",
                     "explanatory",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "outcomeredefined")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="calibrationTable",
@@ -1977,28 +2226,28 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="metric", 
-                        `title`="Metric", 
+                        `name`="metric",
+                        `title`="Metric",
                         `type`="text"),
                     list(
-                        `name`="value", 
-                        `title`="Value", 
+                        `name`="value",
+                        `title`="Value",
                         `type`="number"),
                     list(
-                        `name`="ci_lower", 
-                        `title`="95% CI Lower", 
+                        `name`="ci_lower",
+                        `title`="95% CI Lower",
                         `type`="number"),
                     list(
-                        `name`="ci_upper", 
-                        `title`="95% CI Upper", 
+                        `name`="ci_upper",
+                        `title`="95% CI Upper",
                         `type`="number"),
                     list(
-                        `name`="ideal", 
-                        `title`="Ideal", 
+                        `name`="ideal",
+                        `title`="Ideal",
                         `type`="text"),
                     list(
-                        `name`="interpretation", 
-                        `title`="Interpretation", 
+                        `name`="interpretation",
+                        `title`="Interpretation",
                         `type`="text")),
                 clearWith=list(
                     "calibration_curves",
@@ -2007,7 +2256,20 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "elapsedtime",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "rcs_variable")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="calibrationGroupTable",
@@ -2016,32 +2278,32 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="group", 
-                        `title`="Risk Group", 
+                        `name`="group",
+                        `title`="Risk Group",
                         `type`="text"),
                     list(
-                        `name`="n", 
-                        `title`="N", 
+                        `name`="n",
+                        `title`="N",
                         `type`="integer"),
                     list(
-                        `name`="events", 
-                        `title`="Events", 
+                        `name`="events",
+                        `title`="Events",
                         `type`="integer"),
                     list(
-                        `name`="predicted", 
-                        `title`="Predicted Survival", 
+                        `name`="predicted",
+                        `title`="Predicted Survival",
                         `type`="number"),
                     list(
-                        `name`="observed", 
-                        `title`="Observed (KM)", 
+                        `name`="observed",
+                        `title`="Observed (KM)",
                         `type`="number"),
                     list(
-                        `name`="observed_lower", 
-                        `title`="KM Lower CI", 
+                        `name`="observed_lower",
+                        `title`="KM Lower CI",
                         `type`="number"),
                     list(
-                        `name`="observed_upper", 
-                        `title`="KM Upper CI", 
+                        `name`="observed_upper",
+                        `title`="KM Upper CI",
                         `type`="number")),
                 clearWith=list(
                     "calibration_curves",
@@ -2050,7 +2312,20 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "elapsedtime",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "rcs_variable")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="calibrationPlot",
@@ -2067,7 +2342,20 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "elapsedtime",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "rcs_variable")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="calibrationInterpretation",
@@ -2078,40 +2366,40 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="rcsTestTable",
                 title="Non-Linearity Test (Likelihood Ratio)",
                 visible="(rcs_analysis)",
-                rows=0,
+                rows=2,
                 columns=list(
                     list(
-                        `name`="model", 
-                        `title`="Model", 
+                        `name`="model",
+                        `title`="Model",
                         `type`="text"),
                     list(
-                        `name`="df", 
-                        `title`="df", 
+                        `name`="df",
+                        `title`="df",
                         `type`="integer"),
                     list(
-                        `name`="loglik", 
-                        `title`="Log-Likelihood", 
+                        `name`="loglik",
+                        `title`="Log-Likelihood",
                         `type`="number"),
                     list(
-                        `name`="aic", 
-                        `title`="AIC", 
+                        `name`="aic",
+                        `title`="AIC",
                         `type`="number"),
                     list(
-                        `name`="lr_chisq", 
-                        `title`="LR Chi-sq", 
+                        `name`="lr_chisq",
+                        `title`="LR Chi-sq",
                         `type`="number"),
                     list(
-                        `name`="lr_df", 
-                        `title`="LR df", 
+                        `name`="lr_df",
+                        `title`="LR df",
                         `type`="integer"),
                     list(
-                        `name`="p_value", 
-                        `title`="p", 
-                        `type`="number", 
+                        `name`="p_value",
+                        `title`="p",
+                        `type`="number",
                         `format`="zto,pvalue"),
                     list(
-                        `name`="conclusion", 
-                        `title`="Conclusion", 
+                        `name`="conclusion",
+                        `title`="Conclusion",
                         `type`="text")),
                 clearWith=list(
                     "rcs_analysis",
@@ -2120,7 +2408,19 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "elapsedtime",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="rcsPlot",
@@ -2137,7 +2437,19 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "elapsedtime",
-                    "outcomeLevel")))
+                    "outcomeLevel",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="rcsInterpretation",
@@ -2148,38 +2460,51 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="bootstrapValidationTable",
                 title="Bootstrap Internal Validation",
                 visible="(bootstrapValidation)",
-                rows=0,
+                rows=3,
                 columns=list(
                     list(
-                        `name`="metric", 
-                        `title`="Metric", 
+                        `name`="metric",
+                        `title`="Metric",
                         `type`="text"),
                     list(
-                        `name`="apparent", 
-                        `title`="Apparent", 
-                        `type`="number", 
+                        `name`="apparent",
+                        `title`="Apparent",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="optimism", 
-                        `title`="Optimism", 
-                        `type`="number", 
+                        `name`="optimism",
+                        `title`="Optimism",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="corrected", 
-                        `title`="Corrected", 
-                        `type`="number", 
+                        `name`="corrected",
+                        `title`="Corrected",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="n_bootstrap", 
-                        `title`="n Bootstrap", 
+                        `name`="n_bootstrap",
+                        `title`="n Bootstrap",
                         `type`="integer")),
                 clearWith=list(
                     "bootstrapValidation",
                     "bootstrapValN",
+                    "seed",
                     "explanatory",
                     "outcome",
                     "outcomeLevel",
-                    "elapsedtime")))
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="bootstrapValidationExplanation",
@@ -2188,8 +2513,23 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "bootstrapValidation",
                     "bootstrapValN",
+                    "seed",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="parametricModelComparison",
@@ -2198,34 +2538,49 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="distribution", 
-                        `title`="Distribution", 
+                        `name`="distribution",
+                        `title`="Distribution",
                         `type`="text"),
                     list(
-                        `name`="aic", 
-                        `title`="AIC", 
-                        `type`="number", 
+                        `name`="aic",
+                        `title`="AIC",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="bic", 
-                        `title`="BIC", 
-                        `type`="number", 
+                        `name`="bic",
+                        `title`="BIC",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="loglik", 
-                        `title`="Log-Likelihood", 
-                        `type`="number", 
+                        `name`="loglik",
+                        `title`="Log-Likelihood",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="df", 
-                        `title`="df", 
+                        `name`="df",
+                        `title`="df",
                         `type`="integer")),
                 clearWith=list(
                     "use_parametric",
                     "compare_distributions",
                     "parametric_distribution",
+                    "parametric_covariates",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="parametricModelSummary",
@@ -2234,42 +2589,58 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="parameter", 
-                        `title`="Parameter", 
+                        `name`="parameter",
+                        `title`="Parameter",
                         `type`="text"),
                     list(
-                        `name`="estimate", 
-                        `title`="Estimate", 
-                        `type`="number", 
+                        `name`="estimate",
+                        `title`="Estimate",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="se", 
-                        `title`="SE", 
-                        `type`="number", 
+                        `name`="se",
+                        `title`="SE",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="ci_lower", 
-                        `title`="Lower", 
-                        `superTitle`="95% CI", 
-                        `type`="number", 
+                        `name`="ci_lower",
+                        `title`="Lower",
+                        `superTitle`="95% CI",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="ci_upper", 
-                        `title`="Upper", 
-                        `superTitle`="95% CI", 
-                        `type`="number", 
+                        `name`="ci_upper",
+                        `title`="Upper",
+                        `superTitle`="95% CI",
+                        `type`="number",
                         `format`="zto"),
                     list(
-                        `name`="pvalue", 
-                        `title`="p-value", 
-                        `type`="number", 
+                        `name`="pvalue",
+                        `title`="p-value",
+                        `type`="number",
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "use_parametric",
                     "parametric_distribution",
                     "parametric_covariates",
+                    "spline_knots",
+                    "spline_scale",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="parametricSurvivalPlot",
@@ -2283,8 +2654,25 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "use_parametric",
                     "parametric_survival_plots",
                     "parametric_distribution",
+                    "parametric_covariates",
+                    "spline_knots",
+                    "spline_scale",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypeoutput",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="parametricModelsExplanation",
@@ -2340,10 +2728,10 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Survival Analysis
 #'
-#' Performs univariate time-to-event analysis comparing groups using 
-#' Kaplan-Meier estimates, log-rank tests, and Cox proportional hazards 
-#' regression. Optional outputs include restricted mean survival time and 
-#' crude person-time incidence rates. These methods describe associations and 
+#' Performs univariate time-to-event analysis comparing groups using
+#' Kaplan-Meier estimates, log-rank tests, and Cox proportional hazards
+#' regression. Optional outputs include restricted mean survival time and
+#' crude person-time incidence rates. These methods describe associations and
 #' do not establish causality.
 #' @param data The data as a data frame.
 #' @param elapsedtime The time elapsed from the start of the study to the
@@ -2377,32 +2765,45 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   disease.
 #' @param awod The level of the outcome variable that indicates alive without
 #'   disease.
-#' @param analysistype .
-#' @param cutp .
+#' @param analysistype Defines how outcome levels are combined into event and
+#'   censoring categories. Competing-risk mode reports cumulative incidence and
+#'   suppresses methods that assume a single event type.
+#' @param cutp Comma-separated follow-up times at which survival probabilities
+#'   are reported.
 #' @param timetypedata select the time type in data
 #' @param timetypeoutput select the time type in output
-#' @param uselandmark .
-#' @param landmark .
-#' @param pw .
-#' @param padjustmethod .
-#' @param weightedLogRank .
-#' @param survivalTestType .
-#' @param ph_cox .
-#' @param sc .
-#' @param kmunicate .
-#' @param ce .
-#' @param ch .
-#' @param endplot .
-#' @param ybegin_plot .
-#' @param yend_plot .
-#' @param byplot .
-#' @param multievent .
-#' @param ci95 .
-#' @param risktable .
-#' @param censored .
-#' @param pplot .
-#' @param medianline If true, displays a line indicating the median survival
-#'   time on the survival plot.
+#' @param uselandmark Restricts the analysis to participants still at risk at
+#'   the landmark time and resets their follow-up clock to zero at that point.
+#' @param landmark Landmark time in the selected survival-time units.
+#' @param pw Performs pairwise survival-distribution comparisons between
+#'   explanatory-variable levels.
+#' @param padjustmethod Multiple-comparison adjustment applied to pairwise
+#'   survival-test p-values.
+#' @param weightedLogRank Reports standard log-rank and Fleming-Harrington
+#'   weighted tests together.
+#' @param survivalTestType Selects the log-rank or Fleming-Harrington
+#'   weighting used for pairwise comparisons.
+#' @param ph_cox Tests the Cox proportional-hazards assumption using
+#'   Schoenfeld residuals.
+#' @param sc Displays the Kaplan-Meier survival curve.
+#' @param kmunicate Displays a KMunicate-style Kaplan-Meier plot with
+#'   communication-focused formatting.
+#' @param ce Displays cumulative event probability over follow-up.
+#' @param ch Displays cumulative hazard over follow-up.
+#' @param endplot Upper limit of the time axis for survival plots.
+#' @param ybegin_plot Lower limit of the probability axis for survival plots.
+#' @param yend_plot Upper limit of the probability axis for survival plots.
+#' @param byplot Spacing between labeled time-axis ticks.
+#' @param multievent Enables explicit assignment of multiple outcome levels to
+#'   event and censoring categories.
+#' @param ci95 Displays 95 percent confidence intervals on supported survival
+#'   plots.
+#' @param risktable Displays numbers at risk beneath supported survival plots.
+#' @param censored Displays censoring marks on supported survival plots.
+#' @param pplot Displays the survival-distribution test p-value on supported
+#'   plots.
+#' @param medianline Selects horizontal, vertical, or both median-survival
+#'   reference lines on the survival plot.
 #' @param person_time Enable this option to calculate and display person-time
 #'   metrics, including total follow-up time and incidence rates. These metrics
 #'   help quantify the rate of events per unit of time in your study population.
@@ -2521,8 +2922,10 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   flexible). Knots are placed at Harrell-recommended percentiles. More knots
 #'   allow detection of complex non-linear patterns but may overfit with small
 #'   samples.
-#' @param bootstrapValidation .
-#' @param bootstrapValN .
+#' @param bootstrapValidation Performs bootstrap internal validation of
+#'   discrimination and calibration slope.
+#' @param bootstrapValN Number of bootstrap resamples used for internal
+#'   validation.
 #' @param seed Random seed for the reproducible bootstrap internal validation.
 #'   Change this value to obtain a different bootstrap draw; the default (42)
 #'   reproduces the previous fixed behaviour.
@@ -2531,7 +2934,6 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$eventRecodeInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$errors} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$strongWarnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr

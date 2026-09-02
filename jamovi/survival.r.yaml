@@ -10,7 +10,7 @@ items:
     - name:  eventRecodeInfo
       title: 'Outcome Recode'
       type:  Html
-      visible: true
+      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
       clearWith:
           - outcome
           - outcomeLevel
@@ -24,6 +24,7 @@ items:
     - name: subtitle
       title: '`Survival Analysis - ${explanatory}`'
       type:  Preformatted
+      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
 
 
 
@@ -39,11 +40,6 @@ items:
           - dxdate
           - tint
           - multievent
-
-    - name:  errors
-      title: Critical Errors
-      type:  Html
-      visible: false
 
     - name:  strongWarnings
       title: Strong Warnings
@@ -73,12 +69,13 @@ items:
     - name:  medianSurvivalHeading
       title: Median Survival Analysis
       type:  Preformatted
+      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
 
     - name:  medianSummary
       # title: Median Survival Summary and Table
       title: '`Median Survival Summary and Table - ${explanatory}`'
       type:  Preformatted
-      visible: (showSummaries)
+      visible: (showSummaries && length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
       clearWith:
           - explanatory
           - outcome
@@ -87,12 +84,14 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypeoutput
           - multievent
 
     - name:  medianTable
       # title: Median Survival Table
       title: '`Median Survival Table: Levels for ${explanatory}`'
       type:  Table
+      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
       rows: 0
       columns:
         - name: factor
@@ -136,9 +135,8 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypeoutput
           - multievent
-          # Rows are appended by Table$addRow(), which does not de-duplicate keys;
-          # anything that changes the event coding or the risk set must clear them.
           - analysistype
           - dod
           - dooc
@@ -146,6 +144,8 @@ items:
           - awod
           - uselandmark
           - landmark
+          # Anything that changes event coding, the time scale, or the risk set
+          # must invalidate these rows.
 
     # Median Survival Explanation
     - name:  medianSurvivalHeading3
@@ -171,6 +171,7 @@ items:
     - name:  coxRegressionHeading
       title: Cox Regression Analysis
       type:  Preformatted
+      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
       
 
 
@@ -178,16 +179,24 @@ items:
       # title: Cox Regression Summary and Table
       title: '`Cox Regression Summary and Table - ${explanatory}`'
       type:  Preformatted
-      visible: (showSummaries)
+      visible: (showSummaries && length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
       clearWith:
           - explanatory
           - outcome
           - outcomeLevel
           - elapsedtime
-          - fudate
-          - dxdate
           - tint
+          - dxdate
+          - fudate
+          - timetypeoutput
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
 
 
@@ -195,6 +204,7 @@ items:
       # title: Cox Table
       title: '`Cox Table- ${explanatory}`'
       type:  Table
+      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
       rows: 0
       columns:
         - name: Explanatory
@@ -217,16 +227,25 @@ items:
           - outcome
           - outcomeLevel
           - elapsedtime
-          - fudate
-          - dxdate
           - tint
+          - dxdate
+          - fudate
+          - timetypeoutput
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
 
 
     - name:  tCoxtext2
       title: ''
       type:  Html
+      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
       refs: finalfit
       clearWith:
           - explanatory
@@ -237,6 +256,14 @@ items:
           - dxdate
           - tint
           - multievent
+          - timetypeoutput
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
 
 
@@ -293,6 +320,18 @@ items:
           - outcome
           - outcomeLevel
           - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     - name: ageInteractionTable
       title: 'Age x Group Interaction Test'
@@ -329,6 +368,20 @@ items:
           - age_variable
           - explanatory
           - outcome
+          - outcomeLevel
+          - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     - name: ageAdjustedInterpretation
       title: 'Age Adjustment Interpretation'
@@ -382,6 +435,19 @@ items:
           - explanatory
           - outcome
           - elapsedtime
+          - outcomeLevel
+          - tint
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     - name: ageTimeScaleInterpretation
       title: 'Age Time Scale Interpretation'
@@ -432,6 +498,20 @@ items:
           - age_group_cutpoints
           - explanatory
           - outcome
+          - outcomeLevel
+          - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     - name: ageStandardizationInterpretation
       title: 'Age Standardization Interpretation'
@@ -461,6 +541,18 @@ items:
           - ci95
           - risktable
           - outcomeLevel
+          - tint
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     # Adjusted Survival Curves
     - name: adjustedCurvesPlot
@@ -480,6 +572,18 @@ items:
           - elapsedtime
           - ci95
           - outcomeLevel
+          - tint
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     # REMARK Reporting Checklist
     - name: remarkChecklist
@@ -507,7 +611,15 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypeoutput
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     - name: phInterpretation
       title: 'Proportional Hazards Assessment & Recommendations'
@@ -521,6 +633,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypeoutput
           - multievent
 
     - name: plot8
@@ -543,18 +656,27 @@ items:
           - dxdate
           - tint
           - multievent
+          - timetypeoutput
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
 
     - name:  survivalTablesHeading
       title: Survival Probability Tables
       type:  Preformatted
+      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
 
 
     - name:  survTableSummary
       # title: '1, 3, 5-yr Survival Summary and Table'
       title: '`1, 3, 5-yr Survival Summary and Table  - ${explanatory}`'
       type:  Preformatted
-      visible: (showSummaries)
+      visible: (showSummaries && length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
       clearWith:
           - explanatory
           - outcome
@@ -577,6 +699,7 @@ items:
       title: '`1, 3, 5 year Survival - ${explanatory}`'
       # title: '1, 3, 5 year Survival'
       type:  Table
+      visible: (length(outcome) > 0 && length(explanatory) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
       rows: 0
       columns:
         - name: strata
@@ -627,6 +750,7 @@ items:
           - awod
           - uselandmark
           - landmark
+          - timetypeoutput
 
 
 
@@ -708,6 +832,7 @@ items:
         - awod
         - uselandmark
         - landmark
+        - timetypeoutput
 
     - name: personTimeSummary
       title: 'Person-Time Summary'
@@ -797,6 +922,7 @@ items:
         - dxdate
         - uselandmark
         - landmark
+        - timetypeoutput
 
     - name: rmstSummary
       title: 'RMST Interpretation'
@@ -864,6 +990,19 @@ items:
         - explanatory
         - outcome
         - outcomeLevel
+        - elapsedtime
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
     - name: export_survival_data
       title: 'Export Survival Data'
@@ -875,6 +1014,19 @@ items:
         - explanatory
         - outcome
         - outcomeLevel
+        - elapsedtime
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
     - name: survivalExportSummary
       title: 'Export Summary'
@@ -885,6 +1037,19 @@ items:
         - explanatory
         - outcome
         - outcomeLevel
+        - elapsedtime
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
 
 
@@ -912,6 +1077,8 @@ items:
       visible: (pw)
       clearWith:
           - pw
+          - padjustmethod
+          - survivalTestType
           - explanatory
           - outcome
           - outcomeLevel
@@ -920,6 +1087,14 @@ items:
           - dxdate
           - tint
           - multievent
+          - timetypeoutput
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
       refs:
           - padjust
 
@@ -932,6 +1107,8 @@ items:
       visible: (pw && showSummaries)
       clearWith:
           - pw
+          - padjustmethod
+          - survivalTestType
           - explanatory
           - outcome
           - outcomeLevel
@@ -940,11 +1117,19 @@ items:
           - dxdate
           - tint
           - multievent
+          - timetypeoutput
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     - name: weightedLogRankTable
       title: '`Weighted Log-Rank Tests - ${explanatory}`'
       type: Table
-      rows: 0
+      rows: 3
       columns:
         - name: test
           title: "Test"
@@ -968,7 +1153,6 @@ items:
       visible: (weightedLogRank)
       clearWith:
           - weightedLogRank
-          - survivalTestType
           - explanatory
           - outcome
           - outcomeLevel
@@ -977,6 +1161,14 @@ items:
           - dxdate
           - tint
           - multievent
+          - timetypeoutput
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
       refs:
           - survival
 
@@ -986,7 +1178,6 @@ items:
       visible: (weightedLogRank && showSummaries)
       clearWith:
           - weightedLogRank
-          - survivalTestType
           - explanatory
           - outcome
 
@@ -1021,6 +1212,14 @@ items:
           - multievent
           - pplot
           - medianline
+          - timetypeoutput
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
 
 
@@ -1049,6 +1248,14 @@ items:
           - dxdate
           - tint
           - multievent
+          - timetypeoutput
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
 
 
@@ -1077,6 +1284,14 @@ items:
           - dxdate
           - tint
           - multievent
+          - timetypeoutput
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
 
 
@@ -1102,6 +1317,14 @@ items:
           - dxdate
           - tint
           - multievent
+          - timetypeoutput
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
       refs:
           - KMunicate
           - KMunicate2
@@ -1153,6 +1376,14 @@ items:
           - dxdate
           - tint
           - multievent
+          - timetypeoutput
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
     - name: residualsPlot
       title: '`Residuals Diagnostic Plot - ${explanatory}`'
@@ -1167,6 +1398,19 @@ items:
           - explanatory
           - outcome
           - outcomeLevel
+          - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - timetypeoutput
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
 
 
 
@@ -1180,6 +1424,7 @@ items:
           - tint
           - dxdate
           - fudate
+          - timetypeoutput
           - elapsedtime
           - calculatedtime
 
@@ -1196,6 +1441,11 @@ items:
           - multievent
           - explanatory
           - outcomeLevel
+          - dod
+          - dooc
+          - awd
+          - awod
+          - outcomeredefined
 
     # Calibration Curves Results
     - name: calibrationTable
@@ -1230,6 +1480,19 @@ items:
         - outcome
         - elapsedtime
         - outcomeLevel
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - rcs_variable
 
     - name: calibrationGroupTable
       title: 'Calibration by Risk Group'
@@ -1266,6 +1529,19 @@ items:
         - outcome
         - elapsedtime
         - outcomeLevel
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - rcs_variable
 
     - name: calibrationPlot
       title: 'Calibration Plot'
@@ -1283,6 +1559,19 @@ items:
         - outcome
         - elapsedtime
         - outcomeLevel
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - rcs_variable
 
     - name: calibrationInterpretation
       title: 'Calibration Assessment Interpretation'
@@ -1294,7 +1583,7 @@ items:
       title: 'Non-Linearity Test (Likelihood Ratio)'
       type: Table
       visible: (rcs_analysis)
-      rows: 0
+      rows: 2
       columns:
         - name: model
           title: 'Model'
@@ -1329,6 +1618,18 @@ items:
         - outcome
         - elapsedtime
         - outcomeLevel
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
     - name: rcsPlot
       title: 'Hazard Ratio Curve (Spline Effect)'
@@ -1346,6 +1647,18 @@ items:
         - outcome
         - elapsedtime
         - outcomeLevel
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
     - name: rcsInterpretation
       title: 'Non-Linearity Assessment Interpretation'
@@ -1357,7 +1670,7 @@ items:
       title: 'Bootstrap Internal Validation'
       type: Table
       visible: (bootstrapValidation)
-      rows: 0
+      rows: 3
       columns:
         - name: metric
           title: "Metric"
@@ -1380,10 +1693,23 @@ items:
       clearWith:
         - bootstrapValidation
         - bootstrapValN
+        - seed
         - explanatory
         - outcome
         - outcomeLevel
         - elapsedtime
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
     - name: bootstrapValidationExplanation
       title: 'Bootstrap Validation Interpretation'
@@ -1392,8 +1718,23 @@ items:
       clearWith:
         - bootstrapValidation
         - bootstrapValN
+        - seed
         - explanatory
         - outcome
+        - outcomeLevel
+        - elapsedtime
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
     # Parametric Survival Models Results Section
     # COMMENTED OUT: Parametric options are disabled in .a.yaml
@@ -1427,8 +1768,23 @@ items:
         - use_parametric
         - compare_distributions
         - parametric_distribution
+        - parametric_covariates
         - explanatory
         - outcome
+        - outcomeLevel
+        - elapsedtime
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
     - name: parametricModelSummary
       title: 'Parametric Model Results'
@@ -1465,8 +1821,24 @@ items:
         - use_parametric
         - parametric_distribution
         - parametric_covariates
+        - spline_knots
+        - spline_scale
         - explanatory
         - outcome
+        - outcomeLevel
+        - elapsedtime
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
 
     - name: parametricSurvivalPlot
@@ -1481,8 +1853,25 @@ items:
         - use_parametric
         - parametric_survival_plots
         - parametric_distribution
+        - parametric_covariates
+        - spline_knots
+        - spline_scale
         - explanatory
         - outcome
+        - outcomeLevel
+        - elapsedtime
+        - tint
+        - dxdate
+        - fudate
+        - timetypeoutput
+        - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
 
 
 

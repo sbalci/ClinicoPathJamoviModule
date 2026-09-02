@@ -173,11 +173,20 @@ options:
         - title: Competing Risk
           name: compete
       default: overall
+      description:
+          R: >
+            Defines how outcome levels are combined into event and censoring categories.
+            Competing-risk mode reports cumulative incidence and suppresses methods that
+            assume a single event type.
 
 
     - name: outcomeredefined
       title: Add Redefined Outcome to Data
       type: Output
+      description:
+          R: >
+            Adds the event indicator created from the selected outcome levels and
+            analysis type to the dataset.
 
 
 
@@ -186,6 +195,9 @@ options:
       title: Cutpoints
       type: String
       default: '12, 36, 60'
+      description:
+          R: >
+            Comma-separated follow-up times at which survival probabilities are reported.
 
 
     - name: timetypedata
@@ -232,16 +244,26 @@ options:
       title: Use landmark time
       type: Bool
       default: false
+      description:
+          R: >
+            Restricts the analysis to participants still at risk at the landmark time
+            and resets their follow-up clock to zero at that point.
 
     - name: landmark
       title: Landmark Time
       type: Integer
       default: 3
+      description:
+          R: >
+            Landmark time in the selected survival-time units.
 
     - name: pw
       title: Pairwise comparisons
       type: Bool
       default: false
+      description:
+          R: >
+            Performs pairwise survival-distribution comparisons between explanatory-variable levels.
 
 
 
@@ -266,11 +288,17 @@ options:
         - title: none
           name: none
       default: holm
+      description:
+          R: >
+            Multiple-comparison adjustment applied to pairwise survival-test p-values.
 
     - name: weightedLogRank
       title: Weighted log-rank tests
       type: Bool
       default: false
+      description:
+          R: >
+            Reports standard log-rank and Fleming-Harrington weighted tests together.
 
     - name: survivalTestType
       title: 'Survival Test Type'
@@ -288,85 +316,130 @@ options:
         - title: 'Peto-Peto (Fleming-Harrington rho=1)'
           name: fh_rho1
       default: logrank
+      description:
+          R: >
+            Selects the log-rank or Fleming-Harrington weighting used for pairwise comparisons.
 
 
     - name: ph_cox
       title: Proportional hazards assumption
       type: Bool
       default: false
+      description:
+          R: >
+            Tests the Cox proportional-hazards assumption using Schoenfeld residuals.
 
     - name: sc
       title: Survival plot
       type: Bool
       default: false
+      description:
+          R: >
+            Displays the Kaplan-Meier survival curve.
 
     - name: kmunicate
       title: KMunicate-style plot
       type: Bool
       default: false
+      description:
+          R: >
+            Displays a KMunicate-style Kaplan-Meier plot with communication-focused formatting.
 
 
     - name: ce
       title: Cumulative events
       type: Bool
       default: false
+      description:
+          R: >
+            Displays cumulative event probability over follow-up.
 
 
     - name: ch
       title: Cumulative hazard
       type: Bool
       default: false
+      description:
+          R: >
+            Displays cumulative hazard over follow-up.
 
 
     - name: endplot
       title: Plot End Time
       type: Integer
       default: 60
+      description:
+          R: >
+            Upper limit of the time axis for survival plots.
 
     - name: ybegin_plot
-      title: Start y-axis
+      title: Start Y-axis
       type: Number
       default: 0.00
+      description:
+          R: >
+            Lower limit of the probability axis for survival plots.
 
     - name: yend_plot
-      title: End y-axis
+      title: End Y-axis
       type: Number
       default: 1.00
+      description:
+          R: >
+            Upper limit of the probability axis for survival plots.
 
 
     - name: byplot
       title: Time Interval
       type: Integer
       default: 12
+      description:
+          R: >
+            Spacing between labeled time-axis ticks.
 
 
     - name: multievent
       title: Multiple event levels
       type: Bool
       default: false
+      description:
+          R: >
+            Enables explicit assignment of multiple outcome levels to event and censoring categories.
 
     - name: ci95
       title: '95 percent CI'
       type: Bool
       default: false
+      description:
+          R: >
+            Displays 95 percent confidence intervals on supported survival plots.
 
     - name: risktable
-      title: Risktable
+      title: Risk table
       type: Bool
       default: false
+      description:
+          R: >
+            Displays numbers at risk beneath supported survival plots.
 
     - name: censored
-      title: Censored
+      title: Censor marks
       type: Bool
       default: false
+      description:
+          R: >
+            Displays censoring marks on supported survival plots.
 
     - name: pplot
       title: p-value
       type: Bool
       default: false
+      description:
+          R: >
+            Displays the survival-distribution test p-value on supported plots.
 
     - name: medianline
-      title: medianline
+      title: Median line
       type: List
       options:
         - title: none
@@ -380,7 +453,7 @@ options:
       default: none
       description:
         R: >
-          If true, displays a line indicating the median survival time on the survival plot.
+          Selects horizontal, vertical, or both median-survival reference lines on the survival plot.
 
 
 
@@ -761,6 +834,9 @@ options:
       title: Bootstrap internal validation
       type: Bool
       default: false
+      description:
+          R: >
+            Performs bootstrap internal validation of discrimination and calibration slope.
 
     - name: bootstrapValN
       title: "Number of Bootstrap Resamples"
@@ -768,6 +844,9 @@ options:
       default: 200
       min: 50
       max: 1000
+      description:
+          R: >
+            Number of bootstrap resamples used for internal validation.
 
     - name: seed
       title: "Random Seed"

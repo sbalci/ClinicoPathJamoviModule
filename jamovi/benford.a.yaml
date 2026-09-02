@@ -3,24 +3,37 @@ name:  benford
 title: Benford Analysis
 menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Data Quality
-version: '1.0.7'
+# Analysis version, NOT the package version (DESCRIPTION is at 1.0.8.05).
+# Bumped from 1.0.7 because the user-visible output changed materially: every
+# translated result string moved to jmvcore::format placeholders, the Mantissa
+# Arc Test row gained a "not used by the Assessment" qualifier, the bin listing
+# gained the analysis-row-numbering caveat, and the duplicated small-sample
+# warning was removed. The umbrella copy and the shipped ClinicoPathDescriptives
+# copy must not both claim 1.0.7 while behaving differently.
+version: '1.0.8'
 jas: '1.2'
 
 description:
     main: >
-        Tests whether the leading digits of a numeric variable follow Benford's
-        Law, using the MAD conformity classification, a chi-square
-        goodness-of-fit test and the Mantissa Arc Test. Intended as a screen for
-        systematic recording artefacts such as rounding or preferred values.
+        Compares the leading digits of a positive numeric variable against
+        Benford's Law, using a chi-square goodness-of-fit test, the Mantissa
+        Arc Test and Nigrini's MAD conformity classification. The MAD
+        classification is reported only when the sample is large enough for its
+        cut-offs to exceed sampling noise; otherwise the chi-square test carries
+        the finding. Benford's Law applies to data spanning at least two orders
+        of magnitude. The analysis reports whether a departure from the expected
+        leading-digit frequencies was detected; it does not identify a cause.
     R:
         dontrun: true
         usage: |
-            # Leading-digit screen on follow-up times. These span only 1.3
-            # orders of magnitude, so the analysis reports a narrow-range
-            # warning: Benford's Law needs at least two decades.
+            # Leading-digit screen on cardiac troponin: 400 patients,
+            # 0.005 to 8.96 ng/mL, spanning 3.3 orders of magnitude. At the
+            # default 2-digit setting Nigrini's MAD cut-off is not usable
+            # below n = 5204, so the chi-square goodness-of-fit test carries
+            # the finding here (p = 0.70; no departure detected).
             benford(
-                data = histopathology,
-                var = "OverallTime")
+                data = timeroc_cardiovascular_risk,
+                var = "troponin_level")
 
 options:
     - name: data

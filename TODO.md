@@ -6,12 +6,6 @@
 - summarydata
 - tableone
 
-- [ ] Table One: address jmvcore 2.7.38 `Html$asString()` retaining styled HTML
-  tags in t2/t4 plain-text R exports. Keep styled HTML intact; assess an upstream
-  text-export fix rather than changing the shared converter in this scoped repair.
-  Verify desktop clipboard/Word/PDF separately. See
-  `quality-reports/tableone-release-review-followup-2026-08-31.md`.
-
 ## Data Quality
 
 benford

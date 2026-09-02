@@ -29,10 +29,25 @@ benford_compliant_data$invoices <- round(benford_compliant_data$invoices[benford
 benford_compliant_data <- benford_compliant_data[1:min(1000, nrow(benford_compliant_data)), ]
 
 # ------------------------------------------------------------------------------
-# TEST DATA: Manipulated (Uniform distribution)
-# Expected: High concern, MAD > 0.015
+# TEST DATA: Uniform leading digits spread over ~4 orders of magnitude.
+# Expected: "Departure detected", MAD > 0.015.
+# NOTE: this deliberately is NOT runif(500, 100, 999). That spans only ONE
+# decade, and Benford's Law does not describe data spanning less than two - the
+# analysis reports such a variable as "Not assessable" rather than interpreting
+# it, so it cannot serve as a positive control. And NOT d * 10^U: multiplying a
+# uniform digit by a log-uniform magnitude yields a log-uniform product, i.e.
+# Benford almost exactly (measured leading-digit freq 0.302 0.176 0.124 ...
+# against Benford 0.301 0.176 0.125 ...). Uniform leading digits need a uniform
+# MANTISSA: m ~ U(1,10) scaled by an integer power of ten keeps floor(m) uniform
+# while spanning 4 decades.
 # ------------------------------------------------------------------------------
 benford_manipulated_data <- data.frame(
+    id = 1:500,
+    amounts = runif(500, 1, 10) * 10^sample(0:3, 500, replace = TRUE)
+)
+
+# Uniform over a single decade: the range precondition is not met.
+benford_narrow_range_data <- data.frame(
     id = 1:500,
     amounts = runif(500, min = 100, max = 999)
 )
@@ -58,9 +73,9 @@ benford_with_nas <- data.frame(
 
 
 # ==============================================================================
-# TEST 1: Benford-Compliant Data → Low Concern
+# TEST 1: Benford-Compliant Data → "No departure detected"
 # ==============================================================================
-test_that("benfordClass correctly identifies Benford-compliant data as Low concern", {
+test_that("benfordClass reports no departure for Benford-compliant data", {
   skip_if_not_installed('jmvReadWrite')
     skip_if_not_installed("benford.analysis")
 
@@ -84,10 +99,10 @@ test_that("benfordClass correctly identifies Benford-compliant data as Low conce
     expect_true(nrow(assessment_rows) > 0,
                 info = "Summary table must contain 'Assessment' row")
 
-    # CRITICAL ASSERTION: Concern level should be "Low" for compliant data
-    concern_level <- as.character(assessment_rows$value[1])
-    expect_true(grepl("Low", concern_level, ignore.case = TRUE),
-                info = sprintf("Compliant data should show Low concern, got: %s", concern_level))
+    # CRITICAL ASSERTION: the finding is descriptive, not a concern grade
+    finding <- as.character(assessment_rows$value[1])
+    expect_identical(finding, "No departure detected",
+                info = sprintf("Compliant data should report no departure, got: %s", finding))
 
     # CRITICAL ASSERTION: MAD value should be present and < 0.012
     mad_rows <- summary_df[grepl("MAD", summary_df$statistic, ignore.case = TRUE), ]
@@ -114,9 +129,9 @@ test_that("benfordClass correctly identifies Benford-compliant data as Low conce
 
 
 # ==============================================================================
-# TEST 2: Manipulated Data → High Concern
+# TEST 2: Uniform leading digits → "Departure detected"
 # ==============================================================================
-test_that("benfordClass correctly identifies manipulated uniform data as High concern", {
+test_that("benfordClass reports a departure for uniform leading digits", {
     skip_if_not_installed("benford.analysis")
 
     # Run the actual benford function
@@ -134,10 +149,12 @@ test_that("benfordClass correctly identifies manipulated uniform data as High co
     assessment_rows <- summary_df[summary_df$statistic == "Assessment", ]
     expect_true(nrow(assessment_rows) > 0)
 
-    # CRITICAL ASSERTION: Concern level should be "High" for manipulated data
-    concern_level <- as.character(assessment_rows$value[1])
-    expect_true(grepl("High", concern_level, ignore.case = TRUE),
-                info = sprintf("Manipulated data should show High concern, got: %s", concern_level))
+    # CRITICAL ASSERTION: the finding states what was measured, and never
+    # attributes a cause - the module must not tell a clinician their data was
+    # manipulated. "No departure detected" must not satisfy this by substring.
+    finding <- as.character(assessment_rows$value[1])
+    expect_identical(finding, "Departure detected",
+                info = sprintf("Uniform leading digits should report a departure, got: %s", finding))
 
     # CRITICAL ASSERTION: MAD value should be > 0.015
     mad_rows <- summary_df[grepl("MAD", summary_df$statistic, ignore.case = TRUE), ]
@@ -262,7 +279,7 @@ test_that("benfordClass warns about small sample sizes", {
     assessment_rows <- summary_small[summary_small$statistic == "Assessment", ]
     expect_true(nrow(assessment_rows) > 0)
     concern_level <- as.character(assessment_rows$value[1])
-    expect_true(grepl("Unreliable|N<100|small", concern_level, ignore.case = TRUE),
+    expect_true(grepl("Limited evidence", concern_level, fixed = TRUE),
                 info = sprintf("Small samples (30-99) should be flagged as unreliable, got: %s",
                               concern_level))
 })
@@ -340,30 +357,30 @@ test_that("benfordClass correctly handles NA values (should be excluded)", {
 # ==============================================================================
 # TEST 9: Concern Level Logic - Complete Coverage
 # ==============================================================================
-test_that("benfordClass concern levels correctly map to MAD thresholds", {
+test_that("benfordClass findings correctly map to MAD thresholds", {
     skip_if_not_installed("benford.analysis")
 
-    # Test 1: Compliant data → Low concern
+    # Test 1: Compliant data → no departure
     result_low <- benford(benford_compliant_data, var = invoices, digits = 1)
     summary_low <- result_low$summary$asDF
     mad_low <- as.numeric(summary_low[grepl("MAD", summary_low$statistic), "value"][1])
     concern_low <- as.character(summary_low[summary_low$statistic == "Assessment", "value"][1])
 
     if (mad_low < 0.012) {
-        expect_true(grepl("Low", concern_low, ignore.case = TRUE),
-                    info = sprintf("MAD=%.4f (< 0.012) should yield Low concern, got: %s",
+        expect_identical(concern_low, "No departure detected",
+                    info = sprintf("MAD=%.4f (< 0.012) should report no departure, got: %s",
                                   mad_low, concern_low))
     }
 
-    # Test 2: Manipulated data → High concern
+    # Test 2: Uniform leading digits → departure detected
     result_high <- benford(benford_manipulated_data, var = amounts, digits = 1)
     summary_high <- result_high$summary$asDF
     mad_high <- as.numeric(summary_high[grepl("MAD", summary_high$statistic), "value"][1])
     concern_high <- as.character(summary_high[summary_high$statistic == "Assessment", "value"][1])
 
     if (mad_high > 0.015) {
-        expect_true(grepl("High", concern_high, ignore.case = TRUE),
-                    info = sprintf("MAD=%.4f (> 0.015) should yield High concern, got: %s",
+        expect_identical(concern_high, "Departure detected",
+                    info = sprintf("MAD=%.4f (> 0.015) should report a departure, got: %s",
                                   mad_high, concern_high))
     }
 })
@@ -513,8 +530,8 @@ cat("===========================================================================
 cat("✅ COMPREHENSIVE benfordClass INTEGRATION TESTS COMPLETED\n")
 cat("===============================================================================\n")
 cat("Tests validate:\n")
-cat("  ✓ Compliant data → Low concern (MAD < 0.012)\n")
-cat("  ✓ Manipulated data → High concern (MAD > 0.015)\n")
+cat("  ✓ Compliant data → no departure detected\n")
+cat("  ✓ Uniform leading digits → departure detected\n")
 cat("  ✓ Statistical transparency (MAD, Chi-square, Mantissa Arc Test displayed)\n")
 cat("  ✓ Evidence-based MAD conformity levels (Nigrini 2012)\n")
 cat("  ✓ Edge cases (small samples, zeros, negatives, NAs)\n")

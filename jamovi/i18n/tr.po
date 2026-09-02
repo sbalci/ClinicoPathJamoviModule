@@ -247,7 +247,7 @@ msgid "..."
 msgstr ""
 
 #: R/benford.b.R
-msgid "... and %d more (showing the first %d of %d)"
+msgid "... and {more} more (showing the first {shown} of {total})"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -455,10 +455,6 @@ msgstr ""
 msgid "(adequate)"
 msgstr ""
 
-#: R/benford.b.R
-msgid "(counts and sizes are routinely recorded to a fixed precision) and"
-msgstr ""
-
 #: R/clinicalscore.b.R
 msgid "(INSUFFICIENT)"
 msgstr ""
@@ -608,6 +604,10 @@ msgstr ""
 msgid "{count} of these levels have no observations."
 msgstr ""
 
+#: R/survival.b.R
+msgid "{count} row(s) with missing outcome were excluded before model fitting."
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid ""
 "{cutoff} has the highest Youden's J, {margin} above current; its "
@@ -740,6 +740,15 @@ msgstr ""
 
 #: R/decision.b.R
 msgid "{n} total misclassifications ({pct} error rate)"
+msgstr ""
+
+#: R/benford.b.R
+msgid ""
+"{n} value(s) in the selected variable are infinite or not a number (Inf, "
+"-Inf or NaN). A leading digit is undefined for these, so they were excluded "
+"from the analysis and from every count reported below. Values like these "
+"arise routinely from computed variables, for example a ratio with a zero "
+"denominator; check how the variable was derived."
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -1549,15 +1558,6 @@ msgstr ""
 
 #: R/jjcorrmat.b.R
 msgid "%d to %d observations per pair (pairwise deletion)"
-msgstr ""
-
-#: R/benford.b.R
-msgid ""
-"%d value(s) in the selected variable are infinite or not a number (Inf, -Inf "
-"or NaN). A leading digit is undefined for these, so they were excluded from "
-"the analysis and from every count reported below. Values like these arise "
-"routinely from computed variables, for example a ratio with a zero "
-"denominator; check how the variable was derived."
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -3977,7 +3977,7 @@ msgstr ""
 #: R/benford.b.R
 msgid ""
 "1-digit analysis has only 9 bins, so its MAD conformity label becomes usable "
-"at about 250 observations against about 1300 for 2 digits; 2-digit analysis "
+"at about 1000 observations against about 5200 for 2 digits; 2-digit analysis "
 "is more sensitive but needs the larger sample"
 msgstr ""
 
@@ -5291,6 +5291,14 @@ msgid ""
 "curved arcs connecting nodes."
 msgstr ""
 
+#: R/benford.b.R
+msgid ""
+"A departure this small relative to the MAD cut-offs, yet detectable by the "
+"chi-square test, is the pattern a localized cause produces: systematic "
+"rounding, preferred values, or a subset of records entered differently. The "
+"leading-digit bin listing below shows which digit combinations carry it."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid ""
 "A distinct condition that describes a patient's health status in a Markov "
@@ -5362,6 +5370,12 @@ msgstr ""
 msgid ""
 "A large number of groups ({n}) may cause display issues. Consider grouping "
 "your data."
+msgstr ""
+
+#: R/benford.b.R
+msgid ""
+"A larger sample, typically several hundred observations or more, is needed "
+"before a leading-digit result carries much weight either way."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -5460,7 +5474,10 @@ msgid ""
 msgstr ""
 
 #: R/benford.b.R
-msgid "A percentage close to the expected share is what conforming data"
+msgid ""
+"A percentage close to the expected share is what conforming data looks like. "
+"Whether the data depart from Benford's Law is answered by the MAD and "
+"chi-square results in the summary table, not by this count."
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -5509,7 +5526,9 @@ msgstr ""
 msgid ""
 "A recursive optimal split could not be estimated. Quantile-based cut-points "
 "were used for the remaining groups."
-msgstr "Özyinelemeli en uygun bölme tahmin edilemedi. Kalan gruplar için kantil tabanlı kesim noktaları kullanıldı."
+msgstr ""
+"Özyinelemeli en uygun bölme tahmin edilemedi. Kalan gruplar için kantil "
+"tabanlı kesim noktaları kullanıldı."
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -5517,6 +5536,10 @@ msgid ""
 "is evidence that the pair does not err independently. This is a descriptive "
 "check, not a formal test: the residuals are correlated with one another and "
 "no multiplicity adjustment is applied."
+msgstr ""
+
+#: R/survival.b.R
+msgid "A result table could not be populated completely: {message}"
 msgstr ""
 
 #: R/tableone.b.R
@@ -10759,6 +10782,7 @@ msgstr "Analiz Tamamlandı"
 
 #: R/multisurvival.b.R
 #: R/riverplot.b.R
+#: R/survival.b.R
 msgid "Analysis complete"
 msgstr ""
 
@@ -11774,13 +11798,6 @@ msgstr ""
 msgid "Analyzes spatial relationships between different cell populations"
 msgstr ""
 
-#: R/benford.b.R
-msgid ""
-"Analyzes the distribution of first digits in your data using statistical "
-"tests to detect unusual patterns that may indicate data quality issues, "
-"systematic bias, entry errors, or fraud."
-msgstr ""
-
 #: R/jjpiestats.b.R
 msgid "Analyzing variable:"
 msgstr ""
@@ -12389,10 +12406,6 @@ msgstr ""
 
 #: riverplot/options/curveType/arctangent.title
 msgid "Arctangent (gradual curves)"
-msgstr ""
-
-#: R/benford.b.R
-msgid "are not by themselves evidence of manipulation."
 msgstr ""
 
 #: esquisseauto/options/manualGeom/area.title
@@ -14991,6 +15004,12 @@ msgstr ""
 msgid "Basic Interpretation"
 msgstr ""
 
+#: R/survival.b.R
+msgid ""
+"Basic Kaplan-Meier and Cox analyses are available, but {count} events may be "
+"insufficient for complex calibration, spline, or bootstrap models."
+msgstr ""
+
 #: causalmediation/ui[1][1].label
 msgid "Basic Mediation Options"
 msgstr ""
@@ -15821,17 +15840,21 @@ msgid "Benford analysis could not be completed"
 msgstr ""
 
 #: R/benford.b.R
-msgid ""
-"Benford's Law analysis of {n} observations (N<100): Results unreliable due "
-"to insufficient sample size. Statistical tests require at least 100 "
-"observations for valid interpretation."
+msgid "Benford's Law Analysis"
 msgstr ""
 
 #: R/benford.b.R
 msgid ""
 "Benford's Law analysis of {n} observations using {d}-digit analysis: MAD = "
-"{mad} ({conformity}), Chi-square p = {pval}. Assessment: {level} concern for "
-"data quality issues."
+"{mad} ({conformity}), chi-square p = {pval}. Finding: {level}."
+msgstr ""
+
+#: R/benford.b.R
+msgid ""
+"Benford's Law analysis of {n} observations, fewer than the 100 this analysis "
+"treats as a working minimum. At this size the digit-frequency tests detect "
+"only very large departures, so this run does not establish either a "
+"departure or its absence."
 msgstr ""
 
 #: R/benford.b.R
@@ -16691,7 +16714,7 @@ msgid "Binormal (Parametric)"
 msgstr ""
 
 #: R/benford.b.R
-msgid "Bins selected:"
+msgid "Bins selected: {bins}"
 msgstr ""
 
 #: progressionsurvival/options/progression_definition/biochemical.title
@@ -18080,6 +18103,10 @@ msgstr ""
 msgid "Bootstrap Validation Results"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Bootstrap validation suppressed: fewer than 10 events."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "Bootstrap validation uses Harrell's optimism-correction method (Harrell, "
@@ -18901,10 +18928,6 @@ msgstr ""
 
 #: alluvialSurvival/results/summaryTable.columns.title
 msgid "By Stage"
-msgstr ""
-
-#: R/benford.b.R
-msgid "by the MAD and chi-square results in the summary table, not by this"
 msgstr ""
 
 #: jjsegmentedtotalbar/options/sort_categories/total.title
@@ -20141,6 +20164,10 @@ msgstr ""
 #: survival/options/calibration_curves.title
 #: survival/ui[3][2][0]/calibration_curves.label
 msgid "Calibration curves"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Calibration curves suppressed: fewer than 10 events."
 msgstr ""
 
 #: enhancedROC/options/calibrationDensity.title
@@ -21445,13 +21472,6 @@ msgid ""
 "independence and may overstate significance."
 msgstr ""
 
-#: R/benford.b.R
-msgid ""
-"CAUTION: Sample size too small for reliable Benford's Law analysis. With "
-"fewer than 100 observations, statistical tests lack power and results should "
-"NOT be used for clinical decision-making or data quality assessment."
-msgstr ""
-
 #: R/multisurvival.b.R
 msgid ""
 "Caution: these estimates reflect the development cohort only and require "
@@ -21660,12 +21680,15 @@ msgstr ""
 msgid "Cellular Diversity Metrics"
 msgstr ""
 
+#: survival/options/censored.title
+msgid "Censor marks"
+msgstr ""
+
 #: flexcomprisk/results/modelSummary.columns.title
 #: multisurvival/options/censored.title
 #: rpasurvival/results/riskgrouptable.columns.title
 #: singlearm/options/censored.title
 #: stagemigration/results/informativeCensoringByStage.columns.title
-#: survival/options/censored.title
 #: survivalcont/options/censored.title
 #: survivalendpoints/results/summaryStats.columns.title
 msgid "Censored"
@@ -22321,13 +22344,6 @@ msgstr "Veri dosyanızın doğru içe aktarıldığını kontrol edin."
 msgid "Check that your outcome variable has both positive and negative cases."
 msgstr ""
 
-#: R/benford.b.R
-msgid ""
-"Check the digit distribution for a localized cause such as systematic "
-"rounding, preferred values, or a subset of records entered differently, and "
-"review data collection and entry procedures for that subset."
-msgstr ""
-
 #: clinicaldataintegration/results/consistencyChecks.columns.title
 msgid "Check Type"
 msgstr ""
@@ -22450,10 +22466,11 @@ msgstr ""
 #: R/benford.b.R
 msgid ""
 "Chi-square goodness-of-fit test indicates a departure from Benford's Law "
-"(p=%s). MAD = %.4f, which is %.1f times the deviation expected from sampling "
-"noise alone at N=%d with %d-digit analysis (%.4f). The '%s' label is not "
-"informative at this sample size, so this conclusion rests on the chi-square "
-"test and the size of the deviation relative to that noise level."
+"(p={p}). MAD = {mad}, which is {ratio} times the deviation expected from "
+"sampling noise alone at N={n} with {digits}-digit analysis ({floor}). The "
+"'{label}' label is not informative at this sample size, so this conclusion "
+"rests on the chi-square test and the size of the deviation relative to that "
+"noise level."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -22545,6 +22562,10 @@ msgstr ""
 
 #: crosstable/options/pcat.title
 msgid "Chi-square vs Fisher's exact test"
+msgstr ""
+
+#: R/benford.b.R
+msgid "Chi-square: {stat} (p = {p})"
 msgstr ""
 
 #: enhancedtables/options/test_type/categorical.title
@@ -28722,6 +28743,27 @@ msgid ""
 "room, or when a clinical threshold line is useful."
 msgstr ""
 
+#: R/benford.b.R
+msgid ""
+"Compares the distribution of leading digits in your data against Benford's "
+"Law, which describes how leading digits are distributed in data spanning "
+"several orders of magnitude. A departure indicates the values do not follow "
+"that pattern; it does not identify why."
+msgstr ""
+
+#: package/analyses/benford.description
+#: benford/options.description.main
+msgid ""
+"Compares the leading digits of a positive numeric variable against Benford's "
+"Law, using a chi-square goodness-of-fit test, the Mantissa Arc Test and "
+"Nigrini's MAD conformity classification. The MAD classification is reported "
+"only when the sample is large enough for its cut-offs to exceed sampling "
+"noise; otherwise the chi-square test carries the finding. Benford's Law "
+"applies to data spanning at least two orders of magnitude. The analysis "
+"reports whether a departure from the expected leading-digit frequencies was "
+"detected; it does not identify a cause."
+msgstr ""
+
 #: package/analyses/door.description
 #: door/options.description.main
 msgid ""
@@ -29207,6 +29249,13 @@ msgid ""
 "Competing-risk mode fits a Fine-Gray subdistribution model; HRs reflect "
 "subdistribution hazards and are not directly comparable to cause-specific "
 "Cox HRs."
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Competing-risk mode is selected; standard Cox regression is skipped because "
+"cause-specific hazards require a different model (e.g., Fine-Gray "
+"subdistribution)."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -32130,13 +32179,13 @@ msgid "Confirmed ORR (CR + PR)"
 msgstr ""
 
 #: R/benford.b.R
-msgid "Conformity: %s"
+msgid "Conformity: {label}"
 msgstr ""
 
 #: R/benford.b.R
 msgid ""
-"Conformity: %s - not reliable at N=%d for %d-digit analysis (sampling noise "
-"alone gives MAD ~ %.4f; needs N > %d)"
+"Conformity: {label} - not reliable at N={n} for {digits}-digit analysis "
+"(sampling noise alone gives MAD ~ {floor}; needs N > {needed})"
 msgstr ""
 
 #: rocreg/options/adjustment_purpose/confounder.title
@@ -34365,18 +34414,6 @@ msgstr ""
 msgid "Cost-sensitive trees"
 msgstr ""
 
-#: R/survival.b.R
-msgid "Could not access Cox regression data: {message}"
-msgstr ""
-
-#: R/survival.b.R
-msgid "Could not access median survival data: {message}"
-msgstr ""
-
-#: R/survival.b.R
-msgid "Could not access survival probability data: {message}"
-msgstr ""
-
 #: R/lassocox.b.R
 msgid "Could not assess"
 msgstr "Değerlendirilemedi"
@@ -34489,10 +34526,6 @@ msgstr ""
 #: bayesianclinical/options/outcome_type/count.title
 #: treatmenteffects/options/outcome_type/count.title
 msgid "Count Outcome"
-msgstr ""
-
-#: R/benford.b.R
-msgid "count."
 msgstr ""
 
 #: bayesianci/options/outcome_type/count.title
@@ -35161,6 +35194,10 @@ msgid "Cox Regression by Risk Group"
 msgstr ""
 
 #: R/survival.b.R
+msgid "Cox regression data could not be added to the clinical summary: {message}"
+msgstr ""
+
+#: R/survival.b.R
 msgid ""
 "Cox regression estimated {direction} for {comparison}, with a hazard ratio "
 "of {hr} (95% CI: {lower} to {upper}, p = {p}), which was {significance}."
@@ -35179,7 +35216,10 @@ msgid ""
 "the continuous predictor. HR > 1 indicates a higher instantaneous event rate "
 "and HR < 1 a lower rate, assuming a log-linear effect and proportional "
 "hazards."
-msgstr "Cox regresyonu, sürekli yordayıcıdaki bir birimlik artış için hazard oranını (HR) tahmin eder. Log-doğrusal etki ve orantılı hazard varsayımları altında HR > 1 daha yüksek, HR < 1 ise daha düşük anlık olay hızını gösterir."
+msgstr ""
+"Cox regresyonu, sürekli yordayıcıdaki bir birimlik artış için hazard oranını "
+"(HR) tahmin eder. Log-doğrusal etki ve orantılı hazard varsayımları altında "
+"HR > 1 daha yüksek, HR < 1 ise daha düşük anlık olay hızını gösterir."
 
 #: survivalcont/results/coxRegressionHeading3.title
 msgid "Cox Regression Explanations"
@@ -35192,6 +35232,10 @@ msgstr ""
 #: ihcsurvival/results/coxResults.title
 #: timedependent/results/cox_results.title
 msgid "Cox Regression Results"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Cox regression skipped (competing risks)"
 msgstr ""
 
 #: package/analyses/timevarycox.menuSubtitle
@@ -35217,6 +35261,14 @@ msgstr ""
 
 #: plscox/results/variableLoadings.columns.title
 msgid "Cox-Weighted Importance"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"cox.zph p-values below 0.05 indicate potential violation of the proportional "
+"hazards assumption for one or more terms. Consider time-varying effects, "
+"stratification, or splitting follow-up; see the PH interpretation section "
+"for details."
 msgstr ""
 
 #: sigmametrics/results/processCapability.columns.title
@@ -35949,7 +36001,6 @@ msgstr ""
 #: multisurvival/results/errors.title
 #: oddsratio/results/errors.title
 #: outcomeorganizer/results/errors.title
-#: survival/results/errors.title
 #: survivalcont/results/errors.title
 msgid "Critical Errors"
 msgstr ""
@@ -38424,15 +38475,6 @@ msgstr ""
 msgid "Data dimensions are invalid"
 msgstr ""
 
-#: R/benford.b.R
-msgid ""
-"Data does NOT conform to Benford's Law (MAD=%.4f, %s). Chi-square test: "
-"p=%s. The deviation exceeds Nigrini's nonconformity cut-off for this digit "
-"setting, which is consistent with systematic data quality issues, bias in "
-"how values were recorded, or manipulation - the test does not distinguish "
-"between these."
-msgstr ""
-
 #: synopticcompleteness/results/perItemTable.columns.title
 msgid "Data Element"
 msgstr ""
@@ -38780,6 +38822,10 @@ msgstr ""
 msgid "Data Quality Warnings"
 msgstr ""
 
+#: R/benford.b.R
+msgid "Data range: {min} to {max}"
+msgstr ""
+
 #: R/decision.b.R
 #: R/reportcat.b.R
 msgid "Data Requirements"
@@ -38814,8 +38860,8 @@ msgstr ""
 
 #: R/benford.b.R
 msgid ""
-"Data shows marginally acceptable conformity to Benford's Law (MAD=%.4f). "
-"Chi-square test: p=%s. Consider reviewing data collection procedures."
+"Data shows marginally acceptable conformity to Benford's Law (MAD={mad}). "
+"Chi-square test: p={p}. Consider reviewing data collection procedures."
 msgstr ""
 
 #: bbcplots/options/source_text.title
@@ -38959,6 +39005,10 @@ msgstr ""
 msgid "Data Summary Table"
 msgstr ""
 
+#: R/benford.b.R
+msgid "DATA SUMMARY:"
+msgstr ""
+
 #: generalizedroc/options/transformation.title
 #: methodcomparison/options/transformation.title
 msgid "Data Transformation"
@@ -39066,7 +39116,9 @@ msgstr ""
 msgid ""
 "Dataset contains %d rows. Analysis may take longer than usual, especially "
 "with data-driven cut-off searches and diagnostic plots."
-msgstr "Veri kümesi %d satır içeriyor. Analiz, özellikle veriye dayalı kesim noktası aramaları ve tanısal grafiklerle, normalden daha uzun sürebilir."
+msgstr ""
+"Veri kümesi %d satır içeriyor. Analiz, özellikle veriye dayalı kesim noktası "
+"aramaları ve tanısal grafiklerle, normalden daha uzun sürebilir."
 
 #: jsummarytools/options/data.description
 msgid "Dataset for descriptive analysis"
@@ -40577,6 +40629,10 @@ msgid "Departs from normality"
 msgstr ""
 
 #: R/benford.b.R
+msgid "Departure detected"
+msgstr ""
+
+#: R/benford.b.R
 msgid ""
 "Departures reported below can therefore be large without indicating anything "
 "about how the data were recorded"
@@ -40875,6 +40931,13 @@ msgstr ""
 
 #: decisioncompare/options/showDescriptiveReport.title
 msgid "Descriptive report templates"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Descriptive results (Kaplan-Meier, median, counts) are shown, but with "
+"{count} event(s) they are unstable and confidence intervals will be very "
+"wide. Hazard ratios and other model-based output are suppressed."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -41700,9 +41763,8 @@ msgstr ""
 
 #: R/survival.b.R
 msgid ""
-"Diagnosis date and follow-up date must be in the same format (both numeric "
-"or both text)\n"
-"Please check your date variables and ensure consistent formatting"
+"Diagnosis date and follow-up date must use the same format (both numeric or "
+"both text). Check both date variables and select consistent inputs."
 msgstr ""
 
 #: screeningevaluation/options/diagnosis_date_var.title
@@ -42496,7 +42558,7 @@ msgid "Digit Distribution Analysis"
 msgstr ""
 
 #: R/benford.b.R
-msgid "DIGIT-PATTERN NOTES (DESCRIPTIVE):"
+msgid "DIGIT DISTRIBUTION ANALYSIS ({digits}-digit)"
 msgstr ""
 
 #: rocreg/options/clinical_application/digital_path.title
@@ -47860,9 +47922,12 @@ msgid "End times should be greater than or equal to start times"
 msgstr ""
 
 #: singlearm/options/yend_plot.title
-#: survival/options/yend_plot.title
 #: survivalcont/options/yend_plot.title
 msgid "End y-axis"
+msgstr ""
+
+#: survival/options/yend_plot.title
+msgid "End Y-axis"
 msgstr ""
 
 #: multistatesurvival/options/state_to.description.ui
@@ -49080,6 +49145,7 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
+#: R/benford.b.R
 #: R/decisioncalculator.b.R
 #: R/summarydata.b.R
 msgid "ERROR"
@@ -49143,10 +49209,6 @@ msgstr ""
 
 #: R/pathagreement.b.R
 msgid "Error calculating PABAK:"
-msgstr ""
-
-#: R/survival.b.R
-msgid "Error calculating residuals: {message}"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -50026,13 +50088,17 @@ msgstr ""
 
 #: R/survivalcont.b.R
 msgid "Event counts include all-cause events as defined in the outcome mapping."
-msgstr "Olay sayıları, sonuç eşlemesinde tanımlandığı biçimde tüm nedenlere bağlı olayları içerir."
+msgstr ""
+"Olay sayıları, sonuç eşlemesinde tanımlandığı biçimde tüm nedenlere bağlı "
+"olayları içerir."
 
 #: R/survivalcont.b.R
 msgid ""
 "Event counts reflect the event of interest; competing events are treated as "
 "censored for rates."
-msgstr "Olay sayıları ilgilenilen olayı yansıtır; yarışan olaylar hız hesaplarında sansürlü kabul edilir."
+msgstr ""
+"Olay sayıları ilgilenilen olayı yansıtır; yarışan olaylar hız hesaplarında "
+"sansürlü kabul edilir."
 
 #: R/survivalcont.b.R
 msgid "Event counts reflect the specified event of interest."
@@ -51072,7 +51138,10 @@ msgid ""
 "Exact (Garwood) Poisson 95% CI. Rows with 0 events give a one-sided 97.5% "
 "upper bound; intervals with very little accrued person-time yield "
 "correspondingly wide bounds."
-msgstr "Kesin (Garwood) Poisson %95 GA. Olay sayısı 0 olan satırlar tek taraflı %97,5 üst sınır verir; birikmiş kişi-zamanı çok az olan aralıklar buna uygun olarak geniş sınırlar üretir."
+msgstr ""
+"Kesin (Garwood) Poisson %95 GA. Olay sayısı 0 olan satırlar tek taraflı "
+"%97,5 üst sınır verir; birikmiş kişi-zamanı çok az olan aralıklar buna uygun "
+"olarak geniş sınırlar üretir."
 
 #: cochranq/options/method/exact.title
 #: friedmantest/options/method/exact.title
@@ -56638,10 +56707,6 @@ msgstr ""
 msgid "Framingham-style reference scaling (Sullivan et al. 2004)"
 msgstr ""
 
-#: R/benford.b.R
-msgid "Fraud detection and data quality assessment"
-msgstr ""
-
 #: deeplearningprediction/options/freeze_backbone.title
 msgid "Freeze Backbone Layers"
 msgstr ""
@@ -56851,10 +56916,6 @@ msgstr ""
 #: circos/options/fromVar.title
 #: circos/ui[0][0].label
 msgid "From (source)"
-msgstr ""
-
-#: R/benford.b.R
-msgid "from Benford's Law were selected, and every observation falling in"
 msgstr ""
 
 #: riverplot/results/flowTable.columns.title
@@ -61840,10 +61901,6 @@ msgstr ""
 msgid "Hierarchical/Multilevel Kappa [Categorical] (Multi-Center Studies)"
 msgstr ""
 
-#: R/benford.b.R
-msgid "High"
-msgstr ""
-
 #: R/enhancedROC.b.R
 msgid "high"
 msgstr ""
@@ -63014,7 +63071,9 @@ msgstr ""
 msgid ""
 "HR = 1.05 means each one-unit increase multiplies the hazard by 1.05; it is "
 "not a cumulative risk ratio and does not by itself establish causality."
-msgstr "HR = 1,05, her bir birimlik artışın hazardı 1,05 ile çarptığı anlamına gelir; bu kümülatif risk oranı değildir ve tek başına nedensellik göstermez."
+msgstr ""
+"HR = 1,05, her bir birimlik artışın hazardı 1,05 ile çarptığı anlamına "
+"gelir; bu kümülatif risk oranı değildir ve tek başına nedensellik göstermez."
 
 #: ihcsurvival/ui[4][0][0][0].label
 msgid "HR > 1: Higher marker → Higher risk; HR < 1: Higher marker → Lower risk"
@@ -65745,12 +65804,6 @@ msgstr ""
 msgid "Increase Factor"
 msgstr ""
 
-#: R/benford.b.R
-msgid ""
-"Increase sample size to at least 100-1000 observations before drawing "
-"conclusions. Consider alternative data quality checks for small datasets."
-msgstr ""
-
 #: R/advancedraincloud.b.R
 msgid "Increased from baseline:"
 msgstr ""
@@ -68189,14 +68242,15 @@ msgstr ""
 
 #: R/survival.b.R
 msgid ""
-"Invalid data: %d observation(s) have negative survival times (follow-up date "
-"before diagnosis date). Please check your date variables."
+"Invalid data: {count} observation(s) have negative survival times because "
+"follow-up precedes diagnosis. Check the date variables."
 msgstr ""
 
 #: R/survival.b.R
 msgid ""
-"Invalid data: %d observation(s) have negative survival times. Check that "
-"follow-up dates are after diagnosis dates and that time values are correct."
+"Invalid data: {count} observation(s) have negative survival times. Check "
+"that follow-up dates are after diagnosis dates and that time values are "
+"correct."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -68300,20 +68354,6 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "Investigate capacity constraints and care coordination at high-volume stages."
-msgstr ""
-
-#: R/benford.b.R
-msgid ""
-"Investigate data sources, collection methods, and validation procedures. "
-"Check for systematic rounding, preferred values, or data entry errors, and "
-"review the leading-digit bin listing below for repeated or rounded values."
-msgstr ""
-
-#: R/benford.b.R
-msgid ""
-"Investigate data sources, collection methods, and validation procedures. "
-"Check for systematic rounding, preferred values, or data entry errors, and "
-"review the leading-digit bin listing below."
 msgstr ""
 
 #: R/summarydata.b.R
@@ -70491,7 +70531,7 @@ msgstr ""
 
 #: R/survival.b.R
 msgid ""
-"Landmark time %.2f is beyond all observed follow-up times; no patients "
+"Landmark time {landmark} is beyond all observed follow-up times; no patients "
 "remain at risk."
 msgstr ""
 
@@ -70961,7 +71001,10 @@ msgid "Lead Time Analysis"
 msgstr ""
 
 #: R/benford.b.R
-msgid "leading digits, not because it is individually unusual."
+msgid ""
+"Leading-digit analysis is not informative for a variable with this range. "
+"Range, duplicate, precision and missingness checks address recording quality "
+"directly and do not depend on the data spanning multiple orders of magnitude."
 msgstr ""
 
 #: R/benford.b.R
@@ -70974,9 +71017,9 @@ msgstr ""
 
 #: R/benford.b.R
 msgid ""
-"Leading-digit distribution is consistent with Benford's Law (MAD=%.4f, %s; "
-"chi-square p=%s). Neither measure detected a departure. Absence of a "
-"detected departure is not evidence that the data contain no errors - this "
+"Leading-digit distribution is consistent with Benford's Law (MAD={mad}, "
+"{label}; chi-square p={p}). Neither measure detected a departure. Absence of "
+"a detected departure is not evidence that the data contain no errors - this "
 "analysis examines only leading-digit frequencies."
 msgstr ""
 
@@ -71764,6 +71807,10 @@ msgstr ""
 msgid "Limited early retrieval advantage"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Limited event count: {count}"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "Limited event information per encoded candidate column. Penalization enables "
@@ -71771,6 +71818,10 @@ msgid ""
 msgstr ""
 "Kodlanmış aday sütun başına olay bilgisi sınırlıdır. Cezalandırma model "
 "kurulmasını sağlar, ancak seçimi veya performansı güvenilir kılmaz."
+
+#: R/benford.b.R
+msgid "Limited evidence"
+msgstr ""
 
 #: treatmenteffects/options/iv_method/limited_information.title
 msgid "Limited Information Maximum Likelihood"
@@ -71780,7 +71831,9 @@ msgstr ""
 msgid ""
 "Limited variability in continuous explanatory variable. Consider treating as "
 "categorical."
-msgstr "Sürekli açıklayıcı değişkende değişkenlik sınırlı. Kategorik olarak ele almayı değerlendirin."
+msgstr ""
+"Sürekli açıklayıcı değişkende değişkenlik sınırlı. Kategorik olarak ele "
+"almayı değerlendirin."
 
 #: methodcomparison/options/limits_method.title
 msgid "Limits of Agreement Method"
@@ -73106,10 +73159,6 @@ msgstr ""
 msgid "LOOIC"
 msgstr ""
 
-#: R/benford.b.R
-msgid "looks like. Whether the data depart from Benford's Law is answered"
-msgstr ""
-
 #: advancedSurvivalPower/options/loss_followup.title
 msgid "Loss to Follow-up Rate (per Year)"
 msgstr ""
@@ -73136,23 +73185,8 @@ msgstr ""
 msgid "low"
 msgstr ""
 
-#: R/benford.b.R
-msgid "Low"
-msgstr ""
-
 #: clinicalcalculators/options/clinical_threshold_low.title
 msgid "Low Clinical Threshold"
-msgstr ""
-
-#: R/benford.b.R
-msgid ""
-"Low concern: no departure from Benford's Law was detected, which does not "
-"establish that the data are free of errors - this test looks only at "
-"leading-digit frequencies. Moderate concern: a departure was detected but is "
-"small relative to sampling noise, or the sample is too small for the MAD "
-"label; worth reviewing data collection and entry procedures. High concern: "
-"the departure is large relative to sampling noise; investigate data sources, "
-"systematic rounding or preferred values, and how the values were recorded."
 msgstr ""
 
 #: ihcpredict/results/lowConfidenceCases.title
@@ -73207,7 +73241,9 @@ msgstr ""
 msgid ""
 "Low event rate ({rate}%). May need larger sample or longer follow-up for "
 "reliable survival analysis."
-msgstr "Olay hızı düşük (%{rate}). Güvenilir sağkalım analizi için daha büyük örneklem veya daha uzun izlem gerekebilir."
+msgstr ""
+"Olay hızı düşük (%{rate}). Güvenilir sağkalım analizi için daha büyük "
+"örneklem veya daha uzun izlem gerekebilir."
 
 #: R/clinicalscore.b.R
 msgid "Low Events Per Variable"
@@ -73934,23 +73970,27 @@ msgstr ""
 
 #: R/benford.b.R
 msgid ""
-"MAD = %.4f falls in the '%s' band, but the chi-square goodness-of-fit test "
-"detects a departure from Benford's Law (p=%s). The MAD is %.1f times the "
-"deviation expected from sampling noise alone at N=%d with %d-digit analysis "
-"(%.4f), so the departure is statistically detectable but small in magnitude. "
-"The two measures disagree because the MAD cut-offs are fixed while the "
-"chi-square test gains power as N grows."
+"MAD = {mad} falls in the '{label}' band, but the chi-square goodness-of-fit "
+"test detects a departure from Benford's Law (p={p}). The MAD is {ratio} "
+"times the deviation expected from sampling noise alone at N={n} with "
+"{digits}-digit analysis ({floor}), so the departure is statistically "
+"detectable but small in magnitude. The two measures disagree because the MAD "
+"cut-offs are fixed while the chi-square test gains power as N grows."
 msgstr ""
 
 #: R/benford.b.R
 msgid ""
-"MAD = %.4f. A conformity classification is not available for this digit "
-"setting; interpret the MAD and chi-square test (p=%s) directly. Larger MAD "
+"MAD = {mad}. A conformity classification is not available for this digit "
+"setting; interpret the MAD and chi-square test (p={p}) directly. Larger MAD "
 "values indicate greater deviation from Benford's Law."
 msgstr ""
 
 #: R/benford.b.R
 msgid "MAD conformity label not usable at this sample size"
+msgstr ""
+
+#: R/benford.b.R
+msgid "MAD: {mad} ({label})"
 msgstr ""
 
 #: mageeequation/results/concordanceTable.columns.title
@@ -74220,6 +74260,10 @@ msgstr ""
 
 #: R/benford.b.R
 msgid "Mantissa Arc Test"
+msgstr ""
+
+#: R/benford.b.R
+msgid "Mantissa Arc Test: L\\u{00B2} = {stat} (p = {p})"
 msgstr ""
 
 #: nonparametricregression/options/bandwidth_method/manual.title
@@ -75899,6 +75943,10 @@ msgstr ""
 msgid "Mean |SHAP|"
 msgstr ""
 
+#: R/benford.b.R
+msgid "Mean Absolute Deviation (MAD): {mad}"
+msgstr ""
+
 #: explainableai/results/shapanalysis/shapvaluestable.description
 msgid "Mean absolute SHAP values per feature"
 msgstr ""
@@ -76873,6 +76921,7 @@ msgstr ""
 #: jjridges/options/add_median.title
 #: jjridges/ui[2][0]/add_median.label
 #: singlearm/options/medianline.title
+#: survival/options/medianline.title
 msgid "Median line"
 msgstr ""
 
@@ -77040,6 +77089,10 @@ msgid "Median Survival Comparisons"
 msgstr ""
 
 #: R/survival.b.R
+msgid "Median survival data could not be added to the clinical summary: {message}"
+msgstr ""
+
+#: R/survival.b.R
 msgid ""
 "Median survival for the {group} group was {median} {unit} (95% CI: {lower} "
 "to {upper} {unit})."
@@ -77187,7 +77240,6 @@ msgid ""
 msgstr ""
 
 #: multisurvival/options/medianline.title
-#: survival/options/medianline.title
 msgid "medianline"
 msgstr ""
 
@@ -80030,6 +80082,10 @@ msgid ""
 "automatically and restored in the output."
 msgstr ""
 
+#: R/survival.b.R
+msgid "Missing outcome values excluded"
+msgstr ""
+
 #: featurequality/results/missing_data_analysis.columns.title
 #: partialcorrelation/results/diagnostics.columns.title
 #: patientreported/results/missing_data_patterns.columns.title
@@ -81035,6 +81091,12 @@ msgstr ""
 msgid "Model Error"
 msgstr ""
 
+#: R/survival.b.R
+msgid ""
+"Model estimates may be unstable with {count} events. Simplify the model, "
+"combine sparse categories, or increase the sample size."
+msgstr ""
+
 #: intervalsurvival/results/model_results.title
 #: recurrentsurvival/results/model_results.title
 msgid "Model Estimation Results"
@@ -81743,7 +81805,6 @@ msgstr ""
 msgid "moderate"
 msgstr ""
 
-#: R/benford.b.R
 #: R/clinicalscore.b.R
 #: R/pathagreement.b.R
 msgid "Moderate"
@@ -84270,6 +84331,13 @@ msgstr ""
 msgid "Neighborhood Level"
 msgstr ""
 
+#: R/benford.b.R
+msgid ""
+"Neither measure detected a departure. This test does not assess accuracy, "
+"completeness, units, or transcription of individual values, so it does not "
+"substitute for the usual range, duplicate, and missingness checks."
+msgstr ""
+
 #: R/swimmerplot_html.R
 msgid "Neither sufficient shrinkage for PR nor sufficient increase for PD"
 msgstr ""
@@ -84927,11 +84995,11 @@ msgstr ""
 
 #: R/benford.b.R
 msgid ""
-"Nigrini's MAD cut-off for %d-digit analysis is %s, but sampling noise alone "
-"produces a MAD of about %s at N=%d, so the label '%s' cannot separate a real "
-"departure from noise. It needs N above %d. The assessment below is taken "
-"instead from the chi-square goodness-of-fit test, together with the size of "
-"the MAD relative to that noise level."
+"Nigrini's MAD cut-off for {digits}-digit analysis is {cutoff}, but sampling "
+"noise alone produces a MAD of about {floor} at N={n}, so the label '{label}' "
+"cannot separate a real departure from noise. It needs N above {needed}. The "
+"assessment below is taken instead from the chi-square goodness-of-fit test, "
+"together with the size of the MAD relative to that noise level."
 msgstr ""
 
 #: R/jointmodeling.b.R
@@ -85013,13 +85081,6 @@ msgid ""
 "with the automatic shape instead. Available shapes are: circle for 2-3 sets, "
 "ellipse for 4 sets, polygon for 4-7 sets, and triangle for 6 sets. Change "
 "the number of variables or set the shape back to Automatic."
-msgstr ""
-
-#: R/benford.b.R
-msgid ""
-"No action indicated by this analysis. To use the MAD conformity "
-"classification, collect at least %d observations for %d-digit analysis, or "
-"switch to 1-digit analysis, which needs far fewer."
 msgstr ""
 
 #: sparsegrouplasso/options/weight_type/none.title
@@ -85182,9 +85243,9 @@ msgstr ""
 
 #: R/benford.b.R
 msgid ""
-"No conformity label is available for this digit configuration. Review the "
-"numeric MAD and chi-square results directly, and consider using 1-3 digit "
-"analysis for a classified assessment."
+"No conformity label is available for this digit configuration. The numeric "
+"MAD and the chi-square result above are the evidence; a 1-3 digit setting "
+"additionally provides a classified label."
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -85225,7 +85286,9 @@ msgstr ""
 msgid ""
 "No Cox regression results are available to summarise. This usually means the "
 "model could not be fitted, or every hazard ratio was missing."
-msgstr "Özetlenecek Cox regresyonu sonucu yok. Bu durum genellikle modelin uyarlanamadığı veya tüm hazard oranlarının eksik olduğu anlamına gelir."
+msgstr ""
+"Özetlenecek Cox regresyonu sonucu yok. Bu durum genellikle modelin "
+"uyarlanamadığı veya tüm hazard oranlarının eksik olduğu anlamına gelir."
 
 #: aivalidation/options/crossValidation/none.title
 msgid "No Cross-Validation"
@@ -85282,10 +85345,16 @@ msgid "No Decimals (80 percent)"
 msgstr ""
 
 #: R/benford.b.R
+msgid "No departure detected"
+msgstr ""
+
+#: R/benford.b.R
 msgid ""
-"No departure from Benford's Law was detected. This test does not assess "
-"accuracy, completeness, units, or transcription of individual values, so it "
-"does not substitute for the usual range, duplicate, and missingness checks."
+"No departure was detected. That is not evidence the data are free of errors: "
+"this test examines only leading-digit frequencies. To additionally use the "
+"MAD conformity classification, {needed} observations are needed for "
+"{digits}-digit analysis, or switch to 1-digit analysis, which needs far "
+"fewer."
 msgstr ""
 
 #: R/oddsratio.b.R
@@ -85309,7 +85378,10 @@ msgid ""
 "No evaluated combination both satisfied the minimum group-size requirement "
 "and produced a finite log-rank statistic. Quantile-based cut-points are "
 "shown instead."
-msgstr "Değerlendirilen hiçbir kombinasyon hem en küçük grup büyüklüğü koşulunu sağlamadı hem de sonlu bir log-rank istatistiği üretmedi. Bunun yerine kantil tabanlı kesim noktaları gösteriliyor."
+msgstr ""
+"Değerlendirilen hiçbir kombinasyon hem en küçük grup büyüklüğü koşulunu "
+"sağlamadı hem de sonlu bir log-rank istatistiği üretmedi. Bunun yerine "
+"kantil tabanlı kesim noktaları gösteriliyor."
 
 #: R/multisurvival.b.R
 msgid "No events observed"
@@ -85328,10 +85400,10 @@ msgstr ""
 
 #: R/benford.b.R
 msgid ""
-"No evidence of departure from Benford's Law (chi-square p=%s). MAD = %.4f, "
-"which is within the range expected from sampling noise alone at N=%d with "
-"%d-digit analysis (about %.4f), so the '%s' label is not informative at this "
-"sample size."
+"No evidence of departure from Benford's Law (chi-square p={p}). MAD = {mad}, "
+"which is within the range expected from sampling noise alone at N={n} with "
+"{digits}-digit analysis (about {floor}), so the '{label}' label is not "
+"informative at this sample size."
 msgstr ""
 
 #: R/summarydata.b.R
@@ -86884,6 +86956,10 @@ msgstr ""
 msgid "Normative Comparison"
 msgstr ""
 
+#: R/benford.b.R
+msgid "Not assessable"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid "Not assessable (empty model)"
 msgstr "Değerlendirilemez (boş model)"
@@ -86936,10 +87012,6 @@ msgid ""
 msgstr ""
 "kategorik değil; kategori kodlarını Nominal veya Ordinal yapın ya da R'de "
 "factor() kullanın"
-
-#: R/benford.b.R
-msgid "Not classified"
-msgstr ""
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -87199,6 +87271,7 @@ msgstr ""
 msgid "Note"
 msgstr ""
 
+#: R/benford.b.R
 #: R/summarydata.b.R
 msgid "NOTE"
 msgstr "NOT"
@@ -87950,6 +88023,10 @@ msgstr ""
 
 #: patientsimilarity/ui[4][2].label
 msgid "Number of Clusters:"
+msgstr ""
+
+#: R/benford.b.R
+msgid "Number of combinations analyzed: {bins}"
 msgstr ""
 
 #: pcacox/options/n_components.title
@@ -89097,11 +89174,11 @@ msgid ""
 msgstr ""
 
 #: R/benford.b.R
-msgid "Observations in those bins:"
+msgid "OBSERVATIONS IN THOSE BINS:"
 msgstr ""
 
 #: R/benford.b.R
-msgid "OBSERVATIONS IN THOSE BINS:"
+msgid "Observations in those bins: {n} / {total} ({pct}%)"
 msgstr ""
 
 #: mixedeffectscox/results/hierarchicalStructure.columns.title
@@ -89861,8 +89938,39 @@ msgid ""
 "Cases at any other level are removed, not counted as negative."
 msgstr ""
 
+#: R/survival.b.R
+msgid "Only {count} event(s) observed"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Only {count} events observed"
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid "Only {n} cases in the smaller reference-standard group"
+msgstr ""
+
+#: R/benford.b.R
+msgid ""
+"Only {n} observations were analysed. At this size the digit-frequency tests "
+"detect only very large departures, so neither a departure nor its absence is "
+"established here. The statistics above are reported for completeness."
+msgstr ""
+
+#: R/benford.b.R
+msgid ""
+"Only {n} observations were analysed. The digit-frequency tests below are "
+"computed, but at this size they resolve only very large departures, and the "
+"MAD conformity label is biased upward by sampling noise. Neither a departure "
+"nor its absence is established at this sample size."
+msgstr ""
+
+#: R/benford.b.R
+msgid ""
+"Only {n} valid observations are available; a leading-digit distribution "
+"needs at least 30 (and 100 or more before the tests carry useful power), so "
+"nothing below was computed. Select a variable with more recorded values, or "
+"pool comparable measurements before running this analysis."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -89914,27 +90022,10 @@ msgid ""
 "before the p-value can be read at face value."
 msgstr ""
 
-#: R/benford.b.R
-msgid ""
-"Only %d observations were analysed. The digit-frequency tests below are "
-"computed, but at this size they detect only very large departures, and the "
-"MAD conformity label is biased upward by sampling noise. Treat the "
-"assessment as provisional and gather more observations before drawing "
-"conclusions from it."
-msgstr ""
-
 #: R/advancedraincloud.b.R
 msgid ""
 "Only %d subject(s) have repeated observations, so the longitudinal "
 "connections shown may not be meaningful."
-msgstr ""
-
-#: R/benford.b.R
-msgid ""
-"Only %d valid observations are available; a leading-digit distribution needs "
-"at least 30 (and 100 or more before the tests carry useful power), so "
-"nothing below was computed. Select a variable with more recorded values, or "
-"pool comparable measurements before running this analysis."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -93362,7 +93453,17 @@ msgid "p-value (Upper)"
 msgstr ""
 
 #: R/benford.b.R
-msgid "p-value = %s"
+msgid ""
+"p-value = {p}. Supplementary: this test examines the mantissa distribution "
+"rather than the leading digits, and the Assessment row is not based on it. "
+"On data that follow Benford's Law it reaches p below 0.05 about once in "
+"twenty runs, like any other test, so a small p-value here alongside a "
+"chi-square p-value that is not small is an ordinary result rather than a "
+"contradiction."
+msgstr ""
+
+#: R/benford.b.R
+msgid "p-value = {p}. This is the test the Assessment row is based on."
 msgstr ""
 
 #: groupedbar/options/padjust.title
@@ -94062,6 +94163,10 @@ msgstr ""
 #: vusanalysis/options/plot_pairwise_rocs.title
 #: vusanalysis/results/pairwiseROCPlot.title
 msgid "Pairwise ROC Curves"
+msgstr ""
+
+#: survival/ui[3][4][0]/survivalTestType.label
+msgid "Pairwise test type"
 msgstr ""
 
 #: nonparametric/options/post_hoc_method/pairwise_wilcoxon.title
@@ -104762,6 +104867,10 @@ msgstr ""
 msgid "Proportional hazards assumption"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Proportional hazards assumption may be violated"
+msgstr ""
+
 #: stagemigration/results/proportionalHazardsTest.title
 msgid "Proportional Hazards Assumption Test"
 msgstr ""
@@ -106904,6 +107013,10 @@ msgid ""
 "rates, exact binomial CIs are used for accuracy with small sample sizes."
 msgstr ""
 
+#: R/benford.b.R
+msgid "Range ratio: {ratio}x"
+msgstr ""
+
 #: ihccluster/options/kRange.description
 msgid "Range to test when auto-selecting k"
 msgstr ""
@@ -107663,6 +107776,10 @@ msgstr ""
 msgid "Reading the columns"
 msgstr ""
 
+#: R/benford.b.R
+msgid "Reading the finding:"
+msgstr ""
+
 #: decisioncalculator/results/faganSummary.title
 msgid "Reading the Nomogram"
 msgstr ""
@@ -108109,6 +108226,16 @@ msgstr ""
 
 #: featurequality/results/transformation_recommendations.columns.title
 msgid "Recommended Transformation"
+msgstr ""
+
+#: R/benford.b.R
+msgid ""
+"Recording patterns that produce leading-digit departures include systematic "
+"rounding, preferred or repeated values, truncation at a detection limit, and "
+"a subset of records entered differently. This test does not distinguish "
+"among them, and a departure can also arise where the variable simply does "
+"not follow Benford's Law. The leading-digit bin listing below shows which "
+"digit combinations carry the deviation."
 msgstr ""
 
 #: singlearm/results/medianTable.columns.title
@@ -109655,10 +109782,6 @@ msgstr ""
 msgid "Repeated measures data detected - consider statistical modeling approaches"
 msgstr ""
 
-#: R/benford.b.R
-msgid "Repeated values among all observations in those bins:"
-msgstr ""
-
 #: jjsyndromicplot/options/repel.title
 msgid "Repel Overlapping Labels"
 msgstr ""
@@ -110231,6 +110354,10 @@ msgstr ""
 #: survival/ui[3][0][0]/residual_diagnostics.label
 #: survivalcont/options/residual_diagnostics.title
 msgid "Residual diagnostics"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Residual diagnostics could not be calculated: {message}"
 msgstr ""
 
 #: digitalvalidation/results/residualplot.description
@@ -111029,19 +111156,6 @@ msgstr ""
 msgid "Reversible Jump MCMC"
 msgstr ""
 
-#: R/benford.b.R
-msgid ""
-"Review data collection and entry procedures, and check for systematic "
-"rounding or preferred values. Collect at least %d observations before "
-"relying on the MAD conformity classification."
-msgstr ""
-
-#: R/benford.b.R
-msgid ""
-"Review data entry and collection procedures. Investigate any known "
-"systematic biases or rounding practices."
-msgstr ""
-
 #: R/decision.b.R
 msgid "Review false negative cases to understand what the test misses"
 msgstr ""
@@ -111690,6 +111804,7 @@ msgid "Risk Table"
 msgstr ""
 
 #: singlearm/ui[3][1][0]/risktable.label
+#: survival/options/risktable.title
 #: survival/ui[4][1][0]/risktable.label
 #: survivalcont/options/risktable.title
 msgid "Risk table"
@@ -111749,7 +111864,6 @@ msgstr ""
 
 #: multisurvival/options/risktable.title
 #: singlearm/options/risktable.title
-#: survival/options/risktable.title
 msgid "Risktable"
 msgstr ""
 
@@ -111849,7 +111963,10 @@ msgid ""
 "RMST and its Greenwood-based standard error are calculated from the "
 "Kaplan-Meier estimator using survival::survfit at a common observed time "
 "horizon. Wald 95% confidence intervals are shown."
-msgstr "RMST ve Greenwood tabanlı standart hatası, ortak gözlenen zaman ufkunda survival::survfit kullanılarak Kaplan-Meier tahmininden hesaplanır. Wald %95 güven aralıkları gösterilir."
+msgstr ""
+"RMST ve Greenwood tabanlı standart hatası, ortak gözlenen zaman ufkunda "
+"survival::survfit kullanılarak Kaplan-Meier tahmininden hesaplanır. Wald %95 "
+"güven aralıkları gösterilir."
 
 #: comprehensiveSurvivalPower/ui[5][0][0].label
 msgid "RMST and Non-inferiority Parameters"
@@ -112692,10 +112809,6 @@ msgid "Round Digits"
 msgstr ""
 
 #: R/benford.b.R
-msgid "Rounding and repeated values are expected in clinical measurement"
-msgstr ""
-
-#: R/benford.b.R
 #: checkdata/results/outliers.columns.title
 #: contTables/options/pcRow.title
 #: contTablesPaired/options/pcRow.title
@@ -112762,6 +112875,12 @@ msgstr ""
 
 #: variablebiplot/options/labelPoints/rownum.title
 msgid "Row Numbers"
+msgstr ""
+
+#: R/benford.b.R
+msgid ""
+"Row numbers refer to the rows included in this analysis. If a row filter is "
+"active they will not match the spreadsheet row numbers."
 msgstr ""
 
 #: gtsummary/options/percentType/row.title
@@ -113477,16 +113596,16 @@ msgstr ""
 msgid "Sample sizes for each study/group (optional)"
 msgstr ""
 
+#: R/benford.b.R
+msgid "Sample small: only a very large departure would be detected"
+msgstr ""
+
 #: measurementuncertainty/options/sample_stability_uncertainty.title
 msgid "Sample Stability Uncertainty ( percent)"
 msgstr ""
 
 #: jjoncoplot/results/sampleSummary.title
 msgid "Sample Summary"
-msgstr ""
-
-#: R/benford.b.R
-msgid "Sample too small for a dependable verdict"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -114478,6 +114597,12 @@ msgstr ""
 
 #: consortdiagram/ui[1][1][0].label
 msgid "Screening Exclusions"
+msgstr ""
+
+#: R/benford.b.R
+msgid ""
+"Screening for systematic recording patterns such as rounding or preferred "
+"values"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -117214,7 +117339,7 @@ msgid "Shapiro-Wilk W"
 msgstr ""
 
 #: R/benford.b.R
-msgid "Share expected in those same bins under Benford's Law:"
+msgid "Share expected in those same bins under Benford's Law: {pct}"
 msgstr ""
 
 #: frailtysurvival/options/frailty_type/shared.title
@@ -117270,7 +117395,9 @@ msgstr ""
 msgid ""
 "Short median follow-up ({time} {units}). May be insufficient for meaningful "
 "survival analysis."
-msgstr "Medyan izlem kısa ({time} {units}). Anlamlı bir sağkalım analizi için yetersiz olabilir."
+msgstr ""
+"Medyan izlem kısa ({time} {units}). Anlamlı bir sağkalım analizi için "
+"yetersiz olabilir."
 
 #: competingsurvival/options/showKMvsCIF.title
 #: competingsurvival/ui[3][0]/showKMvsCIF.label
@@ -121963,7 +122090,9 @@ msgstr ""
 msgid ""
 "Small sample size (n = {n}). Consider larger sample for more reliable "
 "cut-off analysis."
-msgstr "Örneklem küçük (n = {n}). Daha güvenilir kesim noktası analizi için daha büyük bir örneklem değerlendirin."
+msgstr ""
+"Örneklem küçük (n = {n}). Daha güvenilir kesim noktası analizi için daha "
+"büyük bir örneklem değerlendirin."
 
 #: R/waterfall.b.R
 msgid ""
@@ -121990,12 +122119,6 @@ msgstr ""
 msgid ""
 "Small sample size after removing missing data: {n} observations. Results may "
 "be unreliable."
-msgstr ""
-
-#: R/benford.b.R
-msgid ""
-"Small sample size detected. Results may be less reliable with fewer than 100 "
-"observations."
 msgstr ""
 
 #: R/decision.b.R
@@ -122391,6 +122514,10 @@ msgstr ""
 msgid "Some censoring values not recognised"
 msgstr ""
 
+#: R/survival.b.R
+msgid "Some clinical summary data were unavailable."
+msgstr ""
+
 #: R/tableone.b.R
 msgid ""
 "Some frequency tables could not be produced. Review the Not tabulated "
@@ -122747,7 +122874,10 @@ msgid ""
 "Sparse strata detected: %s. Strata with fewer than 10 patients or 3 events "
 "provide limited information; interpret the pooled hazard ratio and "
 "proportional-hazards assessment cautiously."
-msgstr "Seyrek tabakalar saptandı: %s. 10'dan az hasta veya 3'ten az olay içeren tabakalar sınırlı bilgi sağlar; ortak hazard oranını ve orantılı hazard değerlendirmesini dikkatle yorumlayın."
+msgstr ""
+"Seyrek tabakalar saptandı: %s. 10'dan az hasta veya 3'ten az olay içeren "
+"tabakalar sınırlı bilgi sağlar; ortak hazard oranını ve orantılı hazard "
+"değerlendirmesini dikkatle yorumlayın."
 
 #: R/survivalcont.b.R
 msgid "Sparse strata in stratified Cox model"
@@ -124916,9 +125046,12 @@ msgid ""
 msgstr ""
 
 #: singlearm/options/ybegin_plot.title
-#: survival/options/ybegin_plot.title
 #: survivalcont/options/ybegin_plot.title
 msgid "Start y-axis"
+msgstr ""
+
+#: survival/options/ybegin_plot.title
+msgid "Start Y-axis"
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -126025,6 +126158,10 @@ msgstr ""
 msgid "Statistical Tests:"
 msgstr ""
 
+#: R/benford.b.R
+msgid "STATISTICAL TESTS:"
+msgstr ""
+
 #: spatialanalysis/ui[5][1].label
 msgid "Statistical threshold for detecting significant patterns (typical: 0.05 = 5%)"
 msgstr ""
@@ -126671,7 +126808,9 @@ msgid "Stratification Variable (optional)"
 msgstr ""
 
 #: R/survival.b.R
-msgid "Stratification variable {variable} not found. Using standard Cox regression."
+msgid ""
+"Stratification variable {variable} was not found. Standard Cox regression "
+"was used."
 msgstr ""
 
 #: desctools/options/stratum_var.description
@@ -128630,7 +128769,7 @@ msgid "Survey-Weighted Survival Summary"
 msgstr ""
 
 #: package/analyses/singlearm.menuGroup
-#: package/analyses/survival.menuGroup
+#: package/analyses/survivalcont.menuGroup
 #: package/analyses/multisurvival.menuGroup
 #: package/analyses/oddsratio.menuGroup
 #: package/analyses/timeinterval.menuGroup
@@ -128648,8 +128787,8 @@ msgstr ""
 #: semimarkov/results/reliabilityAnalysis.columns.title
 #: simonmakuch/results/survivalEstimates.columns.title
 #: singlearm/options.menuGroup
-#: survival/options.menuGroup
 #: survival/results/survTable.columns.title
+#: survivalcont/options.menuGroup
 #: survivalcont/results/survTable.columns.title
 #: survivalcont/results/multipleSurvTable.columns.title
 #: timeinterval/options.menuGroup
@@ -128762,6 +128901,12 @@ msgstr ""
 #: clinicalheatmap/options/survivalAnalysis.title
 #: clinicalheatmap/results/clusterSurvival.title
 msgid "Survival Analysis by Clusters"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Survival analysis completed on {observations} observations with {events} "
+"events ({rate}% event rate)."
 msgstr ""
 
 #: package/analyses/survivalcont.title
@@ -128962,6 +129107,10 @@ msgstr ""
 #: condsurvival/ui[0][0].label
 #: timeupdatesurvival/ui[0][0].label
 msgid "Survival Data"
+msgstr ""
+
+#: R/survival.b.R
+msgid "Survival data export skipped (competing risks)"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -129266,6 +129415,12 @@ msgstr "Sağkalım olasılığı"
 #: pseudosurvival/options/survival_curves.title
 #: pseudosurvival/results/survival_curves_plot.title
 msgid "Survival Probability Curves"
+msgstr ""
+
+#: R/survival.b.R
+msgid ""
+"Survival probability data could not be added to the clinical summary: "
+"{message}"
 msgstr ""
 
 #: simpleSurvivalPower/options/effect_size_type/survival_difference.title
@@ -129626,7 +129781,7 @@ msgstr ""
 msgid "SurvivalExtraD"
 msgstr ""
 
-#: package/analyses/survivalcont.menuGroup
+#: package/analyses/survival.menuGroup
 #: package/analyses/competingsurvival.menuGroup
 #: package/analyses/timeroc.menuGroup
 #: package/analyses/relativesurvival.menuGroup
@@ -129661,8 +129816,8 @@ msgstr ""
 #: relativesurvival/options.menuGroup
 #: rpasurvival/options.menuGroup
 #: sparsegrouplasso/options.menuGroup
+#: survival/options.menuGroup
 #: survivalPower/options.menuGroup
-#: survivalcont/options.menuGroup
 #: timeroc/options.menuGroup
 msgid "SurvivalT"
 msgstr "SağkalımT"
@@ -130126,10 +130281,6 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "Table population error:"
-msgstr ""
-
-#: R/survival.b.R
-msgid "Table population failed: {message}"
 msgstr ""
 
 #: jforester/options/table_position.title
@@ -131963,10 +132114,6 @@ msgstr ""
 msgid "Test type"
 msgstr ""
 
-#: survival/ui[3][5][0]/survivalTestType.label
-msgid "Test type for pairwise comparisons"
-msgstr ""
-
 #: decision/options/newtest.title
 msgid "Test Under Evaluation"
 msgstr ""
@@ -132190,15 +132337,6 @@ msgstr ""
 "işaretleyebilir, küçük örneklemlerde gerçek sapmaları kaçırabilir. Bu "
 "nedenle testi dağılımın görsel incelemesiyle birlikte değerlendirin."
 
-#: package/analyses/benford.description
-#: benford/options.description.main
-msgid ""
-"Tests whether the leading digits of a numeric variable follow Benford's Law, "
-"using the MAD conformity classification, a chi-square goodness-of-fit test "
-"and the Mantissa Arc Test. Intended as a screen for systematic recording "
-"artefacts such as rounding or preferred values."
-msgstr ""
-
 #: R/chisqposttest.b.R
 msgid ""
 "Tests whether two categorical variables are independent. Used when you want "
@@ -132304,6 +132442,18 @@ msgstr ""
 msgid "The {} was conducted to compare groups."
 msgstr ""
 
+#: R/benford.b.R
+msgid ""
+"The {digits}-digit analysis spreads {n} observations over {bins} digit bins. "
+"The smallest expected count is {minexp} and {sparse} percent of the bins "
+"have an expected count below 5, so the chi-square approximation is only "
+"approximate here and rejects more often than its nominal rate: on simulated "
+"conforming data the rejection rate in this regime ran between 6 and 14 "
+"percent against a nominal 5 percent, worst at the 3-digit setting. Read the "
+"p-value as indicative rather than exact. A 1-digit analysis uses 9 bins and "
+"puts far more observations in each."
+msgstr ""
+
 #: R/timeinterval.b.R
 msgid ""
 "The {landmark} landmark excluded no participants, because it is only "
@@ -132341,18 +132491,6 @@ msgstr ""
 "farklı bir lambda kuralını boş sonucu beğenmediğiniz için değil yalnızca "
 "önceden belirlenmiş bir modelleme kararı olarak seçiniz."
 
-#: R/benford.b.R
-msgid ""
-"The %d-digit analysis spreads %d observations over %d digit bins. The "
-"smallest expected count is %.2f and %.0f%% of the bins have an expected "
-"count below 5, so the chi-square approximation is only approximate here and "
-"rejects more often than its nominal rate: on simulated conforming data the "
-"rejection rate in this regime ran between 6 and 14 percent against a nominal "
-"5 percent, worst at the 3-digit setting. Read the p-value as indicative "
-"rather than exact. A 1-digit analysis uses 9 bins and puts far more "
-"observations in each."
-msgstr ""
-
 #: R/enhancedROC.b.R
 msgid ""
 "The %s predictor demonstrated %s diagnostic performance with an AUC of %.3f "
@@ -132374,7 +132512,11 @@ msgstr ""
 "düzenlileştirilmiş değeri seçer ve hiçbir yordayıcıyı seçmeyebilir."
 
 #: R/benford.b.R
-msgid "The 2 leading-digit bins whose observed frequency deviates most"
+msgid ""
+"The 2 leading-digit bins whose observed frequency deviates most from "
+"Benford's Law were selected, and every observation falling in them is listed "
+"below. An observation appears here because of its leading digits, not "
+"because it is individually unusual."
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -132456,6 +132598,24 @@ msgstr ""
 #: R/lassocox.b.R
 msgid "The apparent development-sample C-index was {cindex}."
 msgstr "Geliştirme örneklemindeki görünür C-indeksi {cindex} idi."
+
+#: R/benford.b.R
+msgid ""
+"The Assessment row reports what the tests found, not how concerned to be - "
+"that judgement depends on how the variable was collected and belongs to you. "
+"\\u{201C}No departure detected\\u{201D} means the leading-digit frequencies "
+"are consistent with Benford's Law; it does not establish that the data are "
+"free of errors, because this test looks only at leading digits. "
+"\\u{201C}Departure detected\\u{201D} means the frequencies differ from "
+"Benford's Law by more than sampling noise explains; systematic rounding, "
+"preferred or repeated values, truncation at a detection limit, and a subset "
+"of records entered differently all produce this, as does a variable that "
+"simply does not follow Benford's Law, and the test does not distinguish "
+"among them. \\u{201C}Not assessable\\u{201D} means the data span less than "
+"two orders of magnitude, where the method does not apply. \\u{201C}Limited "
+"evidence\\u{201D} means the sample is too small for the tests to resolve "
+"anything but a very large departure."
+msgstr ""
 
 #: R/chisqposttest.b.R
 msgid ""
@@ -132549,7 +132709,11 @@ msgid ""
 "The candidate space contains %s cut-off combinations. A reproducible random "
 "sample of %d unique combinations was evaluated using seed %d. The reported "
 "solution is approximate and must be validated independently."
-msgstr "Aday uzayı %s kesim noktası kombinasyonu içeriyor. %d benzersiz kombinasyondan oluşan yeniden üretilebilir rastgele bir örneklem %d tohumu kullanılarak değerlendirildi. Bildirilen çözüm yaklaşıktır ve bağımsız olarak doğrulanmalıdır."
+msgstr ""
+"Aday uzayı %s kesim noktası kombinasyonu içeriyor. %d benzersiz "
+"kombinasyondan oluşan yeniden üretilebilir rastgele bir örneklem %d tohumu "
+"kullanılarak değerlendirildi. Bildirilen çözüm yaklaşıktır ve bağımsız "
+"olarak doğrulanmalıdır."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -132781,7 +132945,9 @@ msgstr ""
 msgid ""
 "The data-derived cut-off point for {variable} is {cutoff}; it separates "
 "lower and higher marker values in this dataset."
-msgstr "{variable} için veriden türetilen kesim noktası {cutoff} değeridir; bu veri kümesindeki daha düşük ve daha yüksek belirteç değerlerini ayırır."
+msgstr ""
+"{variable} için veriden türetilen kesim noktası {cutoff} değeridir; bu veri "
+"kümesindeki daha düşük ve daha yüksek belirteç değerlerini ayırır."
 
 #: advancedbarplot/options/data.description.jamovi
 msgid "The dataset for advanced bar chart visualization."
@@ -132918,6 +133084,30 @@ msgstr ""
 "toplayabilir. Nadir bir bulgu (0.5'ten uzak prevalans), kappa0 ile kappa1 "
 "arasındaki küçük fark ve yüksek güç hedefinin her biri örneklem büyüklüğünü "
 "artırır; bunlardan kesin bir gereklilik olmayanı gözden geçirin."
+
+#: R/benford.b.R
+msgid ""
+"The deviation is detectable but modest relative to sampling noise. The "
+"leading-digit bin listing below shows which digit combinations carry it. "
+"Collecting at least {needed} observations would additionally make the MAD "
+"conformity classification usable."
+msgstr ""
+
+#: R/benford.b.R
+msgid ""
+"The deviation is larger than sampling noise accounts for. Leading-digit "
+"departures arise from systematic rounding, preferred or repeated values, a "
+"subset of records entered differently, and other recording patterns; this "
+"test does not distinguish among them. The leading-digit bin listing below "
+"shows which digit combinations carry the deviation."
+msgstr ""
+
+#: R/benford.b.R
+msgid ""
+"The deviation sits in Nigrini's marginal band. Leading-digit departures of "
+"this size are produced by systematic rounding and by preferred values, among "
+"other recording patterns; this test does not distinguish among them."
+msgstr ""
 
 #: decision/options/newtest.description.ui
 msgid ""
@@ -133261,6 +133451,16 @@ msgid ""
 "intervals and convergence, and consider collecting more observations."
 msgstr ""
 
+#: R/benford.b.R
+msgid ""
+"The leading-digit distribution departs from Benford's Law (MAD={mad}, "
+"{label}; chi-square p={p}). The deviation exceeds Nigrini's nonconformity "
+"cut-off for this digit setting. Benford's Law describes how leading digits "
+"are distributed in data spanning several orders of magnitude; a departure "
+"indicates the values do not follow that pattern and does not by itself "
+"identify a cause."
+msgstr ""
+
 #: R/oddsratio.b.R
 msgid "The level '{level}' is used as the positive/exposure category as specified."
 msgstr ""
@@ -133343,7 +133543,13 @@ msgid ""
 "and is optimistic. No selection-adjusted p-value is reported: a single-split "
 "maximally selected-rank test does not adjust a multiple-cutoff procedure. "
 "Validate every cut-point in independent data before clinical use."
-msgstr "Yukarıdaki log-rank p değeri KEŞİFSELDİR: kesim noktaları aynı verilerden seçildiği için, çok sayıdaki istatistiğin en büyüğü tek bir testmiş gibi bildirilmiştir ve iyimserdir. Seçime göre düzeltilmiş p değeri bildirilmez; tek bölmeli maksimum seçilmiş sıra testi çoklu kesim noktası işlemini düzeltmez. Klinik kullanımdan önce her kesim noktasını bağımsız verilerde doğrulayın."
+msgstr ""
+"Yukarıdaki log-rank p değeri KEŞİFSELDİR: kesim noktaları aynı verilerden "
+"seçildiği için, çok sayıdaki istatistiğin en büyüğü tek bir testmiş gibi "
+"bildirilmiştir ve iyimserdir. Seçime göre düzeltilmiş p değeri bildirilmez; "
+"tek bölmeli maksimum seçilmiş sıra testi çoklu kesim noktası işlemini "
+"düzeltmez. Klinik kullanımdan önce her kesim noktasını bağımsız verilerde "
+"doğrulayın."
 
 #: simonmakuch/options/timeDepVariable.description
 msgid ""
@@ -133393,7 +133599,9 @@ msgstr ""
 
 #: R/survivalcont.b.R
 msgid "The median survival time for patients with {group} was {median} {time_unit}."
-msgstr "{group} grubundaki hastalar için medyan sağkalım süresi {median} {time_unit} idi."
+msgstr ""
+"{group} grubundaki hastalar için medyan sağkalım süresi {median} {time_unit} "
+"idi."
 
 #: advancedSurvivalPower/options/median_survival.description
 msgid ""
@@ -133829,6 +134037,10 @@ msgstr ""
 msgid "The proportional-hazards diagnostic did not complete cleanly: {message}"
 msgstr "Orantılı hazard tanısı düzgün biçimde tamamlanmadı: {message}"
 
+#: R/survival.b.R
+msgid "The proportional-hazards test plot could not be created: {message}"
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid "The ranking"
 msgstr ""
@@ -133913,6 +134125,10 @@ msgid ""
 "The response category override contained %d unrecognised label(s): %s. Only "
 "CR, PR, SD, PD and Unknown are accepted. Those patients keep their computed "
 "category; no patient was dropped."
+msgstr ""
+
+#: R/survival.b.R
+msgid "The result table was incomplete."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -134061,10 +134277,10 @@ msgstr ""
 
 #: R/benford.b.R
 msgid ""
-"The selected variable contains %d zero and %d negative values. A leading "
-"digit is undefined for these, so nothing below was computed. Filter them "
-"out, analyse increases and decreases separately if the variable is a change "
-"score, or choose a naturally positive measurement."
+"The selected variable contains {zeros} zero and {negatives} negative values. "
+"A leading digit is undefined for these, so nothing below was computed. "
+"Filter them out, analyse increases and decreases separately if the variable "
+"is a change score, or choose a naturally positive measurement."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -134364,6 +134580,16 @@ msgid ""
 "so they are calendar days and the timezone has no effect on the intervals."
 msgstr ""
 
+#: R/benford.b.R
+msgid ""
+"The values span {decades} orders of magnitude. Benford's Law describes data "
+"spanning several orders of magnitude, so below two decades the leading-digit "
+"frequencies are determined by where the range starts and stops rather than "
+"by how the values were recorded. The measured MAD of {mad} and chi-square p "
+"of {p} are reported above, but for this variable they carry no information "
+"about recording quality and are not interpreted here."
+msgstr ""
+
 #: eurostatmap/options/geo_var.description.jamovi
 msgid "The variable containing NUTS geographic codes (for local data)."
 msgstr ""
@@ -134449,10 +134675,6 @@ msgid ""
 "is used to test whether two categorical variables are independent or "
 "associated. If the p-value is low, it suggests the variables are not "
 "independent, and that there is a relationship between the two variables."
-msgstr ""
-
-#: R/benford.b.R
-msgid "them is listed below. An observation appears here because of its"
 msgstr ""
 
 #: jjpubr/options/theme.title
@@ -136036,10 +136258,9 @@ msgstr ""
 
 #: R/survival.b.R
 msgid ""
-"Time difference cannot be calculated\n"
-"Date parsing produced no valid dates\n"
-"Current date type setting: %s\n"
-"Please verify date format matches your data"
+"Time difference cannot be calculated because date parsing produced no valid "
+"dates with the {format} setting. Verify that the selected format matches the "
+"data."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -138353,6 +138574,10 @@ msgstr ""
 msgid "Total observations:"
 msgstr ""
 
+#: R/benford.b.R
+msgid "Total observations: {n}"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "Total observed follow-up is zero, so an incidence rate cannot be calculated. "
@@ -140464,9 +140689,9 @@ msgid ""
 "label from the benford.analysis package measures the SIZE of the departure "
 "against Nigrini's digit-count-specific cutoffs, and its label is only used "
 "once the sample is large enough for those cutoffs to exceed the deviation "
-"sampling noise alone produces (about 250 observations at 1 digit, 1300 at 2, "
-"2550 at 3); below that the summary table says so and the verdict comes from "
-"the chi-square test instead. The chi-square goodness-of-fit test asks "
+"sampling noise alone produces (about 1000 observations at 1 digit, 5200 at "
+"2, 10200 at 3); below that the summary table says so and the verdict comes "
+"from the chi-square test instead. The chi-square goodness-of-fit test asks "
 "whether ANY departure is detectable and gains power as N grows, so at large "
 "N it can flag a departure too small to move the MAD label - reported here as "
 "a detectable but small departure rather than as an all-clear. The "
@@ -141970,9 +142195,8 @@ msgstr ""
 
 #: R/survival.b.R
 msgid ""
-"Unknown date format: %s\n"
-"Supported formats: %s\n"
-"Please select correct format in Date Type options"
+"Unknown date format: {format}. Supported formats: {supported}. Select the "
+"matching format in Date Type options."
 msgstr ""
 
 #: outbreakanalysis/options/outbreak_type/unknown.title
@@ -142039,10 +142263,6 @@ msgstr "LASSO seçimi sonrası cezasız yeniden kurulum"
 
 #: bayesiannetworkma/options/coherence_method/unrelated_mean_effects.title
 msgid "Unrelated Mean Effects"
-msgstr ""
-
-#: R/benford.b.R
-msgid "Unreliable (N<100)"
 msgstr ""
 
 #: factoranalysis/results/results/unrotatedLoadings.title
@@ -144276,18 +144496,16 @@ msgstr ""
 
 #: R/benford.b.R
 msgid ""
-"Values run from %s to %s, a range of %s orders of magnitude. Benford's Law "
-"describes data spanning several orders of magnitude; between one and two "
-"decades the leading-digit frequencies are dominated by where the range "
-"starts and stops rather than by Benford's Law, so the tests below are not "
-"calibrated and can report a large departure for data that were recorded "
+"Values run from {min} to {max}, a range of {decades} orders of magnitude. "
+"Benford's Law describes data spanning several orders of magnitude; between "
+"one and two decades the leading-digit frequencies are dominated by where the "
+"range starts and stops rather than by Benford's Law, so the tests below are "
+"not calibrated and can report a large departure for data that were recorded "
 "perfectly (on simulated conforming data spanning 1.3 decades the chi-square "
-"test rejected in 38 percent of runs at a nominal 5 percent). Results are "
-"shown but the conformity assessment is not meaningful for this variable."
-msgstr ""
-
-#: R/benford.b.R
-msgid "Values that are multiples of 100:"
+"test rejected in 38 percent of runs at a nominal 5 percent). The statistics "
+"are shown for completeness, but the leading-digit finding is reported as "
+"\\u{201C}Not assessable\\u{201D} for this variable rather than being "
+"interpreted."
 msgstr ""
 
 #: groupedbar/options/values.title
@@ -145992,7 +146210,9 @@ msgstr ""
 msgid ""
 "Very high event rate ({rate}%). Consider competing risks or cause-specific "
 "analysis."
-msgstr "Olay hızı çok yüksek (%{rate}). Yarışan riskleri veya nedene özgü analizi değerlendirin."
+msgstr ""
+"Olay hızı çok yüksek (%{rate}). Yarışan riskleri veya nedene özgü analizi "
+"değerlendirin."
 
 #: netreclassification/results/reclassification.columns.title
 msgid "Very High Risk"
@@ -146060,7 +146280,9 @@ msgstr ""
 msgid ""
 "Very small sample size (n = {n}). Results may be unreliable. Recommend n ≥ "
 "50 for stable cut-off analysis."
-msgstr "Örneklem çok küçük (n = {n}). Sonuçlar güvenilir olmayabilir. Kararlı kesim noktası analizi için n ≥ 50 önerilir."
+msgstr ""
+"Örneklem çok küçük (n = {n}). Sonuçlar güvenilir olmayabilir. Kararlı kesim "
+"noktası analizi için n ≥ 50 önerilir."
 
 #: R/waterfall.b.R
 msgid ""
@@ -146816,6 +147038,7 @@ msgstr ""
 msgid "warning"
 msgstr "uyarı"
 
+#: R/benford.b.R
 #: R/decisioncalculator.b.R
 #: R/summarydata.b.R
 msgid "WARNING"
@@ -146825,7 +147048,6 @@ msgstr "UYARI"
 msgid "Warning Messages"
 msgstr ""
 
-#: R/benford.b.R
 #: R/swimmerplot.b.R
 msgid "Warning:"
 msgstr ""
@@ -146884,7 +147106,9 @@ msgstr ""
 msgid ""
 "Warning: Multiple cut-off searches inflate type I error; treat p-values as "
 "exploratory and validate externally."
-msgstr "Uyarı: Çoklu kesim noktası aramaları tip I hatayı artırır; p değerlerini keşifsel kabul edin ve dış verilerde doğrulayın."
+msgstr ""
+"Uyarı: Çoklu kesim noktası aramaları tip I hatayı artırır; p değerlerini "
+"keşifsel kabul edin ve dış verilerde doğrulayın."
 
 #: R/waterfall.b.R
 msgid "Warning: Negative time values detected. Please verify time measurements."
@@ -147709,10 +147933,6 @@ msgstr ""
 msgid "What to Calculate"
 msgstr ""
 
-#: R/benford.b.R
-msgid "What to do with results:"
-msgstr ""
-
 #: metaanalysis/options/effect_measure.title
 msgid "What type of effect are you combining?"
 msgstr ""
@@ -147729,7 +147949,9 @@ msgstr ""
 msgid ""
 "When {variable} increases by 1 unit, the instantaneous hazard rate of the "
 "event is multiplied by {hr} (a hazard ratio, not a risk ratio)."
-msgstr "{variable} 1 birim arttığında olayın anlık hazard hızı {hr} ile çarpılır (bu bir hazard oranıdır, risk oranı değildir)."
+msgstr ""
+"{variable} 1 birim arttığında olayın anlık hazard hızı {hr} ile çarpılır (bu "
+"bir hazard oranıdır, risk oranı değildir)."
 
 #: R/tableone.b.R
 msgid ""
@@ -149539,7 +149761,7 @@ msgid "Your data contains:"
 msgstr ""
 
 #: R/benford.b.R
-msgid "Your data range:"
+msgid "Your data range: {min} to {max} ({decades} orders of magnitude)"
 msgstr ""
 
 #: sigmametrics/results/benchmarkComparison.columns.title
