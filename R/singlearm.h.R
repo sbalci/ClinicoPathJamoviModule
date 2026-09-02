@@ -563,7 +563,8 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianHeading",
-                title="Median Time-to-Event Analysis"))
+                title="Median Time-to-Event Analysis",
+                visible="(length(outcome) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="medianTable",
@@ -700,7 +701,8 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="survTableHeading",
-                title="Time-Specific Probability Estimates"))
+                title="Time-Specific Probability Estimates",
+                visible="(length(outcome) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="survTable",
@@ -1421,7 +1423,7 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "singlearm",
-                version = c(1,0,8),
+                version = c(1,0,10),
                 options = options,
                 results = singlearmResults$new(options=options),
                 data = data,

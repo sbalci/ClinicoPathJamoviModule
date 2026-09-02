@@ -139,6 +139,7 @@ items:
     - name:  medianHeading
       title: Median Time-to-Event Analysis
       type:  Preformatted
+      visible: (length(outcome) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
 
 
 
@@ -283,6 +284,7 @@ items:
     - name:  survTableHeading
       title: 'Time-Specific Probability Estimates'
       type:  Preformatted
+      visible: (length(outcome) > 0 && (length(elapsedtime) > 0 || (tint && length(dxdate) > 0 && length(fudate) > 0)))
 
 
 

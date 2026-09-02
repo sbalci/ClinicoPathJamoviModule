@@ -17,44 +17,48 @@
 NULL
 
 # Helper function to create styled HTML notice (replaces jmvcore::Notice to avoid serialization errors)
+#
+# The tints are translucent rather than opaque pastel hex. An opaque light fill
+# is a bright island in jamovi's dark theme, and it forces every piece of text
+# on it to carry a hardcoded dark colour -- so anything added later without one
+# is unreadable. Each rgba() below composites over white to EXACTLY the pastel
+# it replaces (tools/theme_safe_html.py does this computation), so the light
+# theme is unchanged, while `color: inherit` lets the dark theme supply its own
+# foreground. Severity stays legible in both themes through the left border.
 .singlearmNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
     type <- match.arg(type)
 
     # Define styles for each notice type
     styles <- list(
         ERROR = list(
-            bg = "#f8d7da",
+            bg = "rgba(216, 33, 50, 0.18)",
             border = "#dc3545",
-            icon = "",
-            title_color = "#721c24"
+            icon = ""
         ),
         STRONG_WARNING = list(
-            bg = "#fff3cd",
+            bg = "rgba(255, 202, 33, 0.23)",
             border = "#ff9800",
-            icon = "",
-            title_color = "#856404"
+            icon = ""
         ),
         WARNING = list(
-            bg = "#fff3cd",
+            bg = "rgba(255, 202, 33, 0.23)",
             border = "#ffc107",
-            icon = "",
-            title_color = "#856404"
+            icon = ""
         ),
         INFO = list(
-            bg = "#d1ecf1",
+            bg = "rgba(33, 163, 188, 0.21)",
             border = "#17a2b8",
-            icon = "",
-            title_color = "#0c5460"
+            icon = ""
         )
     )
 
     style <- styles[[type]]
 
     html <- paste0(
-        "<div style='background-color: ", style$bg, "; ",
+        "<div style='background-color: ", style$bg, "; color: inherit; ",
         "padding: 15px; margin: 10px 0; border-radius: 5px; ",
         "border-left: 4px solid ", style$border, ";'>",
-        "<p style='margin: 0; color: ", style$title_color, ";'>",
+        "<p style='margin: 0; color: inherit;'>",
         "<strong>", style$icon, " ", type, ":</strong> ",
         htmltools::htmlEscape(message),
         "</p>",
@@ -64,6 +68,14 @@ NULL
     return(html)
 }
 
+#' Single Arm Survival backend
+#'
+#' Backend R6 class for the jamovi `singlearm` analysis: single-cohort
+#' Kaplan-Meier and cumulative-incidence estimates, time-specific survival
+#' probabilities, person-time incidence rates and piecewise hazard rates.
+#'
+#' @importFrom R6 R6Class
+#' @return An \code{R6} class generator object for the \code{singlearmClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "singlearmClass",
     inherit = singlearmBase,
@@ -92,121 +104,22 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # from earlier states of this analysis are not retained indefinitely.
           private$.cache <- new.env(parent = emptyenv())
 
-          # Initialize all outputs to FALSE first
-          self$results$medianSummary$setVisible(FALSE)
-          self$results$survTableSummary$setVisible(FALSE)
-          self$results$personTimeHeading2$setVisible(FALSE)
-          self$results$plot$setVisible(FALSE)
-          self$results$plot2$setVisible(FALSE)
-          self$results$plot3$setVisible(FALSE)
-          self$results$plot6$setVisible(FALSE)
-          self$results$medianSurvivalExplanation$setVisible(FALSE)
-          self$results$survivalPlotsHeading3$setVisible(FALSE)
-          self$results$medianHeading3$setVisible(FALSE)
-          self$results$survivalProbabilityExplanation$setVisible(FALSE)
-          self$results$personTimeHeading$setVisible(FALSE)
-          self$results$personTimeTable$setVisible(FALSE)
-          self$results$personTimeSummary$setVisible(FALSE)
-          self$results$personTimeHeading3$setVisible(FALSE)
-          self$results$personTimeExplanation$setVisible(FALSE)
-          self$results$survivalPlotsExplanation$setVisible(FALSE)
-          self$results$baselineHazardHeading$setVisible(FALSE)
-          self$results$baselineHazardTable$setVisible(FALSE)
-          self$results$baselineHazardPlot$setVisible(FALSE)
-          self$results$smoothedHazardPlot$setVisible(FALSE)
-          self$results$baselineHazardSummary$setVisible(FALSE)
-          self$results$baselineHazardHeading3$setVisible(FALSE)
-          self$results$baselineHazardExplanation$setVisible(FALSE)
-          self$results$dataQualityHeading$setVisible(FALSE)
-          self$results$dataQualityTable$setVisible(FALSE)
-          self$results$dataQualitySummary$setVisible(FALSE)
-          # Section headings for the median / survival tables start hidden and
-          # are revealed only once their analyses populate, so empty titles do
-          # not show alongside the welcome/todo message.
-          self$results$medianHeading$setVisible(FALSE)
-          self$results$survTableHeading$setVisible(FALSE)
-
-          # Handle showSummaries visibility
-          if (self$options$showSummaries) {
-            self$results$medianSummary$setVisible(TRUE)
-            self$results$survTableSummary$setVisible(TRUE)
-            # Person-time summary (and its heading) require both showSummaries AND person_time
-            if (self$options$person_time) {
-              self$results$personTimeHeading2$setVisible(TRUE)
-              self$results$personTimeSummary$setVisible(TRUE)
-            }
-          }
-
-          # Handle showExplanations visibility
-          if (self$options$showExplanations) {
-            self$results$medianHeading3$setVisible(TRUE)
-            self$results$medianSurvivalExplanation$setVisible(TRUE)
-            self$results$survivalProbabilityExplanation$setVisible(TRUE)
-            
-            # Survival plots explanation requires showExplanations AND at least one plot
-            if (self$options$sc || self$options$ce || self$options$ch || self$options$kmunicate) {
-              self$results$survivalPlotsHeading3$setVisible(TRUE)
-              self$results$survivalPlotsExplanation$setVisible(TRUE)
-            }
-            
-            # Person-time explanation requires both showExplanations AND person_time
-            if (self$options$person_time) {
-              self$results$personTimeHeading3$setVisible(TRUE)
-              self$results$personTimeExplanation$setVisible(TRUE)
-            }
-          }
-
-          # Handle person_time visibility
-          if (self$options$person_time) {
-            self$results$personTimeHeading$setVisible(TRUE)
-            self$results$personTimeTable$setVisible(TRUE)
-          }
-
-          # Handle baseline hazard visibility
-          if (self$options$baseline_hazard) {
-            self$results$baselineHazardHeading$setVisible(TRUE)
-            self$results$baselineHazardTable$setVisible(TRUE)
-            self$results$baselineHazardPlot$setVisible(TRUE)
-            # Summary requires both baseline_hazard AND showSummaries
-            if (self$options$showSummaries) {
-              self$results$baselineHazardSummary$setVisible(TRUE)
-            }
-            # Explanation requires both baseline_hazard AND showExplanations
-            if (self$options$showExplanations) {
-              self$results$baselineHazardHeading3$setVisible(TRUE)
-              self$results$baselineHazardExplanation$setVisible(TRUE)
-            }
-          }
-
-          # Handle hazard smoothing visibility
-          if (self$options$hazard_smoothing) {
-            self$results$smoothedHazardPlot$setVisible(TRUE)
-          }
-
-          # Handle advanced diagnostics visibility
-          if (self$options$advancedDiagnostics) {
-            self$results$dataQualityHeading$setVisible(TRUE)
-            self$results$dataQualityTable$setVisible(TRUE)
-            # Summary requires both advancedDiagnostics AND showSummaries
-            if (self$options$showSummaries) {
-              self$results$dataQualitySummary$setVisible(TRUE)
-            }
-          }
-
-          # Handle plot visibility based on their options
-          if (self$options$sc) {
-            self$results$plot$setVisible(TRUE)
-          }
-          if (self$options$ce) {
-            self$results$plot2$setVisible(TRUE)
-          }
-          if (self$options$ch) {
-            self$results$plot3$setVisible(TRUE)
-          }
-          if (self$options$kmunicate) {
-            self$results$plot6$setVisible(TRUE)
-          }
-
+          # Result visibility is declared in jamovi/singlearm.r.yaml.
+          #
+          # This used to hide 28 items here and then re-derive the SAME
+          # conditions in R to show them again. setVisible() replaces an
+          # element's binding with a literal and makes asProtoBuf() emit a HARD
+          # Visible$YES/NO instead of DEFAULT_*, so the declarative rule was
+          # discarded on every run and the two encodings had to be kept in step
+          # by hand. They already drifted: `plot` was shown from `sc` alone,
+          # while its binding also excludes competing-risk mode -- only .run()'s
+          # later re-assertion hid it again.
+          #
+          # The imperative calls that remain are the ones a `visible:`
+          # expression genuinely cannot make, because they depend on the DATA
+          # rather than on the options: the KM-vs-CIF switch and the
+          # piecewise-hazard suppression in .run(), both driven by
+          # private$.eventRecode, which does not exist yet at .init() time.
       },
 
       # Message Accumulation Methods (to avoid serialization errors from dynamic Notices) ----
@@ -271,8 +184,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           try(self$results[[nm]]$setState(NULL), silent = TRUE)
         }
 
-        self$results$medianHeading$setVisible(FALSE)
-        self$results$survTableHeading$setVisible(FALSE)
+        # The two section headings are now gated declaratively on the required
+        # inputs (jamovi/singlearm.r.yaml), so they do not need hiding here.
+        # These two do: which of the KM curve and the cumulative-incidence
+        # curve is shown depends on the recoded status, not on the options, so
+        # .run() decides it below -- and must start from a clean slate on the
+        # early-return paths it never reaches.
         self$results$plot$setVisible(FALSE)
         self$results$plot_cif$setVisible(FALSE)
       },
@@ -561,7 +478,17 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           )
           
           if (!silent) {
-            warning(paste(user_msg, .("Technical details:"), e$message))
+            # The user-facing half belongs in this analysis's own notice panel.
+            # jamovi surfaces R warnings only in the undifferentiated "Analysis
+            # Notes" tray, mixed in with third-party package chatter, so a
+            # warning() alone reads as noise rather than as a result.
+            # .displayMessages() runs at the end of .run() and before every
+            # early return, so anything raised on the .run() path is rendered;
+            # the plot renderers execute after that, which is why the technical
+            # detail still goes to the warning stream for both.
+            private$.addWarning(user_msg)
+            warning(paste0("singlearm/", context, ": ", conditionMessage(e)),
+                    call. = FALSE)
           }
           
           return(NULL)
@@ -1887,7 +1814,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         estimand_meta <- private$.estimandMeta()
 
         # Reveal the section heading now that the median-survival analysis runs
-        self$results$medianHeading$setVisible(TRUE)
 
         mydata[[mytime]] <-
           jmvcore::toNumeric(mydata[[mytime]])
@@ -2330,7 +2256,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         estimand_meta <- private$.estimandMeta()
 
         # Reveal the section heading now that the survival-table analysis runs
-        self$results$survTableHeading$setVisible(TRUE)
 
         # Title the table after what it actually contains. The fixed schema said
         # "1, 3, 5 year Survival" whatever the cutpoints and whatever the time
@@ -3332,11 +3257,17 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               stop("Unexpected plot result type from surv_plot")
             }
 
-            # Apply colorblind-safe theme and colors
-            plot_obj <- plot_obj +
+            # Apply colorblind-safe theme and colors.
+            #
+            # ggsurvplot has already attached colour and fill scales, so each
+            # `+` here makes ggplot2 announce "Scale for colour is already
+            # present. Adding another scale for colour, which will replace the
+            # existing scale." The replacement is deliberate, but the message
+            # lands in jamovi's "Analysis Notes" tray on every render.
+            plot_obj <- .quietly(plot_obj +
               ggplot2::scale_color_manual(values = c("#0173B2", "#DE8F05", "#CC78BC", "#029E73", "#D55E00")) +
               ggplot2::scale_fill_manual(values = c("#0173B2", "#DE8F05", "#CC78BC", "#029E73", "#D55E00")) +
-              ggtheme
+              ggtheme)
 
             # Draw the risk table that was asked for.
             #
@@ -3354,12 +3285,16 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # and only applies when the user asks for it.
             if (isTRUE(self$options$risktable) && !is.null(plot_result$table)) {
               plot_result$plot <- plot_obj
-              print(plot_result)
+              .quietly(print(plot_result))
               return(TRUE)
             }
         }
 
-        print(plot_obj)
+        # survminer builds the plot inside its print method and announces
+        # 'Ignoring unknown labels: colour: ""' while doing so. jamovi shows
+        # that in the undifferentiated "Analysis Notes" tray, where it reads as
+        # if the analysis had a caveat to report.
+        .quietly(print(plot_obj))
         TRUE
       }
 
@@ -3624,9 +3559,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         if (inherits(plot2, "ggsurvplot")) {
           plot2$plot <- plot2$plot + ggtheme
-          print(plot2)
+          .quietly(print(plot2))
         } else {
-          print(plot2 + ggtheme)
+          .quietly(print(plot2 + ggtheme))
         }
         TRUE
 
@@ -3726,9 +3661,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 xintercept = median_time, linetype = "dashed", color = "grey40")
           }
           plot3$plot <- plot_obj
-          print(plot3)
+          .quietly(print(plot3))
         } else {
-          print(plot3 + ggtheme)
+          .quietly(print(plot3 + ggtheme))
         }
         TRUE
       }
@@ -3797,21 +3732,40 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         private$.checkpoint()
 
         estimand_meta <- private$.estimandMeta(results)
-        plot6 <-
-          KMunicate::KMunicate(
+
+        # jamovi hands a renderFun a LIST whose element is the ggplot2 theme,
+        # not a bare theme object. KMunicate asserts ggplot2::is.theme(.theme)
+        # and threw "Variable '.theme': Must inherit from class 'theme', but
+        # has class 'list'" on EVERY render, so the KMunicate option produced a
+        # blank white panel in every configuration. Unwrap it; if no theme can
+        # be found, omit the argument and let KMunicate use its own default
+        # rather than fail. inherits() rather than ggplot2::is.theme(), which
+        # is deprecated in ggplot2 >= 3.5.2.
+        km_theme <- if (inherits(ggtheme, "theme")) ggtheme
+          else if (is.list(ggtheme)) {
+            found <- Filter(function(z) inherits(z, "theme"), ggtheme)
+            if (length(found) > 0) found[[1]] else NULL
+          } else NULL
+
+        km_args <- list(
             fit = km_fit,
             time_scale = time_scale,
             .risk_table = if (isTRUE(self$options$risktable)) "KMunicate" else NULL,
-            .theme = ggtheme,
             .xlab = paste0('Time in ', self$options$timetypeoutput),
             .title = estimand_meta$curve,
             # KMunicate always constructs the pointwise interval ribbon; alpha
             # zero makes the separate CI option behave as advertised.
             .alpha = if (isTRUE(self$options$ci95)) 0.25 else 0
-          )
+        )
+        if (!is.null(km_theme)) km_args$.theme <- km_theme
 
+        # KMunicate emits "Ignoring unknown labels: colour/fill/linetype" on
+        # every build. jamovi shows R messages and warnings in the
+        # undifferentiated "Analysis Notes" tray, so upstream chatter reads to a
+        # clinician as if the analysis had something to say.
+        plot6 <- .quietly(do.call(KMunicate::KMunicate, km_args))
 
-        print(plot6)
+        .quietly(print(plot6))
         TRUE
 
       },

@@ -128768,7 +128768,7 @@ msgstr ""
 msgid "Survey-Weighted Survival Summary"
 msgstr ""
 
-#: package/analyses/singlearm.menuGroup
+#: package/analyses/survival.menuGroup
 #: package/analyses/survivalcont.menuGroup
 #: package/analyses/multisurvival.menuGroup
 #: package/analyses/oddsratio.menuGroup
@@ -128786,7 +128786,7 @@ msgstr ""
 #: outcomeorganizer/options.menuGroup
 #: semimarkov/results/reliabilityAnalysis.columns.title
 #: simonmakuch/results/survivalEstimates.columns.title
-#: singlearm/options.menuGroup
+#: survival/options.menuGroup
 #: survival/results/survTable.columns.title
 #: survivalcont/options.menuGroup
 #: survivalcont/results/survTable.columns.title
@@ -129589,6 +129589,10 @@ msgstr ""
 msgid "Survival Time Distribution"
 msgstr ""
 
+#: singlearm/ui[1][0][0]/tint.label
+msgid "Survival time from dates"
+msgstr ""
+
 #: survivalcont/ui[5][0][0]/cutp.label
 msgid "Survival Time Points (default: 1,3,5 years)"
 msgstr ""
@@ -129781,7 +129785,7 @@ msgstr ""
 msgid "SurvivalExtraD"
 msgstr ""
 
-#: package/analyses/survival.menuGroup
+#: package/analyses/singlearm.menuGroup
 #: package/analyses/competingsurvival.menuGroup
 #: package/analyses/timeroc.menuGroup
 #: package/analyses/relativesurvival.menuGroup
@@ -129815,8 +129819,8 @@ msgstr ""
 #: plscox/options.menuGroup
 #: relativesurvival/options.menuGroup
 #: rpasurvival/options.menuGroup
+#: singlearm/options.menuGroup
 #: sparsegrouplasso/options.menuGroup
-#: survival/options.menuGroup
 #: survivalPower/options.menuGroup
 #: timeroc/options.menuGroup
 msgid "SurvivalT"
@@ -130711,7 +130715,6 @@ msgid "Technical Details & References"
 msgstr ""
 
 #: R/decision.b.R
-#: R/singlearm.b.R
 msgid "Technical details:"
 msgstr ""
 

@@ -43,6 +43,7 @@ children:
             children:
               - type: CheckBox
                 name: tint
+                label: Survival time from dates
                 fitToGrid: true
               - type: Label
                 label: Date Variables

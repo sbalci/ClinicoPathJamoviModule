@@ -12,8 +12,8 @@ authors:
     family-names: Balci
     email: serdarbalci@serdarbalci.com
     orcid: 'https://orcid.org/0000-0002-7852-3851'
-date-released: '2026-09-01'
-version: "1.0.8.05"
+date-released: '2026-09-02'
+version: "1.0.8.06"
 identifiers:
   - type: doi
     value: 10.5281/zenodo.3997188

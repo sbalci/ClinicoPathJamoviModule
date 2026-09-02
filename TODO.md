@@ -4266,3 +4266,28 @@ device, so the renderer still returns TRUE and jamovi draws a blank white panel.
       table. Add a "Scope" column or split into two tables.
 - [ ] `jamovi/survival.u.yaml`: `bootstrapValN` and `rate_multiplier` have no `enable:` while
       their siblings (`seed`, `time_intervals`) do.
+
+## [check-function] singlearm follow-ups (2026-09-02)
+
+### [i18n] one new untranslated string
+
+- [ ] `jamovi/i18n/tr.po`: `msgid "Survival time from dates"` (singlearm's `tint`
+      checkbox label) has an empty `msgstr`. It replaced the inherited `.a.yaml` title
+      "Using dates to calculate survival time", which the gate rejects as action-phrased.
+
+### [ui] the same action-phrased title still ships in three sibling analyses
+
+- [ ] `survival`, `survivalcont` and `multisurvival` still inherit
+      `tint: title: 'Using dates to calculate survival time'` from their `.a.yaml`.
+      singlearm was fixed with a `.u.yaml` `label:` override so the shared `.a.yaml`
+      title and its existing Turkish translation stayed intact. Do all four together —
+      either add the same override to each, or rename the `.a.yaml` title once and
+      retranslate. Do not fix them one at a time.
+
+### [gate] `tools/theme_safe_html.py` cannot see concatenated styles
+
+- [ ] The tool reported singlearm CLEAN while `.singlearmNoticeHTML()` set an opaque
+      pastel `background-color` on every notice, because the style was assembled with
+      `paste0("<div style='background-color: ", style$bg, ...)` and the regex only
+      matches a literal hex in the source line. Teach it to flag a `background-color:`
+      whose value is an R variable, or at least to report the file for manual review.
