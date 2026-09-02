@@ -1333,13 +1333,13 @@ items:
     - name:  survivalPlotsHeading3
       title: Survival Plots Explanations
       type:  Preformatted
-      visible: ((sc || ce || ch || kmunicate || loglog) && showExplanations)
+      visible: (showExplanations && (sc || ce || ch || kmunicate || loglog))
 
     # Survival Plots Explanation
     - name: survivalPlotsExplanation
       title: Understanding Survival Curves and Plots
       type: Html
-      visible: ((sc || ce || ch || kmunicate || loglog) && showExplanations)
+      visible: (showExplanations && (sc || ce || ch || kmunicate || loglog))
       clearWith:
           - sc
           - ce

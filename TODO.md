@@ -8,7 +8,7 @@
 
 ## Data Quality
 
-benford
+- benford
 checkdata
 dataquality
 outlierdetection
@@ -74,7 +74,8 @@ jjarcdiagram
 
 multisurvival
 singlearm
-survival
+
+- survival
 - survivalcont
 
 ## Data Preparation
@@ -87,10 +88,9 @@ survival
 
 - oddsratio
 
-## Penalized Cox-Regression 
+## Penalized Cox-Regression
 
-- lassocox 
-
+- lassocox
 
 # meddecide
 
@@ -4227,3 +4227,42 @@ not just noise.
       "English source" rows are not msgids anywhere in the catalog and 4 more belong to other
       analyses. Regenerate the tables mechanically from the 206 catalog entries whose `#:`
       refs contain decisioncombine.
+
+## [release-review] Out-of-scope findings from the `survival` release review (2026-09-02)
+
+### [bug] `visible: ((...)` never routes through jmvcore's binding parser — 7 sites outside `survival`
+
+`jmvcore::Options$eval()` routes a `visible:` expression only when it matches
+`^\([\$A-Za-z].*\)$`. An expression starting with `((` fails that regex, falls through to
+`jmvcore::format()`, and comes back as the RAW STRING; `ResultsElement$.update()` then sets
+`visibleValue <- (length(vis) > 0)` — i.e. **always visible**, silently. Verified empirically
+against jmvcore. Rewrite each as `(<scalarOption> && (<parenthesised group>))`.
+
+- [ ] `jamovi/multisurvival.r.yaml:1857,1863` — `((ac || hr) && showExplanations)`
+- [ ] `jamovi/nonparametric.r.yaml:456,472,511`
+- [ ] `jamovi/survivalcont.r.yaml:1048,1054` — starts with `(((`
+- [ ] Add a gate: fail on `grep -n "visible: *((" jamovi/*.r.yaml`. The 2026-08-14 sweep fixed
+      the leading-`!` variant of this same routing bug but not the leading-`((` variant.
+
+### [bug] `survminer::ggsurvplot(..., facet.by=)` is broken with the installed ggplot2
+
+`surv_summary()` returns only a combined `strata` column, so ggplot2's `combine_vars()` aborts
+with "At least one layer must contain all faceting variables" — at PRINT time, inside the
+device, so the renderer still returns TRUE and jamovi draws a blank white panel. Fixed in
+`R/survival.b.R:.plotAgeStratifiedKM` by drawing the facets from `survfit()` directly.
+
+- [ ] Sweep for other `facet.by` uses: `grep -rn "facet.by" R/*.b.R` and confirm each still
+      produces a non-blank image (render to PNG and check the file size, not the return value).
+
+### [robustness] survival: minor items deliberately left alone
+
+- [ ] `R/survival.b.R` `.calculateCalibration()`: `bh_at_time` picks the baseline hazard at the
+      NEAREST `basehaz` time to the calibration horizon. The step function should be evaluated
+      at the largest time <= the horizon; the nearest-neighbour lookup can read a value from
+      just after it.
+- [ ] `R/survival.b.R` `.calculateRMST()` uses a hard-coded `1.96`; prefer `stats::qnorm(0.975)`.
+- [ ] `personTimeTable` mixes three kinds of row (overall / per-group / per-interval) in one
+      `interval` column with no type column, so the person-time column is not additive down the
+      table. Add a "Scope" column or split into two tables.
+- [ ] `jamovi/survival.u.yaml`: `bootstrapValN` and `rate_multiplier` have no `enable:` while
+      their siblings (`seed`, `time_intervals`) do.

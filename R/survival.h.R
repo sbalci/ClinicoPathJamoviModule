@@ -911,38 +911,38 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="factor",
-                        `title`="Levels",
+                        `name`="factor", 
+                        `title`="Levels", 
                         `type`="text"),
                     list(
-                        `name`="records",
-                        `title`="Records",
+                        `name`="records", 
+                        `title`="Records", 
                         `type`="integer"),
                     list(
-                        `name`="events",
-                        `title`="Events",
+                        `name`="events", 
+                        `title`="Events", 
                         `type`="integer"),
                     list(
-                        `name`="rmean",
-                        `title`="rmean",
+                        `name`="rmean", 
+                        `title`="rmean", 
                         `type`="number"),
                     list(
-                        `name`="se_rmean",
-                        `title`="se_rmean",
+                        `name`="se_rmean", 
+                        `title`="se_rmean", 
                         `type`="number"),
                     list(
-                        `name`="median",
-                        `title`="Median",
+                        `name`="median", 
+                        `title`="Median", 
                         `type`="number"),
                     list(
-                        `name`="x0_95lcl",
-                        `title`="Lower",
-                        `superTitle`="95% Confidence Interval",
+                        `name`="x0_95lcl", 
+                        `title`="Lower", 
+                        `superTitle`="95% Confidence Interval", 
                         `type`="number"),
                     list(
-                        `name`="x0_95ucl",
-                        `title`="Upper",
-                        `superTitle`="95% Confidence Interval",
+                        `name`="x0_95ucl", 
+                        `title`="Upper", 
+                        `superTitle`="95% Confidence Interval", 
                         `type`="number")),
                 clearWith=list(
                     "explanatory",
@@ -1009,20 +1009,20 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="Explanatory",
-                        `title`="Explanatory",
+                        `name`="Explanatory", 
+                        `title`="Explanatory", 
                         `type`="text"),
                     list(
-                        `name`="Levels",
-                        `title`="Levels",
+                        `name`="Levels", 
+                        `title`="Levels", 
                         `type`="text"),
                     list(
-                        `name`="all",
-                        `title`="N",
+                        `name`="all", 
+                        `title`="N", 
                         `type`="text"),
                     list(
-                        `name`="HR_univariable",
-                        `title`="HR (Univariable)",
+                        `name`="HR_univariable", 
+                        `title`="HR (Univariable)", 
                         `type`="text")),
                 clearWith=list(
                     "explanatory",
@@ -1095,24 +1095,24 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="variable",
-                        `title`="Variable",
+                        `name`="variable", 
+                        `title`="Variable", 
                         `type`="text"),
                     list(
-                        `name`="levels",
-                        `title`="Levels",
+                        `name`="levels", 
+                        `title`="Levels", 
                         `type`="text"),
                     list(
-                        `name`="n",
-                        `title`="N",
+                        `name`="n", 
+                        `title`="N", 
                         `type`="text"),
                     list(
-                        `name`="hr_unadjusted",
-                        `title`="HR (Unadjusted)",
+                        `name`="hr_unadjusted", 
+                        `title`="HR (Unadjusted)", 
                         `type`="text"),
                     list(
-                        `name`="hr_age_adjusted",
-                        `title`="HR (Age-Adjusted)",
+                        `name`="hr_age_adjusted", 
+                        `title`="HR (Age-Adjusted)", 
                         `type`="text")),
                 clearWith=list(
                     "age_adjustment",
@@ -1141,33 +1141,33 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="term",
-                        `title`="Term",
+                        `name`="term", 
+                        `title`="Term", 
                         `type`="text"),
                     list(
-                        `name`="coef",
-                        `title`="Coefficient",
-                        `type`="number",
+                        `name`="coef", 
+                        `title`="Coefficient", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="hr",
-                        `title`="HR",
-                        `type`="number",
+                        `name`="hr", 
+                        `title`="HR", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="se",
-                        `title`="SE",
-                        `type`="number",
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="z",
-                        `title`="z",
-                        `type`="number",
+                        `name`="z", 
+                        `title`="z", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="pvalue",
-                        `title`="p-value",
-                        `type`="number",
+                        `name`="pvalue", 
+                        `title`="p-value", 
+                        `type`="number", 
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "age_adjustment",
@@ -1214,32 +1214,32 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="variable",
-                        `title`="Variable",
+                        `name`="variable", 
+                        `title`="Variable", 
                         `type`="text"),
                     list(
-                        `name`="levels",
-                        `title`="Levels",
+                        `name`="levels", 
+                        `title`="Levels", 
                         `type`="text"),
                     list(
-                        `name`="hr",
-                        `title`="HR",
-                        `type`="number",
+                        `name`="hr", 
+                        `title`="HR", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="ci_lower",
-                        `title`="95% CI Lower",
-                        `type`="number",
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="ci_upper",
-                        `title`="95% CI Upper",
-                        `type`="number",
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="pvalue",
-                        `title`="p-value",
-                        `type`="number",
+                        `name`="pvalue", 
+                        `title`="p-value", 
+                        `type`="number", 
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "age_time_scale",
@@ -1277,37 +1277,37 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="group",
-                        `title`="Group",
+                        `name`="group", 
+                        `title`="Group", 
                         `type`="text"),
                     list(
-                        `name`="observed",
-                        `title`="Observed Deaths",
+                        `name`="observed", 
+                        `title`="Observed Deaths", 
                         `type`="integer"),
                     list(
-                        `name`="expected",
-                        `title`="Expected Deaths",
-                        `type`="number",
+                        `name`="expected", 
+                        `title`="Expected Deaths", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="smr",
-                        `title`="SMR / Standardized Rate",
-                        `type`="number",
+                        `name`="smr", 
+                        `title`="SMR / Standardized Rate", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="smr_ci_lower",
-                        `title`="SMR 95% CI Lower",
-                        `type`="number",
+                        `name`="smr_ci_lower", 
+                        `title`="SMR 95% CI Lower", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="smr_ci_upper",
-                        `title`="SMR 95% CI Upper",
-                        `type`="number",
+                        `name`="smr_ci_upper", 
+                        `title`="SMR 95% CI Upper", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="pvalue",
-                        `title`="p-value",
-                        `type`="number",
+                        `name`="pvalue", 
+                        `title`="p-value", 
+                        `type`="number", 
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "age_standardization",
@@ -1504,37 +1504,37 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="strata",
-                        `title`="Levels",
+                        `name`="strata", 
+                        `title`="Levels", 
                         `type`="text"),
                     list(
-                        `name`="time",
-                        `title`="time",
+                        `name`="time", 
+                        `title`="time", 
                         `type`="integer"),
                     list(
-                        `name`="n.risk",
-                        `title`="Number at Risk",
+                        `name`="n.risk", 
+                        `title`="Number at Risk", 
                         `type`="integer"),
                     list(
-                        `name`="n.event",
-                        `title`="Number of Events",
+                        `name`="n.event", 
+                        `title`="Number of Events", 
                         `type`="integer"),
                     list(
-                        `name`="surv",
-                        `title`="Survival",
-                        `type`="number",
+                        `name`="surv", 
+                        `title`="Survival", 
+                        `type`="number", 
                         `format`="pc"),
                     list(
-                        `name`="lower",
-                        `title`="Lower",
-                        `superTitle`="95% Confidence Interval",
-                        `type`="number",
+                        `name`="lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% Confidence Interval", 
+                        `type`="number", 
                         `format`="pc"),
                     list(
-                        `name`="upper",
-                        `title`="Upper",
-                        `superTitle`="95% Confidence Interval",
-                        `type`="number",
+                        `name`="upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% Confidence Interval", 
+                        `type`="number", 
                         `format`="pc")),
                 clearWith=list(
                     "explanatory",
@@ -1580,34 +1580,34 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="interval",
-                        `title`="Time Interval",
+                        `name`="interval", 
+                        `title`="Time Interval", 
                         `type`="text"),
                     list(
-                        `name`="events",
-                        `title`="Events",
+                        `name`="events", 
+                        `title`="Events", 
                         `type`="integer"),
                     list(
-                        `name`="person_time",
-                        `title`="Person-Time",
-                        `type`="number",
+                        `name`="person_time", 
+                        `title`="Person-Time", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="rate",
-                        `title`="Incidence Rate",
-                        `type`="number",
+                        `name`="rate", 
+                        `title`="Incidence Rate", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="rate_ci_lower",
-                        `title`="Lower",
-                        `superTitle`="95% CI",
-                        `type`="number",
+                        `name`="rate_ci_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="rate_ci_upper",
-                        `title`="Upper",
-                        `superTitle`="95% CI",
-                        `type`="number",
+                        `name`="rate_ci_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
                         `format`="zto")),
                 clearWith=list(
                     "outcome",
@@ -1667,35 +1667,35 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="group",
-                        `title`="Group",
+                        `name`="group", 
+                        `title`="Group", 
                         `type`="text"),
                     list(
-                        `name`="rmst",
-                        `title`="RMST",
-                        `type`="number",
+                        `name`="rmst", 
+                        `title`="RMST", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="se",
-                        `title`="SE",
-                        `type`="number",
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="ci_lower",
-                        `title`="Lower",
-                        `superTitle`="95% CI",
-                        `type`="number",
+                        `name`="ci_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="ci_upper",
-                        `title`="Upper",
-                        `superTitle`="95% CI",
-                        `type`="number",
+                        `name`="ci_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="tau",
-                        `title`="Time Horizon (\u03C4)",
-                        `type`="number",
+                        `name`="tau", 
+                        `title`="Time Horizon (\u03C4)", 
+                        `type`="number", 
                         `format`="zto")),
                 clearWith=list(
                     "rmst_analysis",
@@ -1754,28 +1754,28 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="observation",
-                        `title`="Observation",
+                        `name`="observation", 
+                        `title`="Observation", 
                         `type`="integer"),
                     list(
-                        `name`="martingale",
-                        `title`="Martingale",
-                        `type`="number",
+                        `name`="martingale", 
+                        `title`="Martingale", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="deviance",
-                        `title`="Deviance",
-                        `type`="number",
+                        `name`="deviance", 
+                        `title`="Deviance", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="score",
-                        `title`="Score",
-                        `type`="number",
+                        `name`="score", 
+                        `title`="Score", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="schoenfeld",
-                        `title`="Schoenfeld",
-                        `type`="number",
+                        `name`="schoenfeld", 
+                        `title`="Schoenfeld", 
+                        `type`="number", 
                         `format`="zto")),
                 clearWith=list(
                     "residual_diagnostics",
@@ -1854,17 +1854,17 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="rowname",
-                        `title`="Levels",
+                        `name`="rowname", 
+                        `title`="Levels", 
                         `type`="text"),
                     list(
-                        `name`="name",
-                        `title`="Levels",
+                        `name`="name", 
+                        `title`="Levels", 
                         `type`="text"),
                     list(
-                        `name`="value",
-                        `title`="p-value",
-                        `type`="number",
+                        `name`="value", 
+                        `title`="p-value", 
+                        `type`="number", 
                         `format`="zto,pvalue")),
                 visible="(pw)",
                 clearWith=list(
@@ -1921,29 +1921,29 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=3,
                 columns=list(
                     list(
-                        `name`="test",
-                        `title`="Test",
+                        `name`="test", 
+                        `title`="Test", 
                         `type`="text"),
                     list(
-                        `name`="rho",
-                        `title`="rho",
+                        `name`="rho", 
+                        `title`="rho", 
                         `type`="number"),
                     list(
-                        `name`="chisq",
-                        `title`="Chi-Square",
+                        `name`="chisq", 
+                        `title`="Chi-Square", 
                         `type`="number"),
                     list(
-                        `name`="df",
-                        `title`="df",
+                        `name`="df", 
+                        `title`="df", 
                         `type`="integer"),
                     list(
-                        `name`="pvalue",
-                        `title`="p-value",
-                        `type`="number",
+                        `name`="pvalue", 
+                        `title`="p-value", 
+                        `type`="number", 
                         `format`="zto,pvalue"),
                     list(
-                        `name`="weighting",
-                        `title`="Weighting",
+                        `name`="weighting", 
+                        `title`="Weighting", 
                         `type`="text")),
                 visible="(weightedLogRank)",
                 clearWith=list(
@@ -2117,12 +2117,12 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="survivalPlotsHeading3",
                 title="Survival Plots Explanations",
-                visible="((sc || ce || ch || kmunicate || loglog) && showExplanations)"))
+                visible="(showExplanations && (sc || ce || ch || kmunicate || loglog))"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="survivalPlotsExplanation",
                 title="Understanding Survival Curves and Plots",
-                visible="((sc || ce || ch || kmunicate || loglog) && showExplanations)",
+                visible="(showExplanations && (sc || ce || ch || kmunicate || loglog))",
                 clearWith=list(
                     "sc",
                     "ce",
@@ -2226,28 +2226,28 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="metric",
-                        `title`="Metric",
+                        `name`="metric", 
+                        `title`="Metric", 
                         `type`="text"),
                     list(
-                        `name`="value",
-                        `title`="Value",
+                        `name`="value", 
+                        `title`="Value", 
                         `type`="number"),
                     list(
-                        `name`="ci_lower",
-                        `title`="95% CI Lower",
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
                         `type`="number"),
                     list(
-                        `name`="ci_upper",
-                        `title`="95% CI Upper",
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
                         `type`="number"),
                     list(
-                        `name`="ideal",
-                        `title`="Ideal",
+                        `name`="ideal", 
+                        `title`="Ideal", 
                         `type`="text"),
                     list(
-                        `name`="interpretation",
-                        `title`="Interpretation",
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
                         `type`="text")),
                 clearWith=list(
                     "calibration_curves",
@@ -2278,32 +2278,32 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="group",
-                        `title`="Risk Group",
+                        `name`="group", 
+                        `title`="Risk Group", 
                         `type`="text"),
                     list(
-                        `name`="n",
-                        `title`="N",
+                        `name`="n", 
+                        `title`="N", 
                         `type`="integer"),
                     list(
-                        `name`="events",
-                        `title`="Events",
+                        `name`="events", 
+                        `title`="Events", 
                         `type`="integer"),
                     list(
-                        `name`="predicted",
-                        `title`="Predicted Survival",
+                        `name`="predicted", 
+                        `title`="Predicted Survival", 
                         `type`="number"),
                     list(
-                        `name`="observed",
-                        `title`="Observed (KM)",
+                        `name`="observed", 
+                        `title`="Observed (KM)", 
                         `type`="number"),
                     list(
-                        `name`="observed_lower",
-                        `title`="KM Lower CI",
+                        `name`="observed_lower", 
+                        `title`="KM Lower CI", 
                         `type`="number"),
                     list(
-                        `name`="observed_upper",
-                        `title`="KM Upper CI",
+                        `name`="observed_upper", 
+                        `title`="KM Upper CI", 
                         `type`="number")),
                 clearWith=list(
                     "calibration_curves",
@@ -2369,37 +2369,37 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=2,
                 columns=list(
                     list(
-                        `name`="model",
-                        `title`="Model",
+                        `name`="model", 
+                        `title`="Model", 
                         `type`="text"),
                     list(
-                        `name`="df",
-                        `title`="df",
+                        `name`="df", 
+                        `title`="df", 
                         `type`="integer"),
                     list(
-                        `name`="loglik",
-                        `title`="Log-Likelihood",
+                        `name`="loglik", 
+                        `title`="Log-Likelihood", 
                         `type`="number"),
                     list(
-                        `name`="aic",
-                        `title`="AIC",
+                        `name`="aic", 
+                        `title`="AIC", 
                         `type`="number"),
                     list(
-                        `name`="lr_chisq",
-                        `title`="LR Chi-sq",
+                        `name`="lr_chisq", 
+                        `title`="LR Chi-sq", 
                         `type`="number"),
                     list(
-                        `name`="lr_df",
-                        `title`="LR df",
+                        `name`="lr_df", 
+                        `title`="LR df", 
                         `type`="integer"),
                     list(
-                        `name`="p_value",
-                        `title`="p",
-                        `type`="number",
+                        `name`="p_value", 
+                        `title`="p", 
+                        `type`="number", 
                         `format`="zto,pvalue"),
                     list(
-                        `name`="conclusion",
-                        `title`="Conclusion",
+                        `name`="conclusion", 
+                        `title`="Conclusion", 
                         `type`="text")),
                 clearWith=list(
                     "rcs_analysis",
@@ -2463,27 +2463,27 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=3,
                 columns=list(
                     list(
-                        `name`="metric",
-                        `title`="Metric",
+                        `name`="metric", 
+                        `title`="Metric", 
                         `type`="text"),
                     list(
-                        `name`="apparent",
-                        `title`="Apparent",
-                        `type`="number",
+                        `name`="apparent", 
+                        `title`="Apparent", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="optimism",
-                        `title`="Optimism",
-                        `type`="number",
+                        `name`="optimism", 
+                        `title`="Optimism", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="corrected",
-                        `title`="Corrected",
-                        `type`="number",
+                        `name`="corrected", 
+                        `title`="Corrected", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="n_bootstrap",
-                        `title`="n Bootstrap",
+                        `name`="n_bootstrap", 
+                        `title`="n Bootstrap", 
                         `type`="integer")),
                 clearWith=list(
                     "bootstrapValidation",
@@ -2538,27 +2538,27 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="distribution",
-                        `title`="Distribution",
+                        `name`="distribution", 
+                        `title`="Distribution", 
                         `type`="text"),
                     list(
-                        `name`="aic",
-                        `title`="AIC",
-                        `type`="number",
+                        `name`="aic", 
+                        `title`="AIC", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="bic",
-                        `title`="BIC",
-                        `type`="number",
+                        `name`="bic", 
+                        `title`="BIC", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="loglik",
-                        `title`="Log-Likelihood",
-                        `type`="number",
+                        `name`="loglik", 
+                        `title`="Log-Likelihood", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="df",
-                        `title`="df",
+                        `name`="df", 
+                        `title`="df", 
                         `type`="integer")),
                 clearWith=list(
                     "use_parametric",
@@ -2589,35 +2589,35 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
-                        `name`="parameter",
-                        `title`="Parameter",
+                        `name`="parameter", 
+                        `title`="Parameter", 
                         `type`="text"),
                     list(
-                        `name`="estimate",
-                        `title`="Estimate",
-                        `type`="number",
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="se",
-                        `title`="SE",
-                        `type`="number",
+                        `name`="se", 
+                        `title`="SE", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="ci_lower",
-                        `title`="Lower",
-                        `superTitle`="95% CI",
-                        `type`="number",
+                        `name`="ci_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="ci_upper",
-                        `title`="Upper",
-                        `superTitle`="95% CI",
-                        `type`="number",
+                        `name`="ci_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="pvalue",
-                        `title`="p-value",
-                        `type`="number",
+                        `name`="pvalue", 
+                        `title`="p-value", 
+                        `type`="number", 
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "use_parametric",
@@ -2713,7 +2713,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survival",
-                version = c(1,0,8),
+                version = c(1,0,9),
                 options = options,
                 results = survivalResults$new(options=options),
                 data = data,
@@ -2728,10 +2728,10 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Survival Analysis
 #'
-#' Performs univariate time-to-event analysis comparing groups using
-#' Kaplan-Meier estimates, log-rank tests, and Cox proportional hazards
-#' regression. Optional outputs include restricted mean survival time and
-#' crude person-time incidence rates. These methods describe associations and
+#' Performs univariate time-to-event analysis comparing groups using 
+#' Kaplan-Meier estimates, log-rank tests, and Cox proportional hazards 
+#' regression. Optional outputs include restricted mean survival time and 
+#' crude person-time incidence rates. These methods describe associations and 
 #' do not establish causality.
 #' @param data The data as a data frame.
 #' @param elapsedtime The time elapsed from the start of the study to the

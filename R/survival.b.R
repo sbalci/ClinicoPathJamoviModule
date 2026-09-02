@@ -230,6 +230,14 @@ NULL
     return(unname(name_mapping[var_name] %||% as.character(var_name)))
 }
 
+#' Survival Analysis backend
+#'
+#' Backend R6 class for the jamovi `survival` analysis: Kaplan-Meier estimates,
+#' median survival, Cox regression, restricted mean survival time, person-time
+#' incidence rates, age adjustment and parametric survival models.
+#'
+#' @importFrom R6 R6Class
+#' @return An \code{R6} class generator object for the \code{survivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 survivalClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(
         "survivalClass",
@@ -1175,6 +1183,15 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     } else {
                         private$.ageStandardization(results)
                     }
+                }
+                private$.checkpoint()
+
+                ## Age-based plots ----
+                # Give them the cleaned frame instead of letting each renderer
+                # rebuild one from self$data -- see .setAgePlotState().
+                if (self$options$age_adjustment &&
+                    (self$options$age_stratified_km || self$options$adjusted_curves)) {
+                    private$.setAgePlotState(results)
                 }
                 private$.checkpoint()
 
@@ -5591,6 +5608,51 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 return(list(mydata = mydata, age_col_name = age_var))
             }
             ,
+            # State for the two age-based plots.
+            #
+            # Both renderers used to rebuild their own frame from self$data and
+            # self$options -- raw elapsedtime, raw outcome, no landmark shift --
+            # which silently disagreed with every other output in the report:
+            #   * tint (dates) mode: self$options$elapsedtime is NULL, so the
+            #     renderer returned FALSE and drew a BLANK panel with no message.
+            #   * multievent: outcomeLevel is unset by design, so the event
+            #     indicator fell back to as.numeric(as.character(outcome)) -- all
+            #     NA for text levels -- and the panel went blank as well.
+            #   * uselandmark: the renderer never applied the landmark shift, so
+            #     the curves beside a landmarked median table were the
+            #     UN-landmarked ones (medians 28.1/37.6/44.4 next to a table
+            #     reporting 26.8/28.1/37.4 on 158 of 200 patients).
+            # Feed them the same cleaned frame the rest of the analysis uses.
+            .setAgePlotState = function(results) {
+                age_var <- self$options$age_variable
+                if (is.null(age_var) || !(age_var %in% names(self$data)))
+                    return()
+
+                mydata <- results$cleanData
+                age_col <- jmvcore::toNumeric(self$data[[age_var]])[
+                    private$.originalRowIndex(mydata)]
+
+                plot_data <- data.frame(
+                    time  = jmvcore::toNumeric(mydata[[results$name1time]]),
+                    event = mydata[[results$name2outcome]],
+                    group = as.factor(mydata[[results$name3explanatory]]),
+                    age   = age_col,
+                    stringsAsFactors = FALSE
+                )
+                plot_data <- plot_data[stats::complete.cases(plot_data), , drop = FALSE]
+
+                state <- list(
+                    plot_data     = plot_data,
+                    group_label   = self$options$explanatory,
+                    age_label     = age_var,
+                    # Travels with the state for the same reason as in
+                    # .cleandata(): .load() can render without calling .run().
+                    has_competing = private$.isCompetingRisk()
+                )
+                self$results$ageStratifiedKMPlot$setState(state)
+                self$results$adjustedCurvesPlot$setState(state)
+            }
+            ,
             .ageAdjustedCox = function(results) {
                 # Skip if competing risk analysis
                 if (private$.isCompetingRisk()) {
@@ -6306,49 +6368,23 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (!self$options$age_adjustment || !self$options$age_stratified_km) {
                     return(FALSE)
                 }
-                # This renderer rebuilds its own 0/1 indicator from self$data
-                # rather than the recoded status, so it is not inverted -- but
-                # the age-adjusted TABLES it belongs with are refused under
-                # competing risks, and a lone surviving curve there reads as a
-                # result the analysis is standing behind.
-                if (private$.isCompetingRisk())
+                # The age-adjusted TABLES this curve belongs with are refused
+                # under competing risks, and a lone surviving curve there reads
+                # as a result the analysis is standing behind.
+                if (private$.isCompetingRisk(image$state))
                     return(private$.competingRiskPlotRefusal(
                         "Age-stratified Kaplan-Meier curves", ggtheme))
-                if (is.null(self$options$age_variable)) {
+
+                state <- image$state
+                if (is.null(state) || is.null(state$plot_data)) {
                     return(FALSE)
                 }
 
                 tryCatch({
-                    mytime <- self$options$elapsedtime
-                    myoutcome <- self$options$outcome
-                    myfactor <- self$options$explanatory
-
-                    if (is.null(mytime) || is.null(myoutcome) || is.null(myfactor)) {
-                        return(FALSE)
-                    }
-
-                    # Build data from self$data
-                    mydata <- self$data
-                    time_col <- jmvcore::toNumeric(mydata[[mytime]])
-                    outcome_col <- as.numeric(as.character(mydata[[myoutcome]]))
-                    group_col <- as.factor(mydata[[myfactor]])
-                    age_col <- jmvcore::toNumeric(mydata[[self$options$age_variable]])
-
-                    # Handle outcomeLevel
-                    if (!is.null(self$options$outcomeLevel) && self$options$outcomeLevel != "") {
-                        outcome_level <- self$options$outcomeLevel
-                        original_outcome <- mydata[[myoutcome]]
-                        outcome_col <- as.integer(original_outcome == outcome_level)
-                    }
-
-                    plot_data <- data.frame(
-                        time = time_col,
-                        event = outcome_col,
-                        group = group_col,
-                        age = age_col,
-                        stringsAsFactors = FALSE
-                    )
-                    plot_data <- plot_data[complete.cases(plot_data), ]
+                    # The cleaned frame from .setAgePlotState(): same time scale,
+                    # same event coding and same landmark shift as every other
+                    # output in the report.
+                    plot_data <- state$plot_data
 
                     if (nrow(plot_data) < 10) return(FALSE)
 
@@ -6363,29 +6399,70 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         breaks = c(-Inf, cutpoints, Inf),
                         include.lowest = TRUE)
 
-                    # Create combined factor for coloring
-                    plot_data$strata <- interaction(plot_data$group, plot_data$age_group,
-                        sep = " | Age: ")
-
-                    # Fit survfit
                     fit <- survival::survfit(
                         survival::Surv(time, event) ~ age_group + group,
                         data = plot_data)
 
-                    # Plot using survminer
-                    p <- .quietly(survminer::ggsurvplot(
-                        fit,
-                        data = plot_data,
-                        conf.int = self$options$ci95,
-                        risk.table = self$options$risktable,
-                        pval = FALSE,
-                        legend.title = "Age Group + Group",
-                        ggtheme = ggtheme,
-                        title = "Age-Stratified Kaplan-Meier Curves",
-                        facet.by = "age_group"
-                    ))
+                    # Draw the facets directly rather than through
+                    # survminer::ggsurvplot(facet.by = ). With the installed
+                    # survminer/ggplot2 pair, surv_summary() returns only a
+                    # combined `strata` column -- no `age_group` -- so the facet
+                    # spec died in ggplot2's combine_vars() with "At least one
+                    # layer must contain all faceting variables". The error
+                    # surfaced at PRINT time, inside the plot device, so this
+                    # renderer returned TRUE and jamovi drew a blank white panel:
+                    # the option produced an empty result area in every
+                    # configuration, and had never produced a curve.
+                    #
+                    # survfit() pads multi-term strata labels to equal width
+                    # ("group=Control    "), hence the trimws(); and an age band
+                    # from cut() legitimately contains a comma ("(75, Inf]"),
+                    # so the split is on the literal ", group=" separator, never
+                    # on ", ".
+                    sep <- ", group="
+                    lbl <- names(fit$strata)
+                    at <- regexpr(sep, lbl, fixed = TRUE)
+                    if (any(at < 0)) return(FALSE)
+                    age_lab <- trimws(substring(lbl, nchar("age_group=") + 1L, at - 1L))
+                    grp_lab <- trimws(substring(lbl, at + nchar(sep)))
+                    idx <- rep(seq_along(fit$strata), fit$strata)
 
-                    .quietly(print(p))
+                    km <- data.frame(
+                        time = fit$time, surv = fit$surv,
+                        lower = fit$lower, upper = fit$upper,
+                        age_group = age_lab[idx], group = grp_lab[idx],
+                        stringsAsFactors = FALSE)
+                    # Anchor every curve at t = 0, S = 1 so the steps start at
+                    # the origin rather than at each group's first event.
+                    km <- rbind(km, data.frame(
+                        time = 0, surv = 1, lower = 1, upper = 1,
+                        age_group = age_lab, group = grp_lab,
+                        stringsAsFactors = FALSE))
+                    km$age_group <- factor(km$age_group,
+                                           levels = levels(plot_data$age_group))
+                    km$group <- factor(km$group, levels = levels(plot_data$group))
+                    km <- km[order(km$age_group, km$group, km$time), , drop = FALSE]
+
+                    p <- ggplot2::ggplot(
+                            km, ggplot2::aes(x = time, y = surv, colour = group))
+                    if (isTRUE(self$options$ci95))
+                        p <- p + ggplot2::geom_ribbon(
+                            ggplot2::aes(ymin = lower, ymax = upper, fill = group),
+                            alpha = 0.12, colour = NA)
+                    p <- p +
+                        ggplot2::geom_step(linewidth = 0.7) +
+                        ggplot2::facet_wrap(~ age_group) +
+                        ggplot2::coord_cartesian(ylim = c(0, 1)) +
+                        ggplot2::labs(
+                            x = paste0("Time (", self$options$timetypeoutput, ")"),
+                            y = "Survival probability",
+                            colour = state$group_label, fill = state$group_label,
+                            title = "Age-Stratified Kaplan-Meier Curves",
+                            subtitle = paste0("Age bands from ", state$age_label,
+                                              "; N = ", nrow(plot_data))) +
+                        ggtheme
+
+                    print(p)
                     return(TRUE)
 
                 }, error = function(e) {
@@ -6405,46 +6482,23 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (!self$options$age_adjustment || !self$options$adjusted_curves) {
                     return(FALSE)
                 }
-                # Same as .plotAgeStratifiedKM: rebuilt from self$data, so not
-                # inverted, but it belongs to an age-adjusted block that is
-                # refused under competing risks.
-                if (private$.isCompetingRisk())
+                # Belongs to an age-adjusted block that is refused under
+                # competing risks.
+                if (private$.isCompetingRisk(image$state))
                     return(private$.competingRiskPlotRefusal(
                         "Age-adjusted survival curves", ggtheme))
-                if (is.null(self$options$age_variable) || is.null(self$options$explanatory)) {
+
+                state <- image$state
+                if (is.null(state) || is.null(state$plot_data)) {
                     return(FALSE)
                 }
 
                 tryCatch({
-                    mytime <- self$options$elapsedtime
-                    myoutcome <- self$options$outcome
-                    myfactor <- self$options$explanatory
-                    age_var <- self$options$age_variable
-
-                    if (is.null(mytime) || is.null(myoutcome)) return(FALSE)
-
-                    # Build data
-                    mydata <- self$data
-                    time_col <- jmvcore::toNumeric(mydata[[mytime]])
-                    age_col <- jmvcore::toNumeric(mydata[[age_var]])
-                    group_col <- as.factor(mydata[[myfactor]])
-
-                    # Handle outcome level
-                    outcome_raw <- mydata[[myoutcome]]
-                    if (!is.null(self$options$outcomeLevel) && self$options$outcomeLevel != "") {
-                        outcome_col <- as.integer(outcome_raw == self$options$outcomeLevel)
-                    } else {
-                        outcome_col <- as.numeric(as.character(outcome_raw))
-                    }
-
-                    plot_data <- data.frame(
-                        time = time_col,
-                        event = outcome_col,
-                        group = group_col,
-                        age = age_col,
-                        stringsAsFactors = FALSE
-                    )
-                    plot_data <- plot_data[complete.cases(plot_data), ]
+                    # See .setAgePlotState(): shared cleaned frame, so these
+                    # curves cannot disagree with the tables beside them.
+                    plot_data <- state$plot_data
+                    myfactor <- state$group_label
+                    age_var <- state$age_label
 
                     if (nrow(plot_data) < 10) return(FALSE)
 
