@@ -135,7 +135,7 @@ options:
           If `tint` = true, `dxdate` and `fudate` will be used to calculate this time.
 
     - name: tint
-      title: Using dates to calculate survival time
+      title: Survival time from dates
       type: Bool
       default: false
       description:
@@ -324,6 +324,7 @@ options:
           Type of survival analysis:
           - overall: All-cause survival
           - cause: Cause-specific survival
+          - dfs: Disease-free survival (alive with disease counts as an event)
           - compete: Competing risks analysis
 
 
@@ -473,7 +474,7 @@ options:
           If true, displays 95 percent confidence intervals around the survival estimates on plots.
 
     - name: risktable
-      title: Risktable
+      title: Risk table
       type: Bool
       default: false
       description:
@@ -489,7 +490,7 @@ options:
           If true, marks censored observations (e.g., using tick marks) on the survival plot.
 
     - name: medianline
-      title: medianline
+      title: Median line
       type: List
       options:
         - title: none
@@ -562,7 +563,7 @@ options:
 
 
     - name: plotRiskGroups
-      title: Plot risk group survival
+      title: Risk group survival plot
       type: Bool
       default: false
       description:
@@ -592,6 +593,17 @@ options:
           Number of bootstrap resamples used for optimism correction of the
           C-index. Larger values give more stable estimates but take longer to
           compute.
+
+    - name: seed
+      title: Bootstrap seed
+      type: Integer
+      default: 1234
+      min: 1
+      description:
+        R: >
+          Random-number seed for the bootstrap optimism correction, so that
+          repeated runs give the same corrected C-index. Change it to check
+          the stability of the correction.
 
     - name: addRiskScore
       title: Add Risk Score to Data

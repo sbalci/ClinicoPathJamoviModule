@@ -352,3 +352,20 @@ test_that("bivariate variance components and sens/spec correlation are reported"
   corr_ss <- -fit$Psi[1, 2] / sqrt(fit$Psi[1, 1] * fit$Psi[2, 2])
   expect_match(vc_note, sprintf("%.2f", corr_ss), fixed = TRUE)
 })
+
+test_that("fixed-effects method with the SROC plot does not abort the analysis", {
+  # mada 0.5.12 summary.reitsma() errors under method = "fixed"; the SROC path
+  # must fall back to the fitted coefficients instead of killing .run().
+  a <- run_dm(method = "fixed", sroc_plot = TRUE)
+  st <- a$srocplot$state
+  d <- studies()
+  fit <- mada::reitsma(data.frame(TP = d$tp, FP = d$fp, FN = d$fn, TN = d$tn),
+                       method = "fixed", correction = 0.5, correction.control = "single")
+  expect_equal(st$pooled_sens, unname(stats::plogis(fit$coefficients[1, "tsens"])), tolerance = 1e-6)
+  expect_equal(st$pooled_fpr,  unname(stats::plogis(fit$coefficients[1, "tfpr"])),  tolerance = 1e-6)
+  # mada::sroc() is NaN for a fixed fit (no between-study variance); the plot
+  # must say why the curve is missing instead of silently omitting it.
+  expect_null(st$sroc_curve)
+  expect_match(st$curve_note, "fixed-effects", fixed = TRUE)
+  expect_null(run_dm(method = "reml", sroc_plot = TRUE)$srocplot$state$curve_note)
+})

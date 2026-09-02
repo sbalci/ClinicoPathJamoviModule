@@ -232,3 +232,43 @@ test_that("an adjusted curve cannot vary a variable absent from the model", {
                "Adjustment variable is not in the model")
   expect_equal(nrow(as.data.frame(result$adjustedSurvTable)), 0)
 })
+
+test_that("median follow-up in competing-risk mode censors competing events (reverse KM)", {
+  set.seed(913)
+  n <- 200
+  time <- round(stats::rexp(n, 0.05) + 0.5, 1)
+  status <- sample(c("DOD", "DOOC", "AWOD"), n, TRUE, prob = c(0.3, 0.3, 0.4))
+  data <- data.frame(time = time, status = factor(status), group = factor(sample(c("A", "B"), n, TRUE)))
+
+  result <- .msrr_run(data, explanatory = "group", multievent = TRUE, analysistype = "compete",
+                      dod = "DOD", dooc = "DOOC", awod = "AWOD")
+
+  # Only genuinely censored (alive) patients are "events" of the reverse KM;
+  # competing deaths are terminal and must not shorten the reported follow-up.
+  ref_fit <- survival::survfit(survival::Surv(time, status == "AWOD") ~ 1)
+  ref_median <- unname(summary(ref_fit)$table[["median"]])
+  wrong_fit <- survival::survfit(survival::Surv(time, status != "DOD") ~ 1)
+  wrong_median <- unname(summary(wrong_fit)$table[["median"]])
+  expect_false(isTRUE(all.equal(ref_median, wrong_median)))
+
+  info <- as.character(result$infoMessages$content)
+  expect_match(info, sprintf("median follow-up of %.1f months \\(reverse Kaplan-Meier\\)", ref_median))
+})
+
+test_that("a plot horizon shorter than follow-up is disclosed", {
+  set.seed(914)
+  data <- data.frame(
+    time = c(stats::runif(90, 1, 50), stats::runif(10, 61, 120)),
+    status = stats::rbinom(100, 1, 0.6),
+    group = factor(sample(c("A", "B"), 100, TRUE))
+  )
+
+  truncated <- .msrr_run(data, explanatory = "group", km = TRUE, endplot = 60)
+  expect_match(as.character(truncated$infoMessages$content), "Plot horizon shorter than follow-up")
+
+  full <- .msrr_run(data, explanatory = "group", km = TRUE, endplot = 200)
+  expect_false(grepl("Plot horizon shorter than follow-up", as.character(full$infoMessages$content), fixed = TRUE))
+
+  no_plot <- .msrr_run(data, explanatory = "group", km = FALSE, ac = FALSE, endplot = 60)
+  expect_false(grepl("Plot horizon shorter than follow-up", as.character(no_plot$infoMessages$content), fixed = TRUE))
+})

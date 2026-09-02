@@ -285,6 +285,10 @@ children:
                         name: ci_optimism_boot
                         format: number
                         enable: (ci_optimism)
+                      - type: TextBox
+                        name: seed
+                        format: number
+                        enable: (ci_optimism)
   - type: CollapseBox
     label: Adjusted Probability Analysis
     collapsed: true

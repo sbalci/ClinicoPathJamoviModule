@@ -72,9 +72,8 @@ jjarcdiagram
 
 ## ClinicoPath Survival
 
-multisurvival
-singlearm
-
+- multisurvival
+- singlearm 
 - survival
 - survivalcont
 
@@ -4291,3 +4290,96 @@ device, so the renderer still returns TRUE and jamovi draws a blank white panel.
       `paste0("<div style='background-color: ", style$bg, ...)` and the regex only
       matches a literal hex in the source line. Teach it to flag a `background-color:`
       whose value is an R variable, or at least to report the file for manual review.
+
+## [i18n] singlearm: 65 newly translatable strings await Turkish (2026-09-02)
+
+`/fix-function singlearm --apply` wrapped the whole notice layer in `.()`, so
+`jmvtools::i18nUpdate()` harvested 65 new msgids into `catalog.pot` / `en.po` / `tr.po`,
+all with an empty Turkish `msgstr`. singlearm now has 329 catalog entries with 16
+translated (5%).
+
+- [ ] Translate the 65 new singlearm entries in `jamovi/i18n/tr.po`. Prioritise the
+      validation/refusal messages a clinician actually hits: plot-axis and cutpoint
+      errors, the date-parsing family, the zero/negative/implausible follow-up checks,
+      and the competing-risk median refusal.
+- [ ] Two message sources remain untranslated on purpose and are NOT in this count:
+      `res$error` from `survival_utils.R::.defineEventIndicator()` (shared by five
+      analyses — needs one module-wide pass), and `data_quality$warnings[i]`, whose
+      producer `.assessDataQuality()` always returns `character()`. That loop in
+      `.run()` is dead code; delete it rather than translating it.
+
+## [process] `.a.yaml version:` is a DERIVED field in this repo (2026-09-02)
+
+`_updateModules.R:514 update_yaml_a_files()` rewrites every analysis `.a.yaml`
+`version:` to the first three components of the package version
+(`DESCRIPTION 1.0.8.06` -> `version: '1.0.8'`). Per-analysis bumps are therefore
+overwritten on the next module update, which is why three separate bumps of
+`singlearm`/`survival` (1.0.9, 1.0.10, 1.0.11) all reverted.
+
+- [ ] The release-review gate says "bump `.a.yaml` version whenever the analysis
+      changes materially". That is unachievable while the field is synced from
+      `DESCRIPTION`. Decide which is authoritative and say so in `CLAUDE.md`:
+      either stop syncing `.a.yaml` versions and bump them per analysis, or keep
+      the sync and drop the per-analysis-version expectation from the gate.
+      Right now 30 analyses share `1.0.8` and cannot be told apart by version.
+
+## multisurvival — /review-function 2026-09-02, fixes applied by /fix-function --apply the same day
+
+Runtime-confirmed bugs (one-line fixes, none applied):
+- [x] [BUG] `R/multisurvival.b.R:5087` `.plotRiskGroups` competing-risk branch references undefined `cif_df` (data frame is `cif`) -> "object 'cif_df' not found" whenever risk groups are plotted on a Fine-Gray model. Fix: `max(cif$time, na.rm = TRUE)`.
+- [x] [BUG] `R/multisurvival.b.R:3517` `.nomogram` `rms::datadist(mydata[, var_names])` drops to a bare vector for ONE predictor -> nomogram silently blank ("variable x does not have limits defined by datadist"). Fix: `drop = FALSE`.
+- [x] [BUG] `R/multisurvival.b.R:2838` `.personTimeAnalysis` uses the option label (`Sex`) to index janitor-cleaned cleanData (`sex`) -> per-group person-time rows never appear for capitalised/spaced names. Fix: index with `cleaneddata$myexplanatory_labelled[1]`, keep the option value for the label.
+- [x] [BUG] `R/multisurvival.b.R:4388,5816` `.plot3`/`.plot_adj` call `private$.isCompetingRisk()` without `plotData`; after an .omv reopen a Censored/Event/Competing hand-off is drawn as an ordinary Cox forest / "Adjusted survival". Fix: `private$.isCompetingRisk(plotData)`.
+- [x] [BUG] `R/multisurvival.b.R:3705` `.plot_nomogram` reads only `private$.nom_object` (never `image$state`) -> blank nomogram after .omv reopen. Fix: `setState()` the nomogram in `.run()` and read state first.
+- [x] [TEST] add regression tests using a CAPITALISED variable name (person-time group rows), a single-predictor nomogram, and Fine-Gray + plotRiskGroups render.
+
+Clinical/statistical text:
+- [x] `survMetricsTable` prints "Good/Acceptable/Limited discrimination" cut-offs while the glossary says there are no universal C-index cut-offs; drop the verdict words or align them.
+- [x] `.plot_adj` competing-risk branch ignores `byplot` (standard branch honours it).
+- [x] `.todo` welcome text says survival time must be "in months" and cites ggstatsplot (no longer used); `analysistype` description omits `dfs`; roxygen class doc claims ML / frailty / spline / decision-tree features that do not exist.
+- [ ] Pre-fit and post-fit EPV notices plus the validation "low events" notice overlap (3 notices for one problem on small data); consolidate.
+- [x] `.getData()` rejects with an HTML `<div>` message (unique in the module) — verify jamovi renders it, else use plain text.
+- [x] finalfit header cell literally reads "Dependent: Surv(mytime, myoutcome)"; relabel with the user's variable names.
+
+i18n / theme / hygiene:
+- [ ] 202/209 `.()` strings untranslated in tr.po; `.todo` and all seven "Understanding ..." panels plus `.populateInteractionTables` prose are outside `.()` entirely; 2 `.()` strings carry a leading space, 1 contains `\n`, several are paste0-glued fragments ("with", "out of").
+- [ ] dark hex heading colours (#856404, #0056b3, #1976D2, #34495e ...) on translucent tints in ~40 style attrs -> low contrast in dark theme; add `color: inherit`.
+- [x] `timetypedata` is in NO clearWith; `timetypeoutput` missing from survMetricsTable/nomogram_display/cox_phTable/riskScoreTable etc. (113 entries added). Still open: `plot_adj` clearWith lists options the renderer never reads.
+- [ ] dead code: `.formatErrorMessage`, `.sanitizeStringInput`, `.processDataInChunks`, `.competingRiskCumInc`, `.createHRTable`, `.restoreOriginalNamesInMultiSurvivalTable`, `.assessClinicalSignificance`, DEFAULT_* tree/ML constants, ~300 lines of commented-out methods (5681-5725, 5984-6105, 6505-6758, 7866-7921); `n_complete` unused (`:138`, `:2410`).
+- [ ] `R/multisurvival-metrics.R:48` hardcoded bootstrap `seed = 1234` (withr::local_seed) with no user-facing option.
+- [x] `warning()` at `:7860` reports a failed clinical summary only to the R console; use a notice. Also: nomogram risk-axis ticks are now adaptive (fixed 0.1-0.9 grid crashed plot.nomogram for a null single predictor) and the draw is guarded.
+- [ ] `.init()` hides/restores ~30 items that already carry declarative `visible:` expressions (library-review anti-pattern).
+- [x] .u.yaml/.a.yaml labels: `medianline` titled "medianline", `risktable` "Risktable", "Plot risk group survival", "Using dates to calculate survival time"; many Title Case control titles.
+- [ ] menuGroup is currently `SurvivalT` (JamoviTest routing for this review); move back to `Survival` after testing.
+
+## multisurvival — implement review recommendations (2026-09-02)
+
+Phase 1 (behaviour + hygiene), each slice verified with parse + full multisurvival tests:
+- [x] Delete dead helpers (.formatErrorMessage, .sanitizeStringInput, .processDataInChunks, .competingRiskCumInc, .createHRTable, .restoreOriginalNamesInMultiSurvivalTable, .assessClinicalSignificance, uncalled .addExplanations/.setExplanationContent), unused constants, commented-out method blocks.
+- [x] Dark theme: `color: #hex` text on translucent tints -> `color: inherit` (keep borders).
+- [x] `seed` option (Integer, default 1234) wired to the optimism bootstrap.
+- [x] Consolidate small-sample notices into one post-fit EPV notice; keep the data-validation note.
+- [x] Timepoints beyond observed follow-up -> info (not warning); invalid entries stay warnings.
+- [x] Nomogram: one risk axis per valid `cutp` timepoint; scoring guide parses every "Total Points" block and drops the hardcoded 12-month header; summary names all timepoints with the unit.
+- [x] `.init()`: drop imperative setVisible duplicates; add input-validity guards to renderers; fix survival-plots explanation visible expr to include km.
+- [x] `plot_adj` clearWith: drop 4 unused entries; add timetypedata to todo/risk_score_analysis(2)/adjustedSurvTableSummary/adjustedMedianSummary.
+- [x] Verify: visibility snapshot diff vs baseline; prepare(); scenarios.
+Phase 2 (i18n):
+- [x] Wrap remaining user-facing strings in `.()` (welcome, glossary, assumptions, explanation panels, interaction explanation, nomogram guide, narrative summaries); fix leading-space and `\n` strings; no paste0 fragments.
+- [x] `jmvtools::i18nUpdate("en")`/("tr"), refresh catalog.pot, fill Turkish msgstr for multisurvival strings; validate placeholders. (725 strings translated; only the 4 literal defaults/package names left untranslated on purpose.)
+
+## multisurvival — /release-review-function 2026-09-02 (after the review/fix passes above)
+
+Verified independently (scratchpad scripts, not committed): finalfit and adjusted-Cox HR/CI strings equal `survival::coxph` (qnorm(0.975)); standardised adjusted-survival table equals manual g-computation via `survfit(newdata)` at every tabulated timepoint (<6e-4); optimism-corrected C-index reproducible with `seed` and equal to a hand-written Harrell bootstrap (apparent to 1e-8, optimism to 1e-6); landmark HRs equal coxph on the manually filtered/shifted data; DFS/OS/cause/compete event counts match the four-bucket coding; person-time overall and per-group rows equal hand sums; nomogram risk axis `1 - s0^exp(lp)` equals `survfit(cph, newdata)` to 1e-8.
+
+Fixed in this pass:
+- [x] `.run` completion notice: reverse-KM median follow-up counted competing events as censoring events in competing-risk mode (understated follow-up). Now only the `Censored` level is the reverse-KM event.
+- [x] `endplot` (default 60) silently truncated KM/adjusted curves when follow-up is longer (day-scale data cut at day 60). Info notice "Plot horizon shorter than follow-up" when `km || ac` and `endplot < max(mytime)`.
+- [x] `.a.yaml` `version:` 1.0.8 -> 1.0.9 (material changes since a665bbb17: seed option, dfs, notice consolidation, nomogram axes). Needs `jmvtools::prepare()` + `devtools::document()`.
+- [x] Regression tests appended to `tests/testthat/test-multisurvival-release-review.R` (reverse-KM competing censoring; plot-horizon notice present/absent).
+
+Still open (not blocking release):
+- [ ] `.plot`/`.plot3`/`.plotKM` grid.text fallback messages (~10) are outside `.()`; new notice strings above need `jmvtools::i18nUpdate("en"/"tr")`.
+- [ ] `.a.yaml` R `usage:` block is fully commented out, so `man/multisurvival.Rd` ships no example.
+- [ ] `sty` still lists a commented-out ggstatsplot style (`t2`) and `.r.yaml` carries `# visible: (sty:t2)`; harmless.
+- [ ] Landmark keeps events at exactly the landmark time (`mytime >= landmark`, time 0 after shift); matches the Zabor tutorial, documented here only.

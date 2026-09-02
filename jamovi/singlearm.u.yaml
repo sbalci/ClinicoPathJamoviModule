@@ -93,7 +93,7 @@ children:
                       - type: ComboBox
                         name: timetypeoutput
       - type: Label
-        label: Landmark Time
+        label: Landmark time
         fitToGrid: true
         children:
           - type: LayoutBox

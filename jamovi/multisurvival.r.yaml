@@ -45,6 +45,7 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
 
     - name:  errors
       title: Critical Errors
@@ -109,6 +110,7 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
       
 
     - name:  text2
@@ -136,6 +138,7 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
 
     - name: interactionExplanation
       title: 'Interaction Terms — how to read this'
@@ -171,6 +174,8 @@ items:
         - tint
         - dxdate
         - fudate
+        - timetypedata
+        - timetypeoutput
       columns:
         - name: term
           title: 'Interaction'
@@ -215,6 +220,8 @@ items:
         - tint
         - dxdate
         - fudate
+        - timetypedata
+        - timetypeoutput
       columns:
         - name: interaction
           title: 'Interaction'
@@ -273,6 +280,7 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
 
     # Statistical Glossary Panel
     - name: glossaryPanel
@@ -322,6 +330,20 @@ items:
         - contexpl
         - show_survmetrics
         - survmetrics_timepoints
+        - tint
+        - dxdate
+        - fudate
+        - timetypedata
+        - timetypeoutput
+        - uselandmark
+        - landmark
+        - multievent
+        - dod
+        - dooc
+        - awd
+        - awod
+        - analysistype
+        - interactions
 
     - name: survMetricsSummary
       title: ''
@@ -335,6 +357,22 @@ items:
         - contexpl
         - show_survmetrics
         - survmetrics_timepoints
+        - elapsedtime
+        - tint
+        - dxdate
+        - fudate
+        - timetypedata
+        - timetypeoutput
+        - uselandmark
+        - landmark
+        - outcomeLevel
+        - multievent
+        - dod
+        - dooc
+        - awd
+        - awod
+        - analysistype
+        - interactions
 
     - name: survMetricsPlot
       title: 'Brier Score Over Time'
@@ -354,6 +392,20 @@ items:
         - show_survmetrics
         - survmetrics_show_plots
         - survmetrics_timepoints
+        - tint
+        - dxdate
+        - fudate
+        - timetypedata
+        - timetypeoutput
+        - uselandmark
+        - landmark
+        - multievent
+        - dod
+        - dooc
+        - awd
+        - awod
+        - analysistype
+        - interactions
 
 
 
@@ -417,6 +469,7 @@ items:
         - awd
         - awod
         - explanatory
+        - timetypedata
         # Person-time is computed on the complete-case set over ALL selected
         # variables, so any variable that enters the model changes the
         # denominator. Adding one continuous covariate with missing values moved
@@ -466,6 +519,11 @@ items:
         - uselandmark
         - landmark
         - person_time
+        - timetypedata
+        - contexpl
+        - interactions
+        - use_stratify
+        - stratvar
 
 
 
@@ -509,6 +567,8 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
+          - timetypeoutput
 
 
 
@@ -561,6 +621,8 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
+          - timetypeoutput
 
 
     - name: cox_phTable
@@ -582,6 +644,15 @@ items:
           - use_stratify
           - stratvar
           - interactions
+          - timetypedata
+          - timetypeoutput
+          - uselandmark
+          - landmark
+          - dod
+          - dooc
+          - awd
+          - awod
+          - analysistype
       columns:
           - name: term
             title: 'Term'
@@ -629,6 +700,8 @@ items:
           - uselandmark
           - landmark
           - contexpl
+          - timetypedata
+          - timetypeoutput
 
 
     - name: plot8
@@ -662,6 +735,8 @@ items:
           - uselandmark
           - landmark
           - contexpl
+          - timetypedata
+          - timetypeoutput
 
 
 
@@ -726,6 +801,8 @@ items:
           - pplot
           - censored
           - medianline
+          - timetypedata
+          - timetypeoutput
 
 
 
@@ -785,6 +862,8 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
+          - timetypeoutput
 
 
     - name: risk_score_analysis2
@@ -813,6 +892,8 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
+          - timetypeoutput
 
     - name:  riskScoreHeading
       title: Risk Score Analysis
@@ -869,6 +950,8 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
+          - timetypeoutput
 
     - name: riskScoreSummary
       title: ''
@@ -896,6 +979,8 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
+          - timetypeoutput
 
 
     - name: riskScoreMetrics
@@ -924,6 +1009,8 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
+          - timetypeoutput
 
 
 
@@ -962,6 +1049,8 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
+          - timetypeoutput
 
     - name: cindexValidation
       title: Optimism-Corrected Discrimination (Harrell's C-index)
@@ -1001,6 +1090,8 @@ items:
           - use_stratify
           - stratvar
           - interactions
+          - timetypedata
+          - timetypeoutput
 
 
 # Startification
@@ -1158,6 +1249,7 @@ items:
           - uselandmark
           - landmark
           - timetypeoutput
+          - timetypedata
 
     - name: plot_adj
       title: Adjusted Probability Plot
@@ -1171,7 +1263,6 @@ items:
           - ac
           - adjexplanatory
           - ci95
-          - risktable
           - ac_method
           - endplot
           - byplot
@@ -1185,9 +1276,6 @@ items:
           - tint
           - multievent
           - adjexplanatory
-          - pplot
-          - censored
-          - medianline
           - analysistype
           - use_stratify
           - stratvar
@@ -1199,6 +1287,7 @@ items:
           - uselandmark
           - landmark
           - timetypeoutput
+          - timetypedata
 
     # Adjusted Survival Summary (right after adjusted survival analysis)
     - name: adjustedSurvivalSummaryHeading
@@ -1234,6 +1323,7 @@ items:
           - uselandmark
           - landmark
           - timetypeoutput
+          - timetypedata
 
 
 # Nomogram
@@ -1283,6 +1373,7 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
 
     - name: nomogram_display
       title: "Nomogram Scoring Guide"
@@ -1301,6 +1392,17 @@ items:
           - interactions
           - use_stratify
           - stratvar
+          - tint
+          - dxdate
+          - fudate
+          - timetypedata
+          - timetypeoutput
+          - uselandmark
+          - landmark
+          - dod
+          - dooc
+          - awd
+          - awod
 
     # Nomogram Summary (right after nomogram analysis)
 
@@ -1336,6 +1438,7 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
 
 
     # - name: adjustedSummaryTable2
@@ -1431,6 +1534,7 @@ items:
           - cutp
           - adjexplanatory
           - ac_method
+          - timetypedata
           # The adjusted outputs are all predictions from the Cox model, so they
           # go stale whenever the model does. Only ac/ac_summary/adjexplanatory/
           # ac_method were listed, and jamovi keeps a panel's last content until
@@ -1467,6 +1571,7 @@ items:
           - cutp
           - adjexplanatory
           - ac_method
+          - timetypedata
           # Model-defining options; see adjustedSurvTable above.
           - outcome
           - outcomeLevel
@@ -1520,6 +1625,7 @@ items:
           - ac_summary
           - adjexplanatory
           - ac_method
+          - timetypedata
           # Model-defining options; see adjustedSurvTable above.
           - outcome
           - outcomeLevel
@@ -1551,6 +1657,7 @@ items:
           - ac_summary
           - adjexplanatory
           - ac_method
+          - timetypedata
           # Model-defining options; see adjustedSurvTable above.
           - outcome
           - outcomeLevel
@@ -1594,6 +1701,7 @@ items:
           - ac_summary
           - adjexplanatory
           - ac_method
+          - timetypedata
           # Model-defining options; see adjustedSurvTable above.
           - outcome
           - outcomeLevel
@@ -1625,6 +1733,7 @@ items:
           - ac_summary
           - adjexplanatory
           - ac_method
+          - timetypedata
           # Model-defining options; see adjustedSurvTable above.
           - outcome
           - outcomeLevel
@@ -1656,6 +1765,7 @@ items:
           - ac_summary
           - adjexplanatory
           - ac_method
+          - timetypedata
           # This narrative now names each variable, its level and its reference
           # level, so a panel left over from a previous covariate set is not
           # merely stale but actively wrong. Same model-defining list as
@@ -1710,6 +1820,8 @@ items:
           - interactions
           - uselandmark
           - landmark
+          - timetypedata
+          - timetypeoutput
 
 
 
@@ -1759,6 +1871,8 @@ items:
         - interactions
         - uselandmark
         - landmark
+        - timetypedata
+        - timetypeoutput
 
     - name: modelContributionSummary
       title: ''
@@ -1785,6 +1899,8 @@ items:
         - interactions
         - uselandmark
         - landmark
+        - timetypedata
+        - timetypeoutput
 
     # Multivariable Cox Regression Explanation
     - name: multivariableCoxExplanation
@@ -1854,13 +1970,13 @@ items:
     - name:  survivalPlotsHeading3
       title: Survival Plots Explanations
       type:  Preformatted
-      visible: ((ac || hr) && showExplanations)
+      visible: (showExplanations && (ac || hr || km))
 
     # Survival Plots Explanation
     - name: survivalPlotsExplanation
       title: Understanding Adjusted Survival Curves and Plots
       type: Html
-      visible: ((ac || hr) && showExplanations)
+      visible: (showExplanations && (ac || hr || km))
       clearWith:
           - ac
           - hr

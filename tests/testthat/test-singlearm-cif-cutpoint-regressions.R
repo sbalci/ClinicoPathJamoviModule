@@ -31,7 +31,13 @@ library(testthat)
 
   stub <- new.env(parent = globalenv())
   bind <- function(f) { environment(f) <- stub; f }
-  stub$self <- list(options = list(timetypeoutput = timetypeoutput))
+  # jmvcore's .() resolves `self` from the calling frame and calls
+  # self$options$translate(). The real Options object provides it; this stub
+  # must too, or every translated message in the methods under test dies with
+  # "attempt to apply non-function". Identity keeps the English assertions below.
+  stub$self <- list(options = list(
+    timetypeoutput = timetypeoutput,
+    translate = function(text, n = NULL) text))
   stub$private <- list(
     .addInfo    = add("INFO"),
     .addWarning = add("WARNING"),

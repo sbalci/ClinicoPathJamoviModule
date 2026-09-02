@@ -9,8 +9,8 @@ An \code{R6} class generator object for the \code{multisurvivalClass} backend; u
 \description{
 Backend implementation class for comprehensive multivariable survival analysis.
 This R6 class provides the core functionality for the multisurvival jamovi module,
-handling Cox proportional hazards regression, risk stratification, machine learning
-survival methods, and advanced survival modeling techniques.
+handling Cox proportional hazards regression, Fine-Gray competing-risks models,
+risk stratification, adjusted survival curves and nomograms.
 }
 \details{
 The multisurvivalClass implements a modular architecture with the following components:
@@ -19,16 +19,15 @@ The multisurvivalClass implements a modular architecture with the following comp
 \itemize{
 \item Input validation and data preparation
 \item Cox proportional hazards modeling
-\item Competing risks and cause-specific survival
-\item Time-dependent covariate handling
+\item Competing risks (Fine-Gray) and cause-specific survival
+\item Landmark analysis and date-derived follow-up time
 }
 
 \strong{Advanced Methods:}
 \itemize{
 \item Stratified analysis for non-proportional hazards
-\item Frailty models for clustered data
-\item Spline-based time-varying effects
-\item Machine learning survival algorithms
+\item Interaction (effect-modification) terms with within-subgroup hazard ratios
+\item Single-term-deletion covariate contribution tests
 }
 
 \strong{Risk Assessment:}
@@ -36,7 +35,7 @@ The multisurvivalClass implements a modular architecture with the following comp
 \item Prognostic risk score calculation
 \item Risk group stratification
 \item Nomogram generation
-\item Decision tree analysis
+\item Optimism-corrected C-index, IPCW Brier score and time-dependent AUC
 }
 
 \strong{Visualization & Output:}

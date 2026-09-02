@@ -42,6 +42,7 @@ multisurvival(
   plotRiskGroups = FALSE,
   ci_optimism = FALSE,
   ci_optimism_boot = 150,
+  seed = 1234,
   ac = FALSE,
   adjexplanatory = NULL,
   ac_method = "average",
@@ -120,8 +121,8 @@ if applicable.}
 disease, if applicable.}
 
 \item{analysistype}{Type of survival analysis: - overall: All-cause
-survival - cause: Cause-specific survival - compete: Competing risks
-analysis}
+survival - cause: Cause-specific survival - dfs: Disease-free survival
+(alive with disease counts as an event) - compete: Competing risks analysis}
 
 \item{explanatory}{Categorical explanatory (predictor) variables included
 in the Cox model.}
@@ -201,6 +202,10 @@ competing-risks (Fine-Gray) models.}
 \item{ci_optimism_boot}{Number of bootstrap resamples used for optimism
 correction of the C-index. Larger values give more stable estimates but
 take longer to compute.}
+
+\item{seed}{Random-number seed for the bootstrap optimism correction, so
+that repeated runs give the same corrected C-index. Change it to check the
+stability of the correction.}
 
 \item{ac}{.}
 
