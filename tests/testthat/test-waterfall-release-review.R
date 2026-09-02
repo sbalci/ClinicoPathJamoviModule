@@ -495,3 +495,67 @@ test_that("a duplicate baseline row blocks the run with a specific message", {
                            timeVar = "time", inputType = "raw"),
     "more than one baseline")
 })
+
+test_that("a patient with no usable assessment does not erase the time-to-event table", {
+  # PT3 has a baseline row but every percentage is NA. In the per-patient
+  # summarise() min() gave Inf and which.min() gave integer(0), dplyr raised
+  # "must return size 1", the tryCatch swallowed it and the ENTIRE TTR/DoR
+  # table disappeared for the cohort, with only a generic warning notice.
+  d <- data.frame(patientID = rep(c("PT1", "PT2", "PT3"), each = 3),
+                  visitTime = rep(c(0, 6, 12), 3),
+                  pct = c(0, -40, -22,  0, -45, -50,  NA, NA, NA))
+  p <- wf_private(d, patientID = "patientID", responseVar = "pct",
+                  timeVar = "visitTime", inputType = "percentage")
+  proc <- p$.processData(d, "patientID", "percentage", "pct", "visitTime", NULL)
+  tte <- p$.calculateTimeToEventMetrics(proc$spider, "patientID", "visitTime", "response")
+
+  expect_false(is.null(tte))
+  by_pt <- as.data.frame(tte$by_patient)
+  expect_setequal(by_pt$patientID, c("PT1", "PT2"))
+  expect_equal(tte$summary$median_time_to_response, 6)
+})
+
+test_that("re-running on the same instance does not duplicate table rows", {
+  # jamovi reuses the analysis instance; Table$addRow() never checks the rowKey.
+  # Before the deleteRows() sweep at the top of .run(), a second run that did
+  # not trip clearWith doubled clinicalMetrics, the DoR table and the group tables.
+  set.seed(1); n <- 8
+  d <- data.frame(patientID = rep(sprintf("PT%02d", 1:n), each = 3),
+                  visitTime = rep(c(0, 6, 12), n),
+                  pct = as.vector(sapply(1:n, function(i) c(0, cumsum(rnorm(2, -15, 25))))),
+                  grp = rep(c("A", "B"), each = 3, length.out = 3 * n))
+  an <- waterfallClass$new(
+    options = waterfallOptions$new(patientID = "patientID", responseVar = "pct",
+                                   timeVar = "visitTime", inputType = "percentage",
+                                   groupVar = "grp", showResponseDuration = TRUE),
+    data = d)
+  counts <- function() vapply(c("clinicalMetrics", "responseDurationTable",
+                                "groupComparisonTable", "groupComparisonTest"),
+                              function(t) an$results[[t]]$rowCount, numeric(1))
+  an$run(); first <- counts()
+  an$run(); second <- counts()
+  expect_gt(first[["clinicalMetrics"]], 0)
+  expect_equal(second, first)
+})
+
+test_that("group comparison tests explain themselves when skipped or not 2x2", {
+  set.seed(2); n <- 9
+  base <- data.frame(patientID = rep(sprintf("PT%02d", 1:n), each = 2),
+                     visitTime = rep(c(0, 6), n))
+  # three groups: Fisher runs but has no odds ratio -> no "OR = NA"
+  d3 <- base; d3$pct <- rep(c(0, -50, 0, 10, 0, 30), length.out = 2 * n)
+  d3$grp <- rep(c("A", "B", "C"), each = 6)
+  an3 <- waterfallClass$new(options = waterfallOptions$new(patientID = "patientID",
+    responseVar = "pct", timeVar = "visitTime", inputType = "percentage", groupVar = "grp"), data = d3)
+  an3$run()
+  lab <- an3$results$groupComparisonTest$asDF$test_statistic
+  expect_true(length(lab) >= 1)
+  expect_false(any(grepl("NA", lab, fixed = TRUE)))
+
+  # nobody responds in either group: ORR contingency is 2x1, test skipped -> note
+  d0 <- base; d0$pct <- rep(c(0, 5), n); d0$grp <- rep(c("A", "B"), length.out = 2 * n)
+  an0 <- waterfallClass$new(options = waterfallOptions$new(patientID = "patientID",
+    responseVar = "pct", timeVar = "visitTime", inputType = "percentage", groupVar = "grp"), data = d0)
+  an0$run()
+  expect_true("skipped" %in% names(an0$results$groupComparisonTest$notes))
+})

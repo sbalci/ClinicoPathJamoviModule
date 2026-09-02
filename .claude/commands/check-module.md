@@ -4,7 +4,7 @@ description: Scan and validate all functions in a jamovi module. Auto-discovers 
 interactive: true
 args:
   module:
-    description: Module name (wip, jjstatsplot, meddecide, jsurvival, OncoPathology, ClinicoPathDescriptives, or 'all' for current module)
+    description: Module name (jjstatsplot, meddecide, jsurvival, ClinicoPathDescriptives, OncoPath, JamoviTest, or 'all' for every analysis in the current repo). Also accepts a raw menuGroup value (e.g. OncoPathD).
     required: false
     default: all
   --batch:
@@ -46,25 +46,62 @@ You are an expert jamovi module developer performing systematic quality assessme
 - `jamovi/*.a.yaml` files (analysis definitions)
 - Cross-reference to ensure 4-file completeness
 
-**Module-specific function lists** (used when module parameter is provided):
+**Module function lists are derived, never hardcoded.** In the umbrella repo every
+analysis declares a `menuGroup:` in `jamovi/<name>.a.yaml`, and `_updateModules.R`
+ships an analysis to a submodule only when that value matches the module's
+production group **exactly** (anchored `menuGroup: <Group>$`). Suffixes route
+elsewhere:
 
-### Module: wip
-- tableone, summarydata, reportcat, alluvial, agepyramid, venn, vartree, crosstable, benford
+| `menuGroup:` value | Ships to | Meaning |
+|---|---|---|
+| `<Group>` | production submodule | released analysis |
+| `<Group>T` | JamoviTest | under test/modification (see CLAUDE.md "JamoviTest Routing") |
+| `<Group>D` | umbrella only | development, not shipped |
+| `<Group>ExtraD` / `<Group>ExtraT` | umbrella only / JamoviTest | work-in-progress overflow |
+| `Power #<module>` | production submodule named after `#` | a released analysis of THAT module (e.g. `Power #meddecide` IS a meddecide analysis); the `#module` is a YAML comment jamovi ignores, so it shows under the shared Power menu |
+| `PowerT #<module>` | JamoviTest | that module's analysis, under test |
 
-### Module: jjstatsplot
-- jjhistostats, jjscatterstats, jjcorrmat, jjbetweenstats, jjdotplotstats, jjwithinstats, advancedraincloud, jjbarstats, jjpiestats, jwaffle, statsplot2, jjarcdiagram, linechart, lollipop, raincloud, jjsegmentedtotalbar
+Module name → production `menuGroup`:
 
-### Module: meddecide
-- decision, decisioncurve, decisioncompare, decisioncombine, enhancedroc, psychopdaroc, agreement, pathagreement, timedependentdca, diagnosticmeta, nogoldstandard, cotest, sequentialtests, decisioncalculator, kappaSizePower, kappaSizeCI, kappaSizeFixedN
+| Module argument | Production group | Sibling repo |
+|---|---|---|
+| jjstatsplot | `JJStatsPlot` | ../jjstatsplot |
+| meddecide | `meddecide` | ../meddecide |
+| jsurvival | `Survival` | ../jsurvival |
+| ClinicoPathDescriptives | `Exploration` | ../ClinicoPathDescriptives |
+| OncoPath | `OncoPath` | ../OncoPath |
+| JamoviTest | every `*T` group | ../JamoviTest |
 
-### Module: jsurvival
-- survival, multisurvival, survivalcont, condsurvival, finegray, curemodels, survivalpower, jointmodeling
+Resolve the list at run time (do not trust any list written into a playbook):
 
-### Module: OncoPathology
-- ihcdiagnostic, ihccluster, pathsampling, stagemigration, biomarkerresponse, oddsratio, waterfall, swimmerplot
+```bash
+# production analyses of one module: its own group OR 'Power #<module>' (replace both names)
+grep -l -E '^menuGroup: (meddecide|Power #meddecide)[[:space:]]*$' jamovi/*.a.yaml | xargs -n1 basename | sed 's/\.a\.yaml$//'
 
-### Module: ClinicoPathDescriptives
-- tableone, crosstable, crosstablepivot, conttables, conttablespaired, checkdata, dataquality, categorize, datecorrection, nonparametric
+# whole map: count + names per menuGroup (production, D, T, Extra all visible)
+for f in jamovi/*.a.yaml; do g=$(grep -E '^menuGroup:' "$f" | sed -E 's/menuGroup:[[:space:]]*//; s/[[:space:]]+$//'); echo "$g $(basename "$f" .a.yaml)"; done | sort | awk '{a[$1]=a[$1]" "$2; n[$1]++} END{for(k in a) print n[k], k":"a[k]}' | sort -k2
+```
+
+When run inside a sibling repo (a shipped submodule), the list is simply
+`jamovi/0000.yaml` → `analyses:` → `name`. Always confirm the sibling copy of each
+file is byte-identical to the umbrella before debugging it (`diff`), otherwise you
+are chasing a stale build (memory: `reference_stale_generated_module_masquerades_as_bug`).
+
+Snapshot for orientation only (2026-09-02; regenerate with the command above):
+
+| Production group | n | Analyses |
+|---|---|---|
+| OncoPath | 4 | diagnosticmeta, ihcheterogeneity, swimmerplot, waterfall |
+| meddecide | 12 | agreement, cotest, decision, decisioncalculator, decisioncombine, decisioncompare, decisioncurve, enhancedROC, lassologistic, nogoldstandard, psychopdaROC, sequentialtests (+ kappaSizeCI, kappaSizeFixedN, kappaSizePower are meddecide analyses currently at `PowerT #meddecide`, i.e. in JamoviTest) |
+| Survival | 9 | datetimeconverter, lassocox, multisurvival, oddsratio, outcomeorganizer, singlearm, survival, survivalcont, timeinterval |
+| JJStatsPlot | 3 | jjbarstats, jjpiestats, statsplot2 |
+| Exploration | 0 | (all 17 Descriptives analyses currently sit in `ExplorationT`) |
+
+**Scanner false positives to expect** (seen on the 2026-09-02 OncoPath pass):
+options read through a constructed name (`self$options[[paste0("milestone", i, "Name")]]`),
+options used only by `.r.yaml` `visible:` (`show_*` toggles on Html panels), and
+`private$asArgs` / `private$sourcifyOption` reported as phantom methods (jmvcore base
+class). Verify each candidate in the code before listing it as a finding.
 
 ## Check Profiles
 
@@ -116,8 +153,13 @@ You are an expert jamovi module developer performing systematic quality assessme
    - Complete: All 4 files present
    - Partial: Missing 1-2 files
    - Broken: Missing 3+ files
-4. If module parameter provided, filter to module-specific list
+4. If module parameter provided, keep only analyses whose `.a.yaml` `menuGroup:`
+   matches the module's production group EXACTLY (table above) or is
+   `Power #<module>`; a raw menuGroup value (e.g. `OncoPathD`, `SurvivalT`,
+   `PowerT #meddecide`) is matched literally
 5. If --functions parameter provided, use explicit list
+6. If the module has a sibling repo, `diff` each analysis's 4 files + .b.R against
+   it and report drift before checking anything
 ```
 
 ## Execution Order & Workflow
@@ -128,6 +170,7 @@ You are an expert jamovi module developer performing systematic quality assessme
 2. **Sort by Priority** — Complete functions first, then partial, then broken
 3. **Plan** — Print concise checklist for current function
 4. **Confirm** (unless --batch) — Single confirmation per function: *"Proceed to check `<function>`?"*
+   In a non-interactive/autonomous session there is nobody to answer: behave as `--batch` and say so
 5. **Execute Checks** — Run all checks for selected profile
 6. **Report** — Output findings in selected format
 7. **Advance** — Move to next function
@@ -198,7 +241,7 @@ Integration Issues (Common Pattern):
 
 1. Fix critical issues in reportcat (run: /fix-function reportcat schema)
 2. Add error handling to venn, vartree (run: /fix-notices venn vartree)
-3. Run release profile on production-ready functions (run: /check-module wip --profile=release --functions=tableone,summarydata,crosstable)
+3. Run release profile on production-ready functions (run: /check-module ClinicoPathDescriptives --profile=release --functions=tableone,summarydata,crosstable)
 ```
 
 ### Detailed Format
@@ -264,20 +307,23 @@ When `--parallel` is enabled:
 # Check current module with auto-discovery (standard profile)
 /check-module
 
-# Check specific module in batch mode
-/check-module jjstatsplot --batch
+# Check one production module in batch mode (4 analyses as of 2026-09)
+/check-module OncoPath --batch
 
 # Quick check of specific functions
-/check-module wip --functions=tableone,summarydata --profile=quick
+/check-module ClinicoPathDescriptives --functions=tableone,summarydata --profile=quick
+
+# Everything currently routed to JamoviTest (all *T menuGroups)
+/check-module JamoviTest --profile=quick --batch
+
+# A dev menuGroup, matched literally
+/check-module OncoPathD --profile=quick --batch
 
 # Comprehensive check with parallel execution
 /check-module meddecide --profile=comprehensive --parallel --batch
 
 # Release readiness check for production
 /check-module jsurvival --profile=release --output-format=detailed
-
-# Auto-discover all functions and check thoroughly
-/check-module all --auto-discover --profile=comprehensive
 
 # JSON output for CI/CD pipeline
 /check-module --profile=standard --output-format=json > module-quality.json
@@ -289,14 +335,14 @@ After identifying issues, use targeted commands for fixes:
 
 ```bash
 # After check-module identifies schema issues
-/check-module wip --profile=standard
+/check-module ClinicoPathDescriptives --profile=standard
 # → Shows reportcat has schema issues
 
 # Fix specific function
 /fix-function reportcat schema
 
 # After check-module identifies missing notices
-/check-module wip --profile=release
+/check-module ClinicoPathDescriptives --profile=release
 # → Shows venn needs better error handling
 
 # Add notices

@@ -311,3 +311,33 @@ test_that("every panel grades the mean CV with the same user-threshold bands", {
     expect_equal(summ_word, tab_word, info = paste("Summary vs table at thr", thr))
   }
 })
+
+test_that("nominal-integer columns (jamovi factors with a values attribute) are analysed as numbers", {
+    # jamovi passes an integer column with a nominal measure type as a factor
+    # carrying a 'values' attribute; permitted: numeric admits it. The old code
+    # did no coercion and aborted with "non-numeric argument to binary operator".
+    d <- clean_data(); d[] <- lapply(d, round)
+    as_jamovi_nominal <- function(x) { f <- factor(x); attr(f, "values") <- as.integer(levels(f)); f }
+    dj <- data.frame(lapply(d, as_jamovi_nominal))
+    num <- run_ihc(d); fac <- run_ihc(dj)
+    expect_equal(fac$reproducibilitytable$asDF, num$reproducibilitytable$asDF)
+    expect_equal(fac$samplingbiastable$asDF, num$samplingbiastable$asDF)
+})
+
+test_that("the multiplicity note counts the comparisons actually shown", {
+    tab <- run_ihc(clean_data())$samplingbiastable
+    expect_equal(tab$rowCount, 3L)   # b1 vs ref, b2 vs ref, mean of regions vs ref
+    expect_match(tab$notes$multiplicity$note, "^3 paired comparisons")
+})
+
+test_that("the variability plot does not error when no case has two values to compare", {
+    # Image$.render() reports TRUE whatever the renderer does, so call the
+    # renderer itself: it used to die on max(numeric(0)) and a 0-row frame.
+    d <- data.frame(b1 = c(10, 20, 30, 40, 50, 60), b2 = NA_real_)
+    o <- ClinicoPath:::ihcheterogeneityOptions$new(biopsy1 = "b1", biopsy2 = "b2",
+                                                  show_variability_plots = TRUE)
+    an <- ClinicoPath:::ihcheterogeneityClass$new(options = o, data = d); an$run()
+    grDevices::png(tempfile(fileext = ".png")); on.exit(grDevices::dev.off(), add = TRUE)
+    expect_false(an$.__enclos_env__$private$.variabilityplot(
+        an$results$variabilityplot, ggtheme = ggplot2::theme_minimal(), theme = list()))
+})

@@ -172,10 +172,21 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   },
                   NA_real_
                 ),
-                # Best response achieved
-                best_response = min(.data[[responseVar]], na.rm = TRUE),
+                # Best response achieved. A patient whose every assessment is NA
+                # (a baseline row plus missing measurements passes validation)
+                # made min() return Inf and which.min() return integer(0);
+                # summarise() then failed with "must return size 1" and the
+                # whole TTR/DoR table vanished for the entire cohort.
+                best_response = {
+                  v <- .data[[responseVar]]
+                  if (all(is.na(v))) NA_real_ else min(v, na.rm = TRUE)
+                },
                 # Time to best response
-                time_to_best_response = .data[[timeVar]][which.min(.data[[responseVar]])],
+                time_to_best_response = {
+                  valid_idx <- which(!is.na(.data[[responseVar]]))
+                  if (length(valid_idx) == 0) NA_real_
+                  else .data[[timeVar]][valid_idx[which.min(.data[[responseVar]][valid_idx])]]
+                },
                 .groups = "drop"
               ) %>%
               dplyr::filter(!is.na(time_to_first_response) | !is.na(duration_of_response))
@@ -2011,11 +2022,17 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # negative measurements, baseline-only follow-up) used to vanish from
         # this table entirely, so its n never reconciled with the cohort.
         if (!is.null(metrics$n_unknown) && metrics$n_unknown > 0) {
-          self$results$summaryTable$addRow(rowKey = "recist_Unknown", values = list(
+          unknown_values <- list(
             category = .("Unknown / not evaluable"),
             n = metrics$n_unknown,
             percent = NA_real_
-          ))
+          )
+          # This row is not part of the .init() skeleton; addRow() on a re-run
+          # would append a second copy.
+          if ("recist_Unknown" %in% self$results$summaryTable$rowKeys)
+            self$results$summaryTable$setRow(rowKey = "recist_Unknown", values = unknown_values)
+          else
+            self$results$summaryTable$addRow(rowKey = "recist_Unknown", values = unknown_values)
           self$results$summaryTable$setNote("unknown",
             .("Percentages and the response rates below are computed over evaluable patients only (CR/PR/SD/PD); patients with an unknown category are excluded from every denominator. See the Important Information panel for who was excluded and why."))
         }
@@ -2411,7 +2428,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Show clinical significance assessment ----
         if (isTRUE(self$options$showClinicalSignificance)) {
-          private$.generateClinicalSignificance(metrics, nrow(processed_data$waterfall))
+          # metrics$n is the evaluable count every rate on that panel uses;
+          # nrow(waterfall) also counted Unknown patients.
+          private$.generateClinicalSignificance(metrics, metrics$n)
           private$.generateClinicalGlossary()
         }
 
@@ -2613,6 +2632,16 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Step 1: Initialize analysis and show guidance
         private$.initializeAnalysis()
+
+        # jamovi reuses this instance, and Table$addRow() never checks for an
+        # existing rowKey, so a re-run that does not trip clearWith doubled
+        # every row in the addRow-populated tables. Clear them here, once;
+        # summaryTable and enhancedClinicalMetrics keep their .init() skeleton
+        # and are filled with setRow.
+        for (tbl in c("clinicalMetrics", "responseDurationTable", "personTimeTable",
+                      "groupComparisonTable", "groupComparisonTest")) {
+          self$results[[tbl]]$deleteRows()
+        }
 
         # Step 2: Validate inputs and data
         if (!private$.validateInputsAndData()) {
@@ -3610,8 +3639,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$groupComparisonTest$addRow(rowKey = row_count, values = list(
               comparison = .("Objective Response Rate (ORR)"),
-              test_statistic = sprintf("Fisher's exact test, OR = %.2f",
-                                     if (!is.null(orr_test$estimate)) orr_test$estimate else NA),
+              # fisher.test() returns an odds ratio only for a 2x2 table; with
+              # 3+ groups this printed "OR = NA".
+              test_statistic = paste0("Fisher's exact test",
+                  if (!is.null(orr_test$estimate)) sprintf(", OR = %.2f", orr_test$estimate) else ""),
               p_value = round(orr_test$p.value, 4),
               interpretation = orr_interpretation
             ))
@@ -3627,12 +3658,21 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$groupComparisonTest$addRow(rowKey = row_count, values = list(
               comparison = .("Disease Control Rate (DCR)"),
-              test_statistic = sprintf("Fisher's exact test, OR = %.2f",
-                                     if (!is.null(dcr_test$estimate)) dcr_test$estimate else NA),
+              test_statistic = paste0("Fisher's exact test",
+                  if (!is.null(dcr_test$estimate)) sprintf(", OR = %.2f", dcr_test$estimate) else ""),
               p_value = round(dcr_test$p.value, 4),
               interpretation = dcr_interpretation
             ))
           }
+
+          # A skipped test used to leave a silent gap in the table.
+          if (is.null(orr_test) || is.null(dcr_test)) {
+            self$results$groupComparisonTest$setNote("skipped",
+              .("A Fisher's exact test was not run where every patient fell into the same class (e.g. no responders in any group), so there is no contrast to test."))
+          }
+        } else {
+          self$results$groupComparisonTest$setNote("skipped",
+            .("Group comparison tests need at least two groups, each with at least one evaluable patient."))
         }
       }
 

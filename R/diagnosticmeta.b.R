@@ -484,7 +484,10 @@ diagnosticmetaClass <- R6::R6Class(
             }
 
             if (self$options$sroc_plot) {
-                private$.populateSROCPlot(meta_data)
+                # Same continuity-corrected data as the forest plot and the
+                # Reitsma fit behind the pooled point; the raw counts put
+                # zero-cell studies at a different place on the two figures.
+                private$.populateSROCPlot(analysis_data)
             }
 
             if (self$options$funnel_plot && self$options$publication_bias) {
@@ -1099,6 +1102,7 @@ diagnosticmetaClass <- R6::R6Class(
                     # top of .performPHMSROCAnalysis(); no need to clear again.
 
                     # Process each coefficient
+                    theta_se <- NA_real_
                     for (param_name in names(coefficients)) {
                         display_name <- param_labels[[param_name]] %||% param_name
                         estimate <- coefficients[param_name]
@@ -1138,12 +1142,29 @@ diagnosticmetaClass <- R6::R6Class(
                             }
                         }
 
+                        if (identical(param_name, "theta")) theta_se <- std_error
+
                         hsroc_table$addRow(rowKey = param_name, values = list(
                             parameter = display_name,
                             estimate = estimate,
                             std_error = std_error,
                             z_value = z_value,
                             p_value = p_value
+                        ))
+                    }
+
+                    # The AUC of the PHM SROC curve is 1/(1 + theta) (Holling,
+                    # Boehning & Boehning 2012). The note below quoted the formula
+                    # but the value itself was never shown. SE by the delta
+                    # method: d/dtheta [1/(1 + theta)] = -1/(1 + theta)^2.
+                    theta_val <- if ("theta" %in% names(coefficients)) unname(coefficients["theta"]) else NA_real_
+                    if (is.finite(theta_val) && theta_val > 0) {
+                        hsroc_table$addRow(rowKey = "auc", values = list(
+                            parameter = "Area under the SROC curve (AUC = 1/(1 + theta))",
+                            estimate = 1 / (1 + theta_val),
+                            std_error = if (is.finite(theta_se)) theta_se / (1 + theta_val)^2 else NA_real_,
+                            z_value = NA_real_,
+                            p_value = NA_real_
                         ))
                     }
 

@@ -678,3 +678,31 @@ test_that("ongoing arrow sits at the patient's latest end, decided by last statu
     expect_equal(as.character(arrows$patient_id), "A")
     expect_equal(arrows$x, 9)   # latest end, not the first censored episode's end
 })
+
+test_that("Fisher label omits the odds ratio when it does not exist", {
+  # fisher.test() returns $estimate only for a 2x2 table; with three groups the
+  # label read "Fisher's exact test, OR = NA".
+  mk <- function(groups) data.frame(
+    id = paste0("P", 1:12), start = 0, end = 6:17,
+    resp = rep(c("CR", "PR", "SD", "PD"), 3), grp = rep(groups, length.out = 12),
+    stringsAsFactors = FALSE)
+  three <- suppressWarnings(swimmerplot(data = mk(c("A", "B", "C")), patientID = "id",
+    startTime = "start", endTime = "end", responseVar = "resp", groupVar = "grp"))
+  lab3 <- three$groupComparisonTest$asDF$test_statistic
+  expect_true(length(lab3) >= 1)
+  expect_false(any(grepl("NA", lab3, fixed = TRUE)))
+  expect_false(any(grepl("OR =", lab3, fixed = TRUE)))
+
+  two <- suppressWarnings(swimmerplot(data = mk(c("A", "B")), patientID = "id",
+    startTime = "start", endTime = "end", responseVar = "resp", groupVar = "grp"))
+  expect_true(all(grepl("OR = [0-9]", two$groupComparisonTest$asDF$test_statistic)))
+})
+
+test_that("the summary export does not carry the same mean under two names", {
+  d <- data.frame(id = paste0("P", 1:6), start = 0, end = 2:7, stringsAsFactors = FALSE)
+  r <- suppressWarnings(swimmerplot(data = d, patientID = "id", startTime = "start",
+                                    endTime = "end", exportSummary = TRUE))
+  m <- r$summaryData$asDF$metric
+  expect_true("mean_duration" %in% m)
+  expect_false("mean_follow_up" %in% m)
+})

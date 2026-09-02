@@ -2210,8 +2210,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                     self$results$groupComparisonTest$addRow(rowKey = 1, values = list(
                         comparison = .("Objective Response Rate (ORR)"),
-                        test_statistic = sprintf("Fisher's exact test, OR = %.2f",
-                                               if (!is.null(orr_test$estimate)) orr_test$estimate else NA),
+                        # fisher.test() returns an odds ratio only for a 2x2 table;
+                        # with 3+ groups this printed "OR = NA".
+                        test_statistic = paste0("Fisher's exact test",
+                            if (!is.null(orr_test$estimate)) sprintf(", OR = %.2f", orr_test$estimate) else ""),
                         p_value = orr_test$p.value,
                         interpretation = orr_interpretation
                     ))
@@ -2238,8 +2240,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                     self$results$groupComparisonTest$addRow(rowKey = 2, values = list(
                         comparison = .("Disease Control Rate (DCR)"),
-                        test_statistic = sprintf("Fisher's exact test, OR = %.2f",
-                                               if (!is.null(dcr_test$estimate)) dcr_test$estimate else NA),
+                        test_statistic = paste0("Fisher's exact test",
+                            if (!is.null(dcr_test$estimate)) sprintf(", OR = %.2f", dcr_test$estimate) else ""),
                         p_value = dcr_test$p.value,
                         interpretation = dcr_interpretation
                     ))
@@ -2249,7 +2251,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Check for low cell counts in contingency tables
             min_cell_orr <- if (!is.null(orr_contingency)) min(orr_contingency) else NA
             min_cell_dcr <- if (!is.null(dcr_contingency)) min(dcr_contingency) else NA
-            min_cell <- min(c(min_cell_orr, min_cell_dcr), na.rm = TRUE)
+            min_cells <- c(min_cell_orr, min_cell_dcr)
+            # min(c(NA, NA), na.rm = TRUE) is Inf plus an R warning.
+            min_cell <- if (all(is.na(min_cells))) NA else min(min_cells, na.rm = TRUE)
 
             if (!is.na(min_cell) && min_cell < 5) {
                 # REPLACED Notice with HTML to prevent serialization errors
@@ -2319,10 +2323,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Export summary statistics if requested  
             if (self$options$exportSummary) {
                 summary_export <- data.frame(
-                    metric = c("n_patients", "n_observations", "median_duration", 
-                             "mean_duration", "total_person_time", "mean_follow_up"),
+                    # mean_follow_up was byte-identical to mean_duration (both
+                    # mean(valid_follow_up)); the summary table already dropped it.
+                    metric = c("n_patients", "n_observations", "median_duration",
+                             "mean_duration", "total_person_time"),
                     value = c(stats$n_patients, stats$n_observations, stats$median_duration,
-                            stats$mean_duration, stats$total_person_time, stats$mean_follow_up),
+                            stats$mean_duration, stats$total_person_time),
                     stringsAsFactors = FALSE
                 )
                 

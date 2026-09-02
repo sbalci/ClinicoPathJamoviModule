@@ -96,8 +96,12 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             cv <- (sd_val / abs(mean_val)) * 100
 
-            # Cap extreme CVs (>500% likely indicates data issues)
-            if (!is.finite(cv) || cv > 500) {
+            # A finite CV is always reported. The former ">500% = NA" cap
+            # dropped the MOST heterogeneous cases from every mean CV, biasing
+            # the statistic in exactly the direction this analysis exists to
+            # detect. (For non-negative scores CV cannot exceed
+            # 100*sqrt(n-1)%, so the cap only ever fired on negative inputs.)
+            if (!is.finite(cv)) {
                 return(NA)
             }
 
@@ -280,7 +284,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             
             # Extract reference data (optional)
             whole_section <- if (!is.null(self$options$wholesection)) {
-                data[[self$options$wholesection]]
+                private$.toNumeric(data[[self$options$wholesection]])
             } else {
                 NULL
             }
@@ -357,6 +361,16 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             private$.generateHeterogeneityInterpretation(whole_section, biopsy_data, study_design)
         },
         
+        # jamovi hands a nominal variable with an integer/decimal data type
+        # back as a factor carrying a 'values' attribute. permitted: numeric
+        # admits it, and without this unwrap the arithmetic aborted with a raw
+        # "non-numeric argument to binary operator".
+        .toNumeric = function(x) {
+            x <- jmvcore::toNumeric(x)
+            if (is.factor(x)) x <- suppressWarnings(as.numeric(as.character(x)))
+            x
+        },
+
         .extractRegionalData = function(data) {
             # Extract biopsy measurements from multiple columns efficiently
             # Collect individual biopsy columns
@@ -370,7 +384,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             # Create biopsy data matrix (jamovi retains literal column names)
             biopsy_data <- data[, biopsy_columns, drop = FALSE]
-            
+            biopsy_data[] <- lapply(biopsy_data, private$.toNumeric)
+
             # Remove rows with all missing biopsy values
             complete_rows <- rowSums(!is.na(biopsy_data)) > 0
             biopsy_data <- biopsy_data[complete_rows, , drop = FALSE]
@@ -736,10 +751,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 # Up to five paired t-tests are reported here (one per region plus
                 # the pooled comparison) with unadjusted p-values. Say so, rather
                 # than letting a reader treat each p < 0.05 as independent evidence.
-                if (row_key > 2) {
+                if (bias_table$rowCount > 1) {
                     bias_table$setNote("multiplicity", sprintf(
                         .("%d paired comparisons are reported; p-values are unadjusted. With several regions the chance of at least one p < 0.05 under no true bias exceeds 5%% - interpret individual p-values accordingly, and prefer the mean difference and its clinical impact over statistical significance alone."),
-                        row_key - 1))
+                        bias_table$rowCount))
                 }
             } else {
                 # If no reference section, bias analysis is not applicable in this context
@@ -1196,6 +1211,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             cv_results <- lapply(1:data$n_cases, calculate_case_cv_with_id)
             cv_results <- cv_results[!sapply(cv_results, is.null)]
+            # No case has two values to compare: nothing to plot (and
+            # max(numeric(0)) below would be -Inf).
+            if (length(cv_results) == 0) return(FALSE)
 
             case_ids <- sapply(cv_results, `[[`, "case_id")
             cv_values <- sapply(cv_results, `[[`, "cv")
@@ -1321,7 +1339,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         .calculateInterpretationMetrics = function(whole_section, biopsy_data, repro_stats = NULL, study_design = "reference_based") {
             has_reference <- !is.null(whole_section) && study_design == "reference_based"
 
-            n_cases <- if (has_reference) length(whole_section) else nrow(biopsy_data)
+            n_cases <- if (has_reference) sum(!is.na(whole_section)) else nrow(biopsy_data)
             n_biopsies <- ncol(biopsy_data)
 
             biopsy_means <- if (nrow(biopsy_data) > 0) rowMeans(biopsy_data, na.rm = TRUE) else numeric(0)
@@ -2059,7 +2077,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         paste0(
                             "Note: 'psych' package not available. Using correlation-based approximation ",
                             "(r = ", round(mean_r, 3), ", 95% CI [", round(ci_lower, 3), ", ", round(ci_upper, 3), "]) ",
-                            "instead of ICC(3,1). Install 'psych' for exact ICC calculations."
+                            "instead of ICC(2,1). Install 'psych' for exact ICC calculations."
                         )
                     } else {
                         "Note: 'psych' package not available. Install 'psych' for enhanced reliability metrics (ICC)."
@@ -2167,6 +2185,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     icc_value <- mean(correlations, na.rm = TRUE)
                     icc_lower <- icc_upper <- NA
                     icc_method <- "correlation"
+                    # The consistency row must not appear beside a "not estimable" headline.
+                    private$.icc_consistency <- NULL
                 }
                 NULL
             }, error = function(e) e)

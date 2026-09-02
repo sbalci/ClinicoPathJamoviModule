@@ -369,3 +369,25 @@ test_that("fixed-effects method with the SROC plot does not abort the analysis",
   expect_match(st$curve_note, "fixed-effects", fixed = TRUE)
   expect_null(run_dm(method = "reml", sroc_plot = TRUE)$srocplot$state$curve_note)
 })
+
+test_that("the PHM table reports the SROC AUC = 1/(1 + theta) from the same fit", {
+  skip_if_not_installed("mada")
+  hs <- run_dm(hsroc_analysis = TRUE)$hsrocresults$asDF
+  auc_row <- hs[grepl("AUC", hs$parameter), ]
+  expect_equal(nrow(auc_row), 1L)
+  d <- studies()
+  fit <- mada::phm(data.frame(TP = d$tp, FP = d$fp, FN = d$fn, TN = d$tn),
+                   correction = 0.5, correction.control = "single")
+  theta <- unname(stats::coef(fit)["theta"])
+  expect_equal(auc_row$estimate, 1 / (1 + theta), tolerance = 1e-6)
+  expect_equal(auc_row$std_error, sqrt(stats::vcov(fit)[1, 1]) / (1 + theta)^2, tolerance = 1e-6)
+})
+
+test_that("the SROC plot and the forest plot draw the same corrected study data", {
+  d <- studies(); d$fp[1] <- 0
+  a <- run_dm(d, zero_cell_correction = "zero_cells", sroc_plot = TRUE, forest_plot = TRUE)
+  sroc_fp <- a$srocplot$state$data$fp[1]
+  forest_fp <- a$forestplot$state$data$fp[1]
+  expect_equal(sroc_fp, forest_fp)
+  expect_equal(sroc_fp, 0.5)
+})
