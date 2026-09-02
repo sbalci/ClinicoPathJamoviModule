@@ -135,7 +135,7 @@ lassologisticOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=list(
                     "beta10",
                     "schneeweiss",
-                    "sullivan",
+                    "maxscaled",
                     "compare"),
                 default="schneeweiss")
             private$..scoringMaxPoints <- jmvcore::OptionInteger$new(
@@ -471,10 +471,10 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="integer", 
                         `visible`="(scoringMethod == 'schneeweiss' || scoringMethod == 'compare')"),
                     list(
-                        `name`="points_sullivan", 
-                        `title`="Sullivan", 
+                        `name`="points_maxscaled", 
+                        `title`="Max-scaled", 
                         `type`="integer", 
-                        `visible`="(scoringMethod == 'sullivan' || scoringMethod == 'compare')"),
+                        `visible`="(scoringMethod == 'maxscaled' || scoringMethod == 'compare')"),
                     list(
                         `name`="points", 
                         `title`="Points (Selected)", 
@@ -909,12 +909,16 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param scoringMethod Method for converting regression coefficients to
 #'   integer points. Beta10: multiply by 10, round (Zhang et al. 2017).
 #'   Schneeweiss: divide by smallest absolute coefficient (Mehta et al. 2016).
-#'   Sullivan: reference-variable scaling (Sullivan et al. 2004, Framingham
-#'   method). Compare: generate all three and show performance comparison.
+#'   Max-scaled: divide by the largest absolute coefficient and multiply by
+#'   scoringMaxPoints, so the strongest predictor scores exactly the maximum.
+#'   This option was previously labelled "Sullivan/D'Agostino"; it is not the
+#'   Sullivan 2004 Framingham procedure, which awards points per category of
+#'   each factor relative to a reference factor's per-category distance.
+#'   Compare: generate all three and show performance comparison.
 #' @param scoringMaxPoints Points assigned to the strongest predictor in the
-#'   reference-scaled Sullivan method. The Beta10 method uses a fixed x10
-#'   coefficient scaling and ignores this value; the Schneeweiss method scales
-#'   by the smallest coefficient and also ignores it.
+#'   Max-scaled method. The Beta10 method uses a fixed x10 coefficient scaling
+#'   and ignores this value; the Schneeweiss method scales by the smallest
+#'   coefficient and also ignores it.
 #' @param scoreCutMethod How continuous predictors are dichotomized when
 #'   awarding points. A predictor earns its points when the patient's value
 #'   exceeds this cut. 'median' (the default) splits at the sample median, which

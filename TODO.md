@@ -4401,3 +4401,22 @@ Still open (not blocking release):
 ### Working notes
 - `jmvtools::prepare(".")` took 0.7 min today (memory said 20-25 min); document() timing in scratchpad/document.log
 - Harness for tests without an installed package: source R/utils.R + <fn>.h.R + <fn>.b.R, gsub("ClinicoPath:::?", "") in the test file, setwd("tests/testthat") for relative data/yaml paths
+
+## meddecide release review (2026-09-02: /check-module meddecide, agreement, decisioncurve, lassologistic)
+
+- [x] check-module meddecide: 12/12 production analyses complete, parse, byte-identical to ../meddecide; findings filed below
+- [x] agreement: cor() failure no longer replaced by an all-zero matrix in case clustering (surfaces via table note); undefined pair correlations counted in a note; warning() in Krippendorff handler removed; 2 regression tests
+- [x] decisioncurve: NA ribbon rows filtered (rule curve); modelNames NULL guard; clinical rule bootstrapped like models; simultaneous sup-t band (Mandel & Betensky 2008) computed alongside pointwise, new `ciBand` option selects which is drawn; full i18n pass (2 -> 236 `.()`); release-review test file with dcurves as reference (33 expectations)
+- [x] lassologistic: deleteRows() reset for all 10 tables (rows doubled on option toggles); intercept row on original scale; bootstrap replicates use the same stratified/capped fold rule as the main fit; coefficients read off the CV path (no single-lambda refit); precision NA when undefined; entities -> \u{}; importance uses the ZERO_TOL rule + truncation note; variables-vs-terms wording; model-comparison refit failures noted; pROC::plot.roc() explicit; "Sullivan" renamed Max-scaled (key `sullivan` -> `maxscaled`, column `points_sullivan` -> `points_maxscaled`) BREAKING for saved .omv; release-review test file (7 tests, glmnet/pROC reference)
+- [ ] USER: `Rscript -e 'Sys.unsetenv("ELECTRON_RUN_AS_NODE"); jmvtools::prepare()'` then `devtools::document()` — decisioncurve `ciBand` option, lassologistic `maxscaled` key/column and MandelBetensky2008 ref are source-only until then; then `jmvtools::i18nUpdate("en"); i18nUpdate("tr")` for the 234 new decisioncurve msgids
+- [ ] USER: decide menuGroup routing (agreement/decisioncurve were moved back to `meddecide` during the session); lassologistic left at `meddecide`
+- [ ] kappaSizeCI/FixedN/Power: umbrella says `PowerT #meddecide`, ../meddecide ships stale `Power #meddecide` copies — finish testing and re-route, or prune from the submodule before release
+- [x] enhancedROC: `splineCalibration`/`splineKnots` implemented (natural cubic spline of logit(p), knots-1 df; curve on the calibration plot; ICI/E50/E90/Emax columns in the calibration summary, Austin & Steyerberg 2019); knots box moved next to its checkbox and gated
+- [ ] enhancedROC: the other 12 "NOT YET IMPLEMENTED" toggles (Harrell/Uno C, dynamic AUCs, competing risks, E/O ratio, Nam-D'Agostino, GND, calibration belt/density, optimism correction, external validation, decision impact, NB regression, model updating, transportability, bootstrap pAUC/cutoff CIs) still ship as live controls
+- [ ] modelval.b.R:454, predmodel.b.R:433, clinicalnomograms.b.R:868: bare `plot(roc_obj)` is masked by spatstat.explore's plot.roc in the umbrella -> `pROC::plot.roc()`
+- [ ] agreement: ~20 remaining `error = function(e) NULL` handlers skip rows silently (honest but silent); review case by case
+- [ ] test-decisioncurve.R and test-decisioncurve-comparison.R skip entirely under plain Rscript (`skip_on_cran()`); run with `NOT_CRAN=true`
+
+### Working notes
+- jmvcore `.()` truncates any string at a space followed by `[` (translator msgctxt rule) — see memory `reference_jmvcore_translate_bracket_context_truncation`
+- `devtools::load_all()` + one test file took ~20 min per run in this session

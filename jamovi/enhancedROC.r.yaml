@@ -764,6 +764,8 @@ items:
                 - predictors
                 - positiveClass
                 - hlGroups
+                - splineCalibration
+                - splineKnots
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -791,6 +793,26 @@ items:
                   type: number
                   format: zto
                   visible: (calibrationMetrics)
+                - name: ici
+                  title: 'ICI'
+                  type: number
+                  format: zto
+                  visible: (splineCalibration)
+                - name: e50
+                  title: 'E50'
+                  type: number
+                  format: zto
+                  visible: (splineCalibration)
+                - name: e90
+                  title: 'E90'
+                  type: number
+                  format: zto
+                  visible: (splineCalibration)
+                - name: emax
+                  title: 'Emax'
+                  type: number
+                  format: zto
+                  visible: (splineCalibration)
                 - name: interpretation
                   title: 'Interpretation'
                   type: text
@@ -838,6 +860,8 @@ items:
                 - predictors
                 - positiveClass
                 - hlGroups
+                - splineCalibration
+                - splineKnots
                 - plotWidth
                 - plotHeight
             width: 600
@@ -1027,5 +1051,6 @@ refs:
     - ClinicoPathJamoviModule
     - Swamidass2010
     - pROC
+    - AustinSteyerberg2019ICI
 
 ...

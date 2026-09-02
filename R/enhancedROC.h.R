@@ -781,7 +781,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "Swamidass2010",
-                    "pROC"))
+                    "pROC",
+                    "AustinSteyerberg2019ICI"))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -1618,7 +1619,9 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
-                                "hlGroups"),
+                                "hlGroups",
+                                "splineCalibration",
+                                "splineKnots"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1652,6 +1655,30 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `type`="number", 
                                     `format`="zto", 
                                     `visible`="(calibrationMetrics)"),
+                                list(
+                                    `name`="ici", 
+                                    `title`="ICI", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(splineCalibration)"),
+                                list(
+                                    `name`="e50", 
+                                    `title`="E50", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(splineCalibration)"),
+                                list(
+                                    `name`="e90", 
+                                    `title`="E90", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(splineCalibration)"),
+                                list(
+                                    `name`="emax", 
+                                    `title`="Emax", 
+                                    `type`="number", 
+                                    `format`="zto", 
+                                    `visible`="(splineCalibration)"),
                                 list(
                                     `name`="interpretation", 
                                     `title`="Interpretation", 
@@ -1704,6 +1731,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "predictors",
                                 "positiveClass",
                                 "hlGroups",
+                                "splineCalibration",
+                                "splineKnots",
                                 "plotWidth",
                                 "plotHeight"),
                             width=600,
@@ -2034,17 +2063,25 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   between models
 #' @param calibrationAnalysis Assess calibration (agreement between observed
 #'   and predicted probabilities)
-#' @param calibrationPlot Display calibration plot with loess smoothing
+#' @param calibrationPlot Display the calibration plot: observed proportion
+#'   against predicted probability in the Hosmer-Lemeshow risk groups, with an
+#'   optional flexible spline curve (splineCalibration)
 #' @param hosmerLemeshow Perform Hosmer-Lemeshow goodness-of-fit test
 #' @param hlGroups Number of equal-sized risk groups used both for the
 #'   Hosmer-Lemeshow test and for binning the calibration plot
 #' @param brierScore Calculate Brier score and scaled Brier score
 #' @param calibrationMetrics Calculate calibration slope, intercept, and
 #'   calibration-in-the-large
-#' @param splineCalibration NOT YET IMPLEMENTED - selecting this produces no
-#'   output. Use restricted cubic splines for flexible calibration curves
-#' @param splineKnots NOT YET IMPLEMENTED - selecting this produces no output.
-#'   Number of knots for restricted cubic splines (3-7 recommended)
+#' @param splineCalibration Fit a flexible calibration curve by logistic
+#'   regression of the outcome on a natural cubic spline of the logit of the
+#'   predicted probability (Austin & Steyerberg 2019). Adds the smooth curve to
+#'   the calibration plot and the integrated calibration index (ICI, the mean
+#'   absolute difference between the curve and the diagonal) with E50, E90 and
+#'   Emax to the calibration summary. Requires calibrationAnalysis.
+#' @param splineKnots Knots of the spline calibration curve (3 to 7). The
+#'   spline has knots - 1 degrees of freedom; more knots follow the data more
+#'   closely but need more events per knot. Used only when splineCalibration is
+#'   on.
 #' @param eoRatio NOT YET IMPLEMENTED - selecting this produces no output.
 #'   Calculate Expected/Observed ratio for overall calibration assessment
 #' @param namDagostino NOT YET IMPLEMENTED - selecting this produces no

@@ -273,6 +273,11 @@ children:
                 children:
                   - type: CheckBox
                     name: splineCalibration
+                    enable: (calibrationAnalysis)
+                  - type: TextBox
+                    name: splineKnots
+                    format: number
+                    enable: (calibrationAnalysis && splineCalibration)
           - type: LayoutBox
             cell:
               column: 1
@@ -301,12 +306,6 @@ children:
           - type: ComboBox
             name: multiClassStrategy
             enable: (multiClassROC)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: splineKnots
-        format: number
   - type: LayoutBox
     margin: large
     children:

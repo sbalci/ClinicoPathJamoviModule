@@ -452,7 +452,7 @@ options:
       title: "Calibration plot"
       type: Bool
       default: false
-      description: 'Display calibration plot with loess smoothing'
+      description: 'Display the calibration plot: observed proportion against predicted probability in the Hosmer-Lemeshow risk groups, with an optional flexible spline curve (splineCalibration)'
 
     - name: hosmerLemeshow
       title: "Hosmer-Lemeshow test"
@@ -482,18 +482,26 @@ options:
 
     # Advanced Calibration Methods
     - name: splineCalibration
-      title: "Spline calibration curves"
+      title: "Spline calibration curve"
       type: Bool
       default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Use restricted cubic splines for flexible calibration curves'
+      description: >
+        Fit a flexible calibration curve by logistic regression of the outcome on a natural
+        cubic spline of the logit of the predicted probability (Austin & Steyerberg 2019).
+        Adds the smooth curve to the calibration plot and the integrated calibration index
+        (ICI, the mean absolute difference between the curve and the diagonal) with E50, E90
+        and Emax to the calibration summary. Requires calibrationAnalysis.
 
     - name: splineKnots
-      title: 'Number of Knots'
+      title: 'Number of knots'
       type: Integer
       default: 4
       min: 3
       max: 7
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Number of knots for restricted cubic splines (3-7 recommended)'
+      description: >
+        Knots of the spline calibration curve (3 to 7). The spline has knots - 1 degrees of
+        freedom; more knots follow the data more closely but need more events per knot. Used
+        only when splineCalibration is on.
 
     - name: eoRatio
       title: "E/O ratio"

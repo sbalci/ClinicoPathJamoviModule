@@ -91,13 +91,17 @@ system. Multiple methods available following published standards.}
 \item{scoringMethod}{Method for converting regression coefficients to
 integer points. Beta10: multiply by 10, round (Zhang et al. 2017).
 Schneeweiss: divide by smallest absolute coefficient (Mehta et al. 2016).
-Sullivan: reference-variable scaling (Sullivan et al. 2004, Framingham
-method). Compare: generate all three and show performance comparison.}
+Max-scaled: divide by the largest absolute coefficient and multiply by
+scoringMaxPoints, so the strongest predictor scores exactly the maximum.
+This option was previously labelled "Sullivan/D'Agostino"; it is not the
+Sullivan 2004 Framingham procedure, which awards points per category of
+each factor relative to a reference factor's per-category distance.
+Compare: generate all three and show performance comparison.}
 
 \item{scoringMaxPoints}{Points assigned to the strongest predictor in the
-reference-scaled Sullivan method. The Beta10 method uses a fixed x10
-coefficient scaling and ignores this value; the Schneeweiss method scales
-by the smallest coefficient and also ignores it.}
+Max-scaled method. The Beta10 method uses a fixed x10 coefficient scaling
+and ignores this value; the Schneeweiss method scales by the smallest
+coefficient and also ignores it.}
 
 \item{scoreCutMethod}{How continuous predictors are dichotomized when
 awarding points. A predictor earns its points when the patient's value

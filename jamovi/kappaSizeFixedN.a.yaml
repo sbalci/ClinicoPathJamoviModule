@@ -1,10 +1,10 @@
 ---
 name:  kappaSizeFixedN
 title: Lowest Expected Value for a fixed sample size
-menuGroup: PowerT #meddecide
+menuGroup: Power #meddecide
 menuSubgroup:  Power Analysis by meddecide
 menuSubtitle: Find lower Kappa based on sample size
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:

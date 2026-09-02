@@ -4831,14 +4831,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             # For continuous: use correlation or Euclidean
                             if (distance_metric == "correlation") {
                                 # Correlation between rating vectors across raters
-                                cor_matrix <- tryCatch(
-                                    {
-                                        stats::cor(t(as.matrix(ratings)), use = "pairwise.complete.obs")
-                                    },
-                                    error = function(e) {
-                                        matrix(0, n_cases, n_cases)
-                                    }
-                                )
+                                # No fallback here: a cor() failure used to be replaced by an
+                                # all-zero matrix, so every distance became 1 and clustering ran on
+                                # fabricated data with no message. Let the outer handler report it.
+                                # suppressWarnings: the zero-variance warning is explained by the table note below.
+                                cor_matrix <- suppressWarnings(stats::cor(t(as.matrix(ratings)), use = "pairwise.complete.obs"))
+                                n_undefined <- sum(is.na(cor_matrix[upper.tri(cor_matrix)]))
+                                if (n_undefined > 0) {
+                                    self$results$caseClusterTable$setNote(
+                                        "undefined_cor",
+                                        sprintf("%d case pair(s) had an undefined correlation (a case rated identically by every rater, or too few shared raters) and were treated as maximally distant.", n_undefined)
+                                    )
+                                }
                                 cor_matrix[is.na(cor_matrix)] <- 0
                                 dist_matrix <- 1 - cor_matrix
                                 dist_obj <- as.dist(dist_matrix)
@@ -11321,9 +11325,6 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         },
                         error = function(e) {
                             # Handle any errors that occur during calculation
-                            errorMessage <- paste("Error calculating Krippendorff's alpha:", htmltools::htmlEscape(e$message))
-                            warning(errorMessage)
-
                             # Initialize values list for error case
                             values_list <- list(
                                 method = paste0("Krippendorff's Alpha (", self$options$krippMethod, ")"),

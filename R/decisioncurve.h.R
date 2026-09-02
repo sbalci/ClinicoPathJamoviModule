@@ -29,6 +29,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             bootReps = 1000,
             seed = 42,
             ciLevel = 0.95,
+            ciBand = "pointwise",
             showBenefitRange = FALSE,
             compareModels = FALSE,
             weightedAUC = FALSE,
@@ -182,6 +183,13 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default=0.95,
                 min=0.8,
                 max=0.99)
+            private$..ciBand <- jmvcore::OptionList$new(
+                "ciBand",
+                ciBand,
+                options=list(
+                    "pointwise",
+                    "simultaneous"),
+                default="pointwise")
             private$..showBenefitRange <- jmvcore::OptionBool$new(
                 "showBenefitRange",
                 showBenefitRange,
@@ -300,6 +308,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..bootReps)
             self$.addOption(private$..seed)
             self$.addOption(private$..ciLevel)
+            self$.addOption(private$..ciBand)
             self$.addOption(private$..showBenefitRange)
             self$.addOption(private$..compareModels)
             self$.addOption(private$..weightedAUC)
@@ -345,6 +354,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         bootReps = function() private$..bootReps$value,
         seed = function() private$..seed$value,
         ciLevel = function() private$..ciLevel$value,
+        ciBand = function() private$..ciBand$value,
         showBenefitRange = function() private$..showBenefitRange$value,
         compareModels = function() private$..compareModels$value,
         weightedAUC = function() private$..weightedAUC$value,
@@ -389,6 +399,7 @@ decisioncurveOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..bootReps = NA,
         ..seed = NA,
         ..ciLevel = NA,
+        ..ciBand = NA,
         ..showBenefitRange = NA,
         ..compareModels = NA,
         ..weightedAUC = NA,
@@ -445,7 +456,8 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "Vickers2006",
                     "Vickers2019DCA",
                     "Kerr2016DCA",
-                    "Vickers2023DCAInference"))
+                    "Vickers2023DCAInference",
+                    "MandelBetensky2008"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -728,6 +740,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "showNetBenefitCI",
                     "bootReps",
                     "ciLevel",
+                    "ciBand",
                     "seed",
                     "highlightMin",
                     "highlightMax",
@@ -802,6 +815,7 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "showNetBenefitCI",
                     "bootReps",
                     "ciLevel",
+                    "ciBand",
                     "seed",
                     "calculateClinicalImpact",
                     "populationSize")))
@@ -1147,15 +1161,22 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showInterventionAvoided Display the net reduction in interventions
 #'   compared with treat-all, derived from the net-benefit difference after
 #'   accounting for the threshold odds.
-#' @param confidenceIntervals Calculate pointwise percentile-bootstrap
-#'   confidence intervals for net benefit at each threshold. These are not
-#'   simultaneous confidence bands across the curve.
+#' @param confidenceIntervals Calculate bootstrap confidence intervals for net
+#'   benefit at each threshold, for every model and for the clinical decision
+#'   rule if one is supplied. Pointwise percentile intervals and a simultaneous
+#'   sup-t band are both computed; ciBand selects which the plot draws.
 #' @param bootReps Number of bootstrap replications for confidence intervals.
 #' @param seed Random seed for the bootstrap resampling used in the confidence
 #'   intervals and the model-comparison p-values. Without a fixed seed the same
 #'   data and the same options produce a different interval and a different
 #'   p-value on every run.
 #' @param ciLevel Confidence level for bootstrap confidence intervals.
+#' @param ciBand Which bootstrap interval the decision curve plot draws.
+#'   'pointwise' gives a percentile interval at each threshold; read jointly
+#'   across thresholds these overstate confidence. 'simultaneous' gives a sup-t
+#'   band (Mandel & Betensky 2008) from the same replicates that covers the
+#'   entire curve with the stated probability. Both are computed; this only
+#'   selects which is drawn.
 #' @param showBenefitRange Report, for each model, the range of threshold
 #'   probabilities over which its net benefit exceeds both treat-all and
 #'   treat-none. The range is descriptive and may contain separated stretches.
@@ -1189,11 +1210,11 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showClinicalImpactPlot Display projected true positives and false
 #'   positives for the selected population size at the selected threshold
 #'   probabilities.
-#' @param showNetBenefitCI Display pointwise percentile-bootstrap confidence
-#'   intervals around net benefit curves. The ribbons are not simultaneous
-#'   confidence bands. Identical in effect to 'confidenceIntervals': both switch
-#'   on the same case-resampling bootstrap and produce byte-identical output,
-#'   and either one enables the replication-count and confidence-level controls.
+#' @param showNetBenefitCI Display bootstrap confidence ribbons around the net
+#'   benefit curves (pointwise or simultaneous, see ciBand). Identical in effect
+#'   to 'confidenceIntervals': both switch on the same case-resampling bootstrap
+#'   and produce byte-identical output, and either one enables the
+#'   replication-count and confidence-level controls.
 #' @param costBenefitAnalysis Project a simple exploratory monetary payoff
 #'   using user-assigned values in one common currency. This is not an ICER,
 #'   QALY, cost-effectiveness or formal net-monetary-benefit analysis.
@@ -1235,7 +1256,7 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$clinicalImpactTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$weightedAUCTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$dcaPlot} \tab \tab \tab \tab \tab Net-benefit curves with optional pointwise bootstrap intervals; ribbons are not simultaneous confidence bands \cr
+#'   \code{results$dcaPlot} \tab \tab \tab \tab \tab Net-benefit curves with optional bootstrap ribbons, pointwise or a simultaneous sup-t band, for every model and any clinical rule \cr
 #'   \code{results$clinicalImpactPlot} \tab \tab \tab \tab \tab Projected true and false positives for the selected population size \cr
 #'   \code{results$interventionsAvoidedPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$summaryText} \tab \tab \tab \tab \tab a html \cr
@@ -1279,6 +1300,7 @@ decisioncurve <- function(
     bootReps = 1000,
     seed = 42,
     ciLevel = 0.95,
+    ciBand = "pointwise",
     showBenefitRange = FALSE,
     compareModels = FALSE,
     weightedAUC = FALSE,
@@ -1340,6 +1362,7 @@ decisioncurve <- function(
         bootReps = bootReps,
         seed = seed,
         ciLevel = ciLevel,
+        ciBand = ciBand,
         showBenefitRange = showBenefitRange,
         compareModels = compareModels,
         weightedAUC = weightedAUC,

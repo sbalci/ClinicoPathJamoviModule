@@ -227,8 +227,10 @@ options:
       default: false
       description:
           R: >
-            Calculate pointwise percentile-bootstrap confidence intervals for net benefit at
-            each threshold. These are not simultaneous confidence bands across the curve.
+            Calculate bootstrap confidence intervals for net benefit at each threshold, for
+            every model and for the clinical decision rule if one is supplied. Pointwise
+            percentile intervals and a simultaneous sup-t band are both computed; ciBand
+            selects which the plot draws.
 
     - name: bootReps
       title: Bootstrap Replications
@@ -261,6 +263,23 @@ options:
       description:
           R: >
             Confidence level for bootstrap confidence intervals.
+
+    - name: ciBand
+      title: Interval Type
+      type: List
+      options:
+        - name: pointwise
+          title: Pointwise intervals (each threshold separately)
+        - name: simultaneous
+          title: Simultaneous band (whole curve at once)
+      default: pointwise
+      description:
+          R: >
+            Which bootstrap interval the decision curve plot draws. 'pointwise' gives a
+            percentile interval at each threshold; read jointly across thresholds these
+            overstate confidence. 'simultaneous' gives a sup-t band (Mandel & Betensky 2008)
+            from the same replicates that covers the entire curve with the stated probability.
+            Both are computed; this only selects which is drawn.
 
     - name: showBenefitRange
       title: Range of Benefit
@@ -352,11 +371,10 @@ options:
       default: false
       description:
           R: >
-            Display pointwise percentile-bootstrap confidence intervals around net benefit
-            curves. The ribbons are not simultaneous confidence bands. Identical in effect to
-            'confidenceIntervals': both switch on the same case-resampling bootstrap and
-            produce byte-identical output, and either one enables the replication-count and
-            confidence-level controls.
+            Display bootstrap confidence ribbons around the net benefit curves (pointwise or
+            simultaneous, see ciBand). Identical in effect to 'confidenceIntervals': both
+            switch on the same case-resampling bootstrap and produce byte-identical output,
+            and either one enables the replication-count and confidence-level controls.
 
     - name: costBenefitAnalysis
       title: Exploratory Monetary Payoff

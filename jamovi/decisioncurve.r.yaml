@@ -255,7 +255,7 @@ items:
       height: 500
       renderFun: .plotDCA
       visible: (showPlot || confidenceIntervals || showNetBenefitCI)
-      description: Net-benefit curves with optional pointwise bootstrap intervals; ribbons are not simultaneous confidence bands
+      description: Net-benefit curves with optional bootstrap ribbons, pointwise or a simultaneous sup-t band, for every model and any clinical rule
       clearWith:
         - outcome
         - outcomePositive
@@ -271,6 +271,7 @@ items:
         - showNetBenefitCI
         - bootReps
         - ciLevel
+        - ciBand
         - seed
         - highlightMin
         - highlightMax
@@ -349,6 +350,7 @@ items:
         - showNetBenefitCI
         - bootReps
         - ciLevel
+        - ciBand
         - seed
         - calculateClinicalImpact
         - populationSize
@@ -605,3 +607,4 @@ refs:
     - Vickers2019DCA
     - Kerr2016DCA
     - Vickers2023DCAInference
+    - MandelBetensky2008

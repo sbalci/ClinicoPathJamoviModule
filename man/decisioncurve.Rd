@@ -29,6 +29,7 @@ decisioncurve(
   bootReps = 1000,
   seed = 42,
   ciLevel = 0.95,
+  ciBand = "pointwise",
   showBenefitRange = FALSE,
   compareModels = FALSE,
   weightedAUC = FALSE,
@@ -115,9 +116,10 @@ proportions.}
 compared with treat-all, derived from the net-benefit difference after
 accounting for the threshold odds.}
 
-\item{confidenceIntervals}{Calculate pointwise percentile-bootstrap
-confidence intervals for net benefit at each threshold. These are not
-simultaneous confidence bands across the curve.}
+\item{confidenceIntervals}{Calculate bootstrap confidence intervals for net
+benefit at each threshold, for every model and for the clinical decision
+rule if one is supplied. Pointwise percentile intervals and a simultaneous
+sup-t band are both computed; ciBand selects which the plot draws.}
 
 \item{bootReps}{Number of bootstrap replications for confidence intervals.}
 
@@ -127,6 +129,13 @@ data and the same options produce a different interval and a different
 p-value on every run.}
 
 \item{ciLevel}{Confidence level for bootstrap confidence intervals.}
+
+\item{ciBand}{Which bootstrap interval the decision curve plot draws.
+'pointwise' gives a percentile interval at each threshold; read jointly
+across thresholds these overstate confidence. 'simultaneous' gives a sup-t
+band (Mandel & Betensky 2008) from the same replicates that covers the
+entire curve with the stated probability. Both are computed; this only
+selects which is drawn.}
 
 \item{showBenefitRange}{Report, for each model, the range of threshold
 probabilities over which its net benefit exceeds both treat-all and
@@ -169,11 +178,11 @@ tables.}
 positives for the selected population size at the selected threshold
 probabilities.}
 
-\item{showNetBenefitCI}{Display pointwise percentile-bootstrap confidence
-intervals around net benefit curves. The ribbons are not simultaneous
-confidence bands. Identical in effect to 'confidenceIntervals': both switch
-on the same case-resampling bootstrap and produce byte-identical output,
-and either one enables the replication-count and confidence-level controls.}
+\item{showNetBenefitCI}{Display bootstrap confidence ribbons around the net
+benefit curves (pointwise or simultaneous, see ciBand). Identical in effect
+to 'confidenceIntervals': both switch on the same case-resampling bootstrap
+and produce byte-identical output, and either one enables the
+replication-count and confidence-level controls.}
 
 \item{costBenefitAnalysis}{Project a simple exploratory monetary payoff
 using user-assigned values in one common currency. This is not an ICER,
@@ -228,7 +237,7 @@ A results object containing:
 \code{results$clinicalImpactTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$comparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$weightedAUCTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$dcaPlot} \tab \tab \tab \tab \tab Net-benefit curves with optional pointwise bootstrap intervals; ribbons are not simultaneous confidence bands \cr
+\code{results$dcaPlot} \tab \tab \tab \tab \tab Net-benefit curves with optional bootstrap ribbons, pointwise or a simultaneous sup-t band, for every model and any clinical rule \cr
 \code{results$clinicalImpactPlot} \tab \tab \tab \tab \tab Projected true and false positives for the selected population size \cr
 \code{results$interventionsAvoidedPlot} \tab \tab \tab \tab \tab an image \cr
 \code{results$summaryText} \tab \tab \tab \tab \tab a html \cr

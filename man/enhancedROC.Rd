@@ -242,7 +242,9 @@ between models}
 \item{calibrationAnalysis}{Assess calibration (agreement between observed
 and predicted probabilities)}
 
-\item{calibrationPlot}{Display calibration plot with loess smoothing}
+\item{calibrationPlot}{Display the calibration plot: observed proportion
+against predicted probability in the Hosmer-Lemeshow risk groups, with an
+optional flexible spline curve (splineCalibration)}
 
 \item{hosmerLemeshow}{Perform Hosmer-Lemeshow goodness-of-fit test}
 
@@ -254,11 +256,17 @@ Hosmer-Lemeshow test and for binning the calibration plot}
 \item{calibrationMetrics}{Calculate calibration slope, intercept, and
 calibration-in-the-large}
 
-\item{splineCalibration}{NOT YET IMPLEMENTED - selecting this produces no
-output. Use restricted cubic splines for flexible calibration curves}
+\item{splineCalibration}{Fit a flexible calibration curve by logistic
+regression of the outcome on a natural cubic spline of the logit of the
+predicted probability (Austin & Steyerberg 2019). Adds the smooth curve to
+the calibration plot and the integrated calibration index (ICI, the mean
+absolute difference between the curve and the diagonal) with E50, E90 and
+Emax to the calibration summary. Requires calibrationAnalysis.}
 
-\item{splineKnots}{NOT YET IMPLEMENTED - selecting this produces no output.
-Number of knots for restricted cubic splines (3-7 recommended)}
+\item{splineKnots}{Knots of the spline calibration curve (3 to 7). The
+spline has knots - 1 degrees of freedom; more knots follow the data more
+closely but need more events per knot. Used only when splineCalibration is
+on.}
 
 \item{eoRatio}{NOT YET IMPLEMENTED - selecting this produces no output.
 Calculate Expected/Observed ratio for overall calibration assessment}

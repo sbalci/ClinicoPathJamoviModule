@@ -90,3 +90,28 @@ Survival probability → Sağkalım olasılığı
 - [x] Turkish terminology conforms to clinical and statistical guidelines.
 - [x] Catalogs updated via `jmvtools::i18nUpdate()`.
 
+
+---
+
+## Status update (2026-09-02): source wrapping complete
+
+All user-facing strings in `R/decisioncurve.b.R` are now wrapped: 236 `.()` calls (from 2),
+one complete sentence per call, `{placeholder}` values supplied through `.fmt()` (camelCase
+names only - `jmvcore::format` ignores underscored placeholders). The reference-strategy labels
+`"Treat All"` / `"Treat None"` are strategy keys compared in code and are deliberately left
+literal. No `.()` string contains a space followed by `[`: jmvcore's translator treats
+`" [text]"` as a message context and truncates the sentence there.
+
+The catalogs have NOT been regenerated in this pass. To extract the new strings run, at the
+module root:
+
+```r
+jmvtools::i18nCreate("en"); jmvtools::i18nUpdate("en")
+jmvtools::i18nCreate("tr"); jmvtools::i18nUpdate("tr")
+```
+
+then `cp jamovi/i18n/en.po jamovi/i18n/catalog.pot` (header `Language: c`). Turkish
+suggestions for the new msgids follow the glossary above (net benefit -> net fayda,
+threshold probability -> eşik olasılığı, treat all / treat none -> herkesi tedavi et /
+kimseyi tedavi etme, decision curve -> karar eğrisi, clinical decision rule -> klinik karar
+kuralı, simultaneous band -> eşzamanlı bant, pointwise interval -> noktasal aralık).

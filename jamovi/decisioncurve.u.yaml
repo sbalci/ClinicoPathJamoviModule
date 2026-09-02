@@ -240,6 +240,10 @@ children:
             format: number
             label: Confidence level
             enable: (confidenceIntervals || showNetBenefitCI || compareModels || multiModelComparison)
+          - type: ComboBox
+            name: ciBand
+            label: Interval type
+            enable: (confidenceIntervals || showNetBenefitCI)
           - type: TextBox
             name: seed
             format: number

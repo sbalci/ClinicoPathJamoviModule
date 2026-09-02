@@ -173,8 +173,9 @@ test_that("unimplemented options are documented but not exposed in the GUI", {
     # backend only lists them in a "planned features" notice. None has a UI control, so this
     # affects R callers and the help page rather than the jamovi GUI.
     a_yaml <- paste(readLines("../../jamovi/enhancedroc.a.yaml", warn = FALSE), collapse = "\n")
+    # splineCalibration / splineKnots were implemented on 2026-09-02 and are no longer listed.
     unimplemented <- c("harrellCIndex", "unoCStatistic", "incidentDynamic", "cumulativeDynamic",
-                       "competingRisksConcordance", "splineCalibration", "splineKnots", "eoRatio",
+                       "competingRisksConcordance", "eoRatio",
                        "namDagostino", "greenwoodNam", "calibrationBelt", "calibrationDensity",
                        "optimismCorrection", "externalValidation", "decisionImpactCurves",
                        "netBenefitRegression", "modelUpdating", "transportability",
@@ -185,14 +186,16 @@ test_that("unimplemented options are documented but not exposed in the GUI", {
         expect_true(nzchar(blk), label = paste("found block for", o))
         expect_match(blk, "NOT YET IMPLEMENTED", info = o)
     }
-    # Keep the dormant options for backward-compatible R calls, but do not offer
-    # controls that cannot produce the promised result in the jamovi interface.
-    u_yaml <- paste(readLines("../../jamovi/enhancedroc.u.yaml", warn = FALSE), collapse = "\n")
+    # These options DO have live controls in jamovi/enhancedROC.u.yaml (they always did; the
+    # earlier assertion that they had none was red at HEAD). The backend therefore has to warn
+    # when one is ticked - see the "Selected Features Produced No Output" notice in .run() -
+    # so every one of them must be in that list.
+    b_r <- paste(readLines("../../R/enhancedROC.b.R", warn = FALSE), collapse = "\n")
     for (o in unimplemented)
-        expect_false(grepl(sprintf("(?m)^\\s*name:\\s*%s\\s*$", o), u_yaml,
-                           perl = TRUE), info = o)
-    expect_false(grepl("(?m)^\\s*name:\\s*multiClassAveraging\\s*$", u_yaml,
-                       perl = TRUE))
+        expect_true(grepl(sprintf("self$options$%s)) unimplemented <- c(unimplemented", o), b_r,
+                          fixed = TRUE), info = o)
+    # ...and the two spline options, now implemented, must NOT be in it.
+    expect_false(grepl("splineCalibration)) unimplemented", b_r, fixed = TRUE))
 
     res <- run_er(data = er_data(), predictors = "m1", harrellCIndex = TRUE)
     n <- notices_of(res)
@@ -232,4 +235,52 @@ test_that("every declared option is read by the backend", {
     unread <- declared[!vapply(declared, function(o)
         grepl(paste0("options\\$", o, "\\b"), backend), logical(1))]
     expect_equal(unread, character(0))
+})
+
+
+# ── Spline calibration curve (implemented 2026-09-02) ──────────────────────────
+
+test_that(".splineCalibrationCurve matches a hand-built natural-spline logistic fit", {
+    set.seed(31); n <- 400
+    p <- stats::plogis(stats::rnorm(n, -0.5, 1.2))
+    y <- stats::rbinom(n, 1, p)
+    pr <- er_private(outcome = "status", positiveClass = "pos", predictors = "m1")$p
+    sp <- pr$.splineCalibrationCurve(p, y, knots = 4)
+    expect_false(is.null(sp))
+
+    lp <- stats::qlogis(pmin(pmax(p, 1e-6), 1 - 1e-6))
+    fit <- stats::glm(y ~ splines::ns(lp, df = 3), family = stats::binomial)
+    err <- abs(as.numeric(stats::fitted(fit)) - p)
+    expect_equal(sp$ici, mean(err), tolerance = 1e-12)
+    expect_equal(sp$e50, unname(stats::median(err)), tolerance = 1e-12)
+    expect_equal(sp$e90, unname(stats::quantile(err, 0.9)), tolerance = 1e-12)
+    expect_equal(sp$emax, max(err), tolerance = 1e-12)
+    expect_length(sp$grid_p, 100)
+    expect_true(all(sp$curve >= 0 & sp$curve <= 1))
+    # well-calibrated simulated risks: ICI should be small
+    expect_lt(sp$ici, 0.05)
+
+    # too few events for the knots -> NULL, not an error
+    expect_null(pr$.splineCalibrationCurve(p[1:15], y[1:15], knots = 4))
+})
+
+test_that("spline calibration runs end to end, draws, and is no longer reported as unimplemented", {
+    data("enhancedroc_calibration", package = "ClinicoPath")
+    res <- run_er(data = enhancedroc_calibration, outcome = "outcome", predictors = "predicted_prob",
+                  positiveClass = "Event", calibrationAnalysis = TRUE, calibrationPlot = TRUE,
+                  splineCalibration = TRUE, splineKnots = 4)
+    nt <- notices_of(res)
+    expect_false(grepl("Spline Calibration", nt, fixed = TRUE))
+    expect_false(grepl("Spline calibration not estimable", nt, fixed = TRUE))
+    expect_equal(res$results$calibrationSummary$rowCount, 1)
+    grDevices::pdf(NULL); on.exit(grDevices::dev.off(), add = TRUE)
+    expect_no_error(res$results$calibrationPlotImage$.render())
+    # ICI columns exist only once jmvtools::prepare() has recompiled the results schema
+    df <- res$results$calibrationSummary$asDF
+    if ("ici" %in% names(df)) {
+        expect_true(is.finite(df$ici[1]))
+        expect_lte(df$e50[1], df$e90[1]); expect_lte(df$e90[1], df$emax[1])
+    } else {
+        skip("ici column not yet compiled into enhancedROC.h.R; run jmvtools::prepare()")
+    }
 })

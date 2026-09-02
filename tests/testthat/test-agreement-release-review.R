@@ -295,3 +295,48 @@ test_that("the confusion-matrix heatmap renders (seq_len diagonal path)", {
   expect_gt(nrow(res$confusionMatrixTable$asDF), 0)
   expect_silent(invisible(res$agreementHeatmapPlot$.render()))
 })
+
+# ── Case clustering, correlation distance ──────────────────────────────
+# Regression guard: a cor() failure or an undefined pairwise correlation used
+# to be replaced silently by zeros (every distance = 1), so clustering ran on
+# fabricated data with no message. Undefined pairs must now be reported on the
+# table, and a genuine failure must surface through the outer error handler.
+
+cc_fixture <- function(seed = 7) {
+  set.seed(seed)
+  base <- rnorm(12, 50, 10)
+  d <- data.frame(
+    r1 = base + rnorm(12, 0, 2),
+    r2 = base + rnorm(12, 0, 2),
+    r3 = base + rnorm(12, 0, 2)
+  )
+  d[1, ] <- 55 # one case rated identically by every rater -> zero variance
+  d
+}
+
+test_that("undefined case correlations are reported, not silently zeroed", {
+  res <- ClinicoPath::agreement(
+    data = cc_fixture(), vars = c("r1", "r2", "r3"),
+    caseClustering = TRUE, caseClusterMethod = "hierarchical",
+    caseClusterDistance = "correlation", nCaseClusters = 2
+  )
+  tbl <- res$caseClusterTable
+  expect_equal(nrow(tbl$asDF), 12)
+  expect_true("undefined_cor" %in% names(tbl$notes))
+  note <- vapply(tbl$notes, function(n) n$note, character(1))
+  expect_match(note[["undefined_cor"]], "^11 case pair")
+})
+
+test_that("fully defined case correlations produce clusters and no note", {
+  d <- cc_fixture()
+  d[1, ] <- c(30, 33, 36)
+  res <- ClinicoPath::agreement(
+    data = d, vars = c("r1", "r2", "r3"),
+    caseClustering = TRUE, caseClusterMethod = "hierarchical",
+    caseClusterDistance = "correlation", nCaseClusters = 2
+  )
+  tbl <- res$caseClusterTable
+  expect_equal(nrow(tbl$asDF), 12)
+  expect_equal(sort(unique(tbl$asDF$cluster)), c(1L, 2L))
+  expect_false("undefined_cor" %in% names(tbl$notes))
+})

@@ -7,6 +7,7 @@
 #' @importFrom caret confusionMatrix
 #' @importFrom pROC roc
 #' @importFrom stats quantile binom.test glm predict
+#' @importFrom splines ns
 #' @export
 #' @return An \code{R6} class generator object for the \code{enhancedROCClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -383,7 +384,6 @@ enhancedROCClass <- R6::R6Class(
             if (isTRUE(self$options$incidentDynamic)) unimplemented <- c(unimplemented, "Incident/Dynamic AUC")
             if (isTRUE(self$options$cumulativeDynamic)) unimplemented <- c(unimplemented, "Cumulative/Dynamic AUC")
             if (isTRUE(self$options$competingRisksConcordance)) unimplemented <- c(unimplemented, "Competing Risks Concordance")
-            if (isTRUE(self$options$splineCalibration)) unimplemented <- c(unimplemented, "Spline Calibration")
             if (isTRUE(self$options$eoRatio)) unimplemented <- c(unimplemented, "E/O Ratio")
             if (isTRUE(self$options$namDagostino)) unimplemented <- c(unimplemented, "Nam-D'Agostino Test")
             if (isTRUE(self$options$greenwoodNam)) unimplemented <- c(unimplemented, "Greenwood-Nam-D'Agostino Test")
@@ -4277,6 +4277,35 @@ enhancedROCClass <- R6::R6Class(
                 }
             )
         },
+        # Flexible calibration curve (Austin & Steyerberg 2019): logistic regression of the
+        # outcome on a natural cubic spline of logit(p) with `knots` knots (knots - 1 df).
+        # Returns the smoothed observed probability at every observation, a plotting grid,
+        # and the calibration-error summaries: ICI = mean |smoothed - p|, E50/E90 = its
+        # median / 90th percentile, Emax = its maximum. NULL when the curve cannot be fitted
+        # (too few events, a degenerate predictor).
+        .splineCalibrationCurve = function(probs, y_binary, knots) {
+            ok <- is.finite(probs) & !is.na(y_binary)
+            p <- probs[ok]; y <- y_binary[ok]
+            if (length(p) < 20 || sum(y) < knots || sum(1 - y) < knots) return(NULL)
+            lp <- stats::qlogis(pmin(pmax(p, 1e-6), 1 - 1e-6))
+            if (length(unique(lp)) <= knots) return(NULL)
+            fit <- tryCatch(
+                suppressWarnings(stats::glm(y ~ splines::ns(lp, df = knots - 1), family = stats::binomial)),
+                error = function(e) NULL
+            )
+            if (is.null(fit) || !isTRUE(fit$converged)) return(NULL)
+            smoothed <- as.numeric(stats::fitted(fit))
+            grid_lp <- seq(min(lp), max(lp), length.out = 100)
+            curve <- as.numeric(stats::predict(fit, newdata = data.frame(lp = grid_lp), type = "response"))
+            abs_err <- abs(smoothed - p)
+            list(
+                grid_p = stats::plogis(grid_lp), curve = curve,
+                ici = mean(abs_err), e50 = unname(stats::median(abs_err)),
+                e90 = unname(stats::quantile(abs_err, 0.9)), emax = max(abs_err),
+                n_events = sum(y), knots = knots
+            )
+        },
+
         .populateCalibrationAnalysis = function() {
             if (!self$options$calibrationAnalysis) {
                 return()
@@ -4384,6 +4413,38 @@ enhancedROCClass <- R6::R6Class(
                             }
                         }
 
+                        # Flexible (spline) calibration: ICI and its percentiles
+                        ici <- e50 <- e90 <- emax <- NA_real_
+                        if (isTRUE(self$options$splineCalibration)) {
+                            sp <- private$.splineCalibrationCurve(probs, y_binary, self$options$splineKnots)
+                            if (is.null(sp)) {
+                                private$.addNotice(
+                                    type = "WARNING",
+                                    title = paste0("Spline calibration not estimable: ", predictor),
+                                    content = paste0(
+                                        "The spline calibration curve for '", predictor, "' could not be fitted with ",
+                                        self$options$splineKnots, " knots: it needs at least ", self$options$splineKnots,
+                                        " events and ", self$options$splineKnots, " non-events, more distinct predicted ",
+                                        "probabilities than knots, and a converging fit. Reduce the number of knots or ",
+                                        "check the predictor. ICI, E50, E90 and Emax are left blank."
+                                    )
+                                )
+                            } else {
+                                ici <- sp$ici; e50 <- sp$e50; e90 <- sp$e90; emax <- sp$emax
+                                if (!isTRUE(risk$assumed_probability)) {
+                                    private$.addNotice(
+                                        type = "INFO",
+                                        title = paste0("Spline calibration: ", predictor),
+                                        content = paste0(
+                                            "Because the probabilities for '", predictor, "' were derived here by a linear ",
+                                            "logistic fit, the spline curve only tests whether that logit-linear form is ",
+                                            "adequate for this marker; it says nothing about the calibration of an external model."
+                                        )
+                                    )
+                                }
+                            }
+                        }
+
                         # Populate Calibration Summary Table
                         row <- list(
                             predictor = predictor,
@@ -4392,6 +4453,7 @@ enhancedROCClass <- R6::R6Class(
                             calibration_slope = slope,
                             calibration_intercept = intercept,
                             calibration_in_large = cal_in_large,
+                            ici = ici, e50 = e50, e90 = e90, emax = emax,
                             interpretation = interpretation
                         )
                         calTable$addRow(rowKey = private$.escapeVar(predictor), values = row)
@@ -4460,6 +4522,8 @@ enhancedROCClass <- R6::R6Class(
                     # ggplot2 available via package Imports
 
                     plot_data <- data.frame()
+                    spline_data <- data.frame()
+                    spline_failed <- character(0)
                     n_groups <- self$options$hlGroups
 
                     for (predictor in names(private$.rocResults)) {
@@ -4502,6 +4566,18 @@ enhancedROCClass <- R6::R6Class(
                         bin_stats$Predictor <- predictor
 
                         plot_data <- rbind(plot_data, bin_stats)
+
+                        if (isTRUE(self$options$splineCalibration)) {
+                            sp <- private$.splineCalibrationCurve(probs, y_binary, self$options$splineKnots)
+                            if (!is.null(sp)) {
+                                spline_data <- rbind(spline_data, data.frame(
+                                    prob = sp$grid_p, outcome = sp$curve, Predictor = predictor,
+                                    stringsAsFactors = FALSE
+                                ))
+                            } else {
+                                spline_failed <- c(spline_failed, predictor)
+                            }
+                        }
                     }
 
                     if (nrow(plot_data) == 0) {
@@ -4529,16 +4605,34 @@ enhancedROCClass <- R6::R6Class(
                         paste0(min(drawn), "-", max(drawn), " risk-quantile groups")
                     }
 
-                    # Create plot
+                    use_spline <- isTRUE(self$options$splineCalibration) && nrow(spline_data) > 0
+                    # Create plot. With a spline curve the grouped points become the data markers
+                    # and the smooth curve is the estimate; without it the points are joined.
                     p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = prob, y = outcome, color = Predictor, group = Predictor)) +
                         ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
-                        ggplot2::geom_point(size = 3, alpha = 0.7) +
-                        ggplot2::geom_line(linewidth = 1, alpha = 0.7) +
+                        ggplot2::geom_point(size = 3, alpha = 0.7)
+                    if (use_spline) {
+                        p <- p + ggplot2::geom_line(data = spline_data, linewidth = 1)
+                    } else {
+                        p <- p + ggplot2::geom_line(linewidth = 1, alpha = 0.7)
+                    }
+                    subtitle <- if (use_spline) {
+                        paste0("Points: observed proportion in ", grp_label, "; curve: natural cubic spline with ",
+                               self$options$splineKnots, " knots on the logit scale")
+                    } else {
+                        paste0("Observed vs Predicted Probabilities (", grp_label, ")")
+                    }
+                    caption <- if (length(spline_failed) > 0) {
+                        paste0("Spline curve not estimable for: ", paste(spline_failed, collapse = ", "),
+                               " (too few events or distinct probabilities for ", self$options$splineKnots, " knots)")
+                    } else NULL
+                    p <- p +
                         ggplot2::labs(
                             x = "Predicted Probability",
                             y = "Observed Proportion",
                             title = "Calibration Plot",
-                            subtitle = paste0("Observed vs Predicted Probabilities (", grp_label, ")"),
+                            subtitle = subtitle,
+                            caption = caption,
                             color = "Predictor"
                         ) +
                         ggplot2::xlim(0, 1) +

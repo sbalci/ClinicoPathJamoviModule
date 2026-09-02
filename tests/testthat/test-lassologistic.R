@@ -130,7 +130,7 @@ test_that("Method comparison produces 4 rows (3 methods + full model)", {
                scoringSystem = TRUE, scoringMethod = "compare")
 
   comp_df <- result$methodComparison$asDF
-  expect_equal(nrow(comp_df), 4)  # Beta10, Schneeweiss, Sullivan, Full model
+  expect_equal(nrow(comp_df), 4)  # Beta10, Schneeweiss, Max-scaled, Full model
 })
 
 test_that("Majority-present binary predictor contributes to the score (standardized)", {
@@ -246,9 +246,9 @@ test_that("Performance table has AUC and Brier score", {
 # 8. Scoring method fidelity
 # ═══════════════════════════════════════════════════════════════════════════════
 
-test_that("Beta10 scoring uses fixed x10 scaling, distinct from Sullivan", {
+test_that("Beta10 scoring uses fixed x10 scaling, distinct from Max-scaled", {
   # Regression guard: Beta10 previously renormalized the largest |coef| to
-  # max_points, which is algebraically identical to Sullivan -> the two columns
+  # max_points, which is algebraically identical to Max-scaled -> the two columns
   # were always equal, defeating "Compare All Methods". Beta10 must now be a
   # FIXED round(coef * 10).
   set.seed(11)
@@ -266,18 +266,18 @@ test_that("Beta10 scoring uses fixed x10 scaling, distinct from Sullivan", {
 
   st <- result$scoringTable$asDF
   # The two point columns must no longer be identical.
-  expect_false(identical(st$points_beta10, st$points_sullivan))
+  expect_false(identical(st$points_beta10, st$points_maxscaled))
 
   # Beta10 == round(coefficient * 10); coefficient = log(oddsRatio).
   coef_est <- log(st$oddsRatio)
   strongest <- which.max(abs(coef_est))
   expect_equal(st$points_beta10[strongest], round(coef_est[strongest] * 10))
 
-  # Sullivan normalizes the strongest predictor to +/- max_points (=10).
-  expect_equal(max(abs(st$points_sullivan)), 10)
+  # Max-scaled normalizes the strongest predictor to +/- max_points (=10).
+  expect_equal(max(abs(st$points_maxscaled)), 10)
 })
 
-test_that("scoringMaxPoints scales Sullivan but not Beta10", {
+test_that("scoringMaxPoints scales Max-scaled but not Beta10", {
   set.seed(12)
   n <- 160
   x1 <- c(rnorm(80, 0), rnorm(80, 3))
@@ -292,9 +292,9 @@ test_that("scoringMaxPoints scales Sullivan but not Beta10", {
 
   # Beta10 (fixed x10) is unaffected by scoringMaxPoints.
   expect_equal(st10$points_beta10, st20$points_beta10)
-  # Sullivan's strongest predictor scales with the cap: 10 -> 20.
-  expect_equal(max(abs(st10$points_sullivan)), 10)
-  expect_equal(max(abs(st20$points_sullivan)), 20)
+  # Max-scaled's strongest predictor scales with the cap: 10 -> 20.
+  expect_equal(max(abs(st10$points_maxscaled)), 10)
+  expect_equal(max(abs(st20$points_maxscaled)), 20)
 })
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -468,7 +468,7 @@ test_that("odds ratios are on the original measurement scale", {
   expect_lt(abs(or_ki67 - 1), 0.1)
 
   # importance keeps the per-SD magnitude, which is the comparable quantity
-  expect_equal(max(cf$importance), 1)
+  expect_equal(max(cf$importance, na.rm = TRUE), 1)   # the (Intercept) row carries NA
 })
 
 test_that("complete-case exclusions are disclosed", {
@@ -658,7 +658,7 @@ test_that("a machine-zero coefficient is not reported as a selected variable", {
   cf <- ll(d, outcome = "y", outcomeLevel = "pos",
            explanatory = paste0("z", 1:4))$coefficients$asDF
 
-  real <- cf[!is.na(cf$coefficient), , drop = FALSE]
+  real <- cf[!is.na(cf$coefficient) & cf$variable != "(Intercept)", , drop = FALSE]
   if (nrow(real) > 0) {
     # nothing that survives selection may be numerically indistinguishable from 0
     expect_true(all(abs(real$coefficient) > 1e-10))
@@ -893,6 +893,7 @@ test_that("Ridge is exempt from the zero tolerance and still retains everything"
             penalty = "ridge", standardize = FALSE, showVariableImportance = TRUE)
 
   cf <- res$coefficients$asDF
+  cf <- cf[cf$variable != "(Intercept)", , drop = FALSE]
   expect_setequal(cf$variable, c("big", "small", "age", "z"))
   ms <- res$modelSummary$asDF
   # Ridge selects nothing, so every model TERM survives. Compare terms with

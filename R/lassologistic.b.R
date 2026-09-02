@@ -104,6 +104,17 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 private$.noticeList <- list()
                 private$.cutFellback <- character(0)
 
+                # Every table is rebuilt with addRow() below and jmvcore never checks for
+                # duplicate row keys, so an option toggle that is not in a table's
+                # clearWith (showSummary, cv_plot, ...) re-ran .run() and doubled its rows.
+                # One reset here covers all ten tables.
+                for (nm in c("modelSummary", "coefficients", "performance", "scoringTable",
+                             "scoringPerformance", "methodComparison", "lookupTable",
+                             "validationTable", "variableImportance", "modelComparison")) {
+                    tbl <- tryCatch(self$results[[nm]], error = function(e) NULL)
+                    if (!is.null(tbl)) tbl$deleteRows()
+                }
+
                 if (is.null(self$options$outcome) ||
                     is.null(self$options$explanatory) ||
                     length(self$options$explanatory) < 2) {
@@ -281,7 +292,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 private$.addNotice(
                     "INFO", .("Analysis Complete"),
                     sprintf(
-                        .("Penalized logistic regression completed: %d/%d predictors selected using the %s penalty with the %s lambda (N=%d, %d events)."),
+                        .("Penalized logistic regression completed: %d/%d model terms selected using the %s penalty with the %s lambda (N=%d, %d events)."),
                         n_sel, data$p, private$.penaltyLabel(), private$.lambdaLabel(), data$n, data$n_events
                     )
                 )
@@ -610,7 +621,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 # Render HTML
-                icons <- c(green = "&#x2705;", yellow = "&#x26A0;&#xFE0F;", red = "&#x274C;")
+                icons <- c(green = "\u{2705}", yellow = "\u{26A0}\u{FE0F}", red = "\u{274C}")
                 n_green <- sum(sapply(checks, function(x) x$status == "green"))
                 n_yellow <- sum(sapply(checks, function(x) x$status == "yellow"))
                 n_red <- sum(sapply(checks, function(x) x$status == "red"))
@@ -667,6 +678,21 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # ══════════════════════════════════════════════════════════════════
             # Fit LASSO logistic regression
             # ══════════════════════════════════════════════════════════════════
+            # Stratified fold ids: events and non-events are each dealt round the folds, so
+            # every fold holds events. Shared by the main fit and the bootstrap replicates so
+            # the model-selection process being validated is the one actually validated.
+            # NULL on failure lets cv.glmnet fall back to its own random folds.
+            .stratifiedFolds = function(y, nfolds) {
+                tryCatch({
+                    pos_idx <- which(y == 1)
+                    neg_idx <- which(y == 0)
+                    foldid <- integer(length(y))
+                    foldid[pos_idx] <- sample(rep(seq_len(nfolds), length.out = length(pos_idx)))
+                    foldid[neg_idx] <- sample(rep(seq_len(nfolds), length.out = length(neg_idx)))
+                    foldid
+                }, error = function(e) NULL)
+            },
+
             .fitLasso = function(data) {
                 # Determine alpha
                 alpha_val <- switch(self$options$penalty,
@@ -698,21 +724,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 # Stratified CV folds for balanced sampling
-                foldid <- NULL
-                fold_err <- tryCatch(
-                    {
-                        pos_idx <- which(data$y == 1)
-                        neg_idx <- which(data$y == 0)
-                        folds_pos <- sample(rep(seq_len(nfolds), length.out = length(pos_idx)))
-                        folds_neg <- sample(rep(seq_len(nfolds), length.out = length(neg_idx)))
-                        foldid <- integer(data$n)
-                        foldid[pos_idx] <- folds_pos
-                        foldid[neg_idx] <- folds_neg
-                        NULL
-                    },
-                    error = function(e) e
-                )
-                if (!is.null(fold_err)) foldid <- NULL
+                foldid <- private$.stratifiedFolds(data$y, nfolds)
 
                 # Fit CV model
                 cv_args <- list(
@@ -738,15 +750,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     cv_fit$lambda.1se
                 )
 
-                # Final model
-                final_model <- .quietly(glmnet::glmnet(
-                    x = data$X,
-                    y = data$y,
-                    family = "binomial",
-                    alpha = alpha_val,
-                    lambda = lambda_optimal,
-                    standardize = FALSE
-                ))
+                # Final model: the cross-validated path itself. A separate single-lambda
+                # glmnet() refit is discouraged by the glmnet authors and differed from the
+                # path by up to 3e-5, so the coefficient table disagreed with the cv_plot and
+                # with coef(cv_fit, s = lambda) that an R user would compute by hand.
+                final_model <- cv_fit$glmnet.fit
 
                 # Extract coefficients
                 coefs <- as.matrix(coef(final_model, s = lambda_optimal))
@@ -907,11 +915,30 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             },
             .populateCoefficients = function(fit, data = NULL) {
                 table <- self$results$coefficients
+                # Intercept on the ORIGINAL scale. glmnet fitted logit = b0 + sum(beta_z * z)
+                # with z = (x - centre) / sd, so b0_original = b0 - sum(beta_z * centre / sd).
+                # Only the selected (non-zeroed) terms enter, matching the coefficients shown.
+                ctr <- if (!is.null(data) && !is.null(data$X_center)) data$X_center else NULL
+                sdv <- if (!is.null(data) && !is.null(data$X_sd)) data$X_sd else NULL
+                b0 <- fit$intercept
+                if (length(fit$selected) > 0 && !is.null(ctr) && !is.null(sdv)) {
+                    sel <- fit$selected
+                    b0 <- b0 - sum(fit$selected_coefs * ctr[sel] / sdv[sel])
+                }
+                add_intercept <- function() {
+                    table$addRow(rowKey = "intercept", values = list(
+                        variable = .("(Intercept)"),
+                        coefficient = b0, oddsRatio = NA, importance = NA
+                    ))
+                    table$setNote("intercept",
+                        .("The intercept is the log-odds of the event when every selected predictor is 0 (or at its reference level); with the coefficients above it reproduces the model's predicted probability as plogis(intercept + sum(coefficient x value)). No odds ratio or importance applies to it."))
+                }
                 if (length(fit$selected) == 0) {
                     table$addRow(rowKey = 1, values = list(
                         variable = .("No variables selected"),
                         coefficient = NA, oddsRatio = NA, importance = NA
                     ))
+                    add_intercept()
                     return()
                 }
 
@@ -945,6 +972,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         importance = importance
                     ))
                 }
+                add_intercept()
                 # LASSO penalization yields biased, shrunken coefficients without a
                 # valid closed-form sampling distribution, so standard confidence
                 # intervals are not reported here (naive post-selection CIs have
@@ -1050,9 +1078,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tp <- sum(predicted_class == 1 & data$y == 1)
                 fp <- sum(predicted_class == 1 & data$y == 0)
                 fn <- sum(predicted_class == 0 & data$y == 1)
-                precision <- if (tp + fp > 0) tp / (tp + fp) else 0
+                # No positive predictions: precision is undefined, not a perfect 0.
+                precision <- if (tp + fp > 0) tp / (tp + fp) else NA_real_
                 recall <- sensitivity
-                f1 <- if (precision + recall > 0) 2 * precision * recall / (precision + recall) else 0
+                f1 <- if (!is.na(precision) && precision + recall > 0)
+                    2 * precision * recall / (precision + recall) else NA_real_
 
                 rows <- list(
                     list(
@@ -1242,9 +1272,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Zhang et al. 2017 ("Beta10"): multiply each coefficient by a
                     # FIXED factor of 10 and round. This preserves absolute
                     # coefficient magnitude and is deliberately distinct from the
-                    # reference-normalized Sullivan method below. (A previous version
+                    # max-scaled method below. (A previous version
                     # renormalized the largest |coef| to max_points, which made Beta10
-                    # algebraically identical to Sullivan and broke "Compare All
+                    # algebraically identical to Max-scaled and broke "Compare All
                     # Methods".) max_points is intentionally NOT used here.
                     pts <- clamp(coefs * 10)
                     # Ensure every selected (non-zero) predictor contributes >= 1 point
@@ -1256,11 +1286,12 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     if (!is.finite(min_abs) || min_abs <= 0) min_abs <- 1
                     pts <- clamp(coefs / min_abs)
                     pts[pts == 0 & coefs != 0] <- signs[pts == 0 & coefs != 0]
-                } else if (method == "sullivan") {
-                    # Sullivan et al. 2004 (Framingham):
-                    # Choose reference variable W (largest |beta|)
-                    # For each predictor: Points = beta_i / W * max_points
-                    # This preserves relative risk relationships
+                } else if (method == "maxscaled") {
+                    # Max-scaled: Points = beta_i / max|beta| * max_points, so the strongest
+                    # predictor scores exactly max_points and the others keep their ratios.
+                    # This used to be labelled "Sullivan/D'Agostino 2004", which it is not:
+                    # Sullivan's Framingham method fixes a reference risk factor's per-category
+                    # distance B as one point and awards points per CATEGORY of every factor.
                     W <- max(abs_coefs)
                     if (!is.finite(W) || W == 0) {
                         return(rep(0L, length(coefs)))
@@ -1585,13 +1616,13 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Compute points by all three methods
                 pts_beta10 <- private$.computePoints(coefs, "beta10", max_points)
                 pts_schneeweiss <- private$.computePoints(coefs, "schneeweiss", max_points)
-                pts_sullivan <- private$.computePoints(coefs, "sullivan", max_points)
+                pts_maxscaled <- private$.computePoints(coefs, "maxscaled", max_points)
 
                 # Select primary method's points
                 pts_primary <- switch(method,
                     "beta10" = pts_beta10,
                     "schneeweiss" = pts_schneeweiss,
-                    "sullivan" = pts_sullivan,
+                    "maxscaled" = pts_maxscaled,
                     "compare" = pts_schneeweiss, # default to Schneeweiss for primary
                     pts_schneeweiss
                 )
@@ -1605,7 +1636,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     direction = ifelse(coefs > 0, .("Positive (+)"), .("Negative (-)")),
                     points_beta10 = pts_beta10,
                     points_schneeweiss = pts_schneeweiss,
-                    points_sullivan = pts_sullivan,
+                    points_maxscaled = pts_maxscaled,
                     points = pts_primary,
                     stringsAsFactors = FALSE
                 )
@@ -1621,7 +1652,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         direction = score_data$direction[i],
                         points_beta10 = score_data$points_beta10[i],
                         points_schneeweiss = score_data$points_schneeweiss[i],
-                        points_sullivan = score_data$points_sullivan[i],
+                        points_maxscaled = score_data$points_maxscaled[i],
                         points = score_data$points[i]
                     ))
                 }
@@ -1630,7 +1661,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 method_refs <- list(
                     beta10 = .("Beta10 method (Zhang et al. Ann Transl Med 2017)"),
                     schneeweiss = .("Schneeweiss method (Mehta et al. J Clin Epidemiol 2016)"),
-                    sullivan = .("Sullivan/D'Agostino method (Statistics in Medicine 2004)"),
+                    maxscaled = .("Max-scaled method (strongest predictor = maximum points)"),
                     compare = .("All three methods shown for comparison")
                 )
                 table$setNote("method", method_refs[[method]])
@@ -1652,12 +1683,12 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 max_pt <- suppressWarnings(max(abs(pts_primary), na.rm = TRUE))
                 if (is.finite(max_pt) && max_pt > 100) {
                     table$setNote("wide_scale", sprintf(
-                        .("This point scale spans up to %d points per factor, which is too wide to be used as a bedside score. It happens when one selected predictor has a far smaller effect than the others and the chosen method scales relative to it. Try the Sullivan method, which caps the strongest predictor at the Maximum Points you set, or drop the negligible predictor."),
+                        .("This point scale spans up to %d points per factor, which is too wide to be used as a bedside score. It happens when one selected predictor has a far smaller effect than the others and the chosen method scales relative to it. Try the Max-scaled method, which caps the strongest predictor at the Maximum Points you set, or drop the negligible predictor."),
                         as.integer(max_pt)))
                     private$.addNotice(
                         "WARNING", .("Scoring Scale Not Usable"),
                         sprintf(
-                            .("The generated scoring system reaches %d points for a single factor. A usable clinical score is typically under 20 points in total; this one is dominated by the ratio between the largest and smallest selected effects. Switch to the Sullivan method or remove the near-zero predictor before using this score."),
+                            .("The generated scoring system reaches %d points for a single factor. A usable clinical score is typically under 20 points in total; this one is dominated by the ratio between the largest and smallest selected effects. Switch to the Max-scaled method or remove the near-zero predictor before using this score."),
                             as.integer(max_pt)))
                 }
 
@@ -1672,7 +1703,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     list(.("Scoring method"), switch(method,
                         "beta10" = "Beta10",
                         "schneeweiss" = "Schneeweiss",
-                        "sullivan" = "Sullivan/D'Agostino",
+                        "maxscaled" = .("Max-scaled"),
                         "compare" = .("Schneeweiss (primary)"),
                         as.character(method)
                     )),
@@ -1717,7 +1748,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     methods_list <- list(
                         list("Beta10", pts_beta10, "Zhang et al. 2017"),
                         list("Schneeweiss", pts_schneeweiss, "Mehta et al. 2016"),
-                        list("Sullivan/D'Agostino", pts_sullivan, "Sullivan et al. 2004")
+                        list(.("Max-scaled"), pts_maxscaled, .("beta / max|beta| x maximum points"))
                     )
 
                     for (j in seq_along(methods_list)) {
@@ -1832,15 +1863,21 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             # Skip if boot sample not binary
                             if (length(unique(y_boot)) < 2) next
 
-                            # Fit on bootstrap
-                            nfolds_boot <- min(fit$nfolds, length(unique(idx)) - 1)
+                            # Fit on bootstrap with the SAME fold rule as the main fit:
+                            # stratified, capped at the resample's minority class.
+                            nfolds_boot <- min(fit$nfolds, length(unique(idx)) - 1,
+                                               sum(y_boot == 1), sum(y_boot == 0))
                             nfolds_boot <- max(nfolds_boot, 3)
+                            foldid_boot <- private$.stratifiedFolds(y_boot, nfolds_boot)
 
-                            cv_boot <- .quietly(glmnet::cv.glmnet(
+                            cv_boot_args <- list(
                                 x = X_boot, y = y_boot,
                                 family = "binomial", alpha = alpha_val,
-                                nfolds = nfolds_boot, standardize = FALSE
-                            ))
+                                standardize = FALSE, type.measure = "deviance"
+                            )
+                            if (!is.null(foldid_boot)) cv_boot_args$foldid <- foldid_boot
+                            else cv_boot_args$nfolds <- nfolds_boot
+                            cv_boot <- .quietly(do.call(glmnet::cv.glmnet, cv_boot_args))
                             lambda_boot <- switch(self$options$lambda,
                                 "lambda.min" = cv_boot$lambda.min,
                                 "lambda.1se" = cv_boot$lambda.1se,
@@ -1959,7 +1996,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Calculate inclusion proportion across lambda path
                 all_coefs <- as.matrix(coef(fit$cv_fit$glmnet.fit))[-1, , drop = FALSE]
 
-                inclusion_prop <- rowMeans(all_coefs != 0)
+                # Same per-SD zero rule as the coefficient table (see ZERO_TOL in .fitLasso):
+                # an exact `!= 0` counted coordinate-descent residues of 1e-16 as inclusions.
+                sds <- if (!is.null(data$X_sd)) data$X_sd[rownames(all_coefs)] else rep(1, nrow(all_coefs))
+                sds[!is.finite(sds) | sds == 0] <- 1
+                inclusion_prop <- rowMeans(abs(all_coefs) * sds > 1e-10)
                 max_abs <- apply(abs(all_coefs), 1, max)
 
                 imp_df <- data.frame(
@@ -1971,13 +2012,19 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 imp_df <- imp_df[order(-imp_df$importance_score), ]
                 imp_df$stability_rank <- seq_len(nrow(imp_df))
 
-                for (i in seq_len(min(nrow(imp_df), 20))) {
+                n_show <- min(nrow(imp_df), 20)
+                for (i in seq_len(n_show)) {
                     table$addRow(rowKey = i, values = list(
                         variable = imp_df$variable[i],
                         importance_score = imp_df$importance_score[i],
                         selection_frequency = imp_df$selection_frequency[i],
                         stability_rank = imp_df$stability_rank[i]
                     ))
+                }
+                if (n_show < nrow(imp_df)) {
+                    table$setNote("truncated", sprintf(
+                        .("Showing the %d highest-ranked of %d model terms; the remaining terms have smaller maximum coefficients along the path."),
+                        n_show, nrow(imp_df)))
                 }
 
                 table$setNote(
@@ -2041,7 +2088,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 brier = brier_sel
                             ))
                         },
-                        error = function(e) {}
+                        error = function(e) {
+                            table$setNote("refit_failed_sel", sprintf(
+                                .("The unpenalized refit on the LASSO-selected variables could not be fitted (%s), so its row is omitted."),
+                                conditionMessage(e)))
+                        }
                     )
                 }
 
@@ -2068,7 +2119,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             brier = brier_all
                         ))
                     },
-                    error = function(e) {}
+                    error = function(e) {
+                        table$setNote("refit_failed_all", sprintf(
+                            .("The unpenalized refit on all candidate variables could not be fitted (%s), so its row is omitted."),
+                            conditionMessage(e)))
+                    }
                 )
 
                 # Refer to the rows by NAME, not by index: the "LASSO-selected vars"
@@ -2239,8 +2294,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # table that just said "CI not estimable" contradicts it.
                 if (!is.null(ci_obj) && is.finite(ci_obj[1]) && ci_obj[1] >= 1) ci_obj <- NULL
 
-                plot(roc_obj,
-                    main = paste0("ROC Curve (AUC = ", auc_val, ")"),
+                # pROC::plot.roc explicitly: in the umbrella package spatstat.explore also
+                # registers a plot.roc S3 method and wins the dispatch, so a bare plot() on a
+                # pROC object died with "Argument 'x' is not of class 'fv'".
+                pROC::plot.roc(roc_obj,
+                    main = sprintf(.("ROC Curve (AUC = %s)"), auc_val),
                     col = "#2E86C1", lwd = 2, print.auc = FALSE
                 )
                 if (!is.null(ci_obj)) {
@@ -2274,8 +2332,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Copy-ready report sentence (complete phrase; placeholders filled from results)
                 report <- sprintf(
-                    .("%s logistic regression with %s lambda selection and %d-fold cross-validation was applied to %d candidate predictors in %d patients (%d events, %d non-events). %d predictor(s) were retained: %s."),
-                    penalty_name, private$.lambdaLabel(), fit$nfolds, data$p, data$n,
+                    .("%s logistic regression with %s lambda selection and %d-fold cross-validation was applied to %d candidate variables (%d model terms after dummy coding) in %d patients (%d events, %d non-events). %d term(s) were retained: %s."),
+                    penalty_name, private$.lambdaLabel(), fit$nfolds, data$n_vars, data$p, data$n,
                     data$n_events, data$n_nonevents, n_sel, top_vars
                 )
                 if (!is.na(auc_val)) {

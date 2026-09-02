@@ -144,10 +144,10 @@ items:
           title: "Schneeweiss"
           type: integer
           visible: (scoringMethod == 'schneeweiss' || scoringMethod == 'compare')
-        - name: points_sullivan
-          title: "Sullivan"
+        - name: points_maxscaled
+          title: "Max-scaled"
           type: integer
-          visible: (scoringMethod == 'sullivan' || scoringMethod == 'compare')
+          visible: (scoringMethod == 'maxscaled' || scoringMethod == 'compare')
         - name: points
           title: "Points (Selected)"
           type: integer
