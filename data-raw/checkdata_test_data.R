@@ -17,7 +17,7 @@
 # 6. Clinical variables (age, height, weight, lab values)
 # 7. Different distributions (normal, skewed, bimodal)
 # 8. Variables needing transformation (log-normal)
-# 9. Unit system issues (metric vs imperial mix)
+# 9. Unit issues (wrong-unit entries mixed into a cm column)
 # 10. Edge cases (constant, single value, infinite values)
 
 library(tibble)
@@ -154,7 +154,7 @@ age_clinical <- pmin(pmax(age_clinical, 18), 100)
 height_metric <- round(rnorm(n, mean = 170, sd = 10))
 height_metric <- pmin(pmax(height_metric, 140), 210)
 
-# Height - with imperial mix (data entry errors)
+# Height - with wrong-unit entries (data entry errors)
 height_mixed_units <- height_metric
 # Some entered in inches instead of cm (outliers)
 mixed_idx <- sample(n, round(n * 0.04))
@@ -488,7 +488,7 @@ CLINICAL VALIDATION:
 ✓ Height/weight plausibility
 ✓ Vital signs ranges
 ✓ Lab values ranges
-✓ Unit system detection (metric/imperial)
+✓ Unit inference (cm vs m)
 
 DISTRIBUTIONS:
 ✓ Normal distribution
@@ -552,8 +552,7 @@ checkdata(
   data = checkdata_test,
   var = 'height_mixed_units',
   showOutliers = TRUE,
-  clinicalValidation = TRUE,
-  unitSystem = 'auto'  # Detect unit issues
+  clinicalValidation = TRUE  # Detect unit issues
 )
 
 # Example 6: Skewed distribution needing transformation

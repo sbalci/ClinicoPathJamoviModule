@@ -47,9 +47,6 @@ children:
             format: number
           - type: CheckBox
             name: clinicalValidation
-          - type: ComboBox
-            name: unitSystem
-            enable: (clinicalValidation)
           - type: CheckBox
             name: mcarTest
   - type: CollapseBox

@@ -673,7 +673,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Clinical context validation
-        # IMPROVED: Now detects units and uses configurable unit system
+        # Units are inferred from the value range: kg, cm or m, SI or conventional lab units.
         .clinicalContextValidation = function(variable, var_name) {
             if (!is.numeric(variable)) {
                 return(NULL)
@@ -690,20 +690,6 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             clinical_issues <- list()
-            unit_system <- self$options$unitSystem
-
-            # Helper: detect units from data range
-            detect_units <- function(var, possible_units) {
-                range_val <- range(var, na.rm = TRUE)
-                # Returns likely unit based on data range
-                # This is heuristic and may need adjustment
-                for (unit_info in possible_units) {
-                    if (range_val[1] >= unit_info$min && range_val[2] <= unit_info$max) {
-                        return(unit_info$name)
-                    }
-                }
-                return("unknown")
-            }
 
             # Which rule set applies is decided by WHOLE WORDS of the column
             # name (see .nameMatches). Unanchored substring matching used to fire
@@ -729,96 +715,28 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # Weight-specific validations with unit detection
+            # Weight is checked in kilograms.
             if (private$.nameMatches(var_name, c("weight", "bodyweight"))) {
-                # Auto-detect or use specified
-                if (unit_system == "auto") {
-                    weight_units <- detect_units(clean_var, list(
-                        list(name = "kg", min = 2, max = 200),
-                        list(name = "lbs", min = 5, max = 450)
-                    ))
-                } else if (unit_system == "metric") {
-                    weight_units <- "kg"
-                } else {
-                    weight_units <- "lbs"
+                if (any(clean_var < 2)) {
+                    clinical_issues$low_weight <- "PLAUSIBILITY CHECK: Weight <2 kg detected (assumed kg) - verify units or data entry"
                 }
-
-                # Apply appropriate thresholds
-                if (weight_units == "kg") {
-                    if (any(clean_var < 2)) {
-                        clinical_issues$low_weight <- sprintf(
-                            "PLAUSIBILITY CHECK: Weight <2 kg detected (assumed %s) - verify units or data entry",
-                            weight_units
-                        )
-                    }
-                    if (any(clean_var > 200)) {
-                        clinical_issues$high_weight <- sprintf(
-                            "PLAUSIBILITY CHECK: Weight >200 kg detected (assumed %s, threshold: 200) - verify accuracy",
-                            weight_units
-                        )
-                    }
-                } else if (weight_units == "lbs") {
-                    if (any(clean_var < 5)) {
-                        clinical_issues$low_weight <- sprintf(
-                            "PLAUSIBILITY CHECK: Weight <5 lbs detected (assumed %s) - verify units or data entry",
-                            weight_units
-                        )
-                    }
-                    if (any(clean_var > 450)) {
-                        clinical_issues$high_weight <- sprintf(
-                            "PLAUSIBILITY CHECK: Weight >450 lbs detected (assumed %s, threshold: 450) - verify accuracy",
-                            weight_units
-                        )
-                    }
-                } else {
-                    clinical_issues$weight_units <- "PLAUSIBILITY CHECK: Could not auto-detect weight units - specify manually or verify range"
+                if (any(clean_var > 200)) {
+                    clinical_issues$high_weight <- "PLAUSIBILITY CHECK: Weight >200 kg detected (assumed kg, threshold: 200) - verify accuracy"
                 }
             }
 
-            # Height-specific validations with unit detection
+            # Height is centimetres or metres; the value range decides which.
             if (private$.nameMatches(var_name, c("height", "bodyheight"))) {
-                # Auto-detect or use specified
-                if (unit_system == "auto") {
-                    height_units <- detect_units(clean_var, list(
-                        list(name = "cm", min = 50, max = 250),
-                        list(name = "meters", min = 0.5, max = 2.5),
-                        list(name = "feet", min = 1.5, max = 8)
-                    ))
-                } else if (unit_system == "metric") {
-                    # Could be cm or meters - use range to decide
-                    height_units <- ifelse(max(clean_var, na.rm = TRUE) > 10, "cm", "meters")
-                } else {
-                    height_units <- "feet/inches"
-                }
-
-                # Apply appropriate plausibility checks
-                if (height_units == "cm") {
+                if (max(clean_var, na.rm = TRUE) > 10) {
                     if (any(clean_var < 50) || any(clean_var > 250)) {
-                        clinical_issues$implausible_height <- sprintf(
-                            "PLAUSIBILITY CHECK: Height outside 50-250 cm range (assumed %s) - verify units",
-                            height_units
-                        )
+                        clinical_issues$implausible_height <- "PLAUSIBILITY CHECK: Height outside 50-250 cm range (assumed cm) - verify units"
                     }
-                } else if (height_units == "meters") {
-                    if (any(clean_var < 0.5) || any(clean_var > 2.5)) {
-                        clinical_issues$implausible_height <- sprintf(
-                            "PLAUSIBILITY CHECK: Height outside 0.5-2.5 m range (assumed %s) - verify units",
-                            height_units
-                        )
-                    }
-                } else if (height_units == "feet") {
-                    if (any(clean_var < 1.5) || any(clean_var > 8)) {
-                        clinical_issues$implausible_height <- sprintf(
-                            "PLAUSIBILITY CHECK: Height outside 1.5-8 ft range (assumed %s) - verify units",
-                            height_units
-                        )
-                    }
-                } else {
-                    clinical_issues$height_units <- "PLAUSIBILITY CHECK: Could not auto-detect height units - specify manually"
+                } else if (any(clean_var < 0.5) || any(clean_var > 2.5)) {
+                    clinical_issues$implausible_height <- "PLAUSIBILITY CHECK: Height outside 0.5-2.5 m range (assumed m) - verify units"
                 }
             }
 
-            # Laboratory value ranges (assume SI units for metric, traditional for imperial)
+            # Laboratory value ranges (SI or conventional units, inferred from the value range)
             if (private$.nameMatches(var_name, c("hemoglobin", "haemoglobin", "hgb", "hb"))) {
                 # g/dL is common in US, g/L in SI (multiply by 10)
                 # Most data will be in g/dL range (3-20), g/L would be 30-200
@@ -1605,7 +1523,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             .("<b>Clinical Validation rows are heuristic screening flags, not clinical judgements.</b>"),
                             .("Plausibility bounds come from general-population rules of thumb rather than validated reference ranges, and may not suit paediatric, ICU, oncology or athlete populations, or differing measurement methods and demographics."),
                             .("Which checks run is decided by pattern-matching the variable NAME (for example 'age', 'glucose', 'systolic'), so non-standard naming can silently skip a check or apply the wrong one."),
-                            .("The unit system is auto-detected from the data range unless you set it explicitly; a misread unit (inches against centimetres, mg/dL against mmol/L) will flag correct values as implausible."),
+                            .("Units are inferred from the data range (centimetres against metres, mg/dL against \u{B5}mol/L); a misread unit will flag correct values as implausible."),
                             .("Confirm every flag against your own study protocol before excluding or correcting a value."),
                             sep = " "))
                 }
@@ -2032,15 +1950,10 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # grade so it does not break up the component breakdown above.
             if (isTRUE(self$options$clinicalValidation) &&
                 component_scores$clinical$penalty > 0) {
-                unit_note <- if (identical(self$options$unitSystem, "auto")) {
-                    .("auto-detected from the data range")
-                } else {
-                    sprintf(.("set to '%s'"), self$options$unitSystem)
-                }
                 clinical_note <- .fmt(
                     .("This component cost {points} points. Plausibility bounds are general-population rules of thumb, not validated reference ranges, so they may not suit paediatric, ICU, oncology or athlete populations. Which checks run is decided by matching the variable NAME, so non-standard naming can skip a check or apply the wrong one, and units were {units}. Confirm each flag against your study protocol before acting on it."),
                     points = component_scores$clinical$penalty,
-                    units = unit_note)
+                    units = .("inferred from the data range"))
                 # Wrapping and indentation are applied here, never inside .()
                 quality_text <- paste0(quality_text,
                     "  ", .("NOTE ON THE CLINICAL PENALTY"), "\n",
@@ -2295,7 +2208,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 !is.null(clinical_issues_found) && length(clinical_issues_found) > 0) {
                 quality_text <- paste0(quality_text, "\u{2022} CLINICAL CHECKS: Hard-coded plausibility ranges may not suit all populations.\n")
                 quality_text <- paste0(quality_text, "  May over-flag: pediatric, ICU, elite athletes, or diverse ethnic populations.\n")
-                quality_text <- paste0(quality_text, "  Unit auto-detection is heuristic; override if incorrect. Manually verify flagged values.\n")
+                quality_text <- paste0(quality_text, "  Units are inferred from the value range; manually verify flagged values.\n")
                 limitations_added <- TRUE
             }
 
@@ -2350,7 +2263,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Natural-Language Summary (for copying to reports)
             if (self$options$showSummary) {
                 summary_html <- "<div style='font-family: Georgia, serif; line-height: 1.8; padding: 15px; background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid #2c5aa0; color: inherit;'>"
-                summary_html <- paste0(summary_html, "<h3 style='color: #2c5aa0; margin-top: 0;'>Data Quality Summary</h3>")
+                summary_html <- paste0(summary_html, "<h3 style='margin-top: 0;'>Data Quality Summary</h3>")
                 summary_html <- paste0(summary_html, "<p><strong>Variable:</strong> ", htmltools::htmlEscape(var_name), "</p>")
                 summary_html <- paste0(summary_html, "<p><strong>Overall Quality Grade:</strong> ", quality_grade, " (", max(0, min(100, quality_score)), "/100 by heuristic scoring)</p>")
 
@@ -2430,7 +2343,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 about_html <- paste0(about_html, "<li><strong>Missing Data Analysis:</strong> Examines completeness, missing data patterns, and heuristic assessment of potential mechanisms (MCAR/MAR/MNAR) using runs test when sample size permits</li>")
                 about_html <- paste0(about_html, "<li><strong>Outlier Detection:</strong> Uses consensus approach requiring agreement from \u{2265}2 methods (Z-score |z|>3, IQR 1.5\u{D7}rule, Modified Z-score MAD-based |z|>3.5) to minimize false positives</li>")
                 about_html <- paste0(about_html, "<li><strong>Distribution Analysis:</strong> Provides descriptive statistics, robust spread (MAD, IQR), coefficient of variation and the moment coefficient of skewness for numeric variables. No normality test is computed</li>")
-                about_html <- paste0(about_html, "<li><strong>Clinical Validation:</strong> Applies hard-coded plausibility ranges for common clinical variables (age, vital signs, lab values) with configurable unit systems</li>")
+                about_html <- paste0(about_html, "<li><strong>Clinical Validation:</strong> Applies hard-coded plausibility ranges for common clinical variables (age, vital signs, lab values); units are inferred from the value range</li>")
                 about_html <- paste0(about_html, "<li><strong>Quality Scoring:</strong> Generates heuristic composite score (0-100) based on completeness, outlier prevalence, sample size, and variability</li>")
                 about_html <- paste0(about_html, "</ul>")
 
@@ -2486,7 +2399,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 caveats_html <- paste0(caveats_html, "<h4>Clinical Validation Limitations</h4>")
                 caveats_html <- paste0(caveats_html, "<ul>")
                 caveats_html <- paste0(caveats_html, "<li><strong>Hard-coded reference ranges:</strong> Plausibility bounds are based on general population norms and may not suit all contexts (pediatric, ICU, elite athletes, diverse ethnic populations)</li>")
-                caveats_html <- paste0(caveats_html, "<li><strong>Unit auto-detection is heuristic:</strong> May misclassify units in edge cases (e.g., height in inches vs cm); manually verify unit system selection</li>")
+                caveats_html <- paste0(caveats_html, "<li><strong>Unit inference is heuristic:</strong> Units are inferred from the value range and may be misclassified in edge cases (e.g., height in metres vs cm, creatinine in mg/dL vs \u{B5}mol/L); verify the units of flagged values</li>")
                 caveats_html <- paste0(caveats_html, "<li><strong>Variable name matching:</strong> Clinical checks use pattern matching on variable names (e.g., 'age', 'glucose', 'systolic'); may miss or misclassify non-standard naming</li>")
                 caveats_html <- paste0(caveats_html, "<li><strong>Context-specific ranges:</strong> Normal ranges vary by measurement method, population demographics, and clinical context; verify against study-specific protocols</li>")
                 caveats_html <- paste0(caveats_html, "</ul>")

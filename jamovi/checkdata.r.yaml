@@ -12,7 +12,6 @@ items:
         - showOutliers
         - outlierTransform
         - clinicalValidation
-        - unitSystem
         - cvMinMean
 
     - name: todo
@@ -30,7 +29,6 @@ items:
         - showPatterns
         - mcarTest
         - clinicalValidation
-        - unitSystem
         - cvMinMean
 
     - name: missingVals
@@ -165,7 +163,6 @@ items:
         - showPatterns
         - mcarTest
         - clinicalValidation
-        - unitSystem
       rows: 0
       columns:
         - name: pattern
@@ -187,7 +184,6 @@ items:
         - showOutliers
         - outlierTransform
         - clinicalValidation
-        - unitSystem
 
     - name: aboutAnalysis
       title: About This Analysis

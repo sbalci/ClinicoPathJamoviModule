@@ -177,8 +177,7 @@ checkdata(
   data = checkdata_test,
   var = 'height_metric',
   showOutliers = TRUE,
-  clinicalValidation = TRUE,
-  unitSystem = 'metric'
+  clinicalValidation = TRUE
 )
 
 # Example 19: Height with Unit Errors (Mixed Metric/Imperial)
@@ -187,7 +186,6 @@ checkdata(
   var = 'height_mixed_units',
   showOutliers = TRUE,
   clinicalValidation = TRUE,
-  unitSystem = 'auto',  # Auto-detect unit issues
   showSummary = TRUE
 )
 
@@ -196,8 +194,7 @@ checkdata(
   data = checkdata_test,
   var = 'weight_metric',
   showOutliers = TRUE,
-  clinicalValidation = TRUE,
-  unitSystem = 'metric'
+  clinicalValidation = TRUE
 )
 
 # Example 21: Weight with Mixed Units (kg and lb)
@@ -205,8 +202,7 @@ checkdata(
   data = checkdata_test,
   var = 'weight_mixed_units',
   showOutliers = TRUE,
-  clinicalValidation = TRUE,
-  unitSystem = 'auto'
+  clinicalValidation = TRUE
 )
 
 # Example 22: Blood Pressure Validation
@@ -222,8 +218,7 @@ checkdata(
   data = checkdata_test,
   var = 'temperature_clinical',
   showOutliers = TRUE,
-  clinicalValidation = TRUE,
-  unitSystem = 'metric'
+  clinicalValidation = TRUE
 )
 
 # Example 24: Temperature with Mixed Units (°C and °F)
@@ -231,8 +226,7 @@ checkdata(
   data = checkdata_test,
   var = 'temperature_mixed_units',
   showOutliers = TRUE,
-  clinicalValidation = TRUE,
-  unitSystem = 'auto'
+  clinicalValidation = TRUE
 )
 
 # Example 25: Lab Value Validation (Hemoglobin)
@@ -418,7 +412,6 @@ checkdata(
   showPatterns = TRUE,
   rareCategoryThreshold = 5,
   clinicalValidation = TRUE,
-  unitSystem = 'auto',
   outlierTransform = 'none',
   mcarTest = FALSE,
   showSummary = TRUE,
@@ -459,7 +452,6 @@ checkdata(
   var = 'height_mixed_units',
   showOutliers = TRUE,
   clinicalValidation = TRUE,
-  unitSystem = 'auto',
   showSummary = TRUE
 )
 

@@ -15,7 +15,6 @@
 | `showPatterns` | UI Control `showPatterns` | `self$options$showPatterns` | Output item / Table |
 | `rareCategoryThreshold` | UI Control `rareCategoryThreshold` | `self$options$rareCategoryThreshold` | Output item / Table |
 | `clinicalValidation` | UI Control `clinicalValidation` | `self$options$clinicalValidation` | Output item / Table |
-| `unitSystem` | UI Control `unitSystem` | `self$options$unitSystem` | Output item / Table |
 | `outlierTransform` | UI Control `outlierTransform` | `self$options$outlierTransform` | Output item / Table |
 | `mcarTest` | UI Control `mcarTest` | `self$options$mcarTest` | Output item / Table |
 | `cvMinMean` | UI Control `cvMinMean` | `self$options$cvMinMean` | Output item / Table |

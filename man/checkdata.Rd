@@ -13,7 +13,6 @@ checkdata(
   showPatterns = FALSE,
   rareCategoryThreshold = 5,
   clinicalValidation = TRUE,
-  unitSystem = "auto",
   outlierTransform = "none",
   mcarTest = FALSE,
   cvMinMean = 0.01,
@@ -51,9 +50,6 @@ categories (important for chi-squared assumptions and modeling).}
 
 \item{clinicalValidation}{Perform context-specific validation for clinical
 variables (age, lab values, etc.). Heuristic ranges may need adjustment.}
-
-\item{unitSystem}{Unit system for clinical plausibility checks. Auto-detect
-attempts to infer from data ranges.}
 
 \item{outlierTransform}{Apply transformation before outlier detection to
 handle skewed distributions (especially right-skewed lab values).}

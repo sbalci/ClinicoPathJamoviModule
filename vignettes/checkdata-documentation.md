@@ -29,7 +29,6 @@
 | `showPatterns` | `Bool` | `FALSE` | Data patterns |
 | `rareCategoryThreshold` | `Number` | `5` | Rare category threshold (%) |
 | `clinicalValidation` | `Bool` | `TRUE` | Clinical plausibility checks |
-| `unitSystem` | `List` | `auto` | Unit system for clinical checks |
 | `outlierTransform` | `List` | `none` | Outlier-detection transformation |
 | `mcarTest` | `Bool` | `FALSE` | Explain MCAR testability |
 | `cvMinMean` | `Number` | `0.01` | Minimum mean for CV calculation |

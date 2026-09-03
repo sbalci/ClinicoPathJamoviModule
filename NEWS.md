@@ -1,7 +1,11 @@
 # ClinicoPath News
 
-## Unreleased — meddecide audit fixes (module 1.0.8.09)
+## Unreleased — meddecide audit fixes (module 1.0.8.10)
 
+- `checkdata`: the **Unit system for clinical checks** option (`unitSystem`) is
+  removed. Imperial units are no longer supported: weight is checked in kg, height
+  in cm or m (chosen from the value range), and lab values in SI or conventional
+  units as the range indicates.
 - jsurvival remediation from the 2026-09-03 `/audit-module jsurvival` report (all
   eight touched analyses are routed to `SurvivalT`/JamoviTest for testing; move
   them back to `Survival` and re-run `_updateModules.R` to ship):

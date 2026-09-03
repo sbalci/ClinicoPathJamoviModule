@@ -1,7 +1,7 @@
 ---
 name:  checkdata
 title: Single Variable Quality Check
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
 version: '1.0.7'
 jas: '1.2'
@@ -106,21 +106,6 @@ options:
       description:
           R: >
             Perform context-specific validation for clinical variables (age, lab values, etc.). Heuristic ranges may need adjustment.
-
-    - name: unitSystem
-      title: Unit system for clinical checks
-      type: List
-      options:
-        - name: auto
-          title: Auto-detect
-        - name: metric
-          title: Metric (SI units)
-        - name: imperial
-          title: Imperial/US units
-      default: auto
-      description:
-          R: >
-            Unit system for clinical plausibility checks. Auto-detect attempts to infer from data ranges.
 
     - name: outlierTransform
       title: Outlier-detection transformation

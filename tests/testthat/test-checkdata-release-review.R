@@ -180,13 +180,9 @@ test_that("the quality score explains the clinical penalty it just applied", {
   expect_lt(regexpr("HEURISTIC GRADE", qt), regexpr("NOTE ON THE CLINICAL PENALTY", qt))
 })
 
-test_that("the note reports which unit system was actually used", {
-  auto <- as.character(cd_clinical(unitSystem = "auto")$qualityText$content)
-  expect_match(auto, "auto-detected from the data\\s+range")
-
-  metric <- as.character(cd_clinical(unitSystem = "metric")$qualityText$content)
-  expect_match(metric, "set to 'metric'")
-  expect_false(grepl("auto-detected", metric))
+test_that("the note says units were inferred from the data range", {
+  qt <- as.character(cd_clinical()$qualityText$content)
+  expect_match(qt, "inferred from the data\\s+range")
 })
 
 test_that("no clinical note appears when no clinical penalty was applied", {
