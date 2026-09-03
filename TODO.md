@@ -10,8 +10,8 @@
 
 - benford
 - checkdata
-dataquality
-outlierdetection
+- dataquality
+- outlierdetection
 
 ## Descriptive Plots
 

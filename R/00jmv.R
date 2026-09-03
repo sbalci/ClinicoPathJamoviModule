@@ -141,7 +141,8 @@
         `author`="Tukey, J. W.", 
         `year`=1977, 
         `title`="Exploratory Data Analysis", 
-        `publisher`="Addison-Wesley, Reading, MA"), 
+        `publisher`="Addison-Wesley, Reading, MA", 
+        `url`="https://archive.org/details/exploratorydataa00tuke_0"), 
     `agresti2013`=list(
         `type`="book", 
         `author`="Agresti, A.", 

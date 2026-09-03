@@ -11,7 +11,7 @@
 | `vars` | UI Control `vars` | `self$options$vars` | Output item / Table |
 | `check_duplicates` | UI Control `check_duplicates` | `self$options$check_duplicates` | Output item / Table |
 | `check_missing` | UI Control `check_missing` | `self$options$check_missing` | Output item / Table |
-| `complete_cases_only` | UI Control `complete_cases_only` | `self$options$complete_cases_only` | Output item / Table |
+| `row_level_duplicates` | UI Control `row_level_duplicates` | `self$options$row_level_duplicates` | Output item / Table |
 | `plot_data_overview` | UI Control `plot_data_overview` | `self$options$plot_data_overview` | Output item / Table |
 | `plot_missing_patterns` | UI Control `plot_missing_patterns` | `self$options$plot_missing_patterns` | Output item / Table |
 | `plot_data_types` | UI Control `plot_data_types` | `self$options$plot_data_types` | Output item / Table |

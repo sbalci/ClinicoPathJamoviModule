@@ -2,6 +2,21 @@
 
 ## Unreleased — meddecide audit fixes (module 1.0.8.10)
 
+- `outlierdetection`: release review. Restored the R usage example, removed unused
+  roxygen imports and an unreachable branch in the method-comparison table; no change
+  in behaviour. Differential runs confirmed all 17 options effective and the robust
+  Z-score and composite counts identical to direct `performance::check_outliers()`
+  results.
+- `dataquality`: **breaking** - the `complete_cases_only` option is renamed
+  `row_level_duplicates`. The old name implied a complete-case restriction that was
+  never performed; the option only switches duplicate detection between value level
+  and row level. Update R scripts that pass the old argument; saved analyses fall back
+  to the default (value level).
+- `dataquality`: the Recommended Actions "moderate missingness" band now starts at the
+  user's missing-data threshold instead of a fixed 10%, so it flags the same variables as
+  the summary; the threshold control moved from the plot panel to Analysis Options; the
+  Variable Quality Summary shows "-" instead of "NA" in the outlier columns of
+  non-numeric variables.
 - `checkdata`: the **Unit system for clinical checks** option (`unitSystem`) is
   removed. Imperial units are no longer supported: weight is checked in kg, height
   in cm or m (chosen from the value range), and lab values in SI or conventional

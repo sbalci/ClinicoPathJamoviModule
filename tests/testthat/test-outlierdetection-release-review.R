@@ -289,3 +289,26 @@ test_that("sampleSize larger than sampleThreshold is honoured, not clamped", {
     expect_false(grepl("sampled 1,?000 observations", msg))
     expect_match(msg, "3,?001|3001")
 })
+
+# ---- 2026-09-03 release review: method-comparison counts are the per-method flag sums ----
+
+test_that("the method comparison table reports each method's own flag count", {
+  data("histopathology", package = "ClinicoPath")
+  d <- as.data.frame(histopathology)
+  vars <- c("Age", "OverallTime", "MeasurementA")
+  # do.call: a bare `vars = vars` is resolved by jmvcore as a column called "vars"
+  r <- do.call(outlierdetection, list(data = d, vars = vars, method_category = "composite",
+                                      show_method_comparison = TRUE))
+  cc <- d[complete.cases(d[, vars]), vars]
+  ref <- attr(performance::check_outliers(cc, method = c("zscore_robust", "iqr", "mahalanobis"),
+                                          threshold = list(zscore_robust = 3.29, iqr = 1.7)), "data")
+  expected <- colSums(ref[, grep("^Outlier_", names(ref)), drop = FALSE])
+  html <- r$method_comparison$content
+  for (col in names(expected)) {
+    cell <- regmatches(html, regexpr(paste0(col, "</strong></td>\\s*<td[^>]*>\\s*[0-9]+"), html))
+    expect_length(cell, 1)
+    expect_equal(as.numeric(sub(".*>\\s*", "", cell)), unname(expected[[col]]), label = col)
+  }
+  # the agreement sentence counts observations, not flags
+  expect_match(html, sprintf("Of the %d observations analysed", nrow(cc)))
+})

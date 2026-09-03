@@ -16,7 +16,7 @@ test_that("dataquality basic functionality", {
     vars = c("Age", "Sex"),
     check_duplicates = TRUE,
     check_missing = TRUE,
-    complete_cases_only = FALSE,
+    row_level_duplicates = FALSE,
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
@@ -34,7 +34,7 @@ test_that("dataquality parameter validation", {
 
   # Test parameter structure based on YAML configuration (without vis_expect)
   expected_params <- c("data", "vars", "check_duplicates", "check_missing",
-                      "complete_cases_only", "plot_data_overview", "plot_missing_patterns",
+                      "row_level_duplicates", "plot_data_overview", "plot_missing_patterns",
                       "plot_data_types", "missing_threshold_visual")
 
   # Get function arguments
@@ -57,7 +57,7 @@ test_that("dataquality missing data analysis", {
     vars = c("Age", "Sex", "Grade"),
     check_duplicates = FALSE,
     check_missing = TRUE,
-    complete_cases_only = FALSE,
+    row_level_duplicates = FALSE,
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
@@ -74,13 +74,13 @@ test_that("dataquality duplicate detection - value level", {
   # Load test data
   data("histopathology", package = "ClinicoPath")
 
-  # Test duplicate detection at value level (complete_cases_only = FALSE)
+  # Test duplicate detection at value level (row_level_duplicates = FALSE)
   result <- dataquality(
     data = histopathology,
     vars = c("Sex", "Grade"),
     check_duplicates = TRUE,
     check_missing = FALSE,
-    complete_cases_only = FALSE,  # Check duplicates within each variable
+    row_level_duplicates = FALSE,  # Check duplicates within each variable
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
@@ -95,13 +95,13 @@ test_that("dataquality duplicate detection - row level", {
   # Load test data
   data("histopathology", package = "ClinicoPath")
 
-  # Test duplicate detection at row level (complete_cases_only = TRUE)
+  # Test duplicate detection at row level (row_level_duplicates = TRUE)
   result <- dataquality(
     data = histopathology,
     vars = c("Age", "Sex", "Grade"),
     check_duplicates = TRUE,
     check_missing = FALSE,
-    complete_cases_only = TRUE,  # Check for duplicate rows
+    row_level_duplicates = TRUE,  # Check for duplicate rows
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
@@ -122,7 +122,7 @@ test_that("dataquality completeness analysis", {
     vars = c("Age", "Sex", "Grade"),
     check_duplicates = FALSE,
     check_missing = FALSE,
-    complete_cases_only = FALSE,
+    row_level_duplicates = FALSE,
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
@@ -145,7 +145,7 @@ test_that("dataquality visual analysis plots", {
     vars = c("Age", "Sex"),
     check_duplicates = FALSE,
     check_missing = FALSE,
-    complete_cases_only = FALSE,
+    row_level_duplicates = FALSE,
     plot_data_overview = TRUE,
     plot_missing_patterns = TRUE,
     plot_data_types = TRUE,
@@ -173,7 +173,7 @@ test_that("dataquality missing threshold effects", {
       vars = c("Age", "Sex"),
       check_duplicates = FALSE,
       check_missing = TRUE,
-      complete_cases_only = FALSE,
+      row_level_duplicates = FALSE,
       plot_data_overview = FALSE,
       plot_missing_patterns = TRUE,  # This plot uses threshold
       plot_data_types = FALSE,
@@ -194,7 +194,7 @@ test_that("dataquality with different variable types", {
     vars = c("Age", "OverallTime"),
     check_duplicates = TRUE,
     check_missing = TRUE,
-    complete_cases_only = FALSE,
+    row_level_duplicates = FALSE,
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
@@ -209,7 +209,7 @@ test_that("dataquality with different variable types", {
     vars = c("Sex", "Grade"),
     check_duplicates = TRUE,
     check_missing = TRUE,
-    complete_cases_only = FALSE,
+    row_level_duplicates = FALSE,
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
@@ -224,7 +224,7 @@ test_that("dataquality with different variable types", {
     vars = c("Age", "Sex", "Grade"),
     check_duplicates = TRUE,
     check_missing = TRUE,
-    complete_cases_only = FALSE,
+    row_level_duplicates = FALSE,
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
@@ -262,7 +262,7 @@ test_that("dataquality error handling - missing columns", {
       vars = "NonExistentVariable",
       check_duplicates = TRUE,
       check_missing = TRUE,
-      complete_cases_only = FALSE,
+      row_level_duplicates = FALSE,
       plot_data_overview = FALSE,
       plot_missing_patterns = FALSE,
       plot_data_types = FALSE,
@@ -291,7 +291,7 @@ test_that("dataquality error handling - empty data", {
       vars = c("Age", "Sex"),
       check_duplicates = TRUE,
       check_missing = TRUE,
-      complete_cases_only = FALSE,
+      row_level_duplicates = FALSE,
       plot_data_overview = FALSE,
       plot_missing_patterns = FALSE,
       plot_data_types = FALSE,
@@ -300,7 +300,7 @@ test_that("dataquality error handling - empty data", {
   )
   msg <- as.character(dataquality(data = empty_data, vars = c("Age", "Sex"),
                                   check_duplicates = TRUE, check_missing = TRUE,
-                                  complete_cases_only = FALSE,
+                                  row_level_duplicates = FALSE,
                                   plot_data_overview = FALSE,
                                   plot_missing_patterns = FALSE,
                                   plot_data_types = FALSE,
@@ -318,7 +318,7 @@ test_that("dataquality welcome message when no variables", {
   # jmvcore-level limitation shared by every analysis in the module.
   expect_error(
     dataquality(data = histopathology, vars = c(), check_duplicates = FALSE,
-                check_missing = FALSE, complete_cases_only = FALSE,
+                check_missing = FALSE, row_level_duplicates = FALSE,
                 plot_data_overview = FALSE, plot_missing_patterns = FALSE,
                 plot_data_types = FALSE, missing_threshold_visual = 10),
     "row.names")
@@ -329,7 +329,7 @@ test_that("dataquality welcome message when no variables", {
     vars = "Age",
     check_duplicates = FALSE,
     check_missing = FALSE,
-    complete_cases_only = FALSE,
+    row_level_duplicates = FALSE,
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
@@ -354,7 +354,7 @@ test_that("dataquality variable name escaping", {
     vars = c("Patient Age", "Patient Sex"),
     check_duplicates = TRUE,
     check_missing = TRUE,
-    complete_cases_only = FALSE,
+    row_level_duplicates = FALSE,
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,

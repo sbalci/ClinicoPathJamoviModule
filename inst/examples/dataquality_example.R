@@ -59,7 +59,7 @@ dataquality(
   vars = c('tumor_grade_duplicates', 'stage_duplicates',
            'treatment_cycles_duplicates', 'hospital_site_constant'),
   check_duplicates = TRUE,
-  complete_cases_only = FALSE,  # Check within-variable duplicates
+  row_level_duplicates = FALSE,  # Check within-variable duplicates
   showSummary = TRUE
 )
 
@@ -73,7 +73,7 @@ dataquality(
   vars = c('age_perfect', 'sex_perfect', 'stage_duplicates',
            'tumor_grade_duplicates'),
   check_duplicates = TRUE,
-  complete_cases_only = TRUE,  # Check for complete duplicate rows
+  row_level_duplicates = TRUE,  # Check for complete duplicate rows
   showRecommendations = TRUE
 )
 
@@ -239,7 +239,7 @@ dataquality(
            'platelets_mixed_issues', 'comorbidity_mixed'),
   check_duplicates = TRUE,
   check_missing = TRUE,
-  complete_cases_only = FALSE,
+  row_level_duplicates = FALSE,
   plot_data_overview = TRUE,
   plot_missing_patterns = TRUE,
   plot_data_types = TRUE,
@@ -281,7 +281,7 @@ dataquality(
   data = dataquality_test,
   check_duplicates = TRUE,
   check_missing = TRUE,
-  complete_cases_only = TRUE,  # Find duplicate patient records
+  row_level_duplicates = TRUE,  # Find duplicate patient records
   plot_data_overview = TRUE,
   missing_threshold_visual = 15,
   showSummary = TRUE,
@@ -381,7 +381,7 @@ dataquality(
 
 # Step 3: Duplicate detection
 #   - Use check_duplicates = TRUE
-#   - Check complete_cases_only = TRUE for duplicate records
+#   - Check row_level_duplicates = TRUE for duplicate records
 #   - Investigate and resolve duplicates
 
 # Step 4: Variable screening

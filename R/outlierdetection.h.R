@@ -323,7 +323,7 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "outlierdetection",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = outlierdetectionResults$new(options=options),
                 data = data,
@@ -348,6 +348,21 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' outlier detection capabilities.
 #' Perfect for clinical research data quality control and preprocessing.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' data(histopathology, package = "ClinicoPath")
+#'
+#' # Composite detection (the default): robust Z-score, IQR and Mahalanobis
+#' # distance combined; an observation is an outlier when at least half of
+#' # the methods flag it.
+#' outlierdetection(
+#'     data = histopathology,
+#'     vars = c("Age", "OverallTime", "MeasurementA"),
+#'     method_category = "composite",
+#'     show_outlier_table = TRUE,
+#'     show_exclusion_summary = TRUE)
+#'}
 #' @param data The data as a data frame.
 #' @param vars Continuous variables to analyze for outliers. The module will
 #'   detect outliers based on the selected variables using the chosen detection

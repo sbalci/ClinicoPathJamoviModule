@@ -9,7 +9,7 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             vars = NULL,
             check_duplicates = FALSE,
             check_missing = FALSE,
-            complete_cases_only = FALSE,
+            row_level_duplicates = FALSE,
             plot_data_overview = FALSE,
             plot_missing_patterns = FALSE,
             plot_data_types = FALSE,
@@ -36,9 +36,9 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "check_missing",
                 check_missing,
                 default=FALSE)
-            private$..complete_cases_only <- jmvcore::OptionBool$new(
-                "complete_cases_only",
-                complete_cases_only,
+            private$..row_level_duplicates <- jmvcore::OptionBool$new(
+                "row_level_duplicates",
+                row_level_duplicates,
                 default=FALSE)
             private$..plot_data_overview <- jmvcore::OptionBool$new(
                 "plot_data_overview",
@@ -74,7 +74,7 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..vars)
             self$.addOption(private$..check_duplicates)
             self$.addOption(private$..check_missing)
-            self$.addOption(private$..complete_cases_only)
+            self$.addOption(private$..row_level_duplicates)
             self$.addOption(private$..plot_data_overview)
             self$.addOption(private$..plot_missing_patterns)
             self$.addOption(private$..plot_data_types)
@@ -87,7 +87,7 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         vars = function() private$..vars$value,
         check_duplicates = function() private$..check_duplicates$value,
         check_missing = function() private$..check_missing$value,
-        complete_cases_only = function() private$..complete_cases_only$value,
+        row_level_duplicates = function() private$..row_level_duplicates$value,
         plot_data_overview = function() private$..plot_data_overview$value,
         plot_missing_patterns = function() private$..plot_missing_patterns$value,
         plot_data_types = function() private$..plot_data_types$value,
@@ -99,7 +99,7 @@ dataqualityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..vars = NA,
         ..check_duplicates = NA,
         ..check_missing = NA,
-        ..complete_cases_only = NA,
+        ..row_level_duplicates = NA,
         ..plot_data_overview = NA,
         ..plot_missing_patterns = NA,
         ..plot_data_types = NA,
@@ -143,7 +143,7 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "vars",
                     "check_duplicates",
                     "check_missing",
-                    "complete_cases_only",
+                    "row_level_duplicates",
                     "missing_threshold_visual",
                     "plot_data_overview",
                     "plot_missing_patterns",
@@ -160,7 +160,7 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "vars",
                     "check_duplicates",
                     "check_missing",
-                    "complete_cases_only",
+                    "row_level_duplicates",
                     "missing_threshold_visual",
                     "plot_data_overview",
                     "plot_missing_patterns",
@@ -174,7 +174,7 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "vars",
                     "check_duplicates",
                     "check_missing",
-                    "complete_cases_only",
+                    "row_level_duplicates",
                     "missing_threshold_visual")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -185,7 +185,7 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "vars",
                     "check_duplicates",
                     "check_missing",
-                    "complete_cases_only",
+                    "row_level_duplicates",
                     "missing_threshold_visual")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -241,7 +241,7 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "dataquality",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = dataqualityResults$new(options=options),
                 data = data,
@@ -269,9 +269,7 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'     vars = c('Age', 'Sex', 'Grade'),
 #'     check_missing = TRUE,
 #'     check_duplicates = TRUE,
-#'     # NOTE: despite its name this does NOT restrict to complete cases; it
-#'     # switches duplicate detection from value-level to row-level.
-#'     complete_cases_only = TRUE
+#'     row_level_duplicates = TRUE
 #' )
 #'
 #' @param data The data as a data frame.
@@ -281,8 +279,7 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   variable or across the entire dataset.
 #' @param check_missing If TRUE, provides detailed missing value statistics
 #'   and patterns.
-#' @param complete_cases_only Granularity of the duplicate check; this option
-#'   does NOT restrict the analysis to complete cases despite its name. If TRUE,
+#' @param row_level_duplicates Granularity of the duplicate check. If TRUE,
 #'   checks for duplicate rows across all selected variables (requires at least
 #'   two variables). If FALSE, checks for duplicate values within each variable
 #'   separately. Has no effect unless check_duplicates is TRUE.
@@ -291,8 +288,10 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plot_missing_patterns Show missing value patterns visualization.
 #' @param plot_data_types Show data type detection and validation
 #'   visualization.
-#' @param missing_threshold_visual Threshold percentage for highlighting
-#'   variables with missing values in visual analysis.
+#' @param missing_threshold_visual Percentage of missing values above which a
+#'   variable is flagged in the missing-value analysis, the plain-language
+#'   summary and the Recommended Actions panel, and quoted in the
+#'   missing-patterns plot subtitle.
 #' @param showSummary If TRUE, displays a concise plain-language summary of
 #'   quality issues and overall assessment.
 #' @param showRecommendations If TRUE, provides specific recommendations for
@@ -318,7 +317,7 @@ dataquality <- function(
     vars = NULL,
     check_duplicates = FALSE,
     check_missing = FALSE,
-    complete_cases_only = FALSE,
+    row_level_duplicates = FALSE,
     plot_data_overview = FALSE,
     plot_missing_patterns = FALSE,
     plot_data_types = FALSE,
@@ -341,7 +340,7 @@ dataquality <- function(
         vars = vars,
         check_duplicates = check_duplicates,
         check_missing = check_missing,
-        complete_cases_only = complete_cases_only,
+        row_level_duplicates = row_level_duplicates,
         plot_data_overview = plot_data_overview,
         plot_missing_patterns = plot_missing_patterns,
         plot_data_types = plot_data_types,

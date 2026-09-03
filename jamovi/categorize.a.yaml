@@ -1,9 +1,9 @@
 ---
 name:  categorize
 title: Categorize Continuous Variables
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Preparation
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:

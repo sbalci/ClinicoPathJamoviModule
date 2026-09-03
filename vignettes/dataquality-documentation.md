@@ -25,11 +25,11 @@
 | `vars` | `Variables` | `NULL` | Variables |
 | `check_duplicates` | `Bool` | `FALSE` | Duplicate values |
 | `check_missing` | `Bool` | `FALSE` | Missing value analysis |
-| `complete_cases_only` | `Bool` | `FALSE` | Duplicate rows |
+| `row_level_duplicates` | `Bool` | `FALSE` | Duplicate rows |
 | `plot_data_overview` | `Bool` | `FALSE` | Data overview plot (vis_dat) |
 | `plot_missing_patterns` | `Bool` | `FALSE` | Missing patterns plot (vis_miss) |
 | `plot_data_types` | `Bool` | `FALSE` | Data types plot (vis_guess) |
-| `missing_threshold_visual` | `Number` | `10` | Missing-data highlight threshold (percent) |
+| `missing_threshold_visual` | `Number` | `10` | Missing-data flag threshold (percent) |
 | `showSummary` | `Bool` | `TRUE` | Plain-language summary |
 | `showRecommendations` | `Bool` | `TRUE` | Action recommendations |
 | `showExplanations` | `Bool` | `FALSE` | Educational explanations |

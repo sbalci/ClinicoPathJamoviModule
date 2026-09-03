@@ -9,7 +9,7 @@ dataquality(
   vars = NULL,
   check_duplicates = FALSE,
   check_missing = FALSE,
-  complete_cases_only = FALSE,
+  row_level_duplicates = FALSE,
   plot_data_overview = FALSE,
   plot_missing_patterns = FALSE,
   plot_data_types = FALSE,
@@ -31,8 +31,7 @@ variable or across the entire dataset.}
 \item{check_missing}{If TRUE, provides detailed missing value statistics
 and patterns.}
 
-\item{complete_cases_only}{Granularity of the duplicate check; this option
-does NOT restrict the analysis to complete cases despite its name. If TRUE,
+\item{row_level_duplicates}{Granularity of the duplicate check. If TRUE,
 checks for duplicate rows across all selected variables (requires at least
 two variables). If FALSE, checks for duplicate values within each variable
 separately. Has no effect unless check_duplicates is TRUE.}
@@ -45,8 +44,10 @@ variable types and missing values.}
 \item{plot_data_types}{Show data type detection and validation
 visualization.}
 
-\item{missing_threshold_visual}{Threshold percentage for highlighting
-variables with missing values in visual analysis.}
+\item{missing_threshold_visual}{Percentage of missing values above which a
+variable is flagged in the missing-value analysis, the plain-language
+summary and the Recommended Actions panel, and quoted in the
+missing-patterns plot subtitle.}
 
 \item{showSummary}{If TRUE, displays a concise plain-language summary of
 quality issues and overall assessment.}
@@ -84,9 +85,7 @@ dataquality(
     vars = c('Age', 'Sex', 'Grade'),
     check_missing = TRUE,
     check_duplicates = TRUE,
-    # NOTE: despite its name this does NOT restrict to complete cases; it
-    # switches duplicate detection from value-level to row-level.
-    complete_cases_only = TRUE
+    row_level_duplicates = TRUE
 )
 
 }

@@ -177,11 +177,11 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
             <h3 style='color: #2e7d32; margin-top: 0;'>Welcome to Enhanced Data Quality Assessment!</h3>
             <p><strong>Comprehensive data quality analysis</strong> with visual exploration capabilities</p>
-            <p>Enhanced with <strong>visdat integration</strong> based on autoEDA research (R Journal 2019)</p>
+            <p>Includes visual data exploration through the <strong>visdat</strong> package</p>
 
             <h4 style='color: #2e7d32;'>Quick Start:</h4>
             <ol>
-            <li><strong>Select Variables:</strong> Choose specific variables or analyze entire dataset</li>
+            <li><strong>Select Variables:</strong> Choose one or more variables to assess</li>
             <li><strong>Configure Analysis:</strong> Enable duplicate detection, missing value analysis</li>
             <li><strong>Visual Exploration:</strong> Use visdat for visual data quality assessment</li>
             <li><strong>Run Analysis:</strong> Get comprehensive data quality insights</li>
@@ -196,9 +196,6 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             <li><strong>Data Type Analysis:</strong> Automatic type detection and validation</li>
             </ul>
 
-            <p style='font-size: 12px; color: inherit; opacity: 0.75; margin-top: 20px;'>
-            <em>Enhanced with visdat package - unique visual data exploration (68,978+ downloads)</em>
-            </p>
             </div>"
             self$results$todo$setContent(intro_msg)
             return()
@@ -417,7 +414,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         # Duplicate analysis
         if (self$options$check_duplicates) {
-            if (self$options$complete_cases_only && length(var_list) > 1) {
+            if (self$options$row_level_duplicates && length(var_list) > 1) {
                 # Check for duplicate rows across all selected variables
                 total_rows <- nrow(analysis_data)
                 unique_rows <- nrow(unique(analysis_data))
@@ -460,7 +457,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 # had ticked. With a single variable a duplicate row and a
                 # duplicate value are the same thing, so the numbers are right -
                 # but say so rather than appearing to ignore the setting.
-                if (isTRUE(self$options$complete_cases_only) && length(var_list) <= 1) {
+                if (isTRUE(self$options$row_level_duplicates) && length(var_list) <= 1) {
                     quality_results$duplicate_mode_note <- paste0(
                         "<div style='background-color: rgba(33, 144, 246, 0.11); color: inherit; padding: 10px; ",
                         "border-left: 4px solid #2196f3; border-radius: 4px; margin-bottom: 10px;'>",
@@ -549,7 +546,13 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             df <- do.call(rbind, summary_rows)
             # Basic HTML table
             summary_table <- paste(
-                apply(df, 1, function(r) paste0("<tr>", paste0("<td>", htmltools::htmlEscape(r), "</td>", collapse = ""), "</tr>")),
+                apply(df, 1, function(r) {
+                    # as.matrix() formats numeric columns with padding and turns
+                    # NA (outlier columns of non-numeric variables) into "NA".
+                    r <- trimws(r)
+                    r[is.na(r) | r == "NA"] <- "-"
+                    paste0("<tr>", paste0("<td>", htmltools::htmlEscape(r), "</td>", collapse = ""), "</tr>")
+                }),
                 collapse = "\n"
             )
             header <- paste0("<tr><th>Variable</th><th>Type</th><th>N</th><th>Missing</th><th>%Missing</th><th>Unique</th><th>%Duplicates</th><th>Constant</th><th>High card</th><th>Outliers</th><th>%Outliers</th></tr>")
@@ -933,7 +936,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         dup_count <- if (!is.null(duplicate_rows) && !is.na(duplicate_rows)) duplicate_rows else 0
         # Mirror the branch that actually ran in .run(): the row-level branch
         # requires more than one variable, otherwise the value-level branch runs.
-        row_level_dupes <- isTRUE(self$options$complete_cases_only) && length(summary_rows) > 1
+        row_level_dupes <- isTRUE(self$options$row_level_duplicates) && length(summary_rows) > 1
         dup_type <- if (row_level_dupes) "rows" else "values"
 
         # Count variables exceeding the user's own stated missingness tolerance
@@ -1118,9 +1121,12 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             )
         }
 
-        # Moderate missingness (10-50%)
+        # Moderate missingness: above the user's flag threshold, up to 50%. The
+        # lower bound used to be a fixed 10, so the summary and this panel could
+        # flag different variables for the same data.
+        threshold <- self$options$missing_threshold_visual
         moderate_missing_vars <- vapply(summary_rows, function(r) {
-            if (!is.na(r$missing_pct) && r$missing_pct > 10 && r$missing_pct <= 50) r$variable else NA_character_
+            if (!is.na(r$missing_pct) && r$missing_pct > threshold && r$missing_pct <= 50) r$variable else NA_character_
         }, character(1))
         moderate_missing_vars <- moderate_missing_vars[!is.na(moderate_missing_vars)]
 
@@ -1128,7 +1134,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             has_recommendations <- TRUE
             recs_html <- paste0(recs_html,
                 "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='color: #ff8f00; margin-top: 0;'> Moderate Missingness (10-50%)</h4>",
+                sprintf("<h4 style='color: #ff8f00; margin-top: 0;'> Moderate Missingness (%g-50%%)</h4>", threshold),
                 "<p><strong>Variables affected:</strong> ", paste(htmltools::htmlEscape(moderate_missing_vars), collapse = ", "), "</p>",
                 "<p><strong>Recommended approach:</strong></p>",
                 "<ul style='line-height: 1.8;'>",
@@ -1146,7 +1152,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         if (dup_count > 0) {
             # Mirror the branch that actually ran in .run(): the row-level branch
             # requires more than one variable, otherwise value-level mode runs.
-            row_level_dupes <- isTRUE(self$options$complete_cases_only) && length(summary_rows) > 1
+            row_level_dupes <- isTRUE(self$options$row_level_duplicates) && length(summary_rows) > 1
             # Only row-level duplicates count as an issue, matching the "no flags"
             # criterion in .generateSummary(). Repeated VALUES are expected for any
             # low-cardinality variable, so they must not suppress the
@@ -1452,7 +1458,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                         ""
                     },
                     if (self$options$plot_missing_patterns) {
-                        "<li><strong>Missing Patterns (vis_miss):</strong> Highlights missing data patterns. Variables sorted by missingness. Red bands indicate variables exceeding threshold. Look for systematic patterns (MAR) vs. random scatter (MCAR).</li>"
+                        "<li><strong>Missing Patterns (vis_miss):</strong> Shows where values are missing, with variables sorted by missingness; the subtitle quotes the flag threshold used in the report. Look for systematic patterns (MAR) vs. random scatter (MCAR).</li>"
                     } else {
                         ""
                     },

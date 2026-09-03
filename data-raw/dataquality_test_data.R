@@ -170,7 +170,7 @@ comorbidity_mixed <- sample(c("None", "Diabetes", "Hypertension", "Both"), n, re
 comorbidity_mixed[sample(n, round(n * 0.12))] <- NA  # 12% missing
 
 # ═══════════════════════════════════════════════════════════
-# CREATE DUPLICATE ROWS (for complete_cases_only testing)
+# CREATE DUPLICATE ROWS (for row_level_duplicates testing)
 # ═══════════════════════════════════════════════════════════
 
 # Combine all variables into data frame
@@ -315,7 +315,7 @@ TESTING CHECKLIST
 ✓ Outlier detection (3 variables with outliers)
 ✓ Data type diversity (6 types: integer, numeric, character, factor, date, logical)
 ✓ Mixed quality issues (variables with multiple problems)
-✓ Complete duplicate rows (for complete_cases_only option)
+✓ Complete duplicate rows (for row_level_duplicates option)
 ✓ High missing threshold warning (>50% missing)
 
 ═══════════════════════════════════════════════════════════
@@ -342,7 +342,7 @@ dataquality(
   data = dataquality_test,
   vars = c('age_perfect', 'sex_perfect', 'stage_duplicates'),
   check_duplicates = TRUE,
-  complete_cases_only = TRUE
+  row_level_duplicates = TRUE
 )
 
 # Example 4: Comprehensive analysis with all plots

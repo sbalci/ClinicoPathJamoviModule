@@ -139,15 +139,17 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom magrittr %>%
 #' @importFrom ggplot2 ggplot aes labs theme_minimal theme element_text
 #' @importFrom ggplot2 geom_point geom_hline scale_color_manual
 #' @importFrom performance check_outliers
-#' @importFrom dplyr mutate row_number
-#' @importFrom htmltools HTML
-#' @importFrom stringr str_to_title
 #' @importFrom dbscan optics lof
 #' @importFrom robustbase covMcd
+#
+# Every other call in this file is fully namespaced (htmltools::, stats::,
+# base::), so no further @importFrom tags: the ones that used to sit here
+# (magrittr %>%, dplyr mutate/row_number, htmltools HTML, stringr str_to_title)
+# named symbols the file never uses and only fed the module-wide
+# import-collision warnings.
 outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierdetectionClass",
     inherit = outlierdetectionBase,
     private = list(
@@ -1667,29 +1669,11 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                      n_total <- nrow(detailed_data)
                      
                      for (col in valid_cols) {
-                         # Assuming these are probabilities or 0/1 scores. 
-                         # Usually standard in performance is probability or distance converted.
-                         # Roughly, > threshold or some cut-off. 
-                         # For logical columns acts as 0/1. For numeric, it's often a probability.
-                         
+                         # Outlier_* columns are per-method 0/1 flags (logical or
+                         # numeric depending on the performance version).
                          vals <- detailed_data[[col]]
-                         if (is.logical(vals)) {
-                             n_flagged <- sum(vals, na.rm=TRUE)
-                         } else {
-                             # Assume numeric score > threshold is flag, but threshold varies.
-                             # Actually check_outliers standardizes to roughly [0,1] or flags.
-                             # If we can't be sure, we count non-zero? 
-                             # Let's check if it's binary-like.
-                             if (all(vals %in% c(0, 1, NA))) {
-                                  n_flagged <- sum(vals == 1, na.rm=TRUE)
-                             } else {
-                                  # Continuous score - harder to count "flags" without specific threshold
-                                  # Just report "Score Range" maybe?
-                                  # Or use the global composite threshold as proxy?
-                                  n_flagged <- sum(vals >= self$options$composite_threshold, na.rm=TRUE) 
-                             }
-                         }
-                         
+                         n_flagged <- sum(as.logical(vals), na.rm = TRUE)
+
                          pct <- round(n_flagged / n_total * 100, 1)
                          
                          comparison_html <- paste0(comparison_html,

@@ -29,8 +29,12 @@ children:
                 name: check_duplicates
               - type: CheckBox
                 name: check_missing
+              - type: TextBox
+                name: missing_threshold_visual
+                format: number
+                suffix: '%'
               - type: CheckBox
-                name: complete_cases_only
+                name: row_level_duplicates
 
   - type: CollapseBox
     label: Output Options
@@ -68,13 +72,3 @@ children:
                 name: plot_missing_patterns
               - type: CheckBox
                 name: plot_data_types
-      - type: LayoutBox
-        margin: large
-        children:
-          - type: Label
-            label: Visual Parameters
-            children:
-              - type: TextBox
-                name: missing_threshold_visual
-                format: number
-                suffix: '%'

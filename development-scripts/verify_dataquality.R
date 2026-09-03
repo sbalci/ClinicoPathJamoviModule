@@ -102,7 +102,7 @@ source("R/dataquality.b.R")
 create_options <- function(vars = NULL, 
                           check_duplicates = FALSE, 
                           check_missing = FALSE, 
-                          complete_cases_only = FALSE,
+                          row_level_duplicates = FALSE,
                           plot_data_overview = FALSE,
                           plot_missing_patterns = FALSE,
                           plot_data_types = FALSE,
@@ -112,7 +112,7 @@ create_options <- function(vars = NULL,
         vars = vars,
         check_duplicates = check_duplicates,
         check_missing = check_missing,
-        complete_cases_only = complete_cases_only,
+        row_level_duplicates = row_level_duplicates,
         plot_data_overview = plot_data_overview,
         plot_missing_patterns = plot_missing_patterns,
         plot_data_types = plot_data_types,
@@ -129,7 +129,7 @@ test_that("Duplicate Detection (Rows) Works", {
         Value = c("A", "B", "C", "A")
     )
     
-    options <- create_options(vars = c("ID", "Value"), check_duplicates = TRUE, complete_cases_only = TRUE)
+    options <- create_options(vars = c("ID", "Value"), check_duplicates = TRUE, row_level_duplicates = TRUE)
     analysis <- dataqualityClass$new(options, data)
     analysis$run()
     
@@ -144,7 +144,7 @@ test_that("Duplicate Detection (Values) Works", {
         Value = c("A", "B", "C", "A")
     )
     
-    options <- create_options(vars = c("ID", "Value"), check_duplicates = TRUE, complete_cases_only = FALSE)
+    options <- create_options(vars = c("ID", "Value"), check_duplicates = TRUE, row_level_duplicates = FALSE)
     analysis <- dataqualityClass$new(options, data)
     analysis$run()
     

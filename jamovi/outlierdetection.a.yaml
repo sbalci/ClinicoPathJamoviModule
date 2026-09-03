@@ -1,9 +1,9 @@
 ---
 name: outlierdetection
 title: Outlier Detection
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -13,14 +13,20 @@ description:
     multivariate methods (Mahalanobis distance, MCD, OPTICS, LOF), and composite scoring across multiple algorithms.
     Complements existing data quality assessment modules with state-of-the-art outlier detection capabilities.
     Perfect for clinical research data quality control and preprocessing.
-  # R:
-  #   dontrun: true
-  #   usage: |
-  #     # Example:
-  #     # 1. Select variables for outlier detection analysis.
-  #     # 2. Choose detection methods (univariate, multivariate, or composite).
-  #     # 3. Configure thresholds and visualization options.
-  #     # 4. Review outlier results and exclusion recommendations.
+  R:
+    dontrun: true
+    usage: |
+      data(histopathology, package = "ClinicoPath")
+
+      # Composite detection (the default): robust Z-score, IQR and Mahalanobis
+      # distance combined; an observation is an outlier when at least half of
+      # the methods flag it.
+      outlierdetection(
+          data = histopathology,
+          vars = c("Age", "OverallTime", "MeasurementA"),
+          method_category = "composite",
+          show_outlier_table = TRUE,
+          show_exclusion_summary = TRUE)
 
 options:
 

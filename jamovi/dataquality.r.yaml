@@ -11,7 +11,7 @@ items:
           - vars
           - check_duplicates
           - check_missing
-          - complete_cases_only
+          - row_level_duplicates
           - missing_threshold_visual
           - plot_data_overview
           - plot_missing_patterns
@@ -32,7 +32,7 @@ items:
           - vars
           - check_duplicates
           - check_missing
-          - complete_cases_only
+          - row_level_duplicates
           - missing_threshold_visual
           - plot_data_overview
           - plot_missing_patterns
@@ -46,7 +46,7 @@ items:
           - vars
           - check_duplicates
           - check_missing
-          - complete_cases_only
+          - row_level_duplicates
           - missing_threshold_visual
 
     - name: recommendations
@@ -57,7 +57,7 @@ items:
           - vars
           - check_duplicates
           - check_missing
-          - complete_cases_only
+          - row_level_duplicates
           - missing_threshold_visual
 
     - name: explanations

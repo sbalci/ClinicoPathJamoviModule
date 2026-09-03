@@ -129,3 +129,18 @@ Complements existing data quality assessment modules with state-of-the-art
 outlier detection capabilities.
 Perfect for clinical research data quality control and preprocessing.
 }
+\examples{
+\donttest{
+data(histopathology, package = "ClinicoPath")
+
+# Composite detection (the default): robust Z-score, IQR and Mahalanobis
+# distance combined; an observation is an outlier when at least half of
+# the methods flag it.
+outlierdetection(
+    data = histopathology,
+    vars = c("Age", "OverallTime", "MeasurementA"),
+    method_category = "composite",
+    show_outlier_table = TRUE,
+    show_exclusion_summary = TRUE)
+}
+}

@@ -79,13 +79,13 @@ test_that("row-mode duplicates with one variable explain the fallback", {
   set.seed(1)
   d <- data.frame(a = sample(letters[1:3], 60, TRUE))
   out <- dq_txt(dataquality(data = d, vars = "a", check_duplicates = TRUE,
-                            complete_cases_only = TRUE)$text$content)
+                            row_level_duplicates = TRUE)$text$content)
   expect_match(out, "needs at least two variables")
 
   # two variables: real row analysis, no note
   d2 <- cbind(d, b = sample(letters[1:3], 60, TRUE))
   out2 <- dq_txt(dataquality(data = d2, vars = c("a", "b"), check_duplicates = TRUE,
-                             complete_cases_only = TRUE)$text$content)
+                             row_level_duplicates = TRUE)$text$content)
   expect_match(out2, "Duplicate Row Analysis")
   expect_false(grepl("needs at least two variables", out2))
 })
@@ -104,9 +104,9 @@ test_that("duplicate counts match hand computation in both modes", {
   # !! is required: jmvcore resolves a bare symbol to its own NAME, so a plain
   # `vars = vars` asks for a column literally called "vars".
   row_mode <- dq_txt(dataquality(data = d, vars = !!vars, check_duplicates = TRUE,
-                                 complete_cases_only = TRUE)$summary$content)
+                                 row_level_duplicates = TRUE)$summary$content)
   val_mode <- dq_txt(dataquality(data = d, vars = !!vars, check_duplicates = TRUE,
-                                 complete_cases_only = FALSE)$summary$content)
+                                 row_level_duplicates = FALSE)$summary$content)
 
   # the two modes count different things and must SAY which
   expect_match(row_mode, sprintf("%d duplicate rows", dup_rows))
@@ -130,7 +130,68 @@ test_that("per-variable missing and duplicate percentages are correct", {
   # duplicate % is over NON-MISSING values
   nm <- sum(!is.na(g)); uq <- length(unique(na.omit(g)))
   val <- dq_txt(dataquality(data = d, vars = c("x", "g"), check_duplicates = TRUE,
-                            complete_cases_only = FALSE)$text$content)
+                            row_level_duplicates = FALSE)$text$content)
   expect_match(val, sprintf("Unique: %d, Duplicates: %d (%s%% of non-missing)",
                             uq, nm - uq, round(100 * (nm - uq) / nm, 1)), fixed = TRUE)
+})
+
+# ---- 2026-09-03 release review: rename, threshold band, table cells, reference case ----
+
+test_that("the duplicate-granularity option is row_level_duplicates and drives the row branch", {
+  expect_false("complete_cases_only" %in% names(formals(dataquality)))
+  expect_true("row_level_duplicates" %in% names(formals(dataquality)))
+  d <- data.frame(a = c(1, 1, 2, 2, 3), b = c("x", "x", "y", "z", "z"), stringsAsFactors = FALSE)
+  rows <- dataquality(data = d, vars = c("a", "b"), check_duplicates = TRUE, row_level_duplicates = TRUE)$text$content
+  vals <- dataquality(data = d, vars = c("a", "b"), check_duplicates = TRUE, row_level_duplicates = FALSE)$text$content
+  # only row (1,x) repeats -> 1 duplicate row of 5; a has 2 duplicate values, b has 2
+  expect_match(rows, "Duplicate rows: 1 \\(20%\\)")
+  expect_match(vals, "a: Unique: 3, Duplicates: 2")
+  expect_match(vals, "b: Unique: 3, Duplicates: 2")
+})
+
+test_that("the moderate-missingness recommendation band starts at the user's threshold", {
+  data("histopathology", package = "ClinicoPath")
+  d <- as.data.frame(histopathology); d$Age[1:40] <- NA          # 16% missing
+  at20 <- dataquality(data = d, vars = c("Age", "Sex"), check_missing = TRUE, missing_threshold_visual = 20)
+  at10 <- dataquality(data = d, vars = c("Age", "Sex"), check_missing = TRUE, missing_threshold_visual = 10)
+  expect_false(grepl("Moderate Missingness", at20$recommendations$content))
+  expect_match(at10$recommendations$content, "Moderate Missingness \\(10-50%\\)")
+  # and the summary agrees with the recommendations on the same threshold
+  expect_match(at20$summary$content, "0 variables exceed 20% missing threshold")
+  expect_match(at10$summary$content, "1 variable exceeds 10% missing threshold")
+})
+
+test_that("the Variable Quality Summary prints '-' rather than NA for non-numeric outlier cells", {
+  data("histopathology", package = "ClinicoPath")
+  txt <- dataquality(data = as.data.frame(histopathology), vars = "Sex")$text$content
+  expect_false(grepl("<td>NA</td>", txt, fixed = TRUE))
+  expect_true(grepl("<td>-</td>", txt, fixed = TRUE))
+})
+
+test_that("reported statistics match independent reference computations", {
+  set.seed(9)
+  data("histopathology", package = "ClinicoPath")
+  d <- as.data.frame(histopathology)
+  d$Age[sample(250, 30)] <- NA; d$Age[c(1, 2)] <- c(140, -5)
+  txt <- dataquality(data = d, vars = c("Age", "OverallTime", "Sex"), check_missing = TRUE)$text$content
+
+  # Little's MCAR test vs naniar on the same numeric columns
+  ref <- naniar::mcar_test(d[, c("Age", "OverallTime")])
+  expect_match(txt, sprintf("chi-square = %.2f, df = %d, p = %.4f", ref$statistic, ref$df, ref$p.value), fixed = TRUE)
+
+  # Age row of the summary table vs base R
+  age <- d$Age; nn <- sum(!is.na(age))
+  cells <- strsplit(gsub("</?t[dr]>", "|", regmatches(txt, regexpr("<tr><td>Age</td>.*?</tr>", txt))), "\\|+")[[1]]
+  cells <- cells[nzchar(cells)]
+  expect_equal(cells[1:2], c("Age", "numeric"))
+  expect_equal(as.numeric(cells[3:5]), c(250, sum(is.na(age)), round(100 * sum(is.na(age)) / 250, 1)))
+  expect_equal(as.numeric(cells[6]), length(unique(na.omit(age))))
+  expect_equal(as.numeric(cells[7]), round(100 * (nn - length(unique(na.omit(age)))) / nn, 1))
+  expect_equal(as.numeric(cells[10]), length(boxplot.stats(na.omit(age))$out))
+
+  # case-level missingness and complete cases vs base R
+  sub <- d[, c("Age", "OverallTime", "Sex")]
+  cm <- rowSums(is.na(sub))
+  expect_match(txt, sprintf("Case-level missing: median %.1f, mean %.1f, max %d", median(cm), mean(cm), max(cm)), fixed = TRUE)
+  expect_match(txt, sprintf("Complete cases: %d/%d", sum(complete.cases(sub)), nrow(sub)), fixed = TRUE)
 })

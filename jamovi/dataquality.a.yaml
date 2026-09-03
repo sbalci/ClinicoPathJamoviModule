@@ -20,9 +20,7 @@ description:
           vars = c('Age', 'Sex', 'Grade'),
           check_missing = TRUE,
           check_duplicates = TRUE,
-          # NOTE: despite its name this does NOT restrict to complete cases; it
-          # switches duplicate detection from value-level to row-level.
-          complete_cases_only = TRUE
+          row_level_duplicates = TRUE
       )
 
 options:
@@ -62,22 +60,19 @@ options:
         R: >
           If TRUE, provides detailed missing value statistics and patterns.
 
-    # NOTE (naming): this option does NOT perform any complete-case restriction -
-    # the name is historical and misleading. It selects the GRANULARITY of the
-    # duplicate check only. Renaming it is a breaking change to the public wrapper
-    # signature and to saved .omv files, so it is left for a maintainer decision;
-    # the description below states the real behaviour up front.
-    - name: complete_cases_only
+    # Renamed from `complete_cases_only` (module 1.0.8.10): that name suggested a
+    # complete-case restriction it never performed. Saved analyses that used the
+    # old key fall back to the default (value-level duplicates).
+    - name: row_level_duplicates
       title: "Duplicate rows"
       type: Bool
       default: false
       description:
         R: >
-          Granularity of the duplicate check; this option does NOT restrict the
-          analysis to complete cases despite its name. If TRUE, checks for
-          duplicate rows across all selected variables (requires at least two
-          variables). If FALSE, checks for duplicate values within each variable
-          separately. Has no effect unless check_duplicates is TRUE.
+          Granularity of the duplicate check. If TRUE, checks for duplicate rows
+          across all selected variables (requires at least two variables). If
+          FALSE, checks for duplicate values within each variable separately.
+          Has no effect unless check_duplicates is TRUE.
 
     - name: plot_data_overview
       title: "Data overview plot (vis_dat)"
@@ -113,14 +108,16 @@ options:
     #       Show value expectations analysis visualization.
 
     - name: missing_threshold_visual
-      title: "Missing-data highlight threshold (percent)"
+      title: "Missing-data flag threshold (percent)"
       type: Number
       min: 0
       max: 100
       default: 10
       description:
         R: >
-          Threshold percentage for highlighting variables with missing values in visual analysis.
+          Percentage of missing values above which a variable is flagged in the
+          missing-value analysis, the plain-language summary and the Recommended
+          Actions panel, and quoted in the missing-patterns plot subtitle.
 
     - name: showSummary
       title: "Plain-language summary"
