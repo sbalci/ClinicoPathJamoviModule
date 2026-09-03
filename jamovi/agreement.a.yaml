@@ -44,7 +44,7 @@ options:
             Typically 0.95 for 95 percent confidence intervals.
 
     - name: confLevel
-      title: 'Confidence Level for CIs'
+      title: 'Confidence level for CIs'
       type: Number
       default: 0.95
       min: 0.80
@@ -55,7 +55,7 @@ options:
             and other agreement statistics. Default is 0.95 (95 percent CI).
 
     - name: proportionalBias
-      title: "Test for proportional bias"
+      title: "Proportional bias test"
       type: Bool
       default: false
       description:
@@ -97,7 +97,7 @@ options:
             classifications with complex disagreement patterns.
 
     - name: heatmapColorScheme
-      title: "Heatmap Color Scheme"
+      title: "Heatmap colour scheme"
       type: List
       options:
         - title: 'Blue-Red Diverging (Agreement Focus)'
@@ -136,7 +136,7 @@ options:
             cells with insufficient data and assessing statistical reliability.
 
     - name: heatmapAnnotationSize
-      title: "Cell Annotation Size"
+      title: "Cell annotation size"
       type: Number
       default: 3.5
       min: 2
@@ -168,7 +168,7 @@ options:
 
 
     - name: wght
-      title: Weighted Kappa (Ordinal Data Only)
+      title: Weighted kappa (ordinal data only)
       type: List
       options:
         - title: Unweighted (Standard)
@@ -319,7 +319,7 @@ options:
             Coefficient, including ICC model selection, interpretation thresholds, and clinical examples.
 
     - name: iccType
-      title: "ICC Model"
+      title: "ICC model"
       type: List
       options:
         - title: 'ICC(1,1) - One-way random, single rater'
@@ -414,7 +414,7 @@ options:
             This defines what percentage of future measurements must fall within acceptable limits.
 
     - name: tdiLimit
-      title: "Acceptable Limit"
+      title: "Acceptable limit"
       type: Number
       default: 10
       min: 0.1
@@ -485,7 +485,7 @@ options:
             5 for 5-point Likert scale). Must specify the total number of distinct categories in your rating scale.
 
     - name: finnModel
-      title: "Finn Model Type"
+      title: "Finn model type"
       type: List
       options:
         - title: 'One-way (subjects random)'
@@ -550,8 +550,8 @@ options:
       default: false
       description:
           R: >
-            Robinson's A is an agreement coefficient for ordinal data based on the proportion of
-            concordant pairs. It ranges from -1 (complete disagreement) to 1 (perfect agreement),
+            Robinson's A (1957) is an agreement coefficient for ordinal or numeric ratings: 1 minus
+            the within-case variance divided by the total variance. It ranges from 0 to 1 (perfect agreement),
             with 0 indicating agreement no better than chance. Alternative to weighted kappa that
             directly measures the degree of ordinal association between raters. Particularly useful
             when ordinal categories have meaningful rank order (e.g., disease severity stages, tumor
@@ -589,7 +589,7 @@ options:
             Show educational guide and clinical use cases for Mean Spearman Rho before running analysis.
 
     - name: raterBias
-      title: "Test for rater bias (systematic differences)"
+      title: "Rater bias test (systematic differences)"
       type: Bool
       default: false
       description:
@@ -646,13 +646,14 @@ options:
             Show educational guide for the Stuart-Maxwell test of marginal homogeneity.
 
     - name: maxwellRE
-      title: "Maxwell's RE (random error index)"
+      title: "Rater variance decomposition (systematic vs random)"
       type: Bool
       default: false
       description:
           R: >
-            Maxwell's Random Error (RE) index decomposes total measurement variance into systematic
-            and random error components. RE represents the proportion of total disagreement attributable
+            A two-way (case + rater) variance decomposition splits rater disagreement into a systematic
+            (rater offset) and a random (residual) component; the between-case variance is reported separately.
+            The random share is the proportion of disagreement attributable
             to random measurement error rather than systematic differences between raters or methods.
             Values range from 0 (all error is systematic) to 1 (all error is random). Essential for
             understanding error sources in method comparison studies, diagnostic test validation, and
@@ -660,12 +661,12 @@ options:
             2+ raters/methods.
 
     - name: showMaxwellREGuide
-      title: "When to use Maxwell's RE"
+      title: "When to use the variance decomposition"
       type: Bool
       default: false
       description:
           R: >
-            Show educational guide and clinical use cases for Maxwell's RE before running analysis.
+            Show the guide to the rater variance decomposition before running analysis.
 
     - name: interIntraRater
       title: "Inter/Intra-rater reliability (test-retest)"
@@ -681,7 +682,7 @@ options:
             both within-rater consistency and between-rater agreement.
 
     - name: interIntraSeparator
-      title: "Column Name Separator (Inter/Intra)"
+      title: "Column name separator (inter/intra)"
       type: String
       default: "_"
       description:
@@ -709,7 +710,7 @@ options:
             Essential for training assessment, rater certification, and performance monitoring.
 
     - name: referenceRater
-      title: "Reference Rater Variable"
+      title: "Reference rater variable"
       type: Variable
       suggested: [ordinal, nominal]
       permitted: [factor, numeric]
@@ -809,7 +810,7 @@ options:
             estimates. Essential for multi-center reliability studies.
 
     - name: clusterVariable
-      title: "Cluster/Institution Variable"
+      title: "Cluster/institution variable"
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor, numeric]
@@ -860,7 +861,7 @@ options:
             Recommended when cluster sizes vary substantially.
 
     - name: testClusterHomogeneity
-      title: "Test cluster homogeneity"
+      title: "Cluster homogeneity test"
       type: Bool
       default: true
       description:
@@ -889,7 +890,7 @@ options:
 
     # Mixed-Effects Condition Comparison
     - name: conditionVariable
-      title: "Condition/Method Variable"
+      title: "Condition/method variable"
       type: Variable
       suggested: [nominal, ordinal]
       permitted: [factor]
@@ -914,7 +915,7 @@ options:
             rater x case x condition design (e.g., Dy et al. 2024 Ki-67 AI study).
 
     - name: multipleTestCorrection
-      title: "Multiple Testing Correction"
+      title: "Multiple testing correction"
       type: List
       options:
         - title: "None"
@@ -1028,7 +1029,7 @@ options:
             strict consensus-based evaluation.
 
     - name: predictionColumn
-      title: "Prediction Column (First Rater)"
+      title: "Prediction column (first rater)"
       type: Integer
       default: 1
       min: 1
@@ -1063,7 +1064,7 @@ options:
             revealing which categories have reliable agreement and which need attention.
 
     - name: specificPositiveCategory
-      title: "Positive Category (Binary Analysis)"
+      title: "Positive category (binary analysis)"
       type: String
       default: ""
       description:
@@ -1121,7 +1122,7 @@ options:
             Display an explanatory panel describing what this analysis does, when to use it, and how to interpret results.
 
     - name: consensusName
-      title: "Consensus Variable Name"
+      title: "Consensus variable name"
       type: String
       default: "consensus_rating"
       description:
@@ -1131,7 +1132,7 @@ options:
 
     # Create Consensus Variable
     - name: consensusVar
-      title: "Create Consensus Variable"
+      title: "Consensus variable"
       type: Output
       description:
           R: >
@@ -1140,7 +1141,7 @@ options:
             Adds new variable to dataset with most common rating for each case.
 
     - name: consensusRule
-      title: "Consensus Rule"
+      title: "Consensus rule"
       type: List
       options:
         - title: 'Simple Majority (>50 percent)'
@@ -1157,7 +1158,7 @@ options:
             Cases not meeting threshold are set to NA in consensus variable.
 
     - name: tieBreaker
-      title: "Tie Handling"
+      title: "Tie handling"
       type: List
       options:
         - title: 'Set to NA (exclude case)'
@@ -1190,7 +1191,7 @@ options:
             'Add case agreement categorization to data'.
 
     - name: detailLevel
-      title: "Detail Level"
+      title: "Detail level"
       type: List
       options:
         - title: Simple (3 categories)
@@ -1216,7 +1217,7 @@ options:
             50 percent = simple majority, 75 percent = supermajority, 100 percent = unanimous.
 
     - name: loaThresholds
-      title: "Categorization Method - Detailed Mode"
+      title: "Categorization method (detailed mode)"
       type: List
       options:
         - title: Custom Thresholds
@@ -1281,7 +1282,7 @@ options:
     # The name must stay equal to the .r.yaml item name. No `default:` -- the
     # compiler's optionify() emits only the bare name for an Output option.
     - name: loaOutput
-      title: "Add case agreement categorization to data"
+      title: "Case agreement categorization column"
       type: Output
       description:
           R: >
@@ -1308,7 +1309,7 @@ options:
             from systematic differences in rating distributions or random variation.
 
     - name: raterProfileType
-      title: "Profile Plot Type"
+      title: "Profile plot type"
       type: List
       options:
         - title: 'Box Plot (Median + IQR)'
@@ -1357,7 +1358,7 @@ options:
             or whether specific subgroups need targeted attention.
 
     - name: subgroupVariable
-      title: "Subgroup Variable"
+      title: "Subgroup variable"
       type: Variable
       suggested:
         - nominal
@@ -1415,7 +1416,7 @@ options:
             of disagreement.
 
     - name: clusterMethod
-      title: "Clustering Method"
+      title: "Clustering method"
       type: List
       options:
         - title: 'Hierarchical (Dendrogram)'
@@ -1431,7 +1432,7 @@ options:
             Best when number of groups is known a priori (e.g., 2 training cohorts, 3 experience levels).
 
     - name: clusterDistance
-      title: "Distance Metric"
+      title: "Distance metric"
       type: List
       options:
         - title: 'Correlation (1 - r)'
@@ -1455,7 +1456,7 @@ options:
             regardless of systematic shifts (one rater consistently 10 percent higher).
 
     - name: clusterLinkage
-      title: "Linkage Method (Hierarchical)"
+      title: "Linkage method (hierarchical)"
       type: List
       options:
         - title: 'Average Linkage (UPGMA)'
@@ -1524,7 +1525,7 @@ options:
             Identifies groups of cases that received similar ratings.
 
     - name: caseClusterMethod
-      title: "Clustering Method"
+      title: "Clustering method"
       type: List
       options:
         - title: 'Hierarchical (Dendrogram)'
@@ -1538,7 +1539,7 @@ options:
             K-means: Partitions cases into K distinct clusters (continuous data only).
 
     - name: caseClusterDistance
-      title: "Distance Metric"
+      title: "Distance metric"
       type: List
       options:
         - title: 'Correlation (1 - r)'
@@ -1558,7 +1559,7 @@ options:
             Agreement-Based: Proportion of disagreeing raters (categorical).
 
     - name: caseClusterLinkage
-      title: "Linkage Method (Hierarchical)"
+      title: "Linkage method (hierarchical)"
       type: List
       options:
         - title: 'Average Linkage (UPGMA)'
@@ -1622,7 +1623,7 @@ options:
             (e.g., manual vs AI-assisted scoring of the same cases).
 
     - name: conditionBVars
-      title: Condition B Raters
+      title: Condition B raters
       type: Variables
       default: NULL
       suggested:
@@ -1636,7 +1637,7 @@ options:
             The main rater variables serve as Condition A.
 
     - name: pairedBootN
-      title: Bootstrap Replications
+      title: Bootstrap replications
       type: Integer
       min: 500
       max: 10000
@@ -1666,7 +1667,7 @@ options:
             for a prospective agreement study based on kappa or ICC.
 
     - name: ssMetric
-      title: Agreement Metric
+      title: Agreement metric
       type: List
       options:
         - title: "Cohen's Kappa (2 raters)"
@@ -1680,7 +1681,7 @@ options:
           R: The agreement metric to power the study for.
 
     - name: ssKappaNull
-      title: Null Kappa (H0)
+      title: Null kappa (H0)
       type: Number
       min: 0
       max: 0.99
@@ -1691,7 +1692,7 @@ options:
             Common choices - 0.4 (moderate), 0.6 (substantial).
 
     - name: ssKappaAlt
-      title: Expected Kappa (H1)
+      title: Expected kappa (H1)
       type: Number
       min: 0.01
       max: 1
@@ -1720,7 +1721,7 @@ options:
           R: Number of rating categories (e.g., 4 for HER2 0/1+/2+/3+).
 
     - name: ssAlpha
-      title: Significance Level
+      title: Significance level
       type: Number
       min: 0.001
       max: 0.2
@@ -1729,7 +1730,7 @@ options:
           R: Type I error rate (two-sided).
 
     - name: ssPower
-      title: Desired Power
+      title: Desired power
       type: Number
       min: 0.5
       max: 0.999
@@ -1746,7 +1747,7 @@ options:
             Show educational guide for planning agreement study sample size.
 
     - name: seed
-      title: "Random Seed"
+      title: "Random seed"
       type: Integer
       default: 42
       description:

@@ -284,3 +284,121 @@ test_that("spline calibration runs end to end, draws, and is no longer reported 
         skip("ici column not yet compiled into enhancedROC.h.R; run jmvtools::prepare()")
     }
 })
+
+
+# --- 2026-09-03 /fix-function: cutoff direction, plot state, Youden toggle, validation, OVR, notices ---
+
+er_private_data <- function(d, ...) {
+    o <- do.call(ClinicoPath:::enhancedROCOptions$new, list(...))
+    a <- ClinicoPath:::enhancedROCClass$new(options = o, data = d)
+    a$init()
+    list(a = a, o = o, p = a$.__enclos_env__$private)
+}
+er_img <- function(pr, name) pr$a$results$results$get(name)
+
+test_that("a custom cutoff equal to an observed value under direction 'lower' matches pROC's tie rule", {
+    skip_if_not_installed("pROC")
+    d <- er_data()
+    cut <- d$bad[5]
+    pr <- er_private_data(d, outcome = "status", positiveClass = "pos", predictors = "bad",
+                          direction = "lower", customCutoffs = as.character(cut), cutoffTable = TRUE)
+    pr$p$.run()
+    ca <- pr$a$results$results$cutoffAnalysis$asDF
+    row <- ca[grepl("Custom", ca$cutoff_type) & abs(ca$cutoff - cut) < 1e-9, ]
+    ref <- pROC::coords(pr$p$.rocResults$bad$roc, cut, ret = c("tp", "fp", "sensitivity", "specificity"))
+    expect_equal(row$true_positive, ref$tp)      # was predictor < cutoff: TP/FP contradicted sens/spec
+    expect_equal(row$false_positive, ref$fp)
+    expect_equal(row$sensitivity, ref$sensitivity, tolerance = 1e-9)
+})
+
+test_that("renderers draw from image$state when .run() has not executed in this instance", {
+    skip_if_not_installed("pROC")
+    opts <- list(outcome = "status", positiveClass = "pos", predictors = c("m1", "m2"),
+                 analysisType = "comparative", cutoffTable = TRUE, clinicalMetrics = TRUE,
+                 smoothMethod = "binormal", customCutoffs = "0.5,1")
+    live <- do.call(er_private, opts)
+    live$p$.run()
+    st <- er_img(live, "rocCurvePlot")$state
+    expect_false(is.null(st))
+    expect_false(any(rapply(st, is.function, how = "unlist")))      # protobuf-safe payload
+    expect_setequal(names(st$roc), c("m1", "m2"))
+
+    fresh <- do.call(er_private, opts)                              # as after reopening a saved .omv
+    for (nm in c("rocCurvePlot", "comparativeROCPlot", "cutoffAnalysisPlot", "youdenIndexPlot", "clinicalDecisionPlot")) {
+        er_img(fresh, nm)$setState(er_img(live, nm)$state)
+    }
+    expect_null(fresh$p$.rocResults)
+    expect_true(fresh$p$.plotROCCurve(er_img(fresh, "rocCurvePlot"), jmvcore::theme_default(), NULL))
+    expect_true(fresh$p$.plotComparativeROC(er_img(fresh, "comparativeROCPlot"), jmvcore::theme_default(), NULL))
+    expect_true(fresh$p$.plotCutoffAnalysis(er_img(fresh, "cutoffAnalysisPlot"), jmvcore::theme_default(), NULL))
+    expect_equal(as.numeric(fresh$p$.rocResults$m1$roc$auc), as.numeric(live$p$.rocResults$m1$roc$auc))
+    expect_equal(nrow(fresh$p$.rocResults$m1$custom_cutoffs), 2)
+    expect_false(is.null(fresh$p$.rocSmoothed$m1))
+})
+
+test_that("a run that returns early leaves no plot state behind", {
+    live <- er_private(outcome = "status", positiveClass = "pos", predictors = "m1")
+    live$p$.run()
+    expect_false(is.null(er_img(live, "rocCurvePlot")$state))
+    live$p$.predictors <- NULL                                       # simulate the missing-variables early return
+    live$p$.run()
+    expect_null(er_img(live, "rocCurvePlot")$state)
+})
+
+test_that("Youden optimisation off reports the closest-to-top-left cutoff and labels it", {
+    skip_if_not_installed("pROC")
+    pr <- er_private(outcome = "status", positiveClass = "pos", predictors = "m1",
+                     youdenOptimization = FALSE, cutoffTable = TRUE)
+    pr$p$.run()
+    ref <- pROC::coords(pr$p$.rocResults$m1$roc, "best", best.method = "closest.topleft", ret = "threshold")
+    expect_equal(pr$p$.rocResults$m1$optimal_cutoff$cutoff, ref$threshold[1])
+    ca <- pr$a$results$results$cutoffAnalysis$asDF
+    expect_true("Optimal (closest to top-left)" %in% ca$cutoff_type)
+    expect_false("Optimal (Youden)" %in% ca$cutoff_type)            # was: Youden under either setting
+})
+
+test_that("one-vs-rest curves share one direction per marker and the table says so", {
+    skip_if_not_installed("pROC")
+    d <- er_data()
+    d$stage <- factor(ifelse(d$m1 < -0.3, "I", ifelse(d$m1 < 0.9, "II", "III")), levels = c("I", "II", "III"))
+    pr <- er_private_data(d, outcome = "stage", positiveClass = "III", predictors = "m1",
+                          multiClassROC = TRUE, multiClassStrategy = "ovr")
+    pr$p$.run()
+    expect_equal(pr$p$.ovrDirection(d$stage, d$m1), "<")
+    notes <- pr$a$results$results$multiClassAUC$.__enclos_env__$private$.notes
+    expect_true("ovr_direction" %in% names(notes))
+    expect_match(get("note", envir = notes[["ovr_direction"]]), "the same way for every class", fixed = TRUE)
+})
+
+test_that("internal validation labels its interval honestly and fixes the probability direction", {
+    skip_if_not_installed("pROC")
+    pr <- er_private(outcome = "status", positiveClass = "pos", predictors = "m1",
+                     internalValidation = TRUE, validationMethod = "bootstrap", bootstrapSamples = 100)
+    pr$p$.run()
+    html_items <- Filter(function(it) inherits(it, "Html"), pr$a$results$results$items)
+    txt <- paste(vapply(html_items, function(it) it$content %||% "", character(1)), collapse = " ")
+    expect_match(txt, "Internal Validation", fixed = TRUE)
+    expect_match(txt, "shifted by the optimism estimate", fixed = TRUE)
+    expect_match(txt, "SD across resamples", fixed = TRUE)
+    expect_false(grepl("95% CI \\[", txt))
+})
+
+test_that("extreme prevalence is reported once for the sample, and a failed predictor gets a notice", {
+    skip_if_not_installed("pROC")
+    d <- er_data()
+    d$status <- factor(ifelse(seq_len(nrow(d)) <= 6, "pos", "neg"), levels = c("neg", "pos"))   # 3 % prevalence
+    pr <- er_private_data(d, outcome = "status", positiveClass = "pos", predictors = c("m1", "m2"))
+    env <- pr$p
+    orig <- env$.calculateOptimalCutoff
+    unlockBinding(".calculateOptimalCutoff", env)
+    assign(".calculateOptimalCutoff", function(roc_obj, data, predictor) {
+        if (predictor == "m2") stop("boom")
+        orig(roc_obj, data, predictor)
+    }, envir = env)
+    pr$p$.run()
+    html <- pr$a$results$results$notices$content
+    expect_equal(lengths(regmatches(html, gregexpr("Extreme Prevalence", html, fixed = TRUE))), 1)   # was: once per predictor
+    expect_match(html, "ROC Analysis Failed: m2", fixed = TRUE)                                     # was: instructions panel only
+    expect_match(html, "ROC analysis failed for predictor &#x27;m2&#x27;: boom", fixed = TRUE)
+    expect_setequal(names(pr$p$.rocResults), "m1")
+})

@@ -411,3 +411,156 @@ test_that("DeLong's test warns when a class is too small for its asymptotics", {
     # the methodology note is always present, so an empty note set would not fake a pass
     expect_true("delong_method" %in% note_keys(40, 40))
 })
+
+
+# --- 2026-09-03 /fix-function: stale per-run state, late warnings, NULL positive class, NA strata ---
+
+ps_private_data <- function(d, ...) {
+    o <- do.call(ClinicoPath:::psychopdaROCOptions$new, list(...))
+    a <- ClinicoPath:::psychopdaROCClass$new(options = o, data = d)
+    a$init()
+    list(a = a, p = a$.__enclos_env__$private)
+}
+
+test_that("a second run with smoothing, the threshold table and the combined criterion plot does not crash", {
+    skip_if_not_installed("pROC")
+    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease",
+                     refVar = NULL, rocSmoothingMethod = "binormal", showThresholdTable = TRUE,
+                     combinePlots = TRUE, showCriterionPlot = TRUE)
+    expect_no_error(pr$p$.run())
+    n1 <- nrow(pr$a$results$thresholdTable$asDF)
+    # used to fail with "numbers of columns of arguments do not match": the previous run's
+    # biomarker_smooth frame was still in private$.rocDataList when the criterion plot rbind() ran
+    expect_no_error(pr$p$.run())
+    expect_setequal(names(pr$p$.rocDataList), c("biomarker", "biomarker_smooth"))
+    expect_equal(nrow(pr$a$results$thresholdTable$asDF), n1)
+})
+
+test_that("no positive class selected: the last level is assumed and disclosed instead of crashing", {
+    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = NULL, refVar = NULL)
+    expect_no_error(pr$p$.run())   # was: argument is of length zero
+    expect_equal(pr$p$.assumedPositiveClass, "Disease")
+    expect_match(tnote(pr$a$results$aucSummaryTable, "assumed_positive_class"), "Disease", fixed = TRUE)
+})
+
+test_that("a missing value in the subgroup variable drops that row, not the whole analysis", {
+    d <- ps_data()
+    d$grp <- factor(rep(c("A", "B"), length.out = nrow(d)))
+    d$grp[1] <- NA
+    pr <- ps_private_data(d, dependentVars = "biomarker", classVar = "disease_status",
+                          positiveClass = "Disease", refVar = NULL, subGroup = "grp")
+    expect_no_error(pr$p$.run())   # was: "Insufficient data ... found: 0" from a "biomarker ::: NA" stratum
+    expect_setequal(pr$a$results$resultsTable$itemKeys, c("biomarker ::: A", "biomarker ::: B"))
+    expect_match(pr$a$results$runSummary$content, "1 row(s) with a missing value", fixed = TRUE)
+})
+
+test_that("warnings raised after the Analysis Status box is built still reach it", {
+    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease",
+                     refVar = NULL, partialAUC = TRUE)
+    env <- pr$p
+    unlockBinding(".checkPackageDependencies", env)
+    assign(".checkPackageDependencies",
+           function(...) { env$.warnUser("LATE-WARNING-PROBE"); FALSE }, envir = env)
+    pr$p$.run()
+    expect_true("LATE-WARNING-PROBE" %in% pr$p$.userWarnings)
+    expect_match(pr$a$results$runSummary$content, "LATE-WARNING-PROBE", fixed = TRUE)
+})
+
+test_that("Analysis Status warnings are HTML-escaped once", {
+    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease", refVar = NULL)
+    pr$p$.run()
+    pr$p$.warnUser("<b>x</b> & y")
+    pr$p$.renderRunSummary()
+    html <- pr$a$results$runSummary$content
+    expect_match(html, "&lt;b&gt;x&lt;/b&gt; &amp; y", fixed = TRUE)
+    expect_false(grepl("<b>x</b>", html, fixed = TRUE))
+})
+
+test_that("a cutpointr failure is disclosed, not silently replaced by the Youden fallback", {
+    d <- ps_data()
+    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease", refVar = NULL)
+    r <- pr$p$.runCutpointrMetrics(dependentVar = d$biomarker, classVar = d$disease_status,
+                                   positiveClass = "Disease", method = function(...) stop("boom"),
+                                   score = NULL, metric = cutpointr::youden, direction = ">=",
+                                   tol_metric = 0, boot_runs = 0, break_ties = mean, var_label = "biomarker")
+    expect_true(is.finite(r$results$AUC))
+    expect_match(pr$p$.userWarnings, "cutpointr could not analyse biomarker (boom)", fixed = TRUE)
+})
+
+
+# --- 2026-09-03 /fix-function (second pass): effect-size labels, power curve, DCA plot, subgroup messages ---
+
+test_that("effect-size table gives each marker's d and labels the differences as differences", {
+    d <- ps_data()
+    set.seed(3)
+    d$m2 <- d$biomarker + rnorm(nrow(d), 0, 20)
+    pr <- ps_private_data(d, dependentVars = c("biomarker", "m2"), classVar = "disease_status",
+                          positiveClass = "Disease", refVar = NULL, effectSizeAnalysis = TRUE)
+    pr$p$.run()
+    es <- pr$a$results$effectSizeTable$asDF
+    expect_equal(nrow(es), 1)
+    pooled_d <- function(x) {
+        pos <- x[d$disease_status == "Disease"]; neg <- x[d$disease_status == "Healthy"]
+        sp <- sqrt(((length(pos) - 1) * var(pos) + (length(neg) - 1) * var(neg)) / (length(pos) + length(neg) - 2))
+        (mean(pos) - mean(neg)) / sp
+    }
+    d1 <- pooled_d(d$biomarker); d2 <- pooled_d(d$m2)
+    expect_equal(es$d_first, d1, tolerance = 1e-8)
+    expect_equal(es$d_second, d2, tolerance = 1e-8)
+    expect_equal(es$cohens_d, d2 - d1, tolerance = 1e-8)
+    J <- 1 - 3 / (4 * (nrow(d) - 2) - 1)
+    expect_equal(es$hedges_g, J * d2 - J * d1, tolerance = 1e-8)   # difference of two Hedges' g
+    expect_match(tnote(pr$a$results$effectSizeTable, "definition"), "second marker minus first marker", fixed = TRUE)
+})
+
+test_that("power curve plot uses the table's Hanley-McNeil power and renders", {
+    skip_if_not_installed("pROC")
+    pr <- ps_private(dependentVars = "biomarker", classVar = "disease_status", positiveClass = "Disease",
+                     refVar = NULL, powerAnalysis = TRUE, powerAnalysisType = "sample_size",
+                     expectedAUCDifference = 0.2, targetPower = 0.8, significanceLevel = 0.05)
+    pr$p$.run()
+    tab <- pr$a$results$powerAnalysisTable$asDF
+    st <- pr$a$results$powerCurvePlot$get(key = "biomarker")$state
+    expect_equal(st$auc_target, 0.7)
+    expect_equal(st$required_n, tab$required_n)
+    # the required N is the smallest n reaching the target on the SAME power function the plot draws
+    powr <- function(n) pr$p$.hanleyMcNeilPower(0.7, n, st$pos_frac, 0.05, st$adjustment_factor)
+    expect_gte(powr(tab$required_n), 0.8)
+    expect_lt(powr(tab$required_n - 1), 0.8)
+    expect_true(pr$p$.plotPowerCurves(pr$a$results$powerCurvePlot$get(key = "biomarker"), ggplot2::theme_minimal(), NULL))
+})
+
+test_that("decision-curve plot state uses the complete-case prevalence and the table's risk fit", {
+    skip_if_not_installed("pROC")
+    d <- ps_data()
+    d$biomarker[1:20] <- NA                      # missingness in the marker
+    d$sep <- ifelse(d$disease_status == "Disease", 1, 0) + runif(nrow(d), 0, 0.1)   # complete separation
+    pr <- ps_private_data(d, dependentVars = c("biomarker", "sep"), classVar = "disease_status",
+                          positiveClass = "Disease", refVar = NULL, clinicalUtilityAnalysis = TRUE)
+    pr$p$.run()
+    st <- pr$a$results$decisionCurvePlot$get(key = "biomarker")$state
+    expect_equal(st$prevalence, mean(st$outcome))               # was: all-rows prevalence
+    expect_equal(length(st$risk), length(st$outcome))
+    st2 <- pr$a$results$decisionCurvePlot$get(key = "sep")$state
+    expect_false(is.null(st2$risk))                              # was: NULL (warning caught) -> blank plot
+    expect_true(pr$p$.plotDecisionCurve(pr$a$results$decisionCurvePlot$get(key = "sep"), ggplot2::theme_minimal(), NULL))
+})
+
+test_that("subgroup analysis: DeLong is an explicit error, IDI/NRI say they use the full sample", {
+    skip_if_not_installed("pROC")
+    d <- ps_data()
+    set.seed(5)
+    d$m2 <- d$biomarker + rnorm(nrow(d), 0, 20)
+    pr <- ps_private_data(d, dependentVars = c("biomarker", "m2"), classVar = "disease_status",
+                          positiveClass = "Disease", refVar = NULL, subGroup = "sex", delongTest = TRUE)
+    expect_error(pr$p$.run(), "DeLong")     # .validateInputs(): actionable, not a silent skip
+    pr <- ps_private_data(d, dependentVars = c("biomarker", "m2"), classVar = "disease_status",
+                          positiveClass = "Disease", refVar = NULL, subGroup = "sex",
+                          calculateIDI = TRUE, calculateNRI = TRUE)
+    expect_no_error(pr$p$.run())
+    html <- pr$a$results$runSummary$content
+    expect_match(html, "IDI/NRI are computed on the full sample", fixed = TRUE)
+    expect_false(grepl("IDI/NRI disabled", html, fixed = TRUE))   # was: claimed disabled while computing them
+    expect_gt(nrow(pr$a$results$idiTable$asDF), 0)
+    expect_match(tnote(pr$a$results$idiTable, "subgroup_warning"), "full sample", fixed = TRUE)
+})

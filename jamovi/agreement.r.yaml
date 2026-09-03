@@ -287,6 +287,7 @@ items:
           - bootstrap
           - nBoot
           - confLevel
+          - seed
 
     - name: krippExplanation
       title: "About Krippendorff's Alpha"
@@ -443,21 +444,20 @@ items:
         - name: robinsonA
           title: "A"
           type: number
-        - name: se
-          title: 'SE'
+        - name: ci_lower
+          title: '95% CI Lower'
           type: number
-        - name: z
-          title: 'z-value'
+        - name: ci_upper
+          title: '95% CI Upper'
           type: number
-        - name: p
-          title: 'p-value'
-          type: number
-          format: zto,pvalue
         - name: interpretation
           title: 'Interpretation'
           type: text
       clearWith:
           - vars
+          - nBoot
+          - seed
+          - confLevel
 
     - name: robinsonAExplanation
       title: "About Robinson's A"
@@ -830,6 +830,8 @@ items:
       clearWith:
           - vars
           - clusterVariable
+          - shrinkageEstimates
+          - clusterRankings
 
     - name: varianceDecompositionTable
       title: "Variance Component Decomposition"
@@ -963,6 +965,7 @@ items:
       clearWith:
           - vars
           - conditionVariable
+          - multipleTestCorrection
 
     - name: mixedEffectsVarianceTable
       title: "Mixed-Effects Variance Components"
@@ -1088,6 +1091,8 @@ items:
           - vars
           - nBoot
           - confLevel
+          - seed
+          - iccType
 
     - name: bootstrapCIExplanation
       title: "About Bootstrap Confidence Intervals"
@@ -1419,6 +1424,8 @@ items:
           - tdiCoverage
           - tdiLimit
           - confLevel
+          - nBoot
+          - seed
 
     - name: tdiExplanation
       title: "About Total Deviation Index (TDI)"
@@ -1440,7 +1447,7 @@ items:
           - showIotaGuide
 
     - name: maxwellRETable
-      title: "Maxwell's Random Error (RE) Index - Error Decomposition"
+      title: "Rater Variance Decomposition - Systematic vs Random Disagreement"
       type: Table
       visible: (maxwellRE)
       rows: 1
@@ -1455,7 +1462,7 @@ items:
           title: 'Raters/Methods'
           type: integer
         - name: re_value
-          title: 'RE Index'
+          title: 'Random share'
           type: number
         - name: systematic_prop
           title: 'Systematic %'
@@ -1466,13 +1473,13 @@ items:
           type: number
           format: pc
         - name: total_variance
-          title: 'Total Variance'
+          title: 'Disagreement variance'
           type: number
         - name: systematic_var
-          title: 'Systematic Variance'
+          title: 'Systematic (rater) variance'
           type: number
         - name: random_var
-          title: 'Random Variance'
+          title: 'Random (residual) variance'
           type: number
         - name: interpretation
           title: 'Interpretation'
@@ -1481,7 +1488,7 @@ items:
           - vars
 
     - name: maxwellREExplanation
-      title: "About Maxwell's Random Error Index"
+      title: About the rater variance decomposition
       type: Html
       visible: (showMaxwellREGuide)
       clearWith:
@@ -1659,6 +1666,7 @@ items:
           - specificPositiveCategory
           - specificAllCategories
           - confLevel
+          - specificConfidenceIntervals
 
     - name: specificAgreementExplanation
       title: "About Specific Agreement Indices"
@@ -1899,6 +1907,7 @@ items:
           - vars
           - subgroupVariable
           - confLevel
+          - subgroupMinCases
 
     - name: subgroupForestPlotImage
       title: 'Forest Plot of Agreement by Subgroup'
@@ -1911,6 +1920,7 @@ items:
       clearWith:
           - vars
           - subgroupVariable
+          - subgroupMinCases
 
     - name: subgroupExplanation
       title: "About Agreement by Subgroup"
@@ -2068,6 +2078,8 @@ items:
           - vars
           - conditionBVars
           - pairedBootN
+          - confLevel
+          - seed
       columns:
         - name: metric
           title: "Metric"

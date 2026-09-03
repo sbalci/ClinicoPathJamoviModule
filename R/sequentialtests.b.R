@@ -2,7 +2,6 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom ggplot2 ggplot aes geom_text geom_line geom_point labs theme_void theme element_blank scale_x_continuous scale_y_continuous annotate
-#' @importFrom gridExtra grid.arrange
 #' @return An \code{R6} class generator object for the \code{sequentialtestsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 sequentialtestsClass <- if (requireNamespace('jmvcore'))
@@ -723,7 +722,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     }
 
                     results_explanation <- private$.formatTranslated(
-                        .("<h3>Sequential Testing Strategy Explanation</h3>{strategy}<h3>Results Interpretation</h3><p>With an entered prevalence of {prevalence}, the combined strategy has:</p><ul><li><strong>Combined sensitivity:</strong> {sensitivity}</li><li><strong>Combined specificity:</strong> {specificity}</li><li><strong>Combined PPV:</strong> {ppv}</li><li><strong>Combined NPV:</strong> {npv}</li></ul><p>For an illustrative population of {population} people:</p><ul><li>{final_pos} have a final positive classification</li><li>{final_neg} have a final negative classification</li><li>Among {diseased} expected people with disease, {tp} are correctly identified ({tp_rate})</li><li>Among {healthy} expected people without disease, {tn} are correctly identified ({tn_rate})</li></ul>"),
+                        .("<h3>Sequential Testing Strategy Explanation</h3>{strategy}<h3>Results Interpretation</h3><p>With an entered prevalence of {prevalence}, the combined strategy has:</p><ul><li><strong>Combined sensitivity:</strong> {sensitivity}</li><li><strong>Combined specificity:</strong> {specificity}</li><li><strong>Combined PPV:</strong> {ppv}</li><li><strong>Combined NPV:</strong> {npv}</li></ul><p>For an illustrative population of {population} people:</p><ul><li>{finalPos} have a final positive classification</li><li>{finalNeg} have a final negative classification</li><li>Among {diseased} expected people with disease, {tp} are correctly identified ({tpRate})</li><li>Among {healthy} expected people without disease, {tn} are correctly identified ({tnRate})</li></ul>"),
                         list(
                             strategy = strategy_explanation,
                             prevalence = format_percent(prevalence),
@@ -732,14 +731,14 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             ppv = format_percent(combined_ppv),
                             npv = format_percent(combined_npv),
                             population = base::format(pop_size, big.mark = ","),
-                            final_pos = sprintf("%.0f", final_pos),
-                            final_neg = sprintf("%.0f", final_neg),
+                            finalPos = sprintf("%.0f", final_pos),
+                            finalNeg = sprintf("%.0f", final_neg),
                             diseased = sprintf("%.0f", diseased),
                             tp = sprintf("%.0f", final_tp),
-                            tp_rate = tp_rate_text,
+                            tpRate = tp_rate_text,
                             healthy = sprintf("%.0f", healthy),
                             tn = sprintf("%.0f", final_tn),
-                            tn_rate = tn_rate_text
+                            tnRate = tn_rate_text
                         )
                     )
                     independence_note <- private$.formatTranslated(
@@ -991,11 +990,11 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             se = base::format(combined_sens, digits = 4),
                             numerator = base::format(ppv_numerator, digits = 4))))
                     formulas <- paste0(formulas, private$.formatTranslated(
-                        .("<li>Denominator = P \u{00D7} Se + (1-P) \u{00D7} (1-Sp) = {numerator} + {one_minus_p} \u{00D7} {one_minus_sp} = {denominator}</li>"),
+                        .("<li>Denominator = P \u{00D7} Se + (1-P) \u{00D7} (1-Sp) = {numerator} + {oneMinusP} \u{00D7} {oneMinusSp} = {denominator}</li>"),
                         list(
                             numerator = base::format(ppv_numerator, digits = 4),
-                            one_minus_p = base::format(1 - prevalence, digits = 4),
-                            one_minus_sp = base::format(1 - combined_spec, digits = 4),
+                            oneMinusP = base::format(1 - prevalence, digits = 4),
+                            oneMinusSp = base::format(1 - combined_spec, digits = 4),
                             denominator = base::format(ppv_denominator, digits = 4))))
                     formulas <- paste0(formulas, private$.formatTranslated(
                         .("<li>PPV = numerator/denominator = {numerator}/{denominator} = {ppv}</li>"),
@@ -1026,17 +1025,17 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         .("<li>Combined specificity (Sp) = {value}</li>"),
                         list(value = base::format(combined_spec, digits = 4))))
                     formulas <- paste0(formulas, private$.formatTranslated(
-                        .("<li>Numerator = (1-P) \u{00D7} Sp = {one_minus_p} \u{00D7} {sp} = {numerator}</li>"),
+                        .("<li>Numerator = (1-P) \u{00D7} Sp = {oneMinusP} \u{00D7} {sp} = {numerator}</li>"),
                         list(
-                            one_minus_p = base::format(1 - prevalence, digits = 4),
+                            oneMinusP = base::format(1 - prevalence, digits = 4),
                             sp = base::format(combined_spec, digits = 4),
                             numerator = base::format(npv_numerator, digits = 4))))
                     formulas <- paste0(formulas, private$.formatTranslated(
-                        .("<li>Denominator = (1-P) \u{00D7} Sp + P \u{00D7} (1-Se) = {numerator} + {p} \u{00D7} {one_minus_se} = {denominator}</li>"),
+                        .("<li>Denominator = (1-P) \u{00D7} Sp + P \u{00D7} (1-Se) = {numerator} + {p} \u{00D7} {oneMinusSe} = {denominator}</li>"),
                         list(
                             numerator = base::format(npv_numerator, digits = 4),
                             p = base::format(prevalence, digits = 4),
-                            one_minus_se = base::format(1 - combined_sens, digits = 4),
+                            oneMinusSe = base::format(1 - combined_sens, digits = 4),
                             denominator = base::format(npv_denominator, digits = 4))))
                     formulas <- paste0(formulas, private$.formatTranslated(
                         .("<li>NPV = numerator/denominator = {numerator}/{denominator} = {npv}</li>"),
@@ -1085,6 +1084,8 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         "Test2_Sens" = test2_sens,
                         "Test2_Spec" = test2_spec,
                         "Strategy" = strategy,
+                        # translated label for plot subtitles; "Strategy" stays the key the renderers branch on
+                        "StrategyLabel" = strategy_name,
                         "Combined_Sens" = combined_sens,
                         "Combined_Spec" = combined_spec,
                         "Combined_PPV" = combined_ppv,
@@ -1392,7 +1393,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     ggplot2::labs(
                         title = .("Test Performance Comparison"),
                         subtitle = private$.formatTranslated(
-                            .("Strategy: {strategy}"), list(strategy = plotData$Strategy)),
+                            .("Strategy: {strategy}"), list(strategy = if (is.null(plotData$StrategyLabel)) plotData$Strategy else plotData$StrategyLabel)),
                         y = .("Value (%)"), x = "", fill = ""
                     ) +
                     ggplot2::theme_minimal() +
@@ -1495,7 +1496,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         subtitle = private$.formatTranslated(
                             .("Strategy: {strategy} | Prevalence: {prevalence}"),
                             list(
-                                strategy = plotData$Strategy,
+                                strategy = if (is.null(plotData$StrategyLabel)) plotData$Strategy else plotData$StrategyLabel,
                                 prevalence = sprintf("%.1f%%", plotData$Prevalence * 100))),
                         x = .("Testing Stage"), y = .("Disease Probability (%)"),
                         color = "", linetype = ""
@@ -1612,7 +1613,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         subtitle = private$.formatTranslated(
                             .("Strategy: {strategy} | Sensitivity: {sensitivity} | Specificity: {specificity}"),
                             list(
-                                strategy = plotData$Strategy,
+                                strategy = if (is.null(plotData$StrategyLabel)) plotData$Strategy else plotData$StrategyLabel,
                                 sensitivity = sprintf("%.1f%%", plotData$Combined_Sens * 100),
                                 specificity = sprintf("%.1f%%", plotData$Combined_Spec * 100)))
                     ) +

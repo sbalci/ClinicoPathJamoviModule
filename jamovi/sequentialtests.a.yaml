@@ -28,7 +28,7 @@ description:
 options:
     # Teaching examples
     - name: preset
-      title: Teaching Example
+      title: Teaching example
       type: List
       options:
         - name: custom
@@ -58,7 +58,7 @@ options:
 
     # First Test (Screening Test) Parameters
     - name: test1_name
-      title: Screening Test Name
+      title: Screening test name
       type: String
       default: 'Screening Test'
       description:
@@ -74,7 +74,7 @@ options:
           R: Assumed sensitivity of the first test, entered as a proportion from 0.01 to 0.99.
       
     - name: test1_spec
-      title: Specificity 
+      title: Specificity
       type: Number
       default: 0.70
       min: 0.01
@@ -83,7 +83,7 @@ options:
           R: Assumed specificity of the first test, entered as a proportion from 0.01 to 0.99.
 
     - name: test1_cost
-      title: Illustrative Unit Cost
+      title: Illustrative unit cost
       type: Number
       default: 0
       min: 0
@@ -92,7 +92,7 @@ options:
     
     # Second Test (Confirmatory Test) Parameters  
     - name: test2_name
-      title: Confirmatory Test Name
+      title: Confirmatory test name
       type: String
       default: 'Confirmatory Test'
       description:
@@ -117,7 +117,7 @@ options:
           R: Assumed specificity of the second test, entered as a proportion from 0.01 to 0.99.
 
     - name: test2_cost
-      title: Illustrative Unit Cost
+      title: Illustrative unit cost
       type: Number
       default: 0
       min: 0
@@ -126,7 +126,7 @@ options:
     
     # Testing Strategy
     - name: strategy
-      title: Testing Strategy
+      title: Testing strategy
       type: List
       options:
         - title: Test all positives from first test
@@ -144,7 +144,7 @@ options:
       
     # Disease Prevalence
     - name: prevalence
-      title: Disease Prevalence
+      title: Disease prevalence
       type: Number
       default: 0.10
       min: 0.001
@@ -153,7 +153,7 @@ options:
           R: Assumed pre-test disease probability, entered as a proportion from 0.001 to 0.999.
 
     - name: population_size
-      title: Illustrative Population Size
+      title: Illustrative population size
       type: Integer
       default: 1000
       min: 100

@@ -23,7 +23,7 @@ options:
             The data as a data frame.
 
     - name: outcome
-      title: 'Outcome Variable'
+      title: 'Outcome variable'
       type: Variable
       suggested:
           - nominal
@@ -34,13 +34,13 @@ options:
       description: 'Binary outcome variable (disease status)'
 
     - name: positiveClass
-      title: 'Positive Class'
+      title: 'Positive class'
       type: Level
       variable: (outcome)
       description: 'Select which level represents the positive class (disease/condition present)'
 
     - name: predictors
-      title: 'Predictor Variables'
+      title: 'Predictor variables'
       type: Variables
       suggested:
           - continuous
@@ -49,7 +49,7 @@ options:
       description: 'Numeric predictor variables for ROC analysis'
 
     - name: analysisType
-      title: 'Analysis Type'
+      title: 'Analysis type'
       type: List
       options:
           - title: 'Single ROC Analysis'
@@ -79,10 +79,10 @@ options:
       title: "Youden index optimization"
       type: Bool
       default: true
-      description: 'Find optimal cutoff using Youden Index (Sensitivity + Specificity - 1)'
+      description: 'Find the optimal cutoff by maximising the Youden index (sensitivity + specificity - 1), subject to the minimum sensitivity/specificity below. When off, the cutoff closest to the top-left corner of the ROC curve is reported instead.'
 
     - name: customCutoffs
-      title: 'Custom Cutoffs'
+      title: 'Custom cutoffs'
       type: String
       default: ''
       description: 'Comma-separated list of custom cutoffs to evaluate (e.g., 0.1, 0.5, 0.9)'
@@ -105,7 +105,7 @@ options:
 
     # Statistical Options
     - name: confidenceLevel
-      title: 'Confidence Level'
+      title: 'Confidence level'
       type: Number
       default: 95
       min: 50
@@ -113,7 +113,7 @@ options:
       description: 'Confidence level for AUC confidence intervals'
 
     - name: bootstrapSamples
-      title: 'Bootstrap Samples'
+      title: 'Bootstrap samples'
       type: Integer
       default: 1000
       min: 100
@@ -127,7 +127,7 @@ options:
       description: 'Use bootstrap methods for confidence intervals'
 
     - name: bootstrapMethod
-      title: 'Bootstrap Method'
+      title: 'Bootstrap method'
       type: List
       options:
           - title: 'Percentile Method'
@@ -158,7 +158,7 @@ options:
       description: 'Maintain outcome class proportions in bootstrap samples (recommended for imbalanced data)'
 
     - name: seed
-      title: "Random Seed"
+      title: "Random seed"
       type: Integer
       default: 0
       description:
@@ -177,7 +177,7 @@ options:
       description: 'Perform pairwise comparisons between ROC curves'
 
     - name: comparisonMethod
-      title: 'Comparison Method'
+      title: 'Comparison method'
       type: List
       options:
           - title: 'DeLong et al. (1988)'
@@ -228,7 +228,7 @@ options:
 
     # Advanced Options
     - name: smoothMethod
-      title: 'ROC Curve Smoothing'
+      title: 'ROC curve smoothing'
       type: List
       options:
           - title: 'None'
@@ -247,7 +247,7 @@ options:
       description: 'Calculate partial AUC for specific sensitivity/specificity ranges'
 
     - name: partialAucType
-      title: 'Partial AUC Type'
+      title: 'Partial AUC type'
       type: List
       options:
           - title: 'Specificity Range (for high-specificity applications)'
@@ -258,7 +258,7 @@ options:
       description: 'Whether to calculate pAUC over a specificity or sensitivity range'
 
     - name: partialRange
-      title: 'Partial AUC Range'
+      title: 'Partial AUC range'
       type: String
       default: '0.8,1.0'
       description: 'Range for partial AUC (min,max) - e.g., 0.8,1.0 for high specificity or sensitivity'
@@ -271,7 +271,7 @@ options:
       description: 'Calculate Concentrated ROC curves for early retrieval analysis'
 
     - name: crocAlpha
-      title: 'CROC Alpha Parameter'
+      title: 'CROC alpha parameter'
       type: Number
       default: 7.0
       min: 1.0
@@ -285,7 +285,7 @@ options:
       description: 'Calculate ROC convex hull (optimal achievable performance)'
 
     - name: tiedScoreHandling
-      title: 'Tied Score Handling'
+      title: 'Tied score handling'
       type: List
       options:
           - title: 'Average'
@@ -305,7 +305,7 @@ options:
       description: 'Automatically detect class imbalance and recommend PRC when appropriate'
 
     - name: imbalanceThreshold
-      title: 'Imbalance Threshold'
+      title: 'Imbalance threshold'
       type: Number
       default: 3.0
       min: 1.5
@@ -319,7 +319,7 @@ options:
       description: 'Display warning message when class imbalance is detected'
 
     - name: recommendPRC
-      title: "Recommend PRC for imbalanced data"
+      title: "PRC recommendation for imbalanced data"
       type: Bool
       default: false
       description: 'Recommend using Precision-Recall curves when imbalance is detected'
@@ -340,7 +340,7 @@ options:
       description: 'Compute PPV, NPV and the clinical impact metrics at the prevalence observed in these data (the default). Untick it to assume a different prevalence instead - appropriate when the sample is enriched for cases and does not reflect the population the test will be used in. The prevalence actually used is printed in the results.'
 
     - name: clinicalContext
-      title: 'Clinical Context'
+      title: 'Clinical context'
       type: List
       options:
           - title: 'Screening'
@@ -357,7 +357,7 @@ options:
       description: 'Clinical application context for interpretation'
 
     - name: clinicalPresets
-      title: 'Clinical Presets'
+      title: 'Clinical presets'
       type: List
       options:
           - title: 'Custom Configuration'
@@ -388,7 +388,7 @@ options:
 
     # Plotting Options
     - name: plotTheme
-      title: 'Plot Theme'
+      title: 'Plot theme'
       type: List
       options:
           - title: 'Classic'
@@ -401,7 +401,7 @@ options:
       description: 'Visual theme for ROC plots'
 
     - name: plotWidth
-      title: 'Plot Width'
+      title: 'Plot width'
       type: Integer
       default: 600
       min: 300
@@ -409,7 +409,7 @@ options:
       description: 'Width of ROC plots'
 
     - name: plotHeight
-      title: 'Plot Height'
+      title: 'Plot height'
       type: Integer
       default: 600
       min: 300
@@ -541,7 +541,7 @@ options:
       description: 'Enable multi-class ROC analysis for outcomes with >2 levels'
 
     - name: multiClassStrategy
-      title: 'Multi-Class Strategy'
+      title: 'Multi-class strategy'
       type: List
       options:
           - title: 'One-vs-Rest (OVR)'
@@ -552,7 +552,7 @@ options:
       description: 'Strategy for multi-class ROC analysis'
 
     - name: multiClassAveraging
-      title: 'Multi-Class AUC Averaging'
+      title: 'Multi-class AUC averaging'
       type: List
       options:
           - title: 'Macro Average (unweighted)'
@@ -596,10 +596,10 @@ options:
       description: 'Calculate clinical impact metrics (NNT, NND, clinical utility)'
 
     - name: nntCalculation
-      title: "Number needed to test/Treat"
+      title: "NNT and NND columns"
       type: Bool
       default: false
-      description: 'Calculate number needed to test and number needed to diagnose'
+      description: 'Show the number needed to test (1 / net benefit) and number needed to diagnose (1 / Youden index) columns in the clinical impact table'
 
     - name: clinicalUtilityCurve
       title: "Clinical utility curve"
@@ -658,7 +658,7 @@ options:
       description: 'Perform internal validation using cross-validation or bootstrap'
 
     - name: validationMethod
-      title: 'Validation Method'
+      title: 'Validation method'
       type: List
       options:
           - title: 'Bootstrap Validation'

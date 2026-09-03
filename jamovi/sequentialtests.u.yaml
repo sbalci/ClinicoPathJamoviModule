@@ -63,18 +63,20 @@ children:
             enable: (preset == 'custom')
             events:
               change: ./sequentialtests.events::onChange_test2_spec
-  - type: LayoutBox
-    margin: large
+  - type: Label
+    label: Illustrative unit costs
     children:
-      - type: TextBox
-        name: test1_cost
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: test2_cost
-        format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: test1_cost
+            format: number
+            label: First test
+          - type: TextBox
+            name: test2_cost
+            format: number
+            label: Second test
   - type: Label
     label: Testing Strategy
     children:
@@ -94,6 +96,10 @@ children:
             enable: (preset == 'custom')
             events:
               change: ./sequentialtests.events::onChange_prevalence
+          - type: TextBox
+            name: population_size
+            format: number
+            label: Illustrative population size
   - type: CollapseBox
     label: Display Options
     collapsed: true
@@ -109,9 +115,3 @@ children:
             name: show_plots
           - type: CheckBox
             name: show_cost_analysis
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: population_size
-        format: number

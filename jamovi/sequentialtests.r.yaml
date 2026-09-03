@@ -154,6 +154,8 @@ items:
          - test1_cost
          - test2_cost
          - population_size
+         - test1_name
+         - test2_name
       columns:
         - name: item
           title: 'Item'

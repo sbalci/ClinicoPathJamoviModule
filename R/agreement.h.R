@@ -1933,18 +1933,13 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="A", 
                         `type`="number"),
                     list(
-                        `name`="se", 
-                        `title`="SE", 
+                        `name`="ci_lower", 
+                        `title`="95% CI Lower", 
                         `type`="number"),
                     list(
-                        `name`="z", 
-                        `title`="z-value", 
+                        `name`="ci_upper", 
+                        `title`="95% CI Upper", 
                         `type`="number"),
-                    list(
-                        `name`="p", 
-                        `title`="p-value", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
                     list(
                         `name`="interpretation", 
                         `title`="Interpretation", 
@@ -3096,7 +3091,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="maxwellRETable",
-                title="Maxwell's Random Error (RE) Index - Error Decomposition",
+                title="Rater Variance Decomposition - Systematic vs Random Disagreement",
                 visible="(maxwellRE)",
                 rows=1,
                 columns=list(
@@ -3114,7 +3109,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="integer"),
                     list(
                         `name`="re_value", 
-                        `title`="RE Index", 
+                        `title`="Random share", 
                         `type`="number"),
                     list(
                         `name`="systematic_prop", 
@@ -3128,15 +3123,15 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="pc"),
                     list(
                         `name`="total_variance", 
-                        `title`="Total Variance", 
+                        `title`="Disagreement variance", 
                         `type`="number"),
                     list(
                         `name`="systematic_var", 
-                        `title`="Systematic Variance", 
+                        `title`="Systematic (rater) variance", 
                         `type`="number"),
                     list(
                         `name`="random_var", 
-                        `title`="Random Variance", 
+                        `title`="Random (residual) variance", 
                         `type`="number"),
                     list(
                         `name`="interpretation", 

@@ -293,6 +293,21 @@ children:
                     name: hlGroups
                     format: number
                     enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: eoRatio
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: namDagostino
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: greenwoodNam
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: calibrationBelt
+                    enable: (calibrationAnalysis)
+                  - type: CheckBox
+                    name: calibrationDensity
+                    enable: (calibrationAnalysis)
   - type: CollapseBox
     label: Multi-Class ROC
     collapsed: true
@@ -306,11 +321,9 @@ children:
           - type: ComboBox
             name: multiClassStrategy
             enable: (multiClassROC)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: multiClassAveraging
+          - type: ComboBox
+            name: multiClassAveraging
+            enable: (multiClassROC)
   - type: CollapseBox
     label: Clinical Impact
     collapsed: true
@@ -340,19 +353,6 @@ children:
             name: cumulativeDynamic
           - type: CheckBox
             name: competingRisksConcordance
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: eoRatio
-      - type: CheckBox
-        name: namDagostino
-      - type: CheckBox
-        name: greenwoodNam
-      - type: CheckBox
-        name: calibrationBelt
-      - type: CheckBox
-        name: calibrationDensity
   - type: CollapseBox
     label: Plot Settings
     collapsed: true

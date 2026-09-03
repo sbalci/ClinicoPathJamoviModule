@@ -270,6 +270,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       .samplePrevalenceList = list(),
       .aucList = list(), # Store AUC values for clinical interpretation
       .forestPlotData = NULL, # Store forest plot data for meta-analysis
+      .runSummaryHead = NULL, # Fixed part of the Analysis Status box, built in .run(); see .renderRunSummary
       .assumedPositiveClass = NULL, # Set when no positive class was chosen and one was guessed
       .modeInstructionsHtml = "", # Instructions written by .applyClinicalModeSettings(); the
       # preset block runs straight afterwards and writes the SAME Html item, so it has to
@@ -300,6 +301,23 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       #   * dangerously optimistic at small effects - 62 where 1149 are needed.
       # Inverting the power function cannot disagree with the power column, is
       # monotone in the effect size, and has no pole.
+      # Power of a two-sided z-test of AUC = 0.5 at total n with positive fraction
+      # pos_frac, Hanley-McNeil variance. Shared by .requiredNforPower and the power
+      # curve plot, so the figure can no longer disagree with the table.
+      .hanleyMcNeilPower = function(auc, n, pos_frac, alpha, adjustment_factor = 1) {
+        z_alpha <- stats::qnorm(1 - alpha / 2)
+        n_a <- n * pos_frac
+        n_n <- n * (1 - pos_frac)
+        if (n_a < 2 || n_n < 2) return(0)
+        q1 <- auc / (2 - auc)
+        q2 <- 2 * auc^2 / (1 + auc)
+        v <- (auc * (1 - auc) + (n_a - 1) * (q1 - auc^2) +
+              (n_n - 1) * (q2 - auc^2)) / (n_a * n_n)
+        se <- sqrt(max(v, 0)) * adjustment_factor
+        if (!is.finite(se) || se <= 0) return(1)
+        1 - stats::pnorm(z_alpha - (auc - 0.5) / se)
+      },
+
       .requiredNforPower = function(auc, alpha, target_power, pos_frac,
                                     adjustment_factor = 1, n_max = 1e7) {
         if (!is.finite(auc) || auc <= 0.5 || !is.finite(pos_frac) ||
@@ -308,19 +326,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # degenerate (perfectly correlated markers). Refuse rather than return a
         # number: adj -> 0 makes the SE vanish and yields an absurd n of 6.
         if (!is.finite(adjustment_factor) || adjustment_factor <= 0) return(NA_integer_)
-        z_alpha <- stats::qnorm(1 - alpha / 2)
-        powr <- function(n) {
-          n_a <- n * pos_frac
-          n_n <- n * (1 - pos_frac)
-          if (n_a < 2 || n_n < 2) return(0)
-          q1 <- auc / (2 - auc)
-          q2 <- 2 * auc^2 / (1 + auc)
-          v <- (auc * (1 - auc) + (n_a - 1) * (q1 - auc^2) +
-                (n_n - 1) * (q2 - auc^2)) / (n_a * n_n)
-          se <- sqrt(max(v, 0)) * adjustment_factor
-          if (!is.finite(se) || se <= 0) return(1)
-          1 - stats::pnorm(z_alpha - (auc - 0.5) / se)
-        }
+        powr <- function(n) private$.hanleyMcNeilPower(auc, n, pos_frac, alpha, adjustment_factor)
         if (powr(n_max) < target_power) return(NA_integer_)
         lo <- 4; hi <- 16
         while (hi < n_max && powr(hi) < target_power) { lo <- hi; hi <- hi * 2 }
@@ -336,6 +342,24 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (length(msg) && nzchar(msg)) {
           private$.userWarnings <- unique(c(private$.userWarnings, msg))
         }
+        invisible(NULL)
+      },
+
+      # Writes the Analysis Status box: the header built in .run() plus every warning
+      # collected so far. Producers pass plain text; escaping happens here, once.
+      .renderRunSummary = function() {
+        head <- private$.runSummaryHead
+        if (is.null(head)) return(invisible(NULL))
+        warnings <- private$.userWarnings
+        box <- ""
+        if (length(warnings) > 0) {
+          box <- paste0(
+            "<div style='background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 10px; border-radius: 4px; margin-top: 10px;'>",
+            "<strong>", .("Warnings:"), "</strong><ul>",
+            paste0("<li>", htmltools::htmlEscape(warnings), "</li>", collapse = ""),
+            "</ul></div>")
+        }
+        self$results$runSummary$setContent(paste0(head, box, "</div>"))
         invisible(NULL)
       },
 
@@ -1210,8 +1234,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           varName <- varParts[1]
           varNameEscaped <- private$.escapeVar(varName)
           groupName <- paste(varParts[-1], collapse = "_")
-          dependentVar <- jmvcore::toNumeric(data[[varNameEscaped]][subGroup == groupName])
-          classVar <- data[[classVarEscaped]][subGroup == groupName]
+          dependentVar <- jmvcore::toNumeric(data[[varNameEscaped]][subGroup %in% groupName])
+          classVar <- data[[classVarEscaped]][subGroup %in% groupName]
         }
 
         # Data validation and cleaning
@@ -1225,7 +1249,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         unique_levels <- levels(classVar)
 
         # Validate that positive class exists
-        if (self$options$positiveClass != "" && !self$options$positiveClass %in% unique_levels) {
+        if (!is.null(self$options$positiveClass) && nzchar(self$options$positiveClass) &&
+            !self$options$positiveClass %in% unique_levels) {
           private$.throwError(
             "missing_positive_class",
             paste("'", self$options$positiveClass, "' not found in class variable."),
@@ -1279,7 +1304,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # Run cutpointr and return results with confusion matrix
       .runCutpointrMetrics = function(dependentVar, classVar, positiveClass,
                                       method, score, metric, direction,
-                                      tol_metric, boot_runs, break_ties) {
+                                      tol_metric, boot_runs, break_ties,
+                                      var_label = .("this marker")) {
         result_success <- FALSE
         result_message <- NULL
         results <- NULL
@@ -1307,7 +1333,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         )
 
         if (!result_success) {
-          # Fallback: manual ROC calculation
+          # Fallback: manual ROC calculation. Say so -- it ignores the selected method,
+          # metric and tolerance, and used to replace them silently.
+          private$.warnUser(sprintf(
+            .("cutpointr could not analyse %s (%s). A built-in Youden-index search was used instead, so the selected cutpoint method, metric and tolerance were not applied to that marker."),
+            var_label, result_message))
           response <- as.numeric(classVar == positiveClass)
           roc_data <- data.frame(
             x.sorted = sort(unique(dependentVar)),
@@ -2213,6 +2243,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # jamovi reuses the R6 instance across runs, so a warning raised once
         # would otherwise persist into every later run of the analysis.
         private$.userWarnings <- character(0)
+        private$.runSummaryHead <- NULL
         # -----------------------------------------------------------------------
         # 0. SET SEED FOR REPRODUCIBILITY (preserve and restore global RNG state)
         # -----------------------------------------------------------------------
@@ -2246,6 +2277,17 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # and then return without recomputing them, which is the opposite of what manual mode is
         # for.
         private$.assumedPositiveClass <- NULL
+        # Per-run storage is keyed by variable name and read back by the threshold table,
+        # the combined criterion plot, the prevalence plot and the forest plot renderer.
+        # Without a reset, entries from the previous run survive: a `<var>_smooth` frame
+        # (different columns) written by the smoothing step made every later rbind() and
+        # addRow() over names(.rocDataList) fail, and dropped variables kept their rows.
+        private$.rocDataList <- list()
+        private$.optimalCriteriaList <- list()
+        private$.prevalenceList <- list()
+        private$.samplePrevalenceList <- list()
+        private$.aucList <- list()
+        private$.forestPlotData <- NULL
         private$.clearTables()
 
         # -----------------------------------------------------------------------
@@ -2315,7 +2357,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           )
 
           # Add positive class info
-          if (self$options$positiveClass == "") {
+          if (is.null(self$options$positiveClass) || !nzchar(self$options$positiveClass)) {
             procedureNotes <- paste0(
               procedureNotes,
               "<p> Positive Class: ",
@@ -2422,14 +2464,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         n_total <- sum(!is.na(classVar))
         prevalence <- if (n_total > 0) n_pos / n_total else NA
 
-        summary_status <- list()
-        summary_status$warnings <- character()
-
         if (!is.na(prevalence) && (prevalence < 0.1 || prevalence > 0.9)) {
-          summary_status$warnings <- c(
-            summary_status$warnings,
-            sprintf("Class imbalance detected (Prevalence: %.1f%%). Consider using Precision-Recall curves.", prevalence * 100)
-          )
+          private$.warnUser(sprintf(
+            .("Class imbalance detected (Prevalence: %.1f%%). Consider using Precision-Recall curves."),
+            prevalence * 100))
         }
 
         # Warn when the gold-standard class variable has more than two levels.
@@ -2438,53 +2476,37 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # is applied. Surface this explicitly rather than collapsing silently.
         n_class_levels <- nlevels(droplevels(as.factor(classVar)))
         if (!is.na(n_class_levels) && n_class_levels > 2) {
-          summary_status$warnings <- c(
-            summary_status$warnings,
-            sprintf(
-              "Class variable has %d levels, but ROC analysis requires exactly two. A one-vs-rest dichotomization is applied: '%s' (positive) vs. all other levels combined.",
-              n_class_levels, htmltools::htmlEscape(positiveClass)
-            )
-          )
+          private$.warnUser(sprintf(
+            .("Class variable has %d levels, but ROC analysis requires exactly two. A one-vs-rest dichotomization is applied: '%s' (positive) vs. all other levels combined."),
+            n_class_levels, positiveClass))
         }
 
-        # Gating incompatible options
+        # Subgroup analysis: DeLong + subgroup is rejected by .validateInputs() before this
+        # point (an explicit, actionable error), so the old "DeLong test disabled" warning
+        # here could never be seen. IDI/NRI are NOT disabled -- they run on the full sample
+        # (see the idiTable note) -- and the message used to claim the opposite.
         if (!is.null(self$options$subGroup)) {
-          if (self$options$delongTest) {
-            summary_status$warnings <- c(summary_status$warnings, "DeLong test disabled because subgroup analysis is active.")
-          }
           if (self$options$calculateIDI || self$options$calculateNRI) {
-            summary_status$warnings <- c(summary_status$warnings, "IDI/NRI disabled because subgroup analysis is active.")
+            private$.warnUser(.("IDI/NRI are computed on the full sample; the subgroup variable is not applied to them."))
           }
         }
 
-        # Populate Run Summary
-        run_summary_html <- paste0(
+        # Analysis Status box. The header is fixed for this run; the warning box is
+        # rendered from private$.userWarnings now AND again when .run() exits (normally
+        # or through reject()), so warnings raised by later steps -- package checks,
+        # the DeLong fallback, the global test, subgroup handling -- reach the user
+        # instead of being collected after the box was already written.
+        private$.runSummaryHead <- paste0(
           "<div style='padding: 10px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; border-radius: 4px; margin-bottom: 15px; color: inherit;'>",
           "<h4>Analysis Status</h4>",
           "<ul>",
           "<li><strong>Seed:</strong> ", self$options$seed, "</li>",
           "<li><strong>Positive Class:</strong> ", htmltools::htmlEscape(positiveClass), " (Prevalence: ", round(prevalence * 100, 1), "%)</li>",
-          "<li><strong>Analysis Mode:</strong> ", tools::toTitleCase(self$options$clinicalMode), "</li>"
+          "<li><strong>Analysis Mode:</strong> ", tools::toTitleCase(self$options$clinicalMode), "</li>",
+          "</ul>"
         )
-
-        # Fold in anything raised through .warnUser() during this run.
-        summary_status$warnings <- unique(c(summary_status$warnings, private$.userWarnings))
-
-        if (length(summary_status$warnings) > 0) {
-          run_summary_html <- paste0(
-            run_summary_html,
-            "</ul><div style='background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 10px; border-radius: 4px; margin-top: 10px;'>",
-            "<strong>Warnings:</strong><ul>"
-          )
-          for (w in summary_status$warnings) {
-            run_summary_html <- paste0(run_summary_html, "<li>", w, "</li>")
-          }
-          run_summary_html <- paste0(run_summary_html, "</ul></div>")
-        } else {
-          run_summary_html <- paste0(run_summary_html, "</ul></div>")
-        }
-
-        self$results$runSummary$setContent(run_summary_html)
+        on.exit(private$.renderRunSummary(), add = TRUE)
+        private$.renderRunSummary()
 
         # Set up cutpoint method
         if (self$options$method == "oc_manual") {
@@ -2637,7 +2659,15 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # Use [[]] for safe column access with escaped names
           subGroup <- data[[subGroupEscaped]]
           classVar <- data[[classVarEscaped]]
-          uniqueGroups <- unique(subGroup)
+          # NA is not a stratum: unique() kept it, producing a "var ::: NA" level whose
+          # `subGroup == "NA"` selection was empty and aborted the whole analysis.
+          n_na_subgroup <- sum(is.na(subGroup))
+          if (n_na_subgroup > 0) {
+            private$.warnUser(sprintf(
+              .("%d row(s) with a missing value in the subgroup variable (%s) were excluded from the subgroup analysis."),
+              n_na_subgroup, self$options$subGroup))
+          }
+          uniqueGroups <- unique(subGroup[!is.na(subGroup)])
           # Create combined variable names (var_group)
           vars <- apply(expand.grid(vars, uniqueGroups), 1, function(x) paste(x, collapse = " ::: "))
         } else {
@@ -2698,7 +2728,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             direction = direction,
             tol_metric = tol_metric,
             boot_runs = boot_runs,
-            break_ties = break_ties
+            break_ties = break_ties,
+            var_label = var
           )
           results <- cp_res$results
           confusionMatrix <- cp_res$confusionMatrix
@@ -2947,7 +2978,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           }
 
           if (!is.null(self$options$subGroup)) {
-            jmvcore::reject(.("DeLong's test does not currently support the group variable. If you would like to contribute/provide guidance, please use the contact information provided in the documentation."))
+            # Unreachable: .validateInputs() already rejects DeLong with a subgroup variable.
+            NULL
           } else {
             # Escape variable names for safe data access
             depVarsEscaped <- private$.escapeVar(self$options$dependentVars)
@@ -3127,91 +3159,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           }, logical(1))]
         }, error = function(e) character(0))
 
-        # Track CI method per variable for user transparency
+        # CI method per variable (delong / hanley_mcneil), recorded by the AUC summary
+        # loop below for the footnote; a second, identical CI pass used to run here.
         ci_methods_used <- list()
-
-        # Add rows for each variable
-        for (var in names(aucList)) {
-          # Calculate confidence interval for AUC
-          auc_value <- aucList[[var]]
-
-          # Get counts of positive and negative cases for this variable
-          # Escape class variable name for safe data access
-          classVarEscaped <- private$.escapeVar(self$options$classVar)
-
-          if (is.null(subGroup)) {
-            classVar <- data[[classVarEscaped]]
-          } else {
-            # For grouped variables, extract the group
-            varParts <- strsplit(var, split = " ::: ", fixed = TRUE)[[1]]
-            groupName <- paste(varParts[-1], collapse = "_")
-            classVar <- data[[classVarEscaped]][subGroup == groupName]
-          }
-
-          # na.rm: a SINGLE NA in the gold standard made both sums NA, which failed
-          # the valid_sample_size gate below and silently skipped the whole CI/p
-          # block - including the ci_method footnote - so every marker showed a
-          # bare AUC with blank CI and blank p and nothing said why.
-          n_pos <- sum(classVar == positiveClass, na.rm = TRUE)
-          n_neg <- sum(classVar != positiveClass, na.rm = TRUE)
-
-          # Calculate AUC CI using pROC DeLong method (accurate for small samples)
-          auc_lci <- NA
-          auc_uci <- NA
-          p_val <- NA
-
-          valid_sample_size <- !is.na(n_pos) && !is.na(n_neg) && n_pos > 0 && n_neg > 0
-          valid_auc <- !is.na(auc_value) && is.finite(auc_value) && auc_value >= 0 && auc_value <= 1
-
-          if (valid_sample_size && valid_auc) {
-            used_fallback <- FALSE
-            tryCatch(
-              {
-                prepared <- private$.prepareVarData(data, var, subGroup)
-                pROC_direction <- ifelse(direction == ">=", "<", ">")
-                roc_obj <- pROC::roc(
-                  response = prepared$classVar,
-                  predictor = prepared$dependentVar,
-                  levels = c(
-                    levels(as.factor(prepared$classVar))[levels(as.factor(prepared$classVar)) != positiveClass][1],
-                    positiveClass
-                  ),
-                  direction = pROC_direction,
-                  ci = TRUE,
-                  ci.method = "delong",
-                  quiet = TRUE
-                )
-                auc_lci <- as.numeric(roc_obj$ci[1])
-                auc_uci <- as.numeric(roc_obj$ci[3])
-
-                # DeLong-based variance for p-value
-                auc_se_delong <- sqrt(pROC::var(roc_obj))
-                if (!is.na(auc_se_delong) && auc_se_delong > 0) {
-                  z_stat <- (auc_value - 0.5) / auc_se_delong
-                  p_val <- 2 * pnorm(-abs(z_stat))
-                }
-              },
-              error = function(e) {
-                # Fallback to Hanley-McNeil if pROC fails
-                used_fallback <<- TRUE
-                q1 <- auc_value / (2 - auc_value)
-                q2 <- 2 * auc_value^2 / (1 + auc_value)
-                auc_se <- sqrt((auc_value * (1 - auc_value) +
-                  (n_pos - 1) * (q1 - auc_value^2) +
-                  (n_neg - 1) * (q2 - auc_value^2)) / (n_pos * n_neg))
-                if (!is.na(auc_se) && auc_se > 0) {
-                  z_critical <- qnorm(0.975)
-                  auc_lci <<- max(0, auc_value - z_critical * auc_se)
-                  auc_uci <<- min(1, auc_value + z_critical * auc_se)
-                  z_stat <- (auc_value - 0.5) / auc_se
-                  p_val <<- 2 * pnorm(-abs(z_stat))
-                }
-              }
-            )
-            ci_methods_used[[var]] <- if (used_fallback) "hanley_mcneil" else "delong"
-          }
-
-        }
 
         # Populate clinical interpretation table after simple table is complete
         private$.populateClinicalInterpretation()
@@ -3236,7 +3186,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             # For grouped variables, extract the group
             varParts <- strsplit(var, split = " ::: ", fixed = TRUE)[[1]]
             groupName <- paste(varParts[-1], collapse = "_")
-            classVar <- data[[classVarEscaped]][subGroup == groupName]
+            classVar <- data[[classVarEscaped]][subGroup %in% groupName]
           }
 
           # Calculate counts and statistics
@@ -3280,6 +3230,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   z_stat <- (auc_value - 0.5) / auc_se_delong
                   p_val <- 2 * pnorm(-abs(z_stat))
                 }
+                ci_methods_used[[var]] <- "delong"
               },
               error = function(e) {
                 # Fallback to Hanley-McNeil if pROC fails
@@ -3662,7 +3613,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           if (!is.null(self$options$subGroup) && self$options$subGroup != "") {
             self$results$idiTable$setNote(
               key = "subgroup_warning",
-              note = "IDI/NRI calculations do not currently support subgroup analysis. Results are computed on the full dataset.",
+              note = .("IDI/NRI calculations do not support subgroup analysis; these results are computed on the full sample, not per subgroup."),
               init = FALSE
             )
           }
@@ -5167,6 +5118,14 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Get binary outcomes
         y <- as.numeric(data[[private$.escapeVar(self$options$classVar)]] == positiveClass)
 
+        # The three "difference" columns held d2 - d1 under the heading "Cohen's d", so a
+        # reader took the between-marker difference for a single marker's effect size.
+        self$results$effectSizeTable$setNote(
+          key = "definition",
+          note = .("Cohen's d is the standardized difference in a marker's mean between the positive and negative classes (pooled SD), given for each marker of the pair. The three difference columns are second marker minus first marker; Glass' delta uses the negative-class SD and Hedges' g applies the small-sample correction J to each d before differencing. No interval or test accompanies these point estimates."),
+          init = FALSE
+        )
+
         for (i in 1:(length(vars) - 1)) {
           for (j in (i + 1):length(vars)) {
             var1 <- vars[i]
@@ -5215,8 +5174,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 glass_delta2 <- if (sd_neg2 > 0) (mean(pos2) - mean(neg2)) / sd_neg2 else NA
                 glass_delta <- glass_delta2 - glass_delta1
 
-                # Hedges' g: bias-corrected Cohen's d
-                # Correction factor J = 1 - 3/(4*df - 1)
+                # Hedges' g: bias-corrected Cohen's d, J = 1 - 3/(4*df - 1). Both markers share
+                # n_pos/n_neg after complete-case filtering, so J*(d2 - d1) == g2 - g1.
                 df <- n_pos + n_neg - 2
                 correction <- 1 - 3 / (4 * df - 1)
                 hedges_g <- cohens_d * correction
@@ -5240,6 +5199,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
                 self$results$effectSizeTable$addRow(rowKey = paste0(var1, "_vs_", var2), values = list(
                   comparison = paste0(var1, " vs ", var2),
+                  d_first = d1,
+                  d_second = d2,
                   cohens_d = cohens_d,
                   glass_delta = glass_delta,
                   hedges_g = hedges_g,
@@ -5313,6 +5274,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
                 z_alpha <- qnorm(1 - significance_level / 2)
                 z_beta <- qnorm(target_power)
+                adjustment_factor <- 1 # post-hoc: single AUC against 0.5; other branches reassign
 
                 # Switch logic based on analysis type
                 if (analysis_type == "post_hoc") {
@@ -5361,10 +5323,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   # the adjustment collapses to 0, expected_se becomes 0, z becomes
                   # NA, and `if (NA)` threw inside a bare tryCatch(error=...) that
                   # swallowed it -- the table came back with 0 rows and no message.
-                  # A note on the table itself, not .warnUser(): this method runs
-                  # AFTER runSummary has already been rendered, so anything
-                  # accumulated here never reaches that box. The note sits next to
-                  # the affected numbers, which is where it is needed anyway.
+                  # A note on the table itself rather than .warnUser(): it sits
+                  # next to the affected numbers, which is where it is needed.
                   if (!is.finite(adjustment_factor) || adjustment_factor <= 0) {
                     tryCatch(self$results$powerAnalysisTable$setNote(
                       "degenerate_correlation",
@@ -5410,10 +5370,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   # the adjustment collapses to 0, expected_se becomes 0, z becomes
                   # NA, and `if (NA)` threw inside a bare tryCatch(error=...) that
                   # swallowed it -- the table came back with 0 rows and no message.
-                  # A note on the table itself, not .warnUser(): this method runs
-                  # AFTER runSummary has already been rendered, so anything
-                  # accumulated here never reaches that box. The note sits next to
-                  # the affected numbers, which is where it is needed anyway.
+                  # A note on the table itself rather than .warnUser(): it sits
+                  # next to the affected numbers, which is where it is needed.
                   if (!is.finite(adjustment_factor) || adjustment_factor <= 0) {
                     tryCatch(self$results$powerAnalysisTable$setNote(
                       "degenerate_correlation",
@@ -5473,7 +5431,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                       observed_power = observed_power,
                       target_power = target_power,
                       significance_level = significance_level,
-                      n_total = n_total
+                      n_total = n_total,
+                      pos_frac = n_pos / n_total,
+                      adjustment_factor = adjustment_factor,
+                      # the AUC the table's power/required N refer to
+                      auc_target = if (analysis_type == "post_hoc") observed_auc else 0.5 + expected_auc_diff,
+                      required_n = required_n
                     ))
                   }
                 }
@@ -5837,19 +5800,18 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     # benefit was wrong by up to 0.181 and changed SIGN at t = 0.50.
                     # Calibrate the marker to a probability once, here, and let the
                     # renderer threshold it directly.
-                    dca_fit <- tryCatch(
-                      stats::glm(y_complete ~ x_complete, family = stats::binomial()),
-                      error = function(e) NULL, warning = function(w) NULL)
-                    dca_risk <- if (is.null(dca_fit)) NULL else
-                      tryCatch(as.numeric(stats::fitted(dca_fit)), error = function(e) NULL)
-
+                    # Reuse the table's fit (dca_tbl_risk): a separate fit here caught
+                    # warnings as NULL, so a perfectly separating marker got a table but
+                    # an empty plot; and `prevalence` was the all-rows value while the
+                    # curve is computed on complete cases, so Treat All sat on a
+                    # different denominator whenever the marker had missing values.
                     image$setState(list(
                       ready = TRUE,
                       threshold_range = threshold_range,
                       harm_benefit_ratio = harm_benefit_ratio,
-                      prevalence = prevalence,
+                      prevalence = mean(y_complete),
                       intervention_cost = intervention_cost,
-                      risk = dca_risk,
+                      risk = dca_tbl_risk,
                       outcome = as.integer(y_complete),
                       sensitivities = roc_obj$sensitivities,
                       specificities = roc_obj$specificities
@@ -6137,10 +6099,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 linetype = "dashed", alpha = 0.5
               ) +
               ggplot2::labs(
-                title = "Effect Size Analysis for ROC Comparisons",
-                x = "Comparison",
-                y = "Cohen's d",
-                fill = "Effect Magnitude"
+                title = .("Difference in Cohen's d between markers"),
+                x = .("Comparison (first vs second marker)"),
+                y = .("Cohen's d, second minus first"),
+                fill = .("Size of difference")
               ) +
               ggplot2::theme_minimal() +
               ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
@@ -6159,30 +6121,47 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         }
 
         if (private$.checkPackageDependencies("ggplot2", "power analysis visualization")) {
-          # Generate power curves for sample size planning
-          effect_sizes <- seq(0.1, 1.0, by = 0.1)
-          sample_sizes <- seq(50, 500, by = 25)
-          target_power <- self$options$targetPower
+          state <- image$state
+          # Same Hanley-McNeil power the table reports, at this sample's positive fraction
+          # and the chosen alpha. The previous curve used a crude SE (sqrt(0.25/(n/2))) on
+          # an "effect size" scale unrelated to the table, so the two disagreed.
+          pos_frac <- state$pos_frac
+          alpha <- state$significance_level
+          adj <- state$adjustment_factor
+          if (is.null(pos_frac) || !is.finite(pos_frac) || pos_frac <= 0 || pos_frac >= 1 ||
+              is.null(alpha) || !is.finite(alpha)) {
+            return(FALSE)
+          }
+          if (is.null(adj) || !is.finite(adj) || adj <= 0) adj <- 1
+          target_power <- state$target_power
+          n_total <- state$n_total
+          auc_target <- state$auc_target
+          required_n <- state$required_n
 
-          # Create grid of power calculations
-          power_data <- expand.grid(effect_size = effect_sizes, n = sample_sizes)
-          power_data$power <- apply(power_data, 1, function(row) {
-            # Simplified power calculation for AUC
-            effect_size <- row[1]
-            n <- row[2]
-            se <- sqrt((0.5 * 0.5) / (n / 2)) # Approximate SE for AUC = 0.5 + effect_size/2
-            z_stat <- (effect_size) / (2 * se)
-            1 - pnorm(1.96 - abs(z_stat))
-          })
+          n_max <- max(500, 2 * n_total, if (is.finite(required_n)) 1.2 * required_n else 0)
+          sample_sizes <- unique(round(seq(20, n_max, length.out = 60)))
+          auc_grid <- c(0.60, 0.65, 0.70, 0.75, 0.80, 0.90)
+          if (is.finite(auc_target) && auc_target > 0.5 && auc_target < 1) {
+            auc_grid <- sort(unique(c(auc_grid, round(auc_target, 3))))
+          }
+          power_data <- expand.grid(auc = auc_grid, n = sample_sizes)
+          power_data$power <- mapply(function(a, n) private$.hanleyMcNeilPower(a, n, pos_frac, alpha, adj),
+                                     power_data$auc, power_data$n)
+          power_data$curve <- ifelse(is.finite(auc_target) & abs(power_data$auc - round(auc_target, 3)) < 1e-9,
+                                     sprintf("%.3f (target)", power_data$auc), sprintf("%.2f", power_data$auc))
 
-          p <- ggplot2::ggplot(power_data, ggplot2::aes(x = n, y = power, color = factor(effect_size))) +
+          p <- ggplot2::ggplot(power_data, ggplot2::aes(x = n, y = power, color = curve)) +
             ggplot2::geom_line(linewidth = 1) +
             ggplot2::geom_hline(yintercept = target_power, linetype = "dashed", color = "red") +
+            ggplot2::geom_vline(xintercept = n_total, linetype = "dotted") +
             ggplot2::labs(
-              title = "Power Analysis for ROC Studies",
-              x = "Sample Size",
-              y = "Statistical Power",
-              color = "Effect Size"
+              title = .("Power to detect AUC above 0.5 (Hanley-McNeil)"),
+              subtitle = sprintf(.("alpha = %s, positive fraction = %.1f%%, dotted line = current n = %d%s"),
+                                 format(alpha), 100 * pos_frac, as.integer(n_total),
+                                 if (adj != 1) sprintf(.(", correlation adjustment = %.2f"), adj) else ""),
+              x = .("Total sample size"),
+              y = .("Statistical power"),
+              color = .("AUC")
             ) +
             ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
             ggplot2::theme_minimal()

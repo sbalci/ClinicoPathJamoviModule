@@ -95,4 +95,7 @@ __pycache__/
 # scratch artifacts (see stagemigration cleanup)
 ALL_HTML.txt
 adv_diag.html
+
 tests/testthat/_problems/
+
+docs/audit/

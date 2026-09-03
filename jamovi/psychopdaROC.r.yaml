@@ -567,23 +567,31 @@ items:
         - name: comparison
           title: Comparison
           type: text
+        - name: d_first
+          title: Cohen's d (first)
+          type: number
+          format: zto
+        - name: d_second
+          title: Cohen's d (second)
+          type: number
+          format: zto
         - name: cohens_d
-          title: Cohen's d
+          title: Δ Cohen's d
           type: number
           format: zto
         - name: glass_delta
-          title: Glass' Δ
+          title: Δ Glass' Δ
           type: number
           format: zto
         - name: hedges_g
-          title: Hedges' g
+          title: Δ Hedges' g
           type: number
           format: zto
         - name: effect_magnitude
-          title: Effect Magnitude
+          title: Size of difference
           type: text
         - name: clinical_importance
-          title: Clinical Importance
+          title: Interpretation
           type: text
       refs:
         - Cohen1988

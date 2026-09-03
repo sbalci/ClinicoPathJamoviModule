@@ -263,7 +263,7 @@ children:
           - type: CheckBox
             name: showAgreementHeatmapGuide
   - type: CollapseBox
-    label: Maxwell's RE [Continuous/Ordinal] (Random Error Decomposition)
+    label: Rater Variance Decomposition [Continuous] (Systematic vs Random Disagreement)
     collapsed: true
     children:
       - type: LayoutBox

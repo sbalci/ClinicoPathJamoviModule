@@ -477,6 +477,20 @@ test_that("translated templates interpolate dynamic values without ellipses", {
     expect_false(grepl("\u2026", rendered, fixed = TRUE))
     expect_match(rendered, "Test 2: Confirmatory Test", fixed = TRUE)
     expect_match(rendered, "combined specificity above is too high", fixed = TRUE)
+    # jmvcore::format() ignores underscored placeholder names, so {final_pos}-style tokens
+    # shipped as literal braces in the explanation and formulas panels until 2026-09-02.
+    expect_false(grepl("[{][A-Za-z_]+[}]", rendered))
+    expect_match(res$explanation_text$content, "1,234", fixed = TRUE)
+    expect_match(res$explanation_text$content, "have a final positive classification", fixed = TRUE)
+    expect_match(res$formulas_text$content, "Denominator = P", fixed = TRUE)
+})
+
+test_that("plot subtitles show the translated strategy label, not the internal key", {
+    pr <- private_st(strategy = "serial_positive", show_plots = TRUE)
+    pr$p$.run()
+    st <- pr$a$results$plot_performance$state
+    expect_equal(st$Strategy, "serial_positive")
+    expect_match(st$StrategyLabel, "Serial Testing", fixed = TRUE)
 })
 
 

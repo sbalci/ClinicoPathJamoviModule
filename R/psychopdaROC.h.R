@@ -1394,27 +1394,37 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `title`="Comparison", 
                         `type`="text"),
                     list(
+                        `name`="d_first", 
+                        `title`="Cohen's d (first)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="d_second", 
+                        `title`="Cohen's d (second)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
                         `name`="cohens_d", 
-                        `title`="Cohen's d", 
+                        `title`="\u0394 Cohen's d", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="glass_delta", 
-                        `title`="Glass' \u0394", 
+                        `title`="\u0394 Glass' \u0394", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="hedges_g", 
-                        `title`="Hedges' g", 
+                        `title`="\u0394 Hedges' g", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="effect_magnitude", 
-                        `title`="Effect Magnitude", 
+                        `title`="Size of difference", 
                         `type`="text"),
                     list(
                         `name`="clinical_importance", 
-                        `title`="Clinical Importance", 
+                        `title`="Interpretation", 
                         `type`="text")),
                 refs=list(
                     "Cohen1988",

@@ -158,9 +158,10 @@ test_that("undefined kappa does not crash the analysis or read as poor agreement
   expect_true(is.na(res$irrtable$asDF$kappa[1]))
 
   # and the plain-language summary must not throw on a non-finite kappa
-  set.seed(3); n <- 50
-  d2 <- data.frame(A = factor(sample(c("x", "y", "z"), n, TRUE)),
-                   B = factor(sample(c("x", "y", "z"), n, TRUE)))
+  # Weighted kappa on NOMINAL factors is now a structured error (see the 2026-09-03 test
+  # below), so drive the non-finite path with an ordered but degenerate scale instead.
+  d2 <- data.frame(A = factor(rep("x", 50), levels = c("x", "y", "z"), ordered = TRUE),
+                   B = factor(rep("x", 50), levels = c("x", "y", "z"), ordered = TRUE))
   expect_no_error(ClinicoPath::agreement(data = d2, vars = c("A", "B"),
                                          wght = "squared", sft = TRUE))
 })
@@ -249,41 +250,34 @@ test_that("one benchmark scale is used across the whole analysis", {
 })
 
 
-# ── Release review 2026-08-29: vectorised Robinson's A, seq_len confusion diagonal ──
+# ── 2026-09-03 /fix-function: Robinson's A is the variance-ratio coefficient, not gamma ──
 
-test_that("Robinson's A matches an independent concordant/discordant count", {
-  # .robinsonAPairwise counts C/D with a vectorised inner loop. This pins the
-  # published value against a naive scalar reference written from the definition
-  # A = (C - D) / (C + D), so a future "optimisation" cannot drift the statistic.
-  d <- agr_fixture(n = 60, seed = 5)
-  x <- as.numeric(d$r1)
-  y <- as.numeric(d$r2)
+robinson_ref <- function(m) {
+  m <- as.matrix(m)
+  1 - sum((m - rowMeans(m))^2) / sum((m - mean(m))^2)
+}
 
-  C <- 0; D <- 0
-  for (i in seq_len(length(x) - 1)) {
-    for (j in (i + 1):length(x)) {
-      dx <- x[i] - x[j]; dy <- y[i] - y[j]
-      if (dx != 0 && dy != 0) {
-        if (sign(dx) == sign(dy)) C <- C + 1 else D <- D + 1
-      }
-    }
-  }
-  expected <- (C - D) / (C + D)
-
-  res <- agreement(data = d, vars = c("r1", "r2"), robinsonA = TRUE)
-  expect_equal(res$robinsonATable$asDF$robinsonA[1], expected, tolerance = 1e-10)
+test_that("Robinson's A is 1 - within-case variance / total variance (Robinson 1957)", {
+  set.seed(4)
+  d <- data.frame(r1 = round(rnorm(60, 10, 3)), r2 = NA, r3 = NA)
+  d$r2 <- d$r1 + sample(c(-1, 0, 0, 1), 60, TRUE)
+  d$r3 <- d$r1 + sample(c(-1, 0, 1), 60, TRUE)
+  res <- agreement(data = d, vars = c("r1", "r2", "r3"), robinsonA = TRUE)
+  tb <- res$robinsonATable$asDF
+  expect_equal(tb$robinsonA[1], robinson_ref(d), tolerance = 1e-10)
+  expect_true(tb$ci_lower[1] <= tb$robinsonA[1] && tb$robinsonA[1] <= tb$ci_upper[1])
+  expect_false("se" %in% names(tb))                       # the old SE/z/p belonged to gamma
 })
 
-test_that("Robinson's A reports no significance test for more than two raters", {
-  # The pairwise A values share raters, so their spread is not a null distribution.
-  # se/z/p must stay NA rather than carrying an invalid test.
-  d <- agr_fixture(n = 80, seed = 7)
-  d$r3 <- factor(ifelse(runif(nrow(d)) < 0.7, as.character(d$r1),
-                        sample(levels(d$r1), nrow(d), TRUE)), levels = levels(d$r1))
-  res <- agreement(data = d, vars = c("r1", "r2", "r3"), robinsonA = TRUE)
-  t <- res$robinsonATable$asDF
-  expect_false(is.na(t$robinsonA[1]))
-  expect_true(is.na(t$se[1]) && is.na(t$z[1]) && is.na(t$p[1]))
+test_that("Robinson's A penalises a constant offset that a rank correlation ignores", {
+  d <- data.frame(r1 = rep(1:4, each = 10))
+  d$r2 <- d$r1 + 1                                          # perfectly correlated, never equal
+  res <- agreement(data = d, vars = c("r1", "r2"), robinsonA = TRUE)
+  a <- res$robinsonATable$asDF$robinsonA[1]
+  expect_lt(a, 0.9)                                         # gamma would report 1.0 here
+  expect_equal(a, robinson_ref(d), tolerance = 1e-10)
+  same <- data.frame(r1 = d$r1, r2 = d$r1)
+  expect_equal(agreement(data = same, vars = c("r1", "r2"), robinsonA = TRUE)$robinsonATable$asDF$robinsonA[1], 1)
 })
 
 test_that("the confusion-matrix heatmap renders (seq_len diagonal path)", {
@@ -339,4 +333,101 @@ test_that("fully defined case correlations produce clusters and no note", {
   expect_equal(nrow(tbl$asDF), 12)
   expect_equal(sort(unique(tbl$asDF$cluster)), c(1L, 2L))
   expect_false("undefined_cor" %in% names(tbl$notes))
+})
+
+
+# ── 2026-09-03 /fix-function: row reset, variance decomposition, nominal guard, seeds, notices ──
+
+agr_private <- function(d, ...) {
+  o <- do.call(ClinicoPath:::agreementOptions$new, list(...))
+  a <- ClinicoPath:::agreementClass$new(options = o, data = d)
+  a$init()
+  list(a = a, o = o, p = a$.__enclos_env__$private)
+}
+agr_note <- function(tbl, key) {
+  n <- tbl$.__enclos_env__$private$.notes
+  if (!(key %in% names(n))) return("(none)")
+  get("note", envir = n[[key]])
+}
+
+test_that("re-running on the same object does not duplicate rows or columns", {
+  d <- agr_fixture()
+  set.seed(12)
+  d$r3 <- factor(ifelse(runif(nrow(d)) < 0.7, as.character(d$r1), sample(levels(d$r1), nrow(d), TRUE)), levels = levels(d$r1))
+  pr <- agr_private(d, vars = c("r1", "r2", "r3"), allPairsKappa = TRUE, specificAgreement = TRUE)
+  counts <- function() c(nrow(pr$a$results$contingencyTable$asDF), ncol(pr$a$results$contingencyTable$asDF),
+                         nrow(pr$a$results$allPairsKappaTable$asDF), nrow(pr$a$results$specificAgreementTable$asDF))
+  pr$p$.run()
+  n1 <- counts()
+  pr$p$.run()                                               # any guide toggle re-runs .run() on the same object
+  expect_equal(counts(), n1)                                # was: rows doubled, columns re-added
+  expect_gt(n1[3], 0)
+  expect_gt(n1[4], 0)
+})
+
+test_that("the variance decomposition separates rater offsets from random disagreement", {
+  set.seed(9)
+  base <- rnorm(80, 50, 10)
+  offset <- data.frame(r1 = base, r2 = base + 5)            # pure systematic offset
+  noise  <- data.frame(r1 = base, r2 = base + rnorm(80, 0, 3))   # pure random disagreement
+  o <- agreement(data = offset, vars = c("r1", "r2"), maxwellRE = TRUE)$maxwellRETable$asDF
+  n <- agreement(data = noise,  vars = c("r1", "r2"), maxwellRE = TRUE)$maxwellRETable$asDF
+  expect_gt(o$systematic_prop[1], 0.99)                     # one-way version put case variance in "random"
+  expect_lt(n$systematic_prop[1], 0.15)
+  expect_match(o$method[1], "Two-way", fixed = TRUE)
+  expect_false(grepl("Maxwell", o$method[1], fixed = TRUE))
+})
+
+test_that("the mixed-effects comparison refuses categorical ratings instead of coding them", {
+  d <- agr_fixture()
+  d$cond <- factor(rep(c("AI", "Manual"), length.out = nrow(d)))
+  res <- agreement(data = d, vars = c("r1", "r2"), mixedEffectsComparison = TRUE, conditionVariable = "cond")
+  expect_match(agr_note(res$mixedEffectsTable, "error"), "requires continuous numeric ratings", fixed = TRUE)
+  expect_equal(nrow(res$mixedEffectsTable$asDF), 0)
+})
+
+test_that("the TDI bootstrap interval is reproducible and follows the seed", {
+  set.seed(2)
+  d <- data.frame(a = rnorm(60, 10, 2)); d$b <- d$a + rnorm(60, 0, 1)
+  t1 <- agreement(data = d, vars = c("a", "b"), tdi = TRUE, nBoot = 200)$tdiTable$asDF
+  t2 <- agreement(data = d, vars = c("a", "b"), tdi = TRUE, nBoot = 200)$tdiTable$asDF
+  t3 <- agreement(data = d, vars = c("a", "b"), tdi = TRUE, nBoot = 200, seed = 7)$tdiTable$asDF
+  expect_equal(t1$ci_lower, t2$ci_lower)                    # was: unseeded, different every run
+  expect_false(isTRUE(all.equal(t1$ci_lower, t3$ci_lower)))
+})
+
+test_that("the paired comparison interval follows confLevel", {
+  d <- agr_fixture()
+  d$s1 <- d$r1; d$s2 <- factor(ifelse(runif(nrow(d)) < 0.6, as.character(d$r1), sample(levels(d$r1), nrow(d), TRUE)), levels = levels(d$r1))
+  w95 <- agreement(data = d, vars = c("r1", "r2"), pairedAgreementTest = TRUE, conditionBVars = c("s1", "s2"),
+                   pairedBootN = 500)$pairedAgreementTable$asDF
+  w80 <- agreement(data = d, vars = c("r1", "r2"), pairedAgreementTest = TRUE, conditionBVars = c("s1", "s2"),
+                   pairedBootN = 500, confLevel = 0.80)$pairedAgreementTable$asDF
+  expect_lt(w80$ci_upper[1] - w80$ci_lower[1], w95$ci_upper[1] - w95$ci_lower[1])   # was: hard-coded 0.025/0.975
+})
+
+test_that("the bootstrap ICC row is labelled with the chosen ICC model", {
+  set.seed(5)
+  d <- data.frame(a = rnorm(40, 10, 2)); d$b <- d$a + rnorm(40, 0, 1)
+  tb <- agreement(data = d, vars = c("a", "b"), bootstrapCI = TRUE, nBoot = 100, iccType = "icc31")$bootstrapCITable$asDF
+  expect_true("ICC(3,1)" %in% tb$metric)                     # was: fixed "ICC (two-way, agreement)"
+})
+
+test_that("weighted kappa on nominal data is a structured error, not an NA row", {
+  d <- agr_fixture()
+  d$r1 <- factor(as.character(d$r1)); d$r2 <- factor(as.character(d$r2))   # unordered
+  expect_error(agreement(data = d, vars = c("r1", "r2"), wght = "equal"), "Weighted kappa requires ordinal")
+})
+
+test_that("small samples and sparse discordant cells are flagged on the tables they affect", {
+  d <- agr_fixture(n = 20)
+  res <- agreement(data = d, vars = c("r1", "r2"), bhapkar = TRUE)
+  expect_match(agr_note(res$irrtable, "small_sample"), "Only 20 complete cases", fixed = TRUE)
+  # a 3x3 table whose off-diagonal cells are all 1-3 (sparse) but non-zero (Bhapkar stays estimable)
+  cnt <- matrix(c(12, 2, 1,  3, 10, 2,  1, 2, 9), 3, byrow = TRUE, dimnames = list(c("a", "b", "c"), c("a", "b", "c")))
+  idx <- which(cnt > 0, arr.ind = TRUE)
+  d2 <- data.frame(r1 = factor(rep(rownames(cnt)[idx[, 1]], cnt[idx])), r2 = factor(rep(colnames(cnt)[idx[, 2]], cnt[idx])))
+  res2 <- agreement(data = d2, vars = c("r1", "r2"), bhapkar = TRUE)
+  expect_match(agr_note(res2$bhapkarTable, "sparse"), "smallest off-diagonal count is 1", fixed = TRUE)
+  expect_false(is.na(res2$bhapkarTable$asDF$chisq[1]))
 })

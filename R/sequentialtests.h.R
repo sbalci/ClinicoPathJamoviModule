@@ -379,7 +379,9 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test2_spec",
                     "test1_cost",
                     "test2_cost",
-                    "population_size"),
+                    "population_size",
+                    "test1_name",
+                    "test2_name"),
                 columns=list(
                     list(
                         `name`="item", 

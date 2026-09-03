@@ -35,6 +35,8 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - imbalanceThreshold
+                - recommendPRC
             rows: 1
             columns:
                 - name: n_positive
@@ -135,6 +137,10 @@ items:
                 - direction
                 - confidenceLevel
                 - useBootstrap
+                - bootstrapMethod
+                - bootstrapSamples
+                - stratifiedBootstrap
+                - seed
 
             columns:
                 - name: predictor
@@ -286,6 +292,10 @@ items:
                 - predictors
                 - positiveClass
                 - direction
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
 
             columns:
                 - name: predictor
@@ -327,6 +337,10 @@ items:
                 - positiveClass
                 - direction
                 - customCutoffs
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
 
             columns:
                 - name: predictor
@@ -379,6 +393,10 @@ items:
                 - predictors
                 - positiveClass
                 - direction
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
 
             columns:
                 - name: predictor
@@ -424,6 +442,10 @@ items:
                 - direction
                 - useObservedPrevalence
                 - prevalence
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
 
             columns:
                 - name: predictor
@@ -701,6 +723,10 @@ items:
                 - positiveClass
                 - plotWidth
                 - plotHeight
+                - youdenOptimization
+                - sensitivityThreshold
+                - specificityThreshold
+                - clinicalPresets
             width: 600
             height: 600
 
@@ -766,6 +792,8 @@ items:
                 - hlGroups
                 - splineCalibration
                 - splineKnots
+                - brierScore
+                - calibrationMetrics
             columns:
                 - name: predictor
                   title: 'Predictor'
@@ -981,6 +1009,7 @@ items:
                   title: 'NND'
                   type: number
                   format: zto
+                  visible: (nntCalculation)
                 - name: tested_positive
                   title: 'Tested Positive (%)'
                   type: number
