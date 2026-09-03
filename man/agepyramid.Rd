@@ -14,6 +14,8 @@ agepyramid(
   age_interval = "left",
   bin_width = 5,
   custom_breaks = "",
+  pct_base = "within_gender",
+  plot_values = "count",
   plot_title = "Age Pyramid",
   color_palette = "standard",
   female_color = "#E91E63",
@@ -82,6 +84,19 @@ filled in these override bin_width; leave empty to use bin_width. Entries
 that are not numbers are reported in a note and left out, and the top band
 is always open-ended.}
 
+\item{pct_base}{Denominator of the percentage columns and of the percent
+axis of the plots. 'within_gender' divides each band by the number of that
+gender, so the Female and Male columns each sum to 100 and the two sides
+compare the shape of the two age distributions. 'total' divides every band
+by the number of analysed observations, so both columns together sum to 100
+and the sides also reflect how many of each gender there are; the Total row
+then shows each gender's share.}
+
+\item{plot_values}{Whether the bars of the pyramid show counts or the
+percentages defined by pct_base. Percentages make the two sides comparable
+when the genders are unequal in number. Applies to both the main and the
+ggcharts pyramid.}
+
 \item{plot_title}{The title displayed on the age pyramid plot.}
 
 \item{color_palette}{Color palette for gender visualization. Choose
@@ -136,4 +151,19 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 Generates an age pyramid from an age variable and a gender variable.
+}
+\examples{
+\donttest{
+# `female` and `male` are Level options: jamovi forbids a default on
+# them, so they are REQUIRED arguments of this function. Pass NULL to
+# have the levels read from their names.
+agepyramid(
+    data = histopathology,
+    age = "Age",
+    gender = "Sex",
+    female = "Female",
+    male = "Male",
+    age_groups = "who"
+)
+}
 }

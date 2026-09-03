@@ -1412,8 +1412,8 @@
         `url`="https://CRAN.R-project.org/package=tidyr"), 
     `ggcharts`=list(
         `type`="software", 
-        `author`="", 
-        `year`="", 
+        `author`="Thomas Neitmann", 
+        `year`=2020, 
         `title`="ggcharts: R package", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=ggcharts", 
         `url`="https://CRAN.R-project.org/package=ggcharts"), 

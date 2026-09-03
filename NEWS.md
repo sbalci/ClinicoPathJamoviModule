@@ -2,6 +2,24 @@
 
 ## Unreleased — meddecide audit fixes (module 1.0.8.10)
 
+- `agepyramid`: `/check-function` pass. The Population Data table no longer doubles
+  its rows when an option outside its `clearWith` (plot title, colours, theme) is
+  changed; a gender variable literally named `Age` is no longer overwritten by the
+  numeric ages before it is read (every row was dropped as "unrecognised gender");
+  the ggcharts plot now cites the `ggcharts` reference. Unusable ages (negative,
+  infinite or non-numeric) now raise a warning naming the column instead of appearing
+  only in the Data Summary. With a fixed bin width the top band is labelled by its
+  width ("70-74") like every other band, not by the oldest patient ("70-73"). The R
+  usage example is restored and the comprehensive vignette replaced with a working
+  one. New options: **Percentage base** (`pct_base`: within each gender, the default,
+  or of all observations so both columns together sum to 100%) and **Bar values**
+  (`plot_values`: counts or percentages on both pyramids). A rejected run no longer
+  leaves earlier notes beside the error. Every user-visible backend string is now
+  wrapped for translation and the Turkish catalog carries all agepyramid strings.
+  Routed to `ExplorationT` for JamoviTest.
+- Vignettes: the 11 remaining `explorationt-*-comprehensive.Rmd` scaffolds now load
+  `ClinicoPath` and an existing dataset; their example calls still need the required
+  variable arguments filled in.
 - `outlierdetection`: release review. Restored the R usage example, removed unused
   roxygen imports and an unreachable branch in the method-comparison table; no change
   in behaviour. Differential runs confirmed all 17 options effective and the robust

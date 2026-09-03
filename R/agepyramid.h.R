@@ -14,6 +14,8 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             age_interval = "left",
             bin_width = 5,
             custom_breaks = "",
+            pct_base = "within_gender",
+            plot_values = "count",
             plot_title = "Age Pyramid",
             color_palette = "standard",
             female_color = "#E91E63",
@@ -87,6 +89,20 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "custom_breaks",
                 custom_breaks,
                 default="")
+            private$..pct_base <- jmvcore::OptionList$new(
+                "pct_base",
+                pct_base,
+                options=list(
+                    "within_gender",
+                    "total"),
+                default="within_gender")
+            private$..plot_values <- jmvcore::OptionList$new(
+                "plot_values",
+                plot_values,
+                options=list(
+                    "count",
+                    "percent"),
+                default="count")
             private$..plot_title <- jmvcore::OptionString$new(
                 "plot_title",
                 plot_title,
@@ -159,6 +175,8 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..age_interval)
             self$.addOption(private$..bin_width)
             self$.addOption(private$..custom_breaks)
+            self$.addOption(private$..pct_base)
+            self$.addOption(private$..plot_values)
             self$.addOption(private$..plot_title)
             self$.addOption(private$..color_palette)
             self$.addOption(private$..female_color)
@@ -181,6 +199,8 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         age_interval = function() private$..age_interval$value,
         bin_width = function() private$..bin_width$value,
         custom_breaks = function() private$..custom_breaks$value,
+        pct_base = function() private$..pct_base$value,
+        plot_values = function() private$..plot_values$value,
         plot_title = function() private$..plot_title$value,
         color_palette = function() private$..color_palette$value,
         female_color = function() private$..female_color$value,
@@ -202,6 +222,8 @@ agepyramidOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..age_interval = NA,
         ..bin_width = NA,
         ..custom_breaks = NA,
+        ..pct_base = NA,
+        ..plot_values = NA,
         ..plot_title = NA,
         ..color_palette = NA,
         ..female_color = NA,
@@ -301,7 +323,8 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "age_groups",
                     "age_interval",
                     "bin_width",
-                    "custom_breaks")))
+                    "custom_breaks",
+                    "pct_base")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -318,6 +341,8 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "age_interval",
                     "bin_width",
                     "custom_breaks",
+                    "pct_base",
+                    "plot_values",
                     "plot_title",
                     "color_palette",
                     "female_color",
@@ -331,6 +356,8 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".plotGGCharts",
                 visible="(enableGGCharts)",
+                refs=list(
+                    "ggcharts"),
                 clearWith=list(
                     "age",
                     "gender",
@@ -340,6 +367,8 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "age_interval",
                     "bin_width",
                     "custom_breaks",
+                    "pct_base",
+                    "plot_values",
                     "ggcharts_sort",
                     "ggcharts_colors",
                     "ggcharts_color1",
@@ -355,7 +384,7 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agepyramid",
-                version = c(1,0,8),
+                version = c(1,0,9),
                 options = options,
                 results = agepyramidResults$new(options=options),
                 data = data,
@@ -372,6 +401,21 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Generates an age pyramid from an age variable and a gender variable.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' # `female` and `male` are Level options: jamovi forbids a default on
+#' # them, so they are REQUIRED arguments of this function. Pass NULL to
+#' # have the levels read from their names.
+#' agepyramid(
+#'     data = histopathology,
+#'     age = "Age",
+#'     gender = "Sex",
+#'     female = "Female",
+#'     male = "Male",
+#'     age_groups = "who"
+#' )
+#'}
 #' @param data The data as a data frame.
 #' @param age a string naming the variable from \code{data} that contains the
 #'   continuous values used for the report
@@ -412,6 +456,17 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   filled in these override bin_width; leave empty to use bin_width. Entries
 #'   that are not numbers are reported in a note and left out, and the top band
 #'   is always open-ended.
+#' @param pct_base Denominator of the percentage columns and of the percent
+#'   axis of the plots. 'within_gender' divides each band by the number of that
+#'   gender, so the Female and Male columns each sum to 100 and the two sides
+#'   compare the shape of the two age distributions. 'total' divides every band
+#'   by the number of analysed observations, so both columns together sum to 100
+#'   and the sides also reflect how many of each gender there are; the Total row
+#'   then shows each gender's share.
+#' @param plot_values Whether the bars of the pyramid show counts or the
+#'   percentages defined by pct_base. Percentages make the two sides comparable
+#'   when the genders are unequal in number. Applies to both the main and the
+#'   ggcharts pyramid.
 #' @param plot_title The title displayed on the age pyramid plot.
 #' @param color_palette Color palette for gender visualization. Choose
 #'   'custom' to specify your own colors.
@@ -462,6 +517,8 @@ agepyramid <- function(
     age_interval = "left",
     bin_width = 5,
     custom_breaks = "",
+    pct_base = "within_gender",
+    plot_values = "count",
     plot_title = "Age Pyramid",
     color_palette = "standard",
     female_color = "#E91E63",
@@ -497,6 +554,8 @@ agepyramid <- function(
         age_interval = age_interval,
         bin_width = bin_width,
         custom_breaks = custom_breaks,
+        pct_base = pct_base,
+        plot_values = plot_values,
         plot_title = plot_title,
         color_palette = color_palette,
         female_color = female_color,

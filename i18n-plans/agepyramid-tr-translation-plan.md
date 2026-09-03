@@ -1,92 +1,87 @@
 # Internationalization (i18n) Translation Plan: agepyramid → Turkish (TR)
 
-## 0) Argument Normalization
+Updated 2026-09-03 after the `/prepare-translation` pass. This replaces an earlier
+plan that wrongly reported the backend as already wrapped.
 
-**SANITIZED_FN**: `agepyramid`
+## 0) Files
 
-**Target files analysis**:
-- ✅ `jamovi/agepyramid.a.yaml` (options)
-- ✅ `jamovi/agepyramid.u.yaml` (UI)
-- ✅ `jamovi/agepyramid.r.yaml` (results)
-- ✅ `R/agepyramid.b.R` (backend)
+- `jamovi/agepyramid.a.yaml`, `jamovi/agepyramid.u.yaml`, `jamovi/agepyramid.r.yaml`
+  (strings auto-extracted)
+- `R/agepyramid.b.R` (111 `.()` wraps, 110 unique msgids)
 
-All required files are verified and present in the package codebase.
+## 1) NAMESPACE
 
----
+`import(jmvcore)` is present, so `.()` resolves. No change needed.
 
-## 1) NAMESPACE i18n Hook Status
+## 2) What was wrapped in `R/agepyramid.b.R`
 
-✅ **ALREADY CONFIGURED**: `NAMESPACE` contains `import(jmvcore)` and `importFrom(jmvcore, .)`, enabling runtime internationalization and extraction.
+- Notice prefixes (`ERROR`, `WARNING`, `NOTE`) and all 19 notice titles and bodies.
+  Bodies are single complete sentences with `{}` placeholders filled through
+  `jmvcore::format()`; the two notices that used to splice "female"/"male" into one
+  sentence are now two complete alternatives.
+- The four `reject()` messages.
+- The welcome panel: HTML structure stays outside `.()`, each phrase is wrapped and
+  HTML-escaped on the way in.
+- The Data Summary panel labels and the "Single-gender ({level})" cohort line.
+- Table note (both percentage bases), plot axis titles, legend labels, default titles,
+  and the ggcharts fallback text (one `.()` per sentence, wrapped with `strwrap`).
+- Preset names used inside the right-closure note.
 
----
+Placeholder rules followed: camelCase names only (`{maxAge}`, `{nBands}`) because
+`jmvcore::format()` ignores underscored placeholders; no placeholder named `s`/`st`
+(partial-matches the `str` formal); no `.()` string ends in `]` (treated as msgctxt).
 
-## 2) Translatable String Analysis
-
-### 2.1 Current State Assessment
-- ✅ All user-visible strings in `R/agepyramid.b.R` and YAML definitions are wrapped in `.(...)` or declared in schemas.
-- ✅ Error notices, warning banners, and clinical interpretations use proper placeholder tokens `{var}`, `{n}`, etc.
-- ✅ Programmatic identifiers, column keys, formulas, and factor codes remain un-wrapped.
-
----
-
-## 3) Extraction & Update Commands
+## 3) Catalog update (done)
 
 ```r
-# In R console at package root:
-jmvtools::i18nCreate("en")
-jmvtools::i18nUpdate("en")
-jmvtools::i18nCreate("tr")
-jmvtools::i18nUpdate("tr")
+jmvtools::i18nUpdate("en"); jmvtools::i18nUpdate("tr")
 ```
 
----
-
-## 4) Turkish Translation Dictionary
-
-| English (msgid) | Suggested Turkish (TR) | Context / Notes |
-| :--- | :--- | :--- |
-| `Age Pyramid` | `Yaş Piramidi` | Başlık |
-| `Age` | `Age` | Seçenek başlığı |
-| `Gender` | `Gender` | Seçenek başlığı |
-| `Female level` | `Female level` | Seçenek başlığı |
-| `Male level` | `Male level` | Seçenek başlığı |
-| `Age group preset` | `Age group preset` | Seçenek başlığı |
-| `Age band boundaries` | `Age band boundaries` | Seçenek başlığı |
-| `Bin width (years)` | `Bin width (years)` | Seçenek başlığı |
-| `Custom age breaks` | `Custom age breaks` | Seçenek başlığı |
-| `Plot title` | `Plot title` | Seçenek başlığı |
-| `Color palette` | `Color palette` | Seçenek başlığı |
-| `Female color` | `Female color` | Seçenek başlığı |
-| `Male color` | `Male color` | Seçenek başlığı |
-| `Original custom theme` | `Original custom theme` | Seçenek başlığı |
-| `ggcharts pyramid` | `ggcharts pyramid` | Seçenek başlığı |
-| `Bar order` | `Bar order` | Seçenek başlığı |
-| `Bar colors` | `Bar colors` | Seçenek başlığı |
-| `First group color` | `First group color` | Seçenek başlığı |
-| `Second group color` | `Second group color` | Seçenek başlığı |
-| `ggcharts plot title` | `ggcharts plot title` | Seçenek başlığı |
-
----
-
-## 5) Consistency & Glossary (TR)
-
-```text
-Confidence Interval (CI) → Güven Aralığı (GA)
-Hazard Ratio (HR) → Tehlike Oranı (TO)
-Odds Ratio (OR) → Odds Oranı (OO)
-Sensitivity / Specificity → Duyarlılık / Özgüllük
-p-value → p-değeri
-Sample size (n) → Örneklem büyüklüğü (n)
-Median / Mean → Medyan / Ortalama
-Survival probability → Sağkalım olasılığı
+```bash
+msgfmt -c jamovi/i18n/tr.po      # 1724 translated, 0 errors
+cp jamovi/i18n/en.po jamovi/i18n/catalog.pot   # header set to "Language: c"
 ```
 
----
+Note: `jmvtools::i18nUpdate()` wraps long msgids over several `"..."` lines. A fill
+script must join the pieces before matching on msgid text.
 
-## 6) QA Checklist
+## 4) Turkish translations (filled in `jamovi/i18n/tr.po`)
 
-- [x] User-facing strings in `R/agepyramid.b.R` properly wrapped in `.(...)`.
-- [x] Schema files (`.a.yaml`, `.u.yaml`, `.r.yaml`) synchronized with backend.
-- [x] Turkish terminology conforms to clinical and statistical guidelines.
-- [x] Catalogs updated via `jmvtools::i18nUpdate()`.
+All 158 agepyramid msgids (backend + YAML) carry a Turkish msgstr. Key terms:
 
+| English | Turkish |
+| --- | --- |
+| Age Pyramid | Yaş Piramidi |
+| Female / Male | Kadın / Erkek |
+| Female level / Male level | Kadın düzeyi / Erkek düzeyi |
+| Age group preset | Hazır yaş grubu |
+| Age band boundaries; left-closed / right-closed | Yaş aralığı sınırları; sol-kapalı / sağ-kapalı |
+| Bin width (years) | Aralık genişliği (yıl) |
+| Custom age breaks | Özel yaş sınırları |
+| Percentage base: within each gender / of all observations | Yüzde tabanı: her cinsiyet içinde / tüm gözlemlere göre |
+| Bar values: counts / percentages | Çubuk değerleri: sayılar / yüzdeler |
+| WHO/UN standard; WHO abridged | DSÖ/BM standart; DSÖ kısaltılmış |
+| Pediatric / Reproductive / Geriatric / Life course | Pediatrik / Üreme çağı / Geriatrik / Yaşam evreleri |
+| Population Data; Population Count | Nüfus Verisi; Kişi Sayısı |
+| Data Summary; Excluded | Veri Özeti; Dışarıda bırakılan |
+| observation(s) | gözlem |
+| band | aralık |
+
+Style: plain clinical Turkish, second person formal ("kontrol edin"), percentages
+written `%{pct}` (Turkish places the sign before the number), decimal comma in fixed
+text (14,6 yaş), placeholders untouched.
+
+## 5) QA
+
+- [x] All user-visible backend strings wrapped (grep for unwrapped quoted phrases is clean)
+- [x] No `.()` with leading/trailing space, `\n`, or a trailing `]`
+- [x] Placeholders identical between msgid and msgstr (checked by the fill script)
+- [x] `msgfmt -c` passes for en.po, tr.po, catalog.pot
+- [x] No `msgctxt` generated for agepyramid strings
+- [x] Rendered outputs (sourced backend) show filled placeholders, no literal braces
+- [ ] Open in jamovi with language set to Turkish and read every panel
+
+## 6) Weblate
+
+The module-level `catalog.pot` is refreshed; push it to the `<module>-i18n` repo per
+the module's existing Weblate setup.

@@ -29,14 +29,15 @@ The **`dataquality`** analysis (Multi-Variable Visual Quality) provides clinicop
 # Example Workflow in R
 
 ```r
-library(ClinicoPathJamoviModule)
+library(ClinicoPath)
 
 # Load package test dataset
-data("dataquality_test_data", package = "ClinicoPathJamoviModule", envir = environment())
+data("dataquality_test", package = "ClinicoPath", envir = environment())
 
-# Run analysis with default settings
-# ClinicoPathJamoviModule::dataquality(
-#   data = dataquality_test_data
+# Run analysis with default settings (add the required variable arguments
+# for this analysis; see ?dataquality)
+# ClinicoPath::dataquality(
+#   data = dataquality_test
 # )
 ```
 

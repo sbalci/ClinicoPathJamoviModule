@@ -443,7 +443,7 @@ test_that("agepyramid output is correct and stable", {
   # Check that the plot is a simple bar chart (not a pyramid)
   # We can't directly test the plot object, but we can check the plot's state
   plot_state_data <- result_single_gender$plot$state
-  expect_equal(ncol(plot_state_data), 3) # Should have Pop, Gender, n
+  expect_true(setequal(names(plot_state_data), c("Gender", "Pop", "n", "pct"))) # count and per-band percentage
   expect_equal(as.character(unique(plot_state_data$Gender)), "Female")
   
   # 4. Test correctness of age bin labels
@@ -715,16 +715,16 @@ test_that("REGRESSION: ggcharts gender mapping is deterministic", {
   # unique(Gender) is deterministic and Female always takes the first side
   expect_equal(nrow(ggcharts_state), 4L)
   expect_equal(unique(ggcharts_state$Gender), c("Female", "Male"))
-  # bin_width 5 over ages 1..6 gives breaks 0, 5, 6; left-closed bands are
-  # [0,5) -> "0-4" and the final [5,6] -> "5-6" (closed at the top by
-  # include.lowest so the oldest observation is kept).
-  expect_equal(as.character(ggcharts_state$Pop), rep(c("0-4", "5-6"), 2))
+  # bin_width 5 over ages 1..6 gives breaks 0, 5, Inf; left-closed bands are
+  # [0,5) -> "0-4" and the open-ended top band [5, Inf) -> "5-9", labelled by
+  # the bin width like every other band (it holds only the 6-year-olds).
+  expect_equal(as.character(ggcharts_state$Pop), rep(c("0-4", "5-9"), 2))
 
   female_young <- ggcharts_state$n[
     ggcharts_state$Gender == "Female" & as.character(ggcharts_state$Pop) == "0-4"
   ]
   male_older <- ggcharts_state$n[
-    ggcharts_state$Gender == "Male" & as.character(ggcharts_state$Pop) == "5-6"
+    ggcharts_state$Gender == "Male" & as.character(ggcharts_state$Pop) == "5-9"
   ]
 
   expect_equal(female_young, 0L)

@@ -26,10 +26,12 @@
 | `gender` | `Variable` | `NULL` | Gender |
 | `female` | `Level` | `NULL` | Female level |
 | `male` | `Level` | `NULL` | Male level |
-| `age_groups` | `List` | `custom` | Age group preset |
+| `age_groups` | `List` | `custom` | Age group preset: `custom` (bin width or custom breaks), `who` (0-4, 5-9, ... 85+), `who_infant` (<1, 1-4, 5-9, ... 85+), `pediatric`, `reproductive`, `geriatric`, `lifecourse` |
 | `age_interval` | `List` | `left` | Age band boundaries |
 | `bin_width` | `Number` | `5` | Bin width (years) |
 | `custom_breaks` | `String` | `` | Custom age breaks |
+| `pct_base` | `List` | `within_gender` | Percentage base: within each gender (each column sums to 100%) or of all observations (both columns together sum to 100%); also drives the percent axis of the plots |
+| `plot_values` | `List` | `count` | Bar values: counts or percentages (using the percentage base) on both pyramids |
 | `plot_title` | `String` | `Age Pyramid` | Plot title |
 | `color_palette` | `List` | `standard` | Color palette |
 | `female_color` | `String` | `#E91E63` | Female color |

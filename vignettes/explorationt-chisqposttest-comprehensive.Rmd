@@ -29,13 +29,14 @@ The **`chisqposttest`** analysis (Chi-Square Post-Hoc Tests) provides clinicopat
 # Example Workflow in R
 
 ```r
-library(ClinicoPathJamoviModule)
+library(ClinicoPath)
 
 # Load package test dataset
-data("chisqposttest_test_data", package = "ClinicoPathJamoviModule", envir = environment())
+data("chisqposttest_test_data", package = "ClinicoPath", envir = environment())
 
-# Run analysis with default settings
-# ClinicoPathJamoviModule::chisqposttest(
+# Run analysis with default settings (add the required variable arguments
+# for this analysis; see ?chisqposttest)
+# ClinicoPath::chisqposttest(
 #   data = chisqposttest_test_data
 # )
 ```

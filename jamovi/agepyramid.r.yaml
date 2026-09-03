@@ -72,8 +72,7 @@ items:
           - age_interval
           - bin_width
           - custom_breaks
-
-
+          - pct_base
 
     - name: plot
       title: 'Age Pyramid'
@@ -90,6 +89,8 @@ items:
           - age_interval
           - bin_width
           - custom_breaks
+          - pct_base
+          - plot_values
           - plot_title
           - color_palette
           - female_color
@@ -103,6 +104,7 @@ items:
       height: 500
       renderFun: .plotGGCharts
       visible: (enableGGCharts)
+      refs: [ggcharts]
       clearWith:
           - age
           - gender
@@ -112,6 +114,8 @@ items:
           - age_interval
           - bin_width
           - custom_breaks
+          - pct_base
+          - plot_values
           - ggcharts_sort
           - ggcharts_colors
           - ggcharts_color1

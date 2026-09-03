@@ -4,7 +4,7 @@
       result$pyramidTable$asDF
     Output
           Pop Female Male Female_Pct Male_Pct
-      1 70-73     10    7        8.3      5.5
+      1 70-79     10    7        8.3      5.5
       2 60-69     34   21       28.3     16.4
       3 50-59     23   28       19.2     21.9
       4 40-49     23   29       19.2     22.7

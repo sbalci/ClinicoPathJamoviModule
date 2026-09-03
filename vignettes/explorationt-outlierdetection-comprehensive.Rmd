@@ -29,13 +29,14 @@ The **`outlierdetection`** analysis (Outlier Detection) provides clinicopatholog
 # Example Workflow in R
 
 ```r
-library(ClinicoPathJamoviModule)
+library(ClinicoPath)
 
 # Load package test dataset
-data("outlierdetection_test_data", package = "ClinicoPathJamoviModule", envir = environment())
+data("outlierdetection_test_data", package = "ClinicoPath", envir = environment())
 
-# Run analysis with default settings
-# ClinicoPathJamoviModule::outlierdetection(
+# Run analysis with default settings (add the required variable arguments
+# for this analysis; see ?outlierdetection)
+# ClinicoPath::outlierdetection(
 #   data = outlierdetection_test_data
 # )
 ```

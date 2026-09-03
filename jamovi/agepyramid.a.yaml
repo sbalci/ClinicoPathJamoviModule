@@ -9,20 +9,20 @@ jas: '1.2'
 description:
     main: >
         Generates an age pyramid from an age variable and a gender variable.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # `female` and `male` are Level options: jamovi forbids a default on
-    #         # them, so they are REQUIRED arguments of this function. Pass NULL to
-    #         # have the levels read from their names.
-    #         agepyramid(
-    #             data = histopathology,
-    #             age = "Age",
-    #             gender = "Sex",
-    #             female = "Female",
-    #             male = "Male",
-    #             age_groups = "who"
-    #         )
+    R:
+        dontrun: true
+        usage: |
+            # `female` and `male` are Level options: jamovi forbids a default on
+            # them, so they are REQUIRED arguments of this function. Pass NULL to
+            # have the levels read from their names.
+            agepyramid(
+                data = histopathology,
+                age = "Age",
+                gender = "Sex",
+                female = "Female",
+                male = "Male",
+                age_groups = "who"
+            )
 
 options:
     - name: data
@@ -178,6 +178,44 @@ options:
           jamovi: >
             Comma-separated age break points (e.g., 0,18,25,50,65,100).
             When filled in, these override the bin width.
+
+    - name: pct_base
+      title: Percentage base
+      type: List
+      options:
+        - name: within_gender
+          title: Within each gender (each column sums to 100%)
+        - name: total
+          title: Of all observations (both columns together sum to 100%)
+      default: within_gender
+      description:
+          R: >
+            Denominator of the percentage columns and of the percent axis of the plots.
+            'within_gender' divides each band by the number of that gender, so the Female
+            and Male columns each sum to 100 and the two sides compare the shape of the
+            two age distributions. 'total' divides every band by the number of analysed
+            observations, so both columns together sum to 100 and the sides also reflect
+            how many of each gender there are; the Total row then shows each gender's share.
+          jamovi: >
+            Denominator of the percentages: within each gender (each column sums to 100%)
+            or of all analysed observations (both columns together sum to 100%).
+
+    - name: plot_values
+      title: Bar values
+      type: List
+      options:
+        - name: count
+          title: Counts
+        - name: percent
+          title: Percentages (using the percentage base)
+      default: count
+      description:
+          R: >
+            Whether the bars of the pyramid show counts or the percentages defined by
+            pct_base. Percentages make the two sides comparable when the genders are
+            unequal in number. Applies to both the main and the ggcharts pyramid.
+          jamovi: >
+            Show counts or percentages on the bars of both pyramids.
 
     - name: plot_title
       title: Plot title

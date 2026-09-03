@@ -29,14 +29,15 @@ The **`reportcat`** analysis (Summary of Categorical Variables) provides clinico
 # Example Workflow in R
 
 ```r
-library(ClinicoPathJamoviModule)
+library(ClinicoPath)
 
 # Load package test dataset
-data("reportcat_test_data", package = "ClinicoPathJamoviModule", envir = environment())
+data("reportcat_test", package = "ClinicoPath", envir = environment())
 
-# Run analysis with default settings
-# ClinicoPathJamoviModule::reportcat(
-#   data = reportcat_test_data
+# Run analysis with default settings (add the required variable arguments
+# for this analysis; see ?reportcat)
+# ClinicoPath::reportcat(
+#   data = reportcat_test
 # )
 ```
 

@@ -52,6 +52,16 @@ children:
     margin: large
     children:
       - type: Label
+        label: Percentages
+        children:
+          - type: ComboBox
+            name: pct_base
+          - type: ComboBox
+            name: plot_values
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: Label
         label: Plot Options
         children:
           - type: TextBox

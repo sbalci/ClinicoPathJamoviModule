@@ -29,14 +29,15 @@ The **`venn`** analysis (Venn Diagram) provides clinicopathological researchers 
 # Example Workflow in R
 
 ```r
-library(ClinicoPathJamoviModule)
+library(ClinicoPath)
 
 # Load package test dataset
-data("venn_test_data", package = "ClinicoPathJamoviModule", envir = environment())
+data("venn_test", package = "ClinicoPath", envir = environment())
 
-# Run analysis with default settings
-# ClinicoPathJamoviModule::venn(
-#   data = venn_test_data
+# Run analysis with default settings (add the required variable arguments
+# for this analysis; see ?venn)
+# ClinicoPath::venn(
+#   data = venn_test
 # )
 ```
 

@@ -328,3 +328,103 @@ test_that("selecting right-closed does not disturb the WHO preset labels", {
   expect_equal(L_right[length(L_right)], "86+")
   expect_false(identical(L_left, L_right))
 })
+
+# ---- /check-function pass (2026-09-03) ---------------------------------------
+
+.ap_obj <- function(name) {
+  if (exists(name, inherits = TRUE)) return(get(name))
+  utils::getFromNamespace(name, "ClinicoPath")
+}
+
+test_that("re-running with the table rows still in place does not duplicate them", {
+  # A change to plot_title or a colour re-runs .run() WITHOUT clearing the
+  # Population Data table (neither is in its clearWith), and addRow() never
+  # checks for an existing rowKey, so every such change doubled the table.
+  d <- data.frame(age = rep(0:19, each = 2), gender = rep(c("Female", "Male"), 20))
+  o <- .ap_obj("agepyramidOptions")$new(age = "age", gender = "gender",
+                                        female = NULL, male = NULL, bin_width = 5)
+  a <- .ap_obj("agepyramidClass")$new(options = o, data = d)
+  priv <- a$.__enclos_env__$private
+  priv$.run()
+  n1 <- a$results$pyramidTable$rowCount
+  priv$.run()
+  n2 <- a$results$pyramidTable$rowCount
+  expect_equal(n1, 5L)   # four bands + Total
+  expect_equal(n2, n1)
+})
+
+test_that("a gender variable named 'Age' is read before the working Age column overwrites it", {
+  # mydata[["Age"]] <- age_values ran before mydata[[gender]] was read, so a
+  # gender column literally called "Age" was replaced by the ages and every
+  # row was then dropped as "unrecognised gender".
+  d <- data.frame(Yrs = rep(0:19, each = 2), Age = rep(c("Female", "Male"), 20))
+  res <- agepyramid(data = d, age = "Yrs", gender = "Age",
+                    female = "Female", male = "Male")
+  tot <- res$pyramidTable$asDF
+  tot <- tot[tot$Pop == "Total", , drop = FALSE]
+  expect_equal(tot$Female, 20)
+  expect_equal(tot$Male, 20)
+})
+
+test_that("unusable ages raise a warning even when few rows are affected", {
+  # Negative ages were dropped with no notice unless the total exclusion
+  # crossed 20%; a negative age is always a data error.
+  d <- data.frame(age = c(-3, -1, rep(0:19, each = 2)), gender = rep(c("Female", "Male"), 21))
+  res <- ap(d, bin_width = 5)
+  expect_match(res$notices$content, "2 observation\\(s\\) had an age that is negative")
+  expect_equal(bands(res)$Female + bands(res)$Male, rep(10, 4))
+})
+
+test_that("the top bin-width band is labelled by its width, like the presets", {
+  # With ages up to 73 the top band [70, Inf) was labelled "70-73"; the WHO
+  # preset labels the same band "70-74". Label by width so the two agree.
+  d <- data.frame(age = rep(c(60, 66, 73), each = 2), gender = rep(c("Female", "Male"), 3))
+  labs <- as.character(bands(ap(d, bin_width = 5))$Pop)
+  expect_true("70-74" %in% labs, info = paste(labs, collapse = ","))
+  expect_false("70-73" %in% labs)
+  # fractional widths cannot name a whole-year top band: fall back to "lower+"
+  labs2 <- as.character(bands(ap(d, bin_width = 2.5))$Pop)
+  expect_true(any(grepl("\\+$", labs2)), info = paste(labs2, collapse = ","))
+})
+
+test_that("pct_base = 'total' gives gender shares that sum to 100 across both columns", {
+  d <- data.frame(age = rep(0:19, each = 3), gender = rep(c("Female", "Male", "Male"), 20))  # 20 F, 40 M
+  res <- ap(d, bin_width = 5, pct_base = "total")
+  tab <- res$pyramidTable$asDF
+  tot <- tab[tab$Pop == "Total", , drop = FALSE]
+  b <- bands(res)
+  expect_equal(tot$Female_Pct, 33.3)
+  expect_equal(tot$Male_Pct, 66.7)
+  expect_equal(sum(b$Female_Pct) + sum(b$Male_Pct), 100, tolerance = 0.2)
+  expect_match(res$pyramidTable$notes$pct$note, "of all 60 analysed observations")
+  # the default keeps each column at 100
+  res2 <- ap(d, bin_width = 5)
+  tot2 <- res2$pyramidTable$asDF
+  tot2 <- tot2[tot2$Pop == "Total", , drop = FALSE]
+  expect_equal(c(tot2$Female_Pct, tot2$Male_Pct), c(100, 100))
+})
+
+test_that("plot_values = 'percent' carries per-band percentages into both plot states and renders", {
+  d <- data.frame(age = rep(0:19, each = 3), gender = rep(c("Female", "Male", "Male"), 20))
+  o <- .ap_obj("agepyramidOptions")$new(age = "age", gender = "gender", female = NULL, male = NULL,
+                                        pct_base = "total", plot_values = "percent", enableGGCharts = TRUE)
+  a <- .ap_obj("agepyramidClass")$new(options = o, data = d)
+  priv <- a$.__enclos_env__$private
+  priv$.run()
+  st <- a$results$plot$state
+  expect_true("pct" %in% names(st))
+  expect_equal(sum(st$pct), 100)
+  expect_equal(sum(st$pct[st$Gender == "Female"]), 100 / 3, tolerance = 1e-6)
+  f <- tempfile(fileext = ".png"); grDevices::png(f)
+  ok <- priv$.plot(a$results$plot, ggtheme = ggplot2::theme_gray(), theme = list())
+  ok2 <- priv$.plotGGCharts(a$results$plotGGCharts, ggtheme = ggplot2::theme_gray(), theme = list())
+  grDevices::dev.off()
+  expect_true(ok); expect_true(ok2)
+  # within-gender base: each side sums to 100
+  o2 <- .ap_obj("agepyramidOptions")$new(age = "age", gender = "gender", female = NULL, male = NULL,
+                                         plot_values = "percent")
+  a2 <- .ap_obj("agepyramidClass")$new(options = o2, data = d)
+  a2$.__enclos_env__$private$.run()
+  st2 <- a2$results$plot$state
+  expect_equal(as.vector(tapply(st2$pct, st2$Gender, sum)), c(100, 100))
+})
