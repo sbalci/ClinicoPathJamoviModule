@@ -1,7 +1,7 @@
 ---
 name: summarydata
 title: Summary of Continuous Variables
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Descriptives
 version: '1.0.8'
 jas: '1.2'

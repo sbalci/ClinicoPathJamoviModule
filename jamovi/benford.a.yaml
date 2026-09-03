@@ -1,15 +1,8 @@
 ---
 name:  benford
 title: Benford Analysis
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
-# Analysis version, NOT the package version (DESCRIPTION is at 1.0.8.05).
-# Bumped from 1.0.7 because the user-visible output changed materially: every
-# translated result string moved to jmvcore::format placeholders, the Mantissa
-# Arc Test row gained a "not used by the Assessment" qualifier, the bin listing
-# gained the analysis-row-numbering caveat, and the duplicated small-sample
-# warning was removed. The umbrella copy and the shipped ClinicoPathDescriptives
-# copy must not both claim 1.0.7 while behaving differently.
 version: '1.0.8'
 jas: '1.2'
 

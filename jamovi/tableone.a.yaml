@@ -1,7 +1,7 @@
 ---
 name: tableone
 title: "Table One"
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: "ClinicoPath Descriptives"
 version: '1.0.9'
 jas: '1.2'
