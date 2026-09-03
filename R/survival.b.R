@@ -1704,7 +1704,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$showExplanations) {
                     median_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
-                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Median Survival by Groups</h4>
+                        <h4 style="margin-top: 0; color: inherit;">Understanding Median Survival by Groups</h4>
                         <p style="margin-bottom: 10px;">This analysis compares median survival times between different groups in your data:</p>
                         <ul style="margin-left: 20px;">
                             <li><strong>Median Survival:</strong> Time when 50% of patients in each group experienced the event</li>
@@ -2048,7 +2048,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$showExplanations) {
                     cox_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
-                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Cox Proportional Hazards Regression</h4>
+                        <h4 style="margin-top: 0; color: inherit;">Understanding Cox Proportional Hazards Regression</h4>
                         <p style="margin-bottom: 10px;">Cox regression models the relationship between explanatory variables and the hazard: the rate at which the event occurs among the patients still event-free at each moment.</p>
                         <ul style="margin-left: 20px;">
                             <li><strong>Hazard Ratio (HR):</strong> Ratio of instantaneous event rates versus the reference group (a relative rate, not a cumulative risk)</li>
@@ -2217,21 +2217,21 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Build HTML interpretation
                     html <- paste0(
                         "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
-                        "<h4 style='margin-top: 0; color: #2c3e50;'>Proportional Hazards Assessment</h4>"
+                        "<h4 style='margin-top: 0; color: inherit;'>Proportional Hazards Assessment</h4>"
                     )
 
                     # Status indicator
                     if (ph_violated) {
                         html <- paste0(html,
                             "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px; color: inherit;'>",
-                            "<strong style='color: #856404;'> WARNING: Proportional Hazards Assumption May Be Violated</strong><br/>",
+                            "<strong style='color: inherit;'> WARNING: Proportional Hazards Assumption May Be Violated</strong><br/>",
                             sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p < 0.05 suggests violation)</p>", p_value),
                             "</div>"
                         )
                     } else {
                         html <- paste0(html,
                             "<div style='background-color: rgba(33, 162, 64, 0.19); border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 4px; color: inherit;'>",
-                            "<strong style='color: #155724;'> No Evidence Against the Proportional Hazards Assumption</strong><br/>",
+                            "<strong style='color: inherit;'> No Evidence Against the Proportional Hazards Assumption</strong><br/>",
                             sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p \u2265 0.05)</p>", p_value),
                             "</div>"
                         )
@@ -2240,7 +2240,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # Educational content
                     html <- paste0(html,
                         "<div style='margin: 20px 0;'>",
-                        "<h5 style='color: #2c3e50; margin-bottom: 10px;'>Understanding the Test:</h5>",
+                        "<h5 style='color: inherit; margin-bottom: 10px;'>Understanding the Test:</h5>",
                         "<ul style='line-height: 1.8;'>",
                         "<li><strong>Null Hypothesis:</strong> The hazard ratio remains constant over time (PH assumption holds)</li>",
                         "<li><strong>Test Method:</strong> Schoenfeld residuals correlation with time</li>",
@@ -2253,7 +2253,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (ph_violated) {
                         html <- paste0(html,
                             "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-radius: 4px; margin: 15px 0; color: inherit;'>",
-                            "<h5 style='color: #0056b3; margin-top: 0;'> Recommended Solutions:</h5>",
+                            "<h5 style='color: inherit; margin-top: 0;'> Recommended Solutions:</h5>",
                             "<ol style='line-height: 1.8; margin: 10px 0;'>",
                             "<li><strong>Stratified Cox Model:</strong> Stratify by '", covariate_name, "' if it has few categories",
                             "<pre style='background-color: rgba(255, 255, 255, 0.06); padding: 10px; margin: 5px 0; border-left: 3px solid #0056b3; color: inherit;'>",
@@ -2275,7 +2275,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     } else {
                         html <- paste0(html,
                             "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-radius: 4px; margin: 15px 0; color: inherit;'>",
-                            "<h5 style='color: #2e7d32; margin-top: 0;'> Next Steps:</h5>",
+                            "<h5 style='color: inherit; margin-top: 0;'> Next Steps:</h5>",
                             "<p style='margin: 5px 0;'>The test did not detect a departure from proportional hazards. ",
                             "That is absence of evidence, not evidence of absence: a non-significant test is also ",
                             "what you see with few events or short follow-up. Inspect the Schoenfeld residual plot ",
@@ -3355,7 +3355,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$showExplanations) {
                     person_time_explanation_html <- '
                     <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 152, 255, 0.07); border-left: 4px solid #4169e1; color: inherit;">
-                        <h4 style="margin-top: 0; color: #2c3e50;">Understanding Person-Time Analysis</h4>
+                        <h4 style="margin-top: 0; color: inherit;">Understanding Person-Time Analysis</h4>
                         <p style="margin-bottom: 10px;">Person-time analysis calculates incidence rates by accounting for the total time each patient was at risk:</p>
                         <ul style="margin-left: 20px;">
                             <li><strong>Person-Time:</strong> Sum of individual follow-up periods for all patients in each group</li>

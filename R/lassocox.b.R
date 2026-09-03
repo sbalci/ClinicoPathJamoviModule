@@ -1892,7 +1892,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Interpretation guidance (always shown)
             html <- paste0(html,
-                "<div style='margin-top: 10px; font-size: 12px; color: #6c757d;'>",
+                "<div style='margin-top: 10px; font-size: 12px; color: inherit; opacity: 0.8;'>",
                 "<em>", .("This assessment is advisory and cannot establish model adequacy. The analysis proceeds regardless of the verdict. Green = no issue detected by this limited check, Gray = adequacy not determined by this diagnostic, Yellow = proceed with caution, Red = results may be highly unstable or misspecified."), "</em></div>"
             )
 

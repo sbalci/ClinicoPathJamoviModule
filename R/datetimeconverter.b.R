@@ -1144,7 +1144,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; overflow-x: auto; color: inherit;'>",
                 "<p><strong>Showing first ", n_show, " of ", length(original), " observations</strong></p>",
                 "<table style='width: 100%; border-collapse: collapse; font-size: 12px;'>",
-                "<thead><tr style='background-color: #6c757d; color: #ffffff;'>",
+                "<thead><tr style='background-color: rgba(108, 117, 125, 0.25); color: inherit;'>",
                 "<th style='padding: 6px; border: 1px solid #dee2e6;'>Row</th>",
                 "<th style='padding: 6px; border: 1px solid #dee2e6;'>Original Value</th>",
                 "<th style='padding: 6px; border: 1px solid #dee2e6;'>Converted DateTime</th>",
@@ -1216,7 +1216,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-radius: 8px; overflow-x: auto; color: inherit;'>",
                 "<p><strong>Showing first ", n_show, " of ", length(components[[1]]), " observations</strong></p>",
                 "<table style='width: 100%; border-collapse: collapse; font-size: 12px;'>",
-                "<thead><tr style='background-color: #6c757d; color: #ffffff;'>",
+                "<thead><tr style='background-color: rgba(108, 117, 125, 0.25); color: inherit;'>",
                 "<th style='padding: 6px; border: 1px solid #dee2e6;'>Row</th>"
             )
 
