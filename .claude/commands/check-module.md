@@ -102,6 +102,12 @@ options read through a constructed name (`self$options[[paste0("milestone", i, "
 options used only by `.r.yaml` `visible:` (`show_*` toggles on Html panels), and
 `private$asArgs` / `private$sourcifyOption` reported as phantom methods (jmvcore base
 class). Verify each candidate in the code before listing it as a finding.
+Also seen on the 2026-09-03 jsurvival pass: private methods defined in leading-comma style
+(`,.executeAnalysis = function()`) missed by a `^\s*\.name = function` regex; `Notice$new` hits
+that are commented out; `pkg::` hits inside strings/comments (oddsratio's inline epiR re-
+implementation); local lists named `results` matching `results$x`; and `warning()` calls in a
+file that collects them via `withCallingHandlers(... muffleWarning)` and renders them itself
+(lassocox) — those are the module's notice mechanism, not a gap.
 
 ## Check Profiles
 

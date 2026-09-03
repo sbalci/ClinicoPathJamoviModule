@@ -1750,7 +1750,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "krippMethod",
                     "bootstrap",
                     "nBoot",
-                    "confLevel")))
+                    "confLevel",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="krippExplanation",
@@ -1945,7 +1946,10 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Interpretation", 
                         `type`="text")),
                 clearWith=list(
-                    "vars")))
+                    "vars",
+                    "nBoot",
+                    "seed",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="robinsonAExplanation",
@@ -2375,7 +2379,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `visible`="(clusterRankings)")),
                 clearWith=list(
                     "vars",
-                    "clusterVariable")))
+                    "clusterVariable",
+                    "shrinkageEstimates",
+                    "clusterRankings")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="varianceDecompositionTable",
@@ -2531,7 +2537,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "vars",
-                    "conditionVariable")))
+                    "conditionVariable",
+                    "multipleTestCorrection")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="mixedEffectsVarianceTable",
@@ -2679,7 +2686,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "nBoot",
-                    "confLevel")))
+                    "confLevel",
+                    "seed",
+                    "iccType")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="bootstrapCIExplanation",
@@ -3068,7 +3077,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "tdiCoverage",
                     "tdiLimit",
-                    "confLevel")))
+                    "confLevel",
+                    "nBoot",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tdiExplanation",
@@ -3142,7 +3153,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="maxwellREExplanation",
-                title="About Maxwell's Random Error Index",
+                title="About the rater variance decomposition",
                 visible="(showMaxwellREGuide)",
                 clearWith=list(
                     "showMaxwellREGuide")))
@@ -3350,7 +3361,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "specificPositiveCategory",
                     "specificAllCategories",
-                    "confLevel")))
+                    "confLevel",
+                    "specificConfidenceIntervals")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="specificAgreementExplanation",
@@ -3611,7 +3623,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "subgroupVariable",
-                    "confLevel")))
+                    "confLevel",
+                    "subgroupMinCases")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="subgroupForestPlotImage",
@@ -3623,7 +3636,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "vars",
-                    "subgroupVariable")))
+                    "subgroupVariable",
+                    "subgroupMinCases")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="subgroupExplanation",
@@ -3781,7 +3795,9 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "conditionBVars",
-                    "pairedBootN"),
+                    "pairedBootN",
+                    "confLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -4058,14 +4074,14 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   raters rank cases in similar order.
 #' @param showKendallWGuide Show educational guide explaining Kendall's W for
 #'   ordinal concordance and ranking agreement.
-#' @param robinsonA Robinson's A is an agreement coefficient for ordinal data
-#'   based on the proportion of concordant pairs. It ranges from -1 (complete
-#'   disagreement) to 1 (perfect agreement), with 0 indicating agreement no
-#'   better than chance. Alternative to weighted kappa that directly measures
-#'   the degree of ordinal association between raters. Particularly useful when
-#'   ordinal categories have meaningful rank order (e.g., disease severity
-#'   stages, tumor grades). Less affected by marginal distribution imbalances
-#'   than kappa-based measures.
+#' @param robinsonA Robinson's A (1957) is an agreement coefficient for
+#'   ordinal or numeric ratings: 1 minus the within-case variance divided by the
+#'   total variance. It ranges from 0 to 1 (perfect agreement), with 0
+#'   indicating agreement no better than chance. Alternative to weighted kappa
+#'   that directly measures the degree of ordinal association between raters.
+#'   Particularly useful when ordinal categories have meaningful rank order
+#'   (e.g., disease severity stages, tumor grades). Less affected by marginal
+#'   distribution imbalances than kappa-based measures.
 #' @param showRobinsonAGuide Show educational guide and clinical use cases for
 #'   Robinson's A before running analysis.
 #' @param meanSpearman Mean Spearman Rho calculates the average rank
@@ -4104,17 +4120,17 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   differences.
 #' @param showStuartMaxwellGuide Show educational guide for the Stuart-Maxwell
 #'   test of marginal homogeneity.
-#' @param maxwellRE Maxwell's Random Error (RE) index decomposes total
-#'   measurement variance into systematic and random error components. RE
-#'   represents the proportion of total disagreement attributable to random
-#'   measurement error rather than systematic differences between raters or
-#'   methods. Values range from 0 (all error is systematic) to 1 (all error is
-#'   random). Essential for understanding error sources in method comparison
-#'   studies, diagnostic test validation, and measurement reliability
-#'   assessment. Typically used with continuous or ordinal data requiring 2+
-#'   raters/methods.
-#' @param showMaxwellREGuide Show educational guide and clinical use cases for
-#'   Maxwell's RE before running analysis.
+#' @param maxwellRE A two-way (case + rater) variance decomposition splits
+#'   rater disagreement into a systematic (rater offset) and a random (residual)
+#'   component; the between-case variance is reported separately. The random
+#'   share is the proportion of disagreement attributable to random measurement
+#'   error rather than systematic differences between raters or methods. Values
+#'   range from 0 (all error is systematic) to 1 (all error is random).
+#'   Essential for understanding error sources in method comparison studies,
+#'   diagnostic test validation, and measurement reliability assessment.
+#'   Typically used with continuous or ordinal data requiring 2+ raters/methods.
+#' @param showMaxwellREGuide Show the guide to the rater variance
+#'   decomposition before running analysis.
 #' @param interIntraRater Simultaneous assessment of inter-rater and
 #'   intra-rater reliability for test-retest studies. Calculates intra-rater
 #'   reliability (same rater consistency across time) and inter-rater

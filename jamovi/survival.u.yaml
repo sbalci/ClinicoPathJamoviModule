@@ -268,6 +268,7 @@ children:
                 name: bootstrapValN
                 format: number
                 label: Bootstrap Resamples (50-1000)
+                enable: (bootstrapValidation)
               - type: TextBox
                 name: seed
                 format: number

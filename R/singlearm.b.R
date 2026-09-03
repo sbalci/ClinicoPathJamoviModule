@@ -127,8 +127,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         private$.errorMessages <- c(private$.errorMessages, message)
       },
 
-      .addWarning = function(message) {
-        private$.warningMessages <- c(private$.warningMessages, message)
+      .addWarning = function(message, strong = FALSE) {
+        # The severity travels as the element name, so .displayMessages()
+        # never has to guess it from the wording.
+        private$.warningMessages <- c(
+          private$.warningMessages,
+          stats::setNames(message, if (isTRUE(strong)) "STRONG_WARNING" else "WARNING"))
       },
 
       .addInfo = function(message) {
@@ -208,11 +212,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Display accumulated warning messages
         if (length(private$.warningMessages) > 0) {
-          html_content <- paste(sapply(private$.warningMessages, function(msg) {
-            # Determine if it's a STRONG_WARNING or regular WARNING based on keywords
-            type <- if (grepl("Very few events|critically", msg, ignore.case = TRUE)) "STRONG_WARNING" else "WARNING"
-            .singlearmNoticeHTML(msg, type)
-          }), collapse = "")
+          msgs <- private$.warningMessages
+          types <- names(msgs)
+          if (is.null(types)) types <- rep("", length(msgs))
+          html_content <- paste(vapply(seq_along(msgs), function(i) {
+            type <- if (identical(types[i], "STRONG_WARNING")) "STRONG_WARNING" else "WARNING"
+            .singlearmNoticeHTML(unname(msgs[i]), type)
+          }, character(1)), collapse = "")
           self$results$warnings$setContent(html_content)
           self$results$warnings$setVisible(TRUE)
         } else {
@@ -229,6 +235,54 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         } else {
           self$results$info$setVisible(FALSE)
         }
+      },
+
+      .hazardSectionVisibility = function(cr) {
+        # The option expressions mirror the `visible:` bindings in
+        # singlearm.r.yaml; `cr` is the data-driven competing-risk flag that a
+        # .r.yaml expression cannot see.
+        hz <- isTRUE(self$options$baseline_hazard)
+        hazard_visible <- list(
+          baselineHazardHeading     = hz,
+          baselineHazardTable       = hz,
+          baselineHazardPlot        = hz,
+          smoothedHazardPlot        = isTRUE(self$options$hazard_smoothing),
+          baselineHazardSummary     = hz && isTRUE(self$options$showSummaries),
+          baselineHazardHeading3    = hz && isTRUE(self$options$showExplanations),
+          baselineHazardExplanation = hz && isTRUE(self$options$showExplanations))
+        for (nm in names(hazard_visible))
+          self$results[[nm]]$setVisible(!isTRUE(cr) && hazard_visible[[nm]])
+        invisible(NULL)
+      },
+
+      .eventCountNotice = function(dq) {
+        # One assessment of event scarcity, in one place (see the note in
+        # .assessDataQuality()). Zero events of interest most often means the
+        # wrong event level was selected: the KM table then shows an NA median
+        # and every probability is 100%, which is easily read as excellent
+        # survival. The recode disclosure in eventRecodeInfo is hidden by
+        # default, so this notice carries the check itself.
+        n_events <- dq$n_events
+        if (is.null(n_events) || is.na(n_events)) return(invisible(NULL))
+        cr <- private$.isCompetingRisk()
+        ev_lab <- private$.eventRecode$event_label
+        ev_lab <- if (length(ev_lab) > 0 && nzchar(ev_lab[1])) ev_lab[1] else .("(not set)")
+        if (n_events == 0) {
+          counts <- if (isTRUE(dq$n_competing > 0))
+            jmvcore::format(.("{censored} censored, {k} competing"),
+                            censored = dq$n_censored, k = dq$n_competing)
+          else
+            jmvcore::format(.("{censored} censored"), censored = dq$n_censored)
+          private$.addWarning(jmvcore::format(
+            .("No events of interest were observed among {n} subjects ({counts}). Every survival or cumulative-incidence estimate is therefore a boundary value and the median is not estimable. The event level currently mapped to the event of interest is \"{level}\"; check that it is the intended level before interpreting these results as low risk."),
+            n = dq$n_total, counts = counts, level = ev_lab), strong = TRUE)
+        } else if (n_events < 10) {
+          private$.addWarning(jmvcore::format(
+            .("Only {n} event(s) of interest among {total} subjects. Estimates with fewer than 10 events are imprecise: confidence intervals will be wide and the {median} may not be reached. Report the number at risk alongside every estimate and treat this as a descriptive result."),
+            n = n_events, total = dq$n_total,
+            median = if (cr) .("median cumulative-incidence time") else .("median")), strong = TRUE)
+        }
+        invisible(NULL)
       },
 
       # Utility Helper Functions ----
@@ -538,20 +592,27 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         return(TRUE)
       },
 
-      .getCachedSurvfit = function(formula, data, cache_key_suffix = "") {
+      .getCachedSurvfit = function(formula, data, cache_key_suffix = "",
+                                   conf.type = "log-log") {
+        # Complementary log-log (Kalbfleisch-Prentice) pointwise band for every
+        # survfit in this analysis: it never leaves (0, 1), unlike survfit's
+        # default "log" band whose upper limit is clipped at 1. The KM median CI
+        # is the Brookmeyer-Crowley inversion of this same band, and the
+        # multi-state (CIF) fit gets the log(-log) transformation recommended
+        # for cumulative-incidence intervals (Choudhury 2002).
         if (!requireNamespace('digest', quietly = TRUE)) {
           # Fallback if digest not available
-          return(survival::survfit(formula, data = data))
+          return(survival::survfit(formula, data = data, conf.type = conf.type))
         }
         
         cache_key <- paste0("survfit_", 
-                           digest::digest(list(as.character(formula), data, cache_key_suffix)))
+                           digest::digest(list(as.character(formula), data, cache_key_suffix, conf.type)))
         
         if (exists(cache_key, envir = private$.cache)) {
           return(get(cache_key, envir = private$.cache))
         }
         
-        result <- survival::survfit(formula, data = data)
+        result <- survival::survfit(formula, data = data, conf.type = conf.type)
         assign(cache_key, result, envir = private$.cache)
         return(result)
       },
@@ -565,15 +626,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # For larger datasets, use logarithmic scaling
         base_span <- 0.75 / log10(n_points + 1)
         return(pmax(0.1, pmin(0.8, base_span)))
-      },
-
-      .systematicSample = function(data, target_size = 50) {
-        n <- nrow(data)
-        if (n <= target_size) return(data)
-
-        # Use systematic sampling to preserve distribution
-        keep_indices <- round(seq(1, n, length.out = target_size))
-        return(data[keep_indices, ])
       },
 
       .hazardIntervals = function(time, status, target_events = 10L,
@@ -1112,8 +1164,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                     n_nonfinite, ifelse(n_nonfinite == 1, ' is', 's are')))
           return(NULL)
         }
-        if (any(df_time$mytime < 0, na.rm = TRUE)) {
-          private$.addError(.('Time values must be zero or positive. Negative follow-up means the event/follow-up date precedes study entry; verify the date order and the elapsed-time variable.'))
+        n_negative <- sum(df_time$mytime < 0, na.rm = TRUE)
+        if (n_negative > 0) {
+          private$.addError(.fmt(.('{n} time value(s) are negative (smallest {min}). Time values must be zero or positive: negative follow-up means the event/follow-up date precedes study entry; verify the date order and the elapsed-time variable.'),
+                                 n = n_negative,
+                                 min = base::format(round(min(df_time$mytime, na.rm = TRUE), 2))))
           return(NULL)
         }
         n_zero <- sum(df_time$mytime == 0, na.rm = TRUE)
@@ -1340,7 +1395,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           }
 
           if (n_after < n_before) {
-            private$.addInfo(sprintf(.('Landmark analysis removed %d subject(s) whose follow-up ended at or before %s %s; %d remain. Time is measured from the landmark, and estimates are conditional on surviving to it.'),
+            private$.addWarning(sprintf(.('Landmark analysis removed %d subject(s) whose follow-up ended at or before %s %s; %d remain. Time is measured from the landmark, and estimates are conditional on surviving to it.'),
                                      n_before - n_after, landmark, self$options$timetypeoutput, n_after))
           }
         }
@@ -1572,16 +1627,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # so the outcomeorganizer hand-off (0/1/2 outcome, multievent = FALSE)
         # looks like ordinary survival there. Same blind spot as the CIF plot
         # above, which is why both are re-asserted here.
-        if (cr) {
-          for (nm in c("baselineHazardHeading", "baselineHazardTable",
-                       "baselineHazardPlot", "smoothedHazardPlot",
-                       "baselineHazardSummary", "baselineHazardHeading3",
-                       "baselineHazardExplanation")) {
-            it <- try(self$results[[nm]], silent = TRUE)
-            if (!inherits(it, "try-error") && !is.null(it))
-              try(it$setVisible(FALSE), silent = TRUE)
-          }
-        }
+        #
+        # Re-asserted symmetrically: setVisible() replaces the declarative
+        # `visible:` binding from singlearm.r.yaml with a literal, so a one-way
+        # setVisible(FALSE) kept the populated hazard table hidden for the rest
+        # of the session after the user switched back to ordinary survival.
+        private$.hazardSectionVisibility(cr)
 
         ## Data Quality Assessment ----
         private$.checkpoint()
@@ -1589,6 +1640,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Store data quality for potential use in outputs
         results$data_quality <- data_quality
+
+        # Event-count notice: always visible, quantified, never gated behind
+        # showExplanations (where the eventRecodeInfo disclosure lives).
+        private$.eventCountNotice(data_quality)
 
         # WARNING for data quality issues from assessment
         # `.assessDataQuality()` deliberately assigns no warnings of its own --
@@ -1916,6 +1971,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           formula <- jmvcore::asFormula(formula, additional_allowed_functions = c("Surv"))
 
           km_fit <- private$.safeExecute({
+            # log-log band (see .getCachedSurvfit); the median CI is the
+            # Brookmeyer-Crowley inversion of the same band the time-specific
+            # table reports.
             private$.getCachedSurvfit(formula, mydata, "median")
           }, context = "survival_calculation")
 
@@ -2081,8 +2139,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           dq <- results$data_quality
           quality_info <- paste0(
             "Descriptive follow-up: range ", dq$min_time, "-", dq$max_time, " ",
-            self$options$timetypeoutput, ". ",
-            if (length(dq$warnings) > 0) paste("Considerations:", paste(dq$warnings, collapse = "; "), ".") else ""
+            self$options$timetypeoutput, ". "
           )
         }
         
@@ -2125,7 +2182,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                              paste0("Observed event proportion: ", event_rate, "% (", n_events, " of ", n_total, " subjects). This is a crude proportion, not an incidence rate."),
                              quality_info,
                              .median_meaning,
-                             "Note: Confidence intervals use survfit's default log-transformation method (conf.type='log'), based on Greenwood's variance estimate."
+                             "Note: Confidence intervals use the complementary log-log (Kalbfleisch-Prentice) transformation (conf.type='log-log'), based on Greenwood's variance estimate; the median CI is the Brookmeyer-Crowley inversion of that pointwise band."
           )
         }
 
@@ -2404,8 +2461,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           )
 
           survTable <- self$results$survTable
+          # std.err stays in km_fit_df for the narrative; it is not a column of
+          # the table and Table$setRow would drop it silently.
           for (i in seq_along(km_fit_df[, 1, drop = TRUE])) {
-            survTable$addRow(rowKey = i, values = c(km_fit_df[i,]))
+            survTable$addRow(rowKey = i, values = c(km_fit_df[i, names(km_fit_df) != "std.err"]))
           }
           
           km_fit_df$ci <- private$.ciText(km_fit_df$lower, km_fit_df$upper)
@@ -2469,6 +2528,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         formula <- jmvcore::asFormula(formula, additional_allowed_functions = c("Surv"))
 
         km_fit <- private$.safeExecute({
+          # Same fit and the same log-log band as the median section.
           private$.getCachedSurvfit(formula, mydata, "survtable")
         }, context = "survival_calculation")
 
@@ -2506,7 +2566,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         for (col in c("std.err", "lower", "upper"))
           km_fit_df[[col]][!is.finite(km_fit_df[[col]])] <- NA_real_
 
-        # Greenwood/log intervals have zero estimated variance while the curve
+        # Greenwood-based (log-log) intervals have zero estimated variance while the curve
         # is exactly 1 (and can degenerate at 0). A displayed 100%-100% interval
         # before any event, especially in an all-censored cohort, is easily read
         # as certainty about population survival. Leave boundary limits blank;
@@ -2521,12 +2581,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           self$results$survTable$setNote("cif_note", NULL)
           self$results$survTable$setNote(
             "boundary_ci",
-            .("Confidence limits are left blank where the Kaplan-Meier event-free estimate is exactly 0% or 100%. The usual Greenwood-based large-sample interval degenerates at a probability boundary; the absence of observed events does not establish zero population risk."))
+            .("Confidence limits are left blank where the Kaplan-Meier event-free estimate is exactly 0% or 100%. The Greenwood-based complementary log-log interval degenerates at a probability boundary; the absence of observed events does not establish zero population risk."))
         }
 
         survTable <- self$results$survTable
 
-        data_frame <- km_fit_df
+        data_frame <- km_fit_df[, names(km_fit_df) != "std.err", drop = FALSE]
         for (i in seq_along(data_frame[, 1, drop = TRUE])) {
           survTable$addRow(rowKey = i, values = c(data_frame[i,]))
         }
@@ -3151,8 +3211,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         myoutcome <- results$name2outcome
 
         myfactor <- results$name3explanatory
-        myfactor <-
-        jmvcore::constructFormula(terms = myfactor)
+        myfactor <- jmvcore::composeTerm(myfactor)
 
         plotData <- results$cleanData
 
@@ -3480,16 +3539,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (!private$.validatePlotParameters()) return()
 
         mytime <- results$name1time
-        mytime <- jmvcore::constructFormula(terms = mytime)
+        mytime <- jmvcore::composeTerm(mytime)
 
         myoutcome <- results$name2outcome
-        myoutcome <-
-          jmvcore::constructFormula(terms = myoutcome)
-
+        myoutcome <- jmvcore::composeTerm(myoutcome)
 
         myfactor <- results$name3explanatory
-        myfactor <-
-        jmvcore::constructFormula(terms = myfactor)
+        myfactor <- jmvcore::composeTerm(myfactor)
 
         plotData <- results$cleanData
 
@@ -3497,7 +3553,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           jmvcore::toNumeric(plotData[[mytime]])
 
         # Unqualified `Surv` (globally allow-listed); mytime/myoutcome already
-        # backtick-escaped via jmvcore::constructFormula above.
+        # backtick-escaped via jmvcore::composeTerm above.
         myformula <-
           paste0("Surv(", mytime, ", ", myoutcome, ")")
 
@@ -3509,8 +3565,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             dependent = myformula,
             explanatory = myfactor,
             xlab = paste0('Time (', self$options$timetypeoutput, ')'),
-            # pval = self$options$pplot,
-            # pval.method	= self$options$pplot,
             legend = 'none',
             break.time.by = self$options$byplot,
             xlim = c(0, self$options$endplot),
@@ -3570,16 +3624,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (!private$.validatePlotParameters(check_y = FALSE)) return()
 
         mytime <- results$name1time
-        mytime <- jmvcore::constructFormula(terms = mytime)
+        mytime <- jmvcore::composeTerm(mytime)
 
         myoutcome <- results$name2outcome
-        myoutcome <-
-          jmvcore::constructFormula(terms = myoutcome)
-
+        myoutcome <- jmvcore::composeTerm(myoutcome)
 
         myfactor <- results$name3explanatory
-        myfactor <-
-        jmvcore::constructFormula(terms = myfactor)
+        myfactor <- jmvcore::composeTerm(myfactor)
 
         plotData <- results$cleanData
 
@@ -3587,7 +3638,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           jmvcore::toNumeric(plotData[[mytime]])
 
         # Unqualified `Surv` (globally allow-listed); mytime/myoutcome already
-        # backtick-escaped via jmvcore::constructFormula above.
+        # backtick-escaped via jmvcore::composeTerm above.
         myformula <-
           paste0("Surv(", mytime, ", ", myoutcome, ")")
 
@@ -3600,8 +3651,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             explanatory = myfactor,
             xlab = paste0('Time (', self$options$timetypeoutput, ')'),
             ylab = "Cumulative Hazard",
-            # pval = self$options$pplot,
-            # pval.method	= self$options$pplot,
             legend = 'none',
             break.time.by = self$options$byplot,
             xlim = c(0, self$options$endplot),
@@ -3672,16 +3721,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
 
         mytime <- results$name1time
-        mytime <- jmvcore::constructFormula(terms = mytime)
+        mytime <- jmvcore::composeTerm(mytime)
 
         myoutcome <- results$name2outcome
-        myoutcome <-
-          jmvcore::constructFormula(terms = myoutcome)
-
+        myoutcome <- jmvcore::composeTerm(myoutcome)
 
         myfactor <- results$name3explanatory
-        myfactor <-
-          jmvcore::constructFormula(terms = myfactor)
+        myfactor <- jmvcore::composeTerm(myfactor)
 
         plotData <- results$cleanData
 
@@ -3690,7 +3736,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
 
         # mytime/myoutcome/myfactor are already backtick-escaped via
-        # jmvcore::constructFormula above. Switch to unqualified `Surv`
+        # jmvcore::composeTerm above. Switch to unqualified `Surv`
         # (allow-listed) and asFormula for parse-tree validation.
         myformula <-
           paste0('Surv(', mytime, ', ', myoutcome, ') ~ ', myfactor)
@@ -4078,15 +4124,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Generate data quality summary
         if (self$options$showSummaries) {
-          warning_text <- if (length(dq$warnings) > 0) {
-            paste("<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ffc107; color: inherit;'>",
-                  "<strong> Data Quality Considerations:</strong><ul>",
-                  paste0("<li>", dq$warnings, "</li>", collapse = ""),
-                  "</ul></div>")
-          } else {
-            paste0("<div style='background-color: rgba(33, 152, 239, 0.13);padding:10px;border-radius:5px;margin:10px 0;border-left:4px solid #2196f3; color: inherit;'>",
+          # .assessDataQuality() grades nothing; event scarcity is reported
+          # by .eventCountNotice() in .run().
+          warning_text <- paste0("<div style='background-color: rgba(33, 152, 239, 0.13);padding:10px;border-radius:5px;margin:10px 0;border-left:4px solid #2196f3; color: inherit;'>",
                    "<strong>Automated grading:</strong> No universal adequacy grade is assigned. Review the event counts, risk sets, confidence intervals, follow-up, missingness, and endpoint context directly.</div>")
-          }
 
           count_text <- if (dq$n_competing > 0)
             paste0(dq$n_events, " event(s) of interest, ", dq$n_competing,

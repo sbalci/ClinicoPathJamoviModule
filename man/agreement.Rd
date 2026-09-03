@@ -383,14 +383,14 @@ raters rank cases in similar order.}
 \item{showKendallWGuide}{Show educational guide explaining Kendall's W for
 ordinal concordance and ranking agreement.}
 
-\item{robinsonA}{Robinson's A is an agreement coefficient for ordinal data
-based on the proportion of concordant pairs. It ranges from -1 (complete
-disagreement) to 1 (perfect agreement), with 0 indicating agreement no
-better than chance. Alternative to weighted kappa that directly measures
-the degree of ordinal association between raters. Particularly useful when
-ordinal categories have meaningful rank order (e.g., disease severity
-stages, tumor grades). Less affected by marginal distribution imbalances
-than kappa-based measures.}
+\item{robinsonA}{Robinson's A (1957) is an agreement coefficient for
+ordinal or numeric ratings: 1 minus the within-case variance divided by the
+total variance. It ranges from 0 to 1 (perfect agreement), with 0
+indicating agreement no better than chance. Alternative to weighted kappa
+that directly measures the degree of ordinal association between raters.
+Particularly useful when ordinal categories have meaningful rank order
+(e.g., disease severity stages, tumor grades). Less affected by marginal
+distribution imbalances than kappa-based measures.}
 
 \item{showRobinsonAGuide}{Show educational guide and clinical use cases for
 Robinson's A before running analysis.}
@@ -439,18 +439,18 @@ differences.}
 \item{showStuartMaxwellGuide}{Show educational guide for the Stuart-Maxwell
 test of marginal homogeneity.}
 
-\item{maxwellRE}{Maxwell's Random Error (RE) index decomposes total
-measurement variance into systematic and random error components. RE
-represents the proportion of total disagreement attributable to random
-measurement error rather than systematic differences between raters or
-methods. Values range from 0 (all error is systematic) to 1 (all error is
-random). Essential for understanding error sources in method comparison
-studies, diagnostic test validation, and measurement reliability
-assessment. Typically used with continuous or ordinal data requiring 2+
-raters/methods.}
+\item{maxwellRE}{A two-way (case + rater) variance decomposition splits
+rater disagreement into a systematic (rater offset) and a random (residual)
+component; the between-case variance is reported separately. The random
+share is the proportion of disagreement attributable to random measurement
+error rather than systematic differences between raters or methods. Values
+range from 0 (all error is systematic) to 1 (all error is random).
+Essential for understanding error sources in method comparison studies,
+diagnostic test validation, and measurement reliability assessment.
+Typically used with continuous or ordinal data requiring 2+ raters/methods.}
 
-\item{showMaxwellREGuide}{Show educational guide and clinical use cases for
-Maxwell's RE before running analysis.}
+\item{showMaxwellREGuide}{Show the guide to the rater variance
+decomposition before running analysis.}
 
 \item{interIntraRater}{Simultaneous assessment of inter-rater and
 intra-rater reliability for test-retest studies. Calculates intra-rater

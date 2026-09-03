@@ -42,7 +42,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     "<div style='background-color: rgba(37, 99, 235, 0.06); ",
                     "border-left: 4px solid #93c5fd; padding: 14px; margin: 10px 0; ",
                     "border-radius: 4px; color: inherit;'>",
-                    "<h3 style='margin-top: 0; color: #2563eb;'>",
+                    "<h3 style='margin-top: 0; color: inherit;'>",
                     htmltools::htmlEscape(title), "</h3>", body, "</div>"
                 )
             },

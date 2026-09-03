@@ -67,7 +67,7 @@
 #' }
 #' 
 #' @importFrom R6 R6Class
-#' @import jmvcore
+#' @importFrom jmvcore .
 #' @return An \code{R6} class generator object for the \code{lassocoxClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(

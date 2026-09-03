@@ -469,7 +469,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ))
                 }
 
-                mydata <- self$data[, selected_columns, drop = FALSE]
+                mydata <- jmvcore::select(self$data, selected_columns)
 
                 # Perform input validation before processing
                 validation_results <- private$.validateInputs(
@@ -557,14 +557,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             levels = new_levels
                         )
 
-                        # Inform user which level is modeled as the positive outcome
-                        private$.addNotice(
-                            jmvcore::NoticeType$INFO,
-                            .fmt(
-                                .("Outcome variable releveled: '{level}' is now modeled as the positive outcome (event)."),
-                                level = positive_level
-                            )
-                        )
+                        # The event level is already reported by .validateInputs().
                     } else {
                         # Warn if selected level doesn't exist
                         private$.addNotice(
@@ -634,7 +627,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
                 model_names <- model_names[!is.na(model_names) & nzchar(model_names)]
                 mydata <- mydata[, model_names, drop = FALSE]
-                mydata <- mydata[stats::complete.cases(mydata), , drop = FALSE]
+                mydata <- jmvcore::naOmit(mydata)
 
                 if (nrow(mydata) == 0) {
                     jmvcore::reject(
@@ -689,6 +682,28 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ))
                 }
 
+                # A numeric with exactly two distinct values is the SAME model
+                # whether it is fitted as a 0/1 term or as a two-level factor --
+                # identical odds ratio, interval and p-value -- so cont_cut = 0
+                # buys nothing here and costs the descriptive column: a 0/1
+                # diagnostic marker was summarised as "Mean (SD) 0.2 (0.4)"
+                # instead of the per-level n (%) cross-tab a pathologist reads
+                # off that row, in the table AND in the forest plot. Coerce once,
+                # before any fit, so finalfit, logistf and rms::lrm still all see
+                # the same term, and before the separation check below so a
+                # 0/1 marker with an empty 2x2 cell is warned about too. (Do NOT
+                # express this as cont_cut = 3 instead: that puts or_plot's
+                # factorlist back out of step with its own glmmulti fit and
+                # re-breaks the fit_id join for binaries.)
+                for (v in explanatory_variable_names) {
+                    if (is.numeric(mydata[[v]]) &&
+                        length(unique(mydata[[v]])) == 2L) {
+                        lab <- attr(mydata[[v]], "label", exact = TRUE)
+                        mydata[[v]] <- factor(mydata[[v]])
+                        if (!is.null(lab)) attr(mydata[[v]], "label") <- lab
+                    }
+                }
+
                 # Additional diagnostics: EPV and separation checks
                 extra_warnings <- c()
                 if (!is.null(dependent_variable_name_from_label) && !is.null(self$options$outcomeLevel)) {
@@ -736,26 +751,6 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                         variable = all_labels[[v]]))
                             }
                         }
-                    }
-                }
-
-                # A numeric with exactly two distinct values is the SAME model
-                # whether it is fitted as a 0/1 term or as a two-level factor --
-                # identical odds ratio, interval and p-value -- so cont_cut = 0
-                # buys nothing here and costs the descriptive column: a 0/1
-                # diagnostic marker was summarised as "Mean (SD) 0.2 (0.4)"
-                # instead of the per-level n (%) cross-tab a pathologist reads
-                # off that row, in the table AND in the forest plot. Coerce once,
-                # before any fit, so finalfit, logistf and rms::lrm still all see
-                # the same term. (Do NOT express this as cont_cut = 3 instead:
-                # that puts or_plot's factorlist back out of step with its own
-                # glmmulti fit and re-breaks the fit_id join for binaries.)
-                for (v in explanatory_variable_names) {
-                    if (is.numeric(mydata[[v]]) &&
-                        length(unique(mydata[[v]])) == 2L) {
-                        lab <- attr(mydata[[v]], "label", exact = TRUE)
-                        mydata[[v]] <- factor(mydata[[v]])
-                        if (!is.null(lab)) attr(mydata[[v]], "label") <- lab
                     }
                 }
 
@@ -1042,10 +1037,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             dependent_variable_name_from_label,
                             diagnostic_predictor
                         ), drop = FALSE]
-                        diagnostic_data <- diagnostic_data[
-                            stats::complete.cases(diagnostic_data),
-                            , drop = FALSE
-                        ]
+                        diagnostic_data <- jmvcore::naOmit(diagnostic_data)
 
                         diagnostic_data[[dependent_variable_name_from_label]] <- droplevels(factor(
                             diagnostic_data[[dependent_variable_name_from_label]]
@@ -1675,7 +1667,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 options(datadist = dd)
 
                 # Create formula for model
-                formula_str <- paste(jmvcore::composeTerm(dependent), "~", paste(jmvcore::composeTerms(as.list(explanatory)), collapse = " + "))
+                formula_str <- jmvcore::constructFormula(dependent, as.list(explanatory))
 
                 # Fit logistic regression model
                 private$.checkpoint()
@@ -2467,10 +2459,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # spaces or other non-syntactic characters. composeTerm
                 # backtick-quotes them, which is correct here because this is a
                 # formula string (never use it as a data[[ ]] key).
-                fml <- stats::as.formula(paste0(
-                    jmvcore::composeTerm(dependent), " ~ ",
-                    paste(vapply(explanatory, jmvcore::composeTerm, character(1)),
-                          collapse = " + ")))
+                fml <- .asSurvivalFormula(
+                    jmvcore::constructFormula(dependent, as.list(explanatory)))
                 fit <- logistf::logistf(fml, data = .data)
 
                 est <- private$.firthEstimates(fit)
@@ -2570,9 +2560,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # RAW variable names; this helper escapes them via jmvcore::composeTerm/composeTerms,
             # so names with spaces or special characters are handled safely and callers never
             # have to reason about whether a name is already escaped.
-            f <- .asSurvivalFormula(paste(
-                jmvcore::composeTerm(dependent), "~",
-                paste(jmvcore::composeTerms(as.list(explanatory)), collapse = " + ")))
+            f <- .asSurvivalFormula(
+                jmvcore::constructFormula(dependent, as.list(explanatory)))
             
             # Fit Firth model using logistf
             # logistf doesn't directly support data frames in the same way for labels
@@ -2595,9 +2584,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 lapply(explanatory, function(v) {
                     tryCatch(
                         private$.firthEstimates(logistf::logistf(
-                            .asSurvivalFormula(paste(
-                                jmvcore::composeTerm(dependent), "~",
-                                jmvcore::composeTerm(v))),
+                            .asSurvivalFormula(
+                                jmvcore::constructFormula(dependent, list(v))),
                             data = .data)),
                         error = function(e) NULL)
                 })))

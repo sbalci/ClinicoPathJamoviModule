@@ -106,7 +106,9 @@ options:
       description:
           R: >
             Date format specification. 'Auto-detect' attempts to identify the format automatically.
-            Manual selection ensures accurate parsing for specific date formats.
+            Manual selection ensures accurate parsing for specific date formats. Two-digit years
+            are read as 2000-2068 for 00-68 and as 1969-1999 for 69-99; a message reports how
+            many values were parsed that way.
 
     - name: output_unit
       title: Time unit for results
@@ -185,6 +187,10 @@ options:
             These rows are dropped from every statistic, including the mean and the total
             person-time, not merely flagged. The Data Quality Assessment panel reports how
             many were removed. Leave off to keep all intervals and only see the count.
+            With fewer than 101 intervals the 99th percentile is interpolated between the two
+            longest intervals, so the rule can remove at most the single longest one, and none
+            at all when n is 51 or fewer at the default multiplier of 2; the analysis says so
+            when that applies.
 
     - name: extreme_multiplier
       title: Extreme threshold multiplier

@@ -156,6 +156,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # What actually ran this cycle, as opposed to what the user ticked.
             .cutoffRan = FALSE,
             .multicutRan = FALSE,
+            # Why .multipleCutoffs() returned NULL this cycle; .run() shows it.
+            .multicutFailReason = NULL,
 
             # Competing Risk Helper Functions ----
             .isCompetingRisk = function(state = NULL) {
@@ -183,29 +185,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     isTRUE(private$.eventRecode$has_competing) ||
                     (isTRUE(self$options$multievent) &&
                          identical(self$options$analysistype, "compete"))
-            },
-
-            .competingRiskCumInc = function(mydata, mytime, myoutcome) {
-                # Proper competing risk analysis using cmprsk::cuminc()
-                # Returns cumulative incidence estimates for the event of interest
-
-                # Ensure time is numeric
-                mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
-
-                # For competing risk: outcome is 0=censored, 1=event of interest, 2=competing event
-                tryCatch({
-                    # Run cumulative incidence analysis
-                    cuminc_fit <- cmprsk::cuminc(
-                        ftime = mydata[[mytime]],
-                        fstatus = mydata[[myoutcome]],
-                        cencode = 0  # 0 is censored
-                    )
-
-                    return(cuminc_fit)
-
-                }, error = function(e) {
-                    return(NULL)
-                })
             },
 
             .getDefaultCutpoints = function() {
@@ -275,12 +254,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 byplot
             },
 
-            # Helper function to escape variable names with special characters for formulas
+            # Backtick-quote non-syntactic names for formula strings (jmvcore does
+            # the quoting and escapes embedded backticks/backslashes).
             .escapeVariableNames = function(var_names) {
-                # Check if variable names contain special characters that need escaping
-                need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
-                var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
-                return(var_names)
+                vapply(var_names, jmvcore::composeTerm, character(1), USE.NAMES = FALSE)
             },
 
             # Map outcome to event-of-interest indicator respecting analysis type
@@ -585,185 +562,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             .init = function() {
                 # Initialize HTML message outputs
                 private$.initializeMessageOutputs()
-
-                # Initialize all outputs to FALSE first (following singlearm pattern)
-                # Core Cox Regression outputs
-                self$results$coxRegressionHeading$setVisible(FALSE)
-                self$results$coxSummary$setVisible(FALSE)
-                self$results$coxTable$setVisible(FALSE)
-                self$results$tCoxtext2$setVisible(FALSE)
-                self$results$coxRegressionHeading3$setVisible(FALSE)
-                self$results$coxRegressionExplanation$setVisible(FALSE)
-
-                # Person-time analysis outputs
-                self$results$personTimeHeading$setVisible(FALSE)
-                self$results$personTimeTable$setVisible(FALSE)
-                self$results$personTimeSummary$setVisible(FALSE)
-                self$results$personTimeExplanation$setVisible(FALSE)
-
-                # RMST analysis outputs
-                self$results$rmstHeading$setVisible(FALSE)
-                self$results$rmstTable$setVisible(FALSE)
-                self$results$rmstSummary$setVisible(FALSE)
-                self$results$rmstExplanation$setVisible(FALSE)
-
-                # Residuals analysis outputs
-                self$results$residualsTable$setVisible(FALSE)
-                self$results$schoenfeldResidualsTable$setVisible(FALSE)
-                self$results$residualsPlot$setVisible(FALSE)
-                self$results$residualDiagnosticsExplanation$setVisible(FALSE)
-
-                # Cut-off analysis outputs
-                self$results$cutoffAnalysisHeading$setVisible(FALSE)
-                self$results$rescutTable$setVisible(FALSE)
-                self$results$cutoffAnalysisHeading3$setVisible(FALSE)
-                self$results$cutoffAnalysisExplanation$setVisible(FALSE)
-                self$results$plot4$setVisible(FALSE)
-                self$results$plot5$setVisible(FALSE)
-                self$results$medianSummary$setVisible(FALSE)
-                self$results$medianTable$setVisible(FALSE)
-                self$results$survTableSummary$setVisible(FALSE)
-                self$results$survTable$setVisible(FALSE)
-
-                # Multiple cut-offs outputs
-                self$results$multipleCutTable$setVisible(FALSE)
-                self$results$multipleMedianTable$setVisible(FALSE)
-                self$results$multipleCutoffsExplanation$setVisible(FALSE)
-                self$results$multipleSurvTable$setVisible(FALSE)
-                self$results$plotMultipleCutoffs$setVisible(FALSE)
-                self$results$plotMultipleSurvival$setVisible(FALSE)
-
-                # Survival plots outputs
-                self$results$plot2$setVisible(FALSE)
-                self$results$plot3$setVisible(FALSE)
-                self$results$plot6$setVisible(FALSE)
-                self$results$plot7$setVisible(FALSE)
-                self$results$survivalPlotsHeading3$setVisible(FALSE)
-                self$results$survivalPlotsExplanation$setVisible(FALSE)
-                self$results$loglogPlotExplanation$setVisible(FALSE)
-
-                # Always show Cox Regression heading and table when data is present
-                self$results$coxRegressionHeading$setVisible(TRUE)
-                self$results$coxTable$setVisible(TRUE)
-                self$results$tCoxtext2$setVisible(TRUE)
-
-                # Handle showSummaries visibility
-                if (self$options$showSummaries) {
-                    self$results$coxSummary$setVisible(TRUE)
-
-                    # Conditional summaries - require both showSummaries AND their specific option
-                    if (self$options$person_time) {
-                        self$results$personTimeSummary$setVisible(TRUE)
-                    }
-                    if (self$options$rmst_analysis) {
-                        self$results$rmstSummary$setVisible(TRUE)
-                    }
-                    if (self$options$findcut) {
-                        self$results$medianSummary$setVisible(TRUE)
-                        self$results$survTableSummary$setVisible(TRUE)
-                    }
-                }
-
-                # Handle showExplanations visibility
-                if (self$options$showExplanations) {
-                    # Cox regression explanation is always shown with explanations
-                    self$results$coxRegressionHeading3$setVisible(TRUE)
-                    self$results$coxRegressionExplanation$setVisible(TRUE)
-
-                    # Conditional explanations - require both showExplanations AND their specific option
-                    if (self$options$findcut) {
-                        self$results$cutoffAnalysisHeading3$setVisible(TRUE)
-                        self$results$cutoffAnalysisExplanation$setVisible(TRUE)
-                    }
-                    if (self$options$multiple_cutoffs) {
-                        self$results$multipleCutoffsExplanation$setVisible(TRUE)
-                    }
-                    if (self$options$person_time) {
-                        self$results$personTimeExplanation$setVisible(TRUE)
-                    }
-                    if (self$options$rmst_analysis) {
-                        self$results$rmstExplanation$setVisible(TRUE)
-                    }
-                    if (self$options$residual_diagnostics) {
-                        self$results$residualDiagnosticsExplanation$setVisible(TRUE)
-                    }
-                    # The log-log, cumulative-events, cumulative-hazard and
-                    # KMunicate plots only render on the findcut path, so their
-                    # explanations must not appear when only multiple_cutoffs is on --
-                    # a proportional-hazards write-up with no plot to read it against.
-                    if (self$options$loglog && self$options$findcut) {
-                        self$results$loglogPlotExplanation$setVisible(TRUE)
-                    }
-
-                    # Survival plots explanation requires showExplanations AND at least one plot
-                    if ((self$options$sc && (self$options$findcut || self$options$multiple_cutoffs)) ||
-                        (self$options$findcut &&
-                         (self$options$ce || self$options$ch || self$options$kmunicate))) {
-                        self$results$survivalPlotsHeading3$setVisible(TRUE)
-                        self$results$survivalPlotsExplanation$setVisible(TRUE)
-                    }
-                }
-
-                # Handle person_time visibility
-                if (self$options$person_time) {
-                    self$results$personTimeHeading$setVisible(TRUE)
-                    self$results$personTimeTable$setVisible(TRUE)
-                }
-
-                # Handle RMST analysis visibility
-                if (self$options$rmst_analysis) {
-                    self$results$rmstHeading$setVisible(TRUE)
-                    self$results$rmstTable$setVisible(TRUE)
-                }
-
-                # Handle residual diagnostics visibility
-                if (self$options$residual_diagnostics) {
-                    self$results$residualsTable$setVisible(TRUE)
-                    self$results$schoenfeldResidualsTable$setVisible(TRUE)
-                    self$results$residualsPlot$setVisible(TRUE)
-                }
-
-                # Handle findcut visibility
-                if (self$options$findcut) {
-                    self$results$cutoffAnalysisHeading$setVisible(TRUE)
-                    self$results$rescutTable$setVisible(TRUE)
-                    self$results$plot4$setVisible(TRUE)
-                    self$results$medianTable$setVisible(TRUE)
-                    self$results$survTable$setVisible(TRUE)
-
-                    # Show survival plot if requested
-                    if (self$options$sc) {
-                        self$results$plot5$setVisible(TRUE)
-                    }
-                }
-
-                # Handle multiple cutoffs visibility
-                if (self$options$multiple_cutoffs) {
-                    self$results$multipleCutTable$setVisible(TRUE)
-                    self$results$multipleMedianTable$setVisible(TRUE)
-                    self$results$multipleSurvTable$setVisible(TRUE)
-                    self$results$plotMultipleCutoffs$setVisible(TRUE)
-
-                    if (self$options$sc) {
-                        self$results$plotMultipleSurvival$setVisible(TRUE)
-                    }
-                }
-
-                # Handle plot visibility based on their options
-                if (self$options$findcut) {
-                    if (self$options$ce) {
-                        self$results$plot2$setVisible(TRUE)
-                    }
-                    if (self$options$ch) {
-                        self$results$plot3$setVisible(TRUE)
-                    }
-                    if (self$options$kmunicate) {
-                        self$results$plot6$setVisible(TRUE)
-                    }
-                    if (self$options$loglog) {
-                        self$results$plot7$setVisible(TRUE)
-                    }
-                }
+                # Result visibility is declared once in survivalcont.r.yaml
+                # (`visible:`); it is not mirrored here.
             }
 
             # getData ----
@@ -1407,6 +1207,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     list(
                         "landmark_offset" = if (self$options$uselandmark)
                             jmvcore::toNumeric(self$options$landmark) else 0,
+                        # Raw dxdate->fudate interval for EVERY row, taken before
+                        # the landmark shift/filter and naOmit; this is what the
+                        # calculatedtime Output exports.
+                        "calculated_time" = time,
                         "name1time" = name1time,
                         "name2outcome" = name2outcome,
                         "analysis_outcome" = analysis_outcome,
@@ -1436,6 +1240,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 private$.eventRecode <- NULL
                 private$.cutoffRan <- FALSE
                 private$.multicutRan <- FALSE
+                private$.multicutFailReason <- NULL
                 self$results$eventRecodeInfo$setContent("")
 
                 # Prevent plots from a previous valid run remaining visible after
@@ -1535,7 +1340,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     private$.lowEventCount <- n_events < 10
                     if (private$.lowEventCount) {
                         private$.addHtmlMessage(
-                            type = "warning",
+                            type = "strongWarning",
                             title = sprintf("Only %d event(s) observed", n_events),
                             message = sprintf('Only %d event(s) detected (n=%d total). Descriptive results are shown, but estimates from this many events are unstable with very wide confidence intervals. Cut-off determination is suppressed.', n_events, n_total)
                         )
@@ -1750,18 +1555,27 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         self$results$multipleSurvTable$deleteRows()
                     }
                     if (is.null(multicut_results) && !private$.lowEventCount) {
+                        reason <- private$.multicutFailReason
                         private$.addHtmlMessage(
                             "warning",
                             "Multiple cut-offs unavailable",
-                            "The requested multiple cut-offs could not be estimated from these data. Check variability, group-size constraints, and event counts, or use the continuous Cox model."
+                            paste0(
+                                "The requested multiple cut-offs could not be estimated from these data",
+                                if (!is.null(reason)) paste0(": ", reason) else "",
+                                ". Check variability, group-size constraints, and event counts, or use the continuous Cox model."
+                            )
                         )
                     }
                 }
 
                 # Add Calculated Time to Data (independent of cut-off analysis) ----
+                # Export the raw interval, not cleanData$CalculatedTime: with a
+                # landmark active that column is time FROM the landmark and rows
+                # below the landmark are gone, so the exported "time from dxdate
+                # to fudate" silently became a different quantity.
                 if (self$options$tint && self$options$calculatedtime && self$results$calculatedtime$isNotFilled()) {
-                    self$results$calculatedtime$setRowNums(results$cleanData$row_names)
-                    self$results$calculatedtime$setValues(results$cleanData$CalculatedTime)
+                    self$results$calculatedtime$setRowNums(results$calculated_time$row_names)
+                    self$results$calculatedtime$setValues(results$calculated_time$mytime)
                 }
 
                 # Add Redefined Outcome to Data (independent of cut-off analysis) ----
@@ -1856,13 +1670,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
 
 
-                # self$results$mydataview$setContent(
-                #     list(
-                #         res.cut = res.cut,
-                #         cutoffdata = cutoffdata,
-                #         not_continue_analysis = not_continue_analysis
-                #     )
-                # )
 
 
 
@@ -1888,7 +1695,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                   # not_continue_analysis = not_continue_analysis
                 )
 
-                # self$results$mydataview2$setContent(plotData1)
 
 
                 image4 <- self$results$plot4
@@ -1970,7 +1776,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     private$.addHtmlMessage(
                         type = "info",
                         title = "Methodology Reference",
-                        message = 'Cut-off analysis uses maximally selected rank statistics (Hothorn & Lausen, 2003). When publishing results from this analysis, please cite the survminer and maxstat packages. Consider reporting both continuous Cox regression (primary) and cut-off-based analysis (secondary) to avoid bias from data-driven cut-offs.'
+                        message = 'The cut-off is the value that maximises the standardised log-rank statistic (maximally selected rank statistic, survminer::surv_cutpoint / maxstat). No multiplicity-adjusted p-value is computed or reported for the selected cut-off; the group comparison p-values shown after the split are exploratory because the split was chosen from these same data. Report the continuous Cox model as the primary analysis and validate the cut-off in independent data. When publishing, cite survminer and maxstat.'
                     )
                 }
             }
@@ -2351,7 +2157,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Multiplicity caution (plain text)
-                rescutTable$setNote("multiplicity", "Warning: The optimal cut-off maximizes separation; associated p-values are exploratory and should be validated in independent data.")
+                rescutTable$setNote("multiplicity", "The statistic is the maximally selected standardised log-rank statistic; no multiplicity-adjusted p-value is reported for this cut-off. Downstream group comparisons are exploratory and should be validated in independent data.")
 
                 data_frame <- rescut_summary
                 for (i in seq_along(data_frame[, 1, drop = TRUE])) {
@@ -2446,11 +2252,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                              replacement = paste0(self$options$contexpl, " = "),
                                              x = results1table$factor)
 
-                # self$results$mydataview$setContent(
-                #     list(
-                #         results2table = results2table
-                #     )
-                # )
 
 
                 medianTable <- self$results$medianTable
@@ -2669,13 +2470,6 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 myoutcome <- results$analysis_outcome
                 mydata <- results$cleanData
 
-                # self$results$mydataview_personTimeAnalysis$setContent(
-                #   list(
-                #     mytime = mytime,
-                #     myoutcome = myoutcome,
-                #     mydata = mydata
-                #   )
-                # )
 
                 # Ensure time is numeric
                 mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
@@ -3199,11 +2993,15 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             # Multiple Cut-offs Analysis ----
             ,
             .multipleCutoffs = function(results) {
-                # The warning() calls below are console-only diagnostics; the
-                # user-facing text comes from .addHtmlMessage() in .run(). They used
-                # to pass glue-style named arguments (var =, cols =, error =) to
-                # base::warning(), which pastes them onto the end of the message
-                # instead of interpolating them, so the printed text was garbled.
+                # On failure this records WHY in private$.multicutFailReason and
+                # returns NULL; .run() folds the reason into its single
+                # "Multiple cut-offs unavailable" notice. (Formerly bare warning()
+                # calls, which reached the Analysis Notes panel as a second,
+                # differently worded copy of that notice.)
+                fail <- function(reason) {
+                    private$.multicutFailReason <- reason
+                    NULL
+                }
                 tryCatch({
                     mytime <- results$name1time
                     myoutcome <- results$analysis_outcome
@@ -3214,39 +3012,24 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     mydata[[mytime]] <- jmvcore::toNumeric(mydata[[mytime]])
 
                     # Extract continuous variable values
-                    if (!mycontexpl %in% names(mydata)) {
-                        warning(sprintf(
-                            .("survivalcont: variable '%s' not found in data. Available columns: %s"),
-                            mycontexpl, paste(names(mydata), collapse = ", ")))
-                        return(NULL)
-                    }
-
                     cont_var <- mydata[[mycontexpl]]
                     if (is.null(cont_var)) {
-                        warning(sprintf(.("survivalcont: variable '%s' is NULL"), mycontexpl))
-                        return(NULL)
+                        return(fail(sprintf(
+                            .("the continuous variable '%s' was not found in the analysis data"),
+                            self$options$contexpl)))
                     }
 
                     cont_var <- cont_var[!is.na(cont_var)]
 
                     # Check if we have enough data
                     if (length(cont_var) < 10) {
-                        warning(.("survivalcont: insufficient data for multiple cut-offs analysis"))
-                        return(NULL)
+                        return(fail(sprintf(
+                            .("only %d non-missing value(s) of '%s' are available; at least 10 are required"),
+                            length(cont_var), self$options$contexpl)))
                     }
 
 
 
-                # self$results$mydataview_multipleCutoffs2$setContent(
-                #                     list(
-                #                         name_of_debug = c('inside multipleCutoffs'),
-                #                         mytime = mytime,
-                #                         myoutcome = myoutcome,
-                #                         mycontexpl = mycontexpl,
-                #                         mydata = mydata,
-                #                         cont_var = cont_var
-                #                         )
-                #                 )
 
 
 
@@ -3266,8 +3049,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                     # Check if cutoffs were successfully calculated
                     if (is.null(cutoff_values) || length(cutoff_values) == 0) {
-                        warning(.("survivalcont: failed to calculate cut-off values"))
-                        return(NULL)
+                        return(fail(sprintf(
+                            .("the '%s' method returned no cut-off value"),
+                            self$options$cutoff_method)))
                     }
 
                     # Sanitise, then ENFORCE the minimum group size.
@@ -3289,8 +3073,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     # when de-duplication leaves fewer than num_cuts values.
                     cutoff_values <- sort(unique(cutoff_values[is.finite(cutoff_values)]))
                     if (length(cutoff_values) == 0) {
-                        warning(.("survivalcont: failed to calculate cut-off values"))
-                        return(NULL)
+                        return(fail(sprintf(
+                            .("the '%s' method returned no finite cut-off value"),
+                            self$options$cutoff_method)))
                     }
 
                     min_n <- ceiling(length(cont_var) * self$options$min_group_size / 100)
@@ -3357,8 +3142,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         mycontexpl = mycontexpl
                     ))
                 }, error = function(e) {
-                    warning(sprintf(.("survivalcont: error in multiple cut-offs analysis: %s"), e$message))
-                    return(NULL)
+                    fail(sprintf(.("the analysis stopped with an error: %s"), conditionMessage(e)))
                 })
             }
 
@@ -3654,9 +3438,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                         pval <- tryCatch({
                             logrank_test <- survival::survdiff(formula, data = test_data)
-                            1 - stats::pchisq(
+                            stats::pchisq(
                                 logrank_test$chisq,
-                                df = length(logrank_test$n) - 1
+                                df = length(logrank_test$n) - 1,
+                                lower.tail = FALSE
                             )
                         }, error = function(e) NA_real_)
 
@@ -3829,7 +3614,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     tryCatch({
                         logrank_test <- survival::survdiff(.asSurvivalFormula(formula_str), data = mydata)
                         overall_chisq <- logrank_test$chisq
-                        overall_pval <- 1 - pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1)
+                        overall_pval <- stats::pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1, lower.tail = FALSE)
 
                         # Set the log-rank test results as text
                         logrank_text <- paste0("Overall Log-rank Test: \u03c7\u00b2 = ", round(overall_chisq, 3),
@@ -4045,7 +3830,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         data = plot_data,
                         title = paste0("Survival Curves - Multiple Cut-offs for ", self$options$contexpl),
                         subtitle = paste0("Method: ", plotData$method,
-                                          " | Groups: ", length(levels(plotData$risk_groups))),
+                                          " | Groups: ", length(levels(plotData$risk_groups)),
+                                          " | log-rank p is exploratory: groups were chosen from these data"),
                         xlab = private$.timeAxisLabel(),
                         ylab = "Survival Probability",
                         legend.title = .("Marker groups"),
@@ -4509,9 +4295,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 fit <- tryCatch({
                     fml <- .asSurvivalFormula(paste0(
-                        "survival::Surv(", .escapeVariableNames(mytime), ", ",
-                        .escapeVariableNames(myoutcome), ") ~ ",
-                        .escapeVariableNames(contexpl), " + strata(.strata)"))
+                        "survival::Surv(", private$.escapeVariableNames(mytime), ", ",
+                        private$.escapeVariableNames(myoutcome), ") ~ ",
+                        private$.escapeVariableNames(contexpl), " + strata(.strata)"))
                     survival::coxph(fml, data = mydata)
                 }, error = function(e) e)
 
@@ -4817,10 +4603,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         <div style="background-color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                             <strong>1. Maximally Selected Rank Statistics Method:</strong>
                             <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li>Tests every possible cut-off value</li>
-                                <li>For each cut-off, performs survival comparison</li>
-                                <li>Selects cut-off with smallest p-value (biggest difference)</li>
-                                <li>Adjusts p-value for multiple testing</li>
+                                <li>Tests every candidate cut-off value (respecting the minimum group size)</li>
+                                <li>For each cut-off, computes the standardised log-rank statistic</li>
+                                <li>Selects the cut-off with the largest statistic (biggest difference)</li>
+                                <li>No multiplicity-adjusted p-value is reported for the selected cut-off; validate it in independent data</li>
                             </ul>
                         </div>
 
@@ -4833,17 +4619,17 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             <tr>
                                 <td style="padding: 8px; border: 1px solid #ffc107;"><strong>1. Testing</strong></td>
                                 <td style="padding: 8px; border: 1px solid #ffc107;">Try multiple cut-offs</td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Range of p-values</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Range of log-rank statistics</td>
                             </tr>
                             <tr style="background-color: rgba(255, 196, 33, 0.07); color: inherit;">
                                 <td style="padding: 8px; border: 1px solid #ffc107;"><strong>2. Selection</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Find minimum p-value</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Find the maximum statistic</td>
                                 <td style="padding: 8px; border: 1px solid #ffc107;">Optimal cut-off value</td>
                             </tr>
                             <tr>
                                 <td style="padding: 8px; border: 1px solid #ffc107;"><strong>3. Validation</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Multiple testing correction</td>
-                                <td style="padding: 8px; border: 1px solid #ffc107;">Adjusted p-value</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Independent data (no adjusted p-value is computed here)</td>
+                                <td style="padding: 8px; border: 1px solid #ffc107;">Confirmed or rejected cut-off</td>
                             </tr>
                         </table>
                     </div>

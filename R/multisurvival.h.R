@@ -585,7 +585,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         cox_ph = function() private$.items[["cox_ph"]],
         plot8 = function() private$.items[["plot8"]],
         plotKM = function() private$.items[["plotKM"]],
-        risk_score_analysis = function() private$.items[["risk_score_analysis"]],
         risk_score_analysis2 = function() private$.items[["risk_score_analysis2"]],
         riskScoreHeading = function() private$.items[["riskScoreHeading"]],
         riskScoreSummaryHeading = function() private$.items[["riskScoreSummaryHeading"]],
@@ -931,6 +930,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="survMetricsTable",
                 title="Model Performance Metrics",
                 visible="(show_survmetrics)",
+                refs="riskRegression",
                 rows=0,
                 columns=list(
                     list(
@@ -1019,6 +1019,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 height=450,
                 renderFun=".plotSurvMetrics",
                 visible="(show_survmetrics && survmetrics_show_plots)",
+                refs="riskRegression",
                 clearWith=list(
                     "use_stratify",
                     "stratvar",
@@ -1380,35 +1381,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "pplot",
                     "censored",
                     "medianline",
-                    "timetypedata",
-                    "timetypeoutput")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="risk_score_analysis",
-                title="Risk Score Analysis",
-                visible="(calculateRiskScore)",
-                clearWith=list(
-                    "calculateRiskScore",
-                    "outcome",
-                    "outcomeLevel",
-                    "explanatory",
-                    "contexpl",
-                    "numRiskGroups",
-                    "elapsedtime",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent",
-                    "analysistype",
-                    "dod",
-                    "dooc",
-                    "awd",
-                    "awod",
-                    "use_stratify",
-                    "stratvar",
-                    "interactions",
-                    "uselandmark",
-                    "landmark",
                     "timetypedata",
                     "timetypeoutput")))
             self$add(jmvcore::Html$new(
@@ -2654,7 +2626,6 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$risk_score_analysis} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$risk_score_analysis2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$riskScoreHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$riskScoreSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr

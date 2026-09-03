@@ -180,7 +180,14 @@ test_that("youdenOptimization = FALSE survives a tied best cutoff", {
         oc <- as.data.frame(res$results$optimalCutoffSummary)
         expect_equal(nrow(oc), 1L)
         expect_true(is.finite(as.numeric(oc$optimal_cutoff[1])))
-        expect_match(er_strip(res$results$notices$content), "Tied Best Cutoff")
+        # Since 2026-09-03 youdenOptimization = FALSE means closest-to-top-left (the default
+        # best.method of coords("best") was still youden, so the toggle changed nothing). The
+        # tie notice therefore fires only when THAT criterion ties.
+        n_tl <- NROW(pROC::coords(r, "best", best.method = "closest.topleft",
+                                  ret = c("threshold", "sensitivity", "specificity")))
+        if (n_tl > 1) expect_match(er_strip(res$results$notices$content), "Tied Best Cutoff")
+        ca <- as.data.frame(res$results$cutoffAnalysis)
+        if (nrow(ca) > 0) expect_true(any(grepl("closest to top-left", ca$cutoff_type, fixed = TRUE)))
     }
 })
 

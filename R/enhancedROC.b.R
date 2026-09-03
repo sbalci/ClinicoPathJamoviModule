@@ -103,7 +103,7 @@ enhancedROCClass <- R6::R6Class(
                     "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
                     "<strong style='color: ", style$color, ";'>",
                     style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
-                    "<span style='color: #374151;'>", private$.safeHtmlOutput(notice$content), "</span>",
+                    "<span style='color: inherit;'>", private$.safeHtmlOutput(notice$content), "</span>",
                     "</div>"
                 )
             }
@@ -3013,7 +3013,7 @@ enhancedROCClass <- R6::R6Class(
             # Generate summary paragraph
             summary_text <- paste0(
                 "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
-                "<h4 style='margin-top: 0; color: #007bff;'>", .("Analysis Summary"), "</h4>",
+                "<h4 style='margin-top: 0; color: inherit;'>", .("Analysis Summary"), "</h4>",
                 "<p><strong>", .("ROC Analysis Results:"), "</strong> ",
                 sprintf(
                     .("This analysis evaluated %d predictor(s) using %d observations in a %s context."),
@@ -3128,7 +3128,7 @@ enhancedROCClass <- R6::R6Class(
 
             # Generate report sections
             report_html <- "<div style='background-color: rgba(33, 152, 255, 0.07); border: 1px solid #0066cc; padding: 15px; margin: 10px 0; color: inherit;'>"
-            report_html <- paste0(report_html, "<h4 style='color: #0066cc; margin-top: 0;'>", .("Clinical Report Sentences"), "</h4>")
+            report_html <- paste0(report_html, "<h4 style='color: inherit; margin-top: 0;'>", .("Clinical Report Sentences"), "</h4>")
             report_html <- paste0(report_html, "<p><em>", .("Copy and paste the sections below into your clinical reports or publications"), ":</em></p>")
 
             # Methods section

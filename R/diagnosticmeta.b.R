@@ -420,7 +420,7 @@ diagnosticmetaClass <- R6::R6Class(
                     private$.pooled_specificity <- NULL
                     # Table notes are a plain-text sink (limited HTML allow-list),
                     # so the message must NOT be HTML-escaped: escaping turned
-                    # "object 'x' not found" into "object &#39;x&#39; not found".
+                    # "object 'x' not found" into "object &apos;x&apos; not found (numeric entity was rendered literally)".
                     self$results$bivariateresults$setNote("error", sprintf(.("Bivariate analysis error: %s"), e$message))
                     private$.addNotice("ERROR", .("Bivariate model failed"), sprintf(
                         .("The Reitsma bivariate model could not be fitted (%s). Pooled sensitivity and specificity are unavailable; the SROC plot and summary fall back to descriptive output."),
@@ -739,7 +739,7 @@ diagnosticmetaClass <- R6::R6Class(
             fpr_estimate <- fpr_prob_row[1, "Estimate"]
             pooled_spec <- if (is.finite(fpr_estimate)) 1 - fpr_estimate else NA_real_
             spec_ci <- c(NA_real_, NA_real_)
-            if (!is.null(ci_lower_col) && !is.null(ci_upper_col)) {
+            if (!is.na(ci_lower_col) && !is.na(ci_upper_col)) {
                 fpr_ci_lower <- fpr_prob_row[1, ci_lower_col]
                 fpr_ci_upper <- fpr_prob_row[1, ci_upper_col]
                 if (is.finite(fpr_ci_lower) && is.finite(fpr_ci_upper)) {

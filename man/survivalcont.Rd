@@ -261,7 +261,7 @@ A results object containing:
 \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
 \code{results$coxRegressionHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$coxSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$stratifiedCoxTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr

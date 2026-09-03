@@ -199,6 +199,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .validateInputs = function(mydata, outcome_var, recurrence_var = NULL, id_var = NULL, analysistype = "os", multievent = FALSE) {
             validation_results <- list(
                 errors = character(0),
+                strong_warnings = character(0),
                 warnings = character(0),
                 info = character(0),
                 should_stop = FALSE
@@ -298,7 +299,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Check for minimum sample size
                 if (total_rows < 10) {
-                    validation_results$warnings <- c(validation_results$warnings,
+                    validation_results$strong_warnings <- c(validation_results$strong_warnings,
                         paste("Very small sample size: ", total_rows, " observations. Results may be unreliable.", sep=""))
                 } else if (total_rows < 30) {
                     validation_results$warnings <- c(validation_results$warnings,
@@ -320,14 +321,29 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                   "% (", missing_outcome, " out of ", total_rows, " rows).", sep=""))
                     }
                     
-                    # Check for rare events (separation issue warning)
-                    if (length(unique(mydata[[outcome_var]])) == 2) {
-                        tbl <- table(mydata[[outcome_var]])
-                        min_cell <- min(tbl)
-                        if (min_cell < 5) {
-                            validation_results$warnings <- c(validation_results$warnings,
-                                paste("Rare event detected (min cell count =", min_cell, "). Logistic regression may suffer from separation. Consider penalized methods."))
-                        }
+                    # Few events: Kaplan-Meier / Cox estimates are unstable below ~5
+                    # events. table() drops NA, so a 2-level outcome with missing
+                    # values is still checked (unique() would have counted NA as a
+                    # third level and skipped it). Count the selected event level
+                    # when there is one; otherwise fall back to the rarest level.
+                    tbl <- table(mydata[[outcome_var]])
+                    n_nonmissing <- sum(tbl)
+                    event_lvl <- if (multievent) NULL else self$options$outcomeLevel
+                    if (!is.null(event_lvl) && as.character(event_lvl) %in% names(tbl)) {
+                        n_ev <- as.integer(tbl[[as.character(event_lvl)]])
+                        rare_lvl <- as.character(event_lvl)
+                    } else if (length(tbl) == 2) {
+                        n_ev <- as.integer(min(tbl))
+                        rare_lvl <- names(tbl)[which.min(tbl)]
+                    } else {
+                        n_ev <- NA_integer_
+                    }
+                    if (!is.na(n_ev) && n_nonmissing > 0 && n_ev < 5) {
+                        validation_results$warnings <- c(validation_results$warnings,
+                            paste0("Few events: only ", n_ev, " of ", n_nonmissing,
+                                   " non-missing outcomes (", round(100 * n_ev / n_nonmissing, 1),
+                                   "%) are '", rare_lvl, "'. Kaplan-Meier and Cox estimates ",
+                                   "are unstable with fewer than 5 events."))
                     }
                 }
             }
@@ -336,11 +352,6 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (analysistype == "cause" && !multievent) {
                 validation_results$warnings <- c(validation_results$warnings,
                     "Cause-specific survival typically requires distinguishing between disease deaths and other deaths. Consider enabling 'Multiple Event Types' or switch to 'Overall Survival'.")
-            }
-
-            if (analysistype %in% c("rfs", "pfs", "dfs") && is.null(recurrence_var)) {
-                validation_results$warnings <- c(validation_results$warnings,
-                    paste0(toupper(analysistype), " analysis typically requires both a recurrence/progression variable AND an outcome variable. Currently only outcome is specified."))
             }
             
             return(validation_results)
@@ -1560,7 +1571,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Add validation warnings
+            # Add validation strong warnings, then warnings
+            for (sw_msg in validation_results$strong_warnings) {
+                private$.addNotice(jmvcore::NoticeType$STRONG_WARNING, sw_msg)
+            }
             if (length(validation_results$warnings) > 0) {
                 for (warn_msg in validation_results$warnings) {
                     private$.addNotice(jmvcore::NoticeType$WARNING, warn_msg)
@@ -1896,7 +1910,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$addAdminTime$setValues(as.numeric(private$.adminTime))
             }
 
-            if (self$options$addOutcome) {
+            # Same gate as addAdminTime above: isNotFilled() only, never
+            # self$options$addOutcome (unreachable from the R wrapper).
+            if (self$results$addOutcome$isNotFilled()) {
                 # The .r.yaml varTitle is a STATIC string. It used to interpolate
                 # `{analysistype}`, which substitutes the List option's raw KEY, so
                 # the column landed in the user's spreadsheet called "Recoded Outcome

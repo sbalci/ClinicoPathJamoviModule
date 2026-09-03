@@ -50,7 +50,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
                         "<strong style='color: ", style$color, ";'>",
                         htmltools::htmlEscape(notice$title), "</strong><br>",
-                        "<span style='color: #374151;'>",
+                        "<span style='color: inherit;'>",
                         htmltools::htmlEscape(notice$content), "</span>",
                         "</div>"
                     )

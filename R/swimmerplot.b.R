@@ -1,3 +1,5 @@
+.datatable.aware <- TRUE
+
 #' @title Swimmer Plot
 #' @description 
 #' Comprehensive swimmer plot function with full ggswim integration.
@@ -10,6 +12,7 @@
 #' @importFrom tibble tibble
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom ggswim geom_swim_lane geom_swim_marker scale_marker_discrete geom_swim_arrow theme_ggswim theme_ggswim_dark
+#' @importFrom data.table as.data.table
 #' @return An \code{R6} class generator object for the \code{swimmerplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
@@ -2391,11 +2394,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
                 "<h4>", .("Clinical Interpretation"), "</h4>",
                 "<div style='margin: 10px 0;'>",
-                "<h5 style='color: #2e7d32;'>", .("Timeline Analysis:"), "</h5>",
+                "<h5 style='color: inherit;'>", .("Timeline Analysis:"), "</h5>",
                 "<p>", interpretation$timeline, "</p>",
                 "</div>",
                 "<div style='margin: 10px 0;'>",
-                "<h5 style='color: #2e7d32;'>", .("Person-Time Analysis:"), "</h5>",
+                "<h5 style='color: inherit;'>", .("Person-Time Analysis:"), "</h5>",
                 "<p>", interpretation$person_time, "</p>",
                 "</div>"
             )
@@ -2403,7 +2406,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (self$options$responseAnalysis && !is.null(interpretation$response)) {
                 interp_html <- paste0(interp_html,
                     "<div style='margin: 10px 0;'>",
-                    "<h5 style='color: #2e7d32;'>", .("Response Pattern Analysis:"), "</h5>",
+                    "<h5 style='color: inherit;'>", .("Response Pattern Analysis:"), "</h5>",
                     "<p>", interpretation$response, "</p>",
                     "</div>"
                 )

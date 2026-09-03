@@ -228,7 +228,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
               "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
               "<strong style='color: ", style$color, ";'>",
               style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
-              "<span style='color: #374151;'>", private$.safeHtmlOutput(notice$content), "</span>",
+              "<span style='color: inherit;'>", private$.safeHtmlOutput(notice$content), "</span>",
               "</div>"
             )
           }
@@ -2370,7 +2370,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         
         # Generate methodological footnotes for enhanced clinical understanding
         .generateMethodologicalFootnotes = function() {
-            footnotes <- "<div style='margin-top: 20px; font-size: 0.9em; color: #666;'>"
+            footnotes <- "<div style='margin-top: 20px; font-size: 0.9em; color: inherit; opacity: 0.85;'>"
             footnotes <- paste0(footnotes, "<p><strong>", .("Methodological Notes:"), "</strong></p>")
             footnotes <- paste0(footnotes, "<ul style='font-size: 0.85em;'>")
             item <- function(label, text) paste0("<li><strong>", label, ":</strong> ", text, "</li>")

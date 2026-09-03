@@ -606,7 +606,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="coxRegressionHeading",
                 title="Cox Regression for Continuous Variables"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="coxSummary",
                 title="`Cox Regression Summary and Table - ${contexpl}`",
@@ -700,11 +700,20 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
                     "contexpl",
                     "stratified_cox",
                     "strata_variable",
                     "multievent",
+                    "uselandmark",
+                    "landmark",
                     "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
                     "timetypeoutput",
                     "timetypedata"),
                 columns=list(
@@ -828,6 +837,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "rate_multiplier",
                     "time_intervals",
                     "person_time",
+                    "contexpl",
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
@@ -859,6 +869,7 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "rate_multiplier",
                     "time_intervals",
                     "person_time",
+                    "contexpl",
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
@@ -969,6 +980,10 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "contexpl",
                     "outcome",
                     "outcomeLevel",
+                    "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
                     "findcut",
                     "multiple_cutoffs",
                     "uselandmark",
@@ -1066,6 +1081,9 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
+                    "fudate",
+                    "dxdate",
+                    "tint",
                     "findcut",
                     "uselandmark",
                     "landmark",
@@ -1098,6 +1116,9 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="rescutTable",
                 title="Cut Point",
                 rows=0,
+                refs=list(
+                    "survminer",
+                    "maxstat"),
                 columns=list(
                     list(
                         `name`="cutpoint", 
@@ -2256,7 +2277,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$infoMessages} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coxRegressionHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$coxSummary} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$coxSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$coxTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$stratifiedCoxTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$tCoxtext2} \tab \tab \tab \tab \tab a html \cr

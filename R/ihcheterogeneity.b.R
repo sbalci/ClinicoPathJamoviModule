@@ -2115,7 +2115,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</div>",
 
                 "<div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #28a745;'>",
-                "<h4 style='color: #28a745; margin-top: 0;'> ", .("Key Findings:"), "</h4>",
+                "<h4 style='color: inherit; margin-top: 0;'> ", .("Key Findings:"), "</h4>",
                 "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
                 agreement_sentence,
                 variability_sentence,
@@ -2130,7 +2130,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</p>",
                 "</div>",
 
-                "<div style='text-align: center; margin-top: 15px; font-size: 14px; color: #6c757d;'>",
+                "<div style='text-align: center; margin-top: 15px; font-size: 14px; color: inherit;'>",
                 "<p style='margin: 0;'>", .("This summary provides a simplified interpretation of the statistical results for clinical understanding."), "</p>",
                 "</div>",
 

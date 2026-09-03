@@ -298,6 +298,7 @@ items:
       title: 'Model Performance Metrics'
       type: Table
       visible: (show_survmetrics)
+      refs: riskRegression
       rows: 0
       columns:
         - name: metric
@@ -381,6 +382,7 @@ items:
       height: 450
       renderFun: .plotSurvMetrics
       visible: (show_survmetrics && survmetrics_show_plots)
+      refs: riskRegression
       clearWith:
         - use_stratify
         - stratvar
@@ -834,36 +836,6 @@ items:
     #       - adjexplanatory
     #       - pplot
     #       - censored
-
-
-    - name: risk_score_analysis
-      title: 'Risk Score Analysis'
-      type:  Preformatted
-      visible: (calculateRiskScore)
-      clearWith:
-          - calculateRiskScore
-          - outcome
-          - outcomeLevel
-          - explanatory
-          - contexpl
-          - numRiskGroups
-          - elapsedtime
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-          - analysistype
-          - dod
-          - dooc
-          - awd
-          - awod
-          - use_stratify
-          - stratvar
-          - interactions
-          - uselandmark
-          - landmark
-          - timetypedata
-          - timetypeoutput
 
 
     - name: risk_score_analysis2

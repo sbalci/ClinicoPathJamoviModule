@@ -210,10 +210,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     instructions <- paste0(
                         "<html><head></head><body>",
                         "<div class='instructions' style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>",
-                        "<h3 style='color: #2e7d32; margin-top: 0;'> ", .("Analysis Without Gold Standard"), "</h3>",
+                        "<h3 style='color: inherit; margin-top: 0;'> ", .("Analysis Without Gold Standard"), "</h3>",
                         "<p><strong>", .("Analyze diagnostic test performance when no perfect reference test (gold standard) is available."), "</strong></p>",
                         "<p>", .("This analysis estimates latent-class parameters or describes agreement with a reference rule built from the selected tests. Interpretation depends on the chosen method and its assumptions."), "</p>",
-                        "<h4 style='color: #2e7d32;'>", .("Required Steps:"), "</h4>",
+                        "<h4 style='color: inherit;'>", .("Required Steps:"), "</h4>",
                         "<ol>",
                         "<li><strong>", .("Select Test Variables:"), "</strong> ", .("Choose at least 2 diagnostic tests to analyze"), "</li>",
                         "<li><strong>", .("Define Positive Levels:"), "</strong> ", .("Specify which level represents a positive test result for each test"), "</li>",
@@ -234,7 +234,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         if (!is.null(private$.preset_info)) {
                             paste0(
                                 "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4caf50; color: inherit;'>",
-                                "<h4 style='color: #2e7d32; margin-top: 0;'> ", .("Active Illustrative Example"), "</h4>",
+                                "<h4 style='color: inherit; margin-top: 0;'> ", .("Active Illustrative Example"), "</h4>",
                                 "<p><strong>", .("Example only:"), "</strong> ", .("This scenario is illustrative, does not change settings, and is not a clinical guide or validated recommendation."), "</p>",
                                 "<p><strong>", .("Scenario"), ":</strong> ", self$options$clinicalPreset, "</p>",
                                 "<p><strong>", .("Description"), ":</strong> ", private$.preset_info$description, "</p>",
@@ -326,7 +326,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 background <- paste0(
-                    "<h4 style='color: #2e7d32;'>", method_content$title, "</h4><ul>",
+                    "<h4 style='color: inherit;'>", method_content$title, "</h4><ul>",
                     paste0("<li>", method_content$bullets, "</li>", collapse = ""),
                     "</ul>"
                 )
@@ -334,7 +334,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     ""
                 } else {
                     paste0(
-                        "<h4 style='color: #2e7d32;'>", .("References"), "</h4><ul>",
+                        "<h4 style='color: inherit;'>", .("References"), "</h4><ul>",
                         paste0("<li>", method_content$citations, "</li>", collapse = ""),
                         "</ul>"
                     )
@@ -1938,40 +1938,40 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # Create comprehensive method selection guide in HTML
                 guide_html <- paste0(
                     "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff; color: inherit;'>",
-                    "<h3 style='color: #007bff; margin-top: 0;'> ", .("Method Selection Guide"), "</h3>",
+                    "<h3 style='color: inherit; margin-top: 0;'> ", .("Method Selection Guide"), "</h3>",
                     "<div style='margin: 15px 0; padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-radius: 5px; color: inherit;'>",
                     "<p><strong>", .("Scope warning:"), "</strong> ", .("The scenarios and method examples below are illustrative examples only. They are not clinical guides, validated recommendations, or substitutes for a study-specific statistical analysis plan."), "</p>",
-                    "<h4 style='color: #2e7d32; margin-top: 0;'> ", .("Latent Class Analysis"), "</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'> ", .("Latent Class Analysis"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("A two-class conditional-independence mixture model for three or more tests."), "</p>",
                     "<p><strong>", .("Illustrative context"), ":</strong> ", .("Studies with at least three tests whose errors are plausibly independent within each latent class."), "</p>",
                     "<p><strong>", .("Limitations"), ":</strong> ", .("Class labels are unidentified; the high-positive class is not automatically disease. The model assumes conditionally independent errors and does NOT model conditional dependence; with exactly three tests its fit cannot be tested."), "</p>",
                     "</div>",
                     "<div style='margin: 15px 0; padding: 15px; background-color: rgba(33, 152, 239, 0.13); border-radius: 5px; color: inherit;'>",
-                    "<h4 style='color: #1565c0; margin-top: 0;'> ", .("Penalized EM (MAP-like; Fixed Priors)"), "</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'> ", .("Penalized EM (MAP-like; Fixed Priors)"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("A latent-class EM point estimator using fixed Beta priors."), "</p>",
                     "<p><strong>", .("Illustrative context"), ":</strong> ", .("Sensitivity analysis showing how the fixed penalties affect a conditional-independence fit."), "</p>",
                     "<p><strong>", .("Limitations"), ":</strong> ", .("This is not posterior sampling, priors are not configurable, intervals are not credible intervals, and latent-class labels remain unidentified."), "</p>",
                     "</div>",
                     "<div style='margin: 15px 0; padding: 15px; background-color: rgba(255, 169, 33, 0.14); border-radius: 5px; color: inherit;'>",
-                    "<h4 style='color: #ef6c00; margin-top: 0;'> ", .("Composite Reference"), "</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'> ", .("Composite Reference"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Uses majority vote of available tests as pseudo-gold standard."), "</p>",
                     "<p><strong>", .("Illustrative context"), ":</strong> ", .("Exploratory description of agreement with a majority-vote rule using three or more tests."), "</p>",
                     "<p><strong>", .("Limitations"), ":</strong> ", .("This is not an accuracy estimate: each test helps build the rule against which it is evaluated, creating incorporation bias. Strict majority means more than half positive; with an even number of tests, tied cases are rule negative. With two tests this is identical to the all-tests-positive rule."), "</p>",
                     "</div>",
                     "<div style='margin: 15px 0; padding: 15px; background-color: rgba(230, 33, 99, 0.12); border-radius: 5px; color: inherit;'>",
-                    "<h4 style='color: #c2185b; margin-top: 0;'> ", .("All Tests Positive"), "</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'> ", .("All Tests Positive"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Defines a case as rule positive only when every selected test is positive."), "</p>",
                     "<p><strong>", .("Illustrative context"), ":</strong> ", .("Exploring agreement with the strict rule that every selected test is positive."), "</p>",
                     "<p><strong>", .("Limitations"), ":</strong> ", .("Each test is part of the rule against which it is evaluated, creating incorporation bias. The positive-response probability and NPV are fixed at 100% by construction and are left blank; the other values describe agreement with the rule, not diagnostic accuracy."), "</p>",
                     "</div>",
                     "<div style='margin: 15px 0; padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-radius: 5px; color: inherit;'>",
-                    "<h4 style='color: #388e3c; margin-top: 0;'> ", .("Any Test Positive"), "</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'> ", .("Any Test Positive"), "</h4>",
                     "<p><strong>", .("Description"), ":</strong> ", .("Defines a case as rule positive when at least one selected test is positive."), "</p>",
                     "<p><strong>", .("Illustrative context"), ":</strong> ", .("Exploring agreement with the permissive rule that at least one selected test is positive."), "</p>",
                     "<p><strong>", .("Limitations"), ":</strong> ", .("Each test is part of the rule against which it is evaluated, creating incorporation bias. The negative-response probability and PPV are fixed at 100% by construction and are left blank; the other values describe agreement with the rule, not diagnostic accuracy."), "</p>",
                     "</div>",
                     "<div style='margin: 15px 0; padding: 10px; background-color: rgba(255, 203, 33, 0.14); border-radius: 5px; border-left: 3px solid #ffb300; color: inherit;'>",
-                    "<h4 style='color: #e65100; margin-top: 0;'> ", .("Interpretation Cautions"), "</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'> ", .("Interpretation Cautions"), "</h4>",
                     "<ul>",
                     "<li>", .("Match the method to the estimand: latent-class parameters and agreement with a self-built rule are different quantities."), "</li>",
                     "<li>", .("Assess conditional independence before interpreting latent-class response probabilities as accuracy."), "</li>",
@@ -2129,7 +2129,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 summary_html <- paste0(
                     "<div class='clinical-summary' style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
-                    "<h4 style='color: #1565c0; margin-top: 0;'> ", .("Plain-Language Summary"), "</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'> ", .("Plain-Language Summary"), "</h4>",
                     "<p><strong>", .("Analysis:"), "</strong> ", method_label, "</p>",
                     "<p><strong>", .("Tests analyzed:"), "</strong> ", paste(htmltools::htmlEscape(unlist(tests)), collapse = ", "), " (N=", n_tests, ")</p>",
                     "<p><strong>", prev_label, "</strong> ", prev_pct,

@@ -98,6 +98,23 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # but the "multiplier x 99th percentile" rule is not usable (q99 <= 0).
         .extremeSkipReason = NULL,
 
+        # Number of successfully parsed date values (both columns) whose text did
+        # not carry the four-digit year lubridate assigned them -- i.e. two-digit
+        # years, which lubridate pivots at 68 (00-68 -> 2000-2068, 69-99 -> 1969-1999).
+        .twoDigitYearCount = 0L,
+
+        # A parsed value was written with a two-digit year when its own text does
+        # not contain the four-digit year it was read as. Tested on the text rather
+        # than a digit-run regex so a packed numeric YYMMDD (200115) is caught as
+        # well as "15/01/20", while "2020-01-15" and 20200115 pass.
+        .countTwoDigitYears = function(raw, parsed) {
+            ok <- !is.na(parsed) & !is.na(raw)
+            if (!any(ok)) return(0L)
+            yr <- base::format(parsed[ok], "%Y")
+            txt <- as.character(raw[ok])
+            sum(!mapply(grepl, yr, txt, MoreArgs = list(fixed = TRUE)))
+        },
+
         .validateInputData = function(data, dx_date, fu_date) {
             # Input validation - returns status instead of throwing errors.
             #
@@ -322,9 +339,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             a_iv <- a_iv[is.finite(a_iv)]; r_iv <- r_iv[is.finite(r_iv)]
             if (length(a_iv) < 4 || length(r_iv) < 8) return(invisible(NULL))
 
-            p <- tryCatch(
-                suppressWarnings(stats::wilcox.test(a_iv, r_iv, exact = FALSE)$p.value),
-                error = function(e) NA_real_)
+            p <- jmvcore::tryNaN(
+                suppressWarnings(stats::wilcox.test(a_iv, r_iv, exact = FALSE)$p.value))
             if (!is.finite(p) || p >= 0.001) return(invisible(NULL))
 
             # Effect size as well as significance: in a large cohort a trivial
@@ -369,8 +385,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             sample_size <-  min(50, max(length(sample_start), length(sample_end)))
-            sample_start <- head(sample_start, sample_size)
-            sample_end <- head(sample_end, sample_size)
+            sample_start <- utils::head(sample_start, sample_size)
+            sample_end <- utils::head(sample_end, sample_size)
             
             # Test common formats
             formats_to_try <- c("ymd", "dmy", "mdy", "ydm", "myd", "dym", "ymdhms")
@@ -798,6 +814,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.validateParsedDates(start_dates, data[[dx_date]], dx_date, detected_format)
             private$.validateParsedDates(end_dates, data[[fu_date]], fu_date, detected_format)
 
+            private$.twoDigitYearCount <-
+                private$.countTwoDigitYears(data[[dx_date]], start_dates) +
+                private$.countTwoDigitYears(data[[fu_date]], end_dates)
+
             # Rows entered in the opposite day/month order parse cleanly and stay
             # positive, so nothing downstream can catch them. Check here, on the
             # raw strings, while both readings are still recoverable.
@@ -835,7 +855,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Explicitly handle negative intervals before any filtering
             negative_idx <- which(!is.na(calculated_time_raw) & calculated_time_raw < 0)
             if (length(negative_idx) > 0 && !self$options$remove_negative) {
-                example_rows <- head(negative_idx, 3)
+                example_rows <- utils::head(negative_idx, 3)
                 examples <- paste0(
                     "Row ", example_rows, ": Start=", base::format(start_dates_raw[example_rows]),
                     ", End=", base::format(end_dates_raw[example_rows])
@@ -880,17 +900,31 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # negative q99 multiplying moves the threshold the wrong way and
                 # flags the entire column. Neither is a meaningful outlier rule, so
                 # skip the filter and say why rather than dropping real rows.
+                n_intervals <- sum(!is.na(calculated_time_raw))
                 if (!is.na(q99) && is.finite(q99) && q99 > 0) {
                     extreme_threshold <- q99 * self$options$extreme_multiplier
                     removed_extreme <- sum(calculated_time_raw > extreme_threshold, na.rm = TRUE)
                     valid_idx <- valid_idx & (calculated_time_raw <= extreme_threshold | is.na(calculated_time_raw))
                     filter_applied <- TRUE
+                    # With fewer than 101 intervals, type-7 quantile() interpolates
+                    # the 99th percentile BETWEEN the two longest intervals, giving
+                    # the longest one weight (101 - n)/100 -- so the candidate outlier
+                    # inflates its own threshold. The rule can then flag at most that
+                    # one row, and none at all once multiplier x (101 - n) >= 100
+                    # (n <= 51 at the default 2x). The rule itself is deliberately
+                    # unchanged; what changed is that it now SAYS so instead of
+                    # reporting "0 removed" as if the data had been screened.
+                    if (n_intervals < 101 &&
+                        self$options$extreme_multiplier * (101 - n_intervals) >= 100) {
+                        private$.extremeSkipReason <- .fmt(
+                            .("Extreme-value filtering cannot act on these data: with {n} intervals (fewer than 101) the 99th percentile is interpolated between the two longest intervals, so at a multiplier of {mult} no interval can exceed the '{mult} x 99th percentile' threshold of {threshold} {unit}, and none was removed. Review the longest intervals directly."),
+                            n = n_intervals, mult = self$options$extreme_multiplier,
+                            threshold = signif(extreme_threshold, 4), unit = output_unit)
+                    }
                 } else if (!is.na(q99) && is.finite(q99)) {
-                    private$.extremeSkipReason <- sprintf(
-                        paste0("Extreme-value filtering was skipped: the 99th percentile of the intervals is %.4g, ",
-                               "so a '%.4g x 99th percentile' threshold cannot separate long follow-up from typical ",
-                               "follow-up. Review the interval distribution directly."),
-                        q99, self$options$extreme_multiplier)
+                    private$.extremeSkipReason <- .fmt(
+                        .("Extreme-value filtering was skipped: the 99th percentile of the intervals is {q99}, so a '{mult} x 99th percentile' threshold cannot separate long follow-up from typical follow-up. Review the interval distribution directly."),
+                        q99 = signif(q99, 4), mult = self$options$extreme_multiplier)
                 }
             }
 
@@ -924,7 +958,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 filter = list(
                     removed_negative = removed_negative,
                     removed_extreme = removed_extreme,
-                    extreme_threshold = extreme_threshold
+                    extreme_threshold = extreme_threshold,
+                    n_intervals = sum(!is.na(calculated_time_raw))
                 )
             ))
         },
@@ -935,6 +970,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.extremeSkipReason <- NULL
             private$.mixedOrderNote <- NULL
             private$.ambiguousExposure <- NULL
+            private$.twoDigitYearCount <- 0L
 
             # None of the Html items declare clearWith, and .run() has several early
             # returns, so anything written on a previous run survives into this one:
@@ -1113,6 +1149,16 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     exampleswapped = base::formatC(mox$example_swapped, format = "f", digits = 0)))
             }
 
+            # Two-digit years are pivoted silently by lubridate; a 1960s date of
+            # birth written "22/09/68" lands in 2068 and only the downstream
+            # symptoms (future dates, negative intervals) ever showed, none of
+            # which named the cause.
+            if (private$.twoDigitYearCount > 0) {
+                add_message('warning', .fmt(
+                    .("{count} date value(s) were written with a two-digit year. These are read as 2000-2068 for 00-68 and as 1969-1999 for 69-99, so a date such as 22/09/68 becomes 2068 and a 1950s-1960s date is pushed a century forward. If any interval is a century off, rewrite the column with four-digit years."),
+                    count = private$.twoDigitYearCount))
+            }
+
             # Timezone reaches only a parser with a time component; every date-only
             # format yields a Date, which carries no zone. Tested against the format
             # ACTUALLY used, because under "auto" the detector may pick ymdhms and
@@ -1172,12 +1218,11 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                       calculated_times$landmark$landmark_time else 0
                     self$results$calculated_time$setTitle(
                         if (isTRUE(lm_written > 0))
-                            sprintf("Calculated Time (%s, from %s %s landmark)",
-                                    self$options$output_unit,
-                                    base::format(round(lm_written, 4)),
-                                    self$options$output_unit)
+                            .fmt(.("Calculated Time ({unit}, from {landmark} {unit} landmark)"),
+                                 unit = self$options$output_unit,
+                                 landmark = base::format(round(lm_written, 4)))
                         else
-                            sprintf("Calculated Time (%s)", self$options$output_unit))
+                            .fmt(.("Calculated Time ({unit})"), unit = self$options$output_unit))
                 }
             }
 
@@ -1325,6 +1370,25 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             if (self$options$remove_extreme && !is.null(private$.extremeSkipReason)) {
                 filter_lines <- c(filter_lines, private$.extremeSkipReason)
+                # A filter the user switched on and that cannot act deserves a
+                # banner, not only one line of small print in the summary panel.
+                add_message('warning', private$.extremeSkipReason)
+            } else if (self$options$remove_extreme && filter_info$removed_extreme == 0 &&
+                       !is.na(filter_info$extreme_threshold)) {
+                # "0 removed" is only reassuring if the threshold is stated with it.
+                filter_lines <- c(filter_lines, .fmt(
+                    .("No interval exceeded the extreme threshold of {threshold} {unit} (0 removed)"),
+                    threshold = signif(filter_info$extreme_threshold, 4),
+                    unit = self$options$output_unit))
+            }
+            if (self$options$remove_extreme && is.null(private$.extremeSkipReason) &&
+                !is.na(filter_info$extreme_threshold) && filter_info$n_intervals < 101) {
+                # Below 101 intervals the 99th percentile sits between the two longest
+                # values, so whatever the multiplier only the single longest interval
+                # can ever be flagged (see .calculate_survival_time).
+                filter_lines <- c(filter_lines, .fmt(
+                    .("with {n} intervals (fewer than 101) the 99th percentile is interpolated between the two longest intervals, so this rule can flag at most the single longest one"),
+                    n = filter_info$n_intervals))
             }
             if (self$options$remove_extreme && filter_info$removed_extreme > 0) {
                 threshold_txt <- if (!is.na(filter_info$extreme_threshold)) round(filter_info$extreme_threshold, 2) else "threshold"
@@ -2043,6 +2107,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             <li><strong>Mixed date orders in one column:</strong> if some rows were typed DD/MM/YYYY and others MM/DD/YYYY, choosing a format manually does NOT fix it \u2192 whichever order you pick, the rows typed the other way are read as a different date, silently and without error. Only rows whose day exceeds 12 give themselves away by failing to parse. The fix is in the source data, not here. See the day/month ambiguity figure above for how many rows in this dataset cannot be verified either way</li>
                             <li><strong>Text vs numeric dates:</strong> Ensure dates are stored consistently (all text or all numeric)</li>
                             <li><strong>Future dates:</strong> End dates after today's date may indicate data errors</li>
+                            <li><strong>Two-digit years:</strong> 00-68 are read as 2000-2068 and 69-99 as 1969-1999, so a 1960s date written with two digits is pushed a century forward; use four-digit years</li>
                             <li><strong>Extreme outliers:</strong> Very long intervals may be real (long follow-up) or errors</li>
                         </ul>
 
@@ -2050,7 +2115,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         <ul style='margin: 5px 0;'>
                             <li>If auto-detection fails, manually select your date format</li>
                             <li>Check for negative intervals - these indicate date column errors</li>
-                            <li>Review extreme values - anything above {self$options$extreme_multiplier}\u00d7 the 99th percentile is counted as extreme</li>
+                            <li>Review extreme values - anything above {self$options$extreme_multiplier}\u00d7 the 99th percentile is counted as extreme. With fewer than 101 intervals the 99th percentile is interpolated between the two longest intervals, so this rule can flag at most the single longest one, and none at all when n \u2264 51 at the default multiplier of 2</li>
                             <li>Ensure date columns don't contain non-date values (text, codes, etc.)</li>
                         </ul>
                     </div>

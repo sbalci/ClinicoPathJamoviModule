@@ -855,7 +855,9 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             clearWith=list(
                                 "outcome",
                                 "predictors",
-                                "positiveClass"),
+                                "positiveClass",
+                                "imbalanceThreshold",
+                                "recommendPRC"),
                             rows=1,
                             columns=list(
                                 list(
@@ -960,7 +962,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "positiveClass",
                                 "direction",
                                 "confidenceLevel",
-                                "useBootstrap"),
+                                "useBootstrap",
+                                "bootstrapMethod",
+                                "bootstrapSamples",
+                                "stratifiedBootstrap",
+                                "seed"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1126,7 +1132,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
-                                "direction"),
+                                "direction",
+                                "youdenOptimization",
+                                "sensitivityThreshold",
+                                "specificityThreshold",
+                                "clinicalPresets"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1171,7 +1181,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "predictors",
                                 "positiveClass",
                                 "direction",
-                                "customCutoffs"),
+                                "customCutoffs",
+                                "youdenOptimization",
+                                "sensitivityThreshold",
+                                "specificityThreshold",
+                                "clinicalPresets"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1231,7 +1245,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
-                                "direction"),
+                                "direction",
+                                "youdenOptimization",
+                                "sensitivityThreshold",
+                                "specificityThreshold",
+                                "clinicalPresets"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1281,7 +1299,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "positiveClass",
                                 "direction",
                                 "useObservedPrevalence",
-                                "prevalence"),
+                                "prevalence",
+                                "youdenOptimization",
+                                "sensitivityThreshold",
+                                "specificityThreshold",
+                                "clinicalPresets"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1564,7 +1586,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "predictors",
                                 "positiveClass",
                                 "plotWidth",
-                                "plotHeight"),
+                                "plotHeight",
+                                "youdenOptimization",
+                                "sensitivityThreshold",
+                                "specificityThreshold",
+                                "clinicalPresets"),
                             width=600,
                             height=600))
                         self$add(jmvcore::Image$new(
@@ -1621,7 +1647,9 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "positiveClass",
                                 "hlGroups",
                                 "splineCalibration",
-                                "splineKnots"),
+                                "splineKnots",
+                                "brierScore",
+                                "calibrationMetrics"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1861,7 +1889,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `name`="nnd", 
                                     `title`="NND", 
                                     `type`="number", 
-                                    `format`="zto"),
+                                    `format`="zto", 
+                                    `visible`="(nntCalculation)"),
                                 list(
                                     `name`="tested_positive", 
                                     `title`="Tested Positive (%)", 
@@ -1972,8 +2001,10 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param predictors Numeric predictor variables for ROC analysis
 #' @param analysisType Type of ROC analysis to perform
 #' @param direction Direction of the predictor-outcome relationship
-#' @param youdenOptimization Find optimal cutoff using Youden Index
-#'   (Sensitivity + Specificity - 1)
+#' @param youdenOptimization Find the optimal cutoff by maximising the Youden
+#'   index (sensitivity + specificity - 1), subject to the minimum
+#'   sensitivity/specificity below. When off, the cutoff closest to the top-left
+#'   corner of the ROC curve is reported instead.
 #' @param customCutoffs Comma-separated list of custom cutoffs to evaluate
 #'   (e.g., 0.1, 0.5, 0.9)
 #' @param sensitivityThreshold Minimum sensitivity a cutoff must achieve to be
@@ -2103,8 +2134,9 @@ enhancedROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   strategy) or the Hand-Till pairwise AUC (OVO strategy)
 #' @param clinicalImpact Calculate clinical impact metrics (NNT, NND, clinical
 #'   utility)
-#' @param nntCalculation Calculate number needed to test and number needed to
-#'   diagnose
+#' @param nntCalculation Show the number needed to test (1 / net benefit) and
+#'   number needed to diagnose (1 / Youden index) columns in the clinical impact
+#'   table
 #' @param clinicalUtilityCurve Display clinical utility curve showing test
 #'   consequences
 #' @param decisionImpactTable Show decision impact at various thresholds

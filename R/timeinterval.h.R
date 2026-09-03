@@ -309,7 +309,9 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   the start date column.
 #' @param time_format Date format specification. 'Auto-detect' attempts to
 #'   identify the format automatically. Manual selection ensures accurate
-#'   parsing for specific date formats.
+#'   parsing for specific date formats. Two-digit years are read as 2000-2068
+#'   for 00-68 and as 1969-1999 for 69-99; a message reports how many values
+#'   were parsed that way.
 #' @param output_unit Unit for calculated time intervals. Affects person-time
 #'   calculations and  statistical summaries. Choose based on study duration and
 #'   event frequency.
@@ -333,7 +335,11 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   percentile) from the analysis. These rows are dropped from every statistic,
 #'   including the mean and the total person-time, not merely flagged. The Data
 #'   Quality Assessment panel reports how many were removed. Leave off to keep
-#'   all intervals and only see the count.
+#'   all intervals and only see the count. With fewer than 101 intervals the
+#'   99th percentile is interpolated between the two longest intervals, so the
+#'   rule can remove at most the single longest one, and none at all when n is
+#'   51 or fewer at the default multiplier of 2; the analysis says so when that
+#'   applies.
 #' @param extreme_multiplier Multiplier for 99th percentile to define extreme
 #'   values. Default 2.0 means intervals longer than 2x the 99th percentile are
 #'   removed when 'Remove extreme values' is on. Higher values are more

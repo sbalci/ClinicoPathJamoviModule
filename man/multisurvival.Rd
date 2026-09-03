@@ -311,7 +311,6 @@ A results object containing:
 \code{results$cox_ph} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot8} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotKM} \tab \tab \tab \tab \tab an image \cr
-\code{results$risk_score_analysis} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$risk_score_analysis2} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskScoreHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$riskScoreSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr

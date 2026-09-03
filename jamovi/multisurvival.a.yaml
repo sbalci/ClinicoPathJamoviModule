@@ -712,9 +712,10 @@ options:
         # the menu will now display what is really being computed instead of a
         # method that was never running.
         #
-        # The `marginal` branch is retained in the backend as a guard, so a
-        # hand-edited or older file passing "marginal" refuses rather than
-        # silently computing something else.
+        # The backend has no `marginal` branch any more; any method value it
+        # does not implement (a hand-edited or older file passing "marginal")
+        # falls into the unknown-method guard and refuses with a notice rather
+        # than silently computing something else.
         #
         # Reinstating it means writing a real IPTW estimator (weight truncation,
         # multi-level treatment, robust confidence intervals) -- a separate piece

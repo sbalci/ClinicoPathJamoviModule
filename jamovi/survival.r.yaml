@@ -39,6 +39,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
 
     - name:  strongWarnings
@@ -84,6 +85,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - timetypeoutput
           - multievent
 
@@ -135,6 +137,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - timetypeoutput
           - multievent
           - analysistype
@@ -186,6 +189,7 @@ items:
           - outcomeLevel
           - elapsedtime
           - tint
+          - timetypedata
           - dxdate
           - fudate
           - timetypeoutput
@@ -197,6 +201,8 @@ items:
           - awod
           - uselandmark
           - landmark
+          - stratified_cox
+          - strata_variable
 
 
 
@@ -228,6 +234,7 @@ items:
           - outcomeLevel
           - elapsedtime
           - tint
+          - timetypedata
           - dxdate
           - fudate
           - timetypeoutput
@@ -239,6 +246,8 @@ items:
           - awod
           - uselandmark
           - landmark
+          - stratified_cox
+          - strata_variable
 
 
 
@@ -255,6 +264,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
           - timetypeoutput
           - analysistype
@@ -264,6 +274,8 @@ items:
           - awod
           - uselandmark
           - landmark
+          - stratified_cox
+          - strata_variable
 
 
 
@@ -321,6 +333,7 @@ items:
           - outcomeLevel
           - elapsedtime
           - tint
+          - timetypedata
           - dxdate
           - fudate
           - timetypeoutput
@@ -332,6 +345,7 @@ items:
           - awod
           - uselandmark
           - landmark
+          - age_stratified_cox
 
     - name: ageInteractionTable
       title: 'Age x Group Interaction Test'
@@ -371,6 +385,7 @@ items:
           - outcomeLevel
           - elapsedtime
           - tint
+          - timetypedata
           - dxdate
           - fudate
           - timetypeoutput
@@ -382,6 +397,7 @@ items:
           - awod
           - uselandmark
           - landmark
+          - age_stratified_cox
 
     - name: ageAdjustedInterpretation
       title: 'Age Adjustment Interpretation'
@@ -437,6 +453,7 @@ items:
           - elapsedtime
           - outcomeLevel
           - tint
+          - timetypedata
           - dxdate
           - fudate
           - timetypeoutput
@@ -501,6 +518,7 @@ items:
           - outcomeLevel
           - elapsedtime
           - tint
+          - timetypedata
           - dxdate
           - fudate
           - timetypeoutput
@@ -542,6 +560,7 @@ items:
           - risktable
           - outcomeLevel
           - tint
+          - timetypedata
           - dxdate
           - fudate
           - timetypeoutput
@@ -573,6 +592,7 @@ items:
           - ci95
           - outcomeLevel
           - tint
+          - timetypedata
           - dxdate
           - fudate
           - timetypeoutput
@@ -611,6 +631,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - timetypeoutput
           - multievent
           - analysistype
@@ -633,6 +654,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - timetypeoutput
           - multievent
 
@@ -655,6 +677,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
           - timetypeoutput
           - analysistype
@@ -685,6 +708,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
 
 
@@ -736,6 +760,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
           # cutp defines the rows of this table. jmvcore's Table$addRow() appends
           # unconditionally -- it has no duplicate-key check -- so a table that is
@@ -820,6 +845,7 @@ items:
         - fudate
         - dxdate
         - tint
+        - timetypedata
         - multievent
         # This table carries one row per level of the explanatory variable, so it
         # must clear when that variable changes; Table$addRow() appends without a
@@ -848,6 +874,7 @@ items:
         - fudate
         - dxdate
         - tint
+        - timetypedata
         - multievent
 
 
@@ -918,6 +945,7 @@ items:
         - awd
         - awod
         - tint
+        - timetypedata
         - fudate
         - dxdate
         - uselandmark
@@ -969,6 +997,10 @@ items:
         - name: observation
           title: "Observation"
           type: integer
+        - name: lp
+          title: "Linear predictor"
+          type: number
+          format: zto
         - name: martingale
           title: "Martingale"
           type: number
@@ -981,10 +1013,6 @@ items:
           title: "Score"
           type: number
           format: zto
-        - name: schoenfeld
-          title: "Schoenfeld"
-          type: number
-          format: zto
       clearWith:
         - residual_diagnostics
         - explanatory
@@ -992,6 +1020,7 @@ items:
         - outcomeLevel
         - elapsedtime
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1016,6 +1045,7 @@ items:
         - outcomeLevel
         - elapsedtime
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1039,6 +1069,7 @@ items:
         - outcomeLevel
         - elapsedtime
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1086,6 +1117,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
           - timetypeoutput
           - analysistype
@@ -1116,6 +1148,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
           - timetypeoutput
           - analysistype
@@ -1160,6 +1193,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
           - timetypeoutput
           - analysistype
@@ -1209,6 +1243,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
           - pplot
           - medianline
@@ -1247,6 +1282,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
           - timetypeoutput
           - analysistype
@@ -1283,6 +1319,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
           - timetypeoutput
           - analysistype
@@ -1316,6 +1353,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
           - timetypeoutput
           - analysistype
@@ -1375,6 +1413,7 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
           - multievent
           - timetypeoutput
           - analysistype
@@ -1400,6 +1439,7 @@ items:
           - outcomeLevel
           - elapsedtime
           - tint
+          - timetypedata
           - dxdate
           - fudate
           - timetypeoutput
@@ -1422,6 +1462,7 @@ items:
       measureType: continuous
       clearWith:
           - tint
+          - timetypedata
           - dxdate
           - fudate
           - timetypeoutput
@@ -1481,6 +1522,7 @@ items:
         - elapsedtime
         - outcomeLevel
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1530,6 +1572,7 @@ items:
         - elapsedtime
         - outcomeLevel
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1560,6 +1603,7 @@ items:
         - elapsedtime
         - outcomeLevel
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1619,6 +1663,7 @@ items:
         - elapsedtime
         - outcomeLevel
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1648,6 +1693,7 @@ items:
         - elapsedtime
         - outcomeLevel
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1699,6 +1745,7 @@ items:
         - outcomeLevel
         - elapsedtime
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1724,6 +1771,7 @@ items:
         - outcomeLevel
         - elapsedtime
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1774,6 +1822,7 @@ items:
         - outcomeLevel
         - elapsedtime
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1828,6 +1877,7 @@ items:
         - outcomeLevel
         - elapsedtime
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput
@@ -1861,6 +1911,7 @@ items:
         - outcomeLevel
         - elapsedtime
         - tint
+        - timetypedata
         - dxdate
         - fudate
         - timetypeoutput

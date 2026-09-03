@@ -2560,10 +2560,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Generate Analysis Explanations
         explanations_html <- paste0(
           "<div style='padding: 15px; background-color: rgba(33, 149, 188, 0.1); border-left: 4px solid #17a2b8; margin: 20px 0; color: inherit;'>",
-          "<h3 style='color: #17a2b8; margin-top: 0;'>", .("What This Analysis Does"), "</h3>",
+          "<h3 style='color: inherit; margin-top: 0;'>", .("What This Analysis Does"), "</h3>",
           "<p>", .("The Treatment Response Analysis creates waterfall and spider plots using threshold-based response categories adapted from RECIST v1.1 (not a full RECIST v1.1 assessment)."), "</p>",
 
-          "<h4 style='color: #17a2b8; margin-top: 15px;'>", .("Visualization Types:"), "</h4>",
+          "<h4 style='color: inherit; margin-top: 15px;'>", .("Visualization Types:"), "</h4>",
           "<ul style='margin: 5px 0;'>",
           "<li><strong>", .("Waterfall Plot:"), "</strong> ", .("Shows best response for each patient as vertical bars, ideal for single timepoint or best response data."), "</li>",
           "<li><strong>", .("Spider Plot:"), "</strong> ", .("Shows response trajectories over time as connected lines, requires time variable for longitudinal data."), "</li>",
@@ -3293,7 +3293,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Generate natural language summary
         summary_text <- paste0(
           "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #1b9e77; margin: 10px 0; color: inherit;'>",
-          "<h4 style='color: #1b9e77; margin-top: 0;'>", .("Treatment Response Summary"), "</h4>",
+          "<h4 style='color: inherit; margin-top: 0;'>", .("Treatment Response Summary"), "</h4>",
 
           "<p><strong>", .("Analysis Overview:"), "</strong> ",
           sprintf(.("Response analysis of %d patients (%d evaluable) using threshold-based categories adapted from RECIST v1.1; this is not a full RECIST v1.1 assessment."),
@@ -3706,7 +3706,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px;'>",
 
           "<div>",
-          "<h5 style='color: #6c757d; margin-bottom: 10px;'>", .("Response Metrics"), "</h5>",
+          "<h5 style='color: inherit; margin-bottom: 10px;'>", .("Response Metrics"), "</h5>",
           "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
           "<li><strong>ORR (Objective Response Rate - Unconfirmed):</strong> ", .("Percentage of patients achieving threshold-based CR (\u{2264}-100%) or PR (\u{2264}-30%) without RECIST v1.1 confirmation requirement. May overestimate true confirmed ORR."), "</li>",
           "<li><strong>DCR (Disease Control Rate - Unconfirmed):</strong> ", .("Percentage achieving threshold-based response or stable disease (CR + PR + SD) without confirmation. Exploratory endpoint only."), "</li>",
@@ -3716,7 +3716,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "</div>",
 
           "<div>",
-          "<h5 style='color: #6c757d; margin-bottom: 10px;'>", .("Response Categories (Simplified Threshold-Based)"), "</h5>",
+          "<h5 style='color: inherit; margin-bottom: 10px;'>", .("Response Categories (Simplified Threshold-Based)"), "</h5>",
           "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
           "<li><strong>CR (Complete Response - Threshold):</strong> ", .("\u{2264}-100% change from baseline (simplified criterion, NOT full RECIST CR which requires disappearance of ALL lesions including non-target)"), "</li>",
           "<li><strong>PR (Partial Response - Threshold):</strong> ", .("\u{2264}-30% change from baseline (simplified criterion, NOT full RECIST PR which requires target lesion sum calculation and no new lesions)"), "</li>",
@@ -3728,7 +3728,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "</div>",
 
           "<div style='margin-top: 15px;'>",
-          "<h5 style='color: #6c757d; margin-bottom: 10px;'>", .("Statistical Terms"), "</h5>",
+          "<h5 style='color: inherit; margin-bottom: 10px;'>", .("Statistical Terms"), "</h5>",
           "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
           "<li><strong>95% CI (Confidence Interval):</strong> ", .("Range of values compatible with the observed data; over repeated studies, 95% of such intervals contain the true population parameter"), "</li>",
           "<li><strong>Fisher's Exact Test:</strong> ", .("Statistical test for comparing response rates between groups"), "</li>",
@@ -3820,7 +3820,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (!has_patient_id) {
             paste0("<br><small style='color: #dc2626;'>", .("Required: Choose a variable that uniquely identifies each patient"), "</small>")
           } else {
-            paste0("<br><small style='color: #16a34a;'>", .("Patient ID selected"), "</small>")
+            paste0("<br><small style='color: inherit;'>", .("Patient ID selected"), "</small>")
           },
           "</li>",
 
@@ -3831,7 +3831,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (!has_response) {
             paste0("<br><small style='color: #dc2626;'>", .("Required: Choose tumor measurements or percentage changes"), "</small>")
           } else {
-            paste0("<br><small style='color: #16a34a;'>", .("Response variable selected"), "</small>")
+            paste0("<br><small style='color: inherit;'>", .("Response variable selected"), "</small>")
           },
           "</li>",
 
@@ -3855,9 +3855,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (input_type == "raw" && !has_time) {
             paste0("<br><small style='color: #dc2626;'>", .("Required for raw measurements: Select time variable with baseline = 0"), "</small>")
           } else if (has_time) {
-            paste0("<br><small style='color: #16a34a;'>", .("Time variable selected - enables spider plots"), "</small>")
+            paste0("<br><small style='color: inherit;'>", .("Time variable selected - enables spider plots"), "</small>")
           } else {
-            paste0("<br><small style='color: #6b7280;'>", .("Optional for percentage data"), "</small>")
+            paste0("<br><small style='color: inherit;'>", .("Optional for percentage data"), "</small>")
           },
           "</li>",
 
@@ -3866,9 +3866,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if (has_patient_id && has_response) "[READY]" else "[WAITING]",
           " <strong>", .("Run Analysis"), "</strong>",
           if (has_patient_id && has_response) {
-            paste0("<br><small style='color: #16a34a;'>", .("Ready to run! Results will appear below."), "</small>")
+            paste0("<br><small style='color: inherit;'>", .("Ready to run! Results will appear below."), "</small>")
           } else {
-            paste0("<br><small style='color: #6b7280;'>", .("Complete required steps above"), "</small>")
+            paste0("<br><small style='color: inherit;'>", .("Complete required steps above"), "</small>")
           },
           "</li>",
           "</ol>",

@@ -52,7 +52,7 @@ TEST: false
 jjstatsplot: false
 jsurvival: false
 ClinicoPathDescriptives: false
-OncoPath: false
+OncoPath: true
 meddecide: true
 
 
@@ -165,6 +165,23 @@ modules:
       # re-add here when survivalPower is promoted to a production Survival menuGroup.
       - "multisurvival-interactions.R"
       - "multisurvival-metrics.R"
+    # psychopdaROC_utilities.R is a meddecide helper (computeNRI/bootstrapNRI) with no
+    # caller in any shipped jsurvival analysis; an earlier manifest left it behind.
+    prune_r_files:
+      - "psychopdaROC_utilities.R"
+    # Declared in jsurvival Imports but referenced by no shipped R file (2026-09-03
+    # /check-module audit). maxstat is survminer's own Import, so surv_cutpoint()
+    # still gets it transitively. Also dropped from R/zzz_imports.R + NAMESPACE.
+    prune_imports:
+      - "MASS"
+      - "maxstat"
+      - "pec"
+      - "purrr"
+      - "randomForestSRC"
+      - "rpart.plot"
+      - "survivalsvm"
+      - "SurvMetrics"
+      - "xgboost"
     data_files:
       - "histopathology.rda"
       - "melanoma.rda"
@@ -211,6 +228,10 @@ modules:
       - "ggflowchart_comprehensive_data.rda"
   OncoPath:
     directory: "/Users/serdarbalci/Documents/GitHub/OncoPath"
+    i18n_files:
+      - "catalog.pot"
+      - "en.po"
+      - "tr.po"
     r_files:
       # Static/guidance HTML builders extracted from swimmerplot.b.R.
       # Must ship wherever swimmerplot ships.
@@ -236,6 +257,7 @@ modules:
     prune_imports:
       - "cluster"
       - "tidyr"
+      - "magrittr"
       # ihc_utilities.R intentionally NOT shipped to production OncoPath: its
       # consumers (ihcimmune/ihcbasic/ihcadvanced/ihcdiagnostic) are dev-routed to
       # menuGroup OncoPathD/T, and the one production analysis here

@@ -1,6 +1,6 @@
 jsurvival_audit_analyses <- c(
   "singlearm", "survival", "survivalcont", "multisurvival",
-  "oddsratio", "datetimeconverter", "timeinterval", "outcomeorganizer"
+  "oddsratio", "datetimeconverter", "timeinterval", "outcomeorganizer", "lassocox"
 )
 
 jsurvival_audit_root <- normalizePath(
@@ -267,6 +267,11 @@ test_that("checkbox labels use noun phrases", {
     )
 
     for (checkbox in checkboxes) {
+      # timeinterval's two row-dropping filters keep the verb on purpose: the
+      # label must say rows are deleted from every statistic, person-time
+      # included (rationale in jamovi/timeinterval.u.yaml, 2026-09-01).
+      if (analysis == "timeinterval" &&
+          checkbox$name %in% c("remove_negative", "remove_extreme")) next
       label <- checkbox$label
       if (is.null(label) || !nzchar(label)) label <- option_titles[[checkbox$name]]
       expect_false(

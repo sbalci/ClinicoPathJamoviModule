@@ -429,7 +429,11 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (inherits(vector, 'Date')) {
-                parsed_dates <- as.POSIXct(vector)
+                # as.POSIXct(<Date>) is UTC midnight whatever the Timezone option says;
+                # force_tz() keeps the 00:00 clock and moves the instant to midnight in
+                # the requested zone, which is what the same date as text would give.
+                parsed_dates <- lubridate::force_tz(as.POSIXct(vector),
+                                                    tzone = private$.resolveTimezone()$tz)
                 original_display <- base::format(vector)
                 notes <- c(notes, 'Detected Date input; converted to POSIXct at midnight.')
                 format_hint <- 'date'
@@ -557,9 +561,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     !identical(force_format, 'unix_epoch')
             if (any(.neg)) {
                 numeric_vector[.neg] <- NA_real_
-                notes <- c(notes, sprintf(
-                    'Set %d negative value(s) to missing: a negative serial is not a valid date in either Excel epoch.',
-                    sum(.neg)))
+                notes <- c(notes, .fmt(
+                    .('Set {count} negative value(s) to missing: a negative serial is not a valid date in either Excel epoch.'),
+                    count = sum(.neg)))
             }
 
             non_missing <- numeric_vector[!is.na(numeric_vector)]
@@ -814,6 +818,17 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(char_vector)
         },
 
+        # Canonical text form of a POSIXct vector, NA kept as NA.
+        # as.character(<POSIXct>) is element-wise on R >= 4.3 and drops the clock
+        # for midnight rows, so a column advertised as "standardized" mixed
+        # "2024-01-15" with "2024-01-15 10:30:00" whenever a source row was a bare
+        # date -- and a downstream ymd_hms() re-parse failed on exactly those rows.
+        # base::format (see .prepareDatetimeInput) formats in the vector's own
+        # tzone, i.e. the timezone the conversion actually used.
+        .datetimeText = function(x) {
+            base::format(x, "%Y-%m-%d %H:%M:%S")
+        },
+
         # ===================================================================
         # DATETIME PARSING
         # ===================================================================
@@ -843,12 +858,16 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # it teaches the user to ignore the one signal that a wrong format
                 # has silently mis-parsed their dates.
                 yrs <- suppressWarnings(as.integer(base::format(parsed_dates, "%Y")))
-                if (any(!is.na(yrs) & (yrs < 1900 | yrs > as.integer(base::format(Sys.Date() + 365, "%Y"))))) {
+                .bad <- !is.na(yrs) & (yrs < 1900 | yrs > as.integer(base::format(Sys.Date() + 365, "%Y")))
+                if (any(.bad)) {
                     private$.addNotice(
                         type = "WARNING",
                         title = .("Implausible Dates Detected"),
-                class = "date-suspect",
-                        content = .("Detected parsed dates outside plausible range (<1900 or >1 year in future). Review preview to confirm correct parsing.")
+                        class = "date-suspect",
+                        content = .fmt(
+                            .("{count} of {total} parsed date(s) fall outside the plausible range (<1900 or >1 year in the future); the first is {example}. Review preview to confirm correct parsing."),
+                            count = sum(.bad), total = sum(!is.na(yrs)),
+                            example = base::format(parsed_dates[which(.bad)[1]], "%Y-%m-%d"))
                     )
                 }
                 return(parsed_dates)
@@ -1145,7 +1164,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 parsed_val <- if (is.na(parsed[i])) {
                     "<em>NA</em>"
                 } else {
-                    as.character(parsed[i])
+                    # NOT as.character(): on R >= 4.3 it drops the clock for midnight
+                    # rows, so the column mixed "2024-01-15" and "2024-01-15 10:30:00".
+                    private$.datetimeText(parsed[i])
                 }
 
             # Status: success if parsed is not NA (unless original was NA)
@@ -1294,8 +1315,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             quality_summary <- if (is.na(quality$success_rate)) {
                 "N/A (no non-missing values)"
             } else if (.grade_unsafe) {
-                sprintf("%s%% of non-missing values produced a date, but see the warnings above: a column read in the wrong format still parses at a high rate.",
-                        base::format(round(quality$success_rate, 1)))
+                .fmt(.("{pct}% of non-missing values produced a date, but see the warnings above: a column read in the wrong format still parses at a high rate."),
+                     pct = base::format(round(quality$success_rate, 1)))
             } else if (quality$success_rate >= 95) {
                 "Excellent (\u226595% success)"
             } else if (quality$success_rate >= 80) {
@@ -1398,8 +1419,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # into a manuscript, so it has to be arithmetically true on its own.
             n_values <- quality$total_observations - quality$original_missing
             missing_clause <- if (quality$original_missing > 0)
-                sprintf("; %d of the %d rows were missing",
-                        quality$original_missing, quality$total_observations) else ""
+                .fmt(.("; {missing} of the {total} rows were missing"),
+                     missing = quality$original_missing, total = quality$total_observations) else ""
             summary_html <- glue::glue("
                 <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border: 1px solid #b3d9ff; border-radius: 5px; color: inherit;'>
                     <h4 style='margin-top: 0;'> Analysis Summary</h4>
@@ -1595,7 +1616,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$glossaryPanel$setContent(glossary_html)
         },
 
-        .detectMisuse = function(parsed_dates) {
+        .detectMisuse = function(parsed_dates, format_hint = NULL) {
             # Detect potential misuse patterns and return warnings
             warnings <- c()
 
@@ -1605,8 +1626,15 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (!(self$options$datetime_format %in% c("auto", "excel_serial", "excel_serial_1904", "unix_epoch")) &&
                 is.numeric(original_vector) && !all(is.na(original_vector))) {
-                warnings <- c(warnings,
-                    .("A text date format is selected but this column is numeric. \u2022 Choose Excel Serial or Unix Epoch if these really are serial numbers, or select a text date column instead."))
+                # A compact yyyymmdd integer column (20240115) is numeric too, and the
+                # numeric branch hands it to the text parser, where `ymd` reads it at
+                # 100%. Warn only when the text parser mostly failed, or when the numeric
+                # branch overrode the selection with a serial reading (format_hint set).
+                .rate <- if (is.null(parsed_dates)) NA_real_ else
+                    mean(!is.na(parsed_dates[!is.na(original_vector)]))
+                if (!is.null(format_hint) || is.na(.rate) || .rate < 0.85)
+                    warnings <- c(warnings,
+                        .("A text date format is selected but this column is numeric. \u2022 Choose Excel Serial or Unix Epoch if these really are serial numbers, or select a text date column instead."))
             }
 
             # Check for dates before 1900 (unusual in medical data)
@@ -1791,7 +1819,11 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # return already_parsed = TRUE, and for those the selection was honoured,
                 # not ignored -- the note contradicted the "Forced ... interpretation"
                 # line printed directly beside it.
+                # A NUMERIC column auto-read as an Excel/Unix serial also lands here with
+                # already_parsed = TRUE; it is not "stored as datetime values", and the
+                # .detectMisuse() warning covers that case, so gate on the true hints.
                 if (self$options$datetime_format != "auto" &&
+                    prepared$format_hint %in% c("posixct", "date") &&
                     !identical(prepared$format_hint, self$options$datetime_format)) {
                     preprocessing_notes <- c(preprocessing_notes, .fmt(
                         .("Manual format selection ({fmt}) was ignored because the column is already stored as datetime values."),
@@ -1919,7 +1951,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Add misuse warnings as INFO notices
-            misuse_warnings <- private$.detectMisuse(parsed_dates)
+            misuse_warnings <- private$.detectMisuse(parsed_dates, prepared$format_hint)
             if (length(misuse_warnings) > 0) {
                 # A two-digit-year column pivoted into the next century used to be
                 # reported at INFO severity, rendered in the same blue as the
@@ -2109,7 +2141,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$results$corrected_datetime_char$isNotFilled()) {
                 self$results$corrected_datetime_char$setRowNums(out_row_nums)
                 self$results$corrected_datetime_char$setValues(
-                    private$.safeCharacterConversion(parsed_dates)
+                    private$.safeCharacterConversion(private$.datetimeText(parsed_dates))
                 )
             }
 

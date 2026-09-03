@@ -128,7 +128,15 @@ test_that("agreement has no declared-but-unpopulated audit headings", {
 
 test_that("meddecide updater manifest includes all translation catalogs", {
   root <- audit_source_root()
-  config <- yaml::read_yaml(file.path(root, "_updateModules_config.yaml"))
+  config_path <- file.path(root, "_updateModules_config.yaml")
+  if (!file.exists(config_path)) {
+    config_path <- file.path(root, "..", "ClinicoPathJamoviModule", "_updateModules_config.yaml")
+  }
+  testthat::skip_if_not(
+    file.exists(config_path),
+    "updater config not available"
+  )
+  config <- yaml::read_yaml(config_path)
 
   expect_setequal(
     unlist(config$modules$meddecide$i18n_files, use.names = FALSE),

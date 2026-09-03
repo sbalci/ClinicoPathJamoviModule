@@ -1624,14 +1624,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Additional specific validations for multievent scenarios
         if (self$options$multievent) {
           if (is.null(self$options$dod) && is.null(self$options$dooc)) {
-            # Convert to Notice for consistent UX
-            # Notice Disabled
-            # notice <- jmvcore::Notice$new(...)
-            
-            self$results$todo$setContent(paste0(
-              "<b>", .("Error:"), "</b> ",
-              .("Multiple Events Configuration Error: when using multiple event levels, you must specify at least one event type (Dead of Disease or Dead of Other Causes). Select at least one event level from the outcome variable and ensure it has the appropriate levels.")))
-            self$results$todo$setVisible(TRUE)
+            private$.addHtmlMessage(
+              "error",
+              .("Multiple events configuration error"),
+              .("When using multiple event levels, you must specify at least one event type (Dead of Disease or Dead of Other Causes). Select at least one event level from the outcome variable and ensure it has the appropriate levels."))
+            self$results$todo$setVisible(FALSE)
             return(FALSE)
           }
         }
@@ -2134,6 +2131,15 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # with a three-level status. .definemyoutcome() hands Fine-Gray the
         # Censored/Event/Competing factor, which is exactly what finegray()
         # needs, so the hand-off belongs in this branch.
+        # Capture fitter warnings (monotone likelihood / "coefficient may be
+        # infinite", ran out of iterations, singular X) so they reach the
+        # results pane as a notice instead of only the Analysis Notes.
+        cox_fit_warnings <- character(0)
+        .capture_fit <- function(expr) withCallingHandlers(expr, warning = function(w) {
+          cox_fit_warnings <<- c(cox_fit_warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        })
+
         if (private$.isCompetingRisk()) {
             # Use Fine-Gray model
             # Create Fine-Gray dataset (outcome is factor from .definemyoutcome)
@@ -2167,7 +2173,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             # the standard errors -- making the subdistribution CIs too narrow
             # and the p-values too small. survival::finegray's documentation
             # calls for a robust variance on the expanded data.
-            cox_model <- survival::coxph(
+            cox_model <- .capture_fit(survival::coxph(
               fg_formula,
               data = fg_data,
               weights = fgwt,
@@ -2175,16 +2181,32 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               x = TRUE,
               y = TRUE,
               model = TRUE
-            )
+            ))
         } else {
             # Standard Cox model
-            cox_model <- survival::coxph(
+            cox_model <- .capture_fit(survival::coxph(
               coxformula,
               data = mydata,
               x = TRUE,
               y = TRUE,
               model = TRUE
-            )
+            ))
+        }
+
+        if (length(cox_fit_warnings) > 0) {
+          msgs <- unique(trimws(cox_fit_warnings))
+          # coxph names the offending column(s) by index ("... before
+          # variable  2,3 ; ..."); map them back to coefficient names.
+          coef_names <- names(stats::coef(cox_model))
+          idx <- suppressWarnings(as.integer(unlist(strsplit(gsub("[^0-9,]", "", msgs), ","))))
+          idx <- idx[!is.na(idx) & idx >= 1 & idx <= length(coef_names)]
+          affected <- if (length(idx) > 0) paste(unique(coef_names[idx]), collapse = ", ")
+                      else .("not identified by the fitter")
+          private$.addHtmlMessage(
+            "strongWarning",
+            .("Cox model convergence problem"),
+            .fmt(.("The model fitter reported: {msg} Affected term(s): {terms}. This usually means a covariate or factor level perfectly predicts the outcome (monotone likelihood / separation), so its hazard ratio is not estimable: expect an extreme HR with a confidence interval from 0 to infinity. Combine or drop sparse levels, or use Firth-penalised Cox (coxphf)."),
+                 msg = paste(msgs, collapse = " "), terms = affected))
         }
 
         # Populate interaction / effect-modification output.
@@ -2253,11 +2275,21 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         ph_diag <- try(survival::cox.zph(cox_model), silent = TRUE)
         if (!inherits(ph_diag, "try-error")) {
           ph_p <- ph_diag$table[, "p"]
-          if (any(ph_p[!is.na(ph_p)] < 0.05)) {
+          sig <- names(ph_p)[!is.na(ph_p) & ph_p < 0.05]
+          # Name the violating terms; fall back to GLOBAL only when no single
+          # term is flagged on its own.
+          viol <- setdiff(sig, "GLOBAL")
+          if (length(viol) == 0 && "GLOBAL" %in% sig) viol <- "GLOBAL"
+          if (length(viol) > 0) {
+            viol_txt <- paste0(viol, " (",
+                               ifelse(ph_p[viol] < 0.001, "p < 0.001",
+                                      sprintf("p = %.3f", ph_p[viol])), ")",
+                               collapse = ", ")
             private$.addHtmlMessage(
-              "warning",
+              "strongWarning",
               .("Proportional hazards violation"),
-              .("Proportional hazards test (cox.zph) indicates potential violations (p < 0.05) for one or more terms. Interpret HRs with caution or consider time-varying effects/stratification.")
+              .fmt(.("The proportional hazards test (cox.zph) is significant for: {terms}. The hazard ratio of such a term is a time-average of an effect that changes over follow-up and may misrepresent it at any particular time. Consider entering the variable as a stratification variable, modelling a time-varying effect, or reporting hazard ratios within time windows."),
+                   terms = viol_txt)
             )
           }
         }
@@ -2685,7 +2717,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             if (length(na_coefs) > 0) {
               self$results$survMetricsSummary$setContent(paste0(
                 "<p><b>", .("Performance metrics unavailable."), "</b> ",
-                .fmt(.("The model could not estimate a coefficient for: <i>{terms}</i>."), terms = paste(na_coefs, collapse = ", ")), " ",
+                .fmt(.("The model could not estimate a coefficient for: <i>{terms}</i>."), terms = htmltools::htmlEscape(paste(na_coefs, collapse = ", "))), " ",
                 .("This happens when a covariate is constant, or is collinear with another covariate, in the rows remaining after missing values are dropped."), " ",
                 .("Brier score, time-dependent AUC and IBS require a fully identified model; remove or combine the affected term(s) and re-run."), "</p>"))
               return(invisible(NULL))
@@ -3080,15 +3112,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             sprintf(.("The model is stratified by %s. A nomogram maps a total point score onto a single absolute-risk scale, but a stratified model has a separate baseline hazard for each stratum, so no single scale applies to all patients. Remove the stratification, or enter these variables as ordinary covariates, to obtain a nomogram."),
                     paste(strata_vars, collapse = ", ")))
 
-          # Withdraw the whole nomogram section, not just the plot.
+          # Withdraw the plot, scoring guide and walkthrough, not the summary.
           #
           # Returning early leaves every sibling panel showing whatever the
           # previous run put there: an empty plot frame, a "How to read the
           # nomogram" walkthrough, and a scoring guide -- all describing a
           # nomogram that was deliberately not produced. An explanation of how
           # to read something that is not on the page is worse than silence.
+          # nomogramSummary is left alone: .calculate_nomogram() writes the
+          # "no nomogram for a stratified model" explanation into it next.
           for (nm in c("nomogramHeading", "plot_nomogram", "nomogram_display",
-                       "nomogramSummaryHeading", "nomogramSummary",
                        "nomogramExplanation")) {
             it <- try(self$results[[nm]], silent = TRUE)
             if (!inherits(it, "try-error") && !is.null(it)) {
@@ -3422,7 +3455,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         <h2>', .("Nomogram Scoring Guide"), '</h2>
 
         <div class="tech-details">
-            ', paste(tech_details, collapse="<br>"), '
+            ', paste(htmltools::htmlEscape(tech_details), collapse="<br>"), '
         </div>
 
         <div class="instructions">
@@ -3442,9 +3475,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         for(section_name in names(sections)) {
           html_content <- paste0(html_content, '
             <div class="variable-section">
-                <div class="section-title">', section_name, '</div>
+                <div class="section-title">', htmltools::htmlEscape(section_name), '</div>
                 <div class="values">',
-                                 paste(sections[[section_name]], collapse="<br>"),
+                                 paste(htmltools::htmlEscape(sections[[section_name]]), collapse="<br>"),
                                  '</div>
             </div>')
         }
@@ -3467,8 +3500,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             if(length(values) == 2) {
               html_content <- paste0(html_content, '
                 <tr>
-                    <td>', values[1], '</td>
-                    <td>', values[2], '</td>
+                    <td>', htmltools::htmlEscape(values[1]), '</td>
+                    <td>', htmltools::htmlEscape(values[2]), '</td>
                 </tr>')
             }
           }
@@ -4457,19 +4490,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
 
-        self$results$risk_score_analysis$setContent(""
-          # list(
-          #   desired_groups,
-          #   percentile_text,
-          #   message_risk_score_analysis,
-          #   warning_message,
-          #   length(levels(mydata$risk_group)),
-          #   levels(mydata$risk_group),
-          #   c_index,
-          #   c_index_formatted
-          #   )
-        )
-
         self$results$risk_score_analysis2$setContent(message_risk_score_analysis)
 
         # Generate narrative summary if showSummaries is enabled
@@ -4822,25 +4842,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                        stringsAsFactors = FALSE)
           }))
 
-        } else if (identical(method, "marginal")) {
-          # Refuse WITHOUT calling survminer.
-          #
-          # Inverse-probability weighting is survminer's estimator, and its
-          # implementation builds a propensity glm by string surgery on the Cox
-          # formula. When the adjustment variable is also a model covariate --
-          # the usual case here -- the response lands on the right-hand side and
-          # the weighted fit is unusable. Calling it anyway did not merely fail:
-          # on real data it ran without returning, so the plot renderer never
-          # completed and jamovi span on a loading animation forever. The table
-          # path had already refused, so the report showed a refusal notice
-          # beside a plot that never stopped loading.
-          #
-          # There is nothing to learn from attempting it, so do not attempt it.
-          # Writing our own IPTW estimator is a separate piece of work (weight
-          # truncation, multi-level treatment, robust CIs); a subtly wrong one
-          # would be worse than none.
-          NULL
         } else {
+          # No "marginal" (IPTW) estimator: survminer's implementation breaks
+          # whenever the adjustment variable is also a model covariate, and it
+          # is no longer an option value.
           NULL
         }
       }, error = function(e) e)
@@ -4849,10 +4854,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Refuse explicitly. The old .plot_adj() silently retried "marginal" as
         # "average" and printed the result under the requested name; that kind
         # of silent substitution is how this whole defect stayed invisible.
-        detail <- if (identical(method, "marginal"))
-          .("The marginal (inverse-probability-weighted) curve is computed by survminer, whose implementation fails whenever the adjustment variable is also a covariate of the Cox model - which is the usual case here.")
-        else
-          .("The model could not be evaluated under this adjustment method.")
+        detail <- .("The model could not be evaluated under this adjustment method.")
         private$.addHtmlMessage(
           "warning",
           .("Adjusted curves unavailable"),
@@ -5001,7 +5003,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         "average" = .("Estimand: survival standardised over the observed patients - every patient is set to the stated level in turn and the model-predicted curves are averaged (g-computation). Confidence intervals require bootstrapping and are left blank."),
         "conditional" = .("Estimand: the model-predicted curve for one reference patient - the mean of every numeric covariate and the most common level of every categorical covariate. Confidence intervals are those of that single prediction."),
         "single" = .("Estimand: one curve for the whole cohort with each patient at their own covariate values; the adjustment variable is not varied. Confidence intervals require bootstrapping and are left blank."),
-        "marginal" = .("Estimand: survival reweighted by the inverse probability of the observed level (survminer's marginal method). Confidence intervals are not available and are left blank."),
         .("Estimand: model-based adjusted survival.")
       )
       if (private$.isCompetingRisk()) {
@@ -5108,7 +5109,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             paste0(" ", .fmt(.("(95% CI {lower} to {upper})"), lower = row$lower, upper = row$upper)) else ""
           paste0(
             .fmt(.("For {level} at {time} {unit}, {estimate} is {value}{ci}."),
-                 level = row$strata, time = row$time, unit = self$options$timetypeoutput,
+                 level = htmltools::htmlEscape(row$strata), time = row$time, unit = self$options$timetypeoutput,
                  estimate = estimate_label, value = row$surv, ci = ci), " ",
             .fmt(.("Among the {atrisk} patients still under observation at that time, {events} events had been observed in this group."),
                  atrisk = row$atrisk, events = row$events)
@@ -5186,26 +5187,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
 
-
-        ### prepare formula ----
-
-        myexplanatory <- NULL
-        if (!is.null(self$options$explanatory)) {
-          myexplanatory <- as.vector(myexplanatory_labelled)
-        }
-
-        mycontexpl <- NULL
-        if (!is.null(self$options$contexpl)) {
-          mycontexpl <- as.vector(mycontexpl_labelled)
-        }
-
-        formula2 <- c(myexplanatory, mycontexpl)
-
-        myformula <-
-          paste("survival::Surv(mytime, myoutcome) ~ ",
-                paste(formula2, collapse = " + "))
-
-        myformula <- .asSurvivalFormula(myformula)
 
         # Fit model
         # Use the central model (handles Fine-Gray if needed)
@@ -5457,7 +5438,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           paste0(" ", .fmt(.("(95% CI {lower} to {upper})"), lower = round(r$x0_95lcl, 1), upper = round(r$x0_95ucl, 1)))
         quantity <- if (is_cr) .("adjusted median time to the event of interest") else .("adjusted median survival")
         description <- .fmt(.("For {variable} = {level}, {quantity} is {median}{ci} {unit}."),
-                            variable = adj_var, level = r$factor, quantity = quantity,
+                            variable = htmltools::htmlEscape(adj_var), level = htmltools::htmlEscape(r$factor), quantity = quantity,
                             median = round(r$median, 1), ci = ci, unit = self$options$timetypeoutput)
         if (is.na(r$median)) {
           description <- paste0(description, "\n", .("Note:"), " ",
@@ -5886,13 +5867,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
     # It is excluded from the multivariable fit only, at the call below.
   }
 
+  # Interaction terms go to the MULTIVARIABLE model only. In `explanatory`
+  # finalfit would also fit each one on its own -- Surv ~ A:B with no main
+  # effects -- and print those non-hierarchical cell-vs-cell contrasts in the
+  # "HR (univariable)" column as if they were interpretable next to the
+  # adjusted estimates. finalfit_merge() keeps rows that exist only in the
+  # multivariable fit, so the interaction row still appears, with "-" in the
+  # univariable column.
+  interaction_ff <- character(0)
   if (length(self$options$interactions) > 0) {
     .all_labels_ff <- labelled::var_label(cleaneddata$mydata_labelled)
-    explanatory_formula <- c(
-      explanatory_formula,
-      .interactionTermsForFinalfit(
-        .mapInteractionTerms(self$options$interactions, .all_labels_ff))
-    )
+    interaction_ff <- .interactionTermsForFinalfit(
+      .mapInteractionTerms(self$options$interactions, .all_labels_ff))
   }
 
   # Prepare the dependent variable formula
@@ -5931,6 +5917,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         .data = mydata,
         dependent = dependent_formula,
         explanatory = explanatory_formula,
+        explanatory_multi = c(explanatory_formula, interaction_ff),
         cont_cut = 0,
         metrics = TRUE
       )) -> tCox
@@ -5953,11 +5940,15 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         .data = mydata,
         dependent = dependent_formula,
         explanatory = explanatory_formula,
-        explanatory_multi = c(covars_multi, paste0("strata(", strata_ff, ")")),
+        explanatory_multi = c(covars_multi, interaction_ff, paste0("strata(", strata_ff, ")")),
         cont_cut = 0,
         metrics = TRUE
       )) -> tCox
     }
+    # Rows present only in the multivariable fit (interactions) carry NA in
+    # the count and univariable cells; print them as finalfit's own "-".
+    if (is.list(tCox) && is.data.frame(tCox[[1]]))
+      tCox[[1]][is.na(tCox[[1]])] <- "-"
 
     # Convert finalfit table to HTML with nice formatting
     # escape = TRUE: finalfit HR cells are plain text, so HTML-escaping keeps

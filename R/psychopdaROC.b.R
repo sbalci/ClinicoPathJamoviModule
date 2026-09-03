@@ -889,11 +889,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Generate comprehensive explanation
         explanation <- paste0(
           "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #007bff; margin: 10px 0; color: inherit;'>",
-          "<h4 style='color: #007bff; margin-top: 0;'> Fixed ", tools::toTitleCase(analysis_type), " Analysis Guide</h4>",
-          "<h5 style='color: #495057; margin-top: 20px;'> Analysis Overview</h5>",
+          "<h4 style='color: inherit; margin-top: 0;'> Fixed ", tools::toTitleCase(analysis_type), " Analysis Guide</h4>",
+          "<h5 style='color: inherit; margin-top: 20px;'> Analysis Overview</h5>",
           "<p>This analysis determines the <strong>cutpoint threshold</strong> that achieves a target ", analysis_type, " of <strong>", round(target_value, 3), "</strong> (", round(target_value * 100, 1), "%). ",
           "The corresponding ", if (analysis_type == "sensitivity") "specificity" else "sensitivity", " and other performance metrics are then calculated.</p>",
-          "<h5 style='color: #495057;'> Clinical Context</h5>"
+          "<h5 style='color: inherit;'> Clinical Context</h5>"
         )
 
         # Add clinical context based on analysis type
@@ -930,7 +930,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Add interpolation method explanation
         explanation <- paste0(
           explanation,
-          "<h5 style='color: #495057;'> Interpolation Method: ", tools::toTitleCase(gsub("_", " ", interpolation_method)), "</h5>"
+          "<h5 style='color: inherit;'> Interpolation Method: ", tools::toTitleCase(gsub("_", " ", interpolation_method)), "</h5>"
         )
 
         if (interpolation_method == "linear") {
@@ -971,7 +971,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Add interpretation of results
         explanation <- paste0(
           explanation,
-          "<h5 style='color: #495057;'> Results Interpretation</h5>",
+          "<h5 style='color: inherit;'> Results Interpretation</h5>",
           "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
           "<p><strong>Key Metrics to Review:</strong></p>",
           "<ul style='margin-bottom: 0;'>",
@@ -987,7 +987,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Add clinical decision framework
         explanation <- paste0(
           explanation,
-          "<h5 style='color: #495057;'> How to Read These Numbers</h5>",
+          "<h5 style='color: inherit;'> How to Read These Numbers</h5>",
           "<div style='background-color: rgba(33, 41, 56, 0.13); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
           "<ul style='margin-bottom: 0;'>",
           "<li><strong>Achieved is not guaranteed</strong>: the achieved ", analysis_type, " is what this sample produced at this cutpoint; it is not a level the test will reproduce in another sample</li>",
@@ -1001,7 +1001,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Add warnings and considerations
         explanation <- paste0(
           explanation,
-          "<h5 style='color: #dc3545;'> Important Considerations</h5>",
+          "<h5 style='color: inherit;'> Important Considerations</h5>",
           "<div style='background-color: rgba(216, 33, 50, 0.18); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
           "<ul style='margin-bottom: 0;'>",
           "<li><strong>Population Specificity</strong>: Results may not generalize to different populations</li>",
@@ -1016,8 +1016,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # Add references and further reading
         explanation <- paste0(
           explanation,
-          "<h5 style='color: #495057;'> Further Reading</h5>",
-          "<p style='font-size: 0.9em; color: #6c757d;'>",
+          "<h5 style='color: inherit;'> Further Reading</h5>",
+          "<p style='font-size: 0.9em; color: inherit; opacity: 0.85;'>",
           "For comprehensive guidance on ROC analysis and cutpoint selection, see: ",
           "<em>Youden WJ (1950). Index for rating diagnostic tests. Cancer 3:32-35</em> | ",
           "<em>Zweig MH, Campbell G (1993). Receiver-operating characteristic plots. Clin Chem 39:561-577</em>",

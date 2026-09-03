@@ -52,14 +52,6 @@ items:
       type:  Html
       visible: false
 
-    # - name:  mydataview2
-    #   title: mydataview2
-    #   type:  Preformatted
-
-    # - name:  mydataview
-    #   title: mydataview
-    #   type:  Preformatted
-
     - name:  coxRegressionHeading
       title: Cox Regression for Continuous Variables
       type:  Preformatted
@@ -67,7 +59,7 @@ items:
 
     - name:  coxSummary
       title: '`Cox Regression Summary and Table - ${contexpl}`'
-      type:  Preformatted
+      type:  Html
       visible: (showSummaries)
       clearWith:
           - sc
@@ -153,11 +145,20 @@ items:
           - outcome
           - outcomeLevel
           - elapsedtime
+          - fudate
+          - dxdate
+          - tint
           - contexpl
           - stratified_cox
           - strata_variable
           - multievent
+          - uselandmark
+          - landmark
           - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
           - timetypeoutput
           - timetypedata
       columns:
@@ -212,10 +213,6 @@ items:
           - seed
           - timetypeoutput
           - timetypedata
-
-    # - name:  mydataview_personTimeAnalysis
-    #   title: mydataview_personTimeAnalysis
-    #   type:  Preformatted
 
 
 
@@ -288,6 +285,7 @@ items:
         - rate_multiplier
         - time_intervals
         - person_time
+        - contexpl
         - outcome
         - outcomeLevel
         - elapsedtime
@@ -319,6 +317,7 @@ items:
         - rate_multiplier
         - time_intervals
         - person_time
+        - contexpl
         - outcome
         - outcomeLevel
         - elapsedtime
@@ -433,6 +432,10 @@ items:
         - contexpl
         - outcome
         - outcomeLevel
+        - elapsedtime
+        - fudate
+        - dxdate
+        - tint
         - findcut
         - multiple_cutoffs
         - uselandmark
@@ -534,6 +537,9 @@ items:
         - outcome
         - outcomeLevel
         - elapsedtime
+        - fudate
+        - dxdate
+        - tint
         - findcut
         - uselandmark
         - landmark
@@ -574,6 +580,9 @@ items:
       title: Cut Point
       type:  Table
       rows: 0
+      refs:
+          - survminer
+          - maxstat
       columns:
         - name: cutpoint
           title: 'Cut Point'
@@ -1265,14 +1274,6 @@ items:
           - timetypedata
 
 
-
-    # - name:  mydataview_multipleCutoffs1
-    #   title: mydataview_multipleCutoffs1
-    #   type:  Preformatted
-
-    # - name:  mydataview_multipleCutoffs2
-    #   title: mydataview_multipleCutoffs2
-    #   type:  Preformatted
 
 
     - name: multipleCutTable

@@ -1,5 +1,75 @@
 # ClinicoPath News
 
+## Unreleased — meddecide audit fixes (module 1.0.8.09)
+
+- jsurvival remediation from the 2026-09-03 `/audit-module jsurvival` report (all
+  eight touched analyses are routed to `SurvivalT`/JamoviTest for testing; move
+  them back to `Survival` and re-run `_updateModules.R` to ship):
+  - `multisurvival`: factor levels and variable names are HTML-escaped in the
+    nomogram guide, adjusted-survival and metrics summaries; interaction terms
+    no longer enter the univariable HR column; the PH-violation notice is a
+    strong warning naming the terms and p-values; Cox convergence warnings
+    reach the results pane; the stratified nomogram no longer hides the
+    summary it writes; dead `risk_score_analysis`/`marginal` schema removed.
+  - `survival`: stratification and RCS variable names escaped in Html; the RCS
+    formula goes through the guarded helper; calibration uses the last event
+    time at or before t; the residuals table reports Schoenfeld residuals only
+    for events and the plot has a meaningful x-axis; the person-time
+    explanation is no longer overwritten; Gray's test is shown in
+    competing-risk mode; the pairwise table stays visible with a note;
+    `clearWith` covers stratification and age-stratification options.
+  - `survivalcont`: the calculated-time export is the raw interval, not the
+    landmark-shifted one; the cut-off text no longer claims an adjusted
+    p-value that is never computed; `coxSummary` is an Html item; the
+    duplicated cut-off warnings and the `.init()` hide/show block are gone.
+  - `singlearm`: time-specific survival CIs use log-log; the piecewise-hazard
+    table is shown by `visible:` binding instead of a one-way hide; zero and
+    low event counts raise quantified notices.
+  - `oddsratio`: the Firth forest-plot formula uses the guarded helper; the
+    separation check runs after 0/1 numerics become factors.
+  - `outcomeorganizer`: the few-events warning is survival-worded and no
+    longer skips 2-level outcomes with missing values; `addOutcome` follows
+    the Output-option idiom; the duplicate RFS/PFS/DFS warning is emitted once.
+  - `timeinterval`: the extreme-value filter discloses its threshold, count,
+    and when n is too small for the rule to act; two-digit years are reported.
+  - `datetimeconverter`: the text datetime column keeps the clock at midnight;
+    two advisory notices no longer fire on numeric serial columns.
+  - One regression test file per analysis (`test-<name>-audit-2026-09.R`).
+- jsurvival packaging (from `/check-module jsurvival`): nine Imports no shipped
+  file used (MASS, maxstat, pec, purrr, randomForestSRC, rpart.plot, survivalsvm,
+  SurvMetrics, xgboost) are pruned from the submodule DESCRIPTION, NAMESPACE and
+  the `zzz_imports.R` shim, and the stray meddecide helper
+  `psychopdaROC_utilities.R` is no longer shipped; both are now `prune_imports` /
+  `prune_r_files` entries in `_updateModules_config.yaml`. `lassocox` now
+  imports only `.` from jmvcore instead of the whole namespace, and it joins the
+  library-audit test's analysis list; that test also exempts timeinterval's two
+  deliberately verb-labelled row-dropping checkboxes (rationale in its `.u.yaml`).
+- `agreement`: Robinson's A is now Robinson's (1957) variance-ratio coefficient
+  with a seeded bootstrap interval; the previous value was Goodman-Kruskal's
+  gamma, an association measure. "Maxwell's RE" is renamed and recomputed as a
+  two-way (case + rater) decomposition of disagreement. The bootstrap ICC row
+  follows the chosen ICC model, the mixed-effects comparison refuses categorical
+  ratings, the TDI bootstrap is seeded, paired-comparison intervals follow the
+  confidence level, all 28 dynamic tables are reset before repopulation, weighted
+  kappa on nominal data is a structured error, and small-sample and
+  sparse-discordant-cell notes were added.
+- `enhancedROC`: custom cutoffs under "lower is positive" now use pROC's tie
+  rule, plots re-render from image state after reopening a saved file, the Youden
+  toggle off means closest-to-top-left, internal validation uses the known
+  probability direction and labels its interval honestly, one-vs-rest curves share
+  one direction per marker, the NNT/NND columns follow their checkbox, dead code
+  and stray UI boxes were removed, and notice text is translatable.
+- `psychopdaROC`: fixed a crash on every re-run after ROC smoothing, warnings
+  raised late in the run now reach the status box, an unselected positive class
+  no longer crashes, a missing subgroup value no longer aborts the analysis, the
+  cutpointr fallback is disclosed, the duplicate CI pass was removed, effect-size
+  columns are labelled as differences with each marker's own d, the power-curve
+  plot uses the table's Hanley-McNeil power, and the decision-curve plot uses the
+  table's risk fit and prevalence.
+- `sequentialtests`: explanation and formula panels render their numbers
+  (placeholders were shipped as literal braces), plot subtitles show the
+  translated strategy label, and control titles follow sentence case.
+
 ## Unreleased — Continuous-Predictor Survival 1.0.8 (module 1.0.8.05)
 
 - Align the analysis title across the option, result, UI, generated help, and

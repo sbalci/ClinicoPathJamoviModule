@@ -1619,6 +1619,31 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (private$.isCompetingRisk()) {
                     medianTable$setNote("crci",
                         "Confidence intervals for competing risk median times are not available (CIF quantile CIs require specialized methods such as bootstrap).")
+                    # Gray's test is the between-group comparison in this mode
+                    # (Cox / log-rank / pairwise are refused); cuminc() already
+                    # computed it, so show it rather than leave no inference at all.
+                    gray <- cuminc_fit$Tests
+                    if (is.matrix(gray) && "1" %in% rownames(gray)) {
+                        medianTable$setNote("gray",
+                            .fmt(.("Gray's test for equality of cumulative incidence of the event of interest across groups: chi-square = {stat}, df = {df}, p = {p}."),
+                                 stat = sprintf("%.2f", gray["1", "stat"]),
+                                 df = as.integer(gray["1", "df"]),
+                                 p = format.pval(gray["1", "pv"], digits = 3, eps = 0.001)))
+                    }
+                }
+
+                # Zero events in a group: the KM curve never drops, the median is
+                # undefined and any HR against it is degenerate. Say so up front.
+                zero_groups <- results2table$factor[
+                    !is.na(results2table$events) & as.numeric(results2table$events) == 0]
+                if (length(zero_groups) > 0 && nrow(results2table) > 1) {
+                    private$.addHtmlMessage(
+                        "warning",
+                        .("No events in one or more groups"),
+                        .fmt(
+                            .("Group(s) with zero events: {groups}. Their median is undefined and hazard ratios involving them are not estimable (the estimate diverges); compare these groups descriptively."),
+                            groups = paste(zero_groups, collapse = ", ")
+                        ))
                 }
 
                 ## Median Survival Summary ----
@@ -1889,7 +1914,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     multi_form <- .asSurvivalFormula(paste(myformula, "~", explanatory_formula, "+ strata(", jmvcore::composeTerm(strata_var), ")"))
                     multi_mod <- try(survival::coxph(multi_form, data = mydata), silent = TRUE)
                     if (!inherits(multi_mod, "try-error") && isTRUE(strat_applied)) {
-                        tCox[[2]][[1]] <- paste("Stratified by", strata_var, "-", tCox[[2]][[1]])
+                        tCox[[2]][[1]] <- paste("Stratified by", htmltools::htmlEscape(strata_var), "-", tCox[[2]][[1]])
                     } else if (!isTRUE(strat_applied)) {
                         # Never claim stratification that was not applied.
                         tCox[[2]][[1]] <- paste(
@@ -2077,9 +2102,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ph_p <- ph_p[!is.na(ph_p)]
                         if (length(ph_p) > 0 && any(ph_p < 0.05)) {
                             private$.addHtmlMessage(
-                                "warning",
-                                .("Proportional hazards assumption may be violated"),
-                                .("cox.zph p-values below 0.05 indicate potential violation of the proportional hazards assumption for one or more terms. Consider time-varying effects, stratification, or splitting follow-up; see the PH interpretation section for details.")
+                                "strongWarning",
+                                .fmt(.("Proportional hazards assumption may be violated (smallest cox.zph p = {p})"),
+                                     p = format.pval(min(ph_p), digits = 3, eps = 0.001)),
+                                .("cox.zph p-values below 0.05 indicate potential violation of the proportional hazards assumption for one or more terms; the hazard ratio is then an average over follow-up, not a constant effect. Consider time-varying effects, stratification, or splitting follow-up; see the PH interpretation section for details.")
                             )
                         }
                     }, error = function(e) invisible(NULL))
@@ -2115,10 +2141,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             for (i in seq_len(nrow(residuals_data))) {
                                 residuals_table$addRow(rowKey = i, values = list(
                                     observation = residuals_data$observation[i],
+                                    lp = residuals_data$lp[i],
                                     martingale = residuals_data$martingale[i],
                                     deviance = residuals_data$deviance[i],
-                                    score = residuals_data$score[i],
-                                    schoenfeld = residuals_data$schoenfeld[i]
+                                    score = residuals_data$score[i]
                                 ))
                             }
                             
@@ -2143,21 +2169,25 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     martingale_res <- residuals(cox_model, type = "martingale")
                     deviance_res <- residuals(cox_model, type = "deviance")
                     score_res <- residuals(cox_model, type = "score")
-                    schoenfeld_res <- residuals(cox_model, type = "schoenfeld")
-                    
+                    # Schoenfeld residuals exist only for EVENTS (one per event
+                    # time, not one per subject), so they cannot fill a per-row
+                    # table; the cox.zph plot above is their proper display.
+                    lp <- stats::predict(cox_model, type = "lp")
+
                     # Create data frame with residuals
                     residuals_df <- data.frame(
                         observation = seq_along(martingale_res),
+                        lp = round(as.numeric(lp), 4),
                         martingale = round(martingale_res, 4),
                         deviance = round(deviance_res, 4),
-                        score = if (is.matrix(score_res)) round(score_res[,1], 4) else round(score_res, 4),
-                        schoenfeld = if (length(schoenfeld_res) == length(martingale_res)) {
-                            round(schoenfeld_res, 4)
-                        } else {
-                            rep(NA, length(martingale_res))
-                        }
+                        score = if (is.matrix(score_res)) round(score_res[,1], 4) else round(score_res, 4)
                     )
-                    
+                    if (is.matrix(score_res) && ncol(score_res) > 1) {
+                        self$results$residualsTable$setNote("score_term",
+                            .fmt(.("Score residuals are shown for the first model term ({term}) only."),
+                                 term = colnames(score_res)[1]))
+                    }
+
                     return(residuals_df)
                     
                 }, error = function(e) {
@@ -2683,12 +2713,13 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
 
                 if (dim(mypairwise2)[1] == 1) {
-                    self$results$pairwiseTable$setVisible(FALSE)
-
-                    pairwiseSummary <-
-                        "No pairwise comparison when explanatory variable has < 3 levels."
-                    self$results$pairwiseSummary$setContent(pairwiseSummary)
-
+                    # Two levels: the single pairwise row IS the overall test, so
+                    # no multiplicity adjustment applies. Keep the table in place
+                    # (hiding it left an empty heading) and say why in a note.
+                    pairwiseTable$setNote("twolevels",
+                        .("The explanatory variable has only two levels, so there is a single comparison and no multiplicity adjustment is applied; it is equivalent to the overall log-rank test above."))
+                    self$results$pairwiseSummary$setContent(
+                        .("No pairwise comparison beyond the overall test when the explanatory variable has fewer than 3 levels."))
                 }
 
 
@@ -3785,15 +3816,27 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 
                 tryCatch({
                     # Create residuals plot
-                    plot9 <- ggplot2::ggplot(residuals_data, ggplot2::aes(x = observation)) +
-                        ggplot2::geom_point(ggplot2::aes(y = martingale), color = "blue", alpha = 0.6) +
-                        ggplot2::geom_smooth(ggplot2::aes(y = martingale), method = "loess", se = TRUE, color = "red") +
-                        ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
+                    # Older saved states carry no lp column; fall back to the row index.
+                    has_lp <- !is.null(residuals_data$lp)
+                    residuals_data$.x <- if (has_lp) residuals_data$lp else residuals_data$observation
+                    plot9 <- ggplot2::ggplot(residuals_data, ggplot2::aes(x = .x, y = martingale)) +
+                        ggplot2::geom_point(color = "blue", alpha = 0.6) +
+                        ggplot2::geom_hline(yintercept = 0, linetype = "dashed")
+                    # A loess smoother needs a spread of x; a single binary
+                    # covariate gives two lp values, where group means say it all.
+                    if (length(unique(residuals_data$.x)) >= 10) {
+                        plot9 <- plot9 +
+                            ggplot2::geom_smooth(method = "loess", se = TRUE, color = "red", formula = y ~ x)
+                    } else {
+                        plot9 <- plot9 +
+                            ggplot2::stat_summary(fun = mean, geom = "point", shape = 4, size = 4, color = "red")
+                    }
+                    plot9 <- plot9 +
                         ggplot2::labs(
-                            x = "Observation Index",
-                            y = "Martingale Residuals",
-                            title = .("Cox Model Residual Diagnostics"),
-                            subtitle = .("Martingale residuals should be randomly scattered around zero")
+                            x = if (has_lp) .("Linear predictor (log relative hazard)") else .("Observation index"),
+                            y = .("Martingale residuals"),
+                            title = .("Cox model residual diagnostics"),
+                            subtitle = .("Martingale residuals against the linear predictor; a trend suggests a mis-specified functional form")
                         ) +
                         ggtheme
                     
@@ -4090,21 +4133,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 </div>
                 ')
                 
-                # Person-Time Analysis Explanation
-                private$.setExplanationContent("personTimeExplanation", '
-                <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit;">
-                    <h4>Understanding Person-Time Analysis</h4>
-                    <p><strong>Person-Time:</strong> Accounts for varying follow-up durations by calculating total observation time.</p>
-                    <ul>
-                        <li><strong>Person-Years:</strong> Sum of follow-up time for all patients in the group</li>
-                        <li><strong>Incidence Rate:</strong> Events per unit of person-time (e.g., deaths per 100 person-years)</li>
-                        <li><strong>Rate Ratio:</strong> Compares incidence rates between groups</li>
-                        <li><strong>Confidence Intervals:</strong> Provide precision estimates for incidence rates</li>
-                    </ul>
-                    <p><em>Advantage:</em> More precise than simple event proportions when follow-up times vary significantly between patients.</p>
-                </div>
-                ')
-                
+                # personTimeExplanation is written by the person-time method itself
+                # (it describes exactly what that table contains); do not overwrite it here.
+
                 # RMST Explanation
                 private$.setExplanationContent("rmstExplanation", '
                 <div style="margin-bottom: 20px; padding: 15px; background-color: rgba(33, 41, 56, 0.13); border-left: 4px solid #6c757d; color: inherit;">
@@ -4895,8 +4926,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                    ") exceeds maximum observed time. Choose a smaller value."))
                         return()
                     }
-                    # Find baseline cumulative hazard at calibration time
-                    bh_at_time <- basehaz_df$hazard[which.min(abs(basehaz_df$time - cal_time))]
+                    # Baseline cumulative hazard at calibration time. H0(t) is a
+                    # right-continuous step function: take the LAST jump at or
+                    # before cal_time (H0 = 0 before the first event), never the
+                    # nearest jump, which can lie in the future and over-predict risk.
+                    bh_idx <- which(basehaz_df$time <= cal_time)
+                    bh_at_time <- if (length(bh_idx) == 0) 0 else basehaz_df$hazard[max(bh_idx)]
                     # Predicted survival for each patient using true baseline hazard
                     pred_surv <- exp(-bh_at_time * exp(lp))
 
@@ -5307,17 +5342,18 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     # Interpretation
                     if (self$options$showExplanations) {
+                        rcs_var_html <- htmltools::htmlEscape(rcs_var)
                         html <- paste0(
                             "<div style='font-family: Arial, sans-serif; max-width: 700px; line-height: 1.5;'>",
                             "<h3>Non-Linearity Assessment (Restricted Cubic Splines)</h3>",
-                            "<p>This analysis tests whether the effect of <strong>", rcs_var,
+                            "<p>This analysis tests whether the effect of <strong>", rcs_var_html,
                             "</strong> on survival follows a linear pattern or a more complex non-linear curve.</p>",
                             "<h4>Likelihood Ratio Test</h4>",
-                            "<p>The LR test compares a Cox model with a linear term for ", rcs_var,
+                            "<p>The LR test compares a Cox model with a linear term for ", rcs_var_html,
                             " against a model with natural splines (", n_knots, " knots, ", n_knots - 1,
                             " df). A significant p-value (< 0.05) indicates non-linearity.</p>",
                             "<h4>HR Curve Plot</h4>",
-                            "<p>The hazard ratio curve shows how the relative risk changes across values of ", rcs_var,
+                            "<p>The hazard ratio curve shows how the relative risk changes across values of ", rcs_var_html,
                             ", with the reference point at the median value (", round(var_median, 1),
                             "). A flat line would indicate a constant HR (linear on log-HR scale).</p>",
                             "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 12px; border-left: 4px solid #FF9800; margin-top: 15px; color: inherit;'>",
@@ -5476,7 +5512,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (nlevels(df$.grp) < 2) useCov <- FALSE
                 }
                 rhs  <- if (useCov) ".grp" else "1"
-                form <- stats::as.formula(paste0("survival::Surv(.time, .status) ~ ", rhs))
+                form <- .asSurvivalFormula(paste0("survival::Surv(.time, .status) ~ ", rhs))
                 dist <- self$options$parametric_distribution
 
                 fitOne <- function(dd) {

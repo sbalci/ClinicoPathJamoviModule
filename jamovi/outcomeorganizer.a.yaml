@@ -19,8 +19,7 @@ description:
 #                 data = lung,
 #                 outcome = status,
 #                 outcomeLevel = 2,
-#                 analysistype = 'os',
-#                 addOutcome = TRUE
+#                 analysistype = 'os'
 #             )
 # 
 #             # Example 2: Competing risks (disease death vs other death)
@@ -38,8 +37,7 @@ description:
 #                 dod = 'Dead_Disease',
 #                 dooc = 'Dead_Other',
 #                 awd = 'Alive_Disease',
-#                 awod = 'Alive_NED',
-#                 addOutcome = TRUE
+#                 awod = 'Alive_NED'
 #             )
 # 
 #             # Example 3: Progression-free survival with recurrence
@@ -55,8 +53,7 @@ description:
 #                 outcomeLevel = 'Dead',
 #                 recurrence = recurrence,
 #                 recurrenceLevel = 'Yes',
-#                 analysistype = 'pfs',
-#                 addOutcome = TRUE
+#                 analysistype = 'pfs'
 #             )
 
 options:

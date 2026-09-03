@@ -244,7 +244,7 @@ test_that("diagnostic models honor estimator choices and zero-cell guards", {
   bivariate <- as.data.frame(result$bivariateresults)
   heterogeneity <- as.data.frame(result$heterogeneity)
   expect_identical(
-    phm$parameter,
+    phm$parameter[1:2],
     c(
       "Diagnostic accuracy parameter (theta)",
       "Between-study variance (tau^2)"

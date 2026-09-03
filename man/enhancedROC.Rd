@@ -105,8 +105,10 @@ enhancedROC(
 
 \item{direction}{Direction of the predictor-outcome relationship}
 
-\item{youdenOptimization}{Find optimal cutoff using Youden Index
-(Sensitivity + Specificity - 1)}
+\item{youdenOptimization}{Find the optimal cutoff by maximising the Youden
+index (sensitivity + specificity - 1), subject to the minimum
+sensitivity/specificity below. When off, the cutoff closest to the top-left
+corner of the ROC curve is reported instead.}
 
 \item{customCutoffs}{Comma-separated list of custom cutoffs to evaluate
 (e.g., 0.1, 0.5, 0.9)}
@@ -298,8 +300,9 @@ strategy) or the Hand-Till pairwise AUC (OVO strategy)}
 \item{clinicalImpact}{Calculate clinical impact metrics (NNT, NND, clinical
 utility)}
 
-\item{nntCalculation}{Calculate number needed to test and number needed to
-diagnose}
+\item{nntCalculation}{Show the number needed to test (1 / net benefit) and
+number needed to diagnose (1 / Youden index) columns in the clinical impact
+table}
 
 \item{clinicalUtilityCurve}{Display clinical utility curve showing test
 consequences}
