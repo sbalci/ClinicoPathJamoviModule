@@ -337,6 +337,7 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "var",
                     "showPatterns",
+                    "rareCategoryThreshold",
                     "mcarTest",
                     "clinicalValidation"),
                 rows=0,
@@ -386,7 +387,7 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "checkdata",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = checkdataResults$new(options=options),
                 data = data,

@@ -30,7 +30,7 @@ The **Single Variable Quality Check** module provides comprehensive data quality
 - **Statistical runs test** with p-values for clustering/alternating patterns
 - **Dropout detection** with Wilson score confidence intervals
 - **Percentage thresholds** with clinical context (MCAR/MAR/MNAR guidance)
-- **Optional MCAR test** (requires `naniar` package)
+- **MCAR explanation option**: states why the mechanism cannot be tested from one variable and points to `naniar::mcar_test()` on the full dataset
 - All methods labeled as **HEURISTIC** with limitations disclosed
 
 ### 3. **Distribution Analysis**
@@ -46,10 +46,10 @@ The **Single Variable Quality Check** module provides comprehensive data quality
 ### 4. **Clinical Plausibility Checks**
 - **Unit-aware validation** for:
   - Age (years, with biological limits)
-  - Weight (kg vs lbs auto-detection)
-  - Height (cm, meters, or feet auto-detection)
+  - Weight (kg)
+  - Height (cm or metres, chosen from the value range)
   - Lab values (hemoglobin, creatinine with SI vs traditional units)
-- **Configurable unit system**: Auto-detect, Metric, or Imperial
+- Units are inferred from the value range; there is no unit-system option
 - All checks labeled **"PLAUSIBILITY CHECK"** with thresholds disclosed
 - Can be enabled/disabled globally
 
@@ -108,16 +108,12 @@ The **Single Variable Quality Check** module provides comprehensive data quality
   - Toggle all context-specific validation (age, weight, height, labs)
   - Disable for non-clinical variables to avoid false flags
 
-- **Unit System** (default: Auto-detect)
-  - Auto-detect: Infer units from data range (recommended)
-  - Metric: Force SI units (kg, cm, g/L, µmol/L)
-  - Imperial: Force US units (lbs, feet, g/dL, mg/dL)
+- Units are inferred from the value range (kg; cm or m; g/dL or g/L; mg/dL or µmol/L). Imperial units are not supported.
 
 #### Missing Data Analysis
-- **Perform MCAR Statistical Test** (default: false)
-  - Enable Little's MCAR test (requires `naniar` package installation)
-  - Provides formal test vs. heuristic runs test
-  - Note: Single-variable analysis has limited MCAR test utility
+- **Explain MCAR testability** (default: false)
+  - Adds a statement that Little's MCAR test is multivariate and cannot be computed from a single variable
+  - No test is performed; run `naniar::mcar_test()` on the full dataset for a formal test
 
 ---
 
@@ -328,12 +324,12 @@ All messages prefixed **"PLAUSIBILITY CHECK:"** with detected units and threshol
 - <1 year (fractional) → "verify units (years vs months)"
 
 **Weight**:
-- Auto-detects kg (2-200) vs lbs (5-450)
+- Checked in kg (plausible range 2-200)
 - Outside range → "verify units or data entry"
 - Shows detected unit: "(assumed kg)"
 
 **Height**:
-- Auto-detects cm (50-250), meters (0.5-2.5), or feet (1.5-8)
+- cm (50-250) when the maximum exceeds 10, otherwise metres (0.5-2.5)
 - Outside range → "verify units"
 - Shows detected unit: "(assumed cm)"
 
@@ -348,12 +344,12 @@ All messages prefixed **"PLAUSIBILITY CHECK:"** with detected units and threshol
 **False Positives/Negatives**:
 - **Pediatric populations**: May flag normal child weights/heights
 - **ICU/extreme cases**: May flag valid extreme values
-- **Mixed units in dataset**: Auto-detection may fail
+- **Mixed units in dataset**: unit inference from the value range may fail
 - **Population differences**: Different normal ranges by ethnicity
 
 **Action**:
 - Review flagged values in clinical context
-- Override unit system if auto-detection wrong
+- Check the units of flagged values (cm vs m, mg/dL vs µmol/L)
 - Adjust thresholds mentally for special populations
 - Disable clinical checks for non-clinical variables
 
@@ -369,7 +365,7 @@ All messages prefixed **"PLAUSIBILITY CHECK:"** with detected units and threshol
    - Anticipate potential outliers (e.g., rare diseases)
 
 2. **Configure Appropriately**:
-   - Set unit system if auto-detection likely to fail
+   - Know the units your columns are recorded in; the checks infer them from the value range
    - Adjust rare category threshold based on analysis plan
    - Consider transformation for known skewed variables
 
@@ -400,7 +396,7 @@ All messages prefixed **"PLAUSIBILITY CHECK:"** with detected units and threshol
 
 4. **Clinical Checks**:
    - ✅ **Do**: Verify flagged values in source data
-   - ✅ **Do**: Override unit system for known populations
+   - ✅ **Do**: Confirm the units of flagged values before acting
    - ❌ **Don't**: Assume all flags are true errors
    - ❌ **Don't**: Apply checks to non-clinical variables
 
@@ -551,7 +547,7 @@ Informative flags (n=7):
 
 **Mitigation**:
 - Label all assessments as HEURISTIC
-- Use optional MCAR test for formal assessment
+- Run `naniar::mcar_test()` on the full dataset for a formal assessment
 - Report confidence intervals for dropout
 - Complement with subject-matter knowledge
 
@@ -586,7 +582,7 @@ Informative flags (n=7):
 - No custom range specification (yet)
 
 **Mitigation**:
-- Override unit system when auto-detection fails
+- Check the units of flagged values when the inferred unit looks wrong
 - Manually review flagged values in clinical context
 - Disable checks for non-clinical variables
 - Document population characteristics
@@ -728,7 +724,7 @@ Grade D (<70) requires more serious consideration of data validity.
 **Action**:
 1. **Option 1**: Disable clinical validation entirely
 2. **Option 2**: Manually review and document flagged values as expected for your population
-3. **Option 3**: Override unit system if auto-detection wrong
+3. **Option 3**: Confirm the units of the flagged values
 4. **Future**: Request custom plausibility ranges feature
 
 ### Q6: Can I use this quality score in my manuscript?
@@ -826,19 +822,11 @@ MAD = 1.5 (unaffected by outlier)
 | Symmetric with heavy tails | None | Use MAD-based detection instead |
 | Bimodal distribution | None | Outlier detection may misidentify modes |
 
-### Interpreting MCAR Test Results (if enabled)
+### The MCAR explanation option
 
-**Little's MCAR Test** (requires `naniar` package):
-- Null hypothesis: Data are missing completely at random
-- p < 0.05: Reject MCAR, suggests MAR or MNAR
-- p >= 0.05: Fail to reject MCAR (but doesn't prove it)
+Little's MCAR test is multivariate: it compares observed means across missingness patterns using the other variables. It is undefined for a single variable, so this analysis does not run it. Enabling **Explain MCAR testability** adds that statement to the Quality Assessment Summary (and to Data Patterns when that table is shown).
 
-**Limitation**: Requires multivariate data; single-variable context limits utility
-
-**Action**:
-- p > 0.05: Complete-case analysis likely unbiased
-- p < 0.05: Plan imputation or sensitivity analysis
-- Combine with runs test for convergent evidence
+**Action**: to test MCAR formally, run `naniar::mcar_test()` on the full dataset and combine the result with the heuristic runs and dropout findings reported here.
 
 ### Quality Score Customization (future)
 
@@ -886,9 +874,9 @@ Current penalty weights are fixed:
 **Likely cause**: Population or unit mismatch
 
 **Solution**:
-1. Check **Unit System** setting:
-   - Auto-detect may fail for mixed units
-   - Override to Metric or Imperial if known
+1. Check the units of the column:
+   - Units are inferred from the value range and mixed units defeat that
+   - Convert the column to one unit (cm, kg, one lab unit) and re-run
 2. Disable checks for specialized populations (pediatric, ICU, etc.)
 3. Manually review flagged values and document as expected for your cohort
 
@@ -927,7 +915,7 @@ Current penalty weights are fixed:
 
 **Run checkdata with defaults**:
 - Enable all display options
-- Use auto-detect for unit system
+- Record each column in a single unit
 - Default transformation (None)
 
 **Review**:
@@ -951,7 +939,7 @@ Current penalty weights are fixed:
 
 **Clinical check flags**:
 - Review in clinical context
-- Override unit system if needed
+- Confirm the units of flagged values
 - Document expected outliers for population
 
 ### Step 3: Data Cleaning
@@ -1036,7 +1024,7 @@ Specific actions taken:
 ### R Packages Used
 
 - Base R: `stats::mad()`, `stats::quantile()`, `stats::scale()`
-- Optional: `naniar::mcar_test()` (if MCAR test enabled)
+- Not used here: `naniar::mcar_test()` is recommended on the full dataset for a formal MCAR test
 
 ---
 
@@ -1058,7 +1046,7 @@ Specific actions taken:
 - ✅ Implemented Wald-Wolfowitz runs test with p-values
 - ✅ Added Wilson score confidence intervals for dropout detection
 - ✅ Labeled all methods as "HEURISTIC" with limitations
-- ✅ Optional MCAR test support (requires naniar package)
+- ✅ MCAR explanation option stating why the test cannot run on one variable
 
 **Variability Metrics**:
 - ✅ Added CV stability guard (suppress when |mean| < threshold)
@@ -1067,8 +1055,7 @@ Specific actions taken:
 - ✅ Consistent CV handling across table and narrative
 
 **Clinical Validation**:
-- ✅ Implemented unit auto-detection (weight, height, lab values)
-- ✅ Added configurable unit system override (Auto/Metric/Imperial)
+- ✅ Units inferred from the value range (weight, height, lab values); imperial units not supported
 - ✅ Labeled all checks as "PLAUSIBILITY CHECK" with thresholds
 - ✅ Can be enabled/disabled globally
 

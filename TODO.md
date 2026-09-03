@@ -9,7 +9,7 @@
 ## Data Quality
 
 - benford
-checkdata
+- checkdata
 dataquality
 outlierdetection
 

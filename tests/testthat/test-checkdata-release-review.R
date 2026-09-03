@@ -218,3 +218,78 @@ test_that("the caveats panel warns about mixed scales under a transform", {
   expect_match(html, "Mixed scales when a transform is applied")
   expect_match(html, "transformed scale")
 })
+
+# ---- 2026-09-03 release review: imperial removal and the four follow-up fixes ----
+
+test_that("the unit-system option is gone and clinical checks assume kg / cm / m", {
+  expect_false("unitSystem" %in% names(formals(checkdata)))
+  pats <- function(d, v) do.call(checkdata, list(data = d, var = v, showPatterns = TRUE))$patterns$asDF$description
+  set.seed(3)
+  expect_match(paste(pats(data.frame(weight = c(rnorm(50, 75, 10), 260)), "weight"), collapse = " "),
+               "Weight >200 kg")
+  expect_match(paste(pats(data.frame(height = c(rnorm(50, 1.7, 0.08), 3.1)), "height"), collapse = " "),
+               "outside 0.5-2.5 m")
+  expect_false(any(grepl("PLAUSIBILITY", pats(data.frame(height = rnorm(50, 170, 8)), "height"))))
+  expect_false(any(grepl("auto-detect", pats(data.frame(height = rnorm(50, 170, 8)), "height"))))
+})
+
+test_that("a constant variable fills every Distribution cell", {
+  d <- checkdata(data = data.frame(x = rep(5, 30)), var = "x", showDistribution = TRUE)$distribution$asDF
+  expect_false(any(is.na(d$interpretation)))
+  expect_match(d$interpretation[d$metric == "Median"], "constant")
+  expect_match(d$interpretation[grepl("Coefficient", d$metric)], "No variability")
+})
+
+test_that("the Data Patterns rare-category rule follows rareCategoryThreshold", {
+  g <- data.frame(g = factor(c(rep("A", 120), rep("B", 70), rep("C", 8), rep("D", 2))))
+  at5 <- checkdata(data = g, var = "g", showPatterns = TRUE, rareCategoryThreshold = 5)$patterns$asDF$description
+  at1 <- checkdata(data = g, var = "g", showPatterns = TRUE, rareCategoryThreshold = 1)$patterns$asDF$description
+  expect_match(grep("Rare categories", at5, value = TRUE), "below 5.0%.*C, D")
+  expect_false(any(grepl("Rare categories", at1)))
+})
+
+test_that("a capped duplicates list says so in a footnote", {
+  set.seed(1)
+  many <- checkdata(data = data.frame(k = factor(sample(letters[1:25], 300, TRUE))),
+                    var = "k", showDuplicates = TRUE)$duplicates
+  expect_equal(nrow(many$asDF), 20)
+  expect_match(many$notes$truncated$note, "20 most frequent of 25 categories")
+  few <- checkdata(data = data.frame(v = rep(1:5, each = 3)), var = "v", showDuplicates = TRUE)$duplicates
+  expect_equal(nrow(few$asDF), 5)
+  expect_null(few$notes$truncated)
+})
+
+test_that("outlier flags and consensus rows match an independent computation", {
+  set.seed(11)
+  x <- c(round(rnorm(60, 100, 10), 1), 160, 175, 40)
+  r <- checkdata(data = data.frame(lab = x), var = "lab", showDistribution = TRUE)
+  ms <- r$outlierMethodSummary$asDF; ot <- r$outliers$asDF; ds <- r$distribution$asDF
+
+  z_flag   <- which(abs(scale(x)[, 1]) > 3)
+  q        <- quantile(x, c(.25, .75)); iqr <- diff(q)
+  iqr_flag <- which(x < q[1] - 1.5 * iqr | x > q[2] + 1.5 * iqr)
+  mz       <- 0.6745 * (x - median(x)) / median(abs(x - median(x)))   # Iglewicz & Hoaglin
+  mad_flag <- which(abs(mz) > 3.5)
+  all_flags <- c(z_flag, iqr_flag, mad_flag)
+  consensus <- sort(unique(all_flags[duplicated(all_flags)]))
+
+  expect_equal(ms$outliers_detected, c(length(z_flag), length(iqr_flag), length(mad_flag)))
+  expect_equal(ot$rowNumber, consensus)
+  expect_equal(ot$zscore, round(scale(x)[consensus, 1], 3), tolerance = 1e-6)
+  expect_equal(ds$value[ds$metric == "Skewness"], round(moments::skewness(x), 3))
+  expect_equal(ds$value[grepl("MAD", ds$metric)], round(mad(x), 4))
+  expect_equal(ds$value[grepl("Interquartile", ds$metric)], round(unname(iqr), 4))
+})
+
+test_that("the runs test and dropout interval match hand computation", {
+  set.seed(5)
+  y <- rnorm(120); y[sample(120, 30)] <- NA; y[100:120] <- NA
+  desc <- checkdata(data = data.frame(v = y), var = "v", showPatterns = TRUE)$patterns$asDF$description
+  m <- is.na(y); n1 <- sum(m); n2 <- sum(!m); N <- n1 + n2
+  R <- length(rle(m)$lengths); ER <- 2 * n1 * n2 / N + 1
+  expect_match(grep("runs test", desc, value = TRUE), sprintf("%d vs %.1f expected", R, ER))
+  lq <- round(N * 0.75); k <- sum(which(m) > lq)
+  w <- Hmisc::binconf(k, n1, method = "wilson")
+  expect_match(grep("dropout", desc, value = TRUE),
+               sprintf("%.1f%% of missing values.*95%% CI: %.1f%%-%.1f%%", 100 * k / n1, 100 * w[2], 100 * w[3]))
+})

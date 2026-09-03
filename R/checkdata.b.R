@@ -636,11 +636,14 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     category_analysis$balanced <- "Categories reasonably balanced"
                 }
                 
-                # Rare category detection
-                rare_categories <- names(freq_table)[freq_table < 5]
+                # Rare category detection, on the same percentage rule the
+                # Distribution table uses, so the two tables cannot disagree.
+                rare_threshold_pct <- self$options$rareCategoryThreshold
+                rare_categories <- names(freq_table)[freq_table < (rare_threshold_pct / 100) * n_total]
                 if (length(rare_categories) > 0) {
-                    category_analysis$rare_categories <- paste("Rare categories with <5 observations:",
-                                                             paste(rare_categories, collapse = ", "))
+                    category_analysis$rare_categories <- sprintf(
+                        "Rare categories below %.1f%% of complete cases: %s",
+                        rare_threshold_pct, paste(rare_categories, collapse = ", "))
                 }
             }
             
@@ -877,8 +880,11 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 self$results$distribution$setRow(rowKey="median", values=list(
                     value=round(median_val, 4),
-                    interpretation=ifelse(abs(mean_val - median_val) / sd_val < 0.2,
-                                        "Close to mean (symmetric)", "Different from mean (skewed)")
+                    # sd_val is 0 for a constant variable; the ratio below would
+                    # be NaN and leave the cell blank.
+                    interpretation=if (sd_val == 0) "Equal to mean (constant value)"
+                                   else if (abs(mean_val - median_val) / sd_val < 0.2) "Close to mean (symmetric)"
+                                   else "Different from mean (skewed)"
                 ))
 
                 self$results$distribution$setRow(rowKey="std_dev", values=list(
@@ -894,10 +900,11 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # CV with improved context
                 if (!is.na(cv)) {
-                    cv_interpretation <- ifelse(cv < 10, "Low relative variability",
+                    cv_interpretation <- ifelse(sd_val == 0, "No variability (constant value)",
+                                        ifelse(cv < 10, "Low relative variability",
                                         ifelse(cv < 20, "Moderate relative variability",
                                               ifelse(cv < 50, "High relative variability",
-                                                    "Very high relative variability")))
+                                                    "Very high relative variability"))))
                     self$results$distribution$setRow(rowKey="coeff_var", values=list(
                         value=round(cv, 2),
                         interpretation=paste(cv_interpretation, " - appropriate for ratio scale data")
@@ -1448,6 +1455,10 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             percentage=dup_pct
                         ))
                     }
+                    if (length(freq_table_sorted) > max_display)
+                        self$results$duplicates$setNote("truncated", sprintf(
+                            "Showing the %d most frequent of %d categories.",
+                            max_display, length(freq_table_sorted)))
                 } else {
                     # For numeric data, show only duplicates
                     self$results$duplicates$setTitle("Duplicate Values")
@@ -1466,6 +1477,10 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 percentage=dup_pct
                             ))
                         }
+                        if (length(duplicates) > max_display)
+                            self$results$duplicates$setNote("truncated", sprintf(
+                                "Showing the %d most frequent of %d duplicated values.",
+                                max_display, length(duplicates)))
                     }
                 }
             }
