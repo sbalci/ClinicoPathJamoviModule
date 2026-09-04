@@ -28,12 +28,11 @@
 | `marg` | `Bool` | `FALSE` | Marginal plots |
 | `fill` | `List` | `first_variable` | Fill by |
 | `fillGgalluvial` | `Variable` | `NULL` | Fill by (ggalluvial) |
-| `bin` | `List` | `default` | Bin labels |
 | `orient` | `List` | `vert` | Plot orientation |
 | `usetitle` | `Bool` | `FALSE` | Custom title |
 | `mytitle` | `String` | `Alluvial Plot` | Title |
 | `maxvars` | `Integer` | `8` | Maximum variables |
-| `custombinlabels` | `String` | `` | Custom bin labels |
+| `showFlowTable` | `Bool` | `false` | Flow table: one row per path with cases, percent of cases and, when weighted, weight total; commonest first |
 | `colorPalette` | `List` | `default` | Color palette |
 | `showCounts` | `Bool` | `FALSE` | Counts on nodes |
 | `themeStyle` | `List` | `default` | Theme style |
@@ -52,8 +51,8 @@
 | :--- | :--- | :--- | :--- |
 | `notices` | `Preformatted` | `Important Information` |  |
 | `todo` | `Html` | `To Do` |  |
-| `dataWarning` | `Html` | `Data Validation` |  |
 | `plot` | `Image` | `Alluvial Diagrams` |  |
+| `flowTable` | `Table` | `Flow Table` | visible when Flow table is on |
 | `condensationWarning` | `Html` | `Condensation Plot Information` |  |
 | `plot2` | `Image` | ``Condensation Plot ${condensationvar}`` |  |
 

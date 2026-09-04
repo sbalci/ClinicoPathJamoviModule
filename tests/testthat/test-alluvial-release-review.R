@@ -88,7 +88,7 @@ test_that("missing values become a visible stratum by default, not a silent drop
   d$T2[1:12] <- NA
 
   kept <- al_priv(d, vars = c("T1", "T2"))$.handleMissingValues(
-    d, c("T1", "T2"), exclude = FALSE, report = TRUE)
+    d, c("T1", "T2"), exclude = FALSE)
 
   expect_equal(nrow(kept), n)
   expect_equal(sum(is.na(kept$T2)), 0L)
@@ -101,9 +101,11 @@ test_that("excluding missing values reports the exact case loss", {
                   T2 = factor(sample(c("Rem", "Prog"), n, TRUE)))
   d$T2[1:12] <- NA
 
-  warn <- al_txt(al(d, vars = c("T1", "T2"), excl = TRUE)$dataWarning$content)
-  expect_match(warn, "12 of 100")
-  expect_match(warn, "88 complete cases")
+  # Reported once, in the "How to read this diagram" notice (the former HTML
+  # "Data Validation" panel duplicated it and is gone).
+  warn <- al_txt(al(d, vars = c("T1", "T2"), excl = TRUE)$notices$content)
+  expect_match(warn, "12 of 100 rows had a missing value")
+  expect_match(warn, "remaining 88 rows")
   expect_equal(sum(complete.cases(d)), 88L)
 })
 
@@ -113,8 +115,10 @@ test_that("a continuous variable is refused with an actionable message", {
   set.seed(4); n <- 120
   d <- data.frame(grp = factor(sample(c("X", "Y"), n, TRUE)), lab = rnorm(n, 100, 20))
 
-  warn <- al_txt(al(d, vars = c("grp", "lab"))$dataWarning$content)
-  expect_match(warn, "Continuous Variable Not Allowed")
+  res <- al(d, vars = c("grp", "lab"))
+  warn <- al_txt(res$notices$content)
+  expect_match(warn, "ERROR: Continuous Variable Not Allowed")
+  expect_null(res$plot$state)
   expect_match(warn, "lab")
   expect_match(warn, "categorize")
 })
@@ -128,4 +132,85 @@ test_that("the condensation plot uses tidy-eval injection", {
   window <- paste(src[max(1, i - 4):(i + 4)], collapse = " ")
   expect_match(window, "rlang::inject")
   expect_match(window, "!!rlang::sym")
+})
+
+# ---- /check-function pass (2026-09-03) ---------------------------------------
+
+test_that("variable names with spaces and punctuation reach both engines, the weight formula and the condensation panel", {
+  set.seed(11); n <- 60
+  d <- data.frame(
+    "tumour grade"  = factor(sample(c("G1", "G2", "G3"), n, TRUE)),
+    "stage/2020"    = factor(sample(c("I", "II", "III"), n, TRUE)),
+    "resp (RECIST)" = factor(sample(c("CR", "PR", "SD"), n, TRUE)),
+    "wt%"           = runif(n, 1, 3),
+    check.names = FALSE)
+  vars <- c("tumour grade", "stage/2020", "resp (RECIST)")
+  ns <- asNamespace("ClinicoPath")
+  obj <- function(...) {
+    get("alluvialClass", ns)$new(options = get("alluvialOptions", ns)$new(...), data = d)
+  }
+  # The renderers catch every error and draw an explanation into the image, so a
+  # plain "returned TRUE" proves nothing. Turn that fallback into an error.
+  draw <- function(a, item, fn) {
+    priv <- a$.__enclos_env__$private
+    unlockBinding(".messagePlot", priv)
+    priv$.messagePlot <- function(text) stop("render fell back to a message plot: ", text)
+    lockBinding(".messagePlot", priv)
+    f <- tempfile(fileext = ".png"); grDevices::png(f)
+    on.exit(grDevices::dev.off(), add = TRUE)
+    priv[[fn]](a$results[[item]], ggtheme = ggplot2::theme_gray(), theme = list())
+  }
+
+  a <- obj(vars = vars, condensationvar = "stage/2020", fillGgalluvial = NULL, weight = NULL)
+  a$.__enclos_env__$private$.run()
+  expect_false(is.null(a$results$plot$state))
+  expect_false(is.null(a$results$plot2$state))
+  expect_no_error(draw(a, "plot", ".plot"))
+  expect_no_error(draw(a, "plot2", ".plot2"))
+
+  # GG Alluvial: the weight goes through constructFormula()/asFormula() into
+  # aggregate(), the fill and axes through rlang::sym()
+  b <- obj(vars = vars, engine = "ggalluvial", weight = "wt%", fillGgalluvial = "resp (RECIST)",
+           condensationvar = NULL, showCounts = TRUE, labelNodes = TRUE, colorPalette = "dark2")
+  b$.__enclos_env__$private$.run()
+  expect_false(is.null(b$results$plot$state))
+  expect_false(grepl("ERROR", b$results$notices$content))
+  expect_no_error(draw(b, "plot", ".plot"))
+  agg <- b$results$plot$state$data
+  expect_equal(sum(agg[["wt%"]]), sum(d[["wt%"]]))
+})
+
+test_that("the flow table lists every path with counts that match table(), commonest first", {
+  set.seed(21); n <- 90
+  d <- data.frame(A = factor(sample(c("a1", "a2"), n, TRUE)), B = factor(sample(c("b1", "b2", "b3"), n, TRUE)))
+  res <- al(d, vars = c("A", "B"), showFlowTable = TRUE)
+  ft <- res$flowTable$asDF
+  ref <- as.data.frame(table(paste(d$A, d$B, sep = " \u{2192} ")), stringsAsFactors = FALSE)
+  expect_equal(nrow(ft), nrow(ref))
+  expect_equal(sum(ft$n), n)
+  expect_equal(ft$n, sort(ref$Freq, decreasing = TRUE))
+  expect_equal(ft$n[match(ref$Var1, ft$path)], ref$Freq)
+  expect_equal(sum(ft$pct), 1)
+  expect_match(al_txt(res$notices$content), "Commonest path: ")
+  expect_match(al_txt(res$notices$content), paste0("\\(", max(ref$Freq), " of ", n, " cases"))
+  # off by default: no rows are built
+  expect_equal(nrow(al(d, vars = c("A", "B"))$flowTable$asDF), 0L)
+})
+
+test_that("a weighted flow table carries exact weight totals and orders by weight", {
+  set.seed(22); n <- 60
+  d <- data.frame(A = factor(sample(c("x", "y"), n, TRUE)), B = factor(sample(c("p", "q"), n, TRUE)),
+                  w = sample(1:9, n, TRUE))
+  d$w[1:5] <- NA
+  res <- al(d, vars = c("A", "B"), engine = "ggalluvial", weight = "w", showFlowTable = TRUE)
+  ft <- res$flowTable$asDF
+  ref <- tapply(d$w, paste(d$A, d$B, sep = " \u{2192} "), sum, na.rm = TRUE)
+  expect_equal(ft$w[match(names(ref), ft$path)], as.numeric(ref))
+  expect_equal(ft$w, sort(as.numeric(ref), decreasing = TRUE))
+  expect_equal(sum(ft$n), n - 5L)   # cases are the rows the ribbons are drawn from: no-weight rows excluded
+  expect_true(res$flowTable$getColumn("w")$visible)
+  # under the Easy engine the weight is ignored, so the column stays hidden
+  res_easy <- al(d, vars = c("A", "B"), weight = "w", showFlowTable = TRUE)
+  expect_false(res_easy$flowTable$getColumn("w")$visible)
+  expect_match(al_txt(res$notices$content), "weight total")
 })

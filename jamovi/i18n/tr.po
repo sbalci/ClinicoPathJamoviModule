@@ -275,6 +275,15 @@ msgid ""
 "Competing Risks or Multistate."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"'{weight}' must be numeric (current type: {type}). Select a numeric variable "
+"containing counts, frequencies, or sampling weights."
+msgstr ""
+"'{weight}' sayısal olmalıdır (geçerli tür: {type}). Sayı, sıklık ya da "
+"örnekleme ağırlığı içeren sayısal bir değişken seçin."
+
+
 #: R/jjpiestats.b.R
 msgid "'%s' contains a zero or negative proportion."
 msgstr ""
@@ -342,7 +351,6 @@ msgstr ""
 "aralığı sınırları' seçicisi devre dışıdır: sağ-kapalı aralıklar kullanmak ya "
 "da o seçiciyi sol-kapalıya geri alıp bu notu kaldırmak için 'Hazır yaş "
 "grubu' seçeneğini 'Özel (aralık genişliği kullan)' olarak geri ayarlayın."
-
 
 #: package/analyses/jjridges.description
 #: jjridges/options.description.main
@@ -865,7 +873,6 @@ msgstr ""
 "negatif yaş bir veri giriş hatasıdır, 'n/a' gibi metinler ise eksik değer "
 "olmalıdır. Veri Özeti bunları 'Kullanılamayan yaşlar' altında listeler."
 
-
 #: R/agepyramid.b.R
 msgid ""
 "{n} observation(s) have an age above 120 years, the highest being {maxAge}. "
@@ -882,10 +889,23 @@ msgstr ""
 "yılına kadar uzatıldığından şekilde uzun ve boş bir kuyruk oluşur. Şekli "
 "yorumlamadan önce yaş sütununu kontrol edin."
 
+#: R/alluvial.b.R
+msgid ""
+"{n} observations ({pct}%) have missing weights. These will be excluded from "
+"the visualization."
+msgstr ""
+"{n} gözlemin (%{pct}) ağırlığı eksik. Bunlar görselleştirmenin dışında "
+"bırakılacak."
+
 
 #: enhancedcrosstable/options/percent_pattern/count_only.title
 msgid "{n} only"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "{n} row(s) had no value for the weight variable '{weight}' and were removed."
+msgstr "{n} satırın '{weight}' ağırlık değişkeninde değeri yoktu ve kaldırıldı."
+
 
 #: R/reportcat.b.R
 msgid "{n} rows"
@@ -943,7 +963,6 @@ msgstr ""
 "dışarıda bırakıldı: {entries}. Sınır noktalarını virgülle ayrılmış düz "
 "sayılar olarak girin, örneğin 0,18,45,65."
 
-
 #: R/agepyramid.b.R
 msgid ""
 "{nExcluded} of the {nTotal} rows ({pct}%) are not in this pyramid. The "
@@ -959,7 +978,6 @@ msgstr ""
 "satırların yaş ve cinsiyet bileşimi tutulanlarla aynıysa tüm veri setini "
 "temsil eder. Tam döküm Veri Özeti'ndedir."
 
-
 #: R/agepyramid.b.R
 msgid ""
 "{nSparse} of the {nBands} occupied age bands hold fewer than 5 observations. "
@@ -971,7 +989,6 @@ msgstr ""
 "aralıklar için gösterilen yüzdeler olgu başına büyük adımlarla değişir; bu "
 "yüzden komşu kısa çubuklar arasındaki farklar bilgi vermez. Aralık "
 "genişliğini artırmak bunları daha kararlı aralıklarda toplar."
-
 
 #: enhancedcrosstable/options/percent_pattern/percent_only.title
 msgid "{p_col} only"
@@ -2370,7 +2387,8 @@ msgstr ""
 
 #: alluvial/results/plot2.title
 msgid "`Condensation Plot ${condensationvar}`"
-msgstr ""
+msgstr "`Yoğunlaştırma Grafiği ${condensationvar}`"
+
 
 #: survivalcont/results/coxSummary.title
 msgid "`Cox Regression Summary and Table - ${contexpl}`"
@@ -5998,6 +6016,15 @@ msgid ""
 "class (e.g. no responders in any group), so there is no contrast to test."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"A further {n} row(s) had no value for the weight variable '{weight}' and "
+"were removed."
+msgstr ""
+"Ayrıca {n} satırın '{weight}' ağırlık değişkeninde değeri yoktu ve "
+"kaldırıldı."
+
+
 #: R/multisurvival.b.R
 msgid ""
 "A further {rows} row(s){events} were excluded from the model because the "
@@ -6107,6 +6134,9 @@ msgid ""
 "A list for the argument fill for selecting the variable to be represented by "
 "color. Default is 'first_variable'."
 msgstr ""
+"Renkle gösterilecek değişkeni seçen dolgu seçeneği. Varsayılan "
+"'first_variable'."
+
 
 #: R/multisurvival.b.R
 msgid "a lower fitted hazard"
@@ -6434,6 +6464,9 @@ msgid ""
 "A string naming the categorical variable from `data` that will be used to "
 "color the flows in the ggalluvial plot."
 msgstr ""
+"ggalluvial grafiğinde akışları renklendirmek için kullanılacak `data` "
+"içindeki kategorik değişkenin adı."
+
 
 #: clinicalheatmap/options/valueVar.description.jamovi
 msgid "A string naming the numeric variable to visualize."
@@ -6473,6 +6506,9 @@ msgid ""
 "a string naming the variables from `data` that contains the values used for "
 "the Alluvial Diagram."
 msgstr ""
+"Alüvyal Diyagramda kullanılan değerleri içeren `data` değişkenlerinin "
+"adları."
+
 
 #: R/multisurvival.b.R
 msgid ""
@@ -9093,7 +9129,8 @@ msgstr ""
 #: gradientboosting/ui[8].label
 #: tumorgrowth/ui[4].label
 msgid "Advanced"
-msgstr ""
+msgstr "Gelişmiş"
+
 
 #: package/analyses/adaptivetrialdesign.description
 #: adaptivetrialdesign/options.description.main
@@ -10853,7 +10890,6 @@ msgstr ""
 "'Kadın düzeyi' ve 'Erkek düzeyi' seçicilerini ve Veri Özeti'ndeki "
 "'Eksik/tanınmayan cinsiyet' sayısını kontrol edin."
 
-
 #: R/agepyramid.b.R
 msgid ""
 "All {n} analysed observations fall in the male group, so the figure is a "
@@ -10867,7 +10903,6 @@ msgstr ""
 "tablosunun kadın sütunu her aralıkta sıfırdır. Veride her iki grup da varsa "
 "'Kadın düzeyi' ve 'Erkek düzeyi' seçicilerini ve Veri Özeti'ndeki "
 "'Eksik/tanınmayan cinsiyet' sayısını kontrol edin."
-
 
 #: outbreakanalysis/options/statistical_tests/all_tests.title
 msgid "All Appropriate Tests"
@@ -10951,7 +10986,8 @@ msgstr ""
 
 #: alluvial/options/fill/all_flows.title
 msgid "All flows"
-msgstr ""
+msgstr "Tüm akışlar"
+
 
 #: R/decisioncalculator.b.R
 msgid "All four frequencies for cut-off \"{cutoff}\" are zero."
@@ -10999,6 +11035,15 @@ msgid ""
 "All observations excluded due to missing ID values. Longitudinal connections "
 "disabled."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"All observations have missing values in one or more selected variables. "
+"Cannot generate plot."
+msgstr ""
+"Tüm gözlemlerin seçilen değişkenlerden en az birinde eksik değeri var. "
+"Grafik oluşturulamıyor."
+
 
 #: R/linechart.b.R
 msgid ""
@@ -11380,6 +11425,7 @@ msgstr ""
 msgid "Alluvial (flowing streams)"
 msgstr ""
 
+#: R/alluvial.b.R
 #: R/riverplot.b.R
 #: package/analyses/alluvial.title
 #: package/analyses/alluvial.menuTitle
@@ -11388,7 +11434,17 @@ msgstr ""
 #: alluvial/results.title
 #: alluvial/results/plot.title
 msgid "Alluvial Diagrams"
+msgstr "Alüvyal Diyagramlar"
+
+
+#: R/alluvial.b.R
+msgid ""
+"Alluvial diagrams require at least 2 variables. Select additional variables "
+"from the left panel."
 msgstr ""
+"Alüvyal diyagramlar en az 2 değişken gerektirir. Sol panelden başka "
+"değişkenler seçin."
+
 
 #: R/riverplot.b.R
 msgid ""
@@ -11400,7 +11456,8 @@ msgstr ""
 
 #: alluvial/options/mytitle.default
 msgid "Alluvial Plot"
-msgstr ""
+msgstr "Alüvyal Grafik"
+
 
 #: statsplot2/options/alluvsty.title
 msgid "Alluvial Plot Style"
@@ -13408,7 +13465,8 @@ msgstr ""
 
 #: alluvial/options/sankeyStyle.description.jamovi
 msgid "Apply Sankey diagram styling (narrow nodes, sigmoid curves)."
-msgstr ""
+msgstr "Sankey diyagramı biçemini uygula (dar düğümler, sigmoid eğriler)."
+
 
 #: intervalsurvival/options/baseline_hazard_smooth.description.ui
 #: recurrentsurvival/options/baseline_hazard_smooth.description.ui
@@ -13433,7 +13491,8 @@ msgstr ""
 
 #: alluvial/options/enhancedGradients.description.jamovi
 msgid "Apply sophisticated color gradients to flow edges for better visual appeal."
-msgstr ""
+msgstr "Akış kenarlarına daha iyi görünüm için gelişmiş renk geçişleri uygula."
+
 
 #: economistplots/options/economist_theme.description.jamovi
 msgid "Apply The Economist's signature visual styling."
@@ -13525,7 +13584,8 @@ msgstr ""
 
 #: alluvial/options/curveType/arctangent.title
 msgid "Arctangent"
-msgstr ""
+msgstr "Arktanjant"
+
 
 #: riverplot/options/curveType/arctangent.title
 msgid "Arctangent (gradual curves)"
@@ -13630,6 +13690,13 @@ msgid ""
 "accuracy estimate; this sample supports preliminary estimates, particularly "
 "once it is divided across the result patterns."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Arrange variables in logical order (e.g., temporal sequence: Grade, Stage, "
+"Response)"
+msgstr "Değişkenleri mantıksal sırada dizin (örn. zaman sırası: Derece, Evre, Yanıt)"
+
 
 #: jjsyndromicplot/ui[3][0][0].label
 msgid "Arrow & Text Settings"
@@ -17792,10 +17859,6 @@ msgstr ""
 msgid "Bin Fill Color"
 msgstr ""
 
-#: alluvial/options/bin.title
-msgid "Bin labels"
-msgstr ""
-
 #: package/analyses/categorize.menuSubtitle
 msgid "Bin numeric variables into categories"
 msgstr ""
@@ -18535,7 +18598,8 @@ msgstr ""
 #: jsjplot/options/theme_style/bw.title
 #: jviolin/options/themex/bw.title
 msgid "Black & White"
-msgstr ""
+msgstr "Siyah-Beyaz"
+
 
 #: ihcscoring/options/classification_system/bladder_mibc.title
 msgid "Bladder MIBC (GATA3/CK5/6/p16)"
@@ -19746,7 +19810,8 @@ msgstr ""
 
 #: alluvial/options/flowDirection/bottom_top.title
 msgid "Bottom to Top"
-msgstr ""
+msgstr "Aşağıdan Yukarıya"
+
 
 #: measurementuncertainty/options/uncertainty_method/bottom_up.title
 msgid "Bottom-up Approach"
@@ -22289,6 +22354,7 @@ msgstr ""
 #: agreement/results/tdiTable.columns.title
 #: agreement/results/maxwellRETable.columns.title
 #: agreement/results/iotaTable.columns.title
+#: alluvial/results/flowTable.columns.title
 #: ihcheterogeneity/results/spatialanalysistable.columns.title
 #: modalitycomparison/results/overviewTable.columns.title
 #: outbreakanalysis/results/spatial_analysis_results.columns.title
@@ -22303,7 +22369,8 @@ msgstr ""
 #: pathsampling/results/ajccNStage.columns.title
 #: pathsampling/results/adequacyByELN.columns.title
 msgid "Cases"
-msgstr ""
+msgstr "Olgu"
+
 
 #: outbreakanalysis/results/descriptive_summary.columns.title
 msgid "Cases (%)"
@@ -24398,6 +24465,9 @@ msgid ""
 "Choose plotting engine: easyalluvial for automatic plots, ggalluvial for "
 "manual control with curve types and Sankey styling."
 msgstr ""
+"Çizim motorunu seçin: otomatik grafikler için easyalluvial, eğri türleri ve "
+"Sankey biçemiyle elle denetim için ggalluvial."
+
 
 #: basegraphics/options/point_type.description.jamovi
 msgid "Choose point symbol type for scatter plots."
@@ -25158,7 +25228,8 @@ msgstr ""
 #: multiclassdiagnostics/options/plotTheme/classic.title
 #: raincloud/options/plot_theme/classic.title
 msgid "Classic"
-msgstr ""
+msgstr "Klasik"
+
 
 #: waterfall/options/spiderColorScheme/classic.title
 msgid "Classic (Blue/Red)"
@@ -27276,6 +27347,11 @@ msgstr ""
 msgid "Clinical Trial Settings"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Clinical Use Cases"
+msgstr "Klinik Kullanım Örnekleri"
+
+
 #: agreement/results/clinicalUseCases.title
 msgid "Clinical Use Cases & Method Selection Guide"
 msgstr ""
@@ -27561,7 +27637,8 @@ msgstr ""
 #: vartree/options.menuSubgroup
 #: venn/options.menuSubgroup
 msgid "ClinicoPath Descriptive Plots"
-msgstr ""
+msgstr "ClinicoPath Tanımlayıcı Grafikler"
+
 
 #: package/analyses/tableone.menuSubgroup
 #: package/analyses/summarydata.menuSubgroup
@@ -29053,7 +29130,8 @@ msgstr ""
 
 #: alluvial/options/colorPalette.description.jamovi
 msgid "Color palette for the diagram flows."
-msgstr ""
+msgstr "Diyagram akışları için renk paleti."
+
 
 #: jjpubr/options/palette.description.ui
 msgid "Color palette for the plot"
@@ -29336,7 +29414,8 @@ msgstr ""
 #: alluvial/ui[2][0][0][0].label
 #: tidyplots/ui[8].label
 msgid "Colors & Theme"
-msgstr ""
+msgstr "Renkler ve Tema"
+
 
 #: raincloud/ui[3].label
 msgid "Colors & Themes"
@@ -29365,6 +29444,11 @@ msgstr ""
 #: R/venn.b.R
 msgid "Colour Not Recognised"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Colour palette stretched"
+msgstr "Renk paleti esnetildi"
+
 
 #: contTables/options/pcCol.title
 #: contTablesPaired/options/pcCol.title
@@ -29999,6 +30083,24 @@ msgstr ""
 #: treatmentswitching/options/censoringAssumption/common_treatment.title
 msgid "Common Treatment Effect"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Commonest path: {path} ({n} of {total} cases, {pct}%; weight total "
+"{weight}). Switch on 'Flow table' to list every path."
+msgstr ""
+"En sık yol: {path} ({total} olgunun {n} tanesi, %{pct}; ağırlık toplamı "
+"{weight}). Her yolu listelemek için 'Akış tablosu' seçeneğini açın."
+
+
+#: R/alluvial.b.R
+msgid ""
+"Commonest path: {path} ({n} of {total} cases, {pct}%). Switch on 'Flow "
+"table' to list every path."
+msgstr ""
+"En sık yol: {path} ({total} olgunun {n} tanesi, %{pct}). Her yolu listelemek "
+"için 'Akış tablosu' seçeneğini açın."
+
 
 #: factoranalysis/options/communalities.title
 #: factoranalysis/results/results/communalitiesTable.title
@@ -31350,6 +31452,11 @@ msgstr ""
 #: jcomplexupset/ui.title
 msgid "Complex UpSet Plot Visualization"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Complex Visualization"
+msgstr "Karmaşık Görselleştirme"
+
 
 #: classification/options/complexity.title
 msgid "Complexity"
@@ -32919,14 +33026,39 @@ msgstr ""
 msgid "Concordant Results"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Condensation panel sample"
+msgstr "Yoğunlaştırma paneli örneklemi"
+
+
 #: alluvial/results/condensationWarning.title
 msgid "Condensation Plot Information"
-msgstr ""
+msgstr "Yoğunlaştırma Grafiği Bilgisi"
+
 
 #: alluvial/options/condensationvar.title
 #: alluvial/ui[0][1].label
 msgid "Condensation variable"
+msgstr "Yoğunlaştırma değişkeni"
+
+
+#: R/alluvial.b.R
+msgid ""
+"Condensation variable '{variable}' does not exist in the data. Select a "
+"valid variable from the available list."
 msgstr ""
+"'{variable}' yoğunlaştırma değişkeni veride yok. Listeden geçerli bir "
+"değişken seçin."
+
+
+#: R/alluvial.b.R
+msgid ""
+"Condensation variable '{variable}' has {n} distinct numeric values and "
+"appears continuous, so no condensation plot was drawn."
+msgstr ""
+"'{variable}' yoğunlaştırma değişkeninin {n} farklı sayısal değeri var ve "
+"sürekli görünüyor; bu yüzden yoğunlaştırma grafiği çizilmedi."
+
 
 #: decisionpanel/results/treePerformance.columns.title
 #: entropyanalysis/results/conditionalEntropyTable.columns.title
@@ -34682,6 +34814,11 @@ msgstr ""
 msgid "Continuous Clinical Variables"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Continuous Condensation Variable"
+msgstr "Sürekli Yoğunlaştırma Değişkeni"
+
+
 #: stagemigration/options/continuousCovariates.title
 #: stagemigration/ui[5][1][0].label
 msgid "Continuous Covariates"
@@ -34859,6 +34996,11 @@ msgstr ""
 #: jviolin/options/dep.description
 msgid "Continuous variable for y-axis (violin height)"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Continuous Variable Not Allowed"
+msgstr "Sürekli Değişkene İzin Verilmez"
+
 
 #: package/analyses/continuousrelationship.title
 #: package/analyses/continuousrelationship.menuTitle
@@ -36611,9 +36753,11 @@ msgstr ""
 msgid "Counts in cells"
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/showCounts.title
 msgid "Counts on nodes"
-msgstr ""
+msgstr "Düğümlerde sayılar"
+
 
 #: R/jjbarstats.b.R
 msgid "Counts variable '{var}' contains negative values."
@@ -37454,7 +37598,9 @@ msgstr ""
 
 #: R/agepyramid.b.R
 msgid "Create demographic visualizations showing age distribution by gender."
-msgstr "Yaş dağılımını cinsiyete göre gösteren demografik görselleştirmeler oluşturun."
+msgstr ""
+"Yaş dağılımını cinsiyete göre gösteren demografik görselleştirmeler "
+"oluşturun."
 
 #: survivalmodelvalidation/options/discrimination_plots.description.ui
 msgid "Create discrimination assessment plots"
@@ -38529,7 +38675,8 @@ msgstr ""
 
 #: alluvial/options/curveType/cubic.title
 msgid "Cubic (smooth)"
-msgstr ""
+msgstr "Kübik (yumuşak)"
+
 
 #: nonparametricregression/options/gam_smoother/cubic_spline.title
 msgid "Cubic Regression Spline"
@@ -39233,11 +39380,14 @@ msgstr ""
 
 #: alluvial/options/curveType.description.jamovi
 msgid "Curve style for flows. Requires ggalluvial engine."
-msgstr ""
+msgstr "Akışlar için eğri biçemi. ggalluvial motoru gerektirir."
 
+
+#: R/alluvial.b.R
 #: alluvial/options/curveType.title
 msgid "Curve type"
-msgstr ""
+msgstr "Eğri türü"
+
 
 #: R/riverplot.b.R
 msgid "Curved flowing streams"
@@ -39343,10 +39493,6 @@ msgstr ""
 
 #: methodvalidation/options/custom_bias_limit.title
 msgid "Custom Bias Limit ( percent)"
-msgstr ""
-
-#: alluvial/options/custombinlabels.title
-msgid "Custom bin labels"
 msgstr ""
 
 #: greyzoneroc/options/grey_zone_method/custom.title
@@ -39693,15 +39839,6 @@ msgstr ""
 msgid "Custom mtry Value"
 msgstr ""
 
-#: alluvial/options/custombinlabels.description.jamovi
-msgid ""
-"Custom names for the intervals the drawing engine creates when it has to "
-"split a continuous variable, separated by commas (e.g. \"Low,Medium,High\"); "
-"at least two are required. As with the bin labels above, every axis variable "
-"here is drawn as a category, so in practice nothing is binned. Leave empty "
-"to use the selected bin-label method."
-msgstr ""
-
 #: jjarcdiagram/options/analysisPreset/custom.title
 msgid "Custom Network"
 msgstr ""
@@ -39883,7 +40020,8 @@ msgstr ""
 
 #: alluvial/options/usetitle.title
 msgid "Custom title"
-msgstr ""
+msgstr "Özel başlık"
+
 
 #: jforester/options/plot_title.description
 msgid "Custom title for forest plot"
@@ -40486,7 +40624,8 @@ msgstr ""
 #: raincloud/options/color_palette/dark2.title
 #: venn/options/colorPalette/Dark2.title
 msgid "Dark2"
-msgstr ""
+msgstr "Dark2"
+
 
 #: tidyplots/options/meanType/dash.title
 #: tidyplots/options/medianType/dash.title
@@ -40588,6 +40727,15 @@ msgstr ""
 #: R/benford.b.R
 msgid "Data contains no (complete) rows."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Data contains no (complete) rows. Check your data for missing values or "
+"filtering."
+msgstr ""
+"Veride (tam) satır yok. Verinizi eksik değerler ya da filtreleme açısından "
+"kontrol edin."
+
 
 #: R/waterfall.b.R
 msgid "Data contains no complete rows. Check the data."
@@ -41203,7 +41351,6 @@ msgstr ""
 msgid "Data types plot (vis_guess)"
 msgstr ""
 
-#: alluvial/results/dataWarning.title
 #: benford/results/dataWarning.title
 #: biomarkerresponse/results/dataWarning.title
 #: survivalendpoints/results/dataWarning.title
@@ -42356,7 +42503,6 @@ msgid "Deep Learning Model"
 msgstr ""
 
 #: advancedraincloud/options/journal_style/default.title
-#: alluvial/options/bin/default.title
 #: alluvial/options/colorPalette/default.title
 #: autoeda/options/plot_theme/default.title
 #: basegraphics/options/color_scheme/default.title
@@ -42391,7 +42537,8 @@ msgstr ""
 #: vartree/options/style/default.title
 #: venn/options/colorPalette/default.title
 msgid "Default"
-msgstr ""
+msgstr "Varsayılan"
+
 
 #: diagnosticmeta/options/zero_cell_correction/none.title
 msgid "Default (+0.5 to zero-cell studies at model fit)"
@@ -42411,7 +42558,8 @@ msgstr ""
 
 #: alluvial/options/themeStyle/default.title
 msgid "Default (easyalluvial)"
-msgstr ""
+msgstr "Varsayılan (easyalluvial)"
+
 
 #: jjhistostats/options/centralitytype/default.title
 msgid "Default (follows test type)"
@@ -42765,6 +42913,11 @@ msgstr ""
 #: labinterpret/options/reference_source/demographic_adjusted.title
 msgid "Demographic-Adjusted Ranges"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Demographics:"
+msgstr "Demografi:"
+
 
 #: R/decisioncalculator.b.R
 msgid "Demonstrate how prevalence changes predictive values."
@@ -44267,6 +44420,11 @@ msgstr ""
 msgid "Diagnostic OR"
 msgstr "Tanısal Odds Oranı (DOR)"
 
+#: R/alluvial.b.R
+msgid "Diagnostic pathways:"
+msgstr "Tanı yolları:"
+
+
 #: imagingcorrelation/results/patternRecognitionTable.title
 msgid "Diagnostic Pattern Recognition"
 msgstr ""
@@ -45072,7 +45230,8 @@ msgstr ""
 
 #: alluvial/options/flowDirection.description.jamovi
 msgid "Direction of flow in the diagram."
-msgstr ""
+msgstr "Diyagramdaki akış yönü."
+
 
 #: likelihoodratio/options/testDirection.description
 msgid "Direction of test values relative to disease presence"
@@ -45985,7 +46144,8 @@ msgstr ""
 
 #: alluvial/options/showCounts.description.jamovi
 msgid "Display count values on nodes."
-msgstr ""
+msgstr "Düğümlerde sayı değerlerini göster."
+
 
 #: reclassmetrics/options/showReclassTable.description
 msgid "Display cross-tabulation of risk category changes."
@@ -48280,6 +48440,13 @@ msgid ""
 "always counts cases. Every axis variable is drawn with its own recorded "
 "values as the strata."
 msgstr ""
+"Alüvyal diyagram çizer: olguların birkaç kategorik değişkenin kategorileri "
+"arasında nasıl hareket ettiğinin akış resmi. Şerit genişliği o yolu izleyen "
+"olgu sayısıdır; GG Alluvial motoru ve bir ağırlık değişkeniyle o olgular "
+"üzerindeki ağırlık toplamıdır, Easy Alluvial motoru ise her zaman olguları "
+"sayar. Her eksen değişkeni kendi kayıtlı değerleri katman olarak alınarak "
+"çizilir."
+
 
 #: missingdataexplorer/options/dropout_analysis.title
 msgid "Dropout Analysis"
@@ -48797,6 +48964,11 @@ msgid ""
 "and carries no information."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Each variable should have 3-7 categories for best readability"
+msgstr "En iyi okunabilirlik için her değişkenin 3-7 kategorisi olmalıdır"
+
+
 #: enhancedROC/results/results/crocAnalysisTable.columns.title
 msgid "Early Retrieval Gain"
 msgstr ""
@@ -48819,7 +48991,8 @@ msgstr ""
 
 #: alluvial/options/engine/easyalluvial.title
 msgid "Easy Alluvial (automatic)"
-msgstr ""
+msgstr "Easy Alluvial (otomatik)"
+
 
 #: package/analyses/grafify.menuSubtitle
 #: grafify/options.menuSubtitle
@@ -50580,7 +50753,8 @@ msgstr ""
 
 #: alluvial/options/enhancedGradients.title
 msgid "Enhanced edge gradients"
-msgstr ""
+msgstr "Gelişmiş kenar geçişleri"
+
 
 #: pathagreement/options/enhancedErrorGuidance.title
 #: pathagreement/ui[11][0]/enhancedErrorGuidance.label
@@ -51610,6 +51784,7 @@ msgid "Error"
 msgstr ""
 
 #: R/agepyramid.b.R
+#: R/alluvial.b.R
 #: R/benford.b.R
 #: R/decisioncalculator.b.R
 #: R/summarydata.b.R
@@ -54168,7 +54343,8 @@ msgstr ""
 
 #: alluvial/options/excl.description.jamovi
 msgid "Exclude missing values from the analysis."
-msgstr ""
+msgstr "Eksik değerleri analizin dışında bırak."
+
 
 #: jviolin/options/excl.description
 msgid "Exclude observations with missing data from analysis"
@@ -55039,7 +55215,7 @@ msgstr ""
 #: package/analyses/summarydata.menuGroup
 #: package/analyses/reportcat.menuGroup
 #: package/analyses/benford.menuGroup
-#: package/analyses/alluvial.menuGroup
+#: package/analyses/agepyramid.menuGroup
 #: package/analyses/venn.menuGroup
 #: package/analyses/vartree.menuGroup
 #: package/analyses/categorize.menuGroup
@@ -55048,7 +55224,7 @@ msgstr ""
 #: package/analyses/outlierdetection.menuGroup
 #: package/analyses/checkdata.menuGroup
 #: package/analyses/chisqposttest.menuGroup
-#: alluvial/options.menuGroup
+#: agepyramid/options.menuGroup
 #: benford/options.menuGroup
 #: categorize/options.menuGroup
 #: checkdata/options.menuGroup
@@ -55164,11 +55340,11 @@ msgstr ""
 msgid "ExplorationExtraD"
 msgstr ""
 
-#: package/analyses/agepyramid.menuGroup
+#: package/analyses/alluvial.menuGroup
 #: package/analyses/nonparametric.menuGroup
 #: package/analyses/pcacomponenttest.menuGroup
 #: package/analyses/pcaloadingtest.menuGroup
-#: agepyramid/options.menuGroup
+#: alluvial/options.menuGroup
 #: nonparametric/options.menuGroup
 #: pcacomponenttest/options.menuGroup
 #: pcaloadingtest/options.menuGroup
@@ -55259,6 +55435,11 @@ msgstr "Keşifsel cezasız yeniden kurulum karşılaştırması"
 #: R/decisioncalculator.b.R
 msgid "Explore diagnostic methods or illustrative cut-off scenarios."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Explore patterns across age/sex/location categories"
+msgstr "Yaş/cinsiyet/yer kategorileri boyunca örüntüleri inceleyin"
+
 
 #: R/vartree.b.R
 msgid "Explore relationships between categorical variables in clinical data"
@@ -57107,13 +57288,17 @@ msgstr ""
 msgid "Fifth variable for 5+ set analysis."
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/fill.title
 msgid "Fill by"
-msgstr ""
+msgstr "Dolgu ölçütü"
 
+
+#: R/alluvial.b.R
 #: alluvial/options/fillGgalluvial.title
 msgid "Fill by (ggalluvial)"
-msgstr ""
+msgstr "Dolgu ölçütü (ggalluvial)"
+
 
 #: jjpubr/ui[6]/fillColor.label
 msgid "Fill color (hex)"
@@ -57157,9 +57342,15 @@ msgstr ""
 msgid "Fill Variable"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Fill variable '{variable}' does not exist in the data."
+msgstr "'{variable}' dolgu değişkeni veride yok."
+
+
 #: alluvial/ui[0][3].label
 msgid "Fill variable (ggalluvial)"
-msgstr ""
+msgstr "Dolgu değişkeni (ggalluvial)"
+
 
 #: advancedbarplot/options/fill_var.title
 #: advancedbarplot/ui[0][2].label
@@ -57171,6 +57362,11 @@ msgstr ""
 #: jjridges/ui[0][2].label
 msgid "Fill Variable (Optional)"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Fill Variable Not Found"
+msgstr "Dolgu Değişkeni Bulunamadı"
+
 
 #: R/jjridges.b.R
 msgid "Fill Variable:"
@@ -57603,7 +57799,8 @@ msgstr ""
 
 #: alluvial/options/fill/first_variable.title
 msgid "First variable"
-msgstr ""
+msgstr "İlk değişken"
+
 
 #: jsummarytools/options/cross_var1.title
 #: jsummarytools/ui[1][3].label
@@ -58339,11 +58536,13 @@ msgstr ""
 
 #: alluvial/options/flowDirection.title
 msgid "Flow direction"
-msgstr ""
+msgstr "Akış yönü"
+
 
 #: alluvial/ui[3][0][1][0].label
 msgid "Flow Options"
-msgstr ""
+msgstr "Akış Seçenekleri"
+
 
 #: R/riverplot.b.R
 msgid ""
@@ -58362,6 +58561,16 @@ msgstr ""
 #: riverplot/results/flowTable.title
 msgid "Flow Summary Table"
 msgstr ""
+
+#: alluvial/options/showFlowTable.title
+msgid "Flow table"
+msgstr "Akış tablosu"
+
+
+#: alluvial/results/flowTable.title
+msgid "Flow Table"
+msgstr "Akış Tablosu"
+
 
 #: riverplot/options/flowAlpha.title
 msgid "Flow Transparency"
@@ -58921,6 +59130,11 @@ msgstr ""
 #: R/multisurvival.b.R
 msgid "For continuous variables, interpolate between the given values"
 msgstr "Sürekli değişkenler için verilen değerler arasında ara değer bulun"
+
+#: R/alluvial.b.R
+msgid "For continuous variables, use the categorize function to create groups first"
+msgstr "Sürekli değişkenler için önce kategorize işleviyle gruplar oluşturun"
+
 
 #: statsplot2/options/sampleLarge.description.ui
 msgid ""
@@ -61639,7 +61853,13 @@ msgstr ""
 
 #: alluvial/options/engine/ggalluvial.title
 msgid "GG Alluvial (manual control)"
-msgstr ""
+msgstr "GG Alluvial (elle denetim)"
+
+
+#: R/alluvial.b.R
+msgid "GG Alluvial Engine Not Available"
+msgstr "GG Alluvial Motoru Kullanılamıyor"
+
 
 #: statsplot2/options/alluvsty/t1.title
 msgid "ggalluvial (detailed flow diagram)"
@@ -62435,7 +62655,8 @@ msgstr ""
 #: alluvial/options/themeStyle/grey.title
 #: jviolin/options/themex/grey.title
 msgid "Grey"
-msgstr ""
+msgstr "Gri"
+
 
 #: jjbarstats/options/ggpubrBalloonPalette/grey.title
 #: jjbetweenstats/options/ggpubrPalette/grey.title
@@ -65853,7 +66074,8 @@ msgstr ""
 #: jjtreemap/ui[1][2][0][5]/labelAlignH.label
 #: lollipop/options/orientation/horizontal.title
 msgid "Horizontal"
-msgstr ""
+msgstr "Yatay"
+
 
 #: multisurvival/options/medianline/h.title
 #: singlearm/options/medianline/h.title
@@ -66157,6 +66379,11 @@ msgstr ""
 #: variablebiplot/results/interpretation.title
 msgid "How to Read This Biplot"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "How to read this diagram"
+msgstr "Bu diyagram nasıl okunur"
+
 
 #: ihccluster/options/heatmapScale.description
 msgid "How to scale heatmap values"
@@ -67335,6 +67562,16 @@ msgstr ""
 #: R/decisioncurve.b.R
 msgid "Ignored {values}."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Ignored by the Easy Alluvial engine: {options}."
+msgstr "Easy Alluvial motorunun yok saydıkları: {options}."
+
+
+#: R/alluvial.b.R
+msgid "Ignored by the GG Alluvial engine: {options}."
+msgstr "GG Alluvial motorunun yok saydıkları: {options}."
+
 
 #: R/waterfall.b.R
 msgid "Ignores censoring; n=%d with duration data"
@@ -68794,7 +69031,8 @@ msgstr ""
 
 #: alluvial/options/marg.description.jamovi
 msgid "Include marginal plots."
-msgstr ""
+msgstr "Kenar grafiklerini ekle."
+
 
 #: jsummarytools/options/include_mean.title
 msgid "Include Mean"
@@ -70537,6 +70775,11 @@ msgid ""
 "age and follow-up time are in compatible units."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Insufficient Variables"
+msgstr "Yetersiz Değişken"
+
+
 #: advancedbarplot/options/value_format/integer.title
 #: jggheatmap/options/value_format/integer.title
 msgid "Integer"
@@ -71706,10 +71949,6 @@ msgstr ""
 msgid "Interval Censoring Visualization"
 msgstr ""
 
-#: alluvial/options/bin/cuts.title
-msgid "Interval cut points"
-msgstr ""
-
 #: outcomeorganizer/options/intervalEnd.title
 #: outcomeorganizer/ui[4][0]/intervalCensoring[0][1].label
 msgid "Interval End Variable"
@@ -71983,6 +72222,11 @@ msgstr ""
 #: outbreakanalysis/results/data_quality_report.columns.title
 msgid "Invalid Values (N)"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Invalid Weight Variable"
+msgstr "Geçersiz Ağırlık Değişkeni"
+
 
 #: ihcsurvival/results/regionalComparison.columns.title
 msgid "Invasive HR"
@@ -73956,7 +74200,8 @@ msgstr ""
 #: jjtreemap/ui[1][2].label
 #: jwaffle/ui[2].label
 msgid "Labels"
-msgstr ""
+msgstr "Etiketler"
+
 
 #: riverplot/ui[4].label
 msgid "Labels & Themes"
@@ -74744,7 +74989,8 @@ msgstr ""
 
 #: alluvial/options/fill/last_variable.title
 msgid "Last variable"
-msgstr ""
+msgstr "Son değişken"
+
 
 #: labcontrolcharts/results/violationSummary.columns.title
 msgid "Last Violation (Run)"
@@ -75038,7 +75284,8 @@ msgstr ""
 #: alluvial/options/flowDirection/left_right.title
 #: studydiagram/options/direction/LR.title
 msgid "Left to Right"
-msgstr ""
+msgstr "Soldan Sağa"
+
 
 #: jointmodeling/options/left_truncation.title
 msgid "Left Truncation"
@@ -75886,7 +76133,8 @@ msgstr ""
 #: classification/options/svmKernel/linear.title
 #: jointmodeling/options/functional_form/linear.title
 msgid "Linear"
-msgstr ""
+msgstr "Doğrusal"
+
 
 #: R/clinicalscore.b.R
 msgid "linear"
@@ -78545,9 +78793,24 @@ msgstr ""
 msgid "Marginal Plot Type"
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/marg.title
 msgid "Marginal plots"
+msgstr "Kenar grafikleri"
+
+
+#: R/alluvial.b.R
+msgid ""
+"Marginal plots are switched on, so the diagram and its histograms are "
+"assembled into a fixed grid that cannot take further styling. These settings "
+"were left out of this plot: colour palette, theme style, enhanced edge "
+"gradients, plot orientation, flow direction, plot subtitle and custom title."
 msgstr ""
+"Kenar grafikleri açık olduğundan diyagram ve histogramları daha fazla "
+"biçemlendirilemeyen sabit bir ızgarada birleştirildi. Şu ayarlar bu grafikte "
+"uygulanmadı: renk paleti, tema biçemi, gelişmiş kenar geçişleri, grafik "
+"yönü, akış yönü, grafik alt başlığı ve özel başlık."
+
 
 #: cochranq/results/marginalProportionsPlot.title
 msgid "Marginal Proportions Plot"
@@ -79476,7 +79739,8 @@ msgstr ""
 
 #: alluvial/options/maxvars.description.jamovi
 msgid "Maximum number of variables to include in the alluvial plot."
-msgstr ""
+msgstr "Alüvyal grafiğe dahil edilecek en fazla değişken sayısı."
+
 
 #: qtwist/options/tau_selection/max_followup.title
 msgid "Maximum Observed Follow-up"
@@ -79610,7 +79874,8 @@ msgstr ""
 
 #: alluvial/options/maxvars.title
 msgid "Maximum variables"
-msgstr ""
+msgstr "En fazla değişken"
+
 
 #: vartree/options/maxwidth.title
 msgid "Maximum width"
@@ -79874,7 +80139,6 @@ msgstr ""
 #: R/summarydata.b.R
 #: advancedanova/results/descriptives.columns.title
 #: advancedbarplot/options/stat_type/mean.title
-#: alluvial/options/bin/mean.title
 #: bayesiandiagnostic/results/posteriorSummary.columns.title
 #: biomarkerresponse/results/groupComparison.columns.title
 #: ciSingle/results/citable.columns.title
@@ -80851,7 +81115,6 @@ msgstr ""
 #: R/summarydata.b.R
 #: advancedanova/results/descriptives.columns.title
 #: advancedbarplot/options/stat_type/median.title
-#: alluvial/options/bin/median.title
 #: bayesiandiagnostic/results/posteriorSummary.columns.title
 #: biomarkerresponse/options/thresholdMethod/median.title
 #: biomarkerresponse/results/groupComparison.columns.title
@@ -83213,10 +83476,6 @@ msgstr ""
 msgid "Min ρ"
 msgstr ""
 
-#: alluvial/options/bin/min_max.title
-msgid "Min-Max"
-msgstr ""
-
 #: groupedbar/options/errortype/range.title
 msgid "Min-Max Range"
 msgstr ""
@@ -83259,7 +83518,8 @@ msgstr ""
 #: tinytable/options/style_borders/minimal.title
 #: vartree/options/style/minimal.title
 msgid "Minimal"
-msgstr ""
+msgstr "Minimal"
+
 
 #: R/ihcheterogeneity.b.R
 msgid "Minimal (<5%)"
@@ -84457,9 +84717,36 @@ msgstr ""
 msgid "Missing values: {count}. Percentages above are of {valid} valid cases."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"Missing values: {n} of {total} rows had a missing value in a plotted "
+"variable and were removed."
+msgstr ""
+"Eksik değerler: {total} satırın {n} tanesinin çizilen bir değişkende eksik "
+"değeri vardı ve kaldırıldı."
+
+
+#: R/alluvial.b.R
+msgid ""
+"Missing values: {n} of {total} rows had a missing value in a plotted "
+"variable. Those cells are shown as a '{label}' category, which is drawn like "
+"any other category but is not an observed group. Switch on 'Missing-value "
+"exclusion (NA)' to drop those rows instead."
+msgstr ""
+"Eksik değerler: {total} satırın {n} tanesinin çizilen bir değişkende eksik "
+"değeri vardı. Bu hücreler '{label}' kategorisi olarak gösterilir; diğer "
+"kategoriler gibi çizilir ama gözlenmiş bir grup değildir. Bu satırları "
+"kaldırmak için 'Eksik değer dışlama (NA)' seçeneğini açın."
+
+
 #: R/reportcat.b.R
 msgid "Missing values: {rate}% of cases."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Missing values: no row had a missing value in any plotted variable."
+msgstr "Eksik değerler: hiçbir satırın çizilen değişkenlerde eksik değeri yoktu."
+
 
 #: R/enhancedROC.b.R
 msgid "Missing Variables"
@@ -84468,6 +84755,11 @@ msgstr ""
 #: R/jjsegmentedtotalbar.b.R
 msgid "Missing variables in data:"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Missing Weights"
+msgstr "Eksik Ağırlıklar"
+
 
 #: dataquality/options/missing_threshold_visual.title
 msgid "Missing-data flag threshold (percent)"
@@ -88324,15 +88616,6 @@ msgstr ""
 msgid "Names for states (comma-separated, e.g., \"Healthy,Disease,Death\")"
 msgstr ""
 
-#: alluvial/options/bin.description.jamovi
-msgid ""
-"Names for the intervals the drawing engine creates when it has to split a "
-"continuous variable (e.g. 'LL' for low-low, 'HH' for high-high). This "
-"analysis draws every axis variable with its own recorded values as "
-"categories, so in practice nothing is binned and this setting has no visible "
-"effect. To group values, use the categorize function on the variable first."
-msgstr ""
-
 #: multiclassdiagnostics/options/modelNames.description
 msgid "Names for the models being compared (comma-separated)"
 msgstr ""
@@ -88746,6 +89029,11 @@ msgid ""
 "Negative values detected. Most IHC biomarkers should have non-negative "
 "values (e.g., Ki67 %, H-scores). Verify data coding."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Negative Weights Detected"
+msgstr "Negatif Ağırlık Saptandı"
+
 
 #: nogoldstandard/results/test_metrics.columns.superTitle
 msgid "Negative-Response Probability"
@@ -89726,6 +90014,11 @@ msgstr ""
 msgid "No complete cases remain after removing missing data."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "No Complete Data"
+msgstr "Tam Veri Yok"
+
+
 #: R/jjpiestats.b.R
 msgid ""
 "No complete data rows available after handling missing values. Please check "
@@ -89737,6 +90030,11 @@ msgid ""
 "No complete data rows available after handling missing values. Please check "
 "your data or change the \"Exclude Missing (NA)\" setting."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "No complete observations remain for the condensation plot."
+msgstr "Yoğunlaştırma grafiği için tam gözlem kalmadı."
+
 
 #: R/oddsratio.b.R
 msgid ""
@@ -89868,6 +90166,7 @@ msgstr ""
 msgid "No data are available. Load data before running the analysis."
 msgstr ""
 
+#: R/alluvial.b.R
 #: R/tableone.b.R
 msgid "No Data Available"
 msgstr "Veri Yok"
@@ -89947,7 +90246,6 @@ msgstr ""
 "({width} yıl) türetildi. Bu iletiyi kaldırmak için kutuyu temizleyin ya da "
 "sınır noktalarını virgülle ayrılmış düz sayılar olarak girin, örneğin "
 "0,18,45,65."
-
 
 #: R/waterfall.b.R
 msgid "NO EVALUABLE PATIENTS"
@@ -90163,7 +90461,6 @@ msgstr ""
 "Belirtilen yaş sınırı aralığına düşen gözlem yok. Özel yaş sınırlarını veya "
 "aralık genişliğini veriyi kapsayacak biçimde düzenleyin."
 
-
 #: R/benford.b.R
 msgid ""
 "No observations fell in the two most-deviating leading-digit bins. This does "
@@ -90180,6 +90477,11 @@ msgid ""
 "No observations were found for pattern \"{pattern}\". This combination was "
 "skipped."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "No observations with non-missing weights remain."
+msgstr "Ağırlığı eksik olmayan gözlem kalmadı."
+
 
 #: R/decisioncalculator.b.R
 msgid "No obvious sparse-cell warning."
@@ -90233,6 +90535,11 @@ msgstr ""
 #: R/decisioncalculator.b.R
 msgid "No positive test results"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "No Positive Weights"
+msgstr "Pozitif Ağırlık Yok"
+
 
 #: jsummarytools/options/cross_proportions/none.title
 msgid "No Proportions"
@@ -90649,6 +90956,11 @@ msgstr ""
 msgid "No valid variables selected."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "No Valid Weights"
+msgstr "Geçerli Ağırlık Yok"
+
+
 #: R/lassocox.b.R
 msgid ""
 "No variable-based risk scores are available because the selected rule "
@@ -90738,10 +91050,21 @@ msgstr ""
 msgid "Node ID"
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/labelNodes.title
 #: vartree/options/nodelabel.title
 msgid "Node labels"
+msgstr "Düğüm etiketleri"
+
+
+#: R/alluvial.b.R
+msgid ""
+"Node numbers: the total of the weight variable in that group, rounded to one "
+"decimal place - not a case count."
 msgstr ""
+"Düğüm sayıları: o gruptaki ağırlık değişkeninin bir ondalık basamağa "
+"yuvarlanmış toplamı - olgu sayısı değil."
+
 
 #: jjarcdiagram/ui[1][0].label
 msgid "Node Options"
@@ -90954,6 +91277,11 @@ msgstr ""
 #: R/benford.b.R
 msgid "Non-finite values excluded"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Non-finite Weights"
+msgstr "Sonlu Olmayan Ağırlıklar"
+
 
 #: markovmultistate/options/modelType/nonhomogeneous.title
 msgid "Non-homogeneous Markov (mstate)"
@@ -91890,7 +92218,6 @@ msgstr ""
 "tam 15 yaş bir sonraki aralığı başlatır. Sayılar ve yüzdeler yuvarlanmış "
 "yaşlardan değil, kaydedildiği haliyle yaşlardan hesaplanır."
 
-
 #: R/singlearm.b.R
 msgid "not graded"
 msgstr ""
@@ -91934,6 +92261,11 @@ msgstr "yarışan riskler için bildirilmez"
 #: R/waterfall.b.R
 msgid "NOT RESPONSE-EVALUABLE"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Not shown: {variables}"
+msgstr "Gösterilmeyenler: {variables}"
+
 
 #: R/raincloud.b.R
 msgid "not significant at the 0.05 level"
@@ -92114,6 +92446,7 @@ msgid "Note"
 msgstr ""
 
 #: R/agepyramid.b.R
+#: R/alluvial.b.R
 #: R/benford.b.R
 #: R/summarydata.b.R
 msgid "NOTE"
@@ -93971,6 +94304,11 @@ msgstr ""
 msgid "Numeric variables for factor analysis"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Numeric variables plotted as categories"
+msgstr "Sayısal değişkenler kategori olarak çizildi"
+
+
 #: R/crosstable.b.R
 msgid "Numeric variables that look like coded categories"
 msgstr ""
@@ -94811,6 +95149,26 @@ msgstr "Her çaprazlanmış terim için bir satır."
 msgid "One row per lesion per visit"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"One row per path through the plotted variables, commonest first. Percentages "
+"are of all plotted cases."
+msgstr ""
+"Çizilen değişkenler boyunca her yol için bir satır, en sık olan önce. "
+"Yüzdeler çizilen tüm olgulara göredir."
+
+
+#: R/alluvial.b.R
+msgid ""
+"One row per path through the plotted variables, largest weight first. Cases "
+"and percentages count rows; Weight total is the sum of the weight variable "
+"over those rows, which is what the ribbon width shows."
+msgstr ""
+"Çizilen değişkenler boyunca her yol için bir satır, en büyük ağırlık önce. "
+"Olgular ve yüzdeler satırları sayar; Ağırlık toplamı o satırlardaki ağırlık "
+"değişkeninin toplamıdır ve şerit genişliğinin gösterdiği budur."
+
+
 #: jrecode/options/recode_rules.description
 msgid "One rule per line. Format: oldvalue -> newvalue"
 msgstr ""
@@ -95150,7 +95508,6 @@ msgstr ""
 "anlatır. Tahmini kaldırmak için hem 'Kadın düzeyi' hem 'Erkek düzeyi' "
 "seçicilerini ayarlayın."
 
-
 #: R/agepyramid.b.R
 msgid ""
 "Only one of the two gender selectors was set, so the level '{level}' was "
@@ -95164,7 +95521,6 @@ msgstr ""
 "uyuşmuyorsa piramidin erkek tarafı ve 'Erkek (n)' sütunu yanlış hastaları "
 "anlatır. Tahmini kaldırmak için hem 'Kadın düzeyi' hem 'Erkek düzeyi' "
 "seçicilerini ayarlayın."
-
 
 #: R/lassocox.b.R
 msgid "Only one predictor column; collinearity not applicable."
@@ -95187,6 +95543,15 @@ msgstr ""
 #: jjsegmentedtotalbar/options/label_threshold.description.jamovi
 msgid "Only show labels for segments above this percentage threshold."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Only the first {shown} of {selected} selected variables are plotted, because "
+"'Maximum variables' is set to {max}."
+msgstr ""
+"'En fazla değişken' {max} olarak ayarlı olduğundan seçilen {selected} "
+"değişkenin yalnızca ilk {shown} tanesi çizildi."
+
 
 #: R/crosstable.b.R
 msgid "Only the level '%s' is left, holding all %d rows."
@@ -95992,6 +96357,9 @@ msgid ""
 "Optional weight variable for flow thickness. If not provided, counts are "
 "used."
 msgstr ""
+"Akış kalınlığı için isteğe bağlı ağırlık değişkeni. Verilmezse sayılar "
+"kullanılır."
+
 
 #: R/waterfallrecist.b.R
 msgid "Optional, and each unlocks a RECIST rule:"
@@ -96104,7 +96472,8 @@ msgstr ""
 #: precisionrecall/ui[1].label
 #: retracted/ui[1].label
 msgid "Options"
-msgstr ""
+msgstr "Seçenekler"
+
 
 #: R/clinicalscore.b.R
 msgid "OPV"
@@ -96389,6 +96758,9 @@ msgid ""
 "choices and more, so this setting applies only while Flow direction is Left "
 "to Right."
 msgstr ""
+"Grafiğin yönü. Aynı seçenekleri ve fazlasını sunan Akış yönü bunun yerini "
+"almıştır; bu ayar yalnızca Akış yönü Soldan Sağa iken uygulanır."
+
 
 #: R/mageeequation.b.R
 #: biomarkerdiscovery/results/data_summary.columns.title
@@ -97490,7 +97862,8 @@ msgstr ""
 #: jjdotchart/ui[3].label
 #: latentbiomarker/ui[2].label
 msgid "Output"
-msgstr ""
+msgstr "Çıktı"
+
 
 #: decisionpanel/ui[6].label
 msgid "Output & Display Options"
@@ -100301,7 +100674,8 @@ msgstr ""
 #: alluvial/options/colorPalette/pastel1.title
 #: venn/options/colorPalette/Pastel1.title
 msgid "Pastel1"
-msgstr ""
+msgstr "Pastel1"
+
 
 #: venn/options/colorPalette/Pastel2.title
 msgid "Pastel2"
@@ -100310,6 +100684,11 @@ msgstr ""
 #: ggprism/options/prism_palette/pastels.title
 msgid "Pastels (9 colors)"
 msgstr ""
+
+#: alluvial/results/flowTable.columns.title
+msgid "Path"
+msgstr "Yol"
+
 
 #: latentbiomarker/options/show_plot_path.title
 msgid "Path diagram"
@@ -100501,6 +100880,11 @@ msgstr ""
 #: classicalSurvivalPower/options/entry_type.title
 msgid "Patient Entry Pattern"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Patient flow:"
+msgstr "Hasta akışı:"
+
 
 #: package/analyses/patientfollowupintro.title
 #: patientfollowupintro/options.title
@@ -101624,6 +102008,11 @@ msgstr ""
 msgid "Percent of all observations"
 msgstr "Tüm gözlemlerin yüzdesi"
 
+#: alluvial/results/flowTable.columns.title
+msgid "Percent of cases"
+msgstr "Olgu yüzdesi"
+
+
 #: concordanceindex/results/decomposition.columns.title
 msgid "Percent of Pairs"
 msgstr ""
@@ -101871,7 +102260,6 @@ msgstr ""
 "Yüzdeler her cinsiyet içindeki sütun yüzdeleridir (Kadın ve Erkek ayrı ayrı "
 "%100 eder). Yuvarlanmış aralık yüzdeleri tam olarak 100 etmeyebilir."
 
-
 #: R/agepyramid.b.R
 msgid ""
 "Percentages are of all {n} analysed observations (the Female and Male "
@@ -101881,7 +102269,6 @@ msgstr ""
 "Yüzdeler analiz edilen {n} gözlemin tamamına göredir (Kadın ve Erkek "
 "sütunları birlikte %100 eder; Toplam satırı her cinsiyetin payını gösterir). "
 "Yuvarlanmış aralık yüzdeleri tam olarak 100 etmeyebilir."
-
 
 #: agreement/options/heatmapShowPercentages.title
 msgid "Percentages in cells"
@@ -103872,7 +104259,8 @@ msgstr ""
 #: robustcorrelation/options/heatmap_colors/plasma.title
 #: venn/options/colorPalette/plasma.title
 msgid "Plasma"
-msgstr ""
+msgstr "Plasma"
+
 
 #: pathagreement/options/heatmapTheme/plasma.title
 #: pathagreement/ui[3][0]/heatmapTheme/plasma.title
@@ -104325,11 +104713,13 @@ msgstr ""
 
 #: alluvial/ui[3][0][0][0].label
 msgid "Plot Engine"
-msgstr ""
+msgstr "Grafik Motoru"
+
 
 #: alluvial/options/engine.title
 msgid "Plot engine"
-msgstr ""
+msgstr "Grafik motoru"
+
 
 #: jjscatterstats/ui[7][1].label
 #: tidydensity/options/plot_enhancements.title
@@ -104669,7 +105059,8 @@ msgstr "Grafik Seçenekleri"
 #: alluvial/options/orient.title
 #: raincloud/ui[1][1]/orientation.label
 msgid "Plot orientation"
-msgstr ""
+msgstr "Grafik yönü"
+
 
 #: economistplots/options/plot_orientation.title
 #: enhancedfactorvariable/options/plotOrientation.title
@@ -104858,7 +105249,8 @@ msgstr ""
 #: alluvial/options/plotSubtitle.title
 #: jjridges/ui[5][1]/plot_subtitle.label
 msgid "Plot subtitle"
-msgstr ""
+msgstr "Grafik alt başlığı"
+
 
 #: tidyplots/results/summary.title
 msgid "Plot Summary"
@@ -111965,9 +112357,11 @@ msgstr ""
 msgid "Quick Selection Help:"
 msgstr ""
 
+#: R/alluvial.b.R
 #: R/decision.b.R
 msgid "Quick Start"
-msgstr ""
+msgstr "Hızlı Başlangıç"
+
 
 #: pathsampling/results/guidedInstructions.title
 msgid "Quick Start Checklist"
@@ -111996,7 +112390,8 @@ msgstr ""
 
 #: alluvial/options/curveType/quintic.title
 msgid "Quintic (very smooth)"
-msgstr ""
+msgstr "Beşinci derece (çok yumuşak)"
+
 
 #: bayesiandiagnostic/results/convergenceDiagnostics.columns.title
 #: bayesiannetworkma/results/convergenceDiagnostics.columns.title
@@ -112164,6 +112559,15 @@ msgstr ""
 #: advancedraincloud/options/rain_side.title
 msgid "Raincloud Position"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Raise 'Maximum variables' to include them, or deselect the ones you do not "
+"need."
+msgstr ""
+"Bunları dahil etmek için 'En fazla değişken' değerini artırın ya da "
+"gerekmeyenlerin seçimini kaldırın."
+
 
 #: dynamicprediction/results/trajectoryParameters.columns.title
 msgid "Rand. Intercept Var"
@@ -113592,6 +113996,11 @@ msgstr "Grafiği Okuma:"
 msgid "Ready for Decision Curve Analysis"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Ready to begin? Select at least 2 categorical variables from the left panel."
+msgstr "Başlamaya hazır mısınız? Sol panelden en az 2 kategorik değişken seçin."
+
+
 #: R/waterfall.b.R
 msgid "Ready to run! Results will appear below."
 msgstr ""
@@ -114222,6 +114631,11 @@ msgstr ""
 "Alan bilgisine dayanarak aday parametreleri azaltınız veya daha fazla "
 "sonlanım bilgisi toplayınız; cezalandırma tek başına çok sınırlı bilgiyi "
 "telafi edemez."
+
+#: R/alluvial.b.R
+msgid "Reduce the number of variables or group infrequent categories."
+msgstr "Değişken sayısını azaltın ya da seyrek kategorileri gruplayın."
+
 
 #: R/decisioncurve.b.R
 msgid "Reduce the step size to {maxstep}% or less, or widen the range."
@@ -115875,6 +116289,11 @@ msgstr ""
 msgid "Report-Ready Sentences"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Reported by R: {message}"
+msgstr "R'nin bildirdiği: {message}"
+
+
 #: classification/options/reporting.title
 #: classification/ui[1][1][0].label
 msgid "Reporting"
@@ -117226,6 +117645,22 @@ msgstr ""
 msgid "Ribbon Transparency"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"Ribbon width: the number of cases following that path (each case counts "
+"once)."
+msgstr "Şerit genişliği: o yolu izleyen olgu sayısı (her olgu bir kez sayılır)."
+
+
+#: R/alluvial.b.R
+msgid ""
+"Ribbon width: the total of the weight variable '{weight}' over the cases "
+"following that path."
+msgstr ""
+"Şerit genişliği: o yolu izleyen olgular üzerinde '{weight}' ağırlık "
+"değişkeninin toplamı."
+
+
 #: causalmediation/options/hd_penalty/ridge.title
 #: predmodel/options/modelSelection/ridge.title
 msgid "Ridge"
@@ -117362,7 +117797,8 @@ msgstr ""
 
 #: alluvial/options/flowDirection/right_left.title
 msgid "Right to Left"
-msgstr ""
+msgstr "Sağdan Sola"
+
 
 #: agepyramid/options/age_interval/right.title
 msgid "Right-closed (0,5] - age 5 closes the band"
@@ -119991,9 +120427,11 @@ msgid ""
 "clinical pathway analysis. Flow thickness indicates volume."
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/sankeyStyle.title
 msgid "Sankey styling"
-msgstr ""
+msgstr "Sankey biçemi"
+
 
 #: R/riverplot.b.R
 msgid "Sankey:"
@@ -121561,6 +121999,11 @@ msgstr ""
 msgid "Select 'Date Format':"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Select 2-5 categorical variables (optimal: 3-4)"
+msgstr "2-5 kategorik değişken seçin (en uygun: 3-4)"
+
+
 #: R/venn.b.R
 msgid "Select 2-7 categorical variables"
 msgstr ""
@@ -121574,6 +122017,15 @@ msgid ""
 "Select a binary rule variable or disable \"Clinical Decision Rule "
 "Integration\"."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Select a categorical variable, or group the values with Data > Transform "
+"first."
+msgstr ""
+"Kategorik bir değişken seçin ya da değerleri önce Veri > Dönüştür ile "
+"gruplayın."
+
 
 #: survival/options/rcs_variable.description
 msgid ""
@@ -123351,7 +123803,8 @@ msgstr ""
 
 #: alluvial/options/colorPalette/set3.title
 msgid "Set3"
-msgstr ""
+msgstr "Set3"
+
 
 #: venn/options/colorPalette/Set3.title
 msgid "Set3 (Qualitative)"
@@ -125774,7 +126227,8 @@ msgstr ""
 
 #: alluvial/options/labelNodes.description.jamovi
 msgid "Show node labels (for ggalluvial engine)."
-msgstr ""
+msgstr "Düğüm etiketlerini göster (ggalluvial motoru için)."
+
 
 #: decisiongraph/options/nodeShapes.title
 msgid "Show Node Shapes"
@@ -126342,6 +126796,11 @@ msgstr ""
 #: ncvregcox/options/plot_path.title
 msgid "Show Regularization Path"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Show relationships between symptoms, diagnosis and outcomes"
+msgstr "Belirtiler, tanı ve sonuçlar arasındaki ilişkileri gösterin"
+
 
 #: semimarkov/options/showReliabilityAnalysis.title
 msgid "Show Reliability Analysis"
@@ -127501,7 +127960,8 @@ msgstr ""
 
 #: alluvial/options/curveType/sigmoid.title
 msgid "Sigmoid (S-shaped)"
-msgstr ""
+msgstr "Sigmoid (S biçimli)"
+
 
 #: friedmantest/options/posthoc_method/sign_test.title
 msgid "Sign Test"
@@ -128047,7 +128507,8 @@ msgstr ""
 
 #: alluvial/options/curveType/sine.title
 msgid "Sine"
-msgstr ""
+msgstr "Sinüs"
+
 
 #: riverplot/options/curveType/sine.title
 msgid "Sine (sinusoidal curves)"
@@ -131628,6 +132089,11 @@ msgid ""
 "later."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Start with fewer variables and add more once you understand the patterns"
+msgstr "Az değişkenle başlayın; örüntüleri anladıkça ekleyin"
+
+
 #: R/waterfall.b.R
 msgid ""
 "Start with percentage data if available, or use raw measurements with proper "
@@ -134304,7 +134770,13 @@ msgstr ""
 
 #: alluvial/ui[2].label
 msgid "Styling"
-msgstr ""
+msgstr "Biçem"
+
+
+#: R/alluvial.b.R
+msgid "Styling options not applied"
+msgstr "Biçem seçenekleri uygulanmadı"
+
 
 #: finegray/results/shrTable.title
 msgid "Sub-Hazard Ratios (sHR)"
@@ -134666,7 +135138,8 @@ msgstr ""
 
 #: alluvial/options/plotSubtitle.description.jamovi
 msgid "Subtitle for the plot (shown below the title)."
-msgstr ""
+msgstr "Grafik alt başlığı (başlığın altında gösterilir)."
+
 
 #: ihcscoring/results/molecularclassification/subtypestatistics.title
 msgid "Subtype Statistical Comparison"
@@ -136659,9 +137132,33 @@ msgid ""
 "Application Metrics table."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Switch on marginal histograms to see individual variable distributions"
+msgstr "Tek tek değişken dağılımlarını görmek için kenar histogramlarını açın"
+
+
+#: R/alluvial.b.R
+msgid "Switch on the flow table to list every path with its number of cases"
+msgstr "Her yolu olgu sayısıyla listelemek için akış tablosunu açın"
+
+
+#: R/alluvial.b.R
+msgid ""
+"Switch the 'Plot engine' option to 'Easy Alluvial', or run "
+"install.packages(\"ggalluvial\") in R and restart jamovi."
+msgstr ""
+"'Grafik motoru' seçeneğini 'Easy Alluvial' olarak değiştirin ya da R'da "
+"install.packages(\"ggalluvial\") çalıştırıp jamovi'yi yeniden başlatın."
+
+
 #: R/waterfall.b.R
 msgid "Switch to 'Percentage Changes' input format if changes are pre-calculated, OR"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Switch to the GG Alluvial engine to use weighted flows."
+msgstr "Ağırlıklı akışlar için GG Alluvial motoruna geçin."
+
 
 #: treatmentswitching/options/switchingMethod.title
 msgid "Switching Analysis Method"
@@ -136988,6 +137485,15 @@ msgstr ""
 #: tinytable/options/table_notes.title
 msgid "Table Notes"
 msgstr ""
+
+#: alluvial/options/showFlowTable.description.jamovi
+msgid ""
+"Table of every path through the plotted variables with its number of cases, "
+"percentage and, when weighted, weight total, commonest first."
+msgstr ""
+"Çizilen değişkenler boyunca her yolun olgu sayısı, yüzdesi ve ağırlıklıysa "
+"ağırlık toplamıyla listelendiği tablo, en sık olan önce."
+
 
 #: package/analyses/tableone.title
 #: package/analyses/tableone.menuTitle
@@ -139224,6 +139730,25 @@ msgstr ""
 msgid "The 'Exclude missing values' box has no effect"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"The 'GG Alluvial' plot engine needs the R package 'ggalluvial', which is not "
+"installed on this computer, so no alluvial plot can be drawn. What to do "
+"next: switch the 'Plot engine' option to 'Easy Alluvial' - it is already "
+"installed and shows the same category flows (weighted flows and a separate "
+"fill variable are only available in GG Alluvial); or install the package by "
+"running install.packages(\"ggalluvial\") in R, then restart jamovi and run "
+"the analysis again."
+msgstr ""
+"'GG Alluvial' grafik motoru bu bilgisayarda kurulu olmayan 'ggalluvial' R "
+"paketini gerektirir; bu yüzden alüvyal grafik çizilemiyor. Ne yapmalı: "
+"'Grafik motoru' seçeneğini 'Easy Alluvial' olarak değiştirin - zaten "
+"kuruludur ve aynı kategori akışlarını gösterir (ağırlıklı akışlar ve ayrı "
+"bir dolgu değişkeni yalnızca GG Alluvial'da vardır); ya da R'da "
+"install.packages(\"ggalluvial\") çalıştırarak paketi kurun, sonra jamovi'yi "
+"yeniden başlatıp analizi yeniden çalıştırın."
+
+
 #: R/jjpubr.b.R
 msgid "The 'ggpubr' package is required. Install with: install.packages('ggpubr')"
 msgstr ""
@@ -139299,6 +139824,15 @@ msgid ""
 "Report the landmark, the number excluded and the reason alongside any rate "
 "taken from this analysis."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"The {palette} palette publishes {cap} distinguishable colours, and this "
+"diagram has at least {groups} groups to colour."
+msgstr ""
+"{palette} paleti {cap} ayırt edilebilir renk sunar; bu diyagramda "
+"renklendirilecek en az {groups} grup var."
+
 
 #: R/lassocox.b.R
 msgid ""
@@ -139402,10 +139936,14 @@ msgstr ""
 "sınırın altındaki yaşlar piramitte gösterilmez ve Veri Özeti'nde 'Yaş sınırı "
 "aralığı dışında' altında sayılır."
 
-
 #: R/agepyramid.b.R
 msgid "The age bands cover different numbers of years"
 msgstr "Yaş aralıkları farklı sayıda yılı kapsıyor"
+
+#: R/alluvial.b.R
+msgid "The alluvial diagram could not be drawn."
+msgstr "Alüvyal diyagram çizilemedi."
+
 
 #: kappaSizePower/options/kappa1.description.ui
 msgid ""
@@ -139566,7 +140104,6 @@ msgstr ""
 "aralıkları birbiriyle karşılaştırın ya da karşılaştırmadan önce aralığın "
 "sayısını yıl olarak genişliğine bölün. Sabit genişlikli aralıklar 'Özel "
 "(aralık genişliği kullan)' seçeneğinden gelir."
-
 
 #: R/waterfallrecist.b.R
 msgid "the baseline visit must be present (default: time = 0)"
@@ -139742,6 +140279,22 @@ msgid ""
 "these toggles to add them under other focuses."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"The condensation panel is based on {panel} rows; the diagram above uses "
+"{diagram}. The two panels require different variables to be recorded, so "
+"they drop different rows."
+msgstr ""
+"Yoğunlaştırma paneli {panel} satıra dayanır; yukarıdaki diyagram {diagram} "
+"satır kullanır. İki panel farklı değişkenlerin kayıtlı olmasını "
+"gerektirdiğinden farklı satırları düşürür."
+
+
+#: R/alluvial.b.R
+msgid "The condensation plot could not be drawn."
+msgstr "Yoğunlaştırma grafiği çizilemedi."
+
+
 #: R/survival.b.R
 msgid ""
 "The confidence interval includes 1, so the data are compatible with no "
@@ -139864,9 +140417,7 @@ msgstr ""
 "ortalama {perBand} gözlem. Bu kadar ince çubuklar tek bir hasta eklendiğinde "
 "ya da çıkarıldığında boylarının büyük bir kısmı kadar değişir; bu yüzden "
 "piramidin dış hattı çoğunlukla bu değişkenliği yansıtır. Daha geniş bir "
-"aralık genişliği ya da hazır gruplardan biri daha okunabilir bir şekil "
-"verir."
-
+"aralık genişliği ya da hazır gruplardan biri daha okunabilir bir şekil verir."
 
 #: R/agepyramid.b.R
 msgid ""
@@ -139883,7 +140434,6 @@ msgstr ""
 "Aralık genişliğini artırın, daha az özel sınır yazın ya da hazır yaş "
 "gruplarından birini seçin - bu şeklin çizildiği boyutta yaklaşık 25 veya "
 "daha az aralık okunabilir."
-
 
 #: R/agepyramid.b.R
 msgid "The custom age breaks could not be used"
@@ -139963,7 +140513,17 @@ msgstr ""
 #: venn/options/data.description.jamovi
 #: waterfall/options/data.description.jamovi
 msgid "The data as a data frame."
+msgstr "Veri çerçevesi olarak veri."
+
+
+#: R/alluvial.b.R
+msgid ""
+"The data contain {n} distinct paths through the selected variables. This may "
+"produce an overcrowded plot."
 msgstr ""
+"Veride seçilen değişkenler boyunca {n} farklı yol var. Bu, aşırı kalabalık "
+"bir grafik üretebilir."
+
 
 #: R/agreement.b.R
 msgid "The data contain no rows. Check the dataset and any active filters."
@@ -140165,6 +140725,11 @@ msgid ""
 "The diagnostic test being evaluated for performance. This is typically a "
 "new, faster, or less expensive test compared to the gold standard."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "The diagram is based on the remaining {n} rows."
+msgstr "Diyagram kalan {n} satıra dayanır."
+
 
 #: R/lassocox.b.R
 msgid ""
@@ -140395,6 +140960,15 @@ msgstr ""
 #: eurostatmap/options/geo_level.description.jamovi
 msgid "The geographic level for mapping."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"The GG Alluvial engine needs the R package 'ggalluvial', which is not "
+"installed, so this plot cannot be drawn."
+msgstr ""
+"GG Alluvial motoru kurulu olmayan 'ggalluvial' R paketini gerektirir; bu "
+"yüzden bu grafik çizilemiyor."
+
 
 #: R/agepyramid.b.R
 msgid "The ggcharts pyramid cannot be drawn"
@@ -140688,7 +141262,6 @@ msgstr ""
 "düzey seçin ya da seçicilerden birini veya ikisini boş bırakarak düzeylerin "
 "adlarından okunmasına izin verin."
 
-
 #: R/oddsratio.b.R
 msgid "The level '{level}' is used as the positive/exposure category as specified."
 msgstr ""
@@ -140776,7 +141349,6 @@ msgstr ""
 "sütunları. Kodlamayı açıkça belirtmek için 'Kadın düzeyi' ve 'Erkek düzeyi' "
 "seçicilerini ayarlayın."
 
-
 #: R/linechart.b.R
 msgid "The linear relationship assumption appears reasonable."
 msgstr ""
@@ -140809,7 +141381,6 @@ msgid ""
 msgstr ""
 "Yukarıdaki ana Yaş Piramidi grafiği ve Nüfus Verisi tablosu eksiksizdir ve "
 "etkilenmez - yalnızca bu ikinci, isteğe bağlı grafik eksiktir."
-
 
 #: simonmakuch/options/timeDepVariable.description
 msgid ""
@@ -141386,7 +141957,8 @@ msgstr ""
 
 #: alluvial/options/condensationvar.description.jamovi
 msgid "The primary variable to be used for condensation."
-msgstr ""
+msgstr "Yoğunlaştırma için kullanılacak ana değişken."
+
 
 #: advancedSurvivalPower/options/power.description
 msgid ""
@@ -141462,7 +142034,6 @@ msgstr ""
 "geldikleri yaş dağılımının kararlı bir tahminini değil, yalnızca bu olguları "
 "anlatır."
 
-
 #: R/agepyramid.b.R
 msgid ""
 "The R package 'ggcharts' is not installed, so the second pyramid (the 'Age "
@@ -141475,9 +142046,7 @@ msgstr ""
 "(ggcharts)' grafiği) boş. Yukarıdaki ana Yaş Piramidi grafiği ve Nüfus "
 "Verisi tablosu eksiksizdir ve etkilenmez. ggcharts sürümünü almak için "
 "paketi install.packages(\"ggcharts\") ile kurup yeniden çalıştırın; aksi "
-"halde boş grafiği gizlemek için 'ggcharts piramidi' onay kutusunu "
-"temizleyin."
-
+"halde boş grafiği gizlemek için 'ggcharts piramidi' onay kutusunu temizleyin."
 
 #: R/decisioncombine.b.R
 msgid "The ranking"
@@ -142228,6 +142797,21 @@ msgid ""
 "below."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "The weight variable contains only missing values."
+msgstr "Ağırlık değişkeni yalnızca eksik değer içeriyor."
+
+
+#: R/alluvial.b.R
+msgid "The weight variable is only supported by the GG Alluvial engine."
+msgstr "Ağırlık değişkeni yalnızca GG Alluvial motorunda desteklenir."
+
+
+#: R/alluvial.b.R
+msgid "The weight variable must contain at least one positive value."
+msgstr "Ağırlık değişkeni en az bir pozitif değer içermelidir."
+
+
 #: R/decisioncurve.b.R
 msgid ""
 "The whole curve, including any clinical rule, lies within the band with this "
@@ -142303,11 +142887,13 @@ msgstr ""
 #: alluvial/options/themeStyle.title
 #: jjridges/ui[5][0]/theme_style.label
 msgid "Theme style"
-msgstr ""
+msgstr "Tema biçemi"
+
 
 #: alluvial/options/themeStyle.description.jamovi
 msgid "Theme style for the plot background and elements."
-msgstr ""
+msgstr "Grafik arka planı ve öğeleri için tema biçemi."
+
 
 #: samplingerror/options/calculationMode/theoretical.title
 msgid "Theoretical (from parameters)"
@@ -142574,6 +143160,15 @@ msgid ""
 "so a two-by-two p-value can move to the other side of 0.05 when nothing but "
 "the style is changed. Fisher's exact test does not involve this choice."
 msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"These variables hold numbers and are drawn with their own recorded values as "
+"categories: {variables}."
+msgstr ""
+"Şu değişkenler sayı içeriyor ve kaydedilmiş değerleri kategori olarak "
+"alınarak çizildi: {variables}."
+
 
 #: R/reportcat.b.R
 msgid "These will be excluded from analysis."
@@ -145861,6 +146456,11 @@ msgid ""
 "for detailed intersection analysis."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Tips"
+msgstr "İpuçları"
+
+
 #: R/sequentialtests.b.R
 msgid "Tissue Biopsy"
 msgstr ""
@@ -145889,7 +146489,8 @@ msgstr ""
 #: jjwithinstats/options/mytitle.title
 #: jwaffle/options/mytitle.title
 msgid "Title"
-msgstr ""
+msgstr "Başlık"
+
 
 #: tidyplots/options/titleAlignment.title
 #: tidyplots/ui[19][1].label
@@ -145910,7 +146511,8 @@ msgstr ""
 
 #: alluvial/options/mytitle.description.jamovi
 msgid "Title for the plot."
-msgstr ""
+msgstr "Grafik başlığı."
+
 
 #: consortdiagram/options/study_title.description.ui
 msgid "Title to display at the top of the diagram."
@@ -146162,6 +146764,11 @@ msgstr ""
 msgid "Too many age bands to draw"
 msgstr "Çizilemeyecek kadar çok yaş aralığı"
 
+#: R/alluvial.b.R
+msgid "Too Many Categories"
+msgstr "Çok Fazla Kategori"
+
+
 #: R/multisurvival.b.R
 msgid "Too many predictors relative to events (low EPV) leads to overfitting"
 msgstr "Olaylara göre çok fazla öngördürücü (düşük EPV) aşırı uyuma yol açar"
@@ -146297,7 +146904,8 @@ msgstr ""
 #: alluvial/options/flowDirection/top_bottom.title
 #: studydiagram/options/direction/TB.title
 msgid "Top to Bottom"
-msgstr ""
+msgstr "Yukarıdan Aşağıya"
+
 
 #: measurementuncertainty/options/uncertainty_method/top_down.title
 msgid "Top-down Approach"
@@ -146902,6 +147510,11 @@ msgstr ""
 #: R/swimmerplot_html.R
 msgid "Track key clinical events (surgery, progression, etc.)"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Track progression through treatment stages"
+msgstr "Tedavi aşamaları boyunca ilerlemeyi izleyin"
+
 
 #: irecist/options/trackPseudoprogression.title
 msgid "Track Pseudoprogression"
@@ -148620,6 +149233,11 @@ msgstr ""
 #: jjoncoplot/options/clinicalPreset/tumor_profiling.title
 msgid "Tumor Profiling (Top genes, TMB)"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Tumor progression:"
+msgstr "Tümör ilerlemesi:"
+
 
 #: ihcimmune/ui[2][0][1][2].label
 msgid "Tumor Region (Optional)"
@@ -151003,7 +151621,8 @@ msgstr ""
 
 #: alluvial/options/usetitle.description.jamovi
 msgid "Use a custom title for the plot."
-msgstr ""
+msgstr "Grafik için özel başlık kullan."
+
 
 #: R/benford.b.R
 msgid "Use a different variable with more observations"
@@ -151693,6 +152312,15 @@ msgid ""
 "expression, population counts)"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"Use weighted flows (GG Alluvial engine) for aggregated data with frequency "
+"counts"
+msgstr ""
+"Sıklık sayıları içeren toplulaştırılmış veriler için ağırlıklı akışları (GG "
+"Alluvial motoru) kullanın"
+
+
 #: decision/ui[2][0].label
 msgid "Use when sample doesn't represent target population disease prevalence"
 msgstr ""
@@ -151838,7 +152466,6 @@ msgid ""
 msgstr ""
 "demografideki sol-kapalı aralık geleneğiyle (örn. 0-4, 5-9, 85+); sınırdaki "
 "bir yaş, o sınırla başlayan aralığa düşer"
-
 
 #: R/timeinterval.b.R
 msgid ""
@@ -152693,7 +153320,8 @@ msgstr ""
 #: alluvial/options/fill/values.title
 #: lollipop/options/showValues.title
 msgid "Values"
-msgstr ""
+msgstr "Değerler"
+
 
 #: jjsegmentedtotalbar/ui[0][1]/y_var.label
 msgid "Values (e.g., Patient Counts)"
@@ -153002,6 +153630,27 @@ msgid ""
 "2 categories."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"Variable '{variable}' has {n} distinct categories, so the diagram will be "
+"split into that many strata and the flows between them will be very thin."
+msgstr ""
+"'{variable}' değişkeninin {n} farklı kategorisi var; bu yüzden diyagram o "
+"kadar katmana bölünecek ve aralarındaki akışlar çok ince olacak."
+
+
+#: R/alluvial.b.R
+msgid ""
+"Variable '{variable}' has {n} unique values and appears continuous, so it "
+"has no meaningful strata. Alluvial diagrams need categorical data: group the "
+"values first with the categorize analysis or Data > Transform."
+msgstr ""
+"'{variable}' değişkeninin {n} farklı değeri var ve sürekli görünüyor; bu "
+"yüzden anlamlı katmanları yok. Alüvyal diyagramlar kategorik veri "
+"gerektirir: değerleri önce kategorize analiziyle ya da Veri > Dönüştür ile "
+"gruplayın."
+
+
 #: R/tableone.b.R
 msgid ""
 "Variable '{variable}' has many unique text values. Consider grouping "
@@ -153015,6 +153664,15 @@ msgid "Variable '{variable}' is stored as a number but has only {n} distinct val
 msgstr ""
 "'{variable}' değişkeni sayısal saklanıyor ancak yalnızca {n} farklı değeri "
 "var."
+
+#: R/alluvial.b.R
+msgid ""
+"Variable '{variable}' was not found in the data. Make sure every selected "
+"variable still exists in the dataset."
+msgstr ""
+"'{variable}' değişkeni veride bulunamadı. Seçilen her değişkenin veri "
+"setinde hâlâ var olduğundan emin olun."
+
 
 #: R/riverplot.b.R
 msgid ""
@@ -153478,9 +154136,11 @@ msgstr ""
 msgid "Variable names"
 msgstr ""
 
+#: R/alluvial.b.R
 #: R/datetimeconverter.b.R
 msgid "Variable Not Found"
-msgstr ""
+msgstr "Değişken Bulunamadı"
+
 
 #: jjsyndromicplot/options/varorder.title
 #: jjsyndromicplot/ui[3][0][1]/varorder.label
@@ -153996,6 +154656,11 @@ msgstr ""
 msgid "Variables not found in the dataset: {vars}."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Variables not shown"
+msgstr "Gösterilmeyen değişkenler"
+
+
 #: conditionalinference/options/mtry.title
 #: extratrees/options/mtry.title
 #: stagemigration/ui[9][2]/forestMTry.label
@@ -154461,7 +155126,8 @@ msgstr "Değişken adında özel karakter olmadığını doğrulayın"
 #: lollipop/options/orientation/vertical.title
 #: raincloud/options/orientation/vertical.title
 msgid "Vertical"
-msgstr ""
+msgstr "Dikey"
+
 
 #: multisurvival/options/medianline/v.title
 #: singlearm/options/medianline/v.title
@@ -154824,7 +155490,8 @@ msgstr ""
 #: toxicityprofile/options/gradeColors/viridis.title
 #: venn/options/colorPalette/viridis.title
 msgid "Viridis"
-msgstr ""
+msgstr "Viridis"
+
 
 #: ggprism/options/prism_palette/viridis.title
 msgid "Viridis (6 colors)"
@@ -155070,6 +155737,11 @@ msgstr ""
 msgid "Visualize flows, transitions, and categorical changes across time or stages:"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Visualize grade/stage transitions"
+msgstr "Derece/evre geçişlerini görselleştirin"
+
+
 #: R/riverplot.b.R
 msgid "Visualize multi-stage workflows, decision pathways"
 msgstr ""
@@ -155085,6 +155757,11 @@ msgstr ""
 #: hierarchicalbayes/options/shrinkage_plots.description.ui
 msgid "Visualize shrinkage of study estimates"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Visualize the flow of categorical data across multiple dimensions."
+msgstr "Kategorik verinin birden çok boyut boyunca akışını görselleştirin."
+
 
 #: R/jjridges.b.R
 msgid "Visualize treatment response patterns across disease stages"
@@ -155362,6 +156039,7 @@ msgid "warning"
 msgstr "uyarı"
 
 #: R/agepyramid.b.R
+#: R/alluvial.b.R
 #: R/benford.b.R
 #: R/decisioncalculator.b.R
 #: R/summarydata.b.R
@@ -155857,6 +156535,11 @@ msgstr ""
 msgid "Weight Specification"
 msgstr ""
 
+#: alluvial/results/flowTable.columns.title
+msgid "Weight total"
+msgstr "Ağırlık toplamı"
+
+
 #: treatmenteffects/options/weight_trimming.title
 msgid "Weight Trimming"
 msgstr ""
@@ -155866,9 +156549,34 @@ msgstr ""
 msgid "Weight Variable"
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/weight.title
 msgid "Weight variable"
+msgstr "Ağırlık değişkeni"
+
+
+#: R/alluvial.b.R
+msgid ""
+"Weight variable '{weight}' contains {n} negative value(s). Weights must be "
+"non-negative (>= 0)."
 msgstr ""
+"'{weight}' ağırlık değişkeninde {n} negatif değer var. Ağırlıklar negatif "
+"olmamalıdır (>= 0)."
+
+
+#: R/alluvial.b.R
+msgid "Weight variable '{weight}' does not exist in the data."
+msgstr "'{weight}' ağırlık değişkeni veride yok."
+
+
+#: R/alluvial.b.R
+msgid ""
+"Weight variable '{weight}' must be different from the axis and fill "
+"variables."
+msgstr ""
+"'{weight}' ağırlık değişkeni eksen ve dolgu değişkenlerinden farklı "
+"olmalıdır."
+
 
 #: riverplot/options/weight.title
 #: riverplot/ui[0][3].label
@@ -155877,7 +156585,23 @@ msgstr ""
 
 #: alluvial/ui[0][2].label
 msgid "Weight variable (optional)"
-msgstr ""
+msgstr "Ağırlık değişkeni (isteğe bağlı)"
+
+
+#: R/alluvial.b.R
+msgid "Weight Variable Ignored"
+msgstr "Ağırlık Değişkeni Yok Sayıldı"
+
+
+#: R/alluvial.b.R
+msgid "Weight Variable Not Found"
+msgstr "Ağırlık Değişkeni Bulunamadı"
+
+
+#: R/alluvial.b.R
+msgid "Weight Variable Reused"
+msgstr "Ağırlık Değişkeni Yeniden Kullanıldı"
+
 
 #: R/riverplot.b.R
 msgid "Weight Variable:"
@@ -156075,6 +156799,11 @@ msgstr ""
 #: agreement/options/gwetWeights.title
 msgid "Weights for Gwet's AC"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid "Weights must be finite numeric values or missing."
+msgstr "Ağırlıklar sonlu sayısal değerler ya da eksik olmalıdır."
+
 
 #: coxrobust/options/weights_variable.title
 #: coxrobust/ui[9][1].label
@@ -156289,6 +157018,64 @@ msgstr ""
 msgid "What to Calculate"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"What to do next: choose Viridis or Plasma, which stay distinguishable over "
+"many groups, or group categories with Data > Transform until the palette "
+"fits."
+msgstr ""
+"Ne yapmalı: çok sayıda grupta da ayırt edilebilir kalan Viridis ya da "
+"Plasma'yı seçin veya palet yetene kadar kategorileri Veri > Dönüştür ile "
+"gruplayın."
+
+
+#: R/alluvial.b.R
+msgid ""
+"What to do next: group the less frequent categories with Data > Transform, "
+"or plot fewer variables at a time."
+msgstr ""
+"Ne yapmalı: seyrek kategorileri Veri > Dönüştür ile gruplayın ya da bir "
+"seferde daha az değişken çizin."
+
+
+#: R/alluvial.b.R
+msgid ""
+"What to do next: nothing is needed. To combine values into wider groups, "
+"recode the variable with Data > Transform before plotting."
+msgstr ""
+"Ne yapmalı: bir şey gerekmiyor. Değerleri daha geniş gruplarda birleştirmek "
+"için değişkeni çizmeden önce Veri > Dönüştür ile yeniden kodlayın."
+
+
+#: R/alluvial.b.R
+msgid ""
+"What to do next: switch 'Marginal plots' off if you need any of those "
+"settings."
+msgstr ""
+"Ne yapmalı: bu ayarlardan birine ihtiyacınız varsa 'Kenar grafikleri' "
+"seçeneğini kapatın."
+
+
+#: R/alluvial.b.R
+msgid ""
+"What to try next: choose a categorical condensation variable; group "
+"categories with very few cases (Data > Transform)."
+msgstr ""
+"Denenebilecekler: kategorik bir yoğunlaştırma değişkeni seçin; çok az olgulu "
+"kategorileri gruplayın (Veri > Dönüştür)."
+
+
+#: R/alluvial.b.R
+msgid ""
+"What to try next: switch 'Plot engine' to Easy Alluvial; plot fewer "
+"variables; group categories with few cases (Data > Transform); check that "
+"every selected variable is still in the data."
+msgstr ""
+"Denenebilecekler: 'Grafik motoru'nu Easy Alluvial yapın; daha az değişken "
+"çizin; az olgulu kategorileri gruplayın (Veri > Dönüştür); seçilen her "
+"değişkenin veride hâlâ var olduğunu kontrol edin."
+
+
 #: R/agepyramid.b.R
 msgid ""
 "What to try next: widen the age bin width (or choose a preset) so more than "
@@ -156300,7 +157087,6 @@ msgstr ""
 "genişliğini artırın (ya da bir hazır grup seçin) ve özel çubuk renklerinin "
 "geçerli renk adları ya da #RRGGBB kodları olduğunu kontrol edin. Bu görünüme "
 "gerek yoksa gizlemek için 'ggcharts piramidi' onay kutusunu temizleyin."
-
 
 #: metaanalysis/options/effect_measure.title
 msgid "What type of effect are you combining?"
@@ -156718,7 +157504,6 @@ msgstr ""
 "DSÖ kısaltılmış gruplar (<1, 1-4, 5-9, ...), Pediatrik (<18), Üreme çağı "
 "(15-50), Geriatrik (65+), Yaşam evreleri veya Özel"
 
-
 #: R/ihcheterogeneity.b.R
 msgid "whole section"
 msgstr ""
@@ -156758,6 +157543,46 @@ msgstr "Neden önemli:"
 #: R/waterfall.b.R
 msgid "Why this matters:"
 msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Why this matters: changing any of them will not alter the picture on screen "
+"while marginal plots are on."
+msgstr ""
+"Neden önemli: kenar grafikleri açıkken bunlardan herhangi birini değiştirmek "
+"ekrandaki resmi değiştirmez."
+
+
+#: R/alluvial.b.R
+msgid ""
+"Why this matters: the drawing engine would otherwise rescale each numeric "
+"variable and cut it into equal-width bins, so values coded 1/2/3 would "
+"appear on the diagram as bin labels such as LL/M/HH."
+msgstr ""
+"Neden önemli: aksi halde çizim motoru her sayısal değişkeni yeniden "
+"ölçekleyip eşit genişlikli aralıklara bölerdi; 1/2/3 olarak kodlanmış "
+"değerler diyagramda LL/M/HH gibi aralık etiketleriyle görünürdü."
+
+
+#: R/alluvial.b.R
+msgid ""
+"Why this matters: the extra groups are drawn in shades blended between the "
+"published colours, so neighbouring groups can look alike and are hard to "
+"tell apart in the legend."
+msgstr ""
+"Neden önemli: fazladan gruplar yayımlanan renkler arasında harmanlanmış "
+"tonlarla çizilir; bu yüzden komşu gruplar birbirine benzeyebilir ve "
+"göstergede ayırt etmek zorlaşır."
+
+
+#: R/alluvial.b.R
+msgid ""
+"Why this matters: with more than about 7 categories per variable the ribbons "
+"overlap and individual paths can no longer be traced by eye."
+msgstr ""
+"Neden önemli: değişken başına yaklaşık 7'den fazla kategoride şeritler üst "
+"üste biner ve tek tek yollar gözle izlenemez."
+
 
 #: R/riverplot.b.R
 msgid "Why:"
@@ -158164,7 +158989,6 @@ msgstr ""
 "Piramidin tarafları, gösterge ve 'Kadın (n)' / 'Erkek (n)' tablo sütunları "
 "bu atamayı izler. Açıkça belirlemek için 'Kadın düzeyi' ve 'Erkek düzeyi' "
 "seçicilerini kullanın."
-
 
 #: R/enhancedROC.b.R
 msgid "you entered"

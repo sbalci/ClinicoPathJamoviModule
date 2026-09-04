@@ -59,6 +59,8 @@ children:
                   - type: CheckBox
                     name: excl
                   - type: CheckBox
+                    name: showFlowTable
+                  - type: CheckBox
                     name: marg
                     enable: (engine:easyalluvial && orient:vert && !usetitle)
                   - type: ComboBox
@@ -79,14 +81,6 @@ children:
                 children:
                   - type: ComboBox
                     name: fill
-                    enable: (engine:easyalluvial)
-                  - type: ComboBox
-                    name: bin
-                    enable: (engine:easyalluvial)
-                  - type: TextBox
-                    name: custombinlabels
-                    format: string
-                    width: large
                     enable: (engine:easyalluvial)
                   - type: TextBox
                     name: maxvars

@@ -55,6 +55,7 @@ alluvialSurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             private$..survivalVar <- jmvcore::OptionVariable$new(
                 "survivalVar",
                 survivalVar,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -267,7 +268,7 @@ alluvialSurvival <- function(
     stageVar,
     treatmentVar,
     patientId,
-    survivalVar,
+    survivalVar = NULL,
     showRightAxis = FALSE,
     colorScheme = "clinical",
     showSurvival = FALSE) {

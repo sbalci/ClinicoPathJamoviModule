@@ -10,7 +10,7 @@ alluvialSurvival(
   stageVar,
   treatmentVar,
   patientId,
-  survivalVar,
+  survivalVar = NULL,
   showRightAxis = FALSE,
   colorScheme = "clinical",
   showSurvival = FALSE

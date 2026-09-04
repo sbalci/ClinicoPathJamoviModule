@@ -107,35 +107,6 @@ options:
             A string naming the categorical variable from `data` that will be
             used to color the flows in the ggalluvial plot.
 
-    - name: bin
-      title: Bin labels
-      type: List
-      options:
-        - title: Default
-          name: default
-        - title: Mean
-          name: mean
-        - title: Median
-          name: median
-        - title: Min-Max
-          name: min_max
-        - title: Interval cut points
-          name: cuts
-      default: default
-      description:
-          R: >
-            Names for the intervals the drawing engine creates when it has to split a
-            continuous variable. This analysis draws every axis variable with its own
-            recorded values as categories, so in practice nothing is binned and this
-            setting has no visible effect. To group values, recode the variable first.
-          jamovi: >
-            Names for the intervals the drawing engine creates when it has to split a
-            continuous variable (e.g. 'LL' for low-low, 'HH' for high-high). This analysis
-            draws every axis variable with its own recorded values as categories, so in
-            practice nothing is binned and this setting has no visible effect. To group
-            values, use the categorize function on the variable first.
-
-
     - name: orient
       title: Plot orientation
       type: List
@@ -188,25 +159,21 @@ options:
           jamovi: >
             Maximum number of variables to include in the alluvial plot.
 
-    - name: custombinlabels
-      title: Custom bin labels
-      type: String
-      default: ''
+    # === Phase 1: Easy Additions ===
+
+    - name: showFlowTable
+      title: Flow table
+      type: Bool
+      default: false
       description:
           R: >
-            Custom names for the intervals the drawing engine creates when it has to
-            split a continuous variable, separated by commas (e.g. "Low,Medium,High");
-            at least two are required. As with the bin labels above, every axis variable
-            here is drawn as a category, so in practice nothing is binned. Leave empty
-            to use the selected bin-label method.
+            Add a table of every path through the plotted variables with the number of
+            cases on it and its percentage of all cases; with a weight variable under the
+            GG Alluvial engine the weight total is listed as well. Rows are ordered by
+            frequency, so the first row is the commonest path.
           jamovi: >
-            Custom names for the intervals the drawing engine creates when it has to
-            split a continuous variable, separated by commas (e.g. "Low,Medium,High");
-            at least two are required. As with the bin labels above, every axis variable
-            here is drawn as a category, so in practice nothing is binned. Leave empty
-            to use the selected bin-label method.
-
-    # === Phase 1: Easy Additions ===
+            Table of every path through the plotted variables with its number of cases,
+            percentage and, when weighted, weight total, commonest first.
 
     - name: colorPalette
       title: Color palette

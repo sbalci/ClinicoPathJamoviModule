@@ -36,8 +36,8 @@ test_that("alluvialSurvival function basic structure", {
         )
         
         # Check that result is an alluvialSurvival analysis object
-        expect_s3_class(result, "alluvialSurvivalClass")
-        expect_true(inherits(result, "alluvialSurvivalBase"))
+        expect_s3_class(result, "alluvialSurvivalResults")
+        expect_true(inherits(result, "ResultsElement"))
     }
 })
 
@@ -63,7 +63,7 @@ test_that("alluvialSurvival with survival variable", {
             survivalVar = "SurvivalStatus"
         )
         
-        expect_s3_class(result, "alluvialSurvivalClass")
+        expect_s3_class(result, "alluvialSurvivalResults")
         expect_equal(result$options$survivalVar, "SurvivalStatus")
     }
 })
@@ -94,7 +94,7 @@ test_that("alluvialSurvival parameter validation", {
                 patientId = "Patient",
                 colorScheme = scheme
             )
-            expect_s3_class(result, "alluvialSurvivalClass")
+            expect_s3_class(result, "alluvialSurvivalResults")
             expect_equal(result$options$colorScheme, scheme)
         }
         
@@ -107,7 +107,7 @@ test_that("alluvialSurvival parameter validation", {
             patientId = "Patient",
             showRightAxis = TRUE
         )
-        expect_s3_class(result, "alluvialSurvivalClass")
+        expect_s3_class(result, "alluvialSurvivalResults")
         expect_true(result$options$showRightAxis)
         
         # Test with survival functionality
@@ -120,7 +120,7 @@ test_that("alluvialSurvival parameter validation", {
             survivalVar = "Status",
             showSurvival = TRUE
         )
-        expect_s3_class(result, "alluvialSurvivalClass")
+        expect_s3_class(result, "alluvialSurvivalResults")
         expect_equal(result$options$survivalVar, "Status")
         expect_true(result$options$showSurvival)
     }
@@ -152,7 +152,7 @@ test_that("alluvialSurvival comprehensive parameter combinations", {
             showSurvival = TRUE
         )
         
-        expect_s3_class(result, "alluvialSurvivalClass")
+        expect_s3_class(result, "alluvialSurvivalResults")
         expect_equal(result$options$timeVar, "VisitTime")
         expect_equal(result$options$stageVar, "TumorStage")
         expect_equal(result$options$treatmentVar, "Treatment")
@@ -233,14 +233,15 @@ test_that("alluvialSurvival survival variable validation", {
         
         # Test with invalid survival values (not 0/1)
         invalid_survival_data <- data.frame(
-            ID = rep(c("P1", "P2", "P3"), each = 2),
-            Time = rep(c(0, 6), 3),
-            Stage = sample(c("A", "B"), 6, replace = TRUE),
-            Treatment = sample(c("X", "Y"), 6, replace = TRUE),
-            Survival = c(0, 1, 2, 3, 0, 1),  # Invalid values 2, 3
+            ID = rep(c("P1", "P2", "P3", "P4", "P5"), each = 2),
+            Time = rep(c(0, 6), 5),
+            Stage = sample(c("A", "B"), 10, replace = TRUE),
+            Treatment = sample(c("X", "Y"), 10, replace = TRUE),
+            Survival = c(0, 1, 2, 3, 0, 1, 0, 1, 0, 1),  # Invalid values 2, 3
             stringsAsFactors = TRUE
         )
         
+        # five patients, so the binary check (not the patient-count guard) is what fires
         expect_error(
             alluvialSurvival(
                 data = invalid_survival_data,
@@ -249,16 +250,17 @@ test_that("alluvialSurvival survival variable validation", {
                 treatmentVar = "Treatment",
                 patientId = "ID",
                 survivalVar = "Survival"
-            )
+            ),
+            "must be binary"
         )
         
         # Test with valid survival values including NA
         valid_survival_data <- data.frame(
-            ID = rep(c("P1", "P2", "P3"), each = 2),
-            Time = rep(c(0, 6), 3),
-            Stage = sample(c("A", "B"), 6, replace = TRUE),
-            Treatment = sample(c("X", "Y"), 6, replace = TRUE),
-            Survival = c(0, 1, NA, 0, 1, NA),  # Valid values including NA
+            ID = rep(c("P1", "P2", "P3", "P4", "P5"), each = 2),
+            Time = rep(c(0, 6), 5),
+            Stage = sample(c("A", "B"), 10, replace = TRUE),
+            Treatment = sample(c("X", "Y"), 10, replace = TRUE),
+            Survival = c(0, 1, NA, 0, 1, NA, 0, 0, 1, 1),  # Valid values including NA
             stringsAsFactors = TRUE
         )
         
@@ -271,7 +273,7 @@ test_that("alluvialSurvival survival variable validation", {
             survivalVar = "Survival"
         )
         
-        expect_s3_class(result, "alluvialSurvivalClass")
+        expect_s3_class(result, "alluvialSurvivalResults")
     }
 })
 
@@ -279,10 +281,10 @@ test_that("alluvialSurvival required methods exist", {
     
     # Simple test data
     test_data <- data.frame(
-        ID = rep(c("A", "B", "C"), each = 2),
-        Time = rep(c(0, 6), 3),
-        Stage = c("I", "II", "I", "III", "II", "I"),
-        Treatment = c("S", "C", "S", "R", "C", "S"),
+        ID = rep(c("A", "B", "C", "D", "E"), each = 2),
+        Time = rep(c(0, 6), 5),
+        Stage = c("I", "II", "I", "III", "II", "I", "II", "III", "I", "II"),
+        Treatment = c("S", "C", "S", "R", "C", "S", "R", "C", "S", "C"),
         stringsAsFactors = TRUE
     )
     
@@ -295,17 +297,17 @@ test_that("alluvialSurvival required methods exist", {
             patientId = "ID"
         )
         
-        # Check that required methods exist
-        expect_true(exists(".plot", envir = result$.__enclos_env__$private))
-        expect_true(exists(".run", envir = result$.__enclos_env__$private))
-        expect_true(exists(".validateData", envir = result$.__enclos_env__$private))
-        expect_true(exists(".calculateStats", envir = result$.__enclos_env__$private))
-        expect_true(exists(".prepareAlluvialData", envir = result$.__enclos_env__$private))
+        # The wrapper returns the Results object; the methods live on the class
+        expect_true(".plot" %in% names(alluvialSurvivalClass$private_methods))
+        expect_true(".run" %in% names(alluvialSurvivalClass$private_methods))
+        expect_true(".validateData" %in% names(alluvialSurvivalClass$private_methods))
+        expect_true(".calculateStats" %in% names(alluvialSurvivalClass$private_methods))
+        expect_true(".prepareAlluvialData" %in% names(alluvialSurvivalClass$private_methods))
         
         # Check for survival-specific methods
-        expect_true(exists(".plotSurvival", envir = result$.__enclos_env__$private))
-        expect_true(exists(".prepareSurvivalData", envir = result$.__enclos_env__$private))
-        expect_true(exists(".calculateSurvivalStats", envir = result$.__enclos_env__$private))
+        expect_true(".plotSurvival" %in% names(alluvialSurvivalClass$private_methods))
+        expect_true(".prepareSurvivalData" %in% names(alluvialSurvivalClass$private_methods))
+        expect_true(".calculateSurvivalStats" %in% names(alluvialSurvivalClass$private_methods))
     }
 })
 
@@ -328,7 +330,7 @@ test_that("alluvialSurvival with treatment_pathways dataset", {
                 survivalVar = "Survival_Status"
             )
             
-            expect_s3_class(result, "alluvialSurvivalClass")
+            expect_s3_class(result, "alluvialSurvivalResults")
             
             # Test with all features enabled
             result_full <- alluvialSurvival(
@@ -343,7 +345,7 @@ test_that("alluvialSurvival with treatment_pathways dataset", {
                 showSurvival = TRUE
             )
             
-            expect_s3_class(result_full, "alluvialSurvivalClass")
+            expect_s3_class(result_full, "alluvialSurvivalResults")
             expect_true(result_full$options$showRightAxis)
             expect_equal(result_full$options$colorScheme, "colorblind")
             expect_true(result_full$options$showSurvival)
@@ -375,7 +377,7 @@ test_that("alluvialSurvival longitudinal data structure", {
             colorScheme = "clinical"
         )
         
-        expect_s3_class(result, "alluvialSurvivalClass")
+        expect_s3_class(result, "alluvialSurvivalResults")
         expect_equal(result$options$timeVar, "FollowUpMonth")
         expect_equal(result$options$colorScheme, "clinical")
         
@@ -407,7 +409,7 @@ test_that("alluvialSurvival color scheme functionality", {
             colorScheme = "clinical"
         )
         
-        expect_s3_class(result_clinical, "alluvialSurvivalClass")
+        expect_s3_class(result_clinical, "alluvialSurvivalResults")
         expect_equal(result_clinical$options$colorScheme, "clinical")
         
         # Test colorblind-safe scheme
@@ -420,7 +422,7 @@ test_that("alluvialSurvival color scheme functionality", {
             colorScheme = "colorblind"
         )
         
-        expect_s3_class(result_colorblind, "alluvialSurvivalClass")
+        expect_s3_class(result_colorblind, "alluvialSurvivalResults")
         expect_equal(result_colorblind$options$colorScheme, "colorblind")
     }
 })

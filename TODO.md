@@ -15,8 +15,8 @@
 
 ## Descriptive Plots
 
-agepyramid
-alluvial
+- agepyramid
+- alluvial
 vartree
 venn
 

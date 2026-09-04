@@ -45,8 +45,8 @@
 # ==============================================
 
 
-new_version: "1.0.8.10"
-new_date: "2026-09-03"
+new_version: "1.0.8.11"
+new_date: "2026-09-04"
 quick: false
 TEST: false
 jjstatsplot: false
@@ -197,6 +197,10 @@ modules:
       - "stagemigration_summary_stats.rda"
   ClinicoPathDescriptives:
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
+    i18n_files:
+      - "catalog.pot"
+      - "en.po"
+      - "tr.po"
     r_files:
       - "utils.R"
     data_files:

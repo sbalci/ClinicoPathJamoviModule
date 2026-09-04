@@ -22,7 +22,7 @@
 #' - Condensation plots for detailed variable analysis
 #' - Marginal histograms for additional context
 #' - Flexible orientation (horizontal/vertical)
-#' - Customizable bin labels and fill options
+#' - Fill options and an optional flow table (one row per path, commonest first)
 #' - Multiple plot engines (easyalluvial and ggalluvial)
 #' - Color palettes and theme styling
 #' - Sankey diagram styling with curve types
@@ -45,6 +45,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # when composing the reading notice / the condensation panel notice.
         .naLabel = "(Missing)",
         .mainPlotRows = NULL,
+        # One-row data frame (path, n, pct, w) for the commonest path, set by
+        # .prepareMainPlotState and quoted in the reading notice.
+        .topFlow = NULL,
 
         .addNotice = function(type, title, content) {
             duplicate <- vapply(private$.noticeList, function(notice) {
@@ -74,10 +77,10 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
-                    ERROR          = "ERROR: ",
-                    STRONG_WARNING = "WARNING: ",
-                    WARNING        = "WARNING: ",
-                    INFO           = "NOTE: ",
+                    ERROR          = paste0(.("ERROR"), ": "),
+                    STRONG_WARNING = paste0(.("WARNING"), ": "),
+                    WARNING        = paste0(.("WARNING"), ": "),
+                    INFO           = paste0(.("NOTE"), ": "),
                     "")
                 paste0(prefix, notice$title, "\n", notice$content)
             }, character(1))
@@ -92,9 +95,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!weight_var %in% names(data)) {
                 private$.addNotice(
                     "ERROR",
-                    "Weight Variable Not Found",
-                    paste0("Weight variable '", weight_var,
-                        "' does not exist in the data.")
+                    .("Weight Variable Not Found"),
+                    jmvcore::format(.("Weight variable '{weight}' does not exist in the data."),
+                                    weight = weight_var)
                 )
                 return(FALSE)
             }
@@ -110,11 +113,10 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.numeric(weight_col)) {
                 private$.addNotice(
                     "ERROR",
-                    "Invalid Weight Variable",
-                    sprintf(
-                        "'%s' must be numeric (current type: %s). Please select a numeric variable containing counts, frequencies, or sampling weights.",
-                        weight_var, class(weight_col)[1]
-                    )
+                    .("Invalid Weight Variable"),
+                    jmvcore::format(
+                        .("'{weight}' must be numeric (current type: {type}). Select a numeric variable containing counts, frequencies, or sampling weights."),
+                        weight = weight_var, type = class(weight_col)[1])
                 )
                 return(FALSE)
             }
@@ -123,8 +125,8 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!any(non_missing)) {
                 private$.addNotice(
                     "ERROR",
-                    "No Valid Weights",
-                    "The weight variable contains only missing values."
+                    .("No Valid Weights"),
+                    .("The weight variable contains only missing values.")
                 )
                 return(FALSE)
             }
@@ -132,8 +134,8 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (any(!is.finite(weight_col[non_missing]))) {
                 private$.addNotice(
                     "ERROR",
-                    "Non-finite Weights",
-                    "Weights must be finite numeric values or missing."
+                    .("Non-finite Weights"),
+                    .("Weights must be finite numeric values or missing.")
                 )
                 return(FALSE)
             }
@@ -143,11 +145,10 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (n_negative > 0) {
                 private$.addNotice(
                     "ERROR",
-                    "Negative Weights Detected",
-                    sprintf(
-                        "Weight variable '%s' contains %d negative value%s. Weights must be non-negative (>= 0).",
-                        weight_var, n_negative, if (n_negative > 1) "s" else ""
-                    )
+                    .("Negative Weights Detected"),
+                    jmvcore::format(
+                        .("Weight variable '{weight}' contains {n} negative value(s). Weights must be non-negative (>= 0)."),
+                        weight = weight_var, n = n_negative)
                 )
                 return(FALSE)
             }
@@ -155,8 +156,8 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!any(weight_col > 0, na.rm = TRUE)) {
                 private$.addNotice(
                     "ERROR",
-                    "No Positive Weights",
-                    "The weight variable must contain at least one positive value."
+                    .("No Positive Weights"),
+                    .("The weight variable must contain at least one positive value.")
                 )
                 return(FALSE)
             }
@@ -165,11 +166,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_na <- sum(is.na(weight_col))
             if (n_na > 0) {
                 pct_na <- round(100 * n_na / length(weight_col), 1)
-                private$.addNotice('STRONG_WARNING', 'Missing Weights', paste0(
-                    n_na, " observations (", pct_na,
-                    "%) have missing weights. ",
-                    "These will be excluded from the visualization."
-                ))
+                private$.addNotice("STRONG_WARNING", .("Missing Weights"), jmvcore::format(
+                    .("{n} observations ({pct}%) have missing weights. These will be excluded from the visualization."),
+                    n = n_na, pct = pct_na))
             }
 
             return(TRUE)
@@ -204,11 +203,10 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Handle missing values according to the user-facing exclusion option.
-        .handleMissingValues = function(data, vars, exclude, report = TRUE) {
-            n_total <- nrow(data)
-            missing_counts <- sapply(vars, function(v) sum(is.na(data[[v]])))
-
-            if (!any(missing_counts > 0))
+        # What was dropped is reported once, by the "How to read this diagram"
+        # notice (.addReadingNotice), not here.
+        .handleMissingValues = function(data, vars, exclude) {
+            if (!anyNA(data[, vars, drop = FALSE]))
                 return(data)
 
             if (!exclude) {
@@ -262,91 +260,50 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             data_clean <- data[stats::complete.cases(data[, vars, drop = FALSE]), ]
-            n_removed <- n_total - nrow(data_clean)
-
-            if (report && n_removed > 0) {
-                pct_removed <- round(100 * n_removed / n_total, 1)
-
-                vars_with_missing <- names(missing_counts[missing_counts > 0])
-                missing_details <- paste(sapply(vars_with_missing,
-                    function(v) sprintf("%s: %d", htmltools::htmlEscape(v), missing_counts[v])),
-                    collapse = ", ")
-
-                info_html <- paste0(
-                    "<div style='padding: 15px; margin: 6px 0; background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #17a2b8; color: inherit; border-radius: 5px;'>",
-                    "<strong>Missing Data Excluded:</strong> ", n_removed, " of ", n_total,
-                    " observations (", pct_removed, "%) excluded due to missing values.<br/>",
-                    "Variables with missingness: ", missing_details, "<br/>",
-                    "Analysis based on ", nrow(data_clean), " complete cases.",
-                    "</div>"
-                )
-                self$results$dataWarning$setContent(info_html)
-                self$results$dataWarning$setVisible(TRUE)
-            }
-
             return(data_clean)
         },
 
-        # Shared validation helper to reduce duplication
+        # Shared validation helper. Every failure is an ERROR notice in the one
+        # notices panel; the analysis used to split these between an HTML
+        # "Data Validation" panel and the notices, so a user had two places to
+        # look for why no plot appeared.
         .validateAlluvialInputs = function() {
-            # Clear any previous validation messages at the start
-            # This prevents old errors from persisting when validation state changes
-            self$results$dataWarning$setContent("")
-            self$results$dataWarning$setVisible(FALSE)
-
             if (is.null(self$options$vars) || length(self$options$vars) == 0)
                 return(FALSE)
 
             if (length(self$options$vars) < 2) {
-                html <- paste0(
-                    "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
-                    "<h4 style='margin-top: 0; color: #e05260;'>Insufficient Variables</h4>",
-                    "<p>Alluvial diagrams require at least <strong>2 variables</strong>.</p>",
-                    "<p>Please select additional variables from the left panel.</p>",
-                    "</div>"
+                private$.addNotice(
+                    "ERROR",
+                    .("Insufficient Variables"),
+                    .("Alluvial diagrams require at least 2 variables. Select additional variables from the left panel.")
                 )
-                self$results$dataWarning$setContent(html)
-                self$results$dataWarning$setVisible(TRUE)
                 return(FALSE)
             }
 
             if (nrow(self$data) == 0) {
-                html <- paste0(
-                    "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
-                    "<h4 style='margin-top: 0; color: #e05260;'>No Data Available</h4>",
-                    "<p>Data contains no (complete) rows.</p>",
-                    "<p>Please check your data for missing values or filtering issues.</p>",
-                    "</div>"
+                private$.addNotice(
+                    "ERROR",
+                    .("No Data Available"),
+                    .("Data contains no (complete) rows. Check your data for missing values or filtering.")
                 )
-                self$results$dataWarning$setContent(html)
-                self$results$dataWarning$setVisible(TRUE)
                 return(FALSE)
             }
 
             # Validate that variables are appropriate for alluvial diagrams
-            if (!private$.validateVariableTypes(self$options$vars)) {
-                return(FALSE)
-            }
-
-            # Clear warnings if everything is valid
-            self$results$dataWarning$setContent("")
-            return(TRUE)
+            private$.validateVariableTypes(self$options$vars)
         },
 
         # Data type validation and discretization helper
         .validateVariableTypes = function(vars) {
             for (var in vars) {
                 if (!(var %in% names(self$data))) {
-                    var_safe <- htmltools::htmlEscape(var)
-                    html <- paste0(
-                        "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
-                        "<h4 style='margin-top: 0; color: #e05260;'>Variable Not Found</h4>",
-                        "<p>Variable '<strong>", var_safe, "</strong>' not found in the data.</p>",
-                        "<p>Please ensure all selected variables exist in your dataset.</p>",
-                        "</div>"
+                    private$.addNotice(
+                        "ERROR",
+                        .("Variable Not Found"),
+                        jmvcore::format(
+                            .("Variable '{variable}' was not found in the data. Make sure every selected variable still exists in the dataset."),
+                            variable = var)
                     )
-                    self$results$dataWarning$setContent(html)
-                    self$results$dataWarning$setVisible(TRUE)
                     return(FALSE)
                 }
 
@@ -357,11 +314,13 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # means the column is a measurement, and an alluvial diagram has
                 # no meaningful stratum for a measurement.
                 if (is.numeric(var_data) && private$.countCategories(var_data) > 20) {
-                    var_safe <- htmltools::htmlEscape(var)
-                    self$results$dataWarning$setContent(sprintf(
-                        "<div style='padding: 15px; margin: 6px 0; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Error:</strong> Continuous Variable Not Allowed: Variable '%s' has %d unique values and appears continuous. Alluvial plots require categorical data. Please use the categorize function.</div>",
-                        var_safe, private$.countCategories(var_data)))
-                    self$results$dataWarning$setVisible(TRUE)
+                    private$.addNotice(
+                        "ERROR",
+                        .("Continuous Variable Not Allowed"),
+                        jmvcore::format(
+                            .("Variable '{variable}' has {n} unique values and appears continuous, so it has no meaningful strata. Alluvial diagrams need categorical data: group the values first with the categorize analysis or Data > Transform."),
+                            variable = var, n = private$.countCategories(var_data))
+                    )
                     return(FALSE)
                 }
 
@@ -386,15 +345,15 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (n_categories <= 10)
                 return(invisible(NULL))
 
-            private$.addNotice('STRONG_WARNING', 'Too Many Categories', paste0(
-                "Variable '", var, "' has ", n_categories,
-                " distinct categories, so the diagram will be split into that many ",
-                "strata and the flows between them will be very thin.\n",
-                "Why this matters: with more than about 7 categories per variable the ",
-                "ribbons overlap and individual paths can no longer be traced by eye.\n",
-                "What to do next: group the less frequent categories with Data > Transform, ",
-                "or plot fewer variables at a time."
-            ))
+            # One complete sentence per .() and the line breaks added here, so
+            # each sentence translates on its own.
+            private$.addNotice("STRONG_WARNING", .("Too Many Categories"), paste(
+                jmvcore::format(
+                    .("Variable '{variable}' has {n} distinct categories, so the diagram will be split into that many strata and the flows between them will be very thin."),
+                    variable = var, n = n_categories),
+                .("Why this matters: with more than about 7 categories per variable the ribbons overlap and individual paths can no longer be traced by eye."),
+                .("What to do next: group the less frequent categories with Data > Transform, or plot fewer variables at a time."),
+                sep = "\n"))
             invisible(NULL)
         },
 
@@ -431,6 +390,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # reliably write to results elements, so a failure reported through a
         # notice can vanish and leave the user with a blank panel; the plot
         # itself is the only channel that is certain to reach them.
+        # Line-wrap a translated sentence for drawing inside an image.
+        .wrapText = function(text, width = 62) {
+            paste(strwrap(text, width = width), collapse = "\n")
+        },
+
         .messagePlot = function(text) {
             ggplot2::ggplot() +
                 ggplot2::geom_text(
@@ -448,12 +412,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # notice for this during .run, so normally we never get here; this is
             # the render-phase fallback, where results elements cannot be set.
             if (!requireNamespace("ggalluvial", quietly = TRUE)) {
-                return(private$.messagePlot(paste0(
-                    "The GG Alluvial engine needs the R package 'ggalluvial',\n",
-                    "which is not installed, so this plot cannot be drawn.\n\n",
-                    "Switch the 'Plot engine' option to 'Easy Alluvial',\n",
-                    "or run install.packages(\"ggalluvial\") in R and restart jamovi."
-                )))
+                return(private$.messagePlot(paste(
+                    private$.wrapText(.("The GG Alluvial engine needs the R package 'ggalluvial', which is not installed, so this plot cannot be drawn.")),
+                    "",
+                    private$.wrapText(.("Switch the 'Plot engine' option to 'Easy Alluvial', or run install.packages(\"ggalluvial\") in R and restart jamovi.")),
+                    sep = "\n")))
             }
 
             # Prepare data - convert to factors
@@ -475,11 +438,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Create axis aesthetics dynamically
             n_vars <- length(vars)
-            axis_names <- paste0("axis", 1:n_vars)
+            axis_names <- paste0("axis", seq_len(n_vars))
 
             # Build the aes call
             aes_args <- list()
-            for (i in 1:n_vars) {
+            for (i in seq_len(n_vars)) {
                 aes_args[[axis_names[i]]] <- rlang::sym(vars[i])
             }
 
@@ -643,14 +606,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
         },
 
-        .appendDataWarning = function(html) {
-            existing <- self$results$dataWarning$content
-            if (is.null(existing))
-                existing <- ""
-            self$results$dataWarning$setContent(paste0(existing, html))
-            self$results$dataWarning$setVisible(TRUE)
-        },
-
         .prepareMainPlotState = function() {
             vars_name <- self$options$vars
             max_vars <- self$options$maxvars
@@ -665,12 +620,14 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dropped <- setdiff(vars_name, plot_vars)
                 private$.addNotice(
                     "WARNING",
-                    "Variables not shown",
-                    paste0(
-                        sprintf("Only the first %d of %d selected variables are plotted, because 'Maximum variables' is set to %d.",
-                                length(plot_vars), length(vars_name), max_vars),
-                        "\nNot shown: ", paste(dropped, collapse = ", "),
-                        "\nRaise 'Maximum variables' to include them, or deselect the ones you do not need."))
+                    .("Variables not shown"),
+                    paste(
+                        jmvcore::format(
+                            .("Only the first {shown} of {selected} selected variables are plotted, because 'Maximum variables' is set to {max}."),
+                            shown = length(plot_vars), selected = length(vars_name), max = max_vars),
+                        jmvcore::format(.("Not shown: {variables}"), variables = paste(dropped, collapse = ", ")),
+                        .("Raise 'Maximum variables' to include them, or deselect the ones you do not need."),
+                        sep = "\n"))
             }
             engine <- self$options$engine
             weight_var <- self$options$weight
@@ -682,37 +639,10 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (engine == "ggalluvial" && !requireNamespace("ggalluvial", quietly = TRUE)) {
                 private$.addNotice(
                     "ERROR",
-                    "GG Alluvial Engine Not Available",
-                    paste0(
-                        "The 'GG Alluvial' plot engine needs the R package 'ggalluvial', ",
-                        "which is not installed on this computer, so no alluvial plot can be drawn. ",
-                        "What to do next: switch the 'Plot engine' option to 'Easy Alluvial' - ",
-                        "it is already installed and shows the same category flows ",
-                        "(weighted flows and a separate fill variable are only available in GG Alluvial); ",
-                        "or install the package by running install.packages(\"ggalluvial\") in R, ",
-                        "then restart jamovi and run the analysis again."
-                    )
+                    .("GG Alluvial Engine Not Available"),
+                    .("The 'GG Alluvial' plot engine needs the R package 'ggalluvial', which is not installed on this computer, so no alluvial plot can be drawn. What to do next: switch the 'Plot engine' option to 'Easy Alluvial' - it is already installed and shows the same category flows (weighted flows and a separate fill variable are only available in GG Alluvial); or install the package by running install.packages(\"ggalluvial\") in R, then restart jamovi and run the analysis again.")
                 )
                 return(NULL)
-            }
-
-            # Pre-render validations that depend only on options are performed
-            # here (during .run) rather than inside the .plot render callback.
-            # Notices mutated from a render callback are not reliably transmitted
-            # to the client, so option-only failures must surface before the
-            # plot is drawn.
-            custombinlabels <- self$options$custombinlabels
-            if (!is.null(custombinlabels) && nzchar(custombinlabels)) {
-                bin_labels <- trimws(strsplit(custombinlabels, ",")[[1]])
-                bin_labels <- bin_labels[nzchar(bin_labels)]
-                if (length(bin_labels) < 2) {
-                    private$.addNotice(
-                        "ERROR",
-                        "Invalid Bin Labels",
-                        "Provide at least two non-empty, comma-separated bin labels."
-                    )
-                    return(NULL)
-                }
             }
 
             # Marginal histograms are drawn by assembling the diagram and the
@@ -728,17 +658,12 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (marg_suppresses_styling) {
                 private$.addNotice(
                     "WARNING",
-                    "Styling options not applied",
-                    paste0(
-                        "Marginal plots are switched on, so the diagram and its histograms are ",
-                        "assembled into a fixed grid that cannot take further styling. These ",
-                        "settings were left out of this plot: colour palette, theme style, ",
-                        "enhanced edge gradients, plot orientation, flow direction, plot ",
-                        "subtitle and custom title.\n",
-                        "Why this matters: changing any of them will not alter the picture on ",
-                        "screen while marginal plots are on.\n",
-                        "What to do next: switch 'Marginal plots' off if you need any of those settings."
-                    )
+                    .("Styling options not applied"),
+                    paste(
+                        .("Marginal plots are switched on, so the diagram and its histograms are assembled into a fixed grid that cannot take further styling. These settings were left out of this plot: colour palette, theme style, enhanced edge gradients, plot orientation, flow direction, plot subtitle and custom title."),
+                        .("Why this matters: changing any of them will not alter the picture on screen while marginal plots are on."),
+                        .("What to do next: switch 'Marginal plots' off if you need any of those settings."),
+                        sep = "\n")
                 )
             }
 
@@ -756,9 +681,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!requested_fill %in% names(self$data)) {
                     private$.addNotice(
                         "ERROR",
-                        "Fill Variable Not Found",
-                        paste0("Fill variable '", requested_fill,
-                            "' does not exist in the data.")
+                        .("Fill Variable Not Found"),
+                        jmvcore::format(.("Fill variable '{variable}' does not exist in the data."),
+                                        variable = requested_fill)
                     )
                     return(NULL)
                 }
@@ -769,11 +694,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     weight_var %in% unique(c(plot_vars, fill_var))) {
                 private$.addNotice(
                     "ERROR",
-                    "Weight Variable Reused",
-                    paste0(
-                        "Weight variable '", weight_var,
-                        "' must be different from the axis and fill variables."
-                    )
+                    .("Weight Variable Reused"),
+                    jmvcore::format(.("Weight variable '{weight}' must be different from the axis and fill variables."),
+                                    weight = weight_var)
                 )
                 return(NULL)
             }
@@ -786,11 +709,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (has_weight) {
                 private$.addNotice(
                     "STRONG_WARNING",
-                    "Weight Variable Ignored",
-                    paste0(
-                        "The weight variable is only supported by the GG Alluvial engine.\n",
-                        "Switch to the GG Alluvial engine to use weighted flows."
-                    )
+                    .("Weight Variable Ignored"),
+                    paste(
+                        .("The weight variable is only supported by the GG Alluvial engine."),
+                        .("Switch to the GG Alluvial engine to use weighted flows."),
+                        sep = "\n")
                 )
             }
 
@@ -819,16 +742,14 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(coerced_numeric) > 0) {
                 private$.addNotice(
                     "INFO",
-                    "Numeric variables plotted as categories",
-                    paste0(
-                        "These variables hold numbers and are drawn with their own recorded ",
-                        "values as categories: ", paste(coerced_numeric, collapse = ", "), ".\n",
-                        "Why this matters: the drawing engine would otherwise rescale each ",
-                        "numeric variable and cut it into equal-width bins, so values coded ",
-                        "1/2/3 would appear on the diagram as bin labels such as LL/M/HH.\n",
-                        "What to do next: nothing is needed. To combine values into wider ",
-                        "groups, recode the variable with Data > Transform before plotting."
-                    )
+                    .("Numeric variables plotted as categories"),
+                    paste(
+                        jmvcore::format(
+                            .("These variables hold numbers and are drawn with their own recorded values as categories: {variables}."),
+                            variables = paste(coerced_numeric, collapse = ", ")),
+                        .("Why this matters: the drawing engine would otherwise rescale each numeric variable and cut it into equal-width bins, so values coded 1/2/3 would appear on the diagram as bin labels such as LL/M/HH."),
+                        .("What to do next: nothing is needed. To combine values into wider groups, recode the variable with Data > Transform before plotting."),
+                        sep = "\n")
                 )
             }
 
@@ -846,27 +767,10 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(mydata) == 0) {
                 private$.addNotice(
                     "ERROR",
-                    "No Complete Data",
-                    paste0(
-                        "All observations have missing values in one or more selected ",
-                        "variables. Cannot generate plot."
-                    )
+                    .("No Complete Data"),
+                    .("All observations have missing values in one or more selected variables. Cannot generate plot.")
                 )
                 return(NULL)
-            }
-
-            if (length(vars_name) > max_vars) {
-                warning_html <- paste0(
-                    "<div style='background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #17a2b8; padding: 15px; margin: 10px 0; color: inherit;'>",
-                    "<h4 style='margin-top: 0; color: #4db8cc;'>Variables Truncated</h4>",
-                    "<p>You selected <strong>",
-                    length(vars_name), "</strong> variables, but the maximum is <strong>",
-                    max_vars, "</strong>.</p>",
-                    "<p>Only the first <strong>", max_vars,
-                    "</strong> variables are displayed.</p>",
-                    "</div>"
-                )
-                private$.appendDataWarning(warning_html)
             }
 
             # Count the paths the data actually contain rather than the cartesian
@@ -879,13 +783,57 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (n_distinct_paths > 100) {
                 private$.addNotice(
                     "STRONG_WARNING",
-                    "Complex Visualization",
-                    paste0(
-                        "The data contain ", n_distinct_paths,
-                        " distinct paths through the selected variables. This may produce an overcrowded plot.\n",
-                        "Reduce the number of variables or group infrequent categories."
-                    )
+                    .("Complex Visualization"),
+                    paste(
+                        jmvcore::format(
+                            .("The data contain {n} distinct paths through the selected variables. This may produce an overcrowded plot."),
+                            n = n_distinct_paths),
+                        .("Reduce the number of variables or group infrequent categories."),
+                        sep = "\n")
                 )
+            }
+
+            # Flow table and the commonest path. Built from the row-level data,
+            # before any weight aggregation, so `n` is a case count. Under a
+            # weight the table describes exactly the rows the ribbons are drawn
+            # from: rows with no weight are left out of it, as they are of the
+            # diagram, and the reading notice reports them separately.
+            weighted <- engine == "ggalluvial" && has_weight
+            flow_rows <- if (weighted) mydata[!is.na(mydata[[weight_var]]), , drop = FALSE] else mydata
+            path_key <- do.call(paste, c(
+                lapply(plot_vars, function(v) as.character(flow_rows[[v]])),
+                sep = " \u{2192} "))
+            flows <- as.data.frame(table(path = path_key), stringsAsFactors = FALSE)
+            names(flows)[2] <- "n"
+            flows$n <- as.integer(flows$n)
+            if (weighted) {
+                w_sum <- tapply(flow_rows[[weight_var]], path_key, sum)
+                flows$w <- as.numeric(w_sum[flows$path])
+                flows <- flows[order(-flows$w, -flows$n, flows$path), , drop = FALSE]
+            } else {
+                flows$w <- NA_real_
+                flows <- flows[order(-flows$n, flows$path), , drop = FALSE]
+            }
+            flows$pct <- flows$n / sum(flows$n)
+            private$.topFlow <- flows[1, , drop = FALSE]
+            if (isTRUE(self$options$showFlowTable)) {
+                tbl <- self$results$flowTable
+                # The weight column belongs to the engine that uses the weight,
+                # not to the mere presence of a weight selection.
+                tbl$getColumn("w")$setVisible(weighted)
+                # Data-shaped rows: not an .init() row set, so clear before adding
+                # (addRow() never checks for an existing rowKey).
+                tbl$deleteRows()
+                for (i in seq_len(nrow(flows))) {
+                    tbl$addRow(rowKey = i, values = list(
+                        path = flows$path[i], n = flows$n[i],
+                        pct = flows$pct[i], w = flows$w[i]))
+                }
+                tbl$setNote("base", if (weighted) {
+                    .("One row per path through the plotted variables, largest weight first. Cases and percentages count the rows that carry a weight, the rows the diagram is drawn from; Weight total is the sum of the weight variable over those rows, which is what the ribbon width shows.")
+                } else {
+                    .("One row per path through the plotted variables, commonest first. Percentages are of all plotted cases.")
+                })
             }
 
             # How many groups the fill scale has to colour. Counted here, from the
@@ -915,17 +863,14 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     n_fill_groups > palette_cap) {
                 private$.addNotice(
                     "WARNING",
-                    "Colour palette stretched",
-                    paste0(
-                        sprintf(
-                            "The %s palette publishes %d distinguishable colours, and this diagram has at least %d groups to colour.",
-                            private$.paletteLabel[[colorPalette]], palette_cap, n_fill_groups),
-                        "\nWhy this matters: the extra groups are drawn in shades blended between ",
-                        "the published colours, so neighbouring groups can look alike and are hard ",
-                        "to tell apart in the legend.\n",
-                        "What to do next: choose Viridis or Plasma, which stay distinguishable over ",
-                        "many groups, or group categories with Data > Transform until the palette fits."
-                    )
+                    .("Colour palette stretched"),
+                    paste(
+                        jmvcore::format(
+                            .("The {palette} palette publishes {cap} distinguishable colours, and this diagram has at least {groups} groups to colour."),
+                            palette = private$.paletteLabel[[colorPalette]], cap = palette_cap, groups = n_fill_groups),
+                        .("Why this matters: the extra groups are drawn in shades blended between the published colours, so neighbouring groups can look alike and are hard to tell apart in the legend."),
+                        .("What to do next: choose Viridis or Plasma, which stay distinguishable over many groups, or group categories with Data > Transform until the palette fits."),
+                        sep = "\n")
                 )
             }
 
@@ -946,8 +891,8 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (nrow(mydata) == 0) {
                     private$.addNotice(
                         "ERROR",
-                        "No Valid Weights",
-                        "No observations with non-missing weights remain."
+                        .("No Valid Weights"),
+                        .("No observations with non-missing weights remain.")
                     )
                     return(NULL)
                 }
@@ -988,77 +933,82 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # already been aggregated by this point.
             n_dropped_incomplete <- if (excl) n_incomplete else 0L
             n_rows_after <- n_rows_before - n_dropped_incomplete - n_weight_na
+            # Every line is one complete translatable sentence (or two joined by
+            # a space); nothing is spliced mid-sentence.
             width_text <- if (has_weight) {
-                sprintf("the total of the weight variable '%s' over the cases following that path.",
-                        weight_var)
+                jmvcore::format(.("Ribbon width: the total of the weight variable '{weight}' over the cases following that path."),
+                                weight = weight_var)
             } else {
-                "the number of cases following that path (each case counts once)."
+                .("Ribbon width: the number of cases following that path (each case counts once).")
             }
 
             missing_text <- if (n_incomplete == 0) {
-                "no row had a missing value in any plotted variable."
+                .("Missing values: no row had a missing value in any plotted variable.")
             } else if (excl) {
-                sprintf(paste0("%d of %d rows had a missing value in a plotted variable and ",
-                               "were removed."),
-                        n_incomplete, n_rows_before)
+                jmvcore::format(.("Missing values: {n} of {total} rows had a missing value in a plotted variable and were removed."),
+                                n = n_incomplete, total = n_rows_before)
             } else {
-                sprintf(paste0("%d of %d rows had a missing value in a plotted variable. Those ",
-                               "cells are shown as a '%s' category, which is drawn like ",
-                               "any other category but is not an observed group. Switch on ",
-                               "'Missing-value exclusion (NA)' to drop those rows instead."),
-                        n_incomplete, n_rows_before, private$.naLabel)
+                jmvcore::format(.("Missing values: {n} of {total} rows had a missing value in a plotted variable. Those cells are shown as a '{label}' category, which is drawn like any other category but is not an observed group. Switch on 'Missing-value exclusion (NA)' to drop those rows instead."),
+                                n = n_incomplete, total = n_rows_before, label = private$.naLabel)
             }
 
             if (n_weight_na > 0) {
-                missing_text <- paste0(missing_text, sprintf(
-                    paste0(" %s%d row(s) had no value for the weight variable '%s' ",
-                           "and were removed."),
-                    if (n_incomplete > 0) "A further " else "",
-                    n_weight_na, weight_var))
+                missing_text <- paste(missing_text, if (n_incomplete > 0) {
+                    jmvcore::format(.("A further {n} row(s) had no value for the weight variable '{weight}' and were removed."),
+                                    n = n_weight_na, weight = weight_var)
+                } else {
+                    jmvcore::format(.("{n} row(s) had no value for the weight variable '{weight}' and were removed."),
+                                    n = n_weight_na, weight = weight_var)
+                })
             }
             if (n_dropped_incomplete + n_weight_na > 0) {
-                missing_text <- paste0(missing_text, sprintf(
-                    " The diagram is based on the remaining %d rows.", n_rows_after))
+                missing_text <- paste(missing_text,
+                    jmvcore::format(.("The diagram is based on the remaining {n} rows."), n = n_rows_after))
             }
 
+            # The option titles named here are the .a.yaml titles, which the
+            # catalogs already carry, so the same msgids are reused.
             if (engine == "ggalluvial") {
-                engine_label <- "GG Alluvial"
-                ignored <- c("Fill by", "Bin labels", "Custom bin labels", "Marginal plots")
+                engine_text <- jmvcore::format(
+                    .("Ignored by the GG Alluvial engine: {options}."),
+                    options = paste(c(.("Fill by"), .("Marginal plots")), collapse = ", "))
             } else {
-                engine_label <- "Easy Alluvial"
-                ignored <- c("Fill variable (ggalluvial)", "Weight variable", "Node labels",
-                             "Counts on nodes", "Sankey styling", "Curve type")
+                engine_text <- jmvcore::format(
+                    .("Ignored by the Easy Alluvial engine: {options}."),
+                    options = paste(c(.("Fill by (ggalluvial)"), .("Weight variable"), .("Node labels"),
+                                      .("Counts on nodes"), .("Sankey styling"), .("Curve type")),
+                                    collapse = ", "))
             }
 
-            lines <- c(
-                paste0("Ribbon width: ", width_text),
-                paste0("Missing values: ", missing_text),
-                paste0("Ignored by the ", engine_label, " engine: ",
-                       paste(ignored, collapse = ", "), ".")
-            )
+            lines <- c(width_text, missing_text, engine_text)
+
+            # A quotable sentence: the commonest path and its share of cases (and
+            # its weight total when that is what the ribbon shows).
+            top <- private$.topFlow
+            if (!is.null(top) && nrow(top) == 1) {
+                # .mainPlotRows already excludes rows with no weight, which is
+                # the base the flow table uses too.
+                n_cases <- private$.mainPlotRows
+                top_text <- if (has_weight && !is.na(top$w)) {
+                    jmvcore::format(
+                        .("Commonest path: {path} ({n} of {total} cases, {pct}%; weight total {weight}). Switch on 'Flow table' to list every path."),
+                        path = top$path, n = top$n, total = n_cases, pct = round(100 * top$pct, 1),
+                        weight = round(top$w, 1))
+                } else {
+                    jmvcore::format(
+                        .("Commonest path: {path} ({n} of {total} cases, {pct}%). Switch on 'Flow table' to list every path."),
+                        path = top$path, n = top$n, total = n_cases, pct = round(100 * top$pct, 1))
+                }
+                lines <- c(lines, top_text)
+            }
 
             # The numbers 'Counts on nodes' draws come from the same y aesthetic as
             # the ribbon widths, so under a weight variable they are weight totals.
             if (has_weight && isTRUE(self$options$showCounts)) {
-                lines <- c(lines, paste0(
-                    "Node numbers: the total of the weight variable in that group, rounded to ",
-                    "one decimal place - not a case count."))
+                lines <- c(lines, .("Node numbers: the total of the weight variable in that group, rounded to one decimal place - not a case count."))
             }
 
-            # Bin labels only rename intervals that the engine creates when it has
-            # to split a continuous variable, and this analysis draws every axis
-            # variable as a category, so they never take effect.
-            bin_labels_set <- !identical(self$options$bin, "default") ||
-                (!is.null(self$options$custombinlabels) &&
-                     nzchar(self$options$custombinlabels))
-            if (engine == "easyalluvial" && bin_labels_set) {
-                lines <- c(lines, paste0(
-                    "Bin labels: not used. They rename the intervals the engine creates when it ",
-                    "has to split a continuous variable, and every variable here is drawn as a ",
-                    "category, so nothing was binned."))
-            }
-
-            private$.addNotice("INFO", "How to read this diagram",
+            private$.addNotice("INFO", .("How to read this diagram"),
                                paste(lines, collapse = "\n"))
         },
 
@@ -1084,15 +1034,14 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # hard to read, so it is warned about and still drawn.
             unique_values <- private$.countCategories(cond_data)
             if (is.numeric(cond_data) && unique_values > 10) {
-                cond_var_safe <- htmltools::htmlEscape(cond_var)
+                esc <- htmltools::htmlEscape
                 html <- paste0(
                     "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; color: inherit;'>",
-                    "<h4 style='margin-top: 0; color: #d4a017;'>Continuous Condensation Variable</h4>",
-                    "<p>Condensation variable '<strong>", cond_var_safe,
-                    "</strong>' has <strong>", unique_values,
-                    "</strong> distinct numeric values and appears continuous, so no condensation ",
-                    "plot was drawn.</p>",
-                    "<p>Select a categorical variable, or group the values with Data &gt; Transform first.</p>",
+                    "<h4 style='margin-top: 0; color: #d4a017;'>", esc(.("Continuous Condensation Variable")), "</h4>",
+                    "<p>", esc(jmvcore::format(
+                        .("Condensation variable '{variable}' has {n} distinct numeric values and appears continuous, so no condensation plot was drawn."),
+                        variable = cond_var, n = unique_values)), "</p>",
+                    "<p>", esc(.("Select a categorical variable, or group the values with Data > Transform first.")), "</p>",
                     "</div>"
                 )
                 self$results$condensationWarning$setContent(html)
@@ -1105,12 +1054,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- private$.handleMissingValues(
                 mydata,
                 vars_name,
-                exclude = self$options$excl,
-                report = FALSE
+                exclude = self$options$excl
             )
             if (nrow(mydata) == 0) {
                 self$results$condensationWarning$setContent(
-                    "No complete observations remain for the condensation plot."
+                    htmltools::htmlEscape(.("No complete observations remain for the condensation plot."))
                 )
                 return(NULL)
             }
@@ -1123,11 +1071,10 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     nrow(mydata) != private$.mainPlotRows) {
                 private$.addNotice(
                     "INFO",
-                    "Condensation panel sample",
-                    sprintf(paste0("The condensation panel is based on %d rows; the diagram ",
-                                   "above uses %d. The two panels require different variables ",
-                                   "to be recorded, so they drop different rows."),
-                            nrow(mydata), private$.mainPlotRows))
+                    .("Condensation panel sample"),
+                    jmvcore::format(
+                        .("The condensation panel is based on {panel} rows; the diagram above uses {diagram}. The two panels require different variables to be recorded, so they drop different rows."),
+                        panel = nrow(mydata), diagram = private$.mainPlotRows))
             }
 
             self$results$condensationWarning$setContent("")
@@ -1139,15 +1086,14 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.noticeList <- list()
             private$.naLabel <- "(Missing)"
             private$.mainPlotRows <- NULL
+            private$.topFlow <- NULL
             private$.renderNotices()
             self$results$plot$setState(NULL)
             self$results$plot2$setState(NULL)
             self$results$condensationWarning$setContent("")
 
-            # TODO (forward-looking): no `.()` wrapping anywhere in this file:
-            # welcome HTML, error/warning HTML, plot captions, and the data
-            # summary are English-only. Internationalise in a
-            # /prepare-translation pass before the next i18n release.
+            # Every user-visible string is wrapped in .(); HTML structure stays
+            # outside the wrappers and translated text is escaped on the way in.
             # Plot callbacks do not expose a render-safe cancellation point;
             # data preparation is interrupted between its expensive phases.
 
@@ -1155,53 +1101,44 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 # ToDo Message ----
-                todo <- "
-                <div style='font-family: Arial, sans-serif; color: inherit; padding: 10px;'>
-                  <h2> Alluvial Diagrams</h2>
-                  <p>Visualize the flow of categorical data across multiple dimensions.</p>
-
-                  <div style='background-color: rgba(33, 144, 255, 0.11); border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0; color: inherit;'>
-                    <h3 style='margin-top: 0;'> Quick Start</h3>
-                    <ul style='margin-bottom: 0;'>
-                      <li>Select <strong>2-5 categorical variables</strong> (optimal: 3-4)</li>
-                      <li>Each variable should have <strong>3-7 categories</strong> for best readability</li>
-                      <li>For continuous variables, use the <em>categorize function</em> to create bins first</li>
-                    </ul>
-                  </div>
-
-                  <div style='background-color: rgba(33, 152, 33, 0.07); border-left: 4px solid #4caf50; padding: 10px; margin: 10px 0; color: inherit;'>
-                    <h3 style='margin-top: 0;'> Clinical Use Cases</h3>
-                    <ul style='margin-bottom: 0;'>
-                      <li><strong>Patient flow:</strong> Track progression through treatment stages</li>
-                      <li><strong>Tumor progression:</strong> Visualize grade/stage transitions</li>
-                      <li><strong>Diagnostic pathways:</strong> Show relationships between symptoms \u{2192} diagnosis \u{2192} outcomes</li>
-                      <li><strong>Demographics:</strong> Explore patterns across age/sex/location categories</li>
-                    </ul>
-                  </div>
-
-                  <div style='background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>
-                    <h3 style='margin-top: 0;'> Tips</h3>
-                    <ul style='margin-bottom: 0;'>
-                      <li>Arrange variables in <strong>logical order</strong> (e.g., temporal sequence: Grade \u{2192} Stage \u{2192} Response)</li>
-                      <li>Start with <strong>fewer variables</strong> and add more once you understand the patterns</li>
-                      <li>Use <strong>weighted flows</strong> (GG Alluvial engine) for aggregated data with frequency counts</li>
-                      <li>Enable <strong>marginal histograms</strong> to see individual variable distributions</li>
-                    </ul>
-                  </div>
-
-                  <hr style='margin-top: 15px;'>
-                  <p style='font-size: 0.9em; text-align: center;'>
-                    Ready to begin? Select at least 2 categorical variables from the left panel.
-                  </p>
-                </div>
-                "
+                esc <- htmltools::htmlEscape
+                li <- function(head, body = NULL) {
+                    if (is.null(body)) return(paste0("<li>", esc(head), "</li>"))
+                    paste0("<li><strong>", esc(head), "</strong> ", esc(body), "</li>")
+                }
+                box <- function(style, heading, items) {
+                    paste0("<div style='", style, "'><h3 style='margin-top: 0;'>", esc(heading), "</h3>",
+                           "<ul style='margin-bottom: 0;'>", paste(items, collapse = ""), "</ul></div>")
+                }
+                todo <- paste0(
+                    "<div style='font-family: Arial, sans-serif; color: inherit; padding: 10px;'>",
+                    "<h2>", esc(.("Alluvial Diagrams")), "</h2>",
+                    "<p>", esc(.("Visualize the flow of categorical data across multiple dimensions.")), "</p>",
+                    box("background-color: rgba(33, 144, 255, 0.11); border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0; color: inherit;",
+                        .("Quick Start"), c(
+                        li(.("Select 2-5 categorical variables (optimal: 3-4)")),
+                        li(.("Each variable should have 3-7 categories for best readability")),
+                        li(.("For continuous variables, use the categorize function to create groups first")))),
+                    box("background-color: rgba(33, 152, 33, 0.07); border-left: 4px solid #4caf50; padding: 10px; margin: 10px 0; color: inherit;",
+                        .("Clinical Use Cases"), c(
+                        li(.("Patient flow:"), .("Track progression through treatment stages")),
+                        li(.("Tumor progression:"), .("Visualize grade/stage transitions")),
+                        li(.("Diagnostic pathways:"), .("Show relationships between symptoms, diagnosis and outcomes")),
+                        li(.("Demographics:"), .("Explore patterns across age/sex/location categories")))),
+                    box("background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;",
+                        .("Tips"), c(
+                        li(.("Arrange variables in logical order (e.g., temporal sequence: Grade, Stage, Response)")),
+                        li(.("Start with fewer variables and add more once you understand the patterns")),
+                        li(.("Use weighted flows (GG Alluvial engine) for aggregated data with frequency counts")),
+                        li(.("Switch on marginal histograms to see individual variable distributions")),
+                        li(.("Switch on the flow table to list every path with its number of cases")))),
+                    "<hr style='margin-top: 15px;'>",
+                    "<p style='font-size: 0.9em; text-align: center;'>",
+                    esc(.("Ready to begin? Select at least 2 categorical variables from the left panel.")),
+                    "</p></div>")
 
                 html <- self$results$todo
                 html$setContent(todo)
-
-                # Clear validation messages when no variables selected
-                self$results$dataWarning$setContent("")
-                self$results$dataWarning$setVisible(FALSE)
 
             } else {
                 # Clear the to-do message
@@ -1210,12 +1147,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 html$setContent(todo)
 
                 # Use shared validation logic. Every failure branch inside
-                # .validateAlluvialInputs() writes its own specific, visible
-                # message to dataWarning (too few variables / no rows / a
-                # continuous variable / a variable not in the data). The generic
-                # "requires at least 2 variables" notice that used to be added
-                # here contradicted two of those three panels and sent users to
-                # the wrong fix.
+                # .validateAlluvialInputs() raises its own specific ERROR notice
+                # (too few variables / no rows / a continuous variable / a
+                # variable not in the data), so nothing generic is added here.
                 if (!private$.validateAlluvialInputs())
                     return()
 
@@ -1224,16 +1158,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     length(self$options$condensationvar) > 0 &&
                     !(self$options$condensationvar %in% names(self$data))) {
 
-                    private$.addNotice('ERROR', 'Variable Not Found', paste0(
-                        "Condensation variable '", self$options$condensationvar,
-                        "' does not exist in the data. Please select a valid variable from the available list."
-                    ))
+                    private$.addNotice("ERROR", .("Variable Not Found"), jmvcore::format(
+                        .("Condensation variable '{variable}' does not exist in the data. Select a valid variable from the available list."),
+                        variable = self$options$condensationvar))
                     return()
                 }
-
-                # Clear dataWarning if validation passes
-                self$results$dataWarning$setContent("")
-                self$results$dataWarning$setVisible(FALSE)
 
                 main_state <- private$.prepareMainPlotState()
                 if (is.null(main_state))
@@ -1267,39 +1196,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # it must be used verbatim do NOT run it through composeTerm().
                 fill <- self$options$fill
 
-                # Configure bin labels with proper binning method
-                bin_option <- self$options$bin
-                custombinlabels <- self$options$custombinlabels
-
-                # Bin labels rename the intervals easyalluvial creates when it has
-                # to split a CONTINUOUS column. .prepareMainPlotState converts
-                # every axis variable to a factor first, so in practice nothing is
-                # binned and these labels are inert; they are kept so that data
-                # reaching the engine by any other route is labelled sensibly.
-                # The label count (>= 2) is already enforced during .run, which
-                # returns before setState, so .plot cannot be reached with a bad
-                # list - the duplicate guard that used to live here was dead code.
-                bins <- 5L
-                if (!is.null(custombinlabels) && custombinlabels != "") {
-                    bin <- trimws(strsplit(custombinlabels, ",")[[1]])
-                    bin <- bin[nzchar(bin)]
-                    bins <- length(bin)
-                } else {
-                    # "cuts" is an easyalluvial keyword that prints the real
-                    # interval boundaries. It used to be mapped to c("Q1".."Q5"),
-                    # which labelled equal-WIDTH bins as if they were quintiles -
-                    # a skewed variable could put 60% of cases in "Q1" and leave
-                    # "Q2" and "Q4" empty.
-                    bin <- switch(bin_option,
-                        "default" = c("LL", "ML", "M", "MH", "HH"),
-                        "mean" = "mean",
-                        "median" = "median",
-                        "min_max" = "min_max",
-                        "cuts" = "cuts",
-                        c("LL", "ML", "M", "MH", "HH")  # fallback
-                    )
-                }
-
                 maxvars <- self$options$maxvars
 
                 # Generate plot based on selected engine ----
@@ -1311,14 +1207,14 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         weight_var = weight_var
                     )
                 } else {
-                    # Use easyalluvial engine (default)
+                    # Use easyalluvial engine (default). No bins/bin_labels: every
+                    # axis variable reaches the engine as a factor (see
+                    # .prepareMainPlotState), so nothing is ever binned.
                     plot <- .quietly(easyalluvial::alluvial_wide(
                         data = mydata,
                         max_variables = maxvars,
-                        bins = bins,
                         fill_by = fill,
-                        verbose = FALSE,  # Disabled to prevent console clutter in jamovi
-                        bin_labels = bin
+                        verbose = FALSE  # Disabled to prevent console clutter in jamovi
                     ))
                 }
 
@@ -1411,15 +1307,13 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # the old .addNotice call could leave the user with a blank panel
                 # and no idea why. It also fell off the end without an explicit
                 # return value.
-                print(private$.messagePlot(paste0(
-                    "The alluvial diagram could not be drawn.\n\n",
-                    "Reported by R: ", conditionMessage(e), "\n\n",
-                    "What to try next:\n",
-                    "  - switch 'Plot engine' to Easy Alluvial\n",
-                    "  - plot fewer variables\n",
-                    "  - group categories with few cases (Data > Transform)\n",
-                    "  - check that every selected variable is still in the data"
-                )))
+                print(private$.messagePlot(paste(
+                    private$.wrapText(.("The alluvial diagram could not be drawn.")),
+                    "",
+                    private$.wrapText(jmvcore::format(.("Reported by R: {message}"), message = conditionMessage(e))),
+                    "",
+                    private$.wrapText(.("What to try next: switch 'Plot engine' to Easy Alluvial; plot fewer variables; group categories with few cases (Data > Transform); check that every selected variable is still in the data.")),
+                    sep = "\n")))
                 TRUE
             })
         }
@@ -1447,13 +1341,13 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Same reasoning as .plot: notices written from a render callback
                 # are not reliably transmitted, so the explanation goes in the
                 # image where the user is certain to see it.
-                print(private$.messagePlot(paste0(
-                    "The condensation plot could not be drawn.\n\n",
-                    "Reported by R: ", conditionMessage(e), "\n\n",
-                    "What to try next:\n",
-                    "  - choose a categorical condensation variable\n",
-                    "  - group categories with very few cases (Data > Transform)"
-                )))
+                print(private$.messagePlot(paste(
+                    private$.wrapText(.("The condensation plot could not be drawn.")),
+                    "",
+                    private$.wrapText(jmvcore::format(.("Reported by R: {message}"), message = conditionMessage(e))),
+                    "",
+                    private$.wrapText(.("What to try next: choose a categorical condensation variable; group categories with very few cases (Data > Transform).")),
+                    sep = "\n")))
                 TRUE
             })
         }

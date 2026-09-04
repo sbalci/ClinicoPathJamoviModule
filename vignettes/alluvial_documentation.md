@@ -14,12 +14,10 @@
 | `marg` | UI Control `marg` | `self$options$marg` | Output item / Table |
 | `fill` | UI Control `fill` | `self$options$fill` | Output item / Table |
 | `fillGgalluvial` | UI Control `fillGgalluvial` | `self$options$fillGgalluvial` | Output item / Table |
-| `bin` | UI Control `bin` | `self$options$bin` | Output item / Table |
 | `orient` | UI Control `orient` | `self$options$orient` | Output item / Table |
 | `usetitle` | UI Control `usetitle` | `self$options$usetitle` | Output item / Table |
 | `mytitle` | UI Control `mytitle` | `self$options$mytitle` | Output item / Table |
 | `maxvars` | UI Control `maxvars` | `self$options$maxvars` | Output item / Table |
-| `custombinlabels` | UI Control `custombinlabels` | `self$options$custombinlabels` | Output item / Table |
 | `colorPalette` | UI Control `colorPalette` | `self$options$colorPalette` | Output item / Table |
 | `showCounts` | UI Control `showCounts` | `self$options$showCounts` | Output item / Table |
 | `themeStyle` | UI Control `themeStyle` | `self$options$themeStyle` | Output item / Table |

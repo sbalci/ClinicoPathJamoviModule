@@ -44,6 +44,7 @@ options:
     - name: survivalVar
       title: Survival Status
       type: Variable
+      default: NULL
       suggested: [nominal]
       permitted: [factor]
       description:

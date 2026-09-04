@@ -12,12 +12,11 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             marg = FALSE,
             fill = "first_variable",
             fillGgalluvial = NULL,
-            bin = "default",
             orient = "vert",
             usetitle = FALSE,
             mytitle = "Alluvial Plot",
             maxvars = 8,
-            custombinlabels = "",
+            showFlowTable = FALSE,
             colorPalette = "default",
             showCounts = FALSE,
             themeStyle = "default",
@@ -69,16 +68,6 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nominal"),
                 permitted=list(
                     "factor"))
-            private$..bin <- jmvcore::OptionList$new(
-                "bin",
-                bin,
-                options=list(
-                    "default",
-                    "mean",
-                    "median",
-                    "min_max",
-                    "cuts"),
-                default="default")
             private$..orient <- jmvcore::OptionList$new(
                 "orient",
                 orient,
@@ -100,10 +89,10 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=2,
                 max=20,
                 default=8)
-            private$..custombinlabels <- jmvcore::OptionString$new(
-                "custombinlabels",
-                custombinlabels,
-                default="")
+            private$..showFlowTable <- jmvcore::OptionBool$new(
+                "showFlowTable",
+                showFlowTable,
+                default=FALSE)
             private$..colorPalette <- jmvcore::OptionList$new(
                 "colorPalette",
                 colorPalette,
@@ -187,12 +176,11 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..marg)
             self$.addOption(private$..fill)
             self$.addOption(private$..fillGgalluvial)
-            self$.addOption(private$..bin)
             self$.addOption(private$..orient)
             self$.addOption(private$..usetitle)
             self$.addOption(private$..mytitle)
             self$.addOption(private$..maxvars)
-            self$.addOption(private$..custombinlabels)
+            self$.addOption(private$..showFlowTable)
             self$.addOption(private$..colorPalette)
             self$.addOption(private$..showCounts)
             self$.addOption(private$..themeStyle)
@@ -212,12 +200,11 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         marg = function() private$..marg$value,
         fill = function() private$..fill$value,
         fillGgalluvial = function() private$..fillGgalluvial$value,
-        bin = function() private$..bin$value,
         orient = function() private$..orient$value,
         usetitle = function() private$..usetitle$value,
         mytitle = function() private$..mytitle$value,
         maxvars = function() private$..maxvars$value,
-        custombinlabels = function() private$..custombinlabels$value,
+        showFlowTable = function() private$..showFlowTable$value,
         colorPalette = function() private$..colorPalette$value,
         showCounts = function() private$..showCounts$value,
         themeStyle = function() private$..themeStyle$value,
@@ -236,12 +223,11 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..marg = NA,
         ..fill = NA,
         ..fillGgalluvial = NA,
-        ..bin = NA,
         ..orient = NA,
         ..usetitle = NA,
         ..mytitle = NA,
         ..maxvars = NA,
-        ..custombinlabels = NA,
+        ..showFlowTable = NA,
         ..colorPalette = NA,
         ..showCounts = NA,
         ..themeStyle = NA,
@@ -261,7 +247,7 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
-        dataWarning = function() private$.items[["dataWarning"]],
+        flowTable = function() private$.items[["flowTable"]],
         plot = function() private$.items[["plot"]],
         condensationWarning = function() private$.items[["condensationWarning"]],
         plot2 = function() private$.items[["plot2"]]),
@@ -290,8 +276,6 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fillGgalluvial",
                     "marg",
                     "usetitle",
-                    "bin",
-                    "custombinlabels",
                     "fill",
                     "curveType",
                     "colorPalette",
@@ -310,18 +294,38 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="To Do",
                 clearWith=list(
                     "vars")))
-            self$add(jmvcore::Html$new(
+            self$add(jmvcore::Table$new(
                 options=options,
-                name="dataWarning",
-                title="Data Validation",
-                visible=FALSE,
+                name="flowTable",
+                title="Flow Table",
+                visible="(showFlowTable)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="path", 
+                        `title`="Path", 
+                        `type`="text"),
+                    list(
+                        `name`="n", 
+                        `title`="Cases", 
+                        `type`="integer"),
+                    list(
+                        `name`="pct", 
+                        `title`="Percent of cases", 
+                        `type`="number", 
+                        `format`="pc"),
+                    list(
+                        `name`="w", 
+                        `title`="Weight total", 
+                        `type`="number", 
+                        `visible`=FALSE)),
                 clearWith=list(
                     "vars",
-                    "maxvars",
                     "excl",
+                    "maxvars",
                     "weight",
                     "engine",
-                    "fillGgalluvial")))
+                    "showFlowTable")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="Alluvial Diagrams",
@@ -329,14 +333,11 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot",
-                requiresData=TRUE,
                 clearWith=list(
                     "vars",
                     "excl",
                     "marg",
                     "fill",
-                    "bin",
-                    "custombinlabels",
                     "orient",
                     "usetitle",
                     "mytitle",
@@ -369,7 +370,6 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot2",
-                requiresData=TRUE,
                 clearWith=list(
                     "vars",
                     "condensationvar",
@@ -426,22 +426,17 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   represented by color. Default is 'first_variable'.
 #' @param fillGgalluvial A string naming the categorical variable from
 #'   \code{data} that will be used to color the flows in the ggalluvial plot.
-#' @param bin Names for the intervals the drawing engine creates when it has
-#'   to split a continuous variable. This analysis draws every axis variable
-#'   with its own recorded values as categories, so in practice nothing is
-#'   binned and this setting has no visible effect. To group values, recode the
-#'   variable first.
 #' @param orient Orientation of the plot. One of 'horr' (horizontal) or 'vert'
 #'   (vertical). Superseded by flowDirection, which offers the same choices and
 #'   more, so this setting is applied only while flowDirection is 'left_right'.
 #' @param usetitle Use a custom title for the plot.
 #' @param mytitle Title for the plot.
 #' @param maxvars Maximum number of variables to include in the alluvial plot.
-#' @param custombinlabels Custom names for the intervals the drawing engine
-#'   creates when it has to split a continuous variable, separated by commas
-#'   (e.g. "Low,Medium,High"); at least two are required. As with the bin labels
-#'   above, every axis variable here is drawn as a category, so in practice
-#'   nothing is binned. Leave empty to use the selected bin-label method.
+#' @param showFlowTable Add a table of every path through the plotted
+#'   variables with the number of cases on it and its percentage of all cases;
+#'   with a weight variable under the GG Alluvial engine the weight total is
+#'   listed as well. Rows are ordered by frequency, so the first row is the
+#'   commonest path.
 #' @param colorPalette Color palette for the diagram flows.
 #' @param showCounts Display count values on nodes.
 #' @param themeStyle Theme style for the plot background and elements.
@@ -461,11 +456,17 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$flowTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$condensationWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$flowTable$asDF}
+#'
+#' \code{as.data.frame(results$flowTable)}
 #'
 #' @export
 alluvial <- function(
@@ -476,12 +477,11 @@ alluvial <- function(
     marg = FALSE,
     fill = "first_variable",
     fillGgalluvial = NULL,
-    bin = "default",
     orient = "vert",
     usetitle = FALSE,
     mytitle = "Alluvial Plot",
     maxvars = 8,
-    custombinlabels = "",
+    showFlowTable = FALSE,
     colorPalette = "default",
     showCounts = FALSE,
     themeStyle = "default",
@@ -518,12 +518,11 @@ alluvial <- function(
         marg = marg,
         fill = fill,
         fillGgalluvial = fillGgalluvial,
-        bin = bin,
         orient = orient,
         usetitle = usetitle,
         mytitle = mytitle,
         maxvars = maxvars,
-        custombinlabels = custombinlabels,
+        showFlowTable = showFlowTable,
         colorPalette = colorPalette,
         showCounts = showCounts,
         themeStyle = themeStyle,

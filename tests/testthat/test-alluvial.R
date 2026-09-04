@@ -57,18 +57,6 @@ test_that("alluvial parameter validation", {
             expect_s3_class(result, "alluvialResults")
         }
         
-        # Test with different bin options
-        bin_options <- c("default", "mean", "median", "min_max", "cuts")
-        
-        for (bin_opt in bin_options) {
-            result <- alluvial(
-                data = test_data,
-                vars = c("Var1", "Var2", "Var3"),
-                bin = bin_opt
-            )
-            expect_s3_class(result, "alluvialResults")
-        }
-        
         # Test with different orientation options
         orient_options <- c("vert", "horr")
         
@@ -204,7 +192,6 @@ test_that("alluvial comprehensive parameter combination", {
             excl = TRUE,
             marg = FALSE,
             fill = "all_flows",
-            bin = "median",
             orient = "horr",
             usetitle = TRUE,
             mytitle = "Comprehensive Test Analysis"
@@ -215,7 +202,6 @@ test_that("alluvial comprehensive parameter combination", {
         expect_true(result$options$excl)
         expect_false(result$options$marg)
         expect_equal(result$options$fill, "all_flows")
-        expect_equal(result$options$bin, "median")
         expect_equal(result$options$orient, "horr")
         expect_true(result$options$usetitle)
         expect_equal(result$options$mytitle, "Comprehensive Test Analysis")
@@ -343,29 +329,17 @@ test_that("weighted alluvial rejects unusable or reused weights", {
     expect_match(reused_result$notices$content, "Weight Variable Reused")
 })
 
-test_that("easyalluvial bin labels and flow directions render", {
+test_that("reversed flow direction renders", {
     data <- data.frame(
         value = 1:10,
         group = factor(rep(c("x", "y"), 5))
     )
 
-    min_max <- alluvial(
-        data = data,
-        vars = c("value", "group"),
-        bin = "min_max"
-    )
-    custom <- alluvial(
-        data = data,
-        vars = c("value", "group"),
-        custombinlabels = "Low, Middle, High"
-    )
     reversed <- alluvial(
         data = data,
         vars = c("value", "group"),
         flowDirection = "right_left"
     )
 
-    expect_error(suppressWarnings(min_max$plot$.render()), NA)
-    expect_error(suppressWarnings(custom$plot$.render()), NA)
     expect_error(suppressWarnings(reversed$plot$.render()), NA)
 })

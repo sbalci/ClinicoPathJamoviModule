@@ -1,6 +1,6 @@
 # ClinicoPath News
 
-## Unreleased — meddecide audit fixes (module 1.0.8.10)
+## Unreleased — meddecide audit fixes (module 1.0.8.11)
 
 - `agepyramid`: `/check-function` pass. The Population Data table no longer doubles
   its rows when an option outside its `clearWith` (plot title, colours, theme) is
@@ -17,6 +17,34 @@
   leaves earlier notes beside the error. Every user-visible backend string is now
   wrapped for translation and the Turkish catalog carries all agepyramid strings.
   Routed to `ExplorationT` for JamoviTest.
+- `alluvial` 1.0.9: **breaking** - the `bin` and `custombinlabels` options are removed.
+  They renamed intervals the drawing engine creates when it has to split a continuous
+  variable, and this analysis draws every axis variable as a category, so they never
+  had an effect; R scripts that pass them now get "unused argument". New **Flow table**
+  option (`showFlowTable`): one row per path through the plotted variables with cases,
+  percent of cases and, under a weight, the weight total, commonest first. The "How to
+  read this diagram" notice now quotes the commonest path and its share. Every
+  user-visible backend string is wrapped for translation and the Turkish catalog
+  carries all alluvial strings.
+- `alluvial`: the flow table's Weight total column is shown only when the GG Alluvial
+  engine actually uses the weight, and under a weight the table counts the rows the
+  ribbons are drawn from (rows with no weight are left out, as in the diagram).
+  Moved back to the `Exploration` menu after JamoviTest.
+- `alluvialSurvival`: `survivalVar` is optional and now compiles as an optional R
+  argument (it threw "argument missing, with no default" from R); a factor-coded 0/1
+  survival variable no longer crashes `max()`/`sum()` (converted to numeric first);
+  per-patient first stage and last treatment are taken in time order within each
+  patient (`arrange(.by_group = TRUE)`). Its tests assert the correct result class.
+- `alluvial`: validation messages now arrive through one channel. The HTML "Data
+  Validation" panel is removed: too few variables, empty data, an unknown variable and
+  a continuous variable are ERROR notices, and the missing-value and truncation facts
+  it repeated are reported once by the "How to read this diagram" notice. The
+  comprehensive vignette now has working example calls.
+- `alluvial`: `/check-function` pass. Both plots no longer re-read the dataset on
+  every resize (`requiresData` removed; the renderers use only the saved state), and
+  a regression test covers variable names with spaces and punctuation through both
+  engines, the weight formula and the condensation panel. Routed to `ExplorationT`
+  for JamoviTest.
 - Vignettes: the 11 remaining `explorationt-*-comprehensive.Rmd` scaffolds now load
   `ClinicoPath` and an existing dataset; their example calls still need the required
   variable arguments filled in.

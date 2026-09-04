@@ -151,8 +151,9 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (!is.null(survivalVar)) {
                 if (!survivalVar %in% names(data))
                     jmvcore::reject("Survival variable {} not found in data", code = NULL, survivalVar)
-
-                # TODO (correctness): factor-vs-numeric comparison hazard. `survivalVar` is declared `permitted: [factor]` in the .a.yaml - when its levels are character "0"/"1", the `%in% c(0, 1, NA)` check coerces the factor via as.character then compares to numerics, which can return FALSE on otherwise-valid 0/1 data. Use `jmvcore::toNumeric(data[[survivalVar]])` (honors the `values` attribute) and check the result. Same hazard reappears in `.calculateSurvivalStats` at lines ~189-194 (`sum(x == 1)`, `mean(x == 0)`).
+                # The binary check compares by label, so a factor coded "0"/"1" passes;
+                # the arithmetic sites (.calculateSurvivalStats, .prepareSurvivalData)
+                # convert by label before summing.
                 if (!all(data[[survivalVar]] %in% c(0, 1, NA)))
                     jmvcore::reject("Survival variable must be binary (0/1) or missing")
             }
@@ -188,7 +189,9 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             list(data[[self$options$stageVar]],
                                  data[[self$options$treatmentVar]]),
                             function(x) {
-                                x <- x[!is.na(x)]  # Remove missing values
+                                # A factor-coded 0/1 (permitted: [factor]) must be read
+                                # by its labels, not its level indices.
+                                x <- as.numeric(as.character(x[!is.na(x)]))
                                 list(
                                     patients = length(x),
                                     events = sum(x == 1),
@@ -284,14 +287,17 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             treatmentVar <- self$options$treatmentVar
             patientId <- self$options$patientId
 
-            # TODO (correctness): `dplyr::arrange()` on a grouped frame does NOT order rows within each group by default - it orders the result globally. `first()`/`last()` then read whatever row dplyr happened to put first/last in each group, which can be nondeterministic across dplyr versions. Either arrange BEFORE group_by, or use `.by_group = TRUE` on arrange (>= 1.0.0): `dplyr::arrange(!!sym(timeVar), .by_group = TRUE)`. Otherwise initialStage / finalTreatment can be wrong.
-            # Create survival data by stage and treatment
+            # Order rows by time WITHIN each patient (.by_group = TRUE) so that
+            # first()/last() read the earliest stage and the latest treatment; a
+            # plain arrange() on a grouped frame orders globally. The survival
+            # variable may be a factor coded "0"/"1", so it is read by label.
             survData <- data %>%
+                dplyr::mutate(.event = as.numeric(as.character(!!sym(survivalVar)))) %>%
                 dplyr::group_by(!!sym(patientId)) %>%
-                dplyr::arrange(!!sym(timeVar)) %>%
+                dplyr::arrange(!!sym(timeVar), .by_group = TRUE) %>%
                 dplyr::summarise(
                     maxTime = max(!!sym(timeVar), na.rm = TRUE),
-                    event = max(!!sym(survivalVar), na.rm = TRUE),
+                    event = max(.event, na.rm = TRUE),
                     initialStage = first(!!sym(stageVar)),
                     finalTreatment = last(!!sym(treatmentVar)),
                     .groups = 'drop'

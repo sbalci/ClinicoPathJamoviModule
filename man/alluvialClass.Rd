@@ -18,7 +18,7 @@ Features:
 \item Condensation plots for detailed variable analysis
 \item Marginal histograms for additional context
 \item Flexible orientation (horizontal/vertical)
-\item Customizable bin labels and fill options
+\item Fill options and an optional flow table (one row per path, commonest first)
 \item Multiple plot engines (easyalluvial and ggalluvial)
 \item Color palettes and theme styling
 \item Sankey diagram styling with curve types

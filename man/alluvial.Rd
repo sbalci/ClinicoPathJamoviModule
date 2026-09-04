@@ -12,12 +12,11 @@ alluvial(
   marg = FALSE,
   fill = "first_variable",
   fillGgalluvial = NULL,
-  bin = "default",
   orient = "vert",
   usetitle = FALSE,
   mytitle = "Alluvial Plot",
   maxvars = 8,
-  custombinlabels = "",
+  showFlowTable = FALSE,
   colorPalette = "default",
   showCounts = FALSE,
   themeStyle = "default",
@@ -49,12 +48,6 @@ represented by color. Default is 'first_variable'.}
 \item{fillGgalluvial}{A string naming the categorical variable from
 \code{data} that will be used to color the flows in the ggalluvial plot.}
 
-\item{bin}{Names for the intervals the drawing engine creates when it has
-to split a continuous variable. This analysis draws every axis variable
-with its own recorded values as categories, so in practice nothing is
-binned and this setting has no visible effect. To group values, recode the
-variable first.}
-
 \item{orient}{Orientation of the plot. One of 'horr' (horizontal) or 'vert'
 (vertical). Superseded by flowDirection, which offers the same choices and
 more, so this setting is applied only while flowDirection is 'left_right'.}
@@ -65,11 +58,11 @@ more, so this setting is applied only while flowDirection is 'left_right'.}
 
 \item{maxvars}{Maximum number of variables to include in the alluvial plot.}
 
-\item{custombinlabels}{Custom names for the intervals the drawing engine
-creates when it has to split a continuous variable, separated by commas
-(e.g. "Low,Medium,High"); at least two are required. As with the bin labels
-above, every axis variable here is drawn as a category, so in practice
-nothing is binned. Leave empty to use the selected bin-label method.}
+\item{showFlowTable}{Add a table of every path through the plotted
+variables with the number of cases on it and its percentage of all cases;
+with a weight variable under the GG Alluvial engine the weight total is
+listed as well. Rows are ordered by frequency, so the first row is the
+commonest path.}
 
 \item{colorPalette}{Color palette for the diagram flows.}
 
@@ -102,11 +95,17 @@ A results object containing:
 \tabular{llllll}{
 \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
-\code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
+\code{results$flowTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$condensationWarning} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$flowTable$asDF}
+
+\code{as.data.frame(results$flowTable)}
 }
 \description{
 Draws an alluvial diagram: a flow picture of how cases move between the

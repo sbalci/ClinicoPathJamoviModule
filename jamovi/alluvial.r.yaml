@@ -18,8 +18,6 @@ items:
           - fillGgalluvial
           - marg
           - usetitle
-          - bin
-          - custombinlabels
           - fill
           - curveType
           - colorPalette
@@ -39,17 +37,33 @@ items:
       clearWith:
           - vars
 
-    - name: dataWarning
-      title: Data Validation
-      type: Html
-      visible: false
+    - name: flowTable
+      title: Flow Table
+      type: Table
+      visible: (showFlowTable)
+      rows: 0
+      columns:
+        - name: path
+          title: Path
+          type: text
+        - name: n
+          title: Cases
+          type: integer
+        - name: pct
+          title: Percent of cases
+          type: number
+          format: pc
+        - name: w
+          title: Weight total
+          type: number
+          visible: false
       clearWith:
           - vars
-          - maxvars
           - excl
+          - maxvars
           - weight
           - engine
-          - fillGgalluvial
+          - showFlowTable
 
     - title: Alluvial Diagrams
       name: plot
@@ -57,14 +71,11 @@ items:
       width:  600
       height: 450
       renderFun: .plot
-      requiresData: true
       clearWith:
           - vars
           - excl
           - marg
           - fill
-          - bin
-          - custombinlabels
           - orient
           - usetitle
           - mytitle
@@ -98,7 +109,6 @@ items:
       width:  600
       height: 450
       renderFun: .plot2
-      requiresData: true
       clearWith:
           - vars
           - condensationvar

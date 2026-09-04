@@ -275,6 +275,12 @@ msgid ""
 "Competing Risks or Multistate."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"'{weight}' must be numeric (current type: {type}). Select a numeric variable "
+"containing counts, frequencies, or sampling weights."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "'%s' contains a zero or negative proportion."
 msgstr ""
@@ -859,8 +865,18 @@ msgid ""
 "a long empty tail. Check the age column before reading the figure."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"{n} observations ({pct}%) have missing weights. These will be excluded from "
+"the visualization."
+msgstr ""
+
 #: enhancedcrosstable/options/percent_pattern/count_only.title
 msgid "{n} only"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "{n} row(s) had no value for the weight variable '{weight}' and were removed."
 msgstr ""
 
 #: R/reportcat.b.R
@@ -5923,6 +5939,12 @@ msgid ""
 "class (e.g. no responders in any group), so there is no contrast to test."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"A further {n} row(s) had no value for the weight variable '{weight}' and "
+"were removed."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "A further {rows} row(s){events} were excluded from the model because the "
@@ -10851,6 +10873,12 @@ msgid ""
 "disabled."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"All observations have missing values in one or more selected variables. "
+"Cannot generate plot."
+msgstr ""
+
 #: R/linechart.b.R
 msgid ""
 "All observations share a single X value (%s). A line chart needs at least "
@@ -11221,6 +11249,7 @@ msgstr ""
 msgid "Alluvial (flowing streams)"
 msgstr ""
 
+#: R/alluvial.b.R
 #: R/riverplot.b.R
 #: package/analyses/alluvial.title
 #: package/analyses/alluvial.menuTitle
@@ -11229,6 +11258,12 @@ msgstr ""
 #: alluvial/results.title
 #: alluvial/results/plot.title
 msgid "Alluvial Diagrams"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Alluvial diagrams require at least 2 variables. Select additional variables "
+"from the left panel."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -13452,6 +13487,12 @@ msgid ""
 "Around 100 cases or more is the usual target for a stable diagnostic "
 "accuracy estimate; this sample supports preliminary estimates, particularly "
 "once it is divided across the result patterns."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Arrange variables in logical order (e.g., temporal sequence: Grade, Stage, "
+"Response)"
 msgstr ""
 
 #: jjsyndromicplot/ui[3][0][0].label
@@ -17582,10 +17623,6 @@ msgstr ""
 
 #: jjhistostats/options/binfill.title
 msgid "Bin Fill Color"
-msgstr ""
-
-#: alluvial/options/bin.title
-msgid "Bin labels"
 msgstr ""
 
 #: package/analyses/categorize.menuSubtitle
@@ -22060,6 +22097,7 @@ msgstr ""
 #: agreement/results/tdiTable.columns.title
 #: agreement/results/maxwellRETable.columns.title
 #: agreement/results/iotaTable.columns.title
+#: alluvial/results/flowTable.columns.title
 #: ihcheterogeneity/results/spatialanalysistable.columns.title
 #: modalitycomparison/results/overviewTable.columns.title
 #: outbreakanalysis/results/spatial_analysis_results.columns.title
@@ -27022,6 +27060,10 @@ msgstr ""
 msgid "Clinical Trial Settings"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Clinical Use Cases"
+msgstr ""
+
 #: agreement/results/clinicalUseCases.title
 msgid "Clinical Use Cases & Method Selection Guide"
 msgstr ""
@@ -29108,6 +29150,10 @@ msgstr ""
 msgid "Colour Not Recognised"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Colour palette stretched"
+msgstr ""
+
 #: contTables/options/pcCol.title
 #: contTablesPaired/options/pcCol.title
 #: esquisseauto/options/manualGeom/col.title
@@ -29738,6 +29784,18 @@ msgstr ""
 
 #: treatmentswitching/options/censoringAssumption/common_treatment.title
 msgid "Common Treatment Effect"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Commonest path: {path} ({n} of {total} cases, {pct}%; weight total "
+"{weight}). Switch on 'Flow table' to list every path."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Commonest path: {path} ({n} of {total} cases, {pct}%). Switch on 'Flow "
+"table' to list every path."
 msgstr ""
 
 #: factoranalysis/options/communalities.title
@@ -31078,6 +31136,10 @@ msgstr ""
 #: jcomplexupset/options.title
 #: jcomplexupset/ui.title
 msgid "Complex UpSet Plot Visualization"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Complex Visualization"
 msgstr ""
 
 #: classification/options/complexity.title
@@ -32646,6 +32708,10 @@ msgstr ""
 msgid "Concordant Results"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Condensation panel sample"
+msgstr ""
+
 #: alluvial/results/condensationWarning.title
 msgid "Condensation Plot Information"
 msgstr ""
@@ -32653,6 +32719,18 @@ msgstr ""
 #: alluvial/options/condensationvar.title
 #: alluvial/ui[0][1].label
 msgid "Condensation variable"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Condensation variable '{variable}' does not exist in the data. Select a "
+"valid variable from the available list."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Condensation variable '{variable}' has {n} distinct numeric values and "
+"appears continuous, so no condensation plot was drawn."
 msgstr ""
 
 #: decisionpanel/results/treePerformance.columns.title
@@ -34386,6 +34464,10 @@ msgstr ""
 msgid "Continuous Clinical Variables"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Continuous Condensation Variable"
+msgstr ""
+
 #: stagemigration/options/continuousCovariates.title
 #: stagemigration/ui[5][1][0].label
 msgid "Continuous Covariates"
@@ -34559,6 +34641,10 @@ msgstr ""
 
 #: jviolin/options/dep.description
 msgid "Continuous variable for y-axis (violin height)"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Continuous Variable Not Allowed"
 msgstr ""
 
 #: package/analyses/continuousrelationship.title
@@ -36302,6 +36388,7 @@ msgstr ""
 msgid "Counts in cells"
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/showCounts.title
 msgid "Counts on nodes"
 msgstr ""
@@ -38912,6 +38999,7 @@ msgstr ""
 msgid "Curve style for flows. Requires ggalluvial engine."
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/curveType.title
 msgid "Curve type"
 msgstr ""
@@ -39020,10 +39108,6 @@ msgstr ""
 
 #: methodvalidation/options/custom_bias_limit.title
 msgid "Custom Bias Limit ( percent)"
-msgstr ""
-
-#: alluvial/options/custombinlabels.title
-msgid "Custom bin labels"
 msgstr ""
 
 #: greyzoneroc/options/grey_zone_method/custom.title
@@ -39368,15 +39452,6 @@ msgstr ""
 
 #: extratrees/options/mtry_custom.title
 msgid "Custom mtry Value"
-msgstr ""
-
-#: alluvial/options/custombinlabels.description.jamovi
-msgid ""
-"Custom names for the intervals the drawing engine creates when it has to "
-"split a continuous variable, separated by commas (e.g. \"Low,Medium,High\"); "
-"at least two are required. As with the bin labels above, every axis variable "
-"here is drawn as a category, so in practice nothing is binned. Leave empty "
-"to use the selected bin-label method."
 msgstr ""
 
 #: jjarcdiagram/options/analysisPreset/custom.title
@@ -40264,6 +40339,12 @@ msgstr ""
 msgid "Data contains no (complete) rows."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"Data contains no (complete) rows. Check your data for missing values or "
+"filtering."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Data contains no complete rows. Check the data."
 msgstr ""
@@ -40871,7 +40952,6 @@ msgstr ""
 msgid "Data types plot (vis_guess)"
 msgstr ""
 
-#: alluvial/results/dataWarning.title
 #: benford/results/dataWarning.title
 #: biomarkerresponse/results/dataWarning.title
 #: survivalendpoints/results/dataWarning.title
@@ -42018,7 +42098,6 @@ msgid "Deep Learning Model"
 msgstr ""
 
 #: advancedraincloud/options/journal_style/default.title
-#: alluvial/options/bin/default.title
 #: alluvial/options/colorPalette/default.title
 #: autoeda/options/plot_theme/default.title
 #: basegraphics/options/color_scheme/default.title
@@ -42426,6 +42505,10 @@ msgstr ""
 
 #: labinterpret/options/reference_source/demographic_adjusted.title
 msgid "Demographic-Adjusted Ranges"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Demographics:"
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -43923,6 +44006,10 @@ msgstr ""
 #: decisioncombine/results/combinationTable.columns.title
 #: enhancedROC/results/results/clinicalApplicationMetrics.columns.title
 msgid "Diagnostic OR"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Diagnostic pathways:"
 msgstr ""
 
 #: imagingcorrelation/results/patternRecognitionTable.title
@@ -48433,6 +48520,10 @@ msgid ""
 "and carries no information."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Each variable should have 3-7 categories for best readability"
+msgstr ""
+
 #: enhancedROC/results/results/crocAnalysisTable.columns.title
 msgid "Early Retrieval Gain"
 msgstr ""
@@ -51237,6 +51328,7 @@ msgid "Error"
 msgstr ""
 
 #: R/agepyramid.b.R
+#: R/alluvial.b.R
 #: R/benford.b.R
 #: R/decisioncalculator.b.R
 #: R/summarydata.b.R
@@ -54606,7 +54698,7 @@ msgstr ""
 #: package/analyses/summarydata.menuGroup
 #: package/analyses/reportcat.menuGroup
 #: package/analyses/benford.menuGroup
-#: package/analyses/alluvial.menuGroup
+#: package/analyses/agepyramid.menuGroup
 #: package/analyses/venn.menuGroup
 #: package/analyses/vartree.menuGroup
 #: package/analyses/categorize.menuGroup
@@ -54615,7 +54707,7 @@ msgstr ""
 #: package/analyses/outlierdetection.menuGroup
 #: package/analyses/checkdata.menuGroup
 #: package/analyses/chisqposttest.menuGroup
-#: alluvial/options.menuGroup
+#: agepyramid/options.menuGroup
 #: benford/options.menuGroup
 #: categorize/options.menuGroup
 #: checkdata/options.menuGroup
@@ -54731,11 +54823,11 @@ msgstr ""
 msgid "ExplorationExtraD"
 msgstr ""
 
-#: package/analyses/agepyramid.menuGroup
+#: package/analyses/alluvial.menuGroup
 #: package/analyses/nonparametric.menuGroup
 #: package/analyses/pcacomponenttest.menuGroup
 #: package/analyses/pcaloadingtest.menuGroup
-#: agepyramid/options.menuGroup
+#: alluvial/options.menuGroup
 #: nonparametric/options.menuGroup
 #: pcacomponenttest/options.menuGroup
 #: pcaloadingtest/options.menuGroup
@@ -54825,6 +54917,10 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid "Explore diagnostic methods or illustrative cut-off scenarios."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Explore patterns across age/sex/location categories"
 msgstr ""
 
 #: R/vartree.b.R
@@ -56667,10 +56763,12 @@ msgstr ""
 msgid "Fifth variable for 5+ set analysis."
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/fill.title
 msgid "Fill by"
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/fillGgalluvial.title
 msgid "Fill by (ggalluvial)"
 msgstr ""
@@ -56717,6 +56815,10 @@ msgstr ""
 msgid "Fill Variable"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Fill variable '{variable}' does not exist in the data."
+msgstr ""
+
 #: alluvial/ui[0][3].label
 msgid "Fill variable (ggalluvial)"
 msgstr ""
@@ -56730,6 +56832,10 @@ msgstr ""
 #: jjridges/options/fill_var.title
 #: jjridges/ui[0][2].label
 msgid "Fill Variable (Optional)"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Fill Variable Not Found"
 msgstr ""
 
 #: R/jjridges.b.R
@@ -57920,6 +58026,14 @@ msgstr ""
 msgid "Flow Summary Table"
 msgstr ""
 
+#: alluvial/options/showFlowTable.title
+msgid "Flow table"
+msgstr ""
+
+#: alluvial/results/flowTable.title
+msgid "Flow Table"
+msgstr ""
+
 #: riverplot/options/flowAlpha.title
 msgid "Flow Transparency"
 msgstr ""
@@ -58450,6 +58564,10 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "For continuous variables, interpolate between the given values"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "For continuous variables, use the categorize function to create groups first"
 msgstr ""
 
 #: statsplot2/options/sampleLarge.description.ui
@@ -61143,6 +61261,10 @@ msgstr ""
 
 #: alluvial/options/engine/ggalluvial.title
 msgid "GG Alluvial (manual control)"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "GG Alluvial Engine Not Available"
 msgstr ""
 
 #: statsplot2/options/alluvsty/t1.title
@@ -65631,6 +65753,10 @@ msgstr ""
 msgid "How to Read This Biplot"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "How to read this diagram"
+msgstr ""
+
 #: ihccluster/options/heatmapScale.description
 msgid "How to scale heatmap values"
 msgstr ""
@@ -66790,6 +66916,14 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Ignored {values}."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Ignored by the Easy Alluvial engine: {options}."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Ignored by the GG Alluvial engine: {options}."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -69983,6 +70117,10 @@ msgid ""
 "age and follow-up time are in compatible units."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Insufficient Variables"
+msgstr ""
+
 #: advancedbarplot/options/value_format/integer.title
 #: jggheatmap/options/value_format/integer.title
 msgid "Integer"
@@ -71144,10 +71282,6 @@ msgstr ""
 msgid "Interval Censoring Visualization"
 msgstr ""
 
-#: alluvial/options/bin/cuts.title
-msgid "Interval cut points"
-msgstr ""
-
 #: outcomeorganizer/options/intervalEnd.title
 #: outcomeorganizer/ui[4][0]/intervalCensoring[0][1].label
 msgid "Interval End Variable"
@@ -71420,6 +71554,10 @@ msgstr ""
 
 #: outbreakanalysis/results/data_quality_report.columns.title
 msgid "Invalid Values (N)"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Invalid Weight Variable"
 msgstr ""
 
 #: ihcsurvival/results/regionalComparison.columns.title
@@ -77915,8 +78053,17 @@ msgstr ""
 msgid "Marginal Plot Type"
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/marg.title
 msgid "Marginal plots"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Marginal plots are switched on, so the diagram and its histograms are "
+"assembled into a fixed grid that cannot take further styling. These settings "
+"were left out of this plot: colour palette, theme style, enhanced edge "
+"gradients, plot orientation, flow direction, plot subtitle and custom title."
 msgstr ""
 
 #: cochranq/results/marginalProportionsPlot.title
@@ -79244,7 +79391,6 @@ msgstr ""
 #: R/summarydata.b.R
 #: advancedanova/results/descriptives.columns.title
 #: advancedbarplot/options/stat_type/mean.title
-#: alluvial/options/bin/mean.title
 #: bayesiandiagnostic/results/posteriorSummary.columns.title
 #: biomarkerresponse/results/groupComparison.columns.title
 #: ciSingle/results/citable.columns.title
@@ -80215,7 +80361,6 @@ msgstr ""
 #: R/summarydata.b.R
 #: advancedanova/results/descriptives.columns.title
 #: advancedbarplot/options/stat_type/median.title
-#: alluvial/options/bin/median.title
 #: bayesiandiagnostic/results/posteriorSummary.columns.title
 #: biomarkerresponse/options/thresholdMethod/median.title
 #: biomarkerresponse/results/groupComparison.columns.title
@@ -82575,10 +82720,6 @@ msgstr ""
 msgid "Min ρ"
 msgstr ""
 
-#: alluvial/options/bin/min_max.title
-msgid "Min-Max"
-msgstr ""
-
 #: groupedbar/options/errortype/range.title
 msgid "Min-Max Range"
 msgstr ""
@@ -83817,8 +83958,26 @@ msgstr ""
 msgid "Missing values: {count}. Percentages above are of {valid} valid cases."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"Missing values: {n} of {total} rows had a missing value in a plotted "
+"variable and were removed."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Missing values: {n} of {total} rows had a missing value in a plotted "
+"variable. Those cells are shown as a '{label}' category, which is drawn like "
+"any other category but is not an observed group. Switch on 'Missing-value "
+"exclusion (NA)' to drop those rows instead."
+msgstr ""
+
 #: R/reportcat.b.R
 msgid "Missing values: {rate}% of cases."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Missing values: no row had a missing value in any plotted variable."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -83827,6 +83986,10 @@ msgstr ""
 
 #: R/jjsegmentedtotalbar.b.R
 msgid "Missing variables in data:"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Missing Weights"
 msgstr ""
 
 #: dataquality/options/missing_threshold_visual.title
@@ -87668,15 +87831,6 @@ msgstr ""
 msgid "Names for states (comma-separated, e.g., \"Healthy,Disease,Death\")"
 msgstr ""
 
-#: alluvial/options/bin.description.jamovi
-msgid ""
-"Names for the intervals the drawing engine creates when it has to split a "
-"continuous variable (e.g. 'LL' for low-low, 'HH' for high-high). This "
-"analysis draws every axis variable with its own recorded values as "
-"categories, so in practice nothing is binned and this setting has no visible "
-"effect. To group values, use the categorize function on the variable first."
-msgstr ""
-
 #: multiclassdiagnostics/options/modelNames.description
 msgid "Names for the models being compared (comma-separated)"
 msgstr ""
@@ -88085,6 +88239,10 @@ msgstr ""
 msgid ""
 "Negative values detected. Most IHC biomarkers should have non-negative "
 "values (e.g., Ki67 %, H-scores). Verify data coding."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Negative Weights Detected"
 msgstr ""
 
 #: nogoldstandard/results/test_metrics.columns.superTitle
@@ -89063,6 +89221,10 @@ msgstr ""
 msgid "No complete cases remain after removing missing data."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "No Complete Data"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid ""
 "No complete data rows available after handling missing values. Please check "
@@ -89073,6 +89235,10 @@ msgstr ""
 msgid ""
 "No complete data rows available after handling missing values. Please check "
 "your data or change the \"Exclude Missing (NA)\" setting."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "No complete observations remain for the condensation plot."
 msgstr ""
 
 #: R/oddsratio.b.R
@@ -89196,6 +89362,7 @@ msgstr ""
 msgid "No data are available. Load data before running the analysis."
 msgstr ""
 
+#: R/alluvial.b.R
 #: R/tableone.b.R
 msgid "No Data Available"
 msgstr ""
@@ -89484,6 +89651,10 @@ msgid ""
 "skipped."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "No observations with non-missing weights remain."
+msgstr ""
+
 #: R/decisioncalculator.b.R
 msgid "No obvious sparse-cell warning."
 msgstr ""
@@ -89533,6 +89704,10 @@ msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid "No positive test results"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "No Positive Weights"
 msgstr ""
 
 #: jsummarytools/options/cross_proportions/none.title
@@ -89935,6 +90110,10 @@ msgstr ""
 msgid "No valid variables selected."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "No Valid Weights"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "No variable-based risk scores are available because the selected rule "
@@ -90020,9 +90199,16 @@ msgstr ""
 msgid "Node ID"
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/labelNodes.title
 #: vartree/options/nodelabel.title
 msgid "Node labels"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Node numbers: the total of the weight variable in that group, rounded to one "
+"decimal place - not a case count."
 msgstr ""
 
 #: jjarcdiagram/ui[1][0].label
@@ -90228,6 +90414,10 @@ msgstr ""
 
 #: R/benford.b.R
 msgid "Non-finite values excluded"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Non-finite Weights"
 msgstr ""
 
 #: markovmultistate/options/modelType/nonhomogeneous.title
@@ -91191,6 +91381,10 @@ msgstr ""
 msgid "NOT RESPONSE-EVALUABLE"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Not shown: {variables}"
+msgstr ""
+
 #: R/raincloud.b.R
 msgid "not significant at the 0.05 level"
 msgstr ""
@@ -91365,6 +91559,7 @@ msgid "Note"
 msgstr ""
 
 #: R/agepyramid.b.R
+#: R/alluvial.b.R
 #: R/benford.b.R
 #: R/summarydata.b.R
 msgid "NOTE"
@@ -93202,6 +93397,10 @@ msgstr ""
 msgid "Numeric variables for factor analysis"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Numeric variables plotted as categories"
+msgstr ""
+
 #: R/crosstable.b.R
 msgid "Numeric variables that look like coded categories"
 msgstr ""
@@ -94027,6 +94226,19 @@ msgstr ""
 msgid "One row per lesion per visit"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"One row per path through the plotted variables, commonest first. Percentages "
+"are of all plotted cases."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"One row per path through the plotted variables, largest weight first. Cases "
+"and percentages count rows; Weight total is the sum of the weight variable "
+"over those rows, which is what the ribbon width shows."
+msgstr ""
+
 #: jrecode/options/recode_rules.description
 msgid "One rule per line. Format: oldvalue -> newvalue"
 msgstr ""
@@ -94385,6 +94597,12 @@ msgstr ""
 
 #: jjsegmentedtotalbar/options/label_threshold.description.jamovi
 msgid "Only show labels for segments above this percentage threshold."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Only the first {shown} of {selected} selected variables are plotted, because "
+"'Maximum variables' is set to {max}."
 msgstr ""
 
 #: R/crosstable.b.R
@@ -99484,6 +99702,10 @@ msgstr ""
 msgid "Pastels (9 colors)"
 msgstr ""
 
+#: alluvial/results/flowTable.columns.title
+msgid "Path"
+msgstr ""
+
 #: latentbiomarker/options/show_plot_path.title
 msgid "Path diagram"
 msgstr ""
@@ -99673,6 +99895,10 @@ msgstr ""
 
 #: classicalSurvivalPower/options/entry_type.title
 msgid "Patient Entry Pattern"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Patient flow:"
 msgstr ""
 
 #: package/analyses/patientfollowupintro.title
@@ -100786,6 +101012,10 @@ msgstr ""
 
 #: R/agepyramid.b.R
 msgid "Percent of all observations"
+msgstr ""
+
+#: alluvial/results/flowTable.columns.title
+msgid "Percent of cases"
 msgstr ""
 
 #: concordanceindex/results/decomposition.columns.title
@@ -111077,6 +111307,7 @@ msgstr ""
 msgid "Quick Selection Help:"
 msgstr ""
 
+#: R/alluvial.b.R
 #: R/decision.b.R
 msgid "Quick Start"
 msgstr ""
@@ -111275,6 +111506,12 @@ msgstr ""
 
 #: advancedraincloud/options/rain_side.title
 msgid "Raincloud Position"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Raise 'Maximum variables' to include them, or deselect the ones you do not "
+"need."
 msgstr ""
 
 #: dynamicprediction/results/trajectoryParameters.columns.title
@@ -112700,6 +112937,10 @@ msgstr ""
 msgid "Ready for Decision Curve Analysis"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Ready to begin? Select at least 2 categorical variables from the left panel."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Ready to run! Results will appear below."
 msgstr ""
@@ -113324,6 +113565,10 @@ msgid ""
 "Reduce candidate parameters using subject-matter knowledge or collect more "
 "outcome information; penalization alone cannot repair very limited "
 "information."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Reduce the number of variables or group infrequent categories."
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -114967,6 +115212,10 @@ msgstr ""
 msgid "Report-Ready Sentences"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Reported by R: {message}"
+msgstr ""
+
 #: classification/options/reporting.title
 #: classification/ui[1][1][0].label
 msgid "Reporting"
@@ -116300,6 +116549,18 @@ msgstr ""
 
 #: circos/options/transparency.title
 msgid "Ribbon Transparency"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Ribbon width: the number of cases following that path (each case counts "
+"once)."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Ribbon width: the total of the weight variable '{weight}' over the cases "
+"following that path."
 msgstr ""
 
 #: causalmediation/options/hd_penalty/ridge.title
@@ -119046,6 +119307,7 @@ msgid ""
 "clinical pathway analysis. Flow thickness indicates volume."
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/sankeyStyle.title
 msgid "Sankey styling"
 msgstr ""
@@ -120594,6 +120856,10 @@ msgstr ""
 msgid "Select 'Date Format':"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Select 2-5 categorical variables (optimal: 3-4)"
+msgstr ""
+
 #: R/venn.b.R
 msgid "Select 2-7 categorical variables"
 msgstr ""
@@ -120606,6 +120872,12 @@ msgstr ""
 msgid ""
 "Select a binary rule variable or disable \"Clinical Decision Rule "
 "Integration\"."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Select a categorical variable, or group the values with Data > Transform "
+"first."
 msgstr ""
 
 #: survival/options/rcs_variable.description
@@ -125356,6 +125628,10 @@ msgstr ""
 #: highdimcox/ui[5][0]/show_regularization_path.label
 #: ncvregcox/options/plot_path.title
 msgid "Show Regularization Path"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Show relationships between symptoms, diagnosis and outcomes"
 msgstr ""
 
 #: semimarkov/options/showReliabilityAnalysis.title
@@ -130620,6 +130896,10 @@ msgid ""
 "later."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Start with fewer variables and add more once you understand the patterns"
+msgstr ""
+
 #: R/waterfall.b.R
 msgid ""
 "Start with percentage data if available, or use raw measurements with proper "
@@ -133284,6 +133564,10 @@ msgstr ""
 msgid "Styling"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Styling options not applied"
+msgstr ""
+
 #: finegray/results/shrTable.title
 msgid "Sub-Hazard Ratios (sHR)"
 msgstr ""
@@ -135616,8 +135900,26 @@ msgid ""
 "Application Metrics table."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Switch on marginal histograms to see individual variable distributions"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Switch on the flow table to list every path with its number of cases"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Switch the 'Plot engine' option to 'Easy Alluvial', or run "
+"install.packages(\"ggalluvial\") in R and restart jamovi."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Switch to 'Percentage Changes' input format if changes are pre-calculated, OR"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Switch to the GG Alluvial engine to use weighted flows."
 msgstr ""
 
 #: treatmentswitching/options/switchingMethod.title
@@ -135944,6 +136246,12 @@ msgstr ""
 #: gtsummary/results/table_notes.title
 #: tinytable/options/table_notes.title
 msgid "Table Notes"
+msgstr ""
+
+#: alluvial/options/showFlowTable.description.jamovi
+msgid ""
+"Table of every path through the plotted variables with its number of cases, "
+"percentage and, when weighted, weight total, commonest first."
 msgstr ""
 
 #: package/analyses/tableone.title
@@ -138158,6 +138466,17 @@ msgstr ""
 msgid "The 'Exclude missing values' box has no effect"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"The 'GG Alluvial' plot engine needs the R package 'ggalluvial', which is not "
+"installed on this computer, so no alluvial plot can be drawn. What to do "
+"next: switch the 'Plot engine' option to 'Easy Alluvial' - it is already "
+"installed and shows the same category flows (weighted flows and a separate "
+"fill variable are only available in GG Alluvial); or install the package by "
+"running install.packages(\"ggalluvial\") in R, then restart jamovi and run "
+"the analysis again."
+msgstr ""
+
 #: R/jjpubr.b.R
 msgid "The 'ggpubr' package is required. Install with: install.packages('ggpubr')"
 msgstr ""
@@ -138232,6 +138551,12 @@ msgid ""
 "they were enrolled recently - check that before interpreting the selection. "
 "Report the landmark, the number excluded and the reason alongside any rate "
 "taken from this analysis."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"The {palette} palette publishes {cap} distinguishable colours, and this "
+"diagram has at least {groups} groups to colour."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -138321,6 +138646,10 @@ msgstr ""
 
 #: R/agepyramid.b.R
 msgid "The age bands cover different numbers of years"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "The alluvial diagram could not be drawn."
 msgstr ""
 
 #: kappaSizePower/options/kappa1.description.ui
@@ -138622,6 +138951,17 @@ msgid ""
 "these toggles to add them under other focuses."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"The condensation panel is based on {panel} rows; the diagram above uses "
+"{diagram}. The two panels require different variables to be recorded, so "
+"they drop different rows."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "The condensation plot could not be drawn."
+msgstr ""
+
 #: R/survival.b.R
 msgid ""
 "The confidence interval includes 1, so the data are compatible with no "
@@ -138823,6 +139163,12 @@ msgstr ""
 msgid "The data as a data frame."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"The data contain {n} distinct paths through the selected variables. This may "
+"produce an overcrowded plot."
+msgstr ""
+
 #: R/agreement.b.R
 msgid "The data contain no rows. Check the dataset and any active filters."
 msgstr ""
@@ -139010,6 +139356,10 @@ msgstr ""
 msgid ""
 "The diagnostic test being evaluated for performance. This is typically a "
 "new, faster, or less expensive test compared to the gold standard."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "The diagram is based on the remaining {n} rows."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -139212,6 +139562,12 @@ msgstr ""
 
 #: eurostatmap/options/geo_level.description.jamovi
 msgid "The geographic level for mapping."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"The GG Alluvial engine needs the R package 'ggalluvial', which is not "
+"installed, so this plot cannot be drawn."
 msgstr ""
 
 #: R/agepyramid.b.R
@@ -140903,6 +141259,18 @@ msgid ""
 "below."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "The weight variable contains only missing values."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "The weight variable is only supported by the GG Alluvial engine."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "The weight variable must contain at least one positive value."
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid ""
 "The whole curve, including any clinical rule, lies within the band with this "
@@ -141228,6 +141596,12 @@ msgid ""
 "Pearson chi-square. The corrected p-value is never the smaller of the two, "
 "so a two-by-two p-value can move to the other side of 0.05 when nothing but "
 "the style is changed. Fisher's exact test does not involve this choice."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"These variables hold numbers and are drawn with their own recorded values as "
+"categories: {variables}."
 msgstr ""
 
 #: R/reportcat.b.R
@@ -144415,6 +144789,10 @@ msgid ""
 "for detailed intersection analysis."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Tips"
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid "Tissue Biopsy"
 msgstr ""
@@ -144711,6 +145089,10 @@ msgstr ""
 
 #: R/agepyramid.b.R
 msgid "Too many age bands to draw"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Too Many Categories"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -145450,6 +145832,10 @@ msgstr ""
 
 #: R/swimmerplot_html.R
 msgid "Track key clinical events (surgery, progression, etc.)"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Track progression through treatment stages"
 msgstr ""
 
 #: irecist/options/trackPseudoprogression.title
@@ -147166,6 +147552,10 @@ msgstr ""
 
 #: jjoncoplot/options/clinicalPreset/tumor_profiling.title
 msgid "Tumor Profiling (Top genes, TMB)"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Tumor progression:"
 msgstr ""
 
 #: ihcimmune/ui[2][0][1][2].label
@@ -150217,6 +150607,12 @@ msgid ""
 "expression, population counts)"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"Use weighted flows (GG Alluvial engine) for aggregated data with frequency "
+"counts"
+msgstr ""
+
 #: decision/ui[2][0].label
 msgid "Use when sample doesn't represent target population disease prevalence"
 msgstr ""
@@ -151519,6 +151915,19 @@ msgid ""
 "2 categories."
 msgstr ""
 
+#: R/alluvial.b.R
+msgid ""
+"Variable '{variable}' has {n} distinct categories, so the diagram will be "
+"split into that many strata and the flows between them will be very thin."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Variable '{variable}' has {n} unique values and appears continuous, so it "
+"has no meaningful strata. Alluvial diagrams need categorical data: group the "
+"values first with the categorize analysis or Data > Transform."
+msgstr ""
+
 #: R/tableone.b.R
 msgid ""
 "Variable '{variable}' has many unique text values. Consider grouping "
@@ -151527,6 +151936,12 @@ msgstr ""
 
 #: R/tableone.b.R
 msgid "Variable '{variable}' is stored as a number but has only {n} distinct values."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Variable '{variable}' was not found in the data. Make sure every selected "
+"variable still exists in the dataset."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -151991,6 +152406,7 @@ msgstr ""
 msgid "Variable names"
 msgstr ""
 
+#: R/alluvial.b.R
 #: R/datetimeconverter.b.R
 msgid "Variable Not Found"
 msgstr ""
@@ -152507,6 +152923,10 @@ msgstr ""
 
 #: R/jjwithinstats.b.R
 msgid "Variables not found in the dataset: {vars}."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Variables not shown"
 msgstr ""
 
 #: conditionalinference/options/mtry.title
@@ -153571,6 +153991,10 @@ msgstr ""
 msgid "Visualize flows, transitions, and categorical changes across time or stages:"
 msgstr ""
 
+#: R/alluvial.b.R
+msgid "Visualize grade/stage transitions"
+msgstr ""
+
 #: R/riverplot.b.R
 msgid "Visualize multi-stage workflows, decision pathways"
 msgstr ""
@@ -153585,6 +154009,10 @@ msgstr ""
 
 #: hierarchicalbayes/options/shrinkage_plots.description.ui
 msgid "Visualize shrinkage of study estimates"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Visualize the flow of categorical data across multiple dimensions."
 msgstr ""
 
 #: R/jjridges.b.R
@@ -153863,6 +154291,7 @@ msgid "warning"
 msgstr ""
 
 #: R/agepyramid.b.R
+#: R/alluvial.b.R
 #: R/benford.b.R
 #: R/decisioncalculator.b.R
 #: R/summarydata.b.R
@@ -154356,6 +154785,10 @@ msgstr ""
 msgid "Weight Specification"
 msgstr ""
 
+#: alluvial/results/flowTable.columns.title
+msgid "Weight total"
+msgstr ""
+
 #: treatmenteffects/options/weight_trimming.title
 msgid "Weight Trimming"
 msgstr ""
@@ -154365,8 +154798,25 @@ msgstr ""
 msgid "Weight Variable"
 msgstr ""
 
+#: R/alluvial.b.R
 #: alluvial/options/weight.title
 msgid "Weight variable"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Weight variable '{weight}' contains {n} negative value(s). Weights must be "
+"non-negative (>= 0)."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Weight variable '{weight}' does not exist in the data."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Weight variable '{weight}' must be different from the axis and fill "
+"variables."
 msgstr ""
 
 #: riverplot/options/weight.title
@@ -154376,6 +154826,18 @@ msgstr ""
 
 #: alluvial/ui[0][2].label
 msgid "Weight variable (optional)"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Weight Variable Ignored"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Weight Variable Not Found"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Weight Variable Reused"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -154573,6 +155035,10 @@ msgstr ""
 
 #: agreement/options/gwetWeights.title
 msgid "Weights for Gwet's AC"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid "Weights must be finite numeric values or missing."
 msgstr ""
 
 #: coxrobust/options/weights_variable.title
@@ -154786,6 +155252,44 @@ msgstr ""
 
 #: comprehensiveSurvivalPower/options/calculation_type.title
 msgid "What to Calculate"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"What to do next: choose Viridis or Plasma, which stay distinguishable over "
+"many groups, or group categories with Data > Transform until the palette "
+"fits."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"What to do next: group the less frequent categories with Data > Transform, "
+"or plot fewer variables at a time."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"What to do next: nothing is needed. To combine values into wider groups, "
+"recode the variable with Data > Transform before plotting."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"What to do next: switch 'Marginal plots' off if you need any of those "
+"settings."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"What to try next: choose a categorical condensation variable; group "
+"categories with very few cases (Data > Transform)."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"What to try next: switch 'Plot engine' to Easy Alluvial; plot fewer "
+"variables; group categories with few cases (Data > Transform); check that "
+"every selected variable is still in the data."
 msgstr ""
 
 #: R/agepyramid.b.R
@@ -155238,6 +155742,32 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "Why this matters:"
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Why this matters: changing any of them will not alter the picture on screen "
+"while marginal plots are on."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Why this matters: the drawing engine would otherwise rescale each numeric "
+"variable and cut it into equal-width bins, so values coded 1/2/3 would "
+"appear on the diagram as bin labels such as LL/M/HH."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Why this matters: the extra groups are drawn in shades blended between the "
+"published colours, so neighbouring groups can look alike and are hard to "
+"tell apart in the legend."
+msgstr ""
+
+#: R/alluvial.b.R
+msgid ""
+"Why this matters: with more than about 7 categories per variable the ribbons "
+"overlap and individual paths can no longer be traced by eye."
 msgstr ""
 
 #: R/riverplot.b.R
