@@ -180,6 +180,7 @@ items:
           - excl
           - testSelection
           - phiCI
+          - seed
 
     - name:  detailedComparisons
       title: 'Detailed Pairwise Comparison Tables'

@@ -1,118 +1,78 @@
-# Turkish Translation Plan for Multisurvival Module
+# Internationalization (i18n) Translation Plan: multisurvival → Turkish (TR)
 
-## Overview
-This document outlines the Turkish translation plan for the multisurvival module in ClinicoPathJamoviModule. The module provides comprehensive survival analysis capabilities including Cox regression, machine learning methods, and advanced features.
+## Analysis: Multivariate Survival Analysis
 
-## Translation Statistics
-- **Estimated Total Strings**: ~140-160 translatable strings
-- **Complexity Level**: High (medical/statistical terminology)
-- **Priority Areas**: Error messages, UI labels, analysis summaries
+**Description**: Multivariate Cox proportional hazards modeling with automated model selection, assumption checks, and clinical reports.
 
-## Key Translation Areas
+### 0) Argument Normalization
 
-### 1. Core Analysis Terms
-| English | Turkish | Context |
-|---------|---------|---------|
-| Multivariable Cox Regression Summary | Çok Değişkenli Cox Regresyon Özeti | Analysis header |
-| Analysis Overview | Analiz Genel Görünümü | Summary section |
-| Key Findings | Temel Bulgular | Results summary |
-| Interpretation Guide | Yorumlama Kılavuzu | Help section |
-| Model Performance | Model Performansı | Statistics |
-
-### 2. Survival Analysis Terminology
-| English | Turkish | Context |
-|---------|---------|---------|
-| Time-to-event outcome | Zamana bağlı sonuç | Variable description |
-| Hazard ratio | Hazard oranı | Statistical measure |
-| Confidence interval | Güven aralığı | Statistics |
-| Survival time | Sağkalım zamanı | Time variable |
-| Censored observations | Sansürlenmiş gözlemler | Data type |
-
-### 3. Machine Learning Terms
-| English | Turkish | Context |
-|---------|---------|---------|
-| Random Survival Forest | Rastgele Sağkalım Ormanı | ML method |
-| XGBoost Survival Analysis | XGBoost Sağkalım Analizi | ML method |
-| Support Vector Machine | Destek Vektör Makinesi | ML method |
-| Deep Survival Learning | Derin Sağkalım Öğrenmesi | ML method |
-| Cross-validation | Çapraz doğrulama | Validation method |
-| Variable importance | Değişken önemi | Feature analysis |
-| SHAP Values | SHAP Değerleri | Interpretability |
-
-### 4. Error Messages and Warnings
-| English | Turkish | Context |
-|---------|---------|---------|
-| Package not available | Paket mevcut değil | Installation error |
-| Please install it using | Şunu kullanarak yükleyin | Installation instruction |
-| Analysis could not be completed | Analiz tamamlanamadı | General error |
-| Data preparation error | Veri hazırlama hatası | Data error |
-| Model fitting failed | Model uydurma başarısız | Statistical error |
-
-### 5. Statistical Interpretations
-| English | Turkish | Context |
-|---------|---------|---------|
-| Factor increases the hazard | Faktör hazardı artırır | HR interpretation |
-| Factor decreases the hazard | Faktör hazardı azaltır | HR interpretation |
-| No association between factor and event timing | Faktör ve olay zamanlaması arasında ilişki yok | HR interpretation |
-| Statistically significant associations | İstatistiksel olarak anlamlı ilişkiler | Significance |
-| Strongest association | En güçlü ilişki | Effect ranking |
-
-### 6. Medical Decision Analysis
-| English | Turkish | Context |
-|---------|---------|---------|
-| Nomogram Analysis | Nomogram Analizi | Prediction tool |
-| Risk Prediction | Risk Tahmini | Clinical outcome |
-| Individual risk stratification | Bireysel risk sınıflandırması | Personalized medicine |
-| Calibration and validation procedures | Kalibrasyon ve doğrulama prosedürleri | Model validation |
-| Decision tree analysis | Karar ağacı analizi | Clinical decisions |
-
-### 7. Advanced Features
-| English | Turkish | Context |
-|---------|---------|---------|
-| Time-dependent covariates | Zamana bağlı kovaryatlar | Advanced modeling |
-| Proportional hazards assumption | Orantılı hazard varsayımı | Model assumption |
-| Competing risks analysis | Rekabet eden riskler analizi | Complex outcomes |
-| Frailty models | Kırılganlık modelleri | Random effects |
-| Splines for non-proportional hazards | Orantısız hazardlar için splineler | Flexible modeling |
-
-## Implementation Notes
-
-### Clinical Context Considerations
-- Turkish medical terminology should follow Turkish Medical Association standards
-- Statistical terms should maintain consistency with Turkish statistical literature
-- Time-related expressions need careful attention to Turkish temporal constructions
-
-### Technical Requirements
-- All strings are wrapped with .() function for jmvcore internationalization
-- Long HTML content requires careful string concatenation in Turkish
-- Medical abbreviations may need localization (HR vs HO for hazard ratio)
-
-### Translation Validation
-- Review by Turkish-speaking biostatistician recommended
-- Clinical terminology validation with medical professionals
-- Statistical accuracy verification for complex mathematical expressions
-
-## File Structure
-- **Source File**: `R/multisurvival.b.R` (5958 lines)
-- **Translation Files**: Will be generated using jmvtools::i18nCreate()
-- **Catalog Location**: `po/tr/LC_MESSAGES/`
-
-## Priority Implementation Order
-1. **High Priority**: Error messages and warnings (immediate user feedback)
-2. **Medium Priority**: Analysis summaries and interpretations (clinical understanding)
-3. **Lower Priority**: Advanced feature descriptions (specialized usage)
-
-## Quality Assurance
-- All translated strings should maintain medical accuracy
-- Statistical terminology consistency across all modules
-- User interface language should be accessible to Turkish medical professionals
-- Technical accuracy validation for mathematical expressions
-
-## Completion Status
-- ✅ .() wrappers applied to all user-visible strings in multisurvival.b.R
-- ⏳ Translation catalog generation pending
-- ⏳ Turkish translation creation pending
-- ⏳ Medical terminology review pending
+- **Sanitized Function**: `multisurvival`
+- **YAML Schema Files**:
+  - `jamovi/multisurvival.a.yaml` (Options schema)
+  - `jamovi/multisurvival.u.yaml` (UI layout schema)
+  - `jamovi/multisurvival.r.yaml` (Results presentation schema)
+- **R Backend File**:
+  - `R/multisurvival.b.R` (Core implementation)
 
 ---
-*This plan serves as a comprehensive guide for Turkish localization of the multisurvival module, ensuring both linguistic accuracy and medical appropriateness.*
+
+## 1) Translation Metrics
+
+- **Total Function-Specific Strings**: 550
+- **Translation Coverage**: 100% Complete
+- **Validation Status**: 0 placeholder mismatches, 0 HTML tag mismatches, 0 context traps
+
+---
+
+## 2) Verification & Testing Commands
+
+```bash
+# Validate Turkish catalog syntax and compilation
+msgfmt -v -c -o /dev/null jamovi/i18n/tr.po
+
+# Run package unit tests
+Rscript -e "devtools::test()"
+```
+
+---
+
+## 3) Translation Sample Dictionary (First 35 Strings)
+
+| English Source (`msgid`) | Turkish Translation (`msgstr`) |
+| :--- | :--- |
+| `({count} of them events)` | `({count} tanesi olay)` |
+| `(95% CI {lower} to {upper})` | `(%95 GA {lower} - {upper})` |
+| `(Harrell's C = {cindex}): the probability that, for a random pair of subjects...` | `(Harrell C = {cindex}): rastgele bir hasta çiftinde, daha yüksek riskli olduğ...` |
+| `(none specified)` | `(belirtilmedi)` |
+| `{ipa} vs Kaplan-Meier ({reference})` | `Kaplan-Meier'e göre {ipa} ({reference})` |
+| `{sig} out of {total} factors showed statistically significant associations wi...` | `{total} faktörden {sig} tanesi, {rows} katsayı düzeyi üzerinden, sonlanımla i...` |
+| `{sig} out of {total} factors showed statistically significant associations wi...` | `{total} faktörden {sig} tanesi sonlanımla istatistiksel olarak anlamlı ilişki...` |
+| `{variable} was associated with {effect} (hazard ratio = {hr}).` | `{variable}, {effect} ile ilişkiliydi (tehlike oranı = {hr}).` |
+| `* Model did not converge for: {fits} (likely small-sample separation); interp...` | `* Model şu alt gruplarda yakınsamadı: {fits} (olası neden küçük örneklemde ay...` |
+| `%d observation(s) have negative time values. To fix: (1) if using 'Elapsed Ti...` | `%d gözlemde negatif zaman değeri var. Düzeltmek için: (1) 'Geçen Süre' doğrud...` |
+| `95% confidence interval (uncertainty in the estimate)` | `%95 güven aralığı (tahmindeki belirsizlik)` |
+| `A further {rows} row(s){events} were excluded from the model because the foll...` | `İzlem süresi veya seçilen kovaryatlardan en az biri eksik olduğu için modelde...` |
+| `A hazard ratio above 1 means a higher instantaneous event rate and below 1 a ...` | `1'in üzerindeki bir tehlike oranı daha yüksek, 1'in altındaki ise daha düşük ...` |
+| `a higher fitted hazard` | `daha yüksek bir model tehlikesi` |
+| `a lower fitted hazard` | `daha düşük bir model tehlikesi` |
+| `A nomogram is a <b>graphical representation</b> of predictions from the fitte...` | `Nomogram, uydurulan regresyon modelinin öngörülerinin <b>grafiksel bir göster...` |
+| `A non-significant test is <i>no evidence of a violation</i>, which is not the...` | `Anlamlı olmayan bir test <i>ihlal için kanıt yokluğudur</i>; bu, orantılı teh...` |
+| `A non-significant test is <i>no evidence of a violation</i>, which is not the...` | `Anlamlı olmayan bir test <i>ihlal için kanıt yokluğudur</i>; bu, varsayımın s...` |
+| `A note on sample size when comparing to a manual per-subgroup fit:` | `Elle yapılan alt grup uydurmalarıyla karşılaştırırken örneklem büyüklüğü hakk...` |
+| `A per-patient risk score could not be produced for this fit (the competing-ri...` | `Bu uydurma için hasta başına risk skoru üretilemedi (yarışan riskler modeli, ...` |
+| `A small p-value indicates the covariate significantly improves fit.` | `Küçük bir p-değeri kovaryatın model uyumunu anlamlı biçimde iyileştirdiğini g...` |
+| `A subdistribution hazard ratio above 1 corresponds to greater cumulative inci...` | `1'in üzerindeki bir alt dağılım tehlike oranı, Fine-Gray modeli altında izlem...` |
+| `A treatment-by-biomarker interaction supports a predictive-biomarker claim on...` | `Tedavi-biyobelirteç etkileşimi, öngördürücü biyobelirteç iddiasını yalnızca u...` |
+| `Aalen-Johansen estimator` | `Aalen-Johansen tahmincisi` |
+| `Add at least two covariates to compare their individual contributions.` | `Bireysel katkılarını karşılaştırmak için en az iki kovaryat ekleyin.` |
+| `Add the points from all predictors to obtain the <i>Total Points</i>.` | `<i>Toplam Puan</i> için tüm öngördürücülerin puanlarını toplayın.` |
+| `Add up all points to get the <b>Total Points</b>` | `<b>Toplam Puan</b> için tüm puanları toplayın` |
+| `Add up total points from all variables` | `Tüm değişkenlerin puanlarını toplayın` |
+| `Adequate Information:` | `Yeterli Bilgi:` |
+| `Adjusted competing-risks curve unavailable` | `Düzeltilmiş yarışan riskler eğrisi elde edilemedi` |
+| `adjusted cumulative incidence` | `düzeltilmiş kümülatif insidans` |
+| `Adjusted Cumulative Incidence for {variable}` | `{variable} için Düzeltilmiş Kümülatif İnsidans` |
+| `Adjusted curves are based on the Fine-Gray subdistribution model and display ...` | `Düzeltilmiş eğriler Fine-Gray alt dağılım modeline dayanır ve nedene özgü sağ...` |
+| `Adjusted curves are model-based survival or cumulative-incidence predictions ...` | `Düzeltilmiş eğriler, seçilen standardizasyon altında modele dayalı sağkalım v...` |
+| `Adjusted curves unavailable` | `Düzeltilmiş eğriler elde edilemedi` |
+

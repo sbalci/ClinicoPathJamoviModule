@@ -9,6 +9,7 @@ statsplot2(
   dep = NULL,
   group = NULL,
   grvar = NULL,
+  subjectID = NULL,
   direction = "independent",
   distribution = "p",
   alluvsty = "t1",
@@ -30,6 +31,11 @@ continuous or categorical.}
 
 \item{grvar}{Optional grouping variable for creating grouped plots across
 multiple panels.}
+
+\item{subjectID}{Subject identifier for long-format repeated continuous
+outcomes. Each subject must have one row per condition; incomplete subjects
+are excluded. Sampling retains whole subjects. Not used for wide-format
+alluvial data.}
 
 \item{direction}{Measurement design type. "independent" for
 between-subjects comparisons,  "repeated" for within-subjects/repeated

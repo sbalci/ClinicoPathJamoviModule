@@ -1,6 +1,6 @@
 ---
 name:  crosstable
-title: Cross Table
+title: Cross Tables
 jrs:   '1.1'
 
 items:
@@ -26,6 +26,10 @@ items:
           - vars
           - group
           - excl
+          - sty
+          - cont
+          - pcat
+          - p_adjust
 
     - name: dataQualityNotice
       title: Data Quality Warnings
@@ -38,16 +42,6 @@ items:
           - cont
           - pcat
           - p_adjust
-          - excl
-
-    - name: analysisInfo
-      title: Analysis Information
-      type: Html
-      visible: false
-      clearWith:
-          - vars
-          - group
-          - sty
           - excl
 
     - name: subtitle
@@ -72,15 +66,6 @@ items:
           - vars
           - group
           - sty
-          - excl
-
-    - name: varNameWarnings
-      title: Variable Name Warnings
-      type: Html
-      visible: false
-      clearWith:
-          - vars
-          - group
           - excl
 
     - name: tablestyle1
@@ -134,6 +119,20 @@ items:
       visible: (sty:nejm || sty:lancet || sty:hmisc)
       refs: tangram
 
+    - name: summary
+      title: Summary
+      type: Html
+      visible: (showSummary)
+      clearWith:
+          - vars
+          - group
+          - sty
+          - cont
+          - pcat
+          - p_adjust
+          - excl
+          - showSummary
+
     - name: qvalueExplanation
       title: "Q-value Explanation"
       type: Html
@@ -182,6 +181,19 @@ items:
           - name: balance
             title: "Balance"
             type: text
+
+    - name: notes
+      title: Notes
+      type: Preformatted
+      visible: false
+      clearWith:
+          - vars
+          - group
+          - excl
+          - sty
+          - cont
+          - pcat
+          - p_adjust
 
 refs:
     - ClinicoPathJamoviModule

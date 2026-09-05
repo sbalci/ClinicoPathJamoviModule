@@ -1,0 +1,65 @@
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+advancedraincloud-release-review: ...............................
+hullplot-release-review: ......................................................
+jjarcdiagram-release-review: ........................................
+jjbarstats-release-review: ....................................
+jjbetweenstats-release-review: .............................................................................
+jjcorrmat-release-review: .....................................................................................
+jjdotchart: .............................................................
+jjdotplotstats-release-review: ............................................1........
+jjhistostats-release-review: ........................................................................
+jjpiestats-release-review: .............................................................
+jjridges-release-review: ................................................................
+jjscatterstats-release-review: ...................................................................................
+jjsegmentedtotalbar-release-review: .............................................................................
+jjstatsplot-module-review: .................................................
+jjwithinstats-release-review: ............................................................................................................
+jwaffle-release-review: ............................
+linechart-release-review: ...........................S................
+lollipop-release-review: ...........................
+raincloud-release-review: .............................................................................................................[1] TRUE
+.
+statsplot2-release-review: .........................
+
+══ Skipped ═════════════════════════════════════════════════════════════════════
+1. with the switch uncompiled, the legacy rule still applies ('test-linechart-release-review.R:141:5') - Reason: showRefline is compiled - legacy fallback no longer in play
+
+══ Failed ══════════════════════════════════════════════════════════════════════
+── 1. Error ('test-jjdotplotstats-release-review.R:273:5'): an out-of-range conf
+Error: conflevel must be between 0.5 and 0.999 (is 1)
+Backtrace:
+     ▆
+  1. ├─testthat::expect_match(...) at test-jjdotplotstats-release-review.R:273:5
+  2. │ └─testthat::quasi_label(enquo(object), label)
+  3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+  4. ├─dp_notices(...)
+  5. │ ├─base::gsub("<[^>]*>", "", res$notices$content %||% "") at test-jjdotplotstats-release-review.R:36:15
+  6. │ │ └─base::is.factor(x)
+  7. │ └─res$notices$content %||% ""
+  8. └─jjstatsplot::jjdotplotstats(...) at test-jjdotplotstats-release-review.R:37:11
+  9.   └─analysis$run() at jjstatsplot19-validation-flpnc3v3/R/jjdotplotstats.h.R:481:5
+ 10.     └─self$init()
+ 11.       ├─jmvcore (local) try(...)
+ 12.       │ └─base::eval(expr)
+ 13.       └─self$options$check(checkValues = TRUE)
+ 14.         └─option$check(checkValues, checkVars, checkData)
+ 15.           └─private$.check(data, checkValues, checkVars, checkData)
+ 16.             └─jmvcore::reject(...)
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+     nb  failed skipped   error warning  passed 
+   1184       0       1       1       0    1183 

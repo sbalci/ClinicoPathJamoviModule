@@ -23,7 +23,8 @@ jjdotchart(
   xtitle = "",
   ytitle = "",
   plotwidth = 650,
-  plotheight = 450
+  plotheight = 450,
+  seed = 20250101
 )
 }
 \arguments{
@@ -105,6 +106,9 @@ Leave blank to use the variable name.}
 
 \item{plotheight}{Height of the plot in pixels. Increase it when there are
 many groups, since each one needs a labelled row.}
+
+\item{seed}{Seed for reproducible bootstrap intervals and stochastic
+statistical methods.}
 }
 \value{
 A results object containing:

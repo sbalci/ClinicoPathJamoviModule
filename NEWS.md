@@ -2,6 +2,48 @@
 
 ## Unreleased — meddecide audit fixes (module 1.0.8.11)
 
+- `categorize`: `/check-function` pass. An unparsable manual break-point entry now gets
+  the "Invalid manual break points" message instead of the generic "Insufficient break
+  points generated" (the friendly check ran after the validation that pre-empted it, so
+  it was unreachable). The Break Points and Category Frequencies tables are reset before
+  they are refilled, so a re-run cannot double their rows (same defect as the
+  `agepyramid` fix). The standalone test file sources `R/utils.R` again (it had silently
+  broken when the notice text moved to the shared `.fmt()` helper) and gains a test that
+  runs variable names with spaces, punctuation, a quote and Unicode through the analysis
+  and evaluates the generated R code, checking it reproduces the on-screen counts. Routed
+  to `ExplorationT` for JamoviTest.
+- `crosstable` 1.0.9: `/check-function` + `/check-function-full` pass. **The default table
+  style is now gtsummary** (was NEJM); it is the only style that honours every option
+  control, and NEJM/Lancet/Hmisc apply none of them. The chi-square/Fisher control is now
+  enabled in the UI for gtsummary (the backend honoured it, the control was greyed out).
+  Missing-value exclusion now reports how many rows it removed, and the >20% missing
+  warning is judged before exclusion (with exclusion on it could never fire). Low expected
+  counts escalate to a strong warning only when a chi-square will actually be run, note
+  gtsummary's automatic switch to Fisher, and are not raised when Fisher's exact test is
+  selected. INFO notes (coded numeric variables, Yates on 2x2 tables, rank-based
+  gtsummary tests, completion) now render below the table in a new Notes panel; errors
+  and warnings stay on top. Severity comes from the validator, not from a regex over the
+  message text. The SMD table labels numeric codes "continuous (numeric codes)". The
+  Variable Name Warnings panel (a warning about names that are handled correctly) and the
+  Analysis Information panel are removed. `/review-function` pass: new **Plain-language
+  summary** option (`showSummary`, off by default) adds a copy-ready paragraph under the
+  table with the sample size, groups, the tests the chosen style ran and the variables
+  that differed at p < 0.05 (q < 0.05 under a gtsummary adjustment); the p-values are
+  read back from each engine's own object, recomputed only for the tangram styles with
+  the tests their footnote names. Continuous variables shown as Mean (SD) with sample
+  skewness above 1 get a note suggesting Median (Q1, Q3). P-value adjustment, SMD and the
+  summary now sit in a collapsed Advanced box. The four table engines are separate
+  private methods; rendered output is byte-identical. `/release-review-function`
+  pass: empty levels of the grouping variable no longer render as an all-zero column
+  (which also made the chi-square NaN) in the gtsummary, finalfit and tangram layouts;
+  an all-missing variable, or a single-valued one under finalfit, is reported by name
+  and left out instead of failing the whole table with an internal dplyr/contrasts
+  error, and other layouts say why a single-valued variable has no p-value; the
+  tangram layouts' continuous p-values in the summary now use the rank-based F
+  approximation the table itself prints (kruskal.test differed in the third decimal).
+  Every engine's p-values are pinned to base R in the tests (Pearson, Yates, Fisher,
+  aov/pooled t, Wilcoxon, Kruskal-Wallis, BH q-values, rank-F). Fourteen regression
+  tests added today. Routed to `ExplorationT` for JamoviTest.
 - `agepyramid`: `/check-function` pass. The Population Data table no longer doubles
   its rows when an option outside its `clearWith` (plot title, colours, theme) is
   changed; a gender variable literally named `Age` is no longer overwritten by the

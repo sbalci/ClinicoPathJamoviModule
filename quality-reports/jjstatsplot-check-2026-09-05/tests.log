@@ -1,0 +1,68 @@
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+jjbarstats-basic: .......................
+jjbarstats-correctness: ...........................................
+jjbarstats-edge-cases: .................................
+jjbarstats-release-review: ....................................
+jjpiestats-basic: ...................................
+jjpiestats-correctness: .................................................1.
+jjpiestats-edge-cases: ..2........................3..4
+jjpiestats-release-review: .............................................................
+statsplot2-basic: ..................
+statsplot2-edge-cases: ...............................
+statsplot2-release-review: .........................
+statsplot2-smoke: ........
+
+══ Failed ══════════════════════════════════════════════════════════════════════
+── 1. Failure ('test-jjpiestats-correctness.R:842:3'): jjpiestats BUG FIX: Handl
+Expected `as.character(result$todo$content)` to match regexp "Welcome to jjstatsplot".
+Actual text:
+✖ │ <br>Welcome to ClinicoPath
+  │ <br><br>
+  │ This tool will help you generate Pie Charts with statistical analysis.
+  │ <br><br>
+  │ This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggpiestats.html' target='_blank'>ggpiestats</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggpiestats.html' target='_blank'>grouped_ggpiestats</a>.
+  │ <br>
+  │ Please cite jamovi and the packages as given below.
+  │ <br><hr>
+
+── 2. Error ('test-jjpiestats-edge-cases.R:51:3'): jjpiestats handles very unbal
+Error in `filter(., treatment_response == "Complete Response" | (treatment_response == "Progressive Disease" & row_number() <= 3))`: ℹ In argument: `|...`.
+Caused by error in `row_number()`:
+! could not find function "row_number"
+Backtrace:
+     ▆
+  1. ├─jjpiestats_test %>% ... at test-jjpiestats-edge-cases.R:51:3
+  2. ├─dplyr::filter(...)
+  3. ├─dplyr:::filter.data.frame(...)
+  4. │ └─dplyr:::filter_impl(...)
+  5. │   └─dplyr:::filter_rows(...)
+  6. │     └─dplyr:::filter_eval(...)
+  7. │       ├─base::withCallingHandlers(...)
+  8. │       └─mask$eval_all_filter(dots_expanded, invert, env_filter)
+  9. │         └─dplyr (local) eval()
+ 10. └─base::.handleSimpleError(...)
+ 11.   └─dplyr (local) h(simpleError(msg, call))
+ 12.     └─rlang::abort(message, class = error_class, parent = parent, call = error_call)
+
+── 3. Error ('test-jjpiestats-edge-cases.R:391:3'): jjpiestats handles perfectly
+Error in `tibble(id = 1:(n_per_group * 3), category = rep(c("A", "B", "C"), each = n_per_group))`: could not find function "tibble"
+Backtrace:
+    ▆
+ 1. ├─... %>% mutate(category = as.factor(category)) at test-jjpiestats-edge-cases.R:391:3
+ 2. └─dplyr::mutate(., category = as.factor(category))
+
+── 4. Error ('test-jjpiestats-edge-cases.R:450:3'): jjpiestats handles aggregate
+Error in `tibble(category = c("A", "B", "C", "D"), counts = c(0, 10, 0, 5))`: could not find function "tibble"
+Backtrace:
+    ▆
+ 1. ├─... %>% mutate(category = as.factor(category)) at test-jjpiestats-edge-cases.R:450:3
+ 2. └─dplyr::mutate(., category = as.factor(category))
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+TOTALS
+     nb  failed skipped   error warning  passed 
+    392       1       0       3       0     391 

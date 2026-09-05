@@ -1,0 +1,46 @@
+
+jamovi compiler
+
+wrote: advancedraincloud.h.R
+wrote: advancedraincloud.src.js
+wrote: hullplot.h.R
+wrote: hullplot.src.js
+wrote: jjarcdiagram.h.R
+wrote: jjarcdiagram.src.js
+wrote: jjbarstats.h.R
+wrote: jjbarstats.src.js
+wrote: jjbetweenstats.h.R
+wrote: jjbetweenstats.src.js
+wrote: jjcorrmat.h.R
+wrote: jjcorrmat.src.js
+wrote: jjdotchart.h.R
+wrote: jjdotchart.src.js
+wrote: jjdotplotstats.h.R
+wrote: jjdotplotstats.src.js
+wrote: jjhistostats.h.R
+wrote: jjhistostats.src.js
+wrote: jjpiestats.h.R
+wrote: jjpiestats.src.js
+wrote: jjridges.h.R
+wrote: jjridges.src.js
+wrote: jjscatterstats.h.R
+wrote: jjscatterstats.src.js
+wrote: jjsegmentedtotalbar.h.R
+wrote: jjsegmentedtotalbar.src.js
+wrote: jjwithinstats.h.R
+wrote: jjwithinstats.src.js
+wrote: jwaffle.h.R
+wrote: jwaffle.src.js
+wrote: linechart.h.R
+wrote: linechart.src.js
+wrote: lollipop.h.R
+wrote: lollipop.src.js
+wrote: raincloud.h.R
+wrote: raincloud.src.js
+wrote: statsplot2.h.R
+wrote: statsplot2.src.js
+writing module meta
+wrote: 00jmv.R
+copied histopathologyGraphsPlots.omv
+wrote: 0000.yaml
+COMPILER_EXIT: 0 

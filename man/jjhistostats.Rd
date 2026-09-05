@@ -72,8 +72,8 @@ changebinwidth is TRUE. Smaller values create more bins, larger values
 create fewer bins.}
 
 \item{resultssubtitle}{Whether to display statistical test results as
-subtitle in the plot, including normality test results and descriptive
-statistics.}
+subtitle in the plot, including the selected one-sample location test and
+descriptive statistics.}
 
 \item{showInterpretation}{Generate clinical interpretation of histogram
 results including distribution shape, normality assessment, and practical

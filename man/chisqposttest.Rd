@@ -20,6 +20,7 @@ chisqposttest(
   residualsCriterion = "bonferroni",
   residualsCutoff = 2,
   phiCI = FALSE,
+  seed = 42,
   testSelection = "auto",
   exportResults = FALSE,
   showClinicalSummary = FALSE,
@@ -83,6 +84,11 @@ set to 'Fixed cutoff'.}
 coefficient using BCa method (Bias-Corrected and accelerated). Note: This
 is computationally intensive and may take longer for large tables.}
 
+\item{seed}{Random seed for the bootstrap confidence intervals, so that the
+interval reported for a given table is reproducible. Change it to see how
+much the interval depends on the resampling. Used only when bootstrap
+confidence intervals are requested.}
+
 \item{testSelection}{method for selecting statistical test for pairwise
 comparisons}
 
@@ -136,16 +142,20 @@ significant (p < alpha). This enforces proper statistical workflow and
 prevents data dredging. Selecting 'None' for post-hoc method DISABLES all
 pairwise testing. If you want unadjusted pairwise comparisons, this feature
 is not available (by design, as it would encourage inappropriate multiple
-testing). No automated validation against established packages exists. Use
-with caution for clinical decision-making.
+testing). The chi-square statistic, the pairwise p-values and their
+adjustment are checked against base R (chisq.test, fisher.test, p.adjust)
+in the package tests. Read the pairwise results together with the effect
+sizes and the residuals, not from the p-values alone.
 }
 \examples{
 \donttest{
-# Tumour grade level by lymphovascular invasion,
-# using the histopathology data bundled with the module
+# Tumour grade by treatment group, using the histopathology data
+# bundled with the module. The overall test is significant
+# (p = 0.010) and the three grade levels give three pairwise
+# comparisons, so the post-hoc table is populated.
 chisqposttest(
     data = histopathology,
     rows = "Grade_Level",
-    cols = "LVI")
+    cols = "Group")
 }
 }

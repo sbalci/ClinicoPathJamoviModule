@@ -159,6 +159,7 @@ children:
           - type: TextBox
             name: labelPrecisionDigits
             format: number
+            enable: (regionLabels:percent || regionLabels:both)
           - type: TextBox
             name: setNameSize
             format: number
@@ -188,6 +189,7 @@ children:
             name: fillColorMapping
           - type: ComboBox
             name: colorPalette
+            enable: (fillColorMapping)
 
   - type: CollapseBox
     label: Set Calculations

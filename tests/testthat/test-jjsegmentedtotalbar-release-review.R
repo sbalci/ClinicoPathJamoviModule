@@ -228,7 +228,7 @@ test_that("negative category totals are rejected", {
                     s = factor(c("x", "y", "x", "y")),
                     v = c(-5, 2, 3, 4))
     expect_match(stb_warn(jjsegmentedtotalbar(data = d, x_var = "g", fill_var = "s", y_var = "v")),
-                 "Negative Values")
+                 "Negative values")
 })
 
 test_that("an empty dataset is explained, not crashed on", {

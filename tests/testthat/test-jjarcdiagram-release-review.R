@@ -31,9 +31,9 @@ test_that("negative edge weights are rejected with an actionable message", {
                                      weight = "w", showStats = TRUE, weightMode = mode))
         n <- arc_notices(jjarcdiagram(data = d, source = "from", target = "to",
                                       weight = "w", showStats = TRUE, weightMode = mode))
-        expect_match(n, "Negative Edge Weights", info = mode)
-        expect_match(n, "2 of 10 edge weights", info = mode)
-        expect_match(n, "absolute value", info = mode)   # tells the user what to do
+        expect_match(n, "Invalid edge weights", info = mode)
+        expect_match(n, "non-negative numeric values", info = mode)
+        expect_match(n, "every row", info = mode)   # tells the user what to do
     }
 })
 
@@ -45,7 +45,7 @@ test_that("a zero minimum weight no longer breaks Strength mode", {
                                  weight = "w", showStats = TRUE, weightMode = "strength"))
     res <- jjarcdiagram(data = d, source = "from", target = "to",
                         weight = "w", showStats = TRUE, weightMode = "strength")
-    expect_false(grepl("Negative Edge Weights", arc_notices(res), fixed = TRUE))
+    expect_false(grepl("Invalid edge weights", arc_notices(res), fixed = TRUE))
     expect_match(arc_stats(res), "Number of Nodes")
 })
 
@@ -64,7 +64,7 @@ test_that("ordinary positive weights run in both modes", {
     for (mode in c("strength", "distance")) {
         n <- arc_notices(jjarcdiagram(data = d, source = "from", target = "to",
                                       weight = "w", showStats = TRUE, weightMode = mode))
-        expect_false(grepl("Negative Edge Weights", n, fixed = TRUE), info = mode)
+        expect_false(grepl("Invalid edge weights", n, fixed = TRUE), info = mode)
         expect_false(grepl("Zero Edge Distances", n, fixed = TRUE), info = mode)
     }
 })
@@ -161,7 +161,7 @@ test_that("the density adjective and the Insight paragraph agree", {
     t <- arc_stats(jjarcdiagram(data = band, source = "from", target = "to",
                                 weight = "w", showStats = TRUE))
     expect_match(t, "sparsely connected")
-    expect_match(t, "Sparse networks")
+    expect_match(t, "does not establish shared biological pathways")
     expect_false(grepl("Moderate connectivity", t, fixed = TRUE))
 })
 

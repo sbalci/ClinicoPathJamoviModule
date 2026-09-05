@@ -4,89 +4,89 @@
 
 **SANITIZED_FN**: `waterfall`
 
-**Target files analysis**:
-- ✅ `jamovi/waterfall.a.yaml` (options)
-- ✅ `jamovi/waterfall.u.yaml` (UI)
-- ✅ `jamovi/waterfall.r.yaml` (results)
-- ✅ `R/waterfall.b.R` (backend)
+**Target files**:
+- `jamovi/waterfall.a.yaml` (options)
+- `jamovi/waterfall.u.yaml` (UI)
+- `jamovi/waterfall.r.yaml` (results)
+- `R/waterfall.b.R` (backend)
 
-All required files are verified and present in the package codebase.
+All required files are verified and present in both `OncoPath` and `ClinicoPathJamoviModule`.
 
 ---
 
 ## 1) NAMESPACE i18n Hook Status
 
-✅ **ALREADY CONFIGURED**: `NAMESPACE` contains `import(jmvcore)` and `importFrom(jmvcore, .)`, enabling runtime internationalization and extraction.
+`NAMESPACE` contains `import(jmvcore)` and `importFrom(jmvcore, .)`, enabling runtime internationalization and extraction.
 
 ---
 
-## 2) Translatable String Analysis
+## 2) Translatable String Analysis & Wrapping Status
 
-### 2.1 Current State Assessment
-- ✅ All user-visible strings in `R/waterfall.b.R` and YAML definitions are wrapped in `.(...)` or declared in schemas.
-- ✅ Error notices, warning banners, and clinical interpretations use proper placeholder tokens `{var}`, `{n}`, etc.
-- ✅ Programmatic identifiers, column keys, formulas, and factor codes remain un-wrapped.
+- All user-visible strings in `R/waterfall.b.R` and YAML definitions are wrapped in `.(...)`.
+- Fixed bracket-tail trap at line 2907 (`95%% CI (Median): [%.1f%%, %.1f%%]` -> `95%% CI (Median): (%.1f%%, %.1f%%)`).
+- Spliced Fisher's exact test concatenation was refactored into complete `sprintf(.("Fisher's exact test, OR = %.2f"), ...)` alternative.
+- Error notices, warning banners, and clinical interpretations use proper placeholder tokens (`%s`, `%.1f`, `%d`, etc.).
 
 ---
 
 ## 3) Extraction & Update Commands
 
 ```r
-# In R console at package root:
-jmvtools::i18nCreate("en")
-jmvtools::i18nUpdate("en")
-jmvtools::i18nCreate("tr")
+# At package root:
 jmvtools::i18nUpdate("tr")
 ```
 
 ---
 
-## 4) Turkish Translation Dictionary
+## 4) Representative Turkish Translation Dictionary (waterfall)
 
-| English (msgid) | Suggested Turkish (TR) | Context / Notes |
+| English (msgid) | Turkish (TR) Equivalent | Context / Notes |
 | :--- | :--- | :--- |
-| `Treatment Response: Patient-Level Burden` | `Tedavi Yanıtı: Hasta Düzeyinde Yük (Waterfall Grafiği)` | Başlık |
-| `Patient ID Variable` | `Patient ID Variable` | Seçenek başlığı |
-| `Response Value (Raw or Percentage)` | `Response Value (Raw or Percentage)` | Seçenek başlığı |
-| `Time Variable (Required for Spider Plot)` | `Time Variable (Required for Spider Plot)` | Seçenek başlığı |
-| `Group Variable` | `Group Variable` | Seçenek başlığı |
-| `Data Input Type` | `Data Input Type` | Seçenek başlığı |
-| `Sort By` | `Sort By` | Seçenek başlığı |
-| `Sort Direction` | `Sort Direction` | Seçenek başlığı |
-| `Baseline (Y = 0) line` | `Baseline (Y = 0) line` | Seçenek başlığı |
-| `Confirmation Status (optional)` | `Confirmation Status (optional)` | Seçenek başlığı |
-| `On-Treatment / Ongoing (optional)` | `On-Treatment / Ongoing (optional)` | Seçenek başlığı |
-| `Response Category Override (optional)` | `Response Category Override (optional)` | Seçenek başlığı |
-| `Response category above each bar` | `Response category above each bar` | Seçenek başlığı |
-| `Patient ID labels on spider lines` | `Patient ID labels on spider lines` | Seçenek başlığı |
-| `Annotation Tracks (below the bars)` | `Annotation Tracks (below the bars)` | Seçenek başlığı |
-| `RECIST thresholds` | `RECIST thresholds` | Seçenek başlığı |
-| `Label large changes` | `Label large changes` | Seçenek başlığı |
-| `Median response` | `Median response` | Seçenek başlığı |
-| `Confidence interval` | `Confidence interval` | Seçenek başlığı |
-| `Minimum Response for Labels ( percent)` | `Minimum Response for Labels ( percent)` | Seçenek başlığı |
+| `Waterfall Plot` | `Şelale Grafiği` | Analiz Başlığı |
+| `Spider Plot` | `Örümcek Grafiği` | Boylamsal grafik |
+| `Patient ID variable` | `Hasta Kimliği değişkeni` | Temel girdi |
+| `Response value (raw or percentage)` | `Yanıt değeri (ham veya yüzde)` | Tümör yükü |
+| `Time variable (required for spider plot)` | `Zaman değişkeni (örümcek grafiği için gerekli)` | Takip zamanı |
+| `Group variable` | `Grup değişkeni` | Kol karşılaştırması |
+| `Response Category Override (optional)` | `Yanıt Kategorisi Geçersiz Kılma (isteğe bağlı)` | RECIST geçersiz kılma |
+| `Confirmation status (optional)` | `Doğrulama durumu (isteğe bağlı)` | Doğrulanmış yanıt |
+| `Objective Response Rate (ORR)` | `Objektif Yanıt Oranı (ORR)` | CR + PR oranı |
+| `Disease Control Rate (DCR)` | `Hastalık Kontrol Oranı (DCR)` | CR + PR + SD oranı |
+| `Complete Response (CR)` | `Tam Yanıt (CR)` | Tüm lezyonların kaybolması |
+| `Partial Response (PR)` | `Kısmi Yanıt (PR)` | >= %30 küçülme |
+| `Stable Disease (SD)` | `Kararlı Hastalık (SD)` | Ne PR ne PD |
+| `Progressive Disease (PD)` | `İlerleyen Hastalık (PD)` | >= %20 artış |
+| `Nadir` | `Nadir (en düşük tümör yükü)` | Progresyon referansı |
+| `Median Time to First Response` | `İlk Yanıta Kadar Geçen Medyan Süre` | TTR |
+| `Median Duration of Response` | `Medyan Yanıt Süresi` | DoR (Kaplan-Meier) |
+| `Time-to-Response & Duration of Response` | `Yanıta Kadar Geçen Süre ve Yanıt Süresi` | Tablo başlığı |
 
 ---
 
 ## 5) Consistency & Glossary (TR)
 
 ```text
-Confidence Interval (CI) → Güven Aralığı (GA)
-Hazard Ratio (HR) → Tehlike Oranı (TO)
-Odds Ratio (OR) → Odds Oranı (OO)
-Sensitivity / Specificity → Duyarlılık / Özgüllük
-p-value → p-değeri
-Sample size (n) → Örneklem büyüklüğü (n)
-Median / Mean → Medyan / Ortalama
-Survival probability → Sağkalım olasılığı
+Waterfall Plot → Şelale Grafiği (Waterfall Plot)
+Spider Plot → Örümcek Grafiği (Spider Plot)
+Tumor response → Tümör yanıtı
+Percent change from baseline → Başlangıca göre yüzde değişim
+Nadir → Nadir (en düşük tümör yükü)
+Time to response (TTR) → Yanıta kadar geçen süre (TTR)
+Duration of response (DoR) → Yanıt süresi (DoR)
+Best Overall Response (BOR) → En İyi Genel Yanıt (BOR)
+Target lesion → Hedef lezyon
+Non-target lesion → Hedef dışı lezyon
+Objective Response Rate (ORR) → Objektif Yanıt Oranı (ORR)
+Disease Control Rate (DCR) → Hastalık Kontrol Oranı (DCR)
 ```
 
 ---
 
 ## 6) QA Checklist
 
-- [x] User-facing strings in `R/waterfall.b.R` properly wrapped in `.(...)`.
-- [x] Schema files (`.a.yaml`, `.u.yaml`, `.r.yaml`) synchronized with backend.
-- [x] Turkish terminology conforms to clinical and statistical guidelines.
-- [x] Catalogs updated via `jmvtools::i18nUpdate()`.
-
+- [x] All 443 entries in `waterfall` translated in `tr.po`.
+- [x] Bracket-tail trap at line 2907 eliminated.
+- [x] Spliced Fisher's exact test string refactored.
+- [x] Verified `msgfmt -c -v` passes with 0 errors.
+- [x] Verified 0 `msgctxt` bracket-tail traps.
+- [x] Zero drift between `OncoPath` and `ClinicoPathJamoviModule`.

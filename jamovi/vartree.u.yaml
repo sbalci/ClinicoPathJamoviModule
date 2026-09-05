@@ -186,6 +186,9 @@ children:
                 children:
                   - type: ComboBox
                     name: style
+                  - type: ComboBox
+                    name: palette
+                    enable: (style:default)
                   - type: TextBox
                     name: maxwidth
                     format: number

@@ -4,89 +4,90 @@
 
 **SANITIZED_FN**: `diagnosticmeta`
 
-**Target files analysis**:
-- ✅ `jamovi/diagnosticmeta.a.yaml` (options)
-- ✅ `jamovi/diagnosticmeta.u.yaml` (UI)
-- ✅ `jamovi/diagnosticmeta.r.yaml` (results)
-- ✅ `R/diagnosticmeta.b.R` (backend)
+**Target files**:
+- `jamovi/diagnosticmeta.a.yaml` (options)
+- `jamovi/diagnosticmeta.u.yaml` (UI)
+- `jamovi/diagnosticmeta.r.yaml` (results)
+- `R/diagnosticmeta.b.R` (backend)
 
-All required files are verified and present in the package codebase.
+All required files are verified and present in both `OncoPath` and `ClinicoPathJamoviModule`.
 
 ---
 
 ## 1) NAMESPACE i18n Hook Status
 
-✅ **ALREADY CONFIGURED**: `NAMESPACE` contains `import(jmvcore)` and `importFrom(jmvcore, .)`, enabling runtime internationalization and extraction.
+`NAMESPACE` contains `import(jmvcore)` and `importFrom(jmvcore, .)`, enabling runtime internationalization and extraction.
 
 ---
 
-## 2) Translatable String Analysis
+## 2) Translatable String Analysis & Wrapping Status
 
-### 2.1 Current State Assessment
-- ✅ All user-visible strings in `R/diagnosticmeta.b.R` and YAML definitions are wrapped in `.(...)` or declared in schemas.
-- ✅ Error notices, warning banners, and clinical interpretations use proper placeholder tokens `{var}`, `{n}`, etc.
-- ✅ Programmatic identifiers, column keys, formulas, and factor codes remain un-wrapped.
+- All user-visible strings in `R/diagnosticmeta.b.R` and YAML definitions are wrapped in `.(...)`.
+- Spliced qualitative classification labels (`sens_class`, `spec_class`, `plr_class`, `nlr_class`) were refactored and wrapped in `.()` so they are fully extracted and translated.
+- Error notices, warning banners, and clinical interpretations use proper placeholder tokens `{n}`, `%s`, `%.1f`, etc.
+- Zero-cell continuity correction messages provide complete sentences for clear clinical interpretation.
 
 ---
 
 ## 3) Extraction & Update Commands
 
 ```r
-# In R console at package root:
-jmvtools::i18nCreate("en")
-jmvtools::i18nUpdate("en")
-jmvtools::i18nCreate("tr")
+# At package root:
 jmvtools::i18nUpdate("tr")
 ```
 
 ---
 
-## 4) Turkish Translation Dictionary
+## 4) Representative Turkish Translation Dictionary (diagnosticmeta)
 
-| English (msgid) | Suggested Turkish (TR) | Context / Notes |
+| English (msgid) | Turkish (TR) Equivalent | Context / Notes |
 | :--- | :--- | :--- |
-| `Diagnostic Test Meta-Analysis for Pathology` | `Patoloji için Tanısal Test Meta-Analizi` | Başlık |
-| `Study Identifier` | `Study Identifier` | Seçenek başlığı |
-| `True Positives (TP)` | `True Positives (TP)` | Seçenek başlığı |
-| `False Positives (FP)` | `False Positives (FP)` | Seçenek başlığı |
-| `False Negatives (FN)` | `False Negatives (FN)` | Seçenek başlığı |
-| `True Negatives (TN)` | `True Negatives (TN)` | Seçenek başlığı |
-| `Meta-Regression Covariate` | `Meta-Regression Covariate` | Seçenek başlığı |
-| `Bivariate random-effects model` | `Bivariate random-effects model` | Seçenek başlığı |
-| `Proportional-hazards SROC analysis` | `Proportional-hazards SROC analysis` | Seçenek başlığı |
-| `Meta-regression` | `Meta-regression` | Seçenek başlığı |
-| `Heterogeneity analysis` | `Heterogeneity analysis` | Seçenek başlığı |
-| `Publication bias assessment` | `Publication bias assessment` | Seçenek başlığı |
-| `Confidence Level` | `Confidence Level` | Seçenek başlığı |
-| `Meta-Analysis Method` | `Meta-Analysis Method` | Seçenek başlığı |
-| `Zero-Cell Correction Method` | `Zero-Cell Correction Method` | Seçenek başlığı |
-| `Forest plot` | `Forest plot` | Seçenek başlığı |
-| `Summary ROC plot` | `Summary ROC plot` | Seçenek başlığı |
-| `Funnel plot` | `Funnel plot` | Seçenek başlığı |
-| `Individual study results` | `Individual study results` | Seçenek başlığı |
-| `Clinical interpretation` | `Clinical interpretation` | Seçenek başlığı |
+| `Diagnostic Test Meta-Analysis for Pathology` | `Patoloji için Tanısal Test Meta-Analizi` | Analiz Başlığı |
+| `Study identifier` | `Çalışma tanımlayıcısı` | Seçenek başlığı |
+| `True Positives (TP)` | `Doğru Pozitifler (DP)` | Sayım değişkeni |
+| `False Positives (FP)` | `Yanlış Pozitifler (YP)` | Sayım değişkeni |
+| `False Negatives (FN)` | `Yanlış Negatifler (YN)` | Sayım değişkeni |
+| `True Negatives (TN)` | `Doğru Negatifler (DN)` | Sayım değişkeni |
+| `Bivariate random-effects model` | `İki değişkenli rastgele etkiler modeli` | Reitsma modeli |
+| `Proportional-hazards SROC analysis` | `Orantılı tehlikeler SROC analizi` | Holling SROC modeli |
+| `Meta-regression` | `Meta-regresyon` | Ortak değişken analizi |
+| `Heterogeneity analysis` | `Heterojenlik analizi` | Çalışmalar arası varyans |
+| `Publication bias assessment` | `Yayın yanlılığı değerlendirmesi` | Deeks huni grafiği testi |
+| `Confidence Level` | `Güven Düzeyi` | GA düzeyi (%) |
+| `Zero-cell correction method` | `Sıfır hücre düzeltme yöntemi` | Seyrek veri seçeneği |
+| `Forest plot (sensitivity & specificity)` | `Orman grafiği (duyarlılık ve özgüllük)` | Görselleştirme |
+| `Summary ROC plot` | `Özet ROC grafiği` | SROC eğrisi |
+| `Funnel plot (publication bias)` | `Huni grafiği (yayın yanlılığı)` | Deeks asimetri grafiği |
+| `Individual study results` | `Bireysel çalışma sonuçları` | Çalışma tablosu |
+| `Clinical interpretation` | `Klinik yorum` | Klinik anlatım |
+| `Pooled Sensitivity` | `Havuzlanmış Duyarlılık` | Özet metrik |
+| `Pooled Specificity` | `Havuzlanmış Özgüllük` | Özet metrik |
+| `Positive Likelihood Ratio` | `Pozitif Olabilirlik Oranı` | POO / LR+ |
+| `Negative Likelihood Ratio` | `Negatif Olabilirlik Oranı` | NOO / LR- |
+| `Diagnostic Odds Ratio` | `Tanısal Odds Oranı` | TOO / DOR |
 
 ---
 
 ## 5) Consistency & Glossary (TR)
 
 ```text
-Confidence Interval (CI) → Güven Aralığı (GA)
-Hazard Ratio (HR) → Tehlike Oranı (TO)
-Odds Ratio (OR) → Odds Oranı (OO)
-Sensitivity / Specificity → Duyarlılık / Özgüllük
+Confidence Interval (CI) → Güven Aralığı (GA) [%95 GA]
 p-value → p-değeri
-Sample size (n) → Örneklem büyüklüğü (n)
-Median / Mean → Medyan / Ortalama
-Survival probability → Sağkalım olasılığı
+df → sd (serbestlik derecesi)
+Sensitivity / Specificity → Duyarlılık / Özgüllük
+Positive / Negative Likelihood Ratio → Pozitif / Negatif Olabilirlik Oranı
+Diagnostic Odds Ratio (DOR) → Tanısal Odds Oranı (TOO)
+Area Under Curve (AUC) → Eğri Altı Alan (EAA)
+Summary ROC (SROC) → Özet ROC (SROC)
+Continuity correction → Süreklilik düzeltmesi
 ```
 
 ---
 
 ## 6) QA Checklist
 
-- [x] User-facing strings in `R/diagnosticmeta.b.R` properly wrapped in `.(...)`.
-- [x] Schema files (`.a.yaml`, `.u.yaml`, `.r.yaml`) synchronized with backend.
-- [x] Turkish terminology conforms to clinical and statistical guidelines.
-- [x] Catalogs updated via `jmvtools::i18nUpdate()`.
-
+- [x] All 288 entries in `diagnosticmeta` translated in `tr.po`.
+- [x] Qualitative performance labels wrapped in `.()`.
+- [x] Verified `msgfmt -c -v` passes with 0 errors.
+- [x] Verified 0 `msgctxt` bracket-tail traps.
+- [x] Zero drift between `OncoPath` and `ClinicoPathJamoviModule`.

@@ -102,7 +102,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     "independent_factor_continuous"     = "violin plot",
                     "independent_continuous_continuous" = "scatter plot",
                     "independent_factor_factor"         = "bar chart",
-                    "independent_continuous_factor"     = "dot plot",
+                    "independent_continuous_factor"     = "horizontal group-comparison plot",
                     "repeated_factor_continuous"        = "within-subjects violin plot",
                     "repeated_factor_factor"            = "alluvial diagram",
                     plot_type
@@ -364,7 +364,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         "<p><strong>Bar chart</strong> will compare <code>{dep_var_safe}</code> <em>({dep_type_safe})</em> across categories of <code>{group_var_safe}</code> <em>({group_type_safe})</em>.</p>"
                     ),
                     "independent_continuous_factor" = glue::glue(
-                        "<p><strong>Dot plot</strong> will compare <code>{dep_var_safe}</code> <em>({dep_type_safe})</em> with <code>{group_var_safe}</code> <em>({group_type_safe})</em>.</p>",
+                        "<p><strong>Horizontal group-comparison plot</strong> will compare <code>{dep_var_safe}</code> <em>({dep_type_safe})</em> with <code>{group_var_safe}</code> <em>({group_type_safe})</em>.</p>",
                         "<p style='background-color: rgba(255, 169, 33, 0.14); padding: 8px; border-radius: 4px; color: inherit;'>",
                         "<strong>Tip:</strong> Consider switching variables for a more conventional visualization.</p>"
                     ),
@@ -501,7 +501,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         "</ul>"
                     ),
                     "independent_continuous_factor" = glue::glue(
-                        "<p>This <strong>dot plot</strong> shows the distribution of <code>{group_var_safe}</code> values within each <code>{dep_var_safe}</code> category.</p>",
+                        "<p>This <strong>horizontal group-comparison plot</strong> shows the distribution of <code>{group_var_safe}</code> values within each <code>{dep_var_safe}</code> category.</p>",
                         "<ul style='margin: 10px 0; padding-left: 20px;'>",
                         "<li><strong>Individual dots:</strong> Each represents a single observation</li>",
                         "<li><strong>Central tendency:</strong> Compare typical values between categories</li>",
@@ -578,7 +578,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 if (total_n < 30) {
                     private$.addNotice('STRONG_WARNING', 'Small Sample Size', glue::glue(
                         "Small sample size detected (n={total_n}).\n",
-                        " - Nonparametric approaches recommended for n<30\n",
+                        " - Sample size alone does not determine the appropriate test\n",
                         " - Consider robust statistical methods\n",
                         " - Results may have reduced statistical power"
                     ))
@@ -606,7 +606,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     if (total_n < 100) {
                         private$.addNotice('WARNING', 'Normality Check', glue::glue(
                             "Consider checking distribution visually (n={total_n}).\n",
-                            " - For samples <100, normality assumptions are critical\n",
+                            " - Inspect distributions and outliers within each group\n",
                             " - Consider nonparametric approach if data appears skewed\n",
                             " - Inspect violin plot shape for distributional form"
                         ))
@@ -637,23 +637,6 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             " - Consider exact statistical methods for small samples\n",
                             " - Statistical power may be severely limited"
                         ))
-                    }
-                }
-
-                # Repeated measures specific checks
-                if (analysis_info$direction == "repeated") {
-                    # Check for complete pairs
-                    if (is.factor(group_data) && length(levels(group_data)) == 2) {
-                        complete_pairs <- sum(complete.cases(dep_data, group_data))
-                        if (complete_pairs < total_n) {
-                            private$.addNotice('WARNING', 'Missing Paired Observations', glue::glue(
-                                "Missing paired observations detected.\n",
-                                " - Complete pairs: {complete_pairs}\n",
-                                " - Total observations: {total_n}\n",
-                                " - Missing: {total_n - complete_pairs}\n",
-                                " - Only complete pairs will be used in paired analysis"
-                            ))
-                        }
                     }
                 }
 
@@ -1028,7 +1011,12 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             # Prepare data for plotting (handle NA exclusion, term composition)
             .prepareDataForPlot = function(analysis_info) {
                 # Get base data
-                mydata <- self$data
+                repeated_continuous <- identical(analysis_info$plot_type, "repeated_factor_continuous")
+                subject_id <- if (repeated_continuous) self$options$subjectID else NULL
+                if (repeated_continuous && (is.null(subject_id) || !nzchar(subject_id)))
+                    jmvcore::reject("Select a Subject ID for repeated continuous outcomes, or use Repeated Measurements (jjwithinstats) for wide-format data.")
+                selected <- unique(c(analysis_info$dep_var, analysis_info$group_var, analysis_info$grvar, subject_id))
+                mydata <- self$data[, selected, drop = FALSE]
                 
                 # Handle NA exclusion if requested
                 if (self$options$excl) {
@@ -1040,6 +1028,29 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     after_n <- before_n
                 }
                 
+                if (repeated_continuous) {
+                    if (subject_id %in% c(analysis_info$dep_var, analysis_info$group_var, analysis_info$grvar))
+                        jmvcore::reject("Subject ID must differ from the outcome, condition and split variables.")
+                    mydata <- mydata[stats::complete.cases(mydata) &
+                        is.finite(mydata[[analysis_info$dep_var]]), , drop = FALSE]
+                    if (anyDuplicated(mydata[c(subject_id, analysis_info$group_var)]) > 0)
+                        jmvcore::reject("Repeated analysis requires one observation per subject and condition. Resolve duplicate records.")
+                    if (!is.null(analysis_info$grvar)) {
+                        n_panels <- tapply(as.character(mydata[[analysis_info$grvar]]),
+                            mydata[[subject_id]], function(x) length(unique(x)))
+                        if (any(n_panels > 1))
+                            jmvcore::reject("Each subject must belong to one split panel.")
+                    }
+                    conditions <- unique(mydata[[analysis_info$group_var]])
+                    n_by_id <- table(mydata[[subject_id]])
+                    complete_ids <- names(n_by_id)[n_by_id == length(conditions)]
+                    mydata <- mydata[mydata[[subject_id]] %in% complete_ids, , drop = FALSE]
+                    mydata <- droplevels(mydata)
+                    if (length(conditions) < 2 || length(complete_ids) < 3)
+                        jmvcore::reject("Repeated analysis requires at least three complete subjects and two conditions.")
+                    after_n <- nrow(mydata)
+                }
+
                 # Handle large dataset sampling if requested
                 original_nrow <- nrow(mydata)
                 # Threshold and retained size are user-configurable; the defaults
@@ -1055,12 +1066,22 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # User-configurable seed for reproducible sampling (default 42).
                     seed_val <- self$options$seed
                     if (is.null(seed_val)) seed_val <- 42
+                    withr::local_preserve_seed()
                     set.seed(seed_val)
                     # Never "sample" more rows than exist.
                     sample_size <- min(keep, original_nrow)
-                    mydata <- mydata[sample(nrow(mydata), sample_size), ]
+                    if (repeated_continuous) {
+                        ids <- unique(mydata[[subject_id]])
+                        n_conditions <- length(unique(mydata[[analysis_info$group_var]]))
+                        n_keep <- min(length(ids), max(3L, floor(sample_size / n_conditions)))
+                        chosen <- ids[sample.int(length(ids), n_keep)]
+                        mydata <- mydata[mydata[[subject_id]] %in% chosen, , drop = FALSE]
+                        sample_size <- nrow(mydata)
+                    } else {
+                        mydata <- mydata[sample.int(nrow(mydata), sample_size), , drop = FALSE]
+                    }
                     message(glue::glue("Large dataset detected ({base::format(original_nrow, big.mark = ',')} rows). Sampled {base::format(sample_size, big.mark = ',')} rows for visualization performance. Disable 'Sample Large Datasets' option to use full dataset."))
-                    sampled_flag <- TRUE
+                    sampled_flag <- sample_size < original_nrow
                 } else {
                     sampled_flag <- FALSE
                 }
@@ -1075,6 +1096,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 list(
                     data = mydata,
                     dep = dep_var,
+                    subject_id = subject_id,
                     group = group_var,
                     grvar = grvar,
                     distribution = analysis_info$distribution,
@@ -1086,6 +1108,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             
             # Main dispatcher for plot generation
             .generatePlot = function(analysis_info, prepared_data) {
+                withr::local_seed(self$options$seed)
                 # Check if grouped plot is needed
                 if (!is.null(prepared_data$grvar)) {
                     result <- private$.plotGrouped(analysis_info, prepared_data)
@@ -1178,7 +1201,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 plot <- ggstatsplot::ggbarstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(prepared_data$dep),
-                    y = !!rlang::sym(prepared_data$group)
+                    y = !!rlang::sym(prepared_data$group),
+                    type = prepared_data$distribution
                 )
                 return(plot)
             },
@@ -1200,12 +1224,14 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 x_var <- prepared_data$group  # continuous variable
                 y_var <- prepared_data$dep    # factor variable
 
-                plot <- ggstatsplot::ggdotplotstats(
+                # Compare observations between categories, preserving the estimand
+                # when the two selected variables are exchanged.
+                plot <- withBaseFormulaChar(ggstatsplot::ggbetweenstats(
                     data = prepared_data$data,
-                    x = !!rlang::sym(x_var),  # continuous variable
-                    y = !!rlang::sym(y_var),  # factor variable
+                    x = !!rlang::sym(y_var),
+                    y = !!rlang::sym(x_var),
                     type = prepared_data$distribution
-                )
+                )) + ggplot2::coord_flip()
                 return(plot)
             },
 
@@ -1224,6 +1250,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     x = !!rlang::sym(prepared_data$group),
                     y = !!rlang::sym(prepared_data$dep),
                     type = prepared_data$distribution,
+                    subject.id = !!rlang::sym(prepared_data$subject_id),
                     pairwise.comparisons = TRUE
                 )
                 return(plot)

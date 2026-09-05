@@ -4,7 +4,7 @@ title: Histogram
 menuGroup: JJStatsPlotT
 menuSubgroup: Distribution
 # menuSubtitle: Histogram
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 
@@ -160,9 +160,9 @@ options:
       description:
           R: >
             Whether to display statistical test results as subtitle in the plot,
-            including normality test results and descriptive statistics.
+            including the selected one-sample location test and descriptive statistics.
           ui: >
-            Show statistical results directly on the plot (normality tests, descriptive statistics). 
+            Show the selected one-sample location test and descriptive statistics on the plot.
             Helpful for quick interpretation without switching between tabs.
     
     - name: showInterpretation
@@ -205,7 +205,7 @@ options:
             statistical methods and display options appropriate for that clinical context.
 
     - name: enableOneSampleTest
-      title: One-sample test
+      title: Use a custom null value
       type: Bool
       default: false
       description:

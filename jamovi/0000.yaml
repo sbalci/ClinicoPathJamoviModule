@@ -124,7 +124,7 @@ analyses:
   - title: Categorize Continuous Variables
     name: categorize
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Data Preparation
     menuTitle: Categorize Continuous Variables
     menuSubtitle: Bin numeric variables into categories
@@ -944,8 +944,10 @@ analyses:
       prevents data dredging. Selecting 'None' for post-hoc method DISABLES all
       pairwise testing. If you want unadjusted pairwise comparisons, this
       feature is not available (by design, as it would encourage inappropriate
-      multiple testing). No automated validation against established packages
-      exists. Use with caution for clinical decision-making.
+      multiple testing). The chi-square statistic, the pairwise p-values and
+      their adjustment are checked against base R (chisq.test, fisher.test,
+      p.adjust) in the package tests. Read the pairwise results together with
+      the effect sizes and the residuals, not from the p-values alone.
     ribbon: analyses
     category: analyses
   - title: Group and Summarize
@@ -1781,7 +1783,7 @@ analyses:
   - title: Bar Charts
     name: jjbarstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Categorical
     menuTitle: Bar Charts
     description: |
@@ -1793,7 +1795,7 @@ analyses:
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     ribbon: analyses
@@ -1820,7 +1822,7 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: All-In-One
     menuTitle: Automatic Plot Selection
     description: >-

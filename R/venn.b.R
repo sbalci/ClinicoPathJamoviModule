@@ -234,6 +234,18 @@ vennClass <- if (requireNamespace('jmvcore'))
                     self$results[[nm]]$setVisible(FALSE)
                 }
 
+                # summary is a rows: 0 table filled with addRow(), and jmvcore's addRow()
+                # appends without checking for a duplicate rowKey. The top-level clearWith
+                # covers the variables and the plot options but not the panel toggles
+                # (showGlossary, clinicalSummary, showSetCalculations, ...), so ticking one
+                # of those re-entered .run() against the retained rows and printed every
+                # variable twice - three runs gave 9 rows for 3 variables and
+                # as.data.frame() died with "duplicate 'row.names'". Clearing here rather
+                # than next to the fill loop also covers the early returns below, so a
+                # validation failure cannot leave the previous run's counts on screen
+                # underneath the error panel.
+                self$results$summary$deleteRows()
+
                 # Validate required variables and their true levels
                 if (!private$.validateVariables()) {
                     private$.displayNotices()
@@ -340,20 +352,18 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 # Check if required variables (var1 and var2) are provided.
                 if (is.null(self$options$var1) || is.null(self$options$var2)) {
-                    # Onboarding guidance is shown in the richer 'welcome' panel above;
-                    # keep 'todo' empty here to avoid duplicate onboarding content.
-                    self$results$todo$setContent("")
+                    # Onboarding guidance is shown in the richer 'welcome' panel above.
                     return()
                 } else {
-                    # Clear welcome message once variables are selected.
-                    self$results$todo$setContent("")
-
-                    # Surface the ggvenn fallback notice now that variables are set
+                    # The ggvenn fallback goes through the notices channel like every
+                    # other message. It used to have a results item of its own titled
+                    # "To Do" - developer-speak shown to the user as a heading - which
+                    # carried this one sentence and nothing else.
                     if (default_to_ggvenn) {
-                        self$results$todo$setContent(
-                            paste0("<div class='alert alert-info'>",
-                                   .("No plot type was selected; defaulting to ggvenn output."), "</div>")
-                        )
+                        private$.addNotice(
+                            "INFO",
+                            .("Defaulting to the ggvenn Diagram"),
+                            .("No plot type is selected, so the classic ggvenn diagram below is drawn by default. Tick ggVennDiagram, UpSetR or ComplexUpset in Plot Selection to choose a different one."))
                     }
 
                     # Generate explanatory content if requested
@@ -400,6 +410,24 @@ vennClass <- if (requireNamespace('jmvcore'))
                     # CRITICAL FIX: Select ONLY the variables needed for analysis
                     # This prevents dropping cases with NAs in unrelated columns
                     selected_data <- original_data[, selected_vars, drop = FALSE]
+
+                    # An explicit NA LEVEL (addNA(), factor(exclude = NULL)) is missing
+                    # data wearing a level's clothes. is.na() is FALSE for those cases,
+                    # so jmvcore::naOmit() keeps them; and `Ops.factor` compares level
+                    # CODES, so `f == var1true` returns FALSE rather than NA for them.
+                    # The case was therefore counted as a NEGATIVE: it inflated the
+                    # False column and the denominator of every percentage, and the
+                    # CASE EXCLUSION warning never mentioned it. Re-levelling without
+                    # the NA level restores real NAs, so naOmit() drops those rows and
+                    # the existing exclusion warning discloses them like any other
+                    # missing value. Do NOT "fix" this with an is.na() guard on the
+                    # comparison - that keeps scoring a missing marker as negative.
+                    for (nm in names(selected_data)) {
+                        col <- selected_data[[nm]]
+                        if (is.factor(col) && anyNA(levels(col)))
+                            selected_data[[nm]] <- factor(
+                                col, levels = levels(col)[!is.na(levels(col))])
+                    }
 
                     # Apply naOmit ONLY to selected variables, not entire dataset.
                     # nrow(full_data) IS the number of complete cases on the selected
@@ -924,7 +952,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     }
                 }
 
-                # Validate optional variables (var3-7) - allow skipping if all NA
+                # Validate optional variables (var3-7)
                 for (i in 3:7) {
                     var_name <- paste0("var", i)
                     var_true_name <- paste0("var", i, "true")
@@ -938,6 +966,15 @@ vennClass <- if (requireNamespace('jmvcore'))
                             return(FALSE)
                         }
                         var_data <- self$data[[var_value]]
+                        # Same check var1/var2 already get. Without it an all-missing
+                        # optional variable fell through to the level test below and
+                        # reported "Available levels: " with an empty list, which names
+                        # the symptom rather than the problem.
+                        if (all(is.na(var_data))) {
+                            private$.errors <- c(private$.errors,
+                                sprintf("Variable '%s' contains only missing values. Please select a different variable with valid data.", var_value))
+                            return(FALSE)
+                        }
                         if (!var_true_value %in% levels(as.factor(var_data))) {
                             available_levels <- paste(levels(as.factor(var_data)), collapse=", ")
                             private$.errors <- c(private$.errors,
@@ -1043,9 +1080,13 @@ vennClass <- if (requireNamespace('jmvcore'))
                 var_names <- summaryData$Variable
                 total_n <- nrow(data)
                 
-                # Find largest intersection
-                largest_var <- var_names[which.max(summaryData$TrueCount)]
+                # Most prevalent set. which.max() returns only the FIRST maximum, so
+                # a genuine tie was reported as if one variable were the winner and
+                # the equally-common ones went unmentioned. Name all of them.
                 largest_count <- max(summaryData$TrueCount, na.rm = TRUE)
+                largest_vars <- summaryData$Variable[!is.na(summaryData$TrueCount) &
+                                                     summaryData$TrueCount == largest_count]
+                largest_var <- paste(largest_vars, collapse = ", ")
                 largest_pct <- round((largest_count / total_n) * 100, 1)
                 
                 # Calculate 2-way intersection if we have 2+ variables
@@ -1081,10 +1122,15 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 clinical_summary <- paste0(
                     "<div style='background-color: rgba(33, 149, 236, 0.1); padding: 15px; border-radius: 5px; border-left: 4px solid #3498db; color: inherit;'>",
-                    "<h4 style='color: #2980b9; margin-top: 0;'>", .("Clinical Summary"), "</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'>", .("Clinical Summary"), "</h4>",
                     "<p><strong>", .("Dataset:"), "</strong> ", sprintf(.("%s cases analyzed"), total_n), "</p>",
                     "<p><strong>", .("Most Prevalent:"), "</strong> ", 
-                    sprintf(.("%s was most common (%s cases, %s%%)."), htmltools::htmlEscape(largest_var), largest_count, largest_pct), "</p>",
+                    if (length(largest_vars) > 1)
+                        sprintf(.("%s were equally the most common (%s cases each, %s%%)."),
+                                htmltools::htmlEscape(largest_var), largest_count, largest_pct)
+                    else
+                        sprintf(.("%s was most common (%s cases, %s%%)."),
+                                htmltools::htmlEscape(largest_var), largest_count, largest_pct), "</p>",
                     intersection_analysis,
                     "<p><em>", .("Tip: Use the Venn diagram to visualize overlap patterns and the UpSet plot for detailed intersection analysis."), "</em></p>",
                     "</div>",
@@ -1188,7 +1234,7 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 report_content <- paste0(
                     "<div style='background-color: rgba(33, 152, 33, 0.07); padding: 15px; border-radius: 5px; border-left: 4px solid #27ae60; color: inherit;'>",
-                    "<h4 style='color: #27ae60; margin-top: 0;'> Copy-Ready Clinical Summary</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'> Copy-Ready Clinical Summary</h4>",
                     "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 12px; border-radius: 3px; font-family: Georgia, serif; line-height: 1.6; border: 1px solid #e9ecef; color: inherit;'>",
                     "<h6 style='margin: 0 0 8px 0; color: inherit;'>Clinical Report Template</h6>",
                     "<p style='margin: 0 0 10px 0;'>", clinical_paragraph, "</p>",
@@ -1214,7 +1260,7 @@ vennClass <- if (requireNamespace('jmvcore'))
             .generateAssumptions = function() {
                 assumptions_content <- paste0(
                     "<div style='background-color: rgba(255, 211, 33, 0.16); padding: 15px; border-radius: 5px; border-left: 4px solid #f39c12; color: inherit;'>",
-                    "<h4 style='color: #e67e22; margin-top: 0;'>", .("Interpretation Guide & Assumptions"), "</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'>", .("Interpretation Guide & Assumptions"), "</h4>",
                     
                     "<h5>", .("How to Interpret:"), "</h5>",
                     "<ul style='margin-left: 20px;'>",
@@ -1647,11 +1693,23 @@ vennClass <- if (requireNamespace('jmvcore'))
                 palette_scale <- build_palette_scale()
                 if (is.null(palette_scale)) {
                     adjusted_colors <- grDevices::adjustcolor(base_fill_colors, alpha.f = fillAlpha)
-                    palette_scale <- ggplot2::scale_fill_gradient(
-                        low = adjusted_colors[1],
-                        high = adjusted_colors[length(adjusted_colors)],
-                        guide = "none"
-                    )
+                    # build_palette_scale() returns NULL for BOTH "no palette chosen"
+                    # and "fill colour mapping switched off", and the fallback below
+                    # is itself a count -> colour gradient. So unticking "Fill color
+                    # mapping" - whose label promises exactly the opposite - left the
+                    # regions still shaded by intersection size, and the option was
+                    # observably inert unless a palette happened to be selected.
+                    # Flatten the scale here so the box does what it says.
+                    palette_scale <- if (!isTRUE(fillColorMapping))
+                        ggplot2::scale_fill_gradient(
+                            low = adjusted_colors[length(adjusted_colors)],
+                            high = adjusted_colors[length(adjusted_colors)],
+                            guide = "none")
+                    else
+                        ggplot2::scale_fill_gradient(
+                            low = adjusted_colors[1],
+                            high = adjusted_colors[length(adjusted_colors)],
+                            guide = "none")
                 }
 
                 if (!is.null(ggtheme)) {
@@ -1740,17 +1798,25 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                     # Overlaps: every pairwise intersection, plus the all-way
                     # intersection once three or more sets are selected.
+                    # EVERY intersection order from 2 up to k, listed lowest order
+                    # first. The previous version reported the C(k,2) pairwise
+                    # intersections plus the single k-way one and said nothing about
+                    # the gap: with 4 sets the four 3-way intersections were silently
+                    # absent (measured on n = 200: A&B&C 21, A&B&E 24, A&C&E 27,
+                    # B&C&E 21), and with 7 sets 105 of the 120 intersections were.
+                    # The row count is bounded by 2^7 - 7 - 1 = 120 because the
+                    # analysis accepts at most seven variables, so no cap is needed.
                     if (requested[["overlap"]] && ncol(member_mat) >= 2) {
-                        pairs <- utils::combn(seq_len(ncol(member_mat)), 2)
-                        overlap_counts <- apply(pairs, 2, function(idx)
-                            sum(member_mat[, idx[1]] & member_mat[, idx[2]], na.rm = TRUE))
-                        names(overlap_counts) <- apply(pairs, 2, function(idx)
-                            paste(display_names[idx[1]], display_names[idx[2]], sep = " & "))
-                        if (ncol(member_mat) > 2) {
-                            all_way <- sum(degree == ncol(member_mat), na.rm = TRUE)
-                            names(all_way) <- paste(display_names, collapse = " & ")
-                            overlap_counts <- c(overlap_counts, all_way)
-                        }
+                        k <- ncol(member_mat)
+                        combos <- unlist(
+                            lapply(2:k, function(m) utils::combn(k, m, simplify = FALSE)),
+                            recursive = FALSE)
+                        overlap_counts <- vapply(combos, function(idx)
+                            sum(rowSums(member_mat[, idx, drop = FALSE], na.rm = TRUE) ==
+                                    length(idx)),
+                            numeric(1))
+                        names(overlap_counts) <- vapply(combos, function(idx)
+                            paste(display_names[idx], collapse = " & "), character(1))
                         calculations$overlaps <- overlap_counts
                     }
 
@@ -1783,6 +1849,11 @@ vennClass <- if (requireNamespace('jmvcore'))
                     if (length(calculations) > 0) {
                         # Both vectors are built above as NAMED numeric vectors keyed by
                         # the user's own variable names, so one rendering path covers them.
+                        # round() drops a trailing zero, so a whole number printed as
+                        # "26%" in a list whose other entries read "23.5%".
+                        pct <- function(x) formatC(100 * x / total_observations,
+                                                   format = "f", digits = 1)
+
                         renderCounts <- function(html, heading, counts, unit, empty_msg) {
                             html <- paste0(html, "<h4>", heading, "</h4>")
                             if (is.null(counts) || length(counts) == 0)
@@ -1792,7 +1863,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                                 html <- paste0(html,
                                     "<p><strong>", htmltools::htmlEscape(labels[i]), ":</strong> ",
                                     counts[[i]], " ", unit, " (",
-                                    round(counts[[i]] / total_observations * 100, 1), "%)</p>")
+                                    pct(counts[[i]]), "%)</p>")
                             }
                             html
                         }
@@ -1819,7 +1890,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             html_content <- paste0(html_content,
                                 "<p><strong>Cases positive for at least one selected set:</strong> ",
                                 union_size, " cases (",
-                                round(union_size/total_observations*100, 1), "%)</p>")
+                                pct(union_size), "%)</p>")
                         }
                     } else if (!any(requested)) {
                         html_content <- paste0(html_content,
@@ -1827,7 +1898,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             "<p><strong>Enable calculations:</strong></p>",
                             "<p>No set calculation is currently switched on. Tick one or more of:</p>",
                             "<ul>",
-                            "<li><strong>Overlap calculations:</strong> how many cases fall in each pairwise (and all-way) intersection</li>",
+                            "<li><strong>Overlap calculations:</strong> how many cases fall in every intersection of two or more sets</li>",
                             "<li><strong>Unique member calculations:</strong> how many cases are positive for exactly one set</li>",
                             "<li><strong>Union calculations:</strong> how many cases are positive for at least one set</li>",
                             "</ul>",
@@ -1868,6 +1939,35 @@ vennClass <- if (requireNamespace('jmvcore'))
                         "</div>")
                     self$results$setCalculations$setContent(error_html)
                 })
+            },
+
+            # Write the per-case group back into the dataset as a new column.
+            # `type: Output` options are client-driven: jmvtools emits
+            # OptionOutput$new("membershipGroups") with no value argument and leaves
+            # the name out of the generated wrapper's formals, so this runs from
+            # jamovi ONLY - no example or asSource() call can enter it. It was
+            # wrapped in try(silent = TRUE), which left the single
+            # unreachable-by-example path in the analysis with no safety net at all:
+            # the write failed, no column appeared, and nothing said why.
+            .writeMembershipGroups = function(group_labels, row_numbers) {
+                if (is.null(group_labels) || !self$options$membershipGroups ||
+                    !self$results$membershipGroups$isNotFilled())
+                    return(invisible(NULL))
+
+                tryCatch({
+                    output_rows <- row_numbers
+                    if (length(output_rows) != length(group_labels))
+                        output_rows <- seq_along(group_labels)
+                    self$results$membershipGroups$setRowNums(output_rows)
+                    self$results$membershipGroups$setValues(group_labels)
+                }, error = function(e) {
+                    private$.addNotice(
+                        "WARNING",
+                        .("Membership Groups Column Was Not Added"),
+                        sprintf(.("The membership group for each case could not be written back into the dataset, so no new column has appeared. Everything else in this analysis is computed separately and is unaffected, and the same assignment is shown in the Membership Table if you switch it on. Technical detail: %s"),
+                                conditionMessage(e)))
+                })
+                invisible(NULL)
             },
 
             # Generate membership table showing which items belong to which sets
@@ -1916,6 +2016,16 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                     if (nrow(membership_data) == 0L) {
                         table$deleteRows()
+                        return()
+                    }
+
+                    # group_labels is all the "Add membership groups to data" output
+                    # needs. Everything below renders the TABLE, which is gated by
+                    # `visible: (showMembershipTable)` - so with only the data output
+                    # switched on this was up to 500 addRow() calls written into an
+                    # element the user cannot see.
+                    if (!self$options$showMembershipTable) {
+                        private$.writeMembershipGroups(group_labels, row_numbers)
                         return()
                     }
 
@@ -1979,16 +2089,16 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                     try({ table$setNote(key = "error", note = NULL) }, silent = TRUE)
 
-                    if (!is.null(group_labels) && self$options$membershipGroups && self$results$membershipGroups$isNotFilled()) {
-                        try({
-                            output_rows <- row_numbers
-                            if (length(output_rows) != length(group_labels)) {
-                                output_rows <- seq_len(length(group_labels))
-                            }
-                            self$results$membershipGroups$setRowNums(output_rows)
-                            self$results$membershipGroups$setValues(group_labels)
-                        }, silent = TRUE)
-                    }
+                    # `type: Output` options are client-driven: jmvtools emits
+                    # OptionOutput$new("membershipGroups") with no value argument and
+                    # leaves the name out of the generated wrapper's formals, so this
+                    # branch is reachable from jamovi ONLY - no test, example or
+                    # asSource() call can enter it. try(silent = TRUE) therefore left
+                    # the single unreachable-by-test path in the analysis with no
+                    # safety net at all: the user ticks "Add membership groups to
+                    # data", the write fails, no column appears, and nothing anywhere
+                    # says why. Report the failure instead of swallowing it.
+                    private$.writeMembershipGroups(group_labels, row_numbers)
 
                 }, error = function(e) {
                     self$results$membershipTable$setNote(
@@ -2046,7 +2156,10 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 # Find largest and most meaningful overlaps
                 largest_count <- max(intersection_data$TrueCount, na.rm = TRUE)
-                largest_var <- htmltools::htmlEscape(intersection_data$Variable[which.max(intersection_data$TrueCount)])
+                # every variable at the maximum, not just which.max()'s first one
+                largest_vars <- intersection_data$Variable[!is.na(intersection_data$TrueCount) &
+                                                           intersection_data$TrueCount == largest_count]
+                largest_var <- htmltools::htmlEscape(paste(largest_vars, collapse = "', '"))
                 largest_pct <- round((largest_count / total_n) * 100, 1)
 
                 # Calculate overall overlap assessment
@@ -2057,7 +2170,9 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #28a745; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                     "<h5 style='margin: 0 0 10px 0; color: inherit;'> Clinical Interpretation</h5>",
                     "<p style='margin: 0 0 8px 0;'><strong>Key Finding:</strong> In this dataset of ", total_n, " cases, ",
-                    "'", largest_var, "' shows the highest prevalence with ", largest_count, " positive cases (", largest_pct, "%).</p>",
+                    "'", largest_var, "' ",
+                    if (length(largest_vars) > 1) "are equally the most prevalent, each with " else "shows the highest prevalence with ",
+                    largest_count, " positive cases (", largest_pct, "%).</p>",
                     "<p style='margin: 0 0 8px 0;'><strong>Overlap Pattern:</strong> Across the selected variables, the average share of positive cases is ", overlap_level, ". ",
                     # `intersection_data` is summaryData: one row PER VARIABLE, so
                     # mean_overlap / total_n is the average positivity ACROSS variables.
@@ -2110,6 +2225,23 @@ vennClass <- if (requireNamespace('jmvcore'))
                                 paste(intersection_data$Variable[rare], collapse = ", ")))
                 }
 
+                # Mirror image of `rare`, and the playbook's <5% OR >95% rule. A set
+                # holding (nearly) every case is as uninformative as one holding
+                # almost none: its circle swallows the figure, the unique and
+                # "outside" regions collapse to nothing, and the diagram carries
+                # almost no information. Without this a variable positive in 98% -
+                # or two variables positive in 100% - drew no caution at all, while
+                # the 2% mirror image drew two.
+                saturated <- !is.na(intersection_data$TrueCount) &
+                    (intersection_data$TrueCount / total_n) > 0.95
+                if (any(saturated)) {
+                    add(
+                        .("Very High Prevalence"),
+                        sprintf(.("%d of %d selected variables are positive in more than 95%% of the %d analysed cases (%s). A set that contains almost every case fills the diagram, leaving the regions outside it nearly empty, so the picture separates almost nothing. Check that the level nominated as positive is the one you meant, and read the Summary of True Counts table rather than the shapes."),
+                                sum(saturated), nrow(intersection_data), total_n,
+                                paste(intersection_data$Variable[saturated], collapse = ", ")))
+                }
+
                 if (total_n < 30) {
                     add(
                         .("Small Sample"),
@@ -2141,7 +2273,7 @@ vennClass <- if (requireNamespace('jmvcore'))
             .generateGlossary = function() {
                 glossary_content <- paste0(
                     "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; border-left: 4px solid #6f42c1; color: inherit;'>",
-                    "<h4 style='color: #6f42c1; margin-top: 0;'> Statistical Glossary & Clinical Guide</h4>",
+                    "<h4 style='color: inherit; margin-top: 0;'> Statistical Glossary & Clinical Guide</h4>",
 
                     "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;'>",
 
@@ -2243,8 +2375,12 @@ vennClass <- if (requireNamespace('jmvcore'))
             asSource = function() {
                 # Get arguments
                 args <- private$.asArgs(incData = FALSE)
+                # jmvcore's .asArgs() ALREADY returns a leading "\n    ", so the
+                # copy-pasted ',\n    ' prefix produced a stray blank argument line
+                # in the syntax pane ("data = data,", blank, "var1 = A,"). Harmless -
+                # it still parses and round-trips - but it is what the user copies.
                 if (args != '')
-                    args <- paste0(',\n    ', args)
+                    args <- paste0(',', if (startsWith(args, '\n')) '' else '\n    ', args)
 
                 # Get package name dynamically
                 pkg_name <- utils::packageName()

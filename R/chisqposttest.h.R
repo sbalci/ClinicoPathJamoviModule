@@ -20,6 +20,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             residualsCriterion = "bonferroni",
             residualsCutoff = 2,
             phiCI = FALSE,
+            seed = 42,
             testSelection = "auto",
             exportResults = FALSE,
             showClinicalSummary = FALSE,
@@ -115,6 +116,11 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "phiCI",
                 phiCI,
                 default=FALSE)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=42,
+                min=1)
             private$..testSelection <- jmvcore::OptionList$new(
                 "testSelection",
                 testSelection,
@@ -158,6 +164,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..residualsCriterion)
             self$.addOption(private$..residualsCutoff)
             self$.addOption(private$..phiCI)
+            self$.addOption(private$..seed)
             self$.addOption(private$..testSelection)
             self$.addOption(private$..exportResults)
             self$.addOption(private$..showClinicalSummary)
@@ -180,6 +187,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         residualsCriterion = function() private$..residualsCriterion$value,
         residualsCutoff = function() private$..residualsCutoff$value,
         phiCI = function() private$..phiCI$value,
+        seed = function() private$..seed$value,
         testSelection = function() private$..testSelection$value,
         exportResults = function() private$..exportResults$value,
         showClinicalSummary = function() private$..showClinicalSummary$value,
@@ -201,6 +209,7 @@ chisqposttestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..residualsCriterion = NA,
         ..residualsCutoff = NA,
         ..phiCI = NA,
+        ..seed = NA,
         ..testSelection = NA,
         ..exportResults = NA,
         ..showClinicalSummary = NA,
@@ -433,7 +442,8 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "sig",
                     "excl",
                     "testSelection",
-                    "phiCI")))
+                    "phiCI",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="detailedComparisons",
@@ -548,18 +558,22 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' prevents data dredging. Selecting 'None' for post-hoc method DISABLES all 
 #' pairwise testing. If you want unadjusted pairwise comparisons, this feature 
 #' is not available (by design, as it would encourage inappropriate multiple 
-#' testing). No automated validation against established packages exists. Use 
-#' with caution for clinical decision-making.
+#' testing). The chi-square statistic, the pairwise p-values and their 
+#' adjustment are checked against base R (chisq.test, fisher.test, p.adjust) 
+#' in the package tests. Read the pairwise results together with the effect 
+#' sizes and the residuals, not from the p-values alone.
 #' 
 #'
 #' @examples
 #' \donttest{
-#' # Tumour grade level by lymphovascular invasion,
-#' # using the histopathology data bundled with the module
+#' # Tumour grade by treatment group, using the histopathology data
+#' # bundled with the module. The overall test is significant
+#' # (p = 0.010) and the three grade levels give three pairwise
+#' # comparisons, so the post-hoc table is populated.
 #' chisqposttest(
 #'     data = histopathology,
 #'     rows = "Grade_Level",
-#'     cols = "LVI")
+#'     cols = "Group")
 #'}
 #' @param data The data as a data frame.
 #' @param rows variable in the rows
@@ -600,6 +614,10 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param phiCI calculate bootstrap confidence intervals for the Phi
 #'   coefficient using BCa method (Bias-Corrected and accelerated). Note: This
 #'   is computationally intensive and may take longer for large tables.
+#' @param seed Random seed for the bootstrap confidence intervals, so that the
+#'   interval reported for a given table is reproducible. Change it to see how
+#'   much the interval depends on the resampling. Used only when bootstrap
+#'   confidence intervals are requested.
 #' @param testSelection method for selecting statistical test for pairwise
 #'   comparisons
 #' @param exportResults Export comprehensive analysis results to downloadable
@@ -656,6 +674,7 @@ chisqposttest <- function(
     residualsCriterion = "bonferroni",
     residualsCutoff = 2,
     phiCI = FALSE,
+    seed = 42,
     testSelection = "auto",
     exportResults = FALSE,
     showClinicalSummary = FALSE,
@@ -694,6 +713,7 @@ chisqposttest <- function(
         residualsCriterion = residualsCriterion,
         residualsCutoff = residualsCutoff,
         phiCI = phiCI,
+        seed = seed,
         testSelection = testSelection,
         exportResults = exportResults,
         showClinicalSummary = showClinicalSummary,

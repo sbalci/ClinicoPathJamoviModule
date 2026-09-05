@@ -11,10 +11,6 @@ msgstr ""
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: R/chisqposttest.b.R
-msgid " %d of the %d cells had an expected count below 5."
-msgstr ""
-
 #: R/jjbetweenstats.b.R
 msgid ""
 " %s: 'Equal variances' is ticked, so Student's test is being reported "
@@ -142,12 +138,6 @@ msgstr ""
 msgid " different categories across "
 msgstr ""
 
-#: R/chisqposttest.b.R
-msgid ""
-" Fisher's exact test was used for the pairwise comparisons whose expected "
-"counts fell below 5."
-msgstr ""
-
 #: R/jjwithinstats.b.R
 msgid " Individual trajectories shown"
 msgstr ""
@@ -162,10 +152,6 @@ msgstr ""
 msgid " Laboratory preset: Enable centrality plotting to see overall trends<br>"
 msgstr ""
 
-#: R/chisqposttest.b.R
-msgid " No pairwise comparisons were performed for this table."
-msgstr ""
-
 #: R/jjarcdiagram.b.R
 msgid " nodes"
 msgstr ""
@@ -176,12 +162,6 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid " stages or time points."
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid ""
-" The pairwise comparisons below were computed with the chi-square test and "
-"rest on the same approximation."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -243,6 +223,10 @@ msgstr ""
 msgid "; {missing} of the {total} rows were missing"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "; split panels use Pearson's chi-squared test"
+msgstr ""
+
 #: R/agreement.b.R
 #: R/likelihoodratio.b.R
 msgid "..."
@@ -252,17 +236,8 @@ msgstr ""
 msgid "... and {more} more (showing the first {shown} of {total})"
 msgstr ""
 
-#: R/chisqposttest.b.R
 #: R/vartree.b.R
-msgid "'"
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid "' and '"
-msgstr ""
-
-#: R/vartree.b.R
-msgid "' level of '"
+msgid "... and {n} more"
 msgstr ""
 
 #: R/outcomeorganizer.b.R
@@ -275,10 +250,21 @@ msgid ""
 "Competing Risks or Multistate."
 msgstr ""
 
+#: R/vartree.b.R
+msgid ""
+"'{name}' is selected as a prune-below or follow-below variable, but it is "
+"not one of the tree variables, so it has no effect on the figure. Add it to "
+"Variables, or clear the setting."
+msgstr ""
+
 #: R/alluvial.b.R
 msgid ""
 "'{weight}' must be numeric (current type: {type}). Select a numeric variable "
 "containing counts, frequencies, or sampling weights."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "'%s' and '%s'"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -485,6 +471,10 @@ msgstr ""
 msgid "(adequate)"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "(Expected)"
+msgstr ""
+
 #: R/agepyramid.b.R
 msgid "(ggcharts received {nRows} rows covering {nGroups} age group(s).)"
 msgstr ""
@@ -558,6 +548,12 @@ msgstr ""
 msgid "). Consider reducing groups or using faceting for clarity."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid ""
+"[Enter the test statistic, effect estimate, confidence interval and p-value "
+"or Bayes factor from the relevant chart.]"
+msgstr ""
+
 #: stagemigration/ui[8][13].label
 msgid "[Experimental] Cure Models"
 msgstr ""
@@ -588,10 +584,6 @@ msgstr ""
 
 #: stagemigration/ui[8][22].label
 msgid "[Experimental] Win Ratio Analysis"
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid "[Results will be automatically filled when analysis is complete]"
 msgstr ""
 
 #: R/nonparametric.b.R
@@ -716,6 +708,10 @@ msgstr ""
 
 #: R/kappaSizeFixedN.b.R
 msgid "{head} and {last}"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "{hidden} branch(es) are hidden by the minimum-size setting."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -942,6 +938,12 @@ msgid ""
 "the Data Summary."
 msgstr ""
 
+#: R/vartree.b.R
+msgid ""
+"{nodes} node(s) holding {cases} case(s) are not shown, because 'Prune nodes "
+"smaller than' is set to {threshold}."
+msgstr ""
+
 #: R/agepyramid.b.R
 msgid ""
 "{nSparse} of the {nBands} occupied age bands hold fewer than 5 observations. "
@@ -1059,6 +1061,10 @@ msgstr ""
 
 #: R/tableone.b.R
 msgid "{variables}, and {n} other variables"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "* marks cells with |residual| > %.2f"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -1193,6 +1199,10 @@ msgstr ""
 
 #: R/swimmerplot_html.R
 msgid "\\u{2265}30% decrease in sum of target lesion diameters"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "\\u{B1}%s for significance"
 msgstr ""
 
 #: ppv/options/alpha.title
@@ -1509,17 +1519,18 @@ msgid ""
 "reference rule."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid ""
+"%.0f%% of cells have expected counts below 5, so the chi-square test "
+"assumptions are violated. Use Fisher's exact test for more reliable results."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "%.1f time units (n=%d responders)"
 msgstr ""
 
 #: R/waterfall.b.R
 msgid "%.1f time units (n=%d with duration data)"
-msgstr ""
-
-#: R/waterfall.b.R
-msgctxt "%.1f%%, %.1f%%"
-msgid "95%% CI (Median):"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -1558,6 +1569,12 @@ msgstr ""
 msgid ""
 "%d cases analyzed with %d regional measurements each plus a reference "
 "measurement"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"%d cell(s) have an expected count below 1. Use Fisher's exact test or merge "
+"the sparse category."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -1645,10 +1662,23 @@ msgid ""
 "the per-cell detail."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid ""
+"%d of %d cells have an expected count below 1. The chi-square approximation "
+"is not valid for that table even though most cells are adequate, so the "
+"overall p-value above is not dependable. Use Fisher's exact test, or merge "
+"the sparse category if there is a substantive reason to, and see the "
+"Assumptions check panel for the per-cell detail."
+msgstr ""
+
 #: R/jjsegmentedtotalbar.b.R
 msgid ""
 "%d of %d cells have expected counts below 5, so the chi-square approximation "
 "is unreliable here."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "%d of %d cells significant"
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -1730,6 +1760,16 @@ msgstr ""
 
 #: R/venn.b.R
 msgid ""
+"%d of %d selected variables are positive in more than 95%% of the %d "
+"analysed cases (%s). A set that contains almost every case fills the "
+"diagram, leaving the regions outside it nearly empty, so the picture "
+"separates almost nothing. Check that the level nominated as positive is the "
+"one you meant, and read the Summary of True Counts table rather than the "
+"shapes."
+msgstr ""
+
+#: R/venn.b.R
+msgid ""
 "%d of %d selected variables have fewer than 5 positive cases (%s). The "
 "counts and percentages printed in the regions built from those variables "
 "rest on a handful of cases and move substantially when a single case "
@@ -1757,12 +1797,20 @@ msgstr ""
 msgid "%d of %d supplied rows analysed"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "%d of the %d cells had an expected count below 5."
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid ""
 "%d paired comparisons are reported; p-values are unadjusted. With several "
 "regions the chance of at least one p < 0.05 under no true bias exceeds 5%% - "
 "interpret individual p-values accordingly, and prefer the mean difference "
 "and its clinical impact over statistical significance alone."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "%d pairwise comparisons with %s adjustment, %d significant"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -1925,6 +1973,12 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "%d%% (%d of %d evaluable patients achieved response or stable disease)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"%g observations in a %d x %d table; Pearson chi-square without continuity "
+"correction, p %s at alpha = %g; %s."
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -2135,6 +2189,10 @@ msgstr ""
 msgid ""
 "%s was skipped because the %s package is not installed. Install it and "
 "re-run to enable that output."
+msgstr ""
+
+#: R/venn.b.R
+msgid "%s were equally the most common (%s cases each, %s%%)."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -4896,11 +4954,6 @@ msgstr ""
 msgid "2 Decimals (80.50 percent)"
 msgstr ""
 
-#: agreement/ui[6].label
-msgctxt "2 Raters"
-msgid "PABAK & Prevalence/Bias Indices"
-msgstr ""
-
 #: labcontrolcharts/options/control_limits/2sigma.title
 msgid "2 Sigma (95 percent)"
 msgstr ""
@@ -5749,10 +5802,6 @@ msgstr ""
 msgid "95% CI Upper"
 msgstr ""
 
-#: hullplot/ui[4][0]/confidence_ellipses.label
-msgid "95% confidence ellipses around groups"
-msgstr ""
-
 #: decision/results/epirTable_ratio.columns.superTitle
 #: decision/results/epirTable_number.columns.superTitle
 #: decisioncalculator/results/epirTable_ratio.columns.superTitle
@@ -5804,12 +5853,24 @@ msgstr ""
 msgid "95% CrI Upper"
 msgstr ""
 
+#: hullplot/options/confidence_ellipses.title
+msgid "95% data ellipses"
+msgstr ""
+
+#: hullplot/ui[4][0]/confidence_ellipses.label
+msgid "95% data ellipses around groups"
+msgstr ""
+
 #: bayesianclinical/results/predictive_intervals.columns.title
 msgid "95% PI Lower"
 msgstr ""
 
 #: bayesianclinical/results/predictive_intervals.columns.title
 msgid "95% PI Upper"
+msgstr ""
+
+#: R/waterfall.b.R
+msgid "95%% CI (Median): (%.1f%%, %.1f%%)"
 msgstr ""
 
 #: bayesiandiagnostic/results/posteriorSummary.columns.title
@@ -6253,6 +6314,13 @@ msgstr ""
 msgid ""
 "A recursive optimal split could not be estimated. Quantile-based cut-points "
 "were used for the remaining groups."
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"A reference variable ('{variable}') and level ('{level}') are selected, but "
+"the 'Percentages' option is switched off, so no percentage for that level is "
+"drawn in any node. Tick 'Percentages' to display it."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -7657,10 +7725,6 @@ msgstr ""
 msgid "Add confidence bands to survival curves."
 msgstr ""
 
-#: hullplot/options/confidence_ellipses.title
-msgid "Add confidence ellipses"
-msgstr ""
-
 #: jvisr/options/confidence_interval.description.jamovi
 msgid "Add confidence intervals to survival curves."
 msgstr ""
@@ -8766,6 +8830,7 @@ msgstr ""
 msgid "adjusted p"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: cochranq/results/pairwiseComparisons.columns.title
 #: friedmantest/results/pairwiseComparisons.columns.title
 #: outbreakanalysis/results/risk_factor_analysis.columns.title
@@ -8831,6 +8896,10 @@ msgstr ""
 #: chisqposttest/results/residualsAnalysis.title
 #: chisqposttest/results/plot.title
 msgid "Adjusted Standardized Residuals"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Adjusted Standardized Residuals: %s vs %s"
 msgstr ""
 
 #: stagemigration/results/informativeCensoringAdjustment.columns.title
@@ -10744,6 +10813,12 @@ msgid ""
 "the 'Missing/unrecognized gender' count in the Data Summary."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid ""
+"All analyses were performed using jamovi statistical software. Specify your "
+"prespecified significance threshold when reporting frequentist tests."
+msgstr ""
+
 #: outbreakanalysis/options/statistical_tests/all_tests.title
 msgid "All Appropriate Tests"
 msgstr ""
@@ -10770,6 +10845,13 @@ msgstr ""
 
 #: R/agreement.b.R
 msgid "All cases had tied modes; no per-category summary computable."
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"All cases were removed by missing-value exclusion. No complete observations "
+"remain for the selected variables. Disable missing-value exclusion (NA) or "
+"check your data."
 msgstr ""
 
 #: qualitycontrol/options/control_chart_type/all_charts.title
@@ -11716,12 +11798,6 @@ msgstr ""
 msgid "Analysis assumptions, data requirements, and methodological considerations"
 msgstr ""
 
-#: R/advancedraincloud.b.R
-msgid ""
-"Analysis based on complete paired observations. Change scores calculated as "
-"(Follow-up - Baseline) values."
-msgstr ""
-
 #: stagemigration/results/comparativeAnalysisDashboard.columns.title
 msgid "Analysis Category"
 msgstr ""
@@ -11732,6 +11808,7 @@ msgstr ""
 #: R/lassologistic.b.R
 #: R/mageeequation.b.R
 #: R/sequentialtests.b.R
+#: R/vartree.b.R
 #: directregression/results/todo.title
 #: dynamicprediction/results/todo.title
 #: generalpseudo/results/todo.title
@@ -12273,6 +12350,10 @@ msgstr ""
 msgid "Analysis Settings"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Analysis settings"
+msgstr ""
+
 #: jjbarstats/results/todo.title
 #: jjpiestats/results/todo.title
 #: variablebiplot/results/todo.title
@@ -12426,6 +12507,7 @@ msgstr ""
 msgid "Analysis Summary"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: diagnosticmeta/options/show_analysis_summary.title
 #: diagnosticmeta/ui[1][3][0]/show_analysis_summary.label
 #: jjbarstats/options/showSummary.title
@@ -12547,6 +12629,15 @@ msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "Analysis Type:"
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid ""
+"Analysis uses each subject’s last available level after baseline, according "
+"to the group factor order. Change = follow-up minus baseline; percent change "
+"= 100 × change / absolute baseline. Zero baselines are excluded from the "
+"response percentage denominator. These thresholds describe change and do not "
+"establish clinical benefit."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -13004,26 +13095,6 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "Any additional clinical factors"
-msgstr ""
-
-#: agreement/ui[22].label
-msgctxt "Any Data Type"
-msgid "Bootstrap Confidence Intervals"
-msgstr ""
-
-#: agreement/ui[30].label
-msgctxt "Any Data Type"
-msgid "Case Agreement Categorization"
-msgstr ""
-
-#: agreement/ui[29].label
-msgctxt "Any Data Type"
-msgid "Create Consensus Variable"
-msgstr ""
-
-#: agreement/ui[3].label
-msgctxt "Any Data Type"
-msgid "Krippendorff's Alpha"
 msgstr ""
 
 #: R/waterfallrecist.b.R
@@ -13541,6 +13612,10 @@ msgid ""
 "hemodynamic indices including PRx, Mx, Sx, Dx, CVRi, and COest."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "As expected"
+msgstr ""
+
 #: groupedbar/options/grouporder/data.title
 msgid "As in Data"
 msgstr ""
@@ -14038,6 +14113,10 @@ msgstr ""
 msgid "At least 2 groups required for ridge plot comparison"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "At least 2 groups with complete observations are required."
+msgstr ""
+
 #: R/agreement.b.R
 msgid "At least 2 raters required for correlation analysis."
 msgstr ""
@@ -14092,6 +14171,10 @@ msgstr ""
 msgid ""
 "At least four complete cases are required for combination analysis; only "
 "{used} of {total} cases remain after excluding missing values."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "At least one expected count is below 1"
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -18861,6 +18944,10 @@ msgstr ""
 msgid "Bootstrap confidence intervals"
 msgstr ""
 
+#: agreement/ui[22].label
+msgid "Bootstrap Confidence Intervals (Any Data Type)"
+msgstr ""
+
 #: agreement/results/bootstrapCITable.title
 msgid "Bootstrap Confidence Intervals for Agreement Metrics"
 msgstr ""
@@ -19794,6 +19881,10 @@ msgstr ""
 
 #: R/vartree.b.R
 msgid "Branch:"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Branches hidden by the minimum-size setting"
 msgstr ""
 
 #: relativesurvival/options/ratetable/brazil.title
@@ -21861,6 +21952,10 @@ msgstr ""
 msgid "Case agreement categorization"
 msgstr ""
 
+#: agreement/ui[30].label
+msgid "Case Agreement Categorization (Any Data Type)"
+msgstr ""
+
 #: agreement/options/loaOutput.title
 msgid "Case agreement categorization column"
 msgstr ""
@@ -21918,8 +22013,19 @@ msgstr ""
 msgid "Case exclusion"
 msgstr ""
 
+#: R/vartree.b.R
+msgid "Case Exclusion"
+msgstr ""
+
 #: R/decision.b.R
 msgid "Case exclusion summary: {details}. {analysed} of {total} cases analysed."
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"CASE EXCLUSION: {excluded} cases ({pct}%) excluded due to missing values. "
+"Original N={original}, Final N={final}. Tree counts and percentages reflect "
+"complete cases only. Consider implications for generalizability."
 msgstr ""
 
 #: agreement/results/caseClusterTable.columns.title
@@ -22410,11 +22516,6 @@ msgstr ""
 #: lollipop/options.menuSubgroup
 #: raincloud/options.menuSubgroup
 msgid "Categorical vs Continuous"
-msgstr ""
-
-#: agreement/ui[5].label
-msgctxt "Categorical/Ordinal"
-msgid "Gwet's AC1/AC2"
 msgstr ""
 
 #: agreement/results/finnTable.columns.title
@@ -22967,6 +23068,10 @@ msgstr ""
 
 #: multiplexanalysis/results/clusteringtable.title
 msgid "Cell Population Clustering"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Cell Residuals"
 msgstr ""
 
 #: jggheatmap/options/cell_shape.title
@@ -23766,6 +23871,7 @@ msgstr ""
 msgid "chi-sq"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: advancedbarplot/options/stat_method/chisq.title
 #: agreement/results/kendallWTable.columns.title
 #: agreement/results/raterBiasTable.columns.title
@@ -23807,6 +23913,14 @@ msgstr ""
 msgid "Chi-square / Contingency Table"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Chi-square = %s"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Chi-square = %s, p = %s, adjusted p = %s"
+msgstr ""
+
 #: R/benford.b.R
 msgid ""
 "Chi-square goodness-of-fit test indicates a departure from Benford's Law "
@@ -23841,11 +23955,16 @@ msgstr ""
 msgid "Chi-Square Post-Hoc Tests"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Chi-Square Statistic"
+msgstr ""
+
 #: featurequality/options/importance_method/chi_square.title
 #: outbreakanalysis/options/statistical_tests/chi_square.title
 msgid "Chi-Square Test"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: fragilityindex/options/testType/chisq.title
 #: gtsummary/options/testMethod/chisq.test.title
 #: jjsegmentedtotalbar/ui[7][0]/show_statistical_tests.label
@@ -28496,12 +28615,6 @@ msgstr ""
 msgid "Cohen's d (unpooled SD, matching Welch's t):"
 msgstr ""
 
-#: R/raincloud.b.R
-msgid ""
-"Cohen's d is only reported for the parametric t-test; it is not defined for "
-"the Wilcoxon rank-sum test."
-msgstr ""
-
 #: R/psychopdaROC.b.R
 msgid ""
 "Cohen's d is the standardized difference in a marker's mean between the "
@@ -29150,8 +29263,22 @@ msgstr ""
 msgid "Colour Not Recognised"
 msgstr ""
 
+#: vartree/options/palette.title
+msgid "Colour palette"
+msgstr ""
+
 #: R/alluvial.b.R
 msgid "Colour palette stretched"
+msgstr ""
+
+#: vartree/options/palette/colorblind.title
+msgid "Colour-blind safe"
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"Colour-blind-safe palette applied: blue, orange, purple and brown shades in "
+"place of the default red/green rotation"
 msgstr ""
 
 #: contTables/options/pcCol.title
@@ -29185,6 +29312,10 @@ msgstr ""
 #: clinicalheatmap/options/annotationCols.title
 #: clinicalheatmap/ui[0][3].label
 msgid "Column Annotations (Optional)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "column categories with no observations: %s"
 msgstr ""
 
 #: bbcplots/options/chart_type/column.title
@@ -34355,6 +34486,7 @@ msgstr ""
 msgid "Contingency coefficient"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: categoricaladvanced/results/contingencytable.title
 #: chisqposttest/results/contingencyTable.title
 #: decisioncombine/results/individualTest1/test1Contingency.title
@@ -36200,7 +36332,7 @@ msgid "Could not compute"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Could not compute:"
+msgid "Could not compute: %s"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -36374,6 +36506,10 @@ msgid ""
 "test."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Counts are not whole numbers"
+msgstr ""
+
 #: R/decisioncurve.b.R
 msgid "Counts are projected to a population of {n} from the complete-case cohort."
 msgstr ""
@@ -36439,6 +36575,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Counts variable validated successfully."
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Counts within a branch will therefore not add up to the count above it."
 msgstr ""
 
 #: populationhealth/options/geographic_level/county.title
@@ -37213,6 +37353,10 @@ msgid ""
 "treatments, and clinical events using the advanced ggswim package."
 msgstr ""
 
+#: agreement/ui[29].label
+msgid "Create Consensus Variable (Any Data Type)"
+msgstr ""
+
 #: assayoptimization/options/contour_plots.description.ui
 msgid "Create contour plots for factor interactions"
 msgstr ""
@@ -37835,6 +37979,7 @@ msgid ""
 "consider removing rows with missing data."
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: comprehensiveSurvivalPower/results/sequentialDesign.columns.title
 #: distributionfit/results/goodnessOfFit.columns.title
 #: labinterpret/results/criticalValuesTable.columns.title
@@ -37848,6 +37993,10 @@ msgstr ""
 msgid ""
 "Critical value for identifying significant residuals (typically 2.0 or 3.0). "
 "Used only when 'Residual significance criterion' is set to 'Fixed cutoff'."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Critical value for significance:"
 msgstr ""
 
 #: labinterpret/options/critical_values.title
@@ -40345,6 +40494,12 @@ msgid ""
 "filtering."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid ""
+"Data contains no (complete) rows. Please check your dataset and variable "
+"selections."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Data contains no complete rows. Check the data."
 msgstr ""
@@ -42178,6 +42333,10 @@ msgstr ""
 msgid "Default (theme_minimal)"
 msgstr ""
 
+#: vartree/options/palette/default.title
+msgid "Default (vtree)"
+msgstr ""
+
 #: jointmodeling/options/prior_specification/default.title
 msgid "Default (Weakly Informative)"
 msgstr ""
@@ -42240,6 +42399,10 @@ msgstr ""
 
 #: greyzoneroc/options/grey_zone_action/default_positive.title
 msgid "Default to Positive (Conservative)"
+msgstr ""
+
+#: R/venn.b.R
+msgid "Defaulting to the ggvenn Diagram"
 msgstr ""
 
 #: sigmametrics/results/sigmaResults.columns.title
@@ -42357,6 +42520,7 @@ msgstr ""
 msgid "Degree Centrality"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: flexrstpm2/options/df.title
 #: flexrstpm2/results/splineInfo.columns.title
 #: grouplasso/results/pathSummary.columns.title
@@ -43112,11 +43276,6 @@ msgstr ""
 msgid "Design Recommendations and Interpretation"
 msgstr ""
 
-#: agreement/ui[37].label
-msgctxt "Design"
-msgid "Sample Size for Agreement Study"
-msgstr ""
-
 #: gsdesign/results/summary.title
 msgid "Design Summary"
 msgstr ""
@@ -43709,6 +43868,10 @@ msgstr ""
 #: flexparametric/results/splineDetails.columns.title
 #: ihcheterogeneity/results/compartmentTests.columns.title
 msgid "DF"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "df = %s"
 msgstr ""
 
 #: agreement/results/iccTable.columns.title
@@ -48868,6 +49031,7 @@ msgstr ""
 msgid "effect scale"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: R/nonparametric.b.R
 #: advancedanova/results/tukey.columns.title
 #: advancedanova/results/gameshowell.columns.title
@@ -48957,6 +49121,10 @@ msgstr ""
 
 #: chisqposttest/results/posthocTable.columns.title
 msgid "Effect Size (Phi/V)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Effect size (Phi/V) = %s"
 msgstr ""
 
 #: advancedraincloud/ui[3].label
@@ -49239,6 +49407,10 @@ msgstr ""
 #: bayesianmetaanalysis/results/mcmcDiagnostics.columns.title
 #: spatialbayesiansurvival/results/parameterEstimates.columns.title
 msgid "Effective Sample Size"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Effective test type: %s. Paired: %s. Confidence level: %.1f%%."
 msgstr ""
 
 #: costeffectiveness/options/effect_distribution.title
@@ -49570,6 +49742,7 @@ msgid "empty category-segment pairs. This may indicate sparse data."
 msgstr ""
 
 #: R/datetimeconverter.b.R
+#: R/vartree.b.R
 msgid "Empty Dataset"
 msgstr ""
 
@@ -51710,6 +51883,7 @@ msgstr ""
 msgid "Error Variance Ratio (λ)"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: R/lassocox.b.R
 #: R/linechart.b.R
 #: R/riverplot.b.R
@@ -53649,6 +53823,7 @@ msgid "Excellent"
 msgstr ""
 
 #: R/decision.b.R
+#: R/diagnosticmeta.b.R
 #: R/psychopdaROC.b.R
 msgid "excellent"
 msgstr ""
@@ -54699,20 +54874,20 @@ msgstr ""
 #: package/analyses/reportcat.menuGroup
 #: package/analyses/benford.menuGroup
 #: package/analyses/agepyramid.menuGroup
+#: package/analyses/alluvial.menuGroup
 #: package/analyses/venn.menuGroup
 #: package/analyses/vartree.menuGroup
 #: package/analyses/categorize.menuGroup
-#: package/analyses/crosstable.menuGroup
 #: package/analyses/dataquality.menuGroup
 #: package/analyses/outlierdetection.menuGroup
 #: package/analyses/checkdata.menuGroup
 #: package/analyses/chisqposttest.menuGroup
 #: agepyramid/options.menuGroup
+#: alluvial/options.menuGroup
 #: benford/options.menuGroup
 #: categorize/options.menuGroup
 #: checkdata/options.menuGroup
 #: chisqposttest/options.menuGroup
-#: crosstable/options.menuGroup
 #: dataquality/options.menuGroup
 #: outlierdetection/options.menuGroup
 #: reportcat/options.menuGroup
@@ -54823,11 +54998,11 @@ msgstr ""
 msgid "ExplorationExtraD"
 msgstr ""
 
-#: package/analyses/alluvial.menuGroup
+#: package/analyses/crosstable.menuGroup
 #: package/analyses/nonparametric.menuGroup
 #: package/analyses/pcacomponenttest.menuGroup
 #: package/analyses/pcaloadingtest.menuGroup
-#: alluvial/options.menuGroup
+#: crosstable/options.menuGroup
 #: nonparametric/options.menuGroup
 #: pcacomponenttest/options.menuGroup
 #: pcaloadingtest/options.menuGroup
@@ -57375,6 +57550,7 @@ msgstr ""
 msgid "Fisher's Exact Test"
 msgstr ""
 
+#: R/swimmerplot.b.R
 #: R/waterfall.b.R
 #: contTables/options/fisher.title
 #: contTables/results/chiSq.columns.content
@@ -57384,6 +57560,10 @@ msgstr ""
 msgid "Fisher's exact test"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Fisher's exact test for the sparse two-way chart"
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid ""
 "Fisher's exact test was selected for the comparison %s because at least one "
@@ -57391,6 +57571,17 @@ msgid ""
 "Monte Carlo version of it failed as well. The chi-square p-value is reported "
 "for that comparison instead. It relies on a large-sample approximation that "
 "the low expected counts undermine, so read it with that in mind."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"Fisher's exact test was used for the pairwise comparisons whose expected "
+"counts fell below 5."
+msgstr ""
+
+#: R/swimmerplot.b.R
+#: R/waterfall.b.R
+msgid "Fisher's exact test, OR = %.2f"
 msgstr ""
 
 #: R/swimmerplot_html.R
@@ -58175,6 +58366,14 @@ msgstr ""
 msgid "Follow the standard decision analysis workflow"
 msgstr ""
 
+#: R/vartree.b.R
+msgid "Follow Variable Not Found"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Follow variable not found in dataset. Please verify your variable selection."
+msgstr ""
+
 #: studydiagram/options/step4_label.default
 msgid "Follow-up"
 msgstr ""
@@ -58568,12 +58767,6 @@ msgstr ""
 
 #: R/alluvial.b.R
 msgid "For continuous variables, use the categorize function to create groups first"
-msgstr ""
-
-#: statsplot2/options/sampleLarge.description.ui
-msgid ""
-"For datasets >10,000 rows, randomly sample 5,000 rows for faster "
-"visualization while maintaining statistical validity"
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -61667,6 +61860,7 @@ msgid "Good"
 msgstr ""
 
 #: R/decision.b.R
+#: R/diagnosticmeta.b.R
 #: R/psychopdaROC.b.R
 msgid "good"
 msgstr ""
@@ -63240,6 +63434,10 @@ msgstr ""
 msgid "Gwet's AC1/AC2"
 msgstr ""
 
+#: agreement/ui[5].label
+msgid "Gwet's AC1/AC2 (Categorical/Ordinal)"
+msgstr ""
+
 #: pathagreement/ui[5][0]/gwetAC.label
 msgid "Gwet's AC1/AC2 Coefficients (prevalence-robust)"
 msgstr ""
@@ -64421,6 +64619,10 @@ msgstr ""
 #: hiddenmarkov/options/hiddenCovs.title
 #: hiddenmarkov/ui[0][4].label
 msgid "Hidden State Covariates"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Hidden: {hidden}"
 msgstr ""
 
 #: enhancedfrequency/options/minFrequency.description
@@ -65668,6 +65870,10 @@ msgid ""
 "cutoff' uses the value in the 'Residual significance cutoff' box unchanged."
 msgstr ""
 
+#: R/vartree.b.R
+msgid "How the Percentages Are Calculated"
+msgstr ""
+
 #: ihccluster/options/spatialComparisonMode.description
 msgid "How to analyze spatial compartments"
 msgstr ""
@@ -66059,7 +66265,7 @@ msgid "Hull Points"
 msgstr ""
 
 #: hullplot/ui[1][0][0].label
-msgid "Hull Shape (0 = curved boundaries, 2 = straight edges)"
+msgid "Hull shape (lower values follow the points more closely)"
 msgstr ""
 
 #: hullplot/ui[1].label
@@ -71508,6 +71714,10 @@ msgstr ""
 msgid "Invalid Partial AUC Range"
 msgstr ""
 
+#: R/vartree.b.R
+msgid "Invalid Percentage Level"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "Invalid person-time cutpoints ignored"
 msgstr ""
@@ -72173,15 +72383,6 @@ msgstr ""
 msgid "Jittered"
 msgstr ""
 
-#: package/analyses/jjbarstats.menuGroup
-#: package/analyses/jjpiestats.menuGroup
-#: package/analyses/statsplot2.menuGroup
-#: jjbarstats/options.menuGroup
-#: jjpiestats/options.menuGroup
-#: statsplot2/options.menuGroup
-msgid "JJStatsPlot"
-msgstr ""
-
 #: package/analyses/ggprism.menuGroup
 #: package/analyses/jviolin.menuGroup
 #: package/analyses/parallelplot.menuGroup
@@ -72236,7 +72437,10 @@ msgstr ""
 #: package/analyses/jjdotplotstats.menuGroup
 #: package/analyses/jjbetweenstats.menuGroup
 #: package/analyses/jjwithinstats.menuGroup
+#: package/analyses/jjbarstats.menuGroup
+#: package/analyses/jjpiestats.menuGroup
 #: package/analyses/jwaffle.menuGroup
+#: package/analyses/statsplot2.menuGroup
 #: package/analyses/linechart.menuGroup
 #: package/analyses/lollipop.menuGroup
 #: package/analyses/jjarcdiagram.menuGroup
@@ -72250,12 +72454,14 @@ msgstr ""
 #: basegraphics/options.menuGroup
 #: hullplot/options.menuGroup
 #: jjarcdiagram/options.menuGroup
+#: jjbarstats/options.menuGroup
 #: jjbetweenstats/options.menuGroup
 #: jjcoefstats/options.menuGroup
 #: jjcorrmat/options.menuGroup
 #: jjdotchart/options.menuGroup
 #: jjdotplotstats/options.menuGroup
 #: jjhistostats/options.menuGroup
+#: jjpiestats/options.menuGroup
 #: jjpubr/options.menuGroup
 #: jjridges/options.menuGroup
 #: jjscatterstats/options.menuGroup
@@ -72267,6 +72473,7 @@ msgstr ""
 #: lollipop/options.menuGroup
 #: pcaloadingheatmap/options.menuGroup
 #: raincloud/options.menuGroup
+#: statsplot2/options.menuGroup
 msgid "JJStatsPlotT"
 msgstr ""
 
@@ -73225,6 +73432,10 @@ msgstr ""
 msgid "Krippendorff's alpha"
 msgstr ""
 
+#: agreement/ui[3].label
+msgid "Krippendorff's Alpha (Any Data Type)"
+msgstr ""
+
 #: pathagreement/options/multiraterMethod/krippendorff.title
 msgid "Krippendorff's Alpha (any number)"
 msgstr ""
@@ -74087,6 +74298,10 @@ msgstr ""
 
 #: stagemigration/results/personalizedRiskSummary.columns.title
 msgid "Large Risk Change (%)"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Large Tree Complexity"
 msgstr ""
 
 #: waterfall/options/labelOutliers.title
@@ -75203,6 +75418,7 @@ msgid "Limitations"
 msgstr ""
 
 #: R/decision.b.R
+#: R/diagnosticmeta.b.R
 msgid "limited"
 msgstr ""
 
@@ -79319,10 +79535,10 @@ msgstr ""
 #: R/jjpiestats.b.R
 msgid ""
 "McNemar test requires a 2×2 contingency table. Your data has %d×%d levels "
-"(%s: %d levels, %s: %d levels). For paired data with more than 2 categories, "
-"use Cochran Q test or marginal homogeneity test instead. Consider "
-"dichotomizing your outcome variable or use parametric/nonparametric options "
-"instead of paired analysis."
+"(%s: %d levels, %s: %d levels). For paired outcomes with more than two "
+"categories, use an appropriate test of marginal homogeneity. Do not "
+"substitute an independent-samples test or dichotomize solely to obtain this "
+"test."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -79359,6 +79575,10 @@ msgstr ""
 
 #: cochranq/results/pairwiseComparisons.columns.title
 msgid "McNemar χ²"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "McNemar's test"
 msgstr ""
 
 #: outbreakanalysis/options/statistical_tests/mcnemar.title
@@ -79507,6 +79727,10 @@ msgstr ""
 
 #: agreement/results/itemModalAgreementTable.columns.title
 msgid "Mean Agreement"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Mean and SD Shown for Very Small Subgroups"
 msgstr ""
 
 #: deeplearningprediction/results/crossValidationResults/cvSummary.description
@@ -81113,6 +81337,10 @@ msgstr ""
 msgid "Members"
 msgstr ""
 
+#: R/venn.b.R
+msgid "Membership Groups Column Was Not Added"
+msgstr ""
+
 #: venn/results/membershipTable.title
 msgid "Membership Table"
 msgstr ""
@@ -81941,6 +82169,12 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid ""
+"Method notice: Fisher's exact test was selected in the options and used for "
+"every pairwise comparison; the reported p-values use that exact method."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
 "Method notice: Pairwise comparisons with expected cell counts below 5 are "
 "automatically analysed with Fisher's exact test; the reported p-values use "
 "that exact method."
@@ -82053,6 +82287,18 @@ msgstr ""
 
 #: R/jjcorrmat.b.R
 msgid "Method: %s"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Method: %s (chosen in the options for every comparison)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Method: %s (standard approach)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Method: %s (used because an expected count is below 5)"
 msgstr ""
 
 #: survivalmodelvalidation/results/methodologicalNotes.title
@@ -82762,6 +83008,10 @@ msgstr ""
 #: tinytable/options/style_borders/minimal.title
 #: vartree/options/style/minimal.title
 msgid "Minimal"
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid "minimal"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -83998,6 +84248,13 @@ msgstr ""
 
 #: latentbiomarker/results/summaryTable.columns.title
 msgid "Missing-data handling"
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"Missing-value (NA) nodes are exempt from the threshold while 'Valid "
+"percentages' is on, so an NA node holding fewer cases than the threshold is "
+"still drawn."
 msgstr ""
 
 #: categorize/options/excl.title
@@ -85668,6 +85925,7 @@ msgid "Models to Compare"
 msgstr ""
 
 #: R/decision.b.R
+#: R/diagnosticmeta.b.R
 #: R/enhancedROC.b.R
 #: R/jjcorrmat.b.R
 #: R/linechart.b.R
@@ -89190,6 +89448,7 @@ msgid "No comparison available"
 msgstr ""
 
 #: R/decisioncombine.b.R
+#: R/vartree.b.R
 msgid "No Complete Cases"
 msgstr ""
 
@@ -89684,10 +89943,32 @@ msgid ""
 "has fewer than 3 levels."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "no pairwise comparisons (overall test not significant)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "no pairwise comparisons (post-hoc method set to None)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "No pairwise comparisons were performed for this table."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"No pairwise comparisons were performed. Select Bonferroni, Holm or FDR to "
+"obtain them."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "No pairwise correlation reaches the warning threshold; this does not rule "
 "out multivariable linear dependencies."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "no pairwise sub-comparisons for this table shape"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -89699,7 +89980,10 @@ msgid "No Pattern"
 msgstr ""
 
 #: R/venn.b.R
-msgid "No plot type was selected; defaulting to ggvenn output."
+msgid ""
+"No plot type is selected, so the classic ggvenn diagram below is drawn by "
+"default. Tick ggVennDiagram, UpSetR or ComplexUpset in Plot Selection to "
+"choose a different one."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -89880,6 +90164,13 @@ msgstr ""
 
 #: R/nonparametric.b.R
 msgid "No statistically significant %s (p = %s, alpha = %s)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"No statistically significant association detected at \\u{3B1} = %g; absence "
+"of evidence is not evidence of absence, so read the effect size and its "
+"precision alongside this"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -90217,6 +90508,22 @@ msgstr ""
 
 #: R/vartree.b.R
 msgid "Node Percentage:"
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"Node percentages use the count in the node directly above as the denominator "
+"(the root node at the first split). 'Valid percentages' is OFF, so cases "
+"with a missing value on the splitting variable are counted in that "
+"denominator and the NA node carries its own percentage."
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"Node percentages use the count in the node directly above as the denominator "
+"(the root node at the first split). 'Valid percentages' is ON, so cases with "
+"a missing value on the splitting variable are left out of that denominator "
+"and appear in a separate NA node with no percentage."
 msgstr ""
 
 #: jjarcdiagram/options/nodeSize.title
@@ -90697,6 +91004,7 @@ msgstr ""
 msgid "Non-terminal node that splits into further branches"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: R/lassocox.b.R
 #: R/lassologistic.b.R
 #: advancedbarplot/options/error_bars/none.title
@@ -91301,6 +91609,7 @@ msgstr ""
 msgid "Not estimable"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: R/enhancedROC.b.R
 #: R/nogoldstandard.b.R
 #: R/raincloud.b.R
@@ -91383,6 +91692,14 @@ msgstr ""
 
 #: R/alluvial.b.R
 msgid "Not shown: {variables}"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Not significant"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Not significant after correction"
 msgstr ""
 
 #: R/raincloud.b.R
@@ -91543,12 +91860,6 @@ msgstr ""
 
 #: R/jjcorrmat.b.R
 msgid "Notable Correlations:"
-msgstr ""
-
-#: R/lollipop.b.R
-msgid ""
-"Notable variation observed between groups, suggesting clinically meaningful "
-"differences."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -93552,10 +93863,6 @@ msgstr ""
 msgid "observations"
 msgstr ""
 
-#: R/lollipop.b.R
-msgid "observations across"
-msgstr ""
-
 #: R/benford.b.R
 msgid ""
 "Observations falling in the 2 most-deviating leading-digit bins. This is bin "
@@ -93645,6 +93952,10 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Observed complete-case proportions projected to a population of {n} patients."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Observed count: %s"
 msgstr ""
 
 #: contTables/options/obs.title
@@ -94235,8 +94546,9 @@ msgstr ""
 #: R/alluvial.b.R
 msgid ""
 "One row per path through the plotted variables, largest weight first. Cases "
-"and percentages count rows; Weight total is the sum of the weight variable "
-"over those rows, which is what the ribbon width shows."
+"and percentages count the rows that carry a weight, the rows the diagram is "
+"drawn from; Weight total is the sum of the weight variable over those rows, "
+"which is what the ribbon width shows."
 msgstr ""
 
 #: jrecode/options/recode_rules.description
@@ -94391,6 +94703,15 @@ msgstr ""
 
 #: R/survival.b.R
 msgid "Only {count} events observed"
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"Only {n} cases are available. Each additional variable splits those cases "
+"further, so the subgroups at the bottom of the tree will hold very few cases "
+"and their percentages move substantially with a single observation. N>=50 is "
+"a common rule of thumb for describing subgroups stably. Consider using fewer "
+"variables or collapsing levels so each node keeps a usable count."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -95765,11 +96086,6 @@ msgstr ""
 msgid "Ordinal variables should maintain their natural ordering"
 msgstr ""
 
-#: agreement/ui[2].label
-msgctxt "Ordinal"
-msgid "Weighted Kappa"
-msgstr ""
-
 #: pseudosurvival/options/regression_method/ols.title
 msgid "Ordinary Least Squares"
 msgstr ""
@@ -97124,6 +97440,10 @@ msgid ""
 msgstr ""
 
 #: R/chisqposttest.b.R
+msgid "Over-represented"
+msgstr ""
+
+#: R/chisqposttest.b.R
 msgid "Over-represented. There are MORE observations in this cell than expected."
 msgstr ""
 
@@ -97345,6 +97665,10 @@ msgstr ""
 #: qtwist/options/time_os.title
 #: qtwist/ui[0][0].label
 msgid "Overall Survival Time"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Overall Test"
 msgstr ""
 
 #: competingsurvival/options/overalltime.title
@@ -97883,6 +98207,7 @@ msgstr ""
 msgid "p-value"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: bayesiannetworkma/results/coherenceAssessment.columns.title
 #: biomarkerdiscovery/results/selected_biomarkers.columns.title
 #: biomarkerdiscovery/results/biomarker_interactions.columns.title
@@ -98352,6 +98677,10 @@ msgstr ""
 msgid "PABAK & prevalence/bias indices"
 msgstr ""
 
+#: agreement/ui[6].label
+msgid "PABAK & Prevalence/Bias Indices (2 Raters)"
+msgstr ""
+
 #: pathagreement/options/pabak.title
 msgid "PABAK Analysis"
 msgstr ""
@@ -98609,6 +98938,7 @@ msgstr ""
 msgid "Pairwise Comparison Results"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: comparingSurvival/options/pairwise.title
 #: economistplots/results/comparison_results.title
 #: grafify/options/comparison_method/pairwise.title
@@ -100283,6 +100613,18 @@ msgstr ""
 msgid "Pattern Mixture Models"
 msgstr ""
 
+#: R/vartree.b.R
+msgid "Pattern Mode"
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"PATTERN MODE: Tree groups cases by unique variable combinations (patterns) "
+"regardless of order. Each branch represents a distinct pattern. Use this "
+"mode to identify common patient profiles or covariate combinations. Refer to "
+"pattern table for detailed counts."
+msgstr ""
+
 #: comprehensiveSurvivalPower/options/accrual_distribution.description
 msgid ""
 "Pattern of patient enrollment over time. Uniform = constant rate; "
@@ -100299,6 +100641,10 @@ msgstr ""
 
 #: vartree/options/ptable.title
 msgid "Pattern table"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Pattern Table Not Available"
 msgstr ""
 
 #: vartree/options/pattern.title
@@ -101129,7 +101475,7 @@ msgid "Percentage Bend"
 msgstr ""
 
 #: R/vartree.b.R
-msgid "Percentage calculated for '"
+msgid "Percentage calculated for the '{level}' level of '{variable}'"
 msgstr ""
 
 #: waterfall/options/inputType/percentage.title
@@ -101228,6 +101574,16 @@ msgstr ""
 msgid "Percentage Type"
 msgstr ""
 
+#: R/vartree.b.R
+msgid "Percentage Variable Not Found"
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"Percentage variable not found in dataset. Please verify your variable "
+"selection."
+msgstr ""
+
 #: R/agepyramid.b.R
 #: agepyramid/ui[2][0].label
 #: contTables/ui[1][1][0][1][0].label
@@ -101272,6 +101628,10 @@ msgstr ""
 
 #: agreement/options/heatmapShowPercentages.title
 msgid "Percentages in cells"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Percentages Shown for Very Small Subgroups"
 msgstr ""
 
 #: imagingcorrelation/results/radiomicsTable.columns.title
@@ -102270,8 +102630,10 @@ msgid ""
 "data dredging. Selecting 'None' for post-hoc method DISABLES all pairwise "
 "testing. If you want unadjusted pairwise comparisons, this feature is not "
 "available (by design, as it would encourage inappropriate multiple testing). "
-"No automated validation against established packages exists. Use with "
-"caution for clinical decision-making."
+"The chi-square statistic, the pairwise p-values and their adjustment are "
+"checked against base R (chisq.test, fisher.test, p.adjust) in the package "
+"tests. Read the pairwise results together with the effect sizes and the "
+"residuals, not from the p-values alone."
 msgstr ""
 
 #: package/analyses/simonmakuch.description
@@ -104580,6 +104942,10 @@ msgstr ""
 msgid "Plots Explanations"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "plotted values across"
+msgstr ""
+
 #: hematologicindices/options/indices/plr.title
 #: hematologicindices/options/survivalIndex/plr.title
 msgid "PLR"
@@ -105818,6 +106184,7 @@ msgstr ""
 msgid "Post-hoc Method"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: chisqposttest/options/posthoc.title
 msgid "Post-hoc method"
 msgstr ""
@@ -110118,9 +110485,23 @@ msgstr ""
 msgid "Proximity Threshold (pixels)"
 msgstr ""
 
+#: R/vartree.b.R
+msgid "Prune / Follow Variable Not in the Tree"
+msgstr ""
+
 #: vartree/options/prunebelow.title
 #: vartree/ui[0][3].label
 msgid "Prune below"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Prune Below Variable Not Found"
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"Prune below variable not found in dataset. Please verify your variable "
+"selection."
 msgstr ""
 
 #: vartree/options/prunesmaller.title
@@ -111833,8 +112214,10 @@ msgstr ""
 
 #: R/lassocox.b.R
 #: agreement/options/seed.title
+#: chisqposttest/options/seed.title
 #: decisioncurve/ui[7][0]/seed.label
 #: enhancedROC/options/seed.title
+#: jjdotchart/options/seed.title
 #: lassocox/options/random_seed.title
 #: lassocox/ui[6][0].label
 #: nogoldstandard/ui[2][0]/seed.label
@@ -111865,6 +112248,14 @@ msgstr ""
 
 #: likelihoodratio/options/randomSeed.description
 msgid "Random seed for reproducible bootstrap results"
+msgstr ""
+
+#: chisqposttest/options/seed.description
+msgid ""
+"Random seed for the bootstrap confidence intervals, so that the interval "
+"reported for a given table is reproducible. Change it to see how much the "
+"interval depends on the resampling. Used only when bootstrap confidence "
+"intervals are requested."
 msgstr ""
 
 #: survivalcont/options/seed.description
@@ -111968,6 +112359,12 @@ msgstr ""
 
 #: grafify/options/experimental_design/rbd.title
 msgid "Randomized Block"
+msgstr ""
+
+#: statsplot2/options/sampleLarge.description.ui
+msgid ""
+"Randomly sample for faster plots. Tests use the sampled data and may lose "
+"precision; repeated continuous outcomes retain whole subjects."
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -112822,6 +113219,11 @@ msgstr ""
 msgid "Raw Numeric:"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Raw p = %s"
+msgstr ""
+
+#: R/chisqposttest.b.R
 #: cochranq/results/pairwiseComparisons.columns.title
 #: friedmantest/results/pairwiseComparisons.columns.title
 msgid "Raw p-value"
@@ -113994,6 +114396,10 @@ msgstr ""
 msgid "Reference-Based Imputation"
 msgstr ""
 
+#: R/vartree.b.R
+msgid "Reference-Level Percentage Not Shown"
+msgstr ""
+
 #: decisioncalculator/options/tn1.description.ui
 msgid "Reference-negative participants testing negative in illustrative scenario 1."
 msgstr ""
@@ -114732,10 +115138,6 @@ msgstr ""
 
 #: R/swimmerplot_html.R
 msgid "Relative vs Absolute:"
-msgstr ""
-
-#: R/lollipop.b.R
-msgid "Relatively consistent values across groups with minimal variation."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -115573,6 +115975,7 @@ msgstr ""
 msgid "Reserved Model Name"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: conditionalgee/results/gapTimePredictions.columns.title
 #: coxrobust/results/outlierAnalysis.columns.title
 #: nonparametricregression/results/predictionTable.columns.title
@@ -115708,6 +116111,10 @@ msgstr ""
 
 #: chisqposttest/options/showResiduals.title
 msgid "Residuals analysis"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Residuals Analysis"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -118290,6 +118697,10 @@ msgstr ""
 msgid "Row Annotations (Optional)"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "row categories with no observations: %s"
+msgstr ""
+
 #: clinicalheatmap/results/clusterAssignments/rowClusterTable.title
 msgid "Row Cluster Assignments"
 msgstr ""
@@ -118931,6 +119342,10 @@ msgstr ""
 
 #: agreement/results/agreementSampleSizeTable.title
 msgid "Sample Size for Agreement Study"
+msgstr ""
+
+#: agreement/ui[37].label
+msgid "Sample Size for Agreement Study (Design)"
 msgstr ""
 
 #: package/analyses/kappaSizePower.description
@@ -120982,6 +121397,10 @@ msgid ""
 "your gold standard reference"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Select different dependent and grouping variables."
+msgstr ""
+
 #: R/decision.b.R
 msgid "Select different levels for positive and negative outcomes."
 msgstr ""
@@ -121584,6 +122003,12 @@ msgstr ""
 
 #: R/lassocox.b.R
 msgid "Selected Original Predictors"
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"Selected percentage level '{level}' not present in percentage variable. "
+"Available levels: {available}"
 msgstr ""
 
 #: R/oddsratio.b.R
@@ -122332,6 +122757,18 @@ msgstr ""
 
 #: pathagreement/results/agreementTrendTable.columns.title
 msgid "Sequence Group"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Sequence Mode"
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"SEQUENCE MODE: Tree preserves variable order to show progression patterns. "
+"Same combinations in different orders create separate branches. Use this "
+"mode for temporal sequences (diagnosis to treatment to outcome) or ordered "
+"clinical pathways. Particularly useful for longitudinal or staged data."
 msgstr ""
 
 #: vartree/options/sequence.title
@@ -126957,6 +127394,7 @@ msgstr ""
 msgid "Significance:"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: chisqposttest/results/posthocTable.columns.title
 #: groupedbar/results/posthoctests.columns.title
 #: treecompare/results/statistical_tests.columns.title
@@ -126969,8 +127407,16 @@ msgstr ""
 msgid "significant"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Significant after correction"
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid "Significant asymmetry detected"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Significant Cells"
 msgstr ""
 
 #: stagemigration/results/multifactorialModelDiagnostics.columns.title
@@ -127801,6 +128247,7 @@ msgid "Small sample size"
 msgstr ""
 
 #: R/decisioncurve.b.R
+#: R/vartree.b.R
 msgid "Small Sample Size"
 msgstr ""
 
@@ -127880,6 +128327,10 @@ msgstr ""
 
 #: vartree/options/useprunesmaller.title
 msgid "Small-node pruning"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Small-Node Pruning Not Applied"
 msgstr ""
 
 #: R/nonparametric.b.R
@@ -131797,12 +132248,6 @@ msgstr ""
 msgid "Statistical Significance Testing"
 msgstr ""
 
-#: R/jjpiestats.b.R
-msgid ""
-"Statistical significance was set at p < 0.05. All analyses were performed "
-"using jamovi statistical software."
-msgstr ""
-
 #: R/vartree.b.R
 msgid "Statistical summaries (mean, SD) are shown for the continuous variable"
 msgstr ""
@@ -132072,6 +132517,10 @@ msgstr ""
 
 #: R/nonparametric.b.R
 msgid "Statistically significant %s (p = %s, alpha = %s)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Statistically significant association at \\u{3B1} = %g"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -133080,6 +133529,7 @@ msgstr ""
 msgid "STROBE Compliance"
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: R/jjcorrmat.b.R
 #: R/linechart.b.R
 msgid "strong"
@@ -133796,6 +134246,11 @@ msgstr ""
 msgid "Subject ID (patient mode)"
 msgstr ""
 
+#: statsplot2/options/subjectID.title
+#: statsplot2/ui[0][3].label
+msgid "Subject ID (Repeated Continuous Outcomes)"
+msgstr ""
+
 #: grafify/options/befafter_id_var.title
 #: grafify/ui[16][1].label
 #: illnessdeath/options/subject_id.title
@@ -134465,6 +134920,24 @@ msgstr ""
 
 #: jforester/options/summary_ci_upper.title
 msgid "Summary Upper CI"
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"Summary variable is not numeric. Statistical summaries (mean, SD) may not be "
+"meaningful. Consider selecting a continuous variable."
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Summary Variable Not Found"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Summary variable not found in dataset. Please verify your variable selection."
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Summary Variable Not Numeric"
 msgstr ""
 
 #: aeplot/ui[3].label
@@ -137051,6 +137524,7 @@ msgstr ""
 msgid "Tertiles (Data-Driven)"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: R/decisioncompare.b.R
 #: R/nonparametric.b.R
 #: aalenhazard/results/goodnessOfFit.columns.title
@@ -137129,6 +137603,10 @@ msgstr ""
 #: treatmentmeta/results/pcurve_results.columns.title
 #: weightedlogrank/results/weightedTestsTable.columns.title
 msgid "Test"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "test"
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -137817,6 +138295,10 @@ msgstr ""
 msgid "Test Method for Informative Censoring"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Test method: %s"
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid ""
 "Test names are similar (\"%s\" vs \"%s\"). If tests measure similar "
@@ -138004,6 +138486,10 @@ msgstr ""
 #: bayesiandiagnostic/options/test_results.title
 #: bayesiandiagnostic/ui[0][0].label
 msgid "Test Results Variable"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Test Results:"
 msgstr ""
 
 #: bayesianci/results/robustnessCheck.columns.title
@@ -138495,6 +138981,13 @@ msgid ""
 "use Bootstrap Internal Validation for optimism-corrected discrimination."
 msgstr ""
 
+#: R/vartree.b.R
+msgid ""
+"The 'Prune counts <' threshold has to be a whole number of 2 or more before "
+"it can hide anything, because every displayed node holds at least one case. "
+"The current setting removed no branches."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "The 'rms' package is required for nomogram generation but is not available."
 msgstr ""
@@ -138572,10 +139065,6 @@ msgid ""
 "(%s%% CI: %s--%s). At the optimal cutoff of %.3f, the test achieved %s "
 "sensitivity (%.1f%%) and %s specificity (%.1f%%), resulting in a Youden "
 "Index of %.3f."
-msgstr ""
-
-#: R/ihcheterogeneity.b.R
-msgid "The %s variance estimate was negative and has been truncated to zero."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -138664,6 +139153,10 @@ msgid ""
 "study to demonstrate that agreement is WORSE than the null value, not "
 "better. If you meant to detect an improvement, swap the two values - the "
 "required sample size is not the same either way."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "The analysis cannot proceed"
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -138870,6 +139363,16 @@ msgid ""
 "new data, not a validated recommendation."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"The case and method variance estimates were negative and have been truncated "
+"to zero."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "The case variance estimate was negative and has been truncated to zero."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid ""
 "The chart subtitle still reports an uncorrected Pearson chi-square - no "
@@ -138889,6 +139392,18 @@ msgstr ""
 msgid ""
 "The chart subtitle therefore reports Fisher's exact test instead of the "
 "chi-square."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"The chi-square test could not be computed: %s. Check that both variables are "
+"categorical with valid, nonnegative counts."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"The chi-square test is undefined because of %s. Drop or merge empty "
+"categories and re-run."
 msgstr ""
 
 #: R/jjsegmentedtotalbar.b.R
@@ -138976,10 +139491,30 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid ""
+"The contingency table could not be created. Please check your data format "
+"and variable selections, and ensure the row and column variables are "
+"categorical."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
 "The contingency table generates %d pairwise comparisons, exceeding the "
 "safety threshold of 500. Pairwise comparisons were disabled to avoid "
 "computational freezing and extreme multiple-testing penalties. Please bin "
 "continuous variables or group factor levels."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"The contingency table is empty: no rows are complete on both selected "
+"variables. Check the selected variables, and the counts variable if one is "
+"used."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"The contingency table must have at least 2 rows and 2 columns. Please check "
+"that each variable has at least 2 categories."
 msgstr ""
 
 #: survivalcont/options/contexpl.description
@@ -139020,6 +139555,19 @@ msgstr ""
 msgid ""
 "The correlation summary could not be computed. This is an unavailable "
 "diagnostic, not evidence that collinearity is absent."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"The counts variable '%s' does not exist in the data. Please select a valid "
+"numeric variable for counts."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"The counts variable contains non-integer values. A frequency table needs "
+"whole-number counts; the chi-square statistic was computed on the values as "
+"given, but they do not describe a table of observed cases."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -139186,6 +139734,12 @@ msgid ""
 "settle on the options and remove it for the final table."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid ""
+"The data is being treated as frequency counts. Each row represents a "
+"combination of categories with the specified count/weight."
+msgstr ""
+
 #: jviolin/options/data.description
 msgid "The data to be analyzed"
 msgstr ""
@@ -139248,6 +139802,13 @@ msgstr ""
 
 #: jiwillsurvive/options/data.description.jamovi
 msgid "The dataset for survival analysis."
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"The dataset has no rows, so there is nothing to build a tree from. Check "
+"that a data file is loaded and that any row filters are not excluding every "
+"case."
 msgstr ""
 
 #: R/linechart.b.R
@@ -139830,6 +140391,14 @@ msgid ""
 "identify a cause."
 msgstr ""
 
+#: R/vartree.b.R
+msgid ""
+"The level '{level}' contains characters that cannot be used in a tree "
+"summary; only letters, digits and the symbols ~ @ # ( ) _ | , . are accepted "
+"there. No reference-level percentage is drawn in the nodes. Recode that "
+"level to a name without '+', '-', '/' or '=' to display it."
+msgstr ""
+
 #: R/agepyramid.b.R
 msgid ""
 "The level '{level}' is selected for BOTH the female and the male side, so "
@@ -140017,6 +140586,14 @@ msgid ""
 "that outcomes were good"
 msgstr ""
 
+#: R/venn.b.R
+msgid ""
+"The membership group for each case could not be written back into the "
+"dataset, so no new column has appeared. Everything else in this analysis is "
+"computed separately and is unaffected, and the same assignment is shown in "
+"the Membership Table if you switch it on. Technical detail: %s"
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid "The metafor package is not available, so heterogeneity could not be assessed."
 msgstr ""
@@ -140029,6 +140606,10 @@ msgstr ""
 msgid ""
 "The metafor package is not available, so publication bias could not be "
 "assessed."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "The method variance estimate was negative and has been truncated to zero."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -140297,6 +140878,14 @@ msgstr ""
 msgid "The outcome variable to be used in the analysis."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid ""
+"The overall chi-square test is not significant (p = %s \\u{2265} %g). "
+"Post-hoc pairwise comparisons are only valid when the overall test is "
+"significant: running them after a non-significant omnibus test inflates the "
+"Type I error rate and constitutes data dredging."
+msgstr ""
+
 #: advancedSurvivalPower/options/prob_event.description
 msgid ""
 "The overall probability of observing the event (e.g., death) during the "
@@ -140332,10 +140921,23 @@ msgid ""
 "analysis."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid ""
+"The pairwise comparisons below were computed with the chi-square test and "
+"rest on the same approximation."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "The path legend uses a compact layout and abbreviates long names. Predictor "
 "encoding lists the complete design-column names."
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"The pattern table could not be built for this combination of variables and "
+"options ({reason}). The tree above is unaffected. Try fewer variables, or "
+"switch the pattern table off."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -140600,6 +141202,13 @@ msgid ""
 "different variable for: {variables}."
 msgstr ""
 
+#: R/vartree.b.R
+msgid ""
+"The reference-level percentage printed inside each node uses a different "
+"denominator: that node's count of cases with a non-missing value on the "
+"reference variable. 'mv=N' beside it reports how many cases were left out."
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid ""
 "The Reitsma bivariate model could not be fitted (%s). Pooled sensitivity and "
@@ -140853,6 +141462,15 @@ msgid ""
 "is a change score, or choose a naturally positive measurement."
 msgstr ""
 
+#: R/vartree.b.R
+msgid ""
+"The selected variables allow up to {possible} subgroup combinations "
+"({variables}); {observed} of them contain at least one case. A tree this "
+"wide is hard to read on screen and to print. Consider: (1) using fewer "
+"variables, (2) collapsing variable levels, or (3) using the pruning options "
+"to focus on the larger branches."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "The selected-variable Schoenfeld-residual diagnostic could not be computed. "
@@ -140926,6 +141544,25 @@ msgstr ""
 msgid ""
 "The smaller outcome group has only %.1f%% of observations (%d cases). This "
 "may affect ROC reliability."
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"The smallest subgroup displayed in this tree holds {n} case(s), and mean/SD "
+"for '{variable}' are printed there in the same form as for the large nodes. "
+"SD is undefined for a single case (vtree prints SD=NA) and a mean over two "
+"cases carries almost no precision. Mean and SD also describe only the "
+"non-missing values of '{variable}' within each node, independently of the "
+"missing-value exclusion setting. Read the node count next to each mean "
+"before using it."
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"The smallest subgroup with a percentage in this tree holds {n} case(s). A "
+"percentage based on that many cases moves by a large amount with a single "
+"observation, and it is printed in the same form as a percentage from a large "
+"node. Read the count beside each percentage."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -141236,6 +141873,16 @@ msgstr ""
 msgid "The variable that will appear as columns (groups) in the table."
 msgstr ""
 
+#: R/vartree.b.R
+msgid ""
+"The variable tree could not be generated: {reason}. Try selecting fewer "
+"variables, or adjusting the pruning / follow options."
+msgstr ""
+
+#: R/vartree.b.R
+msgid "The variable tree could not be rendered to SVG: {reason}."
+msgstr ""
+
 #: crosstablepivot/options/group.description.jamovi
 msgid "The variable used for grouping (table columns)."
 msgstr ""
@@ -141414,6 +142061,14 @@ msgstr ""
 msgid ""
 "These are descriptive screening heuristics, not validated clinical cutoffs "
 "or tests of statistical assumptions."
+msgstr ""
+
+#: R/lollipop.b.R
+msgid ""
+"These are descriptive summaries of the plotted values. When aggregation is "
+"selected, each point represents a group summary. Clinical importance "
+"requires a prespecified threshold and appropriate comparison; it cannot be "
+"inferred from the range or standard deviation."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -141596,6 +142251,14 @@ msgid ""
 "Pearson chi-square. The corrected p-value is never the smaller of the two, "
 "so a two-by-two p-value can move to the other side of 0.05 when nothing but "
 "the style is changed. Fisher's exact test does not involve this choice."
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"These variables have more than 12 levels ({levels}), so the tree fans out "
+"into that many branches at that split and every branch below it holds only a "
+"few cases. Consider collapsing rare levels into an 'Other' category, or "
+"using the pruning options."
 msgstr ""
 
 #: R/alluvial.b.R
@@ -142319,6 +142982,12 @@ msgid ""
 "by external validation, before considering clinical use."
 msgstr ""
 
+#: R/raincloud.b.R
+msgid ""
+"This panel reports standardized mean differences only with the t-test. A "
+"rank-based effect size for the Wilcoxon test is not implemented."
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid ""
 "This point scale spans up to %d points per factor, which is too wide to be "
@@ -142505,6 +143174,14 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "This typically indicates:"
+msgstr ""
+
+#: R/vartree.b.R
+msgid ""
+"This variable has more than 12 levels ({levels}), so the tree fans out into "
+"that many branches at that split and every branch below it holds only a few "
+"cases. Consider collapsing rare levels into an 'Other' category, or using "
+"the pruning options."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -144970,7 +145647,6 @@ msgstr ""
 #: treatmentswitching/results/todo.title
 #: tumorgrowth/results/todo.title
 #: vartree/results/todo.title
-#: venn/results/todo.title
 msgid "To Do"
 msgstr ""
 
@@ -145250,6 +145926,7 @@ msgstr ""
 msgid "Tornado Diagram (Sensitivity Analysis)"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: R/decision.b.R
 #: R/decisioncalculator.b.R
 #: R/decisioncombine.b.R
@@ -146875,6 +147552,12 @@ msgstr ""
 msgid "Treatment/observation start time"
 msgstr ""
 
+#: R/vartree.b.R
+msgid ""
+"Tree built from {nvars} categorical variable(s) across N={n} observations. "
+"{combos} combination(s) of those variables occur in the data."
+msgstr ""
+
 #: decisiongraph/ui[0].label
 msgid "Tree Configuration"
 msgstr ""
@@ -147652,6 +148335,10 @@ msgstr ""
 
 #: relativesurvival/options/ratetable/turkey.title
 msgid "Turkey Population (WHO)"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Turn the setting off to see every branch."
 msgstr ""
 
 #: bayesiannetworkma/options/heterogeneity_prior/turner_predictive.title
@@ -148605,6 +149292,10 @@ msgstr ""
 
 #: R/oddsratio.b.R
 msgid "undefined (no positive cases)"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Under-represented"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -151662,6 +152353,10 @@ msgid ""
 "interpreted."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Values shown as: Observed"
+msgstr ""
+
 #: groupedbar/options/values.title
 #: groupedbar/ui[0][2].label
 msgid "Values Variable (Optional)"
@@ -151875,6 +152570,10 @@ msgstr ""
 
 #: R/jjwithinstats.b.R
 msgid "Variable '{name}' not found in data"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Variable '{name}' not found in dataset. Please verify variable selection."
 msgstr ""
 
 #: R/jjbarstats.b.R
@@ -152408,6 +153107,7 @@ msgstr ""
 
 #: R/alluvial.b.R
 #: R/datetimeconverter.b.R
+#: R/vartree.b.R
 msgid "Variable Not Found"
 msgstr ""
 
@@ -152621,6 +153321,10 @@ msgstr ""
 
 #: ihccluster/options/weights.title
 msgid "Variable Weights (optional)"
+msgstr ""
+
+#: R/vartree.b.R
+msgid "Variable With Many Levels"
 msgstr ""
 
 #: R/reportcat.b.R
@@ -153458,6 +154162,10 @@ msgid ""
 "analysis."
 msgstr ""
 
+#: R/venn.b.R
+msgid "Very High Prevalence"
+msgstr ""
+
 #: netreclassification/results/reclassification.columns.title
 msgid "Very High Risk"
 msgstr ""
@@ -153526,6 +154234,13 @@ msgstr ""
 msgid ""
 "Very small sample size (n = {n}). Results may be unreliable. Recommend n ≥ "
 "50 for stable cut-off analysis."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"Very small sample size (n = %d). The chi-square approximation may be "
+"unreliable. Consider using Fisher's exact test and interpreting results with "
+"caution."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -154302,6 +155017,7 @@ msgstr ""
 msgid "Warning Messages"
 msgstr ""
 
+#: R/chisqposttest.b.R
 #: R/swimmerplot.b.R
 msgid "Warning:"
 msgstr ""
@@ -154521,6 +155237,7 @@ msgstr ""
 msgid "We compared {outcome} distributions across {groups} using {method}."
 msgstr ""
 
+#: R/diagnosticmeta.b.R
 #: R/linechart.b.R
 msgid "weak"
 msgstr ""
@@ -154887,6 +155604,10 @@ msgstr ""
 msgid "Weighted Cox Regression"
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Weighted Data Analysis"
+msgstr ""
+
 #: imagingcorrelation/options/integration_method/weighted_fusion.title
 msgid "Weighted Data Fusion"
 msgstr ""
@@ -154917,6 +155638,10 @@ msgstr ""
 
 #: pathagreement/options/wght.title
 msgid "Weighted Kappa (Ordinal Variables only)"
+msgstr ""
+
+#: agreement/ui[2].label
+msgid "Weighted Kappa (Ordinal)"
 msgstr ""
 
 #: cohenskappa/options/kappa_type/quadratic.title
@@ -157163,6 +157888,14 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "You have selected more than two variables."
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"You selected 'None' for the post-hoc method, so no pairwise comparisons were "
+"performed. Pairwise comparisons without p-value adjustment are not offered. "
+"Select Bonferroni, Holm or FDR to run pairwise tests with a multiple-testing "
+"correction."
 msgstr ""
 
 #: R/enhancedROC.b.R

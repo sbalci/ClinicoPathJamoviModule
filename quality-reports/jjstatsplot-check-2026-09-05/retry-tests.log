@@ -1,0 +1,23 @@
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+jjpiestats-correctness: ...................................................
+jjpiestats-edge-cases: ...............................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+TOTALS
+     nb  failed skipped   error warning  passed 
+     82       0       0       0       0      82 

@@ -4,89 +4,87 @@
 
 **SANITIZED_FN**: `ihcheterogeneity`
 
-**Target files analysis**:
-- ✅ `jamovi/ihcheterogeneity.a.yaml` (options)
-- ✅ `jamovi/ihcheterogeneity.u.yaml` (UI)
-- ✅ `jamovi/ihcheterogeneity.r.yaml` (results)
-- ✅ `R/ihcheterogeneity.b.R` (backend)
+**Target files**:
+- `jamovi/ihcheterogeneity.a.yaml` (options)
+- `jamovi/ihcheterogeneity.u.yaml` (UI)
+- `jamovi/ihcheterogeneity.r.yaml` (results)
+- `R/ihcheterogeneity.b.R` (backend)
 
-All required files are verified and present in the package codebase.
+All required files are verified and present in both `OncoPath` and `ClinicoPathJamoviModule`.
 
 ---
 
 ## 1) NAMESPACE i18n Hook Status
 
-✅ **ALREADY CONFIGURED**: `NAMESPACE` contains `import(jmvcore)` and `importFrom(jmvcore, .)`, enabling runtime internationalization and extraction.
+`NAMESPACE` contains `import(jmvcore)` and `importFrom(jmvcore, .)`, enabling runtime internationalization and extraction.
 
 ---
 
-## 2) Translatable String Analysis
+## 2) Translatable String Analysis & Wrapping Status
 
-### 2.1 Current State Assessment
-- ✅ All user-visible strings in `R/ihcheterogeneity.b.R` and YAML definitions are wrapped in `.(...)` or declared in schemas.
-- ✅ Error notices, warning banners, and clinical interpretations use proper placeholder tokens `{var}`, `{n}`, etc.
-- ✅ Programmatic identifiers, column keys, formulas, and factor codes remain un-wrapped.
+- All user-visible strings in `R/ihcheterogeneity.b.R` and YAML definitions are wrapped in `.(...)`.
+- Spliced variance truncation message refactored into complete translatable sentence alternatives for case, method, and joint truncation.
+- Spliced `paste(.("Could not compute:"), ...)` refactored into `sprintf(.("Could not compute: %s"), ...)`.
+- Error notices, warning banners, and clinical interpretations use proper placeholder tokens (`%s`, `%.1f`, `%d`, etc.).
 
 ---
 
 ## 3) Extraction & Update Commands
 
 ```r
-# In R console at package root:
-jmvtools::i18nCreate("en")
-jmvtools::i18nUpdate("en")
-jmvtools::i18nCreate("tr")
+# At package root:
 jmvtools::i18nUpdate("tr")
 ```
 
 ---
 
-## 4) Turkish Translation Dictionary
+## 4) Representative Turkish Translation Dictionary (ihcheterogeneity)
 
-| English (msgid) | Suggested Turkish (TR) | Context / Notes |
+| English (msgid) | Turkish (TR) Equivalent | Context / Notes |
 | :--- | :--- | :--- |
-| `IHC Heterogeneity Analysis` | `İHK Heterojenite Analizi` | Başlık |
-| `Overall / Whole Slide / HotSpot (Optional)` | `Overall / Whole Slide / HotSpot (Optional)` | Seçenek başlığı |
-| `Regional Measurement 1 (Required)` | `Regional Measurement 1 (Required)` | Seçenek başlığı |
-| `Regional Measurement 2 (Optional)` | `Regional Measurement 2 (Optional)` | Seçenek başlığı |
-| `Regional Measurement 3 (Optional)` | `Regional Measurement 3 (Optional)` | Seçenek başlığı |
-| `Regional Measurement 4 (Optional)` | `Regional Measurement 4 (Optional)` | Seçenek başlığı |
-| `Additional Regional Measurements` | `Additional Regional Measurements` | Seçenek başlığı |
-| `Spatial Region ID (Optional)` | `Spatial Region ID (Optional)` | Seçenek başlığı |
-| `Spatial compartment comparison` | `Spatial compartment comparison` | Seçenek başlığı |
-| `Compartment comparison tests` | `Compartment comparison tests` | Seçenek başlığı |
-| `Analysis Focus` | `Analysis Focus` | Seçenek başlığı |
-| `Sampling Strategy` | `Sampling Strategy` | Seçenek başlığı |
-| `CV Threshold for Acceptable Variability` | `CV Threshold for Acceptable Variability` | Seçenek başlığı |
-| `Minimum Acceptable Correlation` | `Minimum Acceptable Correlation` | Seçenek başlığı |
-| `Variability plots` | `Variability plots` | Seçenek başlığı |
-| `Variance component analysis` | `Variance component analysis` | Seçenek başlığı |
-| `Power analysis` | `Power analysis` | Seçenek başlığı |
-| `Clinical recommendations` | `Clinical recommendations` | Seçenek başlığı |
-| `Plain-language summary` | `Plain-language summary` | Seçenek başlığı |
-| `Statistical glossary` | `Statistical glossary` | Seçenek başlığı |
+| `IHC Heterogeneity Analysis` | `IHC Heterojenlik Analizi` | Analiz Başlığı |
+| `Overall / Whole Slide / HotSpot (Optional)` | `Genel / Bütün Kesit / HotSpot (İsteğe Bağlı)` | Referans değişkeni |
+| `Regional Measurement 1 (Required)` | `Bölgesel Ölçüm 1 (Gerekli)` | Bölgesel girdi |
+| `Regional Measurement 2 (Optional)` | `Bölgesel Ölçüm 2 (İsteğe Bağlı)` | Bölgesel girdi |
+| `Additional Regional Measurements` | `Ek Bölgesel Ölçümler` | Çoklu bölge |
+| `Spatial Region ID (Optional)` | `Uzamsal Bölge Kimliği (İsteğe Bağlı)` | Uzamsal girdi |
+| `Spatial compartment comparison` | `Uzamsal kompartman karşılaştırması` | Kompartman seçeneği |
+| `Compartment comparison tests` | `Kompartman karşılaştırma testleri` | İstatistiksel test |
+| `CV Threshold for Acceptable Variability` | `Kabul Edilebilir Değişkenlik için CV Eşiği` | Kalite kriteri |
+| `Minimum acceptable correlation` | `Asgari kabul edilebilir korelasyon` | Kalite kriteri |
+| `Variability plots` | `Değişkenlik grafikleri` | Görselleştirme |
+| `Variance Component Analysis` | `Varyans Bileşeni Analizi` | Varyans ayrıştırması |
+| `Power analysis` | `Güç analizi` | Örneklem yeterliliği |
+| `Clinical recommendations` | `Klinik öneriler` | Karar desteği |
+| `Plain-language summary` | `Sade dilde özet` | Anlatım |
+| `Statistical glossary` | `İstatistiksel sözlük` | Kılavuz |
+| `Between-Case Variance` | `Vakalar Arası Varyans` | Biyolojik değişkenlik |
+| `Within-Case Variance (Sampling)` | `Vaka İçi Varyans (Örnekleme)` | Örnekleme hatası |
+| `Method Variance` | `Yöntem Varyansı` | Yöntemsel yanlılık |
+| `Reproducibility & Bias Assessment` | `Tekrarlanabilirlik ve Yanlılık Değerlendirmesi` | Tablo başlığı |
 
 ---
 
 ## 5) Consistency & Glossary (TR)
 
 ```text
-Confidence Interval (CI) → Güven Aralığı (GA)
-Hazard Ratio (HR) → Tehlike Oranı (TO)
-Odds Ratio (OR) → Odds Oranı (OO)
-Sensitivity / Specificity → Duyarlılık / Özgüllük
-p-value → p-değeri
-Sample size (n) → Örneklem büyüklüğü (n)
-Median / Mean → Medyan / Ortalama
-Survival probability → Sağkalım olasılığı
+Immunohistochemistry (IHC) → İmmünohistokimya (IHC)
+Intratumoral heterogeneity → İntratümöral heterojenlik
+Coefficient of Variation (CV) → Varyasyon Katsayısı (CV) [%.. CV]
+Intraclass Correlation Coefficient (ICC) → Sınıf içi Korelasyon Katsayısı (ICC)
+Whole section → Bütün kesit
+Spatial compartment → Uzamsal kompartman
+Two-way random-effects decomposition → İki yönlü rastgele etkiler ayrıştırması
+Brown-Forsythe test → Brown-Forsythe testi
+Kruskal-Wallis Test → Kruskal-Wallis Testi
 ```
 
 ---
 
 ## 6) QA Checklist
 
-- [x] User-facing strings in `R/ihcheterogeneity.b.R` properly wrapped in `.(...)`.
-- [x] Schema files (`.a.yaml`, `.u.yaml`, `.r.yaml`) synchronized with backend.
-- [x] Turkish terminology conforms to clinical and statistical guidelines.
-- [x] Catalogs updated via `jmvtools::i18nUpdate()`.
-
+- [x] All 364 entries in `ihcheterogeneity` translated in `tr.po`.
+- [x] Spliced variance truncation strings refactored into complete alternatives.
+- [x] Verified `msgfmt -c -v` passes with 0 errors.
+- [x] Verified 0 `msgctxt` bracket-tail traps.
+- [x] Zero drift between `OncoPath` and `ClinicoPathJamoviModule`.

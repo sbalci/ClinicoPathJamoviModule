@@ -214,6 +214,13 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 # Get the data - ggstatsplot handles NAs internally
                 mydata <- self$data
 
+                for (v in vars) {
+                    x <- jmvcore::toNumeric(mydata[[v]])
+                    if (!is.numeric(x)) jmvcore::reject("Histogram variables must be numeric.")
+                    x[!is.finite(x)] <- NA_real_
+                    mydata[[v]] <- x
+                }
+
                 # Cache the processed data
                 private$.processedData <- mydata
                 return(mydata)
@@ -317,10 +324,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 # Reachable in one click, because every clinical preset forces centralityline on.
                 for (v in self$options$dep) {
                     if (!v %in% names(self$data)) next
-                    n_ok <- sum(!is.na(self$data[[v]]))
+                    n_ok <- sum(is.finite(jmvcore::toNumeric(self$data[[v]])))
                     if (n_ok < 3)
                         return(list(valid = FALSE, message = paste0(
-                            "Variable '", v, "' has ", n_ok, " non-missing value",
+                            "Variable '", v, "' has ", n_ok, " finite numeric value",
                             if (n_ok == 1) "" else "s",
                             ". A histogram needs at least 3. Check the variable selection and any ",
                             "active row filters.")))
@@ -464,7 +471,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                     if (length(var_data) < 3) {
                         warnings <- c(warnings, paste0(
-                            " <strong>Only ", length(var_data), " non-missing value",
+                            " <strong>Only ", length(var_data), " finite numeric value",
                             if (length(var_data) == 1) "" else "s", " for '",
                             htmltools::htmlEscape(var), "'.</strong> ",
                             "A histogram needs a range of values to bin; the panel will be empty or ",

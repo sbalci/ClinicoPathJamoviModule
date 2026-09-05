@@ -54,7 +54,7 @@ test_that("Glass's delta confidence interval uses the Hedges & Olkin standard er
     x <- d$y[d$g == "Control"]; y <- d$y[d$g == "Treated"]
     n1 <- length(x); n2 <- length(y)
     delta <- (mean(x) - mean(y)) / sd(y)
-    se <- sqrt((n1 + n2) / (n1 * n2) + delta^2 / (2 * (n2 - 1)))
+    se <- sqrt(var(x) / (n1 * var(y)) + 1 / n2 + delta^2 / (2 * (n2 - 1)))
 
     res <- advancedraincloud(data = d, y_var = "y", x_var = "g",
                              show_effect_size = TRUE, effect_size_type = "glass_delta")

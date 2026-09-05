@@ -258,7 +258,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Validate Y variable (must be numeric)
             y_data <- jmvcore::toNumeric(data[[yvar]])
-            if (all(is.na(y_data))) {
+            if (!is.numeric(y_data) || all(is.na(y_data))) {
                 jmvcore::reject(.("Y-axis variable must be numeric (continuous variable)."))
             }
             data[[yvar]] <- y_data
@@ -414,7 +414,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             x_data <- data[[xvar]]
             y_data <- data[[yvar]]
 
-            if (is.numeric(x_data)) {
+            if (is.numeric(x_data) && length(unique(x_data)) >= 2) {
                 # NAIVE STATISTICS (assume independence - for reference only)
                 # Pearson correlation
                 cor_result <- cor.test(x_data, y_data, method = "pearson")
@@ -477,7 +477,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             } else {
                 # For categorical X, calculate trend test if ordered
-                if (is.ordered(x_data) || is.factor(x_data)) {
+                if ((is.ordered(x_data) || is.factor(x_data)) && length(unique(x_data)) >= 2) {
                     # Jonckheere-Terpstra trend test would be ideal here
                     # For now, use basic ANOVA
                     anova_result <- anova(lm(y_data ~ x_data))
@@ -673,7 +673,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Add caution if needed
             if (has_repeated_measures) {
-                copy_ready <- paste0(copy_ready, " ", .("Note: Results should be interpreted with caution as repeated measures were detected, violating the independence assumption."))
+                copy_ready <- paste0(copy_ready, " ", .("Note: Results should be interpreted with caution as repeated X values were observed. This does not identify repeated subjects; verify whether observations are independent."))
             } else if (has_grouping) {
                 copy_ready <- paste0(copy_ready, " ", .("Note: Results should be interpreted with caution as grouped data may mask within-group patterns."))
             } else if (is_significant) {

@@ -52,6 +52,9 @@ children:
         margin: large
         children:
           - type: TextBox
+            name: seed
+            format: number
+          - type: TextBox
             name: conflevel
             format: number
           - type: TextBox

@@ -1228,7 +1228,15 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
 
                 return(stats_html)
             },
+            .hasRepeatedSubjects = function(data) {
+                id <- self$options$id_var
+                !is.null(id) && nzchar(id) && id %in% names(data) &&
+                    anyDuplicated(data[[id]][!is.na(data[[id]])]) > 0
+            },
             .generate_comparisons = function(data, y_var, x_var, fill_var) {
+                if (private$.hasRepeatedSubjects(data))
+                    return(list(html = "<p>Repeated subject IDs detected. Independent-group tests are not appropriate. Use jjwithinstats or a repeated-measures model for inference; the descriptive plot and change scores remain available.</p>", stats = NULL))
+
                 group_var <- if (!is.null(fill_var) && fill_var != "") fill_var else x_var
                 groups <- levels(as.factor(data[[group_var]]))
                 n_groups <- length(groups)
@@ -1251,7 +1259,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     test_name <- "Wilcoxon rank-sum test"
                     test_stat <- round(test_result$statistic, 4)
                     raw_p <- test_result$p.value
-                    p_value <- round(raw_p, 4)
+                    p_value <- private$.format_p_value(raw_p)
                     test_details <- paste0("W = ", test_stat)
                 } else {
                     # Multiple groups - use Kruskal-Wallis
@@ -1261,13 +1269,13 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     test_name <- "Kruskal-Wallis test (omnibus only)"
                     test_stat <- round(kw_result$statistic, 4)
                     raw_p <- kw_result$p.value
-                    p_value <- round(raw_p, 4)
+                    p_value <- private$.format_p_value(raw_p)
                     test_details <- paste0("\u{03C7}\u{00B2} = ", test_stat, ", df = ", kw_result$parameter)
                     df_value <- kw_result$parameter
                 }
 
                 # Format results
-                significance <- if (p_value < 0.001) "Highly significant (***)" else if (p_value < 0.01) "Very significant (**)" else if (p_value < 0.05) "Significant (*)" else "Not significant"
+                significance <- if (!is.finite(raw_p)) "Not estimable" else if (raw_p < 0.05) "Evidence against the null at 0.05" else "No evidence against the null at 0.05"
 
                 # Add warning for Kruskal-Wallis about missing post-hoc tests
                 post_hoc_warning <- ""
@@ -1400,6 +1408,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 return(data)
             },
             .generate_effect_sizes = function(data, y_var, x_var, effect_type) {
+                if (private$.hasRepeatedSubjects(data))
+                    return("<p>Independent-group effect-size intervals are omitted because subject IDs repeat. Use a paired effect-size analysis that accounts for within-subject covariance.</p>")
+
                 groups <- unique(data[[x_var]])
                 n_groups <- length(groups)
 
@@ -1547,7 +1558,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     J <- 1 - (3 / (4 * (n1 + n2 - 2) - 1))
                     effect_size <- d * J
                     # Standard error for Hedges' g (same as Cohen's d)
-                    se <- sqrt((n1 + n2) / (n1 * n2) + effect_size^2 / (2 * (n1 + n2)))
+                    se <- J * sqrt((n1 + n2) / (n1 * n2) + d^2 / (2 * (n1 + n2)))
                 } else if (type == "glass_delta") {
                     # Glass's delta uses ONLY control group (group2) SD
 
@@ -1561,18 +1572,11 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     }
 
                     effect_size <- (mean1 - mean2) / sd2
-                    # Glass's delta standardises by the CONTROL SD only, but both
-                    # group means still carry sampling error, so the first term is
-                    # (n1+n2)/(n1*n2) = 1/n1 + 1/n2 - not 1/n2 alone. The previous
-                    # `n1/(n1*n2)` simplifies to 1/n2 and dropped the treatment
-                    # group's contribution entirely, and the second denominator
-                    # used 2*n2 rather than 2*(n2-1). Measured at n1=n2=20,
-                    # delta=0.8: SE 0.2569 against the correct 0.3418, i.e. a
-                    # confidence interval only 75% as wide as it should be, so the
-                    # estimate looked far more precise than it is.
-                    # Hedges & Olkin (1985), Statistical Methods for Meta-Analysis.
+                    # Delta-method variance: both mean variances divided by
+                    # the control variance, plus uncertainty in the control SD.
                     se <- if (n2 > 1)
-                        sqrt((n1 + n2) / (n1 * n2) + effect_size^2 / (2 * (n2 - 1)))
+                        sqrt(sd1^2 / (n1 * sd2^2) + 1 / n2 +
+                             effect_size^2 / (2 * (n2 - 1)))
                     else NA_real_
                 }
 
@@ -1635,7 +1639,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
 
                 original_n <- nrow(data)
                 required_vars <- c(id_var, x_var, y_var)
-                complete_data <- data[complete.cases(data[required_vars]), ]
+                complete_data <- data[complete.cases(data[required_vars]) & is.finite(data[[y_var]]), , drop = FALSE]
                 excluded_n <- original_n - nrow(complete_data)
 
                 cleaning_report <- ""
@@ -1674,6 +1678,12 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     ))
                 }
 
+                if (anyDuplicated(complete_data[c(id_var, x_var)]) > 0) {
+                    return(list(html = paste0(cleaning_report,
+                        "<p>Change scores require one observation per subject and time point. Resolve duplicate subject/time records before analysis.</p>"),
+                        summary = NULL))
+                }
+
                 id_counts <- table(complete_data[[id_var]])
                 if (all(id_counts == 1)) {
                     return(list(
@@ -1690,7 +1700,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
 
                 level_index <- setNames(seq_along(levels(complete_data[[x_var]])), levels(complete_data[[x_var]]))
                 baseline_data <- complete_data[complete_data[[x_var]] == baseline_group, ]
-                followup_data <- complete_data[complete_data[[x_var]] != baseline_group, ]
+                followup_data <- complete_data[
+                    level_index[as.character(complete_data[[x_var]])] > level_index[[baseline_group]],
+                    , drop = FALSE]
 
                 if (nrow(baseline_data) == 0 || nrow(followup_data) == 0) {
                     return(list(
@@ -1750,7 +1762,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 responders <- paired_data %>%
                     dplyr::mutate(
                         responder = dplyr::case_when(
-                            is.na(.data$percent_change) ~ FALSE,
+                            is.na(.data$percent_change) ~ NA,
                             threshold >= 0 ~ .data$percent_change >= threshold_value,
                             TRUE ~ .data$percent_change <= -threshold_value
                         ),
@@ -1768,6 +1780,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     )
 
                 n_total <- nrow(responders)
+                n_evaluable <- sum(!is.na(responders$responder))
                 n_responders <- sum(responders$responder, na.rm = TRUE)
                 n_improvers <- sum(responders$increased, na.rm = TRUE)
                 n_decliners <- sum(responders$decreased, na.rm = TRUE)
@@ -1780,7 +1793,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 median_change <- round(median(responders$change_score, na.rm = TRUE), 3)
                 sd_change <- round(sd(responders$change_score, na.rm = TRUE), 3)
 
-                threshold_label <- paste0(ifelse(threshold >= 0, ">=", "<="), threshold_value)
+                threshold_label <- paste0(ifelse(threshold >= 0, ">=", "<="), threshold)
 
                 html <- paste0(
                     cleaning_report,
@@ -1805,7 +1818,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     "<h4>", .("Response Categories"), "</h4>",
                     "<table style='width: 100%; border-collapse: collapse;'>",
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Responders ("), threshold_label, "% change):</strong></td>",
-                    "<td style='padding: 8px; border: 1px solid #ddd;'>", n_responders, " (", pct_fmt(n_responders), "%)</td></tr>",
+                    "<td style='padding: 8px; border: 1px solid #ddd;'>", n_responders, " / ", n_evaluable, " evaluable (",
+                    if (n_evaluable > 0) round(100 * n_responders / n_evaluable, 1) else "not estimable",
+                    "%)</td></tr>",
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Increased from baseline:"), "</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #ddd;'>", n_improvers, " (", pct_fmt(n_improvers), "%)</td></tr>",
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Decreased from baseline:"), "</strong></td>",
@@ -1814,7 +1829,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     "<td style='padding: 8px; border: 1px solid #ddd;'>", n_stable, " (", pct_fmt(n_stable), "%)</td></tr>",
                     "</table>",
                     "<p style='font-size: 12px; color: #856404; margin-top: 15px;'>",
-                    "<em>", .("Analysis based on complete paired observations. Change scores calculated as (Follow-up - Baseline) values."), "</em>",
+                    "<em>", .("Analysis uses each subject’s last available level after baseline, according to the group factor order. Change = follow-up minus baseline; percent change = 100 × change / absolute baseline. Zero baselines are excluded from the response percentage denominator. These thresholds describe change and do not establish clinical benefit."), "</em>",
                     "</p></div>"
                 )
 
@@ -1822,6 +1837,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     baseline_group = baseline_group,
                     n_total = n_total,
                     n_responders = n_responders,
+                    n_evaluable = n_evaluable,
                     n_improvers = n_improvers,
                     n_decliners = n_decliners,
                     n_stable = n_stable,
@@ -2045,7 +2061,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     return(p)
                 }
 
-                label <- paste0("p = ", stats$label)
+                label <- paste0("p ", if (startsWith(as.character(stats$label), "<")) "" else "= ", stats$label)
                 if (position == "above") {
                     y_max <- max(data[[y_var]], na.rm = TRUE)
                     y_pos <- y_max + diff(range(data[[y_var]], na.rm = TRUE)) * 0.1

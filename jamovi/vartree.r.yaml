@@ -15,6 +15,7 @@ items:
         - summaryvar
         - summarylocation
         - style
+        - palette
         - prunebelow
         - pruneLevel1
         - pruneLevel2
@@ -53,6 +54,7 @@ items:
         - summaryvar
         - summarylocation
         - style
+        - palette
         - prunebelow
         - pruneLevel1
         - pruneLevel2
@@ -88,6 +90,7 @@ items:
         - summaryvar
         - summarylocation
         - style
+        - palette
         - prunebelow
         - pruneLevel1
         - pruneLevel2
@@ -123,6 +126,7 @@ items:
         - summaryvar
         - summarylocation
         - style
+        - palette
         - prunebelow
         - pruneLevel1
         - pruneLevel2
@@ -158,6 +162,7 @@ items:
         - summaryvar
         - summarylocation
         - style
+        - palette
         - prunebelow
         - pruneLevel1
         - pruneLevel2

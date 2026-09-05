@@ -45,7 +45,7 @@ test_that("the panel states that n is the number of groups, not observations", {
     res <- jjdotchart(data = dc_skew(), dep = "v", group = "g", testvalue = 12)
     n <- dc_notices(res)
     expect_match(n, "3 groups is reduced to one point")
-    expect_match(n, "2 degrees of freedom")
+    expect_match(n, "3 group summaries")
     expect_match(n, "90 observations")
     expect_match(n, "does not compare the groups with each other")
 })
@@ -175,7 +175,7 @@ test_that("infinite values are excluded and disclosed", {
 test_that("fewer than three groups is warned about, and one group is rejected", {
     d2 <- droplevels(subset(dc_skew(), g %in% c("A", "B")))
     expect_match(dc_notices(jjdotchart(data = d2, dep = "v", group = "g", testvalue = 12)),
-                 "very little power")
+                 "inference from their summaries is imprecise")
 
     d1 <- droplevels(subset(dc_skew(), g == "A"))
     n1 <- dc_notices(jjdotchart(data = d1, dep = "v", group = "g", testvalue = 12))

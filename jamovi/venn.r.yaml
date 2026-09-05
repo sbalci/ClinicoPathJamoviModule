@@ -71,10 +71,6 @@ items:
       title: "Welcome"
       type: Html
 
-    - name:  todo
-      title: To Do
-      type:  Html
-
     - title: Summary of True Counts
       name: summary
       type: Table
@@ -107,11 +103,6 @@ items:
       type: Html
       visible: false
 
-    - name: analysisInfo
-      title: "Analysis Information"
-      type: Html
-      visible: false
-
     - title: ggvenn Plot
       name: plotGgvenn
       type: Image
@@ -133,6 +124,8 @@ items:
       visible: (show_ggVennDiagram)
       refs:
         - ggVennDiagram
+        - viridis
+        - RColorBrewer
 
     - title: UpSetR Plot
       name: plotUpsetR
@@ -218,6 +211,12 @@ items:
       title: "Statistical Glossary"
       type: Html
       visible: (showGlossary)
+
+    # INFO-level confirmation: bottom of the results, below everything it describes.
+    - name: analysisInfo
+      title: "Analysis Information"
+      type: Html
+      visible: false
 
 refs:
     - ClinicoPathJamoviModule

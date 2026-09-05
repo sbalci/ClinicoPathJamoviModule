@@ -1,9 +1,11 @@
 
 # Manually source the files since we are running tests without full package load
 if (file.exists("../../R/categorize.h.R")) {
+  source("../../R/utils.R")   # .fmt(), used by the notice/error boxes
   source("../../R/categorize.h.R")
   source("../../R/categorize.b.R")
 } else if (file.exists("R/categorize.h.R")) {
+  source("R/utils.R")
   source("R/categorize.h.R")
   source("R/categorize.b.R")
 }
@@ -183,4 +185,42 @@ test_that("generated categorize code safely quotes names and custom labels", {
     c("O'Brien", "path\\root", "line one\nline two")
   )
   expect_true("risk group" %in% names(env$data))
+})
+
+test_that("categorize handles variable names with spaces, punctuation and Unicode", {
+  skip_if_not_installed("jmvReadWrite")
+  set.seed(7)
+  d <- data.frame(
+    "Ki-67 (%)"      = round(runif(60, 0, 100), 1),
+    "ya\u015f / age" = rnorm(60, 60, 10),
+    "O'Brien score"  = rnorm(60),
+    check.names = FALSE
+  )
+  unescape <- function(h) {
+    h <- gsub("<[^>]*>", "", h)
+    ents <- c("&lt;" = "<", "&gt;" = ">", "&quot;" = "\"", "&#39;" = "'", "&amp;" = "&")
+    for (e in names(ents)) h <- gsub(e, ents[[e]], h, fixed = TRUE)
+    h
+  }
+  for (v in names(d)) {
+    # do.call(): a bare symbol would be resolved as the column name "v"
+    res <- do.call(categorize, list(
+      data = d, var = v, method = "quantile", nbins = 4,
+      showcode = TRUE, showplot = FALSE))
+    ft <- res$freqTable$asDF
+    expect_equal(nrow(ft), 4, info = v)
+    expect_equal(sum(ft$n), 60, info = v)
+    expect_true(grepl(v, res$summaryText$content, fixed = TRUE) ||
+                grepl(htmltools::htmlEscape(v), res$summaryText$content, fixed = TRUE),
+                info = v)
+
+    # The generated R code must be valid R and reproduce the same counts.
+    code <- unescape(res$rcode$content)
+    env <- new.env(parent = globalenv())  # user-session semantics: stats attached
+    env$data <- d
+    expect_error(eval(parse(text = code), envir = env), NA, info = v)
+    newcol <- paste0(v, "_cat")
+    expect_true(newcol %in% names(env$data), info = v)
+    expect_equal(as.integer(table(env$data[[newcol]])), ft$n, info = v)
+  }
 })

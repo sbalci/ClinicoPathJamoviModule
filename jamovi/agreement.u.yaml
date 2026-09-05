@@ -33,7 +33,7 @@ children:
             events:
               change: ./agreement.events::onChange_confLevel
   - type: CollapseBox
-    label: Weighted Kappa [Ordinal]
+    label: Weighted Kappa (Ordinal)
     collapsed: false
     children:
       - type: LayoutBox
@@ -46,7 +46,7 @@ children:
           - type: CheckBox
             name: showLevelInfo
   - type: CollapseBox
-    label: Krippendorff's Alpha [Any Data Type]
+    label: Krippendorff's Alpha (Any Data Type)
     collapsed: true
     children:
       - type: LayoutBox
@@ -74,7 +74,7 @@ children:
           - type: CheckBox
             name: showLightKappaGuide
   - type: CollapseBox
-    label: Gwet's AC1/AC2 [Categorical/Ordinal]
+    label: Gwet's AC1/AC2 (Categorical/Ordinal)
     collapsed: true
     children:
       - type: LayoutBox
@@ -88,7 +88,7 @@ children:
           - type: CheckBox
             name: showGwetGuide
   - type: CollapseBox
-    label: PABAK & Prevalence/Bias Indices [2 Raters]
+    label: PABAK & Prevalence/Bias Indices (2 Raters)
     collapsed: true
     children:
       - type: LayoutBox
@@ -363,7 +363,7 @@ children:
           - type: CheckBox
             name: showConfusionMatrixGuide
   - type: CollapseBox
-    label: Bootstrap Confidence Intervals [Any Data Type]
+    label: Bootstrap Confidence Intervals (Any Data Type)
     collapsed: true
     children:
       - type: LayoutBox
@@ -477,7 +477,7 @@ children:
           - type: CheckBox
             name: showInterIntraRaterGuide
   - type: CollapseBox
-    label: Create Consensus Variable [Any Data Type]
+    label: Create Consensus Variable (Any Data Type)
     collapsed: true
     children:
       - type: LayoutBox
@@ -494,7 +494,7 @@ children:
           - type: Output
             name: consensusVar
   - type: CollapseBox
-    label: Case Agreement Categorization [Any Data Type]
+    label: Case Agreement Categorization (Any Data Type)
     collapsed: true
     children:
       - type: LayoutBox
@@ -685,7 +685,7 @@ children:
           - type: CheckBox
             name: showPairedAgreementGuide
   - type: CollapseBox
-    label: Sample Size for Agreement Study [Design]
+    label: Sample Size for Agreement Study (Design)
     collapsed: true
     children:
       - type: LayoutBox

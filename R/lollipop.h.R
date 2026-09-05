@@ -296,7 +296,7 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lollipop",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = lollipopResults$new(options=options),
                 data = data,
@@ -328,7 +328,8 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sortBy How to sort the lollipops in the chart.
 #' @param orientation Chart orientation (vertical or horizontal lollipops).
 #' @param showValues Whether to display value labels on the lollipops.
-#' @param showMean Whether to display a reference line at the mean value.
+#' @param showMean Whether to display a reference line at the mean of the
+#'   plotted values (group summaries when aggregation is selected).
 #' @param colorScheme Base color hue for the lollipops. The lollipop chart
 #'   draws a single data series, so the scheme sets one base color (the first
 #'   color of the chosen palette) rather than mapping a different color to each

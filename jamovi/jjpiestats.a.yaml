@@ -1,10 +1,10 @@
 ---
 name:  jjpiestats
 title: Pie Charts
-menuGroup: JJStatsPlot
+menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: 'Pie Charts'
-version: '1.0.8'
+version: '1.0.9'
 jas: '1.2'
 
 

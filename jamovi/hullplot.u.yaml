@@ -53,7 +53,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: Hull Shape (0 = curved boundaries, 2 = straight edges)
+            label: Hull shape (lower values follow the points more closely)
             children:
               - type: TextBox
                 name: hull_concavity
@@ -145,7 +145,7 @@ children:
         children:
           - type: CheckBox
             name: confidence_ellipses
-            label: 95% confidence ellipses around groups
+            label: 95% data ellipses around groups
           - type: CheckBox
             name: show_statistics
             label: Group statistics table (means, sample sizes)

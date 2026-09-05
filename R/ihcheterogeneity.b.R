@@ -880,9 +880,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             var_method <- (ms_method - ms_error) / n
             var_error  <- ms_error
 
-            # A negative estimate means the model attributes no variance to that
-            # source; the conventional fix is to truncate at zero and disclose it.
-            truncated <- c("case", "method")[c(var_case < 0, var_method < 0)]
+            trunc_case <- var_case < 0
+            trunc_method <- var_method < 0
             var_case   <- max(var_case, 0)
             var_method <- max(var_method, 0)
 
@@ -894,10 +893,16 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (sum(!keep) > 0)
                 notes <- paste0(notes, " ", sprintf(
                     .("%d case(s) with an incomplete set of measurements were excluded."), sum(!keep)))
-            if (length(truncated) > 0)
-                notes <- paste0(notes, " ", sprintf(
-                    .("The %s variance estimate was negative and has been truncated to zero."),
-                    paste(truncated, collapse = " and ")))
+            if (trunc_case && trunc_method) {
+                notes <- paste0(notes, " ",
+                    .("The case and method variance estimates were negative and have been truncated to zero."))
+            } else if (trunc_case) {
+                notes <- paste0(notes, " ",
+                    .("The case variance estimate was negative and has been truncated to zero."))
+            } else if (trunc_method) {
+                notes <- paste0(notes, " ",
+                    .("The method variance estimate was negative and has been truncated to zero."))
+            }
             variance_table$setNote("vc", notes)
 
             pct <- function(x) if (total_variance > 0) x / total_variance * 100 else NA_real_
@@ -2753,7 +2758,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             statistic = NA,
                             df = NA_integer_,
                             p_value = NA,
-                            interpretation = paste(.("Could not compute:"), htmltools::htmlEscape(conditionMessage(e)))
+                            interpretation = sprintf(.("Could not compute: %s"), htmltools::htmlEscape(conditionMessage(e)))
                         ))
                     })
                     # Increment once after either branch (avoids `<<-` in the handler).

@@ -519,7 +519,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjwithinstats",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = jjwithinstatsResults$new(options=options),
                 data = data,

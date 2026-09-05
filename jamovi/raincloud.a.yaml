@@ -3,7 +3,7 @@ name: raincloud
 title: Raincloud Plot
 menuGroup: JJStatsPlotT
 menuSubgroup: Categorical vs Continuous
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -341,7 +341,7 @@ options:
           name: iqr
         - title: "Z-Score"
           name: zscore
-        - title: "Modified Z-Score"
+        - title: "Modified Z-Score (unscaled MAD)"
           name: modified_zscore
       default: iqr
       description:

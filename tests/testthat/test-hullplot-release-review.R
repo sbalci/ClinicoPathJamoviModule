@@ -86,11 +86,11 @@ test_that("an infinite value cannot flip the separation verdict", {
     d <- data.frame(x = rnorm(40), y = rnorm(40),
                     group = factor(rep(c("A", "B"), each = 20)))
     honest <- hp_text(hp_run(d)$results$summary$content)
-    expect_match(honest, "Groups appear overlapping")
+    expect_match(honest, "Standardized centroid separation is described as overlapping")
 
     d$x[1] <- Inf
     poisoned <- hp_text(hp_run(d)$results$summary$content)
-    expect_match(poisoned, "Groups appear overlapping")
+    expect_match(poisoned, "Standardized centroid separation is described as overlapping")
     expect_false(grepl("well-separated", poisoned, fixed = TRUE))
 })
 
@@ -188,7 +188,7 @@ test_that("a single group does not get a comparative conclusion", {
     # two groups keep the comparative wording
     txt2 <- hp_text(hp_run()$results$summary$content)
     expect_match(txt2, "revealed 2 distinct groups", fixed = TRUE)
-    expect_match(txt2, "Groups appear ", fixed = TRUE)
+    expect_match(txt2, "Standardized centroid separation is described as ", fixed = TRUE)
 })
 
 

@@ -4,7 +4,7 @@ title: Correlation Matrix
 menuGroup: JJStatsPlotT
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Correlation Matrix
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 
@@ -146,8 +146,8 @@ options:
       title: Confidence Level
       type: Number
       default: 0.95
-      min: 0
-      max: 1
+      min: 0.5
+      max: 0.999
       description:
           R: >
             Confidence level for confidence intervals.

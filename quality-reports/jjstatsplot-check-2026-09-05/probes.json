@@ -1,0 +1,51 @@
+{
+  "bar_preset_diagnostic": {
+    "overrides": [],
+    "effective": {
+      "resultssubtitle": false,
+      "pairwisecomparisons": false,
+      "typestatistics": "parametric",
+      "proportiontest": false
+    }
+  },
+  "bar_preset_treatment": {
+    "overrides": [],
+    "effective": {
+      "resultssubtitle": false,
+      "pairwisecomparisons": false,
+      "typestatistics": "parametric",
+      "proportiontest": false
+    }
+  },
+  "bar_preset_biomarker": {
+    "overrides": [],
+    "effective": {
+      "resultssubtitle": false,
+      "pairwisecomparisons": false,
+      "typestatistics": "parametric",
+      "proportiontest": false
+    }
+  },
+  "bar_preset_riskfactor": {
+    "overrides": [],
+    "effective": {
+      "resultssubtitle": false,
+      "pairwisecomparisons": false,
+      "typestatistics": "parametric",
+      "proportiontest": false
+    }
+  },
+  "bar_sparse_report": "<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; margin: 10px 0; color: inherit;'><h4 style='color: #495057; margin-top: 0;'> Copy-Ready Report Template<\/h4><div style='background-color: rgba(255, 255, 255, 0.06); padding: 15px; border: 1px dashed #6c757d; margin: 10px 0; color: inherit;'><h5>Methods:<\/h5><p>Bar chart analysis was performed to examine the association between y and g using chi-square test of independence. Statistical significance was assessed at α = 0.05 level. Analysis included 26 observations across 2 groups.<\/p><h5>Results:<\/h5><p>[Insert specific results here: test statistic, p-value, effect size with 95% CI]<\/p><p>Template (state the direction only if the test was significant): \"There was [a / no] statistically significant association between [variable 1] and [variable 2] (χ² = [value], p = [value], Cramér's V = [value], 95% CI [lower, upper]).\"<\/p><h5>Conclusion:<\/h5><p>[Interpret findings in clinical context, considering both statistical significance and clinical relevance]<\/p><\/div><button onclick='navigator.clipboard.writeText(this.parentElement.querySelector(\"div\").innerText)' style='background-color: #007bff; color: #ffffff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;'> Copy Template to Clipboard<\/button><\/div>",
+  "bar_sparse_summary": "<div style='padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'><h4 style='color: #28a745; margin-top: 0;'> Analysis Summary<\/h4><p><strong>Variables Analyzed:<\/strong> y by g<\/p><p><strong>Sample Size:<\/strong> 26 observations across 2 groups<\/p><p><strong>Statistical Method:<\/strong> Chi-square test of independence<\/p><p><strong>Confidence Level:<\/strong> 95%<\/p><\/div>",
+  "bar_sparse_exact_subtitle": "list(italic(\"p\")[\"Fisher\"] == \"0.051\", widehat(italic(\"OR\")) ==      \"6.16\", CI[\"95%\"] ~ \"[\" * \"0.83\", \"78.70\" * \"]\", italic(\"n\")[\"obs\"] ==      \"26\")",
+  "image_restore_sampleSize": "previous-render.png",
+  "image_restore_sampleThreshold": "previous-render.png",
+  "image_restore_seed": null,
+  "pie_sparse_report": "<h4>Copy-Ready Report Template<\/h4>\n<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; color: inherit;'>\n<p><strong>Methods:<\/strong><\/p>\n<p>We compared y distributions across g using Pearson's chi-squared test. Statistical significance was set at p < 0.05. All analyses were performed using jamovi statistical software.<\/p>\n<p><strong>Results:<\/strong><\/p>\n<p>[Results will be automatically filled when analysis is complete]<\/p>\n<\/div>\n<p><small>Copy the text above and modify as needed for your manuscript or report.<\/small><\/p>\n<hr>",
+  "pie_sparse_exact_subtitle": "list(italic(\"p\")[\"Fisher\"] == \"0.051\", widehat(italic(\"OR\")) ==      \"6.16\", CI[\"95%\"] ~ \"[\" * \"0.83\", \"78.70\" * \"]\", italic(\"n\")[\"obs\"] ==      \"26\")",
+  "pie_paired_report": "<h4>Copy-Ready Report Template<\/h4>\n<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; color: inherit;'>\n<p><strong>Methods:<\/strong><\/p>\n<p>We compared y distributions across g using Pearson's chi-squared test. Statistical significance was set at p < 0.05. All analyses were performed using jamovi statistical software.<\/p>\n<p><strong>Results:<\/strong><\/p>\n<p>[Results will be automatically filled when analysis is complete]<\/p>\n<\/div>\n<p><small>Copy the text above and modify as needed for your manuscript or report.<\/small><\/p>\n<hr>",
+  "pie_preset_mismatch": {
+    "effective_type": "parametric",
+    "report": "<h4>Copy-Ready Report Template<\/h4>\n<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; color: inherit;'>\n<p><strong>Methods:<\/strong><\/p>\n<p>We compared y distributions across g using a Bayesian contingency table analysis. Statistical significance was set at p < 0.05. All analyses were performed using jamovi statistical software.<\/p>\n<p><strong>Results:<\/strong><\/p>\n<p>[Results will be automatically filled when analysis is complete]<\/p>\n<\/div>\n<p><small>Copy the text above and modify as needed for your manuscript or report.<\/small><\/p>\n<hr>"
+  }
+}

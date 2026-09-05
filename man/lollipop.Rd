@@ -53,7 +53,8 @@ Aggregation' will over-plot if multiple rows per group exist.}
 
 \item{showValues}{Whether to display value labels on the lollipops.}
 
-\item{showMean}{Whether to display a reference line at the mean value.}
+\item{showMean}{Whether to display a reference line at the mean of the
+plotted values (group summaries when aggregation is selected).}
 
 \item{colorScheme}{Base color hue for the lollipops. The lollipop chart
 draws a single data series, so the scheme sets one base color (the first

@@ -1,0 +1,47 @@
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+jjarcdiagram-correctness: .........................
+jjbarstats-correctness: .................1.........................
+jjbetweenstats-correctness: ...................
+jjbetweenstats-residual: ..........
+jjcorrmat-correctness: .................................
+jjcorrmat-residual: .........................
+jjdotplotstats-correctness: ...........................
+jjhistostats-correctness: .............................
+jjhistostats-residual: .....................
+jjpiestats-correctness: ...................................................
+jjridges-residual: ............................
+jjscatterstats-residual: ..............................
+jwaffle-residual: ................
+
+══ Failed ══════════════════════════════════════════════════════════════════════
+── 1. Error ('test-jjbarstats-correctness.R:282:3'): jjbarstats handles negative
+Error: Counts variable 'count' contains negative values.
+Backtrace:
+    ▆
+ 1. └─jjstatsplot::jjbarstats(...) at test-jjbarstats-correctness.R:282:3
+ 2.   └─analysis$run() at jjstatsplot19-validation-flpnc3v3/R/jjbarstats.h.R:579:5
+ 3.     ├─jmvcore (local) try(...)
+ 4.     │ └─base::eval(expr)
+ 5.     └─private$.run()
+ 6.       └─base::tryCatch(...) at jjstatsplot19-validation-flpnc3v3/R/jjbarstats.b.R:1221:21
+ 7.         └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 8.           └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 9.             └─value[[3L]](cond)
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+     nb  failed skipped   error warning  passed 
+    356       0       0       1       0     356 

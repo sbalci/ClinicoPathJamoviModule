@@ -1,0 +1,100 @@
+{
+  "analyses": {
+    "jjhistostats": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jjridges": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jwaffle": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jjscatterstats": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jjcorrmat": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jjbetweenstats": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jjwithinstats": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jjdotplotstats": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jjbarstats": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jjsegmentedtotalbar": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jjpiestats": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "raincloud": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "advancedraincloud": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "lollipop": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jjarcdiagram": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "linechart": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "statsplot2": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "hullplot": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    },
+    "jjdotchart": {
+      "review": "source review completed; validation in progress",
+      "fixes": [],
+      "validation": "pending"
+    }
+  },
+  "baseline": "/var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T/jjstatsplot19-baseline-nwpn6d8q"
+}

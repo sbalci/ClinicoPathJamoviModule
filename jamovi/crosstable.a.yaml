@@ -66,7 +66,7 @@ options:
           name: lancet
         - title: hmisc
           name: hmisc
-      default: nejm
+      default: gtsummary
       description:
           R: >
             Table style. "arsenal", "finalfit" and "gtsummary" honour the test and
@@ -161,5 +161,18 @@ options:
             Show a standardized mean difference (SMD) table quantifying between-group balance
             for each variable (continuous and categorical). Requires a two-level grouping
             variable. |SMD| below 0.1 indicates good balance.
+
+    - name: showSummary
+      title: Plain-language summary
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add a copy-ready paragraph below the table naming the sample size, the groups,
+            the tests the chosen style applied and the variables that differed at p < 0.05
+            (q < 0.05 when a p-value adjustment is applied in the gtsummary style).
+          jamovi: >
+            A copy-ready paragraph below the table: sample size, groups, the tests the
+            chosen style applied, and which variables differed at p < 0.05.
 
 ...

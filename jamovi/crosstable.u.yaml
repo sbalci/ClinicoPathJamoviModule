@@ -46,7 +46,11 @@ children:
         children:
           - type: ComboBox
             name: pcat
-            enable: (sty:finalfit || sty:arsenal)
+            enable: (sty:finalfit || sty:arsenal || sty:gtsummary)
+  - type: CollapseBox
+    label: Advanced
+    collapsed: true
+    children:
       - type: LayoutBox
         margin: large
         children:
@@ -58,3 +62,8 @@ children:
         children:
           - type: CheckBox
             name: showSMD
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showSummary

@@ -1,0 +1,56 @@
+{
+  "jjbarstats": {
+    "options": 27,
+    "outputs": 10,
+    "source_files_identical": {
+      "R/jjbarstats.b.R": true,
+      "jamovi/jjbarstats.a.yaml": true,
+      "jamovi/jjbarstats.r.yaml": true,
+      "jamovi/jjbarstats.u.yaml": true
+    },
+    "generated_header_namespace_only": true,
+    "hashes": {
+      "R/jjbarstats.b.R": "3805924a18ac03bde6e211bc710755c9",
+      "jamovi/jjbarstats.a.yaml": "62ee168b1a13d373e89f4e137fca394f",
+      "jamovi/jjbarstats.r.yaml": "f553545416e2dfdab9d93918f7fddee5",
+      "jamovi/jjbarstats.u.yaml": "64386593b858bbd3559e532c5983eed8"
+    },
+    "yaml_and_r_parse": "pass"
+  },
+  "jjpiestats": {
+    "options": 23,
+    "outputs": 11,
+    "source_files_identical": {
+      "R/jjpiestats.b.R": true,
+      "jamovi/jjpiestats.a.yaml": true,
+      "jamovi/jjpiestats.r.yaml": true,
+      "jamovi/jjpiestats.u.yaml": true
+    },
+    "generated_header_namespace_only": true,
+    "hashes": {
+      "R/jjpiestats.b.R": "11b27b3ca39586377ed9b67b3dd71336",
+      "jamovi/jjpiestats.a.yaml": "26a5fb843f69cf8d570ae1bc30a2057d",
+      "jamovi/jjpiestats.r.yaml": "20e6e2a95ddc053fc3367d8aca6df2f1",
+      "jamovi/jjpiestats.u.yaml": "cff2f738bd179f7bbf640d0b07b2180b"
+    },
+    "yaml_and_r_parse": "pass"
+  },
+  "statsplot2": {
+    "options": 12,
+    "outputs": 4,
+    "source_files_identical": {
+      "R/statsplot2.b.R": true,
+      "jamovi/statsplot2.a.yaml": true,
+      "jamovi/statsplot2.r.yaml": true,
+      "jamovi/statsplot2.u.yaml": true
+    },
+    "generated_header_namespace_only": true,
+    "hashes": {
+      "R/statsplot2.b.R": "f5b02418075d1668d992fa15ff8feb09",
+      "jamovi/statsplot2.a.yaml": "6e4bcac797fb1b07a379820acc71dd0f",
+      "jamovi/statsplot2.r.yaml": "95e88a7243d9b75c4d037ae6c0816e8a",
+      "jamovi/statsplot2.u.yaml": "6cc723b85711fe30b08c2b2ead139950"
+    },
+    "yaml_and_r_parse": "pass"
+  }
+}

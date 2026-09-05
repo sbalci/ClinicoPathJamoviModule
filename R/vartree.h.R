@@ -12,6 +12,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             summaryvar = NULL,
             summarylocation = "leafonly",
             style = "default",
+            palette = "default",
             prunebelow = NULL,
             pruneLevel1 = NULL,
             pruneLevel2 = NULL,
@@ -85,6 +86,13 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "default",
                     "clean",
                     "minimal"),
+                default="default")
+            private$..palette <- jmvcore::OptionList$new(
+                "palette",
+                palette,
+                options=list(
+                    "default",
+                    "colorblind"),
                 default="default")
             private$..prunebelow <- jmvcore::OptionVariable$new(
                 "prunebelow",
@@ -199,6 +207,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..summaryvar)
             self$.addOption(private$..summarylocation)
             self$.addOption(private$..style)
+            self$.addOption(private$..palette)
             self$.addOption(private$..prunebelow)
             self$.addOption(private$..pruneLevel1)
             self$.addOption(private$..pruneLevel2)
@@ -230,6 +239,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         summaryvar = function() private$..summaryvar$value,
         summarylocation = function() private$..summarylocation$value,
         style = function() private$..style$value,
+        palette = function() private$..palette$value,
         prunebelow = function() private$..prunebelow$value,
         pruneLevel1 = function() private$..pruneLevel1$value,
         pruneLevel2 = function() private$..pruneLevel2$value,
@@ -260,6 +270,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..summaryvar = NA,
         ..summarylocation = NA,
         ..style = NA,
+        ..palette = NA,
         ..prunebelow = NA,
         ..pruneLevel1 = NA,
         ..pruneLevel2 = NA,
@@ -316,6 +327,7 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "summaryvar",
                     "summarylocation",
                     "style",
+                    "palette",
                     "prunebelow",
                     "pruneLevel1",
                     "pruneLevel2",
@@ -354,6 +366,7 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "summaryvar",
                     "summarylocation",
                     "style",
+                    "palette",
                     "prunebelow",
                     "pruneLevel1",
                     "pruneLevel2",
@@ -389,6 +402,7 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "summaryvar",
                     "summarylocation",
                     "style",
+                    "palette",
                     "prunebelow",
                     "pruneLevel1",
                     "pruneLevel2",
@@ -424,6 +438,7 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "summaryvar",
                     "summarylocation",
                     "style",
+                    "palette",
                     "prunebelow",
                     "pruneLevel1",
                     "pruneLevel2",
@@ -459,6 +474,7 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "summaryvar",
                     "summarylocation",
                     "style",
+                    "palette",
                     "prunebelow",
                     "pruneLevel1",
                     "pruneLevel2",
@@ -558,6 +574,11 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   labels), clean (white nodes, uncoloured labels), minimal (vtree's plain
 #'   layout - one flat tone per level, uncoloured labels, and more space between
 #'   nodes).
+#' @param palette Node fill palette for the default style. 'default' uses
+#'   vtree's own rotation (reds, blues, greens, ...); 'colorblind' rotates
+#'   single-hue blue, orange, purple and brown palettes that stay distinct under
+#'   the common colour-vision deficiencies. Ignored by the clean and minimal
+#'   styles.
 #' @param prunebelow Variable for conditional pruning of tree branches.
 #' @param pruneLevel1 First level for pruning condition.
 #' @param pruneLevel2 Second level for pruning condition.
@@ -603,6 +624,7 @@ vartree <- function(
     summaryvar = NULL,
     summarylocation = "leafonly",
     style = "default",
+    palette = "default",
     prunebelow = NULL,
     pruneLevel1,
     pruneLevel2,
@@ -656,6 +678,7 @@ vartree <- function(
         summaryvar = summaryvar,
         summarylocation = summarylocation,
         style = style,
+        palette = palette,
         prunebelow = prunebelow,
         pruneLevel1 = pruneLevel1,
         pruneLevel2 = pruneLevel2,

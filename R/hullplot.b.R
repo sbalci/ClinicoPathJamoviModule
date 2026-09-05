@@ -725,7 +725,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             
             outlier_html <- paste0(outlier_html,
                 "</ul>",
-                "<p><strong>Total outliers across all groups:</strong> ", total_outliers, "</p>",
+                "<p><strong>Total potential outliers in assessed groups:</strong> ", total_outliers, "</p>",
                 "<p style='font-size: 12px; color: #856404; margin-top: 15px;'>",
                 "<em>Outliers defined as points beyond 1.5 \u00d7 IQR from Q1/Q3. Consider investigating these points for data quality or interesting patterns.</em>",
                 "</p></div>"
@@ -765,6 +765,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
 
                 "<h4 style='color: #0c5460;'>How to Read Hull Plots:</h4>",
                 "<ul>",
+                "<li><strong>Data ellipses:</strong> Optional 95% ellipses describe model-based data dispersion, not confidence regions for the group means.</li>",
                 "<li><strong>Hull Boundaries:</strong> Polygonal areas show the extent of each group</li>",
                 "<li><strong>Overlap:</strong> Overlapping hulls indicate similar characteristics between groups</li>",
                 "<li><strong>Separation:</strong> Distinct hulls suggest clear group differences</li>",
@@ -791,7 +792,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             n_groups <- length(levels(data[[group_var]]))
             n_total <- nrow(data)
 
-            # Calculate descriptive separation measure
+            # Calculate a descriptive separation measure in within-group SD units.
             # NOTE: This is a DESCRIPTIVE HEURISTIC, not a validated statistical test
             group_stats <- data %>%
                 dplyr::group_by(!!rlang::sym(group_var)) %>%
@@ -809,26 +810,16 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 avg_distance <- NA
                 separation_quality <- "single cohort (no comparison available)"
             } else {
-                # Multiple groups - calculate distances between group means
-                mean_distances <- stats::dist(group_stats[c("x_mean", "y_mean")])
-                avg_distance <- mean(mean_distances)
-
-                # Calculate average standard deviation across all groups and dimensions
-                # This provides a scale-independent measure of separation
-                avg_sd <- mean(c(
-                    mean(group_stats$x_sd, na.rm = TRUE),
-                    mean(group_stats$y_sd, na.rm = TRUE)
-                ), na.rm = TRUE)
-
-                # Calculate DESCRIPTIVE discriminability index (NOT a formal statistical test)
-                # Formula: (Mean of pairwise Euclidean distances between group centroids) / (Mean SD across groups and dimensions)
-                # This is analogous to effect size measures like Cohen's d but generalized to multiple groups
-                # LIMITATIONS:
-                #   - Assumes equal importance of X and Y dimensions
-                #   - Sensitive to differences in group variances
-                #   - Thresholds (below) are ARBITRARY and not empirically validated
-                # Avoid division by zero
-                discrim_index <- if (is.na(avg_sd) || avg_sd == 0) 0 else avg_distance / avg_sd
+                # Standardize each axis separately; changing units on one axis must
+                # not change the separation descriptor. Require estimable within-group SDs.
+                axis_sd <- c(mean(group_stats$x_sd, na.rm = TRUE),
+                             mean(group_stats$y_sd, na.rm = TRUE))
+                discrim_index <- NA_real_
+                if (all(is.finite(axis_sd) & axis_sd > 0)) {
+                    centres <- as.matrix(group_stats[c("x_mean", "y_mean")])
+                    centres <- sweep(centres, 2, axis_sd, "/")
+                    discrim_index <- mean(stats::dist(centres))
+                }
 
                 # Determine separation based on discriminability index
                 # IMPORTANT: These thresholds are DESCRIPTIVE RULES OF THUMB, not validated cutoffs
@@ -854,9 +845,9 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>",
                     "<p style='margin: 0; font-size: 13px;'><strong> Note on 'Separation' Assessment:</strong> ",
                     "The descriptors '", separation_quality, "' are based on a descriptive heuristic (discriminability index = ",
-                    "mean distance between group centroids / mean standard deviation). ",
+                    "mean centroid distance after dividing each axis by its mean within-group SD). ",
                     "<strong>This is NOT a formal statistical test.</strong> ",
-                    "Thresholds are rules of thumb adapted from Cohen's d conventions. ",
+                    "Thresholds are arbitrary descriptive categories, not validated clinical cutoffs. ",
                     "For formal inference about group differences, use appropriate statistical tests (MANOVA, discriminant analysis, etc.).</p>",
                     "</div>"
                 ) else "",
@@ -880,7 +871,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     htmltools::htmlEscape(group_var), " classifications. ",
                     "The visualization shows the relationship between ", htmltools::htmlEscape(x_var),
                     " and ", htmltools::htmlEscape(y_var), " across ", n_total, " observations. ",
-                    "Groups appear ", separation_quality, " in the two-dimensional space, ",
+                    "Standardized centroid separation is described as ", separation_quality, "; this does not measure hull overlap, ",
                     "with hull boundaries clearly delineating the extent of each group's distribution.</strong>"
                 ),
                 "</p>",
@@ -912,12 +903,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 # only one category.
                 if (n_groups < 2)
                     "With only one group present there are no categories to compare; add a grouping variable with at least two levels, or check whether missing data removed every observation from the other groups."
-                else paste0(
-                    "The ", separation_quality, " nature of these groups suggests ",
-                    if (separation_quality == "well-separated") "clear distinctions between categories that may indicate meaningful biological or clinical differences."
-                    else if (separation_quality == "moderately separated") "some overlap between categories, suggesting possible transitional states or shared characteristics."
-                    else "substantial overlap between categories, indicating either similar underlying characteristics or the need for additional discriminating variables."
-                ),
+                else
+                    "Separation of sample centroids does not establish biological differences, treatment response, or diagnostic discrimination. Interpret the axes and group definitions in context and validate any clinical claim independently.",
                 "</p>",
 
                 "<p style='font-size: 11px; color: #6c757d; margin-top: 20px; font-style: italic;'>",

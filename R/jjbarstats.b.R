@@ -142,7 +142,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 
                 # Check that variables are appropriate for bar charts (categorical)
                 # Exclude counts variable from categorical check
-                vars_to_check <- all_vars[all_vars != self$options$counts]
+                vars_to_check <- setdiff(all_vars, self$options$counts)
                 for (var in vars_to_check) {
                     if (!is.null(var)) {
                         var_class <- class(self$data[[var]])
@@ -172,6 +172,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         jmvcore::reject(.("Counts variable '{var}' contains negative values."),
                                         var = counts_var)
                     }
+                    count_values <- self$data[[counts_var]]
+                    count_values <- count_values[!is.na(count_values)]
+                    if (any(!is.finite(count_values)) || any(count_values != floor(count_values)))
+                        jmvcore::reject("Frequency counts must be finite whole numbers.")
                     # A zero total is not a small sample, it is no sample. Without
                     # this the summary panel announced "Sample Size: 0 observations"
                     # next to "Statistical Method: Chi-square test of independence"
@@ -294,46 +298,31 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 if (is.null(preset) || !is.character(preset)) preset <- "custom"
                 if (preset == "custom") return()
                 
-                # Apply preset-specific configurations
-                switch(preset,
-                    "diagnostic" = {
-                        # 2x2 diagnostic table: use Fisher's exact when appropriate
-                        if (is.null(private$.option("typestatistics")) || private$.option("typestatistics") == "parametric") {
-                            # Will be handled in statistical validation
-                        }
-                        # Default to showing statistical results
-                        if (is.null(private$.option("resultssubtitle"))) {
-                            private$overrides[["resultssubtitle"]] <- TRUE
-                        }
-                    },
-                    "treatment" = {
-                        # Treatment response: enable pairwise comparisons
-                        if (is.null(private$.option("pairwisecomparisons"))) {
-                            private$overrides[["pairwisecomparisons"]] <- TRUE
-                        }
-                        if (is.null(private$.option("padjustmethod"))) {
-                            private$overrides[["padjustmethod"]] <- "holm"
-                        }
-                    },
-                    "biomarker" = {
-                        # Biomarker expression: robust statistics for potential outliers
-                        if (is.null(private$.option("typestatistics"))) {
-                            private$overrides[["typestatistics"]] <- "robust"
-                        }
-                        if (is.null(private$.option("pairwisecomparisons"))) {
-                            private$overrides[["pairwisecomparisons"]] <- TRUE
-                        }
-                    },
-                    "riskfactor" = {
-                        # Risk factor analysis: parametric with proportion tests
-                        if (is.null(private$.option("typestatistics"))) {
-                            private$overrides[["typestatistics"]] <- "parametric"
-                        }
-                        if (is.null(private$.option("proportiontest"))) {
-                            private$overrides[["proportiontest"]] <- TRUE
-                        }
-                    }
-                )
+                # Presets override their documented fields; custom preserves manual settings.
+                private$overrides <- switch(preset,
+                    diagnostic = list(resultssubtitle = TRUE),
+                    treatment = list(resultssubtitle = TRUE, pairwisecomparisons = TRUE,
+                                     padjustmethod = "holm"),
+                    biomarker = list(resultssubtitle = TRUE, pairwisecomparisons = TRUE,
+                                     padjustmethod = "holm"),
+                    riskfactor = list(resultssubtitle = TRUE, proportiontest = TRUE),
+                    list())
+            },
+
+            .methodDescription = function(data) {
+                if (isTRUE(private$.option("paired"))) return("McNemar's test")
+                if (identical(private$.option("typestatistics"), "bayes"))
+                    return("Bayesian contingency table analysis")
+                methods <- vapply(self$options$dep, function(dv) {
+                    if (isTRUE(private$.option("resultssubtitle")) &&
+                        !is.null(private$.exactSubtitle(data, dv)))
+                        "Fisher's exact test for sparse 2-by-2 tables"
+                    else "Pearson's chi-squared test"
+                }, character(1))
+                desc <- paste(unique(methods), collapse = "; ")
+                if (!is.null(self$options$grvar))
+                    desc <- paste0(desc, "; split panels use Pearson's chi-squared test")
+                desc
             },
 
             .generateAboutContent = function() {
@@ -375,13 +364,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 dep_vars <- htmltools::htmlEscape(paste(self$options$dep, collapse = ", "))
 
-                test_method <- switch(private$.option("typestatistics"),
-                    "parametric" = if (private$.option("paired")) "McNemar's test" else "Chi-square test of independence",
-                    "nonparametric" = "Non-parametric association test",
-                    "robust" = "Robust statistical test",
-                    "bayes" = "Bayesian contingency table analysis",
-                    "Chi-square test"
-                )
+                test_method <- private$.methodDescription(analysis_data)
 
                 summary_content <- paste0(
                     "<div style='padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #28a745; margin: 10px 0; color: inherit;'>",
@@ -753,19 +736,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<h5>Methods:</h5>",
                     "<p>Bar chart analysis was performed to examine the association between ", dep_vars,
                     " and ", htmltools::htmlEscape(self$options$group), " using ",
-                    switch(private$.option("typestatistics"),
-                        "parametric" = if (private$.option("paired")) "McNemar's test" else "chi-square test of independence",
-                        "nonparametric" = "non-parametric association testing",
-                        "robust" = "robust statistical methods",
-                        "bayes" = "Bayesian contingency table analysis"
-                    ), ". ",
+                    private$.methodDescription(analysis_data), ". ",
                     
                     if (private$.option("pairwisecomparisons") && n_groups > 2) {
                         paste0("Post-hoc pairwise comparisons were conducted with ", 
                               private$.option("padjustmethod"), " correction for multiple testing. ")
                     } else "",
                     
-                    "Statistical significance was assessed at \u03b1 = ", (1 - self$options$conflevel), " level. ",
+                    "The confidence level was ", 100 * self$options$conflevel, "%. ",
                     "Analysis included ", n_total, " observations across ", n_groups, " groups.",
                     "</p>",
                     
@@ -889,9 +867,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     paired_valid <- private$.validatePairedData(data, dep_var)
                     if (!paired_valid$valid) {
                         private$.addNotice('ERROR', 'Invalid Paired Data', paired_valid$message)
-                        # SAFETY: disable paired to prevent an invalid McNemar test
-                        private$overrides[["paired"]] <- FALSE
-                        return(invisible(NULL))
+                        jmvcore::reject(paired_valid$message)
                     } else {
                         private$.addNotice('STRONG_WARNING', 'Paired Data Assumption', paired_valid$message)
                     }
@@ -968,7 +944,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     return(list(
                         valid = FALSE,
                         message = sprintf(
-                            "McNemar test requires a 2\u00d72 table. Your data has %d\u00d7%d levels. Use unpaired analysis instead.",
+                            "McNemar test requires a 2\u00d72 table. Your data has %d\u00d7%d levels. Use an analysis for paired categorical outcomes with these categories.",
                             nrow(cross_table), ncol(cross_table)
                         )
                     ))
@@ -980,7 +956,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     return(list(
                         valid = FALSE,
                         message = sprintf(
-                            "McNemar test requires adequate sample size. Current total: %d (recommend \u226510). Use Fisher exact test instead.",
+                            "Only %d paired observations are available. Use an exact binomial test on discordant pairs; do not replace a paired analysis with an independent-samples Fisher test.",
                             total_n
                         )
                     ))
@@ -1205,6 +1181,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # Reset per-run state so notices and safety overrides do not accumulate
                 # across successive runs / plot resizes.
                 private$.noticeList <- list()
+                private$.renderNotices()
                 private$overrides <- list()
 
                 # Always generate About content
@@ -1386,7 +1363,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             \u2022 Confirm variables have adequate variation (\u22652 categories)<br><hr>"
                         )
                         self$results$todo$setContent(error_msg)
-                        return()
+                        stop(e)
                     })
                     
                     # Add checkpoint for user feedback

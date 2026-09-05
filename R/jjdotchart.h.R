@@ -23,7 +23,8 @@ jjdotchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             xtitle = "",
             ytitle = "",
             plotwidth = 650,
-            plotheight = 450, ...) {
+            plotheight = 450,
+            seed = 20250101, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -74,8 +75,8 @@ jjdotchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "conflevel",
                 conflevel,
                 default=0.95,
-                min=0,
-                max=1)
+                min=0.5,
+                max=0.999)
             private$..k <- jmvcore::OptionInteger$new(
                 "k",
                 k,
@@ -135,6 +136,11 @@ jjdotchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=450,
                 min=300,
                 max=800)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=20250101,
+                min=0)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -154,6 +160,7 @@ jjdotchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ytitle)
             self$.addOption(private$..plotwidth)
             self$.addOption(private$..plotheight)
+            self$.addOption(private$..seed)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -173,7 +180,8 @@ jjdotchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         xtitle = function() private$..xtitle$value,
         ytitle = function() private$..ytitle$value,
         plotwidth = function() private$..plotwidth$value,
-        plotheight = function() private$..plotheight$value),
+        plotheight = function() private$..plotheight$value,
+        seed = function() private$..seed$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -192,7 +200,8 @@ jjdotchartOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..xtitle = NA,
         ..ytitle = NA,
         ..plotwidth = NA,
-        ..plotheight = NA)
+        ..plotheight = NA,
+        ..seed = NA)
 )
 
 jjdotchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -217,6 +226,7 @@ jjdotchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "statsExpressions",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
+                    "seed",
                     "dep",
                     "group",
                     "grvar",
@@ -304,7 +314,7 @@ jjdotchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjdotchart",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = jjdotchartResults$new(options=options),
                 data = data,
@@ -406,6 +416,8 @@ jjdotchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plotwidth Width of the plot in pixels.
 #' @param plotheight Height of the plot in pixels. Increase it when there are
 #'   many groups, since each one needs a labelled row.
+#' @param seed Seed for reproducible bootstrap intervals and stochastic
+#'   statistical methods.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -441,7 +453,8 @@ jjdotchart <- function(
     xtitle = "",
     ytitle = "",
     plotwidth = 650,
-    plotheight = 450) {
+    plotheight = 450,
+    seed = 20250101) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjdotchart requires jmvcore to be installed (restart may be required)")
@@ -477,7 +490,8 @@ jjdotchart <- function(
         xtitle = xtitle,
         ytitle = ytitle,
         plotwidth = plotwidth,
-        plotheight = plotheight)
+        plotheight = plotheight,
+        seed = seed)
 
     analysis <- jjdotchartClass$new(
         options = options,

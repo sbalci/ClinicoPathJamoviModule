@@ -4,6 +4,7 @@ title: Dot Chart (Summary vs Reference Value)
 jrs:   '1.1'
 
 clearWith:
+    - seed
     - dep
     - group
     - grvar

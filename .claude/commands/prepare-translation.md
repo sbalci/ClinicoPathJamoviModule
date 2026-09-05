@@ -18,6 +18,9 @@ output_file: i18n-plans/$ARGUMENTS-$ARG_target_lang-translation-plan.md
 # Internationalization (i18n) Preparation & Translation Plan
 
 **Consult:** `vignettes/jamovi_i18n_guide.md` for comprehensive i18n patterns and best practices.
+**Official source:** jamovi "Module Translation" tutorial — https://dev.jamovi.org/tutorial/tuts0204-translation/ (jmvtools/compiler commands below were verified against jmvtools 28.3 / jamovi-compiler `i18n.js`).
+
+**Why jamovi has its own system:** R's built-in translation cannot change language "on the fly" within one R process, so jamovi ships its own catalog-based lookup instead of gettext at the R level.
 
 You are an **expert jamovi module developer**. Prepare the specified function for translation and produce a concrete plan for Turkish (TR) localization. Follow the steps below and render all code and shell snippets in fenced blocks.
 
@@ -44,25 +47,23 @@ If any are missing, note them, continue with what’s available, and suggest cre
 
 ## 1) NAMESPACE i18n hook
 
-Ensure the **NAMESPACE** includes an import for the translation helper `.`:
+Ensure the **NAMESPACE** makes the translation helper `.` available without the `jmvcore::` prefix (so code can write the terse `.('Too few samples')` instead of `jmvcore::.('Too few samples')`):
 
 ```r
 importFrom(jmvcore, .)
 ```
 
-If missing, add it and include a minimal rationale:
-
-- The ``.`` function is used to mark strings for extraction into `.po` catalogs.
+A blanket `import(jmvcore)` (what ClinicoPath's NAMESPACE currently has) also satisfies this. If neither is present, add the `importFrom` line via roxygen (`#' @importFrom jmvcore .`) — never hand-edit NAMESPACE.
 
 ---
 
 ## 2) Wrap translatable strings (jamovi patterns)
 
-Use the `` `.` `` wrapper for all user‑visible strings in `R/*.b.R`. YAML strings (.a.yaml, .r.yaml, .u.yaml) are extracted automatically (no wrapper needed).
+By default **every string in `.a.yaml`, `.r.yaml`, and `.u.yaml` is already translatable** and needs no special treatment. The developer's job is the `R/*.b.R` side: wrap user-visible strings in `.()`. The most common candidates are **error messages and warnings**, then table/column titles, notice text, and narrative sentences.
 
-**IMPORTANT:** The `.()` function serves dual purposes:
-1. **Development time**: Signals to jmvtools that strings need extraction into .po catalogs
-2. **Runtime**: Performs translation lookup based on current language setting
+**IMPORTANT:** Wrapping a string in `.()` performs two roles:
+1. **Development time**: tells the jamovi-compiler / jmvtools to extract the string into the catalog "database" of strings to translate
+2. **Runtime**: `.()` looks up the translated-string database for the current language and returns the match (falls back to the original text)
 
 **Reference:** See `vignettes/jamovi_i18n_guide.md` for comprehensive i18n patterns and best practices.
 
@@ -202,89 +203,95 @@ if (std) {
 
 **❌ DON'T:**
 ```r
-# Leading/trailing spaces
+# Leading/trailing spaces: translators don't know why they are there and
+# may trim them, breaking UI formatting
 .(' Analysis completed ')  # Bad
 
-# Fragmented sentences (translators can't reorder)
-.('Analysis') + ' ' + .('completed')  # Bad
-
-# Concatenation
-if (std) {
-    resids <- .('Standardized ') + .('Residuals')  # Bad!
-}
+# Official "Avoid" example from the jamovi tutorial — a fragment with a
+# trailing space assembled by format(); translators cannot reorder or
+# grammatically agree the pieces
+resids <- format(.('{}Residuals'), ifelse(std, .('Standardized '), ''))  # Bad
 ```
+
+Prefer the branch-per-complete-string form shown under **DO** above.
 
 ### 2.7 Strings requiring `self` context
 
-**IMPORTANT:** The `.()` function requires access to `self` (the analysis object).
+**IMPORTANT:** `.()` needs the analysis object (the `self` in `self$results$...`). It finds it by **looking for a variable named `self` in the calling function's environment**. Inside R6 member functions (`.init`, `.run`, `private$.foo`) this is transparent. It breaks in **auxiliary functions that are not members of the R6 class** — the runtime error is `object 'self' not found` (root cause of ClinicoPath issue #122 in multisurvival).
 
-**In main methods (works automatically):**
+Official tutorial example:
+
 ```r
-private$.run <- function() {
-    message <- .('Running analysis...')  # self in scope
+# BAD (will fail)
+makeSSString <- function(sstype) {
+    if (sstype == 1) {
+        # Error: .() cannot find 'self'
+        return(.('Type 1 Sum of Squares is not suitable for this data set'))
+    }
+    NULL
+}
+
+.run = function() {
+    message <- makeSSString(sstype)
+}
+
+# GOOD — pass self in explicitly, as a parameter literally named `self`
+makeSSString <- function(sstype, self) {
+    if (sstype == 1) {
+        return(.('Type 1 Sum of Squares is not suitable for this data set'))
+    }
+    NULL
+}
+
+.run = function() {
+    message <- makeSSString(sstype, self)
 }
 ```
 
-**In utility functions (must pass self):**
-```r
-# PROBLEM: self not in scope
-makeMessage <- function(data) {
-    return .('Processing data')  # Fails! No self
-}
-
-# SOLUTION: Pass self as parameter
-makeMessage <- function(data, self) {
-    return .('Processing data')  # Works!
-}
-
-# Call with self
-private$.run <- function() {
-    msg <- makeMessage(self$data, self)
-}
-```
+Quick audit for this trap: any `.(` inside a top-level `function(` in `R/SANITIZED_FN.b.R` that has no `self` formal argument.
 
 ---
 
 ## 3) Extraction & Update commands
 
-Render shell snippets to create/update catalogs. Use **SANITIZED_FN** as comment context; these commands are run at the **module root**.
+Run at the **module root** in an R console. These are the official jmvtools commands from the tutorial; jmvtools forwards them to the jamovi-compiler (`jmc --i18n <pkg> --create <code>` / `--update [code]`).
 
-### 3.1 Create or update English template (source language)
+### 3.1 First-time setup (skip any file that already exists)
 
 ```r
-# In R console
-jmvtools::i18nCreate("en")
-jmvtools::i18nUpdate("en")
+# Base catalog (POT template) — 'catalog' (or 'c') is special-cased and
+# writes jamovi/i18n/catalog.pot with header "Language: c\n"
+jmvtools::i18nCreate("catalog")
+
+# Language catalogs
+jmvtools::i18nCreate("en")   # jamovi/i18n/en.po
+jmvtools::i18nCreate("tr")   # jamovi/i18n/tr.po
 ```
 
-This creates/updates:
+ClinicoPath already has all three (`jamovi/i18n/catalog.pot`, `en.po`, `tr.po`), so for SANITIZED_FN you normally go straight to 3.2.
 
+### 3.2 After wrapping new strings (the routine step)
+
+```r
+# No argument = update EVERY .po/.pot in jamovi/i18n/ (catalog.pot, en.po, tr.po, ...)
+jmvtools::i18nUpdate()
+
+# Or one catalog at a time
+jmvtools::i18nUpdate("tr")
+
+# Verbose compiler output when an entry looks wrong
+jmvtools::i18nUpdate(debug = TRUE)
 ```
-jamovi/i18n/en.po
-```
 
-### 3.2 Prepare Weblate template (POT)
+What `i18nUpdate` does (verified in this repo, ~1 minute): rescans every `.a/.r/.u.yaml` and every `.()` call in `R/*.b.R`, adds new `msgid`s tagged with `#: R/<fn>.b.R` / `#: <fn>/options/<x>.title` source references, **keeps existing `msgstr`**, and prunes entries whose source is gone. Because it rewrites all three files, review the `git diff` of `jamovi/i18n/` before committing.
 
-Copy `en.po` to `catalog.pot` and set its language header to `c`:
+Only `catalog.pot` is treated as the source catalog; any other `*.pot` in the folder is skipped with a "skipping unrecognized .pot file" message.
+
+### 3.3 Manual fallback (only if `catalog.pot` is missing or corrupt and `i18nCreate("catalog")` is unavailable)
 
 ```bash
 cp jamovi/i18n/en.po jamovi/i18n/catalog.pot
-# Ensure header contains exactly:
-# Language: c\n
-```
-
-### 3.3 Create/Update Turkish catalog
-
-```r
-# In R console
-jmvtools::i18nCreate("tr")
-jmvtools::i18nUpdate("tr")
-```
-
-Outputs:
-
-```
-jamovi/i18n/tr.po
+# Edit header so it reads exactly:  "Language: c\n"
 ```
 
 ---
@@ -305,6 +312,13 @@ Example table:
 
 > Keep Turkish translations clinician‑friendly. Prefer **p‑değeri**, **Güven Aralığı (GA)**, **Duyarlılık/Özgüllük**, **Etki Büyüklüğü**.
 
+**`.po` mechanics that bite (verified in this repo):**
+
+- `{placeholder}` tokens must match **exactly** between `msgid` and `msgstr`.
+- A `.()` string ending in ` [ ... ]` is split by the compiler into `msgctxt "..."` + `msgid`, and jmvcore strips the bracket tail at runtime — the text never displays. Gate: `grep -nE '\.\("[^"]*\]"\)' R/SANITIZED_FN.b.R` must be empty; put CIs in parentheses.
+- Long msgids (> ~76 chars) are written as `msgid ""` followed by quoted continuation lines. Any fill script must parse entries as blank-line-separated blocks and join the pieces, or it silently skips every long notice.
+- Validate before committing: `msgfmt -c -o /dev/null jamovi/i18n/tr.po`.
+
 ---
 
 ## 5) Consistency & glossary (TR)
@@ -324,15 +338,20 @@ False Discovery Rate (FDR) → Yanlış Keşif Oranı (YKO)
 
 ## 6) QA checklist
 
-- Verify all user-visible strings in R backend files are wrapped with `` `.` ``.
-- Confirm the NAMESPACE imports the translation helper `.`.
+- Verify all user-visible strings in R backend files are wrapped with `` `.` `` (YAML strings need nothing).
+- No translatable string has leading/trailing whitespace; no fragment-and-`format()` assembly.
+- Every non-R6 helper that calls `.()` takes `self` as a parameter and every caller passes it.
+- Confirm the NAMESPACE imports the translation helper `.` (`importFrom(jmvcore, .)` or `import(jmvcore)`).
+- `jmvtools::i18nUpdate()` ran cleanly and the `jamovi/i18n/` diff contains only SANITIZED_FN-related changes.
 - Ensure all known YAML files exist; suggest creation if missing.
 - Validate `.po` files for untranslated or inconsistent entries.
 - Review Turkish translations for clinical accuracy and tone.
 
 ---
 
-## 7) Weblate integration (GitHub)
+## 7) Community translation / Weblate
+
+**Official guidance (tutorial):** the jamovi library can take care of much of the catalog-hosting process; contact the jamovi team to have the module included in the community translation effort. The manual Weblate route below is the older self-hosted path — use it only if the team asks for it.
 
 1. Create a dedicated repo: `<modulename>-i18n`
    - Add `catalog.pot`, `README.md`, license.
@@ -345,18 +364,23 @@ False Discovery Rate (FDR) → Yanlış Keşif Oranı (YKO)
 
 ## 8) Ready-to-run snippets (copy/paste)
 
-**Create/Update catalogs**
+**First time only**
 
 ```r
-jmvtools::i18nCreate("en"); jmvtools::i18nUpdate("en")
-jmvtools::i18nCreate("tr"); jmvtools::i18nUpdate("tr")
+jmvtools::i18nCreate("catalog"); jmvtools::i18nCreate("en"); jmvtools::i18nCreate("tr")
 ```
 
-**Prepare POT**
+**Every time strings change (updates catalog.pot + en.po + tr.po)**
+
+```r
+jmvtools::i18nUpdate()
+```
+
+**Validate the Turkish catalog**
 
 ```bash
-cp jamovi/i18n/en.po jamovi/i18n/catalog.pot
-# Edit header: Language: c\n
+msgfmt -c -o /dev/null jamovi/i18n/tr.po
+grep -B1 msgctxt jamovi/i18n/tr.po | grep SANITIZED_FN   # must be empty
 ```
 
 **Quick grep to find unwrapped strings in R (heuristic)**

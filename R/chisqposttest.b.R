@@ -59,11 +59,20 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ERROR          = "ERROR: ",
                     STRONG_WARNING = "WARNING: ",
                     WARNING        = "WARNING: ",
+                    INFO           = "NOTE: ",
                     "")
                 paste0(prefix, notice$title, "\n", notice$content)
             }, character(1))
 
             self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
+        # Red error box for the `todo` element. Callers push the SAME sentence to
+        # the notices panel first, so the two never disagree and the panel is not
+        # left empty on the very runs where it matters most.
+        .errorBox = function(msg) {
+            paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
+                   "<strong>", .("Error:"), "</strong> ", msg, "</div>")
         },
 
         .init = function() {
@@ -182,9 +191,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     mag <- magnitude[i, j]
                     
                     if (!is_sig) {
-                        interpretation_matrix[i, j] <- "As expected"
+                        interpretation_matrix[i, j] <- .("As expected")
                     } else {
-                        direction <- if (residual_val > 0) "Over-represented" else "Under-represented"
+                        direction <- if (residual_val > 0) .("Over-represented") else .("Under-represented")
                         interpretation_matrix[i, j] <- paste(direction, paste0("(", mag, ")"))
                     }
                 }
@@ -258,6 +267,16 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, numeric(1)))
         },
         
+        # Human-readable name of the adjustment method for prose panels: the
+        # option key ("fdr") reads badly in a sentence meant for a manuscript.
+        .posthocMethodLabel = function() {
+            switch(self$options$posthoc,
+                bonferroni = .("Bonferroni"),
+                holm       = .("Holm"),
+                fdr        = .("Benjamini-Hochberg (FDR)"),
+                self$options$posthoc)
+        },
+
         # Robust pairwise chi-square testing with optimized resource management
         .robustPairwiseTests = function(contingency_table, method = "bonferroni", test_selection = "auto") {
             # Check if we need memory optimization for large tables
@@ -474,8 +493,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .robustPairwiseTestsChunked = function(contingency_table, method = "bonferroni", test_selection = "auto", chunk_size = 50) {
             row_names <- rownames(contingency_table)
             col_names <- colnames(contingency_table)
-            total_comparisons <- private$.pairwiseComparisonCount(contingency_table)
-            
+
             # Initialize variables
             all_pairwise_results <- list()
             completed_comparisons <- 0
@@ -682,38 +700,53 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Helper function to create a section of comparisons
         .createComparisonSection = function(comparisons, row_var_name = NULL, col_var_name = NULL) {
+            # Translated once, outside the closure: .() resolves the translator
+            # through `self` in the calling frame.
+            lbl <- list(
+                heading       = .("Test Results:"),
+                sig           = .("Significant"),
+                notsig        = .("Not significant"),
+                chisq_test    = .("Chi-square test"),
+                method_chi    = .("Method: %s (standard approach)"),
+                method_low    = .("Method: %s (used because an expected count is below 5)"),
+                method_forced = .("Method: %s (chosen in the options for every comparison)"),
+                stats         = .("Chi-square = %s, p = %s, adjusted p = %s"),
+                effect        = .("Effect size (Phi/V) = %s"))
+
             comparison_divs <- lapply(seq_along(comparisons), function(i) {
                 result <- comparisons[[i]]
                 subtable <- result$subtable
-                
+
                 # Determine test method and significance
                 # startsWith, not identical: the Monte Carlo fallback labels itself
                 # "Fisher's exact (Monte Carlo)" and is still an exact-test p-value.
                 use_fisher <- startsWith(result$test_used, "Fisher")
                 p_adj <- result$actual_pvalue_adjusted
                 is_significant <- p_adj < self$options$sig
-                
+
                 # Create significance indicator
                 sig_indicator <- if (is_significant) {
-                    htmltools::span(style = "color: #d32f2f; font-weight: bold;", " Significant")
+                    htmltools::span(style = "color: #d32f2f; font-weight: bold;", lbl$sig)
                 } else {
-                    htmltools::span(style = "color: inherit; opacity: 0.75;", "Not significant")
+                    htmltools::span(style = "color: inherit; opacity: 0.75;", lbl$notsig)
                 }
-                
-                # Test results summary
-                test_method <- if (use_fisher) paste0(result$test_used, " test") else "Chi-square test"
+
+                # Test results summary. The reason given for Fisher must match WHY it
+                # was used: with "Always Fisher's exact" selected it is the user's
+                # choice, not a low-count fallback.
+                test_method <- if (use_fisher) paste(result$test_used, .("test")) else lbl$chisq_test
+                method_tpl <- if (!use_fisher) lbl$method_chi
+                    else if (identical(result$test_selection, "fisher")) lbl$method_forced
+                    else lbl$method_low
                 p_value <- result$actual_pvalue
-                
+
                 test_results <- htmltools::div(
                     style = "margin-bottom: 15px; padding: 10px; background-color: rgba(88, 88, 88, 0.06); border-radius: 3px; color: inherit;",
-                    htmltools::strong("Test Results:"), htmltools::br(),
-                    "Method: ", test_method, " (", 
-                    if (use_fisher) "used due to low expected frequencies" else "standard approach", 
-                    ")", htmltools::br(),
-                    "Chi-square = ", round(result$chi_statistic, 3), ", ",
-                    "p = ", format.pval(p_value, digits = 3), ", ",
-                    "Adjusted p = ", format.pval(p_adj, digits = 3), htmltools::br(),
-                    "Effect size (Phi/V) = ", round(result$effect_size, 3), htmltools::br(),
+                    htmltools::strong(lbl$heading), htmltools::br(),
+                    sprintf(method_tpl, test_method), htmltools::br(),
+                    sprintf(lbl$stats, round(result$chi_statistic, 3),
+                            format.pval(p_value, digits = 3), format.pval(p_adj, digits = 3)), htmltools::br(),
+                    sprintf(lbl$effect, round(result$effect_size, 3)), htmltools::br(),
                     sig_indicator
                 )
                 
@@ -817,7 +850,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add explanation if expected values are shown
             if (!is.null(expValues)) {
                 full_content <- htmltools::div(
-                    htmltools::p("Values shown as: Observed", htmltools::br(), htmltools::tags$small("(Expected)")),
+                    htmltools::p(.("Values shown as: Observed"), htmltools::br(), htmltools::tags$small(.("(Expected)"))),
                     table_content
                 )
                 return(as.character(full_content))
@@ -865,7 +898,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
             header_cells[[length(header_cells) + 1]] <- htmltools::tags$th(
-                style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;", htmltools::strong("Total"))
+                style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;", htmltools::strong(.("Total")))
             header_row <- htmltools::tags$tr(style = "background-color: rgba(33, 152, 239, 0.13); color: inherit;", header_cells)
 
             # Create data rows (iterate over every row and every column)
@@ -899,7 +932,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Create total row (iterate over every column)
             total_cells <- list(
-                htmltools::tags$td(style = "border: 1px solid #e1e5e9; padding: 8px;", "Total")
+                htmltools::tags$td(style = "border: 1px solid #e1e5e9; padding: 8px;", .("Total"))
             )
             for (j in seq_along(col_names)) {
                 col_pct <- if (grand_total > 0) round(col_totals[j] / grand_total * 100, 1) else 0
@@ -959,7 +992,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check sample size
             total_n <- sum(contTable)
             if (total_n < 20) {
-                warning_level <- "moderate"
+                # Escalate only. A "severe" expected-count violation and a small
+                # sample co-occur in exactly the tables where the flag matters, and
+                # this used to overwrite "severe" with "moderate", changing the
+                # panel's colour and severity.
+                if (warning_level %in% c("none", "mild"))
+                    warning_level <- "moderate"
                 warning_msg <- c(warning_msg, sprintf(.("Small sample size (n=%d)"), total_n))
                 recommendation <- c(recommendation, .("Results may be unreliable with small samples."))
             }
@@ -1073,7 +1111,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Generate natural language summary
             var_names <- if (!is.null(rows) && !is.null(cols)) {
-                paste0(.("'"), rows, .("' and '"), cols, .("'"))
+                sprintf(.("'%s' and '%s'"), rows, cols)
             } else {
                 .("the row and column variables")
             }
@@ -1108,7 +1146,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .("Post-hoc analysis revealed %d significant pairwise difference(s) out of %d comparisons after %s correction."),
                     n_significant_pairs,
                     length(pairwise_results),
-                    self$options$posthoc
+                    private$.posthocMethodLabel()
                 )
                 # paste(), not paste0(): these are two complete sentences and this
                 # panel is offered for copying into reports.
@@ -1138,8 +1176,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("A chi-square test of independence, without continuity correction, was performed to examine the relationship between %s categorical variables.%s"),
                 if (nrow(contTable) == 2 && ncol(contTable) == 2) "two binary" else "two",
                 if (assumptions$low_expected_5 > 0)
-                    sprintf(.(" %d of the %d cells had an expected count below 5."),
-                            assumptions$low_expected_5, length(chiSqTest$expected))
+                    paste0(" ", sprintf(.("%d of the %d cells had an expected count below 5."),
+                            assumptions$low_expected_5, length(chiSqTest$expected)))
                 else ""
             )
             
@@ -1225,7 +1263,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (type == "residuals") {
                 return(htmltools::div(
                     style = "padding: 15px; background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #4caf50; margin: 10px 0; color: inherit;",
-                    htmltools::h4(.("Standardized Residuals Interpretation"), style = "color: #2e7d32; margin-top: 0;"),
+                    htmltools::h4(.("Standardized Residuals Interpretation"), style = "color: inherit; margin-top: 0;"),
                     htmltools::p(htmltools::strong(.("What are standardized residuals?"))),
                     htmltools::p(.("Standardized residuals measure how much each cell deviates from what we would expect if there was no association. The Pearson residual is (Observed - Expected) / \u{221A}Expected; the adjusted standardized residual reported here divides that by \u{221A}((1 - row proportion)(1 - column proportion)), which gives it an approximately standard normal distribution so it can be read like a z score.")),
                     htmltools::div(
@@ -1241,11 +1279,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # jmvcore's .() is a lookup, not a template engine: it performs no
                 # brace interpolation, so "{num_comparisons}" used to reach the user
                 # literally. Build the numbers with sprintf instead.
-                method_name <- switch(self$options$posthoc,
-                    bonferroni = .("Bonferroni"),
-                    holm       = .("Holm"),
-                    fdr        = .("Benjamini-Hochberg (FDR)"),
-                    self$options$posthoc)
+                method_name <- private$.posthocMethodLabel()
                 return(htmltools::div(
                     style = "padding: 15px; background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #ff9800; margin: 10px 0; color: inherit;",
                     htmltools::h4(.("Multiple Testing Correction"), style = "color: #e65100; margin-top: 0;"),
@@ -1283,7 +1317,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .("Standardized residuals identify which specific cells in the table drive the overall significant association. They represent the distance (in standard deviations) between the observed count and the expected count.")
                 ),
                 htmltools::div(
-                    style = "background-color: rgba(255, 255, 255, 0.06); padding: 12px; border: 1px border; border-color: #d1e3f8; border-radius: 5px; margin-bottom: 15px; color: inherit;",
+                    style = "background-color: rgba(255, 255, 255, 0.06); padding: 12px; border: 1px solid #d1e3f8; border-radius: 5px; margin-bottom: 15px; color: inherit;",
                     htmltools::tags$ul(
                         style = "margin: 0; padding-left: 20px;",
                         htmltools::tags$li(
@@ -1366,7 +1400,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         rm(".Random.seed", envir = .GlobalEnv),
                     add = TRUE)
             }
-            set.seed(42)
+            # User-configurable so a reader can check the interval's dependence on
+            # the resampling. jmvcore raises "options$seed does not exist" (it does
+            # NOT return NULL) while the generated header predates the option, so
+            # the read is guarded with has() and falls back to the historical value.
+            seed <- if (self$options$has("seed")) self$options$seed else 42L
+            set.seed(seed)
 
             # Run bootstrap. Every failure path returns "" rather than NA: this value
             # goes straight into a text column, where a literal "NA" reads as a number
@@ -1428,11 +1467,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .prepareAndValidateData = function() {
             # Error Message ----
             if (nrow(self$data) == 0) {
-                # Use HTML message in todo element instead of Notice object
-                self$results$todo$setContent(
-                    paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
-                          "<strong>Error:</strong> Data contains no (complete) rows. Please check your dataset and variable selections.",
-                          "</div>"))
+                msg <- .("Data contains no (complete) rows. Please check your dataset and variable selections.")
+                private$.addNotice("ERROR", .("The analysis cannot proceed"), msg)
+                self$results$todo$setContent(private$.errorBox(msg))
                 return(NULL)
             }
 
@@ -1444,11 +1481,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check if counts variable exists when specified
             if (!is.null(counts) && !(counts %in% names(data))) {
-                # Use HTML message in todo element instead of Notice object
-                self$results$todo$setContent(
-                    paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
-                          "<strong>Error:</strong> The counts variable '", htmltools::htmlEscape(counts), "' does not exist in the data. Please select a valid numeric variable for counts.",
-                          "</div>"))
+                tpl <- .("The counts variable '%s' does not exist in the data. Please select a valid numeric variable for counts.")
+                private$.addNotice("ERROR", .("The analysis cannot proceed"), sprintf(tpl, counts))
+                self$results$todo$setContent(private$.errorBox(sprintf(tpl, htmltools::htmlEscape(counts))))
                 return(NULL)
             }
 
@@ -1508,40 +1543,34 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Handle errors
             if (inherits(contTable, "try-error")) {
-                # Use HTML message in todo element instead of Notice object
                 if (show_warnings) {
-                    self$results$todo$setContent(
-                        paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
-                              "<strong>Error:</strong> Error creating contingency table. Please check your data format and variable selections. Ensure rows and columns variables are categorical.",
-                              "</div>"))
+                    msg <- .("The contingency table could not be created. Please check your data format and variable selections, and ensure the row and column variables are categorical.")
+                    private$.addNotice("ERROR", .("The analysis cannot proceed"), msg)
+                    self$results$todo$setContent(private$.errorBox(msg))
                 }
                 return(NULL)
             }
 
             # Validate table dimensions
             if (any(dim(contTable) < 2)) {
-                # Use HTML message in todo element instead of Notice object
                 if (show_warnings) {
-                    self$results$todo$setContent(
-                        paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
-                              "<strong>Error:</strong> Contingency table must have at least 2 rows and 2 columns. Please check that your variables have at least 2 categories each.",
-                              "</div>"))
+                    msg <- .("The contingency table must have at least 2 rows and 2 columns. Please check that each variable has at least 2 categories.")
+                    private$.addNotice("ERROR", .("The analysis cannot proceed"), msg)
+                    self$results$todo$setContent(private$.errorBox(msg))
                 }
                 return(NULL)
             }
-            
-            # Add warning message about weighted data (only in main analysis).
-            # Written whenever counts is set so the visible:(counts) panel is never
-            # rendered empty (does not require the Educational panels toggle).
-            if (!is.null(counts) && show_warnings) {
-                weight_warning <- htmltools::div(
-                    style = "padding: 10px; background-color: rgba(33, 181, 248, 0.14); border-left: 4px solid #0277bd; margin: 10px 0; color: inherit;",
-                    htmltools::h5(" Weighted Data Analysis", style = "color: #01579b; margin-top: 0;"),
-                    htmltools::p("The data is being treated as frequency counts. Each row represents a combination of categories with the specified count/weight.")
-                )
-                self$results$weightedDataInfo$setContent(as.character(weight_warning))
-            }
-            
+
+            # C. Fractional weights are not frequencies. The statistic is computed on
+            # them as given (xtabs sums whatever it is handed), but the result is then
+            # not a table of observed cases, which is what every panel describes.
+            if (!is.null(counts) && show_warnings &&
+                any(abs(data[[counts]] - round(data[[counts]])) > 1e-8, na.rm = TRUE))
+                private$.addNotice(
+                    "WARNING",
+                    .("Counts are not whole numbers"),
+                    .("The counts variable contains non-integer values. A frequency table needs whole-number counts; the chi-square statistic was computed on the values as given, but they do not describe a table of observed cases."))
+
             return(contTable)
         },
         
@@ -1554,20 +1583,21 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # inputs make chisq.test error outright. Reject with an actionable message instead
             # of emitting NaN results or a cryptic error.
             if (sum(contTable) == 0)
-                jmvcore::reject("The contingency table is empty: no rows are complete on both selected variables. Check the selected variables, and the counts variable if one is used.")
+                jmvcore::reject(.("The contingency table is empty: no rows are complete on both selected variables. Check the selected variables, and the counts variable if one is used."))
             empty_rows <- rownames(contTable)[rowSums(contTable) == 0]
             empty_cols <- colnames(contTable)[colSums(contTable) == 0]
             if (length(empty_rows) > 0 || length(empty_cols) > 0) {
                 parts <- c(
-                    if (length(empty_rows) > 0) paste0("row category/categories with no observations: ", paste(empty_rows, collapse = ", ")),
-                    if (length(empty_cols) > 0) paste0("column category/categories with no observations: ", paste(empty_cols, collapse = ", ")))
-                jmvcore::reject(paste0("The chi-square test is undefined because of ", paste(parts, collapse = "; "), ". Drop or merge empty categories and re-run."))
+                    if (length(empty_rows) > 0) sprintf(.("row categories with no observations: %s"), paste(empty_rows, collapse = ", ")),
+                    if (length(empty_cols) > 0) sprintf(.("column categories with no observations: %s"), paste(empty_cols, collapse = ", ")))
+                jmvcore::reject(sprintf(.("The chi-square test is undefined because of %s. Drop or merge empty categories and re-run."), paste(parts, collapse = "; ")))
             }
 
             # Perform Chi-Square Test (wrapped: pathological but non-empty tables can still error) ----
+            failure_tpl <- .("The chi-square test could not be computed: %s. Check that both variables are categorical with valid, nonnegative counts.")
             chiSqTest <- tryCatch(
                 private$.chisqQuiet(contTable, correct = FALSE),
-                error = function(e) jmvcore::reject(paste0("The chi-square test could not be computed: ", conditionMessage(e), ". Check that both variables are categorical with valid, nonnegative counts.")))
+                error = function(e) jmvcore::reject(sprintf(failure_tpl, conditionMessage(e))))
 
             # Add chi-square results to the table ----
             self$results$chisqTable$setRow(
@@ -1640,8 +1670,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 htmltools::p(
                     style = "margin-top: 10px;",
                     htmltools::tags$small(
-                        htmltools::strong("Critical value for significance: "),
-                        "\u{B1}", round(residuals_analysis$critical_value, 3)
+                        htmltools::strong(.("Critical value for significance:")),
+                        " \u{B1}", round(residuals_analysis$critical_value, 3)
                     )
                 )
             )
@@ -1762,11 +1792,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # a design decision, not a defect fix.
             if (self$options$posthoc == "none") {
                 # Use HTML message only (no Notice object to avoid serialization errors)
-                message_text <- paste0(
-                    "You selected 'None' for post-hoc method. No pairwise comparisons will be performed. ",
-                    "If you want pairwise comparisons with no p-value adjustment, this feature is not currently available. ",
-                    "Please select Bonferroni, Holm, or FDR for pairwise testing with appropriate corrections."
-                )
+                message_text <- .("You selected 'None' for the post-hoc method, so no pairwise comparisons were performed. Pairwise comparisons without p-value adjustment are not offered. Select Bonferroni, Holm or FDR to run pairwise tests with a multiple-testing correction.")
                 self$results$multipleTestingInfo$setContent(
                     paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
                           "<strong>", .("Post-hoc Testing Disabled:"), "</strong> ",
@@ -1785,14 +1811,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (!overall_significant) {
                 # Use HTML message only (no Notice object to avoid serialization errors)
-                message_text <- paste0(
-                    "Overall chi-square test is not significant (p = ",
-                    format.pval(chiSqTest$p.value, digits = 3),
-                    " \u{2265} ", self$options$sig, "). ",
-                    "Post-hoc pairwise comparisons are only valid when the overall test is significant. ",
-                    "Running pairwise tests after a non-significant omnibus test increases Type I error (false positives) ",
-                    "and constitutes data dredging."
-                )
+                message_text <- sprintf(
+                    .("The overall chi-square test is not significant (p = %s \u{2265} %g). Post-hoc pairwise comparisons are only valid when the overall test is significant: running them after a non-significant omnibus test inflates the Type I error rate and constitutes data dredging."),
+                    format.pval(chiSqTest$p.value, digits = 3), self$options$sig)
                 self$results$multipleTestingInfo$setContent(
                     paste0("<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; color: inherit;'>",
                           "<strong>", .("Post-hoc Testing Not Performed:"), "</strong> ",
@@ -1819,9 +1840,16 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Use HTML notice for educational panel (no Notice object to avoid serialization errors)
                 fisher_notice <- NULL
                 if (fisher_used) {
+                    # The wording must match WHY Fisher was used: with "Always
+                    # Fisher's exact" selected it is the user's choice for every
+                    # comparison, not a low-count fallback.
+                    fisher_reason <- if (identical(self$options$testSelection, "fisher"))
+                        .("Method notice: Fisher's exact test was selected in the options and used for every pairwise comparison; the reported p-values use that exact method.")
+                    else
+                        .("Method notice: Pairwise comparisons with expected cell counts below 5 are automatically analysed with Fisher's exact test; the reported p-values use that exact method.")
                     fisher_notice <- htmltools::div(
                         style = "padding: 10px; background-color: rgba(33, 152, 239, 0.13); border-left: 4px solid #1976d2; margin: 8px 0; color: inherit;",
-                        htmltools::strong(.("Method notice: Pairwise comparisons with expected cell counts below 5 are automatically analysed with Fisher's exact test; the reported p-values use that exact method.")),
+                        htmltools::strong(fisher_reason),
                         if (fisher_mc_used) htmltools::div(.("For at least one comparison the exact computation could not be completed, and Fisher's test was evaluated by Monte Carlo simulation instead; the Test Method column names those comparisons.")) else NULL
                     )
                 }
@@ -1922,32 +1950,32 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Overall Chi-Square Results
             export_data[[row_index]] <- list(
-                category = "Overall Test",
-                measure = "Chi-Square Statistic",
+                category = .("Overall Test"),
+                measure = .("Chi-Square Statistic"),
                 value = round(chiSqTest$statistic, 4),
-                interpretation = paste("Chi-square =", round(chiSqTest$statistic, 4))
+                interpretation = sprintf(.("Chi-square = %s"), round(chiSqTest$statistic, 4))
             )
             row_index <- row_index + 1
             
             export_data[[row_index]] <- list(
-                category = "Overall Test",
-                measure = "Degrees of Freedom",
+                category = .("Overall Test"),
+                measure = .("Degrees of Freedom"),
                 value = chiSqTest$parameter,
-                interpretation = paste("df =", chiSqTest$parameter)
+                interpretation = sprintf(.("df = %s"), chiSqTest$parameter)
             )
             row_index <- row_index + 1
             
             export_data[[row_index]] <- list(
-                category = "Overall Test",
-                measure = "P-value",
+                category = .("Overall Test"),
+                measure = .("P-value"),
                 value = format.pval(chiSqTest$p.value, digits = 4),
                 # A non-significant p-value is absence of evidence, not evidence that
                 # the variables are independent - "No significant association" as a
                 # bare verdict invites exactly that misreading.
                 interpretation = if (chiSqTest$p.value < self$options$sig)
-                    sprintf("Statistically significant association at \u{3B1} = %g", self$options$sig)
+                    sprintf(.("Statistically significant association at \u{3B1} = %g"), self$options$sig)
                 else
-                    sprintf("No statistically significant association detected at \u{3B1} = %g; absence of evidence is not evidence of absence, so read the effect size and its precision alongside this", self$options$sig)
+                    sprintf(.("No statistically significant association detected at \u{3B1} = %g; absence of evidence is not evidence of absence, so read the effect size and its precision alongside this"), self$options$sig)
             )
             row_index <- row_index + 1
             
@@ -1957,10 +1985,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (i in seq_along(row_names)) {
                 for (j in seq_along(col_names)) {
                     export_data[[row_index]] <- list(
-                        category = "Contingency Table",
+                        category = .("Contingency Table"),
                         measure = paste(row_names[i], "\u{D7}", col_names[j]),
                         value = contTable[i, j],
-                        interpretation = paste("Observed count:", contTable[i, j])
+                        interpretation = sprintf(.("Observed count: %s"), contTable[i, j])
                     )
                     row_index <- row_index + 1
                 }
@@ -1973,18 +2001,18 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 residuals_analysis <- private$.analyzeResiduals(chiSqTest, contTable, self$options$sig, cutoff_value)
                 
                 export_data[[row_index]] <- list(
-                    category = "Residuals Analysis",
-                    measure = "Critical Value",
+                    category = .("Residuals Analysis"),
+                    measure = .("Critical Value"),
                     value = round(residuals_analysis$critical_value, 3),
-                    interpretation = paste("\u{B1}", round(residuals_analysis$critical_value, 3), "for significance")
+                    interpretation = sprintf(.("\u{B1}%s for significance"), round(residuals_analysis$critical_value, 3))
                 )
                 row_index <- row_index + 1
                 
                 export_data[[row_index]] <- list(
-                    category = "Residuals Analysis",
-                    measure = "Significant Cells",
+                    category = .("Residuals Analysis"),
+                    measure = .("Significant Cells"),
                     value = residuals_analysis$num_significant_cells,
-                    interpretation = paste(residuals_analysis$num_significant_cells, "of", length(residuals_analysis$significant_cells), "cells significant")
+                    interpretation = sprintf(.("%d of %d cells significant"), residuals_analysis$num_significant_cells, length(residuals_analysis$significant_cells))
                 )
                 row_index <- row_index + 1
                 
@@ -1992,8 +2020,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (i in seq_along(row_names)) {
                     for (j in seq_along(col_names)) {
                         export_data[[row_index]] <- list(
-                            category = "Cell Residuals",
-                            measure = paste(row_names[i], "\u{D7}", col_names[j], "Residual"),
+                            category = .("Cell Residuals"),
+                            measure = paste(row_names[i], "\u{D7}", col_names[j], .("Residual")),
                             value = round(residuals_analysis$adjusted_residuals[i, j], 3),
                             interpretation = residuals_analysis$interpretation[i, j]
                         )
@@ -2006,10 +2034,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # omnibus test is significant - the same gate the results pane uses)
             if (self$options$posthoc == "none") {
                 export_data[[row_index]] <- list(
-                    category = "Pairwise Comparisons",
-                    measure = "Post-hoc method",
-                    value = "None",
-                    interpretation = "No pairwise comparisons were performed. Select Bonferroni, Holm or FDR to obtain them."
+                    category = .("Pairwise Comparisons"),
+                    measure = .("Post-hoc method"),
+                    value = .("None"),
+                    interpretation = .("No pairwise comparisons were performed. Select Bonferroni, Holm or FDR to obtain them.")
                 )
                 row_index <- row_index + 1
             } else if (chiSqTest$p.value < self$options$sig) {
@@ -2026,42 +2054,42 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         p_adj <- result$actual_pvalue_adjusted
                         
                         export_data[[row_index]] <- list(
-                            category = "Pairwise Comparisons",
-                            measure = paste(result$comparison, "- Test"),
+                            category = .("Pairwise Comparisons"),
+                            measure = paste(result$comparison, "-", .("Test")),
                             value = test_name,
-                            interpretation = paste("Test method:", test_name)
+                            interpretation = sprintf(.("Test method: %s"), test_name)
                         )
                         row_index <- row_index + 1
                         
                         export_data[[row_index]] <- list(
-                            category = "Pairwise Comparisons",
-                            measure = paste(result$comparison, "- Chi-square"),
+                            category = .("Pairwise Comparisons"),
+                            measure = paste(result$comparison, "-", .("Chi-square")),
                             value = round(result$chi_statistic, 4),
-                            interpretation = paste("Chi-square =", round(result$chi_statistic, 4))
+                            interpretation = sprintf(.("Chi-square = %s"), round(result$chi_statistic, 4))
                         )
                         row_index <- row_index + 1
                         
                         export_data[[row_index]] <- list(
-                            category = "Pairwise Comparisons",
-                            measure = paste(result$comparison, "- Raw p-value"),
+                            category = .("Pairwise Comparisons"),
+                            measure = paste(result$comparison, "-", .("Raw p-value")),
                             value = format.pval(p_value, digits = 4),
-                            interpretation = paste("Raw p =", format.pval(p_value, digits = 4))
+                            interpretation = sprintf(.("Raw p = %s"), format.pval(p_value, digits = 4))
                         )
                         row_index <- row_index + 1
                         
                         export_data[[row_index]] <- list(
-                            category = "Pairwise Comparisons",
-                            measure = paste(result$comparison, "- Adjusted p-value"),
+                            category = .("Pairwise Comparisons"),
+                            measure = paste(result$comparison, "-", .("Adjusted p-value")),
                             value = format.pval(p_adj, digits = 4),
-                            interpretation = if (p_adj < self$options$sig) "Significant after correction" else "Not significant after correction"
+                            interpretation = if (p_adj < self$options$sig) .("Significant after correction") else .("Not significant after correction")
                         )
                         row_index <- row_index + 1
                         
                         export_data[[row_index]] <- list(
-                            category = "Pairwise Comparisons",
-                            measure = paste(result$comparison, "- Effect Size"),
+                            category = .("Pairwise Comparisons"),
+                            measure = paste(result$comparison, "-", .("Effect Size")),
                             value = round(result$effect_size, 3),
-                            interpretation = paste("Effect size (Phi/V) =", round(result$effect_size, 3))
+                            interpretation = sprintf(.("Effect size (Phi/V) = %s"), round(result$effect_size, 3))
                         )
                         row_index <- row_index + 1
                     }
@@ -2083,6 +2111,19 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # per run cycle and the panel grows a duplicate on every option change.
             private$.noticeList <- list()
             private$.renderNotices()
+
+            # The weighted-data panel is visible:(counts) in the .r.yaml, so it is
+            # written here, before any early return, whenever a counts variable is
+            # set. Writing it only after the table had been built left a titled,
+            # empty panel while rows/cols were unset or the counts variable was bad.
+            if (!is.null(self$options$counts)) {
+                weight_info <- htmltools::div(
+                    style = "padding: 10px; background-color: rgba(33, 181, 248, 0.14); border-left: 4px solid #0277bd; margin: 10px 0; color: inherit;",
+                    htmltools::h5(.("Weighted Data Analysis"), style = "color: inherit; margin-top: 0;"),
+                    htmltools::p(.("The data is being treated as frequency counts. Each row represents a combination of categories with the specified count/weight."))
+                )
+                self$results$weightedDataInfo$setContent(as.character(weight_info))
+            }
 
             # Initial setup and validation
             if (!private$.handleInitialSetup()) return()
@@ -2138,7 +2179,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Small sample size warning
             if (assumptions$total_n < 20) {
-                warning_msg <- sprintf('Very small sample size (n=%d). Chi-square approximation may be unreliable. Consider using Fisher\'s exact test and interpreting results with caution.', assumptions$total_n)
+                warning_msg <- sprintf(.("Very small sample size (n = %d). The chi-square approximation may be unreliable. Consider using Fisher's exact test and interpreting results with caution."), assumptions$total_n)
                 warning_messages <- c(warning_messages, warning_msg)
                 # Also as a notice: this condition invalidates the test that is
                 # printed above it, and the HTML div shares the `todo` element with
@@ -2152,22 +2193,22 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     any(vapply(pairwise_results,
                                function(x) startsWith(x$test_used, "Fisher"), logical(1)))
                 pairwise_note <- if (fisher_pairwise)
-                    .(" Fisher's exact test was used for the pairwise comparisons whose expected counts fell below 5.")
+                    .("Fisher's exact test was used for the pairwise comparisons whose expected counts fell below 5.")
                 else if (length(pairwise_results) > 0)
-                    .(" The pairwise comparisons below were computed with the chi-square test and rest on the same approximation.")
+                    .("The pairwise comparisons below were computed with the chi-square test and rest on the same approximation.")
                 else
-                    .(" No pairwise comparisons were performed for this table.")
+                    .("No pairwise comparisons were performed for this table.")
                 private$.addNotice(
                     "STRONG_WARNING",
                     .("Sample too small for the chi-square approximation"),
-                    paste0(sprintf(
+                    paste(sprintf(
                         .("Only %d observations remain in the table. The chi-square statistic relies on a large-sample approximation, so the p-value reported above is unreliable at this size. For the overall table, an exact test or a larger sample is needed before the p-value can be read at face value."),
                         assumptions$total_n), pairwise_note))
             }
 
             # Low expected counts warning
             if (assumptions$prop_low_5 > 0.2) {
-                warning_msg <- sprintf('%.0f%% of cells have expected counts < 5. Chi-square test assumptions violated. Use Fisher\'s exact test for more reliable results.', assumptions$prop_low_5 * 100)
+                warning_msg <- sprintf(.("%.0f%% of cells have expected counts below 5, so the chi-square test assumptions are violated. Use Fisher's exact test for more reliable results."), assumptions$prop_low_5 * 100)
                 warning_messages <- c(warning_messages, warning_msg)
                 private$.addNotice(
                     "STRONG_WARNING",
@@ -2177,11 +2218,26 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         assumptions$low_expected_5, length(chiSqTest$expected), assumptions$prop_low_5 * 100))
             }
 
+            # A single cell with an expected count below 1 invalidates the
+            # approximation on its own, even when fewer than 20% of cells are below 5
+            # (a large table with one sparse category). The block above does not fire
+            # then, and the Assumptions check panel that does report it is opt-in.
+            if (assumptions$low_expected_1 > 0 && assumptions$prop_low_5 <= 0.2) {
+                warning_msg <- sprintf(.("%d cell(s) have an expected count below 1. Use Fisher's exact test or merge the sparse category."), assumptions$low_expected_1)
+                warning_messages <- c(warning_messages, warning_msg)
+                private$.addNotice(
+                    "STRONG_WARNING",
+                    .("At least one expected count is below 1"),
+                    sprintf(
+                        .("%d of %d cells have an expected count below 1. The chi-square approximation is not valid for that table even though most cells are adequate, so the overall p-value above is not dependable. Use Fisher's exact test, or merge the sparse category if there is a substantive reason to, and see the Assumptions check panel for the per-cell detail."),
+                        assumptions$low_expected_1, length(chiSqTest$expected)))
+            }
+
             # Display combined warnings in todo element if any exist
             if (length(warning_messages) > 0) {
                 combined_warnings <- paste0(
                     "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; color: inherit;'>",
-                    "<strong>Warning:</strong><ul>",
+                    "<strong>", .("Warning:"), "</strong><ul>",
                     paste0("<li>", warning_messages, "</li>", collapse = ""),
                     "</ul></div>"
                 )
@@ -2235,8 +2291,27 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.generateExportTable(chiSqTest, contTable, pairwise_results)
             }
 
-            # Note: INFO notice at completion removed to avoid serialization errors
-            # The analysis results are already visible in the results tables
+            # One-line methodology summary, added last so it sits below any warning.
+            # %g for n, not %d: a weighted table can sum to a non-integer.
+            n_pairs <- length(pairwise_results)
+            pairwise_text <- if (self$options$posthoc == "none")
+                .("no pairwise comparisons (post-hoc method set to None)")
+            else if (chiSqTest$p.value >= self$options$sig)
+                .("no pairwise comparisons (overall test not significant)")
+            else if (n_pairs == 0)
+                .("no pairwise sub-comparisons for this table shape")
+            else
+                sprintf(.("%d pairwise comparisons with %s adjustment, %d significant"),
+                        n_pairs, private$.posthocMethodLabel(),
+                        sum(vapply(pairwise_results,
+                                   function(x) x$actual_pvalue_adjusted < self$options$sig, logical(1))))
+            private$.addNotice(
+                "INFO",
+                .("Analysis summary"),
+                sprintf(.("%g observations in a %d x %d table; Pearson chi-square without continuity correction, p %s at alpha = %g; %s."),
+                        sum(contTable), nrow(contTable), ncol(contTable),
+                        if (chiSqTest$p.value < 0.001) "< 0.001" else sprintf("= %.3f", chiSqTest$p.value),
+                        self$options$sig, pairwise_text))
         },
         
         # Display clinical summary
@@ -2249,7 +2324,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             summary_content <- htmltools::div(
                 style = summary_style,
-                htmltools::h4(.("Clinical Summary"), style = "margin-top: 0; color: #2e7d32;"),
+                htmltools::h4(.("Clinical Summary"), style = "margin-top: 0; color: inherit;"),
                 htmltools::p(clinical_summary$summary_text),
                 htmltools::div(
                     style = "margin-top: 10px; font-size: 12px; color: inherit; opacity: 0.75;",
@@ -2331,7 +2406,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .displayReportSentences = function(sentences) {
             sentences_content <- htmltools::div(
                 style = "padding: 15px; background-color: rgba(153, 33, 170, 0.12); border-left: 4px solid #9c27b0; margin: 10px 0; color: inherit;",
-                htmltools::h4(.("Report-Ready Sentences"), style = "color: #7b1fa2; margin-top: 0;"),
+                htmltools::h4(.("Report-Ready Sentences"), style = "color: inherit; margin-top: 0;"),
 
                 htmltools::div(
                     htmltools::h5(.("Methods:")),
@@ -2364,7 +2439,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot = function(image, ggtheme, theme, ...) {
             # Only draw if requested
             if (!self$options$plot)
-                return()
+                return(FALSE)
 
             # Sanity checks
             rows   <- self$options$rows
@@ -2445,8 +2520,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     guide    = ggplot2::guide_colorbar()
                 ) +
                 ggplot2::labs(
-                    title = sprintf("Adjusted Standardized Residuals: %s vs %s", rows, cols),
-                    subtitle = sprintf("* marks cells with |residual| > %.2f", critical),
+                    title = sprintf(.("Adjusted Standardized Residuals: %s vs %s"), rows, cols),
+                    subtitle = sprintf(.("* marks cells with |residual| > %.2f"), critical),
                     x     = cols,
                     y     = rows
                 ) +

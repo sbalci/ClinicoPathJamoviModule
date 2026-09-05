@@ -46,7 +46,7 @@ Internationalization (i18n) is the process of designing software so it can be ad
 
 ### The jamovi i18n System
 
-jamovi uses the **gettext** internationalization framework:
+jamovi stores translations in **gettext**-format catalogs (`.pot`/`.po`) but runs its **own** lookup at runtime. R does ship a rudimentary translation system, but it cannot change language "on the fly" within a running R process, so jamovi had to provide its own (official tutorial: https://dev.jamovi.org/tutorial/tuts0204-translation/).
 
 ```
 Source code → String extraction → .pot template → .po translations → Runtime lookup
@@ -83,20 +83,23 @@ message <- .('Analysis completed successfully')
 
 ### The `.()` Translation Function
 
-**What it does:**
-1. **Development time** - Signals to jmvtools that string should be extracted
-2. **Runtime** - Performs translation lookup based on current language
+**What it does** (two roles, per the jamovi tutorial):
+1. **Development time** - tells the jamovi-compiler / jmvtools that the surrounded string needs translating, so it can be extracted into the catalog "database" of strings
+2. **Runtime** - looks up the translated-string database for the present language and returns the match to the caller (falls back to the original text)
 
 **Source:** `jmvcore` package
 
 **Usage:**
 ```r
-# Import in NAMESPACE
+# NAMESPACE - lets you write the terse .('Too few samples')
+# instead of jmvcore::.('Too few samples')
 importFrom(jmvcore, .)
 
 # Use in code
 .('Your translatable string here')
 ```
+
+A blanket `import(jmvcore)` in NAMESPACE (ClinicoPath's current setup) also exposes `.`. Add the import through roxygen (`#' @importFrom jmvcore .`) rather than editing NAMESPACE by hand.
 
 ### Automatic vs Manual Translation
 
@@ -314,39 +317,43 @@ dep <- self$options$.('dep')      # Wrong! - breaks code
 
 ### 3.7 Strings Requiring `self` Context
 
-**The `.()` function needs access to `self`** (the analysis object).
+**The `.()` function needs access to the analysis object** (the `self` in `self$results$...`). It finds it by **looking for a variable named `self` in the calling function's environment**.
 
-**In main methods (`.init()`, `.run()`):**
-```r
-# Works automatically - self is in scope
-private$.run <- function() {
-    message <- .('Running analysis...')
-    # ...
-}
-```
+**In R6 member functions (`.init()`, `.run()`, `private$.foo()`):** `self` is defined, so it works transparently.
 
-**In utility functions:**
+**In auxiliary functions that are not members of the R6 class:** `self` is absent and the call fails at runtime with `object 'self' not found` (the root cause of ClinicoPath issue #122 in multisurvival). Pass `self` in explicitly, as a parameter literally named `self`. Official tutorial example:
+
 ```r
-# PROBLEM: self not in scope
+# BAD (will fail)
 makeSSString <- function(sstype) {
-    # This will fail!
-    return .('Type 1 Sum of Squares is not suitable for this data set')
+    if (sstype == 1) {
+        # Error: .() cannot find 'self'
+        return(.('Type 1 Sum of Squares is not suitable for this data set'))
+    }
+    NULL
 }
 
-# SOLUTION: Pass self as parameter
+# R6 Class
+.run = function() {
+    message <- makeSSString(sstype)
+}
+
+# GOOD
 makeSSString <- function(sstype, self) {
     if (sstype == 1) {
-        return .('Type 1 Sum of Squares is not suitable for this data set')
+        # Success: 'self' is passed in explicitly
+        return(.('Type 1 Sum of Squares is not suitable for this data set'))
     }
-    # ...
+    NULL
 }
 
-# Call with self
-private$.run <- function() {
-    msg <- makeSSString(self$options$ssType, self)
-    # ...
+# R6 Class
+.run = function() {
+    message <- makeSSString(sstype, self)
 }
 ```
+
+Because the failure only fires on the branch that reaches the helper, it is data-dependent and easy to miss in testing. Audit: every `.(` inside a top-level `function(` must have a `self` formal.
 
 ---
 
@@ -372,28 +379,32 @@ message <- .('Your message here')
 # jamovi/i18n/
 ```
 
-### 4.2 Creating the Base Catalog
+### 4.2 Creating the Base Catalog (POT template)
 
-**Generate English template:**
+The official jmvtools commands (they forward to the jamovi-compiler as `jmc --i18n <pkg> --create <code>` / `--update [code]`):
+
 ```r
 # In R console at module root
+# 'catalog' (or 'c') is special-cased: writes jamovi/i18n/catalog.pot
+# with the header "Language: c\n"
+jmvtools::i18nCreate("catalog")
+
+# English source catalog
 jmvtools::i18nCreate("en")
 ```
 
 **Creates:**
 ```
+jamovi/i18n/catalog.pot
 jamovi/i18n/en.po
-```
-
-**Update existing catalog:**
-```r
-jmvtools::i18nUpdate("en")
 ```
 
 **What happens:**
 - Scans all `.a.yaml`, `.r.yaml`, `.u.yaml` files
 - Extracts all `.()` wrapped strings from `.b.R` files
-- Creates/updates .po file with all translatable strings
+- Writes each string as a `msgid` with `#: R/<fn>.b.R` / `#: <fn>/options/<x>.title` source references
+
+Only `catalog.pot` is recognised as the source catalog; any other `*.pot` in `jamovi/i18n/` is skipped with a "skipping unrecognized .pot file" message.
 
 ### 4.3 Creating Language-Specific Catalogs
 
@@ -412,49 +423,42 @@ jmvtools::i18nCreate("ja")  # Japanese
 jmvtools::i18nCreate("zh")  # Chinese
 ```
 
-**Update all catalogs:**
+### 4.4 Updating Catalogs After Code Changes
+
 ```r
+# No argument = update EVERY .po/.pot in jamovi/i18n/ (catalog.pot, en.po, tr.po, ...)
+jmvtools::i18nUpdate()
+
+# One catalog at a time
 jmvtools::i18nUpdate("tr")
-jmvtools::i18nUpdate("de")
-jmvtools::i18nUpdate("fr")
-# etc.
+
+# Verbose compiler output when an entry looks wrong
+jmvtools::i18nUpdate(debug = TRUE)
 ```
 
-### 4.4 Creating the .pot Template
+Verified in this repo (~1 minute): `i18nUpdate` adds new `msgid`s, **keeps existing `msgstr`**, and prunes entries whose source is gone. Because it rewrites every catalog, review the `git diff` of `jamovi/i18n/` before committing.
 
-**For Weblate integration:**
+**Manual fallback** — only if `catalog.pot` is missing and `i18nCreate("catalog")` is unavailable:
 ```bash
-# Copy en.po to catalog.pot
 cp jamovi/i18n/en.po jamovi/i18n/catalog.pot
-
-# Edit catalog.pot header
-# Change "Language: en\n" to "Language: c\n"
+# Edit the header so it reads exactly:  "Language: c\n"
 ```
-
-**Why .pot?**
-- Universal template for all translations
-- Used by Weblate and other translation tools
-- Language-neutral (language code: `c`)
 
 ### 4.5 Complete Workflow Example
 
 ```r
-# 1. Initial creation
+# 1. First time only
+jmvtools::i18nCreate("catalog")
 jmvtools::i18nCreate("en")
 jmvtools::i18nCreate("tr")
 
-# 2. After code changes (added new strings)
-jmvtools::i18nUpdate("en")
-jmvtools::i18nUpdate("tr")
+# 2. Every time strings change (refreshes catalog.pot + en.po + tr.po)
+jmvtools::i18nUpdate()
 
-# 3. Create Weblate template
-# (In terminal)
-# cp jamovi/i18n/en.po jamovi/i18n/catalog.pot
-# Edit catalog.pot: Language: c
+# 3. Translate tr.po (manually or via Weblate), then validate
+#    (In terminal)  msgfmt -c -o /dev/null jamovi/i18n/tr.po
 
-# 4. Translate tr.po (manually or via Weblate)
-
-# 5. Test translations
+# 4. Test translations
 # (Install module and change jamovi language setting)
 ```
 
@@ -478,11 +482,12 @@ jmvtools::i18nUpdate("tr")
 
 **❌ DON'T:**
 ```r
-# Leading/trailing spaces
+# Leading/trailing spaces: translators don't know why they are there and
+# may trim them, breaking UI formatting
 .(' Analysis completed ')  # Bad
 
-# Fragmented sentences
-.('Analysis') + ' ' + .('completed')  # Bad
+# Fragmented sentences (translators can't reorder or agree the pieces)
+paste(.('Analysis'), .('completed'))  # Bad
 
 # Embedded formatting
 paste0(.('Results for '), varname, .(' variable'))  # Bad
@@ -555,7 +560,7 @@ string in.
 ```r
 # Translators can't reorder words
 if (std) {
-    resids <- .('Standardized ') + .('Residuals')  # Bad!
+    resids <- paste0(.('Standardized '), .('Residuals'))  # Bad!
 } else {
     resids <- .('Residuals')
 }
@@ -571,11 +576,10 @@ if (std) {
 }
 ```
 
-**❌ Bad - Embedded variables:**
+**❌ Bad - the jamovi tutorial's own "Avoid" example:**
 ```r
-# Variables inside translation
-resids <- .('{}Residuals')
-formatted <- format(resids, ifelse(std, .('Standardized '), ''))  # Bad!
+# A fragment with a trailing space assembled by format()
+resids <- format(.('{}Residuals'), ifelse(std, .('Standardized '), ''))  # Bad!
 ```
 
 **✅ Good - Placeholder pattern:**
@@ -1007,6 +1011,8 @@ html <- jmvcore::format(template, list(
 
 ## 9. Integration with Weblate
 
+**Official guidance (jamovi tutorial):** the jamovi library can take care of much of the catalog-hosting process; contact the jamovi team to have your module included in the community translation effort. The self-hosted Weblate route below is the older manual path.
+
 ### 9.1 What is Weblate?
 
 **Weblate** is a web-based translation platform that integrates with GitHub:
@@ -1122,7 +1128,7 @@ Test & release
 ```bash
 # 1. Generate updated catalogs in main module
 cd ClinicoPath
-Rscript -e "jmvtools::i18nUpdate('en'); jmvtools::i18nUpdate('tr')"
+Rscript -e "jmvtools::i18nUpdate()"   # no argument = every catalog in jamovi/i18n/
 
 # 2. Copy to i18n repo
 cp jamovi/i18n/*.po ../ClinicoPath-i18n/
@@ -1343,9 +1349,10 @@ private$.run = function() {
 }
 ```
 
-**2. Generate catalogs:**
+**2. Generate catalogs (first time):**
 ```r
 # In R console
+jmvtools::i18nCreate("catalog")   # catalog.pot template
 jmvtools::i18nCreate("en")
 jmvtools::i18nCreate("tr")
 jmvtools::i18nCreate("de")
@@ -1367,10 +1374,9 @@ msgid "Pearson's chi-square test with continuity correction"
 msgstr "Süreklilik düzeltmeli Pearson ki-kare testi"
 ```
 
-**4. Create Weblate template:**
-```bash
-cp jamovi/i18n/en.po jamovi/i18n/catalog.pot
-# Edit header: Language: c
+**4. Refresh every catalog after later code changes:**
+```r
+jmvtools::i18nUpdate()   # catalog.pot + en.po + tr.po + de.po
 ```
 
 **5. Test:**
@@ -1404,9 +1410,8 @@ jmvtools::prepare()
 
 **2. Forgot to update catalog**
 ```r
-# After adding new strings:
-jmvtools::i18nUpdate("en")
-jmvtools::i18nUpdate("tr")
+# After adding new strings (no argument = all catalogs):
+jmvtools::i18nUpdate()
 ```
 
 **3. String syntax error**
@@ -1530,6 +1535,22 @@ if (n == 1) {
 }
 ```
 
+### 11.7 Text After ` [` Silently Disappears
+
+**Symptom:** a `.()` string such as `.("Rate: {rate} [95% CI: {lo}-{hi}]")` renders without the bracketed part, even in English, and `i18nUpdate` writes it as `msgctxt "95% CI: ..."` + a shortened `msgid`.
+
+**Cause:** the compiler and jmvcore treat a trailing ` [context]` as the translator context (msgctxt) and strip it from the displayed text.
+
+**Solution:** never end a `.()` string with `]`; put confidence intervals in parentheses. Gate: `grep -nE '\.\("[^"]*\]"\)' R/*.b.R` must return nothing.
+
+### 11.8 Fill Scripts Skip Long Entries
+
+**Symptom:** a script that fills `msgstr` by matching `msgid "..."` on one line leaves every long notice untranslated.
+
+**Cause:** msgids longer than ~76 characters are written as `msgid ""` followed by quoted continuation lines.
+
+**Solution:** parse the catalog as blank-line-separated blocks, join the quoted pieces before matching, and write long `msgstr` values the same way. Validate with `msgfmt -c -o /dev/null jamovi/i18n/tr.po`.
+
 ---
 
 ## 12. References and Resources
@@ -1623,13 +1644,13 @@ xgettext  # Extract strings (jmvtools does this)
 # Setup
 importFrom(jmvcore, .)  # In NAMESPACE
 
-# Create catalogs
+# Create catalogs (first time)
+jmvtools::i18nCreate("catalog")   # catalog.pot
 jmvtools::i18nCreate("en")
 jmvtools::i18nCreate("tr")
 
-# Update catalogs
-jmvtools::i18nUpdate("en")
-jmvtools::i18nUpdate("tr")
+# Update every catalog after code changes
+jmvtools::i18nUpdate()
 
 # Rebuild module
 jmvtools::prepare()

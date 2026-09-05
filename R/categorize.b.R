@@ -550,6 +550,16 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             manual_breaks <- self$options$breaks
             sdmult <- self$options$sdmult
 
+            # Checked before anything is computed: with an unparsable entry
+            # .calculateBreaks() returns NULL and .validateBreaks() would
+            # report the generic "Insufficient break points" instead.
+            if (method == "manual" &&
+                is.null(private$.parseManualBreaks(manual_breaks))) {
+                self$results$notices$setContent(.errBox(
+                    "Invalid manual break points. Please enter comma-separated numeric values (e.g., 0, 25, 50, 75, 100)."))
+                return()
+            }
+
             private$.checkpoint()
             # Only the manual method can have break points that do not span the
             # data; the computed methods build theirs from min(x)/max(x), so the
@@ -590,15 +600,6 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     varname     = varname,
                     exclude_oor = exclude_oor
                 ))
-            }
-
-            # Additional check for manual breaks
-            if (method == "manual") {
-                if (is.null(private$.parseManualBreaks(manual_breaks))) {
-                    self$results$notices$setContent(.errBox(
-                        "Invalid manual break points. Please enter comma-separated numeric values (e.g., 0, 25, 50, 75, 100)."))
-                    return()
-                }
             }
 
             # Check if custom labels match number of categories
@@ -797,6 +798,9 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Populate break points table ----
             breakTable <- self$results$breakpointsTable
+            # addRow() appends without a duplicate-key check, so a second
+            # $run() on the same analysis object would double every row.
+            breakTable$deleteRows()
             for (i in seq_along(breaks)) {
                 breakTable$addRow(rowKey = i, values = list(
                     index = i,
@@ -809,6 +813,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Populate frequency table ----
             freqTable <- self$results$freqTable
+            freqTable$deleteRows()
 
             # Calculate frequencies. Break points come from the non-missing
             # values, but x_cat carries NA wherever x was NA (and wherever a

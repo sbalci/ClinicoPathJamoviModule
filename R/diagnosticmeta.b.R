@@ -2916,17 +2916,19 @@ diagnosticmetaClass <- R6::R6Class(
             # sensitivity of 90.4% with a 95% CI of 71-97% was reported as
             # "excellent ... will detect 90 out of 100 patients", which the
             # interval does not support.
-            band <- function(x) if (x >= 90) "excellent" else if (x >= 80) "good"
+            band_key <- function(x) if (x >= 90) "excellent" else if (x >= 80) "good"
                                 else if (x >= 70) "moderate" else "limited"
+            band_label <- function(x) if (x >= 90) .("excellent") else if (x >= 80) .("good")
+                                else if (x >= 70) .("moderate") else .("limited")
 
-            sens_class <- band(sens)
-            spec_class <- band(spec)
+            sens_class <- band_label(sens)
+            spec_class <- band_label(spec)
 
             # TRUE when the interval spans more than one performance band, i.e.
             # the data cannot distinguish "excellent" from something worse.
             ci_spans_bands <- function(ci) {
                 if (is.null(ci) || length(ci) < 2 || any(!is.finite(ci))) return(FALSE)
-                band(min(ci)) != band(max(ci))
+                band_key(min(ci)) != band_key(max(ci))
             }
             sens_uncertain <- ci_spans_bands(sens_ci)
             spec_uncertain <- ci_spans_bands(spec_ci)
@@ -2938,22 +2940,22 @@ diagnosticmetaClass <- R6::R6Class(
 
             # Classify positive LR
             plr_class <- if (is.finite(lr_pos)) {
-                if (lr_pos > 10) "strong"
-                else if (lr_pos >= 5) "moderate"
-                else if (lr_pos >= 2) "weak"
-                else "minimal"
+                if (lr_pos > 10) .("strong")
+                else if (lr_pos >= 5) .("moderate")
+                else if (lr_pos >= 2) .("weak")
+                else .("minimal")
             } else {
-                "not estimable"
+                .("not estimable")
             }
 
             # Classify negative LR
             nlr_class <- if (is.finite(lr_neg)) {
-                if (lr_neg < 0.1) "strong"
-                else if (lr_neg <= 0.2) "moderate"
-                else if (lr_neg <= 0.5) "weak"
-                else "minimal"
+                if (lr_neg < 0.1) .("strong")
+                else if (lr_neg <= 0.2) .("moderate")
+                else if (lr_neg <= 0.5) .("weak")
+                else .("minimal")
             } else {
-                "not estimable"
+                .("not estimable")
             }
 
             # Build dynamic interpretation with actual values

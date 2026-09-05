@@ -8,12 +8,13 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             vars = NULL,
             group = NULL,
-            sty = "nejm",
+            sty = "gtsummary",
             excl = FALSE,
             cont = "mean",
             pcat = "chisq",
             p_adjust = "none",
-            showSMD = FALSE, ...) {
+            showSMD = FALSE,
+            showSummary = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -44,7 +45,7 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "nejm",
                     "lancet",
                     "hmisc"),
-                default="nejm")
+                default="gtsummary")
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -77,6 +78,10 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showSMD",
                 showSMD,
                 default=FALSE)
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..group)
@@ -86,6 +91,7 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..pcat)
             self$.addOption(private$..p_adjust)
             self$.addOption(private$..showSMD)
+            self$.addOption(private$..showSummary)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -95,7 +101,8 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cont = function() private$..cont$value,
         pcat = function() private$..pcat$value,
         p_adjust = function() private$..p_adjust$value,
-        showSMD = function() private$..showSMD$value),
+        showSMD = function() private$..showSMD$value,
+        showSummary = function() private$..showSummary$value),
     private = list(
         ..vars = NA,
         ..group = NA,
@@ -104,7 +111,8 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..cont = NA,
         ..pcat = NA,
         ..p_adjust = NA,
-        ..showSMD = NA)
+        ..showSMD = NA,
+        ..showSummary = NA)
 )
 
 crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -114,25 +122,25 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         notices = function() private$.items[["notices"]],
         errorNotice = function() private$.items[["errorNotice"]],
         dataQualityNotice = function() private$.items[["dataQualityNotice"]],
-        analysisInfo = function() private$.items[["analysisInfo"]],
         subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
         todo2 = function() private$.items[["todo2"]],
-        varNameWarnings = function() private$.items[["varNameWarnings"]],
         tablestyle1 = function() private$.items[["tablestyle1"]],
         tablestyle2 = function() private$.items[["tablestyle2"]],
         tablestyle3 = function() private$.items[["tablestyle3"]],
         tablestyle4 = function() private$.items[["tablestyle4"]],
+        summary = function() private$.items[["summary"]],
         qvalueExplanation = function() private$.items[["qvalueExplanation"]],
         testInformation = function() private$.items[["testInformation"]],
-        smdTable = function() private$.items[["smdTable"]]),
+        smdTable = function() private$.items[["smdTable"]],
+        notes = function() private$.items[["notes"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Cross Table",
+                title="Cross Tables",
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "janitor",
@@ -164,7 +172,11 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "group",
-                    "excl")))
+                    "excl",
+                    "sty",
+                    "cont",
+                    "pcat",
+                    "p_adjust")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dataQualityNotice",
@@ -177,16 +189,6 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cont",
                     "pcat",
                     "p_adjust",
-                    "excl")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="analysisInfo",
-                title="Analysis Information",
-                visible=FALSE,
-                clearWith=list(
-                    "vars",
-                    "group",
-                    "sty",
                     "excl")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -211,15 +213,6 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "group",
                     "sty",
-                    "excl")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="varNameWarnings",
-                title="Variable Name Warnings",
-                visible=FALSE,
-                clearWith=list(
-                    "vars",
-                    "group",
                     "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -274,6 +267,20 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs="tangram"))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="summary",
+                title="Summary",
+                visible="(showSummary)",
+                clearWith=list(
+                    "vars",
+                    "group",
+                    "sty",
+                    "cont",
+                    "pcat",
+                    "p_adjust",
+                    "excl",
+                    "showSummary")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="qvalueExplanation",
                 title="Q-value Explanation",
                 visible=FALSE,
@@ -325,7 +332,20 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="balance", 
                         `title`="Balance", 
-                        `type`="text"))))}))
+                        `type`="text"))))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notes",
+                title="Notes",
+                visible=FALSE,
+                clearWith=list(
+                    "vars",
+                    "group",
+                    "excl",
+                    "sty",
+                    "cont",
+                    "pcat",
+                    "p_adjust")))}))
 
 crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "crosstableBase",
@@ -404,23 +424,27 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   the groups for each variable - the standard balance diagnostic for matched,
 #'   weighted, or propensity cohorts. Requires exactly two groups. |SMD| < 0.1
 #'   conventionally indicates negligible imbalance.
+#' @param showSummary Add a copy-ready paragraph below the table naming the
+#'   sample size, the groups, the tests the chosen style applied and the
+#'   variables that differed at p < 0.05 (q < 0.05 when a p-value adjustment is
+#'   applied in the gtsummary style).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$errorNotice} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataQualityNotice} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$analysisInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$varNameWarnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle1} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$qvalueExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$testInformation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$smdTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$notes} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -434,12 +458,13 @@ crosstable <- function(
     data,
     vars = NULL,
     group = NULL,
-    sty = "nejm",
+    sty = "gtsummary",
     excl = FALSE,
     cont = "mean",
     pcat = "chisq",
     p_adjust = "none",
-    showSMD = FALSE) {
+    showSMD = FALSE,
+    showSummary = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("crosstable requires jmvcore to be installed (restart may be required)")
@@ -462,7 +487,8 @@ crosstable <- function(
         cont = cont,
         pcat = pcat,
         p_adjust = p_adjust,
-        showSMD = showSMD)
+        showSMD = showSMD,
+        showSummary = showSummary)
 
     analysis <- crosstableClass$new(
         options = options,

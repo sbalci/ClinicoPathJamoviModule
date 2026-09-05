@@ -144,7 +144,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep <- self$options$dep; grp <- self$options$group
             if (nrow(mydata) == 0) return(NULL)
 
-            cd <- tryCatch(withr::with_seed(private$.SEED, suppressWarnings(
+            cd <- tryCatch(withr::with_seed(self$options$seed, suppressWarnings(
                     rlang::inject(statsExpressions::centrality_description(
                         data       = mydata,
                         x          = !!rlang::sym(grp),
@@ -191,7 +191,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!isTRUE(self$options$resultssubtitle)) return(NULL)
             if (length(values) < 2) return(NULL)
             res <- tryCatch(
-                withr::with_seed(private$.SEED,
+                withr::with_seed(self$options$seed,
                     statsExpressions::one_sample_test(
                         data       = data.frame(.v = values),
                         x          = !!rlang::sym(".v"),
@@ -233,13 +233,13 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # The test's n IS k. Say so numerically rather than leaving the
             # reader to infer it from a degrees-of-freedom term in the subtitle.
             private$.addNotice(sprintf(
-                "Each of the %d groups is reduced to one point (its %s), so the %s runs on %d values with %d degrees of freedom - NOT on the %d observations. This tests the group summaries against the Reference Value; it does not compare the groups with each other.",
-                k, private$.summaryLabelLower(), private$.testLabel(), k, k - 1L, nrow(mydata)), "INFO")
+                "Each of the %d groups is reduced to one point (its %s), so the %s runs on %d group summaries, NOT on the %d observations. This tests the group summaries against the Reference Value; it does not compare the groups with each other.",
+                k, private$.summaryLabelLower(), private$.testLabel(), k, nrow(mydata)), "INFO")
 
             if (k < 4)
                 private$.addNotice(sprintf(
-                    "With %d groups the test has %d degree(s) of freedom and very little power; the chart is still a fair picture of the group summaries, but treat the p-value with great caution.",
-                    k, k - 1L), "WARNING")
+                    "With only %d groups, inference from their summaries is imprecise; treat the p-value and effect estimate with caution.",
+                    k), "WARNING")
 
             # Warn BEFORE the engine is asked, because this is the fixable cause.
             rng <- range(tab$value)
@@ -251,7 +251,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "The Reference Value (%s) lies outside the range of the group %ss (%s to %s).%s",
                     base::format(tv), private$.summaryLabelLower(),
                     base::format(signif(rng[1], 4)), base::format(signif(rng[2], 4)),
-                    if (far) " That is far outside, which can make the effect size impossible to bound and leave the plot with no statistics at all - pick a value on the scale of your measurement." else ""),
+                    if (far) " That is far outside, which can make the effect size impossible to bound and leave the plot with no statistics at all - retain a scientifically prespecified reference and consider a different inferential method." else ""),
                     if (far) "WARNING" else "INFO")
             }
             TRUE
@@ -312,7 +312,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.engineFailure <- private$.engineFails(tab$value)
             if (!is.null(private$.engineFailure))
                 private$.addNotice(sprintf(
-                    "The statistics could not be computed for this data (%s), so the chart carries NO test result - only the points. This usually means the Reference Value is far from the group %ss; move it onto the scale of your measurement and the test will compute.",
+                    "The statistics could not be computed for this data (%s), so the chart carries NO test result - only the points. This usually means the Reference Value is far from the group %ss; retain the scientifically prespecified reference value and consider a different inferential method.",
                     htmltools::htmlEscape(private$.engineFailure),
                     private$.summaryLabelLower()), "ERROR")
         },
@@ -394,7 +394,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # "object 'v' not found" (measured). Calling directly with !!! keeps
             # the symbol unevaluated, which is what ggstatsplot's tidy-eval wants.
             p <- tryCatch(
-                withr::with_seed(private$.SEED, rlang::inject(
+                withr::with_seed(self$options$seed, rlang::inject(
                     ggstatsplot::ggdotplotstats(
                         x = !!rlang::sym(self$options$dep),
                         y = !!rlang::sym(self$options$group),
@@ -425,7 +425,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             args$annotation.args <- list(title = ttl)
             p <- tryCatch(
-                withr::with_seed(private$.SEED, rlang::inject(
+                withr::with_seed(self$options$seed, rlang::inject(
                     ggstatsplot::grouped_ggdotplotstats(
                         x = !!rlang::sym(self$options$dep),
                         y = !!rlang::sym(self$options$group),

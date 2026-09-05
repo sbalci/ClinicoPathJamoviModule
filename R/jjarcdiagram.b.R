@@ -432,8 +432,13 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add weights if specified
             if (!is.null(weight_var) && weight_var %in% names(mydata_clean)) {
-                edge_df$weight <- as.numeric(mydata_clean[[weight_var]])
-                edge_df$weight[is.na(edge_df$weight)] <- 1
+                raw_weights <- jmvcore::toNumeric(mydata_clean[[weight_var]])
+                if (!is.numeric(raw_weights) || any(!is.finite(raw_weights)) || any(raw_weights < 0)) {
+                    private$.addNotice("ERROR", "Invalid edge weights",
+                        "Weights must be finite, non-negative numeric values on every row.")
+                    return(NULL)
+                }
+                edge_df$weight <- raw_weights
             } else {
                 edge_df$weight <- 1
             }
@@ -656,7 +661,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Calculate network density
             private$.checkpoint(flush = FALSE)  # Before density calculation
-            density <- igraph::edge_density(g)
+            density <- igraph::edge_density(igraph::simplify(g, remove.multiple = TRUE, remove.loops = TRUE))
 
             # Domain-specific network density warnings
             if (density > 0.7) {
@@ -902,7 +907,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Basic network metrics with clinical interpretations
             density_interp <- ifelse(network_data$density > 0.5, .("highly"), ifelse(network_data$density > 0.2, .("moderately"), .("sparsely")))
-            connectivity_interp <- ifelse(igraph::is_connected(g), .("fully connected network"), .("network with isolated components"))
+            connectivity_interp <- ifelse(igraph::is_connected(g), .("connected network"), .("network with isolated components"))
             
             stats_text <- paste(
                 .("<h3> Network Statistics</h3>"),
@@ -928,11 +933,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # differ (0.1/0.5 here against 0.2/0.5 there), so a density of 0.19
                 # printed "is sparsely connected" and then "Moderate connectivity
                 # suggests a balanced network" in the very next sentence.
-                ifelse(network_data$density <= 0.2,
-                       .("<p><strong> Insight:</strong> Sparse networks may indicate specialized or selective relationships between entities.</p>"),
-                       ifelse(network_data$density > 0.5,
-                              .("<p><strong> Insight:</strong> Dense networks suggest strong interconnectedness, possibly indicating shared pathways or common mechanisms.</p>"),
-                              .("<p><strong> Insight:</strong> Moderate connectivity suggests a balanced network structure with both specialized and shared relationships.</p>"))),
+                .("<p>Density is the proportion of distinct possible edges observed. It does not establish shared biological pathways, causation, or clinical importance.</p>"),
                 "</div>",
                 sep = "\n"
             )
@@ -1042,7 +1043,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Add centrality interpretation
                 centrality_interp <- paste(
                     "<div style='background-color: rgba(255, 88, 88, 0.06); padding: 8px; margin: 8px 0; border-left: 4px solid #FF6B6B; color: inherit;'>",
-                    sprintf(.("<p><strong> Key Players:</strong> '%s' is the most connected entity (%.2f %s), suggesting it may be a hub or central player.</p>"),
+                    sprintf(.("<p><strong> Key Players:</strong> '%s' has the largest summed edge metric (%.2f %s). In distance mode, a large total distance does not indicate a stronger hub.</p>"),
                             htmltools::htmlEscape(highest_degree_node), max_degree, degree_label),
                     if (highest_betweenness_node != highest_degree_node) {
                         sprintf(.("<p><strong> Bridge Entity:</strong> '%s' has the highest betweenness centrality, indicating it serves as an important bridge between different network regions.</p>"),

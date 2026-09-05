@@ -121,8 +121,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "conflevel",
                 conflevel,
                 default=0.95,
-                min=0,
-                max=1)
+                min=0.5,
+                max=0.999)
             private$..k <- jmvcore::OptionInteger$new(
                 "k",
                 k,
@@ -306,7 +306,7 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjdotplotstats",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = jjdotplotstatsResults$new(options=options),
                 data = data,

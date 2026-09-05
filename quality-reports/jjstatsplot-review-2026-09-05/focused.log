@@ -1,0 +1,45 @@
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+jjstatsplot-module-review: ...................................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+jjridges-release-review: ................................................................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+jjhistostats-release-review: ........................................................................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+jjpiestats-release-review: ..............1....................................23........
+
+══ Failed ══════════════════════════════════════════════════════════════════════
+── 1. Failure ('test-jjpiestats-release-review.R:81:5'): a sparse table gets the
+Expected `t` to match regexp "subtitle therefore reports Fisher's exact test".
+Actual text:
+✖ │  Statistical Assumptions & Warnings General Requirements Data should be categorical (factors or characters) Observations should be independent For statistical tests: adequate sample size in each category Warnings Chi-square is unreliable here: 1 of 4 expected cell counts are below 5. The chart subtitle still reports an uncorrected Pearson chi-square - no statistic option changes that, as the plotting package offers no exact test. Fisher's exact test on this table gives p = 0.051 ; quote that value, not the subtitle. 
+
+── 2. Failure ('test-jjpiestats-release-review.R:276:5'): the assumptions panel 
+Expected `swapped` to match regexp "subtitle therefore reports Fisher's exact test".
+Actual text:
+✖ │  Statistical Assumptions & Warnings General Requirements Data should be categorical (factors or characters) Observations should be independent For statistical tests: adequate sample size in each category Warnings Chi-square is unreliable here: 1 of 4 expected cell counts are below 5. The chart subtitle still reports an uncorrected Pearson chi-square - no statistic option changes that, as the plotting package offers no exact test. Fisher's exact test on this table gives p = 0.051 ; quote that value, not the subtitle. 
+
+── 3. Failure ('test-jjpiestats-release-review.R:277:5'): the assumptions panel 
+Expected `grepl("quote that value, not the subtitle", swapped, fixed = TRUE)` to be FALSE.
+Differences:
+`actual`:   TRUE 
+`expected`: FALSE
+
+
+══ DONE ════════════════════════════════════════════════════════════════════════

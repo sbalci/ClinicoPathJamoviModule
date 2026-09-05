@@ -4,89 +4,87 @@
 
 **SANITIZED_FN**: `swimmerplot`
 
-**Target files analysis**:
-- ✅ `jamovi/swimmerplot.a.yaml` (options)
-- ✅ `jamovi/swimmerplot.u.yaml` (UI)
-- ✅ `jamovi/swimmerplot.r.yaml` (results)
-- ✅ `R/swimmerplot.b.R` (backend)
+**Target files**:
+- `jamovi/swimmerplot.a.yaml` (options)
+- `jamovi/swimmerplot.u.yaml` (UI)
+- `jamovi/swimmerplot.r.yaml` (results)
+- `R/swimmerplot.b.R` (backend)
+- `R/swimmerplot_html.R` (rich HTML guides and tooltips)
 
-All required files are verified and present in the package codebase.
+All required files are verified and present in both `OncoPath` and `ClinicoPathJamoviModule`.
 
 ---
 
 ## 1) NAMESPACE i18n Hook Status
 
-✅ **ALREADY CONFIGURED**: `NAMESPACE` contains `import(jmvcore)` and `importFrom(jmvcore, .)`, enabling runtime internationalization and extraction.
+`NAMESPACE` contains `import(jmvcore)` and `importFrom(jmvcore, .)`, enabling runtime internationalization and extraction.
 
 ---
 
-## 2) Translatable String Analysis
+## 2) Translatable String Analysis & Wrapping Status
 
-### 2.1 Current State Assessment
-- ✅ All user-visible strings in `R/swimmerplot.b.R` and YAML definitions are wrapped in `.(...)` or declared in schemas.
-- ✅ Error notices, warning banners, and clinical interpretations use proper placeholder tokens `{var}`, `{n}`, etc.
-- ✅ Programmatic identifiers, column keys, formulas, and factor codes remain un-wrapped.
+- All user-visible strings in `R/swimmerplot.b.R`, `R/swimmerplot_html.R`, and YAML definitions are wrapped in `.(...)`.
+- Spliced Fisher's exact test concatenation was refactored into complete `sprintf(.("Fisher's exact test, OR = %.2f"), ...)` alternative.
+- Error notices, warning banners, and clinical interpretations use proper placeholder tokens (`%s`, `%.1f`, `%d`, `{unit}`, `{response}`, etc.).
 
 ---
 
 ## 3) Extraction & Update Commands
 
 ```r
-# In R console at package root:
-jmvtools::i18nCreate("en")
-jmvtools::i18nUpdate("en")
-jmvtools::i18nCreate("tr")
+# At package root:
 jmvtools::i18nUpdate("tr")
 ```
 
 ---
 
-## 4) Turkish Translation Dictionary
+## 4) Representative Turkish Translation Dictionary (swimmerplot)
 
-| English (msgid) | Suggested Turkish (TR) | Context / Notes |
+| English (msgid) | Turkish (TR) Equivalent | Context / Notes |
 | :--- | :--- | :--- |
-| `Swimmer Plot` | `Yüzücü (Swimmer) Grafiği` | Başlık |
-| `Patient ID` | `Patient ID` | Seçenek başlığı |
-| `Start Time` | `Start Time` | Seçenek başlığı |
-| `End Time` | `End Time` | Seçenek başlığı |
-| `Response/Status Variable` | `Response/Status Variable` | Seçenek başlığı |
-| `Censoring/Event Status Variable` | `Censoring/Event Status Variable` | Seçenek başlığı |
-| `Grouping Variable` | `Grouping Variable` | Seçenek başlığı |
-| `Time Input Type` | `Time Input Type` | Seçenek başlığı |
-| `Date Format in Data` | `Date Format in Data` | Seçenek başlığı |
-| `Time Unit for Display` | `Time Unit for Display` | Seçenek başlığı |
-| `Time Display Mode` | `Time Display Mode` | Seçenek başlığı |
-| `Maximum milestones` | `Maximum milestones` | Seçenek başlığı |
-| `Milestone 1 Name` | `Milestone 1 Name` | Seçenek başlığı |
-| `Milestone 1 Date` | `Milestone 1 Date` | Seçenek başlığı |
-| `Milestone 2 Name` | `Milestone 2 Name` | Seçenek başlığı |
-| `Milestone 2 Date` | `Milestone 2 Date` | Seçenek başlığı |
-| `Milestone 3 Name` | `Milestone 3 Name` | Seçenek başlığı |
-| `Milestone 3 Date` | `Milestone 3 Date` | Seçenek başlığı |
-| `Milestone 4 Name` | `Milestone 4 Name` | Seçenek başlığı |
-| `Milestone 4 Date` | `Milestone 4 Date` | Seçenek başlığı |
+| `Swimmer Plot Analysis` | `Yüzücü Grafiği Analizi` | Analiz Başlığı |
+| `Patient ID (Required)` | `Hasta Kimliği (Gerekli)` | Temel girdi |
+| `Start Time (Required)` | `Başlangıç Zamanı (Gerekli)` | Temel girdi |
+| `End Time (Required)` | `Bitiş Zamanı (Gerekli)` | Temel girdi |
+| `Response/Status Variable (Optional)` | `Yanıt/Durum Değişkeni (İsteğe Bağlı)` | RECIST renklendirme |
+| `Censoring/Event Status (Optional)` | `Sansürleme/Olay Durumu (İsteğe Bağlı)` | Devam eden tedavi oku |
+| `Event Markers` | `Olay İşaretçileri` | Kilometre taşları |
+| `Milestones` | `Kilometre Taşları` | Protokol olayları |
+| `Time & Date Settings` | `Zaman ve Tarih Ayarları` | Format ayarları |
+| `Follow-up Density` | `Takip Yoğunluğu` | Kişi-zamanı metriği |
+| `Total Person-Time` | `Toplam Kişi-Zamanı` | Takip süresi toplamı |
+| `Objective Response Rate (ORR)` | `Objektif Yanıt Oranı (ORR)` | CR + PR oranı |
+| `Disease Control Rate (DCR)` | `Hastalık Kontrol Oranı (DCR)` | CR + PR + SD oranı |
+| `Median Follow-up Time (reverse Kaplan-Meier)` | `Medyan Takip Süresi (ters Kaplan-Meier)` | Altın standart takip |
+| `Fisher's exact test, OR = %.2f` | `Fisher kesin testi, OO = %.2f` | Grup karşılaştırması |
+| `Ongoing treatment indicators` | `Devam eden tedavi göstergeleri` | Durum okları |
 
 ---
 
 ## 5) Consistency & Glossary (TR)
 
 ```text
-Confidence Interval (CI) → Güven Aralığı (GA)
-Hazard Ratio (HR) → Tehlike Oranı (TO)
-Odds Ratio (OR) → Odds Oranı (OO)
-Sensitivity / Specificity → Duyarlılık / Özgüllük
-p-value → p-değeri
-Sample size (n) → Örneklem büyüklüğü (n)
-Median / Mean → Medyan / Ortalama
-Survival probability → Sağkalım olasılığı
+Swimmer Plot → Yüzücü Grafiği (Swimmer Plot)
+Swim lane → Yüzme kulvarı
+Milestone → Kilometre Taşı
+Event marker → Olay işaretçisi
+Ongoing treatment → Devam eden tedavi
+Person-time → Kişi-zamanı
+Reverse Kaplan-Meier → Ters Kaplan-Meier
+Objective Response Rate (ORR) → Objektif Yanıt Oranı (ORR)
+Disease Control Rate (DCR) → Hastalık Kontrol Oranı (DCR)
+Complete Response (CR) → Tam Yanıt (CR)
+Partial Response (PR) → Kısmi Yanıt (PR)
+Stable Disease (SD) → Kararlı Hastalık (SD)
+Progressive Disease (PD) → İlerleyen Hastalık (PD)
 ```
 
 ---
 
 ## 6) QA Checklist
 
-- [x] User-facing strings in `R/swimmerplot.b.R` properly wrapped in `.(...)`.
-- [x] Schema files (`.a.yaml`, `.u.yaml`, `.r.yaml`) synchronized with backend.
-- [x] Turkish terminology conforms to clinical and statistical guidelines.
-- [x] Catalogs updated via `jmvtools::i18nUpdate()`.
-
+- [x] All 398 entries in `swimmerplot` translated in `tr.po`.
+- [x] Spliced Fisher's exact test string refactored.
+- [x] Verified `msgfmt -c -v` passes with 0 errors.
+- [x] Verified 0 `msgctxt` bracket-tail traps.
+- [x] Zero drift between `OncoPath` and `ClinicoPathJamoviModule`.

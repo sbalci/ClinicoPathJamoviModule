@@ -497,7 +497,7 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjhistostats",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = jjhistostatsResults$new(options=options),
                 data = data,
@@ -536,8 +536,8 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   changebinwidth is TRUE. Smaller values create more bins, larger values
 #'   create fewer bins.
 #' @param resultssubtitle Whether to display statistical test results as
-#'   subtitle in the plot, including normality test results and descriptive
-#'   statistics.
+#'   subtitle in the plot, including the selected one-sample location test and
+#'   descriptive statistics.
 #' @param showInterpretation Generate clinical interpretation of histogram
 #'   results including distribution shape, normality assessment, and practical
 #'   implications for clinical data. Note: Uses simplified heuristics (skewness

@@ -18,31 +18,56 @@ data(vartree_test)
 # Example 1: Single Variable Tree
 vartree(
   data = vartree_test,
-  vars = 'treatment'
+  vars = 'treatment',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 2: Two Variable Tree (Treatment → Response)
 vartree(
   data = vartree_test,
-  vars = c('treatment', 'response')
+  vars = c('treatment', 'response'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 3: Three Variable Tree (Treatment → Response → Stage)
 vartree(
   data = vartree_test,
-  vars = c('treatment', 'response', 'stage')
+  vars = c('treatment', 'response', 'stage'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 4: Four Variable Tree (Clinical Pathway)
 vartree(
   data = vartree_test,
-  vars = c('treatment', 'response', 'stage', 'metastasis')
+  vars = c('treatment', 'response', 'stage', 'metastasis'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 5: Five Variable Tree (Extended Pathway)
 vartree(
   data = vartree_test,
-  vars = c('treatment', 'response', 'stage', 'grade', 'vital_status')
+  vars = c('treatment', 'response', 'stage', 'grade', 'vital_status'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -54,7 +79,12 @@ vartree(
   data = vartree_test,
   vars = c('treatment', 'response'),
   summaryvar = 'age',
-  summarylocation = 'allnodes'
+  summarylocation = 'allnodes',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 7: Tree with Survival Time Summary at Leaf Nodes Only
@@ -62,7 +92,12 @@ vartree(
   data = vartree_test,
   vars = c('stage', 'grade', 'vital_status'),
   summaryvar = 'survival_months',
-  summarylocation = 'leafonly'
+  summarylocation = 'leafonly',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 8: Tree with Tumor Size Summary
@@ -70,15 +105,25 @@ vartree(
   data = vartree_test,
   vars = c('stage', 'histology'),
   summaryvar = 'tumor_size',
-  summarylocation = 'allnodes'
+  summarylocation = 'allnodes',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 9: Tree with BMI Summary
 vartree(
   data = vartree_test,
-  vars = c('sex', 'age_group'),
+  vars = c('sex', 'smoking_status'),
   summaryvar = 'bmi',
-  summarylocation = 'leafonly'
+  summarylocation = 'leafonly',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 10: Tree with Biomarker Summary
@@ -86,7 +131,12 @@ vartree(
   data = vartree_test,
   vars = c('treatment', 'response', 'stage'),
   summaryvar = 'biomarker',
-  summarylocation = 'allnodes'
+  summarylocation = 'allnodes',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 11: Tree with Quality of Life Score Summary
@@ -94,7 +144,12 @@ vartree(
   data = vartree_test,
   vars = c('performance_status', 'comorbidity'),
   summaryvar = 'qol_score',
-  summarylocation = 'leafonly'
+  summarylocation = 'leafonly',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -105,21 +160,36 @@ vartree(
 vartree(
   data = vartree_test,
   vars = c('treatment', 'stage'),
-  percvar = 'vital_status'
+  percvar = 'vital_status',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 13: Tree with Percentages Based on Response
 vartree(
   data = vartree_test,
   vars = c('stage', 'grade'),
-  percvar = 'response'
+  percvar = 'response',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 14: Tree with Percentages Based on Metastasis
 vartree(
   data = vartree_test,
   vars = c('histology', 'stage'),
-  percvar = 'metastasis'
+  percvar = 'metastasis',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -131,7 +201,12 @@ vartree(
   data = vartree_test,
   vars = c('mutation_status', 'treatment', 'response'),
   useprunesmaller = TRUE,
-  prunesmaller = 5
+  prunesmaller = 5,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 16: Prune Nodes with < 10 Observations
@@ -139,7 +214,12 @@ vartree(
   data = vartree_test,
   vars = c('subtype', 'stage', 'grade'),
   useprunesmaller = TRUE,
-  prunesmaller = 10
+  prunesmaller = 10,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 17: Prune Nodes with < 15 Observations (Strict)
@@ -147,7 +227,12 @@ vartree(
   data = vartree_test,
   vars = c('ethnicity', 'marital_status', 'insurance'),
   useprunesmaller = TRUE,
-  prunesmaller = 15
+  prunesmaller = 15,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 18: Pruning with Rare Categories
@@ -155,7 +240,12 @@ vartree(
   data = vartree_test,
   vars = c('mutation_status', 'stage', 'vital_status'),
   useprunesmaller = TRUE,
-  prunesmaller = 3
+  prunesmaller = 3,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -166,21 +256,36 @@ vartree(
 vartree(
   data = vartree_test,
   vars = c('stage', 'treatment', 'response'),
-  prunebelow = 'stage="I"'
+  prunebelow = 'stage',
+  pruneLevel1 = 'I',
+  percvarLevel = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 20: Show Only High Grade Tumors
 vartree(
   data = vartree_test,
   vars = c('grade', 'histology', 'metastasis'),
-  prunebelow = 'grade="High"'
+  prunebelow = 'grade',
+  pruneLevel1 = 'High',
+  percvarLevel = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 21: Show Only Surgery Patients
 vartree(
   data = vartree_test,
   vars = c('treatment', 'stage', 'vital_status'),
-  prunebelow = 'treatment="Surgery"'
+  prunebelow = 'treatment',
+  pruneLevel1 = 'Surgery',
+  percvarLevel = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -191,21 +296,36 @@ vartree(
 vartree(
   data = vartree_test,
   vars = c('treatment', 'response', 'vital_status'),
-  follow = 'response="Complete Response"'
+  follow = 'response',
+  followLevel1 = 'Complete Response',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 23: Follow Metastasis Branch
 vartree(
   data = vartree_test,
   vars = c('stage', 'grade', 'metastasis', 'vital_status'),
-  follow = 'metastasis="Yes"'
+  follow = 'metastasis',
+  followLevel1 = 'Yes',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 24: Follow Specific Treatment Branch
 vartree(
   data = vartree_test,
   vars = c('treatment', 'stage', 'response'),
-  follow = 'treatment="Chemotherapy"'
+  follow = 'treatment',
+  followLevel1 = 'Chemotherapy',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -216,14 +336,24 @@ vartree(
 vartree(
   data = vartree_test,
   vars = c('treatment', 'response_pattern', 'vital_status'),
-  pattern = TRUE
+  pattern = TRUE,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 26: Pattern Tree - Stage and Grade Combinations
 vartree(
   data = vartree_test,
   vars = c('stage', 'grade', 'metastasis'),
-  pattern = TRUE
+  pattern = TRUE,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 27: Pattern Tree with Summary Variable
@@ -231,7 +361,12 @@ vartree(
   data = vartree_test,
   vars = c('histology', 'stage', 'grade'),
   pattern = TRUE,
-  summaryvar = 'survival_months'
+  summaryvar = 'survival_months',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -242,14 +377,24 @@ vartree(
 vartree(
   data = vartree_test,
   vars = c('treatment_sequence', 'response', 'vital_status'),
-  sequence = TRUE
+  sequence = TRUE,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 29: Sequence Tree - Disease Progression
 vartree(
   data = vartree_test,
   vars = c('stage', 'treatment_sequence', 'response_pattern'),
-  sequence = TRUE
+  sequence = TRUE,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 30: Sequence Tree with Pruning
@@ -258,7 +403,12 @@ vartree(
   vars = c('treatment_sequence', 'response_pattern', 'vital_status'),
   sequence = TRUE,
   useprunesmaller = TRUE,
-  prunesmaller = 5
+  prunesmaller = 5,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -269,21 +419,36 @@ vartree(
 vartree(
   data = vartree_test,
   vars = c('treatment', 'response', 'stage'),
-  style = 'default'
+  style = 'default',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 32: Clean Style
 vartree(
   data = vartree_test,
   vars = c('treatment', 'response', 'stage'),
-  style = 'clean'
+  style = 'clean',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 33: Minimal Style
 vartree(
   data = vartree_test,
   vars = c('treatment', 'response', 'stage'),
-  style = 'minimal'
+  style = 'minimal',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -293,19 +458,34 @@ vartree(
 # Example 34: Demographic Breakdown by Age and Sex
 vartree(
   data = vartree_test,
-  vars = c('sex', 'ethnicity', 'marital_status')
+  vars = c('sex', 'ethnicity', 'marital_status'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 35: Ethnicity Distribution
 vartree(
   data = vartree_test,
-  vars = c('ethnicity', 'age_group', 'insurance')
+  vars = c('ethnicity', 'smoking_status', 'insurance'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 36: Marital Status and Insurance
 vartree(
   data = vartree_test,
-  vars = c('marital_status', 'insurance', 'comorbidity')
+  vars = c('marital_status', 'insurance', 'comorbidity'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -315,26 +495,46 @@ vartree(
 # Example 37: Treatment Decision Pathway
 vartree(
   data = vartree_test,
-  vars = c('stage', 'performance_status', 'treatment', 'response')
+  vars = c('stage', 'performance_status', 'treatment', 'response'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 38: Diagnostic Pathway
 vartree(
   data = vartree_test,
-  vars = c('histology', 'stage', 'grade', 'metastasis')
+  vars = c('histology', 'stage', 'grade', 'metastasis'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 39: Prognostic Pathway
 vartree(
   data = vartree_test,
   vars = c('stage', 'grade', 'treatment', 'vital_status'),
-  summaryvar = 'survival_months'
+  summaryvar = 'survival_months',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 40: Risk Stratification Pathway
 vartree(
   data = vartree_test,
-  vars = c('smoking_status', 'performance_status', 'comorbidity', 'vital_status')
+  vars = c('smoking_status', 'performance_status', 'comorbidity', 'vital_status'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -345,28 +545,48 @@ vartree(
 # Expected: Single node with 100% in one category
 vartree(
   data = vartree_test,
-  vars = c('constant_category', 'stage')
+  vars = c('constant_category', 'stage'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 42: Tree with Nearly Constant Variable
 # Expected: Highly imbalanced tree
 vartree(
   data = vartree_test,
-  vars = c('nearly_constant', 'treatment')
+  vars = c('nearly_constant', 'treatment'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 43: Tree with Many Categories (12 levels)
 # Expected: Wide tree with many branches
 vartree(
   data = vartree_test,
-  vars = c('many_categories', 'vital_status')
+  vars = c('many_categories', 'vital_status'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 44: Tree with Missing Data Variable
 # Expected: Includes NA category
 vartree(
   data = vartree_test,
-  vars = c('grade_missing', 'stage', 'vital_status')
+  vars = c('grade_missing', 'stage', 'vital_status'),
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 45: Tree Pruning with Many Rare Categories
@@ -374,7 +594,12 @@ vartree(
   data = vartree_test,
   vars = c('many_categories', 'subtype', 'mutation_status'),
   useprunesmaller = TRUE,
-  prunesmaller = 10
+  prunesmaller = 10,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -389,7 +614,12 @@ vartree(
   summarylocation = 'allnodes',
   percvar = 'vital_status',
   useprunesmaller = TRUE,
-  prunesmaller = 5
+  prunesmaller = 5,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 47: Pattern Tree with Summary and Style
@@ -398,7 +628,12 @@ vartree(
   vars = c('treatment', 'response_pattern', 'vital_status'),
   pattern = TRUE,
   summaryvar = 'qol_score',
-  style = 'clean'
+  style = 'clean',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 48: Sequence Tree with Following and Summary
@@ -406,8 +641,13 @@ vartree(
   data = vartree_test,
   vars = c('treatment_sequence', 'response_pattern', 'vital_status'),
   sequence = TRUE,
-  follow = 'response_pattern="Early Response"',
-  summaryvar = 'survival_months'
+  follow = 'response_pattern',
+  followLevel1 = 'Early Response',
+  summaryvar = 'survival_months',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel2 = NULL
 )
 
 # Example 49: Complex Tree with All Features
@@ -419,7 +659,12 @@ vartree(
   percvar = 'metastasis',
   useprunesmaller = TRUE,
   prunesmaller = 8,
-  style = 'clean'
+  style = 'clean',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -433,7 +678,12 @@ vartree(
   vars = c('treatment', 'stage', 'grade', 'response'),
   summaryvar = 'survival_months',
   summarylocation = 'leafonly',
-  percvar = 'vital_status'
+  percvar = 'vital_status',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Scenario 2: Biomarker Stratification
@@ -444,7 +694,12 @@ vartree(
   summaryvar = 'biomarker',
   summarylocation = 'allnodes',
   useprunesmaller = TRUE,
-  prunesmaller = 5
+  prunesmaller = 5,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Scenario 3: Quality of Life Assessment
@@ -453,15 +708,25 @@ vartree(
   data = vartree_test,
   vars = c('performance_status', 'treatment', 'comorbidity'),
   summaryvar = 'qol_score',
-  summarylocation = 'allnodes'
+  summarylocation = 'allnodes',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Scenario 4: Demographic Distribution in Clinical Trial
 # Check balance of demographic variables across treatment arms
 vartree(
   data = vartree_test,
-  vars = c('treatment', 'sex', 'ethnicity', 'age_group'),
-  style = 'clean'
+  vars = c('treatment', 'sex', 'ethnicity', 'smoking_status'),
+  style = 'clean',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Scenario 5: Metastasis Risk Stratification
@@ -470,7 +735,12 @@ vartree(
   data = vartree_test,
   vars = c('stage', 'histology', 'grade', 'metastasis'),
   percvar = 'metastasis',
-  summaryvar = 'tumor_size'
+  summaryvar = 'tumor_size',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Scenario 6: Survival Analysis by Treatment Pathway
@@ -481,7 +751,12 @@ vartree(
   summaryvar = 'survival_months',
   summarylocation = 'leafonly',
   percvar = 'vital_status',
-  sequence = TRUE
+  sequence = TRUE,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Scenario 7: Smoking Impact on Treatment Outcomes
@@ -490,7 +765,12 @@ vartree(
   data = vartree_test,
   vars = c('smoking_status', 'performance_status', 'treatment', 'response'),
   summaryvar = 'survival_months',
-  percvar = 'vital_status'
+  percvar = 'vital_status',
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # Scenario 8: Insurance and Treatment Access
@@ -500,7 +780,12 @@ vartree(
   vars = c('insurance', 'treatment', 'stage'),
   percvar = 'response',
   useprunesmaller = TRUE,
-  prunesmaller = 10
+  prunesmaller = 10,
+  percvarLevel = NULL,
+  pruneLevel1 = NULL,
+  pruneLevel2 = NULL,
+  followLevel1 = NULL,
+  followLevel2 = NULL
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -584,12 +869,13 @@ vartree(
 # TROUBLESHOOTING
 # ═══════════════════════════════════════════════════════════
 
-# Error: "Variable must be categorical"
-# Solution: Ensure all vars are factors or characters
-# Example fix:
-# vartree_test$age_numeric <- as.numeric(vartree_test$age)
-# vartree(data = vartree_test, vars = 'age_numeric')  # Error!
-# vartree(data = vartree_test, vars = 'age_group')    # Works!
+# A numeric column passed to `vars` is NOT rejected: jamovi converts it to a
+# factor with one level per distinct value, so `vars = 'age'` draws one branch
+# per distinct age. Bin continuous variables first (e.g. with cut()) or use them
+# as `summaryvar` instead:
+# vartree(data = vartree_test, vars = 'smoking_status', summaryvar = 'age',
+#         percvarLevel = NULL, pruneLevel1 = NULL, pruneLevel2 = NULL,
+#         followLevel1 = NULL, followLevel2 = NULL)
 
 # Error: "Summary variable must be numeric"
 # Solution: Check that summaryvar is continuous

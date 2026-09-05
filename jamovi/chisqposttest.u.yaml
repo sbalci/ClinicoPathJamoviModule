@@ -64,6 +64,10 @@ children:
             enable: (residualsCriterion:fixed)
           - type: CheckBox
             name: phiCI
+          - type: TextBox
+            name: seed
+            format: number
+            enable: (phiCI)
           - type: ComboBox
             name: testSelection
           - type: CheckBox

@@ -318,7 +318,7 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "hullplot",
-                version = c(1,0,7),
+                version = c(1,0,8),
                 options = options,
                 results = hullplotResults$new(options=options),
                 data = data,
@@ -375,8 +375,9 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   in each group using the 1.5 x IQR rule applied separately to the X and Y
 #'   variables. Groups with fewer than 5 observations are reported as too small
 #'   rather than given a count. Outliers are counted, not marked on the plot.
-#' @param confidence_ellipses If TRUE, adds confidence ellipses in addition to
-#'   hull polygons.
+#' @param confidence_ellipses If TRUE, adds model-based 95\% data ellipses,
+#'   assuming a multivariate t distribution. These describe data dispersion, not
+#'   uncertainty in group means.
 #' @param show_summary If TRUE, displays a plain-language summary of the
 #'   results with copy-ready text.
 #' @param show_assumptions If TRUE, displays data requirements, assumptions,

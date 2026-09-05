@@ -2221,8 +2221,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         comparison = .("Objective Response Rate (ORR)"),
                         # fisher.test() returns an odds ratio only for a 2x2 table;
                         # with 3+ groups this printed "OR = NA".
-                        test_statistic = paste0("Fisher's exact test",
-                            if (!is.null(orr_test$estimate)) sprintf(", OR = %.2f", orr_test$estimate) else ""),
+                        test_statistic = if (!is.null(orr_test$estimate))
+                            sprintf(.("Fisher's exact test, OR = %.2f"), orr_test$estimate)
+                        else
+                            .("Fisher's exact test"),
                         p_value = orr_test$p.value,
                         interpretation = orr_interpretation
                     ))
@@ -2249,8 +2251,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                     self$results$groupComparisonTest$addRow(rowKey = 2, values = list(
                         comparison = .("Disease Control Rate (DCR)"),
-                        test_statistic = paste0("Fisher's exact test",
-                            if (!is.null(dcr_test$estimate)) sprintf(", OR = %.2f", dcr_test$estimate) else ""),
+                        test_statistic = if (!is.null(dcr_test$estimate))
+                            sprintf(.("Fisher's exact test, OR = %.2f"), dcr_test$estimate)
+                        else
+                            .("Fisher's exact test"),
                         p_value = dcr_test$p.value,
                         interpretation = dcr_interpretation
                     ))

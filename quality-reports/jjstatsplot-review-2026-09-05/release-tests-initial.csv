@@ -1,0 +1,277 @@
+"file","context","test","nb","failed","skipped","error","warning","user","system","real","passed"
+"test-advancedraincloud-release-review.R","advancedraincloud-release-review","Cohen's d and Hedges' g match the published formulas",2,0,FALSE,FALSE,0,0.152,0.00900000000000001,0.169,2
+"test-advancedraincloud-release-review.R","advancedraincloud-release-review","Glass's delta confidence interval uses the Hedges & Olkin standard error",2,0,FALSE,FALSE,0,0.0229999999999997,0.003,0.0270000000000001,2
+"test-advancedraincloud-release-review.R","advancedraincloud-release-review","effect size magnitude bands ignore the sign",8,0,FALSE,FALSE,0,0.00499999999999989,0.001,0.00700000000000056,8
+"test-advancedraincloud-release-review.R","advancedraincloud-release-review","the change panel reports direction, not benefit",4,0,FALSE,FALSE,0,0.216,0.011,0.228999999999999,4
+"test-advancedraincloud-release-review.R","advancedraincloud-release-review","an ITT label on a complete-case analysis is contradicted out loud",4,0,FALSE,FALSE,0,0.0180000000000002,0,0.0179999999999998,4
+"test-advancedraincloud-release-review.R","advancedraincloud-release-review","with no rows dropped the ITT contradiction is not raised",1,0,FALSE,FALSE,0,0.016,0.001,0.0170000000000003,1
+"test-advancedraincloud-release-review.R","advancedraincloud-release-review","log-transformed statistics are labelled as log scale",2,0,FALSE,FALSE,0,0.0329999999999999,0.001,0.0339999999999998,2
+"test-advancedraincloud-release-review.R","advancedraincloud-release-review","non-finite values are excluded and disclosed",1,0,FALSE,FALSE,0,0.0179999999999998,0.001,0.0190000000000001,1
+"test-advancedraincloud-release-review.R","advancedraincloud-release-review","a log transform on non-positive data is rejected, not silently NaN'd",1,0,FALSE,FALSE,0,0.0170000000000003,0.001,0.0190000000000001,1
+"test-advancedraincloud-release-review.R","advancedraincloud-release-review","group comparisons stay non-parametric and disclose the omnibus limit",4,0,FALSE,FALSE,0,0.0219999999999998,0.001,0.024,4
+"test-advancedraincloud-release-review.R","advancedraincloud-release-review","two groups use Wilcoxon and match stats::wilcox.test",2,0,FALSE,FALSE,0,0.0190000000000001,0.001,0.0199999999999996,2
+"test-hullplot-release-review.R","hullplot-release-review","infinite values are excluded rather than propagated into the results",7,0,FALSE,FALSE,0,0.0499999999999998,0.002,0.0529999999999999,7
+"test-hullplot-release-review.R","hullplot-release-review","an infinite value cannot flip the separation verdict",3,0,FALSE,FALSE,0,0.0280000000000005,0.001,0.0279999999999996,3
+"test-hullplot-release-review.R","hullplot-release-review","a group emptied by missing data stops being counted as a group",5,0,FALSE,FALSE,0,0.0279999999999996,0.001,0.0300000000000002,5
+"test-hullplot-release-review.R","hullplot-release-review","excluded rows are disclosed",5,0,FALSE,FALSE,0,0.04,0.002,0.0410000000000004,5
+"test-hullplot-release-review.R","hullplot-release-review","the grouping variable cannot be an axis variable",4,0,FALSE,FALSE,0,0.0469999999999997,0.002,0.0490000000000004,4
+"test-hullplot-release-review.R","hullplot-release-review","hull boundary expansion actually moves the boundary",4,0,FALSE,FALSE,0,2.188,0.054,2.351,4
+"test-hullplot-release-review.R","hullplot-release-review","a single group does not get a comparative conclusion",7,0,FALSE,FALSE,0,0.0300000000000002,0.002,0.032,7
+"test-hullplot-release-review.R","hullplot-release-review","an empty dataset explains itself instead of rendering nothing",3,0,FALSE,FALSE,0,0.00999999999999979,0.001,0.00999999999999979,3
+"test-hullplot-release-review.R","hullplot-release-review","group statistics agree with an independent computation",3,0,FALSE,FALSE,0,0.0449999999999999,0.001,0.0449999999999999,3
+"test-hullplot-release-review.R","hullplot-release-review","outlier counts match the 1.5 x IQR rule",3,0,FALSE,FALSE,0,0.0869999999999997,0.00900000000000001,0.108000000000001,3
+"test-hullplot-release-review.R","hullplot-release-review","the convex-hull fallback renders when concaveman is unavailable",7,0,FALSE,FALSE,0,0.52,0.01,0.536999999999999,7
+"test-hullplot-release-review.R","hullplot-release-review","variable arguments must be passed by value, not as bare symbols",3,0,FALSE,FALSE,0,0.04,0.001,0.0400000000000009,3
+"test-jjarcdiagram-release-review.R","jjarcdiagram-release-review","negative edge weights are rejected with an actionable message",8,0,FALSE,FALSE,0,0.0979999999999999,0.004,0.104999999999999,8
+"test-jjarcdiagram-release-review.R","jjarcdiagram-release-review","a zero minimum weight no longer breaks Strength mode",3,0,FALSE,FALSE,0,0.0300000000000002,0.002,0.032,3
+"test-jjarcdiagram-release-review.R","jjarcdiagram-release-review","a zero weight in Distance mode is rejected, not silently run",3,0,FALSE,FALSE,0,0.0140000000000002,0,0.0149999999999988,3
+"test-jjarcdiagram-release-review.R","jjarcdiagram-release-review","ordinary positive weights run in both modes",4,0,FALSE,FALSE,0,0.0309999999999997,0.002,0.0340000000000007,4
+"test-jjarcdiagram-release-review.R","jjarcdiagram-release-review","Strength mode uses the reciprocal, matching igraph directly",3,0,FALSE,FALSE,0,0.0169999999999995,0.001,0.0179999999999989,3
+"test-jjarcdiagram-release-review.R","jjarcdiagram-release-review","the reciprocal and the old reflection genuinely disagree",3,0,FALSE,FALSE,0,0.00300000000000011,0.001,0.00300000000000011,3
+"test-jjarcdiagram-release-review.R","jjarcdiagram-release-review","density matches igraph::edge_density",3,0,FALSE,FALSE,0,0.0220000000000002,0.001,0.0220000000000002,3
+"test-jjarcdiagram-release-review.R","jjarcdiagram-release-review","rows dropped for missing values are disclosed",4,0,FALSE,FALSE,0,0.016,0.001,0.0170000000000012,4
+"test-jjarcdiagram-release-review.R","jjarcdiagram-release-review","complete data raises no exclusion notice",1,0,FALSE,FALSE,0,0.0139999999999993,0,0.0149999999999988,1
+"test-jjarcdiagram-release-review.R","jjarcdiagram-release-review","the density adjective and the Insight paragraph agree",4,0,FALSE,FALSE,0,0.016,0.002,0.0180000000000007,4
+"test-jjarcdiagram-release-review.R","jjarcdiagram-release-review","the network overview reads as grammatical English",4,0,FALSE,FALSE,0,0.0179999999999998,0.001,0.0199999999999996,4
+"test-jjbarstats-release-review.R","jjbarstats-release-review","the sparse-2x2 panel reports the real Fisher p-value",4,0,FALSE,FALSE,0,0.0349999999999993,0.002,0.0380000000000003,4
+"test-jjbarstats-release-review.R","jjbarstats-release-review","the panel no longer claims an exact test was substituted",4,0,FALSE,FALSE,0,0.032,0.001,0.0349999999999984,4
+"test-jjbarstats-release-review.R","jjbarstats-release-review","a table with adequate expected counts raises no assumption warning",2,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0140000000000011,2
+"test-jjbarstats-release-review.R","jjbarstats-release-review","a sparse table larger than 2x2 says an exact test is not offered",3,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0140000000000011,3
+"test-jjbarstats-release-review.R","jjbarstats-release-review","the user's chosen statistic is never silently overridden",5,0,FALSE,FALSE,0,1.037,0.0219999999999999,1.133,5
+"test-jjbarstats-release-review.R","jjbarstats-release-review","multiple dependent variables each get their own assumption block",2,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0169999999999995,2
+"test-jjbarstats-release-review.R","jjbarstats-release-review","a sparse 2x2 chart reports Fisher's exact test, not chi-squared",4,0,FALSE,FALSE,0,0.366,0.011,0.391,4
+"test-jjbarstats-release-review.R","jjbarstats-release-review","an adequately powered table keeps the chi-squared subtitle",3,0,FALSE,FALSE,0,0.445,0.006,0.456000000000001,3
+"test-jjbarstats-release-review.R","jjbarstats-release-review","the assumptions panel agrees with whatever the chart shows",5,0,FALSE,FALSE,0,0.027000000000001,0.002,0.0299999999999994,5
+"test-jjbarstats-release-review.R","jjbarstats-release-review","paired and Bayesian analyses are left alone",1,0,FALSE,FALSE,0,2.251,0.049,2.454,1
+"test-jjbarstats-release-review.R","jjbarstats-release-review","the split-by chart keeps the disclosure route",1,0,FALSE,FALSE,0,0.016,0.001,0.0210000000000008,1
+"test-jjbarstats-release-review.R","jjbarstats-release-review","with several dependent variables the decision is per-table",2,0,FALSE,FALSE,0,0.748000000000001,0.014,0.786,2
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","Equal variances reaches the test instead of only the prose",6,0,FALSE,FALSE,0,0.902999999999999,0.0299999999999999,0.985999999999999,6
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","Effect size type reaches the effect size",5,0,FALSE,FALSE,0,3.78,0.114,4.057,5
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","Decimal places changes the printed precision",4,0,FALSE,FALSE,0,0.663,0.00700000000000001,0.675000000000001,4
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","Pairwise comparisons can actually be switched off",2,0,FALSE,FALSE,0,1.068,0.0479999999999999,1.239,2
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","Levene's warning reaches the user who ticked Equal variances",5,0,FALSE,FALSE,0,0.0560000000000009,0.001,0.059000000000001,5
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","an empty grouping level does not switch assumption checking off",3,0,FALSE,FALSE,0,0.0390000000000015,0.001,0.0399999999999991,3
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","the outlier count is a count, not a row index",2,0,FALSE,FALSE,0,0.0140000000000029,0.001,0.0160000000000018,2
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","the narrative names the test that was actually run",7,0,FALSE,FALSE,0,0.119999999999997,0.003,0.123999999999999,7
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","the summary does not point at a subtitle that is switched off",4,0,FALSE,FALSE,0,0.0670000000000002,0.002,0.0710000000000015,4
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","the Split By figure discloses which options it cannot honour",4,0,FALSE,FALSE,0,0.0790000000000006,0.004,0.0839999999999996,4
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","the ggpubr panel's visibility expression can be resolved",7,0,FALSE,FALSE,0,0.0160000000000018,0.001,0.0199999999999996,7
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","the subtitle falls back gracefully when statsExpressions cannot run",3,0,FALSE,FALSE,0,0.765999999999998,0.018,0.800000000000001,3
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","three or more groups get the same honoured options",4,0,FALSE,FALSE,0,0.783999999999999,0.00700000000000001,0.797999999999998,4
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","the dead ggstatsplot arguments are gone from the call sites",6,0,FALSE,FALSE,0,0.0109999999999992,0.003,0.0140000000000029,6
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","the shield removes the fallback instead of merely disclosing it",8,0,FALSE,FALSE,0,3.605,0.0509999999999999,3.836,8
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","a stale fallback marker cannot leak into a later run",3,0,FALSE,FALSE,0,0.100000000000001,0.003,0.103000000000002,3
+"test-jjbetweenstats-release-review.R","jjbetweenstats-release-review","only oneway.test is collateral damage from as.character.formula",4,0,FALSE,FALSE,0,0.0069999999999979,0.001,0.00799999999999912,4
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","the robust method is Winsorized Pearson, and the table reports it",5,0,FALSE,FALSE,0,0.106000000000002,0.004,0.119000000000003,5
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","partial correlations reach the table and the interpretation",5,0,FALSE,FALSE,0,0.161999999999999,0.004,0.169999999999998,5
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","Bayesian analysis reports a Bayes factor, not a Pearson p-value",5,0,FALSE,FALSE,0,0.460999999999999,0.0159999999999999,0.483000000000001,5
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","the table carries the adjusted p-value the plot marks cells with",9,0,FALSE,FALSE,0,0.118000000000002,0.00300000000000011,0.125,9
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","confidence intervals are present for every method",18,0,FALSE,FALSE,0,0.585999999999999,0.0169999999999999,0.609999999999999,18
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","the table reports N per pair",4,0,FALSE,FALSE,0,0.0410000000000004,0.00100000000000011,0.0430000000000028,4
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","a missing grouping value does not become a group of NA correlations",3,0,FALSE,FALSE,0,0.0449999999999982,0.00099999999999989,0.0480000000000018,3
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","decimal places do not destroy the table",3,0,FALSE,FALSE,0,0.0619999999999976,0.00100000000000011,0.0630000000000024,3
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","the completion notice actually reaches the user",3,0,FALSE,FALSE,0,0.0560000000000009,0.002,0.0570000000000022,3
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","the interpretation names the coefficient it is reporting",5,0,FALSE,FALSE,0,0.411000000000001,0.0089999999999999,0.425000000000001,5
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","the interpretation counts significance at the chosen level, on adjusted p",4,0,FALSE,FALSE,0,0.0470000000000006,0.00100000000000011,0.0480000000000018,4
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","the grouped plot is sized from the resolved grouping column",3,0,FALSE,FALSE,0,0.041999999999998,0.00099999999999989,0.0440000000000005,3
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","the documented robust method matches the implemented one",5,0,FALSE,FALSE,0,0.00900000000000034,0.00300000000000011,0.0129999999999981,5
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","a Bayesian correlation matrix is reproducible",5,0,FALSE,FALSE,0,0.989999999999998,0.0369999999999999,1.148,5
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","the missing-data exclusion count survives to the user",5,0,FALSE,FALSE,0,0.0840000000000032,0.002,0.0869999999999997,5
+"test-jjcorrmat-release-review.R","jjcorrmat-release-review","a Variables option must be passed by value, not as a bare symbol",3,0,FALSE,FALSE,0,0.0530000000000008,0.00100000000000011,0.0549999999999997,3
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","the reported Welch ANOVA matches stats::oneway.test",2,0,FALSE,FALSE,0,0.472000000000001,0.0130000000000001,0.492999999999999,2
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","partial eta-squared equals df1*F/(df1*F+df2) for the Welch model",1,0,FALSE,FALSE,0,0.443999999999999,0.00800000000000001,0.465000000000003,1
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","two-group Cohen's d and Hedges' g match effectsize",2,0,FALSE,FALSE,0,0.674000000000003,0.012,0.705999999999996,2
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","the nonparametric branch reports Kruskal-Wallis",1,0,FALSE,FALSE,0,0.449999999999999,0.0089999999999999,0.466999999999999,1
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","a three-group comparison actually shows its statistics",2,0,FALSE,FALSE,0,0.428000000000001,0.0109999999999999,0.452000000000005,2
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","the effect size selector changes the reported effect size",3,0,FALSE,FALSE,0,0.898,0.022,0.950999999999993,3
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","the Split By figure renders instead of failing on a title collision",3,0,FALSE,FALSE,0,0.869,0.016,0.893000000000001,3
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","a Split By figure still renders when a plot title is set",2,0,FALSE,FALSE,0,0.843,0.00800000000000001,0.858999999999995,2
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","an infinite value is excluded and disclosed rather than blanking the plot",4,0,FALSE,FALSE,0,0.417999999999999,0.006,0.427000000000007,4
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","a constant dependent variable is rejected in .run(), where notices render",2,0,FALSE,FALSE,0,0.00999999999999801,0.00100000000000011,0.0109999999999957,2
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","nothing claims success before the figure exists",2,0,FALSE,FALSE,0,0.00999999999999801,0.00099999999999989,0.0120000000000005,2
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","contradictory centrality settings are reported, not silently resolved",1,0,FALSE,FALSE,0,0.0120000000000005,0.00100000000000011,0.0130000000000052,1
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","agreeing centrality settings raise no warning",1,0,FALSE,FALSE,0,0.0220000000000056,0.00099999999999989,0.0230000000000032,1
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","the retired centrality precision option says so",1,0,FALSE,FALSE,0,0.0150000000000006,0.00100000000000011,0.0150000000000006,1
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","exclusion messages survive an option-only change (cache hit)",2,0,FALSE,FALSE,0,0.0229999999999961,0.00099999999999989,0.0240000000000009,2
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","the formula shield is restored after every run",2,0,FALSE,FALSE,0,0.450000000000003,0.00500000000000012,0.460000000000001,2
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","the reference line is drawn only when asked for",1,0,FALSE,FALSE,0,0.760999999999996,0.00800000000000001,0.775999999999996,1
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","decimal places reach the rendered statistics",1,0,FALSE,FALSE,0,0.837000000000003,0.012,0.856000000000002,1
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","every statistical test type renders",8,0,FALSE,FALSE,0,2.085,0.0589999999999999,2.176,8
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","axis labels follow the flipped orientation",2,0,FALSE,FALSE,0,0.387999999999998,0.004,0.397999999999996,2
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","a single group is rejected with an actionable message",1,0,FALSE,FALSE,0,0.0260000000000034,0.00099999999999989,0.027000000000001,1
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","an out-of-range confidence level is rejected",1,0,FALSE,FALSE,0,0.027000000000001,0,0.0290000000000035,1
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","small samples and small groups are flagged",2,0,FALSE,FALSE,0,0.0129999999999981,0.00100000000000011,0.0139999999999958,2
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","an incomplete variable selection shows the welcome text, not an error",2,0,FALSE,FALSE,0,0.00800000000000267,0,0.00900000000000034,2
+"test-jjdotplotstats-release-review.R","jjdotplotstats-release-review","the syntax generator quotes variable names that need it",4,0,FALSE,FALSE,0,0.0110000000000028,0.00099999999999989,0.0120000000000005,4
+"test-jjhistostats-release-review.R","jjhistostats-release-review","gghistostats' `type` selects a one-sample location test, not a normality test",8,0,FALSE,FALSE,0,0.314999999999998,0.00499999999999989,0.325000000000003,8
+"test-jjhistostats-release-review.R","jjhistostats-release-review","the option documentation names the tests that are actually run",7,0,FALSE,FALSE,0,0.00800000000000267,0.002,0.0119999999999933,7
+"test-jjhistostats-release-review.R","jjhistostats-release-review","a subtitle testing against zero is disclosed, however it arose",8,0,FALSE,FALSE,0,0.0799999999999983,0.004,0.0860000000000056,8
+"test-jjhistostats-release-review.R","jjhistostats-release-review","the named test tracks the chosen statistic",4,0,FALSE,FALSE,0,0.0690000000000026,0.002,0.0719999999999956,4
+"test-jjhistostats-release-review.R","jjhistostats-release-review","every clinical preset triggers the disclosure, because each forces the subtitle on",4,0,FALSE,FALSE,0,0.0509999999999948,0.002,0.054000000000002,4
+"test-jjhistostats-release-review.R","jjhistostats-release-review","the skewness statistic is the population g1 moment",4,0,FALSE,FALSE,0,0.0140000000000029,0.00100000000000011,0.0140000000000029,4
+"test-jjhistostats-release-review.R","jjhistostats-release-review","a plot title with Split By does not crash the grouped plot",2,0,FALSE,FALSE,0,0.298000000000002,0.004,0.305,2
+"test-jjhistostats-release-review.R","jjhistostats-release-review","a custom title is not stamped onto every variable's panel",6,0,FALSE,FALSE,0,0.110999999999997,0.00099999999999989,0.113,6
+"test-jjhistostats-release-review.R","jjhistostats-release-review","a variable with too few values is refused by name, not by an upstream error",5,0,FALSE,FALSE,0,0.0730000000000004,0.002,0.0750000000000028,5
+"test-jjhistostats-release-review.R","jjhistostats-release-review","symmetric non-normal data is not certified as normal",9,0,FALSE,FALSE,0,0.0850000000000009,0.004,0.0889999999999986,9
+"test-jjhistostats-release-review.R","jjhistostats-release-review","a clinical preset does not keep overriding after the user returns to Custom",4,0,FALSE,FALSE,0,0.0140000000000029,0.00100000000000011,0.0159999999999982,4
+"test-jjhistostats-release-review.R","jjhistostats-release-review","the distribution diagnostics render every selected variable",6,0,FALSE,FALSE,0,1.619,0.0449999999999999,1.692,6
+"test-jjhistostats-release-review.R","jjhistostats-release-review","conf.level is bounded away from the value that erases the subtitle",5,0,FALSE,FALSE,0,0.0660000000000025,0.00100000000000011,0.0670000000000002,5
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the copy-ready Methods sentence names the test that actually ran",7,0,FALSE,FALSE,0,0.0919999999999987,0.002,0.0949999999999989,7
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the three frequentist types really are the same test",3,0,FALSE,FALSE,0,11.241,0.132,12.858,3
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the interpretation guide no longer promises an exact test",2,0,FALSE,FALSE,0,0.0150000000000006,0.002,0.0169999999999959,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","a sparse table gets the exact test, not a redirect to a dead option",4,0,FALSE,FALSE,0,0.017000000000003,0.002,0.0200000000000031,4
+"test-jjpiestats-release-review.R","jjpiestats-release-review","an adequately powered table raises no assumption warning",1,0,FALSE,FALSE,0,0.0140000000000029,0.00099999999999989,0.0159999999999982,1
+"test-jjpiestats-release-review.R","jjpiestats-release-review","every malformed expected-proportions entry is reported",8,0,FALSE,FALSE,0,0.0499999999999972,0.002,0.0519999999999996,8
+"test-jjpiestats-release-review.R","jjpiestats-release-review","a valid expected-proportions entry is accepted silently",1,0,FALSE,FALSE,0,0.0140000000000029,0.00100000000000011,0.0140000000000029,1
+"test-jjpiestats-release-review.R","jjpiestats-release-review","crossing a variable with itself is called out",2,0,FALSE,FALSE,0,0.0209999999999937,0.00099999999999989,0.0230000000000032,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","paired mode explains the missing single-variable chart",1,0,FALSE,FALSE,0,0.0140000000000029,0.00100000000000011,0.0139999999999958,1
+"test-jjpiestats-release-review.R","jjpiestats-release-review","a pie chart with too many slices is flagged",2,0,FALSE,FALSE,0,0.0350000000000037,0.00099999999999989,0.0370000000000061,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the reported chi-square matches stats::chisq.test",3,0,FALSE,FALSE,0,2.112,0.0169999999999999,2.141,3
+"test-jjpiestats-release-review.R","jjpiestats-release-review","paired mode really runs McNemar, matching stats::mcnemar.test",2,0,FALSE,FALSE,0,0.210999999999999,0.002,0.213000000000001,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the weighted counts path equals the expanded raw data",2,0,FALSE,FALSE,0,0.0150000000000006,0,0.0150000000000006,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the effect-size guide says which Cramer's V is on screen",2,0,FALSE,FALSE,0,0.0130000000000052,0.00100000000000011,0.0140000000000029,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the syntax pane emits valid, non-duplicated R",3,0,FALSE,FALSE,0,0.00800000000000267,0.00099999999999989,0.00999999999999801,3
+"test-jjpiestats-release-review.R","jjpiestats-release-review","a sparse 2x2 chart reports Fisher's exact test, not chi-square",4,0,FALSE,FALSE,0,0.402000000000001,0.00800000000000001,0.417999999999999,4
+"test-jjpiestats-release-review.R","jjpiestats-release-review","an adequately powered table keeps the chi-square subtitle",2,0,FALSE,FALSE,0,0.781999999999996,0.0130000000000001,0.808,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","paired and Bayesian analyses are left alone",2,0,FALSE,FALSE,0,2.779,0.028,2.84,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the assumptions panel agrees with whatever the chart shows",4,0,FALSE,FALSE,0,0.0410000000000039,0.002,0.0429999999999922,4
+"test-jjpiestats-release-review.R","jjpiestats-release-review","p-values are formatted without a stray equals sign",2,0,FALSE,FALSE,0,0.0159999999999982,0.00099999999999989,0.0169999999999959,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","Split By panels get their own exact p-values",3,0,FALSE,FALSE,0,0.0150000000000006,0.00100000000000011,0.0160000000000053,3
+"test-jjpiestats-release-review.R","jjpiestats-release-review","a well-powered Split By raises no per-panel notice",1,0,FALSE,FALSE,0,0.0140000000000029,0,0.0150000000000006,1
+"test-jjridges-release-review.R","jjridges-release-review","effect-size point estimates match independent implementations",5,0,FALSE,FALSE,0,0.162999999999997,0.004,0.173000000000002,5
+"test-jjridges-release-review.R","jjridges-release-review","every effect size reports a TWO-sided confidence interval",8,0,FALSE,FALSE,0,0.0919999999999987,0.00300000000000011,0.0960000000000036,8
+"test-jjridges-release-review.R","jjridges-release-review","p-value adjustment matches stats::p.adjust and 'none' is a no-op",8,0,FALSE,FALSE,0,0.536999999999999,0.006,0.548000000000002,8
+"test-jjridges-release-review.R","jjridges-release-review","unadjusted multiple comparisons are flagged where the user can see it",5,0,FALSE,FALSE,0,0.289999999999999,0.00299999999999989,0.293999999999997,5
+"test-jjridges-release-review.R","jjridges-release-review","the copy-ready report names the tests actually run, not the one requested",8,0,FALSE,FALSE,0,0.179000000000002,0.00300000000000011,0.185000000000002,8
+"test-jjridges-release-review.R","jjridges-release-review","pairwise p-values reproduce the underlying stats:: tests",10,0,FALSE,FALSE,0,0.113,0.00099999999999989,0.116,10
+"test-jjridges-release-review.R","jjridges-release-review","unequal variance keeps Welch and does not switch to Wilcoxon",6,0,FALSE,FALSE,0,0.0690000000000026,0.00100000000000011,0.0720000000000027,6
+"test-jjridges-release-review.R","jjridges-release-review","non-normality still switches to a rank-based test",1,0,FALSE,FALSE,0,0.128,0.002,0.129999999999995,1
+"test-jjridges-release-review.R","jjridges-release-review","a constant pair is reported, not thrown, and the plot survives",5,0,FALSE,FALSE,0,0.256999999999998,0.0189999999999999,0.344999999999999,5
+"test-jjridges-release-review.R","jjridges-release-review","the palette stretches to the number of groups instead of failing",7,0,FALSE,FALSE,0,1.237,0.0190000000000001,1.26900000000001,7
+"test-jjridges-release-review.R","jjridges-release-review","ordinary independent data does not raise an independence violation",1,0,FALSE,FALSE,0,0.097999999999999,0.00199999999999978,0.0999999999999943,1
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","each typestatistics level runs the correlation its label names",8,0,FALSE,FALSE,0,0.167999999999999,0.00300000000000011,0.173000000000002,8
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","the parametric correlation and its CI reproduce stats::cor.test exactly",5,0,FALSE,FALSE,0,0.0320000000000036,0.002,0.0339999999999918,5
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","two different correlation coefficients in one output are disclosed",5,0,FALSE,FALSE,0,0.890000000000001,0.018,0.978999999999999,5
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","degenerate data is flagged on the MAIN plot, not only the aesthetics plot",5,0,FALSE,FALSE,0,0.0489999999999995,0.002,0.0510000000000019,5
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","warnings accumulate instead of overwriting each other",2,0,FALSE,FALSE,0,0.00300000000000011,0.00099999999999989,0.00499999999999545,2
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","every visible: expression in the results definition resolves",8,0,FALSE,FALSE,0,0.108999999999995,0.004,0.113,8
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","smoothMethod actually reaches the plot",5,0,FALSE,FALSE,0,0.368000000000002,0.00900000000000012,0.384,5
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","decimal places reach the subtitle",3,0,FALSE,FALSE,0,0.268000000000001,0.004,0.274000000000001,3
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","arguments ggscatterstats does not accept are not passed to it",13,0,FALSE,FALSE,0,0.0150000000000006,0.00499999999999989,0.0200000000000102,13
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","the robust estimator is named consistently everywhere the user can see it",5,0,FALSE,FALSE,0,0.0289999999999964,0.002,0.0309999999999917,5
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","a shape variable with more levels than ggplot2 has shapes does not lose cases",4,0,FALSE,FALSE,0,0.531999999999996,0.032,0.576999999999998,4
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","the grouped ggpubr panel honours the journal palette",2,0,FALSE,FALSE,0,0.588000000000008,0.00700000000000012,0.599999999999994,2
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","the grouped plot applies rug and theme to every panel, not just the last",4,0,FALSE,FALSE,0,0.00699999999999079,0.002,0.00900000000000034,4
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","a clinical preset does not announce settings it cannot deliver",5,0,FALSE,FALSE,0,0.0160000000000053,0.00099999999999989,0.0170000000000101,5
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","the aesthetics-plot subtitle names the right coefficient and reports n",5,0,FALSE,FALSE,0,0.971999999999994,0.016,1.00099999999999,5
+"test-jjscatterstats-release-review.R","jjscatterstats-release-review","a grouped plot discloses that its per-panel p-values are unadjusted",4,0,FALSE,FALSE,0,0.0559999999999974,0.002,0.0580000000000069,4
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","a continuous Value Variable does not crash the analysis",2,0,FALSE,FALSE,0,0.0880000000000081,0.00099999999999989,0.0889999999999986,2
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","fractional totals are shown as fractions, not truncated",2,0,FALSE,FALSE,0,0.0480000000000018,0.002,0.0490000000000066,2
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","a summed measurement is never reported as an observation count",3,0,FALSE,FALSE,0,0.0499999999999972,0.00100000000000011,0.0510000000000019,3
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","the copy-ready sentence puts N on the rows, not on the sum",2,0,FALSE,FALSE,0,0.0480000000000018,0.002,0.0520000000000067,2
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","chi-square matches stats::chisq.test exactly on count data",3,0,FALSE,FALSE,0,0.0510000000000019,0.002,0.0549999999999926,3
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","the count assumption behind chi-square is stated where it is read",2,0,FALSE,FALSE,0,0.0520000000000067,0.002,0.0550000000000068,2
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","the unit-scaling failure mode is real, which is why it is disclosed",1,0,FALSE,FALSE,0,0.085000000000008,0.00099999999999989,0.0859999999999985,1
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","non-integer data skips the test rather than reporting a bogus one",3,0,FALSE,FALSE,0,0.0439999999999969,0.00100000000000011,0.0450000000000017,3
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","sparse tables get an expected-count warning",1,0,FALSE,FALSE,0,0.0849999999999937,0,0.0859999999999985,1
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","composition matches a base-R aggregate and every bar totals 100%",37,0,FALSE,FALSE,0,0.0630000000000024,0.002,0.0649999999999977,37
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","percentages are invariant to the unit of the value variable",1,0,FALSE,FALSE,0,0.0930000000000035,0.00099999999999989,0.0940000000000083,1
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","every clinical preset actually changes the chart",5,0,FALSE,FALSE,0,1.09,0.02,1.123,5
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","an explicit choice overrides the preset",1,0,FALSE,FALSE,0,0.36999999999999,0.0069999999999999,0.379000000000005,1
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","negative category totals are rejected",1,0,FALSE,FALSE,0,0.0330000000000013,0.00100000000000011,0.0339999999999918,1
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","an empty dataset is explained, not crashed on",1,0,FALSE,FALSE,0,0.0150000000000006,0.00099999999999989,0.0150000000000006,1
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","chi-square does not run until the user affirms the value is a count",3,0,FALSE,FALSE,0,0.046999999999997,0,0.0480000000000018,3
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","a missing compiled option degrades instead of crashing the analysis",1,0,FALSE,FALSE,0,0.0460000000000065,0.00100000000000011,0.046999999999997,1
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","a numeric variable is already a factor before the backend sees it",2,0,FALSE,FALSE,0,0.0869999999999891,0.00099999999999989,0.0889999999999986,2
+"test-jjsegmentedtotalbar-release-review.R","jjsegmentedtotalbar-release-review","the template panel names the controls it fills and the override rule",6,0,FALSE,FALSE,0,0.0480000000000018,0.00099999999999989,0.0499999999999972,6
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","the comparison is genuinely paired",5,0,FALSE,FALSE,0,0.462999999999994,0.00900000000000012,0.476000000000013,5
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","three measurements get a repeated-measures ANOVA with a sphericity correction",6,0,FALSE,FALSE,0,0.599999999999994,0.0269999999999999,0.725999999999999,6
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","the effect-size selector reaches the effect size",8,0,FALSE,FALSE,0,6.76,0.0760000000000001,7.042,8
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","pairwise comparisons can actually be switched off",2,0,FALSE,FALSE,0,1.006,0.00800000000000001,1.02399999999999,2
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","the narrative names the test that was actually run",5,0,FALSE,FALSE,0,0.14800000000001,0.002,0.152000000000001,5
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","missing data is deleted listwise and the exclusion is disclosed",5,0,FALSE,FALSE,0,0.0300000000000011,0.00099999999999989,0.0320000000000107,5
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","the visual toggles change the rendered figure",5,0,FALSE,FALSE,0,4.36,0.11,4.538,5
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","decimal places and confidence level reach the subtitle",5,0,FALSE,FALSE,0,2.158,0.0230000000000001,2.27499999999999,5
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","the clinical presets offer guidance and survive the message reset",5,0,FALSE,FALSE,0,0.0900000000000034,0.00200000000000022,0.0930000000000035,5
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","no panel makes a causal claim",4,0,FALSE,FALSE,0,0.0189999999999912,0.00199999999999978,0.0210000000000008,4
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","the removed ggstatsplot arguments are gone from the call site",6,0,FALSE,FALSE,0,0.0100000000000051,0.00200000000000022,0.0120000000000005,6
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","infinite measurements are excluded rather than crashing or poisoning the test",18,0,FALSE,FALSE,0,1.18299999999999,0.024,1.226,18
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","the ggpubr companion panel does not contradict the main figure",5,0,FALSE,FALSE,0,0.578000000000003,0.00800000000000001,0.592999999999989,5
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","the Bayes factor message survives the subtitle takeover",4,0,FALSE,FALSE,0,1.309,0.0289999999999999,1.375,4
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","the ggpubr panel and the main analysis use the same subjects",2,0,FALSE,FALSE,0,0.284000000000006,0.016,0.337000000000003,2
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","every ggpubr plot type BUILDS, not merely prints",9,0,FALSE,FALSE,0,1.169,0.0229999999999997,1.214,9
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","the ggpubr palette applies where it can and is documented where it cannot",5,0,FALSE,FALSE,0,1.635,0.0230000000000001,1.676,5
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","data-quality warnings reach the panel and degenerate input is rejected",4,0,FALSE,FALSE,0,0.0969999999999942,0.00200000000000022,0.100000000000009,4
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","sampling-based output is reproducible across renders",2,0,FALSE,FALSE,0,3.706,0.0429999999999997,3.78999999999999,2
+"test-jjwithinstats-release-review.R","jjwithinstats-release-review","individual trajectories are drawn at every number of measurements",3,0,FALSE,FALSE,0,1.148,0.0170000000000003,1.188,3
+"test-jwaffle-release-review.R","jwaffle-release-review","categories too small to draw are named, and the warning tracks the chart exactly",11,0,FALSE,FALSE,0,0.25,0.00599999999999978,0.262,11
+"test-jwaffle-release-review.R","jwaffle-release-review","the vanishing-category check honours the counts (weights) variable",2,0,FALSE,FALSE,0,0.0300000000000011,0.00200000000000022,0.0330000000000013,2
+"test-jwaffle-release-review.R","jwaffle-release-review","a missing weight does not abort the analysis",3,0,FALSE,FALSE,0,0.0330000000000013,0.00199999999999978,0.0349999999999966,3
+"test-jwaffle-release-review.R","jwaffle-release-review","the vanishing-category list is capped so the notice stays readable",3,0,FALSE,FALSE,0,0.0109999999999957,0.00099999999999989,0.0109999999999957,3
+"test-jwaffle-release-review.R","jwaffle-release-review","rejection messages interpolate their arguments instead of printing {}",5,0,FALSE,FALSE,0,0.0160000000000053,0.00100000000000033,0.0180000000000007,5
+"test-jwaffle-release-review.R","jwaffle-release-review","the palette scales to any number of categories",4,0,FALSE,FALSE,0,0.654999999999987,0.00999999999999979,0.672999999999988,4
+"test-linechart-release-review.R","linechart-release-review","reported values are rounded, not printed at full precision",9,0,FALSE,FALSE,0,0.0490000000000066,0.00100000000000033,0.0520000000000067,9
+"test-linechart-release-review.R","linechart-release-review","base::format is genuinely masked, which is why the helper exists",3,1,FALSE,FALSE,0,0.00600000000000023,0.00199999999999978,0.00699999999999079,2
+"test-linechart-release-review.R","linechart-release-review","infinite values are excluded and explained, not crashed on",4,0,FALSE,FALSE,0,0.019999999999996,0.00099999999999989,0.0210000000000008,4
+"test-linechart-release-review.R","linechart-release-review","rows dropped for missing values are disclosed",3,0,FALSE,FALSE,0,0.01400000000001,0,0.0139999999999958,3
+"test-linechart-release-review.R","linechart-release-review","complete data raises no exclusion notice",2,0,FALSE,FALSE,0,0.012999999999991,0.00200000000000022,0.0160000000000053,2
+"test-linechart-release-review.R","linechart-release-review","a single distinct X value is called out",1,0,FALSE,FALSE,0,0.0219999999999914,0,0.0229999999999961,1
+"test-linechart-release-review.R","linechart-release-review","an empty dataset explains itself instead of going blank",1,0,FALSE,FALSE,0,0.0130000000000052,0.00099999999999989,0.0130000000000052,1
+"test-linechart-release-review.R","linechart-release-review","existing guards still fire",2,0,FALSE,FALSE,0,0.0630000000000024,0.00099999999999989,0.0649999999999977,2
+"test-linechart-release-review.R","linechart-release-review","a reference line at zero is reachable",2,0,FALSE,FALSE,0,0.24199999999999,0.004,0.249000000000009,2
+"test-linechart-release-review.R","linechart-release-review","with the switch uncompiled, the legacy rule still applies",1,0,TRUE,FALSE,0,0.00100000000000477,0.00100000000000033,0.00199999999999534,0
+"test-linechart-release-review.R","linechart-release-review","correlation and regression match base R exactly",4,0,FALSE,FALSE,0,0.019999999999996,0,0.0220000000000056,4
+"test-linechart-release-review.R","linechart-release-review","the summary table matches base R",4,0,FALSE,FALSE,0,0.0139999999999958,0.00099999999999989,0.0150000000000006,4
+"test-linechart-release-review.R","linechart-release-review","the repeated-measures independence limitation is stated",1,0,FALSE,FALSE,0,0.0180000000000007,0.00099999999999989,0.0180000000000007,1
+"test-linechart-release-review.R","linechart-release-review","the confidence band is disclosed as a model fit, not point uncertainty",4,0,FALSE,FALSE,0,0.0559999999999974,0.00099999999999989,0.0589999999999975,4
+"test-linechart-release-review.R","linechart-release-review","the band really is a linear-fit confidence interval",2,0,FALSE,FALSE,0,0.0249999999999915,0.00100000000000033,0.027000000000001,2
+"test-linechart-release-review.R","linechart-release-review","no source file calls a bare format() with base-format arguments",1,0,FALSE,FALSE,0,0.070999999999998,0.00499999999999989,0.0860000000000127,1
+"test-lollipop-release-review.R","lollipop-release-review","a grouping variable with one real level plus NAs is rejected",1,0,FALSE,FALSE,0,0.0280000000000058,0,0.0289999999999964,1
+"test-lollipop-release-review.R","lollipop-release-review","two real levels plus NAs still runs",2,0,FALSE,FALSE,0,0.0160000000000053,0.00099999999999989,0.0180000000000007,2
+"test-lollipop-release-review.R","lollipop-release-review","infinite values are removed and disclosed",2,0,FALSE,FALSE,0,0.0160000000000053,0.00100000000000033,0.0169999999999959,2
+"test-lollipop-release-review.R","lollipop-release-review","aggregation reproduces stats::aggregate",12,0,FALSE,FALSE,0,0.0599999999999881,0.00199999999999978,0.0619999999999976,12
+"test-lollipop-release-review.R","lollipop-release-review","duplicate observations without aggregation are warned about",1,0,FALSE,FALSE,0,0.0190000000000055,0,0.019999999999996,1
+"test-lollipop-release-review.R","lollipop-release-review","a highlight level that is absent is reported, not silently ignored",1,0,FALSE,FALSE,0,0.0189999999999912,0.00099999999999989,0.0190000000000055,1
+"test-lollipop-release-review.R","lollipop-release-review","missing rows are removed and the count disclosed",1,0,FALSE,FALSE,0,0.0190000000000055,0,0.0190000000000055,1
+"test-lollipop-release-review.R","lollipop-release-review","every sort order and orientation renders",6,0,FALSE,FALSE,0,0.715000000000003,0.0110000000000001,0.731999999999999,6
+"test-lollipop-release-review.R","lollipop-release-review","a constant dependent variable does not break the chart",1,0,FALSE,FALSE,0,0.0150000000000006,0.00099999999999989,0.0169999999999959,1
+"test-raincloud-release-review.R","raincloud-release-review","1a. AUTO runs Welch's ANOVA, not aov, when Bartlett rejects equal variances",8,0,FALSE,FALSE,0,0.0169999999999959,0.00100000000000033,0.0180000000000007,8
+"test-raincloud-release-review.R","raincloud-release-review","1b. forcing ANOVA still runs aov but warns that equal variances are doubtful",5,0,FALSE,FALSE,0,0.0250000000000057,0.00099999999999989,0.0259999999999962,5
+"test-raincloud-release-review.R","raincloud-release-review","1c. AUTO still picks ordinary ANOVA when variances ARE equal",4,0,FALSE,FALSE,0,0.0219999999999914,0.00199999999999978,0.0240000000000009,4
+"test-raincloud-release-review.R","raincloud-release-review","1d. non-normal groups still route to Kruskal-Wallis, verified against kruskal.test",3,0,FALSE,FALSE,0,0.0169999999999959,0.00100000000000033,0.0189999999999912,3
+"test-raincloud-release-review.R","raincloud-release-review","2a. >2 groups: adjustment produces a pairwise table matching pairwise.t.test",7,0,FALSE,FALSE,0,0.0190000000000055,0.00099999999999989,0.0210000000000008,7
+"test-raincloud-release-review.R","raincloud-release-review","2b. adjusted pairwise p really differs from the unadjusted one",4,0,FALSE,FALSE,0,0.0150000000000006,0.00099999999999989,0.0160000000000053,4
+"test-raincloud-release-review.R","raincloud-release-review","2c. Kruskal route uses pairwise.wilcox.test",5,0,FALSE,FALSE,0,0.0159999999999911,0.00099999999999989,0.0159999999999911,5
+"test-raincloud-release-review.R","raincloud-release-review","2d. exactly 2 groups: says there is nothing to adjust, prints no fake adjusted row",3,0,FALSE,FALSE,0,0.0130000000000052,0.00100000000000033,0.01400000000001,3
+"test-raincloud-release-review.R","raincloud-release-review","2e. adjust_method = none prints neither a pairwise table nor an adjustment note",2,0,FALSE,FALSE,0,0.0130000000000052,0.00099999999999989,0.01400000000001,2
+"test-raincloud-release-review.R","raincloud-release-review","3a. a singleton group yields a named message instead of a t.test error",5,0,FALSE,FALSE,0,0.0130000000000052,0.00099999999999989,0.0150000000000006,5
+"test-raincloud-release-review.R","raincloud-release-review","3b. every offending group is named, not just the first",3,0,FALSE,FALSE,0,0.0109999999999957,0.00099999999999989,0.0120000000000005,3
+"test-raincloud-release-review.R","raincloud-release-review","4a. a vanishing p renders as the HTML entity, not 0.0000 and not p = 0.000",5,0,FALSE,FALSE,0,0.012999999999991,0.00100000000000033,0.0150000000000006,5
+"test-raincloud-release-review.R","raincloud-release-review","4b. an ordinary p prints to three decimals",3,0,FALSE,FALSE,0,0.0250000000000057,0.00099999999999989,0.0259999999999962,3
+"test-raincloud-release-review.R","raincloud-release-review","4c. stripping real tags leaves the decoded p-value visible to a reader",1,0,FALSE,FALSE,0,0.0300000000000011,0.00099999999999989,0.0320000000000107,1
+"test-raincloud-release-review.R","raincloud-release-review","5a. Cohen's d equals the unpooled-SD estimate, and is labelled as such",5,0,FALSE,FALSE,0,0.0169999999999959,0.00099999999999989,0.0180000000000007,5
+"test-raincloud-release-review.R","raincloud-release-review","5b. zero-variance groups report d as not estimable rather than Inf/NaN",2,0,FALSE,FALSE,0,0.0130000000000052,0.00100000000000033,0.0139999999999958,2
+"test-raincloud-release-review.R","raincloud-release-review","5c. Wilcoxon refuses to report Cohen's d",1,0,FALSE,FALSE,0,0.0109999999999957,0.00099999999999989,0.0120000000000005,1
+"test-raincloud-release-review.R","raincloud-release-review","6a. a jamovi-style numeric-labelled factor is read by its labels, not its codes",4,0,FALSE,FALSE,0,0.0169999999999959,0.00099999999999989,0.0189999999999912,4
+"test-raincloud-release-review.R","raincloud-release-review","6b. label values drive the group comparison too",2,0,FALSE,FALSE,0,0.0139999999999958,0.00099999999999989,0.0150000000000006,2
+"test-raincloud-release-review.R","raincloud-release-review","7a. an infinite value is dropped and counted in the data-summary panel",7,0,FALSE,FALSE,0,0.0180000000000007,0.00200000000000022,0.0200000000000102,7
+"test-raincloud-release-review.R","raincloud-release-review","7b. -Inf is filtered the same way",2,0,FALSE,FALSE,0,0.0150000000000006,0.00099999999999989,0.0150000000000006,2
+"test-raincloud-release-review.R","raincloud-release-review","7c. no removal note appears when the data are clean",1,0,FALSE,FALSE,0,0.0109999999999957,0,0.0109999999999957,1
+"test-raincloud-release-review.R","raincloud-release-review","7d. an all-Inf dependent variable is rejected with a clear message, not a crash",1,0,FALSE,FALSE,0,0.0240000000000009,0.00099999999999989,0.0250000000000057,1
+"test-raincloud-release-review.R","raincloud-release-review","8a. a non-significant Shapiro-Wilk reads as an absence of evidence",4,0,FALSE,FALSE,0,0.0319999999999965,0.00100000000000033,0.032999999999987,4
+"test-raincloud-release-review.R","raincloud-release-review","8b. a significant Shapiro-Wilk reads as a departure, and matches shapiro.test",3,0,FALSE,FALSE,0,0.0139999999999958,0.00099999999999989,0.0139999999999958,3
+"test-raincloud-release-review.R","raincloud-release-review","8c. an untestable group says so",1,0,FALSE,FALSE,0,0.0110000000000099,0,0.0109999999999957,1
+"test-raincloud-release-review.R","raincloud-release-review","9a. z-score on a constant group is reported as not testable",5,0,FALSE,FALSE,0,0.0139999999999958,0.00099999999999989,0.0150000000000006,5
+"test-raincloud-release-review.R","raincloud-release-review","9b. modified z-score on a zero-MAD group (majority tied) is not testable",3,0,FALSE,FALSE,0,0.0139999999999958,0.00200000000000022,0.0170000000000101,3
+"test-raincloud-release-review.R","raincloud-release-review","9c. IQR method is unaffected and still counts outliers",2,0,FALSE,FALSE,0,0.0120000000000005,0.00099999999999989,0.0130000000000052,2
+"test-raincloud-release-review.R","raincloud-release-review","10a. selecting the palette separator falls back to the default palette",5,0,FALSE,FALSE,0,0.0309999999999917,0.00199999999999978,0.034000000000006,5
+"test-raincloud-release-review.R","raincloud-release-review","10b. selecting the theme separator falls back to the clinical theme",3,0,FALSE,FALSE,0,0.118000000000009,0.00200000000000022,0.120999999999995,3
+"test-raincloud-release-review.R","raincloud-release-review","10c. a plot with both separators selected still renders",1,0,FALSE,FALSE,0,0.283000000000001,0.00700000000000012,0.304999999999993,1
+"test-statsplot2-release-review.R","statsplot2-release-review","random subsampling is disclosed, not left looking like missing data",4,0,FALSE,FALSE,0,0.0720000000000027,0.00099999999999989,0.0750000000000028,4
+"test-statsplot2-release-review.R","statsplot2-release-review","no subsample warning when the full data is used",2,0,FALSE,FALSE,0,0.0259999999999962,0.00099999999999989,0.027000000000001,2
+"test-statsplot2-release-review.R","statsplot2-release-review","the sampling threshold and size are under user control",4,0,FALSE,FALSE,0,0.191999999999993,0.0110000000000001,0.209000000000003,4
+"test-statsplot2-release-review.R","statsplot2-release-review","N counts usable observations, not rows",2,0,FALSE,FALSE,0,0.019999999999996,0.00199999999999978,0.0259999999999962,2
+"test-statsplot2-release-review.R","statsplot2-release-review","a one-group comparison is rejected, not called successful",2,0,FALSE,FALSE,0,0.0200000000000102,0.00300000000000011,0.0210000000000008,2
+"test-statsplot2-release-review.R","statsplot2-release-review","a constant outcome is flagged, including the analysis-type switch",3,0,FALSE,FALSE,0,0.019999999999996,0.00200000000000022,0.0220000000000056,3
+"test-statsplot2-release-review.R","statsplot2-release-review","an ordinary analysis still reports success",3,0,FALSE,FALSE,0,0.0180000000000007,0.00199999999999978,0.0210000000000008,3
+"test-statsplot2-release-review.R","statsplot2-release-review","statsplot2 datasets load under the names they are documented by",5,0,FALSE,FALSE,0,0.0449999999999875,0.00700000000000012,0.0549999999999926,5

@@ -1,0 +1,288 @@
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+jjbarstats-basic: .W1W2W3W4W5W6W7W8W9WaWbWcWdWeWfWgWhWiWj
+jjbarstats-correctness: ...........................................
+jjbarstats-edge-cases: WkWlWmWnWoWpWqWrWsWtWu.WvWwWxWyWzWA......WB.
+jjbarstats-release-review: ....................................
+jjpiestats-basic: WWWWWWCDEFGHIJKLMNOPQRSTUVWXYZE
+jjpiestats-correctness: .................................................F.
+jjpiestats-edge-cases: WWEEEEEEEEEE.EEEEEEEEEEEEEE
+jjpiestats-release-review: .............................................................
+statsplot2-basic: .WEWEWEWEWEWEWEWEWEWEWEWEWEWEWEWEWE
+statsplot2-edge-cases: WEWEWEWEWEWEWEWEWEWEWEWEWEWEWEWEWEWEWEWEWEWEWEWE
+statsplot2-release-review: ..........WEWEWEWEWFWFWFWFWF
+statsplot2-smoke: ........
+
+══ Warnings ════════════════════════════════════════════════════════════════════
+1. jjbarstats runs with minimal required arguments ('test-jjbarstats-basic.R:14:3') - data set ‘jjbarstats_test’ not found
+
+2. jjbarstats produces expected output structure ('test-jjbarstats-basic.R:28:3') - data set ‘jjbarstats_test’ not found
+
+3. jjbarstats handles 3×3 contingency table ('test-jjbarstats-basic.R:42:3') - data set ‘jjbarstats_test’ not found
+
+4. jjbarstats handles 2×2 contingency table ('test-jjbarstats-basic.R:56:3') - data set ‘jjbarstats_diagnostic’ not found
+
+5. jjbarstats handles parametric statistics ('test-jjbarstats-basic.R:70:3') - data set ‘jjbarstats_test’ not found
+
+6. jjbarstats handles nonparametric statistics ('test-jjbarstats-basic.R:84:3') - data set ‘jjbarstats_test’ not found
+
+7. jjbarstats handles robust statistics ('test-jjbarstats-basic.R:98:3') - data set ‘jjbarstats_test’ not found
+
+8. jjbarstats handles Bayesian statistics ('test-jjbarstats-basic.R:112:3') - data set ‘jjbarstats_test’ not found
+
+9. jjbarstats handles paired/repeated measures ('test-jjbarstats-basic.R:126:3') - data set ‘jjbarstats_paired’ not found
+
+10. jjbarstats handles independent samples ('test-jjbarstats-basic.R:140:3') - data set ‘jjbarstats_test’ not found
+
+11. jjbarstats handles split-by variable ('test-jjbarstats-basic.R:154:3') - data set ‘jjbarstats_test’ not found
+
+12. jjbarstats handles aggregated data with counts ('test-jjbarstats-basic.R:168:3') - data set ‘jjbarstats_aggregated’ not found
+
+13. jjbarstats handles pairwise comparisons ('test-jjbarstats-basic.R:182:3') - data set ‘jjbarstats_test’ not found
+
+14. jjbarstats handles label display modes ('test-jjbarstats-basic.R:197:3') - data set ‘jjbarstats_test’ not found
+
+15. jjbarstats handles proportion test ('test-jjbarstats-basic.R:229:3') - data set ‘jjbarstats_test’ not found
+
+16. jjbarstats handles clinical presets ('test-jjbarstats-basic.R:243:3') - data set ‘jjbarstats_diagnostic’ not found
+
+17. jjbarstats handles two-level factors ('test-jjbarstats-basic.R:267:3') - data set ‘jjbarstats_test’ not found
+
+18. jjbarstats handles three-level factors ('test-jjbarstats-basic.R:280:3') - data set ‘jjbarstats_test’ not found
+
+19. jjbarstats handles four-level factors ('test-jjbarstats-basic.R:293:3') - data set ‘jjbarstats_test’ not found
+
+20. jjbarstats prompts for the variables it still needs ('test-jjbarstats-edge-cases.R:15:3') - data set ‘jjbarstats_test’ not found
+
+21. jjbarstats handles missing data correctly ('test-jjbarstats-edge-cases.R:36:3') - data set ‘jjbarstats_test’ not found
+
+22. jjbarstats handles all NA in dependent variable ('test-jjbarstats-edge-cases.R:53:3') - data set ‘jjbarstats_test’ not found
+
+23. jjbarstats handles missing grouping variable values ('test-jjbarstats-edge-cases.R:73:3') - data set ‘jjbarstats_test’ not found
+
+24. jjbarstats handles small sample sizes ('test-jjbarstats-edge-cases.R:90:3') - data set ‘jjbarstats_test’ not found
+
+25. jjbarstats handles very small sample sizes ('test-jjbarstats-edge-cases.R:105:3') - data set ‘jjbarstats_test’ not found
+
+26. jjbarstats handles single level in dependent variable ('test-jjbarstats-edge-cases.R:121:3') - data set ‘jjbarstats_test’ not found
+
+27. jjbarstats handles single level in grouping variable ('test-jjbarstats-edge-cases.R:132:3') - data set ‘jjbarstats_test’ not found
+
+28. jjbarstats handles variables with special characters ('test-jjbarstats-edge-cases.R:143:3') - data set ‘jjbarstats_test’ not found
+
+29. jjbarstats handles very long variable names ('test-jjbarstats-edge-cases.R:158:3') - data set ‘jjbarstats_test’ not found
+
+30. jjbarstats handles unbalanced contingency tables ('test-jjbarstats-edge-cases.R:174:3') - data set ‘jjbarstats_test’ not found
+
+31. jjbarstats handles factor levels in different orders ('test-jjbarstats-edge-cases.R:210:3') - data set ‘jjbarstats_test’ not found
+
+32. jjbarstats handles unused factor levels ('test-jjbarstats-edge-cases.R:230:3') - data set ‘jjbarstats_test’ not found
+
+33. jjbarstats handles missing split-by variable values ('test-jjbarstats-edge-cases.R:250:3') - data set ‘jjbarstats_test’ not found
+
+34. jjbarstats handles single level in split variable ('test-jjbarstats-edge-cases.R:268:3') - data set ‘jjbarstats_test’ not found
+
+35. jjbarstats handles invalid expected proportions ('test-jjbarstats-edge-cases.R:284:3') - data set ‘jjbarstats_test’ not found
+
+36. jjbarstats handles wrong number of expected proportions ('test-jjbarstats-edge-cases.R:298:3') - data set ‘jjbarstats_test’ not found
+
+37. jjbarstats handles extreme confidence levels ('test-jjbarstats-edge-cases.R:416:3') - data set ‘jjbarstats_test’ not found
+
+38. (code run outside of `test_that()`) ('test-jjpiestats-basic.R:11:1') - data set ‘jjpiestats_test’ not found
+
+39. (code run outside of `test_that()`) ('test-jjpiestats-basic.R:12:1') - data set ‘jjpiestats_diagnostic’ not found
+
+40. (code run outside of `test_that()`) ('test-jjpiestats-basic.R:13:1') - data set ‘jjpiestats_treatment’ not found
+
+41. (code run outside of `test_that()`) ('test-jjpiestats-basic.R:14:1') - data set ‘jjpiestats_biomarker’ not found
+
+42. (code run outside of `test_that()`) ('test-jjpiestats-basic.R:15:1') - data set ‘jjpiestats_aggregated’ not found
+
+43. (code run outside of `test_that()`) ('test-jjpiestats-basic.R:16:1') - data set ‘jjpiestats_small’ not found
+
+44. (code run outside of `test_that()`) ('test-jjpiestats-edge-cases.R:11:1') - data set ‘jjpiestats_test’ not found
+
+45. (code run outside of `test_that()`) ('test-jjpiestats-edge-cases.R:12:1') - data set ‘jjpiestats_small’ not found
+
+46. statsplot2 runs with minimal required arguments ('test-statsplot2-basic.R:14:3') - data set ‘statsplot2_test’ not found
+
+47. statsplot2 produces expected output structure ('test-statsplot2-basic.R:28:3') - data set ‘statsplot2_test’ not found
+
+48. statsplot2 handles continuous vs categorical (violin plot) ('test-statsplot2-basic.R:43:3') - data set ‘statsplot2_test’ not found
+
+49. statsplot2 handles categorical vs categorical (bar chart) ('test-statsplot2-basic.R:58:3') - data set ‘statsplot2_test’ not found
+
+50. statsplot2 handles continuous vs continuous (scatter) ('test-statsplot2-basic.R:72:3') - data set ‘statsplot2_test’ not found
+
+51. statsplot2 handles parametric distribution ('test-statsplot2-basic.R:86:3') - data set ‘statsplot2_test’ not found
+
+52. statsplot2 handles nonparametric distribution ('test-statsplot2-basic.R:100:3') - data set ‘statsplot2_skewed’ not found
+
+53. statsplot2 handles robust distribution ('test-statsplot2-basic.R:114:3') - data set ‘statsplot2_outliers’ not found
+
+54. statsplot2 handles Bayesian distribution ('test-statsplot2-basic.R:128:3') - data set ‘statsplot2_test’ not found
+
+55. statsplot2 handles independent direction ('test-statsplot2-basic.R:142:3') - data set ‘statsplot2_test’ not found
+
+56. statsplot2 handles repeated direction ('test-statsplot2-basic.R:156:3') - data set ‘statsplot2_repeated’ not found
+
+57. statsplot2 handles split-by variable (grvar) ('test-statsplot2-basic.R:170:3') - data set ‘statsplot2_test’ not found
+
+58. statsplot2 handles custom labels ('test-statsplot2-basic.R:185:3') - data set ‘statsplot2_test’ not found
+
+59. statsplot2 handles multi-level categorical grouping ('test-statsplot2-basic.R:198:3') - data set ‘statsplot2_test’ not found
+
+60. statsplot2 handles two-level factors ('test-statsplot2-basic.R:213:3') - data set ‘statsplot2_test’ not found
+
+61. statsplot2 handles three-level factors ('test-statsplot2-basic.R:227:3') - data set ‘statsplot2_test’ not found
+
+62. statsplot2 handles multi-level factors ('test-statsplot2-basic.R:241:3') - data set ‘statsplot2_test’ not found
+
+63. statsplot2 errors on missing required arguments ('test-statsplot2-edge-cases.R:20:3') - data set ‘statsplot2_test’ not found
+
+64. statsplot2 handles missing data correctly ('test-statsplot2-edge-cases.R:41:3') - data set ‘statsplot2_test’ not found
+
+65. statsplot2 handles all NA in dependent variable ('test-statsplot2-edge-cases.R:55:3') - data set ‘statsplot2_test’ not found
+
+66. statsplot2 handles missing grouping variable values ('test-statsplot2-edge-cases.R:67:3') - data set ‘statsplot2_test’ not found
+
+67. statsplot2 handles small sample sizes ('test-statsplot2-edge-cases.R:79:3') - data set ‘statsplot2_test’ not found
+
+68. statsplot2 handles very small sample sizes ('test-statsplot2-edge-cases.R:94:3') - data set ‘statsplot2_test’ not found
+
+69. statsplot2 handles single group ('test-statsplot2-edge-cases.R:105:3') - data set ‘statsplot2_test’ not found
+
+70. statsplot2 handles constant dependent variable ('test-statsplot2-edge-cases.R:118:3') - data set ‘statsplot2_test’ not found
+
+71. statsplot2 handles constant grouping variable ('test-statsplot2-edge-cases.R:133:3') - data set ‘statsplot2_test’ not found
+
+72. statsplot2 handles variables with special characters ('test-statsplot2-edge-cases.R:144:3') - data set ‘statsplot2_test’ not found
+
+73. statsplot2 handles very long variable names ('test-statsplot2-edge-cases.R:159:3') - data set ‘statsplot2_test’ not found
+
+74. statsplot2 handles extreme values ('test-statsplot2-edge-cases.R:175:3') - data set ‘statsplot2_test’ not found
+
+75. statsplot2 handles negative values ('test-statsplot2-edge-cases.R:190:3') - data set ‘statsplot2_test’ not found
+
+76. statsplot2 handles zero values ('test-statsplot2-edge-cases.R:205:3') - data set ‘statsplot2_test’ not found
+
+77. statsplot2 handles unbalanced groups ('test-statsplot2-edge-cases.R:220:3') - data set ‘statsplot2_test’ not found
+
+78. statsplot2 handles integer vs numeric variables ('test-statsplot2-edge-cases.R:237:3') - data set ‘statsplot2_test’ not found
+
+79. statsplot2 handles empty plot title ('test-statsplot2-edge-cases.R:258:3') - data set ‘statsplot2_test’ not found
+
+80. statsplot2 handles very long plot title ('test-statsplot2-edge-cases.R:271:3') - data set ‘statsplot2_test’ not found
+
+81. statsplot2 handles factor levels in different orders ('test-statsplot2-edge-cases.R:286:3') - data set ‘statsplot2_test’ not found
+
+82. statsplot2 handles unused factor levels ('test-statsplot2-edge-cases.R:306:3') - data set ‘statsplot2_test’ not found
+
+83. statsplot2 handles numeric grouping variable as continuous ('test-statsplot2-edge-cases.R:326:3') - data set ‘statsplot2_test’ not found
+
+84. statsplot2 handles repeated measures with incomplete IDs ('test-statsplot2-edge-cases.R:340:3') - data set ‘statsplot2_repeated’ not found
+
+85. statsplot2 handles missing split-by variable values ('test-statsplot2-edge-cases.R:357:3') - data set ‘statsplot2_test’ not found
+
+86. statsplot2 handles single level in split variable ('test-statsplot2-edge-cases.R:374:3') - data set ‘statsplot2_test’ not found
+
+87. N counts usable observations, not rows ('test-statsplot2-release-review.R:71:3') - data set ‘statsplot2_test’ not found
+
+88. a one-group comparison is rejected, not called successful ('test-statsplot2-release-review.R:84:3') - data set ‘statsplot2_test’ not found
+
+89. a constant outcome is flagged, including the analysis-type switch ('test-statsplot2-release-review.R:96:3') - data set ‘statsplot2_test’ not found
+
+90. an ordinary analysis still reports success ('test-statsplot2-release-review.R:106:3') - data set ‘statsplot2_test’ not found
+
+91. statsplot2 datasets load under the names they are documented by ('test-statsplot2-release-review.R:125:5') - data set ‘statsplot2_test’ not found
+
+92. statsplot2 datasets load under the names they are documented by ('test-statsplot2-release-review.R:125:5') - data set ‘statsplot2_repeated’ not found
+
+93. statsplot2 datasets load under the names they are documented by ('test-statsplot2-release-review.R:125:5') - data set ‘statsplot2_clinical’ not found
+
+94. statsplot2 datasets load under the names they are documented by ('test-statsplot2-release-review.R:125:5') - data set ‘statsplot2_skewed’ not found
+
+95. statsplot2 datasets load under the names they are documented by ('test-statsplot2-release-review.R:125:5') - data set ‘statsplot2_outliers’ not found
+
+══ Failed ══════════════════════════════════════════════════════════════════════
+── 1. Error ('test-jjbarstats-basic.R:17:3'): jjbarstats runs with minimal requi
+Error in `eval(code, test_env)`: object 'jjbarstats_test' not found
+Backtrace:
+    ▆
+ 1. └─jjstatsplot::jjbarstats(...) at test-jjbarstats-basic.R:17:3
+ 2.   └─v %in% names(data) at jjstatsplot/R/jjbarstats.h.R:543:5
+
+── 2. Error ('test-jjbarstats-basic.R:30:3'): jjbarstats produces expected outpu
+Error in `eval(code, test_env)`: object 'jjbarstats_test' not found
+Backtrace:
+    ▆
+ 1. └─jjstatsplot::jjbarstats(...) at test-jjbarstats-basic.R:30:3
+ 2.   └─v %in% names(data) at jjstatsplot/R/jjbarstats.h.R:543:5
+
+── 3. Error ('test-jjbarstats-basic.R:44:3'): jjbarstats handles 3×3 contingency
+Error in `eval(code, test_env)`: object 'jjbarstats_test' not found
+Backtrace:
+    ▆
+ 1. └─jjstatsplot::jjbarstats(...) at test-jjbarstats-basic.R:44:3
+ 2.   └─v %in% names(data) at jjstatsplot/R/jjbarstats.h.R:543:5
+
+── 4. Error ('test-jjbarstats-basic.R:58:3'): jjbarstats handles 2×2 contingency
+Error in `eval(code, test_env)`: object 'jjbarstats_diagnostic' not found
+Backtrace:
+    ▆
+ 1. └─jjstatsplot::jjbarstats(...) at test-jjbarstats-basic.R:58:3
+ 2.   └─v %in% names(data) at jjstatsplot/R/jjbarstats.h.R:543:5
+
+── 5. Error ('test-jjbarstats-basic.R:72:3'): jjbarstats handles parametric stat
+Error in `eval(code, test_env)`: object 'jjbarstats_test' not found
+Backtrace:
+    ▆
+ 1. └─jjstatsplot::jjbarstats(...) at test-jjbarstats-basic.R:72:3
+ 2.   └─v %in% names(data) at jjstatsplot/R/jjbarstats.h.R:543:5
+
+── 6. Error ('test-jjbarstats-basic.R:86:3'): jjbarstats handles nonparametric s
+Error in `eval(code, test_env)`: object 'jjbarstats_test' not found
+Backtrace:
+    ▆
+ 1. └─jjstatsplot::jjbarstats(...) at test-jjbarstats-basic.R:86:3
+ 2.   └─v %in% names(data) at jjstatsplot/R/jjbarstats.h.R:543:5
+
+── 7. Error ('test-jjbarstats-basic.R:100:3'): jjbarstats handles robust statist
+Error in `eval(code, test_env)`: object 'jjbarstats_test' not found
+Backtrace:
+    ▆
+ 1. └─jjstatsplot::jjbarstats(...) at test-jjbarstats-basic.R:100:3
+ 2.   └─v %in% names(data) at jjstatsplot/R/jjbarstats.h.R:543:5
+
+── 8. Error ('test-jjbarstats-basic.R:114:3'): jjbarstats handles Bayesian stati
+Error in `eval(code, test_env)`: object 'jjbarstats_test' not found
+Backtrace:
+    ▆
+ 1. └─jjstatsplot::jjbarstats(...) at test-jjbarstats-basic.R:114:3
+ 2.   └─v %in% names(data) at jjstatsplot/R/jjbarstats.h.R:543:5
+
+── 9. Error ('test-jjbarstats-basic.R:128:3'): jjbarstats handles paired/repeate
+Error in `eval(code, test_env)`: object 'jjbarstats_paired' not found
+Backtrace:
+    ▆
+ 1. └─jjstatsplot::jjbarstats(...) at test-jjbarstats-basic.R:128:3
+ 2.   └─v %in% names(data) at jjstatsplot/R/jjbarstats.h.R:543:5
+
+── 10. Error ('test-jjbarstats-basic.R:142:3'): jjbarstats handles independent s
+Error in `eval(code, test_env)`: object 'jjbarstats_test' not found
+Backtrace:
+    ▆
+ 1. └─jjstatsplot::jjbarstats(...) at test-jjbarstats-basic.R:142:3
+ 2.   └─v %in% names(data) at jjstatsplot/R/jjbarstats.h.R:543:5
+  ... and 127 more
+
+
+Maximum number of 10 failures reached, some test results may be missing.
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+TOTALS
+     nb  failed skipped   error warning  passed 
+    312       6       0     131      87     219 

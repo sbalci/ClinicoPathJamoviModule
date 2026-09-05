@@ -2578,7 +2578,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     ) +
                     ggplot2::labs(
                         title = jmvcore::.("Concordance Heatmap: Per-Case Test Results vs Gold Standard"),
-                        subtitle = paste0(jmvcore::.("Cases sorted by gold standard result"), " (n=", n_cases, ")"),
+                        subtitle = sprintf(jmvcore::.("Cases sorted by gold standard result (n=%d)"), n_cases),
                         x = jmvcore::.("Sample"),
                         y = ""
                     ) +

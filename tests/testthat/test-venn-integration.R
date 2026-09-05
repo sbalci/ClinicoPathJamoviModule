@@ -1,10 +1,14 @@
 # Integration tests for venn module
 # Tests critical bug fixes: selected-variable naOmit, set calculations correctness
+#
+# NOTE: these carried skip_if_not_installed("ClinicoPath") on every test and a
+# skip_if_not_installed('jmvReadWrite') that guarded nothing. ClinicoPath is not
+# *installed* under devtools::load_all() or a sourced tree, so all 12 tests
+# skipped silently in the normal dev loop and only ever ran against a built
+# package. The package under test is loaded by the harness, so no guard is needed.
 
 
 test_that("venn only excludes cases with NAs in SELECTED variables", {
-  skip_if_not_installed('jmvReadWrite')
-    skip_if_not_installed("ClinicoPath")
 
     # CRITICAL TEST: Create data with NAs in UNRELATED columns
     # These should NOT cause case exclusion
@@ -42,6 +46,11 @@ test_that("venn only excludes cases with NAs in SELECTED variables", {
     # (All 100 cases have complete var1 and var2)
     expect_s3_class(result, "vennResults")
 
+    # var1/var2 are complete, so all 100 cases survive and nothing is excluded
+    expect_equal(result$summary$asDF$totalCount, c(100L, 100L))
+    expect_false(grepl("CASE EXCLUSION",
+                       paste(as.character(result$validationWarnings$content), collapse = " ")))
+
     # The membership table should have 100 rows, not 20
     # (Before fix: would be 20 rows = cases complete across ALL columns)
     # (After fix: should be 100 rows = cases complete for SELECTED columns only)
@@ -49,7 +58,6 @@ test_that("venn only excludes cases with NAs in SELECTED variables", {
 
 
 test_that("venn reports exclusion warning when selected variables have NAs", {
-    skip_if_not_installed("ClinicoPath")
 
     # Create data with 30% missing in SELECTED variables
     set.seed(456)
@@ -84,14 +92,20 @@ test_that("venn reports exclusion warning when selected variables have NAs", {
     # CRITICAL: Should report 30 cases (30%) excluded
     expect_s3_class(result, "vennResults")
 
+    # 30 of 100 cases are missing on var1
+    txt <- paste(as.character(result$validationWarnings$content), collapse = " ")
+    expect_match(txt, "CASE EXCLUSION")
+    expect_match(txt, "Original N=100")
+    expect_match(txt, "Final N=70")
+    expect_equal(result$summary$asDF$totalCount, c(70L, 70L))
+
     # Check that todo element contains exclusion warning
-    # (The warning is displayed via self$results$todo$setContent())
+    # (The warning is displayed via the validationWarnings panel)
     # In actual jamovi, this would show "⚠️ Case Exclusion Warning: 30 cases (30%) excluded..."
 })
 
 
 test_that("venn with NO missing values shows no exclusion warning", {
-    skip_if_not_installed("ClinicoPath")
 
     # Create complete data (no NAs anywhere)
     set.seed(789)
@@ -121,11 +135,14 @@ test_that("venn with NO missing values shows no exclusion warning", {
 
     # No warning should be displayed when no cases excluded
     expect_s3_class(result, "vennResults")
+
+    expect_false(grepl("CASE EXCLUSION",
+                       paste(as.character(result$validationWarnings$content), collapse = " ")))
+    expect_equal(result$summary$asDF$totalCount, c(80L, 80L))
 })
 
 
 test_that("venn logical encoding is correct for 2-way Venn", {
-    skip_if_not_installed("ClinicoPath")
 
     # Create simple test data with known outcomes
     set.seed(111)
@@ -164,6 +181,12 @@ test_that("venn logical encoding is correct for 2-way Venn", {
     # CRITICAL: The logical encoding should match expected counts
     expect_s3_class(result, "vennResults")
 
+    # Drug = 60 of 100; Success = 40 Drug + 10 Placebo = 50 of 100
+    sm <- result$summary$asDF
+    expect_equal(sm$trueCount,  c(60L, 50L))
+    expect_equal(sm$falseCount, c(40L, 50L))
+    expect_equal(sm$totalCount, c(100L, 100L))
+
     # In actual use, the Venn diagram should show:
     # - Left circle (Drug only): 20
     # - Intersection (both): 40
@@ -173,7 +196,6 @@ test_that("venn logical encoding is correct for 2-way Venn", {
 
 
 test_that("venn logical encoding is correct for 3-way Venn", {
-    skip_if_not_installed("ClinicoPath")
 
     # Create 3-way test data
     set.seed(222)
@@ -204,11 +226,15 @@ test_that("venn logical encoding is correct for 3-way Venn", {
 
     # CRITICAL: Should handle 3-way combinations correctly
     expect_s3_class(result, "vennResults")
+
+    sm <- result$summary$asDF
+    expect_equal(nrow(sm), 3L)
+    expect_true(all(sm$totalCount == 120L))
+    expect_true(all(sm$trueCount + sm$falseCount == sm$totalCount))
 })
 
 
 test_that("venn with 4 variables works correctly", {
-    skip_if_not_installed("ClinicoPath")
 
     # Test with 4 variables (UpSet plot)
     set.seed(333)
@@ -240,11 +266,14 @@ test_that("venn with 4 variables works correctly", {
 
     # Should switch to UpSet plot for 4+ variables
     expect_s3_class(result, "vennResults")
+
+    sm <- result$summary$asDF
+    expect_equal(nrow(sm), 4L)
+    expect_true(all(sm$totalCount == 100L))
 })
 
 
 test_that("venn handles variables with spaces correctly", {
-    skip_if_not_installed("ClinicoPath")
 
     # Create data with space-containing variable names
     set.seed(444)
@@ -275,11 +304,14 @@ test_that("venn handles variables with spaces correctly", {
 
     # Should handle special characters without errors
     expect_s3_class(result, "vennResults")
+
+    # the ORIGINAL names must survive into the output, not the make.names() form
+    expect_equal(result$summary$asDF$variable, c("Treatment Group", "Response Type"))
+    expect_true(all(result$summary$asDF$totalCount == 70L))
 })
 
 
 test_that("venn percentage calculations match expected values", {
-    skip_if_not_installed("ClinicoPath")
 
     # Create controlled data for exact percentage verification
     # 100 cases total:
@@ -320,6 +352,11 @@ test_that("venn percentage calculations match expected values", {
     # CRITICAL: Percentages should match expected values
     expect_s3_class(result, "vennResults")
 
+    # varA is Yes in 80 of 100, varB in 40 of 100
+    sm <- result$summary$asDF
+    expect_equal(sm$trueCount, c(80L, 40L))
+    expect_equal(sm$truePercentage, c(0.8, 0.4))
+
     # The summary should show:
     # - "True %" for varA: 80%
     # - "True %" for varB: 40%
@@ -327,14 +364,15 @@ test_that("venn percentage calculations match expected values", {
 
 
 test_that("venn with all FALSE values handles correctly", {
-    skip_if_not_installed("ClinicoPath")
 
     # Edge case: All values are the opposite of "true" level
     set.seed(555)
     n <- 50
     testData <- data.frame(
-        var1 = factor(rep("No", n)),   # All "No", looking for "Yes"
-        var2 = factor(rep("Absent", n))  # All "Absent", looking for "Present"
+        # the positive level has to EXIST for this to be the all-negative case
+        # rather than the absent-level case that the last test in this file covers
+        var1 = factor(rep("No", n), levels = c("Yes", "No")),
+        var2 = factor(rep("Absent", n), levels = c("Present", "Absent"))
     )
 
     result <- venn(
@@ -357,11 +395,15 @@ test_that("venn with all FALSE values handles correctly", {
 
     # Should show all cases in the "Neither" category
     expect_s3_class(result, "vennResults")
+
+    sm <- result$summary$asDF
+    expect_equal(sm$trueCount,  c(0L, 0L))
+    expect_equal(sm$falseCount, c(50L, 50L))
+    expect_equal(sm$truePercentage, c(0, 0))
 })
 
 
 test_that("venn with all TRUE values handles correctly", {
-    skip_if_not_installed("ClinicoPath")
 
     # Edge case: All values match the "true" level
     set.seed(666)
@@ -391,11 +433,17 @@ test_that("venn with all TRUE values handles correctly", {
 
     # Should show all cases in the "Both" intersection
     expect_s3_class(result, "vennResults")
+
+    sm <- result$summary$asDF
+    expect_equal(sm$trueCount,  c(50L, 50L))
+    expect_equal(sm$falseCount, c(0L, 0L))
+    expect_equal(sm$truePercentage, c(1, 1))
+    # a set holding every case must draw the high-prevalence caution
+    expect_match(as.character(result$notices$content), "Very High Prevalence")
 })
 
 
 test_that("venn calculates overlap counts correctly", {
-    skip_if_not_installed("ClinicoPath")
 
     # Create data with known overlap pattern
     testData <- data.frame(
@@ -416,6 +464,7 @@ test_that("venn calculates overlap counts correctly", {
         var1true = "In",
         var2 = "set2",
         var2true = "In",
+        showSetCalculations = TRUE,
         calculateOverlap = TRUE,
         calculateDiscern = TRUE,
         calculateUnite = TRUE
@@ -434,10 +483,16 @@ test_that("venn calculates overlap counts correctly", {
     # CRITICAL: Set calculations should match expected values
     # This tests the FIXED overlap/discern/unite processing
     expect_s3_class(result, "vennResults")
+
+    # set1 In = 70, set2 In = 60, both = 40, union = 90, neither = 10
+    sm <- result$summary$asDF
+    expect_equal(sm$trueCount, c(70L, 60L))
+    calc <- as.character(result$setCalculations$content)
+    expect_match(calc, "40 cases")   # the set1/set2 intersection
+    expect_match(calc, "90 cases")   # the union
 })
 
 test_that("validation fails when selected true level not present", {
-    skip_if_not_installed("ClinicoPath")
 
     data <- data.frame(
         a = factor(c("Yes", "Yes")),

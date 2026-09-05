@@ -139,3 +139,117 @@ test_that("a non-significant omnibus test yields no post-hoc comparisons", {
   expect_gt(chisq.test(table(d$rows, d$cols))$p.value, 0.05)
   expect_equal(nrow(cq(d, posthoc = "bonferroni")$posthocTable$asDF), 0L)
 })
+
+test_that("variable names with spaces, punctuation and Unicode run end to end", {
+  # Raw-rows path indexes data[[name]]; the weighted path builds an xtabs()
+  # formula via jmvcore::constructFormula(), which is where an unescaped name
+  # would break. Both must give the same table as plain names.
+  d <- cq_data()
+  names(d) <- c("Tumour grade (WHO)", "LVI: yes/no \u{2013} \u{F6}zet")
+  plain <- cq(cq_data(), posthoc = "bonferroni")$posthocTable$asDF
+
+  raw <- chisqposttest(data = d, rows = "Tumour grade (WHO)",
+                       cols = "LVI: yes/no \u{2013} \u{F6}zet", counts = NULL,
+                       posthoc = "bonferroni")
+  expect_equal(raw$posthocTable$asDF$padj, plain$padj)
+  expect_equal(raw$chisqTable$asDF$value, cq(cq_data())$chisqTable$asDF$value)
+
+  agg <- as.data.frame(table(d[[1]], d[[2]]), stringsAsFactors = TRUE)
+  names(agg) <- c("Tumour grade (WHO)", "LVI: yes/no \u{2013} \u{F6}zet", "n (weight)")
+  weighted <- chisqposttest(data = agg, rows = "Tumour grade (WHO)",
+                            cols = "LVI: yes/no \u{2013} \u{F6}zet",
+                            counts = "n (weight)", posthoc = "bonferroni")
+  expect_equal(weighted$posthocTable$asDF$padj, plain$padj)
+  expect_equal(weighted$chisqTable$asDF$value, raw$chisqTable$asDF$value)
+})
+
+test_that("a severe expected-count violation is not downgraded by a small sample", {
+  # Expected counts below 1 and n < 20 co-occur in exactly the tables where the
+  # severe flag matters. The small-n check used to overwrite "severe" with
+  # "moderate", which changed the panel's colour and severity.
+  d <- data.frame(rows = factor(c(rep("A", 6), rep("B", 6), "C")),
+                  cols = factor(c(rep("X", 6), rep("Y", 6), "X")))
+  expect_lt(min(suppressWarnings(chisq.test(table(d$rows, d$cols)))$expected), 1)
+  html <- as.character(cq(d, showAssumptionsCheck = TRUE)$assumptionsCheck$content)
+  expect_match(html, "#dc3545", fixed = TRUE)   # the severe border colour
+  expect_match(html, "Critical")
+})
+
+test_that("the Fisher method notice reflects a forced selection", {
+  res <- cq(cq_data(), posthoc = "bonferroni", testSelection = "fisher")
+  expect_true(all(startsWith(res$posthocTable$asDF$test_method, "Fisher")))
+  html <- as.character(res$multipleTestingInfo$content)
+  expect_match(html, "selected in the options")
+  expect_false(grepl("automatically", html))
+  detail <- as.character(cq(cq_data(), posthoc = "bonferroni", testSelection = "fisher",
+                            showDetailedTables = TRUE)$detailedComparisons$content)
+  expect_match(detail, "chosen in the options")
+  expect_false(grepl("below 5", detail))
+})
+
+test_that("prose panels name the adjustment method rather than its option key", {
+  html <- as.character(cq(cq_data(), posthoc = "fdr", showClinicalSummary = TRUE)$clinicalSummary$content)
+  expect_match(html, "Benjamini-Hochberg")
+  expect_false(grepl("after fdr", html))
+})
+
+test_that("the weighted-data panel is written before the table is built", {
+  d <- cq_data()
+  agg <- as.data.frame(table(d$rows, d$cols), stringsAsFactors = TRUE)
+  names(agg) <- c("rows", "cols", "n")
+  # counts chosen but rows/cols not yet: the panel is visible:(counts) and used
+  # to be a titled, empty box in this state
+  res <- chisqposttest(data = agg, rows = NULL, cols = NULL, counts = "n")
+  expect_match(as.character(res$weightedDataInfo$content), "frequency counts")
+})
+
+test_that("an expected count below 1 is reported even when most cells are adequate", {
+  # The > 20%-of-cells rule does not fire on a large table with one sparse
+  # category, and the Assumptions panel that reports it is opt-in.
+  set.seed(5)
+  big <- data.frame(rows = factor(sample(paste0("R", 1:5), 600, TRUE, c(.3, .3, .3, .09, .01))),
+                    cols = factor(sample(paste0("C", 1:2), 600, TRUE, c(.85, .15))))
+  big$cols[big$rows == "R1"] <- sample(c("C1", "C2"), sum(big$rows == "R1"), TRUE, c(.6, .4))
+  ex <- suppressWarnings(chisq.test(table(big$rows, big$cols)))$expected
+  expect_true(any(ex < 1) && mean(ex < 5) <= 0.2)     # exactly the gap being covered
+  expect_match(cq(big)$notices$content, "expected count below 1")
+})
+
+test_that("error paths write the notices panel as well as the red box", {
+  d <- cq_data()
+  one <- d; one$cols <- factor("C1")
+  res <- cq(one)
+  expect_match(res$notices$content, "ERROR: The analysis cannot proceed")
+  expect_match(res$notices$content, "at least 2 rows and 2 columns")
+  expect_match(as.character(res$todo$content), "at least 2 rows and 2 columns")
+  expect_match(cq(d[0, ])$notices$content, "no \\(complete\\) rows")
+})
+
+test_that("non-integer counts raise a warning notice, whole-number counts do not", {
+  d <- cq_data()
+  agg <- as.data.frame(table(d$rows, d$cols), stringsAsFactors = TRUE)
+  names(agg) <- c("rows", "cols", "n")
+  ok <- chisqposttest(data = agg, rows = "rows", cols = "cols", counts = "n")
+  expect_false(grepl("not whole numbers", ok$notices$content))
+  agg$n <- agg$n + 0.5
+  frac <- chisqposttest(data = agg, rows = "rows", cols = "cols", counts = "n")
+  expect_match(frac$notices$content, "not whole numbers")
+})
+
+test_that("every run ends with a one-line analysis summary", {
+  s <- cq(cq_data())$notices$content
+  expect_match(s, "NOTE: Analysis summary")
+  expect_match(s, "180 observations in a 3 x 3 table")
+  expect_match(s, "6 pairwise comparisons with Bonferroni adjustment")
+  expect_match(cq(cq_data(), posthoc = "none")$notices$content, "post-hoc method set to None")
+})
+
+test_that("the bootstrap seed option is honoured by the wrapper", {
+  skip_if_not_installed("boot")
+  d <- cq_data()
+  ci <- function(...) cq(d, phiCI = TRUE, ...)$posthocTable$asDF$phi_ci
+  expect_identical(ci(seed = 42), ci(seed = 42))
+  other <- ci(seed = 7)
+  expect_length(other, 6L)
+  expect_false(identical(ci(seed = 42), other))
+})

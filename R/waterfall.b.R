@@ -2904,7 +2904,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 x = 1,
                 y = max(df$response, na.rm=TRUE),
                 label = sprintf(
-                  .("95%% CI (Median): [%.1f%%, %.1f%%]"),
+                  .("95%% CI (Median): (%.1f%%, %.1f%%)"),
                   ci[1],
                   ci[2]
                 ),
@@ -3656,8 +3656,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               comparison = .("Objective Response Rate (ORR)"),
               # fisher.test() returns an odds ratio only for a 2x2 table; with
               # 3+ groups this printed "OR = NA".
-              test_statistic = paste0(.("Fisher's exact test"),
-                  if (!is.null(orr_test$estimate)) sprintf(", OR = %.2f", orr_test$estimate) else ""),
+              test_statistic = if (!is.null(orr_test$estimate))
+                  sprintf(.("Fisher's exact test, OR = %.2f"), orr_test$estimate)
+              else
+                  .("Fisher's exact test"),
               p_value = round(orr_test$p.value, 4),
               interpretation = orr_interpretation
             ))
@@ -3673,8 +3675,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$results$groupComparisonTest$addRow(rowKey = row_count, values = list(
               comparison = .("Disease Control Rate (DCR)"),
-              test_statistic = paste0(.("Fisher's exact test"),
-                  if (!is.null(dcr_test$estimate)) sprintf(", OR = %.2f", dcr_test$estimate) else ""),
+              test_statistic = if (!is.null(dcr_test$estimate))
+                  sprintf(.("Fisher's exact test, OR = %.2f"), dcr_test$estimate)
+              else
+                  .("Fisher's exact test"),
               p_value = round(dcr_test$p.value, 4),
               interpretation = dcr_interpretation
             ))

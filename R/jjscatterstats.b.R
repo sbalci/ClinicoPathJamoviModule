@@ -315,6 +315,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             d[[dep]] <- jmvcore::toNumeric(d[[dep]])
             d[[group]] <- jmvcore::toNumeric(d[[group]])
 
+            if (!is.numeric(d[[dep]]) || !is.numeric(d[[group]]))
+                jmvcore::reject("Both scatterplot variables must be numeric.")
+
             nonfinite <- (!is.na(d[[dep]]) & !is.finite(d[[dep]])) |
                          (!is.na(d[[group]]) & !is.finite(d[[group]]))
             n_dropped <- sum(nonfinite)

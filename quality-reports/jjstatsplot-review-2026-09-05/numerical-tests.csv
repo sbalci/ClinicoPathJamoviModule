@@ -1,0 +1,204 @@
+"file","context","test","nb","failed","skipped","error","warning","user","system","real","passed"
+"test-jjarcdiagram-correctness.R","jjarcdiagram-correctness","jjarcdiagram correctly handles node-level groups (not edge-level)",3,0,FALSE,FALSE,0,0.108,0.00900000000000001,0.129,3
+"test-jjarcdiagram-correctness.R","jjarcdiagram-correctness","jjarcdiagram correctly uses edge weights in centrality calculations",3,0,FALSE,FALSE,0,0.276,0.017,0.303000000000001,3
+"test-jjarcdiagram-correctness.R","jjarcdiagram-correctness","jjarcdiagram uses selective NA omission (not global)",2,0,FALSE,FALSE,0,0.0150000000000001,0.001,0.016,2
+"test-jjarcdiagram-correctness.R","jjarcdiagram-correctness","jjarcdiagram correctly handles NAs in required columns",1,0,FALSE,FALSE,0,0.0150000000000001,0,0.0149999999999997,1
+"test-jjarcdiagram-correctness.R","jjarcdiagram-correctness","jjarcdiagram correctly handles directed networks in statistics",6,0,FALSE,FALSE,0,0.032,0.002,0.0360000000000005,6
+"test-jjarcdiagram-correctness.R","jjarcdiagram-correctness","jjarcdiagram produces correct network density",2,0,FALSE,FALSE,0,0.0169999999999999,0.001,0.0179999999999998,2
+"test-jjarcdiagram-correctness.R","jjarcdiagram-correctness","jjarcdiagram correctly calculates weighted betweenness centrality",2,0,FALSE,FALSE,0,0.0210000000000004,0.003,0.024,2
+"test-jjarcdiagram-correctness.R","jjarcdiagram-correctness","jjarcdiagram handles self-loops correctly",1,0,FALSE,FALSE,0,0.0159999999999996,0.002,0.0179999999999998,1
+"test-jjarcdiagram-correctness.R","jjarcdiagram-correctness","jjarcdiagram correctly handles group sorting",1,0,FALSE,FALSE,0,0.0250000000000004,0.002,0.0259999999999998,1
+"test-jjarcdiagram-correctness.R","jjarcdiagram-correctness","jjarcdiagram correctly handles degree-based node sizing with weights",2,0,FALSE,FALSE,0,0.0179999999999998,0.001,0.0190000000000001,2
+"test-jjarcdiagram-correctness.R","jjarcdiagram-correctness","jjarcdiagram produces consistent results across multiple runs",2,0,FALSE,FALSE,0,0.0310000000000001,0.002,0.032,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats correctly handles weighted data in sample size reporting",3,0,FALSE,FALSE,0,0.0350000000000001,0.002,0.0439999999999996,3
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats weighted contingency table matches manual calculation",1,0,FALSE,FALSE,0,0.00300000000000011,0.001,0.00300000000000011,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats chi-square expected counts use weighted data",2,0,FALSE,FALSE,0,0.00399999999999956,0.001,0.00399999999999956,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles weighted data with missing values",1,0,FALSE,FALSE,0,0.0289999999999999,0.002,0.0299999999999994,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats unweighted vs weighted produce different expected counts",1,0,FALSE,FALSE,0,0.00200000000000067,0,0.00199999999999978,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats correctly identifies low expected counts in weighted data",1,0,FALSE,FALSE,0,0.00299999999999923,0.001,0.00199999999999978,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles empty cells in weighted contingency table",1,0,FALSE,FALSE,0,0.00200000000000067,0.000999999999999945,0.00300000000000011,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats properly filters NAs before analysis",1,0,FALSE,FALSE,0,0.0219999999999994,0.001,0.0229999999999997,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats weighted group sizes are calculated correctly",3,0,FALSE,FALSE,0,0.0149999999999997,0,0.0170000000000003,3
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles both weighted and unweighted data in same session",2,0,FALSE,FALSE,0,0.0279999999999996,0.002,0.0299999999999994,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats validates counts column is numeric",1,0,FALSE,FALSE,0,0.0150000000000006,0,0.0150000000000006,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles negative counts correctly",0,0,FALSE,TRUE,0,0.0129999999999999,0.001,0.0140000000000002,0
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats joint distribution check detects sparse cells",1,0,FALSE,FALSE,0,0.00300000000000011,0.001,0.00300000000000011,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats produces consistent results across multiple runs",2,0,FALSE,FALSE,0,0.0279999999999996,0.001,0.0289999999999999,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats weighted data with multiple dep variables works",1,0,FALSE,FALSE,0,0.0380000000000003,0,0.0379999999999994,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats chi-square p-value matches manual calculation",2,0,FALSE,FALSE,0,0.00199999999999978,0.001,0.00300000000000011,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats Fisher exact p-value matches manual calculation for 2×2 table",2,0,FALSE,FALSE,0,0.00499999999999989,0,0.00499999999999989,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats Cramér's V effect size matches manual calculation",2,0,FALSE,FALSE,0,0.00300000000000011,0.001,0.00399999999999956,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats McNemar p-value matches manual calculation for paired 2×2 data",2,0,FALSE,FALSE,0,0.00300000000000011,0.001,0.00300000000000011,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats auto-switch to Fisher is triggered correctly for low counts",1,0,FALSE,FALSE,0,0.00199999999999978,0,0.00300000000000011,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats validates 2×2 requirement for paired analysis",1,0,FALSE,FALSE,0,0.00199999999999978,0.001,0.00300000000000011,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats cache invalidation works when data values change",2,0,FALSE,FALSE,0,1.573,0.026,1.629,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats effect sizes are within valid ranges",3,0,FALSE,FALSE,0,0.00800000000000001,0.002,0.00900000000000034,3
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles Unicode and special character variable names",1,0,FALSE,FALSE,0,0.0140000000000002,0.001,0.0140000000000002,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles R reserved words as variable names",1,0,FALSE,FALSE,0,0.0129999999999999,0,0.0140000000000002,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats warns about extreme prevalence in diagnostic preset",2,0,FALSE,FALSE,0,0.00300000000000011,0.001,0.00399999999999956,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats balloon plot handles multiple dependent variables",2,0,FALSE,FALSE,0,0.0250000000000004,0.001,0.0260000000000007,2
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats uses selective NA omission, not global",1,0,FALSE,FALSE,0,0.0380000000000003,0.001,0.0389999999999997,1
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats drops rows only with NAs in analysis variables",1,0,FALSE,FALSE,0,0.0209999999999999,0,0.0220000000000002,1
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats handles multiple dependent variables correctly",1,0,FALSE,FALSE,0,0.0190000000000001,0.002,0.0209999999999999,1
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats single variable analysis works",1,0,FALSE,FALSE,0,0.0149999999999997,0,0.0170000000000003,1
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats handles different statistical methods",4,0,FALSE,FALSE,0,0.0589999999999993,0.003,0.0619999999999994,4
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats handles pairwise comparisons",1,0,FALSE,FALSE,0,0.0140000000000002,0,0.016,1
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats grouped analysis works",1,0,FALSE,FALSE,0,0.0149999999999997,0.001,0.0150000000000006,1
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats handles equal variance assumption",2,0,FALSE,FALSE,0,0.0280000000000005,0.001,0.0289999999999999,2
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats detects small sample sizes",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0139999999999993,1
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats handles outliers correctly",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0150000000000006,1
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats validates minimum group sizes",1,0,FALSE,FALSE,0,0.0120000000000005,0,0.0129999999999999,1
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats handles missing group levels",1,0,FALSE,FALSE,0,0.0210000000000008,0.001,0.0220000000000002,1
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats produces consistent results across runs",2,0,FALSE,FALSE,0,0.0269999999999992,0.001,0.0270000000000001,2
+"test-jjbetweenstats-correctness.R","jjbetweenstats-correctness","jjbetweenstats handles real clinical data structure",1,0,FALSE,FALSE,0,0.0140000000000002,0.001,0.0149999999999997,1
+"test-jjbetweenstats-residual.R","jjbetweenstats-residual","a Bayesian test that yields no subtitle is disclosed, not announced",4,0,FALSE,FALSE,0,1.461,0.067,1.566,4
+"test-jjbetweenstats-residual.R","jjbetweenstats-residual","a Bayesian test that DOES compute is left alone",3,0,FALSE,FALSE,0,0.0640000000000001,0.002,0.0649999999999995,3
+"test-jjbetweenstats-residual.R","jjbetweenstats-residual","colorblindSafe changes the ggpubr companion panel",3,0,FALSE,FALSE,0,0.447,0.011,0.464,3
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat uses selective NA omission, not global",1,0,FALSE,FALSE,0,0.0439999999999987,0.002,0.048,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat drops rows only with NAs in correlation variables",1,0,FALSE,FALSE,0,0.0199999999999996,0.001,0.0210000000000008,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat handles all-NA variables correctly",1,0,FALSE,FALSE,0,0.00999999999999979,0,0.00999999999999979,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat detects and rejects factor variables",1,0,FALSE,FALSE,0,0.011000000000001,0.001,0.0120000000000005,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat works with all numeric variables",1,0,FALSE,FALSE,0,0.0190000000000001,0,0.0210000000000008,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat rejects multiple factor variables",1,0,FALSE,FALSE,0,0.0120000000000005,0.001,0.0119999999999987,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat Pearson correlation works correctly",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0149999999999988,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat Spearman correlation works correctly",1,0,FALSE,FALSE,0,0.0150000000000006,0,0.016,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat robust correlation works correctly",1,0,FALSE,FALSE,0,0.0149999999999988,0.001,0.0170000000000012,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat Bayesian correlation works correctly",1,0,FALSE,FALSE,0,0.0859999999999985,0.003,0.0889999999999986,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat partial correlations require 3+ variables",1,0,FALSE,FALSE,0,0.0129999999999999,0,0.0129999999999999,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat partial correlations work with 3+ variables",1,0,FALSE,FALSE,0,0.0380000000000003,0.001,0.0389999999999997,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat zero-order vs partial correlations produce different results",2,0,FALSE,FALSE,0,0.0389999999999997,0.001,0.0399999999999991,2
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat grouped analysis works",1,0,FALSE,FALSE,0,0.0439999999999987,0.001,0.0449999999999999,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat grouped analysis handles NA in group variable",1,0,FALSE,FALSE,0,0.0210000000000008,0.001,0.020999999999999,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat handles different matrix types",3,0,FALSE,FALSE,0,0.0489999999999995,0.002,0.0499999999999989,3
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat handles different matrix methods",2,0,FALSE,FALSE,0,0.0289999999999999,0.001,0.0289999999999999,2
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat validates minimum number of variables",1,0,FALSE,FALSE,0,0.00999999999999979,0,0.0109999999999992,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat validates minimum sample size",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0150000000000006,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat warns about too many variables",1,0,FALSE,FALSE,0,0.495000000000001,0.002,0.496,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat handles constant variables",1,0,FALSE,FALSE,0,0.0149999999999988,0.001,0.0150000000000006,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat produces consistent results across runs",2,0,FALSE,FALSE,0,0.0289999999999999,0.001,0.0309999999999988,2
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat handles real clinical correlation data structure",1,0,FALSE,FALSE,0,0.110999999999999,0.002,0.114000000000001,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat handles highly correlated variables",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.016,1
+"test-jjcorrmat-correctness.R","jjcorrmat-correctness","jjcorrmat handles p-value adjustment methods",4,0,FALSE,FALSE,0,0.0700000000000003,0.001,0.0749999999999993,4
+"test-jjcorrmat-residual.R","jjcorrmat-residual","ggcorrplot.args keeps ggstatsplot's pch.cex so the cross spans the cell",3,0,FALSE,FALSE,0,0.0679999999999996,0.003,0.0730000000000004,3
+"test-jjcorrmat-residual.R","jjcorrmat-residual","pairwise deletion reports per-pair N and warns",4,0,FALSE,FALSE,0,0.0380000000000003,0.001,0.0410000000000004,4
+"test-jjcorrmat-residual.R","jjcorrmat-residual","listwise deletion still reports a single N",2,0,FALSE,FALSE,0,0.0179999999999989,0.001,0.0190000000000001,2
+"test-jjcorrmat-residual.R","jjcorrmat-residual","a zero-variance variable produces a warning naming it",3,0,FALSE,FALSE,0,0.0179999999999989,0,0.0190000000000001,3
+"test-jjcorrmat-residual.R","jjcorrmat-residual","a duplicated variable does not create a structural r = 1 row",2,0,FALSE,FALSE,0,0.0140000000000011,0.001,0.0149999999999988,2
+"test-jjcorrmat-residual.R","jjcorrmat-residual","summary and assumptions print the method name, not the raw token",11,0,FALSE,FALSE,0,0.229999999999999,0.006,0.236000000000001,11
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats uses selective NA omission, not global",1,0,FALSE,FALSE,0,0.011000000000001,0.001,0.011000000000001,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats drops rows only with NAs in analysis variables",1,0,FALSE,FALSE,0,0.0169999999999995,0.001,0.0180000000000007,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats handles NA in grouping variable",1,0,FALSE,FALSE,0,0.00999999999999979,0.001,0.00999999999999979,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats correctly identifies two-group parametric test",1,0,FALSE,FALSE,0,0.00999999999999979,0,0.00999999999999979,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats correctly identifies two-group nonparametric test",1,0,FALSE,FALSE,0,0.0419999999999998,0.001,0.0429999999999993,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats two-group robust test works",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0150000000000006,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats two-group Bayesian test works",1,0,FALSE,FALSE,0,0.00999999999999979,0.001,0.0109999999999992,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats correctly identifies three-group parametric test",1,0,FALSE,FALSE,0,0.00899999999999856,0,0.00999999999999979,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats correctly identifies multi-group nonparametric test",1,0,FALSE,FALSE,0,0.00900000000000034,0.001,0.00999999999999979,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats multi-group robust test works",1,0,FALSE,FALSE,0,0.00899999999999856,0.001,0.00999999999999979,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats multi-group Bayesian test works",1,0,FALSE,FALSE,0,0.00900000000000034,0,0.00900000000000034,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats grouped analysis works",1,0,FALSE,FALSE,0,0.00999999999999979,0.001,0.00999999999999979,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats grouped analysis handles NA in split variable",1,0,FALSE,FALSE,0,0.00900000000000034,0.001,0.00999999999999979,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats handles centrality plotting",1,0,FALSE,FALSE,0,0.00900000000000034,0,0.00999999999999979,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats handles different centrality types",3,0,FALSE,FALSE,0,0.0289999999999999,0.002,0.0300000000000011,3
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats handles single group gracefully",1,0,FALSE,FALSE,0,0.00900000000000034,0,0.00900000000000034,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats validates minimum sample sizes per group",1,0,FALSE,FALSE,0,0.00900000000000034,0.001,0.00900000000000034,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats handles constant outcome variable",1,0,FALSE,FALSE,0,0.00900000000000034,0.001,0.00999999999999979,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats produces consistent results across runs",2,0,FALSE,FALSE,0,0.0169999999999995,0.001,0.0180000000000007,2
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats handles real clinical data structure",1,0,FALSE,FALSE,0,0.00999999999999979,0,0.0109999999999992,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats handles unequal group sizes",1,0,FALSE,FALSE,0,0.016,0,0.0170000000000012,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","jjdotplotstats handles outliers in data",1,0,FALSE,FALSE,0,0.0149999999999988,0.001,0.0149999999999988,1
+"test-jjdotplotstats-correctness.R","jjdotplotstats-correctness","clinical presets are not an available option",2,0,FALSE,FALSE,0,0.011000000000001,0.001,0.0119999999999987,2
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats uses selective NA omission, not global",1,0,FALSE,FALSE,0,0.016,0.001,0.0169999999999995,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats drops rows only with NAs in analyzed variables",1,0,FALSE,FALSE,0,0.0179999999999989,0.001,0.0190000000000001,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles all-NA variables",1,0,FALSE,FALSE,0,0.011000000000001,0,0.0120000000000005,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats detects and rejects single factor variable",1,0,FALSE,FALSE,0,0.0120000000000005,0.001,0.0119999999999987,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats rejects multiple factor variables",1,0,FALSE,FALSE,0,0.0120000000000005,0,0.0119999999999987,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats works with all numeric variables",1,0,FALSE,FALSE,0,0.0119999999999987,0.001,0.0129999999999999,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats rejects ordinal factors (prevents spurious analysis)",1,0,FALSE,FALSE,0,0.0120000000000005,0,0.0120000000000005,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats parametric test works with single variable",1,0,FALSE,FALSE,0,0.0120000000000005,0.001,0.0119999999999987,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats nonparametric test works with skewed data",1,0,FALSE,FALSE,0,0.0109999999999992,0.001,0.0120000000000005,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats robust test works with outliers",1,0,FALSE,FALSE,0,0.0119999999999987,0,0.0129999999999999,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats Bayesian test works",1,0,FALSE,FALSE,0,0.011000000000001,0.001,0.0120000000000005,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles multiple variables",1,0,FALSE,FALSE,0,0.0220000000000002,0.001,0.0220000000000002,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles variables with different scales",1,0,FALSE,FALSE,0,0.0139999999999993,0,0.0140000000000011,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats grouped analysis works",1,0,FALSE,FALSE,0,0.0120000000000005,0.001,0.0129999999999999,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats grouped analysis handles NA in group variable",1,0,FALSE,FALSE,0,0.0120000000000005,0.001,0.0129999999999999,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles centrality line",1,0,FALSE,FALSE,0,0.0120000000000005,0,0.0120000000000005,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles custom bin width",1,0,FALSE,FALSE,0,0.0119999999999987,0.001,0.0120000000000005,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats validates positive bin width",1,0,FALSE,FALSE,0,0.0120000000000005,0,0.0129999999999999,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles constant variable",1,0,FALSE,FALSE,0,0.0120000000000005,0.001,0.0119999999999987,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles very small sample sizes",1,0,FALSE,FALSE,0,0.0119999999999987,0.001,0.0119999999999987,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles few unique values",1,0,FALSE,FALSE,0,0.011000000000001,0,0.0120000000000005,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats produces consistent results across runs",2,0,FALSE,FALSE,0,0.0210000000000008,0.001,0.0229999999999997,2
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles real clinical data structure",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0140000000000011,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles extreme outliers",1,0,FALSE,FALSE,0,0.0120000000000005,0.001,0.0129999999999999,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles negative values (shouldn't always test against 0)",1,0,FALSE,FALSE,0,0.0190000000000001,0,0.0199999999999996,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles all positive values (common for biomarkers)",1,0,FALSE,FALSE,0,0.0170000000000012,0.001,0.0169999999999995,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles wide range of values",1,0,FALSE,FALSE,0,0.0109999999999992,0.001,0.0129999999999999,1
+"test-jjhistostats-correctness.R","jjhistostats-correctness","jjhistostats handles integer data",1,0,FALSE,FALSE,0,0.0109999999999992,0,0.0120000000000005,1
+"test-jjhistostats-residual.R","jjhistostats-residual","the To Do panel never shows the internal progress message",5,0,FALSE,FALSE,0,0.151999999999999,0.002,0.156000000000001,5
+"test-jjhistostats-residual.R","jjhistostats-residual","the distribution-shape bullet does not contradict the normality bullet",6,0,FALSE,FALSE,0,0.0739999999999998,0.002,0.0760000000000005,6
+"test-jjhistostats-residual.R","jjhistostats-residual","labels that are discarded are reported instead of silently dropped",5,0,FALSE,FALSE,0,0.0470000000000006,0.001,0.0489999999999995,5
+"test-jjhistostats-residual.R","jjhistostats-residual","degenerate bin widths and self-grouping are refused with a readable message",3,0,FALSE,FALSE,0,0.0359999999999996,0.001,0.0370000000000008,3
+"test-jjhistostats-residual.R","jjhistostats-residual","a constant variable says the histogram panel will be empty",2,0,FALSE,FALSE,0,0.0120000000000005,0,0.0119999999999987,2
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats uses selective NA omission for relevant variables only",1,0,FALSE,FALSE,0,0.0389999999999997,0.001,0.0389999999999997,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats drops rows with NAs in dependent variable",1,0,FALSE,FALSE,0,0.0220000000000002,0,0.0220000000000002,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats drops rows with NAs in grouping variable",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0129999999999999,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats drops rows with NAs in split variable",1,0,FALSE,FALSE,0,0.0169999999999995,0.001,0.0190000000000001,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats creates basic pie chart for single categorical variable",1,0,FALSE,FALSE,0,0.0170000000000012,0.001,0.0229999999999997,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats creates pie chart with contingency table analysis",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0150000000000006,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats creates grouped pie charts by split variable",1,0,FALSE,FALSE,0,0.0150000000000006,0.00099999999999989,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats runs parametric analysis (Pearson Chi-square)",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats runs nonparametric analysis",1,0,FALSE,FALSE,0,0.0139999999999993,0,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats runs Bayesian analysis",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0139999999999993,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles different label display options",3,0,FALSE,FALSE,0,0.0460000000000012,0.002,0.0469999999999988,3
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles expected proportions for proportion test",2,0,FALSE,FALSE,0,0.0329999999999995,0.001,0.0350000000000001,2
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles paired/repeated measures design",1,0,FALSE,FALSE,0,0.0140000000000011,0.001,0.0139999999999993,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats respects confidence level setting",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0150000000000006,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles decimal digits specification",1,0,FALSE,FALSE,0,0.0140000000000011,0.002,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles proportion test enable/disable",2,0,FALSE,FALSE,0,0.0280000000000005,0.001,0.0310000000000006,2
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles Bayes factor message display",1,0,FALSE,FALSE,0,0.016,0.001,0.0169999999999995,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats shows statistical results in subtitle",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0150000000000006,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats applies clinical presets correctly",2,0,FALSE,FALSE,0,0.0280000000000005,0.002,0.0289999999999999,2
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles case with no complete data gracefully",1,0,FALSE,FALSE,0,0.0139999999999993,0,0.0150000000000006,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles binary categorical variables",1,0,FALSE,FALSE,0,0.0140000000000011,0.001,0.0139999999999993,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles multiple categories (>2)",1,0,FALSE,FALSE,0,0.0249999999999986,0.001,0.0260000000000016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles ordinal categorical variables",1,0,FALSE,FALSE,0,0.0180000000000007,0.001,0.0189999999999984,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles large sample sizes",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles small sample sizes",1,0,FALSE,FALSE,0,0.0130000000000017,0.001,0.0140000000000011,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles unbalanced categorical groups",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0129999999999999,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles character variables as categorical",1,0,FALSE,FALSE,0,0.0129999999999999,0,0.0129999999999999,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles logical variables as binary categorical",1,0,FALSE,FALSE,0,0.0119999999999987,0.001,0.0129999999999999,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles aggregated data with counts variable",1,0,FALSE,FALSE,0,0.0119999999999987,0,0.0140000000000011,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats can add ggpubr donut chart variant",1,0,FALSE,FALSE,0,0.0119999999999987,0.001,0.0129999999999999,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #3: McNemar validation rejects non-2x2 tables",1,0,FALSE,FALSE,0,0.0130000000000017,0.001,0.0139999999999993,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #3: McNemar validation accepts valid 2x2 tables",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0139999999999993,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #2: Rejects non-numeric counts variable",1,0,FALSE,FALSE,0,0.0119999999999987,0,0.0120000000000005,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #2: Rejects negative counts",1,0,FALSE,FALSE,0,0.0140000000000011,0.001,0.0140000000000011,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #2: Accepts valid numeric counts",1,0,FALSE,FALSE,0,0.0139999999999993,0,0.0149999999999988,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #4: Assumption checks respect weighted data",1,0,FALSE,FALSE,0,0.0240000000000009,0.001,0.0260000000000016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #6: Ratio parsing normalizes non-summing values",1,0,FALSE,FALSE,0,0.0169999999999995,0.002,0.020999999999999,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #6: Ratio parsing handles invalid values gracefully",1,0,FALSE,FALSE,0,0.016,0,0.0169999999999995,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #1: Small group sizes trigger Notice (not warning)",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0150000000000006,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #2: Extreme prevalence triggers info notice in diagnostic preset",1,0,FALSE,FALSE,0,0.0140000000000011,0.001,0.0140000000000011,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #2: High prevalence (>90%) triggers info notice",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0149999999999988,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #2: Normal prevalence (10-90%) does not trigger warning",1,0,FALSE,FALSE,0,0.0140000000000011,0.001,0.0140000000000011,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #2: Prevalence check only for diagnostic preset",1,0,FALSE,FALSE,0,0.0139999999999993,0,0.0139999999999993,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats BUG FIX: Handles empty string dep variable gracefully",2,0,FALSE,FALSE,0,0.0109999999999992,0.001,0.0120000000000005,2
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles single-column data without dropping dimensions",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0140000000000011,1
+"test-jjridges-residual.R","jjridges-residual","quantile lines do not paint an unstyled grey ridge over the figure",10,0,FALSE,FALSE,0,0.891,0.015,0.908999999999999,10
+"test-jjridges-residual.R","jjridges-residual","a non-finite X value is dropped with a named warning instead of poisoning the run",10,0,FALSE,FALSE,0,0.212999999999999,0.003,0.216000000000001,10
+"test-jjridges-residual.R","jjridges-residual","Basic Ridgeline, Density Ridges and Violin Ridges are three different figures",1,0,FALSE,FALSE,0,0.328000000000001,0.004,0.334,1
+"test-jjridges-residual.R","jjridges-residual","a comparison that cannot be tested says so in the Method column and in a notice",3,0,FALSE,FALSE,0,0.0820000000000007,0.001,0.0839999999999996,3
+"test-jjridges-residual.R","jjridges-residual","reusing the Y variable as Fill or Facet still produces comparisons, with a notice",4,0,FALSE,FALSE,0,0.182,0.001,0.184000000000001,4
+"test-jjscatterstats-residual.R","jjscatterstats-residual","an infinite value is removed and reported instead of silently voiding the statistics",11,0,FALSE,FALSE,0,0.869000000000002,0.023,0.908999999999999,11
+"test-jjscatterstats-residual.R","jjscatterstats-residual",".plot3 no longer wipes the Warnings panel written by .run()",4,0,FALSE,FALSE,0,0.0969999999999995,0.001,0.0990000000000002,4
+"test-jjscatterstats-residual.R","jjscatterstats-residual","the ggpubr panel labels its coefficient with the symbol of the method it ran",2,0,FALSE,FALSE,0,0.77,0.005,0.775,2
+"test-jjscatterstats-residual.R","jjscatterstats-residual","robust/Bayesian analyses disclose that the ggpubr panel shows a different statistic",3,0,FALSE,FALSE,0,0.797000000000001,0.006,0.803999999999998,3
+"test-jjscatterstats-residual.R","jjscatterstats-residual","an ordinal x variable still yields a coefficient in the ggpubr panel",5,0,FALSE,FALSE,0,0.235999999999999,0.003,0.239000000000001,5
+"test-jjscatterstats-residual.R","jjscatterstats-residual","the Title option reaches the grouped plot",5,0,FALSE,FALSE,0,0.491,0.006,0.498000000000001,5
+"test-jwaffle-residual.R","jwaffle-residual","an Inf weight is rejected by name instead of poisoning the summary and the chart",4,0,FALSE,FALSE,0,0.0100000000000016,0.002,0.0120000000000005,4
+"test-jwaffle-residual.R","jwaffle-residual","a counts variable that sums to zero is rejected instead of failing inside waffle",2,0,FALSE,FALSE,0,0.00800000000000267,0.001,0.00900000000000034,2
+"test-jwaffle-residual.R","jwaffle-residual","the rare-categories notice keeps its body (the '<5' is not eaten as a tag)",3,0,FALSE,FALSE,0,0.00899999999999679,0.001,0.0100000000000016,3
+"test-jwaffle-residual.R","jwaffle-residual","Chart Title renders as a title, not as caption text",4,0,FALSE,FALSE,0,0.274000000000001,0.005,0.280999999999999,4
+"test-jwaffle-residual.R","jwaffle-residual","asSource() emits parseable R for a title containing quotes and backslashes",3,0,FALSE,FALSE,0,0.00900000000000034,0.001,0.0100000000000016,3

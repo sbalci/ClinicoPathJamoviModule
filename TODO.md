@@ -17,13 +17,13 @@
 
 - agepyramid
 - alluvial
-vartree
-venn
+- vartree
+- venn
 
 ## Comparisons
 
-chisqposttest
-crosstable
+- chisqposttest
+- crosstable
 
 ## Data Preparation
 
@@ -2838,6 +2838,91 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 
 ---
 
+### /check-function 2026-09-05 (standard profile)
+
+**Done**: Enhancement 1 above is already shipped (`phiCI` option, `.calculatePhiCI()`, `phi_ci` column). Four `.()` fragment
+splices (leading-space strings, `'`/`' and '` pieces) rewritten as whole sentences; end-to-end regression test for
+variable names with spaces/punctuation/Unicode on both the raw-rows and the weighted `counts` (xtabs formula) paths;
+`menuGroup` routed to `ExplorationT` for JamoviTest (move back after testing).
+
+### /fix-function 2026-09-05
+
+**Fixed** (regression tests in `test-chisqposttest-release-review.R`):
+- [bug] `.validateAssumptions()` overwrote a "severe" expected-count level with "moderate" whenever n < 20, so the
+  panel colour and severity were wrong for exactly the tables that trigger both. Now escalate-only.
+- [bug] Fisher wording claimed a low-expected-count fallback even with "Always Fisher's exact" selected
+  (`multipleTestingInfo` notice and the detailed-comparison "Method:" line).
+- [wording] Clinical summary printed the option key ("after fdr correction"); shared `.posthocMethodLabel()` now
+  feeds both the summary and the educational panel.
+- [ux] `weightedDataInfo` is written at the top of `.run()` whenever `counts` is set, so the `visible: (counts)`
+  panel is never a titled empty box.
+- [i18n] All remaining user-facing literals wrapped in `.()` (error divs, both `reject()` messages, post-hoc
+  messages, comparison section, `.run()` warnings, export table, residual interpretations, plot title/subtitle).
+- [minor] `.plot()` returns `FALSE`, not `NULL`, when the plot option is off.
+
+**Follow-ups (out of scope)**:
+- [ ] [i18n] Catalog refresh (`jmvtools::i18nUpdate`) so `catalog.pot`/`tr.po` pick up the ~40 new msgids. Not run
+      here: it regenerates the module-wide catalogs, which another session is also touching.
+- [ ] [i18n] `test_used` ("Chi-square", "Fisher's exact", "Fisher's exact (Monte Carlo)") doubles as a logic key
+      (`startsWith(x, "Fisher")`) and as the Test Method column text, so it is deliberately untranslated. Add a
+      separate display label if translated column text is wanted.
+- [ ] [reporting] The copy-ready Methods sentence never mentions the pairwise tests or the adjustment method, while
+      the Results sentence does; add one clause when `posthoc != "none"`.
+
+### /check-function-full 2026-09-05 (audit, then "fix detected issues")
+
+**Fixed**: STRONG_WARNING notice for an expected count below 1 when the 20%-of-cells rule does not fire; the four
+error paths now push an ERROR notice through a shared `.errorBox()` as well as the red `todo` box; WARNING for
+non-integer `counts`; one-line INFO "Analysis summary" closes every run (stale serialization comment removed);
+invalid `border: 1px border` CSS; three dark accent headings changed to `color: inherit`; `.a.yaml` example now
+uses `Grade_Level x Group` (p = 0.010, post-hoc table populated) and the description no longer claims there is
+no validation against established packages. Regression tests appended to `test-chisqposttest-release-review.R`.
+
+**Not fixed**: `chisqposttest(data, rows = NULL, cols = NULL, counts = NULL)` from R errors inside
+`jmvcore::select()` before the welcome message; that is jmvcore behaviour, not this module.
+
+**Note**: the audit's "no vignette" finding was a tooling error (a failed zsh glob aborted the grep);
+`vignettes/explorationt-chisqposttest-comprehensive.Rmd` exists and uses current option names.
+
+### /review-function 2026-09-05
+
+**Fixed**: hardcoded `set.seed(42)` in `.calculatePhiCI()` replaced by a `seed` Integer option (default 42, `.a.yaml`
++ `.u.yaml` TextBox enabled by `phiCI` + `posthocTable` clearWith); `is.null()` fallback keeps 42 until
+`jmvtools::prepare()` regenerates the header and wrapper. Unused `total_comparisons` assignment removed from
+`.robustPairwiseTestsChunked()`.
+
+**Pending prepare()**: `seed` option, the new example, and the reworded description all sit in the yaml only; the
+R wrapper gains `seed = 42` after the next `prepare()` + `document()`. Then verify: same seed gives an identical
+bootstrap interval, a different seed still runs.
+
+**Follow-ups**:
+- [ ] [i18n] tr.po has 11 of 217 `.()` strings translated and 88 not yet in the catalog; run the catalog refresh and
+      `/prepare-translation chisqposttest`.
+- [ ] [reporting] Pairwise table has no df column; a 2xC sub-table has C-1 df, so the chi-square statistic alone is
+      hard to read. Add `df` next to `chi`.
+- [ ] [perf] `.generateClinicalSummary()` runs twice when both the clinical summary and report sentences are on;
+      compute once in `.run()` and pass to both.
+- [ ] [lint] `quotes_linter` (single quotes) fires 15x, all in the generated-style `requireNamespace('jmvcore')`
+      line and `asSource()`; style only.
+
+### /release-review-function 2026-09-05
+
+**Verdict**: ready after the user runs `jmvtools::prepare()` + `devtools::document()` (yaml edits pending: `seed`
+option, example, description, `version: '1.0.9'`, `posthocTable` clearWith `seed`).
+
+**Independently verified** (scratch `verify_chisqposttest.R`, not committed): omnibus chi-square and p vs hand
+formula; adjusted residual vs Agresti eq. 2.4.5; Bonferroni-over-cells critical z vs `qnorm`; all six Holm
+adjusted p vs the step-down rule; pairwise 2x3 chi-square and effect size vs hand formula; Cramer's V vs
+`vcd::assocstats`; Fisher p vs `stats::fisher.test`; bootstrap CI contains the point estimate; power text vs
+`pwr::pwr.chisq.test`. All match.
+
+**Gates passed**: class name, Collate, case duplicates, file naming test, no committed .jmo/.tar.gz, refs resolve,
+no duplicate .u.yaml names, headless UI render, rendering contract, state guards, theme, entities.
+
+- [ ] [refs] `agresti2013` in `00refs.yaml` has no `url:`; the other six cited refs do. Add the publisher or DOI link.
+
+---
+
 ### Enhancement 2: Residuals Interpretation Guidance Panel [H]
 
 **Status**: ⏳ Planned for v0.0.32
@@ -4420,3 +4505,79 @@ Still open (not blocking release):
 ### Working notes
 - jmvcore `.()` truncates any string at a space followed by `[` (translator msgctxt rule) — see memory `reference_jmvcore_translate_bracket_context_truncation`
 - `devtools::load_all()` + one test file took ~20 min per run in this session
+
+- [ ] vignettes: 14 generated `explorationt-*-comprehensive.Rmd` files carry the JamoviTest `T` routing suffix as their domain prefix, which no `domain_mapping` entry recognises, so none is distributed to a submodule. Rename to the `clinicopath-descriptives-` domain (filed 2026-09-04 from /check-function-full vartree).
+
+## venn check (2026-09-04: /check-function venn --profile=standard)
+
+- [x] `summary` table doubled on every re-run: `rows: 0` + `addRow()` with no `deleteRows()`, and the top-level `clearWith` covers the variables and plot options but none of the panel toggles (`showGlossary`, `clinicalSummary`, `showSetCalculations`, `showMembershipTable`, `explanatory`, ...). Ticking any of those re-entered `.run()` against the retained rows. Measured: 3 variables -> 3/6/9 rows over three `$run()` calls, then `summary$asDF` died with `duplicate 'row.names'`. Fixed with one `deleteRows()` in the reset block at the top of `.run()` (covers the early returns too); regression test in `test-venn-release-review.R`.
+- [x] four HTML headings carried hardcoded hex text colours that fail WCAG in one theme or the other (`#6f42c1` 2.17:1 on dark, `#27ae60` 2.87:1 and `#e67e22` 2.85:1 on light) -> `color: inherit`, matching the rest of the file. Note `tools/theme_safe_html.py` does NOT catch this class (it only looks for an opaque `background-color` with no `color:`); grep `color: *#` yourself.
+- [x] `menuGroup: Exploration` -> `ExplorationT` (JamoviTest routing per CLAUDE.md). USER: move it back after testing.
+- [x] WON'T DO - `summary` rows are option-determined and the library audits flagged them for `.init()`, but three tests assert the table stays EMPTY when validation fails, and that is the correct UX: a red validation error above a table of named rows with blank counts reads as a half-finished analysis. `deleteRows()` in the reset block gives the same protection against row accumulation without that cost. Revisit only if the empty-on-failure behaviour is itself reconsidered.
+- [x] an explicit `<NA>` factor level (`addNA()`, `factor(exclude = NULL)`) was counted as a NEGATIVE, not as missing. Correction to the note filed in the first pass: the comparison does not return `NA` — `Ops.factor` compares level CODES, so `f == var1true` is plain `FALSE` for the NA-level case, `is.na()` is `FALSE` so `naOmit()` keeps the row, and the case inflated `falseCount` and the denominator of every percentage while the CASE EXCLUSION warning stayed silent. Measured on 5 cases with 2 NA-level: variable A reported 3/5 = 60% positive, actually 3/3 = 100% with 2 excluded. Fixed by re-levelling factors without the NA level before `naOmit()`, so the existing exclusion warning discloses them; regression test in `test-venn-release-review.R`. Reachable through the R API; jamovi's own UI does not create `<NA>` levels.
+- [x] optional variables 3-7 skipped the "contains only missing values" check that `var1`/`var2` get (`.validateVariables`); an all-NA optional variable errored with `Available levels: ` and an empty list instead of naming the real problem. Same branch added for 3-7; the stale `- allow skipping if all NA` comment above the loop (which said the opposite of what the code did) removed. Regression test added.
+- [x] `membershipTable` was populated (up to 500 `addRow()` calls) even when hidden. `.generateMembershipTable` now returns straight after `.writeMembershipGroups()` when `showMembershipTable` is off, so the data output costs nothing extra. The Output write moved into that new helper, which is also where the failure notice lives.
+- [x] `test-venn-integration.R`: removed 12 `skip_if_not_installed("ClinicoPath")` guards plus a `skip_if_not_installed('jmvReadWrite')` that guarded nothing (ClinicoPath is not *installed* under `devtools::load_all()` or a sourced tree, so all 12 skipped silently in the normal dev loop). Un-skipping exposed that 11 of them asserted only `expect_s3_class(result, "vennResults")` despite names like "logical encoding is correct" and "percentage calculations match expected values" - every expected value was written in the comments and never asserted. Filled them in from those comments: 12 -> 45 expectations. Two setups were broken and are fixed: "all FALSE values" built `factor(rep("No", n))` with no "Yes" LEVEL, so it duplicated the absent-level test instead of testing the zero-positive path (levels now declared); "overlap counts" set the three `calculate*` toggles but never `showSetCalculations`, so the panel it asserted against was never built.
+
+### venn deep audit (2026-09-05: /check-function-full venn)
+
+Differential runs: every option toggled default-vs-changed with its prerequisite enabled in BOTH arms, digesting 24 components including an MD5 of each rendered PNG (styling options act in the renderer, not in `setState()`, so a state-only digest reports them all as non-effective). All 48 options effective. Two are effective only in combination and their controls stay enabled regardless:
+
+- [x] `labelPrecisionDigits` gated with `enable: (regionLabels:percent || regionLabels:both)`. `fillColorMapping` turned out to be a real BUG rather than a gating problem: `build_palette_scale()` returns NULL for both "no palette chosen" AND "mapping off", and the fallback applied afterwards is itself a count -> colour gradient, so unticking a box labelled "Map fill colors to intersection sizes" left the regions still shaded by size. The off state now flattens the scale (low == high). `colorPalette` gated with `enable: (fillColorMapping)`, the real dependency direction. Regression test compares rendered PNGs.
+- [x] `membershipGroups` write was wrapped in `try(..., silent = TRUE)`. `type: Output` options are client-driven — jmvtools emits `OptionOutput$new("membershipGroups")` with no value argument and omits the name from the generated wrapper's formals (48 formals, verified), so `venn(membershipGroups = TRUE)` is silently dropped and the branch is reachable from jamovi ONLY. That made it the single path no test, example or `asSource()` call can enter, and the silent `try` left it with no safety net: write fails -> no column -> no message anywhere. Now `tryCatch` with a `.addNotice("WARNING", ...)`. A coverage test reaches the branch by setting the OptionOutput value the way the client does (`o$.__enclos_env__$private$..membershipGroups$value <- list(value = TRUE)`).
+- [x] prevalence advisory had a low tail only: `<5%` warned, `>95%` silent. Verified on n=60 — a variable positive in 2% drew two notices, the same variable at 98% and two variables at 100% drew none. Added `Very High Prevalence` alongside `Low Prevalence`; a balanced set still raises neither.
+- [ ] i18n half-done: 75 `.()` calls cover the plots and most notices, but every message in the validation channel is English-only — 13 `private$.errors`, 2 `.warnings`, 2 `.info` writes, the `.addNotice` calls at `venn.b.R:1010` and `:2070`, the summary `setNote("levels", ...)`, and the welcome / glossary / set-calculations / copy-ready-sentences HTML. Route through `/prepare-translation venn`.
+- [ ] i18n tooling (MODULE-WIDE, not venn-specific): 42 `catalog.pot` msgids are stored as the literal `\u{...}` escape while R parses that to the character before `.()` sees it, so those entries can never match at runtime. venn 4, chisqposttest 13, decisiongraph 12, sequentialtests 7, swimmerplot_html 2, ihcheterogeneity 2, enhancedROC 1, benford 1. Harmless while every `msgstr` is empty; it will silently defeat the first translator who fills them.
+- [x] `analysisInfo` moved to the last item in `.r.yaml`, below everything it describes.
+- [x] the `todo` item is removed from `.r.yaml` entirely; its one message (the ggvenn fallback) now goes through `.addNotice("INFO", ...)` like every other message, which also drops an HTML `<div>` out of the notice path.
+- [x] `viridis` and `RColorBrewer` added to `plotGgVennDiagram`'s `refs:` (both already present in `00refs.yaml` with complete entries).
+- [ ] the `membershipGroups` FAILURE branch still has no test: the Output results item cannot be swapped for a throwing stub (`results$...$private$.items[[...]] <-` is rejected), so only the success path is covered.
+
+Clean: all 49 options wired and present in `.u.yaml`; all 19 results items populated; 5/5 `refs:` resolve in `00refs.yaml` with non-empty years; no dead schema, `if (FALSE)`, TODO/FIXME or debug scaffolding; no `.events.js`; roxygen examples verified against the shipped `histopathology` (columns and levels all match); library-review gates all pass. NOTE: the playbook's section E prescribes `jmvcore::Notice` + `self$results$insert()`, which CLAUDE.md forbids (protobuf serialization crash) — venn already uses the sanctioned Preformatted + `.addNotice()`/`.renderNotices()` channel and must not be migrated.
+
+### venn code review (2026-09-05: /review-function venn)
+
+- [x] `seq_linter`: `seq_len(length(group_labels))` -> `seq_along(group_labels)` in `.writeMembershipGroups`. The only real lintr finding; the other 52 are style (quotes/braces/infix spaces/pipe) and non-blocking.
+- [x] Set Calculations now enumerates EVERY intersection order from 2 up to k, lowest order first, instead of the C(k,2) pairwise ones plus the single k-way. The row count is bounded by 2^7 - 7 - 1 = 120 because the analysis takes at most seven variables, so no size cap was needed. Regression test walks all 11 intersections of a 4-set run and checks each count against a hand-computed `rowSums(...) == length(idx)`; it fails 4/12 against the previous behaviour. The "Enable calculations" blurb no longer says "pairwise (and all-way)".
+- [x] Set Calculations percentages go through one `pct()` helper using `formatC(format = "f", digits = 1)`, so a whole number prints "50.0%" rather than "50%" beside "23.5%". Covers the intersection rows and the union line.
+- [x] both `which.max()` calls replaced by "every variable at the maximum". `.generateClinicalSummary` and `.generateClinicalInterpretation` now name all tied variables and switch to a plural sentence ("A, B were equally the most common (30 cases each, 30%)"); the singular wording is kept for the untied case, as a second complete `.()` sentence rather than a spliced fragment.
+- [ ] 8 of the 12 `jmvcore::reject()` messages are not wrapped in `.()` (the 7 per-variable "Error processing variable" rejects and the duplicate-variable reject) - part of the i18n item above, listed here because the library gate calls out `reject()` specifically.
+
+Verified during this review, not taken on faith:
+- one denominator across engines: ggVennDiagram region labels now read share-of-all-cases (A-only 28 of 100 = "28%"), not its native share-of-union (28/66 = 42.4%), so they agree with the summary table, the ggvenn labels and the ComplexUpset bar labels.
+- `sprintf`/`gettextf`: `sprintf_linter` CRASHES on this file (lintr `str2lang` cannot reconstruct the multi-line `sprintf` with an inline `if` at `.generateReportSentences`), so the check was done by walking the AST instead - 34 literal-format calls, 0 format/argument mismatches.
+- lintr's two R6 blind spots checked by hand: no `&`/`|` in any scalar `if()`/`while()` condition; `codetools::checkUsage` over every private and public method reports no undefined or unused locals beyond the injected `self`/`private`.
+- `<<-` at `venn.b.R:2180` is a FALSE POSITIVE: `add()` is defined in the same method frame as `advisories`, so `<<-` writes that frame, not `.GlobalEnv`. Changing it to `<-` would silently drop every advisory.
+- performance is not a concern: `.run()` on 4 sets takes 0.06s at n=20000; the row-wise `paste` used to find the largest intersection costs 0.04s and runs twice per render.
+
+### venn release review (2026-09-05: /release-review-function venn)
+
+- [x] `.a.yaml` `version:` bumped `1.0.8` -> `1.0.9`. `../ClinicoPathDescriptives/jamovi/venn.a.yaml` still says `1.0.8` and its `R/venn.b.R` differs from the umbrella copy, i.e. two builds claimed the same analysis version while behaving differently - exactly what the version gate exists to prevent. **The submodule copy is still stale; `_updateModules.R` has to run before release.**
+- [x] `asSource()` emitted a stray blank argument line: jmvcore's `.asArgs()` already returns a leading `"\n    "` and the copy-pasted `paste0(',\n    ', args)` added another. Cosmetic (the syntax parses and round-trips) but it is what the user copies out of the syntax pane. Regression test asserts no blank line, the exact opening, every `varNtrue = NULL`, and that the emitted call re-runs.
+- [ ] the same `paste0(',\n    ', args)` idiom is copy-pasted into 6 more analyses and produces the same blank line there: `chisqposttest`, `contTables`, `contTablesPaired`, `crosstable`, `jjbetweenstats`, `statsplot2`. Left alone to keep this review scoped.
+- [ ] `tools/ui_harness/render_ui.sh` CANNOT validate `enable:`/`visible:` binding expressions. Control-tested on venn: a deliberately malformed `enable: (regionLabels:percent |& broken` and an `enable: (noSuchOption)` both print exactly the same `placeholder present = false ; errors = undefined` as the correct file. The harness only detects the grey-skeleton / duplicate-control-name class, so a harness pass is NOT evidence that a binding expression parses. Worth stating in `vignettes/jamovi_library_review_guide.md`.
+
+Verified in this pass (independent references, not the code's own arithmetic):
+- 34 numeric comparisons in `scratchpad/verify_venn.R`, all MATCH, on n=250 / 3 sets. The reference formulation is deliberately different from the backend's: venn uses a logical matrix + `rowSums`, the check uses base-R set algebra over index sets (`Reduce(intersect/setdiff/union)`), plus `ComplexUpset::upset_data()` as a third opinion. Covered: per-variable true counts and percentages vs `table()`; all 4 intersections of orders 2-3; the 3 unique-member counts; the union; all 7 ggVennDiagram region counts AND percent labels; all 8 ComplexUpset exclusive-intersection sizes including "Outside of known sets".
+- Three apparent mismatches in the first run were all faults in the verification script, not the backend (a `grab()` regex matching the TAIL of "A &amp; B" for label "B", and a mis-keyed all-negative region). Corrected, then everything matched.
+- naming/case gate clean: `vennClass` is defined where the generated wrapper calls it, all 8 `venn.*` paths carry exact case, no case-colliding tracked paths, `test-zzz-analysis-file-naming.R` passes.
+- metadata gate clean: `compilerMode: tame`; no committed `.tar.gz`/`.jmo`; every `clearWith` entry is a declared option; all 4 `renderFun:` are real methods; all 7 `refs:` keys resolve with exact case and carry title/author/url.
+- `private$.asArgs` is inherited from `vennBase`, not a phantom method (checked because the phantom-`private$.` bug class is real here).
+
+### crosstable audit fixes (2026-09-05: /check-function crosstable + /check-function-full crosstable)
+
+- [x] `.u.yaml`: `pcat` control was `enable: (sty:finalfit || sty:arsenal)` although the backend honours it in gtsummary since the release review - the Fisher fix was unreachable from the UI. Widened to include gtsummary.
+- [x] `.r.yaml`: `errorNotice` cleared on `sty`/`cont`/`pcat`/`p_adjust` too; title "Cross Table" -> "Cross Tables".
+- [x] default `sty` nejm -> gtsummary (only style honouring every option); analysis version 1.0.9; NEWS entry.
+- [x] `excl = TRUE` was silent: exclusion count now reported (WARNING above the table when > 20% of rows, INFO below otherwise); the > 20% missing-data warning is computed on the pre-exclusion data (it could never fire with exclusion on).
+- [x] validator returns typed messages; severity no longer parsed out of the message text with a regex. Low expected counts: STRONG_WARNING when a chi-square is actually run (arsenal/finalfit with chi-square, all tangram styles), WARNING noting the automatic Fisher switch under gtsummary, not raised when Fisher is selected.
+- [x] INFO notices moved below the table into a new `notes` Preformatted item; `analysisInfo` folded into it; `varNameWarnings` (warning about names that are handled correctly) removed with its checks.
+- [x] SMD table: numeric codes labelled "continuous (numeric codes)"; `.crosstableIsCategorical` header comment no longer claims the SMD table uses it.
+- [x] tests: special-character name round-trip (4 engines) + 5 audit-fix regressions in `test-crosstable.R`.
+- [x] `/review-function`: `<<-` accumulator -> environment; unused `cleaned_names_mapping`/`sample_size` removed; lintr bug-class linters 0; SMD formulas match `tableone::ExtractSmd` to 6 dp.
+- [x] `/review-function` recommendations: four engine branches split into `.tableArsenal/.tableFinalfit/.tableGtsummary/.tableTangram` (snapshot-compared byte-identical over 48 option combinations); `p_adjust`/`showSMD`/`showSummary` in a collapsed Advanced box; new `showSummary` copy-ready paragraph (p-values read from each engine's object, recomputed for tangram and cross-checked against the printed P=); skewness INFO note for Mean (SD) on |skewness| > 1.
+- [x] `/release-review-function`: 23/24 independent reference checks matched base R across all four engines (the 24th was tangram printing "P<0.01" where the probe expected "P=0.00"; the number is right); SMD matches `tableone` to 6 dp; UI harness renders the panel with no swallowed exception; duplicate-name, naming, Collate and artefact gates clean. Fixed: phantom "Ghost" column for an empty group level (gtsummary/finalfit/tangram; chi-square NaN), finalfit/arsenal engine crashes on all-missing and single-valued variables (now named in a WARNING and left out where the engine cannot hold them), tangram summary p for continuous variables now uses the rank-based F the table prints.
+- [ ] `VariableTargetListBox` suggested in the review does not exist in jamovi (0 hits in the dev docs; 352 `.u.yaml` files use `VariablesListBox` + `maxItemCount: 1`). Dropped.
+- [ ] effect sizes / pairwise post-hoc (review enhancement 3): deferred - pairwise chi-square post-hoc already exists as the `chisqposttest` analysis; a per-row effect-size column needs its own design.
+- [ ] translation: ~35 strings are `.()`-wrapped; the HTML panels, validator messages, SMD note and welcome text are not, and the new strings are absent from `catalog.pot`/`tr.po`. `/prepare-translation crosstable`.
+- [ ] `_updateModules.R` must run before release so ClinicoPathDescriptives picks up 1.0.9.

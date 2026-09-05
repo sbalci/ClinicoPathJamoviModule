@@ -1846,7 +1846,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     private$.addNotice(
                         type = "ERROR",
                         title = .("Error in misclassified cases analysis"),
-                        content = paste(.("Technical details:"), e$message, .("Please report this issue if it persists."))
+                        content = sprintf(.("Technical details: %s Please report this issue if it persists."), e$message)
                     )
                 })
 

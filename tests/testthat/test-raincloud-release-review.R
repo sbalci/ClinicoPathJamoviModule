@@ -334,7 +334,7 @@ test_that("5c. Wilcoxon refuses to report Cohen's d", {
                     g = factor(rep(c("A", "B"), each = 20)))
     txt <- rc_comparison(rc_run(d, comparison_test = TRUE, comparison_method = "wilcoxon",
                                 effect_size = TRUE))
-    expect_match(txt, "only reported for the parametric t-test", fixed = TRUE)
+    expect_match(txt, "standardized mean differences only with the t-test", fixed = TRUE)
 })
 
 

@@ -1,0 +1,135 @@
+{
+  "jjhistostats": {
+    "options": 36,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jjridges": {
+    "options": 48,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jwaffle": {
+    "options": 12,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jjscatterstats": {
+    "options": 37,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jjcorrmat": {
+    "options": 21,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jjbetweenstats": {
+    "options": 30,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jjwithinstats": {
+    "options": 35,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jjdotplotstats": {
+    "options": 22,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jjbarstats": {
+    "options": 27,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.9",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jjsegmentedtotalbar": {
+    "options": 37,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jjpiestats": {
+    "options": 23,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.9",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "raincloud": {
+    "options": 29,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "advancedraincloud": {
+    "options": 45,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "lollipop": {
+    "options": 23,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jjarcdiagram": {
+    "options": 27,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "linechart": {
+    "options": 18,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "statsplot2": {
+    "options": 13,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.9",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "hullplot": {
+    "options": 22,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  },
+  "jjdotchart": {
+    "options": 20,
+    "menuGroup": "JJStatsPlotT",
+    "version": "1.0.8",
+    "duplicate_options": false,
+    "unknown_clearWith": []
+  }
+}

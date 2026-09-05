@@ -482,7 +482,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(facet_var) && !is.null(facet_level)) {
                 # Facet-specific caption
                 caption_text <- sprintf(
-                    "%s = %s: Each square ~ %.1f %s (%.1f%%) (total = %.0f)",
+                    "%s = %s: Each square ~ %.1f %s (%.1f%%) (total = %g)",
                     facet_var, facet_level, units_per_square, unit_label, pct_per_square, total_cases
                 )
             } else if (!is.null(facet_var)) {
@@ -498,7 +498,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 # Simple caption
                 caption_text <- sprintf(
-                    "Each square represents %.1f %s (approximately %.1f%%) (total n=%.0f)",
+                    "Each square represents %.1f %s (approximately %.1f%%) (total n=%g)",
                     units_per_square, unit_label, pct_per_square, total_cases
                 )
             }
@@ -828,10 +828,10 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # Create breakdown showing all categories within this facet.
                     # counts (facet_data$count) are doubles when a numeric weight
-                    # variable is used, so format with %.0f rather than %d (sprintf
+                    # variable is used, so format with %g rather than %d (sprintf
                     # "%d" errors on non-integer doubles).
                     category_breakdown <- paste(
-                        sprintf("%s %s: %.1f%% (n=%.0f)",
+                        sprintf("%s %s: %.1f%% (n=%g)",
                                groups_var_safe,
                                facet_data[[groups_var]],
                                proportions,
@@ -845,7 +845,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     max_proportion <- proportions[max_prop_idx]
 
                     summary_parts[[facet_level]] <- sprintf(
-                        "<b>Among %s %s</b> (n=%.0f): %s \u2192 <i>%s %s predominates (%.1f%%)</i>",
+                        "<b>Among %s %s</b> (n=%g): %s \u2192 <i>%s %s predominates (%.1f%%)</i>",
                         facet_var_safe, facet_level, facet_total, category_breakdown,
                         groups_var_safe, dominant_category, max_proportion
                     )
@@ -868,9 +868,9 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 max_proportion <- proportions[max_prop_idx]
 
                 # Create simple breakdown (counts are doubles for weighted data, so
-                # format with %.0f rather than %d to avoid a sprintf crash).
+                # format with %g rather than %d to avoid a sprintf crash).
                 breakdown_list <- paste(
-                    sprintf("%s: %.1f%% (n=%.0f)",
+                    sprintf("%s: %.1f%% (n=%g)",
                            plotdata[[groups_var]],
                            proportions,
                            plotdata$count),
@@ -879,10 +879,10 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 summary_text <- sprintf(
                     "<b> Waffle Chart Summary:</b><br><br>
-                    The sample contains %.0f %s distributed as: %s.<br><br>
+                    The sample contains %g %s distributed as: %s.<br><br>
                     <b>Key Finding:</b> %s represents the largest proportion (%.1f%% of %s).<br><br>
                     <b> Report Template:</b><br>
-                    <i>\"Distribution analysis revealed %s as the most frequent category (%.1f%%, n=%.0f) in our sample of %.0f %s.\"</i>",
+                    <i>\"Distribution analysis revealed %s as the most frequent category (%.1f%%, n=%g) in our sample of %g %s.\"</i>",
                     total_cases, unit_label, breakdown_list, dominant_category, max_proportion, unit_label,
                     dominant_category, max_proportion, plotdata$count[max_prop_idx], total_cases, unit_label
                 )

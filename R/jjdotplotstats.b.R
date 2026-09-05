@@ -472,6 +472,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep_var <- self$options$dep
             if (!is.null(dep_var)) {
                 mydata[[dep_var]] <- jmvcore::toNumeric(mydata[[dep_var]])
+                if (!is.numeric(mydata[[dep_var]]))
+                    jmvcore::reject("The dependent variable must be numeric.")
             }
 
             # SELECTIVE NA OMISSION - only remove rows with NAs in analysis variables

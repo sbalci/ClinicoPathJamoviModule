@@ -53,7 +53,7 @@ test_that("arsenal and finalfit still honour the test choice", {
 })
 
 test_that("styles that ignore a setting say so", {
-  # The tangram styles (NEJM is the DEFAULT) apply none of the statistical
+  # The tangram styles (NEJM was the default until 1.0.9) apply none of the statistical
   # options, and p-value adjustment exists only in gtsummary. Nothing said so, so
   # a user could set Fisher + Benjamini-Hochberg, see a table, and reasonably
   # believe both had been applied.
@@ -144,4 +144,46 @@ test_that("style-honours notice does not erase the data-quality warnings", {
 
     expect_match(notice, "does not apply the following setting")   # honours
     expect_match(notice, "small sample size")                      # data quality
+})
+
+# --- release review 2026-09-05: every engine pinned to base R -----------------
+ct_ref <- function() {
+  set.seed(42); n <- 120
+  d <- data.frame(grp2 = factor(rep(c("Ctrl", "Trt"), each = n / 2)),
+                  grp3 = factor(rep(c("G1", "G2", "G3"), length.out = n)))
+  d$bin  <- factor(ifelse(runif(n) < ifelse(d$grp2 == "Trt", 0.55, 0.35), "Pos", "Neg"))
+  d$cat3 <- factor(sample(c("Low", "Mid", "High"), n, TRUE, c(.4, .35, .25)))
+  d$age  <- rnorm(n, 60, 10) + ifelse(d$grp2 == "Trt", 3, 0)
+  d
+}
+f3 <- function(p) sprintf("%.3f", round(p, 3))
+
+test_that("finalfit p-values match base R: Yates on 2x2, Pearson otherwise, aov", {
+  d <- ct_ref()
+  t <- ct_tab(crosstable(data = d, vars = c("bin", "cat3", "age"), group = "grp2", sty = "finalfit"), "finalfit")
+  expect_match(t, f3(chisq.test(table(d$bin, d$grp2), correct = TRUE)$p.value), fixed = TRUE)
+  expect_match(t, f3(chisq.test(table(d$cat3, d$grp2))$p.value), fixed = TRUE)
+  expect_match(t, f3(anova(lm(age ~ grp2, d))$`Pr(>F)`[1]), fixed = TRUE)
+})
+
+test_that("gtsummary p- and q-values match base R: Pearson, Wilcoxon/Kruskal-Wallis, BH", {
+  d <- ct_ref()
+  t <- ct_tab(crosstable(data = d, vars = c("bin", "cat3", "age"), group = "grp2",
+                         sty = "gtsummary", p_adjust = "BH"), "gtsummary")
+  p <- c(chisq.test(table(d$bin, d$grp2), correct = FALSE)$p.value,
+         chisq.test(table(d$cat3, d$grp2))$p.value,
+         wilcox.test(age ~ grp2, d)$p.value)
+  for (v in c(f3(p), f3(p.adjust(p, "BH")))) expect_match(t, v, fixed = TRUE)
+  t3 <- ct_tab(crosstable(data = d, vars = "age", group = "grp3", sty = "gtsummary"), "gtsummary")
+  expect_match(t3, f3(kruskal.test(age ~ grp3, d)$p.value), fixed = TRUE)
+})
+
+test_that("tangram layouts print Pearson and the rank-based F test, and the summary reproduces them", {
+  d <- ct_ref()
+  res <- crosstable(data = d, vars = c("bin", "age"), group = "grp2", sty = "nejm", showSummary = TRUE)
+  t <- ct_tab(res, "nejm")
+  expect_match(t, sprintf("=%.2f", chisq.test(table(d$bin, d$grp2), correct = FALSE)$statistic), fixed = TRUE)
+  a <- anova(lm(rank(age) ~ grp2, d))
+  expect_match(t, sprintf("=%.2f, P=%.2f", a$`F value`[1], a$`Pr(>F)`[1]), fixed = TRUE)
+  expect_match(ct_txt(res$summary$content), sprintf("age (p = %s)", f3(a$`Pr(>F)`[1])), fixed = TRUE)
 })

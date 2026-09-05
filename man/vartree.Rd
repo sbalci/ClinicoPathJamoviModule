@@ -12,6 +12,7 @@ vartree(
   summaryvar = NULL,
   summarylocation = "leafonly",
   style = "default",
+  palette = "default",
   prunebelow = NULL,
   pruneLevel1,
   pruneLevel2,
@@ -55,6 +56,12 @@ in tree nodes.}
 labels), clean (white nodes, uncoloured labels), minimal (vtree's plain
 layout - one flat tone per level, uncoloured labels, and more space between
 nodes).}
+
+\item{palette}{Node fill palette for the default style. 'default' uses
+vtree's own rotation (reds, blues, greens, ...); 'colorblind' rotates
+single-hue blue, orange, purple and brown palettes that stay distinct under
+the common colour-vision deficiencies. Ignored by the clean and minimal
+styles.}
 
 \item{prunebelow}{Variable for conditional pruning of tree branches.}
 

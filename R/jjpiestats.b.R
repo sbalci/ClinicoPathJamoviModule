@@ -285,7 +285,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 paste(.('Comparing across groups:'), htmltools::htmlEscape(self$options$group))
             } else { .('No grouping variable - single pie chart') }
             
-            method_info <- paste(.('Statistical method:'), tools::toTitleCase(self$options$typestatistics))
+            method_info <- paste(.('Statistical method:'), if (private$.effectiveOptionsList()$paired) 'McNemar' else tools::toTitleCase(private$.effectiveOptionsList()$typestatistics))
             
             glue::glue(
                 "<h4>{summary_title}</h4>
@@ -295,11 +295,16 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <p>\u2022 {sample_info}</p>
                 <hr>",
                 summary_title = .('Analysis Configuration'),
-                sample_info = paste(.('Sample size:'), nrow(self$data), .('observations'))
+                sample_info = paste(.('Sample size:'), nrow(self$data), .('input rows (before exclusions; frequencies may differ)'))
             )
         },
         
         .generateAssumptionsContent = function() {
+            opts <- private$.effectiveOptionsList()
+            if (isTRUE(opts$paired))
+                return("<p>McNemar analysis requires paired categorical observations with matching category coding. Pairs must be independent of one another. Sparse discordant pairs require an exact paired analysis; an independent-samples Fisher test is not a replacement.</p>")
+            if (identical(opts$typestatistics, "bayes"))
+                return("<p>Bayesian contingency analysis assumes independent observations and valid case frequencies. Interpret the Bayes factor with its prior; Pearson expected-count diagnostics do not determine Bayesian validity.</p>")
             warnings_list <- c()
 
             # Check for small sample sizes
@@ -334,7 +339,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # checks. Keep this text in step with what is actually on
                         # the figure - a panel that contradicts the chart is the
                         # defect this whole fix is about.
-                        swapped <- !is.null(private$.exactSubtitle(
+                        swapped <- isTRUE(opts$resultssubtitle) && !is.null(private$.exactSubtitle(
                             self$data, self$options$dep, self$options$group,
                             self$options$counts, self$options$conflevel, self$options$digits))
 
@@ -352,6 +357,9 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             " ",
                             if (swapped)
                                 .('The chart subtitle therefore reports Fisher\'s exact test instead of the chi-square.')
+                            else if (!isTRUE(opts$resultssubtitle))
+                                paste0("Statistical subtitles are disabled. Fisher's exact test on this table: ",
+                                    if (is.finite(fisher_p)) private$.fmtP(fisher_p) else "not computed", ".")
                             else if (is.finite(fisher_p))
                                 sprintf(.('The chart subtitle still reports an uncorrected Pearson chi-square - no statistic option changes that, as the plotting package offers no exact test. Fisher\'s exact test on this table gives <b>%s</b>; quote that value, not the subtitle.'),
                                         private$.fmtP(fisher_p))
@@ -381,7 +389,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                       paste0("<li>", warnings_list, "</li>", collapse = "\n"),
                       "\n</ul>\n")
             } else {
-                paste0("<p> ", .('All basic assumptions appear to be met.'), "</p>\n")
+                paste0("<p> ", .('No issue was detected by these limited checks; study design and independence still require verification.'), "</p>\n")
             }
             
             glue::glue(
@@ -398,7 +406,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .generateInterpretationContent = function() {
-            method_guidance <- switch(self$options$typestatistics,
+            method_guidance <- switch(private$.effectiveOptionsList()$typestatistics,
                 "parametric" = .('Chi-square test results show whether group differences are statistically significant. Look for p-values < 0.05 for significant associations. Example: \u03c7\u00b2(1) = 5.2, p = 0.023 indicates significant difference between groups.'),
                 # For a contingency table, ggstatsplot computes the SAME Pearson
                 # chi-square for parametric, nonparametric and robust - it offers no
@@ -461,10 +469,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # and on that table Fisher gives p = 0.0511 - the other side of 0.05
             # from the number shown. statsExpressions::contingency_table() routes
             # every frequentist type to chi-square; there is no exact-test option.
-            method_name <- switch(self$options$typestatistics,
-                "bayes" = .('a Bayesian contingency table analysis'),
-                .('Pearson\'s chi-squared test')
-            )
+            opts <- private$.effectiveOptionsList()
+            method_name <- if (isTRUE(opts$paired)) .("McNemar's test")
+            else if (identical(opts$typestatistics, "bayes"))
+                .('a Bayesian contingency table analysis')
+            else if (isTRUE(opts$resultssubtitle) &&
+                     !is.null(private$.exactSubtitle(self$data, opts$dep, opts$group,
+                                                    opts$counts, opts$conflevel, opts$digits)))
+                .("Fisher's exact test for the sparse two-way chart")
+            else .("Pearson's chi-squared test")
+            if (!is.null(opts$grvar) && !isTRUE(opts$paired) &&
+                !identical(opts$typestatistics, "bayes"))
+                method_name <- paste0(method_name, .("; split panels use Pearson's chi-squared test"))
+
             
             # Interpolate the {outcome}/{groups}/{method} placeholders with glue.
             # (paste() only honors sep/collapse, so named args were previously
@@ -492,8 +509,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 report_title = .('Copy-Ready Report Template'),
                 methods_title = .('Methods'),
                 results_title = .('Results'),
-                additional_details = .('Statistical significance was set at p < 0.05. All analyses were performed using jamovi statistical software.'),
-                results_placeholder = .('[Results will be automatically filled when analysis is complete]'),
+                additional_details = .('All analyses were performed using jamovi statistical software. Specify your prespecified significance threshold when reporting frequentist tests.'),
+                results_placeholder = .('[Enter the test statistic, effect estimate, confidence interval and p-value or Bayes factor from the relevant chart.]'),
                 note = .('Copy the text above and modify as needed for your manuscript or report.')
             )
         },
@@ -761,7 +778,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                   conf_level = 0.95, digits = 2L) {
             if (is.null(group_var) || !nzchar(group_var))
                 return(NULL)
-            if (isTRUE(self$options$paired) || identical(self$options$typestatistics, "bayes"))
+            opts <- private$.effectiveOptionsList()
+            if (isTRUE(opts$paired) || identical(opts$typestatistics, "bayes"))
                 return(NULL)
 
             tryCatch({
@@ -832,7 +850,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(
                     valid = FALSE,
                     message = sprintf(
-                        .('McNemar test requires a 2\u00d72 contingency table. Your data has %d\u00d7%d levels (%s: %d levels, %s: %d levels). For paired data with more than 2 categories, use Cochran Q test or marginal homogeneity test instead. Consider dichotomizing your outcome variable or use parametric/nonparametric options instead of paired analysis.'),
+                        .('McNemar test requires a 2\u00d72 contingency table. Your data has %d\u00d7%d levels (%s: %d levels, %s: %d levels). For paired outcomes with more than two categories, use an appropriate test of marginal homogeneity. Do not substitute an independent-samples test or dichotomize solely to obtain this test.'),
                         nrow(cross_table), ncol(cross_table),
                         dep_var, nrow(cross_table),
                         group_var, ncol(cross_table)
@@ -1180,7 +1198,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sub_df <- prepared_data[!is.na(prepared_data[[grvar]]) &
                                             prepared_data[[grvar]] == lv, , drop = FALSE]
                     r <- tryCatch({
-                        tb <- table(sub_df[[dep]], sub_df[[group]])
+                        cv <- self$options$counts
+                        tb <- if (!is.null(cv) && nzchar(cv)) {
+                            f <- paste(jmvcore::composeTerm(cv), "~", jmvcore::composeTerm(dep),
+                                       "+", jmvcore::composeTerm(group))
+                            stats::xtabs(jmvcore::asFormula(f), data = sub_df)
+                        } else table(sub_df[[dep]], sub_df[[group]])
                         if (!identical(dim(tb), c(2L, 2L))) NULL
                         else if (!any(suppressWarnings(chisq.test(tb)$expected) < 5)) NULL
                         else {
@@ -1211,6 +1234,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     sprintf(.('\'%s\' is used as both the outcome and the grouping variable. The contingency table is then diagonal by construction, so the association test reports a near-zero p-value that reflects the setup rather than the data. Choose a different grouping variable.'),
                             dep))
 
+            if (isTRUE(self$options$messages)) {
+                opts <- private$.effectiveOptionsList()
+                private$.addNotice("INFO", .("Analysis settings"),
+                    sprintf(.("Effective test type: %s. Paired: %s. Confidence level: %.1f%%."),
+                            opts$typestatistics, opts$paired, 100 * opts$conflevel))
+            }
             private$.renderNotices()
         },
 
@@ -1292,7 +1321,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     todo <- glue::glue(
                         "<br>{ready_msg} {dep_info}{group_info}{split_info}.<br>
                         <br>{data_msg}: {nrow(prepared_data)} {obs_msg}{cache_status}.<br>
-                        <br>{method_msg}: {tools::toTitleCase(self$options$typestatistics)} {analysis_msg}.<br>
+                        <br>{method_msg}: {if (private$.effectiveOptionsList()$paired) 'McNemar' else tools::toTitleCase(private$.effectiveOptionsList()$typestatistics)} {analysis_msg}.<br>
                         {perf_warning}
                         {if(prep_time > 0.1) paste0('<br>', prep_time_msg, ': ', prep_time, ' ', seconds_msg, '.<br>') else ''}
                         <hr>",

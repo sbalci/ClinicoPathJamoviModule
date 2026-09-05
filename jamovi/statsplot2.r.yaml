@@ -12,10 +12,13 @@ items:
           - dep
           - group
           - direction
+          - subjectID
           - distribution
           - excl
           - grvar
           - sampleLarge
+          - sampleThreshold
+          - sampleSize
           - seed
 
     - name:  todo
@@ -25,10 +28,13 @@ items:
           - dep
           - group
           - direction
+          - subjectID
           - distribution
           - excl
           - grvar
           - sampleLarge
+          - sampleThreshold
+          - sampleSize
 
 
     - name:  ExplanationMessage
@@ -38,10 +44,13 @@ items:
           - dep
           - group
           - direction
+          - subjectID
           - distribution
           - excl
           - grvar
           - sampleLarge
+          - sampleThreshold
+          - sampleSize
           - seed
 
 
@@ -57,11 +66,14 @@ items:
           - dep
           - group
           - direction
+          - subjectID
           - distribution
           - alluvsty
           - excl
           - grvar
           - sampleLarge
+          - sampleThreshold
+          - sampleSize
           - seed
 
 

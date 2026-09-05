@@ -185,10 +185,10 @@ test_that("a variable with too few values is refused by name, not by an upstream
     # forces centralityline on, so that path was one click away.
     one <- data.frame(v = c(3, rep(NA_real_, 9)))
     expect_error(ClinicoPath::jjhistostats(data = one, dep = "v", showInterpretation = TRUE),
-                 "has 1 non-missing value")
+                 "has 1 finite numeric value")
     none <- data.frame(v = rep(NA_real_, 40))
     expect_error(ClinicoPath::jjhistostats(data = none, dep = "v", centralityline = TRUE),
-                 "has 0 non-missing values")
+                 "has 0 finite numeric values")
     # neither message may be the old opaque one
     msg <- tryCatch(ClinicoPath::jjhistostats(data = one, dep = "v", showInterpretation = TRUE),
                     error = conditionMessage)

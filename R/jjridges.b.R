@@ -964,7 +964,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                paste0(" (", length(private$.assumptionSwitches),
                                       " comparison",
                                       if (length(private$.assumptionSwitches) == 1) "" else "s",
-                                      " switched to Wilcoxon - see the table's Method column)")
+                                      " flagged by normality diagnostics; Welch retained)")
                            else "")
                 else ""
             )
@@ -1660,7 +1660,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # end of the parametric branch throws. .generateTests() is called from .run()
             # before the plot is built, so the exception cost the ridge plot as well as the
             # table. Return an explicit NA row instead.
-            if (stats::var(data1) == 0 && stats::var(data2) == 0) {
+            if (stats::var(data1) == 0 && stats::var(data2) == 0 &&
+                (test_type != "nonparametric" || length(unique(c(data1, data2))) == 1)) {
                 private$.testWarnings <- c(private$.testWarnings, paste0(
                     "Comparison ", group1, " vs ", group2,
                     if (stratum_label != "") paste0(" (", stratum_label, ")") else "",
@@ -1737,12 +1738,12 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         )
                     )
 
-                    test_result <- wilcox.test(data1, data2, conf.int = TRUE)
+                    test_result <- t.test(data1, data2)
                     statistic <- test_result$statistic
                     p_value <- test_result$p.value
-                    ci_lower <- if(!is.null(test_result$conf.int)) test_result$conf.int[1] else NA
-                    ci_upper <- if(!is.null(test_result$conf.int)) test_result$conf.int[2] else NA
-                    test_method <- "Wilcoxon (auto due to assumptions)"
+                    ci_lower <- test_result$conf.int[1]
+                    ci_upper <- test_result$conf.int[2]
+                    test_method <- "t-test"
                 } else {
                     test_result <- t.test(data1, data2)
                     statistic <- test_result$statistic
@@ -2000,7 +2001,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(list(
                 effect_size = effect_size,
                 ci_lower = ci_lower,
-                ci_upper = ci_upper
+                ci_upper = ci_upper,
+                warning = warning_msg
             ))
         },
 
@@ -2273,8 +2275,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     paste0(
                         n_switch,
                         if (n_switch == 1) " comparison was" else " comparisons were",
-                        " auto-switched from t-test to Wilcoxon due to assumption",
-                        " violations (normality/variance): ",
+                        " flagged by normality diagnostics. The selected Welch t-test was retained; assess its assumptions and prespecify the estimand rather than selecting tests from diagnostic p-values: ",
                         paste(private$.assumptionSwitches, collapse = " | ")
                     )
                 )
@@ -2360,7 +2361,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     interpretation,
                     "<div style='background-color: rgba(33, 159, 33, 0.1); padding:10px; margin:10px 0; border-radius:4px; color: inherit;'>",
                     "<strong> ", .("Boxplots:"), "</strong> ", .("Show median (center line), quartiles (box boundaries), and outliers for each group."), " ",
-                    .("Compare medians and quartile ranges across groups for clinical significance."), "</div>"
+                    .("Compare medians and quartile ranges descriptively; clinical importance requires an appropriate clinical threshold."), "</div>"
                 )
             }
             

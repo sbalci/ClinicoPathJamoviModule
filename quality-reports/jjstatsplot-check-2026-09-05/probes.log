@@ -1,0 +1,43 @@
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+[1] TRUE
+[1] TRUE
+[1] TRUE
+$bar_preset_treatment
+$bar_preset_treatment$overrides
+list()
+
+$bar_preset_treatment$effective
+$bar_preset_treatment$effective$resultssubtitle
+[1] FALSE
+
+$bar_preset_treatment$effective$pairwisecomparisons
+[1] FALSE
+
+$bar_preset_treatment$effective$typestatistics
+[1] "parametric"
+
+$bar_preset_treatment$effective$proportiontest
+[1] FALSE
+
+
+
+$image_restore_sampleSize
+[1] "previous-render.png"
+
+$image_restore_sampleThreshold
+[1] "previous-render.png"
+
+$image_restore_seed
+NULL
+
+$pie_preset_mismatch
+$pie_preset_mismatch$effective_type
+[1] "parametric"
+
+$pie_preset_mismatch$report
+[1] "<h4>Copy-Ready Report Template</h4>\n<div style='background-color: rgba(138, 155, 172, 0.06); padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; color: inherit;'>\n<p><strong>Methods:</strong></p>\n<p>We compared y distributions across g using a Bayesian contingency table analysis. Statistical significance was set at p < 0.05. All analyses were performed using jamovi statistical software.</p>\n<p><strong>Results:</strong></p>\n<p>[Results will be automatically filled when analysis is complete]</p>\n</div>\n<p><small>Copy the text above and modify as needed for your manuscript or report.</small></p>\n<hr>"
+
+

@@ -315,6 +315,9 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 jmvcore::reject(.("Variables not found in data: {missing}"), missing = paste(missing_vars, collapse = ", "))
             }
             
+            if (identical(dep_var, group_var))
+                jmvcore::reject(.("Select different dependent and grouping variables."))
+
             # Select and clean data
             data <- self$data[c(dep_var, group_var)]
             
@@ -385,6 +388,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Remove rows with missing values
             complete_before <- nrow(data)
             data <- data[complete.cases(data), ]
+            data <- droplevels(data)
             complete_after <- nrow(data)
             
             if (complete_after == 0) {
@@ -406,6 +410,9 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 jmvcore::reject(.("At least 2 complete observations are required for lollipop chart analysis."))
             }
             
+            if (nlevels(data[[group_var]]) < 2)
+                jmvcore::reject(.("At least 2 groups with complete observations are required."))
+
             # Validate highlight level if provided and highlighting is enabled
             highlight_level <- if (self$options$useHighlight && !is.null(self$options$highlight) && self$options$highlight != "") {
                 self$options$highlight
@@ -442,6 +449,9 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             }
 
+            source_n <- nrow(data)
+            source_group_counts <- group_counts
+
             # Apply aggregation if requested
             if (self$options$aggregation != "none") {
                 data <- private$.aggregateData(data, dep_var, group_var, self$options$aggregation)
@@ -452,6 +462,8 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Add column names for easier reference
             colnames(data) <- c("dependent", "group")
+            attr(data, "source_n") <- source_n
+            attr(data, "source_group_counts") <- source_group_counts
             
             return(data)
         },
@@ -474,7 +486,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 data[[group_var]] <- factor(data[[group_var]], levels = unique(data[[group_var]]))
             } else if (sort_method == "group_alpha") {
                 # Sort alphabetically by group
-                data <- data[order(data[[group_var]]), ]
+                data <- data[order(as.character(data[[group_var]])), ]
                 # Relevel factor to match sorted order
                 data[[group_var]] <- factor(data[[group_var]], levels = unique(data[[group_var]]))
             }
@@ -518,6 +530,8 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Basic data information
             summary_stats$n_observations <- nrow(data)
+            summary_stats$source_n <- attr(data, "source_n")
+            if (is.null(summary_stats$source_n)) summary_stats$source_n <- nrow(data)
             summary_stats$n_groups <- length(unique(data$group))
             
             # Dependent variable statistics
@@ -557,7 +571,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<h5>", .("Clinical Summary"), "</h5>",
                 "<p><strong>", .("Analysis Overview"), ":</strong> ",
                 .("This analysis compared"), " <strong>", summary_stats$n_observations, "</strong> ",
-                .("observations across"), " <strong>", summary_stats$n_groups, "</strong> ",
+                .("plotted values across"), " <strong>", summary_stats$n_groups, "</strong> ",
                 .("groups"), ".</p>",
 
                 "<p><strong>", .("Key Findings"), ":</strong></p>",
@@ -570,10 +584,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "</ul>",
                 
                 "<p><strong>", .("Clinical Interpretation"), ":</strong> ",
-                ifelse(summary_stats$dep_range > 2 * summary_stats$dep_sd,
-                    .("Notable variation observed between groups, suggesting clinically meaningful differences."),
-                    .("Relatively consistent values across groups with minimal variation.")
-                ), "</p>",
+                .("These are descriptive summaries of the plotted values. When aggregation is selected, each point represents a group summary. Clinical importance requires a prespecified threshold and appropriate comparison; it cannot be inferred from the range or standard deviation."), "</p>",
                 "</div>"
             )
             
@@ -583,12 +594,12 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Advanced misuse detection and contextual warnings
         .checkForMisuseAndWarnings = function(data, summary_stats) {
             # Check for too many groups relative to sample size
-            if (summary_stats$n_groups > summary_stats$n_observations / 3) {
+            if (summary_stats$n_groups > summary_stats$source_n / 3) {
                 private$.addNotice(
                     'WARNING',
                     'Many Groups vs Sample Size',
                     sprintf("Many groups (%d) relative to sample size (%d). Consider grouping categories or using a different visualization.",
-                            summary_stats$n_groups, summary_stats$n_observations)
+                            summary_stats$n_groups, summary_stats$source_n)
                 )
             }
 
@@ -603,7 +614,8 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # Check for groups with very different sample sizes
-            group_counts <- table(data$group)
+            group_counts <- attr(data, "source_group_counts")
+            if (is.null(group_counts)) group_counts <- table(droplevels(data$group))
             max_count <- max(group_counts)
             min_count <- min(group_counts)
             if (max_count > 5 * min_count && length(group_counts) > 2) {
@@ -616,12 +628,12 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # Check for small overall sample size
-            if (summary_stats$n_observations < 10) {
+            if (summary_stats$source_n < 10) {
                 private$.addNotice(
                     'WARNING',
                     'Small Sample Size',
                     sprintf("Small sample size (n=%d). Results should be interpreted with caution.",
-                            summary_stats$n_observations)
+                            summary_stats$source_n)
                 )
             }
         },

@@ -209,11 +209,9 @@ A results object containing:
 \tabular{llllll}{
 \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
-\code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$validationErrors} \tab \tab \tab \tab \tab a html \cr
 \code{results$validationWarnings} \tab \tab \tab \tab \tab a html \cr
-\code{results$analysisInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plotGgvenn} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotGgVennDiagram} \tab \tab \tab \tab \tab an image \cr
 \code{results$plotUpsetR} \tab \tab \tab \tab \tab an image \cr
@@ -226,6 +224,7 @@ A results object containing:
 \code{results$membershipTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$membershipGroups} \tab \tab \tab \tab \tab an output \cr
 \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
+\code{results$analysisInfo} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

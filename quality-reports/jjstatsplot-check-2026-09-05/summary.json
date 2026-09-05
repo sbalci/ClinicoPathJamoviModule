@@ -1,0 +1,116 @@
+{
+  "module": "jjstatsplot",
+  "profile": "standard",
+  "date": "2026-09-05",
+  "mode": "batch",
+  "production_analyses": [
+    "jjbarstats",
+    "jjpiestats",
+    "statsplot2"
+  ],
+  "sibling_manifest_count": 19,
+  "summary": {
+    "functions_checked": 3,
+    "functions_needing_changes": 3,
+    "critical_findings": 0,
+    "structural_schema_errors": 0,
+    "distinct_analysis_findings": 5,
+    "module_findings": 1,
+    "assertions_passed": 395,
+    "test_blocks": 256,
+    "test_files": 12,
+    "final_failures": 0,
+    "final_errors": 0,
+    "final_warnings": 0,
+    "final_skips": 0
+  },
+  "compiler": {
+    "status": "pass",
+    "exit_code": 0,
+    "mode": "isolated compiler prepare with --assume-app-version 28.2.0",
+    "native_prepare_status": "could not read app version",
+    "full_jamovi_gui_test": false
+  },
+  "issues": [
+    {
+      "id": "F1",
+      "severity": "high",
+      "analyses": [
+        "statsplot2"
+      ],
+      "category": "invalidation",
+      "title": "Sampling threshold and size changes retain a cached image"
+    },
+    {
+      "id": "F2",
+      "severity": "high",
+      "analyses": [
+        "jjbarstats",
+        "jjpiestats"
+      ],
+      "category": "reporting",
+      "title": "Methods text disagrees with exact-test, paired, or preset-resolved analysis"
+    },
+    {
+      "id": "F3",
+      "severity": "medium",
+      "analyses": [
+        "jjbarstats"
+      ],
+      "category": "options",
+      "title": "Clinical presets cannot override non-null defaults"
+    },
+    {
+      "id": "F4",
+      "severity": "medium",
+      "analyses": [
+        "jjpiestats"
+      ],
+      "category": "options",
+      "title": "Messages control has no effective behavior"
+    },
+    {
+      "id": "F5",
+      "severity": "medium",
+      "analyses": [
+        "jjpiestats"
+      ],
+      "category": "outputs",
+      "title": "Promised automatic Results text remains a placeholder"
+    },
+    {
+      "id": "M1",
+      "severity": "high",
+      "analyses": [],
+      "category": "module_routing",
+      "title": "Sibling exposes 19 analyses while umbrella routes only 3 to production"
+    }
+  ],
+  "source_modified": false,
+  "functions": [
+    {
+      "name": "jjbarstats",
+      "status": "needs_changes",
+      "files_complete": true,
+      "assertions_passed": 135,
+      "high": 1,
+      "medium": 1
+    },
+    {
+      "name": "jjpiestats",
+      "status": "needs_changes",
+      "files_complete": true,
+      "assertions_passed": 178,
+      "high": 1,
+      "medium": 2
+    },
+    {
+      "name": "statsplot2",
+      "status": "needs_changes",
+      "files_complete": true,
+      "assertions_passed": 82,
+      "high": 1,
+      "medium": 0
+    }
+  ]
+}

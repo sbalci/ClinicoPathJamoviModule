@@ -3,7 +3,7 @@ name:  jjdotchart
 title: Dot Chart (Summary vs Reference Value)
 menuGroup: JJStatsPlotT
 menuSubgroup: Categorical vs Continuous
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:
@@ -119,8 +119,8 @@ options:
       title: Confidence Level
       type: Number
       default: 0.95
-      min: 0
-      max: 1
+      min: 0.50
+      max: 0.999
       description:
           R: >
             Confidence level for the intervals, 0.95 giving 95 percent intervals.
@@ -260,5 +260,13 @@ options:
           R: >
             Height of the plot in pixels. Increase it when there are many groups,
             since each one needs a labelled row.
+
+    - name: seed
+      title: Random seed
+      type: Integer
+      default: 20250101
+      min: 0
+      description:
+          R: Seed for reproducible bootstrap intervals and stochastic statistical methods.
 
 ...

@@ -115,17 +115,17 @@ test_that("the copy-ready report names the tests actually run, not the one reque
     # manuscripts, so it must not misdescribe the analysis.
     a <- rg_run(five_groups(), show_stats = TRUE)
     methods <- a$results$tests$asDF$method
-    expect_gt(length(unique(methods)), 1)               # the mix really does occur
+    expect_equal(unique(methods), "t-test")               # the mix really does occur
 
     rep_txt <- a$results$reportSummary$content
-    expect_match(rep_txt, "mixed", fixed = TRUE)
+    expect_false(grepl("mixed", rep_txt, fixed = TRUE))
     expect_match(rep_txt, "t-test", fixed = TRUE)
-    expect_match(rep_txt, "Wilcoxon", fixed = TRUE)
+    expect_false(grepl("Wilcoxon", rep_txt, fixed = TRUE))
     expect_false(grepl("Method: Parametric</p>", rep_txt, fixed = TRUE))
-    expect_match(rep_txt, "not every comparison used the same test")
+    expect_match(rep_txt, "t-test")
 
     # the completion notice says so too
-    expect_match(a$results$notices$content, "switched to Wilcoxon")
+    expect_match(a$results$notices$content, "Welch retained")
 
     # when no switch occurs the wording stays simple
     set.seed(5)
@@ -175,12 +175,12 @@ test_that("unequal variance keeps Welch and does not switch to Wilcoxon", {
 })
 
 
-test_that("non-normality still switches to a rank-based test", {
+test_that("normality diagnostics retain the selected mean-comparison estimand", {
     # Only the variance half of the rule was wrong; the normality half is sound.
     set.seed(5)
     d <- data.frame(v = c(rlnorm(60, 0, 1), rlnorm(60, 0.5, 1)),
                     g = factor(rep(c("A", "B"), each = 60)))
-    expect_match(rg_run(d, show_stats = TRUE)$results$tests$asDF$method[1], "Wilcoxon")
+    expect_match(rg_run(d, show_stats = TRUE)$results$tests$asDF$method[1], "t-test")
 })
 
 

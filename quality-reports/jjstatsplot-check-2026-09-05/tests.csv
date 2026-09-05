@@ -1,0 +1,257 @@
+"file","context","test","nb","failed","skipped","error","warning","user","system","real","passed"
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats function exists and loads",1,0,FALSE,FALSE,0,0.00700000000000012,0.002,0.0100000000000002,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats runs with minimal required arguments",1,0,FALSE,FALSE,0,0.153,0.004,0.16,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats produces expected output structure",1,0,FALSE,FALSE,0,0.207,0.002,0.215,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles 3×3 contingency table",1,0,FALSE,FALSE,0,0.012,0.001,0.0139999999999998,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles 2×2 contingency table",1,0,FALSE,FALSE,0,0.012,0.001,0.0129999999999999,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles parametric statistics",1,0,FALSE,FALSE,0,0.012,0.001,0.0140000000000002,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles nonparametric statistics",1,0,FALSE,FALSE,0,0.0129999999999999,0.002,0.0150000000000001,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles robust statistics",1,0,FALSE,FALSE,0,0.0129999999999999,0.002,0.0149999999999997,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles Bayesian statistics",1,0,FALSE,FALSE,0,0.012,0.002,0.0150000000000006,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles paired/repeated measures",1,0,FALSE,FALSE,0,0.0129999999999999,0.002,0.016,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles independent samples",1,0,FALSE,FALSE,0,0.012,0.003,0.0150000000000006,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles split-by variable",1,0,FALSE,FALSE,0,0.0129999999999999,0.002,0.0149999999999997,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles aggregated data with counts",1,0,FALSE,FALSE,0,0.0190000000000001,0.003,0.0220000000000002,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles pairwise comparisons",1,0,FALSE,FALSE,0,0.012,0.002,0.0149999999999997,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles label display modes",3,0,FALSE,FALSE,0,0.036,0.004,0.0429999999999993,3
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles proportion test",1,0,FALSE,FALSE,0,0.0180000000000002,0.002,0.0220000000000002,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles clinical presets",2,0,FALSE,FALSE,0,0.0219999999999998,0.001,0.024,2
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles two-level factors",1,0,FALSE,FALSE,0,0.012,0.001,0.0129999999999999,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles three-level factors",1,0,FALSE,FALSE,0,0.0119999999999996,0.001,0.0129999999999999,1
+"test-jjbarstats-basic.R","jjbarstats-basic","jjbarstats handles four-level factors",1,0,FALSE,FALSE,0,0.012,0.001,0.0129999999999999,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats correctly handles weighted data in sample size reporting",3,0,FALSE,FALSE,0,0.0169999999999999,0.003,0.0210000000000008,3
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats weighted contingency table matches manual calculation",1,0,FALSE,FALSE,0,0.00300000000000011,0,0.00399999999999956,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats chi-square expected counts use weighted data",2,0,FALSE,FALSE,0,0.004,0.001,0.00499999999999989,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles weighted data with missing values",1,0,FALSE,FALSE,0,0.0150000000000001,0.001,0.016,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats unweighted vs weighted produce different expected counts",1,0,FALSE,FALSE,0,0.00199999999999978,0,0.00300000000000011,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats correctly identifies low expected counts in weighted data",1,0,FALSE,FALSE,0,0.00199999999999978,0.001,0.00300000000000011,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles empty cells in weighted contingency table",1,0,FALSE,FALSE,0,0.00300000000000011,0.001,0.00299999999999923,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats properly filters NAs before analysis",1,0,FALSE,FALSE,0,0.02,0.001,0.0209999999999999,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats weighted group sizes are calculated correctly",3,0,FALSE,FALSE,0,0.0150000000000001,0.002,0.0170000000000003,3
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles both weighted and unweighted data in same session",2,0,FALSE,FALSE,0,0.0269999999999997,0.002,0.0289999999999999,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats validates counts column is numeric",1,0,FALSE,FALSE,0,0.012,0.001,0.0140000000000002,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles negative counts correctly",1,0,FALSE,FALSE,0,0.0110000000000001,0.001,0.0119999999999996,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats joint distribution check detects sparse cells",1,0,FALSE,FALSE,0,0.00300000000000011,0.001,0.00300000000000011,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats produces consistent results across multiple runs",2,0,FALSE,FALSE,0,0.032,0.001,0.0339999999999998,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats weighted data with multiple dep variables works",1,0,FALSE,FALSE,0,0.0310000000000001,0.001,0.032,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats chi-square p-value matches manual calculation",2,0,FALSE,FALSE,0,0.00199999999999978,0,0.00399999999999956,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats Fisher exact p-value matches manual calculation for 2×2 table",2,0,FALSE,FALSE,0,0.004,0.001,0.00600000000000023,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats Cramér's V effect size matches manual calculation",2,0,FALSE,FALSE,0,0.00300000000000011,0.000999999999999945,0.00299999999999923,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats McNemar p-value matches manual calculation for paired 2×2 data",2,0,FALSE,FALSE,0,0.00199999999999978,0,0.00199999999999978,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats auto-switch to Fisher is triggered correctly for low counts",1,0,FALSE,FALSE,0,0.00300000000000011,0.001,0.00399999999999956,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats validates 2×2 requirement for paired analysis",1,0,FALSE,FALSE,0,0.00200000000000022,0.001,0.00200000000000067,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats cache invalidation works when data values change",2,0,FALSE,FALSE,0,1.458,0.028,1.534,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats effect sizes are within valid ranges",3,0,FALSE,FALSE,0,0.0579999999999998,0.01,0.0739999999999998,3
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles Unicode and special character variable names",1,0,FALSE,FALSE,0,0.0140000000000002,0.001,0.016,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats handles R reserved words as variable names",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0140000000000002,1
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats warns about extreme prevalence in diagnostic preset",2,0,FALSE,FALSE,0,0.00400000000000045,0.001,0.00400000000000045,2
+"test-jjbarstats-correctness.R","jjbarstats-correctness","jjbarstats balloon plot handles multiple dependent variables",2,0,FALSE,FALSE,0,0.0249999999999995,0.001,0.0280000000000005,2
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats prompts for the variables it still needs",3,0,FALSE,FALSE,0,0.0490000000000004,0.001,0.0500000000000007,3
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles missing data correctly",1,0,FALSE,FALSE,0,0.0119999999999996,0.001,0.0129999999999999,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles all NA in dependent variable",2,0,FALSE,FALSE,0,0.04,0.001,0.0420000000000007,2
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles missing grouping variable values",1,0,FALSE,FALSE,0,0.0119999999999996,0.001,0.0129999999999999,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles small sample sizes",1,0,FALSE,FALSE,0,0.0120000000000005,0.001,0.0129999999999999,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles very small sample sizes",2,0,FALSE,FALSE,0,0.0140000000000002,0.001,0.0140000000000002,2
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles single level in dependent variable",1,0,FALSE,FALSE,0,0.0209999999999999,0.001,0.024,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles single level in grouping variable",1,0,FALSE,FALSE,0,0.233,0.003,0.241,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles variables with special characters",1,0,FALSE,FALSE,0,0.0120000000000005,0,0.0129999999999999,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles very long variable names",1,0,FALSE,FALSE,0,0.0120000000000005,0.001,0.0140000000000002,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles unbalanced contingency tables",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0140000000000002,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles sparse contingency tables",1,0,FALSE,FALSE,0,0.0119999999999996,0.001,0.0129999999999999,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles factor levels in different orders",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0129999999999999,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles unused factor levels",1,0,FALSE,FALSE,0,0.0130000000000008,0.001,0.0129999999999999,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles missing split-by variable values",1,0,FALSE,FALSE,0,0.016,0.001,0.0170000000000003,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles single level in split variable",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.016,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles invalid expected proportions",2,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0180000000000007,2
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles wrong number of expected proportions",2,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0179999999999998,2
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles aggregated data with zero counts",1,0,FALSE,FALSE,0,0.0140000000000002,0.000999999999999945,0.016,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles aggregated data with all zero counts",1,0,FALSE,FALSE,0,0.0199999999999996,0.001,0.0209999999999999,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles perfect association",1,0,FALSE,FALSE,0,0.0170000000000003,0,0.0179999999999998,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles complete independence",1,0,FALSE,FALSE,0,0.0120000000000005,0.001,0.0140000000000002,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles paired data with perfect agreement",1,0,FALSE,FALSE,0,0.0129999999999999,0,0.0140000000000002,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles paired data with perfect disagreement",1,0,FALSE,FALSE,0,0.0120000000000005,0.001,0.0119999999999996,1
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles extreme confidence levels",2,0,FALSE,FALSE,0,0.0229999999999997,0.001,0.0229999999999997,2
+"test-jjbarstats-edge-cases.R","jjbarstats-edge-cases","jjbarstats handles large contingency tables",1,0,FALSE,FALSE,0,0.0119999999999996,0,0.016,1
+"test-jjbarstats-release-review.R","jjbarstats-release-review","the sparse-2x2 panel reports the real Fisher p-value",4,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.016,4
+"test-jjbarstats-release-review.R","jjbarstats-release-review","the panel no longer claims an exact test was substituted",4,0,FALSE,FALSE,0,0.0169999999999995,0.001,0.0199999999999996,4
+"test-jjbarstats-release-review.R","jjbarstats-release-review","a table with adequate expected counts raises no assumption warning",2,0,FALSE,FALSE,0,0.0140000000000002,0.002,0.0150000000000006,2
+"test-jjbarstats-release-review.R","jjbarstats-release-review","a sparse table larger than 2x2 says an exact test is not offered",3,0,FALSE,FALSE,0,0.0149999999999997,0,0.0150000000000006,3
+"test-jjbarstats-release-review.R","jjbarstats-release-review","the user's chosen statistic is never silently overridden",5,0,FALSE,FALSE,0,0.953,0.00800000000000001,0.981999999999999,5
+"test-jjbarstats-release-review.R","jjbarstats-release-review","multiple dependent variables each get their own assumption block",2,0,FALSE,FALSE,0,0.0149999999999997,0.001,0.0179999999999998,2
+"test-jjbarstats-release-review.R","jjbarstats-release-review","a sparse 2x2 chart reports Fisher's exact test, not chi-squared",4,0,FALSE,FALSE,0,0.337,0.006,0.388,4
+"test-jjbarstats-release-review.R","jjbarstats-release-review","an adequately powered table keeps the chi-squared subtitle",3,0,FALSE,FALSE,0,0.436,0.005,0.467,3
+"test-jjbarstats-release-review.R","jjbarstats-release-review","the assumptions panel agrees with whatever the chart shows",5,0,FALSE,FALSE,0,0.0289999999999999,0.002,0.0310000000000006,5
+"test-jjbarstats-release-review.R","jjbarstats-release-review","paired and Bayesian analyses are left alone",1,0,FALSE,FALSE,0,2.064,0.031,3.039,1
+"test-jjbarstats-release-review.R","jjbarstats-release-review","the split-by chart keeps the disclosure route",1,0,FALSE,FALSE,0,0.0139999999999993,0.000999999999999945,0.016,1
+"test-jjbarstats-release-review.R","jjbarstats-release-review","with several dependent variables the decision is per-table",2,0,FALSE,FALSE,0,0.674000000000001,0.00900000000000001,0.708,2
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats function exists and runs with minimal arguments",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0139999999999993,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats creates basic pie chart with single categorical variable",1,0,FALSE,FALSE,0,0.0230000000000015,0.001,0.0240000000000009,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles parametric statistics",1,0,FALSE,FALSE,0,0.0129999999999999,0,0.0139999999999993,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles nonparametric statistics",1,0,FALSE,FALSE,0,0.0199999999999996,0.001,0.0210000000000008,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles robust statistics",1,0,FALSE,FALSE,0,0.0120000000000005,0,0.0129999999999999,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles Bayesian statistics",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0129999999999999,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles grouping variable for contingency table",1,0,FALSE,FALSE,0,0.0129999999999999,0.001,0.0140000000000011,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles 2x2 contingency table",1,0,FALSE,FALSE,0,0.0129999999999999,0,0.0139999999999993,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles split variable for separate pie charts",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0139999999999993,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles both group and split variables",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0149999999999988,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles percentage labels",1,0,FALSE,FALSE,0,0.0140000000000011,0,0.0149999999999988,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles count labels",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0150000000000006,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles both percentage and count labels",1,0,FALSE,FALSE,0,0.0140000000000011,0,0.0140000000000011,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles diagnostic clinical preset",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0150000000000006,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles treatment clinical preset",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0169999999999995,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles biomarker clinical preset",1,0,FALSE,FALSE,0,0.0219999999999985,0.001,0.0280000000000005,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles statistical results subtitle",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0190000000000001,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles Bayes factor message",1,0,FALSE,FALSE,0,0.0140000000000011,0,0.016,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles original ggstatsplot theme",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0199999999999996,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles jamovi default theme",1,0,FALSE,FALSE,0,0.0169999999999995,0.001,0.0199999999999996,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles donut chart with ggpubr",1,0,FALSE,FALSE,0,0.0140000000000011,0,0.0150000000000006,1
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles donut chart palettes",3,0,FALSE,FALSE,0,0.0429999999999993,0.002,0.0460000000000012,3
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats works with all test datasets",5,0,FALSE,FALSE,0,0.102,0.005,0.114999999999998,5
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles different confidence levels",3,0,FALSE,FALSE,0,0.043000000000001,0.001,0.0470000000000006,3
+"test-jjpiestats-basic.R","jjpiestats-basic","jjpiestats handles different decimal digits",3,0,FALSE,FALSE,0,0.0399999999999991,0.002,0.0429999999999993,3
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats uses selective NA omission for relevant variables only",1,0,FALSE,FALSE,0,0.016,0.001,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats drops rows with NAs in dependent variable",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0199999999999996,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats drops rows with NAs in grouping variable",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0169999999999995,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats drops rows with NAs in split variable",1,0,FALSE,FALSE,0,0.016,0.001,0.0180000000000007,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats creates basic pie chart for single categorical variable",1,0,FALSE,FALSE,0,0.0180000000000007,0.002,0.0199999999999996,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats creates pie chart with contingency table analysis",1,0,FALSE,FALSE,0,0.0179999999999989,0.001,0.0220000000000002,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats creates grouped pie charts by split variable",1,0,FALSE,FALSE,0,0.0230000000000015,0.002,0.0250000000000004,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats runs parametric analysis (Pearson Chi-square)",1,0,FALSE,FALSE,0,0.0179999999999989,0.001,0.0190000000000001,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats runs nonparametric analysis",1,0,FALSE,FALSE,0,0.016,0,0.0180000000000007,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats runs Bayesian analysis",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0170000000000012,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles different label display options",3,0,FALSE,FALSE,0,0.043000000000001,0.002,0.0459999999999994,3
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles expected proportions for proportion test",2,0,FALSE,FALSE,0,0.0279999999999987,0.001,0.0299999999999994,2
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles paired/repeated measures design",1,0,FALSE,FALSE,0,0.016,0.001,0.0169999999999995,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats respects confidence level setting",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles decimal digits specification",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles proportion test enable/disable",2,0,FALSE,FALSE,0,0.0389999999999997,0.002,0.0470000000000006,2
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles Bayes factor message display",1,0,FALSE,FALSE,0,0.0170000000000012,0.001,0.0190000000000001,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats shows statistical results in subtitle",1,0,FALSE,FALSE,0,0.016,0.001,0.0180000000000007,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats applies clinical presets correctly",2,0,FALSE,FALSE,0,0.0280000000000005,0.002,0.0350000000000001,2
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles case with no complete data gracefully",1,0,FALSE,FALSE,0,0.0179999999999989,0.001,0.0199999999999996,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles binary categorical variables",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0180000000000007,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles multiple categories (>2)",1,0,FALSE,FALSE,0,0.016,0.001,0.0179999999999989,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles ordinal categorical variables",1,0,FALSE,FALSE,0,0.016,0.001,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles large sample sizes",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles small sample sizes",1,0,FALSE,FALSE,0,0.0149999999999988,0.001,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles unbalanced categorical groups",1,0,FALSE,FALSE,0,0.016,0.001,0.0250000000000004,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles character variables as categorical",1,0,FALSE,FALSE,0,0.0140000000000011,0.001,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles logical variables as binary categorical",1,0,FALSE,FALSE,0,0.0259999999999998,0.001,0.032,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles aggregated data with counts variable",1,0,FALSE,FALSE,0,0.016,0.001,0.0190000000000001,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats can add ggpubr donut chart variant",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #3: McNemar validation rejects non-2x2 tables",1,0,FALSE,FALSE,0,0.0179999999999989,0.001,0.0249999999999986,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #3: McNemar validation accepts valid 2x2 tables",1,0,FALSE,FALSE,0,0.0239999999999991,0.002,0.0340000000000007,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #2: Rejects non-numeric counts variable",1,0,FALSE,FALSE,0,0.0190000000000001,0.001,0.032,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #2: Rejects negative counts",1,0,FALSE,FALSE,0,0.0229999999999997,0.001,0.0379999999999985,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #2: Accepts valid numeric counts",1,0,FALSE,FALSE,0,0.0190000000000001,0.001,0.0289999999999999,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats CRITICAL FIX #4: Assumption checks respect weighted data",1,0,FALSE,FALSE,0,0.0190000000000001,0.001,0.0289999999999999,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #6: Ratio parsing normalizes non-summing values",1,0,FALSE,FALSE,0,0.0189999999999984,0.001,0.0280000000000005,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #6: Ratio parsing handles invalid values gracefully",1,0,FALSE,FALSE,0,0.0250000000000004,0.002,0.0410000000000004,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #1: Small group sizes trigger Notice (not warning)",1,0,FALSE,FALSE,0,0.0199999999999996,0.002,0.0299999999999994,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #2: Extreme prevalence triggers info notice in diagnostic preset",1,0,FALSE,FALSE,0,0.0199999999999996,0.002,0.027000000000001,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #2: High prevalence (>90%) triggers info notice",1,0,FALSE,FALSE,0,0.0329999999999995,0.003,0.0459999999999994,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #2: Normal prevalence (10-90%) does not trigger warning",1,0,FALSE,FALSE,0,0.0200000000000014,0.002,0.0260000000000016,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats ENHANCEMENT #2: Prevalence check only for diagnostic preset",1,0,FALSE,FALSE,0,0.0199999999999996,0.001,0.0229999999999997,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats BUG FIX: Handles empty string dep variable gracefully",2,1,FALSE,FALSE,0,0.0199999999999996,0.003,0.0330000000000013,1
+"test-jjpiestats-correctness.R","jjpiestats-correctness","jjpiestats handles single-column data without dropping dimensions",1,0,FALSE,FALSE,0,0.0199999999999996,0.00199999999999989,0.0250000000000004,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles very small datasets",1,0,FALSE,FALSE,0,0.0259999999999998,0.003,0.0359999999999996,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles single category level",1,0,FALSE,FALSE,0,0.0190000000000001,0.001,0.0230000000000015,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles very unbalanced category distributions",0,0,FALSE,TRUE,0,0.0370000000000008,0.005,0.0980000000000008,0
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles factor variables",1,0,FALSE,FALSE,0,0.0149999999999988,0.001,0.016,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles character variables",1,0,FALSE,FALSE,0,0.0149999999999988,0.002,0.020999999999999,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles missing values in dependent variable",1,0,FALSE,FALSE,0,0.0230000000000015,0.001,0.0340000000000007,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles missing values in grouping variable",1,0,FALSE,FALSE,0,0.016,0.001,0.0210000000000008,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles missing values in split variable",1,0,FALSE,FALSE,0,0.0259999999999998,0.002,0.0329999999999995,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles variable names with spaces",1,0,FALSE,FALSE,0,0.0170000000000012,0.001,0.0169999999999995,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles long category names",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0150000000000006,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats errors on non-existent variables",1,0,FALSE,FALSE,0,0.00999999999999979,0.001,0.0100000000000016,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","a continuous dependent variable is coerced, and the slice count is flagged",1,0,FALSE,FALSE,0,0.0139999999999993,0,0.016,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats errors on empty dataset",1,0,FALSE,FALSE,0,0.0150000000000006,0.001,0.0149999999999988,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles invalid ratio specifications",4,0,FALSE,FALSE,0,0.0280000000000005,0.001,0.0289999999999999,4
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles duplicate rows",1,0,FALSE,FALSE,0,0.0139999999999993,0.001,0.0139999999999993,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles boundary confidence levels",2,0,FALSE,FALSE,0,0.027000000000001,0.001,0.0299999999999994,2
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles boundary decimal digits",2,0,FALSE,FALSE,0,0.0289999999999999,0.001,0.0380000000000003,2
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles tibble input",1,0,FALSE,FALSE,0,0.016,0.001,0.0290000000000017,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles data.frame input",1,0,FALSE,FALSE,0,0.0250000000000004,0.001,0.032,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles many categorical levels",1,0,FALSE,FALSE,0,0.016,0.001,0.0190000000000001,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats warns when dep and group are the same variable",2,0,FALSE,FALSE,0,0.0180000000000007,0.001,0.0199999999999996,2
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles perfectly balanced categorical distributions",0,0,FALSE,TRUE,0,0.00900000000000034,0.001,0.011000000000001,0
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles categories with all levels defined but some with zero counts",1,0,FALSE,FALSE,0,0.0149999999999988,0.001,0.016,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles constant categorical variable",1,0,FALSE,FALSE,0,0.016,0,0.0169999999999995,1
+"test-jjpiestats-edge-cases.R","jjpiestats-edge-cases","jjpiestats handles aggregated data with zero counts",0,0,FALSE,TRUE,0,0.00300000000000011,0.001,0.00399999999999956,0
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the copy-ready Methods sentence names the test that actually ran",7,0,FALSE,FALSE,0,0.0650000000000013,0.003,0.0699999999999985,7
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the three frequentist types really are the same test",3,0,FALSE,FALSE,0,12.742,0.31,14.913,3
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the interpretation guide no longer promises an exact test",2,0,FALSE,FALSE,0,0.0240000000000009,0.002,0.0280000000000022,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","a sparse table gets the exact test, not a redirect to a dead option",4,0,FALSE,FALSE,0,0.0189999999999984,0.003,0.0209999999999972,4
+"test-jjpiestats-release-review.R","jjpiestats-release-review","an adequately powered table raises no assumption warning",1,0,FALSE,FALSE,0,0.0160000000000018,0.001,0.0180000000000007,1
+"test-jjpiestats-release-review.R","jjpiestats-release-review","every malformed expected-proportions entry is reported",8,0,FALSE,FALSE,0,0.0539999999999985,0.002,0.059000000000001,8
+"test-jjpiestats-release-review.R","jjpiestats-release-review","a valid expected-proportions entry is accepted silently",1,0,FALSE,FALSE,0,0.0139999999999993,0.002,0.014999999999997,1
+"test-jjpiestats-release-review.R","jjpiestats-release-review","crossing a variable with itself is called out",2,0,FALSE,FALSE,0,0.0140000000000029,0.001,0.0160000000000018,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","paired mode explains the missing single-variable chart",1,0,FALSE,FALSE,0,0.0129999999999981,0,0.0139999999999993,1
+"test-jjpiestats-release-review.R","jjpiestats-release-review","a pie chart with too many slices is flagged",2,0,FALSE,FALSE,0,0.0730000000000004,0.013,0.123999999999999,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the reported chi-square matches stats::chisq.test",3,0,FALSE,FALSE,0,3.39,0.355,7.797,3
+"test-jjpiestats-release-review.R","jjpiestats-release-review","paired mode really runs McNemar, matching stats::mcnemar.test",2,0,FALSE,FALSE,0,0.437000000000001,0.087,1.669,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the weighted counts path equals the expanded raw data",2,0,FALSE,FALSE,0,0.0420000000000016,0.0229999999999999,0.199000000000005,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the effect-size guide says which Cramer's V is on screen",2,0,FALSE,FALSE,0,0.0250000000000021,0.00800000000000001,0.0579999999999998,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the syntax pane emits valid, non-duplicated R",3,0,FALSE,FALSE,0,0.0210000000000008,0.01,0.0949999999999989,3
+"test-jjpiestats-release-review.R","jjpiestats-release-review","a sparse 2x2 chart reports Fisher's exact test, not chi-square",4,0,FALSE,FALSE,0,0.756,0.134,1.901,4
+"test-jjpiestats-release-review.R","jjpiestats-release-review","an adequately powered table keeps the chi-square subtitle",2,0,FALSE,FALSE,0,1.21,0.186,2.1,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","paired and Bayesian analyses are left alone",2,0,FALSE,FALSE,0,5.08,0.323,9.523,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","the assumptions panel agrees with whatever the chart shows",4,0,FALSE,FALSE,0,0.0439999999999969,0.00600000000000023,0.0539999999999949,4
+"test-jjpiestats-release-review.R","jjpiestats-release-review","p-values are formatted without a stray equals sign",2,0,FALSE,FALSE,0,0.0200000000000031,0.00099999999999989,0.0240000000000009,2
+"test-jjpiestats-release-review.R","jjpiestats-release-review","Split By panels get their own exact p-values",3,0,FALSE,FALSE,0,0.0189999999999984,0.00199999999999978,0.0210000000000008,3
+"test-jjpiestats-release-review.R","jjpiestats-release-review","a well-powered Split By raises no per-panel notice",1,0,FALSE,FALSE,0,0.027000000000001,0.00200000000000022,0.0319999999999965,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 function exists and loads",1,0,FALSE,FALSE,0,0.00399999999999778,0.00099999999999989,0.00600000000000023,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 runs with minimal required arguments",1,0,FALSE,FALSE,0,0.0489999999999995,0.00600000000000023,0.0769999999999982,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 produces expected output structure",1,0,FALSE,FALSE,0,0.0210000000000008,0.00300000000000011,0.0279999999999987,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles continuous vs categorical (violin plot)",1,0,FALSE,FALSE,0,0.0169999999999959,0.00199999999999978,0.027000000000001,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles categorical vs categorical (bar chart)",1,0,FALSE,FALSE,0,0.0120000000000005,0.00200000000000022,0.0159999999999982,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles continuous vs continuous (scatter)",1,0,FALSE,FALSE,0,0.0150000000000006,0.00099999999999989,0.0229999999999961,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles parametric distribution",1,0,FALSE,FALSE,0,0.0150000000000006,0.00199999999999978,0.0250000000000057,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles nonparametric distribution",1,0,FALSE,FALSE,0,0.0120000000000005,0.00100000000000033,0.0150000000000006,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles robust distribution",1,0,FALSE,FALSE,0,0.00900000000000034,0.00099999999999989,0.0110000000000028,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles Bayesian distribution",1,0,FALSE,FALSE,0,0.0110000000000028,0.00199999999999978,0.0150000000000006,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles independent direction",1,0,FALSE,FALSE,0,0.0150000000000006,0.00200000000000022,0.0200000000000031,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles repeated direction",1,0,FALSE,FALSE,0,0.00999999999999801,0.00199999999999978,0.0120000000000005,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles split-by variable (grvar)",1,0,FALSE,FALSE,0,0.0110000000000028,0.00100000000000033,0.0150000000000006,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles custom labels",1,0,FALSE,FALSE,0,0.0109999999999957,0.00199999999999978,0.0150000000000006,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles multi-level categorical grouping",1,0,FALSE,FALSE,0,0.0120000000000005,0.00200000000000022,0.0189999999999984,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles two-level factors",1,0,FALSE,FALSE,0,0.0110000000000028,0.00099999999999989,0.0129999999999981,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles three-level factors",1,0,FALSE,FALSE,0,0.0110000000000028,0.00199999999999978,0.0129999999999981,1
+"test-statsplot2-basic.R","statsplot2-basic","statsplot2 handles multi-level factors",1,0,FALSE,FALSE,0,0.0149999999999935,0.00200000000000022,0.0309999999999988,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 errors on missing required arguments",3,0,FALSE,FALSE,0,0.0700000000000003,0.004,0.139000000000003,3
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles missing data correctly",2,0,FALSE,FALSE,0,0.0140000000000029,0.00199999999999978,0.0309999999999988,2
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles all NA in dependent variable",1,0,FALSE,FALSE,0,0.0309999999999988,0.00200000000000022,0.0470000000000041,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles missing grouping variable values",1,0,FALSE,FALSE,0,0.0180000000000007,0.00199999999999978,0.0279999999999987,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles small sample sizes",1,0,FALSE,FALSE,0,0.0189999999999984,0.00100000000000033,0.0210000000000008,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles very small sample sizes",1,0,FALSE,FALSE,0,0.0240000000000009,0.00199999999999978,0.0330000000000013,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles single group",2,0,FALSE,FALSE,0,0.0189999999999984,0.00200000000000022,0.036999999999999,2
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles constant dependent variable",3,0,FALSE,FALSE,0,0.017000000000003,0.00199999999999978,0.0230000000000032,3
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles constant grouping variable",1,0,FALSE,FALSE,0,0.0210000000000008,0.00200000000000022,0.027000000000001,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles variables with special characters",1,0,FALSE,FALSE,0,0.0129999999999981,0.00199999999999978,0.0159999999999982,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles very long variable names",1,0,FALSE,FALSE,0,0.0110000000000028,0.00099999999999989,0.0120000000000005,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles extreme values",1,0,FALSE,FALSE,0,0.00999999999999801,0.00100000000000033,0.0129999999999981,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles negative values",1,0,FALSE,FALSE,0,0.0129999999999981,0.00199999999999978,0.0189999999999984,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles zero values",1,0,FALSE,FALSE,0,0.00900000000000034,0.00200000000000022,0.0130000000000052,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles unbalanced groups",1,0,FALSE,FALSE,0,0.00999999999999801,0.00099999999999989,0.0129999999999981,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles integer vs numeric variables",2,0,FALSE,FALSE,0,0.0180000000000007,0.00199999999999978,0.0229999999999961,2
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles empty plot title",1,0,FALSE,FALSE,0,0.00999999999999801,0.00100000000000033,0.0110000000000028,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles very long plot title",1,0,FALSE,FALSE,0,0.0189999999999984,0.00299999999999967,0.0220000000000056,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles factor levels in different orders",1,0,FALSE,FALSE,0,0.00900000000000034,0.00100000000000033,0.0110000000000028,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles unused factor levels",1,0,FALSE,FALSE,0,0.00999999999999801,0.00099999999999989,0.0119999999999933,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles numeric grouping variable as continuous",1,0,FALSE,FALSE,0,0.0109999999999957,0.00199999999999978,0.0140000000000029,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles repeated measures with incomplete IDs",1,0,FALSE,FALSE,0,0.0120000000000005,0.00100000000000033,0.0180000000000007,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles missing split-by variable values",1,0,FALSE,FALSE,0,0.0130000000000052,0.00199999999999978,0.0160000000000053,1
+"test-statsplot2-edge-cases.R","statsplot2-edge-cases","statsplot2 handles single level in split variable",1,0,FALSE,FALSE,0,0.0109999999999957,0.00099999999999989,0.0139999999999958,1
+"test-statsplot2-release-review.R","statsplot2-release-review","random subsampling is disclosed, not left looking like missing data",4,0,FALSE,FALSE,0,0.0589999999999975,0.00999999999999979,0.0940000000000012,4
+"test-statsplot2-release-review.R","statsplot2-release-review","no subsample warning when the full data is used",2,0,FALSE,FALSE,0,0.0260000000000034,0.00300000000000011,0.0309999999999988,2
+"test-statsplot2-release-review.R","statsplot2-release-review","the sampling threshold and size are under user control",4,0,FALSE,FALSE,0,0.245999999999995,0.0129999999999999,0.381999999999998,4
+"test-statsplot2-release-review.R","statsplot2-release-review","N counts usable observations, not rows",2,0,FALSE,FALSE,0,0.0150000000000006,0.00200000000000022,0.0210000000000008,2
+"test-statsplot2-release-review.R","statsplot2-release-review","a one-group comparison is rejected, not called successful",2,0,FALSE,FALSE,0,0.0130000000000052,0.00199999999999978,0.0210000000000008,2
+"test-statsplot2-release-review.R","statsplot2-release-review","a constant outcome is flagged, including the analysis-type switch",3,0,FALSE,FALSE,0,0.0150000000000006,0.00200000000000022,0.0209999999999937,3
+"test-statsplot2-release-review.R","statsplot2-release-review","an ordinary analysis still reports success",3,0,FALSE,FALSE,0,0.0159999999999982,0.00299999999999967,0.0210000000000008,3
+"test-statsplot2-release-review.R","statsplot2-release-review","statsplot2 datasets load under the names they are documented by",5,0,FALSE,FALSE,0,0.017000000000003,0.00600000000000023,0.0319999999999965,5
+"test-statsplot2-smoke.R","statsplot2-smoke","Type inference works correctly",1,0,FALSE,FALSE,0,0.0140000000000029,0.00099999999999989,0.0230000000000032,1
+"test-statsplot2-smoke.R","statsplot2-smoke","Sampling notice is generated for large datasets",3,0,FALSE,FALSE,0,0.0359999999999943,0.004,0.0579999999999998,3
+"test-statsplot2-smoke.R","statsplot2-smoke","NA exclusion notice works",2,0,FALSE,FALSE,0,0.0160000000000053,0.00200000000000022,0.0200000000000031,2
+"test-statsplot2-smoke.R","statsplot2-smoke","Alluvial notice appears when not applicable",2,0,FALSE,FALSE,0,0.0249999999999986,0.00099999999999989,0.0379999999999967,2

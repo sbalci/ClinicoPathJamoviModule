@@ -194,6 +194,14 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
             # Resolve possible B64 column names from jamovi (shared helper)
             resolve_name <- function(var) private$.resolveName(var, mydata)
+            for (v in self$options$dep) {
+                nm <- resolve_name(v)
+                x <- jmvcore::toNumeric(mydata[[nm]])
+                if (!is.numeric(x)) jmvcore::reject("Correlation variables must be numeric.")
+                x[!is.finite(x)] <- NA_real_
+                mydata[[nm]] <- x
+            }
+
 
             # SELECTIVE NA OMISSION - only remove rows with NAs in selected correlation variables
             # This prevents dropping patients with NAs in unused columns
@@ -426,7 +434,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (abs(r) >= 0.3 && is_notable) {
                 guidance <- .("<br><strong>Clinical Note:</strong> This suggests a meaningful association that may warrant further investigation.")
             } else if (abs(r) < 0.3) {
-                guidance <- .("<br><strong>Clinical Note:</strong> This correlation is weak and may not be clinically meaningful.")
+                guidance <- .("<br><strong>Clinical Note:</strong> The estimated correlation is weak by this descriptive convention. Clinical importance depends on context, uncertainty and a prespecified clinical criterion.")
             } else {
                 guidance <- .("<br><strong>Clinical Note:</strong> Although the correlation appears moderate-to-strong, the evidence for it is not conclusive at the chosen threshold.")
             }
@@ -973,7 +981,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         private$.n_valid_pairs <- private$.n_valid_pairs + sum(!is.na(res$r))
         for (i in seq_len(nrow(res))) {
             table$addRow(
-                rowKey = paste0(res$var1[i], "_", res$var2[i], "_", grp_label),
+                rowKey = table$rowCount + 1L,
                 values = list(
                     var1      = res$var1[i],
                     var2      = res$var2[i],
@@ -1022,7 +1030,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         table$setNote("padj", .("No correction for multiple comparisons was applied, so <b>p (adjusted)</b> repeats the unadjusted p-value. Each additional variable adds several pairwise tests."))
     } else {
         table$setNote("padj", sprintf(
-            .("<b>p (adjusted)</b> applies the %s correction across all pairwise tests. This is the p-value the plot uses to mark cells as non-significant at %s."),
+            .("<b>p (adjusted)</b> applies the %s correction across pairwise tests within each split panel (not across panels). This is the p-value the plot uses to mark cells as non-significant at %s."),
             private$.padjustLabel(options_data$padjustmethod),
             base::format(options_data$siglevel)))
     }

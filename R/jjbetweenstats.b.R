@@ -694,14 +694,15 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_before <- nrow(mydata)
 
             # Filter to complete cases ONLY for relevant columns
-            mydata <- mydata[complete.cases(mydata[relevant_cols]), ]
+            mydata <- mydata[complete.cases(mydata[relevant_cols]) &
+                Reduce(`&`, lapply(mydata[vars], is.finite)), , drop = FALSE]
 
             n_after <- nrow(mydata)
 
             # Report NA removal for auditability
             if (n_before > n_after) {
                 n_dropped <- n_before - n_after
-                na_message <- glue::glue(.("<br> Info: {n_dropped} rows with missing values in analysis variables were excluded.<br>"))
+                na_message <- glue::glue(.("<br> Info: {n_dropped} rows with missing or non-finite values in analysis variables were excluded.<br>"))
                 # ACCUMULATE instead of overwrite
                 private$.appendMessage(na_message)
             }

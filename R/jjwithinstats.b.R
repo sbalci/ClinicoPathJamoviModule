@@ -587,7 +587,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             # Variables already validated above, proceed with data preparation
-            mydata <- self$data
+            mydata <- self$data[, vars, drop = FALSE]
             
             # Check for empty dataset
             if (nrow(mydata) == 0) {
@@ -609,7 +609,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     var = paste(dup, collapse = ", "))
             }
 
-            mydata$rowid <- seq.int(nrow(mydata))
+            subject_ids <- seq_len(nrow(mydata))
 
             # Check if required variables exist in dataset (raw names)
             missing_vars <- vars[!vars %in% names(mydata)]
@@ -674,7 +674,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Within-subjects analysis requires complete data for all subjects across measurements
             # Check for excessive missing data that would break paired tests
             n_rows <- nrow(mydata)
-            complete_cases <- sum(complete.cases(mydata[, vars, drop = FALSE]))
+            complete_cases <- sum(Reduce(`&`, lapply(mydata[, vars, drop = FALSE], is.finite)))
             missing_pct <- (1 - complete_cases/n_rows) * 100
 
             if (complete_cases < 3) {
@@ -732,8 +732,8 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 x <- jmvcore::toNumeric(mydata[[v]])
                 is.finite(x)
             }))
+            subject_ids <- subject_ids[finite_rows]
             mydata <- mydata[finite_rows, , drop = FALSE]
-            mydata <- jmvcore::naOmit(mydata)
 
             # Report N retained
             final_n <- nrow(mydata)
@@ -776,6 +776,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Preserve measurement ordering for display
+            long_data$rowid <- rep(subject_ids, each = length(vars))
             long_data$measurement <- factor(long_data$measurement, levels = vars)
             
             private$.prepared_data <- long_data
@@ -900,8 +901,8 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Test explanation
             test_explanation <- switch(test_type,
-                "parametric" = .("Repeated measures ANOVA tests whether means differ significantly across time points, assuming normal distribution."),
-                "nonparametric" = .("Friedman test compares medians across time points without assuming normal distribution (robust for skewed biomarker data)."),
+                "parametric" = if (num_measurements == 2) .("The paired t-test compares the mean within-subject difference with zero; normality concerns the differences.") else .("Repeated-measures ANOVA compares means across conditions, accounting for subjects and the sphericity correction."),
+                "nonparametric" = if (num_measurements == 2) .("The Wilcoxon signed-rank test assesses paired differences and assumes a symmetric difference distribution for a location-shift interpretation.") else .("The Friedman test compares within-subject ranks across conditions. A median-shift interpretation requires comparable distribution shapes."),
                 "robust" = .("Robust test uses trimmed means, reducing influence of outliers common in clinical measurements."),
                 "bayes" = .("Bayesian analysis provides evidence for/against differences, useful when traditional p-values are inconclusive."),
                 .("Statistical test compares measurements across time points.")
@@ -914,7 +915,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             # What to look for
-            guidance <- .(" <strong>What to look for:</strong><br>\u2022 Statistical significance (p < 0.05) indicates real changes over time<br>\u2022 Effect sizes show practical importance<br>\u2022 Individual trajectories reveal response patterns<br>\u2022 Outliers may indicate treatment non-responders or measurement errors")
+            guidance <- .(" <strong>What to look for:</strong><br>\u2022 A small p-value is evidence against the null under the model assumptions; it does not prove a treatment effect<br>\u2022 Compare effect estimates and uncertainty with a prespecified clinically important difference<br>\u2022 Individual trajectories reveal response patterns<br>\u2022 Outliers may indicate treatment non-responders or measurement errors")
             
             interpretation_parts <- list(
                 paste0("<div style='background-color: rgba(138, 155, 172, 0.06);padding:15px;margin:10px 0;border-left:4px solid #007bff; color: inherit;'>"),
@@ -1269,13 +1270,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Create subject ID for paired analysis
-                mydata$Subject_ID <- seq_len(nrow(mydata))
+                subject_ids <- seq_len(nrow(mydata))
 
                 # Convert to long format using raw variable names
                 long_data <- data.frame()
                 for (i in seq_along(deps)) {
                     temp <- data.frame(
-                        Subject_ID = mydata$Subject_ID,
+                        Subject_ID = subject_ids,
                         Measurement = deps[i],
                         Value = mydata[[deps[i]]]
                     )

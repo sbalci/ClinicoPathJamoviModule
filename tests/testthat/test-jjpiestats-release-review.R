@@ -73,7 +73,7 @@ test_that("a sparse table gets the exact test, not a redirect to a dead option",
     expect_equal(round(oracle, 4), 0.0511, tolerance = 1e-4)          # pins the fixture
 
     t <- pie_txt(jjpiestats(data = d, dep = "resp", group = "arm",
-                            showAssumptions = TRUE)$assumptions$content)
+                            showAssumptions = TRUE, resultssubtitle = TRUE)$assumptions$content)
     expect_match(t, "1 of 4 expected cell counts are below 5")
     # For a 2x2 the exact test now replaces the chart subtitle, so the panel
     # points at the figure rather than repeating the number; the p-value itself
@@ -84,7 +84,7 @@ test_that("a sparse table gets the exact test, not a redirect to a dead option",
 
 test_that("an adequately powered table raises no assumption warning", {
     t <- pie_txt(jjpiestats(data = pie_wide(), dep = "resp", group = "arm",
-                            showAssumptions = TRUE)$assumptions$content)
+                            showAssumptions = TRUE, resultssubtitle = TRUE)$assumptions$content)
     expect_false(grepl("Chi-square is unreliable", t, fixed = TRUE))
 })
 
@@ -272,7 +272,7 @@ test_that("the assumptions panel agrees with whatever the chart shows", {
     # Once the subtitle can be swapped, saying so regardless would recreate the
     # contradiction this whole review is about.
     swapped <- pie_txt(jjpiestats(data = pie_sparse(), dep = "resp", group = "arm",
-                                  showAssumptions = TRUE)$assumptions$content)
+                                  showAssumptions = TRUE, resultssubtitle = TRUE)$assumptions$content)
     expect_match(swapped, "subtitle therefore reports Fisher's exact test")
     expect_false(grepl("quote that value, not the subtitle", swapped, fixed = TRUE))
 
@@ -281,7 +281,7 @@ test_that("the assumptions panel agrees with whatever the chart shows", {
     d3 <- data.frame(resp = factor(rep(c("A", "B", "C"), times = c(3, 12, 12))),
                      arm  = factor(rep(c("X", "Y"), times = c(13, 14))))
     not_swapped <- pie_txt(jjpiestats(data = d3, dep = "resp", group = "arm",
-                                      showAssumptions = TRUE)$assumptions$content)
+                                      showAssumptions = TRUE, resultssubtitle = TRUE)$assumptions$content)
     expect_match(not_swapped, "still reports an uncorrected Pearson chi-square")
     expect_match(not_swapped, "quote that value, not the subtitle")
 })
@@ -290,7 +290,7 @@ test_that("p-values are formatted without a stray equals sign", {
     d3 <- data.frame(resp = factor(rep(c("A", "B", "C"), times = c(3, 12, 12))),
                      arm  = factor(rep(c("X", "Y"), times = c(13, 14))))
     t <- as.character(jjpiestats(data = d3, dep = "resp", group = "arm",
-                                 showAssumptions = TRUE)$assumptions$content)
+                                 showAssumptions = TRUE, resultssubtitle = TRUE)$assumptions$content)
     expect_false(grepl("p = &lt;", t, fixed = TRUE))
     expect_match(t, "p &lt; 0.001", fixed = TRUE)
 })

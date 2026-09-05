@@ -3,7 +3,7 @@ name: jjarcdiagram
 title: Arc Diagram
 menuGroup: JJStatsPlotT
 menuSubgroup: Network
-version: '1.0.7'
+version: '1.0.8'
 jas: '1.2'
 
 description:

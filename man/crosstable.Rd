@@ -8,12 +8,13 @@ crosstable(
   data,
   vars = NULL,
   group = NULL,
-  sty = "nejm",
+  sty = "gtsummary",
   excl = FALSE,
   cont = "mean",
   pcat = "chisq",
   p_adjust = "none",
-  showSMD = FALSE
+  showSMD = FALSE,
+  showSummary = FALSE
 )
 }
 \arguments{
@@ -52,6 +53,11 @@ across variables. Only available with gtsummary table style.}
 the groups for each variable - the standard balance diagnostic for matched,
 weighted, or propensity cohorts. Requires exactly two groups. |SMD| < 0.1
 conventionally indicates negligible imbalance.}
+
+\item{showSummary}{Add a copy-ready paragraph below the table naming the
+sample size, the groups, the tests the chosen style applied and the
+variables that differed at p < 0.05 (q < 0.05 when a p-value adjustment is
+applied in the gtsummary style).}
 }
 \value{
 A results object containing:
@@ -59,18 +65,18 @@ A results object containing:
 \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$errorNotice} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataQualityNotice} \tab \tab \tab \tab \tab a html \cr
-\code{results$analysisInfo} \tab \tab \tab \tab \tab a html \cr
 \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
-\code{results$varNameWarnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle1} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr
 \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$qvalueExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$testInformation} \tab \tab \tab \tab \tab a html \cr
 \code{results$smdTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$notes} \tab \tab \tab \tab \tab a preformatted \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

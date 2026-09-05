@@ -46,6 +46,10 @@
 #'            gtsummary style only.
 #' @param showSMD Logical. If TRUE, adds a standardized mean difference table
 #'            quantifying between-group balance. Requires exactly two groups.
+#' @param showSummary Logical. If TRUE, adds a copy-ready plain-language paragraph
+#'            below the table: sample size, groups, the tests the chosen style applied,
+#'            and the variables that differed at p < 0.05 (q < 0.05 under a gtsummary
+#'            p-value adjustment).
 #'
 #' @return The function produces an HTML table output in the selected style.
 #'
@@ -120,13 +124,14 @@ NULL
     return(var_names)
 }
 
-# The module's single variable-typing rule.
+# The display-table variable-typing rule.
 # A numeric column with 6 or fewer distinct non-missing values is almost always
 # an encoded category (grade 1/2/3, stage codes) rather than a measurement, and
-# a mean or an ANOVA on those codes is not a meaningful summary. Every site that
-# has to decide "continuous or categorical?" calls this one function so the
-# data-quality checks, the gtsummary table and the SMD table cannot drift apart
-# and label the same column differently.
+# a mean or an ANOVA on those codes is not a meaningful summary. The data-quality
+# checks, the coded-variable note and the gtsummary table all call this one
+# function so they cannot drift apart. The SMD table is the deliberate exception:
+# it keeps numeric codes on the continuous SMD (see .populateSMD for why) and
+# labels such rows "continuous (numeric codes)" so the two never contradict.
 .crosstableIsCategorical <- function(v) {
     is.factor(v) || is.character(v) ||
         (is.numeric(v) && length(unique(stats::na.omit(v))) <= 6)
@@ -146,10 +151,12 @@ NULL
     return(unname(original_name))
 }
 
-# Helper function to validate variable names and detect issues
+# Helper function to validate variable names. janitor::clean_names() already
+# de-duplicates, so the duplicate check is defensive. Names with spaces or
+# punctuation round-trip correctly through the label mapping and are NOT
+# reported: a warning the user cannot act on is noise.
 .validateCrosstableVariableNames <- function(original_names, cleaned_names) {
     issues <- list()
-    warnings <- list()
 
     # Check for duplicate names after cleaning
     duplicated_cleaned <- duplicated(cleaned_names) | duplicated(cleaned_names, fromLast = TRUE)
@@ -164,34 +171,24 @@ NULL
         ))
     }
 
-    # Check for very long names that might be truncated
-    long_names <- original_names[nchar(original_names) > 50]
-    if (length(long_names) > 0) {
-        warnings <- append(warnings, paste0(
-            "Very long variable names detected (>50 characters): ",
-            paste(substring(long_names, 1, 30), "...", sep = "", collapse = ", ")
-        ))
-    }
-
-    # Check for special characters that needed escaping
-    needs_escaping <- grepl("[^a-zA-Z0-9._]", original_names)
-    if (any(needs_escaping)) {
-        special_names <- original_names[needs_escaping]
-        warnings <- append(warnings, paste0(
-            "Variable names with special characters detected: ",
-            paste(special_names, collapse = ", ")
-        ))
-    }
-
-    return(list(issues = issues, warnings = warnings))
+    return(list(issues = issues))
 }
 
-# Helper function to validate sample size and data quality
+# Helper function to validate sample size and data quality.
 # name_mapping: optional named character vector mapping cleaned -> original variable
 # names so user-facing warnings use the labels users actually selected.
-.validateAnalysisAssumptions <- function(mydata, myvars, mygroup, name_mapping = NULL) {
-    issues <- list()
-    warnings <- list()
+# full_data: the data BEFORE missing-value exclusion, used only for the
+# missing-percentage check (after naOmit() there is nothing left to count).
+# sty / pcat: the selected style and categorical test, which decide whether a
+# chi-square will actually be run on a sparse table.
+# Returns typed messages (type = STRONG_WARNING/WARNING, text) so the caller
+# renders severity from data instead of parsing it back out of the wording.
+.validateAnalysisAssumptions <- function(mydata, myvars, mygroup, name_mapping = NULL,
+                                         full_data = mydata, sty = "gtsummary", pcat = "chisq") {
+    # Accumulate into an environment so the helper needs no `<<-`.
+    acc <- new.env(parent = emptyenv())
+    acc$messages <- list()
+    add <- function(type, text) acc$messages[[length(acc$messages) + 1]] <- list(type = type, text = text)
     group_sizes <- integer(0)
 
     .display <- function(name) {
@@ -203,7 +200,8 @@ NULL
     # Check overall sample size
     n_total <- nrow(mydata)
     if (n_total < 20) {
-        issues <- append(issues, sprintf("Very small sample size (n = %d). Results may be unreliable.", n_total))
+        add(if (n_total < 10) "STRONG_WARNING" else "WARNING",
+            sprintf("Very small sample size (n = %d). Results may be unreliable.", n_total))
     }
 
     # Check group sizes
@@ -216,7 +214,7 @@ NULL
         min_group_size <- if (length(group_sizes) > 0) min(group_sizes) else 0L
 
         if (length(group_sizes) > 0 && min_group_size < 5) {
-            warnings <- append(warnings, paste0("Small group detected (n = ", min_group_size, "). Consider combining categories or using exact tests."))
+            add("STRONG_WARNING", paste0("Small group detected (n = ", min_group_size, "). Consider combining categories or using exact tests."))
         }
 
         # Check for empty cells in cross-tabulations (categorical variables only)
@@ -227,14 +225,17 @@ NULL
                 if (.crosstableIsCategorical(mydata[[var]])) {
                     cont_table <- table(mydata[[var]], mydata[[mygroup]])
                     if (any(cont_table == 0)) {
-                        warnings <- append(warnings, paste0("Empty cells detected in ", .display(var), " \u{D7} ", .display(mygroup), " table. Results may be unstable."))
+                        add("WARNING", paste0("Empty cells detected in ", .display(var), " \u{D7} ", .display(mygroup), " table. Results may be unstable."))
                     }
 
                     # Cochran's condition: the chi-square approximation needs
-                    # expected counts of at least 5. Nothing else in this analysis
-                    # checks it, and only the gtsummary style switches to Fisher on
-                    # its own - arsenal and finalfit run the chi-square the user
-                    # selected and finalfit's R warning is invisible in jamovi.
+                    # expected counts of at least 5. Which test actually runs on
+                    # this variable depends on the style: gtsummary switches to
+                    # Fisher on its own; arsenal and finalfit run whatever `pcat`
+                    # says (finalfit's R warning is invisible in jamovi); the
+                    # tangram styles (NEJM/Lancet/Hmisc) always run the uncorrected
+                    # Pearson chi-square and never switch (verified: a 2x2 with
+                    # Fisher p = 0.065 prints "P=0.03, Pearson" under NEJM).
                     # Rows/columns with no observations are dropped first so that
                     # empty factor levels do not manufacture a zero expected count.
                     nz <- cont_table[rowSums(cont_table) > 0, colSums(cont_table) > 0, drop = FALSE]
@@ -243,12 +244,28 @@ NULL
                             suppressWarnings(stats::chisq.test(nz)$expected),
                             error = function(e) NULL
                         )
-                        if (!is.null(expected) && all(is.finite(expected)) && any(expected < 5)) {
-                            warnings <- append(warnings, paste0(
+                        fisher_selected <- sty %in% c("arsenal", "finalfit") && identical(pcat, "fisher")
+                        if (!is.null(expected) && all(is.finite(expected)) && any(expected < 5) && !fisher_selected) {
+                            where <- paste0(
                                 "Low expected counts in ", .display(var), " \u{D7} ", .display(mygroup),
-                                " table (smallest expected count ", format(round(min(expected), 2), nsmall = 2),
-                                "). The chi-square approximation is unreliable for this variable, so its chi-square p-value should not be relied on; Fisher's exact test is the appropriate choice here. The gtsummary style makes that switch automatically, while the arsenal and finalfit styles use whichever test is selected in Options."
-                            ))
+                                " table (smallest expected count ", format(round(min(expected), 2), nsmall = 2), ")."
+                            )
+                            if (identical(sty, "gtsummary")) {
+                                add("WARNING", paste0(
+                                    where,
+                                    " The gtsummary style switches this variable to Fisher's exact test automatically, so its p-value is exact; the sparse cells still make its percentages imprecise."
+                                ))
+                            } else if (sty %in% c("nejm", "lancet", "hmisc")) {
+                                add("STRONG_WARNING", paste0(
+                                    where,
+                                    " The chi-square approximation is unreliable here, and the NEJM, Lancet and Hmisc styles always apply an uncorrected Pearson chi-square and never switch to an exact test, so this variable's p-value should not be relied on. Choose the gtsummary style, which switches to Fisher's exact test automatically, or arsenal or finalfit with Fisher's exact test selected."
+                                ))
+                            } else {
+                                add("STRONG_WARNING", paste0(
+                                    where,
+                                    " The chi-square approximation is unreliable here, so this variable's chi-square p-value should not be relied on. Select Fisher's exact test in Options."
+                                ))
+                            }
                         }
                     }
                 }
@@ -256,20 +273,19 @@ NULL
         }
     }
 
-    # Check for excessive missing data
+    # Check for excessive missing data - on the data as selected, BEFORE any
+    # missing-value exclusion, otherwise this can never fire with `excl` on.
     for (var in c(myvars, mygroup)) {
-        if (var %in% names(mydata)) {
-            missing_pct <- mean(is.na(mydata[[var]])) * 100
+        if (var %in% names(full_data)) {
+            missing_pct <- mean(is.na(full_data[[var]])) * 100
             if (missing_pct > 20) {
-                warnings <- append(warnings, paste0("High missing data in ", .display(var), " (", round(missing_pct, 1), "%). Consider imputation or sensitivity analysis."))
+                add("WARNING", paste0("High missing data in ", .display(var), " (", round(missing_pct, 1), "%). Consider imputation or sensitivity analysis."))
             }
         }
     }
 
     return(list(
-        critical_issues = issues,
-        warnings = warnings,
-        sample_size = n_total,
+        messages = acc$messages,
         # Named counts of the group levels that still hold at least one row.
         # Fewer than two means there is nothing to compare; .run() stops there.
         group_sizes = group_sizes
@@ -288,10 +304,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
         inherit = crosstableBase,
         private = list(
 
-            # Notice collection helpers. A single Preformatted (plain-text) output item:
-            # avoids BOTH the jmvcore::Notice serialization error from
-            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-            # notice content must be plain text). ====
+            # Notice collection helpers. Two Preformatted (plain-text) output items
+            # (`notices` on top, `notes` below the tables): avoids BOTH the
+            # jmvcore::Notice serialization error from self$results$insert(999, Notice)
+            # AND any HTML in notices (project convention: notice content must be
+            # plain text). ====
             .noticeList = list(),
 
             .addNotice = function(type, title, content) {
@@ -313,25 +330,31 @@ crosstableClass <- if (requireNamespace('jmvcore'))
             },
 
             .renderNotices = function() {
-                if (length(private$.noticeList) == 0) {
-                    self$results$notices$setContent("")
-                    self$results$notices$setVisible(FALSE)
-                    return()
+                # Two plain-text Preformatted sinks: errors and warnings go to
+                # `notices` at the top of the output, INFO goes to `notes` below
+                # the tables, so a 100-word methodology note never pushes the
+                # table off the first screen. Plain text only (project
+                # convention); Preformatted renders it literally.
+                render <- function(item, list) {
+                    if (length(list) == 0) {
+                        item$setContent("")
+                        item$setVisible(FALSE)
+                        return()
+                    }
+                    blocks <- vapply(list, function(notice) {
+                        prefix <- switch(notice$type,
+                            ERROR          = "ERROR: ",
+                            STRONG_WARNING = "WARNING: ",
+                            WARNING        = "WARNING: ",
+                            "")
+                        paste0(prefix, notice$title, "\n", notice$content)
+                    }, character(1))
+                    item$setContent(paste(blocks, collapse = "\n\n"))
+                    item$setVisible(TRUE)
                 }
-
-                # Plain text only notices avoid HTML by project convention; the Preformatted
-                # output item renders this literally (no markup, no injection surface).
-                blocks <- vapply(private$.noticeList, function(notice) {
-                    prefix <- switch(notice$type,
-                        ERROR          = "ERROR: ",
-                        STRONG_WARNING = "WARNING: ",
-                        WARNING        = "WARNING: ",
-                        "")
-                    paste0(prefix, notice$title, "\n", notice$content)
-                }, character(1))
-
-                self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
-                self$results$notices$setVisible(TRUE)
+                is_info <- vapply(private$.noticeList, function(n) identical(n$type, "INFO"), logical(1))
+                render(self$results$notices, private$.noticeList[!is_info])
+                render(self$results$notes,   private$.noticeList[is_info])
             },
 
             .htmlSafeTableData = function(data) {
@@ -401,11 +424,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                                     paste(validation_results$issues, collapse = "; "))
                 }
 
-                # Create bidirectional mappings for robust variable handling
-                # original_names_mapping: cleaned_name -> original_name
+                # Mapping cleaned_name -> original_name, used to label every
+                # user-facing name in the results.
                 original_names_mapping <- setNames(original_names, cleaned_names)
-                # cleaned_names_mapping: original_name -> cleaned_name
-                cleaned_names_mapping <- setNames(cleaned_names, original_names)
 
                 # Apply labels to preserve original names
                 mydata <- labelled::set_variable_labels(
@@ -466,30 +487,6 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     )
                 })
 
-                # Report warnings about variable names if any
-                if (length(validation_results$warnings) > 0) {
-                    # Escape each warning individually before joining with <br> so the
-                    # line-break markup is preserved while user-supplied column names
-                    # embedded in the warning text are rendered inert.
-                    warning_msg <- paste0(
-                        "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107; color: inherit;'>",
-                        "<strong> Variable Name Warnings:</strong><br>",
-                        paste(htmltools::htmlEscape(unlist(validation_results$warnings)), collapse = "<br>"),
-                        "</div>"
-                    )
-                    # Display variable-name warnings in their own item so they do
-                    # not clobber the finalfit methodology note (which uses todo2).
-                    self$results$varNameWarnings$setContent(warning_msg)
-                    self$results$varNameWarnings$setVisible(TRUE)
-                } else {
-                    # Renaming a column in the spreadsheet is exactly what makes
-                    # these warnings appear or disappear, and it changes none of the
-                    # options in this item's clearWith - so without this reset the
-                    # stale panel would survive the rename that fixed it.
-                    self$results$varNameWarnings$setContent("")
-                    self$results$varNameWarnings$setVisible(FALSE)
-                }
-
                 # If any user-specified variable could not be matched, block analysis.
                 # Reported here rather than inside the tryCatch() above, whose error handler
                 # would otherwise swallow the message and replace it with a generic one.
@@ -520,8 +517,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     "mydata" = mydata,
                     "myvars" = myvars,
                     "mygroup" = mygroup,
-                    "original_names_mapping" = original_names_mapping,
-                    "cleaned_names_mapping" = cleaned_names_mapping
+                    "original_names_mapping" = original_names_mapping
                 ))
             },
 
@@ -615,12 +611,6 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 private$.noticeList <- list()
                 private$.renderNotices()
 
-                # Only the success path at the end of .run() writes analysisInfo, and
-                # this run can stop before reaching it - clear it here so a previous
-                # run's "completed successfully" panel cannot sit above a new error.
-                self$results$analysisInfo$setContent("")
-                self$results$analysisInfo$setVisible(FALSE)
-
                 sty <- self$options$sty
                 # If required options are missing, show a welcome message with instructions.
                 if (is.null(self$options$vars) || is.null(self$options$group)) {
@@ -637,7 +627,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "<ol style='margin-left: 20px;'>",
                         "<li>Select <strong>dependent variables</strong> (rows) - continuous or categorical measures</li>",
                         "<li>Select <strong>grouping variable</strong> (columns) - treatment groups, disease stages, etc.</li>",
-                        "<li>Choose <strong>table style</strong> from Options (NEJM, Lancet, gtsummary, etc.)</li>",
+                        "<li>Choose <strong>table style</strong> from Options (gtsummary by default; NEJM, Lancet, finalfit, arsenal and Hmisc are also available)</li>",
                         "</ol>",
 
                         "<h4 style='margin-top: 15px;'>Test Selection:</h4>",
@@ -747,7 +737,6 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 myvars <- cleaneddata$myvars
                 mygroup <- cleaneddata$mygroup
                 original_names_mapping <- cleaneddata$original_names_mapping
-                cleaned_names_mapping <- cleaneddata$cleaned_names_mapping
 
                 # Build formula using escaped variable names for safety.
                 escaped_myvars <- .crosstableEscapeVariableNames(myvars)
@@ -755,50 +744,109 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 formula <- jmvcore::constructFormula(terms = escaped_myvars, dep = escaped_mygroup)
                 formula <- jmvcore::asFormula(formula)
 
-                # Exclude missing data if requested.
-                if (self$options$excl)
+                # Exclude missing data if requested, and say how much went. A
+                # Table One that silently drops a quarter of the cohort is not
+                # something a clinician can report; the pre-exclusion data is kept
+                # so the missing-percentage check below still sees what was there.
+                data_before_exclusion <- mydata
+                n_dropped <- 0L
+                if (self$options$excl) {
                     mydata <- jmvcore::naOmit(mydata)
+                    n_dropped <- nrow(data_before_exclusion) - nrow(mydata)
+                    if (n_dropped > 0) {
+                        pct_dropped <- 100 * n_dropped / nrow(data_before_exclusion)
+                        private$.addNotice(
+                            if (pct_dropped > 20) "WARNING" else "INFO",
+                            .("Rows excluded for missing values"),
+                            sprintf(
+                                .("Missing-value exclusion removed %d of %d rows (%s%%) that had a missing value in at least one of the selected variables. Every statistic below is computed on the remaining %d rows."),
+                                n_dropped, nrow(data_before_exclusion),
+                                format(round(pct_dropped, 1), nsmall = 1), nrow(mydata)
+                            )
+                        )
+                    }
+                }
                 
-                # Validate analysis assumptions and data quality
+                # Empty levels of the grouping variable would appear as an all-zero
+                # column in gtsummary, finalfit and the tangram layouts, and a
+                # chi-square on such a table is NaN. Drop them here. Row variables
+                # keep their empty levels: a "Grade 4: 0 (0%)" row is legitimate
+                # Table One content.
+                if (is.factor(mydata[[mygroup]])) {
+                    # droplevels() returns a fresh factor and silently discards
+                    # the variable label set in .labelData(); without it finalfit
+                    # prints the cleaned column name as its dependent label.
+                    group_label_attr <- attr(mydata[[mygroup]], "label", exact = TRUE)
+                    mydata[[mygroup]] <- droplevels(mydata[[mygroup]])
+                    attr(mydata[[mygroup]], "label") <- group_label_attr
+                }
+
+                # Variables no engine can tabulate. An all-missing column makes
+                # arsenal and finalfit fail with an internal contrasts/dplyr error;
+                # a single-valued column makes finalfit fail the same way while the
+                # other engines show it without a p-value. Say so, and leave them
+                # out of the engines that cannot take them, instead of surfacing
+                # the engine's error as the whole table.
+                n_distinct <- vapply(myvars, function(v) length(unique(stats::na.omit(mydata[[v]]))), integer(1))
+                all_missing <- myvars[n_distinct == 0]
+                constant <- myvars[n_distinct == 1]
+                dropped_vars <- all_missing
+                if (identical(sty, "finalfit")) dropped_vars <- c(dropped_vars, constant)
+                if (length(all_missing) > 0) {
+                    private$.addNotice(
+                        "WARNING",
+                        .("Variables with no values were left out"),
+                        sprintf(
+                            .("These variables have no non-missing values among the rows being analysed, so nothing can be tabulated for them and they were left out of the table: %s."),
+                            paste(vapply(all_missing, function(v) .crosstableDisplayName(v, original_names_mapping), character(1)), collapse = ", ")
+                        )
+                    )
+                }
+                if (length(constant) > 0) {
+                    constant_labels <- paste(vapply(constant, function(v) .crosstableDisplayName(v, original_names_mapping), character(1)), collapse = ", ")
+                    private$.addNotice(
+                        "WARNING",
+                        .("Single-valued variables cannot be compared"),
+                        if (identical(sty, "finalfit"))
+                            sprintf(.("These variables take a single value in the rows being analysed, so no comparison between the groups is possible for them: %s. The finalfit style cannot build a table that contains them, so they were left out; choose another style to see their row."), constant_labels)
+                        else
+                            sprintf(.("These variables take a single value in the rows being analysed, so no comparison between the groups is possible for them and their p-value is blank: %s."), constant_labels)
+                    )
+                }
+                if (length(dropped_vars) > 0) {
+                    myvars <- setdiff(myvars, dropped_vars)
+                    if (length(myvars) == 0) {
+                        private$.addNotice(
+                            "ERROR",
+                            .("Nothing left to tabulate"),
+                            .("Every selected variable was left out for the reasons above, so there is no table to build. Select at least one variable that has values in the rows being analysed.")
+                        )
+                        return()
+                    }
+                    formula <- jmvcore::asFormula(jmvcore::constructFormula(
+                        terms = .crosstableEscapeVariableNames(myvars),
+                        dep = .crosstableEscapeVariableNames(mygroup)))
+                }
+
+                # Validate analysis assumptions and data quality. The validator
+                # returns typed messages; severity is carried as data, not parsed
+                # back out of the wording.
                 validation_results <- .validateAnalysisAssumptions(
                     mydata,
                     myvars,
                     mygroup,
-                    name_mapping = original_names_mapping
+                    name_mapping = original_names_mapping,
+                    full_data = data_before_exclusion,
+                    sty = sty,
+                    pcat = self$options$pcat
                 )
-                validation_messages <- c(
-                    validation_results$critical_issues,
-                    validation_results$warnings
-                )
+                validation_messages <- validation_results$messages
                 data_quality_html <- ""
                 if (length(validation_messages) > 0) {
                     # Accumulate all warnings into HTML (avoid serialization errors from dynamic Notice inserts)
-                    warning_html_parts <- character(length(validation_messages))
-
-                    for (i in seq_along(validation_messages)) {
-                        warn <- validation_messages[[i]]
-
-                        # Determine severity based on content
-                        notice_type <- if (grepl("Very small|n = [0-9]+\\)", warn)) {
-                            # Extract sample size if present
-                            n_match <- regmatches(warn, regexec("n = ([0-9]+)", warn))
-                            if (length(n_match[[1]]) > 1) {
-                                n_val <- as.numeric(n_match[[1]][2])
-                                if (n_val < 10) {
-                                    "STRONG_WARNING"
-                                } else {
-                                    "WARNING"
-                                }
-                            } else {
-                                "WARNING"
-                            }
-                        } else {
-                            "WARNING"
-                        }
-
-                        # Create HTML for this warning
-                        warning_html_parts[i] <- .crosstableNoticeHTML(warn, type = notice_type)
-                    }
+                    warning_html_parts <- vapply(validation_messages, function(m) {
+                        .crosstableNoticeHTML(m$text, type = m$type)
+                    }, character(1))
 
                     # Combine all warnings into single HTML output
                     data_quality_html <- paste(warning_html_parts, collapse = "\n")
@@ -858,6 +906,31 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     )
                 }
 
+                # Mean (SD) misdescribes a long-tailed variable (Ki-67, CA-125,
+                # hospital stay). Sample skewness above 1 in absolute value is the
+                # usual "highly skewed" cut; the note lists the offenders once.
+                if (identical(self$options$cont, "mean")) {
+                    skewed <- myvars[vapply(myvars, function(v) {
+                        x <- mydata[[v]]
+                        if (!is.numeric(x) || .crosstableIsCategorical(x)) return(FALSE)
+                        x <- x[is.finite(x)]
+                        if (length(x) < 10) return(FALSE)
+                        s <- stats::sd(x)
+                        is.finite(s) && s > 0 && abs(mean((x - mean(x))^3) / s^3) > 1
+                    }, logical(1))]
+                    if (length(skewed) > 0) {
+                        skewed_labels <- vapply(skewed, function(v) .crosstableDisplayName(v, original_names_mapping), character(1))
+                        private$.addNotice(
+                            "INFO",
+                            .("Skewed continuous variables shown as Mean (SD)"),
+                            sprintf(
+                                .("These continuous variables look markedly skewed, with a long tail on one side (skewness coefficient above 1): %s. Mean (SD) can misrepresent such distributions; consider switching the statistic to Median (Q1, Q3) in Options."),
+                                paste(skewed_labels, collapse = ", ")
+                            )
+                        )
+                    }
+                }
+
                 # Yates' continuity correction is not applied consistently across
                 # the three styles that honour `pcat`: finalfit's chi-square applies
                 # it on 2x2 tables, arsenal's and gtsummary's (chisq.test.no.correct)
@@ -891,122 +964,247 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     }
                 }
 
-                # Generate table based on selected style.
-                if (sty == "arsenal") {
-                    private$.checkpoint()
-                    arsenal_control <- arsenal::tableby.control(
-                        test = TRUE,
-                        total = TRUE,
-                        numeric.test = if (self$options$cont == "mean") "anova" else "kwt",
-                        cat.test = if (self$options$pcat == "fisher") "fe" else "chisq",
-                        numeric.stats = if (self$options$cont == "mean") c("Nmiss", "meansd") else c("Nmiss", "median", "q1q3"),
-                        stats.labels = list(meansd = "Mean (SD)", median = "Median", q1q3 = "Q1, Q3")
-                    )
+                # Generate table based on selected style. Each engine lives in its
+                # own method and returns the rendered HTML plus the per-variable
+                # p-values it displayed, or NULL after reporting its error.
+                built <- switch(sty,
+                    arsenal   = private$.tableArsenal(mydata, formula, original_names_mapping),
+                    finalfit  = private$.tableFinalfit(mydata, myvars, mygroup),
+                    gtsummary = private$.tableGtsummary(mydata, myvars, mygroup, original_names_mapping),
+                    private$.tableTangram(mydata, formula, myvars, mygroup, original_names_mapping)
+                )
+                if (is.null(built)) return()
+                table_item <- switch(sty, arsenal = "tablestyle1", finalfit = "tablestyle2",
+                                     gtsummary = "tablestyle3", "tablestyle4")
+                self$results$get(table_item)$setContent(built$html)
 
-                    arsenal_data <- private$.htmlSafeTableData(mydata)
-                    tablearsenal <- tryCatch(arsenal::tableby(
-                        formula = formula,
-                        data = arsenal_data,
-                        control = arsenal_control,
-                        digits = 1,
-                        digits.count = 1
-                    ), error = function(e) { private$.reportTableError(e); NULL })
-                    if (is.null(tablearsenal)) return()
-                    # Render Arsenal's own markup after escaping every data-derived
-                    # label and value on a render-only copy.
-                    tablearsenal <- summary(
-                        tablearsenal,
-                        text = "html",
-                        pfootnote = "html"
-                    )
-                    tablearsenal <- paste(
-                        capture.output(tablearsenal),
+
+                # Completion note (INFO, rendered below the tables with the other notes)
+                n_vars <- length(self$options$vars)
+                group_display <- self$options$group
+                style_display <- switch(self$options$sty,
+                    "arsenal" = "arsenal",
+                    "finalfit" = "finalfit",
+                    "gtsummary" = "gtsummary",
+                    "nejm" = "NEJM",
+                    "lancet" = "Lancet",
+                    "hmisc" = "Hmisc",
+                    self$options$sty
+                )
+
+                # Not every style honours every statistical option, and until now
+                # nothing said so: the tangram styles (NEJM/Lancet/Hmisc; NEJM was
+                # the default until 1.0.9) apply none of them, and p-value adjustment
+                # only exists in gtsummary. A user could set "Fisher's exact test"
+                # and "Benjamini-Hochberg", see a table, and reasonably believe both
+                # had been applied. Verified per style by comparing rendered output.
+                sty_now <- self$options$sty
+                honours <- list(
+                    arsenal   = c("pcat", "cont"),
+                    finalfit  = c("pcat", "cont"),
+                    gtsummary = c("pcat", "cont", "p_adjust"),
+                    nejm      = character(0),
+                    lancet    = character(0),
+                    hmisc     = character(0)
+                )
+                supported <- honours[[sty_now]]
+                if (is.null(supported)) supported <- character(0)
+
+                requested <- character(0)
+                if (!identical(self$options$pcat, "chisq"))
+                    requested <- c(requested, pcat = "Test for categorical variables")
+                if (!identical(self$options$cont, "mean"))
+                    requested <- c(requested, cont = "Statistic for continuous variables")
+                if (!identical(self$options$p_adjust, "none"))
+                    requested <- c(requested, p_adjust = "P-value adjustment")
+
+                ignored <- requested[!(names(requested) %in% supported)]
+                if (length(ignored) > 0) {
+                    ignored_html <- .crosstableNoticeHTML(
+                        sprintf(
+                            "The %s style does not apply the following setting(s), so the table below is unchanged by them: %s. %s",
+                            style_display,
+                            paste(unname(ignored), collapse = "; "),
+                            # gtsummary honours every option in `requested`, so
+                            # `ignored` is always empty for it and only the
+                            # tangram styles and arsenal/finalfit can reach here.
+                            if (sty_now %in% c("nejm", "lancet", "hmisc"))
+                                "These styles use their own built-in tests. Choose arsenal, finalfit or gtsummary to control the test; p-value adjustment is available in gtsummary only."
+                            else
+                                "P-value adjustment is available in the gtsummary style only."),
+                        type = "WARNING")
+                    # Compose onto the data-quality warnings already written to this
+                    # same output element earlier in .run() (lines ~602 and ~799)
+                    # rather than replacing them. setContent() overwrites, and the
+                    # earlier block escalates to STRONG_WARNING for cells with n < 10 -
+                    # exactly the small-sample warning a pathologist most needs - so
+                    # replacing it silently dropped that warning whenever the user also
+                    # picked a style that ignores one of their statistical settings.
+                    data_quality_html <- paste(
+                        Filter(nzchar, c(data_quality_html, ignored_html)),
                         collapse = "\n"
                     )
-                    self$results$tablestyle1$setContent(tablearsenal)
-                } else if (sty == "finalfit") {
-                    myvars_term <- jmvcore::composeTerm(components = myvars)
-                    myvars_term <- jmvcore::decomposeTerm(term = myvars_term)
-                    private$.checkpoint()
-                    # Create the finalfit summary table.
-                    tablefinalfit <- tryCatch(mydata %>%
-                        finalfit::summary_factorlist(
-                            .data = .,
-                            dependent = mygroup,
-                            explanatory = myvars_term,
-                            total_col = TRUE,
-                            p = TRUE,
-                            add_dependent_label = TRUE,
-                            na_include = FALSE,
-                            na_to_p = FALSE,
-                            cont = self$options$cont,
-                            cont_nonpara = NULL,
-                            # cont_cut = 5 is finalfit's default and is KEPT DELIBERATELY here.
-                            # Do not "sweep" it to 0.
-                            #
-                            # finalfit runs, on its own copy of the data,
-                            #   cont_distinct = select(explanatory) %>% summarise_if(is.numeric, n_distinct) %>% keep(~ .x < cont_cut)
-                            #   .data = mutate_at(.data, cont_distinct, as.factor)
-                            # so a numeric explanatory with fewer than 5 distinct values (n_distinct
-                            # counts NA) is summarised as a category and its p-value comes from
-                            # p_cat (chisq/fisher) instead of p_cont_para (aov). Verified against
-                            # finalfit 1.1.0: explanatory_type is read AFTER that mutate, so it is
-                            # what picks the test branch.
-                            #
-                            # In multisurvival/survivalcont/oddsratio the same rewrite is a BUG and is
-                            # disabled with cont_cut = 0, because those analyses also fit the same
-                            # column with coxph/glm/lrm, which do not apply the rule -- one selection,
-                            # two different models. This analysis fits NO model. It is a purely
-                            # descriptive Table One, so there is nothing to disagree with, and the
-                            # conversion is what a clinician wants: on the bundled histopathology data
-                            # the columns it touches are Grade, Anti-X/Anti-Y intensity (1/2/3) and the
-                            # 0/1 markers -- categorical variables stored as numbers. At cont_cut = 5
-                            # Grade prints 25 (31.2) / 27 (33.8) / 28 (35.0), chisq p = 0.529; at
-                            # cont_cut = 0 it collapses to a meaningless "Mean (SD) 2.1 (0.8)", aov
-                            # p = 0.409. Genuine factors and numerics with >= 5 distinct values (Age,
-                            # OverallTime, TStage) are byte-identical either way.
-                            cont_cut = 5,
-                            cont_range = TRUE,
-                            p_cont_para = "aov",
-                            p_cat = self$options$pcat,
-                            dependent_label_prefix = "Dependent: ",
-                            dependent_label_suffix = "",
-                            row_totals_colname = "Total N",
-                            row_missing_colname = "Missing N",
-                            column = TRUE,
-                            orderbytotal = FALSE,
-                            digits = c(1, 1, 3, 1, 0),
-                            na_include_dependent = FALSE,
-                            na_complete_cases = FALSE,
-                            fit_id = FALSE,
-                            na_to_prop = TRUE,
-                            add_col_totals = TRUE,
-                            include_col_totals_percent = TRUE,
-                            col_totals_rowname = NULL,
-                            col_totals_prefix = "",
-                            add_row_totals = FALSE,
-                            include_row_totals_percent = TRUE,
-                            include_row_missing_col = TRUE,
-                            catTest = NULL,
-                            weights = NULL
-                        ), error = function(e) { private$.reportTableError(e); NULL })
-                    if (is.null(tablefinalfit)) return()
-                    tablefinalfit <- kableExtra::kable(
-                        tablefinalfit,
-                        format = "html",
-                        digits = 1,
-                        escape = TRUE
+                    self$results$dataQualityNotice$setContent(data_quality_html)
+                    self$results$dataQualityNotice$setVisible(TRUE)
+                }
+
+                private$.addNotice(
+                    "INFO",
+                    .("Analysis completed"),
+                    sprintf(
+                        .("%d variable(s) compared across the levels of %s using the %s style."),
+                        n_vars, group_display, style_display
                     )
-                    self$results$tablestyle2$setContent(tablefinalfit)
-                } else if (sty == "gtsummary") {
-                    private$.checkpoint()
-                    # tablegtsummary <- gtsummary::tbl_summary(data = mydata, by = mygroup)
-                    # tablegtsummary <- gtsummary::as_kable_extra(tablegtsummary)
-                    # self$results$tablestyle3$setContent(tablegtsummary)
+                )
+
+                # Standardized mean differences (balance diagnostic)
+                if (isTRUE(self$options$showSMD))
+                    private$.populateSMD(
+                        data = mydata,
+                        vars = myvars,
+                        group = mygroup,
+                        name_mapping = original_names_mapping
+                    )
+
+                # Copy-ready plain-language summary
+                if (isTRUE(self$options$showSummary)) {
+                    self$results$summary$setContent(private$.summarySentence(
+                        mydata, myvars, mygroup, original_names_mapping,
+                        group_sizes = validation_results$group_sizes,
+                        n_dropped = n_dropped,
+                        style_display = style_display,
+                        pvalues = built$pvalues
+                    ))
+                }
+
+            },
+
+            # ----------------------------------------------------------------
+            # Table engines. Each returns list(html, pvalues), or NULL after the
+            # engine's error has been reported through .reportTableError().
+            # pvalues is data.frame(display, p, p_text, q): the per-variable
+            # p-values the rendered table shows, consumed by .summarySentence().
+            # ----------------------------------------------------------------
+            .tableArsenal = function(mydata, formula, name_mapping) {
+                private$.checkpoint()
+                arsenal_control <- arsenal::tableby.control(
+                    test = TRUE,
+                    total = TRUE,
+                    numeric.test = if (self$options$cont == "mean") "anova" else "kwt",
+                    cat.test = if (self$options$pcat == "fisher") "fe" else "chisq",
+                    numeric.stats = if (self$options$cont == "mean") c("Nmiss", "meansd") else c("Nmiss", "median", "q1q3"),
+                    stats.labels = list(meansd = "Mean (SD)", median = "Median", q1q3 = "Q1, Q3")
+                )
+
+                arsenal_data <- private$.htmlSafeTableData(mydata)
+                tablearsenal <- tryCatch(arsenal::tableby(
+                    formula = formula,
+                    data = arsenal_data,
+                    control = arsenal_control,
+                    digits = 1,
+                    digits.count = 1
+                ), error = function(e) { private$.reportTableError(e); NULL })
+                if (is.null(tablearsenal)) return(NULL)
+                # Per-variable p-values as arsenal computed them, read before
+                # the object is rendered away below.
+                pvalues <- private$.pvaluesFromArsenal(tablearsenal, name_mapping)
+                # Render Arsenal's own markup after escaping every data-derived
+                # label and value on a render-only copy.
+                tablearsenal <- summary(
+                    tablearsenal,
+                    text = "html",
+                    pfootnote = "html"
+                )
+                tablearsenal <- paste(
+                    capture.output(tablearsenal),
+                    collapse = "\n"
+                )
+                list(html = tablearsenal, pvalues = pvalues)
+            },
+
+            .tableFinalfit = function(mydata, myvars, mygroup) {
+                myvars_term <- jmvcore::composeTerm(components = myvars)
+                myvars_term <- jmvcore::decomposeTerm(term = myvars_term)
+                private$.checkpoint()
+                # Create the finalfit summary table.
+                tablefinalfit <- tryCatch(mydata %>%
+                    finalfit::summary_factorlist(
+                        .data = .,
+                        dependent = mygroup,
+                        explanatory = myvars_term,
+                        total_col = TRUE,
+                        p = TRUE,
+                        add_dependent_label = TRUE,
+                        na_include = FALSE,
+                        na_to_p = FALSE,
+                        cont = self$options$cont,
+                        cont_nonpara = NULL,
+                        # cont_cut = 5 is finalfit's default and is KEPT DELIBERATELY here.
+                        # Do not "sweep" it to 0.
+                        #
+                        # finalfit runs, on its own copy of the data,
+                        #   cont_distinct = select(explanatory) %>% summarise_if(is.numeric, n_distinct) %>% keep(~ .x < cont_cut)
+                        #   .data = mutate_at(.data, cont_distinct, as.factor)
+                        # so a numeric explanatory with fewer than 5 distinct values (n_distinct
+                        # counts NA) is summarised as a category and its p-value comes from
+                        # p_cat (chisq/fisher) instead of p_cont_para (aov). Verified against
+                        # finalfit 1.1.0: explanatory_type is read AFTER that mutate, so it is
+                        # what picks the test branch.
+                        #
+                        # In multisurvival/survivalcont/oddsratio the same rewrite is a BUG and is
+                        # disabled with cont_cut = 0, because those analyses also fit the same
+                        # column with coxph/glm/lrm, which do not apply the rule -- one selection,
+                        # two different models. This analysis fits NO model. It is a purely
+                        # descriptive Table One, so there is nothing to disagree with, and the
+                        # conversion is what a clinician wants: on the bundled histopathology data
+                        # the columns it touches are Grade, Anti-X/Anti-Y intensity (1/2/3) and the
+                        # 0/1 markers -- categorical variables stored as numbers. At cont_cut = 5
+                        # Grade prints 25 (31.2) / 27 (33.8) / 28 (35.0), chisq p = 0.529; at
+                        # cont_cut = 0 it collapses to a meaningless "Mean (SD) 2.1 (0.8)", aov
+                        # p = 0.409. Genuine factors and numerics with >= 5 distinct values (Age,
+                        # OverallTime, TStage) are byte-identical either way.
+                        cont_cut = 5,
+                        cont_range = TRUE,
+                        p_cont_para = "aov",
+                        p_cat = self$options$pcat,
+                        dependent_label_prefix = "Dependent: ",
+                        dependent_label_suffix = "",
+                        row_totals_colname = "Total N",
+                        row_missing_colname = "Missing N",
+                        column = TRUE,
+                        orderbytotal = FALSE,
+                        digits = c(1, 1, 3, 1, 0),
+                        na_include_dependent = FALSE,
+                        na_complete_cases = FALSE,
+                        fit_id = FALSE,
+                        na_to_prop = TRUE,
+                        add_col_totals = TRUE,
+                        include_col_totals_percent = TRUE,
+                        col_totals_rowname = NULL,
+                        col_totals_prefix = "",
+                        add_row_totals = FALSE,
+                        include_row_totals_percent = TRUE,
+                        include_row_missing_col = TRUE,
+                        catTest = NULL,
+                        weights = NULL
+                    ), error = function(e) { private$.reportTableError(e); NULL })
+                if (is.null(tablefinalfit)) return(NULL)
+                pvalues <- private$.pvaluesFromFinalfit(tablefinalfit)
+                tablefinalfit <- kableExtra::kable(
+                    tablefinalfit,
+                    format = "html",
+                    digits = 1,
+                    escape = TRUE
+                )
+                list(html = tablefinalfit, pvalues = pvalues)
+            },
+
+            .tableGtsummary = function(mydata, myvars, mygroup, name_mapping) {
+                private$.checkpoint()
 
 
 
-                    # http://www.danieldsjoberg.com/gtsummary/articles/gallery.html
+                # http://www.danieldsjoberg.com/gtsummary/articles/gallery.html
 
 
                 # Select only the analysis variables and grouping variable
@@ -1102,24 +1300,18 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                   add_p(test = gts_test,
                         pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)),
                   error = function(e) { private$.reportTableError(e); NULL })
-                if (is.null(tablegtsummary)) return()
+                if (is.null(tablegtsummary)) return(NULL)
 
                 # Add adjusted p-values/q-values only if adjustment method is not "none"
                 if (p_adjust_method != "none") {
-                    # Warn if adjusting with only 1 variable (pointless)
-                    if (n_vars == 1) {
-                        single_var_warning <- .crosstableNoticeHTML(
-                            paste0("P-value adjustment with only 1 variable has no effect. ",
-                                   "Adjusted p-value will equal the original p-value. ",
-                                   "Multiple testing correction is only meaningful when testing multiple variables simultaneously."),
-                            type = "INFO"
+                    # Adjusting with only one variable is a no-op; say so below
+                    # the table rather than in the warnings panel above it.
+                    if (length(myvars) == 1) {
+                        private$.addNotice(
+                            "INFO",
+                            .("P-value adjustment with one variable has no effect"),
+                            .("The adjusted p-value equals the original p-value: a multiple-testing correction only changes anything when several variables are tested at once.")
                         )
-                        data_quality_html <- paste(
-                            c(data_quality_html, single_var_warning),
-                            collapse = "\n"
-                        )
-                        self$results$dataQualityNotice$setContent(data_quality_html)
-                        self$results$dataQualityNotice$setVisible(TRUE)
                     }
 
                     # Determine if this is FWER or FDR method
@@ -1149,10 +1341,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 tablegtsummary <- tablegtsummary %>%
                   bold_labels()
 
+                pvalues <- private$.pvaluesFromGtsummary(tablegtsummary, name_mapping)
                 tablegtsummary <-
                     gtsummary::as_kable_extra(tablegtsummary)
 
-                self$results$tablestyle3$setContent(tablegtsummary)
+                table_html <- tablegtsummary
 
                 # Add adjustment explanation (only if adjustment is applied)
                 if (p_adjust_method != "none") {
@@ -1275,129 +1468,204 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     self$results$testInformation$setVisible(FALSE)
                 }
 
-                } else if (sty %in% c("nejm", "lancet", "hmisc")) {
-                    private$.checkpoint()
-                    sty_term <- jmvcore::composeTerm(components = self$options$sty)
-                    # No .htmlSafeTableData() here: tangram::html5() escapes the
-                    # labels and factor levels it emits itself (verified - a raw
-                    # level "<img src=x onerror=alert(1)>" and a raw label
-                    # "<script>alert(2)</script>" both come out fully escaped), so
-                    # pre-escaping produced "Ki-67 &amp;gt;20%", which the user reads
-                    # as "Ki-67 &gt;20%". The caption below IS escaped by hand
-                    # because tangram does not escape that argument. The arsenal
-                    # branch keeps its pre-escaping - arsenal emits raw HTML.
-                    tabletangram <- tryCatch(tangram::html5(
-                        tangram::tangram(
-                            paste(deparse(formula), collapse = " "),
-                            mydata,
-                            transform = tangram::hmisc,
-                            id = "tbl3",
-                            test = TRUE,
-                            digits = 1,
-                            include_p = TRUE
-                        ),
-                        fragment = TRUE,
-                        style = sty_term,
-                        caption = paste0(
-                            "Cross Table for Dependent ",
-                            htmltools::htmlEscape(
-                                .crosstableDisplayName(mygroup, original_names_mapping)
-                            )
-                        ),
-                        id = "tbl3"
-                    ), error = function(e) { private$.reportTableError(e); NULL })
-                    if (is.null(tabletangram)) return()
-                    self$results$tablestyle4$setContent(tabletangram)
+                list(html = table_html, pvalues = pvalues)
+            },
+
+            .tableTangram = function(mydata, formula, myvars, mygroup, name_mapping) {
+                private$.checkpoint()
+                sty_term <- jmvcore::composeTerm(components = self$options$sty)
+                # No .htmlSafeTableData() here: tangram::html5() escapes the
+                # labels and factor levels it emits itself (verified - a raw
+                # level "<img src=x onerror=alert(1)>" and a raw label
+                # "<script>alert(2)</script>" both come out fully escaped), so
+                # pre-escaping produced "Ki-67 &amp;gt;20%", which the user reads
+                # as "Ki-67 &gt;20%". The caption below IS escaped by hand
+                # because tangram does not escape that argument. The arsenal
+                # branch keeps its pre-escaping - arsenal emits raw HTML.
+                tabletangram <- tryCatch(tangram::html5(
+                    tangram::tangram(
+                        paste(deparse(formula), collapse = " "),
+                        mydata,
+                        transform = tangram::hmisc,
+                        id = "tbl3",
+                        test = TRUE,
+                        digits = 1,
+                        include_p = TRUE
+                    ),
+                    fragment = TRUE,
+                    style = sty_term,
+                    caption = paste0(
+                        "Cross Table for Dependent ",
+                        htmltools::htmlEscape(
+                            .crosstableDisplayName(mygroup, name_mapping)
+                        )
+                    ),
+                    id = "tbl3"
+                ), error = function(e) { private$.reportTableError(e); NULL })
+                if (is.null(tabletangram)) return(NULL)
+                list(html = tabletangram,
+                     pvalues = private$.pvaluesRecomputed(mydata, myvars, mygroup, name_mapping))
+            },
+
+            # ----------------------------------------------------------------
+            # Per-variable p-values, read back from each engine's own object so
+            # the summary sentence can never disagree with the table.
+            # ----------------------------------------------------------------
+            .pvaluesFrame = function(display, p, p_text = NULL, q = NA_real_) {
+                if (is.null(p_text)) p_text <- private$.formatP(p)
+                data.frame(display = unname(display), p = as.numeric(p), p_text = p_text,
+                           q = as.numeric(q), stringsAsFactors = FALSE)
+            },
+
+            # "= 0.028", "< 0.001" or "n/a"; the caller supplies the "p"/"q".
+            .formatP = function(p) {
+                ifelse(is.na(p), "n/a",
+                       ifelse(p < 0.001, "< 0.001", paste0("= ", formatC(p, format = "f", digits = 3))))
+            },
+
+            .pvaluesFromArsenal = function(tab, name_mapping) {
+                df <- tryCatch(unique(as.data.frame(tab)[, c("variable", "p.value")]), error = function(e) NULL)
+                if (is.null(df) || nrow(df) == 0) return(NULL)
+                private$.pvaluesFrame(
+                    display = vapply(as.character(df$variable), function(v) .crosstableDisplayName(v, name_mapping), character(1)),
+                    p = df$p.value)
+            },
+
+            .pvaluesFromFinalfit = function(df) {
+                # summary_factorlist() returns the displayed frame: the label is in
+                # the first column on each variable's first row, and `p` is the
+                # printed text ("0.068" or "<0.001"), so that text is kept as-is.
+                if (!is.data.frame(df) || ncol(df) < 2 || !("p" %in% names(df))) return(NULL)
+                p_txt <- trimws(as.character(df$p))
+                keep <- nzchar(p_txt) & !is.na(p_txt)
+                if (!any(keep)) return(NULL)
+                p_txt <- p_txt[keep]
+                private$.pvaluesFrame(
+                    display = as.character(df[[1]][keep]),
+                    p = suppressWarnings(as.numeric(sub("^<", "", p_txt))),
+                    p_text = ifelse(startsWith(p_txt, "<"), paste0("< ", sub("^<", "", p_txt)), paste0("= ", p_txt)))
+            },
+
+            .pvaluesFromGtsummary = function(tbl, name_mapping) {
+                tb <- tryCatch(tbl$table_body, error = function(e) NULL)
+                if (is.null(tb) || !all(c("variable", "row_type", "p.value") %in% names(tb))) return(NULL)
+                lab <- tb[tb$row_type == "label", , drop = FALSE]
+                if (nrow(lab) == 0) return(NULL)
+                private$.pvaluesFrame(
+                    display = vapply(as.character(lab$variable), function(v) .crosstableDisplayName(v, name_mapping), character(1)),
+                    p = lab$p.value,
+                    q = if ("q.value" %in% names(lab)) lab$q.value else NA_real_)
+            },
+
+            .pvaluesRecomputed = function(mydata, myvars, mygroup, name_mapping) {
+                # tangram does not expose its test results, so they are recomputed
+                # with the tests its table actually prints: Pearson's chi-square
+                # without continuity correction for factors, and for numeric
+                # columns the Hmisc-style F approximation to the Wilcoxon /
+                # Kruskal-Wallis test, i.e. an ANOVA on the ranks (verified: the
+                # NEJM table prints "F 1,118 = 4.68, P = 0.03" and this reproduces
+                # F = 4.6814, P = 0.0325; kruskal.test() would give 0.0331). The
+                # test suite checks both against the rendered table.
+                g <- mydata[[mygroup]]
+                p <- vapply(myvars, function(v) {
+                    x <- mydata[[v]]
+                    ok <- !is.na(x) & !is.na(g)
+                    tryCatch({
+                        if (is.numeric(x)) {
+                            gg <- droplevels(factor(g[ok]))
+                            stats::anova(stats::lm(rank(x[ok]) ~ gg))[["Pr(>F)"]][1]
+                        } else
+                            suppressWarnings(stats::chisq.test(
+                                table(droplevels(factor(x[ok])), droplevels(factor(g[ok]))),
+                                correct = FALSE))$p.value
+                    }, error = function(e) NA_real_)
+                }, numeric(1))
+                private$.pvaluesFrame(
+                    display = vapply(myvars, function(v) .crosstableDisplayName(v, name_mapping), character(1)),
+                    p = p)
+            },
+
+            # ----------------------------------------------------------------
+            # Copy-ready plain-language summary (shown when showSummary is on)
+            # ----------------------------------------------------------------
+            .summarySentence = function(mydata, myvars, mygroup, name_mapping, group_sizes,
+                                        n_dropped, style_display, pvalues) {
+                # Assembled as plain text and HTML-escaped ONCE at the end: that
+                # covers the user's variable names and the "<" in "p < 0.05"
+                # alike, with no double escaping.
+                sty <- self$options$sty
+                cont <- self$options$cont
+                pcat <- self$options$pcat
+                p_adjust <- self$options$p_adjust
+                n_groups <- length(group_sizes)
+
+                var_labels <- vapply(myvars, function(v) .crosstableDisplayName(v, name_mapping), character(1))
+                group_label <- .crosstableDisplayName(mygroup, name_mapping)
+                group_sizes_txt <- paste(
+                    sprintf("%s n = %d", names(group_sizes), as.integer(group_sizes)),
+                    collapse = "; ")
+
+                # The tests each style actually runs (see the notices for why they
+                # differ); wording is kept in step with those notices.
+                cat_test <- switch(sty,
+                    arsenal   = if (identical(pcat, "fisher")) .("Fisher's exact test") else .("Pearson's chi-square test without continuity correction"),
+                    finalfit  = if (identical(pcat, "fisher")) .("Fisher's exact test") else .("the chi-square test with Yates' continuity correction on 2x2 tables"),
+                    gtsummary = if (identical(pcat, "fisher")) .("Fisher's exact test") else .("the chi-square test, switching to Fisher's exact test where an expected count was below 5"),
+                    .("Pearson's chi-square test"))
+                cont_test <- if (sty %in% c("arsenal", "finalfit")) {
+                    if (identical(cont, "mean")) {
+                        if (n_groups == 2) .("one-way ANOVA, which for two groups is the pooled-variance t-test") else .("one-way ANOVA")
+                    } else {
+                        .("the Kruskal-Wallis test")
+                    }
+                } else if (identical(sty, "gtsummary")) {
+                    if (n_groups == 2) .("the Wilcoxon rank-sum test") else .("the Kruskal-Wallis test")
+                } else {
+                    if (n_groups == 2) .("the Wilcoxon rank-sum test, through the F approximation the NEJM, Lancet and Hmisc layouts use") else .("the Kruskal-Wallis test, through the F approximation the NEJM, Lancet and Hmisc layouts use")
                 }
 
-
-                # Add INFO notice for successful analysis completion (using HTML to avoid serialization errors)
-                n_vars <- length(self$options$vars)
-                group_display <- self$options$group
-                style_display <- switch(self$options$sty,
-                    "arsenal" = "arsenal",
-                    "finalfit" = "finalfit",
-                    "gtsummary" = "gtsummary",
-                    "nejm" = "NEJM",
-                    "lancet" = "Lancet",
-                    "hmisc" = "Hmisc",
-                    self$options$sty
-                )
-
-                info_message <- sprintf(
-                    'Cross table analysis completed successfully. Analyzed %d variable(s) across %s groups using %s style.',
-                    n_vars, group_display, style_display
-                )
-
-                # Not every style honours every statistical option, and until now
-                # nothing said so: the tangram styles (NEJM/Lancet/Hmisc, of which
-                # NEJM is the default) apply none of them, and p-value adjustment
-                # only exists in gtsummary. A user could set "Fisher's exact test"
-                # and "Benjamini-Hochberg", see a table, and reasonably believe both
-                # had been applied. Verified per style by comparing rendered output.
-                sty_now <- self$options$sty
-                honours <- list(
-                    arsenal   = c("pcat", "cont"),
-                    finalfit  = c("pcat", "cont"),
-                    gtsummary = c("pcat", "cont", "p_adjust"),
-                    nejm      = character(0),
-                    lancet    = character(0),
-                    hmisc     = character(0)
-                )
-                supported <- honours[[sty_now]]
-                if (is.null(supported)) supported <- character(0)
-
-                requested <- character(0)
-                if (!identical(self$options$pcat, "chisq"))
-                    requested <- c(requested, pcat = "Test for categorical variables")
-                if (!identical(self$options$cont, "mean"))
-                    requested <- c(requested, cont = "Statistic for continuous variables")
-                if (!identical(self$options$p_adjust, "none"))
-                    requested <- c(requested, p_adjust = "P-value adjustment")
-
-                ignored <- requested[!(names(requested) %in% supported)]
-                if (length(ignored) > 0) {
-                    ignored_html <- .crosstableNoticeHTML(
-                        sprintf(
-                            "The %s style does not apply the following setting(s), so the table below is unchanged by them: %s. %s",
-                            style_display,
-                            paste(unname(ignored), collapse = "; "),
-                            # gtsummary honours every option in `requested`, so
-                            # `ignored` is always empty for it and only the
-                            # tangram styles and arsenal/finalfit can reach here.
-                            if (sty_now %in% c("nejm", "lancet", "hmisc"))
-                                "These styles use their own built-in tests. Choose arsenal, finalfit or gtsummary to control the test; p-value adjustment is available in gtsummary only."
-                            else
-                                "P-value adjustment is available in the gtsummary style only."),
-                        type = "WARNING")
-                    # Compose onto the data-quality warnings already written to this
-                    # same output element earlier in .run() (lines ~602 and ~799)
-                    # rather than replacing them. setContent() overwrites, and the
-                    # earlier block escalates to STRONG_WARNING for cells with n < 10 -
-                    # exactly the small-sample warning a pathologist most needs - so
-                    # replacing it silently dropped that warning whenever the user also
-                    # picked a style that ignores one of their statistical settings.
-                    data_quality_html <- paste(
-                        Filter(nzchar, c(data_quality_html, ignored_html)),
-                        collapse = "\n"
-                    )
-                    self$results$dataQualityNotice$setContent(data_quality_html)
-                    self$results$dataQualityNotice$setVisible(TRUE)
+                parts <- sprintf(
+                    .("Cross table of %d rows comparing %d variable(s) (%s) across %s (%s) using the %s style."),
+                    nrow(mydata), length(myvars), paste(var_labels, collapse = ", "),
+                    group_label, group_sizes_txt, style_display)
+                if (n_dropped > 0) {
+                    n_all <- nrow(mydata) + n_dropped
+                    parts <- c(parts, sprintf(
+                        .("%d of %d rows (%s%%) were excluded for missing values in the selected variables."),
+                        n_dropped, n_all, format(round(100 * n_dropped / n_all, 1), nsmall = 1)))
                 }
+                parts <- c(parts, sprintf(
+                    .("Categorical variables were compared with %s and continuous variables with %s."),
+                    cat_test, cont_test))
 
-                info_html <- .crosstableNoticeHTML(info_message, type = "INFO")
-                self$results$analysisInfo$setContent(info_html)
-                self$results$analysisInfo$setVisible(TRUE)
-
-                # Standardized mean differences (balance diagnostic)
-                if (isTRUE(self$options$showSMD))
-                    private$.populateSMD(
-                        data = mydata,
-                        vars = myvars,
-                        group = mygroup,
-                        name_mapping = original_names_mapping
-                    )
-
+                if (is.null(pvalues) || nrow(pvalues) == 0 || all(is.na(pvalues$p))) {
+                    parts <- c(parts, .("Per-variable p-values could not be read from the table, so no significance summary is given."))
+                } else {
+                    use_q <- identical(sty, "gtsummary") && !identical(p_adjust, "none") && any(!is.na(pvalues$q))
+                    if (use_q) {
+                        method <- c(bonferroni = "Bonferroni", holm = "Holm",
+                                    BH = "Benjamini-Hochberg", BY = "Benjamini-Yekutieli")[[p_adjust]]
+                        sig <- pvalues[!is.na(pvalues$q) & pvalues$q < 0.05, , drop = FALSE]
+                        listing <- paste(sprintf("%s (p %s, q %s)", sig$display, sig$p_text, private$.formatP(sig$q)), collapse = ", ")
+                        parts <- c(parts, if (nrow(sig) > 0)
+                            sprintf(.("After %s adjustment across the %d variables, %d differed between the groups at q < 0.05: %s."),
+                                    method, nrow(pvalues), nrow(sig), listing)
+                        else
+                            sprintf(.("After %s adjustment across the %d variables, none differed between the groups at q < 0.05."),
+                                    method, nrow(pvalues)))
+                    } else {
+                        sig <- pvalues[!is.na(pvalues$p) & pvalues$p < 0.05, , drop = FALSE]
+                        listing <- paste(sprintf("%s (p %s)", sig$display, sig$p_text), collapse = ", ")
+                        parts <- c(parts, if (nrow(sig) > 0)
+                            sprintf(.("At p < 0.05, %d of %d variables differed between the groups: %s."),
+                                    nrow(sig), nrow(pvalues), listing)
+                        else
+                            .("No variable differed between the groups at p < 0.05."))
+                    }
+                }
+                paste0("<p style='color: inherit;'>",
+                       htmltools::htmlEscape(paste(parts, collapse = " ")),
+                       "</p>")
             },
 
             # ----------------------------------------------------------------
@@ -1435,7 +1703,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     isNum <- is.numeric(x) && !is.factor(x)
                     smd <- NA_real_; vtype <- "categorical"
                     if (isNum) {
-                        vtype <- "continuous"
+                        # Label numeric codes so this row cannot contradict the
+                        # coded-variable note above the table.
+                        vtype <- if (.crosstableIsCategorical(x)) "continuous (numeric codes)" else "continuous"
                         x1 <- x[i1]; x2 <- x[i2]
                         smd <- private$.smdContinuous(x1, x2)
                     } else {
@@ -1452,7 +1722,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         absSMD = a, balance = bal))
                 }
                 tab$setNote("smd", sprintf(
-                    "SMD between '%s' and '%s'. Continuous: (m1 - m2) / sqrt((s1^2 + s2^2)/2). Categorical: multinomial SMD (Yang & Dalton, 2012). |SMD| < 0.1 conventionally indicates negligible imbalance.",
+                    "SMD between '%s' and '%s'. Continuous: (m1 - m2) / sqrt((s1^2 + s2^2)/2); numeric columns with 6 or fewer distinct values are labelled 'continuous (numeric codes)' and treat the codes as an interval scale. Categorical: multinomial SMD (Yang & Dalton, 2012). |SMD| < 0.1 conventionally indicates negligible imbalance.",
                     levs[1], levs[2]))
             },
 

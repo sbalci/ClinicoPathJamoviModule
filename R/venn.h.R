@@ -492,11 +492,9 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         notices = function() private$.items[["notices"]],
         welcome = function() private$.items[["welcome"]],
-        todo = function() private$.items[["todo"]],
         summary = function() private$.items[["summary"]],
         validationErrors = function() private$.items[["validationErrors"]],
         validationWarnings = function() private$.items[["validationWarnings"]],
-        analysisInfo = function() private$.items[["analysisInfo"]],
         plotGgvenn = function() private$.items[["plotGgvenn"]],
         plotGgVennDiagram = function() private$.items[["plotGgVennDiagram"]],
         plotUpsetR = function() private$.items[["plotUpsetR"]],
@@ -508,7 +506,8 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         setCalculations = function() private$.items[["setCalculations"]],
         membershipTable = function() private$.items[["membershipTable"]],
         membershipGroups = function() private$.items[["membershipGroups"]],
-        glossary = function() private$.items[["glossary"]]),
+        glossary = function() private$.items[["glossary"]],
+        analysisInfo = function() private$.items[["analysisInfo"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -578,10 +577,6 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="welcome",
                 title="Welcome"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="todo",
-                title="To Do"))
             self$add(jmvcore::Table$new(
                 options=options,
                 title="Summary of True Counts",
@@ -619,11 +614,6 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="validationWarnings",
                 title="Important Warnings",
                 visible=FALSE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="analysisInfo",
-                title="Analysis Information",
-                visible=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="ggvenn Plot",
@@ -645,7 +635,9 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 visible="(show_ggVennDiagram)",
                 refs=list(
-                    "ggVennDiagram")))
+                    "ggVennDiagram",
+                    "viridis",
+                    "RColorBrewer")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="UpSetR Plot",
@@ -729,7 +721,12 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="glossary",
                 title="Statistical Glossary",
-                visible="(showGlossary)"))}))
+                visible="(showGlossary)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="analysisInfo",
+                title="Analysis Information",
+                visible=FALSE))}))
 
 vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "vennBase",
@@ -859,11 +856,9 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$validationErrors} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$validationWarnings} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$analysisInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plotGgvenn} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotGgVennDiagram} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotUpsetR} \tab \tab \tab \tab \tab an image \cr
@@ -876,6 +871,7 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$membershipTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$membershipGroups} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$analysisInfo} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

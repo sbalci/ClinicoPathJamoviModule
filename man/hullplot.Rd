@@ -83,8 +83,9 @@ in each group using the 1.5 x IQR rule applied separately to the X and Y
 variables. Groups with fewer than 5 observations are reported as too small
 rather than given a count. Outliers are counted, not marked on the plot.}
 
-\item{confidence_ellipses}{If TRUE, adds confidence ellipses in addition to
-hull polygons.}
+\item{confidence_ellipses}{If TRUE, adds model-based 95\\% data ellipses,
+assuming a multivariate t distribution. These describe data dispersion, not
+uncertainty in group means.}
 
 \item{show_summary}{If TRUE, displays a plain-language summary of the
 results with copy-ready text.}
