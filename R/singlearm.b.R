@@ -273,12 +273,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             censored = dq$n_censored, k = dq$n_competing)
           else
             jmvcore::format(.("{censored} censored"), censored = dq$n_censored)
-          private$.addWarning(jmvcore::format(
-            .("No events of interest were observed among {n} subjects ({counts}). Every survival or cumulative-incidence estimate is therefore a boundary value and the median is not estimable. The event level currently mapped to the event of interest is \"{level}\"; check that it is the intended level before interpreting these results as low risk."),
+          private$.addWarning(jmvcore::format(.("No events of interest were observed among {n} subjects ({counts}). Every survival or cumulative-incidence estimate is therefore a boundary value and the median is not estimable. The event level currently mapped to the event of interest is \"{level}\"; check that it is the intended level before interpreting these results as low risk."),
             n = dq$n_total, counts = counts, level = ev_lab), strong = TRUE)
         } else if (n_events < 10) {
-          private$.addWarning(jmvcore::format(
-            .("Only {n} event(s) of interest among {total} subjects. Estimates with fewer than 10 events are imprecise: confidence intervals will be wide and the {median} may not be reached. Report the number at risk alongside every estimate and treat this as a descriptive result."),
+          private$.addWarning(jmvcore::format(.("Only {n} event(s) of interest among {total} subjects. Estimates with fewer than 10 events are imprecise: confidence intervals will be wide and the {median} may not be reached. Report the number at risk alongside every estimate and treat this as a descriptive result."),
             n = n_events, total = dq$n_total,
             median = if (cr) .("median cumulative-incidence time") else .("median")), strong = TRUE)
         }
@@ -323,25 +321,25 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         switch(estimand,
           "overall survival" = list(
-            probability = "Overall survival",
-            median = "Median overall survival",
-            median_lower = "median overall survival",
-            curve = "Overall Survival"),
+            probability = .("Overall survival"),
+            median = .("Median overall survival"),
+            median_lower = .("median overall survival"),
+            curve = .("Overall Survival")),
           "cause-specific survival" = list(
-            probability = "Cause-specific survival",
-            median = "Median cause-specific survival",
-            median_lower = "median cause-specific survival",
-            curve = "Cause-Specific Survival"),
+            probability = .("Cause-specific survival"),
+            median = .("Median cause-specific survival"),
+            median_lower = .("median cause-specific survival"),
+            curve = .("Cause-Specific Survival")),
           "disease-free survival" = list(
-            probability = "Disease-free survival",
-            median = "Median disease-free survival",
-            median_lower = "median disease-free survival",
-            curve = "Disease-Free Survival"),
+            probability = .("Disease-free survival"),
+            median = .("Median disease-free survival"),
+            median_lower = .("median disease-free survival"),
+            curve = .("Disease-Free Survival")),
           list(
-            probability = "Kaplan-Meier event-free probability",
-            median = "Median event-free time",
-            median_lower = "median event-free time",
-            curve = "Event-Free Probability for the Selected Event")
+            probability = .("Kaplan-Meier event-free probability"),
+            median = .("Median event-free time"),
+            median_lower = .("median event-free time"),
+            curve = .("Event-Free Probability for the Selected Event"))
         )
       },
 
@@ -1697,8 +1695,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if (!identical(self$options$medianline, "none"))
             unavailable <- c(unavailable, "median reference lines")
           if (length(unavailable) > 0L)
-            private$.addInfo(jmvcore::format(
-              .("The competing-risk CIF plot does not display {options}. The cumulative-incidence table remains available for estimates, confidence intervals, and counts at selected times."),
+            private$.addInfo(jmvcore::format(.("The competing-risk CIF plot does not display {options}. The cumulative-incidence table remains available for estimates, confidence intervals, and counts at selected times."),
               options = paste(unavailable, collapse = ", ")))
         }
         if (!private$.isCompetingRisk() && isTRUE(self$options$kmunicate) &&
@@ -1905,8 +1902,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             n_at_risk <- sum(mydata[[mytime]] >= candidate, na.rm = TRUE)
 
             if (is.finite(max_time) && candidate >= max_time && prev_est < 0.5) {
-              private$.addWarning(jmvcore::format(
-                .("The cumulative incidence of the event of interest reaches 50% only at the very last observed time ({time} {unit}), stepping from {before}% to {after}% with {atrisk} subject(s) still at risk. That step is driven by the final observation rather than by the cohort, so no median is reported. Report the cumulative incidence at fixed time points instead, or extend follow-up."),
+              private$.addWarning(jmvcore::format(.("The cumulative incidence of the event of interest reaches 50% only at the very last observed time ({time} {unit}), stepping from {before}% to {after}% with {atrisk} subject(s) still at risk. That step is driven by the final observation rather than by the cohort, so no median is reported. Report the cumulative incidence at fixed time points instead, or extend follow-up."),
                 time   = base::format(round(candidate, 1), trim = TRUE),
                 unit   = self$options$timetypeoutput,
                 before = sprintf("%.1f", 100 * prev_est),
@@ -2028,9 +2024,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             "cr_ci",
             .("No confidence interval is computed for the cumulative-incidence median. Restricted-mean survival columns are not applicable to this cumulative-incidence quantile and are left empty."))
         } else {
-          median_title <- paste0(estimand_meta$median, " Analysis")
+          median_title <- jmvcore::format(.("{median} Analysis"), median = estimand_meta$median)
           self$results$medianHeading$setTitle(median_title)
-          medianTable$setTitle(paste0(estimand_meta$median, " Table"))
+          medianTable$setTitle(jmvcore::format(.("{median} Table"), median = estimand_meta$median))
           medianTable$getColumn("median")$setTitle(estimand_meta$median)
           medianTable$getColumn("rmean")$setTitle(
             if (identical(private$.eventRecode$estimand, "overall survival"))
@@ -2047,11 +2043,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     base::format(round(max(mydata[[mytime]], na.rm = TRUE), 2), trim = TRUE),
                     self$options$timetypeoutput))
           self$results$medianSummary$setTitle(
-            paste0(estimand_meta$median, ": Natural Language Summary"))
+            jmvcore::format(.("{median}: Natural Language Summary"), median = estimand_meta$median))
           self$results$medianHeading3$setTitle(
-            paste0(estimand_meta$median, ": Explanations"))
+            jmvcore::format(.("{median}: Explanations"), median = estimand_meta$median))
           self$results$medianSurvivalExplanation$setTitle(
-            paste0("Understanding ", estimand_meta$median))
+            jmvcore::format(.("Understanding {median}"), median = estimand_meta$median))
         }
         data_frame <- results1table
 
@@ -2116,14 +2112,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # Standard survival analysis narrative
           km_fit_median_definition <- ifelse(
             !is.finite(.med) & results1table$events == 0,
-            paste0(estimand_meta$median, " cannot be estimated: no events were observed, so the ",
-                   "Kaplan-Meier event-free probability is 100% throughout the observed ",
-                   "follow-up and the curve never falls to 50%."),
+            jmvcore::format(.("{median} cannot be estimated: no events were observed, so the Kaplan-Meier event-free probability is 100% throughout the observed follow-up and the curve never falls to 50%."),
+                            median = estimand_meta$median),
             ifelse(
               !is.finite(.med),
-              paste0(estimand_meta$median, " was not reached: the Kaplan-Meier curve did not ",
-                     "fall to 50% within the observed follow-up."),
-              paste0(estimand_meta$median, " is ", round(.med, 1), " ", time_unit, .ci_txt, ".")))
+              jmvcore::format(.("{median} was not reached: the Kaplan-Meier curve did not fall to 50% within the observed follow-up."),
+                              median = estimand_meta$median),
+              jmvcore::format(.("{median} is {val} {unit}{ci}."),
+                              median = estimand_meta$median, val = round(.med, 1), unit = time_unit, ci = .ci_txt)))
         }  # End of if/else for competing risk vs standard
 
 
@@ -2327,17 +2323,17 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           self$results$survivalProbabilityExplanation$setTitle(
             .("Understanding Cumulative Incidence at Selected Time Points"))
         } else {
-          surv_title <- sprintf("%s at Selected Time Points (%s)",
-                                estimand_meta$probability,
-                                self$options$timetypeoutput)
+          surv_title <- jmvcore::format(.("{probability} at Selected Time Points ({unit})"),
+                                probability = estimand_meta$probability,
+                                unit = self$options$timetypeoutput)
           self$results$survTable$getColumn("surv")$setTitle(
             estimand_meta$probability)
           self$results$survTableSummary$setTitle(
-            paste0(estimand_meta$probability, ": Natural Language Summary"))
+            jmvcore::format(.("{probability}: Natural Language Summary"), probability = estimand_meta$probability))
           self$results$survTableHeading3$setTitle(
-            paste0(estimand_meta$probability, ": Explanations"))
+            jmvcore::format(.("{probability}: Explanations"), probability = estimand_meta$probability))
           self$results$survivalProbabilityExplanation$setTitle(
-            paste0("Understanding ", estimand_meta$probability))
+            jmvcore::format(.("Understanding {probability}"), probability = estimand_meta$probability))
         }
         self$results$survTableHeading$setTitle(surv_title)
         self$results$survTable$setTitle(surv_title)
@@ -4220,7 +4216,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # is not median survival.
             median_label <- if (private$.isCompetingRisk())
               .("Median time to event of interest was %.1f %s") else
-              paste0(estimand_meta$median, " was %.1f %s")
+              sprintf(.("%s was %%.1f %%s"), estimand_meta$median)
             median_text <- sprintf(median_label, median_survival, time_unit)
             if (is.finite(ci_lower) && is.finite(ci_upper))
               median_text <- paste0(median_text, " ", sprintf(
@@ -4230,7 +4226,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # no median survival to be estimated in the first place.
             no_median_label <- if (private$.isCompetingRisk())
               .("The median time to the event of interest could not be estimated: no event of interest was observed (longest follow-up %.1f %s)") else
-              paste0(estimand_meta$median, " could not be estimated: no events were observed (longest follow-up %.1f %s)")
+              sprintf(.("%s could not be estimated: no events were observed (longest follow-up %%.1f %%s)"), estimand_meta$median)
             median_text <- sprintf(no_median_label, max_followup, time_unit)
           } else if (private$.isCompetingRisk()) {
             median_text <- sprintf(
@@ -4239,7 +4235,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
           } else {
             median_text <- sprintf(
-              paste0(estimand_meta$median, " was not reached: the Kaplan-Meier curve stayed above 50%% within the observed follow-up (longest follow-up %.1f %s). This can reflect the event process, short follow-up, or censoring, so no conclusion about outcome should be drawn from its absence"),
+              sprintf(.("%s was not reached: the Kaplan-Meier curve stayed above 50%%%% within the observed follow-up (longest follow-up %%.1f %%s). This can reflect the event process, short follow-up, or censoring, so no conclusion about outcome should be drawn from its absence"), estimand_meta$median),
               max_followup, time_unit
             )
           }

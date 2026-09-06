@@ -34,6 +34,7 @@ options:
     - name: vars
       title: Variables
       type: Variables
+      default: NULL
       description:
           R: >
             a string naming the variables from `data` that contains the

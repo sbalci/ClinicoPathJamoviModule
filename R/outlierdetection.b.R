@@ -812,11 +812,11 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             
             # Check data validity before proceeding
             if (is.null(data) || nrow(data) == 0) {
-                jmvcore::reject("No data available for outlier detection")
+                jmvcore::reject(.("No data available for outlier detection"))
             }
 
             if (is.null(data) || ncol(data) == 0) {
-                jmvcore::reject("No variables available for outlier detection")
+                jmvcore::reject(.("No variables available for outlier detection"))
             }
             
             # Check for completely missing variables
@@ -825,7 +825,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 # `code = NULL` is required: reject()'s second POSITIONAL argument is
                 # `code`, so passing the value positionally left "{}" unsubstituted
                 # and the user saw a literal "{}" instead of the variable names.
-                jmvcore::reject("Variables with all missing values: {}", code = NULL,
+                jmvcore::reject(.("Variables with all missing values: {}"), code = NULL,
                                 paste(names(data)[all_na_vars], collapse = ", "))
             }
             
@@ -835,7 +835,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 length(unique(non_na_x)) <= 1
             })
             if (any(constant_vars)) {
-                jmvcore::reject("Variables with constant values (no variation): {}", code = NULL,
+                jmvcore::reject(.("Variables with constant values (no variation): {}"), code = NULL,
                                 paste(names(data)[constant_vars], collapse = ", "))
             }
             
@@ -883,23 +883,16 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     ci <- self$options$confidence_level
                     cap <- 2 * ceiling((1 - ci) / 2 * (nrow(data) - 1))
                     method_label <- if (method == "eti")
-                        "equal-tailed interval" else "highest density interval"
+                        .("equal-tailed interval") else .("highest density interval")
                     private$.accumulateMessage(sprintf(
-                        paste0('<strong>How many values this method can flag:</strong> the %s ',
-                               'places its bounds on the observed quantiles, so at a confidence ',
-                               'level of %s with %d observations it can flag at most about %d ',
-                               'value(s) per variable, however many extreme values the data ',
-                               'contain. On data with no extreme values it will usually flag ',
-                               'close to that many anyway, because the bounds fall between the ',
-                               'outermost observations. Use Robust Z-score or IQR if you need a ',
-                               'count that responds to how far out the values are.'),
+                        .('<strong>How many values this method can flag:</strong> the %s places its bounds on the observed quantiles, so at a confidence level of %s with %d observations it can flag at most about %d value(s) per variable, however many extreme values the data contain. On data with no extreme values it will usually flag close to that many anyway, because the bounds fall between the outermost observations. Use Robust Z-score or IQR if you need a count that responds to how far out the values are.'),
                         method_label, base::format(ci), nrow(data), cap))
                 }
 
             } else if (method_category == "multivariate") {
                 # Check if multivariate methods are applicable
                 if (ncol(data) == 1) {
-                    jmvcore::reject("Multivariate methods require multiple variables. Please select more variables or use univariate methods.")
+                    jmvcore::reject(.("Multivariate methods require multiple variables. Please select more variables or use univariate methods."))
                 }
                 
                 method <- self$options$multivariate_methods
@@ -909,14 +902,14 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 if (method %in% c("optics", "lof")) {
                     if (!requireNamespace("dbscan", quietly = TRUE)) {
                         jmvcore::reject(
-                            "The {} method needs the dbscan package, which is not available in this session. Choose Mahalanobis distance or MCD instead, or reinstall the module.",
+                            .("The {} method needs the dbscan package, which is not available in this session. Choose Mahalanobis distance or MCD instead, or reinstall the module."),
                             code = NULL, method)
                     }
                 }
                 
                 if (method == "mcd") {
                     if (!requireNamespace("robustbase", quietly = TRUE)) {
-                        jmvcore::reject("The MCD method needs the robustbase package, which is not available in this session. Choose Mahalanobis distance or a univariate method instead, or reinstall the module.")
+                        jmvcore::reject(.("The MCD method needs the robustbase package, which is not available in this session. Choose Mahalanobis distance or a univariate method instead, or reinstall the module."))
                     }
                 }
 
@@ -925,7 +918,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 # a raw R error they cannot act on inside jamovi.
                 if (method == "mahalanobis_robust") {
                     if (!requireNamespace("bigutilsr", quietly = TRUE)) {
-                        jmvcore::reject("Robust Mahalanobis distance is computed through the bigutilsr package, which is not installed with this module, so no result can be produced for this method. Choose Minimum covariance determinant (MCD) for a robust multivariate distance, or Mahalanobis distance for the classical one.")
+                        jmvcore::reject(.("Robust Mahalanobis distance is computed through the bigutilsr package, which is not installed with this module, so no result can be produced for this method. Choose Minimum covariance determinant (MCD) for a robust multivariate distance, or Mahalanobis distance for the classical one."))
                     }
                 }
 
@@ -965,7 +958,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
             # Check if result is valid
             if (is.null(outlier_result)) {
-                jmvcore::reject("Outlier detection returned no results")
+                jmvcore::reject(.("Outlier detection returned no results"))
             }
 
             # CRITICAL FIX: Extract detailed data from attributes

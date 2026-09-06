@@ -25,11 +25,7 @@ create_jjbarstats_analysis <- function(data, dep, group, grvar = NULL, ...) {
       dep = dep,
       group = group,
       grvar = grvar,
-      excl = TRUE,
       typestatistics = "parametric",
-      pairwisecomparisons = TRUE,
-      pairwisedisplay = "significant",
-      padjustmethod = "holm",
       originaltheme = FALSE,
       ...
     ),
@@ -120,7 +116,7 @@ test_that("jjbarstats works with grouping variable (grvar)", {
 # Test 4: Different statistical test types
 test_that("jjbarstats works with different statistical methods", {
   
-  stat_types <- c("parametric", "nonparametric", "robust", "bayes")
+  stat_types <- c("parametric", "bayes")
   
   for (stat_type in stat_types) {
     expect_no_error({
@@ -129,46 +125,6 @@ test_that("jjbarstats works with different statistical methods", {
         dep = "primary_outcome",
         group = "drug_dosage",
         typestatistics = stat_type
-      )
-    })
-  }
-})
-
-# Test 5: Pairwise comparison options
-test_that("jjbarstats handles pairwise comparison settings", {
-  
-  # Test with pairwise comparisons enabled
-  expect_no_error({
-    analysis <- create_jjbarstats_analysis(
-      data = quality_improvement_data,
-      dep = "implementation_status",
-      group = "improvement_category",
-      pairwisecomparisons = TRUE,
-      pairwisedisplay = "significant"
-    )
-  })
-  
-  # Test with pairwise comparisons disabled
-  expect_no_error({
-    analysis <- create_jjbarstats_analysis(
-      data = quality_improvement_data,
-      dep = "implementation_status",
-      group = "improvement_category",
-      pairwisecomparisons = FALSE
-    )
-  })
-  
-  # Test different adjustment methods
-  adjustment_methods <- c("holm", "hochberg", "bonferroni", "BH", "BY", "fdr", "none")
-  
-  for (method in adjustment_methods) {
-    expect_no_error({
-      analysis <- create_jjbarstats_analysis(
-        data = diagnostic_test_data,
-        dep = "test_result",
-        group = "test_method",
-        pairwisecomparisons = TRUE,
-        padjustmethod = method
       )
     })
   }
@@ -281,8 +237,7 @@ test_that("jjbarstats handles missing data appropriately", {
     analysis <- create_jjbarstats_analysis(
       data = data_with_na,
       dep = "response",
-      group = "treatment_group",
-      excl = TRUE
+      group = "treatment_group"
     )
   })
 })
@@ -326,9 +281,7 @@ test_that("jjbarstats handles realistic clinical research scenarios", {
       dep = "response",
       group = "treatment_group",
       grvar = "severity",
-      typestatistics = "nonparametric",
-      pairwisecomparisons = TRUE,
-      padjustmethod = "BH"
+      typestatistics = "parametric"
     )
   })
   
@@ -338,8 +291,7 @@ test_that("jjbarstats handles realistic clinical research scenarios", {
       data = quality_improvement_data,
       dep = c("implementation_status", "priority_level"),
       group = "department_involved",
-      typestatistics = "parametric",
-      pairwisecomparisons = FALSE
+      typestatistics = "parametric"
     )
   })
   
@@ -350,9 +302,7 @@ test_that("jjbarstats handles realistic clinical research scenarios", {
       dep = "test_result",
       group = "test_method",
       grvar = "laboratory",
-      typestatistics = "robust",
-      pairwisecomparisons = TRUE,
-      pairwisedisplay = "everything"
+      typestatistics = "bayes"
     )
   })
 })
@@ -369,7 +319,7 @@ test_that("jjbarstats validates parameters correctly", {
 
   expect_error(jjbarstats(data = medical_study_data, dep = "response",
                           group = "treatment_group",
-                          padjustmethod = "invalid_adjustment"),
+                          label = "invalid_label"),
                "must be one of")
 })
 
@@ -382,9 +332,7 @@ test_that("jjbarstats integrates well with ggstatsplot ecosystem", {
       data = patient_satisfaction_data,
       dep = "satisfaction_level",
       group = "service_type",
-      typestatistics = "bayes",
-      pairwisecomparisons = TRUE,
-      pairwisedisplay = "non-significant"
+      typestatistics = "bayes"
     )
   })
 })

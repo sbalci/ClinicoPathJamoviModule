@@ -236,6 +236,8 @@ items:
           - counts
           - excl
           - sig
+          - posthoc
+          - testSelection
           - copyReadySentences
           
     - name:  glossaryPanel

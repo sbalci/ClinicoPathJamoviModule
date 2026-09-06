@@ -374,6 +374,7 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "condensationvar",
                     "excl",
+                    "maxvars",
                     "colorPalette",
                     "themeStyle"),
                 visible="(condensationvar)"))}))

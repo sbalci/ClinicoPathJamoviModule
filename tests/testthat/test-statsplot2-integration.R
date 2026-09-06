@@ -137,6 +137,7 @@ test_that("statsplot2 scenario: Longitudinal symptom tracking", {
     data = statsplot2_repeated,
     dep = "symptom_severity",
     group = "timepoint",
+    subjectID = "patient_id",
     direction = "repeated",
     distribution = "p"
   )
@@ -154,6 +155,7 @@ test_that("statsplot2 scenario: Treatment comparison over time", {
     dep = "symptom_severity",
     group = "timepoint",
     grvar = "treatment_arm",
+    subjectID = "patient_id",
     direction = "repeated",
     distribution = "p"
   )

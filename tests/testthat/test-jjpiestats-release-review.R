@@ -319,3 +319,42 @@ test_that("a well-powered Split By raises no per-panel notice", {
                        pie_notices(jjpiestats(data = ds, dep = "resp", group = "arm",
                                               grvar = "site")), fixed = TRUE))
 })
+
+
+# ---- check-function pass, 2026-09-06 ----------------------------------------
+
+test_that("the biomarker interpretation sentence is not truncated by the translator", {
+    # jmvcore's .() treats ' [ctx]' as a msgctxt marker and drops everything from
+    # the space-bracket on when no catalog entry matches, so
+    # 'OR = 4.3 [2.1-8.7]) describes ...' lost its CI and its whole second half.
+    t <- pie_txt(jjpiestats(data = pie_wide(), dep = "resp", group = "arm",
+                            clinicalpreset = "biomarker",
+                            showInterpretation = TRUE)$interpretation$content)
+    expect_match(t, "independent cohort", fixed = TRUE)
+    expect_match(t, "95% CI", fixed = TRUE)
+})
+
+test_that("the weighted donut chart accepts names with spaces and punctuation", {
+    # as.data.frame(xtabs()) runs make.names() on the dimension names, so the
+    # aggregated table came back as 'Tumor.Grade' / 'Arm..x.' and
+    # ggdonutchart(label = dep) could not find 'Tumor Grade'.
+    d <- data.frame(g = factor(c("low", "high", "low", "high")),
+                    a = factor(c("A", "A", "B", "B")),
+                    n = c(3, 5, 2, 6))
+    names(d) <- c("Tumor Grade", "Arm (x)", "n counts")
+    res <- jjpiestats(data = d, dep = "Tumor Grade", group = "Arm (x)",
+                      counts = "n counts", addGGPubrDonut = TRUE)
+    t <- pie_plot_txt(res, "donutPlot")
+    expect_match(t, "low", fixed = TRUE)
+    expect_match(t, "high", fixed = TRUE)
+})
+
+test_that("a paired request on a table that is not 2x2 says why nothing was drawn", {
+    # .validatePairedData ran only inside .plot2/.plot4, i.e. during .plot(),
+    # where its notice is discarded - the chart was blank and silent.
+    d3 <- data.frame(resp = factor(rep(c("A", "B", "C"), times = c(10, 12, 12))),
+                     arm  = factor(rep(c("X", "Y"), times = c(17, 17))))
+    n <- pie_notices(jjpiestats(data = d3, dep = "resp", group = "arm", paired = TRUE))
+    expect_match(n, "Paired analysis not shown", fixed = TRUE)
+    expect_match(n, "3\u00d72", fixed = TRUE)
+})

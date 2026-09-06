@@ -79,34 +79,6 @@ test_that("jjbarstats handles parametric statistics", {
   expect_s3_class(result, "jjbarstatsResults")
 })
 
-test_that("jjbarstats handles nonparametric statistics", {
-
-  data(jjbarstats_test)
-
-  result <- jjbarstats(
-    data = jjbarstats_test,
-    dep = "response",
-    group = "treatment",
-    typestatistics = "nonparametric"
-  )
-
-  expect_s3_class(result, "jjbarstatsResults")
-})
-
-test_that("jjbarstats handles robust statistics", {
-
-  data(jjbarstats_test)
-
-  result <- jjbarstats(
-    data = jjbarstats_test,
-    dep = "response",
-    group = "treatment",
-    typestatistics = "robust"
-  )
-
-  expect_s3_class(result, "jjbarstatsResults")
-})
-
 test_that("jjbarstats handles Bayesian statistics", {
 
   data(jjbarstats_test)
@@ -177,7 +149,7 @@ test_that("jjbarstats handles aggregated data with counts", {
   expect_s3_class(result, "jjbarstatsResults")
 })
 
-test_that("jjbarstats handles pairwise comparisons", {
+test_that("jjbarstats handles proportion tests", {
 
   data(jjbarstats_test)
 
@@ -185,8 +157,7 @@ test_that("jjbarstats handles pairwise comparisons", {
     data = jjbarstats_test,
     dep = "response",
     group = "treatment",
-    pairwisecomparisons = TRUE,
-    padjustmethod = "holm"
+    proportiontest = TRUE
   )
 
   expect_s3_class(result, "jjbarstatsResults")

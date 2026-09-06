@@ -8,13 +8,10 @@ clearWith:
     - group
     - grvar
     - counts
-    - excl
     - paired
     - typestatistics
-    - pairwisecomparisons
-    - pairwisedisplay
-    - padjustmethod
     - originaltheme
+    - palette
     - resultssubtitle
     - label
     - digits
@@ -99,10 +96,6 @@ items:
       renderFun: .plotBalloon
       requiresData: true
       visible: (addGGPubrBalloon)
-      clearWith:
-        - dep
-        - group
-        - ggpubrBalloonPalette
 
 
 refs:

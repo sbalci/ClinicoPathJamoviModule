@@ -161,6 +161,7 @@ refs:
         year: 2013
         title: "Categorical Data Analysis"
         publisher: 'Wiley, Hoboken, NJ (3rd edition)'
+        url: https://www.wiley.com/en-us/Categorical+Data+Analysis%2C+3rd+Edition-p-9780470463635
 
     kableExtra:
         type: 'software'
@@ -461,6 +462,14 @@ refs:
         title: 'ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics'
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggplot2'
         url: https://CRAN.R-project.org/package=ggplot2
+
+    classInt:
+        type: 'software'
+        author: Bivand, R.
+        year: 2023
+        title: 'classInt: Choose Univariate Class Intervals'
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=classInt'
+        url: https://CRAN.R-project.org/package=classInt
 
     ggridges:
         type: 'software'
@@ -1087,6 +1096,16 @@ refs:
         publisher:  Statist. Med.
         volume: 25
         pages: 127-141
+
+    AltmanRoyston2006:
+        type: 'article'
+        title: 'The cost of dichotomising continuous variables.'
+        year: 2006
+        author: "Altman, D. G., & Royston, P."
+        publisher: BMJ
+        volume: 332
+        pages: 1080
+        doi: 10.1136/bmj.332.7549.1080
         doi: 10.1002/sim.2331
         url: https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.2331
 

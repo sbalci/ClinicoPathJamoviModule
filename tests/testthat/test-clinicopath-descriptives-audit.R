@@ -305,26 +305,29 @@ test_that("crosstable retains all data-quality messages when appending output", 
     p_adjust = "bonferroni"
   )
   notice <- as.character(result$dataQualityNotice$content)
+  notes <- as.character(result$notes$content)
   expect_match(notice, "Very small sample size", fixed = TRUE)
   expect_match(notice, "Small group detected", fixed = TRUE)
-  expect_match(notice, "P-value adjustment with only 1 variable", fixed = TRUE)
+  expect_match(notes, "P-value adjustment with one variable has no effect", fixed = TRUE)
 })
 
 test_that("categorize source literals round-trip special characters", {
   generate_code <- categorizeClass$private_methods$.generateRCode
-  labels <- paste0("O'Brien, path", "\\", "root, line one\nline two")
+  labels <- c("O'Brien", paste0("path", "\\", "root"), "line one\nline two")
   code <- generate_code(
     varname = "tumor grade",
     method = "equal",
     nbins = 3,
-    breaks = "",
+    manual_breaks = "",
     sdmult = 1,
-    labels = "custom",
-    customlabels = labels,
+    label_style = "custom",
+    labels_used = labels,
     newvarname = "risk group",
     includelowest = TRUE,
     rightclosed = TRUE,
-    ordered = TRUE
+    ordered = TRUE,
+    exclude_oor = FALSE,
+    n_obs = 9
   )
 
   parsed <- parse(text = code)

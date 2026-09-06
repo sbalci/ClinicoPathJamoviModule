@@ -159,6 +159,7 @@ describe("statsplot2 Type Detection", {
       data = test_data,
       dep = "score",
       group = "timepoint",
+      subjectID = "patient_id",
       direction = "repeated"
     )
 
@@ -194,18 +195,20 @@ describe("statsplot2 Type Detection", {
     expect_true("plot" %in% names(result))
   })
 
-  test_that("detects Repeated Continuous × Factor (uses fallback)", {
+  test_that("Repeated with a factor condition and continuous outcome needs a Subject ID", {
+    # group = factor, dep = continuous is the repeated_factor_continuous path;
+    # unstructured data without a Subject ID is rejected rather than drawn.
     test_data <- setup_continuous_factor_data()
 
-    result <- statsplot2(
-      data = test_data,
-      dep = "biomarker_level",
-      group = "disease_status",
-      direction = "repeated"
+    expect_error(
+      statsplot2(
+        data = test_data,
+        dep = "biomarker_level",
+        group = "disease_status",
+        direction = "repeated"
+      ),
+      "Subject ID"
     )
-
-    expect_s3_class(result, "Group")
-    expect_true("plot" %in% names(result))
   })
 })
 
@@ -292,6 +295,7 @@ describe("statsplot2 Dispatch to Correct ggstatsplot Function", {
       data = test_data,
       dep = "score",
       group = "timepoint",
+      subjectID = "patient_id",
       direction = "repeated",
       distribution = "p"
     )
@@ -333,19 +337,18 @@ describe("statsplot2 Dispatch to Correct ggstatsplot Function", {
     expect_true("plot" %in% names(result))
   })
 
-  test_that("uses fallback for Repeated Continuous × Factor", {
+  test_that("does not dispatch a repeated continuous outcome without a Subject ID", {
     test_data <- setup_continuous_factor_data()
 
-    # Should use fallback ggplot2 visualization
-    result <- statsplot2(
-      data = test_data,
-      dep = "biomarker_level",
-      group = "disease_status",
-      direction = "repeated"
+    expect_error(
+      statsplot2(
+        data = test_data,
+        dep = "biomarker_level",
+        group = "disease_status",
+        direction = "repeated"
+      ),
+      "Subject ID"
     )
-
-    expect_s3_class(result, "Group")
-    expect_true("plot" %in% names(result))
   })
 })
 
@@ -797,6 +800,7 @@ describe("statsplot2 Clinical Scenarios", {
       data = longitudinal_data,
       dep = "pain_score",
       group = "visit",
+      subjectID = "patient_id",
       direction = "repeated",
       distribution = "np"
     )

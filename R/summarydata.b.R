@@ -176,7 +176,8 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                             missing = n_missing,
                             total = n_total,
                             percent = formatC(missing_pct, format = "f", digits = 1),
-                            available = n_valid
+                            available = n_valid,
+                            escape = FALSE
                         )
                     )
                 }
@@ -188,7 +189,8 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                         private$.fmtVar(
                             .("{variable} has only {available} non-missing observation(s); descriptive estimates are unstable, normality cannot be assessed, and the output should not be used for clinical inference."),
                             var,
-                            available = n_valid
+                            available = n_valid,
+                            escape = FALSE
                         )
                     )
                 }
@@ -239,7 +241,10 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     # Check if data has variance (not all values identical)
                     n_unique <- length(unique(valid_data))
 
-                    if (n_unique == 1) {
+                    # n < 3 is a sample-size problem, not "constant data": with a
+                    # single observation the n-range message below is the one
+                    # that names the actual cause.
+                    if (n_unique == 1 && length(valid_data) >= 3) {
                         # All values are identical - no variance
                         distribution_assessment <- .("The data are constant and have no variance.")
                     } else {
@@ -376,8 +381,11 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     x
                 }), stringsAsFactors = FALSE)
 
-                # Restore column names
-                names(clean_data) <- var_list
+                # Restore column names. gt_plt_summary() renders the name column
+                # as raw HTML, so a column called "<img src=x onerror=...>" was
+                # emitted verbatim into the text1 Html item. Escape the DISPLAY
+                # names only; var_list stays raw for dataset[var_list] lookups.
+                names(clean_data) <- htmltools::htmlEscape(var_list)
 
                 # Use gtExtras with default styling as intended
                 private$.checkpoint()
@@ -481,9 +489,12 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
         # through format() and putting the name in afterwards keeps the name
         # opaque. sub(fixed = TRUE) uses the replacement literally, so a name
         # containing "\\" or "&" survives intact.
-        .fmtVar = function(template, var, ...) {
+        # escape = FALSE is for the Preformatted notices item: jamovi renders
+        # Preformatted content as text, so an escaped name shows "&amp;" literally.
+        .fmtVar = function(template, var, ..., escape = TRUE) {
             out <- .fmt(template, variable = "\001", ...)
-            sub("\001", htmltools::htmlEscape(var), out, fixed = TRUE)
+            if (escape) var <- htmltools::htmlEscape(var)
+            sub("\001", var, out, fixed = TRUE)
         },
 
         # A p-value is never zero. round(2.8e-12, 3) is 0, which printed as
@@ -609,7 +620,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
 
             summary_stats <- data.frame(
                 Variable = numeric_vars,
-                Type = rep("numeric", length(numeric_vars)),
+                Type = rep(.("numeric"), length(numeric_vars)),
                 N = round(stats_matrix["n", ]),
                 Missing = round(stats_matrix["missing", ]),
                 Mean = round(stats_matrix["mean", ], dp),
@@ -760,7 +771,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 
                 "<p><strong>", .("Key considerations"), ":</strong></p>",
                 "<ul style='margin: 5px 0 10px 20px;'>",
-                "<li>", .("Enable 'Distribution Diagnostics' for normality assessment"), "</li>",
+                "<li>", .("Enable 'Distribution diagnostics' for normality assessment"), "</li>",
                 "<li>", .("Consider data transformations if distributions are highly skewed"), "</li>",
                 "<li>", .("Investigate outliers before proceeding with inferential statistics"), "</li>",
                 "<li>", .("Every statistic here is computed per row. If the dataset holds several rows per patient (one per block, core or visit), aggregate to one row per patient before reading these numbers as patient-level results."), "</li>",
@@ -824,7 +835,10 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             report_html <- paste0(
                 "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; margin: 10px 0; border-radius: 4px; color: inherit;'>",
                 "<h4 style='margin-top: 0; color: inherit;'>", .("Outlier Detection Results"), "</h4>",
-                "<p>", .("Potential outliers flagged using the IQR method (values beyond Q1-1.5\u{D7}IQR or Q3+1.5\u{D7}IQR):"), "</p>"
+                # The multiplication sign travels as a placeholder: a "\u{D7}"
+                # escape inside .() is keyed in the catalog as the literal escape
+                # text and never matches the parsed runtime string.
+                "<p>", .fmt(.("Potential outliers flagged using the IQR method (values beyond Q1-1.5{times}IQR or Q3+1.5{times}IQR):"), times = "\u{D7}"), "</p>"
             )
             
             for (var in variables) {
@@ -1010,7 +1024,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     paste0(
                         "<div style='margin-bottom: 10px; padding-top: 10px; border-top: 1px solid #d1d5db;'>",
                         "<strong>", .("Outlier Detection"), ":</strong><br>",
-                        "<strong>", .("IQR Method"), ":</strong> ", .("Values beyond Q1-1.5\u{D7}IQR or Q3+1.5\u{D7}IQR are flagged as potential outliers for investigation."), "<br>",
+                        "<strong>", .("IQR Method"), ":</strong> ", .fmt(.("Values beyond Q1-1.5{times}IQR or Q3+1.5{times}IQR are flagged as potential outliers for investigation."), times = "\u{D7}"), "<br>",
                         "<strong>", .("Q1, Q3"), ":</strong> ", .("First and third quartiles (25th and 75th percentiles)."), "<br>",
                         "</div>"
                     )

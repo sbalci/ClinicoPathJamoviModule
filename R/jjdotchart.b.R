@@ -138,7 +138,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #
         # The bootstrap must run under the same seed as the plot, or the table's
         # interval and the drawn error bar disagree by a resampling wobble.
-        # Verified identical for all four test types under .SEED.
+        # Use the same user-selected seed for the table and the plot.
         .groupTable = function(mydata) {
             if (!is.null(private$.tab)) return(private$.tab)
             dep <- self$options$dep; grp <- self$options$group

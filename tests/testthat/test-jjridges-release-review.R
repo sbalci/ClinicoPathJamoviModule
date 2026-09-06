@@ -108,14 +108,11 @@ test_that("unadjusted multiple comparisons are flagged where the user can see it
 
 
 test_that("the copy-ready report names the tests actually run, not the one requested", {
-    # .performSingleTest switches a comparison to Wilcoxon whenever its normality or
-    # equal-variance check fails. On five groups drawn from ONE N(10, 2), a single chance
-    # Shapiro result (p = 0.031) switched 4 of the 10 comparisons -- while the copy-ready
-    # paragraph still read "Method: Parametric". That text is offered for pasting into
-    # manuscripts, so it must not misdescribe the analysis.
+    # Chance rejections in normality diagnostics must not change a prespecified
+    # mean-comparison estimand. The report and table should retain Welch throughout.
     a <- rg_run(five_groups(), show_stats = TRUE)
     methods <- a$results$tests$asDF$method
-    expect_equal(unique(methods), "t-test")               # the mix really does occur
+    expect_equal(unique(methods), "t-test")               # preserve the selected estimand
 
     rep_txt <- a$results$reportSummary$content
     expect_false(grepl("mixed", rep_txt, fixed = TRUE))
@@ -176,7 +173,7 @@ test_that("unequal variance keeps Welch and does not switch to Wilcoxon", {
 
 
 test_that("normality diagnostics retain the selected mean-comparison estimand", {
-    # Only the variance half of the rule was wrong; the normality half is sound.
+    # A diagnostic p-value is not authorization to switch the scientific estimand.
     set.seed(5)
     d <- data.frame(v = c(rlnorm(60, 0, 1), rlnorm(60, 0.5, 1)),
                     g = factor(rep(c("A", "B"), each = 60)))

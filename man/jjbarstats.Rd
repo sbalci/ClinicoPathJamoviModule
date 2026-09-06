@@ -10,12 +10,9 @@ jjbarstats(
   group = NULL,
   grvar = NULL,
   counts = NULL,
-  excl = FALSE,
   typestatistics = "parametric",
-  pairwisecomparisons = FALSE,
-  pairwisedisplay = "significant",
-  padjustmethod = "holm",
   originaltheme = FALSE,
+  palette = "Dark2",
   resultssubtitle = FALSE,
   paired = FALSE,
   label = "percentage",
@@ -37,26 +34,25 @@ jjbarstats(
 \arguments{
 \item{data}{The data as a data frame.}
 
-\item{dep}{.}
+\item{dep}{One or more categorical outcome variables; each gets its own
+chart.}
 
-\item{group}{.}
+\item{group}{Categorical grouping variable shown on the x axis.}
 
-\item{grvar}{.}
+\item{grvar}{Optional categorical variable; the chart is repeated for each
+of its levels.}
 
 \item{counts}{A variable in data containing counts, or NULL if each row
 represents a single observation.}
 
-\item{excl}{.}
+\item{typestatistics}{Frequentist (Pearson's chi-squared; Fisher's exact
+test on a sparse 2x2 table; McNemar's test when paired) or Bayesian
+contingency analysis.}
 
-\item{typestatistics}{.}
+\item{originaltheme}{Use the ggstatsplot theme instead of the jamovi theme.}
 
-\item{pairwisecomparisons}{.}
-
-\item{pairwisedisplay}{.}
-
-\item{padjustmethod}{.}
-
-\item{originaltheme}{.}
+\item{palette}{Palette for the bar segments: an RColorBrewer palette, or
+gdoc, the ggstatsplot default.}
 
 \item{resultssubtitle}{Display statistical test results in plot subtitle.
 Disabling improves performance significantly.}
@@ -85,9 +81,11 @@ proportion test  (should sum to 1). For example: '0.5,0.5' for two equal
 groups or  '0.25,0.25,0.25,0.25' for four equal groups. Leave empty for
 equal  theoretical proportions.}
 
-\item{clinicalpreset}{Predefined configurations for common clinical
-scenarios.  Automatically sets appropriate statistical methods and
-parameters.}
+\item{clinicalpreset}{Tailors the interpretation guide and the prevalence
+check to a common clinical scenario. In the jamovi interface choosing a
+preset also switches on the statistics subtitle (and, for risk factor
+analysis, the proportion tests); the R function leaves those options as
+given.}
 
 \item{showexplanations}{Display detailed explanations of statistical
 methods, assumptions, and clinical interpretations to guide analysis and
@@ -125,6 +123,19 @@ A results object containing:
 }
 }
 \description{
-'Wrapper Function for ggstatsplot::ggbarstats and
-ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+Bar charts of one or more categorical outcomes by a grouping variable, with
+the test in the subtitle: Pearson's chi-squared, Fisher's exact test on a
+sparse 2x2 table, McNemar's test for paired data, or a Bayesian contingency
+analysis. Wraps ggstatsplot::ggbarstats and
+ggstatsplot::grouped_ggbarstats.
+}
+\examples{
+\donttest{
+jjbarstats(
+    data = jjbarstats_test,
+    dep = "response",
+    group = "treatment",
+    resultssubtitle = TRUE
+)
+}
 }

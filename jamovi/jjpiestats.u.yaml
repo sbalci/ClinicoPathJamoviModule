@@ -112,6 +112,7 @@ children:
                 label: Console messages
               - type: CheckBox
                 name: addGGPubrDonut
+                label: Donut chart (ggpubr)
       - type: Label
         label: Pie Chart Labels
         fitToGrid: true

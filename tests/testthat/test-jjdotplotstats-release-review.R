@@ -270,9 +270,8 @@ test_that("a single group is rejected with an actionable message", {
 })
 
 test_that("an out-of-range confidence level is rejected", {
-    expect_match(dp_notices(jjdotplotstats(data = dp_data3(), dep = "v",
-                                           group = "g", conflevel = 1)),
-                 "greater than 0 and less than 1")
+    expect_error(jjdotplotstats(data = dp_data3(), dep = "v", group = "g", conflevel = 1),
+                 "conflevel must be between 0.5 and 0.999")
 })
 
 test_that("small samples and small groups are flagged", {

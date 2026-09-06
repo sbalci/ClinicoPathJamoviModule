@@ -45,11 +45,11 @@
 # ==============================================
 
 
-new_version: "1.0.8.11"
-new_date: "2026-09-04"
+new_version: "1.0.8.12"
+new_date: "2026-09-06"
 quick: false
 TEST: false
-jjstatsplot: false
+jjstatsplot: true
 jsurvival: false
 ClinicoPathDescriptives: true
 OncoPath: false
@@ -131,6 +131,7 @@ modules:
       - "tr.po"
     r_files:
       - "utils.R"
+      - "formula_utils.R"
       - "error_handling.R"
       # diagnostichelpers.R removed: all 17 functions are dead umbrella-wide.
       # decisiongraph_utils.R intentionally NOT shipped: the decisiongraph and
@@ -156,6 +157,7 @@ modules:
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     r_files:
       - "utils.R"
+      - "formula_utils.R"
       - "survival_utils.R"
       # diagnostichelpers.R removed: all 17 functions are dead umbrella-wide.
       # survivalPower_distributions.R is intentionally NOT shipped to production jsurvival:
@@ -203,6 +205,11 @@ modules:
       - "tr.po"
     r_files:
       - "utils.R"
+    # vcd is declared in this module's Imports but no shipped R file uses it
+    # (2026-09-06 /audit-module). The sync only ever ADDS imports, so drop it here;
+    # also removed from R/zzz_imports.R + NAMESPACE by the prune step.
+    prune_imports:
+      - "vcd"
     data_files:
       - "histopathology.rda"
       - "agepyramid_cancer.rda"
@@ -292,6 +299,7 @@ modules:
       - "histopathology.rda"
     r_files:
       - "utils.R"
+      - "formula_utils.R"
       - "survival_utils.R"
       - "error_handling.R"
       - "survivalPower_distributions.R"

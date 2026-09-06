@@ -12,7 +12,10 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             subjectID = NULL,
             direction = "independent",
             distribution = "p",
+            forceContinuous = FALSE,
             alluvsty = "t1",
+            showSummary = FALSE,
+            showExplanations = FALSE,
             excl = FALSE,
             sampleLarge = FALSE,
             sampleThreshold = 10000,
@@ -57,6 +60,10 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "r",
                     "bf"),
                 default="p")
+            private$..forceContinuous <- jmvcore::OptionBool$new(
+                "forceContinuous",
+                forceContinuous,
+                default=FALSE)
             private$..alluvsty <- jmvcore::OptionList$new(
                 "alluvsty",
                 alluvsty,
@@ -64,6 +71,14 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "t1",
                     "t2"),
                 default="t1")
+            private$..showSummary <- jmvcore::OptionBool$new(
+                "showSummary",
+                showSummary,
+                default=FALSE)
+            private$..showExplanations <- jmvcore::OptionBool$new(
+                "showExplanations",
+                showExplanations,
+                default=FALSE)
             private$..excl <- jmvcore::OptionBool$new(
                 "excl",
                 excl,
@@ -95,7 +110,10 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..subjectID)
             self$.addOption(private$..direction)
             self$.addOption(private$..distribution)
+            self$.addOption(private$..forceContinuous)
             self$.addOption(private$..alluvsty)
+            self$.addOption(private$..showSummary)
+            self$.addOption(private$..showExplanations)
             self$.addOption(private$..excl)
             self$.addOption(private$..sampleLarge)
             self$.addOption(private$..sampleThreshold)
@@ -109,7 +127,10 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         subjectID = function() private$..subjectID$value,
         direction = function() private$..direction$value,
         distribution = function() private$..distribution$value,
+        forceContinuous = function() private$..forceContinuous$value,
         alluvsty = function() private$..alluvsty$value,
+        showSummary = function() private$..showSummary$value,
+        showExplanations = function() private$..showExplanations$value,
         excl = function() private$..excl$value,
         sampleLarge = function() private$..sampleLarge$value,
         sampleThreshold = function() private$..sampleThreshold$value,
@@ -122,7 +143,10 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..subjectID = NA,
         ..direction = NA,
         ..distribution = NA,
+        ..forceContinuous = NA,
         ..alluvsty = NA,
+        ..showSummary = NA,
+        ..showExplanations = NA,
         ..excl = NA,
         ..sampleLarge = NA,
         ..sampleThreshold = NA,
@@ -135,6 +159,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         notices = function() private$.items[["notices"]],
+        summary = function() private$.items[["summary"]],
         todo = function() private$.items[["todo"]],
         ExplanationMessage = function() private$.items[["ExplanationMessage"]],
         plot = function() private$.items[["plot"]]),
@@ -162,6 +187,26 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "direction",
                     "subjectID",
                     "distribution",
+                    "forceContinuous",
+                    "excl",
+                    "grvar",
+                    "sampleLarge",
+                    "sampleThreshold",
+                    "sampleSize",
+                    "seed")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="summary",
+                title="Result sentence",
+                visible="(showSummary)",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "direction",
+                    "subjectID",
+                    "distribution",
+                    "forceContinuous",
+                    "alluvsty",
                     "excl",
                     "grvar",
                     "sampleLarge",
@@ -178,6 +223,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "direction",
                     "subjectID",
                     "distribution",
+                    "forceContinuous",
                     "excl",
                     "grvar",
                     "sampleLarge",
@@ -187,12 +233,14 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="ExplanationMessage",
                 title="Explanation",
+                visible="(showExplanations)",
                 clearWith=list(
                     "dep",
                     "group",
                     "direction",
                     "subjectID",
                     "distribution",
+                    "forceContinuous",
                     "excl",
                     "grvar",
                     "sampleLarge",
@@ -213,6 +261,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "direction",
                     "subjectID",
                     "distribution",
+                    "forceContinuous",
                     "alluvsty",
                     "excl",
                     "grvar",
@@ -229,7 +278,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "statsplot2",
-                version = c(1,0,9),
+                version = c(1,1,0),
                 options = options,
                 results = statsplot2Results$new(options=options),
                 data = data,
@@ -250,6 +299,32 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' comprehensive fallback options. Supports both independent and repeated 
 #' measures designs with various plot types including violin plots, scatter 
 #' plots, bar charts, and alluvial diagrams.
+#'
+#' @examples
+#' \donttest{
+#' # Continuous outcome across groups: Grade is stored as the numbers
+#' # 1-3, so it is read as categorical (a notice says so) and a violin
+#' # plot with a nonparametric comparison is drawn.
+#' statsplot2(
+#'     data = histopathology,
+#'     dep = "Age",
+#'     group = "Grade",
+#'     distribution = "np",
+#'     showSummary = TRUE
+#' )
+#'
+#' # One panel per level of a third variable
+#' statsplot2(
+#'     data = histopathology,
+#'     dep = "Age",
+#'     group = "Grade",
+#'     grvar = "Sex"
+#' )
+#'
+#' # Long-format repeated continuous outcomes need a Subject ID:
+#' # statsplot2(data = long, dep = "score", group = "visit",
+#' #            subjectID = "patient_id", direction = "repeated")
+#'}
 #' @param data The data as a data frame.
 #' @param dep The dependent variable (y-axis, 1st measurement). Can be
 #'   continuous or categorical.
@@ -266,23 +341,36 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   measures comparisons.
 #' @param distribution Statistical approach: "p" = parametric, "np" =
 #'   nonparametric,  "r" = robust, "bf" = Bayes factor.
+#' @param forceContinuous If TRUE, every numeric variable is treated as
+#'   continuous. By default a numeric variable with 15 or fewer distinct
+#'   whole-number values is treated as categorical (a notice reports this),
+#'   which changes the plot type and the test used.
 #' @param alluvsty Style for alluvial diagrams: "t1" = ggalluvial with stratum
 #'   labels,  "t2" = easyalluvial with automatic variable selection.
+#' @param showSummary If TRUE, a plain-language result sentence with the test
+#'   statistic, p-value, effect size and sample size is added to the output.
+#' @param showExplanations If TRUE, an explanation panel describing the
+#'   selected plot, its clinical interpretation and the assumptions of the
+#'   statistical approach is shown.
 #' @param excl If TRUE, excludes rows with missing values before analysis.
-#' @param sampleLarge If TRUE, automatically samples large datasets (>10,000
-#'   rows) to 5,000 rows for improved performance.
+#' @param sampleLarge If TRUE, randomly samples large datasets for plotting
+#'   speed (by default those above 10,000 rows are reduced to 5,000; see
+#'   sampleThreshold and sampleSize). Statistics are computed on the retained
+#'   rows only.
 #' @param sampleThreshold Row count above which sampling is applied, when
 #'   'Sample large datasets' is enabled. Datasets at or below this size are
 #'   always analysed in full.
 #' @param sampleSize Number of rows to retain when sampling. Larger values
 #'   keep more statistical power at the cost of plotting speed. Statistics are
 #'   computed on the retained rows only.
-#' @param seed Random seed for the reproducible sampling of large datasets
-#'   (used when 'Sample Large Datasets' is enabled). Change it to draw a
-#'   different sample; the default (42) reproduces the previous fixed behaviour.
+#' @param seed Random seed used for the sampling of large datasets (when
+#'   'Sample large datasets' is enabled) and for any resampling inside the plot
+#'   statistics (robust and Bayesian approaches). Change it to draw a different
+#'   sample; the default (42) reproduces the previous fixed behaviour.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$ExplanationMessage} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -297,7 +385,10 @@ statsplot2 <- function(
     subjectID = NULL,
     direction = "independent",
     distribution = "p",
+    forceContinuous = FALSE,
     alluvsty = "t1",
+    showSummary = FALSE,
+    showExplanations = FALSE,
     excl = FALSE,
     sampleLarge = FALSE,
     sampleThreshold = 10000,
@@ -327,7 +418,10 @@ statsplot2 <- function(
         subjectID = subjectID,
         direction = direction,
         distribution = distribution,
+        forceContinuous = forceContinuous,
         alluvsty = alluvsty,
+        showSummary = showSummary,
+        showExplanations = showExplanations,
         excl = excl,
         sampleLarge = sampleLarge,
         sampleThreshold = sampleThreshold,

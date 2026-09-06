@@ -82,6 +82,7 @@ items:
           - show_guidance
 
 refs:
+    - gt
     - gtExtras
     - moments
     - ClinicoPathJamoviModule

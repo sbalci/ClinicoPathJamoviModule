@@ -208,21 +208,21 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # 1. Check if required variables exist in data
             if (!is.null(outcome_var) && length(outcome_var) > 0 && !outcome_var %in% names(mydata)) {
                 validation_results$errors <- c(validation_results$errors,
-                    paste("Outcome variable '", outcome_var, "' not found in dataset (possibly lost during name cleaning).", sep=""))
+                    jmvcore::format(.("Outcome variable '{var}' not found in dataset (possibly lost during name cleaning)."), var = outcome_var))
                 validation_results$should_stop <- TRUE
             }
             
             # 2. Check recurrence variable if specified
             if (!is.null(recurrence_var) && length(recurrence_var) > 0 && !recurrence_var %in% names(mydata)) {
                 validation_results$errors <- c(validation_results$errors,
-                    paste("Recurrence variable '", recurrence_var, "' not found in dataset.", sep=""))
+                    jmvcore::format(.("Recurrence variable '{var}' not found in dataset."), var = recurrence_var))
                 validation_results$should_stop <- TRUE
             }
             
             # 3. Check patient ID variable if specified
             if (!is.null(id_var) && length(id_var) > 0 && !id_var %in% names(mydata)) {
                 validation_results$errors <- c(validation_results$errors,
-                    paste("Patient ID variable '", id_var, "' not found in dataset.", sep=""))
+                    jmvcore::format(.("Patient ID variable '{var}' not found in dataset."), var = id_var))
                 validation_results$should_stop <- TRUE
             }
             
@@ -239,12 +239,12 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Check for ordered factors
                 if (is.ordered(outcome_data)) {
                     validation_results$info <- c(validation_results$info,
-                        "Outcome variable is an ordered factor. It will be treated as nominal (unordered) for analysis to avoid contrast issues.")
+                        .("Outcome variable is an ordered factor. It will be treated as nominal (unordered) for analysis to avoid contrast issues."))
                 }
                 
                 if (length(outcome_data_clean) == 0) {
                     validation_results$errors <- c(validation_results$errors,
-                        "Outcome variable contains no non-missing values.")
+                        .("Outcome variable contains no non-missing values."))
                     validation_results$should_stop <- TRUE
                 } else {
                     # Check unique values
@@ -253,13 +253,14 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     if (outcome_count < 2) {
                         validation_results$errors <- c(validation_results$errors,
-                            "Outcome variable must have at least 2 different values.")
+                            .("Outcome variable must have at least 2 different values."))
                         validation_results$should_stop <- TRUE
                     } else {
                         validation_results$info <- c(validation_results$info,
-                            paste("Outcome variable has ", outcome_count, " unique values: ", 
-                                  paste(head(unique_outcomes, 5), collapse=", "), 
-                                  if(outcome_count > 5) "..." else "", sep=""))
+                            jmvcore::format(.("Outcome variable has {count} unique values: {values}{more}"), 
+                                count = outcome_count,
+                                values = paste(head(unique_outcomes, 5), collapse=", "),
+                                more = if(outcome_count > 5) "..." else ""))
                     }
                 }
             }
@@ -268,8 +269,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             valid_analysis_types <- c("os", "cause", "compete", "rfs", "pfs", "dfs", "ttp", "multistate")
             if (!analysistype %in% valid_analysis_types) {
                 validation_results$errors <- c(validation_results$errors,
-                    paste("Invalid analysis type '", analysistype, "'. Must be one of: ", 
-                          paste(valid_analysis_types, collapse=", "), sep=""))
+                    jmvcore::format(.("Invalid analysis type '{type}'. Must be one of: {valid}"), 
+                        type = analysistype,
+                        valid = paste(valid_analysis_types, collapse=", ")))
                 validation_results$should_stop <- TRUE
             }
             
@@ -278,18 +280,18 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # This remains a warning as technically one could abuse these modes without recurrence, 
                 # but strongly advised against.
                 validation_results$warnings <- c(validation_results$warnings,
-                    paste("Analysis type '", analysistype, "' typically requires a recurrence/progression variable. You are analyzing death/event only.", sep=""))
+                    jmvcore::format(.("Analysis type '{type}' typically requires a recurrence/progression variable. You are analyzing death/event only."), type = analysistype))
             }
 
             if (analysistype == "multistate" && !multievent) {
                 validation_results$errors <- c(validation_results$errors,
-                    "Multistate models require multiple event types. Please enable 'Multiple Event Types' option.")
+                    .("Multistate models require multiple event types. Please enable 'Multiple Event Types' option."))
                 validation_results$should_stop <- TRUE
             }
             
             if (analysistype == "compete" && !multievent) {
                 validation_results$errors <- c(validation_results$errors,
-                    "Competing risks analysis requires multiple event types. Please enable 'Multiple Event Types' option.")
+                    .("Competing risks analysis requires multiple event types. Please enable 'Multiple Event Types' option."))
                 validation_results$should_stop <- TRUE
             }
             
@@ -300,10 +302,10 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Check for minimum sample size
                 if (total_rows < 10) {
                     validation_results$strong_warnings <- c(validation_results$strong_warnings,
-                        paste("Very small sample size: ", total_rows, " observations. Results may be unreliable.", sep=""))
+                        jmvcore::format(.("Very small sample size: {n} observations. Results may be unreliable."), n = total_rows))
                 } else if (total_rows < 30) {
                     validation_results$warnings <- c(validation_results$warnings,
-                        paste("Small sample size: ", total_rows, " observations. Consider larger sample for more reliable estimates.", sep=""))
+                        jmvcore::format(.("Small sample size: {n} observations. Consider larger sample for more reliable estimates."), n = total_rows))
                 }
 
                 # Check for missing data patterns
@@ -313,12 +315,16 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     if (missing_proportion > 0.1) {
                         validation_results$warnings <- c(validation_results$warnings,
-                            paste("Large amount of missing outcome data: ", round(missing_proportion * 100, 1),
-                                  "% (", missing_outcome, " out of ", total_rows, " rows).", sep=""))
+                            jmvcore::format(.("Large amount of missing outcome data: {pct}% ({missing} out of {total} rows)."), 
+                                pct = round(missing_proportion * 100, 1),
+                                missing = missing_outcome,
+                                total = total_rows))
                     } else if (missing_proportion > 0) {
                         validation_results$info <- c(validation_results$info,
-                            paste("Missing outcome data: ", round(missing_proportion * 100, 1),
-                                  "% (", missing_outcome, " out of ", total_rows, " rows).", sep=""))
+                            jmvcore::format(.("Missing outcome data: {pct}% ({missing} out of {total} rows)."), 
+                                pct = round(missing_proportion * 100, 1),
+                                missing = missing_outcome,
+                                total = total_rows))
                     }
                     
                     # Few events: Kaplan-Meier / Cox estimates are unstable below ~5
@@ -340,10 +346,11 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     if (!is.na(n_ev) && n_nonmissing > 0 && n_ev < 5) {
                         validation_results$warnings <- c(validation_results$warnings,
-                            paste0("Few events: only ", n_ev, " of ", n_nonmissing,
-                                   " non-missing outcomes (", round(100 * n_ev / n_nonmissing, 1),
-                                   "%) are '", rare_lvl, "'. Kaplan-Meier and Cox estimates ",
-                                   "are unstable with fewer than 5 events."))
+                            jmvcore::format(.("Few events: only {n_ev} of {n_total} non-missing outcomes ({pct}%) are '{level}'. Kaplan-Meier and Cox estimates are unstable with fewer than 5 events."), 
+                                n_ev = n_ev,
+                                n_total = n_nonmissing,
+                                pct = round(100 * n_ev / n_nonmissing, 1),
+                                level = rare_lvl))
                     }
                 }
             }
@@ -351,7 +358,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # 8. Contextual warnings for potential misuse
             if (analysistype == "cause" && !multievent) {
                 validation_results$warnings <- c(validation_results$warnings,
-                    "Cause-specific survival typically requires distinguishing between disease deaths and other deaths. Consider enabling 'Multiple Event Types' or switch to 'Overall Survival'.")
+                    .("Cause-specific survival typically requires distinguishing between disease deaths and other deaths. Consider enabling 'Multiple Event Types' or switch to 'Overall Survival'."))
             }
             
             return(validation_results)
@@ -417,9 +424,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.causeFactor <- res$status_factor
 
                 diagnostics$binary_check <- sprintf(
-                    "Event level '%s' -> 1 (%d rows); %s -> 0 (%d rows); %d row(s) missing.",
+                    .("Event level '%s' -> 1 (%d rows); %s -> 0 (%d rows); %d row(s) missing."),
                     res$event_label, res$n_event,
-                    if (length(res$censored_labels)) paste(sprintf("'%s'", res$censored_labels), collapse = ", ") else "no other level",
+                    if (length(res$censored_labels)) paste(sprintf("'%s'", res$censored_labels), collapse = ", ") else .("no other level"),
                     res$n_censored, res$n_missing)
 
                 # Special handling for RFS/PFS/DFS if selected
@@ -466,7 +473,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     mydata[["myoutcome"]] <- composite
 
                     diagnostics[[paste0(analysistype, "_handling")]] <- sprintf(
-                        "%s: events include recurrence/progression and death (%d events, %d censored, %d missing). This analysis produces the STATUS only - it has no recurrence-time variable and therefore cannot compute time to FIRST event.",
+                        .("%s: events include recurrence/progression and death (%d events, %d censored, %d missing). This analysis produces the STATUS only - it has no recurrence-time variable and therefore cannot compute time to FIRST event."),
                         toupper(analysistype),
                         sum(composite == 1, na.rm = TRUE),
                         sum(composite == 0, na.rm = TRUE),
@@ -532,13 +539,13 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         yes = 1,
                         no = 0
                     )
-                    diagnostics$ttp_handling <- "TTP: Only progression events counted, deaths censored"
+                    diagnostics$ttp_handling <- .("TTP: Only progression events counted, deaths censored")
 
                     # TTP replaces the outcome-derived indicator entirely.
                     if (!is.null(private$.eventRecode)) {
                         ttp <- mydata[["myoutcome"]]
-                        private$.eventRecode$estimand    <- "time to progression (deaths censored)"
-                        private$.eventRecode$event_label <- "progression"
+                        private$.eventRecode$estimand    <- .("time to progression (deaths censored)")
+                        private$.eventRecode$event_label <- .("progression")
                         private$.eventRecode$n_event     <- sum(ttp == 1, na.rm = TRUE)
                         private$.eventRecode$n_censored  <- sum(ttp == 0, na.rm = TRUE)
                         private$.eventRecode$n_missing   <- sum(is.na(ttp))
@@ -552,11 +559,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (isTRUE(self$options$useHierarchy)) {
                     private$.addHtmlMessage(
                         "warning",
-                        "Event hierarchy not applied",
-                        paste0(
-                            "Event hierarchy is only available with Multiple Event Levels ",
-                            "enabled. It was requested but has been ignored for this ",
-                            "single-event-level analysis, and the outcome is unchanged."))
+                        .("Event hierarchy not applied"),
+                        .("Event hierarchy is only available with Multiple Event Levels enabled. It was requested but has been ignored for this single-event-level analysis, and the outcome is unchanged."))
                 }
 
             } else {
@@ -594,7 +598,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.causeFactor <- res$status_factor
 
                     diagnostics$multievent_coding <- sprintf(
-                        "%s: %d event(s), %d censored, %d competing, %d missing.",
+                        .("%s: %d event(s), %d censored, %d competing, %d missing."),
                         res$estimand, res$n_event, res$n_censored,
                         res$n_competing, res$n_missing)
 
@@ -633,7 +637,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     mydata[["myoutcome"]][!is.na(outcome1) & outcome1 == dod]  <- 2  # Death from disease
                     mydata[["myoutcome"]][!is.na(outcome1) & outcome1 == dooc] <- 3  # Death from other causes
 
-                    diagnostics$multistate_coding <- "Multistate: Healthy (0), Disease (1), Death-disease (2), Death-other (3)"
+                    diagnostics$multistate_coding <- .("Multistate: Healthy (0), Disease (1), Death-disease (2), Death-other (3)")
 
                 } else {
                     # rfs / pfs / dfs / ttp are offered in the analysis-type list
@@ -670,20 +674,15 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # mapped and the loss is missing data in the outcome column.
                     private$.addHtmlMessage(
                         "strong_warning",
-                        "Most rows have no usable outcome",
-                        sprintf(paste0(
-                            "Only %d of %d row(s) (%.1f%%) have an outcome value; the other %.1f%% are ",
-                            "missing in the outcome variable and are dropped from every number below, ",
-                            "so the denominator is smaller than your dataset and any percentage is over ",
-                            "the survivors of that filtering. The levels you assigned (%s) cover every ",
-                            "value that IS present, so this is missing data rather than a mis-selected ",
-                            "level. Check that the outcome column is complete before reporting these numbers."),
+                        .("Most rows have no usable outcome"),
+                        sprintf(
+                            .("Only %d of %d row(s) (%.1f%%) have an outcome value; the other %.1f%% are missing in the outcome variable and are dropped from every number below, so the denominator is smaller than your dataset and any percentage is over the survivors of that filtering. The levels you assigned (%s) cover every value that IS present, so this is missing data rather than a mis-selected level. Check that the outcome column is complete before reporting these numbers."),
                             n_recoded, length(outcome1),
                             n_recoded / length(outcome1) * 100, pct_lost,
                             paste(unique(c(private$.lvlOrUnset(dod), private$.lvlOrUnset(dooc),
                                            private$.lvlOrUnset(awd), private$.lvlOrUnset(awod))),
                                   collapse = ", ")))
-                    diagnostics$recoding_warning <- sprintf("Only %d/%d (%.1f%%) outcomes successfully recoded",
+                    diagnostics$recoding_warning <- sprintf(.("Only %d/%d (%.1f%%) outcomes successfully recoded"),
                                                              n_recoded, length(outcome1),
                                                              n_recoded/length(outcome1) * 100)
                 }
@@ -714,9 +713,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # layout -- so the hierarchy has nothing to collapse
                             # and the outcome is left exactly as recoded. Stay
                             # quiet rather than implying something was applied.
-                            diagnostics$hierarchy <- paste0(
-                                "Event hierarchy not applied: each patient has a single record, ",
-                                "so there is nothing to collapse. The outcome is unchanged.")
+                            diagnostics$hierarchy <- .("Event hierarchy not applied: each patient has a single record, so there is nothing to collapse. The outcome is unchanged.")
                         } else {
                             # Apply hierarchy
                             # `any()` returns a single value, so ifelse() returned a
@@ -757,33 +754,22 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # a few hundred lines below; the hierarchy had no such
                             # guard, which is the inconsistency this closes.
                             if (identical(self$options$analysistype, "multistate")) {
-                                diagnostics$hierarchy <- paste0(
-                                    "Event hierarchy NOT applied: the multistate coding has no censored code ",
-                                    "(0 means 'alive without disease', a state rather than a censoring indicator), ",
-                                    "so collapsing a patient's non-priority rows to 0 would relabel them into the ",
-                                    "baseline state rather than censor them. No record was changed.")
+                                diagnostics$hierarchy <- .("Event hierarchy NOT applied: the multistate coding has no censored code (0 means 'alive without disease', a state rather than a censoring indicator), so collapsing a patient's non-priority rows to 0 would relabel them into the baseline state rather than censor them. No record was changed.")
                                 private$.addHtmlMessage(
                                     "warning",
-                                    "Event hierarchy not applied",
-                                    paste0(
-                                        "The multistate coding has no censored code - 0 means 'alive without ",
-                                        "disease', a clinical state - so collapsing repeated records to 0 would ",
-                                        "erase real disease states rather than censor them. Nothing was changed. ",
-                                        "Reduce the data to one row per patient before this analysis, or use an ",
-                                        "analysis type whose 0 code means censored."))
+                                    .("Event hierarchy not applied"),
+                                    .("The multistate coding has no censored code - 0 means 'alive without disease', a clinical state - so collapsing repeated records to 0 would erase real disease states rather than censor them. Nothing was changed. Reduce the data to one row per patient before this analysis, or use an analysis type whose 0 code means censored."))
                                 applied$hierarchy <- FALSE
                             } else if (!(highest_priority %in% present_codes) &&
                                        length(present_codes) > 0) {
                                 diagnostics$hierarchy <- sprintf(
-                                    "Event hierarchy NOT applied: the priority event code %s does not occur in the recoded outcome, which contains only %s. No record was changed. Set Priority Event Type to one of the codes actually produced by this analysis type.",
+                                    .("Event hierarchy NOT applied: the priority event code %s does not occur in the recoded outcome, which contains only %s. No record was changed. Set Priority Event Type to one of the codes actually produced by this analysis type."),
                                     highest_priority, paste(present_codes, collapse = ", "))
                                 private$.addHtmlMessage(
                                     "warning",
-                                    "Event hierarchy not applied",
-                                    sprintf(paste0(
-                                        "The priority event code %s does not occur in the recoded outcome ",
-                                        "(the codes produced here are %s), so the event hierarchy changed nothing. ",
-                                        "Set Priority Event Type to one of those codes."),
+                                    .("Event hierarchy not applied"),
+                                    sprintf(
+                                        .("The priority event code %s does not occur in the recoded outcome (the codes produced here are %s), so the event hierarchy changed nothing. Set Priority Event Type to one of those codes."),
                                         highest_priority, paste(present_codes, collapse = ", ")))
                                 applied$hierarchy <- FALSE
                             } else
@@ -853,7 +839,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                              highest_priority %in% present_codes
                             if (hierarchy_ran) {
                             diagnostics$hierarchy <- sprintf(
-                                "Event hierarchy applied (priority: %s) to %d patient(s) with multiple records.",
+                                .("Event hierarchy applied (priority: %s) to %d patient(s) with multiple records."),
                                 highest_priority, n_affected)
 
                             # Duplicate IDs mean long-format data, which is the
@@ -865,27 +851,16 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             if (has_time) {
                                 private$.addHtmlMessage(
                                     "info",
-                                    "Event hierarchy applied using follow-up time",
-                                    sprintf(paste0(
-                                        "%d patient(s) have more than one row. For each, the EARLIEST ",
-                                        "record carrying the priority outcome (%s) was kept as the event ",
-                                        "and their later rows were censored, so the event is not moved ",
-                                        "earlier in time."),
+                                    .("Event hierarchy applied using follow-up time"),
+                                    sprintf(
+                                        .("%d patient(s) have more than one row. For each, the EARLIEST record carrying the priority outcome (%s) was kept as the event and their later rows were censored, so the event is not moved earlier in time."),
                                         n_affected, highest_priority))
                             } else
                             private$.addHtmlMessage(
                                 "warning",
-                                "Event hierarchy applied to repeated patient records",
-                                sprintf(paste0(
-                                    "%d patient(s) have more than one row. For each of them the ",
-                                    "priority outcome (%s) has been written to EVERY one of their ",
-                                    "rows. Because this analysis has no follow-up-time variable it ",
-                                    "cannot order those rows, so if they are successive time points ",
-                                    "a later event is copied back onto the earlier ones - which in a ",
-                                    "survival model would place the event earlier than it happened, ",
-                                    "and count it once per row. Reduce your data to one row per ",
-                                    "patient (keeping the earliest priority event and its date) ",
-                                    "before using this option."),
+                                .("Event hierarchy applied to repeated patient records"),
+                                sprintf(
+                                    .("%d patient(s) have more than one row. For each of them the priority outcome (%s) has been written to EVERY one of their rows. Because this analysis has no follow-up-time variable it cannot order those rows, so if they are successive time points a later event is copied back onto the earlier ones - which in a survival model would place the event earlier than it happened, and count it once per row. Reduce your data to one row per patient (keeping the earliest priority event and its date) before using this option."),
                                     n_affected, highest_priority))
                             }
                             applied$hierarchy <- hierarchy_ran
@@ -903,16 +878,11 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # row -- the guard sat on the whole block, so nothing ran at all.
             if (self$options$intervalCensoring &&
                 (is.null(self$options$intervalStart) || is.null(self$options$intervalEnd))) {
-                diagnostics$interval_censoring <- paste0(
-                    "Interval censoring NOT applied: both an Interval Start and an Interval End ",
-                    "variable are required, and at least one was not selected.")
+                diagnostics$interval_censoring <- .("Interval censoring NOT applied: both an Interval Start and an Interval End variable are required, and at least one was not selected.")
                 private$.addHtmlMessage(
                     "warning",
-                    "Interval censoring not applied",
-                    paste0(
-                        "Interval censoring is switched on but needs BOTH an Interval Start and an ",
-                        "Interval End variable; at least one is not selected, so nothing was done ",
-                        "and these results are identical to leaving it switched off."))
+                    .("Interval censoring not applied"),
+                    .("Interval censoring is switched on but needs BOTH an Interval Start and an Interval End variable; at least one is not selected, so nothing was done and these results are identical to leaving it switched off."))
             }
 
             if (self$options$intervalCensoring && !is.null(self$options$intervalStart) && !is.null(self$options$intervalEnd)) {
@@ -957,56 +927,43 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # spreadsheet: this analysis has a single Output slot and it
                     # carries the recoded outcome. Say so rather than implying a
                     # column the user will go looking for.
-                    diagnostics$interval_censoring <- paste0(
-                        "Interval endpoints prepared (not written to the spreadsheet - this ",
-                        "analysis exports only the recoded outcome). In survival analysis use ",
-                        "Surv(<start>, <end>, type='interval2') with your two interval columns; ",
-                        "note interval2 takes two time arguments and no event argument.")
+                    diagnostics$interval_censoring <- .("Interval endpoints prepared (not written to the spreadsheet - this analysis exports only the recoded outcome). In survival analysis use Surv(<start>, <end>, type='interval2') with your two interval columns; note interval2 takes two time arguments and no event argument.")
                     applied$interval <- TRUE
 
                     if (.kind_mismatch) {
                         diagnostics$interval_censoring <- sprintf(
-                            paste0("Interval censoring NOT prepared: the interval start is a %s and the interval end is a %s, ",
-                                   "so they are not on the same scale and the interval cannot be checked or used. ",
-                                   "Supply both endpoints as the same kind of column, in the same units and from the same origin."),
+                            .("Interval censoring NOT prepared: the interval start is a %s and the interval end is a %s, so they are not on the same scale and the interval cannot be checked or used. Supply both endpoints as the same kind of column, in the same units and from the same origin."),
                             .l_s$kind, .r_s$kind)
                         private$.addHtmlMessage(
                             "warning",
-                            "Interval endpoints not on the same scale",
-                            paste0(diagnostics$interval_censoring,
-                                   " These results are identical to leaving interval censoring switched off."))
+                            .("Interval endpoints not on the same scale"),
+                            paste0(diagnostics$interval_censoring, " ",
+                                   .("These results are identical to leaving interval censoring switched off.")))
                         applied$interval <- FALSE
                     } else if (.inv > 0) {
                         diagnostics$interval_censoring <- sprintf(
-                            "Interval censoring: %d row(s) have a start later than their end, so the interval runs backwards. Surv(type='interval2') requires start <= end. Check that the two columns are the right way round.",
+                            .("Interval censoring: %d row(s) have a start later than their end, so the interval runs backwards. Surv(type='interval2') requires start <= end. Check that the two columns are the right way round."),
                             .inv)
                         private$.addHtmlMessage(
                             "warning",
-                            "Interval endpoints run backwards",
-                            sprintf(paste0(
-                                "%d row(s) have an interval start later than their interval end. ",
-                                "An interval must run forwards - Surv(type='interval2') requires ",
-                                "start <= end - so these rows cannot be used as they stand. Check ",
-                                "that the Interval Start and Interval End variables are not swapped."),
+                            .("Interval endpoints run backwards"),
+                            sprintf(
+                                .("%d row(s) have an interval start later than their interval end. An interval must run forwards - Surv(type='interval2') requires start <= end - so these rows cannot be used as they stand. Check that the Interval Start and Interval End variables are not swapped."),
                                 .inv))
                         applied$interval <- FALSE
                     }
                 } else {
-                    diagnostics$interval_censoring <- "Interval censoring: variables not found in dataset"
+                    diagnostics$interval_censoring <- .("Interval censoring: variables not found in dataset")
                 }
             }
 
             # Same silent no-op as interval censoring above.
             if (self$options$adminCensoring && is.null(self$options$adminDate)) {
-                diagnostics$admin_censoring <- paste0(
-                    "Administrative censoring NOT applied: no cut-off date variable was selected.")
+                diagnostics$admin_censoring <- .("Administrative censoring NOT applied: no cut-off date variable was selected.")
                 private$.addHtmlMessage(
                     "warning",
-                    "Administrative censoring not applied",
-                    paste0(
-                        "Administrative censoring is switched on but no cut-off date variable is ",
-                        "selected, so nothing was truncated and no event status was reset - these ",
-                        "results are identical to leaving it switched off."))
+                    .("Administrative censoring not applied"),
+                    .("Administrative censoring is switched on but no cut-off date variable is selected, so nothing was truncated and no event status was reset - these results are identical to leaving it switched off."))
             }
 
             # Handle administrative censoring if specified
@@ -1070,15 +1027,15 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         if (n_neg > 0 || n_zero > 0)
                             private$.addHtmlMessage(
                                 "warning",
-                                "Follow-up times are not all positive",
+                                .("Follow-up times are not all positive"),
                                 paste0(
                                     if (n_neg > 0) sprintf(
-                                        "%d patient(s) have a NEGATIVE follow-up time, which cannot be a duration - survival functions reject it. This usually means the start and end dates are the wrong way round. ",
+                                        .("%d patient(s) have a NEGATIVE follow-up time, which cannot be a duration - survival functions reject it. This usually means the start and end dates are the wrong way round. "),
                                         n_neg) else "",
                                     if (n_zero > 0) sprintf(
-                                        "%d patient(s) have a follow-up time of zero, which contributes no person-time; check whether a missing date was read as the origin. ",
+                                        .("%d patient(s) have a follow-up time of zero, which contributes no person-time; check whether a missing date was read as the origin. "),
                                         n_zero) else "",
-                                    "These rows are truncated and written back unchanged in sign - fix them in the data before running a survival model."))
+                                    .("These rows are truncated and written back unchanged in sign - fix them in the data before running a survival model.")))
                         cut_s <- private$.timeScale(mydata[["admin_censor_date"]])
                         fu    <- fu_s$v
                         cut   <- cut_s$v
@@ -1101,42 +1058,31 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                         if (scale_mismatch || no_overlap) {
                             diagnostics$admin_censoring <- if (no_overlap)
-                                paste0("Administrative cut-off NOT applied: no row has both a follow-up time and a cut-off value, so there was nothing to compare.")
+                                .("Administrative cut-off NOT applied: no row has both a follow-up time and a cut-off value, so there was nothing to compare.")
                             else if (fu_s$kind == "unreadable" || cut_s$kind == "unreadable")
-                                paste0("Administrative cut-off NOT applied: the ",
-                                       if (fu_s$kind == "unreadable") "follow-up time" else "cut-off",
-                                       " column could not be read as a number or a date.")
+                                sprintf(.("Administrative cut-off NOT applied: the %s column could not be read as a number or a date."),
+                                       if (fu_s$kind == "unreadable") .("follow-up time") else .("cut-off"))
                             # "Supply both as dates" was impossible advice: the
                             # Follow-up Time field is `permitted: [numeric]`, so jamovi
                             # will not let a date column be dropped into it at all. The
                             # only route the GUI actually offers is to make the CUT-OFF
                             # a duration on the follow-up's own scale, so say that.
                             else sprintf(
-                                paste0("Administrative cut-off NOT applied: the follow-up time is a %s and the cut-off is a %s, so they are not on the same scale and cannot be compared. ",
-                                       "The Follow-up Time field accepts numeric columns only, so express the cut-off the same way - as a duration in the same units and from the same origin as the follow-up time (for a date cut-off, that is the number of %s between each patient's start date and the cut-off date)."),
+                                .("Administrative cut-off NOT applied: the follow-up time is a %s and the cut-off is a %s, so they are not on the same scale and cannot be compared. The Follow-up Time field accepts numeric columns only, so express the cut-off the same way - as a duration in the same units and from the same origin as the follow-up time (for a date cut-off, that is the number of %s between each patient's start date and the cut-off date)."),
                                 fu_s$kind, cut_s$kind,
-                                if (identical(fu_s$kind, "number")) "time units" else "days")
+                                if (identical(fu_s$kind, "number")) .("time units") else .("days"))
                             private$.addHtmlMessage(
                                 "warning",
-                                "Administrative censoring not applied",
-                                paste0(diagnostics$admin_censoring,
-                                       " These results are identical to leaving administrative censoring switched off."))
+                                .("Administrative censoring not applied"),
+                                paste0(diagnostics$admin_censoring, " ",
+                                       .("These results are identical to leaving administrative censoring switched off.")))
                             applied$admin <- FALSE
                         } else if (multistate_coding) {
-                            diagnostics$admin_censoring <- paste0(
-                                "Administrative cut-off NOT applied: the multistate coding has no censored code ",
-                                "(0 means 'alive without disease', a state rather than a censoring indicator), so censoring ",
-                                "at the cut-off would relabel patients into the baseline state instead of censoring them. ",
-                                "Apply the cut-off with an analysis type that has a censored code, or truncate follow-up before this analysis.")
+                            diagnostics$admin_censoring <- .("Administrative cut-off NOT applied: the multistate coding has no censored code (0 means 'alive without disease', a state rather than a censoring indicator), so censoring at the cut-off would relabel patients into the baseline state instead of censoring them. Apply the cut-off with an analysis type that has a censored code, or truncate follow-up before this analysis.")
                             private$.addHtmlMessage(
                                 "warning",
-                                "Administrative censoring not applied",
-                                paste0(
-                                    "The multistate coding has no censored code - 0 means 'alive without ",
-                                    "disease', a clinical state rather than a censoring indicator - so ",
-                                    "censoring at the cut-off would relabel patients into the baseline ",
-                                    "state instead of censoring them. Nothing was changed. Use an analysis ",
-                                    "type that has a censored code, or truncate follow-up before this analysis."))
+                                .("Administrative censoring not applied"),
+                                .("The multistate coding has no censored code - 0 means 'alive without disease', a clinical state rather than a censoring indicator - so censoring at the cut-off would relabel patients into the baseline state instead of censoring them. Nothing was changed. Use an analysis type that has a censored code, or truncate follow-up before this analysis."))
                             applied$admin <- FALSE
                         } else {
                             n_trunc <- sum(keep & fu > cut)
@@ -1180,116 +1126,74 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # the cohort.
                             n_exempt <- sum(!keep)
                             exempt_note <- if (n_exempt > 0) sprintf(
-                                paste0(" %d patient(s) were left untouched because they have no follow-up time or no cut-off value; ",
-                                       "they keep their full follow-up and their original event status, so the cut-off applies to only part of the cohort. ",
-                                       "Supply the missing values, or exclude those rows, before comparing groups."),
+                                .(" %d patient(s) were left untouched because they have no follow-up time or no cut-off value; they keep their full follow-up and their original event status, so the cut-off applies to only part of the cohort. Supply the missing values, or exclude those rows, before comparing groups."),
                                 n_exempt) else ""
 
                             wipes_all_events <- n_events_before > 0 && n_reset == n_events_before
                             truncates_everyone <- sum(keep) > 0 && n_trunc == sum(keep)
-                            # The mirror case: nothing is beyond the cut-off, so it did
-                            # nothing. Legitimate when the cut-off genuinely follows the
-                            # whole cohort -- but indistinguishable from a date serial
-                            # imported as a plain number (44561 against months of
-                            # follow-up), and in BOTH cases claiming "applied" is false
-                            # and writing a column titled "Follow-up Truncated at
-                            # Administrative Cut-off" that holds untruncated values is
-                            # worse than false. Report it as a no-op either way.
                             truncates_nobody <- sum(keep) > 0 && n_trunc == 0
 
                             if (truncates_nobody) {
                                 looks_like_serial <- stats::median(cut[keep], na.rm = TRUE) > 10000 &&
                                                      max(fu[keep], na.rm = TRUE) < 1000
                                 diagnostics$admin_censoring <- paste0(
-                                    "Administrative cut-off had no effect: no patient's follow-up extends beyond it, ",
-                                    "so nothing was truncated and no event status was reset.",
+                                    .("Administrative cut-off had no effect: no patient's follow-up extends beyond it, so nothing was truncated and no event status was reset."),
                                     if (looks_like_serial)
-                                        sprintf(" The cut-off reads %s while follow-up reaches only %s - that is what a date looks like once it has been imported as a plain number, and it is almost certainly not in the same units as the follow-up time.",
+                                        sprintf(.(" The cut-off reads %s while follow-up reaches only %s - that is what a date looks like once it has been imported as a plain number, and it is almost certainly not in the same units as the follow-up time."),
                                                 base::format(stats::median(cut[keep], na.rm = TRUE)),
                                                 base::format(max(fu[keep], na.rm = TRUE)))
                                     else "")
                                 private$.addHtmlMessage(
                                     if (looks_like_serial) "strong_warning" else "info",
-                                    "Administrative censoring had no effect",
-                                    paste0(diagnostics$admin_censoring,
-                                           " No truncated follow-up column was written, because it would be identical to your original follow-up."))
+                                    .("Administrative censoring had no effect"),
+                                    paste0(diagnostics$admin_censoring, " ",
+                                           .("No truncated follow-up column was written, because it would be identical to your original follow-up.")))
                                 applied$admin <- FALSE
                             } else if (wipes_all_events || truncates_everyone) {
                                 diagnostics$admin_censoring <- sprintf(
-                                    paste0("Administrative cut-off NOT applied: at this cut-off %s, which cannot be right. ",
-                                           "The follow-up time and the cut-off are almost certainly in different units - ",
-                                           "follow-up runs from %s to %s and the cut-off is %s. ",
-                                           "Express the cut-off in the same units as the follow-up time, measured from the same origin."),
+                                    .("Administrative cut-off NOT applied: at this cut-off %s, which cannot be right. The follow-up time and the cut-off are almost certainly in different units - follow-up runs from %s to %s and the cut-off is %s. Express the cut-off in the same units as the follow-up time, measured from the same origin."),
                                     if (wipes_all_events)
-                                        sprintf("every one of the %d events would be reset to censored", n_events_before)
-                                    else sprintf("all %d patients would be truncated", n_trunc),
+                                        sprintf(.("every one of the %d events would be reset to censored"), n_events_before)
+                                    else sprintf(.("all %d patients would be truncated"), n_trunc),
                                     base::format(min(fu[keep], na.rm = TRUE)),
                                     base::format(max(fu[keep], na.rm = TRUE)),
                                     base::format(stats::median(cut[keep], na.rm = TRUE)))
                                 private$.addHtmlMessage(
                                     "strong_warning",
-                                    "Administrative censoring not applied",
-                                    paste0(diagnostics$admin_censoring,
-                                           " Nothing was changed; these results are identical to leaving administrative censoring switched off."))
+                                    .("Administrative censoring not applied"),
+                                    paste0(diagnostics$admin_censoring, " ",
+                                           .("Nothing was changed; these results are identical to leaving administrative censoring switched off.")))
                                 applied$admin <- FALSE
                             } else {
 
                             mydata[["admin_time"]] <- fu
                             mydata[["admin_time"]][keep] <- pmin(fu[keep], cut[keep])
-                            # Anyone whose event happened after the cut-off is
-                            # censored at the cut-off, not counted as an event.
                             mydata[["myoutcome"]][keep & fu > cut] <- 0
-
-                            # The TRUNCATED TIME has to travel with the censored status.
-                            # This analysis exports only the status column, so pairing it
-                            # with the user's ORIGINAL follow-up gives a censored patient
-                            # their full untruncated time -- person-time inflated and the
-                            # event removed, which biases survival upward exactly where
-                            # the cut-off was supposed to protect it. Carried out of the
-                            # recoder so .run() can hand it to the second output column.
                             private$.adminTime <- mydata[["admin_time"]]
 
                             diagnostics$admin_censoring <- paste0(sprintf(
-                                "Administrative censoring applied at the supplied cut-off: follow-up truncated for %d patient(s); %d event(s) occurring after the cut-off were reset to censored. Use the truncated follow-up time this analysis writes back, not the original follow-up column.",
+                                .("Administrative censoring applied at the supplied cut-off: follow-up truncated for %d patient(s); %d event(s) occurring after the cut-off were reset to censored. Use the truncated follow-up time this analysis writes back, not the original follow-up column."),
                                 n_trunc, n_reset), exempt_note)
-                            # Say it where the user will see it. Deleting events from a
-                            # survival dataset must never be reported only in a panel
-                            # that defaults to off.
                             private$.addHtmlMessage(
                                 "warning",
-                                "Administrative censoring applied",
-                                paste0(sprintf(paste0(
-                                    "Follow-up was truncated for %d of %d patient(s) and %d of %d event(s) ",
-                                    "occurring after the cut-off were reset to censored. Check that the cut-off ",
-                                    "is in the same units as the follow-up time before using these numbers, and ",
-                                    "pair the recoded outcome with the truncated follow-up column this analysis ",
-                                    "writes back, not with your original follow-up column."),
+                                .("Administrative censoring applied"),
+                                paste0(sprintf(
+                                    .("Follow-up was truncated for %d of %d patient(s) and %d of %d event(s) occurring after the cut-off were reset to censored. Check that the cut-off is in the same units as the follow-up time before using these numbers, and pair the recoded outcome with the truncated follow-up column this analysis writes back, not with your original follow-up column."),
                                     n_trunc, sum(keep), n_reset, n_events_before),
                                     exempt_note))
                             applied$admin <- TRUE
                             }
                         }
                     } else {
-                        diagnostics$admin_censoring <- paste0(
-                            "Administrative cut-off date read, but NOT applied: no Follow-up Time ",
-                            "variable was selected, so no follow-up was truncated and no event ",
-                            "status was reset. Select a Follow-up Time variable to apply it here.")
-                        # A ticked checkbox that does nothing must not be visible only in
-                        # a Diagnostics table that is off by default: the output is
-                        # byte-identical to leaving the box unticked, so the user has no
-                        # way to tell the cut-off was ignored.
+                        diagnostics$admin_censoring <- .("Administrative cut-off date read, but NOT applied: no Follow-up Time variable was selected, so no follow-up was truncated and no event status was reset. Select a Follow-up Time variable to apply it here.")
                         private$.addHtmlMessage(
                             "warning",
-                            "Administrative censoring not applied",
-                            paste0(
-                                "A cut-off date was supplied but no Follow-up Time variable was selected, ",
-                                "so nothing was truncated and no event status was reset - these results are ",
-                                "identical to leaving administrative censoring switched off. ",
-                                "Select a Follow-up Time variable, measured in the same units as the cut-off."))
+                            .("Administrative censoring not applied"),
+                            .("A cut-off date was supplied but no Follow-up Time variable was selected, so nothing was truncated and no event status was reset - these results are identical to leaving administrative censoring switched off. Select a Follow-up Time variable, measured in the same units as the cut-off."))
                         applied$admin <- FALSE
                     }
                 } else {
-                    diagnostics$admin_censoring <- "Administrative censoring: date variable not found in dataset"
+                    diagnostics$admin_censoring <- .("Administrative censoring: date variable not found in dataset")
                 }
             }
 
@@ -1385,22 +1289,22 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (multievent && analysistype == 'multistate') {
                 switch(val_str,
-                       "0" = "Disease-free (0)",
-                       "1" = "Disease state (1)",
-                       "2" = "Death from disease (2)",
-                       "3" = "Death from other causes (3)",
-                       paste0("Unknown (", value, ")"))
+                       "0" = .("Disease-free (0)"),
+                       "1" = .("Disease state (1)"),
+                       "2" = .("Death from disease (2)"),
+                       "3" = .("Death from other causes (3)"),
+                       jmvcore::format(.("Unknown ({value})"), value = value))
             } else if (multievent && analysistype == 'compete') {
                 switch(val_str,
-                       "0" = "Censored (0)",
-                       "1" = "Disease event (1)",
-                       "2" = "Competing event (2)",
-                       paste0("Unknown (", value, ")"))
+                       "0" = .("Censored (0)"),
+                       "1" = .("Disease event (1)"),
+                       "2" = .("Competing event (2)"),
+                       jmvcore::format(.("Unknown ({value})"), value = value))
             } else {
                 switch(val_str,
-                       "0" = "Censored (0)",
-                       "1" = "Event (1)",
-                       paste0("Unknown (", value, ")"))
+                       "0" = .("Censored (0)"),
+                       "1" = .("Event (1)"),
+                       jmvcore::format(.("Unknown ({value})"), value = value))
             }
         },
 
@@ -1542,20 +1446,18 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (length(missing_levels) > 0) {
                     # Add informative notice about available levels
                     private$.addNotice(jmvcore::NoticeType$INFO,
-                        paste0("Outcome variable has ", length(unique_outcomes), " unique values: ",
-                               paste(unique_outcomes, collapse = ", ")))
+                        jmvcore::format(.("Outcome variable has {count} unique values: {values}"), 
+                            count = length(unique_outcomes),
+                            values = paste(unique_outcomes, collapse = ", ")))
 
                     # Add strong warning about missing selections
                     private$.addNotice(jmvcore::NoticeType$STRONG_WARNING,
-                        paste0("Multiple Event Types is enabled but no outcome level has been assigned to a category. ",
-                               "Assign each level of your outcome variable to one of: ",
-                               paste(missing_levels, collapse = ", "), ". ",
-                               "A category with no patients in this cohort is fine and can be left empty - ",
-                               "what matters is that every level present in the data is assigned somewhere."))
+                        jmvcore::format(.("Multiple Event Types is enabled but no outcome level has been assigned to a category. Assign each level of your outcome variable to one of: {categories}. A category with no patients in this cohort is fine and can be left empty - what matters is that every level present in the data is assigned somewhere."), 
+                            categories = paste(missing_levels, collapse = ", ")))
 
                     # Add guidance notice
                     private$.addNotice(jmvcore::NoticeType$INFO,
-                        "Guide: Use the dropdown menus to map your outcome values to the four standard categories: Dead of Disease, Dead of Other Causes, Alive with Disease, and Alive without Disease.")
+                        .("Guide: Use the dropdown menus to map your outcome values to the four standard categories: Dead of Disease, Dead of Other Causes, Alive with Disease, and Alive without Disease."))
 
                     private$.insertNotices()
                     return()
@@ -1760,53 +1662,68 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # found), so gate the report text on the applied flags returned by
             # .organizeOutcomes() rather than on the checkbox alone.
             if (isTRUE(applied$hierarchy)) {
-                summary_text <- paste(summary_text, glue::glue(
-                    "<br><b>Event Hierarchy Applied:</b> If multiple events occur, priority is given to type {self$options$eventPriority}.<br>"
+                summary_text <- paste(summary_text, paste0(
+                    "<br><b>", .("Event Hierarchy Applied:"), "</b> ",
+                    jmvcore::format(.("If multiple events occur, priority is given to type {type}."), type = self$options$eventPriority),
+                    "<br>"
                 ))
             }
 
             if (isTRUE(applied$interval)) {
-                # The Diagnostics table already says the endpoint columns are not
-                # written back, but it is OFF BY DEFAULT. This pane is always visible,
-                # so on its own it read as "interval-censored data has been prepared
-                # for you" when the only column this analysis exports is the recoded
-                # outcome -- and pairing that outcome with an exact follow-up time is
-                # precisely the analysis interval censoring exists to avoid.
-                summary_text <- paste(summary_text, "<br><b>Interval Censoring:</b> Events are known to occur within time intervals rather than at exact times. Your two interval columns were checked but are <b>not</b> written back - this analysis exports only the recoded outcome - so build the response yourself with Surv(&lt;start&gt;, &lt;end&gt;, type='interval2') using your original interval columns.<br>")
+                summary_text <- paste(summary_text, paste0(
+                    "<br><b>", .("Interval Censoring:"), "</b> ",
+                    .("Events are known to occur within time intervals rather than at exact times. Your two interval columns were checked but are <b>not</b> written back - this analysis exports only the recoded outcome - so build the response yourself with Surv(&lt;start&gt;, &lt;end&gt;, type='interval2') using your original interval columns."),
+                    "<br>"
+                ))
             }
 
             if (isTRUE(applied$admin)) {
-                summary_text <- paste(summary_text, "<br><b>Administrative Censoring:</b> Observations are censored at a specified administrative date.<br>")
+                summary_text <- paste(summary_text, paste0(
+                    "<br><b>", .("Administrative Censoring:"), "</b> ",
+                    .("Observations are censored at a specified administrative date."),
+                    "<br>"
+                ))
             }
 
             # Add recommendations for appropriate analyses
-            summary_text <- paste(summary_text, "<br><b>Recommended Analysis Approaches:</b><br>")
+            summary_text <- paste(summary_text, paste0("<br><b>", .("Recommended Analysis Approaches:"), "</b><br>"))
 
-            # Recommend for the coding that was PRODUCED, not the option that was
-            # chosen. On the hand-off path a 0/1/2 status came out under
-            # analysistype = "os" and this block told the reader to run Kaplan-Meier
-            # and Cox -- which treat any non-zero status as the same event, silently
-            # merging competing deaths into the event of interest.
             if (handoff_coded) {
-                summary_text <- paste(summary_text, "- Cumulative incidence function (competing risks)<br>- Fine-Gray subdistribution hazard model<br>- Do NOT use Kaplan-Meier or Cox on this status: they treat every non-zero code as the same event, merging the competing events into the event of interest<br>")
+                summary_text <- paste(summary_text, paste0(
+                    .("- Cumulative incidence function (competing risks)"), "<br>",
+                    .("- Fine-Gray subdistribution hazard model"), "<br>",
+                    .("- Do NOT use Kaplan-Meier or Cox on this status: they treat every non-zero code as the same event, merging the competing events into the event of interest"), "<br>"
+                ))
             } else if (analysistype == 'os') {
-                summary_text <- paste(summary_text, "- Kaplan-Meier method for univariate analysis<br>- Cox proportional hazards for multivariable analysis<br>")
+                summary_text <- paste(summary_text, paste0(
+                    .("- Kaplan-Meier method for univariate analysis"), "<br>",
+                    .("- Cox proportional hazards for multivariable analysis"), "<br>"
+                ))
             } else if (analysistype == 'cause') {
-                summary_text <- paste(summary_text, "- Cause-specific hazard models (standard Cox regression)<br>- Cumulative incidence function with competing risks<br>")
+                summary_text <- paste(summary_text, paste0(
+                    .("- Cause-specific hazard models (standard Cox regression)"), "<br>",
+                    .("- Cumulative incidence function with competing risks"), "<br>"
+                ))
             } else if (analysistype == 'compete') {
-                summary_text <- paste(summary_text, "- Fine-Gray subdistribution hazard model<br>- Cumulative incidence function accounting for competing risks<br>")
+                summary_text <- paste(summary_text, paste0(
+                    .("- Fine-Gray subdistribution hazard model"), "<br>",
+                    .("- Cumulative incidence function accounting for competing risks"), "<br>"
+                ))
             } else if (analysistype == 'multistate') {
-                summary_text <- paste(summary_text, "- A per-patient state code (0 = disease-free, 1 = disease, 2 = death from disease, 3 = death from other causes)<br>- Note: fitting a multistate or illness-death model requires transition times and a subject identifier in long format, which this analysis does not export<br>")
+                summary_text <- paste(summary_text, paste0(
+                    .("- A per-patient state code (0 = disease-free, 1 = disease, 2 = death from disease, 3 = death from other causes)"), "<br>",
+                    .("- Note: fitting a multistate or illness-death model requires transition times and a subject identifier in long format, which this analysis does not export"), "<br>"
+                ))
             } else if (analysistype %in% c('rfs', 'pfs', 'dfs')) {
                 summary_text <- paste(summary_text,
                     if (is.null(self$options$recurrence))
-                        "- NOTE: no recurrence/progression variable was supplied, so the composite endpoint was NOT built and this status is a death-only indicator. Supply the recurrence variable, or report this as overall survival<br>"
-                    else "- Standard survival analysis (Kaplan-Meier, Cox)<br>- Consider competing risks if appropriate<br>")
+                        paste0(.("- NOTE: no recurrence/progression variable was supplied, so the composite endpoint was NOT built and this status is a death-only indicator. Supply the recurrence variable, or report this as overall survival"), "<br>")
+                    else paste0(.("- Standard survival analysis (Kaplan-Meier, Cox)"), "<br>", .("- Consider competing risks if appropriate"), "<br>"))
             } else if (analysistype == 'ttp') {
                 summary_text <- paste(summary_text,
                     if (is.null(self$options$recurrence))
-                        "- NOTE: no recurrence/progression variable was supplied, so progression could not be identified and this status is a death-only indicator - the opposite of time to progression, which censors death. Supply the recurrence variable<br>"
-                    else "- Standard survival analysis with death as censoring<br>- Consider sensitivity analysis treating death as competing risk<br>")
+                        paste0(.("- NOTE: no recurrence/progression variable was supplied, so progression could not be identified and this status is a death-only indicator - the opposite of time to progression, which censors death. Supply the recurrence variable"), "<br>")
+                    else paste0(.("- Standard survival analysis with death as censoring"), "<br>", .("- Consider sensitivity analysis treating death as competing risk"), "<br>"))
             }
 
             # Summary now only contains analysis description (validation moved to Notices)
@@ -1919,12 +1836,16 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # for os Survival Analysis". Name it properly here, where the human
                 # label is available.
                 self$results$addOutcome$setTitle(sprintf(
-                    "Recoded Outcome (%s)",
+                    .("Recoded Outcome (%s)"),
                     switch(analysistype,
-                           os = "overall survival", cause = "cause-specific survival",
-                           compete = "competing risks", rfs = "recurrence-free survival",
-                           pfs = "progression-free survival", dfs = "disease-free survival",
-                           ttp = "time to progression", multistate = "multistate",
+                           os = .("overall survival"),
+                           cause = .("cause-specific survival"),
+                           compete = .("competing risks"),
+                           rfs = .("recurrence-free survival"),
+                           pfs = .("progression-free survival"),
+                           dfs = .("disease-free survival"),
+                           ttp = .("time to progression"),
+                           multistate = .("multistate"),
                            analysistype)))
                 self$results$addOutcome$setRowNums(df_outcome$row_names)
                 # Rebuild the labels from the FINAL status vector.
@@ -1982,91 +1903,54 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$showNaturalSummary) {
                 # Analysis type labels
                 analysis_type_labels <- list(
-                    os = "Overall Survival",
-                    cause = "Cause-Specific Survival",
-                    compete = "Competing Risks",
-                    rfs = "Recurrence-Free Survival",
-                    pfs = "Progression-Free Survival",
-                    dfs = "Disease-Free Survival",
-                    ttp = "Time to Progression",
-                    multistate = "Multistate Model"
+                    os = .("Overall Survival"),
+                    cause = .("Cause-Specific Survival"),
+                    compete = .("Competing Risks"),
+                    rfs = .("Recurrence-Free Survival"),
+                    pfs = .("Progression-Free Survival"),
+                    dfs = .("Disease-Free Survival"),
+                    ttp = .("Time to Progression"),
+                    multistate = .("Multistate Model")
                 )
 
-                # Event description based on analysis type
-                # These describe what the coding MEANS, so they must follow what was
-                # actually coded, not the analysis type alone. Two ways they diverge,
-                # both silent before:
-                #  * the composite branches (rfs/pfs/dfs, ttp) are skipped when no
-                #    recurrence variable is supplied, leaving a plain death
-                #    indicator that this text still called "recurrence/progression
-                #    or death";
-                #  * the Censored/Event/Competing hand-off path produces a 3-level
-                #    coding under analysistype "os", which this text described as a
-                #    two-level all-cause outcome and left the competing events out
-                #    of the narrative entirely.
                 composite_built <- analysistype %in% c("rfs", "pfs", "dfs", "ttp") &&
                                    !is.null(self$options$recurrence)
                 multi_coded <- any(!codes_present %in% c("0", "1"))
 
-                # Multistate has no "event" in the two-group sense at all: 0/1/2/3 are
-                # four clinical STATES, and counting myoutcome == 1 makes every
-                # "alive with disease" patient an event. The chain had no multistate
-                # arm, so it fell through to the placeholder "the selected event type"
-                # and produced a headline sentence that was simply wrong.
                 event_desc <- if (analysistype == "multistate")
-                        "transition to the disease state (1); this is a multistate coding with four states, not a single event indicator - the per-state breakdown below is the meaningful summary"
+                        .("transition to the disease state (1); this is a multistate coding with four states, not a single event indicator - the per-state breakdown below is the meaningful summary")
                     else if (analysistype %in% c("rfs", "pfs", "dfs") && !composite_built)
-                        "death (no recurrence variable was supplied, so the composite endpoint was not built and this is a death-only indicator)"
+                        .("death (no recurrence variable was supplied, so the composite endpoint was not built and this is a death-only indicator)")
                     else if (analysistype == "ttp" && !composite_built)
-                        "death (no recurrence variable was supplied, so progression could not be identified and this is a death-only indicator)"
+                        .("death (no recurrence variable was supplied, so progression could not be identified and this is a death-only indicator)")
                     else if (analysistype == "os" && multi_coded)
-                        "the event of interest (coded 1); this outcome also carries competing states, listed below"
-                    else if (analysistype == "os") "death from any cause"
-                    else if (analysistype == "cause") "death from the disease of interest"
-                    else if (analysistype == "compete") "disease-specific death (competing events coded as 2)"
-                    else if (analysistype %in% c("rfs", "pfs", "dfs")) "recurrence/progression or death"
-                    else if (analysistype == "ttp") "disease progression only"
-                    else "the selected event type"
+                        .("the event of interest (coded 1); this outcome also carries competing states, listed below")
+                    else if (analysistype == "os") .("death from any cause")
+                    else if (analysistype == "cause") .("death from the disease of interest")
+                    else if (analysistype == "compete") .("disease-specific death (competing events coded as 2)")
+                    else if (analysistype %in% c("rfs", "pfs", "dfs")) .("recurrence/progression or death")
+                    else if (analysistype == "ttp") .("disease progression only")
+                    else .("the selected event type")
 
-                # Censor description
-                # Was hard-coded to "patients who remain alive or event-free" for every
-                # type but TTP. Under cause-specific and competing risks the 0 group is
-                # NOT event-free: it contains patients who died of something else, and
-                # calling them event-free in a manuscript sentence is a factual error.
                 censor_desc <- if (analysistype == "ttp" && composite_built)
-                        "patients who died without progression or remain event-free"
+                        .("patients who died without progression or remain event-free")
                     else if (analysistype == "cause")
-                        "patients who were alive at last contact or died of another cause (both censored for this endpoint)"
+                        .("patients who were alive at last contact or died of another cause (both censored for this endpoint)")
                     else if (analysistype == "compete")
-                        "patients alive at last contact; deaths from other causes are coded 2 as competing events, not censored"
+                        .("patients alive at last contact; deaths from other causes are coded 2 as competing events, not censored")
                     else if (analysistype == "multistate")
-                        "patients in the baseline state (0), alive without disease"
-                    else "patients who remain alive or event-free"
+                        .("patients in the baseline state (0), alive without disease")
+                    else .("patients who remain alive or event-free")
 
-                # Calculate frequencies. The denominator must be ALL non-missing coded
-                # records: for competing risks (codes 0/1/2) and multistate (0/1/2/3)
-                # the events (==1) plus censored (==0) counts do NOT sum to the total,
-                # so using n_events + n_censored silently drops the competing/other-cause
-                # states and reports percentages against a wrong total. For binary OS
-                # coding this is identical to the previous denominator.
-                # Under multistate, code 1 is "alive with disease" -- a state, not an
-                # event -- so this count is not an event count and must not be
-                # presented as one. The per-state breakdown below carries the real
-                # information; the headline numbers are labelled accordingly.
                 n_events <- sum(mydata$myoutcome == 1, na.rm = TRUE)
                 n_censored <- sum(mydata$myoutcome == 0, na.rm = TRUE)
                 count_noun <- if (analysistype == "multistate")
-                    "patients in the disease state" else "events"
+                    .("patients in the disease state") else .("events")
                 total_n <- sum(!is.na(mydata$myoutcome))
                 event_pct <- if (total_n > 0) round(n_events / total_n * 100, 1) else 0
                 censor_pct <- if (total_n > 0) round(n_censored / total_n * 100, 1) else 0
 
-                # For competing-risks / multistate coding, append an explicit per-state
-                # breakdown so the copy-ready text does not imply the non-event group
-                # accounts for every remaining patient.
                 state_breakdown <- ""
-                # Fire on what was CODED, not on the option: a 3-level coding needs its
-                # state breakdown however the analysis type is labelled.
                 if (analysistype %in% c("compete", "multistate") ||
                     any(!codes_present %in% c("0", "1"))) {
                     state_tab <- table(mydata$myoutcome)
@@ -2077,28 +1961,26 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 htmltools::htmlEscape(private$.getOutcomeLabel(v, analysistype, self$options$multievent, codes_present)),
                                 cnt, pct)
                     }, character(1))
-                    state_breakdown <- paste0(
-                        " Full state breakdown (of ", total_n, " coded records): ",
-                        paste(state_lines, collapse = "; "), "."
-                    )
+                    state_breakdown <- jmvcore::format(.(" Full state breakdown (of {total} coded records): {states}."), 
+                        total = total_n,
+                        states = paste(state_lines, collapse = "; "))
                 }
 
-                natural_summary <- sprintf(
-                    "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>
-                    <b> Copy-Ready Report Text:</b><br><br>
-                    The outcome variable '<b>%s</b>' was recoded for <b>%s</b> analysis.
-                    Code 1 represents %s.
-                    Code 0 represents %s.
-                    The recoded variable '<b>myoutcome</b>' contains <b>%d %s (%.1f%%)</b> and <b>%d coded 0 (%.1f%%)</b> out of %d coded records.%s
-                    </div>",
-                    htmltools::htmlEscape(self$options$outcome),
-                    analysis_type_labels[[analysistype]],
-                    event_desc,
-                    censor_desc,
-                    n_events, count_noun, event_pct,
-                    n_censored, censor_pct,
-                    total_n,
-                    state_breakdown
+                natural_summary <- paste0(
+                    "<div style='background-color: rgba(33, 144, 255, 0.11); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
+                    "<b> ", .("Copy-Ready Report Text:"), "</b><br><br>",
+                    sprintf(
+                        .("The outcome variable '<b>%s</b>' was recoded for <b>%s</b> analysis. Code 1 represents %s. Code 0 represents %s. The recoded variable '<b>myoutcome</b>' contains <b>%d %s (%.1f%%)</b> and <b>%d coded 0 (%.1f%%)</b> out of %d coded records.%s"),
+                        htmltools::htmlEscape(self$options$outcome),
+                        analysis_type_labels[[analysistype]],
+                        event_desc,
+                        censor_desc,
+                        n_events, count_noun, event_pct,
+                        n_censored, censor_pct,
+                        total_n,
+                        state_breakdown
+                    ),
+                    "</div>"
                 )
 
                 self$results$naturalSummary$setContent(natural_summary)
@@ -2111,7 +1993,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add completion notice
             private$.addNotice(jmvcore::NoticeType$INFO,
-                "Outcome recoding completed successfully. New variable 'myoutcome' is ready for survival analysis.")
+                .("Outcome recoding completed successfully. New variable 'myoutcome' is ready for survival analysis."))
         },
 
         # Plot function for outcome distribution visualization
@@ -2144,9 +2026,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ggplot2::geom_bar(stat = "identity") +
                     ggplot2::geom_text(ggplot2::aes(label = Count), vjust = -0.5, size = 5) +
                     ggplot2::labs(
-                        title = "Distribution of Recoded Outcome Values",
-                        x = "Outcome Category",
-                        y = "Count"
+                        title = .("Distribution of Recoded Outcome Values"),
+                        x = .("Outcome Category"),
+                        y = .("Count")
                     ) +
                     ggtheme +
                     ggplot2::scale_fill_manual(values = cb_palette) +

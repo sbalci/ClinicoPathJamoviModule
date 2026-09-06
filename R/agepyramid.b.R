@@ -294,7 +294,24 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_final <- nrow(mydata)  # Track for data summary
 
             if (n_final == 0) {
-                private$.rejectClean(.("No valid rows remain after filtering age and gender values"))
+                # .rejectClean() wipes the notices panel, including the WARNING
+                # above that names the age column, so the reject text itself has
+                # to say WHY every row went: unusable ages (the usual case, an
+                # age chosen as a text-coded factor), unrecognised gender values,
+                # or source NAs removed by naOmit(). One whole sentence per cause.
+                n_source_na <- n_initial - n_before_age_filter
+                reasons <- c(source = n_source_na, age = n_invalid_age, gender = n_missing_gender)
+                top <- names(reasons)[which.max(reasons)]
+                template <- if (top == "age") {
+                    .("No valid rows remain: all {nTotal} rows were excluded, and the largest single reason was an age in '{age}' that is negative, infinite or not a number ({nReason} rows). Check that '{age}' holds ages as numbers, with text such as 'n/a' set to missing.")
+                } else if (top == "gender") {
+                    .("No valid rows remain: all {nTotal} rows were excluded, and the largest single reason was a value of '{gender}' matching neither the female nor the male level ({nReason} rows). Check the 'Female level' and 'Male level' selectors against the values in '{gender}'.")
+                } else {
+                    .("No valid rows remain: all {nTotal} rows were excluded, and the largest single reason was a missing age or gender in the source data ({nReason} rows). Check the '{age}' and '{gender}' columns for empty cells.")
+                }
+                private$.rejectClean(jmvcore::format(
+                    template, nTotal = n_initial, nReason = reasons[[top]],
+                    age = age, gender = gender))
             }
 
             # Determine age group breaks based on preset or custom bin width ----
@@ -697,7 +714,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add summary row: 100/100 within gender, the two gender shares of
             # all observations otherwise.
             summary_row <- data.frame(
-                Pop = "Total",
+                Pop = .("Total"),
                 Female = total_female,
                 Male = total_male,
                 Female_Pct = pct_of(total_female, female_base),
@@ -882,6 +899,9 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plotData <- private$.prepare_ggcharts_data(plotData)
             if (nrow(plotData) == 0)
                 return(FALSE)
+            # pyramid_chart() titles each side with the group value itself, so
+            # translate the labels here; the Female-first order is unchanged.
+            plotData$Gender <- unname(c(Female = .("Female"), Male = .("Male"))[plotData$Gender])
 
             # ggcharts pyramid_chart requires long-format data with:
             # - x: age groups (categorical)

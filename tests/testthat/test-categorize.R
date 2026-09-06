@@ -224,3 +224,82 @@ test_that("categorize handles variable names with spaces, punctuation and Unicod
     expect_equal(as.integer(table(env$data[[newcol]])), ft$n, info = v)
   }
 })
+
+test_that("categorize audit follow-ups: notice gaps, blank cells, citations", {
+  skip_if_not_installed("jmvReadWrite")
+  txt <- function(h) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", h))
+  set.seed(5)
+
+  # > 20% missing -> warning with the counts
+  d <- data.frame(Age = c(rnorm(40, 50, 10), rep(NA, 60)))
+  r <- categorize(data = d, var = "Age")
+  expect_match(txt(r$notices$content), "Missing values: 60 of 100 observations \\(60%\\)")
+  # the Missing row carries NA, never NaN (jamovi prints NaN literally)
+  ft <- r$freqTable$asDF
+  miss <- ft[ft$category == "Missing", ]
+  expect_equal(nrow(miss), 1)
+  expect_true(is.na(miss$percent) && !is.nan(miss$percent))
+  expect_true(is.na(miss$cumPercent) && !is.nan(miss$cumPercent))
+  expect_false(any(is.nan(ft$percent)))
+
+  # custom labels selected, box empty -> note; generic labels
+  r <- categorize(data = d, var = "Age", labels = "custom")
+  expect_match(txt(r$notices$content), "Custom labels were selected but none were entered")
+  expect_equal(r$freqTable$asDF$category[1], "Category 1")
+
+  # new name equal to the source variable -> strong warning
+  r <- categorize(data = d, var = "Age", newvarname = "Age")
+  expect_match(txt(r$notices$content), "same as the source variable 'Age'")
+  r <- categorize(data = d, var = "Age", newvarname = "Age_group")
+  expect_false(grepl("same as the source variable", r$notices$content))
+
+  # tied data under quantile: the advice names the tie and does not recommend quantiles
+  d3 <- data.frame(M = c(rep(0, 70), rpois(30, 4)))
+  r <- categorize(data = d3, var = "M", nbins = 4)
+  n <- txt(r$notices$content)
+  expect_match(n, "Severe bin imbalance")
+  expect_match(n, "cannot split tied values: 70% of the observations equal 0")
+  expect_false(grepl("quantile-based binning", n))
+  # same data, equal-width: the quantile suggestion is the right one
+  r <- categorize(data = d3, var = "M", method = "equal", nbins = 4)
+  n <- txt(r$notices$content)
+  if (grepl("Severe bin imbalance", n)) expect_match(n, "Consider quantile-based binning")
+
+  # every refs: key in the results schema resolves in 00refs.yaml with a year
+  root <- if (file.exists("../../jamovi/categorize.r.yaml")) "../.." else "."
+  keys <- yaml::read_yaml(file.path(root, "jamovi/categorize.r.yaml"))$refs
+  refs <- yaml::read_yaml(file.path(root, "jamovi/00refs.yaml"))$refs
+  expect_true(all(c("classInt", "dichotomizing") %in% keys))
+  for (k in keys) {
+    expect_true(k %in% names(refs), info = k)
+    expect_true(nzchar(as.character(refs[[k]]$year)), info = k)
+  }
+})
+
+test_that("categorize review follow-ups: non-finite values, tiny n, single manual break", {
+  skip_if_not_installed("jmvReadWrite")
+  txt <- function(h) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", h))
+
+  # Inf / -Inf are treated as missing, reported, and no longer crash the run
+  r <- categorize(data = data.frame(x = c(1:20, Inf, -Inf)), var = "x", method = "equal")
+  ft <- r$freqTable$asDF
+  expect_equal(sum(ft$n[ft$category != "Missing"]), 20)
+  expect_equal(ft$n[ft$category == "Missing"], 2)
+  expect_match(txt(r$notices$content), "Infinite values: 2 observation")
+  expect_match(r$summaryText$content, "N \\(missing\\):</strong> 2")
+
+  # one non-missing value is reported as such, not as "constant"
+  r <- categorize(data = data.frame(x = c(5, NA, NA)), var = "x")
+  expect_match(txt(r$notices$content), "has 1 non-missing observation")
+  r <- categorize(data = data.frame(x = rep(7, 10)), var = "x")
+  expect_match(txt(r$notices$content), "zero variability")
+
+  # a single manual break with exclusion on gets a specific message ...
+  r <- categorize(data = data.frame(x = 1:20), var = "x", method = "manual",
+                  breaks = "10", excludeoutofrange = TRUE)
+  expect_match(txt(r$notices$content), "at least two distinct break points")
+  expect_equal(r$freqTable$rowCount, 0)
+  # ... and without exclusion the same entry still yields two categories
+  r <- categorize(data = data.frame(x = 1:20), var = "x", method = "manual", breaks = "10")
+  expect_equal(r$freqTable$asDF$n, c(10, 10))
+})

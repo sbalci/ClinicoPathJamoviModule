@@ -87,15 +87,15 @@ When run inside a sibling repo (a shipped submodule), the list is simply
 file is byte-identical to the umbrella before debugging it (`diff`), otherwise you
 are chasing a stale build (memory: `reference_stale_generated_module_masquerades_as_bug`).
 
-Snapshot for orientation only (2026-09-02; regenerate with the command above):
+Snapshot for orientation only (2026-09-06; regenerate with the command above):
 
 | Production group | n | Analyses |
 |---|---|---|
 | OncoPath | 4 | diagnosticmeta, ihcheterogeneity, swimmerplot, waterfall |
-| meddecide | 12 | agreement, cotest, decision, decisioncalculator, decisioncombine, decisioncompare, decisioncurve, enhancedROC, lassologistic, nogoldstandard, psychopdaROC, sequentialtests (+ kappaSizeCI, kappaSizeFixedN, kappaSizePower are meddecide analyses currently at `PowerT #meddecide`, i.e. in JamoviTest) |
+| meddecide | 12 | agreement, cotest, decision, decisioncalculator, decisioncombine, decisioncompare, decisioncurve, enhancedROC, lassologistic, nogoldstandard, psychopdaROC, sequentialtests (+ kappaSizeCI, kappaSizePower, kappaSizeFixedN at `Power #meddecide`, i.e. also production) |
 | Survival | 9 | datetimeconverter, lassocox, multisurvival, oddsratio, outcomeorganizer, singlearm, survival, survivalcont, timeinterval |
-| JJStatsPlot | 3 | jjbarstats, jjpiestats, statsplot2 |
-| Exploration | 0 | (all 17 Descriptives analyses currently sit in `ExplorationT`) |
+| JJStatsPlot | 1 | statsplot2 (jjbarstats, jjpiestats and 21 others sit at `JJStatsPlotT`) |
+| Exploration | 14 | agepyramid, alluvial, benford, categorize, checkdata, chisqposttest, crosstable, dataquality, outlierdetection, reportcat, summarydata, tableone, vartree, venn (+ nonparametric, pcacomponenttest, pcaloadingtest at `ExplorationT`) |
 
 **Scanner false positives to expect** (seen on the 2026-09-02 OncoPath pass):
 options read through a constructed name (`self$options[[paste0("milestone", i, "Name")]]`),
@@ -108,6 +108,13 @@ that are commented out; `pkg::` hits inside strings/comments (oddsratio's inline
 implementation); local lists named `results` matching `results$x`; and `warning()` calls in a
 file that collects them via `withCallingHandlers(... muffleWarning)` and renders them itself
 (lassocox) — those are the module's notice mechanism, not a gap.
+Also seen on the 2026-09-06 ClinicoPathDescriptives pass: a `type: Data` option has no
+`jmvcore::Option` line in `.h.R` (not a stale header); every `insert(999`/`Notice$new`/`stop(`/
+`warning(` hit sat inside a comment — strip comments before counting; an Image whose `renderFun:`
+reads `self$data` directly never appears as `self$results$<name>` in `.b.R` (chisqposttest `plot`,
+declared `name:  plot` with two spaces, so an exact-string grep misses it); `private$.optionOr("name",
+default)` is constructed option access (outlierdetection); `switch(sty, arsenal = "tablestyle1", ...)`
+selects a result item by bare string (crosstable).
 
 ## Check Profiles
 

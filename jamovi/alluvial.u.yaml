@@ -62,10 +62,10 @@ children:
                     name: showFlowTable
                   - type: CheckBox
                     name: marg
-                    enable: (engine:easyalluvial && orient:vert && !usetitle)
+                    enable: (engine:easyalluvial)
                   - type: ComboBox
                     name: orient
-                    enable: (flowDirection:left_right && !marg)
+                    enable: (flowDirection:left_right && (engine:ggalluvial || !marg))
           - type: LayoutBox
             cell:
               column: 1
@@ -87,7 +87,7 @@ children:
                     format: number
                   - type: CheckBox
                     name: usetitle
-                    enable: (!marg)
+                    enable: (engine:ggalluvial || !marg)
                     children:
                       - type: TextBox
                         name: mytitle

@@ -37,12 +37,11 @@ test_that("jjbarstats handles missing data correctly", {
   test_data_na <- jjbarstats_test
   test_data_na$response[1:10] <- NA
 
-  # Should handle NA values with excl option
+  # Rows with NA in a selected variable are dropped and reported
   result <- jjbarstats(
     data = test_data_na,
     dep = "response",
-    group = "treatment",
-    excl = TRUE
+    group = "treatment"
   )
 
   expect_s3_class(result, "jjbarstatsResults")
@@ -50,21 +49,23 @@ test_that("jjbarstats handles missing data correctly", {
 
 test_that("jjbarstats handles all NA in dependent variable", {
 
+  # jmvcore::reject() stops the analysis; through the R wrapper that is an error.
+
   data(jjbarstats_test)
   test_data_all_na <- jjbarstats_test
   test_data_all_na$response <- NA
 
   # `$response <- NA` replaces the factor with a logical column, so this lands on
   # the variation guard (0 levels) rather than the complete-cases guard.
-  expect_match(jbs_todo(jjbarstats(data = test_data_all_na, dep = "response",
-                                   group = "treatment")),
+  expect_error(jjbarstats(data = test_data_all_na, dep = "response",
+                          group = "treatment"),
                "insufficient variation")
 
   # Keeping the factor - all values missing, levels intact - takes the other path
   keep_levels <- jjbarstats_test
   keep_levels$response <- factor(NA, levels = levels(jjbarstats_test$response))
-  expect_match(jbs_todo(jjbarstats(data = keep_levels, dep = "response",
-                                   group = "treatment")),
+  expect_error(jjbarstats(data = keep_levels, dep = "response",
+                          group = "treatment"),
                "No complete data rows available")
 })
 
@@ -78,8 +79,7 @@ test_that("jjbarstats handles missing grouping variable values", {
   result <- jjbarstats(
     data = test_data_na_group,
     dep = "response",
-    group = "treatment",
-    excl = TRUE
+    group = "treatment"
   )
 
   expect_s3_class(result, "jjbarstatsResults")
@@ -112,8 +112,8 @@ test_that("jjbarstats handles very small sample sizes", {
   # analysis's own signal, which is more specific and actually reaches the user.
   res <- jjbarstats(data = tiny_data, dep = "response", group = "treatment")
   n <- gsub("[[:space:]]+", " ", paste(as.character(res$notices$content), collapse = " "))
-  expect_match(n, "Small Group Sizes")
-  expect_match(n, "minimum of ~5 observations per group")
+  expect_match(n, "Low Expected Counts")
+  expect_match(n, "expected counts below 5")
 })
 
 test_that("jjbarstats handles single level in dependent variable", {
@@ -122,8 +122,8 @@ test_that("jjbarstats handles single level in dependent variable", {
   single_dep <- jjbarstats_test
   single_dep$response <- "No Response"
 
-  expect_match(jbs_todo(jjbarstats(data = single_dep, dep = "response",
-                                   group = "treatment")),
+  expect_error(jjbarstats(data = single_dep, dep = "response",
+                          group = "treatment"),
                "insufficient variation")
 })
 
@@ -133,8 +133,8 @@ test_that("jjbarstats handles single level in grouping variable", {
   single_group <- jjbarstats_test
   single_group$treatment <- "Placebo"
 
-  expect_match(jbs_todo(jjbarstats(data = single_group, dep = "response",
-                                   group = "treatment")),
+  expect_error(jjbarstats(data = single_group, dep = "response",
+                          group = "treatment"),
                "at least 2 categories")
 })
 
@@ -198,8 +198,7 @@ test_that("jjbarstats handles sparse contingency tables", {
   result <- jjbarstats(
     data = sparse_data,
     dep = "response",
-    group = "treatment",
-    typestatistics = "nonparametric"  # Fisher's exact for sparse tables
+    group = "treatment"
   )
 
   expect_s3_class(result, "jjbarstatsResults")
@@ -256,8 +255,7 @@ test_that("jjbarstats handles missing split-by variable values", {
     data = test_data_na_split,
     dep = "response",
     group = "treatment",
-    grvar = "sex",
-    excl = TRUE
+    grvar = "sex"
   )
 
   expect_s3_class(result, "jjbarstatsResults")
@@ -336,8 +334,8 @@ test_that("jjbarstats handles aggregated data with all zero counts", {
   # n = 0 is not a small sample, it is no sample. This used to run: the summary
   # panel announced "Sample Size: 0 observations" beside "Statistical Method:
   # Chi-square test of independence" and a chart was drawn.
-  expect_match(jbs_todo(jjbarstats(data = zero_all_data, dep = "response",
-                                   group = "treatment", counts = "count")),
+  expect_error(jjbarstats(data = zero_all_data, dep = "response",
+                          group = "treatment", counts = "count"),
                "sums to zero")
 })
 
@@ -375,22 +373,18 @@ test_that("jjbarstats handles complete independence", {
   expect_s3_class(result, "jjbarstatsResults")
 })
 
-test_that("jjbarstats handles paired data with perfect agreement", {
+test_that("jjbarstats rejects paired data with perfect agreement", {
 
-  # All subjects have same status at baseline and follow-up
+  # All subjects have the same status at baseline and follow-up: no discordant
+  # pairs, so McNemar's statistic is 0/0 and the analysis must say so.
   perfect_agreement <- data.frame(
     baseline = c(rep("Negative", 30), rep("Positive", 20)),
     followup = c(rep("Negative", 30), rep("Positive", 20))
   )
 
-  result <- jjbarstats(
-    data = perfect_agreement,
-    dep = "baseline",
-    group = "followup",
-    paired = TRUE
-  )
-
-  expect_s3_class(result, "jjbarstatsResults")
+  expect_error(jjbarstats(data = perfect_agreement, dep = "baseline",
+                          group = "followup", paired = TRUE),
+               "No discordant pairs")
 })
 
 test_that("jjbarstats handles paired data with perfect disagreement", {

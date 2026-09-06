@@ -26,11 +26,7 @@
 | `group` | `Variable` | `NULL` | Grouping Variable |
 | `grvar` | `Variable` | `NULL` | Split By (Optional) |
 | `counts` | `Variable` | `NULL` | Counts (Optional) |
-| `excl` | `Bool` | `FALSE` | Exclude missing (NA) |
 | `typestatistics` | `List` | `parametric` | Type of Statistic |
-| `pairwisecomparisons` | `Bool` | `FALSE` | Pairwise comparisons |
-| `pairwisedisplay` | `List` | `significant` | Pairwise Display |
-| `padjustmethod` | `List` | `holm` | Adjustment Method |
 | `originaltheme` | `Bool` | `FALSE` | Add GGStatsPlot layer |
 | `resultssubtitle` | `Bool` | `FALSE` | Statistical results in subtitle |
 | `paired` | `Bool` | `FALSE` | Paired/Repeated measures |

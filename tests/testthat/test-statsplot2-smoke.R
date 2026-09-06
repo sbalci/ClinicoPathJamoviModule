@@ -19,7 +19,8 @@ test_that("Type inference works correctly", {
   module <- statsplot2(
     data = df,
     dep = "y_cat_small",
-    group = "group_factor"
+    group = "group_factor",
+    showExplanations = TRUE
   )
 
   # Check explanation for "bar chart" or "categorical" to confirm inference
@@ -96,7 +97,8 @@ test_that("Alluvial notice appears when not applicable", {
     g = rnorm(20)
   )
   rep_mod <- statsplot2(data = rep_df, dep = "y", group = "g",
-                        direction = "repeated", alluvsty = "t1")
+                        direction = "repeated", alluvsty = "t1",
+                        showExplanations = TRUE)
   expect_match(gsub("<[^>]*>", " ", as.character(rep_mod$ExplanationMessage$content)),
                "Alluvial style option")
 })

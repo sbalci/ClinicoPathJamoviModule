@@ -421,6 +421,13 @@
         `title`="ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=ggplot2", 
         `url`="https://CRAN.R-project.org/package=ggplot2"), 
+    `classInt`=list(
+        `type`="software", 
+        `author`="Bivand, R.", 
+        `year`=2023, 
+        `title`="classInt: Choose Univariate Class Intervals", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=classInt", 
+        `url`="https://CRAN.R-project.org/package=classInt"), 
     `ggridges`=list(
         `type`="software", 
         `author`="Wilke, C., & RStudio", 

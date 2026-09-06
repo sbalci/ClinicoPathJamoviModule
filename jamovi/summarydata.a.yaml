@@ -36,11 +36,17 @@ options:
       type: Variables
       suggested: [ continuous ]
       permitted: [ numeric ]
+      # The backend has a dedicated "no variables selected" branch that shows
+      # the welcome panel, so NULL is a supported state. Without an explicit
+      # `default: NULL` the compiler makes `vars` a REQUIRED argument of the
+      # public wrapper and summarydata(data = df) fails with the opaque
+      # `argument "vars" is missing, with no default`.
+      default: NULL
       description:
           R: >
             A character vector naming the numeric variables from `data` to
-            summarize. This argument is required when calling the analysis
-            from R; in jamovi, select one or more variables in the options panel.
+            summarize. Until at least one variable is selected, the analysis
+            shows a welcome panel with instructions instead of results.
 
 
     - name: distr

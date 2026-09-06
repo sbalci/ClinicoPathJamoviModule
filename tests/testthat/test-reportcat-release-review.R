@@ -114,11 +114,11 @@ test_that("variable names containing a space survive the formula round-trip", {
 
 test_that("panel visibility follows the populate state", {
   # Visibility is managed procedurally: .resetOutputs() hides every managed
-  # panel at the top of .run(), and each populate path pairs setContent() with
-  # setVisible(TRUE). This replaced setContent("") clearing, which left stray
-  # empty headings ("To Do" above results; five empty panels under a terminal
-  # error). `visible: (!vars)` is not usable - a leading `!` fails jmvcore's
-  # routing regex and the item becomes silently ALWAYS visible.
+  # panel once validation has passed, and each populate path pairs setContent()
+  # with setVisible(TRUE). This replaced setContent("") clearing, which left
+  # stray empty headings ("To Do" above results). `visible: (!vars)` is not
+  # usable - a leading `!` fails jmvcore's routing regex and the item becomes
+  # silently ALWAYS visible.
   d <- data.frame(g = factor(c("A", "B", "B")),
                   allna = factor(rep(NA_character_, 3), levels = c("X", "Y")))
 
@@ -127,17 +127,18 @@ test_that("panel visibility follows the populate state", {
   expect_false(res$todo$visible)
   for (item in c("text", "text1", "clinicalSummary", "reportSentences", "assumptions"))
     expect_true(res[[item]]$visible)
-  expect_false(res$error$visible)
   expect_false(res$dataWarnings$visible)
+  expect_false("error" %in% names(res))
 
-  # terminal-error path (every selected variable empty): content panels stay
-  # hidden - no empty headings - while error and dataWarnings show with content
-  res2 <- reportcat(data = d, vars = "allna")
-  for (item in c("todo", "text", "text1", "clinicalSummary", "reportSentences", "assumptions"))
-    expect_false(res2[[item]]$visible)
-  expect_true(res2$error$visible)
-  expect_true(res2$dataWarnings$visible)
-  expect_match(as.character(res2$dataWarnings$content), "allna")
+  # terminal path (every selected variable empty) is fatal: jmvcore::reject()
+  # names the variables; jamovi leaves the previous results in place under it
+  expect_error(reportcat(data = d, vars = "allna"), "allna")
+
+  # partial path: the empty variable is excluded and named, the rest runs
+  res3 <- reportcat(data = d, vars = c("g", "allna"))
+  expect_true(res3$dataWarnings$visible)
+  expect_match(as.character(res3$dataWarnings$content), "allna")
+  expect_true(res3$text$visible)
 })
 
 test_that("a high-cardinality variable is not lumped into '(Other)'", {

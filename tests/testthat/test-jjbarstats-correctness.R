@@ -105,8 +105,7 @@ test_that("jjbarstats handles weighted data with missing values", {
       data = weighted_data_na,
       dep = "outcome",
       group = "treatment",
-      counts = "count",
-      excl = TRUE  # Should exclude rows with NA
+      counts = "count"
     )
   }, error = function(e) {
     NULL
@@ -185,8 +184,7 @@ test_that("jjbarstats properly filters NAs before analysis", {
       data = data_with_na,
       dep = "dep1",
       group = "group",
-      counts = "count",
-      excl = TRUE
+      counts = "count"
     )
   }, error = function(e) {
     NULL
@@ -277,11 +275,9 @@ test_that("jjbarstats handles negative counts correctly", {
     stringsAsFactors = FALSE
   )
 
-  # Rejected, but as a message in the results panel - a jamovi analysis does not
-  # throw, so expect_error() here would pass only on a crash.
-  res <- jjbarstats(data = negative_counts_data, dep = "outcome",
-                    group = "group", counts = "count")
-  expect_match(gsub("<[^>]*>", " ", as.character(res$todo$content)),
+  # Invalid frequencies must stop analysis rather than leave a usable-looking result.
+  expect_error(jjbarstats(data = negative_counts_data, dep = "outcome",
+                          group = "group", counts = "count"),
                "contains negative values")
 })
 

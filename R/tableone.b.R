@@ -51,9 +51,16 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             for (i in seq_along(matches)) {
                 end <- matches[i] + widths[i] - 1L
                 key <- substr(template, matches[i] + 1L, end - 1L)
-                stopifnot(key %in% names(values), length(values[[key]]) == 1L)
+                # A translated msgstr that renames a placeholder ({N} for {n})
+                # must not abort the whole analysis. The msgid is not available
+                # here, so keep the unknown token literal: the sentence still
+                # reads, and the stray {N} points at the catalogue line to fix.
+                replacement <- if (key %in% names(values))
+                    paste(as.character(values[[key]]), collapse = ", ")
+                else
+                    substr(template, matches[i], end)
                 pieces <- c(pieces, substr(template, start, matches[i] - 1L),
-                            as.character(values[[key]]))
+                            replacement)
                 start <- end + 1L
             }
             paste0(c(pieces, substring(template, start)), collapse = "")
@@ -125,6 +132,8 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     "<br><strong>", .("No Data Available"), "</strong><ul><li>",
                     .("Please load a dataset before using Table One."), "</li><li>",
                     .("Check that your data file is properly imported."), "</li></ul>"))
+                private$.setAssumptionsSkipped(
+                    .("No data quality check was performed because the dataset has no rows."))
                 return(invisible(NULL))
             }
 
@@ -235,6 +244,8 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     .("Nothing to summarise"), ":</b> ",
                     .("No selected variable has recorded values in a supported storage type. Select at least one numeric, categorical, text or logical variable with recorded values."),
                     "</div>"))
+                private$.setAssumptionsSkipped(
+                    .("No data quality check was performed because no selected variable could be summarised; the Instructions panel above explains why."))
                 return(invisible(NULL))
             }
 
@@ -265,6 +276,8 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 if (length(selected_vars) == 0L) {
                     self$results$tablestyle4$setContent(
                         private$.frequencySkipHtml(frequency_skipped))
+                    private$.setAssumptionsSkipped(
+                        .("No data quality check was performed because no selected variable could be tabulated in the janitor style; the Frequency Tables panel below explains why."))
                     return(invisible(NULL))
                 }
             }
@@ -307,6 +320,8 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     private$.formatText(.("Excluding missing values left no cases: each of the {n} cases has at least one missing value among the selected variables. Untick Missing-value exclusion (NA), or select fewer variables."),
                                         n = original_n),
                     "</div>"))
+                private$.setAssumptionsSkipped(
+                    .("No data quality check was performed because missing-value exclusion left no cases; the Instructions panel above explains why."))
                 return(invisible(NULL))
             }
 
@@ -436,9 +451,10 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     # text "&lt;20%". The arsenal path below still needs the call:
                     # arsenal's summary(text = "html") emits levels verbatim.
                     categories <- private$.categoryLabels(data)
-                    missing_label <- if ("Unknown" %in% categories)
+                    unknown_label <- .("Unknown")
+                    missing_label <- if (unknown_label %in% categories)
                         private$.uniqueSummaryLabel(.("Missing (NA)"), categories)
-                    else "Unknown"
+                    else unknown_label
                     tbl <- gtsummary::tbl_summary(data = data, missing_text = missing_label)
                     # Single-row dichotomous summaries must name the counted
                     # level, including TRUE when every observed value is FALSE.
@@ -472,14 +488,15 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 formula_obj <- jmvcore::asFormula(paste('~', formula_str))
                 mytable <- tryCatch({
                     arsenal_data <- private$.htmlSafeTableData(data)
-                    if (!identical(is.na(arsenal_data), is.na(data)))
-                        stop(.("Formatting changed missing values; no table or report was produced."))
-                    categories <- private$.categoryLabels(data)
-                    stats_labels <- list()
-                    if ("N-Miss" %in% categories) {
-                        stats_labels$Nmiss <- private$.uniqueSummaryLabel(
-                            .("Missing (NA)"), categories)
+                    if (!identical(is.na(arsenal_data), is.na(data))) {
+                        private$.rejectPlain(.("Formatting changed missing values; no table or report was produced."))
+                        return(invisible(NULL))
                     }
+                    categories <- private$.categoryLabels(data)
+                    nmiss_label <- .("N-Miss")
+                    stats_labels <- list(Nmiss = if (nmiss_label %in% categories)
+                        private$.uniqueSummaryLabel(.("Missing (NA)"), categories)
+                    else nmiss_label)
                     tab <- arsenal::tableby(formula = formula_obj,
                                             data = arsenal_data,
                                             stats.labels = stats_labels,
@@ -558,9 +575,10 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                                 .("Missing (NA)"), table[[1]])
                             table[[1]][is.na(table[[1]])] <- missing_label
                         }
-                        total_label <- if ("Total" %in% table[[1]])
+                        total_default <- .("Total")
+                        total_label <- if (total_default %in% table[[1]])
                             private$.uniqueSummaryLabel(.("Total (all cases)"), table[[1]])
-                        else "Total"
+                        else total_default
                         table <- janitor::adorn_totals(table, "row", name = total_label)
                         
                         # Do not label raw fractions as percentages if formatting
@@ -573,7 +591,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                         # Rename columns for consistency - use more flexible approach
                         if (length(col_names) >= 2) {
                             # First column is typically the variable values, second is counts
-                            names(table)[2] <- "N"
+                            names(table)[2] <- .("N")
                         }
                         if (length(col_names) >= 3) {
                             names(table)[3] <- .("Percent")
@@ -673,6 +691,8 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                         "<p><strong>",
                         .("Some frequency tables could not be produced. Review the Not tabulated details below. Supplementary summaries and copy-ready text are withheld because the output is incomplete."),
                         "</strong></p>"))
+                    private$.setAssumptionsSkipped(
+                        .("The data quality check was withheld because some frequency tables could not be produced; the Frequency Tables panel below explains why."))
                     return(FALSE)
                 }
             } else {
@@ -757,7 +777,8 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             paste0(
                 "<div style='background-color: rgba(33, 159, 43, 0.1); padding: 15px; border-left: 4px solid #4caf50; margin: 10px 0; color: inherit;'>",
                 "<h4>", .("Data Quality Check"), "</h4><p><strong>",
-                .("Cases in the table"), ":</strong> N = ", n_final, "</p>",
+                .("Cases in the table"), ":</strong> ",
+                private$.formatText(.("N = {n}"), n = n_final), "</p>",
                 "<p><strong>", .("Complete cases in the source data"), ":</strong> ",
                 round(100 - missing_pct_original, 1), "%</p>",
                 "<p><em>",
@@ -767,6 +788,16 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             )
         },
         
+        # `assumptions` is visible whenever variables are selected, so every
+        # path that returns before .checkDataQuality() must give it a body or
+        # the heading sits there empty and reads as a glitch.
+        .setAssumptionsSkipped = function(reason) {
+            self$results$assumptions$setContent(paste0(
+                "<div style='background: rgba(255, 202, 33, 0.23); color: inherit;",
+                "border-left:4px solid #ffc107;padding:10px;margin:10px 0;'><b>",
+                .("Data quality check not performed"), ":</b> ", reason, "</div>"))
+        },
+
         .setAboutContent = function() {
             if (!isTRUE(self$options$showAbout))
                 return(invisible(NULL))

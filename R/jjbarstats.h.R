@@ -10,12 +10,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             group = NULL,
             grvar = NULL,
             counts = NULL,
-            excl = FALSE,
             typestatistics = "parametric",
-            pairwisecomparisons = FALSE,
-            pairwisedisplay = "significant",
-            padjustmethod = "holm",
             originaltheme = FALSE,
+            palette = "Dark2",
             resultssubtitle = FALSE,
             paired = FALSE,
             label = "percentage",
@@ -74,48 +71,26 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "numeric"),
                 default=NULL)
-            private$..excl <- jmvcore::OptionBool$new(
-                "excl",
-                excl,
-                default=FALSE)
             private$..typestatistics <- jmvcore::OptionList$new(
                 "typestatistics",
                 typestatistics,
                 options=list(
                     "parametric",
-                    "nonparametric",
-                    "robust",
                     "bayes"),
                 default="parametric")
-            private$..pairwisecomparisons <- jmvcore::OptionBool$new(
-                "pairwisecomparisons",
-                pairwisecomparisons,
-                default=FALSE)
-            private$..pairwisedisplay <- jmvcore::OptionList$new(
-                "pairwisedisplay",
-                pairwisedisplay,
-                options=list(
-                    "significant",
-                    "non-significant",
-                    "everything"),
-                default="significant")
-            private$..padjustmethod <- jmvcore::OptionList$new(
-                "padjustmethod",
-                padjustmethod,
-                options=list(
-                    "holm",
-                    "hochberg",
-                    "hommel",
-                    "bonferroni",
-                    "BH",
-                    "BY",
-                    "fdr",
-                    "none"),
-                default="holm")
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
                 default=FALSE)
+            private$..palette <- jmvcore::OptionList$new(
+                "palette",
+                palette,
+                options=list(
+                    "Dark2",
+                    "Set2",
+                    "Paired",
+                    "gdoc"),
+                default="Dark2")
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
@@ -205,12 +180,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
             self$.addOption(private$..counts)
-            self$.addOption(private$..excl)
             self$.addOption(private$..typestatistics)
-            self$.addOption(private$..pairwisecomparisons)
-            self$.addOption(private$..pairwisedisplay)
-            self$.addOption(private$..padjustmethod)
             self$.addOption(private$..originaltheme)
+            self$.addOption(private$..palette)
             self$.addOption(private$..resultssubtitle)
             self$.addOption(private$..paired)
             self$.addOption(private$..label)
@@ -233,12 +205,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
         counts = function() private$..counts$value,
-        excl = function() private$..excl$value,
         typestatistics = function() private$..typestatistics$value,
-        pairwisecomparisons = function() private$..pairwisecomparisons$value,
-        pairwisedisplay = function() private$..pairwisedisplay$value,
-        padjustmethod = function() private$..padjustmethod$value,
         originaltheme = function() private$..originaltheme$value,
+        palette = function() private$..palette$value,
         resultssubtitle = function() private$..resultssubtitle$value,
         paired = function() private$..paired$value,
         label = function() private$..label$value,
@@ -260,12 +229,9 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..group = NA,
         ..grvar = NA,
         ..counts = NA,
-        ..excl = NA,
         ..typestatistics = NA,
-        ..pairwisecomparisons = NA,
-        ..pairwisedisplay = NA,
-        ..padjustmethod = NA,
         ..originaltheme = NA,
+        ..palette = NA,
         ..resultssubtitle = NA,
         ..paired = NA,
         ..label = NA,
@@ -315,13 +281,10 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "group",
                     "grvar",
                     "counts",
-                    "excl",
                     "paired",
                     "typestatistics",
-                    "pairwisecomparisons",
-                    "pairwisedisplay",
-                    "padjustmethod",
                     "originaltheme",
+                    "palette",
                     "resultssubtitle",
                     "label",
                     "digits",
@@ -402,11 +365,7 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".plotBalloon",
                 requiresData=TRUE,
-                visible="(addGGPubrBalloon)",
-                clearWith=list(
-                    "dep",
-                    "group",
-                    "ggpubrBalloonPalette")))}))
+                visible="(addGGPubrBalloon)"))}))
 
 jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjbarstatsBase",
@@ -416,7 +375,7 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjbarstats",
-                version = c(1,0,9),
+                version = c(1,0,10),
                 options = options,
                 results = jjbarstatsResults$new(options=options),
                 data = data,
@@ -431,21 +390,36 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Bar Charts
 #'
-#' 'Wrapper Function for ggstatsplot::ggbarstats and
-#' ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+#' Bar charts of one or more categorical outcomes by a grouping variable, with 
+#' the test in the subtitle: Pearson's chi-squared, Fisher's exact test on a 
+#' sparse 2x2 table, McNemar's test for paired data, or a Bayesian contingency 
+#' analysis. Wraps ggstatsplot::ggbarstats and 
+#' ggstatsplot::grouped_ggbarstats.
 #' 
+#'
+#' @examples
+#' \donttest{
+#' jjbarstats(
+#'     data = jjbarstats_test,
+#'     dep = "response",
+#'     group = "treatment",
+#'     resultssubtitle = TRUE
+#' )
+#'}
 #' @param data The data as a data frame.
-#' @param dep .
-#' @param group .
-#' @param grvar .
+#' @param dep One or more categorical outcome variables; each gets its own
+#'   chart.
+#' @param group Categorical grouping variable shown on the x axis.
+#' @param grvar Optional categorical variable; the chart is repeated for each
+#'   of its levels.
 #' @param counts A variable in data containing counts, or NULL if each row
 #'   represents a single observation.
-#' @param excl .
-#' @param typestatistics .
-#' @param pairwisecomparisons .
-#' @param pairwisedisplay .
-#' @param padjustmethod .
-#' @param originaltheme .
+#' @param typestatistics Frequentist (Pearson's chi-squared; Fisher's exact
+#'   test on a sparse 2x2 table; McNemar's test when paired) or Bayesian
+#'   contingency analysis.
+#' @param originaltheme Use the ggstatsplot theme instead of the jamovi theme.
+#' @param palette Palette for the bar segments: an RColorBrewer palette, or
+#'   gdoc, the ggstatsplot default.
 #' @param resultssubtitle Display statistical test results in plot subtitle.
 #'   Disabling improves performance significantly.
 #' @param paired Logical indicating whether data came from a within-subjects
@@ -464,9 +438,11 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   proportion test  (should sum to 1). For example: '0.5,0.5' for two equal
 #'   groups or  '0.25,0.25,0.25,0.25' for four equal groups. Leave empty for
 #'   equal  theoretical proportions.
-#' @param clinicalpreset Predefined configurations for common clinical
-#'   scenarios.  Automatically sets appropriate statistical methods and
-#'   parameters.
+#' @param clinicalpreset Tailors the interpretation guide and the prevalence
+#'   check to a common clinical scenario. In the jamovi interface choosing a
+#'   preset also switches on the statistics subtitle (and, for risk factor
+#'   analysis, the proportion tests); the R function leaves those options as
+#'   given.
 #' @param showexplanations Display detailed explanations of statistical
 #'   methods, assumptions, and clinical interpretations to guide analysis and
 #'   result interpretation.
@@ -502,12 +478,9 @@ jjbarstats <- function(
     group = NULL,
     grvar = NULL,
     counts = NULL,
-    excl = FALSE,
     typestatistics = "parametric",
-    pairwisecomparisons = FALSE,
-    pairwisedisplay = "significant",
-    padjustmethod = "holm",
     originaltheme = FALSE,
+    palette = "Dark2",
     resultssubtitle = FALSE,
     paired = FALSE,
     label = "percentage",
@@ -549,12 +522,9 @@ jjbarstats <- function(
         group = group,
         grvar = grvar,
         counts = counts,
-        excl = excl,
         typestatistics = typestatistics,
-        pairwisecomparisons = pairwisecomparisons,
-        pairwisedisplay = pairwisedisplay,
-        padjustmethod = padjustmethod,
         originaltheme = originaltheme,
+        palette = palette,
         resultssubtitle = resultssubtitle,
         paired = paired,
         label = label,

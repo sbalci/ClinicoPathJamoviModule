@@ -23,9 +23,8 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # notice content must be plain text). ====
         .noticeList = list(),
 
-        # TODO(i18n): the notice titles/contents passed to .addNotice() below are
-        # plain sprintf() strings, not .()-wrapped; wrap them in a
-        # /prepare-translation pass (jmvcore::format with {} placeholders).
+        # Titles/contents arrive .()-wrapped from the call sites in .run(); the
+        # severity prefixes are translated in .renderNotices().
         .addNotice = function(type, title, content) {
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                 type = type,
@@ -46,10 +45,10 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
-                    ERROR          = "ERROR: ",
-                    STRONG_WARNING = "STRONG WARNING: ",
-                    WARNING        = "WARNING: ",
-                    INFO           = "INFO: ",
+                    ERROR          = paste0(.("ERROR"), ": "),
+                    STRONG_WARNING = paste0(.("STRONG WARNING"), ": "),
+                    WARNING        = paste0(.("WARNING"), ": "),
+                    INFO           = paste0(.("INFO"), ": "),
                     "")
                 paste0(prefix, notice$title, "\n", notice$content)
             }, character(1))
@@ -249,6 +248,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             horizontal <- self$options$horizontal
             sline <- self$options$sline
             mytitle <- self$options$mytitle
+            # Pattern and sequence trees are one chain per observed combination;
+            # the node-level rules below (NA exemptions, pruning) differ there.
+            pattern_mode <- isTRUE(self$options$pattern) || isTRUE(self$options$sequence)
             # myvars, percvar, summaryvar already retrieved from labeledData
 
             # Style handling - Enhanced feature from vtree3
@@ -378,7 +380,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # NA as "NA"). With 'Valid percentages' on, such an NA node is drawn with a
             # count but NO percentage, so the percentage warning must not quote it;
             # mean/SD are still printed there, so that warning keeps the full set.
-            if (isTRUE(self$options$vp)) {
+            # In pattern / sequence mode every pattern carries a percentage of the
+            # full N, NA patterns included (verified vtree 5.7.0), so no exemption.
+            if (isTRUE(self$options$vp) && !pattern_mode) {
                 complete <- stats::complete.cases(mydata[, myvars, drop = FALSE])
                 pct_counts <- table(do.call(paste, c(as.list(mydata[complete, myvars, drop = FALSE]), sep = "\r")))
                 smallest_pct_node_n <- if (length(pct_counts) > 0) as.integer(min(pct_counts)) else 0L
@@ -387,7 +391,10 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (max_combinations > 500) {
-                var_summary <- paste(sprintf("%s (%d levels)", myvars, var_level_counts), collapse=", ")
+                level_tmpl <- .("{name} ({n} levels)")
+                var_summary <- paste(vapply(seq_along(myvars), function(i)
+                    jmvcore::format(level_tmpl, name = myvars[i], n = var_level_counts[[i]]),
+                    character(1)), collapse = ", ")
                 # %s, not %d: prod() returns a double and sprintf('%d', 2176782336)
                 # is an error, which would have crashed this very warning.
                 private$.addNotice('WARNING', .('Large Tree Complexity'), jmvcore::format(
@@ -434,6 +441,22 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$options$followLevel2
             )
 
+            # A prune/follow variable with both level selectors at None builds no
+            # spec at all, and vtree draws the tree unchanged without a word. Say
+            # which levels can be picked.
+            if (!is.null(self$options$prunebelow) && is.null(xprunebelow)) {
+                private$.addNotice('WARNING', .('Prune-Below Level Not Selected'), jmvcore::format(
+                    .("'{name}' is selected as the prune-below variable, but no level is chosen, so no branch is pruned. Pick Level 1 (and optionally Level 2) from: {levels}."),
+                    name = self$options$prunebelow,
+                    levels = paste(levels(as.factor(self$data[[self$options$prunebelow]])), collapse = ", ")))
+            }
+            if (!is.null(self$options$follow) && is.null(xfollow)) {
+                private$.addNotice('WARNING', .('Follow-Below Level Not Selected'), jmvcore::format(
+                    .("'{name}' is selected as the follow-below variable, but no level is chosen, so the tree is drawn in full below every level. Pick Level 1 (and optionally Level 2) from: {levels}."),
+                    name = self$options$follow,
+                    levels = paste(levels(as.factor(self$data[[self$options$follow]])), collapse = ", ")))
+            }
+
             # vtree honours prunebelow / follow only for variables that are in `vars`.
             # A setting on any other variable leaves the tree byte-identical, with no
             # error and no message of any kind, so say so here.
@@ -461,7 +484,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             smallest_pct_shown_n <- smallest_pct_node_n
             if (isTRUE(useprunesmaller) && !is.null(xprunesmaller)) {
                 pruned <- private$.prunedByThreshold(mydata, myvars1, xprunesmaller,
-                                                     self$options$vp)
+                                                     self$options$vp, pattern = pattern_mode)
                 smallest_shown_n <- pruned$min_shown
                 smallest_pct_shown_n <- if (isTRUE(self$options$vp)) pruned$min_shown_pct else pruned$min_shown
             }
@@ -546,8 +569,8 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 summ_spec <- paste0(
                     summaryvar, " \\n\\n",
                     summary_label, "\\n",
-                    "mean=%mean%", "\\n",
-                    "SD=%SD%", "\\n",
+                    .("mean"), "=%mean%", "\\n",
+                    .("SD"), "=%SD%", "\\n",
                     summarylocation1, "\\n"
                 )
 
@@ -654,15 +677,27 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (length(shown) > 8)
                     shown <- c(shown[seq_len(8)],
                                jmvcore::format(.("... and {n} more"), n = length(shown) - 8))
+                # Pattern / sequence trees prune whole combinations, NA ones included,
+                # and keep the full N as the percentage denominator; the hierarchical
+                # tree prunes nodes and exempts NA nodes while 'Valid percentages' is on.
+                if (pattern_mode) {
+                    hidden_lines <- c(
+                        jmvcore::format(.("{nodes} pattern(s) holding {cases} case(s) in total are not shown, because 'Prune counts <' is set to {threshold}. In pattern / sequence mode the setting removes every complete combination held by fewer cases than that, including combinations with a missing value."),
+                                        nodes = pruned$nodes, cases = pruned$cases, threshold = xprunesmaller),
+                        .("Percentages are still taken from the full N, so the displayed patterns do not add up to 100%."))
+                } else {
+                    hidden_lines <- c(
+                        jmvcore::format(.("{nodes} node(s) holding {cases} case(s) are not shown, because 'Prune nodes smaller than' is set to {threshold}."),
+                                        nodes = pruned$nodes, cases = pruned$cases, threshold = xprunesmaller),
+                        .("Counts within a branch will therefore not add up to the count above it."))
+                }
                 private$.addNotice(
                     "WARNING",
                     .("Branches hidden by the minimum-size setting"),
                     paste(c(
-                        jmvcore::format(.("{nodes} node(s) holding {cases} case(s) are not shown, because 'Prune nodes smaller than' is set to {threshold}."),
-                                        nodes = pruned$nodes, cases = pruned$cases, threshold = xprunesmaller),
-                        .("Counts within a branch will therefore not add up to the count above it."),
+                        hidden_lines,
                         jmvcore::format(.("Hidden: {hidden}"), hidden = paste(shown, collapse = "; ")),
-                        if (isTRUE(self$options$vp) && pruned$min_shown > 0 &&
+                        if (!pattern_mode && isTRUE(self$options$vp) && pruned$min_shown > 0 &&
                             pruned$min_shown < xprunesmaller)
                             .("Missing-value (NA) nodes are exempt from the threshold while 'Valid percentages' is on, so an NA node holding fewer cases than the threshold is still drawn.")
                         else NULL,
@@ -864,12 +899,35 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #
         # `min_shown` is the smallest node that survives; the small-subgroup notices in
         # .run() need a count that describes the RENDERED tree, not the raw data.
-        .prunedByThreshold = function(data, vars, threshold, vp = TRUE) {
+        .prunedByThreshold = function(data, vars, threshold, vp = TRUE, pattern = FALSE) {
             empty <- list(nodes = 0L, cases = 0L, labels = character(0), min_shown = 0L, min_shown_pct = 0L)
             if (is.null(threshold) || !is.finite(threshold) || threshold <= 0)
                 return(empty)
             vars <- vars[vars %in% names(data)]
             if (length(vars) == 0) return(empty)
+            label_tmpl <- .("{node} (n={count})")
+
+            # Pattern / sequence mode: vtree draws one chain per observed
+            # combination of ALL the variables and drops every chain held by fewer
+            # than `threshold` cases. Verified on vtree 5.7.0 with the A x B data
+            # above and prunesmaller = 10: only big>x and big>y remain; NA>x (1)
+            # and NA>y (1) go too whatever `vp` is - a combination with a missing
+            # value is a pattern like any other - and every surviving pattern, NA
+            # ones included, carries a percentage of the full N.
+            if (isTRUE(pattern)) {
+                combos <- table(do.call(paste, c(as.list(data[, vars, drop = FALSE]), sep = "\r")))
+                gone <- combos[combos < threshold]
+                kept <- combos[combos >= threshold]
+                min_kept <- if (length(kept) > 0) as.integer(min(kept)) else 0L
+                return(list(
+                    nodes = length(gone),
+                    cases = as.integer(sum(gone)),
+                    labels = vapply(seq_along(gone), function(i) jmvcore::format(label_tmpl,
+                        node = gsub("\r", " > ", names(gone)[i], fixed = TRUE),
+                        count = as.integer(gone[[i]])), character(1)),
+                    min_shown = min_kept,
+                    min_shown_pct = min_kept))
+            }
 
             # table() below allocates prod(levels of the first d variables) cells,
             # which is unbounded for a wide selection (12 variables x 6 levels is
@@ -896,7 +954,6 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dn <- dimnames(tab)
                 for (r in seq_len(nrow(idx))) {
                     combo <- vapply(seq_len(d), function(j) dn[[j]][idx[r, j]], character(1))
-                    key <- paste(combo, collapse = "\r")
                     count <- tab[matrix(idx[r, ], nrow = 1)]
 
                     # inside an already-pruned ancestor? then it is not counted again
@@ -918,8 +975,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         pruned_prefixes[[length(pruned_prefixes) + 1]] <- combo
                         n_nodes <- n_nodes + 1L
                         n_cases <- n_cases + as.integer(count)
-                        labels <- c(labels, sprintf("%s (n=%d)",
-                                                    paste(combo, collapse = " > "), count))
+                        labels <- c(labels, jmvcore::format(label_tmpl,
+                                                            node = paste(combo, collapse = " > "),
+                                                            count = as.integer(count)))
                     } else {
                         min_shown <- min(min_shown, as.integer(count))
                         min_shown_pct <- min(min_shown_pct, as.integer(count))
@@ -932,8 +990,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Runs vtree::vtree() with two pieces of console output contained:
-        #  - vtree's own message() ("No nodes were smaller than N"): the pruning
-        #    notice already reports that, with the node names;
+        #  - vtree's own message() ("No nodes were smaller than N", "N patterns
+        #    were pruned"): the pruning notice already reports that, naming the
+        #    nodes / patterns;
         #  - a warning "expanded path length ... would be too long for <DOT>" that
         #    R raises from DiagrammeR::grViz()'s file.exists(diagram) probe when the
         #    DOT source is EXACTLY 1024 characters long (macOS PATH_MAX; R 4.6.0
@@ -1023,69 +1082,73 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Enhancement 3: Generate copy-ready report sentence
         .generateReportSentence = function(n_vars, observed_combinations, final_n, original_n, excluded_n, pruned = NULL, prune_threshold = NULL) {
-            # Format variable list with original labels
+            # Variable list with original labels. Every sentence below is one
+            # complete .() string per plural form, so translators can reorder it.
+            quoted <- paste0("'", self$options$vars, "'")
             if (n_vars == 1) {
-                var_text <- sprintf("'%s'", self$options$vars[1])
+                var_text <- quoted[1]
             } else if (n_vars == 2) {
-                var_text <- sprintf("'%s' and '%s'", self$options$vars[1], self$options$vars[2])
+                var_text <- jmvcore::format(.("{a} and {b}"), a = quoted[1], b = quoted[2])
             } else {
-                var_list <- paste(sprintf("'%s'", self$options$vars[1:(n_vars-1)]), collapse=", ")
-                var_text <- sprintf("%s, and '%s'", var_list, self$options$vars[n_vars])
+                var_text <- jmvcore::format(.("{rest}, and {last}"),
+                    rest = paste(quoted[seq_len(n_vars - 1)], collapse = ", "), last = quoted[n_vars])
             }
 
             # Base sentence. The count reported here is the number of combinations
             # OBSERVED in the data, not the Cartesian product of the variable levels
             # (which counts empty cells and is therefore not a finding).
-            sentence <- sprintf(
-                "Variable tree analysis examined %d categorical variable%s (%s) across N=%d observations, in which %d distinct subgroup combination%s occurred.",
-                n_vars,
-                ifelse(n_vars > 1, "s", ""),
-                var_text,
-                final_n,
-                observed_combinations,
-                ifelse(observed_combinations > 1, "s", "")
-            )
+            base_tmpl <- if (n_vars > 1 && observed_combinations > 1)
+                .("Variable tree analysis examined {n} categorical variables ({vars}) across N={total} observations, in which {k} distinct subgroup combinations occurred.")
+            else if (n_vars > 1)
+                .("Variable tree analysis examined {n} categorical variables ({vars}) across N={total} observations, in which {k} distinct subgroup combination occurred.")
+            else if (observed_combinations > 1)
+                .("Variable tree analysis examined {n} categorical variable ({vars}) across N={total} observations, in which {k} distinct subgroup combinations occurred.")
+            else
+                .("Variable tree analysis examined {n} categorical variable ({vars}) across N={total} observations, in which {k} distinct subgroup combination occurred.")
+            sentence <- jmvcore::format(base_tmpl, n = n_vars, vars = var_text,
+                                        total = final_n, k = observed_combinations)
 
             # Add exclusion note if applicable
             if (excluded_n > 0) {
-                excluded_pct <- round(100 * excluded_n / original_n, 1)
-                sentence <- paste0(
-                    sentence,
-                    sprintf(" Missing value exclusion removed %d cases (%.1f%%).", excluded_n, excluded_pct)
-                )
+                excluded_pct <- sprintf("%.1f", 100 * excluded_n / original_n)
+                excl_tmpl <- if (excluded_n > 1)
+                    .("Missing value exclusion removed {n} cases ({pct}%).")
+                else
+                    .("Missing value exclusion removed {n} case ({pct}%).")
+                sentence <- paste(sentence, jmvcore::format(excl_tmpl, n = excluded_n, pct = excluded_pct))
             }
 
             # Pruning hides branches from the figure, so a sentence describing the
-            # figure has to say so.
+            # figure has to say so. Not "all subgroups smaller than X were removed":
+            # with 'Valid percentages' on, the hierarchical tree exempts NA nodes
+            # from the size threshold, so one can still be drawn below it. State
+            # what went, not a blanket rule. (Several hidden nodes always hold
+            # several cases, so that combination needs no singular form.)
             if (!is.null(pruned) && pruned$nodes > 0) {
-                # Not "all subgroups smaller than X were removed": with 'Valid
-                # percentages' on, vtree exempts NA nodes from the size threshold, so
-                # one can still be drawn below it. State what went, not a blanket rule.
-                sentence <- paste0(
-                    sentence,
-                    sprintf(" %d subgroup%s holding fewer than %d cases %s not displayed (%d case%s in total).",
-                            pruned$nodes, ifelse(pruned$nodes > 1, "s", ""),
-                            prune_threshold,
-                            ifelse(pruned$nodes > 1, "were", "was"),
-                            pruned$cases, ifelse(pruned$cases > 1, "s", ""))
-                )
+                pruned_tmpl <- if (pruned$nodes > 1)
+                    .("{nodes} subgroups holding fewer than {threshold} cases were not displayed ({cases} cases in total).")
+                else if (pruned$cases > 1)
+                    .("{nodes} subgroup holding fewer than {threshold} cases was not displayed ({cases} cases in total).")
+                else
+                    .("{nodes} subgroup holding fewer than {threshold} cases was not displayed ({cases} case in total).")
+                sentence <- paste(sentence, jmvcore::format(pruned_tmpl,
+                    nodes = pruned$nodes, threshold = prune_threshold, cases = pruned$cases))
             }
 
             # Add mode-specific notes
             if (self$options$pattern) {
-                sentence <- paste0(sentence, " Pattern mode was used to group cases by unique variable combinations.")
+                sentence <- paste(sentence, .("Pattern mode was used to group cases by unique variable combinations."))
             } else if (self$options$sequence) {
-                sentence <- paste0(sentence, " Sequence mode preserved variable order for progression analysis.")
+                sentence <- paste(sentence, .("Sequence mode preserved variable order for progression analysis."))
             }
 
             # Add summary variable note
             if (!is.null(self$options$summaryvar)) {
-                summary_location <- ifelse(self$options$summarylocation == "leafonly", "leaf nodes only", "all nodes")
-                sentence <- paste0(
-                    sentence,
-                    sprintf(" Statistical summaries (mean, SD) for '%s' were displayed at %s.",
-                           self$options$summaryvar, summary_location)
-                )
+                summary_tmpl <- if (identical(self$options$summarylocation, "leafonly"))
+                    .("Statistical summaries (mean, SD) for '{variable}' were displayed at leaf nodes only.")
+                else
+                    .("Statistical summaries (mean, SD) for '{variable}' were displayed at all nodes.")
+                sentence <- paste(sentence, jmvcore::format(summary_tmpl, variable = self$options$summaryvar))
             }
 
             return(sentence)
@@ -1106,6 +1169,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 paste0("\u{2022} <b>", .("Pruning:"), "</b> ", .("Removing branches below certain conditions to simplify tree"), "<br>"),
                 paste0("\u{2022} <b>", .("Pattern:"), "</b> ", .("Unique combination of variable values regardless of order"), "<br>"),
                 paste0("\u{2022} <b>", .("Sequence:"), "</b> ", .("Ordered progression of variable values (order matters)"), "<br>"),
+                paste0("\u{2022} <b>", .("Text markup:"), "</b> ", .("A variable name or level written with *text*, **text**, ^text^ or ~text~ is drawn in italics, bold, superscript or subscript, and the marker characters themselves are not shown"), "<br>"),
                 "</div>"
             )
             return(paste(glossary_parts, collapse = ""))

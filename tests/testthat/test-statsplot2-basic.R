@@ -159,6 +159,7 @@ test_that("statsplot2 handles repeated direction", {
     data = statsplot2_repeated,
     dep = "symptom_severity",
     group = "timepoint",
+    subjectID = "patient_id",
     direction = "repeated"
   )
 

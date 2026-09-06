@@ -48,17 +48,17 @@ items:
     - name: summary
       title: Analysis Summary
       type: Html
-      visible: (showSummary)
+      visible: (showSummary || showexplanations)
 
     - name: assumptions
       title: Statistical Assumptions & Warnings
       type: Html
-      visible: (showAssumptions)
+      visible: (showAssumptions || showexplanations)
 
     - name: interpretation
       title: Results Interpretation
       type: Html
-      visible: (showInterpretation)
+      visible: (showInterpretation || showexplanations)
 
     - name: report
       title: Copy-Ready Report
@@ -76,7 +76,7 @@ items:
       height: 300
       renderFun: .plot4
       requiresData: true
-      visible: (grvar)
+      visible: (length(dep) > 0 && length(group) > 0 && length(grvar) > 0)
 
     - name: plot2
       title: '`${group} - {dep}`'
@@ -85,7 +85,7 @@ items:
       height: 300
       renderFun: .plot2
       requiresData: true
-      visible: (group)
+      visible: (length(dep) > 0 && length(group) > 0)
 
     - name: plot1
       title: '`${dep}`'
@@ -103,7 +103,9 @@ items:
       height: 400
       renderFun: .plotDonut
       requiresData: true
-      visible: (addGGPubrDonut)
+      visible: (addGGPubrDonut && length(dep) > 0)
+      refs:
+        - ggpubr
 
 
 refs:

@@ -1557,7 +1557,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     # Small sample correction factor
                     J <- 1 - (3 / (4 * (n1 + n2 - 2) - 1))
                     effect_size <- d * J
-                    # Standard error for Hedges' g (same as Cohen's d)
+                    # Scale the entire approximate standard error by the correction J.
                     se <- J * sqrt((n1 + n2) / (n1 * n2) + d^2 / (2 * (n1 + n2)))
                 } else if (type == "glass_delta") {
                     # Glass's delta uses ONLY control group (group2) SD

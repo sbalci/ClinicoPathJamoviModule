@@ -507,11 +507,15 @@
 #' @param feature Display name of the output being blocked.
 #' @return A character string.
 #' @keywords internal
-.competingRiskUnavailable <- function(feature) {
-    paste0(feature, " is not available for competing-risks analysis. It assumes a ",
-           "single event type, and the competing-risk outcome is coded 0/1/2. Use the ",
-           "cumulative incidence output instead, or set survival type to Overall or ",
-           "Cause Specific.")
+.competingRiskUnavailable <- function(feature, self = NULL) {
+    if (is.null(self)) {
+        paste0(feature, " is not available for competing-risks analysis. It assumes a ",
+               "single event type, and the competing-risk outcome is coded 0/1/2. Use the ",
+               "cumulative incidence output instead, or set survival type to Overall or ",
+               "Cause Specific.")
+    } else {
+        jmvcore::format(.("{feature} is not available for competing-risks analysis. It assumes a single event type, and the competing-risk outcome is coded 0/1/2. Use the cumulative incidence output instead, or set survival type to Overall or Cause Specific."), feature = feature)
+    }
 }
 
 #' Build a survival model formula from variable names

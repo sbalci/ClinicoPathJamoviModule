@@ -838,11 +838,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                   n_excluded_landmark <- n_before_landmark - nrow(cleanData)
                   if (n_excluded_landmark > 0) {
                       self$results$medianTable$setNote("landmark",
-                          paste0("Landmark analysis at ", self$options$landmark, " ",
-                                 self$options$timetypeoutput,
-                                 ": ", n_excluded_landmark,
-                                 " patients excluded (events/censoring before landmark). ",
-                                 .("All times are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark; they are not comparable with unlandmarked survival times.")))
+                          jmvcore::format(.("Landmark analysis at {time} {unit}: {n} patients excluded (events/censoring before landmark). All times are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark; they are not comparable with unlandmarked survival times."), 
+                              time = self$options$landmark,
+                              unit = self$options$timetypeoutput,
+                              n = n_excluded_landmark))
                   }
                 }
 
@@ -1057,7 +1056,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             count = n_events
                         ))
                     self$results$medianTable$setNote("lowevents",
-                        paste0("Caution: Only ", n_events, " events detected. Results may be unreliable. Consider increasing sample size or simplifying the model."))
+                        jmvcore::format(.("Caution: Only {count} events detected. Results may be unreliable. Consider increasing sample size or simplifying the model."), count = n_events))
                 } else if (n_events >= 20 && n_events < 50) {
                     private$.addHtmlMessage(
                         "warning",
@@ -1067,7 +1066,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             count = n_events
                         ))
                     self$results$medianTable$setNote("moderateevents",
-                        paste0("Note: ", n_events, " events detected. Adequate for basic KM/Cox but limited for complex models (calibration, RCS, bootstrap)."))
+                        jmvcore::format(.("Note: {count} events detected. Adequate for basic KM/Cox but limited for complex models (calibration, RCS, bootstrap)."), count = n_events))
                 }
 
                 # Run Analysis ----
@@ -1139,7 +1138,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     for (p in c("plot8", "residualsPlot", "calibrationPlot",
                                 "rcsPlot", "parametricSurvivalPlot"))
                         self$results[[p]]$setState(NULL)
-                    self$results$coxTable$setNote("cr", .competingRiskUnavailable("Cox regression"))
+                    self$results$coxTable$setNote("cr", .competingRiskUnavailable(.("Cox regression"), self))
                     private$.addHtmlMessage(
                         "info",
                         .("Cox regression skipped (competing risks)"),
@@ -1147,7 +1146,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     )
                 } else if (private$.lowEventCount) {
                     self$results$coxTable$setNote("lowevents",
-                        "Cox regression suppressed: fewer than 10 events.")
+                        .("Cox regression suppressed: fewer than 10 events."))
                 } else {
                     private$.cox(results)
                 }
@@ -1157,7 +1156,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$age_adjustment && !is.null(self$options$age_variable)) {
                     if (private$.isCompetingRisk()) {
                         self$results$ageAdjustedCoxTable$setNote(
-                            "cr", .competingRiskUnavailable("Age-adjusted Cox regression"))
+                            "cr", .competingRiskUnavailable(.("Age-adjusted Cox regression"), self))
                     } else {
                         private$.ageAdjustedCox(results)
                     }
@@ -1168,7 +1167,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$age_adjustment && self$options$age_time_scale && !is.null(self$options$age_variable)) {
                     if (private$.isCompetingRisk()) {
                         self$results$ageTimeScaleTable$setNote(
-                            "cr", .competingRiskUnavailable("Age as time scale"))
+                            "cr", .competingRiskUnavailable(.("Age as time scale"), self))
                     } else {
                         private$.ageTimeScaleCox(results)
                     }
@@ -1179,7 +1178,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$age_adjustment && self$options$age_standardization && !is.null(self$options$age_variable)) {
                     if (private$.isCompetingRisk()) {
                         self$results$ageStandardizationTable$setNote(
-                            "cr", .competingRiskUnavailable("Age standardization (SMR)"))
+                            "cr", .competingRiskUnavailable(.("Age standardization (SMR)"), self))
                     } else {
                         private$.ageStandardization(results)
                     }
@@ -1207,7 +1206,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     private$.addHtmlMessage(
                         "warning",
                         .("Survival data export skipped (competing risks)"),
-                        .competingRiskUnavailable("Exported survival estimates")
+                        .competingRiskUnavailable(.("Exported survival estimates"), self)
                     )
                 } else {
                     private$.exportSurvivalData(results)
@@ -1225,7 +1224,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$calibration_curves) {
                     if (private$.isCompetingRisk()) {
                         self$results$calibrationTable$setNote(
-                            "cr", .competingRiskUnavailable("Calibration curves"))
+                            "cr", .competingRiskUnavailable(.("Calibration curves"), self))
                     } else if (!private$.lowEventCount) {
                         private$.calculateCalibration(results)
                     } else {
@@ -1240,7 +1239,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$rcs_analysis && !is.null(self$options$rcs_variable)) {
                     if (private$.isCompetingRisk()) {
                         self$results$rcsTestTable$setNote(
-                            "cr", .competingRiskUnavailable("Restricted cubic spline assessment"))
+                            "cr", .competingRiskUnavailable(.("Restricted cubic spline assessment"), self))
                     } else {
                         private$.calculateRCS(results)
                     }
@@ -1251,7 +1250,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$pw) {
                     if (private$.isCompetingRisk()) {
                         self$results$pairwiseTable$setNote(
-                            "cr", .competingRiskUnavailable("Pairwise log-rank comparisons"))
+                            "cr", .competingRiskUnavailable(.("Pairwise log-rank comparisons"), self))
                     } else {
                         private$.pairwise(results)
                     }
@@ -1261,7 +1260,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$weightedLogRank) {
                     if (private$.isCompetingRisk()) {
                         self$results$weightedLogRankTable$setNote(
-                            "cr", .competingRiskUnavailable("Weighted log-rank tests"))
+                            "cr", .competingRiskUnavailable(.("Weighted log-rank tests"), self))
                     } else {
                         private$.calculateWeightedLogRank(results)
                     }
@@ -1272,7 +1271,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$bootstrapValidation) {
                     if (private$.isCompetingRisk()) {
                         self$results$bootstrapValidationTable$setNote(
-                            "cr", .competingRiskUnavailable("Bootstrap internal validation"))
+                            "cr", .competingRiskUnavailable(.("Bootstrap internal validation"), self))
                     } else if (!private$.lowEventCount) {
                         private$.calculateBootstrapValidation(results)
                     } else {
@@ -1296,7 +1295,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (self$options$person_time) {
                     if (private$.isCompetingRisk()) {
                         self$results$personTimeTable$setNote(
-                            "cr", .competingRiskUnavailable("Person-time incidence rates"))
+                            "cr", .competingRiskUnavailable(.("Person-time incidence rates"), self))
                     } else {
                         private$.personTimeAnalysis(results)
                     }
@@ -1365,7 +1364,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # rather than at the call site, so every caller is covered.
                 if (private$.isCompetingRisk()) {
                     self$results$rmstTable$setNote(
-                        "cr", .competingRiskUnavailable("Restricted mean survival time"))
+                        "cr", .competingRiskUnavailable(.("Restricted mean survival time"), self))
                     return(NULL)
                 }
                 tryCatch({
@@ -1618,7 +1617,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # Add note for competing risk median CI limitation
                 if (private$.isCompetingRisk()) {
                     medianTable$setNote("crci",
-                        "Confidence intervals for competing risk median times are not available (CIF quantile CIs require specialized methods such as bootstrap).")
+                        .("Confidence intervals for competing risk median times are not available (CIF quantile CIs require specialized methods such as bootstrap)."))
                     # Gray's test is the between-group comparison in this mode
                     # (Cox / log-rank / pairwise are refused); cuminc() already
                     # computed it, so show it rather than leave no inference at all.
@@ -1768,7 +1767,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                      identical(self$options$strata_variable, ""))) {
                     self$results$coxTable$setNote(
                         "strata_required",
-                        "Stratified Cox regression was requested, but no stratification variable was selected. The Cox model was not fitted."
+                        .("Stratified Cox regression was requested, but no stratification variable was selected. The Cox model was not fitted.")
                     )
                     return()
                 }
@@ -1782,7 +1781,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         if (length(unique(mydata[[strata_var]])) < 2) {
                             self$results$coxTable$setNote(
                                 "constant_strata",
-                                "The selected stratification variable has fewer than two observed levels. The Cox model was not fitted."
+                                .("The selected stratification variable has fewer than two observed levels. The Cox model was not fitted.")
                             )
                             return()
                         }
@@ -1803,7 +1802,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (length(unique(mydata[[myfactor]])) < 2) {
                     self$results$coxTable$setNote(
                         "single_group",
-                        "Cox regression requires at least two observed groups. Descriptive survival results remain available."
+                        .("Cox regression requires at least two observed groups. Descriptive survival results remain available.")
                     )
                     return()
                 }
@@ -1815,10 +1814,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     epv <- n_events_cox / n_levels
                     if (epv < 5) {
                         self$results$coxTable$setNote("epv_critical",
-                            sprintf("Events per variable = %.1f (< 5). Cox model is likely unreliable; consider reducing categories or increasing sample size.", epv))
+                            sprintf(.("Events per variable = %.1f (< 5). Cox model is likely unreliable; consider reducing categories or increasing sample size."), epv))
                     } else if (epv < 10) {
                         self$results$coxTable$setNote("epv_warning",
-                            sprintf("Events per variable = %.1f (< 10). Cox model may be unstable; interpret hazard ratios with caution.", epv))
+                            sprintf(.("Events per variable = %.1f (< 10). Cox model may be unstable; interpret hazard ratios with caution."), epv))
                     }
                 }
 
@@ -1843,7 +1842,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 self$results$coxTable$setNote(
                     "coerced_to_factor",
                     if (is.null(private$.explanatoryCoercedLevels)) NULL else sprintf(
-                        "%s was supplied as a numeric column with only %d distinct values, so it is analysed as a categorical variable throughout: every hazard ratio compares one level with the reference level, not a one-unit increase. To model it as a linear trend instead, use Survival Analysis for Continuous Variable.",
+                        .("%s was supplied as a numeric column with only %d distinct values, so it is analysed as a categorical variable throughout: every hazard ratio compares one level with the reference level, not a one-unit increase. To model it as a linear trend instead, use Survival Analysis for Continuous Variable."),
                         self$options$explanatory,
                         private$.explanatoryCoercedLevels
                     )
@@ -1855,11 +1854,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     cox_check_model <- suppressWarnings(survival::coxph(cox_check_formula, data = mydata))
                     if (!is.null(cox_check_model$iter) && cox_check_model$iter >= 20) {
                         self$results$coxTable$setNote("convergence",
-                            sprintf("Cox model used %d iterations (maximum reached). Model may not have converged; results should be interpreted with caution.", cox_check_model$iter))
+                            sprintf(.("Cox model used %d iterations (maximum reached). Model may not have converged; results should be interpreted with caution."), cox_check_model$iter))
                     }
                 }, error = function(e) {
                     self$results$coxTable$setNote("convergence_skipped",
-                        "Cox convergence check could not be performed. Review model metrics carefully.")
+                        .("Cox convergence check could not be performed. Review model metrics carefully."))
                 })
 
                 # Manually calculate and override stratified HRs if strata requested
@@ -1991,7 +1990,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (length(hr_numeric) > 0) {
                         if (any(hr_numeric > 10 | hr_numeric < 0.1)) {
                             coxTable$setNote("extreme_hr",
-                                "Some hazard ratios are extreme (HR > 10 or < 0.1), which may indicate sparse data, complete separation, or data quality issues. Verify group sizes and event counts.")
+                                .("Some hazard ratios are extreme (HR > 10 or < 0.1), which may indicate sparse data, complete separation, or data quality issues. Verify group sizes and event counts."))
                         }
                     }
                 }, error = function(e) {
@@ -2802,20 +2801,11 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 labelled_data <- private$.getData()
                 original_names_mapping <- labelled_data$original_names_mapping
                 title2 <- .survivalDisplayName(self$options$explanatory, original_names_mapping)
-                table$setTitle(paste0("Weighted Log-Rank Tests - ", title2))
+                table$setTitle(jmvcore::format(.("Weighted Log-Rank Tests - {title}"), title = title2))
 
-                table$setNote("tests", paste0(
-                    "All tests compare survival distributions across levels of ",
-                    title2, ". These are members of the Fleming-Harrington G-rho ",
-                    "family (survival::survdiff): rho=0 is the standard log-rank test ",
-                    "(equal weight at all time points); larger rho weights early events ",
-                    "more heavily (weights = S(t)^rho). When survival curves cross or the ",
-                    "proportional hazards assumption is violated, different rho values may ",
-                    "yield different conclusions."
-                ))
+                table$setNote("tests", jmvcore::format(.("All tests compare survival distributions across levels of {title}. These are members of the Fleming-Harrington G-rho family (survival::survdiff): rho=0 is the standard log-rank test (equal weight at all time points); larger rho weights early events more heavily (weights = S(t)^rho). When survival curves cross or the proportional hazards assumption is violated, different rho values may yield different conclusions."), title = title2))
                 table$setNote("petopeto",
-                    "survival::survdiff(rho=1) is exactly the Peto-Peto modification of the Gehan-Wilcoxon test (weights = Kaplan-Meier S(t)). The Gehan-Breslow (weights = number at risk) and Tarone-Ware (weights = sqrt of number at risk) tests use different weights and cannot be produced by survdiff()."
-                )
+                    .("survival::survdiff(rho=1) is exactly the Peto-Peto modification of the Gehan-Wilcoxon test (weights = Kaplan-Meier S(t)). The Gehan-Breslow (weights = number at risk) and Tarone-Ware (weights = sqrt of number at risk) tests use different weights and cannot be produced by survdiff()."))
 
                 # Populate explanation if summaries enabled
                 if (self$options$showSummaries) {
@@ -3045,30 +3035,30 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     original_names_mapping <- labelled_data$original_names_mapping
                     title2 <- .survivalDisplayName(self$options$explanatory, original_names_mapping)
 
-                    table$setTitle(paste0("Bootstrap Internal Validation - ", title2))
+                    table$setTitle(jmvcore::format(.("Bootstrap Internal Validation - {title}"), title = title2))
 
                     # Interpretation note
                     interp <- ifelse(
                         mean_optimism > 0.05,
-                        "Substantial optimism detected; the apparent C-index overestimates the model's true discriminative ability.",
+                        .("Substantial optimism detected; the apparent C-index overestimates the model's true discriminative ability."),
                         ifelse(mean_optimism > 0.02,
-                               "Moderate optimism detected; the corrected C-index provides a more realistic estimate.",
-                               "Minimal optimism; the apparent performance is close to the internally validated estimate."
+                               .("Moderate optimism detected; the corrected C-index provides a more realistic estimate."),
+                               .("Minimal optimism; the apparent performance is close to the internally validated estimate.")
                         )
                     )
 
                     slope_interp <- ifelse(
                         mean_slope < 0.8,
-                        " Calibration slope < 0.8 suggests the model predictions are too extreme (overfitting).",
+                        .(" Calibration slope < 0.8 suggests the model predictions are too extreme (overfitting)."),
                         ifelse(mean_slope < 0.9,
-                               " Calibration slope slightly below 1 indicates mild overfitting.",
-                               " Calibration slope near 1 indicates good calibration."
+                               .(" Calibration slope slightly below 1 indicates mild overfitting."),
+                               .(" Calibration slope near 1 indicates good calibration.")
                         )
                     )
 
                     table$setNote("interpretation", paste0(
-                        interp, slope_interp,
-                        " Based on ", length(valid_optimism), " successful bootstrap resamples."
+                        interp, slope_interp, " ",
+                        jmvcore::format(.("Based on {n} successful bootstrap resamples."), n = length(valid_optimism))
                     ))
 
                     # Populate explanation if summaries enabled
@@ -3080,9 +3070,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
 
                 }, error = function(e) {
-                    table$setNote("error", paste0(
-                        "Bootstrap validation failed: ", htmltools::htmlEscape(e$message)
-                    ))
+                    table$setNote("error", jmvcore::format(.("Bootstrap validation failed: {message}"), message = htmltools::htmlEscape(e$message)))
                 })
             }
 
@@ -5032,27 +5020,17 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         slope_ci  <- tryCatch(stats::confint(slope_fit),
                                               error = function(e) matrix(NA_real_, 1, 2))
                         cal_table$addRow(rowKey = "slope", values = list(
-                            metric = "Calibration slope",
+                            metric = .("Calibration slope"),
                             value = cal_slope,
                             ci_lower = slope_ci[1, 1],
                             ci_upper = slope_ci[1, 2],
                             ideal = "1.0",
-                            interpretation = if (is.na(cal_slope)) "Not estimable"
-                                else "Apparent slope - 1 by construction on the development data"
+                            interpretation = if (is.na(cal_slope)) .("Not estimable")
+                                else .("Apparent slope - 1 by construction on the development data")
                         ))
 
-                        # Refitting a model's own linear predictor on the data it
-                        # was fitted to returns a slope of exactly 1 every time.
-                        # The number only carries information when the model is
-                        # applied to data it has not seen, or after bootstrap /
-                        # cross-validation. Saying so prevents it being read as
-                        # evidence of good calibration.
                         cal_table$setNote("slope_apparent",
-                            paste0("The calibration slope is 1 by construction here, because the ",
-                                   "model is evaluated on the same data it was fitted to. It becomes ",
-                                   "informative only on external data or after internal validation ",
-                                   "(bootstrap or cross-validation). The same optimism affects the ",
-                                   "other rows in this table."))
+                            .("The calibration slope is 1 by construction here, because the model is evaluated on the same data it was fitted to. It becomes informative only on external data or after internal validation (bootstrap or cross-validation). The same optimism affects the other rows in this table."))
                     }
 
                     # --- mean calibration at the calibration time ----------------
@@ -5065,14 +5043,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         obs_overall  <- km_overall$surv
                         pred_overall <- mean(pred_surv, na.rm = TRUE)
                         cal_table$addRow(rowKey = "meancal", values = list(
-                            metric = paste0("Mean calibration (observed - predicted at t = ",
-                                            round(cal_time, 1), ")"),
+                            metric = jmvcore::format(.("Mean calibration (observed - predicted at t = {t})"), t = round(cal_time, 1)),
                             value = obs_overall - pred_overall,
                             ci_lower = km_overall$lower - pred_overall,
                             ci_upper = km_overall$upper - pred_overall,
                             ideal = "0.0",
-                            interpretation = sprintf("Observed %.3f vs predicted %.3f",
-                                                     obs_overall, pred_overall)
+                            interpretation = sprintf(.("Observed %.3f vs predicted %.3f"), obs_overall, pred_overall)
                         ))
                     }
 
@@ -5080,13 +5056,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (length(group_pred) >= 3) {
                         mae <- mean(abs(group_obs - group_pred))
                         cal_table$addRow(rowKey = "mae", values = list(
-                            metric = "Mean absolute difference across risk groups",
+                            metric = .("Mean absolute difference across risk groups"),
                             value = mae,
                             ci_lower = NA,
                             ci_upper = NA,
                             ideal = "0.0",
-                            interpretation = sprintf("Averaged over %d risk groups; descriptive only",
-                                                     length(group_pred))
+                            interpretation = sprintf(.("Averaged over %d risk groups; descriptive only"), length(group_pred))
                         ))
                     }
 
@@ -5102,22 +5077,22 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             }, error = function(e) NA)
 
                             cal_table$addRow(rowKey = "cindex", values = list(
-                                metric = "C-index (Discrimination)",
+                                metric = .("C-index (Discrimination)"),
                                 value = c_index,
-                                # A concordance index lives in [0, 1]; the Wald
-                                # limits were previously printed unconstrained.
                                 ci_lower = if (!is.na(c_se)) max(0, c_index - 1.96 * c_se) else NA,
                                 ci_upper = if (!is.na(c_se)) min(1, c_index + 1.96 * c_se) else NA,
                                 ideal = "1.0",
-                                interpretation = if (c_index >= 0.8) "Excellent" else if (c_index >= 0.7) "Good"
-                                                 else if (c_index >= 0.6) "Moderate" else "Poor"
+                                interpretation = if (c_index >= 0.8) .("Excellent") else if (c_index >= 0.7) .("Good")
+                                                 else if (c_index >= 0.6) .("Moderate") else .("Poor")
                             ))
                         }
                     }
 
                     cal_table$setNote("time",
-                        paste0("Calibration assessed at t = ", round(cal_time, 1),
-                               ". N = ", sum(!is.na(pred_surv)), " patients in ", length(group_pred), " risk groups."))
+                        jmvcore::format(.("Calibration assessed at t = {t}. N = {n} patients in {k} risk groups."), 
+                            t = round(cal_time, 1),
+                            n = sum(!is.na(pred_surv)),
+                            k = length(group_pred)))
 
                     # Store data for plot
                     self$results$calibrationPlot$setState(list(
@@ -5291,8 +5266,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     ))
 
                     table$setNote("info",
-                        paste0("Null hypothesis: linear effect of ", rcs_var,
-                               ". Natural splines with ", n_knots - 1, " degrees of freedom."))
+                        jmvcore::format(.("Null hypothesis: linear effect of {var}. Natural splines with {df} degrees of freedom."), 
+                            var = rcs_var,
+                            df = n_knots - 1))
 
                     # Prepare HR curve data for plot
                     var_range <- range(rcs_values, na.rm = TRUE)
@@ -5482,12 +5458,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (!isTRUE(self$options$use_parametric)) return()
                 if (!requireNamespace("flexsurv", quietly = TRUE)) {
                     self$results$parametricModelSummary$setNote("flexsurv",
-                        "The flexsurv package is required for parametric survival models.")
+                        .("The flexsurv package is required for parametric survival models."))
                     return()
                 }
                 if (private$.isCompetingRisk()) {
                     self$results$parametricModelSummary$setNote("compete",
-                        "Parametric survival models are shown for standard (single-event) survival and are not available for competing-risks analyses.")
+                        .("Parametric survival models are shown for standard (single-event) survival and are not available for competing-risks analyses."))
                     return()
                 }
 
@@ -5500,7 +5476,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 df   <- df[keep, , drop = FALSE]
                 if (nrow(df) < 5 || sum(df$.status, na.rm = TRUE) < 2) {
                     self$results$parametricModelSummary$setNote("data",
-                        "Not enough events / observations to fit a parametric survival model.")
+                        .("Not enough events / observations to fit a parametric survival model."))
                     return()
                 }
 
@@ -5528,7 +5504,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 fit <- tryCatch(fitOne(dist), error = function(e) e)
                 if (inherits(fit, "error")) {
                     self$results$parametricModelSummary$setNote("fit",
-                        paste0("Parametric fit failed: ", conditionMessage(fit)))
+                        jmvcore::format(.("Parametric fit failed: {message}"), message = conditionMessage(fit)))
                     return()
                 }
 
@@ -5549,12 +5525,12 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         ci_lower = res[i, "L95%"], ci_upper = res[i, "U95%"], pvalue = pv
                     ))
                 }
-                smy$setNote("modelfit", paste0(
-                    private$.distLabel(dist), " model - AIC ", round(AIC(fit), 1),
-                    ", BIC ", round(BIC(fit), 1),
-                    ", log-likelihood ", round(as.numeric(stats::logLik(fit)), 1),
-                    if (useCov) paste0(". ", private$.covariateScaleNote(dist)) else "."
-                ))
+                smy$setNote("modelfit", jmvcore::format(.("{dist} model - AIC {aic}, BIC {bic}, log-likelihood {loglik}{cov}"), 
+                        dist = private$.distLabel(dist),
+                        aic = round(AIC(fit), 1),
+                        bic = round(BIC(fit), 1),
+                        loglik = round(as.numeric(stats::logLik(fit)), 1),
+                        cov = if (useCov) paste0(". ", private$.covariateScaleNote(dist)) else "."))
 
                 # ---- Distribution comparison (AIC / BIC / logLik) ----
                 if (isTRUE(self$options$compare_distributions)) {
@@ -5777,10 +5753,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                         cox_adjusted <- survival::coxph(.asSurvivalFormula(paste(private$.buildSurvFormula(mytime, myoutcome), "~", rhs)), data = mydata)
 
-                        heading_text <- paste0(
-                            "Age-Stratified Cox Model\n",
-                            "Age groups: ", paste(levels(mydata$age_group), collapse = ", "), "\n",
-                            "N = ", nrow(mydata))
+                        heading_text <- jmvcore::format(.("Age-Stratified Cox Model\nAge groups: {groups}\nN = {n}"), 
+                                groups = paste(levels(mydata$age_group), collapse = ", "),
+                                n = nrow(mydata))
                         self$results$ageAdjustedCoxHeading$setContent(heading_text)
 
                     } else {
@@ -6102,11 +6077,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 any(abs(cf) > 20) || any(!is.finite(se)) || any(se > 20)
 
                     if (isTRUE(diverged)) {
-                        self$results$ageTimeScaleTable$setNote("noconverge", paste0(
-                            "Age-as-time-scale model did not converge, so no hazard ratio is ",
-                            "reported. This normally means one group has no events on the age ",
-                            "scale, or the groups are perfectly separated. Use the standard ",
-                            "time scale, or combine categories, before interpreting."))
+                        self$results$ageTimeScaleTable$setNote("noconverge",
+                            .("Age-as-time-scale model did not converge, so no hazard ratio is reported. This normally means one group has no events on the age scale, or the groups are perfectly separated. Use the standard time scale, or combine categories, before interpreting."))
                         return()
                     }
 
@@ -6269,7 +6241,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         }
 
                         smrTable$setNote("internal_ref",
-                            "Expected deaths derived from the overall study cohort (internal reference). CIs assume fixed external reference rates and may be anti-conservative for internal comparisons.")
+                            .("Expected deaths derived from the overall study cohort (internal reference). CIs assume fixed external reference rates and may be anti-conservative for internal comparisons."))
 
                         # Interpretation
                         interpretation <- paste0(
@@ -6367,13 +6339,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             ))
                         }
 
-                        smrTable$setNote("directrate", paste0(
-                            "Direct method: the 'SMR' column holds the DIRECTLY STANDARDIZED RATE ",
-                            "(events per unit person-time, using the cohort's person-time age ",
-                            "distribution as the standard), with a log-scale 95% interval. ",
-                            "Compare groups by the ratio of these rates. 'Expected' is the events ",
-                            "this group's standardized rate implies over its own person-time. ",
-                            "Switch to the indirect method if you want an observed/expected SMR."))
+                        smrTable$setNote("directrate",
+                            .("Direct method: the 'SMR' column holds the DIRECTLY STANDARDIZED RATE (events per unit person-time, using the cohort's person-time age distribution as the standard), with a log-scale 95% interval. Compare groups by the ratio of these rates. 'Expected' is the events this group's standardized rate implies over its own person-time. Switch to the indirect method if you want an observed/expected SMR."))
 
                         interpretation <- paste0(
                             "<h4>Direct Age Standardization</h4>",

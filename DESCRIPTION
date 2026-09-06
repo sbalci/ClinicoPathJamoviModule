@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 1.0.8.11
-Date: 2026-09-04
+Version: 1.0.8.12
+Date: 2026-09-06
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre", "cph"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: Provides a comprehensive jamovi module designed specifically
@@ -389,6 +389,7 @@ Collate:
     'flexparametric.h.R'
     'flexrstpm2.b.R'
     'flexrstpm2.h.R'
+    'formula_utils.R'
     'fragilityindex.b.R'
     'fragilityindex.h.R'
     'frailtysurvival.b.R'

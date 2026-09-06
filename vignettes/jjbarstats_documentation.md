@@ -12,11 +12,7 @@
 | `group` | UI Control `group` | `self$options$group` | Output item / Table |
 | `grvar` | UI Control `grvar` | `self$options$grvar` | Output item / Table |
 | `counts` | UI Control `counts` | `self$options$counts` | Output item / Table |
-| `excl` | UI Control `excl` | `self$options$excl` | Output item / Table |
 | `typestatistics` | UI Control `typestatistics` | `self$options$typestatistics` | Output item / Table |
-| `pairwisecomparisons` | UI Control `pairwisecomparisons` | `self$options$pairwisecomparisons` | Output item / Table |
-| `pairwisedisplay` | UI Control `pairwisedisplay` | `self$options$pairwisedisplay` | Output item / Table |
-| `padjustmethod` | UI Control `padjustmethod` | `self$options$padjustmethod` | Output item / Table |
 | `originaltheme` | UI Control `originaltheme` | `self$options$originaltheme` | Output item / Table |
 | `resultssubtitle` | UI Control `resultssubtitle` | `self$options$resultssubtitle` | Output item / Table |
 | `paired` | UI Control `paired` | `self$options$paired` | Output item / Table |

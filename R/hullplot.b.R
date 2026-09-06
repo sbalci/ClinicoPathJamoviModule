@@ -823,7 +823,6 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
 
                 # Determine separation based on discriminability index
                 # IMPORTANT: These thresholds are DESCRIPTIVE RULES OF THUMB, not validated cutoffs
-                # Inspired by Cohen's d conventions (0.2/0.5/0.8) but adapted for multi-group settings
                 separation_quality <- if (is.na(discrim_index)) {
                     "unable to calculate"
                 } else if (discrim_index > 3) {

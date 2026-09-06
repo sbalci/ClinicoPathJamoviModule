@@ -2,7 +2,70 @@
 
 ## Unreleased — meddecide audit fixes (module 1.0.8.11)
 
-- `categorize`: `/check-function` pass. An unparsable manual break-point entry now gets
+- `jjbarstats` 1.0.10: `/check-function` pass. The "Pairwise comparisons" and "Pairwise
+  display" options were removed: `ggstatsplot::ggbarstats()` has no such arguments (its `...`
+  is "currently ignored"), so no post-hoc test ever ran while the Analysis Summary, the
+  Interpretation guide and the Copy-Ready Report announced "post-hoc pairwise comparisons
+  with holm correction" and the Treatment/Biomarker presets switched the dead option on.
+  The p-value adjustment list is gone as well: `p.adjust.method` is forwarded into
+  `statsExpressions::contingency_table()`, whose `...` ignores it, so the per-bar
+  proportion-test p-values were raw under every setting (holm, none and bonferroni all
+  printed 0.03, 0.03 and 2.4e-04 on the example data; Holm would give 0.052, 0.052 and
+  7e-04). The summary and report now say those tests are unadjusted, and three notices
+  state how many rows were excluded for missing values (previously a `message()` jamovi
+  never shows), that the per-group proportion tests are unadjusted, and that several
+  outcomes mean several unadjusted tests. The "(cached)" tag printed on every run is gone.
+  "Exclude missing (NA)" is gone: both of its branches dropped the incomplete rows, so it
+  only changed a sentence. The statistic type list is now Frequentist (chi-squared) /
+  Bayesian, because ggstatsplot runs the same Pearson chi-squared for "nonparametric" and
+  "robust" on a contingency table. The sparse-2x2 notice moved from render time into the
+  run and absorbed the duplicate "Low Expected Counts" warning; strong warnings are now
+  prefixed as such. Presets no longer flip options invisibly in the backend: in jamovi the
+  new `jjbarstats.events.js` sets the subtitle (and, for risk factors, the proportion-test)
+  checkboxes when a preset is chosen, and the R function leaves the options as given. The
+  help page gained option descriptions and a runnable example.
+  `/review-function` follow-up: the interpretation guide now prints Cohen's Cramér's V
+  cut-offs scaled to the table (divided by the square root of min(rows, columns) - 1,
+  the values on the subtitle being bias-corrected), so a 3x3 is no longer read on a 2x2
+  scale; McNemar gets a discordant-pair guard (no discordant pairs is an error, fewer than
+  25 a strong warning pointing to the exact binomial test); the rows-per-group "Small
+  Group Sizes" note is gone (expected counts are the criterion); the inert clipboard
+  button left the report panel; a "Color palette" option (Dark2 default, colour-blind
+  safe; gdoc keeps the old look) replaces the fixed ggstatsplot default; the preset box
+  moved below the variable
+  supplier and the balloon-plot checkbox names the thing.
+  `/release-review-function`: independent checks against `stats`, `effectsize` and
+  `BayesFactor` agree with every subtitle quantity; the one discrepancy was a label: the
+  paired test is McNemar's chi-squared *without* continuity correction (statsExpressions'
+  choice; base R defaults to the corrected statistic, 0.26 vs 0.11 on the example subset),
+  which the summary, the assumptions panel and the discordant-pair notice now state.
+  The balloon plot lost its narrow `clearWith` list:
+  jamovi never re-renders a filled image, so changing the counts variable, the
+  missing-data setting or the split variable left the previous balloon plot on screen.
+  With a counts variable, NA is no longer counted as a level of the outcome. The Bayes
+  factor checkbox is relabelled and enabled only for the parametric test (the only one it
+  applies to); the confidence-level label no longer claims a 0.90-0.99 range the option
+  does not enforce; three panel headings dropped dark text colours that vanished in the
+  dark theme.
+- `statsplot2` 1.1.0: `/check-function`, `/check-function-full`, `/fix-function`, `/review-function`
+  and `/release-review-function` passes. The statistical approach now reaches the split-by
+  panels (`grouped_ggbetweenstats`/`grouped_ggscatterstats` were called without `type`, so a
+  robust or nonparametric choice silently became parametric per panel) and split panels use
+  the same pairwise adjustment (Holm) as the unsplit figure. A numeric read as categorical
+  (15 or fewer distinct whole numbers) is reported by name and the new "Treat all numeric
+  variables as continuous" option overrides it. New opt-in "Result sentence" quotes the test,
+  statistic, df, p, effect size with interval and n from the figure's own statistics (one per
+  split panel; Bayes factors state their prior); a test that fails inside ggstatsplot (the
+  Bayesian one-way comparison on three or more groups here) is announced instead of drawn
+  without statistics. The explanation/interpretation panel is opt-in. Removed: the design check
+  that warned "perfectly balanced groups suggest independent data" on every valid repeated
+  dataset, the deprecated ggalluvial `infer.label` (warned on every render) and the benign
+  "strata appear at multiple axes" warning, the NA split level that leaked all-NA rows into
+  every panel, the Bonferroni override, and the duplicated small-sample HTML block. An
+  identifier-like grouping variable is rejected up front and more than 20 groups gets a
+  warning. Long-format repeated continuous outcomes require a Subject ID (16 stale tests
+  fixed). Sampling threshold, size and seed are options; the example uses `histopathology`.
+- `categorize` 1.0.9: `/check-function` pass. An unparsable manual break-point entry now gets
   the "Invalid manual break points" message instead of the generic "Insufficient break
   points generated" (the friendly check ran after the validation that pre-empted it, so
   it was unreachable). The Break Points and Category Frequencies tables are reset before
@@ -10,8 +73,34 @@
   `agepyramid` fix). The standalone test file sources `R/utils.R` again (it had silently
   broken when the notice text moved to the shared `.fmt()` helper) and gains a test that
   runs variable names with spaces, punctuation, a quote and Unicode through the analysis
-  and evaluates the generated R code, checking it reproduces the on-screen counts. Routed
-  to `ExplorationT` for JamoviTest.
+  and evaluates the generated R code, checking it reproduces the on-screen counts.
+  `/check-function-full` pass: 15 of 16 options proven effective by differential runs (the
+  16th is the dataset Output, unreachable from R); the packaged example matches base R
+  and classInt exactly. New notices: more than 20% missing values (warning), custom labels
+  selected but none entered (note), a new variable name that already exists in the data
+  (strong warning: the generated R code would overwrite it), and a failed rename of the
+  added column (warning instead of a silent nominal `<var>_cat`). The severe-imbalance
+  advice no longer recommends quantile binning to a user already on quantiles: under
+  quantiles it names the tied value and its share of the sample. Percent cells of the
+  Missing and Not-categorized rows are blank instead of "NaN". Notices render by
+  severity. The results now cite classInt and Royston, Altman & Sauerbrei (2006).
+  `/review-function` pass: **a single manual cut-off (one threshold, the usual clinical
+  case) now works** - the range extension skipped length-1 break vectors, so the screen
+  reported "Insufficient break points" while the generated R code gave two categories.
+  Inf/-Inf values are treated as missing and reported instead of crashing the run with a
+  raw "missing value where TRUE/FALSE needed"; a variable with fewer than two non-missing
+  values says so instead of "constant value"; a single manual break with out-of-range
+  exclusion on explains that one break point defines no interval. Option help now states
+  that mean +/- SD cuts at the mean as well (four bands, SPSS-style) and that manual
+  entries are sorted and de-duplicated. Bug-class lintr and the lifted-method
+  object-usage/vector-logic checks are clean; generated R code reproduces the on-screen
+  counts for every method. `/release-review-function` pass: 22 independent reference
+  checks against base R (`quantile`, `seq`, `cut`, `prop.table`, `cumsum`) and classInt
+  all match on the histopathology data, including the right-open, open-lower-break,
+  out-of-range and mean+/-SD band-drop paths; 204 tests pass across the three
+  categorize test files under a full package load; the library-review, case/naming and
+  UI-harness gates are clean. Analysis version bumped to 1.0.9. Routed to
+  `ExplorationT` for JamoviTest.
 - `crosstable` 1.0.9: `/check-function` + `/check-function-full` pass. **The default table
   style is now gtsummary** (was NEJM); it is the only style that honours every option
   control, and NEJM/Lancet/Hmisc apply none of them. The chi-square/Fisher control is now

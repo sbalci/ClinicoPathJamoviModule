@@ -953,7 +953,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             explanatory = penalizedPlotData$formulaExplanatory,
                             outcome_label = self$options$outcome))) {
                         private$.addNotice(jmvcore::NoticeType$WARNING,
-                            "The penalized (Firth) forest plot could not be produced, so the forest plot shows unpenalized maximum-likelihood odds ratios. These will not match the penalized estimates in the table above.")
+                            .("The penalized (Firth) forest plot could not be produced, so the forest plot shows unpenalized maximum-likelihood odds ratios. These will not match the penalized estimates in the table above."))
                     }
                 }
 
@@ -1394,7 +1394,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     negative_lr = NA,
                     sensitivity = NA,
                     specificity = NA,
-                    diagnostic_info = "Error: Non-binary variables detected",
+                    diagnostic_info = .("Error: Non-binary variables detected"),
                     positive_outcome_used = NA,
                     positive_predictor_used = NA
                 ))
@@ -1554,16 +1554,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ci <- private$.diagnosticCIs(tp = tp, fp = fp, fn = fn, tn = tn)
 
             # Create diagnostic information
-            diagnostic_info <- paste0(
-                "Positive outcome level: '", positive_outcome_level, "' (", outcome_determination_method, ")\n",
-                "Positive predictor level: '", positive_predictor_level, "' (", predictor_determination_method, ")\n",
-                "Contingency table:\n",
-                "  ", predictor_levels[1], " \u2192 ", outcome_levels[1], ": ", cont_table[1,1],
-                " | ", outcome_levels[2], ": ", cont_table[1,2], "\n",
-                "  ", predictor_levels[2], " \u2192 ", outcome_levels[1], ": ", cont_table[2,1],
-                " | ", outcome_levels[2], ": ", cont_table[2,2], "\n",
-                "True Positives: ", tp, ", False Positives: ", fp, ", False Negatives: ", fn, ", True Negatives: ", tn
-            )
+            diagnostic_info <- jmvcore::format(.("Positive outcome level: '{pos_outcome}' ({outcome_method})\nPositive predictor level: '{pos_pred}' ({pred_method})\nContingency table:\n  {pred1} \u2192 {out1}: {c11} | {out2}: {c12}\n  {pred2} \u2192 {out1}: {c21} | {out2}: {c22}\nTrue Positives: {tp}, False Positives: {fp}, False Negatives: {fn}, True Negatives: {tn}"), pos_outcome = positive_outcome_level,
+                    outcome_method = outcome_determination_method,
+                    pos_pred = positive_predictor_level,
+                    pred_method = predictor_determination_method,
+                    pred1 = predictor_levels[1], out1 = outcome_levels[1], c11 = cont_table[1,1],
+                    out2 = outcome_levels[2], c12 = cont_table[1,2],
+                    pred2 = predictor_levels[2], c21 = cont_table[2,1], c22 = cont_table[2,2],
+                    tp = tp, fp = fp, fn = fn, tn = tn)
 
             # Present the 2x2 positive-first, the way a diagnostic table is
             # conventionally read: test-positive on top, outcome-positive on the
@@ -2209,35 +2207,29 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 if (min_expected < 5) {
                     assumptions_ok <- FALSE
-                    warnings <- c(warnings, paste0(
-                        "Small expected cell counts detected (minimum = ", round(min_expected, 2), "). ",
-                        "Chi-square assumptions may be violated."
-                    ))
+                    warnings <- c(warnings, jmvcore::format(.("Small expected cell counts detected (minimum = {min}). Chi-square assumptions may be violated."), min = round(min_expected, 2)))
                     
                     # c(x, list(<record>)) appends one record. append(x, list(...))
                     # flattens the record into four separate elements, which made
                     # the structured branch of the consumer unreachable and printed
                     # four orphan bullets.
                     recommendations <- c(recommendations, list(list(
-                        test = "Fisher's exact test",
-                        reason = "More reliable for small cell counts",
+                        test = .("Fisher's exact test"),
+                        reason = .("More reliable for small cell counts"),
                         code = "fisher.test()",
-                        interpretation = "Provides exact p-values regardless of sample size"
+                        interpretation = .("Provides exact p-values regardless of sample size")
                     )))
                 }
                 
                 # Check for very small total sample size
                 if (total_n < 20) {
-                    warnings <- c(warnings, paste0(
-                        "Very small sample size (n = ", total_n, "). ",
-                        "Results should be interpreted with extreme caution."
-                    ))
+                    warnings <- c(warnings, jmvcore::format(.("Very small sample size (n = {n}). Results should be interpreted with extreme caution."), n = total_n))
                 }
                 
                 # Check for zero cells
                 if (any(cont_table == 0)) {
                     warnings <- append(warnings, 
-                        "Zero cells detected in contingency table. This may affect odds ratio calculation."
+                        .("Zero cells detected in contingency table. This may affect odds ratio calculation.")
                     )
                 }
             }
@@ -2490,16 +2482,16 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                        hjust = 1, size = sz) +
                     ggplot2::geom_text(ggplot2::aes(x = 2.25, y = y, label = or_text),
                                        hjust = 0, size = sz) +
-                    ggplot2::annotate("text", x = 0,    y = hdr, label = "Variable",
+                    ggplot2::annotate("text", x = 0,    y = hdr, label = .("Variable"),
                                       hjust = 0, fontface = "bold", size = sz) +
-                    ggplot2::annotate("text", x = 2.05, y = hdr, label = "all",
+                    ggplot2::annotate("text", x = 2.05, y = hdr, label = .("all"),
                                       hjust = 1, fontface = "bold", size = sz) +
                     ggplot2::annotate("text", x = 2.25, y = hdr,
-                                      label = "OR (95% CI, p-value)",
+                                      label = .("OR (95% CI, p-value)"),
                                       hjust = 0, fontface = "bold", size = sz) +
                     ggplot2::scale_x_continuous(limits = c(0, 4.3), expand = c(0, 0)) +
                     ggplot2::scale_y_continuous(limits = ylim, expand = c(0, 0)) +
-                    ggplot2::labs(x = "OR, 95% CI (Firth penalized)", y = NULL) +
+                    ggplot2::labs(x = .("OR, 95% CI (Firth penalized)"), y = NULL) +
                     ggplot2::theme_classic() +
                     # The right-hand panel carries an x-axis, which consumes
                     # vertical space. theme_void() here would make this panel
@@ -2535,7 +2527,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                         na.rm = TRUE) +
                     ggplot2::scale_x_continuous(trans = "log10", limits = xr) +
                     ggplot2::scale_y_continuous(limits = ylim, expand = c(0, 0)) +
-                    ggplot2::labs(x = "OR, 95% CI (Firth penalized)", y = NULL) +
+                    ggplot2::labs(x = .("OR, 95% CI (Firth penalized)"), y = NULL) +
                     ggplot2::theme_classic() +
                     ggplot2::theme(
                         axis.title.x = ggplot2::element_text(size = 12),
@@ -2544,13 +2536,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         axis.line.y  = ggplot2::element_blank())
 
                 ttl <- if (!is.null(outcome_label))
-                    grid::textGrob(paste0(outcome_label, ": OR (95% CI, p-value)"),
+                    grid::textGrob(jmvcore::format(.("{outcome}: OR (95% CI, p-value)"), outcome = outcome_label),
                                    gp = grid::gpar(fontsize = 14)) else NULL
 
                 gridExtra::arrangeGrob(
                     t1, g1, ncol = 2, widths = c(3, 2), top = ttl,
                     bottom = grid::textGrob(
-                        "Firth penalized likelihood; profile-likelihood confidence intervals.",
+                        .("Firth penalized likelihood; profile-likelihood confidence intervals."),
                         gp = grid::gpar(fontsize = 9, col = "grey30")))
             }, error = function(e) NULL)
         }
@@ -2633,18 +2625,16 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             lr_df       <- unname(fit$df)
             lr_p        <- stats::pchisq(lr_stat, df = lr_df, lower.tail = FALSE)
             metrics <- list(
-                paste0("Observations: ", nrow(.data)),
-                paste0("Firth penalized log-likelihood: ", round(loglik_full, 2)),
+                jmvcore::format(.("Observations: {n}"), n = nrow(.data)),
+                jmvcore::format(.("Firth penalized log-likelihood: {val}"), val = round(loglik_full, 2)),
                 # Keep the value immediately after the "AIC" label: a parenthetical
                 # formula between the two makes the metrics line hard to read and
                 # makes the figure ambiguous to anything parsing it.
-                paste0("Penalized AIC: ", sprintf("%.1f", -2 * loglik_full + 2 * n_par),
-                       " (-2 x penalized log-likelihood + 2 x ", n_par, " parameters)."),
-                paste0("This AIC is computed from the penalized (Firth) likelihood. ",
-                       "Compare it only with other Firth models fitted to these same ",
-                       "observations, not with the maximum-likelihood AIC of an unpenalized fit."),
-                paste0("Penalized likelihood-ratio test vs null model: chi-square = ",
-                       round(lr_stat, 3), " on ", lr_df, " df, ", private$.fmtP(lr_p), ".")
+                jmvcore::format(.("Penalized AIC: {aic} (-2 x penalized log-likelihood + 2 x {n_par} parameters)."),
+                                aic = sprintf("%.1f", -2 * loglik_full + 2 * n_par), n_par = n_par),
+                .("This AIC is computed from the penalized (Firth) likelihood. Compare it only with other Firth models fitted to these same observations, not with the maximum-likelihood AIC of an unpenalized fit."),
+                jmvcore::format(.("Penalized likelihood-ratio test vs null model: chi-square = {stat} on {df} df, {p}."),
+                                stat = round(lr_stat, 3), df = lr_df, p = private$.fmtP(lr_p))
             )
 
             return(list(summary_table, metrics))

@@ -43,7 +43,7 @@ test_that("unsupported classes are omitted before exclusion and reporting", {
   expect_match(result$todo$content, "Nothing to summarise")
   expect_identical(result$reportSentence$content, "")
   expect_identical(result$summary$content, "")
-  expect_identical(result$assumptions$content, "")
+  expect_match(result$assumptions$content, "Data quality check not performed")
 })
 
 test_that("real protobuf style restoration cannot retain obsolete reports", {
@@ -68,9 +68,10 @@ test_that("real protobuf style restoration cannot retain obsolete reports", {
     expect_identical(restored$results$tablestyle1$content, "")
     if (style == "t4") {
       expect_match(restored$results$tablestyle4$content, "Not tabulated")
-      for (name in c("summary", "reportSentence", "assumptions")) {
+      for (name in c("summary", "reportSentence")) {
         expect_identical(restored$results[[name]]$content, "", info = name)
       }
+      expect_match(restored$results$assumptions$content, "Data quality check not performed")
     } else {
       expect_match(restored$results$reportSentence$content, "40 cases")
     }
@@ -100,8 +101,16 @@ test_that("all no-table and failed-engine paths clear restored outputs", {
     restored$postInit()
     restored$results$fromProtoBuf(saved, c("vars", "excl", "showAbout"), character())
     restored$run()
-    for (name in c("tablestyle1", "summary", "reportSentence", "assumptions", "about")) {
+    for (name in c("tablestyle1", "summary", "reportSentence", "about")) {
       expect_identical(restored$results[[name]]$content, "", info = paste(label, name))
+    }
+    # The panel is visible whenever variables are selected, so it must carry
+    # a body on every early return; without a selection it stays hidden/empty.
+    if (label == "unselected") {
+      expect_identical(restored$results$assumptions$content, "", info = label)
+    } else {
+      expect_match(restored$results$assumptions$content,
+                   "Data quality check not performed", info = label)
     }
   }
   ns <- environment(tableone)

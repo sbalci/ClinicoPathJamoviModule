@@ -150,7 +150,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "tangram",
                     "labelled",
                     "yangdalton2012",
-                    "kableExtra"))
+                    "kableExtra",
+                    "MASS"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",

@@ -1,40 +1,39 @@
 ---
 name:  statsplot2
 title: Automatic Plot Selection
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: All-In-One
 menuSubtitle: Automatic Plot Selection Based on Variable Types
-version: '1.0.9'
+version: '1.1.0'
 jas: '1.2'
 
 description:
     main: 'Automatically selects and generates the most appropriate statistical visualization based on variable data types. Features enhanced error messages with contextual guidance, robust data validation, and comprehensive fallback options. Supports both independent and repeated measures designs with various plot types including violin plots, scatter plots, bar charts, and alluvial diagrams.'
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # Automatic plot selection for factor vs continuous variables
-    #         statsplot2(
-    #             data = mtcars,
-    #             dep = "mpg",
-    #             group = "cyl",
-    #             direction = "independent",
-    #             distribution = "p"
-    #         )
-            
-    #         # Repeated measures with alluvial diagram  
-    #         statsplot2(
-    #             data = survey_data,
-    #             dep = "condition_baseline",
-    #             group = "condition_followup", 
-    #             direction = "repeated",
-    #             alluvsty = "t1"
-    #         )
-            
-    #         # Enhanced error messages provide contextual guidance:
-    #         # - Variable names and types in error messages
-    #         # - Specific data requirement feedback
-    #         # - Package installation instructions when needed
-    #         # - Actionable suggestions for unsupported combinations
+    R:
+        dontrun: true
+        usage: |
+            # Continuous outcome across groups: Grade is stored as the numbers
+            # 1-3, so it is read as categorical (a notice says so) and a violin
+            # plot with a nonparametric comparison is drawn.
+            statsplot2(
+                data = histopathology,
+                dep = "Age",
+                group = "Grade",
+                distribution = "np",
+                showSummary = TRUE
+            )
+
+            # One panel per level of a third variable
+            statsplot2(
+                data = histopathology,
+                dep = "Age",
+                group = "Grade",
+                grvar = "Sex"
+            )
+
+            # Long-format repeated continuous outcomes need a Subject ID:
+            # statsplot2(data = long, dep = "score", group = "visit",
+            #            subjectID = "patient_id", direction = "repeated")
 
 
 options:
@@ -78,6 +77,7 @@ options:
       type: Variable
       default: NULL
       description:
+          ui: Subject identifier for long-format repeated continuous outcomes (one row per subject and condition). Not needed for wide-format alluvial data.
           R: >-
             Subject identifier for long-format repeated continuous outcomes. Each
             subject must have one row per condition; incomplete subjects are excluded.
@@ -118,6 +118,21 @@ options:
             Statistical approach: "p" = parametric, "np" = nonparametric, 
             "r" = robust, "bf" = Bayes factor.
 
+    - name: forceContinuous
+      title: Treat all numeric variables as continuous
+      type: Bool
+      default: false
+      description:
+          ui: >
+            By default a numeric variable with 15 or fewer distinct whole-number
+            values (scores, counts, grades) is analysed as categorical. Enable to
+            analyse every numeric variable as continuous.
+          R: >
+            If TRUE, every numeric variable is treated as continuous. By default a
+            numeric variable with 15 or fewer distinct whole-number values is
+            treated as categorical (a notice reports this), which changes the
+            plot type and the test used.
+
     - name: alluvsty
       title: Alluvial Plot Style
       type: List
@@ -133,6 +148,32 @@ options:
             Style for alluvial diagrams: "t1" = ggalluvial with stratum labels, 
             "t2" = easyalluvial with automatic variable selection.
 
+
+    - name: showSummary
+      title: Result sentence
+      type: Bool
+      default: false
+      description:
+          ui: >
+            A copy-ready sentence with the test name, statistic, p-value, effect
+            size with its interval and the sample size (one per panel when a
+            split variable is used).
+          R: >
+            If TRUE, a plain-language result sentence with the test statistic,
+            p-value, effect size and sample size is added to the output.
+
+    - name: showExplanations
+      title: Explanation and interpretation
+      type: Bool
+      default: false
+      description:
+          ui: >
+            Plot-selection summary, clinical interpretation and notes on the
+            statistical approach.
+          R: >
+            If TRUE, an explanation panel describing the selected plot, its
+            clinical interpretation and the assumptions of the statistical
+            approach is shown.
 
     - name: excl
       title: Exclude missing values
@@ -150,43 +191,49 @@ options:
       description:
           ui: Randomly sample for faster plots. Tests use the sampled data and may lose precision; repeated continuous outcomes retain whole subjects.
           R: >-
-            If TRUE, automatically samples large datasets (>10,000 rows) to 5,000 rows for improved performance.
+            If TRUE, randomly samples large datasets for plotting speed (by default
+            those above 10,000 rows are reduced to 5,000; see sampleThreshold and
+            sampleSize). Statistics are computed on the retained rows only.
 
     # The threshold and the sample size were hard-coded at 10,000 and 5,000, so a
     # user who wanted to keep 20,000 rows had only the all-or-nothing switch. Both
     # are exposed now; the defaults reproduce the previous fixed behaviour.
     - name: sampleThreshold
-      title: 'Sample Above (rows)'
+      title: 'Sample above (rows)'
       type: Integer
       default: 10000
       min: 1000
       max: 1000000
       description:
+          ui: Datasets with more rows than this are randomly subsampled when sampling is enabled.
           R: >
             Row count above which sampling is applied, when 'Sample large datasets'
             is enabled. Datasets at or below this size are always analysed in full.
 
     - name: sampleSize
-      title: 'Rows To Keep'
+      title: 'Rows to keep'
       type: Integer
       default: 5000
       min: 100
       max: 1000000
       description:
+          ui: Rows kept when a large dataset is subsampled; the statistics use only these rows.
           R: >
             Number of rows to retain when sampling. Larger values keep more
             statistical power at the cost of plotting speed. Statistics are
             computed on the retained rows only.
 
     - name: seed
-      title: Random Seed
+      title: Random seed
       type: Integer
       default: 42
       description:
+          ui: Seed for the random subsample and for any resampling in robust or Bayesian statistics; the same seed reproduces the same result.
           R: >
-            Random seed for the reproducible sampling of large datasets (used when
-            'Sample Large Datasets' is enabled). Change it to draw a different
-            sample; the default (42) reproduces the previous fixed behaviour.
+            Random seed used for the sampling of large datasets (when 'Sample large
+            datasets' is enabled) and for any resampling inside the plot statistics
+            (robust and Bayesian approaches). Change it to draw a different sample;
+            the default (42) reproduces the previous fixed behaviour.
             
 
 

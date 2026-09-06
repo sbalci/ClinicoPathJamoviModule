@@ -60,8 +60,6 @@ test_that("jjbarstats scenario: Clinical trial response analysis", {
     group = "treatment",
     clinicalpreset = "treatment",
     typestatistics = "parametric",
-    pairwisecomparisons = TRUE,
-    padjustmethod = "bonferroni",
     showSummary = TRUE,
     showAssumptions = TRUE
   )
@@ -117,7 +115,6 @@ test_that("jjbarstats scenario: Biomarker expression by subtype", {
     group = "subtype",
     clinicalpreset = "biomarker",
     typestatistics = "parametric",
-    pairwisecomparisons = TRUE,
     showInterpretation = TRUE
   )
 
@@ -176,9 +173,7 @@ test_that("jjbarstats scenario: Disease severity stratification", {
     data = jjbarstats_test,
     dep = "response",
     group = "tumor_stage",
-    typestatistics = "parametric",
-    pairwisecomparisons = TRUE,
-    padjustmethod = "holm"
+    typestatistics = "parametric"
   )
 
   expect_s3_class(result, "jjbarstatsResults")
@@ -255,8 +250,7 @@ test_that("jjbarstats scenario: Aggregated clinical trial data", {
     dep = "response_category",
     group = "treatment_group",
     counts = "count",
-    typestatistics = "parametric",
-    pairwisecomparisons = TRUE
+    typestatistics = "parametric"
   )
 
   expect_s3_class(result, "jjbarstatsResults")
@@ -283,12 +277,11 @@ test_that("jjbarstats scenario: Fisher's exact test for small samples", {
   data(jjbarstats_test)
   small_sample <- jjbarstats_test[1:25, ]
 
-  # Nonparametric for small sample
+  # Small sample
   result <- jjbarstats(
     data = small_sample,
     dep = "response",
-    group = "treatment",
-    typestatistics = "nonparametric"
+    group = "treatment"
   )
 
   expect_s3_class(result, "jjbarstatsResults")
@@ -437,7 +430,6 @@ test_that("jjbarstats handles comprehensive multi-outcome report", {
     group = "treatment",
     grvar = "tumor_stage",
     clinicalpreset = "treatment",
-    pairwisecomparisons = TRUE,
     showSummary = TRUE
   )
   expect_s3_class(primary, "jjbarstatsResults")

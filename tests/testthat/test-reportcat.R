@@ -132,18 +132,17 @@ testthat::test_that("reportcat handles special character variable names", {
 testthat::test_that("reportcat errors on empty dataset", {
     testthat::skip_if_not_installed("ClinicoPath")
 
-    # Empty dataframe should trigger error Notice
+    # A zero-row dataset is a fatal condition: it goes through
+    # jmvcore::reject(), which the R wrapper surfaces as an error (jamovi greys
+    # the pane and shows the message with the previous results left in place).
     test_data <- data.frame(
         Gender = factor(character(0))
     )
 
-    # Should handle gracefully with Notice (no R error)
-    testthat::expect_no_error({
-        result <- ClinicoPath::reportcat(
-            data = test_data,
-            vars = "Gender"
-        )
-    })
+    testthat::expect_error(
+        ClinicoPath::reportcat(data = test_data, vars = "Gender"),
+        "no rows"
+    )
 })
 
 testthat::test_that("reportcat handles non-categorical variables", {

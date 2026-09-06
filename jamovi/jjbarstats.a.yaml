@@ -4,17 +4,24 @@ title: Bar Charts
 menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: 'Bar Charts, Grouped Bar Charts'
-version: '1.0.9'
+version: '1.0.10'
 jas: '1.2'
 
 description:
-    main: |
-        'Wrapper Function for ggstatsplot::ggbarstats and
-        ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         # example will be added
+    main: >
+        Bar charts of one or more categorical outcomes by a grouping variable, with
+        the test in the subtitle: Pearson's chi-squared, Fisher's exact test on a
+        sparse 2x2 table, McNemar's test for paired data, or a Bayesian contingency
+        analysis. Wraps ggstatsplot::ggbarstats and ggstatsplot::grouped_ggbarstats.
+    R:
+        dontrun: true
+        usage: |
+            jjbarstats(
+                data = jjbarstats_test,
+                dep = "response",
+                group = "treatment",
+                resultssubtitle = TRUE
+            )
 
 options:
 
@@ -31,6 +38,9 @@ options:
       default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            One or more categorical outcome variables; each gets its own chart.
 
     - name: group
       title: Grouping Variable
@@ -38,6 +48,9 @@ options:
       default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
+      description:
+          R: >
+            Categorical grouping variable shown on the x axis.
 
     - name: grvar
       title: 'Split By (Optional)'
@@ -45,6 +58,9 @@ options:
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       default: NULL
+      description:
+          R: >
+            Optional categorical variable; the chart is repeated for each of its levels.
 
     - name: counts
       title: 'Counts (Optional)'
@@ -72,71 +88,45 @@ options:
     #       R: select measurement type (repeated or independent)
 
 
-    - name: excl
-      title: Exclude missing (NA)
-      type: Bool
-      default: false
-
-
     - name: typestatistics
       title: 'Type of Statistic'
       type: List
       options:
-        - title: Parametric
+        - title: Frequentist (chi-squared)
           name: parametric
-        - title: Nonparametric
-          name: nonparametric
-        - title: Robust
-          name: robust
-        - title: Bayes
+        - title: Bayesian
           name: bayes
       default: parametric
-
-    - name: pairwisecomparisons
-      title: Pairwise comparisons
-      type: Bool
-      default: false
-
-    - name: pairwisedisplay
-      title: 'Pairwise Display'
-      type: List
-      options:
-        - title: significant
-          name: significant
-        - title: non-significant
-          name: non-significant
-        - title: everything
-          name: everything
-      default: significant
-
-
-    - name: padjustmethod
-      title: 'Adjustment Method'
-      type: List
-      options:
-        - title: holm
-          name: holm
-        - title: hochberg
-          name: hochberg
-        - title: hommel
-          name: hommel
-        - title: bonferroni
-          name: bonferroni
-        - title: BH
-          name: BH
-        - title: BY
-          name: BY
-        - title: fdr
-          name: fdr
-        - title: none
-          name: none
-      default: holm
-
+      description:
+          R: >
+            Frequentist (Pearson's chi-squared; Fisher's exact test on a sparse 2x2
+            table; McNemar's test when paired) or Bayesian contingency analysis.
 
     - name: originaltheme
       title: Add GGStatsPlot layer
       type: Bool
       default: false
+      description:
+          R: >
+            Use the ggstatsplot theme instead of the jamovi theme.
+
+    - name: palette
+      title: Color palette
+      type: List
+      options:
+        - title: Dark2 (colour-blind safe)
+          name: Dark2
+        - title: Set2 (colour-blind safe)
+          name: Set2
+        - title: Paired
+          name: Paired
+        - title: gdoc (ggstatsplot default)
+          name: gdoc
+      default: Dark2
+      description:
+          R: >
+            Palette for the bar segments: an RColorBrewer palette, or gdoc, the
+            ggstatsplot default.
 
     - name: resultssubtitle
       title: Statistical results in subtitle
@@ -249,8 +239,10 @@ options:
       default: custom
       description:
           R: >
-            Predefined configurations for common clinical scenarios. 
-            Automatically sets appropriate statistical methods and parameters.
+            Tailors the interpretation guide and the prevalence check to a common
+            clinical scenario. In the jamovi interface choosing a preset also switches
+            on the statistics subtitle (and, for risk factor analysis, the proportion
+            tests); the R function leaves those options as given.
 
     - name: showexplanations
       title: Clinical explanations
@@ -290,7 +282,7 @@ options:
             clinical context based on analysis preset, and methodological notes.
 
     - name: addGGPubrBalloon
-      title: Add balloon plot (ggpubr)
+      title: Balloon plot (ggpubr)
       type: Bool
       default: false
       description:

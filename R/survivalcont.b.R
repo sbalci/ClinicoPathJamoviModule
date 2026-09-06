@@ -216,10 +216,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             .landmarkNote = function(tbl, results) {
                 offset <- results$landmark_offset
                 if (is.null(offset) || !is.finite(offset) || offset <= 0) return(invisible(NULL))
-                tbl$setNote("landmark", sprintf(
-                    paste0("Times are measured from the landmark at %.2f %s, not from diagnosis; ",
-                           "add %.2f to express a time as time from diagnosis."),
-                    offset, self$options$timetypeoutput, offset))
+                tbl$setNote("landmark", jmvcore::format(.("Times are measured from the landmark at {offset} {unit}, not from diagnosis; add {offset} to express a time as time from diagnosis."), offset = round(offset, 2), unit = self$options$timetypeoutput))
                 invisible(NULL)
             },
 
@@ -786,15 +783,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         if (length(epoch_vals) > 0 && max(abs(epoch_vals)) < 1e6) {
                             private$.addHtmlMessage(
                                 "error",
-                                "Numeric dates are not epoch seconds",
-                                paste0(
-                                    "The numeric date columns hold values too small to be Unix epoch seconds ",
-                                    "(the largest is ", base::format(max(abs(epoch_vals)), big.mark = ","),
-                                    ", which is January 1970). They look like day counts, as produced by an R ",
-                                    "Date column or an Excel serial date. Numeric dates must be seconds since ",
-                                    "1970-01-01 -- use the DateTime Converter's corrected_datetime_numeric ",
-                                    "output, or supply the dates as text (e.g. \"2024-01-15\") and set the ",
-                                    "matching input time type."))
+                                .("Numeric dates are not epoch seconds"),
+                                jmvcore::format(.("The numeric date columns hold values too small to be Unix epoch seconds (the largest is {max_val}, which is January 1970). They look like day counts, as produced by an R Date column or an Excel serial date. Numeric dates must be seconds since 1970-01-01 -- use the DateTime Converter's corrected_datetime_numeric output, or supply the dates as text (e.g. \"2024-01-15\") and set the matching input time type."), max_val = base::format(max(abs(epoch_vals)), big.mark = ",")))
                             return(NULL)
                         }
                         mydata[["start"]] <- as.POSIXct(mydata[[dxdate]], origin="1970-01-01", tz="UTC")
@@ -834,22 +824,16 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             if (n_fail > 0) {
                                 private$.addHtmlMessage(
                                     "strongWarning",
-                                    "Dates could not be read",
+                                    .("Dates could not be read"),
                                     sprintf(
-                                        paste0("%d of %d date value(s) did not match the selected input time ",
-                                               "type '%s'. Those records are dropped. Values that DO match an ",
-                                               "ambiguous format (for example 03/04/2024 read as %s) are ",
-                                               "converted using it, so check 'Input time type' before ",
-                                               "interpreting these results."),
+                                        .("%d of %d date value(s) did not match the selected input time type '%s'. Those records are dropped. Values that DO match an ambiguous format (for example 03/04/2024 read as %s) are converted using it, so check 'Input time type' before interpreting these results."),
                                         n_fail, n_dates, timetypedata, timetypedata))
                                 if (n_dates > 0 && n_fail / n_dates > 0.2) {
                                     private$.addHtmlMessage(
                                         "error",
-                                        "Date format does not match the data",
+                                        .("Date format does not match the data"),
                                         sprintf(
-                                            paste0("%.0f%% of date values could not be read as '%s'. This is a ",
-                                                   "format mismatch rather than missing data. Set 'Input time ",
-                                                   "type' to the format actually used in your columns."),
+                                            .("%.0f%% of date values could not be read as '%s'. This is a format mismatch rather than missing data. Set 'Input time type' to the format actually used in your columns."),
                                             100 * n_fail / n_dates, timetypedata))
                                     return(NULL)
                                 }
@@ -918,7 +902,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 if (!is.null(res$error)) {
-                    private$.addHtmlMessage("error", "Outcome variable problem", res$error)
+                    private$.addHtmlMessage("error", .("Outcome variable problem"), res$error)
                     return(NULL)
                 }
 
@@ -1042,8 +1026,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (is.null(time)) {
                     private$.addHtmlMessage(
                         "error",
-                        "Survival time problem",
-                        "Survival time could not be calculated. Check the elapsed-time variable or the selected date variables and date format."
+                        .("Survival time problem"),
+                        .("Survival time could not be calculated. Check the elapsed-time variable or the selected date variables and date format.")
                     )
                     return(NULL)
                 }
@@ -1052,8 +1036,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (is.null(factor)) {
                     private$.addHtmlMessage(
                         "error",
-                        "Continuous variable problem",
-                        "The selected continuous explanatory variable could not be read."
+                        .("Continuous variable problem"),
+                        .("The selected continuous explanatory variable could not be read.")
                     )
                     return(NULL)
                 }
@@ -1076,11 +1060,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (n_negative > 0) {
                     private$.addHtmlMessage(
                         "error",
-                        "Negative survival time",
+                        .("Negative survival time"),
                         sprintf(
-                            paste0("%d of %d record(s) have negative follow-up time. Follow-up cannot be ",
-                                   "negative; this usually means the diagnosis and follow-up date variables ",
-                                   "are swapped, or that the elapsed-time variable contains negative values."),
+                            .("%d of %d record(s) have negative follow-up time. Follow-up cannot be negative; this usually means the diagnosis and follow-up date variables are swapped, or that the elapsed-time variable contains negative values."),
                             n_negative, nrow(cleanData)))
                     return(NULL)
                 }
@@ -1094,8 +1076,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     if (!is.finite(landmark) || landmark < 0) {
                         private$.addHtmlMessage(
                             "error",
-                            "Invalid landmark time",
-                            "Landmark time must be a finite, non-negative value."
+                            .("Invalid landmark time"),
+                            .("Landmark time must be a finite, non-negative value.")
                         )
                         return(NULL)
                     }
@@ -1116,26 +1098,24 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         excl_pct <- 100 * n_landmark_excluded / n_pre_landmark
                         private$.addHtmlMessage(
                             if (excl_pct > 30) "strongWarning" else "info",
-                            "Landmark exclusions",
+                            .("Landmark exclusions"),
                             sprintf(
-                                paste0("Landmark at %.2f %s: %d of %d patient(s) (%.1f%%) had follow-up shorter ",
-                                       "than the landmark and were excluded%s; %d remain at risk. Reported times ",
-                                       "are measured FROM the landmark.%s"),
+                                paste0(.("Landmark at %.2f %s: %d of %d patient(s) (%.1f%%) had follow-up shorter than the landmark and were excluded%s; %d remain at risk. Reported times are measured FROM the landmark."),
+                                       if (excl_pct > 30)
+                                           .(" Excluding this share of the cohort can introduce selection bias; the landmark should be prespecified.")
+                                       else ""),
                                 landmark, self$options$timetypeoutput,
                                 n_landmark_excluded, n_pre_landmark, excl_pct,
-                                if (n_na_time > 0) sprintf(", plus %d with missing follow-up time", n_na_time) else "",
-                                nrow(cleanData),
-                                if (excl_pct > 30)
-                                    " Excluding this share of the cohort can introduce selection bias; the landmark should be prespecified."
-                                else ""))
+                                if (n_na_time > 0) sprintf(.(" , plus %d with missing follow-up time"), n_na_time) else "",
+                                nrow(cleanData)))
                     }
 
                     if (nrow(cleanData) == 0) {
                         private$.addHtmlMessage(
                             "error",
-                            "Landmark beyond follow-up",
+                            .("Landmark beyond follow-up"),
                             sprintf(
-                                "No patients remain at risk at landmark time %.2f. Choose an earlier landmark.",
+                                .("No patients remain at risk at landmark time %.2f. Choose an earlier landmark."),
                                 landmark
                             )
                         )
@@ -1183,9 +1163,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (n_excluded > 0) {
                     private$.addHtmlMessage(
                         "warning",
-                        "Incomplete records excluded",
+                        .("Incomplete records excluded"),
                         sprintf(
-                            "%d of %d record(s) were excluded because survival time, outcome, or the continuous explanatory variable was missing.",
+                            .("%d of %d record(s) were excluded because survival time, outcome, or the continuous explanatory variable was missing."),
                             n_excluded,
                             n_before_complete_cases
                         )
@@ -1195,8 +1175,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (nrow(cleanData) == 0) {
                     private$.addHtmlMessage(
                         "error",
-                        "No complete records",
-                        "No complete records remain after applying the selected variables and landmark restriction."
+                        .("No complete records"),
+                        .("No complete records remain after applying the selected variables and landmark restriction.")
                     )
                     return(NULL)
                 }
@@ -1311,11 +1291,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (private$.isCompetingRisk()) {
                     private$.addHtmlMessage(
                         "error",
-                        "Competing risks not available in this analysis",
-                        paste0(
-                            "Cut-off analysis for a continuous predictor does not support competing risks. ",
-                            "Use Survival Analysis or Multivariable Survival Analysis for competing-risk ",
-                            "models, or set survival type to Overall, Cause Specific, or Disease-Free here."))
+                        .("Competing risks not available in this analysis"),
+                        .("Cut-off analysis for a continuous predictor does not support competing risks. Use Survival Analysis or Multivariable Survival Analysis for competing-risk models, or set survival type to Overall, Cause Specific, or Disease-Free here."))
                     # Returning here means the setState() block further down never
                     # runs, so a plot state left over from the PREVIOUS (valid)
                     # outcome variable would still be rendered -- a correct-looking
@@ -1341,8 +1318,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     if (private$.lowEventCount) {
                         private$.addHtmlMessage(
                             type = "strongWarning",
-                            title = sprintf("Only %d event(s) observed", n_events),
-                            message = sprintf('Only %d event(s) detected (n=%d total). Descriptive results are shown, but estimates from this many events are unstable with very wide confidence intervals. Cut-off determination is suppressed.', n_events, n_total)
+                            title = sprintf(.("Only %d event(s) observed"), n_events),
+                            message = sprintf(.("Only %d event(s) detected (n=%d total). Descriptive results are shown, but estimates from this many events are unstable with very wide confidence intervals. Cut-off determination is suppressed."), n_events, n_total)
                         )
                     }
 
@@ -1350,8 +1327,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     if (n_events >= 10 && n_events < 20) {
                         private$.addHtmlMessage(
                             type = "strongWarning",
-                            title = "Limited Events",
-                            message = sprintf('Only %d events detected (n=%d total). Survival analysis with fewer than 20 events has very limited statistical reliability. Confidence intervals will be wide, median survival may be undefined, and Cox regression estimates are unstable. Consider: (1) collecting more data, (2) combining with external datasets, or (3) performing descriptive analysis only without hypothesis testing.', n_events, n_total)
+                            title = .("Limited Events"),
+                            message = sprintf(.("Only %d events detected (n=%d total). Survival analysis with fewer than 20 events has very limited statistical reliability. Confidence intervals will be wide, median survival may be undefined, and Cox regression estimates are unstable. Consider: (1) collecting more data, (2) combining with external datasets, or (3) performing descriptive analysis only without hypothesis testing."), n_events, n_total)
                         )
                     }
 
@@ -1359,8 +1336,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     if (n_events >= 20 && n_events < 50) {
                         private$.addHtmlMessage(
                             type = "warning",
-                            title = "Moderate Event Count",
-                            message = sprintf('%d events detected (n=%d total). Analysis is feasible but statistical power is limited. Confidence intervals may be wider than ideal. Results should be interpreted cautiously and ideally validated in larger cohorts.', n_events, n_total)
+                            title = .("Moderate Event Count"),
+                            message = sprintf(.("%d events detected (n=%d total). Analysis is feasible but statistical power is limited. Confidence intervals may be wider than ideal. Results should be interpreted cautiously and ideally validated in larger cohorts."), n_events, n_total)
                         )
                     }
 
@@ -1372,8 +1349,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         if (epv < 10) {
                             private$.addHtmlMessage(
                                 type = "strongWarning",
-                                title = "Low Events Per Variable (EPV)",
-                                message = sprintf('Events per variable (EPV) = %d/%d = %.1f. Recommended minimum is 10 EPV for reliable Cox regression. With EPV < 10, coefficient estimates may be biased, standard errors inflated, and overfitting likely. Consider: (1) collecting more events, (2) simpler models, or (3) penalized regression methods.', n_events, n_covariates, epv)
+                                title = .("Low Events Per Variable (EPV)"),
+                                message = sprintf(.("Events per variable (EPV) = %d/%d = %.1f. Recommended minimum is 10 EPV for reliable Cox regression. With EPV < 10, coefficient estimates may be biased, standard errors inflated, and overfitting likely. Consider: (1) collecting more events, (2) simpler models, or (3) penalized regression methods."), n_events, n_covariates, epv)
                             )
                         }
                     }
@@ -1382,8 +1359,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     if (n_total < 50) {
                         private$.addHtmlMessage(
                             type = "warning",
-                            title = "Small Sample Size",
-                            message = sprintf('Total sample size n=%d is small for survival analysis. Asymptotic assumptions for confidence intervals and hypothesis tests may not hold. Results should be considered preliminary and validated in larger datasets.', n_total)
+                            title = .("Small Sample Size"),
+                            message = sprintf(.("Total sample size n=%d is small for survival analysis. Asymptotic assumptions for confidence intervals and hypothesis tests may not hold. Results should be considered preliminary and validated in larger datasets."), n_total)
                         )
                     }
 
@@ -1394,15 +1371,15 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         censoring_rate <- 100 * (1 - event_rate)
                         private$.addHtmlMessage(
                             type = "strongWarning",
-                            title = "High Censoring Rate",
-                            message = sprintf('%.1f%% of observations are censored (only %d events out of %d). With such heavy censoring, survival estimates beyond the median may be unreliable or undefined. Confidence intervals will be very wide in the tail. Consider: (1) longer follow-up, (2) focusing on earlier time points, or (3) alternative endpoints with higher event rates.', censoring_rate, n_events, n_total)
+                            title = .("High Censoring Rate"),
+                            message = sprintf(.("%.1f%% of observations are censored (only %d events out of %d). With such heavy censoring, survival estimates beyond the median may be unreliable or undefined. Confidence intervals will be very wide in the tail. Consider: (1) longer follow-up, (2) focusing on earlier time points, or (3) alternative endpoints with higher event rates."), censoring_rate, n_events, n_total)
                         )
                     } else if (event_rate < 0.30 && event_rate >= 0.20) {
                         censoring_rate <- 100 * (1 - event_rate)
                         private$.addHtmlMessage(
                             type = "warning",
-                            title = "Moderate Censoring",
-                            message = sprintf('%.1f%% of observations are censored. While analysis is feasible, statistical power is reduced and late survival estimates may have wide confidence intervals.', censoring_rate)
+                            title = .("Moderate Censoring"),
+                            message = sprintf(.("%.1f%% of observations are censored. While analysis is feasible, statistical power is reduced and late survival estimates may have wide confidence intervals."), censoring_rate)
                         )
                     }
 
@@ -1422,14 +1399,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             if (n_unique < 10) {
                                 private$.addHtmlMessage(
                                     type = "strongWarning",
-                                    title = "Very Limited Variability",
-                                    message = sprintf('Continuous variable "%s" has only %d unique values. This severely limits cut-off analysis and Cox regression assumptions. Consider: (1) treating as categorical, (2) verifying data quality, or (3) using a different variable with more variation.', results$name3contexpl, n_unique)
+                                    title = .("Very Limited Variability"),
+                                    message = sprintf(.("Continuous variable \"%s\" has only %d unique values. This severely limits cut-off analysis and Cox regression assumptions. Consider: (1) treating as categorical, (2) verifying data quality, or (3) using a different variable with more variation."), results$name3contexpl, n_unique)
                                 )
                             } else if (n_unique < 20) {
                                 private$.addHtmlMessage(
                                     type = "warning",
-                                    title = "Limited Variability",
-                                    message = sprintf('Continuous variable "%s" has only %d unique values. While analysis is possible, optimal cut-off determination and Cox regression may be limited. Results should be interpreted cautiously.', results$name3contexpl, n_unique)
+                                    title = .("Limited Variability"),
+                                    message = sprintf(.("Continuous variable \"%s\" has only %d unique values. While analysis is possible, optimal cut-off determination and Cox regression may be limited. Results should be interpreted cautiously."), results$name3contexpl, n_unique)
                                 )
                             }
                         }
@@ -1558,11 +1535,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         reason <- private$.multicutFailReason
                         private$.addHtmlMessage(
                             "warning",
-                            "Multiple cut-offs unavailable",
+                            .("Multiple cut-offs unavailable"),
                             paste0(
-                                "The requested multiple cut-offs could not be estimated from these data",
+                                .("The requested multiple cut-offs could not be estimated from these data"),
                                 if (!is.null(reason)) paste0(": ", reason) else "",
-                                ". Check variability, group-size constraints, and event counts, or use the continuous Cox model."
+                                .(". Check variability, group-size constraints, and event counts, or use the continuous Cox model.")
                             )
                         )
                     }
@@ -1596,8 +1573,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (is.null(res.cut)) {
                     private$.addHtmlMessage(
                         "warning",
-                        "Optimal cut-off unavailable",
-                        "An optimal cut-off could not be estimated from these data. The continuous Cox model remains the primary analysis; check predictor variability, event count, and minimum group size."
+                        .("Optimal cut-off unavailable"),
+                        .("An optimal cut-off could not be estimated from these data. The continuous Cox model remains the primary analysis; check predictor variability, event count, and minimum group size.")
                     )
                     private$.addExplanations()
                     return()
@@ -1631,15 +1608,15 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 if (group_counts[grp] < 10) {
                                     private$.addHtmlMessage(
                                         type = "strongWarning",
-                                        title = "Very Small Group After Cut-off",
-                                        message = sprintf('Very small group size after cut-off: "%s" has only %d observations (%d events). Statistical tests (log-rank, Cox regression) are unreliable with such small groups. Consider: (1) alternative cut-off methods, (2) treating variable as continuous, or (3) collecting more data.', grp, group_counts[grp], n_events_grp)
+                                        title = .("Very Small Group After Cut-off"),
+                                        message = sprintf(.("Very small group size after cut-off: \"%s\" has only %d observations (%d events). Statistical tests (log-rank, Cox regression) are unreliable with such small groups. Consider: (1) alternative cut-off methods, (2) treating variable as continuous, or (3) collecting more data."), grp, group_counts[grp], n_events_grp)
                                     )
                                 } else if (group_counts[grp] < 20) {
                                     # WARNING for small groups (10-19)
                                     private$.addHtmlMessage(
                                         type = "warning",
-                                        title = "Small Group After Cut-off",
-                                        message = sprintf('Small group size after cut-off: "%s" has %d observations (%d events). Statistical power is limited. Confidence intervals may be wide. Interpret results cautiously.', grp, group_counts[grp], n_events_grp)
+                                        title = .("Small Group After Cut-off"),
+                                        message = sprintf(.("Small group size after cut-off: \"%s\" has %d observations (%d events). Statistical power is limited. Confidence intervals may be wide. Interpret results cautiously."), grp, group_counts[grp], n_events_grp)
                                     )
                                 }
 
@@ -1647,8 +1624,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 if (n_events_grp < 5 && n_events_grp > 0) {
                                     private$.addHtmlMessage(
                                         type = "strongWarning",
-                                        title = "Very Few Events in Group",
-                                        message = sprintf('Very few events in group "%s" (%d events out of %d observations). Survival estimates and confidence intervals are highly unstable. Median survival may be undefined. Cox regression unreliable.', grp, n_events_grp, group_counts[grp])
+                                        title = .("Very Few Events in Group"),
+                                        message = sprintf(.("Very few events in group \"%s\" (%d events out of %d observations). Survival estimates and confidence intervals are highly unstable. Median survival may be undefined. Cox regression unreliable."), grp, n_events_grp, group_counts[grp])
                                     )
                                 }
                             }
@@ -1766,8 +1743,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     analyses_list <- paste(completed_analyses, collapse = ", ")
                     private$.addHtmlMessage(
                         type = "info",
-                        title = "Analysis Complete",
-                        message = sprintf('Successfully completed: %s. Results are displayed in the tables and plots below. Review all sections carefully, paying special attention to any warnings or clinical assumptions.', analyses_list)
+                        title = .("Analysis Complete"),
+                        message = sprintf(.("Successfully completed: %s. Results are displayed in the tables and plots below. Review all sections carefully, paying special attention to any warnings or clinical assumptions."), analyses_list)
                     )
                 }
 
@@ -1775,8 +1752,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (isTRUE(private$.cutoffRan)) {
                     private$.addHtmlMessage(
                         type = "info",
-                        title = "Methodology Reference",
-                        message = 'The cut-off is the value that maximises the standardised log-rank statistic (maximally selected rank statistic, survminer::surv_cutpoint / maxstat). No multiplicity-adjusted p-value is computed or reported for the selected cut-off; the group comparison p-values shown after the split are exploratory because the split was chosen from these same data. Report the continuous Cox model as the primary analysis and validate the cut-off in independent data. When publishing, cite survminer and maxstat.'
+                        title = .("Methodology Reference"),
+                        message = .("The cut-off is the value that maximises the standardised log-rank statistic (maximally selected rank statistic, survminer::surv_cutpoint / maxstat). No multiplicity-adjusted p-value is computed or reported for the selected cut-off; the group comparison p-values shown after the split are exploratory because the split was chosen from these same data. Report the continuous Cox model as the primary analysis and validate the cut-off in independent data. When publishing, cite survminer and maxstat.")
                     )
                 }
             }
@@ -1888,8 +1865,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         # PH assumption violated
                         private$.addHtmlMessage(
                             type = "strongWarning",
-                            title = "Proportional Hazards Assumption Violated",
-                            message = sprintf('Proportional hazards assumption violated (Schoenfeld residual test p=%.3f). Cox model estimates may be unreliable. Hazard ratios may change over time. Consider: (1) stratified Cox regression (Advanced Options), (2) time-varying coefficients, (3) log-log plot for visual assessment, or (4) parametric survival models.', global_p)
+                            title = .("Proportional Hazards Assumption Violated"),
+                            message = sprintf(.("Proportional hazards assumption violated (Schoenfeld residual test p=%.3f). Cox model estimates may be unreliable. Hazard ratios may change over time. Consider: (1) stratified Cox regression (Advanced Options), (2) time-varying coefficients, (3) log-log plot for visual assessment, or (4) parametric survival models."), global_p)
                         )
                     }
 
@@ -1902,8 +1879,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             if (!is.na(var_p) && var_p < 0.05) {
                                 private$.addHtmlMessage(
                                     type = "strongWarning",
-                                    title = "Variable-Specific PH Violation",
-                                    message = sprintf('Proportional hazards assumption violated for "%s" (p=%.3f). The effect of this variable on hazard changes over time. Cox HR may not accurately represent the relationship across all time points.', var_name, var_p)
+                                    title = .("Variable-Specific PH Violation"),
+                                    message = sprintf(.("Proportional hazards assumption violated for \"%s\" (p=%.3f). The effect of this variable on hazard changes over time. Cox HR may not accurately represent the relationship across all time points."), var_name, var_p)
                                 )
                             }
                         }
@@ -1922,12 +1899,12 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                     private$.addHtmlMessage(
                         type = "warning",
-                        title = "Proportional Hazards Test Could Not Be Performed",
+                        title = .("Proportional Hazards Test Could Not Be Performed"),
                         message = if (fit_failure) {
-                            sprintf('The Cox model underlying the proportional hazards test did not converge (%s), so the assumption could NOT be tested. This is not evidence that proportional hazards holds. It usually means a covariate is collinear or perfectly separates the outcome, or that there are too few events. Check the Cox results below for implausibly large hazard ratios or very wide confidence intervals before interpreting them, and consider a log-log plot for visual assessment.',
+                            sprintf(.("The Cox model underlying the proportional hazards test did not converge (%s), so the assumption could NOT be tested. This is not evidence that proportional hazards holds. It usually means a covariate is collinear or perfectly separates the outcome, or that there are too few events. Check the Cox results below for implausibly large hazard ratios or very wide confidence intervals before interpreting them, and consider a log-log plot for visual assessment."),
                                     trimws(e$message))
                         } else {
-                            'The proportional hazards assumption could NOT be tested, so no conclusion about it should be drawn from the absence of a warning. This may occur with very small samples or perfect separation. Interpret the Cox results cautiously and consider visual inspection with log-log plots.'
+                            .("The proportional hazards assumption could NOT be tested, so no conclusion about it should be drawn from the absence of a warning. This may occur with very small samples or perfect separation. Interpret the Cox results cautiously and consider visual inspection with log-log plots.")
                         }
                     )
                 })
@@ -1986,11 +1963,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 coxTable$setNote(
                     "scale",
-                    paste0(
-                        "Hazard ratios are unadjusted and correspond to a one-unit increase in '",
-                        self$options$contexpl,
-                        "'. The model assumes a linear association with log hazard and proportional hazards over time."
-                    )
+                    jmvcore::format(.("Hazard ratios are unadjusted and correspond to a one-unit increase in '{var}'. The model assumes a linear association with log hazard and proportional hazards over time."), var = self$options$contexpl)
                 )
 
                 data_frame <- tCox_df
@@ -2138,7 +2111,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 # Simple plain text title (table titles don't render HTML)
                 rescutTable$setTitle(
-                    glue::glue('{var} Optimal Cut-off Analysis', var = self$options$contexpl)
+                    jmvcore::format(.("{var} Optimal Cut-off Analysis"), var = self$options$contexpl)
                 )
 
                 # Add plain text interpretation note if cutoff was found
@@ -2146,18 +2119,14 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     cutoff_value <- rescut_summary[1, "cutpoint"]
                     variable_name <- self$options$contexpl
 
-                    clinical_note <- glue::glue(
-                        'The data-derived cut-off point for {variable_name} is {cutoff_value}; it separates lower and higher marker values in this dataset.',
-                        variable_name = variable_name,
-                        cutoff_value = round(cutoff_value, 2)
-                    )
+                    clinical_note <- jmvcore::format(.("The data-derived cut-off point for {variable_name} is {cutoff_value}; it separates lower and higher marker values in this dataset."), variable_name = variable_name, cutoff_value = round(cutoff_value, 2))
 
                     # Set table note with plain text (notes don't render HTML)
                     rescutTable$setNote("clinical", clinical_note)
                 }
 
                 # Multiplicity caution (plain text)
-                rescutTable$setNote("multiplicity", "The statistic is the maximally selected standardised log-rank statistic; no multiplicity-adjusted p-value is reported for this cut-off. Downstream group comparisons are exploratory and should be validated in independent data.")
+                rescutTable$setNote("multiplicity", .("The statistic is the maximally selected standardised log-rank statistic; no multiplicity-adjusted p-value is reported for this cut-off. Downstream group comparisons are exploratory and should be validated in independent data."))
 
                 data_frame <- rescut_summary
                 for (i in seq_along(data_frame[, 1, drop = TRUE])) {
@@ -2381,15 +2350,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 dropped <- utimes[utimes > max_observed]
                 utimes <- utimes[utimes <= max_observed]
                 if (length(dropped) > 0)
-                    self$results$survTable$setNote("horizon", sprintf(
-                        paste0("Time point(s) %s omitted: they exceed the longest observed follow-up ",
-                               "(%.2f %s). Survival cannot be estimated beyond the data."),
-                        paste(dropped, collapse = ", "), max_observed, self$options$timetypeoutput))
+                    self$results$survTable$setNote("horizon", jmvcore::format(.("Time point(s) {dropped} omitted: they exceed the longest observed follow-up ({max} {unit}). Survival cannot be estimated beyond the data."), dropped = paste(dropped, collapse = ", "), max = round(max_observed, 2), unit = self$options$timetypeoutput))
                 if (length(utimes) == 0) {
-                    self$results$survTable$setNote("horizon", sprintf(
-                        paste0("No survival time point could be reported: every requested time exceeds ",
-                               "the longest observed follow-up (%.2f %s). Choose earlier time points."),
-                        max_observed, self$options$timetypeoutput))
+                    self$results$survTable$setNote("horizon", jmvcore::format(.("No survival time point could be reported: every requested time exceeds the longest observed follow-up ({max} {unit}). Choose earlier time points."), max = round(max_observed, 2), unit = self$options$timetypeoutput))
                     self$results$survTableSummary$setContent("")
                     return()
                 }
@@ -2529,8 +2492,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (length(time_intervals) < length(raw_intervals)) {
                     private$.addHtmlMessage(
                         "warning",
-                        "Person-time intervals adjusted",
-                        "Duplicate, non-positive, non-numeric, or out-of-range interval boundaries were ignored."
+                        .("Person-time intervals adjusted"),
+                        .("Duplicate, non-positive, non-numeric, or out-of-range interval boundaries were ignored.")
                     )
                 }
 
@@ -3102,23 +3065,18 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     if (min(final_sizes) < min_n)
                         private$.addHtmlMessage(
                             "warning",
-                            "Minimum group size not met",
+                            .("Minimum group size not met"),
                             sprintf(
-                                paste0("The smallest reported group still has %d patient(s) (%.1f%%), below the ",
-                                       "%g%% minimum. No further cut-off can be removed without collapsing the ",
-                                       "grouping entirely. Interpret group-level estimates with caution."),
+                                .("The smallest reported group still has %d patient(s) (%.1f%%), below the %g%% minimum. No further cut-off can be removed without collapsing the grouping entirely. Interpret group-level estimates with caution."),
                                 min(final_sizes), 100 * min(final_sizes) / length(cont_var),
                                 self$options$min_group_size))
 
                     if (length(cutoff_values) < n_requested)
                         private$.addHtmlMessage(
                             "warning",
-                            "Cut-offs reduced to respect minimum group size",
+                            .("Cut-offs reduced to respect minimum group size"),
                             sprintf(
-                                paste0("%d of the %d requested cut-off(s) produced a group smaller than the ",
-                                       "%g%% minimum (%d patients) and were removed. %d cut-off(s) defining %d ",
-                                       "group(s) are reported. Lower the minimum group size, request fewer ",
-                                       "cut-offs, or use the continuous Cox model."),
+                                .("%d of the %d requested cut-off(s) produced a group smaller than the %g%% minimum (%d patients) and were removed. %d cut-off(s) defining %d group(s) are reported. Lower the minimum group size, request fewer cut-offs, or use the continuous Cox model."),
                                 n_requested - length(cutoff_values), n_requested,
                                 self$options$min_group_size, min_n,
                                 length(cutoff_values), length(cutoff_values) + 1))
@@ -3280,11 +3238,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         # "tree" label.
                         private$.addHtmlMessage(
                             "warning",
-                            "Tree-based cut-points unavailable",
-                            paste0("The survival tree produced no usable split for '", mycontexpl,
-                                   "'. Quantile cut-points are shown instead. This usually means ",
-                                   "the tree found no split meeting the complexity and minimum ",
-                                   "group-size criteria."))
+                            .("Tree-based cut-points unavailable"),
+                            jmvcore::format(.("The survival tree produced no usable split for '{var}'. Quantile cut-points are shown instead. This usually means the tree found no split meeting the complexity and minimum group-size criteria."), var = mycontexpl))
                     }
 
                     if (length(cutoffs) > num_cuts) {
@@ -3349,11 +3304,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (length(valid_cuts) < num_cuts) {
                     private$.addHtmlMessage(
                         "warning",
-                        "Minimum p-value search not possible",
+                        .("Minimum p-value search not possible"),
                         sprintf(
-                            paste0("'%s' has too few distinct values between the %g%% and %g%% quantiles to place ",
-                                   "%d cut-off(s). Quantile-based cut-points are shown instead of minimum-p-value ",
-                                   "cut-points."),
+                            .("'%s' has too few distinct values between the %g%% and %g%% quantiles to place %d cut-off(s). Quantile-based cut-points are shown instead of minimum-p-value cut-points."),
                             self$options$contexpl, self$options$min_group_size,
                             100 - self$options$min_group_size, num_cuts))
                     return(private$.quantileCutoffs(cont_var, num_cuts))
@@ -3463,9 +3416,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }, error = function(e) {
                     private$.addHtmlMessage(
                         "warning",
-                        "Minimum p-value search failed",
-                        paste0("The minimum-p-value search could not be completed (", conditionMessage(e),
-                               "). Quantile-based cut-points are shown instead."))
+                        .("Minimum p-value search failed"),
+                        sprintf(.("The minimum-p-value search could not be completed (%s). Quantile-based cut-points are shown instead."), conditionMessage(e)))
                     return(private$.quantileCutoffs(cont_var, num_cuts))
                 })
             }
@@ -3910,7 +3862,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (!is.finite(max_supported_tau) || max_supported_tau <= 0) {
                     self$results$rmstTable$setNote(
                         "support",
-                        "RMST could not be calculated because no follow-up horizon is supported in every group."
+                        .("RMST could not be calculated because no follow-up horizon is supported in every group.")
                     )
                     return()
                 }
@@ -3923,15 +3875,15 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         self$results$rmstTable$setNote(
                             "support",
                             sprintf(
-                                "RMST time horizon must be no larger than %.2f, the maximum follow-up supported in every displayed group.",
+                                .("RMST time horizon must be no larger than %.2f, the maximum follow-up supported in every displayed group."),
                                 max_supported_tau
                             )
                         )
                         private$.addHtmlMessage(
                             "error",
-                            "Unsupported RMST horizon",
+                            .("Unsupported RMST horizon"),
                             sprintf(
-                                "The requested RMST horizon %.2f exceeds the common observed follow-up limit of %.2f.",
+                                .("The requested RMST horizon %.2f exceeds the common observed follow-up limit of %.2f."),
                                 tau,
                                 max_supported_tau
                             )
@@ -3973,8 +3925,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         if (!is.finite(rmst)) {
                             private$.addHtmlMessage(
                                 type = "warning",
-                                title = "Insufficient Data for RMST",
-                                message = sprintf('RMST could not be estimated for group "%s".', as.character(group))
+                                title = .("Insufficient Data for RMST"),
+                                message = sprintf(.("RMST could not be estimated for group \"%s\"."), as.character(group))
                             )
                             next
                         }
@@ -3982,8 +3934,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         if (!is.finite(se_rmst)) {
                             private$.addHtmlMessage(
                                 type = "warning",
-                                title = "RMST standard error unavailable",
-                                message = sprintf('The restricted mean survival time for group "%s" is shown without a confidence interval because its standard error could not be estimated.', as.character(group))
+                                title = .("RMST standard error unavailable"),
+                                message = sprintf(.("The restricted mean survival time for group \"%s\" is shown without a confidence interval because its standard error could not be estimated."), as.character(group))
                             )
                             se_rmst <- NA_real_
                         }
@@ -4119,17 +4071,17 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     }
                     residuals_table$setNote(
                         "alignment",
-                        "Schoenfeld residuals are indexed by event time, not by patient row, and are therefore reported in the separate event-time table."
+                        .("Schoenfeld residuals are indexed by event time, not by patient row, and are therefore reported in the separate event-time table.")
                     )
                     # A silent truncation reads as "these are all the cases".
                     if (n_obs > n_shown)
                         residuals_table$setNote("truncated", sprintf(
-                            "Showing the first %d of %d cases.", n_shown, n_obs))
+                            .("Showing the first %d of %d cases."), n_shown, n_obs))
                     residuals_table$setNote("model", sprintf(
-                        "Residuals are from a Cox model of survival on %s.",
+                        .("Residuals are from a Cox model of survival on %s."),
                         if (!is.null(cutoffdata))
-                            sprintf("the cut-off groups of '%s'", self$options$contexpl)
-                        else sprintf("'%s' as a continuous predictor", self$options$contexpl)))
+                            sprintf(.("the cut-off groups of '%s'"), self$options$contexpl)
+                        else sprintf(.("'%s' as a continuous predictor"), self$options$contexpl)))
 
                     schoenfeld_values <- if (is.matrix(schoenfeld_resid)) {
                         schoenfeld_resid[, 1]
@@ -4147,7 +4099,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     n_sch_shown <- min(100, length(schoenfeld_values))
                     if (length(schoenfeld_values) > n_sch_shown)
                         schoenfeld_table$setNote("truncated", sprintf(
-                            "Showing the first %d of %d event times.",
+                            .("Showing the first %d of %d event times."),
                             n_sch_shown, length(schoenfeld_values)))
                     for (i in seq_len(n_sch_shown)) {
                         schoenfeld_table$addRow(
@@ -4179,10 +4131,10 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         score = NA,
                         schoenfeld = NA
                     ))
-                    residuals_table$setNote("error", paste("Residual calculation failed:", htmltools::htmlEscape(e$message)))
+                    residuals_table$setNote("error", sprintf(.("Residual calculation failed: %s"), htmltools::htmlEscape(e$message)))
                     self$results$schoenfeldResidualsTable$setNote(
                         "error",
-                        paste("Schoenfeld residual calculation failed:", htmltools::htmlEscape(e$message))
+                        sprintf(.("Schoenfeld residual calculation failed: %s"), htmltools::htmlEscape(e$message))
                     )
                 })
             }
@@ -4208,7 +4160,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                 strata_var <- self$options$strata_variable
                 if (is.null(strata_var) || length(strata_var) == 0) {
-                    tbl$setNote("novar", "Select a stratification variable to fit a stratified Cox model.")
+                    tbl$setNote("novar", .("Select a stratification variable to fit a stratified Cox model."))
                     return()
                 }
 
@@ -4222,7 +4174,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 labelled <- private$.getData()
                 sv <- names(labelled$all_labels)[labelled$all_labels == strata_var]
                 if (length(sv) == 0 || !sv[1] %in% names(labelled$mydata_labelled)) {
-                    tbl$setNote("missing", "The stratification variable could not be located in the data.")
+                    tbl$setNote("missing", .("The stratification variable could not be located in the data."))
                     return()
                 }
                 src <- labelled$mydata_labelled
@@ -4233,7 +4185,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 mydata[[".strata"]] <- droplevels(as.factor(mydata[[".strata"]]))
 
                 if (nlevels(mydata[[".strata"]]) < 2) {
-                    tbl$setNote("onelevel", "The stratification variable has fewer than two levels in the analysed rows.")
+                    tbl$setNote("onelevel", .("The stratification variable has fewer than two levels in the analysed rows."))
                     return()
                 }
 
@@ -4246,11 +4198,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 n_strata <- nlevels(mydata[[".strata"]])
                 if (n_strata > max(10, floor(nrow(mydata) / 10))) {
                     tbl$setNote("toomany", sprintf(
-                        paste0("Not fitted: '%s' has %d levels across %d analysed rows (about %.1f patients ",
-                               "per stratum). Stratification needs a small number of reasonably sized groups; ",
-                               "a near-continuous variable gives one stratum per patient and no estimable ",
-                               "hazard ratio. Use a categorical variable, or add this variable as a covariate ",
-                               "in Multivariable Survival Analysis instead."),
+                        .("Not fitted: '%s' has %d levels across %d analysed rows (about %.1f patients per stratum). Stratification needs a small number of reasonably sized groups; a near-continuous variable gives one stratum per patient and no estimable hazard ratio. Use a categorical variable, or add this variable as a covariate in Multivariable Survival Analysis instead."),
                         strata_var, n_strata, nrow(mydata), nrow(mydata) / n_strata))
                     return()
                 }
@@ -4302,7 +4250,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 }, error = function(e) e)
 
                 if (inherits(fit, "error")) {
-                    tbl$setNote("err", paste("Stratified Cox model could not be fitted:", conditionMessage(fit)))
+                    tbl$setNote("err", sprintf(.("Stratified Cox model could not be fitted: %s"), conditionMessage(fit)))
                     return()
                 }
 
@@ -4324,10 +4272,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     ))
                 }
 
-                tbl$setNote("method", paste0(
-                    "Baseline hazard allowed to differ across the ", nlevels(mydata[[".strata"]]),
-                    " levels of '", strata_var, "'. Stratification removes the proportional-hazards ",
-                    "assumption for that variable, so no hazard ratio is estimated for it."))
+                tbl$setNote("method", sprintf(
+                    .("Baseline hazard allowed to differ across the %d levels of '%s'. Stratification removes the proportional-hazards assumption for that variable, so no hazard ratio is estimated for it."),
+                    nlevels(mydata[[".strata"]]), strata_var))
             }
 
             # Log-Log Plot Function ----
@@ -4857,8 +4804,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     n_missing <- sum(is.na(data[[time_var]]))
                     private$.addHtmlMessage(
                         type = "error",
-                        title = "Invalid Survival Time",
-                        message = sprintf('Survival time contains %d missing (NA) value(s) after data cleaning. Every observation must have a valid finite follow-up time. Analysis was halted. Check the time variable (and the date inputs if time is calculated from dates).', n_missing)
+                        title = .("Invalid Survival Time"),
+                        message = sprintf(.("Survival time contains %d missing (NA) value(s) after data cleaning. Every observation must have a valid finite follow-up time. Analysis was halted. Check the time variable (and the date inputs if time is calculated from dates)."), n_missing)
                     )
                     return(FALSE)
                 }
@@ -4867,8 +4814,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     n_invalid <- sum(!is.finite(data[[time_var]]))
                     private$.addHtmlMessage(
                         type = "error",
-                        title = "Non-Finite Survival Time",
-                        message = sprintf('Survival time contains %d infinite or non-numeric value(s). Analysis was halted. Correct the elapsed-time variable or date inputs.', n_invalid)
+                        title = .("Non-Finite Survival Time"),
+                        message = sprintf(.("Survival time contains %d infinite or non-numeric value(s). Analysis was halted. Correct the elapsed-time variable or date inputs."), n_invalid)
                     )
                     return(FALSE)
                 }
@@ -4877,8 +4824,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     n_invalid <- sum(data[[time_var]] < 0, na.rm = TRUE)
                     private$.addHtmlMessage(
                         type = "error",
-                        title = "Negative Survival Time",
-                        message = sprintf('Survival time contains %d negative value(s). Follow-up time cannot be negative. Zero-time observations are retained because right-censored survival methods permit them.', n_invalid)
+                        title = .("Negative Survival Time"),
+                        message = sprintf(.("Survival time contains %d negative value(s). Follow-up time cannot be negative. Zero-time observations are retained because right-censored survival methods permit them."), n_invalid)
                     )
                     return(FALSE)
                 }
@@ -4886,8 +4833,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (!any(data[[time_var]] > 0, na.rm = TRUE)) {
                     private$.addHtmlMessage(
                         type = "error",
-                        title = "No Positive Follow-up",
-                        message = "At least one observation must have positive follow-up time. Zero-time observations may be retained, but an all-zero time variable cannot support survival estimation."
+                        title = .("No Positive Follow-up"),
+                        message = .("At least one observation must have positive follow-up time. Zero-time observations may be retained, but an all-zero time variable cannot support survival estimation.")
                     )
                     return(FALSE)
                 }
@@ -4896,8 +4843,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     n_missing <- sum(is.na(data[[outcome_var]]))
                     private$.addHtmlMessage(
                         type = "error",
-                        title = "Invalid Outcome",
-                        message = sprintf('Outcome/event indicator contains %d missing (NA) value(s) after data cleaning. Every observation must be classified as an event or as censored. Analysis was halted. Check the outcome variable and the selected event level.', n_missing)
+                        title = .("Invalid Outcome"),
+                        message = sprintf(.("Outcome/event indicator contains %d missing (NA) value(s) after data cleaning. Every observation must be classified as an event or as censored. Analysis was halted. Check the outcome variable and the selected event level."), n_missing)
                     )
                     return(FALSE)
                 }
@@ -4907,8 +4854,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     pct_missing <- 100 * n_missing / nrow(data)
                     private$.addHtmlMessage(
                         type = "warning",
-                        title = "Missing Values in Explanatory Variable",
-                        message = sprintf('Variable "%s" has %d missing values (%.1f%%). These observations will be excluded from analysis. Consider investigating the pattern of missingness and whether imputation is appropriate.', contexpl_var, n_missing, pct_missing)
+                        title = .("Missing Values in Explanatory Variable"),
+                        message = sprintf(.("Variable \"%s\" has %d missing values (%.1f%%). These observations will be excluded from analysis. Consider investigating the pattern of missingness and whether imputation is appropriate."), contexpl_var, n_missing, pct_missing)
                     )
                 }
 
@@ -4916,8 +4863,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     n_invalid <- sum(!is.finite(data[[contexpl_var]]))
                     private$.addHtmlMessage(
                         type = "error",
-                        title = "Non-Finite Continuous Variable",
-                        message = sprintf('The continuous explanatory variable contains %d infinite or non-numeric value(s). Analysis was halted.', n_invalid)
+                        title = .("Non-Finite Continuous Variable"),
+                        message = sprintf(.("The continuous explanatory variable contains %d infinite or non-numeric value(s). Analysis was halted."), n_invalid)
                     )
                     return(FALSE)
                 }
@@ -4926,8 +4873,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (nrow(data) < 20) {
                     private$.addHtmlMessage(
                         type = "strongWarning",
-                        title = "Very Small Sample",
-                        message = sprintf('Sample size (n=%d) is very small for survival analysis. Statistical inference is highly unreliable. Results should be considered exploratory only. Collect more data before drawing conclusions.', nrow(data))
+                        title = .("Very Small Sample"),
+                        message = sprintf(.("Sample size (n=%d) is very small for survival analysis. Statistical inference is highly unreliable. Results should be considered exploratory only. Collect more data before drawing conclusions."), nrow(data))
                     )
                 }
 
@@ -4993,9 +4940,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     # times the user never asked for.
                     private$.addHtmlMessage(
                         "warning",
-                        "Survival time points not understood",
-                        sprintf(paste0("'%s' could not be read as a list of time points. Default points (%s) ",
-                                       "are shown instead. Enter positive numbers separated by commas."),
+                        .("Survival time points not understood"),
+                        sprintf(.("'%s' could not be read as a list of time points. Default points (%s) are shown instead. Enter positive numbers separated by commas."),
                                 cutp_string, paste(default_points, collapse = ", ")))
                     return(default_points)
                 }

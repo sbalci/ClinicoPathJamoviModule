@@ -12,7 +12,10 @@ statsplot2(
   subjectID = NULL,
   direction = "independent",
   distribution = "p",
+  forceContinuous = FALSE,
   alluvsty = "t1",
+  showSummary = FALSE,
+  showExplanations = FALSE,
   excl = FALSE,
   sampleLarge = FALSE,
   sampleThreshold = 10000,
@@ -44,13 +47,27 @@ measures comparisons.}
 \item{distribution}{Statistical approach: "p" = parametric, "np" =
 nonparametric,  "r" = robust, "bf" = Bayes factor.}
 
+\item{forceContinuous}{If TRUE, every numeric variable is treated as
+continuous. By default a numeric variable with 15 or fewer distinct
+whole-number values is treated as categorical (a notice reports this),
+which changes the plot type and the test used.}
+
 \item{alluvsty}{Style for alluvial diagrams: "t1" = ggalluvial with stratum
 labels,  "t2" = easyalluvial with automatic variable selection.}
 
+\item{showSummary}{If TRUE, a plain-language result sentence with the test
+statistic, p-value, effect size and sample size is added to the output.}
+
+\item{showExplanations}{If TRUE, an explanation panel describing the
+selected plot, its clinical interpretation and the assumptions of the
+statistical approach is shown.}
+
 \item{excl}{If TRUE, excludes rows with missing values before analysis.}
 
-\item{sampleLarge}{If TRUE, automatically samples large datasets (>10,000
-rows) to 5,000 rows for improved performance.}
+\item{sampleLarge}{If TRUE, randomly samples large datasets for plotting
+speed (by default those above 10,000 rows are reduced to 5,000; see
+sampleThreshold and sampleSize). Statistics are computed on the retained
+rows only.}
 
 \item{sampleThreshold}{Row count above which sampling is applied, when
 'Sample large datasets' is enabled. Datasets at or below this size are
@@ -60,14 +77,16 @@ always analysed in full.}
 keep more statistical power at the cost of plotting speed. Statistics are
 computed on the retained rows only.}
 
-\item{seed}{Random seed for the reproducible sampling of large datasets
-(used when 'Sample Large Datasets' is enabled). Change it to draw a
-different sample; the default (42) reproduces the previous fixed behaviour.}
+\item{seed}{Random seed used for the sampling of large datasets (when
+'Sample large datasets' is enabled) and for any resampling inside the plot
+statistics (robust and Bayesian approaches). Change it to draw a different
+sample; the default (42) reproduces the previous fixed behaviour.}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
 \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$ExplanationMessage} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
@@ -80,4 +99,30 @@ messages with contextual guidance, robust data validation, and
 comprehensive fallback options. Supports both independent and repeated
 measures designs with various plot types including violin plots, scatter
 plots, bar charts, and alluvial diagrams.
+}
+\examples{
+\donttest{
+# Continuous outcome across groups: Grade is stored as the numbers
+# 1-3, so it is read as categorical (a notice says so) and a violin
+# plot with a nonparametric comparison is drawn.
+statsplot2(
+    data = histopathology,
+    dep = "Age",
+    group = "Grade",
+    distribution = "np",
+    showSummary = TRUE
+)
+
+# One panel per level of a third variable
+statsplot2(
+    data = histopathology,
+    dep = "Age",
+    group = "Grade",
+    grvar = "Sex"
+)
+
+# Long-format repeated continuous outcomes need a Subject ID:
+# statsplot2(data = long, dep = "score", group = "visit",
+#            subjectID = "patient_id", direction = "repeated")
+}
 }

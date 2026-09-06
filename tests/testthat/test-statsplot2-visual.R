@@ -155,6 +155,7 @@ test_that("Path 5: Repeated Factor × Continuous renders ggwithinstats", {
 
   set.seed(500)
   test_data <- data.frame(
+    patient_id = factor(rep(1:25, times = 3)),
     timepoint = factor(rep(c("Baseline", "Week 4", "Week 8"), each = 25)),
     tumor_size = c(
       rnorm(25, 50, 8),
@@ -167,6 +168,7 @@ test_that("Path 5: Repeated Factor × Continuous renders ggwithinstats", {
     data = test_data,
     dep = "tumor_size",
     group = "timepoint",
+    subjectID = "patient_id",
     direction = "repeated",
     distribution = "p"
   )
@@ -233,19 +235,21 @@ test_that("Path 7: Repeated Continuous × Continuous renders fallback plot", {
   }
 })
 
-test_that("Path 8: Repeated Continuous × Factor renders fallback plot", {
+test_that("Path 8: Repeated continuous outcome across factor conditions renders with a Subject ID", {
   skip_if_not_installed_vdiffr()
 
   set.seed(800)
   test_data <- data.frame(
-    score = rnorm(50, 75, 12),
-    category = factor(sample(c("Low", "Medium", "High"), 50, replace = TRUE))
+    patient_id = factor(rep(1:17, each = 3)),
+    score = rnorm(51, 75, 12),
+    category = factor(rep(c("Low", "Medium", "High"), times = 17))
   )
 
   result <- statsplot2(
     data = test_data,
     dep = "score",
     group = "category",
+    subjectID = "patient_id",
     direction = "repeated",
     distribution = "np"
   )
@@ -442,6 +446,7 @@ test_that("Grouped repeated measures renders correctly", {
 
   set.seed(1600)
   test_data <- data.frame(
+    patient_id = factor(rep(1:40, times = 2)),
     timepoint = factor(rep(c("Pre", "Post"), each = 40)),
     score = c(rnorm(40, 50, 8), rnorm(40, 55, 8)),
     cohort = factor(rep(c("Cohort A", "Cohort B"), 40))
@@ -452,6 +457,7 @@ test_that("Grouped repeated measures renders correctly", {
     dep = "score",
     group = "timepoint",
     grvar = "cohort",
+    subjectID = "patient_id",
     direction = "repeated",
     distribution = "p"
   )
@@ -707,6 +713,7 @@ test_that("Clinical: Longitudinal disease progression renders correctly", {
 
   set.seed(2500)
   longitudinal_data <- data.frame(
+    patient_id = factor(rep(1:40, times = 4)),
     visit = factor(rep(c("Baseline", "Month 3", "Month 6", "Month 12"), each = 40)),
     disease_score = c(
       rnorm(40, 75, 12),
@@ -720,6 +727,7 @@ test_that("Clinical: Longitudinal disease progression renders correctly", {
     data = longitudinal_data,
     dep = "disease_score",
     group = "visit",
+    subjectID = "patient_id",
     direction = "repeated",
     distribution = "p"
   )

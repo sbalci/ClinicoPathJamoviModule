@@ -462,18 +462,11 @@ CLINICAL PRESET SCENARIOS
 STATISTICAL APPROACHES COVERED
 -------------------------------
 
-Parametric (typestatistics = 'parametric'):
-  • Pearson's chi-square test
-  • Cramér's V effect size
+Frequentist (typestatistics = 'parametric'):
+  • Pearson's chi-square test with Cramér's V
+  • Fisher's exact test replaces it on a sparse 2×2 table
+  • McNemar's test for paired data
   • Example: Response × Treatment
-
-Nonparametric (typestatistics = 'nonparametric'):
-  • Fisher's exact test (for small samples)
-  • Example: 2×2 diagnostic tables
-
-Robust (typestatistics = 'robust'):
-  • Robust chi-square variants
-  • Example: Data with outliers or violations
 
 Bayes (typestatistics = 'bayes'):
   • Bayesian contingency table test
@@ -527,13 +520,12 @@ jjbarstats(
   typestatistics = 'parametric'
 )
 
-# 2. With pairwise comparisons
+# 2. Proportion tests within each group
 jjbarstats(
   data = jjbarstats_test,
   dep = 'response',
   group = 'treatment',
-  pairwisecomparisons = TRUE,
-  padjustmethod = 'holm'
+  proportiontest = TRUE
 )
 
 # 3. Split by sex (grouped analysis)

@@ -1,100 +1,326 @@
 {
   "analyses": {
     "jjhistostats": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Clarified that the subtitle contains a one-sample location test, not a normality test. Relabelled the custom-null control. Count finite numeric observations and treat non-finite values as missing during preparation."
+      ],
+      "validation": {
+        "files": [
+          "test-jjhistostats-release-review.R",
+          "test-jjhistostats-correctness.R",
+          "test-jjhistostats-residual.R"
+        ],
+        "test_blocks": 46,
+        "passed": 122,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jjridges": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Keep the selected Welch mean comparison after normality diagnostics instead of automatically changing to a rank test. Retain diagnostic warnings and consistent method reporting. Allow a nonparametric comparison of distinct constant groups. Return effect-size calculation warnings to the caller."
+      ],
+      "validation": {
+        "files": [
+          "test-jjridges-release-review.R",
+          "test-jjridges-residual.R"
+        ],
+        "test_blocks": 16,
+        "passed": 92,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jwaffle": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Preserve fractional weights in the report instead of rounding them to fictitious integer counts. The waffle remains a proportional visual approximation."
+      ],
+      "validation": {
+        "files": [
+          "test-jwaffle-release-review.R",
+          "test-jwaffle-residual.R"
+        ],
+        "test_blocks": 11,
+        "passed": 44,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jjscatterstats": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Reject nonnumeric axes explicitly before correlation and plotting routines receive them."
+      ],
+      "validation": {
+        "files": [
+          "test-jjscatterstats-release-review.R",
+          "test-jjscatterstats-residual.R"
+        ],
+        "test_blocks": 22,
+        "passed": 113,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jjcorrmat": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Normalize non-finite values before pairwise/listwise handling. Use collision-free result row keys. Clarify that multiplicity adjustment is within each split panel. Remove an unsupported implication about clinical importance from a weak correlation. Exclude invalid confidence-level endpoints."
+      ],
+      "validation": {
+        "files": [
+          "test-jjcorrmat-release-review.R",
+          "test-jjcorrmat-correctness.R",
+          "test-jjcorrmat-residual.R"
+        ],
+        "test_blocks": 47,
+        "passed": 143,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jjbetweenstats": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Exclude non-finite outcomes alongside incomplete analysis rows, and disclose both causes."
+      ],
+      "validation": {
+        "files": [
+          "test-jjbetweenstats-release-review.R",
+          "test-jjbetweenstats-correctness.R",
+          "test-jjbetweenstats-residual.R"
+        ],
+        "test_blocks": 34,
+        "passed": 106,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jjwithinstats": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Restrict complete-case handling to selected measurements; unrelated missing columns no longer remove subjects. Preserve a measurement named `rowid` or `Subject_ID` rather than overwriting its values with an internal identifier. Check finite complete subjects. Correct paired-test assumptions and remove claims that significance proves real change or clinical benefit."
+      ],
+      "validation": {
+        "files": "test-jjwithinstats-release-review.R",
+        "test_blocks": 20,
+        "passed": 108,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jjdotplotstats": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Reject nonnumeric outcomes explicitly; constrain confidence levels to an estimable range."
+      ],
+      "validation": {
+        "files": [
+          "test-jjdotplotstats-correctness.R",
+          "test-jjdotplotstats-release-review.R"
+        ],
+        "test_blocks": 48,
+        "passed": 80,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jjbarstats": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Make clinical presets override their documented fields. Name Fisher, Pearson, Bayesian, or McNemar methods consistently in reports. Reject invalid paired designs rather than silently switching to an independent analysis. Reject fractional/non-finite frequency counts. Correct categorical-variable validation when no count variable is selected."
+      ],
+      "validation": {
+        "files": [
+          "test-jjbarstats-release-review.R",
+          "test-jjbarstats-correctness.R"
+        ],
+        "test_blocks": 39,
+        "passed": 79,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jjsegmentedtotalbar": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Reject negative individual values and fractional case frequencies before aggregation. Exclude missing/non-finite values rather than treating them as zero. Identify split panels in composition rows. Label summed measurements as summed values rather than observations. Remove empty table margins and explicitly use uncorrected Pearson chi-square. Disclose pooling across panels. Remove the suggestion that rare events lack clinical importance."
+      ],
+      "validation": {
+        "files": "test-jjsegmentedtotalbar-release-review.R",
+        "test_blocks": 19,
+        "passed": 77,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jjpiestats": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Use effective preset/paired options in narrative and exact-test decisions. Weight split-panel diagnostics by frequencies. Make informational messages effective. Match assumptions to paired/Bayesian designs and subtitle visibility. Remove a promised automatic results paragraph that was only a placeholder."
+      ],
+      "validation": {
+        "files": [
+          "test-jjpiestats-release-review.R",
+          "test-jjpiestats-correctness.R"
+        ],
+        "test_blocks": 67,
+        "passed": 112,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "raincloud": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Correct modified Z scores to use an unscaled MAD once. Use consistent moment definitions in fallback calculations and compute IQR before display rounding. Interpret normality using the unrounded p-value. Report totals only for assessed outlier groups and correct effect-size guidance."
+      ],
+      "validation": {
+        "files": "test-raincloud-release-review.R",
+        "test_blocks": 32,
+        "passed": 110,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "advancedraincloud": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Correct the variance-ratio contribution in Glass's delta intervals and scale the full Hedges standard error by its correction factor. Exclude undefined percentage changes from responder denominators; preserve negative threshold signs. Reject duplicate subject/time records and select follow-up levels after baseline. Omit independent-group tests/effect-size intervals when subject IDs repeat. Use unrounded p-values for interpretation."
+      ],
+      "validation": {
+        "files": "test-advancedraincloud-release-review.R",
+        "test_blocks": 11,
+        "passed": 31,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "lollipop": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Recheck groups after complete-case exclusion. Preserve source sample sizes/group sizes through aggregation. Sort alphabetically by labels rather than factor codes. Describe aggregated plotted values accurately. Remove a claim that range greater than twice the SD establishes clinically meaningful differences."
+      ],
+      "validation": {
+        "files": "test-lollipop-release-review.R",
+        "test_blocks": 9,
+        "passed": 27,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jjarcdiagram": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Validate original numeric weights before aggregation. Calculate density from distinct edges when parallel edges are retained. Remove biological/clinical conclusions from density and avoid equating large summed distances with a strong hub."
+      ],
+      "validation": {
+        "files": [
+          "test-jjarcdiagram-release-review.R",
+          "test-jjarcdiagram-correctness.R"
+        ],
+        "test_blocks": 22,
+        "passed": 65,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "linechart": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Reject a nonnumeric outcome explicitly. Avoid correlation/regression on a constant X axis. Explain that repeated X values alone do not establish repeated subjects."
+      ],
+      "validation": {
+        "files": "test-linechart-release-review.R",
+        "test_blocks": 16,
+        "passed": 43,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 1,
+        "status": "passed"
+      }
     },
     "statsplot2": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Add explicit Subject ID for long-format repeated continuous outcomes; validate subject/condition uniqueness, retain complete subjects, and sample whole subjects. Preserve the caller's RNG. Limit missingness checks to selected columns. Invalidate images when sampling controls or subject ID change. Preserve the between-group estimand when axes are exchanged. Pass the selected statistical approach to categorical plots."
+      ],
+      "validation": {
+        "files": "test-statsplot2-release-review.R",
+        "test_blocks": 8,
+        "passed": 25,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "hullplot": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Standardize each axis separately so changing measurement units cannot change the separation descriptor. Treat unestimable spread as unavailable. Identify ellipses as data-dispersion ellipses, not confidence regions for group means. Remove unsupported clinical conclusions and clarify that centroid separation does not measure hull overlap."
+      ],
+      "validation": {
+        "files": "test-hullplot-release-review.R",
+        "test_blocks": 12,
+        "passed": 54,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     },
     "jjdotchart": {
-      "review": "source review completed; validation in progress",
-      "fixes": [],
-      "validation": "pending"
+      "review": "complete",
+      "fixes": [
+        "Expose a reproducible random seed shared by table and plot. Remove incorrect universal degrees-of-freedom claims and advice to change a scientific null merely to make estimation converge. Constrain confidence levels."
+      ],
+      "validation": {
+        "files": "test-jjdotchart.R",
+        "test_blocks": 17,
+        "passed": 61,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "status": "passed"
+      }
     }
   },
-  "baseline": "/var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T/jjstatsplot19-baseline-nwpn6d8q"
+  "baseline": "/var/folders/cd/2ybg5n514bdfsg2n2wnsspmw0000gn/T/jjstatsplot19-baseline-nwpn6d8q",
+  "completed": "2026-09-06",
+  "tests_passed": 1541,
+  "remaining_failures": 0
 }

@@ -27,17 +27,17 @@
 
 ## Data Preparation
 
-categorize
+- categorize
 
 # jjstatsplot
 
 ## All-In-One
 
-statsplot2
+- statsplot2
 
 ## Categorical × Categorical
 
-jjbarstats
+- jjbarstats
 jjpiestats
 jjsegmentedtotalbar
 
@@ -4581,3 +4581,172 @@ Verified in this pass (independent references, not the code's own arithmetic):
 - [ ] effect sizes / pairwise post-hoc (review enhancement 3): deferred - pairwise chi-square post-hoc already exists as the `chisqposttest` analysis; a per-row effect-size column needs its own design.
 - [ ] translation: ~35 strings are `.()`-wrapped; the HTML panels, validator messages, SMD note and welcome text are not, and the new strings are absent from `catalog.pot`/`tr.po`. `/prepare-translation crosstable`.
 - [ ] `_updateModules.R` must run before release so ClinicoPathDescriptives picks up 1.0.9.
+
+### categorize audit fixes (2026-09-05: /check-function categorize + /check-function-full categorize)
+
+- [x] friendly "Invalid manual break points" message was unreachable (generic validation fired first); check moved before the computation.
+- [x] Break Points / Category Frequencies tables `deleteRows()` before refill (addRow appends; same defect as agepyramid).
+- [x] standalone `test-categorize.R` sources `R/utils.R` again (`.fmt()` was missing, 4 tests failed silently); special-character variable-name round-trip test (Ki-67 (%), Unicode, quote) evaluating the generated R code.
+- [x] `/check-function-full`: 15/16 options effective by differential run (`addtodata` is an Output, not reachable from the R API); packaged example matches base R and classInt exactly.
+- [x] notices added: > 20% missing (WARNING), custom labels selected but empty (INFO), new variable name already in the data (STRONG_WARNING), `Output$set()` failure (WARNING instead of a silent nominal `<var>_cat`).
+- [x] imbalance advice is method-aware: under quantile it names the tied value and its share instead of recommending quantiles to a quantile user.
+- [x] Missing / Not-categorized rows carry NA (blank) instead of NaN (jamovi prints "NaN") in the percent columns; notices rendered by severity.
+- [x] `refs:` now cites classInt (new 00refs entry) and Royston/Altman/Sauerbrei 2006 (`dichotomizing`) beside the module.
+- [ ] `.plot` builds the ggplot twice (`ggplot_build()` only to place the break labels); left as is - one 600x400 image, and `density()`/`hist()` peaks do not match ggplot's 30 bins so labels could overlap the tallest bar.
+- [ ] translation: no `.()` wrapping anywhere in `categorize.b.R` (welcome text, error boxes, notices, R-code box); `/prepare-translation categorize`.
+- [ ] jamovi behaviour when the Output column name equals an existing column is untested in the GUI (the R snippet overwrites; a STRONG_WARNING now says so).
+
+### categorize code review (2026-09-05: /review-function categorize)
+
+- [x] BUG: a single manual cut-off never worked (`length(breaks) > 1` guard skipped the range extension; "Insufficient break points" on screen, two categories in the generated code). Guard is now `>= 1`; regression test.
+- [x] Inf/-Inf crashed the run (sd() -> NaN -> `if (NA)`); now treated as missing, counted, and reported.
+- [x] messages: fewer than two non-missing values is no longer called "constant value"; single manual break + exclusion gets a specific message; `.validateBreaks()` dropped its unused `method` argument.
+- [x] `.a.yaml` help: mean +/- SD cuts at the mean too (four bands, SPSS Visual Binning convention); manual entries sorted/de-duplicated.
+- [x] hygiene greps: no `<<-`, `library()`, `par()`/`options()`, non-ASCII; `\value` present; `::` packages all in Imports (`questionr::` is roxygen prose only). lintr bug-class linters 0; lifted-method object_usage/vector_logic 0 real (aes NSE names are in globalVariables).
+- [ ] `set.seed(20240101L)` at the Jenks subsample (n > 20000 only): RNG state is saved/restored, the seed pins an approximation rather than a stochastic estimate. Left as is; a user-facing `seed` option would only matter for checking approximation stability on very large data - decide whether to expose it.
+- [ ] review recommendations not implemented (separate pass): plain-language **Summary** option (copy-ready sentence with cut points and group sizes, off by default, as in crosstable); move the INFO notes below the tables into a `notes` item so the top panel carries only errors and warnings; "About / caveats" panel (when categorisation is defensible: pre-specified clinical thresholds vs data-driven cut-points, no outcome-based optimal cut-point search here).
+- [ ] i18n: none of the backend strings are `.()`-wrapped (`/prepare-translation categorize`); YAML strings are already in tr.po (103 entries).
+
+### categorize release review (2026-09-05: /release-review-function categorize)
+
+- [x] 22 independent reference checks (base R quantile/seq/cut/prop.table/cumsum, classInt fisher) match; mean+/-SD band drop and the closed-lower-bound manual interval verified by hand.
+- [x] gates: state guards, duplicate control names, theme-safe HTML, entities, setVisible/warning, rendering contract (6/6), file naming (3/3), wrapper-class/Collate/case checks module-wide, UI harness renders with no JS error; every clearWith entry is an option, renderFun exists, compilerMode tame, refs carry title/author/url, no archives committed.
+- [x] 204/204 tests under devtools::load_all() (60 + 97 + 47); `.a.yaml` version 1.0.8 -> 1.0.9.
+- [ ] USER: run `jmvtools::prepare()` + `devtools::document()` for the version bump (0000.yaml does not carry the analysis version, so expect a nil or one-line diff); then `_updateModules.R` so ClinicoPathDescriptives ships 1.0.9.
+- [ ] manual GUI checks: (a) the added column really appears under the typed name as ordinal/nominal - categorize is the only analysis in the module that calls `Output$set()`; (b) typing the source variable's name as the new name (the strong warning is verified in R, the GUI outcome is not); (c) dark theme rendering of the notice boxes.
+- [ ] `data/categorize_test.rda` is not in `_updateModules_config.yaml` data_files; no test depends on it, so it stays umbrella-only unless a vignette needs it.
+
+### statsplot2 check (2026-09-06: /check-function statsplot2, standard profile)
+
+- [x] args wiring: all 13 options read; `distribution` was IGNORED by the split-by (`grvar`) paths - `grouped_ggbetweenstats`/`grouped_ggscatterstats` were called without `type =`, so a "Robust"/"Nonparametric" choice silently became parametric in every split panel (verified: Welch vs Wilcoxon, Pearson vs Spearman now differ).
+- [x] outputs wiring: notices/todo/ExplanationMessage/plot all populated; stale notices now cleared at the top of every `.run()` (early returns never re-rendered them).
+- [x] validation: removed `.validateDesignDataMatch` - its "perfectly balanced groups suggest independent data" warning fired on every VALID long-format repeated dataset, and its divisibility check is meaningless for wide-format alluvial data; the Subject ID path already validates structure precisely. Group-balance check now keyed on the inferred type (character / integer-coded groups were skipped by `is.factor()`).
+- [x] variable safety: `[[ ]]` + `rlang::sym()` throughout, no string formulas; names with spaces, `/`, `'`, `%`, `()` render in every path (smoke harness).
+- [x] library-review gates: state guards, theme tool, entities, setVisible (option-driven welcome only), warning(), addRow, `visible:(!`, rendering contract 6/6. Ten dark hex text colours (`#424242/#616161/#757575`) on translucent tints -> `inherit`.
+- [x] ggalluvial: `infer.label = TRUE` (deprecated, warned on every render) -> `aes(label = after_stat(stratum))`; benign "Some strata appear at multiple axes" muffled around `print()` only.
+- [x] dead code: `.optionOr` (options are compiled), unused `.detectAnalysisType()` in `.init`, empty conditionals in `.plot`; render-path label now matches `.plotTypeLabel` so ERROR notices de-duplicate.
+- [x] `jmvtools::prepare()` OK, `devtools::document()` OK; `0000.yaml` byte-identical to its pre-prepare snapshot; `.h.R`/`.Rd` deltas are the two description edits only.
+- [x] tests: 16 pre-existing errors were stale repeated-design calls without the (earlier-added) required `subjectID`; fixed at 16 sites (one-arg where data has `patient_id`, subject columns added to three ad-hoc visual datasets, two tests now assert the rejection). 314 expectations, 0 failed, 0 errors, 31 skipped (26 vdiffr doppelgangers never reach a plot via the R wrapper).
+- [x] split-by `grouped_ggbetweenstats` hard-coded `p.adjust.method = "bonferroni"` while the unsplit call used ggstatsplot's default (Holm); override removed so both paths report Holm (verified via `extract_stats()`).
+- [ ] labelled parity (oddsratio pattern): n/a - plots use raw jamovi column names; no cleaned-name/label mapping exists here.
+- [ ] i18n: no backend string is `.()`-wrapped (`/prepare-translation statsplot2`).
+- [ ] `.getMissingPackages()` checks packages that are all in Imports, so the "Optional Packages Missing" branch can never fire in jamovi; harmless.
+
+### statsplot2 full audit (2026-09-06: /check-function-full statsplot2, report-only)
+
+- [x] HIGH (fixed 2026-09-06 /fix-function): every numeric read as categorical now posts a WARNING naming the variable and its distinct-value count; new `forceContinuous` option ("Treat all numeric variables as continuous") overrides the inference. Example in the .a.yaml usage block shows it on `histopathology$Grade`.
+- [x] MEDIUM (fixed): split levels are `unique(na.omit())`, rows selected with `which()`; the dead empty-level block and its render-only notice are gone. Test asserts no NA stratum and no third panel.
+- [x] MEDIUM (fixed): `.run()` now counts complete rows per split level and posts a STRONG_WARNING naming the omitted level(s).
+- [x] LOW (fixed): stale `pairwise.comparisons` argument removed from `ggwithinstats`.
+- [x] LOW (fixed): the dropped-rows line says the rows appear as an 'NA' stratum for alluvial diagrams.
+- [x] LOW (fixed): summary prints "Statistical approach: not applicable (categorical comparison)" for factor x factor.
+- [x] LOW (fixed): normality reminder downgraded to INFO; outlier screen now runs within each group (test: an outlier hidden by the pooled IQR is caught).
+- [x] LOW (fixed): empty dataset also posts an ERROR notice.
+- [x] LOW docs (partly fixed): roxygen title now "Automatic Plot Selection"; `.Rd` gains two runnable `histopathology` examples plus a commented Subject ID example; .a.yaml titles for the three sampling controls are sentence case. Left: comprehensive vignette does not mention `subjectID`/`sampleThreshold`/`sampleSize`; three legacy duplicates (`statsplot2_documentation.md`, `statsplot2-documentation.md`, `testing_statsplot2.md`) still in vignettes/.
+
+### statsplot2 review (2026-09-06: /review-function statsplot2, report-only)
+
+- [x] reference agreement: Welch ANOVA, Kruskal-Wallis, Welch t, Pearson, chi-square, paired t and the alluvial flow counts all match base R to 1e-6 on the same data.
+- [x] hygiene greps clean (seed is the user option; `<<-` only in a comment; `jjstatsplot::`/`jmv::` are advisory text inside strings); lintr bug linters 0; codetools on lifted methods 0; stray brace pair in the outlier block removed.
+- [x] tooltips added for `subjectID`, `sampleThreshold`, `sampleSize`, `seed`.
+- [ ] i18n: left for `/prepare-translation statsplot2` (own playbook; regenerates module-wide catalogs). 0 backend strings wrapped; 36 of 54 catalog entries untranslated in tr.po.
+- [x] UI: sampling controls and `forceContinuous` moved into a collapsed "Advanced" box; new "Output" group with `showSummary` / `showExplanations`. Checkbox labels kept: per the library-review guide's exception, a verb is right when the box acts on the data (excluding rows, subsampling, reading numerics as continuous).
+- [x] clinician UX: `summary` item ("Result sentence", `showSummary`, default off) quotes method, statistic, df, p, effect size with interval and n from `extract_stats()` - one sentence per split panel; explanation/interpretation panel now behind `showExplanations` (default off, module convention). The figure is built once in `.run()` and cached for the renderer.
+- [x] duplicated HTML small-sample block removed; n<10 now escalates the notice to "Very Small Sample" (descriptive statistics only).
+- [x] Bayesian: interpretation states the default prior; the sentence reports `prior.distribution`/`prior.scale` from statsExpressions. NEW: a test that fails inside ggstatsplot (e.g. Bayesian one-way comparison errors in performance:: for 3+ groups here) now posts a STRONG_WARNING instead of a silent statistics-free figure.
+- [ ] performance: n=30,000 violin 11.7 s full vs 3.3 s sampled (render included); acceptable, sampling stays opt-in.
+
+- [x] fallback subtitle now "No statistical test is available for this combination"; `.safeHtmlOutput` escapes only the four structural characters (apostrophes and slashes rendered as `&#x27;`/`&#x2F;` in the sentence source).
+- [ ] USER: GUI smoke pass in jamovi (new Output/Advanced boxes, result sentence, dark theme), then `_updateModules.R` and remove the `T` menu suffix.
+### statsplot2 release review (2026-09-06: /release-review-function statsplot2)
+
+- [x] verdict: ready after the two user actions below. Reference agreement extended to 20 quantities (Spearman, Mann-Whitney, robust t1way tr=0.2, Bayes t with rscale 0.707, Friedman, paired Wilcoxon, RM-ANOVA GG, Cramer's V adj.) - see report; the four p-values that differ from base R in the 4th decimal are exact-vs-asymptotic (statsExpressions always uses the asymptotic Wilcoxon) and t-approximation-vs-AS89 (Spearman).
+- [x] identifier-like grouping variable (more than 20 levels and more than one level per two rows) is rejected up front; more than 20 groups gets a STRONG_WARNING with the pairwise-test count (200 one-row levels previously ran 25 s then died with "not enough observations").
+- [x] `.init()` removed: it wrote install guidance into ExplanationMessage (now hidden unless `showExplanations`) and could never fire in jamovi (every checked package is in Imports); `.run()` already posts the notice.
+- [x] example no longer calls `data("histopathology", package = "ClinicoPath")` (lazy data; the literal package name would fail `R CMD check --run-donttest` in jjstatsplot).
+- [x] `.a.yaml` version 1.1.0 (working copy had drifted 1.0.9 -> 1.0.8 outside this session); NEWS.md entry added.
+- [x] gates: UI harness renders (no JS error), duplicate control names, state guards, theme, entities, warning(), addRow, visible(!, class/Collate/case, file-naming test, rendering contract 6/6, lintr bug+brace 0, codetools 0.
+- [x] tests: `devtools::load_all()` + statsplot2 files: 288 expectations, 0 failed, 0 errors, 28 skipped (26 vdiffr doppelgangers never reach a plot via the R wrapper, 2 optional data files). Sourced harness 358/0/0 (over-counts in four files).
+- [ ] USER: `Rscript -e 'devtools::document()'` - `man/statsplot2.Rd` still carries the old example line (headers and 0000.yaml were regenerated at 13:23 by a prepare() run outside this session, so they are current).
+- [ ] USER: `menuGroup` was moved back to `JJStatsPlot` outside this session (HEAD has `JJStatsPlotT`); left as set. GUI smoke pass, `_updateModules.R` for jjstatsplot, then commit.
+- [ ] open (unchanged): i18n via `/prepare-translation statsplot2`; family uses lowercase `showexplanations` in 5 jj* analyses vs camelCase `showExplanations` here and in 57 others; vignette does not mention `subjectID`/sampling options; `cowplot` fallback and ref are dead code (patchwork is in Imports).
+
+### jjbarstats check (2026-09-06: /check-function jjbarstats, standard profile)
+
+- [x] args wiring: 26 options; `pairwisecomparisons` + `pairwisedisplay` REMOVED - not formals of `ggstatsplot::ggbarstats()` 1.0.0 (`...` is "Currently ignored"), so the summary/report/preset/notice/performance-note narrative about post-hoc tests described a test that never ran; all of it deleted. `padjustmethod` was first kept and moved under "Proportion tests" - then removed by the `/check-function-full` pass below (it is dead too, see there).
+- [x] outputs: 10/10 items populated. `balloonPlot` item-level `clearWith` removed - `Analysis$.createImage()` returns early on a filled image, so the old PNG stayed after a counts/excl/grvar change.
+- [x] escape vars: `composeTerm` in xtabs formulas, `rlang::sym` for ggbarstats, raw names for `[[`, `deparse()` in `asSource`, `htmlEscape` in HTML panels; special-character tests already in edge-cases + correctness files.
+- [x] labelled parity: N/A - ggstatsplot wrapper, no finalfit/labelled table; the oddsratio pattern does not apply.
+- [x] gates: no `image$state`, entities `&lt;` only, no `setVisible(FALSE)` / `warning()` / `addRow` / `visible: (!`, Imports complete in umbrella and jjstatsplot; three dark `h4` colours removed (theme tool blind spot).
+- [x] small: NA no longer counted as an outcome level on the weighted branch; bare `reject()` wrapped in `.()`; UI labels (Bayes factor message + parametric-only `enable:`; "Confidence level"; "Palette"); `.a.yaml` 1.0.9 -> 1.0.10.
+- [x] tests: `devtools::document()` clean (`man/jjbarstats.Rd` regenerated); `devtools::load_all()` + 7 jjbarstats files + jjstatsplot-module-review: 304 passed / 0 failed / 2 skipped / 4 errors. The 4 errors (edge-cases: all-NA outcome, single-level outcome, single-level group, zero counts) reproduce identically on a detached HEAD worktree - stale `expect_match(todo)` expectations on `jmvcore::reject()` paths, which the R wrapper raises; converted to `expect_error()` (same decision as the in-flight negative-counts test). Edge-cases file after: 33 / 0 / 0.
+- [x] prepare(): clean. `R/statsplot2.h.R` restored from the pre-run snapshot afterwards: prepare wrote `version = c(1,0,8)` from the drifted `jamovi/statsplot2.a.yaml` (worktree 1.0.8, HEAD 1.0.9, NEWS/TODO/header 1.1.0).
+- [ ] USER: set `jamovi/statsplot2.a.yaml` `version:` to 1.1.0 (drifted to 1.0.8 again; not touched here). GUI smoke pass in jamovi (Statistical Method box, balloon plot after changing counts, dark theme), `_updateModules.R` for jjstatsplot (tests, example and data-raw generator changed too), remove the `T` suffix, commit.
+- [ ] open: presets override `resultssubtitle` / `proportiontest` invisibly (the checkbox keeps showing the manual value); `vignettes/module-development-jamovi.Rmd` still quotes the old jjbarstats yaml with pairwise options as a teaching example; `docs/` pkgdown copies regenerate on the next build; if real post-hoc tests are wanted, `chisqposttest` already exists - link to it from the interpretation panel rather than re-implement.
+
+### ClinicoPathDescriptives module check (2026-09-06: /check-module ClinicoPathDescriptives, standard profile, batch)
+
+- [x] scope: 14 production analyses (`menuGroup: Exploration`): agepyramid, alluvial, benford, categorize, checkdata, chisqposttest, crosstable, dataquality, outlierdetection, reportcat, summarydata, tableone, vartree, venn. Three more sit in `ExplorationT` (nonparametric, pcacomponenttest, pcaloadingtest) and were not checked.
+- [x] structure: 14/14 have all five files; 42 yaml + 28 R files parse; every `.h.R` option set matches its `.a.yaml`; ../ClinicoPathDescriptives is byte-identical for `.a/.r/.u.yaml` + `.b.R` (+ `utils.R`); `.h.R` differs only in the two `package=` namespace lines.
+- [x] wiring: every option is read in `.b.R` (outlierdetection `sampleThreshold`/`sampleSize` through `.optionOr()`) and has a UI control; no dangling or duplicate `.u.yaml` controls; every `enable:` is paren-wrapped; every result item is referenced (crosstable `tablestyle1-4` via `switch`, chisqposttest `plot` via `renderFun: .plot` reading `self$data`); all `refs:` defined in 00refs.yaml; no phantom `private$.x()`, `$setRows`, i18n `[..]` context, or underscored `jmvcore::format` placeholders.
+- [x] notices: 0 live `jmvcore::Notice`/`insert(999`/`warning()`/`stop()` in any of the 14 (every grep hit is a comment). 11 use `.addNotice()` -> Preformatted `notices`; categorize/checkdata/reportcat write Html `notices`/`todo`/`error` directly; outlierdetection/tableone use `jmvcore::reject()`. All 14 have a user-facing path for empty data / wrong type / no variables.
+- [ ] MEDIUM (3, one pattern): `vars` in alluvial, summarydata, vartree is the only `Variables`/`Variable` option (3 of 31) without `default: NULL`, so `alluvial(data)` etc. from R throws "argument 'vars' is missing, with no default" instead of showing the welcome pane (GUI unaffected). Fix: add `default: NULL` under each, then `jmvtools::prepare()` (snapshot the dirty `.h.R` + 0000.yaml first) and `_updateModules.R`. summarydata's description says the argument "is required" - decide whether that is intended before changing it.
+- [ ] USER: 10 files of these analyses are modified-uncommitted in the umbrella (categorize/tableone `.b.R`; alluvial/categorize/crosstable `.h.R`; alluvial/categorize/chisqposttest/crosstable yaml) but already identical in ../ClinicoPathDescriptives - the shipped module reflects the working tree, not HEAD. Commit them.
+- [ ] out of scope (umbrella only, not shipped in this module): `ihcpredict` and `mixedmodelanova` are each defined twice at top level (`R/<name>.b.R` and the generated `R/<name>.h.R` wrapper); Collate order picks one silently (memory: duplicate-toplevel-function-shadowing). Delete the `.b.R` copies.
+- [ ] not run: testthat (2-9 files per analysis exist; `devtools::load_all()` takes ~20 min here, outside the static standard profile). Run `/check-module ClinicoPathDescriptives --profile=release` before the next jamovi-library submission.
+
+### jjbarstats full audit (2026-09-06: /check-function-full jjbarstats, after the /check-function pass)
+
+- [x] differential runs (24 options, direct-construction harness, `data/jjbarstats_test.rda`): every option changes an output EXCEPT `excl` (both branches run `complete.cases`; only the setup sentence differed) and `padjustmethod` (holm / none / bonferroni all left the per-bar p-values at 0.03, 0.03, 2.4e-04 = raw; Holm would be 0.052, 0.052, 7e-04 - `p.adjust.method` is forwarded into `statsExpressions::contingency_table()`, whose `...` ignores it). `typestatistics` nonparametric and robust produce a subtitle IDENTICAL to parametric (no such variants exist for contingency tables); only bayes differs.
+- [x] FIXED (own regression from the morning pass + notices enforcement): `padjustmethod` removed everywhere; summary/report/about now say the proportion tests are unadjusted; new INFO notices "Rows with missing values excluded" (the `message()` in `.prepareData` never reached the user), "Proportion tests are unadjusted" (k groups x k outcomes tests) and "Several outcomes tested"; the "(cached)" tag (always true after `.getCachedData()`) and the false "(missing values will be handled by statistical functions)" text replaced by the dropped-row count. Tests: `padjustmethod` loops removed, invalid-List-value test now uses `label`.
+- [x] agreement: aggregated `counts` run reproduces the row-level subtitle exactly (chi2(4)=24.77, V=0.19, n=300) and identical plot data; sparse 2x2 subtitle Fisher p=0.190 = `fisher.test()`; McNemar path + 3x3 rejection correct; extreme-prevalence notice fires (2.0%); balloon palettes distinct; n=30,000: frequentist plot 1.0 s, Bayes 3.5 s.
+- [x] gates: rendering contract 6/6, refs (ggstatsplot, statsExpressions, ggpubr, ClinicoPathJamoviModule) all resolve in 00refs.yaml, no option read outside the schema, prepare()/document() clean, 293 passed / 0 failed / 0 errors / 2 skipped.
+- [x] (fixed 2026-09-06, "fix issues") [option] `excl` REMOVED - was non-effective: rows with any NA in a selected variable are dropped on both branches. Either delete the option (the notice now reports the count) or make `excl = FALSE` keep the rows (ggbarstats drops them anyway, so the honest fix is deletion).
+- [x] (fixed: list is now Frequentist (chi-squared) / Bayesian; old values rejected by the wrapper) [option] `typestatistics`: "Nonparametric" and "Robust" are aliases of "Parametric" for a contingency table. Collapse the list to Frequentist (chi-squared) / Bayesian, or relabel; the summary already reports "Pearson's chi-squared" for all three.
+- [x] (fixed: sparse-2x2 STRONG_WARNING now raised once per run in `.emitDataQualityNotices`, absorbs the old low-expected-count warning, skipped for paired/Bayes; prefix "STRONG WARNING:") [notices] three overlapping warnings on one sparse 2x2 ("Small Group Sizes", "Low Expected Counts", "Chi-squared assumption violated"): merge the second into the third. `.renderNotices` prints STRONG_WARNING and WARNING with the same "WARNING:" prefix - use "STRONG WARNING:" so the paired-data and prevalence notices stand out.
+- [x] (fixed: descriptions added, main description rewritten, `R: usage` example restored -> `\donttest`) [docs] six options (`dep`, `group`, `grvar`, `excl`, `typestatistics`, `originaltheme`) have no `description.R` (Rd shows "."); `description.main` carries literal quotes into the Rd; no `\examples` in the help page while `inst/examples/jjbarstats_example.R` exists (re-enable the commented `R: usage` block in the `.a.yaml`).
+- [x] (fixed: backend overrides removed; new `jamovi/js/jjbarstats.events.js` sets the checkboxes on preset change in the GUI; `clinicalpreset` description says so) [ux] presets switch `resultssubtitle` (and `proportiontest` for riskfactor) on invisibly - the checkboxes keep showing the manual value. Mirror the preset into the setup text ("Preset X enabled: statistics in subtitle") or drop the overrides.
+- [x] verification after "fix issues": prepare() x2 clean (description folded to one paragraph in 0000.yaml), document() clean (`man/jjbarstats.Rd` has `\donttest` example and option descriptions), 7 jjbarstats files + module-review: 284 passed / 0 failed / 0 errors / 2 skipped; run-time notice checks: one STRONG WARNING per sparse 2x2 (subtitle swapped / Fisher p quoted / split-panel caveat), none for paired or Bayes, cell counts for a 3x3; `clinicalpreset` via R leaves `resultssubtitle` FALSE.
+- [ ] [upstream] report to ggstatsplot: `ggbarstats(p.adjust.method=)` is documented but has no effect on the proportion-test labels in 1.0.0.
+- [x] `jamovi/statsplot2.a.yaml` set to 1.1.0 (reverted to 1.0.8 once at 15:20 by something outside prepare(), which never writes .a.yaml; re-set 15:23 and stable since). USER:  GUI smoke; `_updateModules.R`; remove `T`; commit.
+
+### jjbarstats review (2026-09-06: /review-function jjbarstats, after the three earlier passes)
+
+- [x] hygiene greps: no set.seed / <<- / library() / par() / options() / raw non-ASCII; `\value` present; all `::` packages in Imports. lintr review set: 0 real-bug linters fire (40 quotes_linter + 1 brace_linter are style). codetools on every lifted R6 method: 15 notes, all false positives (glue `{}` interpolation of `prep_time`/`error_context`, purrr `~` lambdas, jamovi render signature `image`/`theme`, unused `e` in handlers). Manual `&`/`|`-in-`if` scan: none. No unreferenced private methods. Rendering contract 6/6.
+- [ ] [stats] interpretation guide quotes Cohen's df=1 thresholds (0.1 / 0.3 / 0.5) for Cramer's V; the subtitle's V is the bias-corrected one and for an r x c table the thresholds are 0.1/0.3/0.5 divided by sqrt(min(r, c) - 1) (3x3: 0.07 / 0.21 / 0.35, so V = 0.19 on the example data is near "medium", not "small"). Compute df* per table in `.generateInterpretationGuide()` and print the scaled thresholds; say "bias-corrected".
+- [ ] [clinical] McNemar has no discordant-pair guard: `.validatePairedData()` checks total n >= 10 only. Add a STRONG_WARNING when b + c < 25 (exact binomial on the discordant pairs is the right test there) and an ERROR when b + c == 0.
+- [ ] [notices] "Small Group Sizes" (< 5 rows per group) is not a chi-squared criterion and now overlaps the expected-count notice; reword as a data note or drop it.
+- [ ] [ui] `addGGPubrBalloon` title "Add balloon plot (ggpubr)" starts with an action verb (no .u.yaml override) -> "Balloon plot (ggpubr)"; "Quick Clinical Setup" CollapseBox sits above the VariableSupplier -> move it below (library rule: supplier near the top).
+- [ ] [ux] copy-ready report's `<button onclick=...>` is inert in exported documents and may be blocked in the results webview; drop it (the text is selectable).
+- [ ] [palette] ggbarstats default palette "Set1" is red/green heavy; expose `palette` (a real ggbarstats formal) with a colour-blind-safe default such as "Dark2".
+- [ ] [i18n] 10 `.()` wraps (all `reject()` messages) vs 12 notices and 11 HTML panels in plain English; tr.po carries the yaml strings but every msgstr is empty -> `/prepare-translation jjbarstats`.
+- [ ] [jjpiestats] same family: `typestatistics` still offers Nonparametric/Robust, which ggpiestats treats as Parametric on a contingency table (proved for ggbarstats 2026-09-06); `pairwisecomparisons`/`padjustmethod` may be dead there too - run `/check-function jjpiestats` (out of the jjbarstats scope).
+- [ ] USER (unchanged): GUI smoke pass, `_updateModules.R`, remove `T`, commit.
+
+### ClinicoPathDescriptives module audit (2026-09-06: /audit-module ClinicoPathDescriptives, standard profile)
+
+- [x] report: `../ClinicoPathDescriptives/docs/audit/MODULE_AUDIT_REPORT_20260906-1526.md` (1,634 lines; 14 analyses, sources byte-identical to the umbrella so every line number applies here too). 14/14 READY, 0 HIGH security, 4 MEDIUM + 4 LOW.
+- [ ] MEDIUM security (2 x D, 2 x I): `gtExtras::gt_plt_summary()` emits raw variable names / factor levels into an Html item in `reportcat` (R/reportcat.b.R:253) and `summarydata` (R/summarydata.b.R:380-386) - `<img onerror>` verified live; `chisqposttest` `sprintf("%d")` on fractional weighted counts aborts the run (6 sites); `venn` a set variable named "Group"/"Row" clobbers the membership table's fixed columns (R/venn.b.R:1986-2011). `/security-audit-function` each.
+- [ ] robustness: `checkdata` detects Inf/-Inf (L226) then crashes in `.computeSkewness` (L73 via L2030) and L885; `vartree` pruned-branch report describes the hierarchical tree even in pattern/sequence mode; `crosstable` arsenal `digits.count = 1` prints "21.0 (52.5%)"; `alluvial` ggalluvial x-axis shows continuous ticks; `dataquality` rounds before threshold comparison. `/review-function` alluvial, crosstable, dataquality, vartree; `/fix-function checkdata`.
+- [ ] package gates (no per-function tool): drop `vcd` from Imports (unused); `outlierdetection` "Robust Mahalanobis" needs `bigutilsr` which is not in this module's Imports (declare it or remove the option); 5 dead helpers ship in `R/utils.R` (`.escapeVariableNames`, `.stripBackticks`, `raw_to_prob`, `bootstrapIDI`, `clinicopath_startup_message`); 1 imperative checkbox title (`tableone` `nonnormal`); 14 synced-but-uncommitted files in the sibling repo.
+- [ ] cross-cutting: `vars` without `default: NULL` in alluvial/summarydata/vartree; i18n NONE in categorize/dataquality and PARTIAL in 10 others (`/prepare-translation`); `.run()` > 120 lines in 12/14 (LOW); dark heading colours on tints in checkdata/chisqposttest/dataquality (theme tool blind spot).
+- note: two earlier reports today in the same folder (07:15, 14:05) predate 20 source-file changes; this one supersedes them.
+
+### jjbarstats release review (2026-09-06: /release-review-function jjbarstats)
+
+- [x] verdict: READY after the user actions below. Independent verification (base R / effectsize / BayesFactor) agrees with every subtitle quantity: Pearson chi2(4) = 24.77, p = 5.60e-05; bias-corrected Cramer's V 0.187 -> "0.19", two-sided CI [0.07, 0.26]; Fisher p = 0.190, OR 10.29 [0.40, 930.25]; McNemar chi2 = 0.26 / p = 0.61 = `mcnemar.test(correct = FALSE)` (base R default 0.11 / 0.74 - label fixed), Cohen's g 0.04; log(BF01) = -5.76 = `contingencyTableBF(indepMulti, rows, prior 1)`; per-bar proportion tests = raw GOF p (2.40e-04, 0.032, 0.026); aggregated counts reproduce row-level exactly.
+- [x] gates: naming/case (wrapper class, Collate, case-only duplicates) OK; versions DESCRIPTION = 0000.yaml = CITATION.cff = 1.0.8.12, analysis 1.0.10; no committed archives; compilerMode tame; clearWith entries and renderFuns real; refs resolve with title/author/url; u.yaml controls == a.yaml options; events.js refs real; duplicate-name, state-guard, theme, entity, setVisible/warning/addRow/visible! checks clean; rendering contract 6/6. UI harness cannot render an analysis with a .events.js (documented blind spot); the two `enable:` bindings use the `(opt)` / `(opt:value)` forms shipped elsewhere in the module.
+- [x] fixed in this pass (.b.R only, no regeneration needed): McNemar labelled as "chi-squared without continuity correction" in the summary method line, the assumptions bullet and the discordant-pair notice.
+- [x] tests added (release-review file): subtitle vs base R/effectsize, df-scaled V cut-offs (3x3 vs 2x2), discordant-pair guard (b+c = 8 warns, 30 does not) + correction wording, palette reaches ggbarstats as package::palette with no warning and Dark2 != gdoc, removed options rejected. Suites: 284 / 0 / 0 / 2 before the additions; release-review 48, module-review 46, edge-cases 33 after, 0 failures.
+- [ ] USER: GUI smoke pass in jamovi (preset flips the checkboxes; sparse 2x2 notice; balloon after changing counts; dark theme; Turkish UI), `Rscript _updateModules.R` for jjstatsplot (ships tests, example, generator, `jamovi/js/jjbarstats.events.js`), remove the `T` suffix, commit.
+- [ ] open, non-blocking: i18n (`/prepare-translation jjbarstats`); jjpiestats sibling has the same alias/dead-option pattern; ggstatsplot upstream report on the inert `p.adjust.method`.
+
+### ClinicoPathDescriptives audit fixes (2026-09-06: "fix all detected issues" from MODULE_AUDIT_REPORT_20260906-1526.md)
+
+Acceptance: every finding in the 14 per-function sections and the module-wide gates is fixed or explicitly declined; parse-clean; `jmvtools::prepare()` clean; the 14 analyses' testthat files green; sibling regenerated by `_updateModules.R`.
+
+- [ ] per-function fixes (one agent per analysis, owns only `R/<name>.b.R`, `jamovi/<name>.{a,u,r}.yaml`, `tests/testthat/test-<name>*.R`): security (D/I), jmvcore migration, `default: NULL`, clearWith, enable drift, notices gaps, math/presentation items, labels, theme colours, setVisible(FALSE)-as-error, option-determined addRow in .run, i18n (`.()` sweep + fragments). EXCLUDED on purpose: `.run()` length refactor (report labels it a non-defect; 12 files, pure churn).
+- [ ] package gates: `vcd` -> `prune_imports` for ClinicoPathDescriptives in `_updateModules_config.yaml`; `bigutilsr` -> sibling DESCRIPTION Imports (+ importFrom shim so R CMD check does not NOTE); move `raw_to_prob`/`bootstrapIDI` -> `R/psychopdaROC_utilities.R`, `clinicopath_startup_message` -> `R/zzz.R`, `.escapeVariableNames` -> `R/survival_utils.R`, `.stripBackticks` -> new `R/formula_utils.R` shipped to jsurvival/meddecide/JamoviTest.
+- [ ] Codex planning step skipped: MCP returned "gpt-6-astra requires a newer Codex CLI"; the audit report's per-finding root causes + fix pointers are the plan.
+- [ ] verify: parse all changed files; snapshot `R/*.h.R` + `jamovi/0000.yaml`; `jmvtools::prepare()`; `devtools::load_all()` + testthat for the 14; `jmvtools::i18nUpdate()` catalog refresh; `Rscript _updateModules.R`; NEWS.md entry.
+- note: menuGroup left at `Exploration` (not routed to JamoviTest) - moving all 14 would empty the shipped module on the next sync.

@@ -123,7 +123,7 @@ options:
   # this list, so inserting a new option higher up would silently change the
   # meaning of any existing positional tableone(df, vars, "t1", TRUE) call.
   - name: nonnormal
-    title: "Report continuous variables as median (Q1, Q3)"
+    title: "Median (Q1, Q3) for continuous variables"
     type: Bool
     default: false
     description:

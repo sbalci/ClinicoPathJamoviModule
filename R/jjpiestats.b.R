@@ -421,7 +421,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             clinical_context <- switch(self$options$clinicalpreset %||% "custom",
                 "diagnostic" = .('For diagnostic tests: Focus on sensitivity (true positive rate) and specificity (true negative rate). Example: Sensitivity = 85% means test correctly identifies 85 out of 100 diseased patients. Specificity = 92% means test correctly identifies 92 out of 100 healthy individuals. PPV and NPV depend on disease prevalence in your population.'),
                 "treatment" = .('For treatment response: Look for significant differences between treatment arms. Example: 45% response in Treatment A vs 25% in Treatment B (p = 0.012, Cram\u00e9r\'s V = 0.31) indicates a moderate effect size. Whether a difference of this magnitude matters for patients is a judgement about the outcome, not a property of the statistic; on the count scale the same contrast is an absolute risk difference of 20 percentage points, i.e. a number needed to treat of 1/0.20 = 5.'),
-                "biomarker" = .('For biomarker analysis: Examine distribution patterns across patient groups. Example: High biomarker expression in 65% of responders vs 30% in non-responders (p < 0.001, OR = 4.3 [2.1-8.7]) describes an association between expression and response in this sample. A cross-sectional association does not establish predictive value; that requires evaluation in an independent cohort.'),
+                "biomarker" = .('For biomarker analysis: Examine distribution patterns across patient groups. Example: High biomarker expression in 65% of responders vs 30% in non-responders (p < 0.001, OR = 4.3, 95% CI 2.1 to 8.7) describes an association between expression and response in this sample. A cross-sectional association does not establish predictive value; that requires evaluation in an independent cohort.'),
                 .('Interpret results in the context of your specific research question and clinical setting. Focus on effect sizes (Cram\u00e9r\'s V, odds ratios) alongside p-values for clinical significance assessment.')
             )
 
@@ -1226,6 +1226,15 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice("WARNING", .('Single-variable pie chart not shown'),
                     .('The paired/repeated-measures option requires a two-way (grouped) comparison, so the single-variable pie chart cannot be drawn. Disable the "Paired" option to display this chart, or read the paired result from the grouped charts.'))
 
+            # .validatePairedData ran only inside .plot2/.plot4, i.e. during
+            # .plot(), so a paired request on a table that is not 2x2 drew
+            # nothing and said nothing. Raise its verdict here as well.
+            if (isTRUE(self$options$paired)) {
+                v <- private$.validatePairedData(prepared_data, dep, group)
+                if (!v$valid)
+                    private$.addNotice("WARNING", .('Paired analysis not shown'), v$message)
+            }
+
             # A variable crossed with itself yields a perfectly diagonal table, so
             # the association test is a tautology: every off-diagonal cell is 0 and
             # the p-value is ~0 by construction, not by any finding in the data.
@@ -1758,10 +1767,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Use xtabs to sum counts
                 agg_table <- xtabs(jmvcore::asFormula(formula_str), data = mydata)
-                plot_data <- as.data.frame(agg_table)
-                
-                # Rename count column to 'Freq' for consistency
-                names(plot_data)[names(plot_data) == "Freq"] <- "count"
+                plot_data <- as.data.frame(agg_table, responseName = "count")
+                # as.data.frame.table() runs make.names() on the dimension names,
+                # so "Tumor Grade" came back as "Tumor.Grade" and ggdonutchart(label =
+                # dep) could not find the column. Restore the raw names; xtabs keeps
+                # the formula order (dep, then group).
+                names(plot_data) <- c(dep, if (!is.null(group) && group != "") group, "count")
                 
             } else {
                 # Unweighted aggregation

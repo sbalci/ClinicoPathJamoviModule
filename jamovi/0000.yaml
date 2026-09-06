@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.8.11
+version: 1.0.8.12
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-09-04'
+date: '2026-09-06'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -124,7 +124,7 @@ analyses:
   - title: Categorize Continuous Variables
     name: categorize
     ns: ClinicoPath
-    menuGroup: ExplorationT
+    menuGroup: Exploration
     menuSubgroup: ClinicoPath Data Preparation
     menuTitle: Categorize Continuous Variables
     menuSubtitle: Bin numeric variables into categories
@@ -1786,9 +1786,12 @@ analyses:
     menuGroup: JJStatsPlotT
     menuSubgroup: Categorical vs Categorical
     menuTitle: Bar Charts
-    description: |
-      'Wrapper Function for ggstatsplot::ggbarstats and
-      ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
+    description: >
+      Bar charts of one or more categorical outcomes by a grouping variable,
+      with the test in the subtitle: Pearson's chi-squared, Fisher's exact test
+      on a sparse 2x2 table, McNemar's test for paired data, or a Bayesian
+      contingency analysis. Wraps ggstatsplot::ggbarstats and
+      ggstatsplot::grouped_ggbarstats.
     ribbon: analyses
     category: analyses
     menuSubtitle: Bar Charts, Grouped Bar Charts
@@ -1822,7 +1825,7 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: All-In-One
     menuTitle: Automatic Plot Selection
     description: >-

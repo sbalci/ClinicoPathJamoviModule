@@ -41,6 +41,7 @@ test_that("statsplot2 handles all direction types", {
     data = statsplot2_repeated,
     dep = "symptom_severity",
     group = "timepoint",
+    subjectID = "patient_id",
     direction = "repeated"
   )
   expect_s3_class(result2, "statsplot2Results")
@@ -134,6 +135,7 @@ test_that("statsplot2 handles repeated measures with split variable", {
     dep = "symptom_severity",
     group = "timepoint",
     grvar = "treatment_arm",
+    subjectID = "patient_id",
     direction = "repeated",
     distribution = "p"
   )
@@ -280,6 +282,7 @@ test_that("statsplot2 handles multiple special datasets", {
     data = statsplot2_repeated,
     dep = "symptom_severity",
     group = "timepoint",
+    subjectID = "patient_id",
     direction = "repeated"
   )
   expect_s3_class(result2, "statsplot2Results")

@@ -45,6 +45,12 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # when composing the reading notice / the condensation panel notice.
         .naLabel = "(Missing)",
         .mainPlotRows = NULL,
+        # A numeric column with more distinct values than this is a measurement
+        # (continuous) and is refused. One rule for the axis variables and the
+        # condensation variable alike; they used to differ (20 vs 10), so a
+        # numeric with 11-20 values was accepted as an axis but refused as the
+        # condensation variable, and neither message mentioned the other rule.
+        .maxNumericCategories = 20L,
         # One-row data frame (path, n, pct, w) for the commonest path, set by
         # .prepareMainPlotState and quoted in the reading notice.
         .topFlow = NULL,
@@ -76,13 +82,15 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Plain text only notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
-                prefix <- switch(notice$type,
-                    ERROR          = paste0(.("ERROR"), ": "),
-                    STRONG_WARNING = paste0(.("WARNING"), ": "),
-                    WARNING        = paste0(.("WARNING"), ": "),
-                    INFO           = paste0(.("NOTE"), ": "),
-                    "")
-                paste0(prefix, notice$title, "\n", notice$content)
+                # The severity label and the title are one template, so a
+                # translator controls the punctuation between them.
+                heading <- switch(notice$type,
+                    ERROR          = .("ERROR: {title}"),
+                    STRONG_WARNING = .("WARNING: {title}"),
+                    WARNING        = .("WARNING: {title}"),
+                    INFO           = .("NOTE: {title}"),
+                    "{title}")
+                paste0(.fmt(heading, title = notice$title), "\n", notice$content)
             }, character(1))
 
             self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
@@ -96,7 +104,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "ERROR",
                     .("Weight Variable Not Found"),
-                    jmvcore::format(.("Weight variable '{weight}' does not exist in the data."),
+                    .fmt(.("Weight variable '{weight}' does not exist in the data."),
                                     weight = weight_var)
                 )
                 return(FALSE)
@@ -114,7 +122,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "ERROR",
                     .("Invalid Weight Variable"),
-                    jmvcore::format(
+                    .fmt(
                         .("'{weight}' must be numeric (current type: {type}). Select a numeric variable containing counts, frequencies, or sampling weights."),
                         weight = weight_var, type = class(weight_col)[1])
                 )
@@ -146,7 +154,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "ERROR",
                     .("Negative Weights Detected"),
-                    jmvcore::format(
+                    .fmt(
                         .("Weight variable '{weight}' contains {n} negative value(s). Weights must be non-negative (>= 0)."),
                         weight = weight_var, n = n_negative)
                 )
@@ -166,7 +174,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_na <- sum(is.na(weight_col))
             if (n_na > 0) {
                 pct_na <- round(100 * n_na / length(weight_col), 1)
-                private$.addNotice("STRONG_WARNING", .("Missing Weights"), jmvcore::format(
+                private$.addNotice("STRONG_WARNING", .("Missing Weights"), .fmt(
                     .("{n} observations ({pct}%) have missing weights. These will be excluded from the visualization."),
                     n = n_na, pct = pct_na))
             }
@@ -219,11 +227,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     x <- data[[v]]
                     if (is.factor(x)) levels(x) else as.character(unique(x))
                 })))
-                na_label <- "(Missing)"
+                na_label <- .("(Missing)")
                 k <- 1L
                 while (na_label %in% observed) {
                     k <- k + 1L
-                    na_label <- sprintf("(Missing %d)", k)
+                    na_label <- .fmt(.("(Missing {k})"), k = k)
                 }
                 private$.naLabel <- na_label
 
@@ -300,7 +308,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.addNotice(
                         "ERROR",
                         .("Variable Not Found"),
-                        jmvcore::format(
+                        .fmt(
                             .("Variable '{variable}' was not found in the data. Make sure every selected variable still exists in the dataset."),
                             variable = var)
                     )
@@ -313,11 +321,12 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # TYPE test, not a readability test: >20 distinct numeric values
                 # means the column is a measurement, and an alluvial diagram has
                 # no meaningful stratum for a measurement.
-                if (is.numeric(var_data) && private$.countCategories(var_data) > 20) {
+                if (is.numeric(var_data) &&
+                        private$.countCategories(var_data) > private$.maxNumericCategories) {
                     private$.addNotice(
                         "ERROR",
                         .("Continuous Variable Not Allowed"),
-                        jmvcore::format(
+                        .fmt(
                             .("Variable '{variable}' has {n} unique values and appears continuous, so it has no meaningful strata. Alluvial diagrams need categorical data: group the values first with the categorize analysis or Data > Transform."),
                             variable = var, n = private$.countCategories(var_data))
                     )
@@ -340,6 +349,17 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             length(unique(values[!is.na(values)]))
         },
 
+        # easyalluvial re-bins every NUMERIC column before drawing (see the
+        # notice raised in .prepareMainPlotState), so every numeric column that
+        # reaches either engine is converted to a factor of its own values.
+        .factorNumeric = function(data, vars) {
+            for (v in vars) {
+                if (is.numeric(data[[v]]))
+                    data[[v]] <- factor(data[[v]])
+            }
+            data
+        },
+
         .warnHighCardinality = function(var, values) {
             n_categories <- private$.countCategories(values)
             if (n_categories <= 10)
@@ -348,7 +368,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # One complete sentence per .() and the line breaks added here, so
             # each sentence translates on its own.
             private$.addNotice("STRONG_WARNING", .("Too Many Categories"), paste(
-                jmvcore::format(
+                .fmt(
                     .("Variable '{variable}' has {n} distinct categories, so the diagram will be split into that many strata and the flows between them will be very thin."),
                     variable = var, n = n_categories),
                 .("Why this matters: with more than about 7 categories per variable the ribbons overlap and individual paths can no longer be traced by eye."),
@@ -480,6 +500,12 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     color = "white"
                 )
 
+            # Name the axes. The stat places axis i at x = i on a continuous
+            # position scale, so without this the ticks read 1.0, 1.5, 2.0, ...
+            # and the reader cannot tell which axis is which variable.
+            plot <- plot +
+                ggplot2::scale_x_discrete(limits = vars, expand = c(0.05, 0.05))
+
             # Add labels if requested
             if (label_nodes) {
                 plot <- plot +
@@ -582,28 +608,39 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(plot)
         },
 
-        .applyFlowDirection = function(plot, orient, flow_direction) {
+        # Resolve the orientation and flow-direction options into whether the
+        # axis order is reversed and whether the axes are flipped. right_left =
+        # reversed x; top_bottom = reversed x + coord_flip; bottom_top = coord_flip.
+        .resolveFlowDirection = function(orient, flow_direction) {
             # Preserve the legacy orientation shortcut only when the newer,
             # explicit flow-direction option remains at its default.
             if (identical(flow_direction, "left_right") &&
                     identical(orient, "horr")) {
                 flow_direction <- "top_bottom"
             }
-
-            reverse_x <- if ("x" %in% names(plot$data) &&
-                    (is.factor(plot$data$x) || is.character(plot$data$x))) {
-                ggplot2::scale_x_discrete(limits = function(values) rev(values))
-            } else {
-                ggplot2::scale_x_reverse()
-            }
-
-            switch(flow_direction,
-                left_right = plot,
-                right_left = plot + reverse_x,
-                top_bottom = plot + reverse_x + ggplot2::coord_flip(),
-                bottom_top = plot + ggplot2::coord_flip(),
-                plot
+            list(
+                reverse = flow_direction %in% c("right_left", "top_bottom"),
+                flip = flow_direction %in% c("top_bottom", "bottom_top")
             )
+        },
+
+        .applyFlowDirection = function(plot, direction, engine) {
+            # Easy Alluvial draws a long frame whose x is a factor of variable
+            # names, so reversing its discrete limits reverses the axes. GG
+            # Alluvial fixes axis i at position x = i, so no position scale can
+            # reorder it: scale_x_reverse() only negated the tick labels and
+            # scale_x_discrete(limits = rev(vars)) would relabel the axes without
+            # moving them. Its axes are laid out in reversed order at creation
+            # instead (.plot passes rev(vars) to .createGgalluvialPlot). The
+            # engine comes from state rather than being sniffed from the plot's
+            # column names, which broke on a variable literally named "x".
+            if (direction$reverse && !identical(engine, "ggalluvial")) {
+                plot <- plot +
+                    ggplot2::scale_x_discrete(limits = function(values) rev(values))
+            }
+            if (direction$flip)
+                plot <- plot + ggplot2::coord_flip()
+            plot
         },
 
         .prepareMainPlotState = function() {
@@ -622,10 +659,10 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "WARNING",
                     .("Variables not shown"),
                     paste(
-                        jmvcore::format(
+                        .fmt(
                             .("Only the first {shown} of {selected} selected variables are plotted, because 'Maximum variables' is set to {max}."),
                             shown = length(plot_vars), selected = length(vars_name), max = max_vars),
-                        jmvcore::format(.("Not shown: {variables}"), variables = paste(dropped, collapse = ", ")),
+                        .fmt(.("Not shown: {variables}"), variables = paste(dropped, collapse = ", ")),
                         .("Raise 'Maximum variables' to include them, or deselect the ones you do not need."),
                         sep = "\n"))
             }
@@ -682,7 +719,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.addNotice(
                         "ERROR",
                         .("Fill Variable Not Found"),
-                        jmvcore::format(.("Fill variable '{variable}' does not exist in the data."),
+                        .fmt(.("Fill variable '{variable}' does not exist in the data."),
                                         variable = requested_fill)
                     )
                     return(NULL)
@@ -695,7 +732,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "ERROR",
                     .("Weight Variable Reused"),
-                    jmvcore::format(.("Weight variable '{weight}' must be different from the axis and fill variables."),
+                    .fmt(.("Weight variable '{weight}' must be different from the axis and fill variables."),
                                     weight = weight_var)
                 )
                 return(NULL)
@@ -732,19 +769,15 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # numeric axis variable reaching this point is categorical; convert
             # it so its own values become the strata. This also makes the two
             # engines agree, since .createGgalluvialPlot factors everything.
-            coerced_numeric <- character(0)
-            for (v in missing_vars) {
-                if (is.numeric(mydata[[v]])) {
-                    coerced_numeric <- c(coerced_numeric, v)
-                    mydata[[v]] <- factor(mydata[[v]])
-                }
-            }
+            coerced_numeric <- missing_vars[vapply(missing_vars, function(v)
+                is.numeric(mydata[[v]]), logical(1))]
+            mydata <- private$.factorNumeric(mydata, missing_vars)
             if (length(coerced_numeric) > 0) {
                 private$.addNotice(
                     "INFO",
                     .("Numeric variables plotted as categories"),
                     paste(
-                        jmvcore::format(
+                        .fmt(
                             .("These variables hold numbers and are drawn with their own recorded values as categories: {variables}."),
                             variables = paste(coerced_numeric, collapse = ", ")),
                         .("Why this matters: the drawing engine would otherwise rescale each numeric variable and cut it into equal-width bins, so values coded 1/2/3 would appear on the diagram as bin labels such as LL/M/HH."),
@@ -785,7 +818,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "STRONG_WARNING",
                     .("Complex Visualization"),
                     paste(
-                        jmvcore::format(
+                        .fmt(
                             .("The data contain {n} distinct paths through the selected variables. This may produce an overcrowded plot."),
                             n = n_distinct_paths),
                         .("Reduce the number of variables or group infrequent categories."),
@@ -850,6 +883,20 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.countCategories(mydata[[plot_vars[1]]]))
             }
 
+            # A separate fill variable with many levels (a patient ID, a site)
+            # colours the flows in that many shades and gives an unreadable
+            # legend. The axis variables are already checked by
+            # .validateVariableTypes; the fill variable was not.
+            if (engine == "ggalluvial" && !fill_var %in% plot_vars &&
+                    n_fill_groups > 10) {
+                private$.addNotice("STRONG_WARNING", .("Too Many Fill Categories"), paste(
+                    .fmt(
+                        .("Fill variable '{variable}' has {n} distinct categories, so the flows are coloured in that many shades and the legend will be hard to read."),
+                        variable = fill_var, n = n_fill_groups),
+                    .("What to do next: choose a fill variable with fewer categories, or group the less frequent categories with Data > Transform."),
+                    sep = "\n"))
+            }
+
             # n_fill_groups is a LOWER bound on what ggplot2 will ask the fill
             # scale for (it counts the flow groups; the scale's domain is the
             # union of those and the stratum values across all layers). So this
@@ -865,7 +912,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "WARNING",
                     .("Colour palette stretched"),
                     paste(
-                        jmvcore::format(
+                        .fmt(
                             .("The {palette} palette publishes {cap} distinguishable colours, and this diagram has at least {groups} groups to colour."),
                             palette = private$.paletteLabel[[colorPalette]], cap = palette_cap, groups = n_fill_groups),
                         .("Why this matters: the extra groups are drawn in shades blended between the published colours, so neighbouring groups can look alike and are hard to tell apart in the legend."),
@@ -936,7 +983,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Every line is one complete translatable sentence (or two joined by
             # a space); nothing is spliced mid-sentence.
             width_text <- if (has_weight) {
-                jmvcore::format(.("Ribbon width: the total of the weight variable '{weight}' over the cases following that path."),
+                .fmt(.("Ribbon width: the total of the weight variable '{weight}' over the cases following that path."),
                                 weight = weight_var)
             } else {
                 .("Ribbon width: the number of cases following that path (each case counts once).")
@@ -945,35 +992,35 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             missing_text <- if (n_incomplete == 0) {
                 .("Missing values: no row had a missing value in any plotted variable.")
             } else if (excl) {
-                jmvcore::format(.("Missing values: {n} of {total} rows had a missing value in a plotted variable and were removed."),
+                .fmt(.("Missing values: {n} of {total} rows had a missing value in a plotted variable and were removed."),
                                 n = n_incomplete, total = n_rows_before)
             } else {
-                jmvcore::format(.("Missing values: {n} of {total} rows had a missing value in a plotted variable. Those cells are shown as a '{label}' category, which is drawn like any other category but is not an observed group. Switch on 'Missing-value exclusion (NA)' to drop those rows instead."),
+                .fmt(.("Missing values: {n} of {total} rows had a missing value in a plotted variable. Those cells are shown as a '{label}' category, which is drawn like any other category but is not an observed group. Switch on 'Missing-value exclusion (NA)' to drop those rows instead."),
                                 n = n_incomplete, total = n_rows_before, label = private$.naLabel)
             }
 
             if (n_weight_na > 0) {
                 missing_text <- paste(missing_text, if (n_incomplete > 0) {
-                    jmvcore::format(.("A further {n} row(s) had no value for the weight variable '{weight}' and were removed."),
+                    .fmt(.("A further {n} row(s) had no value for the weight variable '{weight}' and were removed."),
                                     n = n_weight_na, weight = weight_var)
                 } else {
-                    jmvcore::format(.("{n} row(s) had no value for the weight variable '{weight}' and were removed."),
+                    .fmt(.("{n} row(s) had no value for the weight variable '{weight}' and were removed."),
                                     n = n_weight_na, weight = weight_var)
                 })
             }
             if (n_dropped_incomplete + n_weight_na > 0) {
                 missing_text <- paste(missing_text,
-                    jmvcore::format(.("The diagram is based on the remaining {n} rows."), n = n_rows_after))
+                    .fmt(.("The diagram is based on the remaining {n} rows."), n = n_rows_after))
             }
 
             # The option titles named here are the .a.yaml titles, which the
             # catalogs already carry, so the same msgids are reused.
             if (engine == "ggalluvial") {
-                engine_text <- jmvcore::format(
+                engine_text <- .fmt(
                     .("Ignored by the GG Alluvial engine: {options}."),
                     options = paste(c(.("Fill by"), .("Marginal plots")), collapse = ", "))
             } else {
-                engine_text <- jmvcore::format(
+                engine_text <- .fmt(
                     .("Ignored by the Easy Alluvial engine: {options}."),
                     options = paste(c(.("Fill by (ggalluvial)"), .("Weight variable"), .("Node labels"),
                                       .("Counts on nodes"), .("Sankey styling"), .("Curve type")),
@@ -990,12 +1037,12 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # the base the flow table uses too.
                 n_cases <- private$.mainPlotRows
                 top_text <- if (has_weight && !is.na(top$w)) {
-                    jmvcore::format(
+                    .fmt(
                         .("Commonest path: {path} ({n} of {total} cases, {pct}%; weight total {weight}). Switch on 'Flow table' to list every path."),
                         path = top$path, n = top$n, total = n_cases, pct = round(100 * top$pct, 1),
                         weight = round(top$w, 1))
                 } else {
-                    jmvcore::format(
+                    .fmt(
                         .("Commonest path: {path} ({n} of {total} cases, {pct}%). Switch on 'Flow table' to list every path."),
                         path = top$path, n = top$n, total = n_cases, pct = round(100 * top$pct, 1))
                 }
@@ -1028,17 +1075,20 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             cond_data <- mydata[[cond_var]]
 
             # Distinct non-missing values, counted the same way for every storage
-            # type (.countCategories). The numeric case still hard-stops, because
-            # >10 distinct numbers means the column is a measurement and has no
-            # meaningful condensation panel; a high-cardinality factor is only
-            # hard to read, so it is warned about and still drawn.
+            # type (.countCategories). The numeric case hard-stops at the same
+            # cutoff as the axis variables, because that many distinct numbers
+            # means the column is a measurement and has no meaningful
+            # condensation panel; a high-cardinality variable of any type is
+            # only hard to read, so it is warned about and still drawn.
             unique_values <- private$.countCategories(cond_data)
-            if (is.numeric(cond_data) && unique_values > 10) {
+            if (is.numeric(cond_data) && unique_values > private$.maxNumericCategories) {
                 esc <- htmltools::htmlEscape
+                # color: inherit on the heading: a fixed dark amber read at
+                # about 2.4:1 on the light pane; the border carries the accent.
                 html <- paste0(
                     "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; color: inherit;'>",
-                    "<h4 style='margin-top: 0; color: #d4a017;'>", esc(.("Continuous Condensation Variable")), "</h4>",
-                    "<p>", esc(jmvcore::format(
+                    "<h4 style='margin-top: 0; color: inherit;'>", esc(.("Continuous Condensation Variable")), "</h4>",
+                    "<p>", esc(.fmt(
                         .("Condensation variable '{variable}' has {n} distinct numeric values and appears continuous, so no condensation plot was drawn."),
                         variable = cond_var, n = unique_values)), "</p>",
                     "<p>", esc(.("Select a categorical variable, or group the values with Data > Transform first.")), "</p>",
@@ -1047,9 +1097,14 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$condensationWarning$setContent(html)
                 return(NULL)
             }
-            if (!is.numeric(cond_data) && unique_values > 10) {
-                private$.warnHighCardinality(cond_var, cond_data)
-            }
+            private$.warnHighCardinality(cond_var, cond_data)
+
+            # plot_condensation() bins every numeric column into five equal-width
+            # intervals (and warns "bins ... are empty" into Analysis Notes when
+            # the recorded values do not fill them), so a Grade coded 1/2/3
+            # under-counted its flows. Draw recorded values, as the main diagram
+            # does.
+            mydata <- private$.factorNumeric(mydata, vars_name)
 
             mydata <- private$.handleMissingValues(
                 mydata,
@@ -1072,7 +1127,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "INFO",
                     .("Condensation panel sample"),
-                    jmvcore::format(
+                    .fmt(
                         .("The condensation panel is based on {panel} rows; the diagram above uses {diagram}. The two panels require different variables to be recorded, so they drop different rows."),
                         panel = nrow(mydata), diagram = private$.mainPlotRows))
             }
@@ -1084,7 +1139,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
 
             private$.noticeList <- list()
-            private$.naLabel <- "(Missing)"
+            private$.naLabel <- .("(Missing)")
             private$.mainPlotRows <- NULL
             private$.topFlow <- NULL
             private$.renderNotices()
@@ -1158,7 +1213,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     length(self$options$condensationvar) > 0 &&
                     !(self$options$condensationvar %in% names(self$data))) {
 
-                    private$.addNotice("ERROR", .("Variable Not Found"), jmvcore::format(
+                    private$.addNotice("ERROR", .("Variable Not Found"), .fmt(
                         .("Condensation variable '{variable}' does not exist in the data. Select a valid variable from the available list."),
                         variable = self$options$condensationvar))
                     return()
@@ -1198,11 +1253,17 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 maxvars <- self$options$maxvars
 
+                direction <- private$.resolveFlowDirection(
+                    orient = self$options$orient,
+                    flow_direction = self$options$flowDirection
+                )
+
                 # Generate plot based on selected engine ----
                 if (engine == "ggalluvial") {
+                    # Axis order is fixed at creation (see .applyFlowDirection).
                     plot <- private$.createGgalluvialPlot(
                         data = mydata,
-                        vars = varsName,
+                        vars = if (direction$reverse) rev(varsName) else varsName,
                         fill_var = state$fill_var,
                         weight_var = weight_var
                     )
@@ -1266,14 +1327,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     plot <- private$.applyThemeStyle(plot, themeStyle)
 
                     # Configure plot orientation / flow direction ----
-                    orient <- self$options$orient
-                    flowDirection <- self$options$flowDirection
-
-                    plot <- private$.applyFlowDirection(
-                        plot,
-                        orient = orient,
-                        flow_direction = flowDirection
-                    )
+                    plot <- private$.applyFlowDirection(plot, direction, engine)
 
                     # Apply custom title and subtitle ----
                     usetitle <- self$options$usetitle
@@ -1310,7 +1364,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 print(private$.messagePlot(paste(
                     private$.wrapText(.("The alluvial diagram could not be drawn.")),
                     "",
-                    private$.wrapText(jmvcore::format(.("Reported by R: {message}"), message = conditionMessage(e))),
+                    private$.wrapText(.fmt(.("Reported by R: {message}"), message = conditionMessage(e))),
                     "",
                     private$.wrapText(.("What to try next: switch 'Plot engine' to Easy Alluvial; plot fewer variables; group categories with few cases (Data > Transform); check that every selected variable is still in the data.")),
                     sep = "\n")))
@@ -1344,7 +1398,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 print(private$.messagePlot(paste(
                     private$.wrapText(.("The condensation plot could not be drawn.")),
                     "",
-                    private$.wrapText(jmvcore::format(.("Reported by R: {message}"), message = conditionMessage(e))),
+                    private$.wrapText(.fmt(.("Reported by R: {message}"), message = conditionMessage(e))),
                     "",
                     private$.wrapText(.("What to try next: choose a categorical condensation variable; group categories with very few cases (Data > Transform).")),
                     sep = "\n")))

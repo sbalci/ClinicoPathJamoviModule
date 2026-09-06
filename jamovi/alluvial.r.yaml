@@ -63,6 +63,7 @@ items:
           - maxvars
           - weight
           - engine
+          - fillGgalluvial
           - showFlowTable
 
     - title: Alluvial Diagrams
@@ -113,6 +114,7 @@ items:
           - vars
           - condensationvar
           - excl
+          - maxvars
           - colorPalette
           - themeStyle
       visible: (condensationvar)

@@ -157,14 +157,11 @@ test_that("sampling and subject changes invalidate cached automatic plots", {
     }
 })
 
-test_that("bar presets take effect and reports name the sparse-table test", {
+test_that("bar reports name the sparse-table test", {
     d <- data.frame(y = factor(rep(c("Yes", "No", "Yes", "No"), c(1, 3, 5, 1))),
         g = factor(rep(c("A", "A", "B", "B"), c(1, 3, 5, 1))))
-    a <- mr_backend("jjbarstats", d, dep = "y", group = "g", clinicalpreset = "treatment")
-    p <- mr_private(a); p$.applyClinicalPreset()
-    expect_true(p$.option("resultssubtitle"))
-    expect_true(p$.option("pairwisecomparisons"))
-    expect_equal(p$.option("padjustmethod"), "holm")
+    a <- mr_backend("jjbarstats", d, dep = "y", group = "g", resultssubtitle = TRUE)
+    p <- mr_private(a)
     expect_match(p$.methodDescription(d), "Fisher")
     d$w <- rep(.5, nrow(d))
     b <- mr_backend("jjbarstats", d, dep = "y", group = "g", counts = "w")

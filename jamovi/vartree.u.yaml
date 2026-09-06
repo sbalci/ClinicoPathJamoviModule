@@ -78,12 +78,11 @@ children:
                     name: pct
                   - type: CheckBox
                     name: vp
-                    enable: (!excl && pct)
+                    enable: (!excl)
                   - type: CheckBox
                     name: varnames
                   - type: CheckBox
                     name: legend
-                    enable: (varnames)
                   - type: CheckBox
                     name: nodelabel
           - type: LayoutBox

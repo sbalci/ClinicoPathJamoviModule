@@ -938,7 +938,6 @@ importFrom(graphics,
   title
 )
 importFrom(grid,
-  gpar,
   grid.text,
   pushViewport,
   unit,

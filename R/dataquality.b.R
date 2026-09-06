@@ -18,6 +18,32 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
     # notice content must be plain text). ====
     .noticeList = list(),
 
+    # HTML assembly for the translated report. Tags and styles stay outside
+    # .(); a translated sentence is escaped BEFORE its {placeholders} are
+    # filled, so a placeholder may carry trusted inline markup (<em>, <code>)
+    # while any data value inside it is escaped by the caller.
+    .h = function(text, ...) {
+        text <- htmltools::htmlEscape(text)
+        if (...length() == 0)
+            return(text)
+        .fmt(text, ...)
+    },
+    # <li><strong>head</strong> body</li>, both escaped plain text
+    .li = function(head, body = NULL) {
+        paste0("<li><strong>", htmltools::htmlEscape(head), "</strong>",
+               if (is.null(body)) "" else paste0(" ", htmltools::htmlEscape(body)),
+               "</li>")
+    },
+    .lip = function(text) paste0("<li>", htmltools::htmlEscape(text), "</li>"),
+
+    # Missingness-threshold test on a summary row. Count based, so it is the
+    # same comparison the visdat insights make and no rounding happens before
+    # it: 251/2500 = 10.04% used to round to 10.0 and fail `> 10` here while
+    # the insights counted it, so the two panels disagreed by one variable.
+    .missingAbove = function(row, pct) {
+        row$n > 0 && row$missing > row$n * pct / 100
+    },
+
     .addNotice = function(type, title, content) {
         duplicate <- vapply(private$.noticeList, function(notice) {
             identical(notice$type, type) &&
@@ -46,9 +72,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # output item renders this literally (no markup, no injection surface).
         blocks <- vapply(private$.noticeList, function(notice) {
             prefix <- switch(notice$type,
-                ERROR          = "ERROR: ",
-                STRONG_WARNING = "WARNING: ",
-                WARNING        = "WARNING: ",
+                ERROR          = paste0(.("ERROR"), ": "),
+                STRONG_WARNING = paste0(.("WARNING"), ": "),
+                WARNING        = paste0(.("WARNING"), ": "),
                 "")
             paste0(prefix, notice$title, "\n", notice$content)
         }, character(1))
@@ -84,67 +110,53 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # variable, so the scope has to be stated or the result reads as a
         # statement about the whole selection.
         scope_note <- if (n_non_numeric > 0) {
-            sprintf(
-                paste0(
-                    " Computed on the %d numeric variable(s) (%s); missingness in the ",
-                    "%d non-numeric variable(s) was not tested."
-                ),
-                ncol(numeric_data),
-                paste(names(numeric_data), collapse = ", "),
-                n_non_numeric
-            )
+            paste0(" ", .fmt(
+                .("Computed on the {n_num} numeric variable(s) ({names}); missingness in the {n_non} non-numeric variable(s) was not tested."),
+                n_num = ncol(numeric_data),
+                names = paste(names(numeric_data), collapse = ", "),
+                n_non = n_non_numeric
+            ))
         } else {
             ""
         }
-        assumption_note <- paste0(
-            " Little's test assumes multivariate normality within missing-data ",
-            "patterns and has little power when patterns contain few cases."
+        assumption_note <- paste0(" ",
+            .("Little's test assumes multivariate normality within missing-data patterns and has little power when patterns contain few cases.")
         )
         if (ncol(numeric_data) < 2) {
-            return(paste0(
-                "Little's MCAR test was not run because it requires at least two ",
-                "numeric variables; it is computed on numeric variables only, and ",
-                sprintf("the selection contains %d numeric variable(s).", ncol(numeric_data))
+            return(.fmt(
+                .("Little's MCAR test was not run because it requires at least two numeric variables; it is computed on numeric variables only, and the selection contains {n} numeric variable(s)."),
+                n = ncol(numeric_data)
             ))
         }
         if (!anyNA(numeric_data)) {
-            return("Little's MCAR test was not run because the selected numeric variables have no missing values.")
+            return(.("Little's MCAR test was not run because the selected numeric variables have no missing values."))
         }
 
         if (!requireNamespace("naniar", quietly = TRUE)) {
-            return("Little's MCAR test is unavailable because the optional naniar package is not installed.")
+            return(.("Little's MCAR test is unavailable because the optional naniar package is not installed."))
         }
 
         tryCatch({
             result <- as.data.frame(.quietly(naniar::mcar_test(numeric_data)))[1, , drop = FALSE]
             interpretation <- if (result$p.value < 0.05) {
-                "The data provide evidence against the MCAR assumption."
+                .("The data provide evidence against the MCAR assumption.")
             } else {
-                paste0(
-                    "The test does not reject the MCAR assumption, but this does not ",
-                    "prove that the data are MCAR."
-                )
+                .("The test does not reject the MCAR assumption, but this does not prove that the data are MCAR.")
             }
             paste0(
-                sprintf(
-                    paste0(
-                        "Little's MCAR test (naniar): chi-square = %.2f, df = %s, ",
-                        "p = %.4f, missing patterns = %s. %s"
-                    ),
-                    result$statistic,
-                    result$df,
-                    result$p.value,
-                    result$missing.patterns,
-                    interpretation
+                .fmt(
+                    .("Little's MCAR test (naniar): chi-square = {chi2}, df = {df}, p = {p}, missing patterns = {patterns}. {interp}"),
+                    chi2 = sprintf("%.2f", result$statistic),
+                    df = result$df,
+                    p = sprintf("%.4f", result$p.value),
+                    patterns = result$missing.patterns,
+                    interp = interpretation
                 ),
                 scope_note,
                 assumption_note
             )
         }, error = function(e) {
-            paste0(
-                "Little's MCAR test could not be computed for the selected variables. ",
-                "Review variable types and missing-data patterns."
-            )
+            .("Little's MCAR test could not be computed for the selected variables. Review variable types and missing-data patterns.")
         })
     },
 
@@ -165,39 +177,38 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         self$results$recommendations$setContent("")
         self$results$explanations$setContent("")
 
-        # TODO (forward-looking): no `.()` wrapping in this file (~1.1k LOC
-        # of welcome HTML, recommendations, and explanations). Address in
-        # a /prepare-translation pass.
         # TODO (forward-looking, perf): the visdat plot callbacks can be slow
         # on wide tables; add render-safe cancellation points when supported.
 
+        h <- private$.h
+        li <- private$.li
+        lip <- private$.lip
+        esc <- htmltools::htmlEscape
+
         # Check if variables have been selected. If not, display a welcoming message.
         if (length(self$options$vars) == 0) {
-            intro_msg <- "
-            <div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
-            <h3 style='color: #2e7d32; margin-top: 0;'>Welcome to Enhanced Data Quality Assessment!</h3>
-            <p><strong>Comprehensive data quality analysis</strong> with visual exploration capabilities</p>
-            <p>Includes visual data exploration through the <strong>visdat</strong> package</p>
-
-            <h4 style='color: #2e7d32;'>Quick Start:</h4>
-            <ol>
-            <li><strong>Select Variables:</strong> Choose one or more variables to assess</li>
-            <li><strong>Configure Analysis:</strong> Enable duplicate detection, missing value analysis</li>
-            <li><strong>Visual Exploration:</strong> Use visdat for visual data quality assessment</li>
-            <li><strong>Run Analysis:</strong> Get comprehensive data quality insights</li>
-            </ol>
-
-            <h4 style='color: #2e7d32;'>Analysis Features:</h4>
-            <ul>
-            <li><strong>Missing Value Analysis:</strong> Patterns and statistical summaries</li>
-            <li><strong>Duplicate Detection:</strong> Row and value-level duplicate analysis</li>
-            <li><strong>Data Completeness:</strong> Complete cases across variables</li>
-            <li><strong>Visual Data Overview:</strong> visdat integration for visual exploration</li>
-            <li><strong>Data Type Analysis:</strong> Automatic type detection and validation</li>
-            </ul>
-
-            </div>"
-            self$results$todo$setContent(intro_msg)
+            self$results$todo$setContent(paste0(
+                "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>",
+                "<h3 style='color: inherit; margin-top: 0;'>", h(.("Welcome to Enhanced Data Quality Assessment!")), "</h3>",
+                "<p><strong>", h(.("Comprehensive data quality analysis with visual exploration capabilities")), "</strong></p>",
+                "<p>", h(.("Includes visual data exploration through the {pkg} package"), pkg = "<strong>visdat</strong>"), "</p>",
+                "<h4 style='color: inherit;'>", h(.("Quick Start:")), "</h4>",
+                "<ol>",
+                li(.("Select Variables:"), .("Choose one or more variables to assess")),
+                li(.("Configure Analysis:"), .("Enable duplicate detection, missing value analysis")),
+                li(.("Visual Exploration:"), .("Use visdat for visual data quality assessment")),
+                li(.("Run Analysis:"), .("Get comprehensive data quality insights")),
+                "</ol>",
+                "<h4 style='color: inherit;'>", h(.("Analysis Features:")), "</h4>",
+                "<ul>",
+                li(.("Missing Value Analysis:"), .("Patterns and statistical summaries")),
+                li(.("Duplicate Detection:"), .("Row and value-level duplicate analysis")),
+                li(.("Data Completeness:"), .("Complete cases across variables")),
+                li(.("Visual Data Overview:"), .("visdat integration for visual exploration")),
+                li(.("Data Type Analysis:"), .("Automatic type detection and validation")),
+                "</ul>",
+                "</div>"
+            ))
             return()
         } else {
             self$results$todo$setContent("")
@@ -207,9 +218,12 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # Notices are rendered as HTML to avoid the jamovi protobuf serialization
         # error triggered by dynamically inserted jmvcore::Notice objects.
         if (nrow(self$data) == 0) {
-            self$results$todo$setContent(
-                "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Error:</strong> Dataset contains no rows. Please provide data with at least one observation.</div>"
-            )
+            self$results$todo$setContent(paste0(
+                "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>",
+                .("Error"), ":</strong> ",
+                .("Dataset contains no rows. Please provide data with at least one observation."),
+                "</div>"
+            ))
             return()
         }
 
@@ -226,9 +240,11 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             missing_vars <- var_list[!var_list %in% names(dataset)]
             if (length(missing_vars) > 0) {
                 missing_safe <- paste(vapply(missing_vars, htmltools::htmlEscape, character(1)), collapse = ", ")
-                self$results$todo$setContent(sprintf(
-                    "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>Error:</strong> Variables not found in dataset: %s. Please check variable names and try again.</div>",
-                    missing_safe
+                self$results$todo$setContent(paste0(
+                    "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; color: inherit; border-radius: 5px;'><strong>",
+                    .("Error"), ":</strong> ",
+                    .fmt(.("Variables not found in dataset: {vars}. Please check variable names and try again."), vars = missing_safe),
+                    "</div>"
                 ))
                 return()
             }
@@ -253,17 +269,18 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             near_zero_var <- FALSE
             high_card <- FALSE
             outlier_n <- NA
+            # Constant = a single observed value, for numeric and categorical
+            # alike. This detects EXACTLY constant variables, not "near-zero
+            # variance" in the caret::nearZeroVar sense: a variable with
+            # sd = 1e-9 - genuinely degenerate and quite capable of breaking a
+            # model - is not flagged, because any absolute SD cut-off is
+            # scale-dependent (metres vs millimetres gives SDs 1000x apart). A
+            # proper frequency-ratio / percent-unique screen would be a new
+            # feature. The former numeric rule (sd < .Machine$double.eps) left
+            # a single non-missing value unflagged (sd is NA) while the
+            # categorical rule flagged the same shape.
+            near_zero_var <- n_nonmiss > 0 && n_unique <= 1
             if (is.numeric(data_vec)) {
-                # This detects EXACTLY constant variables, not "near-zero
-                # variance" in the caret::nearZeroVar sense: .Machine$double.eps
-                # is ~2.2e-16, so a variable with sd = 1e-9 - genuinely degenerate
-                # and quite capable of breaking a model - is not flagged. An
-                # absolute SD cut-off is also scale-dependent (the same
-                # measurement in metres and millimetres gives SDs 1000x apart), so
-                # the label is what changed rather than the threshold. A proper
-                # frequency-ratio / percent-unique screen would be a new feature.
-                sdv <- stats::sd(data_vec, na.rm = TRUE)
-                near_zero_var <- !is.na(sdv) && sdv < .Machine$double.eps
                 # High cardinality is expected/normal for continuous numeric
                 # variables (e.g. tumor size, lab values), so it is only flagged
                 # for non-numeric (ID-like / categorical) variables below to
@@ -281,12 +298,6 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 }
             } else {
                 high_card <- n_unique > 50 && n_unique > 0.5 * n_nonmiss
-                # A categorical variable with a single observed level (every
-                # patient "Stage IV", one hospital in Site, all-female Sex after a
-                # filter) has exactly zero variance and breaks any model it enters
-                # - the same defect the numeric branch flags via sd == 0. Without
-                # this it stayed FALSE for every factor/character variable.
-                near_zero_var <- n_nonmiss > 0 && n_unique <= 1
             }
 
             # Return the row; the caller appends it (avoids `<<-` into the
@@ -324,7 +335,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         # Check for high missingness (>50%)
         high_missing_vars <- vapply(summary_rows, function(r) {
-            if (!is.na(r$missing_pct) && r$missing_pct > 50) r$variable else NA_character_
+            if (private$.missingAbove(r, 50)) r$variable else NA_character_
         }, character(1))
         high_missing_vars <- high_missing_vars[!is.na(high_missing_vars)]
 
@@ -344,24 +355,24 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         # serialization.)
         critical_warnings <- character(0)
         if (length(high_missing_vars) > 0) {
-            critical_warnings <- c(critical_warnings, sprintf(
-                "<strong>High missingness (&gt;50%%):</strong> %s",
-                paste(htmltools::htmlEscape(high_missing_vars), collapse = ", ")))
+            critical_warnings <- c(critical_warnings, paste0(
+                "<strong>", h(.("High missingness (>50%):")), "</strong> ",
+                esc(paste(high_missing_vars, collapse = ", "))))
         }
         if (length(near_zero_vars) > 0) {
-            critical_warnings <- c(critical_warnings, sprintf(
-                "<strong>Constant (zero variance):</strong> %s",
-                paste(htmltools::htmlEscape(near_zero_vars), collapse = ", ")))
+            critical_warnings <- c(critical_warnings, paste0(
+                "<strong>", h(.("Constant (zero variance):")), "</strong> ",
+                esc(paste(near_zero_vars, collapse = ", "))))
         }
         if (n_total < 20) {
-            critical_warnings <- c(critical_warnings, sprintf(
-                "<strong>Very small sample size (n=%d):</strong> estimates may be unstable",
-                n_total))
+            critical_warnings <- c(critical_warnings, paste0(
+                "<strong>", h(.("Very small sample size (n={n}):"), n = n_total), "</strong> ",
+                h(.("estimates may be unstable"))))
         }
         if (length(critical_warnings) > 0) {
             quality_results$critical_warnings <- paste0(
                 "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-left: 4px solid #ffc107; border-radius: 5px; color: inherit;'>",
-                "<h4 style='margin-top: 0; color: inherit;'>Critical Data Quality Warnings</h4>",
+                "<h4 style='margin-top: 0; color: inherit;'>", h(.("Critical Data Quality Warnings")), "</h4>",
                 "<ul style='margin-bottom: 0;'><li>",
                 paste(critical_warnings, collapse = "</li><li>"),
                 "</li></ul></div>"
@@ -373,38 +384,43 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             # OPTIMIZED: Extract directly from summary_rows instead of re-iterating
             missing_summary <- setNames(
                 vapply(summary_rows, function(row) {
-                    paste0("Missing: ", row$missing, "/", row$n, " (", row$missing_pct, "%)")
+                    h(.("Missing: {missing}/{n} ({pct}%)"),
+                      missing = row$missing, n = row$n, pct = row$missing_pct)
                 }, character(1)),
                 vapply(summary_rows, function(r) r$variable, character(1))
             )
 
             # Case-level missingness distribution
             case_missing <- rowSums(is.na(analysis_data))
-            case_summary <- sprintf("Case-level missing: median %.1f, mean %.1f, max %d (of %d vars)",
-                                    stats::median(case_missing),
-                                    mean(case_missing),
-                                    max(case_missing),
-                                    ncol(analysis_data))
+            case_summary <- h(
+                .("Case-level missing: median {median}, mean {mean}, max {max} (of {nvars} vars)"),
+                median = sprintf("%.1f", stats::median(case_missing)),
+                mean = sprintf("%.1f", mean(case_missing)),
+                max = as.integer(max(case_missing)),
+                nvars = ncol(analysis_data))
 
             private$.checkpoint()
             mcar_msg <- private$.mcarTestMessage(analysis_data)
 
             # Threshold flagging
             threshold <- self$options$missing_threshold_visual
-            flags <- vapply(summary_rows, function(row) ifelse(!is.na(row$missing_pct) && row$missing_pct > threshold, row$variable, NA_character_), character(1))
+            flags <- vapply(summary_rows, function(row) {
+                if (private$.missingAbove(row, threshold)) row$variable else NA_character_
+            }, character(1))
             flags <- flags[!is.na(flags)]
 
             flag_html <- if (length(flags) > 0) {
-                paste0("<p><strong>Variables exceeding ", threshold, "% missing:</strong> ", paste(htmltools::htmlEscape(flags), collapse = ", "), "</p>")
+                paste0("<p><strong>", h(.("Variables exceeding {threshold}% missing:"), threshold = threshold),
+                       "</strong> ", esc(paste(flags, collapse = ", ")), "</p>")
             } else {
                 ""
             }
 
             quality_results$missing <- paste0(
-                "<h4>Missing Value Analysis</h4>",
-                paste(htmltools::htmlEscape(names(missing_summary)), missing_summary, sep = ": ", collapse = "<br>"),
+                "<h4>", h(.("Missing Value Analysis")), "</h4>",
+                paste(esc(names(missing_summary)), missing_summary, sep = ": ", collapse = "<br>"),
                 "<br>", case_summary,
-                "<br>", htmltools::htmlEscape(mcar_msg),
+                "<br>", esc(mcar_msg),
                 flag_html
             )
         }
@@ -422,7 +438,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 duplicate_pct <- round(duplicate_rows / total_rows * 100, 1)
 
                 # Identify top duplicated row signatures
-                dup_keys <- NA
+                dup_keys <- ""
                 if (duplicate_rows > 0) {
                     # Pasting every row into a signature and tabulating it is the
                     # most expensive step here on a large registry export.
@@ -439,16 +455,21 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                     key_freq <- key_freq[key_freq$Freq > 1, ]
                     key_freq <- key_freq[order(-key_freq$Freq), ]
                     top_keys <- head(key_freq, 5)
-                    dup_keys <- paste0("<br><em>Top duplicated patterns (first 5):</em><br>",
-                                       paste(paste(htmltools::htmlEscape(top_keys$Var1), " (n=", top_keys$Freq, ")", sep = ""), collapse = "<br>"))
+                    top_lines <- vapply(seq_len(nrow(top_keys)), function(i) {
+                        h(.("{pattern} (n={n})"),
+                          pattern = esc(as.character(top_keys$Var1[i])),
+                          n = top_keys$Freq[i])
+                    }, character(1))
+                    dup_keys <- paste0("<br><em>", h(.("Top duplicated patterns (first 5):")), "</em><br>",
+                                       paste(top_lines, collapse = "<br>"))
                 }
 
                 quality_results$duplicates <- paste0(
-                    "<h4>Duplicate Row Analysis</h4>",
-                    "Total rows: ", total_rows, "<br>",
-                    "Unique rows: ", unique_rows, "<br>",
-                    "Duplicate rows: ", duplicate_rows, " (", duplicate_pct, "%)",
-                    if (!is.na(dup_keys)) dup_keys else ""
+                    "<h4>", h(.("Duplicate Row Analysis")), "</h4>",
+                    h(.("Total rows: {n}"), n = total_rows), "<br>",
+                    h(.("Unique rows: {n}"), n = unique_rows), "<br>",
+                    h(.("Duplicate rows: {n} ({pct}%)"), n = duplicate_rows, pct = duplicate_pct),
+                    dup_keys
                 )
             } else {
                 # Ticking "Duplicate rows" with only ONE variable selected used to
@@ -461,46 +482,33 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                     quality_results$duplicate_mode_note <- paste0(
                         "<div style='background-color: rgba(33, 144, 246, 0.11); color: inherit; padding: 10px; ",
                         "border-left: 4px solid #2196f3; border-radius: 4px; margin-bottom: 10px;'>",
-                        "Row-level duplicate analysis needs at least two variables to define a row ",
-                        "signature. With one variable selected, a duplicate row and a duplicate value ",
-                        "are the same thing, so the value-level result below answers the same question. ",
-                        "Select more variables to compare full row signatures.",
+                        h(.("Row-level duplicate analysis needs at least two variables to define a row signature. With one variable selected, a duplicate row and a duplicate value are the same thing, so the value-level result below answers the same question. Select more variables to compare full row signatures.")),
                         "</div>")
                 }
-                # Check for duplicates within each variable
-                # Accumulate the total number of duplicate values across all
-                # selected variables so the plain-language summary and
-                # recommendations report a non-zero count in value-level mode.
-                # (Previously duplicate_rows stayed NA in this branch, so both
-                # always reported 0 duplicates for value-level analysis.)
-                duplicate_rows <- sum(vapply(analysis_data, function(x) {
-                    non_missing <- sum(!is.na(x))
-                    unique_vals <- length(unique(jmvcore::naOmit(x)))
-                    non_missing - unique_vals
-                }, numeric(1)))
+                # Check for duplicates within each variable, read from the
+                # per-variable profile already computed above (non-missing minus
+                # unique) rather than re-scanning every column. The total feeds
+                # the plain-language summary and recommendations so they report
+                # a non-zero count in value-level mode.
+                dup_counts <- vapply(summary_rows, function(r) (r$n - r$missing) - r$unique, integer(1))
+                duplicate_rows <- sum(dup_counts)
 
-                dup_summary <- sapply(analysis_data, function(x) {
-                    total <- length(x)
-                    non_missing <- sum(!is.na(x))
-                    unique_vals <- length(unique(jmvcore::naOmit(x)))
-                    duplicate_vals <- non_missing - unique_vals
-                    dup_pct <- if (non_missing > 0) {
-                        round(duplicate_vals / non_missing * 100, 1)
-                    } else {
-                        0
-                    }
-
-                    paste0("Unique: ", unique_vals, ", Duplicates: ", duplicate_vals,
-                           " (", dup_pct, "% of non-missing)")
-                })
+                dup_summary <- setNames(
+                    vapply(seq_along(summary_rows), function(i) {
+                        r <- summary_rows[[i]]
+                        h(.("Unique: {unique}, Duplicates: {dups} ({pct}% of non-missing)"),
+                          unique = r$unique, dups = dup_counts[i],
+                          pct = if (is.na(r$dup_pct)) 0 else r$dup_pct)
+                    }, character(1)),
+                    vapply(summary_rows, function(r) r$variable, character(1))
+                )
 
                 quality_results$duplicates <- paste0(
-                    "<h4>Duplicate Value Analysis</h4>",
-                    paste(htmltools::htmlEscape(names(dup_summary)), dup_summary, sep = ": ", collapse = "<br>"),
+                    "<h4>", h(.("Duplicate Value Analysis")), "</h4>",
+                    paste(esc(names(dup_summary)), dup_summary, sep = ": ", collapse = "<br>"),
                     "<p style='margin-top: 10px; font-size: 0.9em; color: inherit; opacity: 0.75;'>",
-                    "<em>Interpretation Note:</em> For categorical variables with few unique levels (e.g., 'Gender', 'Status'), ",
-                    "a high number of 'Duplicates' often reflects data redundancy (many observations sharing the same valid value), ",
-                    "not necessarily data errors. For identifier variables (e.g., 'Patient ID'), duplicates would typically indicate errors.",
+                    "<em>", h(.("Interpretation Note:")), "</em> ",
+                    h(.("For categorical variables with few unique levels (e.g., 'Gender', 'Status'), a high number of 'Duplicates' often reflects data redundancy (many observations sharing the same valid value), not necessarily data errors. For identifier variables (e.g., 'Patient ID'), duplicates would typically indicate errors.")),
                     "</p>"
                 )
             }
@@ -513,8 +521,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             complete_pct <- round(complete_cases / total_cases * 100, 1)
 
             quality_results$completeness <- paste0(
-                "<h4>Data Completeness</h4>",
-                "Complete cases: ", complete_cases, "/", total_cases, " (", complete_pct, "%)"
+                "<h4>", h(.("Data Completeness")), "</h4>",
+                h(.("Complete cases: {complete}/{total} ({pct}%)"),
+                  complete = complete_cases, total = total_cases, pct = complete_pct)
             )
         }
 
@@ -524,20 +533,11 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             if (!requireNamespace("visdat", quietly = TRUE)) {
                 private$.addNotice(
                     "WARNING",
-                    "Visual plots unavailable",
-                    paste0(
-                        "The requested visual data quality plots cannot be drawn ",
-                        "because the visdat package is not installed on this ",
-                        "computer. All numeric checks above - missing values, ",
-                        "duplicates, constant variables and outliers - are complete ",
-                        "and unaffected. To get the plots, install the package with ",
-                        "install.packages('visdat') and re-run the analysis; ",
-                        "otherwise switch the plot options off to hide the empty ",
-                        "plot areas."
-                    )
+                    .("Visual plots unavailable"),
+                    .("The requested visual data quality plots cannot be drawn because the visdat package is not installed on this computer. All numeric checks above - missing values, duplicates, constant variables and outliers - are complete and unaffected. To get the plots, install the package with install.packages('visdat') and re-run the analysis; otherwise switch the plot options off to hide the empty plot areas.")
                 )
             }
-            visdat_results <- private$.generate_visdat_analysis(analysis_data)
+            visdat_results <- private$.generate_visdat_analysis(analysis_data, summary_rows)
             quality_results$visual <- visdat_results
         }
 
@@ -551,18 +551,23 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                     # NA (outlier columns of non-numeric variables) into "NA".
                     r <- trimws(r)
                     r[is.na(r) | r == "NA"] <- "-"
-                    paste0("<tr>", paste0("<td>", htmltools::htmlEscape(r), "</td>", collapse = ""), "</tr>")
+                    paste0("<tr>", paste0("<td>", esc(r), "</td>", collapse = ""), "</tr>")
                 }),
                 collapse = "\n"
             )
-            header <- paste0("<tr><th>Variable</th><th>Type</th><th>N</th><th>Missing</th><th>%Missing</th><th>Unique</th><th>%Duplicates</th><th>Constant</th><th>High card</th><th>Outliers</th><th>%Outliers</th></tr>")
+            header <- paste0("<tr>", paste0("<th>", esc(c(
+                .("Variable"), .("Type"), .("N"), .("Missing"), .("%Missing"), .("Unique"),
+                .("%Duplicates"), .("Constant"), .("High card"), .("Outliers"), .("%Outliers")
+            )), "</th>", collapse = ""), "</tr>")
             quality_results$summary_table <- paste0(
-                "<h4>Variable Quality Summary</h4>",
-                "<p><em>Flags:</em> constant (zero-variance) variables, high cardinality (many unique values), and IQR-based outlier counts for numeric variables. ",
-                "The constant flag identifies variables with no variation at all; it does not screen for the broader <em>near-zero variance</em> case (very low but non-zero variation), for which caret::nearZeroVar() is the appropriate tool. ",
-                "The high-cardinality flag is applied to categorical and text variables only - many distinct values are expected and normal for a continuous measurement, so numeric variables are deliberately never flagged. ",
-                "A high %Duplicates is expected for categorical variables with few levels (a binary variable in n=500 reads about 99.6%) and only signals a problem for identifier variables. ",
-                "Read %Outliers rather than the raw count: under the 1.5\u{D7}IQR rule about 0.7% of normally distributed observations fall outside the fences (the expected proportion does not grow with sample size, though it is estimated imprecisely in small samples, and the rule is not applied at all to variables with 10 or fewer non-missing values).</p>",
+                "<h4>", h(.("Variable Quality Summary")), "</h4>",
+                "<p><em>", h(.("Flags:")), "</em> ",
+                h(.("constant (zero-variance) variables, high cardinality (many unique values), and IQR-based outlier counts for numeric variables.")), " ",
+                h(.("The constant flag identifies variables with no variation at all; it does not screen for the broader near-zero variance case (very low but non-zero variation), for which caret::nearZeroVar() is the appropriate tool.")), " ",
+                h(.("The high-cardinality flag is applied to categorical and text variables only - many distinct values are expected and normal for a continuous measurement, so numeric variables are deliberately never flagged.")), " ",
+                h(.("A high %Duplicates is expected for categorical variables with few levels (a binary variable in n=500 reads about 99.6%) and only signals a problem for identifier variables.")), " ",
+                h(.("Read %Outliers rather than the raw count: under the 1.5{times}IQR rule about 0.7% of normally distributed observations fall outside the fences (the expected proportion does not grow with sample size, though it is estimated imprecisely in small samples, and the rule is not applied at all to variables with 10 or fewer non-missing values)."), times = "\u{D7}"),
+                "</p>",
                 "<table border='1' cellspacing='0' cellpadding='4'>",
                 header,
                 summary_table,
@@ -599,20 +604,15 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             # an explanation rather than freezing jamovi.
             n_cells <- nrow(analysis_data) * ncol(analysis_data)
             if (n_cells > 2e5) {
-                plotData$skip_message <- sprintf(
-                    paste0(
-                        "The data types plot was not drawn because the selection is too large: %d rows x %d ",
-                        "variables is %s cells, and this plot guesses a type for every cell individually ",
-                        "(the limit is 200,000 cells). Nothing else in the report is affected - the 'Type' ",
-                        "column of the Variable Quality Summary above reports each variable's storage type ",
-                        "for the full selection. To see the plot, select fewer variables or apply a row ",
-                        "filter, then run again."
-                    ),
-                    nrow(analysis_data), ncol(analysis_data),
+                # Plain text: it is drawn with geom_text, not rendered as HTML.
+                plotData$skip_message <- .fmt(
+                    .("The data types plot was not drawn because the selection is too large: {rows} rows x {cols} variables is {cells} cells, and this plot guesses a type for every cell individually (the limit is 200,000 cells). Nothing else in the report is affected - the 'Type' column of the Variable Quality Summary above reports each variable's storage type for the full selection. To see the plot, select fewer variables or apply a row filter, then run again."),
+                    rows = nrow(analysis_data),
+                    cols = ncol(analysis_data),
                     # base:: is REQUIRED here: `@import jmvcore` brings
-                    # .fmt(str, ..., context) into this namespace, which
-                    # masks base::format and silently swallows big.mark/scientific.
-                    base::format(n_cells, big.mark = ",", scientific = FALSE)
+                    # jmvcore::format into this namespace, which masks
+                    # base::format and silently swallows big.mark/scientific.
+                    cells = base::format(n_cells, big.mark = ",", scientific = FALSE)
                 )
             }
             self$results$plotDataTypes$setState(plotData)
@@ -794,16 +794,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             return(TRUE)
 
         }, error = function(e) {
-            private$.placeholderPlot(paste0(
-                "The data overview plot could not be drawn for the ",
-                ncol(plotData$data), " selected variable(s). ",
-                "Every other data quality check above is unaffected - only this ",
-                "picture is missing. This usually means one of the selected ",
-                "variables has a type the overview cannot display, such as a wide ",
-                "free-text field, a date/time column or a list column. ",
-                "Try removing those variables from the selection, or turn off ",
-                "'Data overview plot' and read the Variable Quality Summary table ",
-                "instead. Technical detail: ", conditionMessage(e)
+            private$.placeholderPlot(.fmt(
+                .("The data overview plot could not be drawn for the {n} selected variable(s). Every other data quality check above is unaffected - only this picture is missing. This usually means one of the selected variables has a type the overview cannot display, such as a wide free-text field, a date/time column or a list column. Try removing those variables from the selection, or turn off 'Data overview plot' and read the Variable Quality Summary table instead. Technical detail: {detail}"),
+                n = ncol(plotData$data), detail = conditionMessage(e)
             ))
         })
     },
@@ -832,7 +825,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 show_perc_col = TRUE  # Show percentage by column
             )) +
                 ggplot2::labs(
-                    subtitle = paste0("Missing value patterns (threshold for warnings: ", plotData$threshold, "%)")
+                    subtitle = .fmt(.("Missing value patterns (threshold for warnings: {threshold}%)"), threshold = plotData$threshold)
                 ) +
                 ggtheme +
                 ggplot2::theme(
@@ -849,17 +842,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             return(TRUE)
 
         }, error = function(e) {
-            private$.placeholderPlot(paste0(
-                "The missing-values pattern plot could not be drawn for the ",
-                ncol(plotData$data), " selected variable(s). ",
-                "The missing-value counts and percentages in the summary table ",
-                "above are unaffected - only this picture is missing, so you ",
-                "cannot see how the gaps line up across variables. ",
-                "This usually means a selected variable has a type the plot ",
-                "cannot display, or that no value is missing at all. ",
-                "Try removing wide free-text or date variables from the ",
-                "selection and running again. Technical detail: ",
-                conditionMessage(e)
+            private$.placeholderPlot(.fmt(
+                .("The missing-values pattern plot could not be drawn for the {n} selected variable(s). The missing-value counts and percentages in the summary table above are unaffected - only this picture is missing, so you cannot see how the gaps line up across variables. This usually means a selected variable has a type the plot cannot display, or that no value is missing at all. Try removing wide free-text or date variables from the selection and running again. Technical detail: {detail}"),
+                n = ncol(plotData$data), detail = conditionMessage(e)
             ))
         })
     },
@@ -900,16 +885,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             return(TRUE)
 
         }, error = function(e) {
-            private$.placeholderPlot(paste0(
-                "The data types plot could not be drawn for the ",
-                ncol(plotData$data), " selected variable(s). ",
-                "The 'Type' column of the Variable Quality Summary table above ",
-                "still reports each variable's storage type - only this ",
-                "value-by-value guess is missing. Guessing types cell by cell is ",
-                "also slow on large tables, so this can fail on very wide or very ",
-                "long data. Try selecting fewer variables, or turn off ",
-                "'Data types plot' and use the summary table instead. ",
-                "Technical detail: ", conditionMessage(e)
+            private$.placeholderPlot(.fmt(
+                .("The data types plot could not be drawn for the {n} selected variable(s). The 'Type' column of the Variable Quality Summary table above still reports each variable's storage type - only this value-by-value guess is missing. Guessing types cell by cell is also slow on large tables, so this can fail on very wide or very long data. Try selecting fewer variables, or turn off 'Data types plot' and use the summary table instead. Technical detail: {detail}"),
+                n = ncol(plotData$data), detail = conditionMessage(e)
             ))
         })
     },

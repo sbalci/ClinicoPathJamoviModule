@@ -811,6 +811,11 @@ collect_used_refs <- function(jamovi_dir) {
         used <- c(used, trimws(gsub("['\"]", "", strsplit(inl[2], ",")[[1]])))
         next
       }
+      inl_scalar <- regmatches(line, regexec("refs:\\s*([A-Za-z0-9._-]+)\\s*$", line))[[1]]
+      if (length(inl_scalar) == 2) {
+        used <- c(used, trimws(gsub("['\"]", "", inl_scalar[2])))
+        next
+      }
       if (grepl("^\\s*refs:\\s*$", line)) { in_refs <- TRUE; next }
       if (in_refs) {
         item <- regmatches(line, regexec("^\\s*-\\s*(\\S+)\\s*$", line))[[1]]

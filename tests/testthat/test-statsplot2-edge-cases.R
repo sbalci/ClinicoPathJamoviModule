@@ -94,10 +94,11 @@ test_that("statsplot2 handles very small sample sizes", {
   data(statsplot2_test)
   tiny_data <- statsplot2_test[1:6, ]
 
-  # n = 6 runs, with a small-sample caveat in the panel.
+  # n = 6 runs, with a small-sample caveat in the panel ("Very Small Sample"
+  # below 10 observations, "Small Sample Size" below 30).
   expect_match(sp_notices(statsplot2(data = tiny_data, dep = "tumor_reduction",
                                      group = "treatment")),
-               "Small Sample Size")
+               "Small Sample")
 })
 
 test_that("statsplot2 handles single group", {
@@ -346,6 +347,7 @@ test_that("statsplot2 handles repeated measures with incomplete IDs", {
     data = incomplete_data,
     dep = "symptom_severity",
     group = "timepoint",
+    subjectID = "patient_id",
     direction = "repeated"
   )
 

@@ -14,6 +14,26 @@ items:
           - direction
           - subjectID
           - distribution
+          - forceContinuous
+          - excl
+          - grvar
+          - sampleLarge
+          - sampleThreshold
+          - sampleSize
+          - seed
+
+    - name:  summary
+      title: Result sentence
+      type:  Html
+      visible: (showSummary)
+      clearWith:
+          - dep
+          - group
+          - direction
+          - subjectID
+          - distribution
+          - forceContinuous
+          - alluvsty
           - excl
           - grvar
           - sampleLarge
@@ -30,6 +50,7 @@ items:
           - direction
           - subjectID
           - distribution
+          - forceContinuous
           - excl
           - grvar
           - sampleLarge
@@ -40,12 +61,14 @@ items:
     - name:  ExplanationMessage
       title: Explanation
       type:  Html
+      visible: (showExplanations)
       clearWith:
           - dep
           - group
           - direction
           - subjectID
           - distribution
+          - forceContinuous
           - excl
           - grvar
           - sampleLarge
@@ -68,6 +91,7 @@ items:
           - direction
           - subjectID
           - distribution
+          - forceContinuous
           - alluvsty
           - excl
           - grvar

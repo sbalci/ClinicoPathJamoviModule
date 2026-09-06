@@ -12,9 +12,7 @@
 #' 
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom stats chisq.test p.adjust fisher.test qnorm complete.cases xtabs quantile
-#' @importFrom grid gpar
-#' @importFrom grDevices hcl.colors
+#' @importFrom stats chisq.test p.adjust fisher.test qnorm xtabs quantile
 #' @importFrom htmltools HTML div h3 h4 h5 p strong em br
 #'
 #' @return An \code{R6} class generator object for the \code{chisqposttestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -54,14 +52,18 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
+            # Translated once, outside the closure, as the other panels do.
+            prefix_error   <- .("ERROR:")
+            prefix_warning <- .("WARNING:")
+            prefix_note    <- .("NOTE:")
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
-                    ERROR          = "ERROR: ",
-                    STRONG_WARNING = "WARNING: ",
-                    WARNING        = "WARNING: ",
-                    INFO           = "NOTE: ",
+                    ERROR          = prefix_error,
+                    STRONG_WARNING = prefix_warning,
+                    WARNING        = prefix_warning,
+                    INFO           = prefix_note,
                     "")
-                paste0(prefix, notice$title, "\n", notice$content)
+                paste0(prefix, " ", notice$title, "\n", notice$content)
             }, character(1))
 
             self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
@@ -73,6 +75,23 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .errorBox = function(msg) {
             paste0("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; color: inherit;'>",
                    "<strong>", .("Error:"), "</strong> ", msg, "</div>")
+        },
+
+        # Observation counts for prose. A weighted (counts) table can sum to a
+        # non-integer, and sprintf("%d") aborts the whole run on one: whole
+        # numbers print as integers, fractional totals keep one decimal.
+        .fmtCount = function(x) {
+            if (isTRUE(all.equal(x, round(x)))) sprintf("%.0f", x) else sprintf("%.1f", x)
+        },
+
+        # Display label for the machine key kept in result$test_used. Every
+        # branch in the code compares the KEY, so translating the label cannot
+        # change which test the code believes it ran.
+        .testMethodLabel = function(key) {
+            switch(key,
+                fisher    = .("Fisher's exact"),
+                fisher_mc = .("Fisher's exact (Monte Carlo)"),
+                .("Chi-square"))
         },
 
         .init = function() {
@@ -122,7 +141,6 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Statistical decision components
                 critical_value = critical_z,
                 alpha_level = alpha,
-                correction_method = if (is.null(cutoff)) "Bonferroni" else "Custom",
                 significant_cells = significant_cells,
                 
                 # Interpretation components
@@ -242,14 +260,14 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .fisherPvalue = function(subtable, comparison_label) {
             fisher_test <- try(stats::fisher.test(subtable), silent = TRUE)
             if (!inherits(fisher_test, "try-error"))
-                return(list(p = fisher_test$p.value, method = "Fisher's exact"))
+                return(list(p = fisher_test$p.value, method = "fisher"))
 
             private$.checkpoint()
             fisher_test <- try(
                 stats::fisher.test(subtable, simulate.p.value = TRUE, B = 2000),
                 silent = TRUE)
             if (!inherits(fisher_test, "try-error"))
-                return(list(p = fisher_test$p.value, method = "Fisher's exact (Monte Carlo)"))
+                return(list(p = fisher_test$p.value, method = "fisher_mc"))
 
             private$.addNotice(
                 "STRONG_WARNING",
@@ -300,6 +318,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Standard processing for smaller datasets
             row_names <- rownames(contingency_table)
             col_names <- colnames(contingency_table)
+            vs_tpl <- .("{a} vs {b}")
             
             # Create all pairwise combinations for rows
             pairwise_results <- list()
@@ -337,7 +356,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # Always compute chi-square for effect size
                             chi_test <- private$.chisqQuiet(subtable, correct = FALSE)
                             expected_counts <- chi_test$expected
-                            comparison_label <- paste(row_names[i], "vs", row_names[j])
+                            comparison_label <- .fmt(vs_tpl, a = row_names[i], b = row_names[j])
                             
                             # Determine which tests to run based on test_selection
                             fisher_res <- NULL
@@ -368,7 +387,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 result$actual_pvalue <- fisher_res$p
                             } else {
                                 result$fisher_pvalue <- NA
-                                result$test_used <- "Chi-square"
+                                result$test_used <- "chisq"
                                 result$actual_pvalue <- chi_test$p.value
                             }
                             
@@ -412,7 +431,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # Always compute chi-square for effect size
                             chi_test <- private$.chisqQuiet(subtable, correct = FALSE)
                             expected_counts <- chi_test$expected
-                            comparison_label <- paste(col_names[i], "vs", col_names[j])
+                            comparison_label <- .fmt(vs_tpl, a = col_names[i], b = col_names[j])
                             
                             # Determine which tests to run based on test_selection
                             fisher_res <- NULL
@@ -443,7 +462,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 result$actual_pvalue <- fisher_res$p
                             } else {
                                 result$fisher_pvalue <- NA
-                                result$test_used <- "Chi-square"
+                                result$test_used <- "chisq"
                                 result$actual_pvalue <- chi_test$p.value
                             }
                             
@@ -493,6 +512,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .robustPairwiseTestsChunked = function(contingency_table, method = "bonferroni", test_selection = "auto", chunk_size = 50) {
             row_names <- rownames(contingency_table)
             col_names <- colnames(contingency_table)
+            vs_tpl <- .("{a} vs {b}")
 
             # Initialize variables
             all_pairwise_results <- list()
@@ -571,7 +591,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Always compute chi-square for effect size
                         chi_test <- private$.chisqQuiet(subtable, correct = FALSE)
                         expected_counts <- chi_test$expected
-                        comparison_label <- paste(comp_names[i], "vs", comp_names[j])
+                        comparison_label <- .fmt(vs_tpl, a = comp_names[i], b = comp_names[j])
                         
                         # Determine which tests to run based on test_selection
                         fisher_res <- NULL
@@ -602,7 +622,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             result$actual_pvalue <- fisher_res$p
                         } else {
                             result$fisher_pvalue <- NA
-                            result$test_used <- "Chi-square"
+                            result$test_used <- "chisq"
                             result$actual_pvalue <- chi_test$p.value
                         }
                         
@@ -672,7 +692,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Row comparisons section
             if (length(row_comparisons) > 0) {
                 row_title <- htmltools::h3(
-                    style = "color: #1976d2; margin-top: 20px;", 
+                    style = "color: inherit; margin-top: 20px;", 
                     paste(.("Row-wise Pairwise Comparisons"), if (!is.null(row_var_name)) paste0(" (", row_var_name, ")") else "")
                 )
                 row_comparisons_html <- private$.createComparisonSection(row_comparisons, row_var_name, col_var_name)
@@ -682,7 +702,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Column comparisons section
             if (length(col_comparisons) > 0) {
                 col_title <- htmltools::h3(
-                    style = "color: #1976d2; margin-top: 20px;", 
+                    style = "color: inherit; margin-top: 20px;", 
                     paste(.("Column-wise Pairwise Comparisons"), if (!is.null(col_var_name)) paste0(" (", col_var_name, ")") else "")
                 )
                 col_comparisons_html <- private$.createComparisonSection(col_comparisons, row_var_name, col_var_name)
@@ -691,7 +711,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             main_content <- htmltools::div(
                 style = "margin: 20px 0;",
-                htmltools::h3(style = "color: #1976d2;", .("Detailed Pairwise Comparison Tables")),
+                htmltools::h3(style = "color: inherit;", .("Detailed Pairwise Comparison Tables")),
                 html_parts
             )
             
@@ -706,7 +726,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 heading       = .("Test Results:"),
                 sig           = .("Significant"),
                 notsig        = .("Not significant"),
-                chisq_test    = .("Chi-square test"),
+                test_chisq    = .("Chi-square test"),
+                test_fisher   = .("Fisher's exact test"),
+                test_fishermc = .("Fisher's exact test (Monte Carlo)"),
                 method_chi    = .("Method: %s (standard approach)"),
                 method_low    = .("Method: %s (used because an expected count is below 5)"),
                 method_forced = .("Method: %s (chosen in the options for every comparison)"),
@@ -717,10 +739,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 result <- comparisons[[i]]
                 subtable <- result$subtable
 
-                # Determine test method and significance
-                # startsWith, not identical: the Monte Carlo fallback labels itself
-                # "Fisher's exact (Monte Carlo)" and is still an exact-test p-value.
-                use_fisher <- startsWith(result$test_used, "Fisher")
+                # Determine test method and significance. Anything but the
+                # chi-square key is an exact-test p-value, Monte Carlo included.
+                use_fisher <- !identical(result$test_used, "chisq")
                 p_adj <- result$actual_pvalue_adjusted
                 is_significant <- p_adj < self$options$sig
 
@@ -734,7 +755,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Test results summary. The reason given for Fisher must match WHY it
                 # was used: with "Always Fisher's exact" selected it is the user's
                 # choice, not a low-count fallback.
-                test_method <- if (use_fisher) paste(result$test_used, .("test")) else lbl$chisq_test
+                test_method <- switch(result$test_used,
+                    fisher    = lbl$test_fisher,
+                    fisher_mc = lbl$test_fishermc,
+                    lbl$test_chisq)
                 method_tpl <- if (!use_fisher) lbl$method_chi
                     else if (identical(result$test_selection, "fisher")) lbl$method_forced
                     else lbl$method_low
@@ -756,7 +780,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Wrap in comparison div
                 htmltools::div(
                     style = "margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;",
-                    htmltools::h4(style = "margin-top: 0; color: #1976d2;", result$comparison),
+                    htmltools::h4(style = "margin-top: 0; color: inherit;", result$comparison),
                     test_results,
                     contingency_table
                 )
@@ -998,7 +1022,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # panel's colour and severity.
                 if (warning_level %in% c("none", "mild"))
                     warning_level <- "moderate"
-                warning_msg <- c(warning_msg, sprintf(.("Small sample size (n=%d)"), total_n))
+                warning_msg <- c(warning_msg, sprintf(.("Small sample size (n=%s)"), private$.fmtCount(total_n)))
                 recommendation <- c(recommendation, .("Results may be unreliable with small samples."))
             }
             
@@ -1063,7 +1087,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 heuristic_limit <- 50 + (df * 10)
                 if (total_n < heuristic_limit) {
                     underpowered <- TRUE
-                    warning_msg <- sprintf(.("Small sample size (n=%d) may limit statistical power."), total_n)
+                    warning_msg <- sprintf(.("Small sample size (n=%s) may limit statistical power."), private$.fmtCount(total_n))
                     recommendation <- .("Consider if the study has sufficient power to detect clinically relevant differences.")
                 }
             }
@@ -1127,13 +1151,13 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             summary_text <- sprintf(
-                .("The association between %s was %s (\u{3C7}\u{B2}(%d) = %.2f, p %s, n = %d). The effect size was %s (Cram\u{E9}r's V = %.3f)."),
+                .("The association between %s was %s (\u{3C7}\u{B2}(%d) = %.2f, p %s, n = %s). The effect size was %s (Cram\u{E9}r's V = %.3f)."),
                 var_names,
                 significance_text,
                 chiSqTest$parameter,
                 chiSqTest$statistic,
                 if (chiSqTest$p.value < 0.001) "< 0.001" else sprintf("= %.3f", chiSqTest$p.value),
-                n,
+                private$.fmtCount(n),
                 effect_interpretation,
                 cramers_v
             )
@@ -1172,22 +1196,27 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # analyst ("Consider using Fisher's exact test for more reliable
             # results.") and read as a non-sequitur in the middle of a Methods
             # paragraph. The recommendation still appears in the Assumptions panel.
-            sentences$methods <- sprintf(
-                .("A chi-square test of independence, without continuity correction, was performed to examine the relationship between %s categorical variables.%s"),
-                if (nrow(contTable) == 2 && ncol(contTable) == 2) "two binary" else "two",
-                if (assumptions$low_expected_5 > 0)
-                    paste0(" ", sprintf(.("%d of the %d cells had an expected count below 5."),
-                            assumptions$low_expected_5, length(chiSqTest$expected)))
-                else ""
-            )
+            # One complete sentence per table shape rather than a "two" / "two
+            # binary" fragment spliced into a template: a translator cannot
+            # inflect a spliced word.
+            methods_core <- if (nrow(contTable) == 2 && ncol(contTable) == 2)
+                .("A chi-square test of independence, without continuity correction, was performed to examine the relationship between two binary categorical variables.")
+            else
+                .("A chi-square test of independence, without continuity correction, was performed to examine the relationship between two categorical variables.")
+            sentences$methods <- if (assumptions$low_expected_5 > 0)
+                paste(methods_core,
+                      .fmt(.("{k} of the {m} cells had an expected count below 5."),
+                           k = assumptions$low_expected_5, m = length(chiSqTest$expected)))
+            else
+                methods_core
             
             # Results sentence
             sentences$results <- clinical_summary$summary_text
             
             # Table description
             sentences$table <- sprintf(
-                .("The contingency table consisted of %d rows and %d columns with a total sample size of %d."),
-                nrow(contTable), ncol(contTable), sum(contTable)
+                .("The contingency table consisted of %d rows and %d columns with a total sample size of %s."),
+                nrow(contTable), ncol(contTable), private$.fmtCount(sum(contTable))
             )
             
             # Statistical conclusion.
@@ -1251,7 +1280,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (type == "overview") {
                 return(htmltools::div(
                     style = "padding: 15px; background-color: rgba(138, 155, 172, 0.06); border-left: 4px solid #1976d2; margin: 10px 0; color: inherit;",
-                    htmltools::h4(.("Chi-Square Post-Hoc Analysis Guide"), style = "color: #1976d2; margin-top: 0;"),
+                    htmltools::h4(.("Chi-Square Post-Hoc Analysis Guide"), style = "color: inherit; margin-top: 0;"),
                     htmltools::p(htmltools::strong(.("Three-Step Comprehensive Analysis:"))),
                     htmltools::div(
                         "1. ", htmltools::strong(.("Overall Chi-Square Test:")), " ", .("Tests if there's any association between variables"), htmltools::br(),
@@ -1282,7 +1311,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 method_name <- private$.posthocMethodLabel()
                 return(htmltools::div(
                     style = "padding: 15px; background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #ff9800; margin: 10px 0; color: inherit;",
-                    htmltools::h4(.("Multiple Testing Correction"), style = "color: #e65100; margin-top: 0;"),
+                    htmltools::h4(.("Multiple Testing Correction"), style = "color: inherit; margin-top: 0;"),
                     htmltools::p(htmltools::strong(.("Why correction is needed:"))),
                     htmltools::p(sprintf(
                         .("When several tests are performed, the chance of at least one false positive grows. With %d comparisons at \u{3B1} = %g, that chance would be about %.0f%% if no correction were applied."),
@@ -1310,7 +1339,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             guidance <- htmltools::div(
                 style = "padding: 15px; background-color: rgba(33, 137, 255, 0.07); color: inherit; border-left: 4px solid #1976d2; margin: 10px 0; font-family: 'Segoe UI', system-ui, sans-serif;",
-                htmltools::h4(.("Residuals Interpretation Guidance"), style = "color: #1976d2; margin-top: 0;"),
+                htmltools::h4(.("Residuals Interpretation Guidance"), style = "color: inherit; margin-top: 0;"),
                 htmltools::p(
                     htmltools::strong(.("How to read the Residuals Table:")),
                     htmltools::br(),
@@ -1508,7 +1537,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             analysis_vars <- intersect(c(rows, cols, counts), names(data))
             n_before <- nrow(data)
             if (length(analysis_vars) > 0)
-                data <- data[stats::complete.cases(data[, analysis_vars, drop = FALSE]), , drop = FALSE]
+                data <- jmvcore::naOmit(jmvcore::select(data, analysis_vars))
             n_dropped <- n_before - nrow(data)
             if (n_dropped > 0 && show_warnings)
                 private$.addNotice(
@@ -1834,8 +1863,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 pairwise_results <- private$.robustPairwiseTests(contTable, adjustMethod, self$options$testSelection)
             
             if (length(pairwise_results) > 0) {
-                fisher_used <- any(sapply(pairwise_results, function(x) startsWith(x$test_used, "Fisher")))
-                fisher_mc_used <- any(sapply(pairwise_results, function(x) identical(x$test_used, "Fisher's exact (Monte Carlo)")))
+                fisher_used <- any(sapply(pairwise_results, function(x) !identical(x$test_used, "chisq")))
+                fisher_mc_used <- any(sapply(pairwise_results, function(x) identical(x$test_used, "fisher_mc")))
 
                 # Use HTML notice for educational panel (no Notice object to avoid serialization errors)
                 fisher_notice <- NULL
@@ -1887,7 +1916,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         rowKey = i,
                         values = list(
                             comparison = result$comparison,
-                            test_method = test_used,
+                            test_method = private$.testMethodLabel(test_used),
                             chi = result$chi_statistic,
                             p = p_raw,
                             padj = p_adj,
@@ -1896,6 +1925,20 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             sig = sig_indicator
                         )
                     )
+                }
+
+                # .calculatePhiCI() returns "" when boot fails or too few resampled
+                # tables keep every category; say so rather than leave the ticked
+                # column silently blank.
+                if (self$options$phiCI) {
+                    n_blank <- sum(vapply(pairwise_results,
+                                          function(x) identical(x$phi_ci, ""), logical(1)))
+                    if (n_blank > 0)
+                        private$.addNotice(
+                            "WARNING",
+                            .("A bootstrap confidence interval could not be computed"),
+                            .fmt(.("The bootstrap interval for the effect size is blank for {k} of {m} pairwise comparisons because too few resampled tables kept every category, or the bootstrap itself failed. The point estimates and p-values of those comparisons are unaffected."),
+                                 k = n_blank, m = length(pairwise_results)))
                 }
 
                 # The bootstrap interval is a 95% interval for ONE comparison; the
@@ -2049,7 +2092,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     for (i in seq_along(pairwise_results)) {
                         result <- pairwise_results[[i]]
                         
-                        test_name <- result$test_used
+                        test_name <- private$.testMethodLabel(result$test_used)
                         p_value <- result$actual_pvalue
                         p_adj <- result$actual_pvalue_adjusted
                         
@@ -2179,7 +2222,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Small sample size warning
             if (assumptions$total_n < 20) {
-                warning_msg <- sprintf(.("Very small sample size (n = %d). The chi-square approximation may be unreliable. Consider using Fisher's exact test and interpreting results with caution."), assumptions$total_n)
+                warning_msg <- sprintf(.("Very small sample size (n = %s). The chi-square approximation may be unreliable. Consider using Fisher's exact test and interpreting results with caution."), private$.fmtCount(assumptions$total_n))
                 warning_messages <- c(warning_messages, warning_msg)
                 # Also as a notice: this condition invalidates the test that is
                 # printed above it, and the HTML div shares the `todo` element with
@@ -2191,7 +2234,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # old wording promised it unconditionally.
                 fisher_pairwise <- length(pairwise_results) > 0 &&
                     any(vapply(pairwise_results,
-                               function(x) startsWith(x$test_used, "Fisher"), logical(1)))
+                               function(x) !identical(x$test_used, "chisq"), logical(1)))
                 pairwise_note <- if (fisher_pairwise)
                     .("Fisher's exact test was used for the pairwise comparisons whose expected counts fell below 5.")
                 else if (length(pairwise_results) > 0)
@@ -2202,8 +2245,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "STRONG_WARNING",
                     .("Sample too small for the chi-square approximation"),
                     paste(sprintf(
-                        .("Only %d observations remain in the table. The chi-square statistic relies on a large-sample approximation, so the p-value reported above is unreliable at this size. For the overall table, an exact test or a larger sample is needed before the p-value can be read at face value."),
-                        assumptions$total_n), pairwise_note))
+                        .("Only %s observations remain in the table. The chi-square statistic relies on a large-sample approximation, so the p-value reported above is unreliable at this size. For the overall table, an exact test or a larger sample is needed before the p-value can be read at face value."),
+                        private$.fmtCount(assumptions$total_n)), pairwise_note))
             }
 
             # Low expected counts warning
@@ -2232,6 +2275,21 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         .("%d of %d cells have an expected count below 1. The chi-square approximation is not valid for that table even though most cells are adequate, so the overall p-value above is not dependable. Use Fisher's exact test, or merge the sparse category if there is a substantive reason to, and see the Assumptions check panel for the per-cell detail."),
                         assumptions$low_expected_1, length(chiSqTest$expected)))
             }
+
+            # Mild case: some cells below 5, but within Cochran's 20% limit and none
+            # below 1. chisq.test()'s own warning is muffled by .chisqQuiet() and the
+            # Assumptions panel that counts the cells is opt-in, so without this the
+            # omnibus p-value carried no default-visible caveat at all. The severity
+            # ladder in .validateAssumptions() is untouched: this is a plain WARNING
+            # and never fires when either STRONG_WARNING above has.
+            if (assumptions$low_expected_5 > 0 && assumptions$prop_low_5 <= 0.2 &&
+                assumptions$low_expected_1 == 0)
+                private$.addNotice(
+                    "WARNING",
+                    .("Some expected counts are below 5"),
+                    .fmt(.("{k} of {m} cells ({pct}%) have an expected count below 5. That is within the usual 20% limit and no cell is below 1, so the chi-square approximation is generally acceptable, but the overall p-value above is less precise than it would be with larger expected counts. Turn on the Assumptions check panel for the per-cell detail, or use Fisher's exact test if the sparse cells matter to the conclusion."),
+                         k = assumptions$low_expected_5, m = length(chiSqTest$expected),
+                         pct = sprintf("%.0f", assumptions$prop_low_5 * 100)))
 
             # Display combined warnings in todo element if any exist
             if (length(warning_messages) > 0) {
@@ -2394,8 +2452,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 },
                 htmltools::div(
                     style = "margin-top: 10px; font-size: 12px;",
-                    sprintf(.("Sample size: %d | Expected counts < 5: %d/%d cells | Expected counts < 1: %d cells"),
-                           assumptions$total_n, assumptions$low_expected_5, length(chiSqTest$expected), assumptions$low_expected_1)
+                    sprintf(.("Sample size: %s | Expected counts < 5: %d/%d cells | Expected counts < 1: %d cells"),
+                           private$.fmtCount(assumptions$total_n), assumptions$low_expected_5, length(chiSqTest$expected), assumptions$low_expected_1)
                 )
             )
             
@@ -2516,7 +2574,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     mid    = "#f7f7f7",
                     high   = high_color,
                     midpoint = 0,
-                    name     = "Adj. std.\nresidual",
+                    name     = .("Adj. std. residual"),
                     guide    = ggplot2::guide_colorbar()
                 ) +
                 ggplot2::labs(

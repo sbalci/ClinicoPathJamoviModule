@@ -63,23 +63,21 @@ test_that("a sparse table larger than 2x2 says an exact test is not offered", {
     expect_false(grepl("Automatically switched", t, fixed = TRUE))
 })
 
-test_that("the user's chosen statistic is never silently overridden", {
-    # The old code rewrote `type` to "nonparametric" behind the user's back. It
-    # is now passed through untouched. This also documents WHY the override was
-    # pointless: on this table the three frequentist types are identical.
+test_that("the removed frequentist aliases are rejected, not silently mapped", {
+    # "nonparametric" and "robust" produced the very same Pearson chi-squared as
+    # "parametric" on a contingency table, so the list now offers only the
+    # frequentist test and the Bayesian analysis. An old value is an error, not
+    # a silent fallback, and the frequentist choice is passed through untouched.
     d <- jbs_2x2()
-    sub <- function(ty) {
-        p <- jjbarstats(data = d, dep = "resp", group = "arm", typestatistics = ty)$plot
-        f <- tempfile(fileext = ".svg"); svglite::svglite(f, 8, 6)
-        ok <- tryCatch({ print(p); TRUE }, error = function(e) conditionMessage(e))
-        grDevices::dev.off()
-        x <- paste(readLines(f, warn = FALSE), collapse = ""); unlink(f)
-        list(ok = ok, svg = x)
-    }
-    a <- sub("parametric"); b <- sub("nonparametric"); r <- sub("robust")
-    expect_true(isTRUE(a$ok)); expect_true(isTRUE(b$ok)); expect_true(isTRUE(r$ok))
-    expect_identical(a$svg, b$svg)
-    expect_identical(a$svg, r$svg)
+    expect_error(jjbarstats(data = d, dep = "resp", group = "arm", typestatistics = "nonparametric"),
+                 "must be one of")
+    expect_error(jjbarstats(data = d, dep = "resp", group = "arm", typestatistics = "robust"),
+                 "must be one of")
+    p <- jjbarstats(data = d, dep = "resp", group = "arm", typestatistics = "parametric")$plot
+    f <- tempfile(fileext = ".svg"); svglite::svglite(f, 8, 6)
+    ok <- tryCatch({ print(p); TRUE }, error = function(e) conditionMessage(e))
+    grDevices::dev.off(); unlink(f)
+    expect_true(isTRUE(ok))
 })
 
 test_that("multiple dependent variables each get their own assumption block", {
@@ -189,4 +187,72 @@ test_that("with several dependent variables the decision is per-table", {
 
     expect_match(t, "Fisher")    # the sparse variable
     expect_match(t, "Pearson")   # the well-powered one
+})
+
+
+# ---- 2026-09-06 release review: regression cover for the day's fixes -----------------
+
+test_that("subtitle statistics agree with base R and effectsize on the bundled data", {
+    data(jjbarstats_test)
+    d <- as.data.frame(jjbarstats_test); tb <- table(d$response, d$treatment)
+    t <- jbs_plot_txt(jjbarstats(data = d, dep = "response", group = "treatment",
+                                 resultssubtitle = TRUE))
+    ct <- stats::chisq.test(tb, correct = FALSE)
+    expect_match(t, formatC(unname(ct$statistic), format = "f", digits = 2), fixed = TRUE)
+    V <- effectsize::cramers_v(tb, adjust = TRUE)
+    expect_match(t, formatC(V$Cramers_v_adjusted, format = "f", digits = 2), fixed = TRUE)
+})
+
+test_that("the interpretation guide scales Cramer's V cut-offs to the table", {
+    data(jjbarstats_test)
+    d <- as.data.frame(jjbarstats_test)
+    strip <- function(h) gsub("\\s+", " ", gsub("<[^>]*>", " ", as.character(h)))
+    g3 <- strip(jjbarstats(data = d, dep = "response", group = "treatment",
+                           showInterpretation = TRUE)$interpretation$content)
+    expect_match(g3, "bias-corrected")
+    expect_match(g3, "0.07 (small), 0.21 (medium), 0.35 (large)", fixed = TRUE)   # df* = 2
+    d2 <- droplevels(subset(d, response != "Partial Response" & treatment != "Low Dose"))
+    g2 <- strip(jjbarstats(data = d2, dep = "response", group = "treatment",
+                           showInterpretation = TRUE)$interpretation$content)
+    expect_match(g2, "0.1 (small), 0.3 (medium), 0.5 (large)", fixed = TRUE)      # df* = 1
+})
+
+test_that("McNemar is guarded by the discordant-pair count", {
+    few <- data.frame(a = factor(rep(c("Y", "N", "Y", "N"), c(40, 5, 3, 40))),
+                      b = factor(rep(c("Y", "Y", "N", "N"), c(40, 5, 3, 40))))   # b = 5, c = 3
+    res <- jjbarstats(data = few, dep = "a", group = "b", paired = TRUE)
+    n <- paste(as.character(res$notices$content), collapse = " ")
+    expect_match(n, "Few discordant pairs")
+    expect_match(n, "Only 8 discordant pairs")
+    # statsExpressions runs mcnemar.test(correct = FALSE); the narrative must say which
+    expect_match(as.character(res$summary$content), "without continuity correction", fixed = TRUE)
+    many <- data.frame(a = factor(rep(c("Y", "N", "Y", "N"), c(20, 15, 15, 20))),
+                       b = factor(rep(c("Y", "Y", "N", "N"), c(20, 15, 15, 20))))  # b + c = 30
+    n2 <- paste(as.character(jjbarstats(data = many, dep = "a", group = "b",
+                                        paired = TRUE)$notices$content), collapse = " ")
+    expect_false(grepl("Few discordant pairs", n2, fixed = TRUE))
+})
+
+test_that("the palette option reaches ggbarstats in package::palette form", {
+    data(jjbarstats_test)
+    d <- as.data.frame(jjbarstats_test)
+    fills <- function(pal) {
+        p <- jjbarstats(data = d, dep = "response", group = "treatment", palette = pal)$plot
+        f <- tempfile(fileext = ".svg"); svglite::svglite(f, 8, 6)
+        w <- character()
+        withCallingHandlers(print(p), warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
+        grDevices::dev.off()
+        x <- paste(readLines(f, warn = FALSE), collapse = ""); unlink(f)
+        list(svg = x, warnings = w)
+    }
+    a <- fills("Dark2"); b <- fills("gdoc")
+    expect_false(identical(a$svg, b$svg))
+    expect_false(any(grepl("package::palette", c(a$warnings, b$warnings))))
+})
+
+test_that("removed options are rejected rather than silently ignored", {
+    data(jjbarstats_test)
+    for (arg in list(list(pairwisecomparisons = TRUE), list(padjustmethod = "holm"), list(excl = TRUE)))
+        expect_error(do.call(jjbarstats, c(list(data = jjbarstats_test, dep = "response", group = "treatment"), arg)),
+                     "unused argument")
 })

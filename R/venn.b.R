@@ -475,7 +475,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     if (anyDuplicated(selected_vars)) {
                         dupes <- unique(selected_vars[duplicated(selected_vars)])
                         jmvcore::reject(
-                            "The same variable is selected more than once ({}). Each set in a Venn diagram must be a different variable.",
+                            .("The same variable is selected more than once ({}). Each set in a Venn diagram must be a different variable."),
                             code = NULL, paste(dupes, collapse = ", "))
                     }
                     safe_lookup <- make.names(selected_vars, unique = TRUE)
@@ -497,7 +497,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                         }, error = function(e) {
                             # Route the raw column name through jamovi's escaped error channel
                             jmvcore::reject(
-                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                .("Error processing variable '{}': {}. Try using backticks around the variable name: `{}`"),
                                 code = NULL, var1, e$message, var1)
                         })
                     }
@@ -508,7 +508,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             name_mapping[[safe_name2]] <- var2
                         }, error = function(e) {
                             jmvcore::reject(
-                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                .("Error processing variable '{}': {}. Try using backticks around the variable name: `{}`"),
                                 code = NULL, var2, e$message, var2)
                         })
                     }
@@ -519,7 +519,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             name_mapping[[safe_name3]] <- var3
                         }, error = function(e) {
                             jmvcore::reject(
-                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                .("Error processing variable '{}': {}. Try using backticks around the variable name: `{}`"),
                                 code = NULL, var3, e$message, var3)
                         })
                     }
@@ -530,7 +530,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             name_mapping[[safe_name4]] <- var4
                         }, error = function(e) {
                             jmvcore::reject(
-                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                .("Error processing variable '{}': {}. Try using backticks around the variable name: `{}`"),
                                 code = NULL, var4, e$message, var4)
                         })
                     }
@@ -541,7 +541,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             name_mapping[[safe_name5]] <- var5
                         }, error = function(e) {
                             jmvcore::reject(
-                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                .("Error processing variable '{}': {}. Try using backticks around the variable name: `{}`"),
                                 code = NULL, var5, e$message, var5)
                         })
                     }
@@ -552,7 +552,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             name_mapping[[safe_name6]] <- var6
                         }, error = function(e) {
                             jmvcore::reject(
-                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                .("Error processing variable '{}': {}. Try using backticks around the variable name: `{}`"),
                                 code = NULL, var6, e$message, var6)
                         })
                     }
@@ -563,7 +563,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             name_mapping[[safe_name7]] <- var7
                         }, error = function(e) {
                             jmvcore::reject(
-                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                .("Error processing variable '{}': {}. Try using backticks around the variable name: `{}`"),
                                 code = NULL, var7, e$message, var7)
                         })
                     }
@@ -691,12 +691,11 @@ vennClass <- if (requireNamespace('jmvcore'))
                         # word "positive" appears throughout the prose panels, so the
                         # mapping has to be visible somewhere.
                         if (nrow(summaryData) > 0 && !all(is.na(summaryData$Level)))
-                            self$results$summary$setNote("levels", paste0(
-                                "\"True\" means the variable equals the level selected for it: ",
-                                paste(sprintf("%s = %s", summaryData$Variable,
-                                              ifelse(is.na(summaryData$Level), "(not set)", summaryData$Level)),
-                                      collapse = "; "),
-                                ". Every count, percentage and sentence below calls that level positive."))
+                            self$results$summary$setNote("levels", .fmt(
+                                .("\"True\" means the variable equals the level selected for it: {levels}. Every count, percentage and sentence below calls that level positive."),
+                                levels = paste(sprintf("%s = %s", summaryData$Variable,
+                                              ifelse(is.na(summaryData$Level), .("(not set)"), summaryData$Level)),
+                                      collapse = "; ")))
                     }
 
                     # Small-sample / low-prevalence advisories go to the always-visible
@@ -2081,7 +2080,7 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                     if (n_all > max_rows) {
                         try({ table$setNote("truncated", .fmt(
-                            "Showing the first {shown} of {total} cases. Enable <b>Add membership groups to data</b> to get the group for every case as a dataset column; rendering one table row per case is slow and is capped here.",
+                            .("Showing the first {shown} of {total} cases. Enable <b>Add membership groups to data</b> to get the group for every case as a dataset column; rendering one table row per case is slow and is capped here."),
                             shown = max_rows, total = n_all)) }, silent = TRUE)
                     } else {
                         try({ table$setNote("truncated", NULL) }, silent = TRUE)
@@ -2103,7 +2102,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 }, error = function(e) {
                     self$results$membershipTable$setNote(
                         key = "error",
-                        note = paste("Error in generating membership table:", e$message)
+                        note = .fmt(.("Error in generating membership table: {err}"), err = e$message)
                     )
                 })
             },

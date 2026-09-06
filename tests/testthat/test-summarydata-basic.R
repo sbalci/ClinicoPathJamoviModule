@@ -48,10 +48,9 @@ test_that("summarydata handles required arguments correctly", {
 })
 
 test_that("summarydata requires variables to be specified", {
-  # The source schema requires vars for R calls. Until generated bindings are
-  # refreshed, an explicit NULL reaches jmvcore's zero-column select path and
-  # fails before the backend. The jamovi UI can still show its welcome panel
-  # before a variable is selected.
+  # `vars` defaults to NULL in the schema, but an explicit NULL still reaches
+  # jmvcore's zero-column select path and fails before the backend. The jamovi
+  # UI can still show its welcome panel before a variable is selected.
   expect_error(
     summarydata(data = summarydata_test, vars = NULL),
     "row.names"

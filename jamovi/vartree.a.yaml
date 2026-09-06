@@ -58,6 +58,7 @@ options:
     - name: vars
       title: Variables
       type: Variables
+      default: NULL
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
       description:

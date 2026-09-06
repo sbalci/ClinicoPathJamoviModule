@@ -125,7 +125,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (nrow(self$data) == 0) {
                 html <- paste0(
                     "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
-                    "<h4 style='margin-top: 0;'> No Data Available</h4>",
+                    "<h4 style='margin-top: 0;'>", .("No Data Available"), "</h4>",
                     "<p>", .("Data contains no (complete) rows."), "</p>",
                     "<p>", .("Please check your data for missing values or filtering issues."), "</p>",
                     "</div>"
@@ -150,7 +150,9 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # distribution (verified: one Inf among 200 values -> nrow(bfd) = 91,
             # five recycling warnings). R warnings never reach the jamovi results
             # pane, so nothing would tell the user.
-            n_nonfinite <- sum(!is.na(var_data) & !is.finite(var_data))
+            # is.na(NaN) is TRUE, so `!is.na & !is.finite` counted only +/-Inf
+            # and the notice under-reported by every NaN it names.
+            n_nonfinite <- sum(is.nan(var_data) | is.infinite(var_data))
             var_data[!is.finite(var_data)] <- NA
             if (n_nonfinite > 0)
                 private$.addNotice("WARNING", .("Non-finite values excluded"),
@@ -163,9 +165,14 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (valid_count < 30) {
                 html <- paste0(
                     "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
-                    "<h4 style='margin-top: 0;'> Insufficient Data</h4>",
-                    "<p>", .("Benford's Law analysis requires at least <strong>30 valid observations</strong> for meaningful results."), "</p>",
-                    "<p><strong>", .("Current data:"), "</strong> ", valid_count, " ", .("valid observations"), "</p>",
+                    "<h4 style='margin-top: 0;'>", .("Insufficient Data"), "</h4>",
+                    # Markup stays outside the .() literal: the threshold is
+                    # passed in already bolded, so the translator sees one
+                    # plain sentence with a {n} field.
+                    "<p>", jmvcore::format(.("Benford's Law analysis requires at least {n} valid observations for meaningful results."),
+                                           n = "<strong>30</strong>"), "</p>",
+                    "<p><strong>", jmvcore::format(.("Current data: {n} valid observations"),
+                                                   n = valid_count), "</strong></p>",
                     "<hr style='border-color: #dc3545;'>",
                     "<p><strong>", .("Recommendations:"), "</strong></p>",
                     "<ol style='margin-left: 20px;'>",
@@ -192,12 +199,12 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 html <- paste0(
                     "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0; color: inherit;'>",
-                    "<h4 style='margin-top: 0;'> Invalid Values Detected</h4>",
+                    "<h4 style='margin-top: 0;'>", .("Invalid Values Detected"), "</h4>",
                     "<p><strong>", .("Benford's Law only applies to positive numbers."), "</strong></p>",
                     "<p>", .("Your data contains:"), "</p>",
                     "<ul style='margin-left: 20px;'>",
-                    if (zero_count > 0) paste0("<li>", zero_count, " ", .("zero values"), "</li>") else "",
-                    if (negative_count > 0) paste0("<li>", negative_count, " ", .("negative values"), "</li>") else "",
+                    if (zero_count > 0) paste0("<li>", jmvcore::format(.("{n} zero values"), n = zero_count), "</li>") else "",
+                    if (negative_count > 0) paste0("<li>", jmvcore::format(.("{n} negative values"), n = negative_count), "</li>") else "",
                     "</ul>",
                     "<hr style='border-color: #dc3545;'>",
                     "<p><strong>", .("Solutions:"), "</strong></p>",
@@ -237,7 +244,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (magnitude_range < 2) {
                 html <- paste0(
                     "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; color: inherit;'>",
-                    "<h4 style='margin-top: 0;'> Limited Data Range</h4>",
+                    "<h4 style='margin-top: 0;'>", .("Limited Data Range"), "</h4>",
                     "<p><strong>", .("Warning: Data spans less than two orders of magnitude."), "</strong></p>",
                     "<p>", .("Benford's Law works best when data spans multiple orders of magnitude (e.g., values ranging from 10 to 1000+)."), "</p>",
                     # One sentence, one .(). The range used to be assembled from
@@ -273,10 +280,16 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$dataWarning$setContent(html)
                 self$results$dataWarning$setVisible(TRUE)
                 private$.addNotice("WARNING", .("Data span less than two orders of magnitude"),
-                    jmvcore::format(.("Values run from {min} to {max}, a range of {decades} orders of magnitude. Benford's Law describes data spanning several orders of magnitude; between one and two decades the leading-digit frequencies are dominated by where the range starts and stops rather than by Benford's Law, so the tests below are not calibrated and can report a large departure for data that were recorded perfectly (on simulated conforming data spanning 1.3 decades the chi-square test rejected in 38 percent of runs at a nominal 5 percent). The statistics are shown for completeness, but the leading-digit finding is reported as \u{201C}Not assessable\u{201D} for this variable rather than being interpreted."),
+                    jmvcore::format(.("Values run from {min} to {max}, a range of {decades} orders of magnitude. Benford's Law describes data spanning several orders of magnitude; between one and two decades the leading-digit frequencies are dominated by where the range starts and stops rather than by Benford's Law, so the tests below are not calibrated and can report a large departure for data that were recorded perfectly (on simulated conforming data spanning 1.3 decades the chi-square test rejected in 38 percent of runs at a nominal 5 percent). The statistics are shown for completeness, but the leading-digit finding is reported as {finding} for this variable rather than being interpreted."),
                             min = base::format(round(min_val, 2)),
                             max = base::format(round(max_val, 2)),
-                            decades = sprintf("%.2f", magnitude_range)))
+                            decades = sprintf("%.2f", magnitude_range),
+                            # Curly quotes are non-ASCII, and a non-ASCII
+                            # character inside a .() literal lands in the
+                            # catalog as the literal "\u{201C}" escape, so the
+                            # msgid never matches at run time. They wrap the
+                            # (already translated) Assessment label here instead.
+                            finding = paste0("\u{201C}", .("Not assessable"), "\u{201D}")))
                 # Continue with analysis but user is warned
             } else {
                 # Clear warnings if validation passes. Hiding the item as well
@@ -624,7 +637,16 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             interpret_title = .("How to interpret:"),
             interpret_text = .("Two measures are read together. The MAD (Mean Absolute Deviation) conformity label from the benford.analysis package measures the SIZE of the departure against Nigrini's digit-count-specific cutoffs, and its label is only used once the sample is large enough for those cutoffs to exceed the deviation sampling noise alone produces (about 1000 observations at 1 digit, 5200 at 2, 10200 at 3); below that the summary table says so and the verdict comes from the chi-square test instead. The chi-square goodness-of-fit test asks whether ANY departure is detectable and gains power as N grows, so at large N it can flag a departure too small to move the MAD label - reported here as a detectable but small departure rather than as an all-clear. The flagged-observation count is bin membership, not an outlier count, and is descriptive only."),
             action_title = .("Reading the finding:"),
-            action_text = .("The Assessment row reports what the tests found, not how concerned to be - that judgement depends on how the variable was collected and belongs to you. \u{201C}No departure detected\u{201D} means the leading-digit frequencies are consistent with Benford's Law; it does not establish that the data are free of errors, because this test looks only at leading digits. \u{201C}Departure detected\u{201D} means the frequencies differ from Benford's Law by more than sampling noise explains; systematic rounding, preferred or repeated values, truncation at a detection limit, and a subset of records entered differently all produce this, as does a variable that simply does not follow Benford's Law, and the test does not distinguish among them. \u{201C}Not assessable\u{201D} means the data span less than two orders of magnitude, where the method does not apply. \u{201C}Limited evidence\u{201D} means the sample is too small for the tests to resolve anything but a very large departure.")
+            # The four Assessment labels are passed in as placeholders: they are
+            # translated once (the same .() strings .interpretResults() writes
+            # into the table), and the curly quotes stay out of the msgid, where
+            # they would otherwise be stored as the literal "\u{201C}" escape.
+            action_text = jmvcore::format(
+                .("The Assessment row reports what the tests found, not how concerned to be - that judgement depends on how the variable was collected and belongs to you. {nodeparture} means the leading-digit frequencies are consistent with Benford's Law; it does not establish that the data are free of errors, because this test looks only at leading digits. {departure} means the frequencies differ from Benford's Law by more than sampling noise explains; systematic rounding, preferred or repeated values, truncation at a detection limit, and a subset of records entered differently all produce this, as does a variable that simply does not follow Benford's Law, and the test does not distinguish among them. {notassessable} means the data span less than two orders of magnitude, where the method does not apply. {limited} means the sample is too small for the tests to resolve anything but a very large departure."),
+                nodeparture   = paste0("\u{201C}", .("No departure detected"), "\u{201D}"),
+                departure     = paste0("\u{201C}", .("Departure detected"), "\u{201D}"),
+                notassessable = paste0("\u{201C}", .("Not assessable"), "\u{201D}"),
+                limited       = paste0("\u{201C}", .("Limited evidence"), "\u{201D}"))
             )
             return(explanation)
         },
@@ -797,7 +819,11 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$explanation$setContent(explanation)
             
             # Guidelines
-            doclink <- .("Package documentation")
+            # The link is built first and dropped into ONE translated sentence,
+            # so the translator gets "For technical details, see {link}" rather
+            # than a dangling "For technical details, see" fragment.
+            doclink <- paste0("<a href='https://github.com/carloscinelli/benford.analysis' target='_blank'>",
+                              .("Package documentation"), "</a>")
             guidelines <- glue::glue("
                 <div style='padding: 10px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 3px; color: inherit;'>
                     <p><strong>{guidelines_title}</strong></p>
@@ -807,7 +833,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         <li>{guideline3}</li>
                     </ul>
                     <p style='margin-bottom: 0; font-size: 14px;'>
-                        {more_info} <a href='https://github.com/carloscinelli/benford.analysis' target='_blank'>{doclink}</a>
+                        {more_info}
                     </p>
                 </div>
                 ",
@@ -815,8 +841,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 guideline1 = .("Ensure data represents naturally occurring numbers (not artificial ranges)"),
                 guideline2 = .("Minimum 100-1000 observations recommended for reliable results"),
                 guideline3 = .("1-digit analysis has only 9 bins, so its MAD conformity label becomes usable at about 1000 observations against about 5200 for 2 digits; 2-digit analysis is more sensitive but needs the larger sample"),
-                more_info = .("For technical details, see"),
-                doclink = doclink
+                more_info = jmvcore::format(.("For technical details, see {link}"), link = doclink)
             )
 
             self$results$todo$setContent(guidelines)
@@ -957,7 +982,13 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Third, show Chi-square goodness-of-fit test
                 self$results$summary$setRow(rowKey=3L, values=list(
-                    value=sprintf("X\u{00B2} = %.2f, df = %d", interpretation$chisq_statistic, interpretation$chisq_df),
+                    # "df" is prose and translatable; the X-squared symbol is
+                    # non-ASCII and is passed in rather than written into the
+                    # msgid, where it would be catalogued as a literal escape.
+                    value=jmvcore::format(.("{chi} = {stat}, df = {df}"),
+                                          chi = "X\u{00B2}",
+                                          stat = sprintf("%.2f", interpretation$chisq_statistic),
+                                          df = interpretation$chisq_df),
                     interpretation=jmvcore::format(.("p-value = {p}. This is the test the Assessment row is based on."),
                                                    p = private$.fmtP(interpretation$chisq_pvalue))
                 ))
@@ -988,9 +1019,10 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # 3-digit, n=300, exactly-Benford -> "2nL2 = 9.68, df = 2,
                 # p-value = 0.0079" directly above "No departure detected".
                 self$results$summary$setRow(rowKey=4L, values=list(
-                    value=sprintf("2nL\u{00B2} = %.2f, df = %d",
-                                  2 * interpretation$n_used * interpretation$mat_statistic,
-                                  interpretation$mat_df),
+                    value=jmvcore::format(.("{stat2nl} = {stat}, df = {df}"),
+                                          stat2nl = "2nL\u{00B2}",
+                                          stat = sprintf("%.2f", 2 * interpretation$n_used * interpretation$mat_statistic),
+                                          df = interpretation$mat_df),
                     interpretation=jmvcore::format(.("p-value = {p}. Supplementary: this test examines the mantissa distribution rather than the leading digits, and the Assessment row is not based on it. On data that follow Benford's Law it reaches p below 0.05 about once in twenty runs, like any other test, so a small p-value here alongside a chi-square p-value that is not small is an ordinary result rather than a contradiction."),
                                                    p = private$.fmtP(interpretation$mat_pvalue))
                 ))
@@ -1036,10 +1068,13 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 # User-friendly error messages with clinical context
-                if (grepl("NA|NaN", e$message)) {
+                # Whole-word match: the bare "NA|NaN" also matched "NAMESPACE",
+                # "unNAmed" and any other substring, sending unrelated errors to
+                # the missing-values message.
+                if (grepl("\\b(NA|NaN)\\b", e$message)) {
                     error_msg <- .("Error: Variable contains missing or non-numeric values that cannot be analyzed. Please ensure your selected variable contains valid numeric data.")
                 } else if (grepl("insufficient", e$message, ignore.case = TRUE)) {
-                    error_msg <- .("Error: Insufficient data for Benford's Law analysis. This test requires at least 30-50 valid observations. Consider combining data or using a different variable.")
+                    error_msg <- .("Error: Insufficient data for Benford's Law analysis. This test requires at least 30 valid observations. Consider combining data or using a different variable.")
                 } else {
                     # jmvcore::format rather than glue::glue: the template is a
                     # translated .() string and glue evaluates {} contents as R
@@ -1100,7 +1135,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Show full table for 1-digit analysis
                 digit_labels <- 1:9
                 dist_table <- paste0(dist_table,
-                    sprintf("%-8s | %-10s | %-10s | %-10s\n", "Digit", "Expected %", "Observed %", "Deviation"),
+                    sprintf("%-8s | %-10s | %-10s | %-10s\n", .("Digit"), .("Expected %"), .("Observed %"), .("Deviation")),
                     paste(rep("-", 50), collapse = ""), "\n"
                 )
 
@@ -1124,7 +1159,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     jmvcore::format(.("Number of combinations analyzed: {bins}"),
                                     bins = length(observed_props)), "\n",
                     "\n", .("Most-deviating digit combinations:"), "\n",
-                    sprintf("%-8s | %-10s | %-10s | %-10s\n", "Digits", "Expected %", "Observed %", "Deviation"),
+                    sprintf("%-8s | %-10s | %-10s | %-10s\n", .("Digits"), .("Expected %"), .("Observed %"), .("Deviation")),
                     paste(rep("-", 50), collapse = ""), "\n"
                 )
                 bfd_df <- as.data.frame(benford_obj$bfd)
@@ -1163,7 +1198,11 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "  ", jmvcore::format(.("MAD: {mad} ({label})"),
                               mad = round(benford_obj$MAD, 6),
                               label = benford_obj$MAD.conformity), "\n",
-                "  ", jmvcore::format(.("Mantissa Arc Test: L\u{00B2} = {stat} (p = {p})"),
+                # L-squared symbol passed in, not written into the msgid (it
+                # was catalogued as the literal "\u{00B2}" escape and never
+                # matched at run time).
+                "  ", jmvcore::format(.("Mantissa Arc Test: {l2} = {stat} (p = {p})"),
+                              l2 = "L\u{00B2}",
                               stat = round(benford_obj$stats$mantissa.arc.test$statistic, 4),
                               p = format.pval(benford_obj$stats$mantissa.arc.test$p.value, digits = 4, eps = 0.0001)), "\n"
             )

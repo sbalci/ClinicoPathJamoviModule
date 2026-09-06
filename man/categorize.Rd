@@ -30,17 +30,21 @@ categorize(
 
 \item{method}{Method for creating bins. Options are 'equal' for equal-width
 intervals, 'quantile' for quantile-based bins, 'manual' for custom break
-points, 'meansd' for mean +/- standard deviation bins, 'median' for median
-split, or 'jenks' for Fisher-Jenks natural breaks clustering. Jenks breaks
-are computed exactly up to 20000 observations; above that classInt works
-from a fixed-seed subsample and a note reports its size. Repeated runs
-always give identical break points.}
+points, 'meansd' for cut points at the mean and at mean +/- k SD (four
+bands, as in SPSS Visual Binning; a band that falls outside the data is
+dropped and reported), 'median' for median split, or 'jenks' for
+Fisher-Jenks natural breaks clustering. Jenks breaks are computed exactly
+up to 20000 observations; above that classInt works from a fixed-seed
+subsample and a note reports its size. Repeated runs always give identical
+break points.}
 
 \item{nbins}{Number of categories to create (2-20). Used for equal,
 quantile, and jenks methods.}
 
 \item{breaks}{Comma-separated break points for manual binning (e.g., "0,
-25, 50, 75, 100"). Values should be in ascending order.}
+25, 50, 75, 100"). Entries are sorted and duplicates removed, and the data
+minimum and maximum are added around them unless out-of-range exclusion is
+on.}
 
 \item{sdmult}{Multiplier for standard deviation when using meansd method
 (default = 1).}

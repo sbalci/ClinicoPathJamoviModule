@@ -8,7 +8,7 @@ test_that("jjbarstats handles all statistical types", {
 
   data(jjbarstats_test)
 
-  statistics_types <- c("parametric", "nonparametric", "robust", "bayes")
+  statistics_types <- c("parametric", "bayes")
 
   for (stat_type in statistics_types) {
     result <- jjbarstats(
@@ -73,45 +73,6 @@ test_that("jjbarstats handles all clinical presets", {
     clinicalpreset = "riskfactor"
   )
   expect_s3_class(result5, "jjbarstatsResults")
-})
-
-test_that("jjbarstats handles all p-value adjustment methods", {
-
-  data(jjbarstats_test)
-
-  adjust_methods <- c("holm", "hochberg", "hommel", "bonferroni",
-                     "BH", "BY", "fdr", "none")
-
-  for (method in adjust_methods) {
-    result <- jjbarstats(
-      data = jjbarstats_test,
-      dep = "response",
-      group = "treatment",
-      pairwisecomparisons = TRUE,
-      padjustmethod = method
-    )
-
-    expect_s3_class(result, "jjbarstatsResults")
-  }
-})
-
-test_that("jjbarstats handles all pairwise display modes", {
-
-  data(jjbarstats_test)
-
-  display_modes <- c("significant", "non-significant", "everything")
-
-  for (mode in display_modes) {
-    result <- jjbarstats(
-      data = jjbarstats_test,
-      dep = "response",
-      group = "treatment",
-      pairwisecomparisons = TRUE,
-      pairwisedisplay = mode
-    )
-
-    expect_s3_class(result, "jjbarstatsResults")
-  }
 })
 
 test_that("jjbarstats handles split-by variable combinations", {
@@ -319,9 +280,6 @@ test_that("jjbarstats handles comprehensive parameter combinations", {
     group = "treatment",
     grvar = "sex",
     typestatistics = "parametric",
-    pairwisecomparisons = TRUE,
-    padjustmethod = "bonferroni",
-    pairwisedisplay = "significant",
     clinicalpreset = "treatment",
     label = "both",
     digits = 2,

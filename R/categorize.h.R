@@ -185,7 +185,9 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Categorize Continuous Variables",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "classInt",
+                    "dichotomizing"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -380,15 +382,19 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param var A numeric variable to be categorized into bins.
 #' @param method Method for creating bins. Options are 'equal' for equal-width
 #'   intervals, 'quantile' for quantile-based bins, 'manual' for custom break
-#'   points, 'meansd' for mean +/- standard deviation bins, 'median' for median
-#'   split, or 'jenks' for Fisher-Jenks natural breaks clustering. Jenks breaks
-#'   are computed exactly up to 20000 observations; above that classInt works
-#'   from a fixed-seed subsample and a note reports its size. Repeated runs
-#'   always give identical break points.
+#'   points, 'meansd' for cut points at the mean and at mean +/- k SD (four
+#'   bands, as in SPSS Visual Binning; a band that falls outside the data is
+#'   dropped and reported), 'median' for median split, or 'jenks' for
+#'   Fisher-Jenks natural breaks clustering. Jenks breaks are computed exactly
+#'   up to 20000 observations; above that classInt works from a fixed-seed
+#'   subsample and a note reports its size. Repeated runs always give identical
+#'   break points.
 #' @param nbins Number of categories to create (2-20). Used for equal,
 #'   quantile, and jenks methods.
 #' @param breaks Comma-separated break points for manual binning (e.g., "0,
-#'   25, 50, 75, 100"). Values should be in ascending order.
+#'   25, 50, 75, 100"). Entries are sorted and duplicates removed, and the data
+#'   minimum and maximum are added around them unless out-of-range exclusion is
+#'   on.
 #' @param sdmult Multiplier for standard deviation when using meansd method
 #'   (default = 1).
 #' @param labels How to label the resulting categories.

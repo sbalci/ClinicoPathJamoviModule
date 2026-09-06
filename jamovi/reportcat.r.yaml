@@ -6,11 +6,12 @@ jrs:   '1.1'
 items:
 
 # Panel visibility is managed procedurally in .b.R: .resetOutputs() hides every
-# panel at the top of .run(), and each populate path pairs setContent() with
-# setVisible(TRUE). `visible: false` here is only the initial state. This
-# replaces setContent("") clearing (stray empty headings) and cannot be done
-# declaratively: `visible: (!vars)` fails jmvcore's routing regex and is
-# silently ALWAYS visible.
+# panel (welcome state, and once fatal validation has passed), and each populate
+# path pairs setContent() with setVisible(TRUE). `visible: false` here is only
+# the initial state. This replaces setContent("") clearing (stray empty
+# headings) and cannot be done declaratively: `visible: (!vars)` fails jmvcore's
+# routing regex and is silently ALWAYS visible. Fatal validation uses
+# jmvcore::reject(), so there is no error panel.
     - name:  todo
       title: To Do
       type:  Html
@@ -60,13 +61,6 @@ items:
 
     - name:  dataWarnings
       title: 'Data Warnings'
-      type:  Html
-      visible: false
-      clearWith:
-          - vars
-
-    - name:  error
-      title: 'Error Message'
       type:  Html
       visible: false
       clearWith:

@@ -28,14 +28,13 @@ jjbarstats(
 # ═══════════════════════════════════════════════════════════
 # Example 2: With Pairwise Comparisons
 # ═══════════════════════════════════════════════════════════
-# Scenario: Post-hoc tests for treatment group differences
+# Scenario: Proportion tests within each treatment group
 
 jjbarstats(
   data = jjbarstats_test,
   dep = "response",
   group = "treatment",
-  pairwisecomparisons = TRUE,
-  padjustmethod = "holm",
+  proportiontest = TRUE,
   label = "both"  # Show counts and percentages
 )
 
@@ -112,8 +111,7 @@ jjbarstats(
   dep = "her2_status",
   group = "subtype",
   clinicalpreset = "biomarker",
-  typestatistics = "parametric",
-  pairwisecomparisons = TRUE
+  typestatistics = "parametric"
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -158,7 +156,7 @@ jjbarstats(
 )
 
 # ═══════════════════════════════════════════════════════════
-# Example 11: Nonparametric Analysis (Fisher's Exact Test)
+# Example 11: Sparse table (Fisher's exact test is reported automatically)
 # ═══════════════════════════════════════════════════════════
 # Scenario: Small sample size or sparse contingency table
 
@@ -168,8 +166,7 @@ small_sample <- jjbarstats_test[1:30, ]
 jjbarstats(
   data = small_sample,
   dep = "response",
-  group = "treatment",
-  typestatistics = "nonparametric"
+  group = "treatment"
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -182,8 +179,7 @@ jjbarstats(
   dep = "response",
   group = "treatment",
   grvar = "age_group",
-  typestatistics = "parametric",
-  pairwisecomparisons = TRUE
+  typestatistics = "parametric"
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -226,8 +222,6 @@ jjbarstats(
   group = "treatment",
   grvar = "tumor_stage",
   typestatistics = "parametric",
-  pairwisecomparisons = TRUE,
-  padjustmethod = "bonferroni",
   clinicalpreset = "treatment",
   showSummary = TRUE,
   showAssumptions = TRUE,

@@ -2719,6 +2719,12 @@ diagnosticmetaClass <- R6::R6Class(
 
             inv_lr_neg <- if (is.finite(lr_neg) && lr_neg > 0) 1 / lr_neg else NA_real_
 
+            # TODO (i18n): the two .() strings below containing " [[APPROX]]" are
+            #   truncated by jmvcore's translator when no catalog entry matches -
+            #   its regex "(.*) \\[(.*)\\]" treats ' [...]' as a msgctxt marker and
+            #   drops everything from the space-bracket on (found by
+            #   /check-function jjpiestats, 2026-09-06). Move the [[APPROX]] token
+            #   outside the .() call or drop the space before it.
             plr_text <- if (is.finite(lr_pos)) {
                 paste0("<p>", sprintf(.("<strong>Positive Likelihood Ratio:</strong> %.2f - A positive test is %.1fx more likely in disease than healthy"),
                         lr_pos, lr_pos), "</p>")

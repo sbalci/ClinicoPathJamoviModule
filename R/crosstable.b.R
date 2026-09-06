@@ -419,7 +419,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 # Report any critical issues
                 if (length(validation_results$issues) > 0) {
-                    jmvcore::reject("Variable name issues detected: {}",
+                    jmvcore::reject(.("Variable name issues detected: {}"),
                                     code = NULL,
                                     paste(validation_results$issues, collapse = "; "))
                 }
@@ -447,13 +447,10 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                             missing_vars <- user_vars[is.na(matched_indices)]
                             private$.addNotice(
                                 "WARNING",
-                                "Some selected variables were left out of the table",
-                                paste0(
-                                    "These variables could not be matched to a column in the data: ",
-                                    paste(missing_vars, collapse = ", "),
-                                    " - so no rows are shown for them and they are not included in any test. ",
-                                    "This usually happens when a column was renamed, removed or re-typed after it was selected. ",
-                                    "Re-select them in the Variables box, or drop them from the selection to clear this message."
+                                .("Some selected variables were left out of the table"),
+                                .fmt(
+                                    .("These variables could not be matched to a column in the data: {vars} - so no rows are shown for them and they are not included in any test. This usually happens when a column was renamed, removed or re-typed after it was selected. Re-select them in the Variables box, or drop them from the selection to clear this message."),
+                                    vars = paste(missing_vars, collapse = ", ")
                                 )
                             )
                         }
@@ -476,14 +473,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 }, error = function(e) {
                     jmvcore::reject(
-                        paste0(
-                            "The selected variables could not be matched to the columns in the data, ",
-                            "so no cross table could be built. Re-select the variables and grouping ",
-                            "variable, or check that the data still contains those columns. ",
-                            "Technical detail: {}"
+                        .fmt(
+                            .("The selected variables could not be matched to the columns in the data, so no cross table could be built. Re-select the variables and grouping variable, or check that the data still contains those columns. Technical detail: {err}"),
+                            err = conditionMessage(e)
                         ),
-                        code = NULL,
-                        conditionMessage(e)
+                        code = NULL
                     )
                 })
 
@@ -492,24 +486,16 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # would otherwise swallow the message and replace it with a generic one.
                 if (length(mygroup) == 0) {
                     jmvcore::reject(
-                        paste0(
-                            "The grouping variable '{}' could not be matched to a column in the data, ",
-                            "so there are no groups to compare across and no table can be built. ",
-                            "This usually happens when the column was renamed, removed or re-typed after ",
-                            "it was selected. Re-select the grouping variable in the Group box."
+                        .fmt(
+                            .("The grouping variable '{group}' could not be matched to a column in the data, so there are no groups to compare across and no table can be built. This usually happens when the column was renamed, removed or re-typed after it was selected. Re-select the grouping variable in the Group box."),
+                            group = self$options$group
                         ),
-                        code = NULL,
-                        self$options$group
+                        code = NULL
                     )
                 }
                 if (length(myvars) == 0) {
                     jmvcore::reject(
-                        paste0(
-                            "None of the selected variables could be matched to a column in the data, ",
-                            "so the table would have no rows. This usually happens when the columns were ",
-                            "renamed or removed after they were selected. Re-select the variables in the ",
-                            "Variables box."
-                        )
+                        .("None of the selected variables could be matched to a column in the data, so the table would have no rows. This usually happens when the columns were renamed or removed after they were selected. Re-select the variables in the Variables box.")
                     )
                 }
 
@@ -662,12 +648,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 group_display <- if (!is.null(self$options$group) && self$options$group != "") {
                     self$options$group
                 } else {
-                    "No group selected"
+                    .("No group selected")
                 }
                 # `subtitle` is a Preformatted item, which renders its content
                 # literally - it is not an HTML sink, so escaping here would print
                 # "Ki-67 &gt;20%" instead of the column name the user chose.
-                self$results$subtitle$setContent(paste0("Cross Table Analysis - Grouped by ", group_display))
+                self$results$subtitle$setContent(.fmt(.("Cross Table Analysis - Grouped by {group}"), group = group_display))
 
                 # Provide additional information when using 'finalfit' style.
                 if (sty == "finalfit") {
@@ -675,14 +661,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     # call below, so Welch's t-test is never run. Verified against
                     # finalfit 1.1.0 on two groups of n = 30 with SD 1 vs SD 4:
                     # finalfit p = 0.581 = aov = pooled t-test; Welch = 0.583.
-                    todo2 <- glue::glue(
-                        "<br>
+                    todo2 <- .("<br>
                          <b>finalfit</b> style compares continuous variables with <em>aov</em> (one-way analysis of variance) when Mean (SD) is displayed. For two groups this is the pooled-variance t-test, so it assumes equal variances in the groups; that assumption is not checked here.
                          When Median (IQR) is displayed, Kruskal-Wallis is used instead (equivalent to the Mann-Whitney U / Wilcoxon rank sum test in two-group settings).
                          Categorical variables use the chi-square or Fisher's exact test selected in Options, and numeric variables with fewer than 5 distinct values, counting missing as one of them, are summarised as categories rather than as measurements.
                          See full documentation <a href='https://finalfit.org/reference/summary_factorlist.html'>here</a>.
-                         "
-                    )
+                         ")
                 } else {
                     todo2 <- ""
                 }
@@ -692,7 +676,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 if (nrow(self$data) == 0) {
                     # Use HTML error notice instead of dynamic Notice to avoid serialization errors
                     error_html <- .crosstableNoticeHTML(
-                        'Dataset contains no complete rows. Please check your data and filters.',
+                        .('Dataset contains no complete rows. Please check your data and filters.'),
                         type = "ERROR"
                     )
                     self$results$errorNotice$setContent(error_html)
@@ -1680,7 +1664,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 g <- droplevels(g)
                 if (nlevels(g) != 2) {
                     tab$setNote("smd",
-                        "Standardized mean differences require exactly two groups; the SMD table is shown only for a two-level grouping variable.")
+                        .("Standardized mean differences require exactly two groups; the SMD table is shown only for a two-level grouping variable."))
                     return()
                 }
                 levs <- levels(g)
@@ -1701,11 +1685,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     # -4.02. It is also unsigned, so the direction of the imbalance
                     # is lost. Numeric columns therefore keep the continuous SMD.
                     isNum <- is.numeric(x) && !is.factor(x)
-                    smd <- NA_real_; vtype <- "categorical"
+                    smd <- NA_real_; vtype <- .("categorical")
                     if (isNum) {
                         # Label numeric codes so this row cannot contradict the
                         # coded-variable note above the table.
-                        vtype <- if (.crosstableIsCategorical(x)) "continuous (numeric codes)" else "continuous"
+                        vtype <- if (.crosstableIsCategorical(x)) .("continuous (numeric codes)") else .("continuous")
                         x1 <- x[i1]; x2 <- x[i2]
                         smd <- private$.smdContinuous(x1, x2)
                     } else {
@@ -1713,16 +1697,16 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     }
                     a <- abs(smd)
                     bal <- if (is.na(a)) "-"
-                           else if (a < 0.1) "negligible (< 0.1)"
-                           else if (a < 0.2) "small (0.1-0.2)"
-                           else "notable (>= 0.2)"
+                           else if (a < 0.1) .("negligible (< 0.1)")
+                           else if (a < 0.2) .("small (0.1-0.2)")
+                           else .("notable (>= 0.2)")
                     display_name <- .crosstableDisplayName(v, name_mapping)
                     tab$setRow(rowKey = display_name, values = list(
                         variable = display_name, vtype = vtype, smd = smd,
                         absSMD = a, balance = bal))
                 }
                 tab$setNote("smd", sprintf(
-                    "SMD between '%s' and '%s'. Continuous: (m1 - m2) / sqrt((s1^2 + s2^2)/2); numeric columns with 6 or fewer distinct values are labelled 'continuous (numeric codes)' and treat the codes as an interval scale. Categorical: multinomial SMD (Yang & Dalton, 2012). |SMD| < 0.1 conventionally indicates negligible imbalance.",
+                    .("SMD between '%s' and '%s'. Continuous: (m1 - m2) / sqrt((s1^2 + s2^2)/2); numeric columns with 6 or fewer distinct values are labelled 'continuous (numeric codes)' and treat the codes as an interval scale. Categorical: multinomial SMD (Yang & Dalton, 2012). |SMD| < 0.1 conventionally indicates negligible imbalance."),
                     levs[1], levs[2]))
             },
 

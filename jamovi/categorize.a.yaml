@@ -1,7 +1,7 @@
 ---
 name:  categorize
 title: Categorize Continuous Variables
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Preparation
 version: '1.0.8'
 jas: '1.2'
@@ -51,24 +51,26 @@ options:
       title: Binning method
       type: List
       options:
-        - title: Equal Intervals
+        - title: Equal intervals
           name: equal
         - title: Quantiles
           name: quantile
-        - title: Manual Breaks
+        - title: Manual break points
           name: manual
         - title: Mean +/- SD
           name: meansd
-        - title: Median Split
+        - title: Median split
           name: median
-        - title: Natural Breaks (Jenks)
+        - title: Natural breaks (Jenks)
           name: jenks
       default: quantile
       description:
           R: >
             Method for creating bins. Options are 'equal' for equal-width intervals,
             'quantile' for quantile-based bins, 'manual' for custom break points,
-            'meansd' for mean +/- standard deviation bins, 'median' for median split,
+            'meansd' for cut points at the mean and at mean +/- k SD (four bands, as in
+            SPSS Visual Binning; a band that falls outside the data is dropped and
+            reported), 'median' for median split,
             or 'jenks' for Fisher-Jenks natural breaks clustering. Jenks breaks are
             computed exactly up to 20000 observations; above that classInt works from
             a fixed-seed subsample and a note reports its size. Repeated runs always
@@ -95,9 +97,13 @@ options:
       description:
           R: >
             Comma-separated break points for manual binning (e.g., "0, 25, 50, 75, 100").
-            Values should be in ascending order.
+            Use a period as the decimal separator (2.5, not 2,5): the comma only
+            separates break points. Entries are sorted and duplicates removed, and
+            the data minimum and maximum are added around them unless out-of-range
+            exclusion is on.
           jamovi: >
             For manual binning, enter comma-separated break points (e.g., "0, 25, 50, 75, 100").
+            Use a period as the decimal separator (2.5, not 2,5).
 
     - name: sdmult
       title: SD multiplier
@@ -123,7 +129,7 @@ options:
           name: numbered
         - title: Lettered (A, B, C...)
           name: lettered
-        - title: Custom Labels
+        - title: Custom labels
           name: custom
       default: auto
       description:

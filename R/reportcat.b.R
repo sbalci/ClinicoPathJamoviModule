@@ -19,18 +19,10 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # select variables.
             self$results$aboutAnalysis$setContent(private$.generateAboutContent())
 
-            # Hide everything written by the previous run. clearWith only reacts
-            # to OPTIONS, and `vars` is the only option here, so a change in the
-            # DATA (row filter, edited cells) does not clear anything: without
-            # this, a validation early-return below would leave the previous
-            # run's fully formed numbers on screen underneath an error message.
-            # Hiding (not setContent("")) is the reset mechanism, so a panel
-            # that is not repopulated never renders a stray empty heading.
-            private$.resetOutputs()
-
             # Check if any variables have been selected.
             # Enhanced welcome message with HTML formatting for a more user-friendly experience.
             if (length(self$options$vars) == 0) {
+                private$.resetOutputs()
                 todo <- glue::glue("
         <div style='font-family: Arial, sans-serif;'>
           <h2>{welcome_title}</h2>
@@ -50,13 +42,15 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             } else {
 
-                # Enhanced input validation with proper error handling
+                # Fatal validation goes through jmvcore::reject(): jamovi greys
+                # the pane and shows the message with the previous results left
+                # in place while the user edits, instead of collapsing them to a
+                # lone error panel. reject() text is rendered as plain text by
+                # jamovi, so variable names are NOT html-escaped here.
                 if (nrow(self$data) == 0) {
-                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg}</div>",
-                        error_label = .("Error"),
-                        error_msg = .("The dataset has no rows. Check whether a row filter is excluding every case.")))
-                    self$results$error$setVisible(TRUE)
-                    return()
+                    jmvcore::reject(
+                        .("The dataset has no rows. Check whether a row filter is excluding every case."),
+                        code = "no_rows")
                 }
 
                 mydata <- self$data
@@ -67,33 +61,24 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # identity transform here, but it reads as if the names came back
                 # backtick-quoted, which would break the data[[ ]] lookups.)
                 myvars <- unlist(self$options$vars)
-                
-                # Comprehensive validation of selected variables
-                if (length(myvars) == 0) {
-                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg}</div>",
-                        error_label = .("Error"),
-                        error_msg = .("No valid variables selected.")))
-                    self$results$error$setVisible(TRUE)
-                    return()
-                }
-                
+
                 # No not-in-data check here: jmvcore rejects unknown variable
                 # names by name before .run() is entered (wrapper and GUI alike),
                 # so such a branch is unreachable - see the "handles missing
                 # variable names gracefully" regression test.
 
                 # Validate that selected variables are actually categorical
+                # (unreachable from the GUI - permitted: [factor] - and from the
+                # wrapper, which coerces with as.factor; kept as defence).
                 non_categorical <- myvars[!sapply(mydata[myvars], function(x) is.factor(x) || is.character(x))]
                 if (length(non_categorical) > 0) {
-                    self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg}: {vars}. {instruction}</div>",
-                        error_label = .("Error"),
-                        error_msg = .("Non-categorical variables detected"),
-                        vars = paste(htmltools::htmlEscape(non_categorical), collapse = ", "),
-                        instruction = .("Please select only categorical (factor or character) variables.")))
-                    self$results$error$setVisible(TRUE)
-                    return()
+                    jmvcore::reject(
+                        jmvcore::format(
+                            .("Non-categorical variables detected: {vars}. Please select only categorical (factor or character) variables."),
+                            vars = paste(non_categorical, collapse = ", ")),
+                        code = "not_categorical")
                 }
-                
+
                 # Check for empty factor levels or all-NA variables
                 empty_vars <- myvars[sapply(mydata[myvars], function(x) {
                     if (is.factor(x)) {
@@ -102,12 +87,28 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         all(is.na(x)) || length(unique(x[!is.na(x)])) == 0
                     }
                 })]
-                
+
+                if (length(empty_vars) == length(myvars)) {
+                    jmvcore::reject(
+                        jmvcore::format(
+                            .("Every selected variable was empty or all-missing, so there is nothing to summarise: {vars}. Select at least one variable that has observed categories."),
+                            vars = paste(empty_vars, collapse = ", ")),
+                        code = "all_empty")
+                }
+
+                # Validation passed: hide everything written by the previous run.
+                # clearWith only reacts to OPTIONS, and `vars` is the only option
+                # here, so a change in the DATA (row filter, edited cells) does
+                # not clear anything. Hiding (not setContent("")) is the reset
+                # mechanism, so a panel that is not repopulated never renders a
+                # stray empty heading. This runs AFTER the fatal checks so that a
+                # reject() leaves the previous results in place.
+                private$.resetOutputs()
+
                 if (length(empty_vars) > 0) {
                     # This is an advisory, not a failure: the analysis still runs
                     # on whatever is left. It goes to its own panel so it is not
-                    # captioned "Error", and so that the terminal message below
-                    # cannot overwrite the list of names it reports.
+                    # captioned "Error".
                     self$results$dataWarnings$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 4px; color: inherit;'><strong>{warning_label}:</strong> {warning_msg}: {vars}. {action}</div>",
                         warning_label = .("Warning"),
                         warning_msg = .("Variables with no valid levels or all missing values"),
@@ -117,14 +118,6 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # Remove empty variables from analysis
                     myvars <- myvars[!myvars %in% empty_vars]
-                    if (length(myvars) == 0) {
-                        self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border: 1px solid #f5c6cb; border-radius: 4px; color: inherit;'><strong>{error_label}:</strong> {error_msg} {action}</div>",
-                            error_label = .("Error"),
-                            error_msg = .("Every selected variable was empty or all-missing, so there is nothing to summarise."),
-                            action = .("See the Data Warnings panel for the variable names, and select at least one variable that has observed categories.")))
-                        self$results$error$setVisible(TRUE)
-                        return()
-                    }
                 }
 
                 # Function to generate a summary for a single categorical variable.
@@ -236,50 +229,53 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # jamovi poll for option/data changes before committing to it.
                 private$.checkpoint()
 
-                # RESTORED: Use gtExtras as intended - it works with categorical data too
+                # Use gtExtras as intended - it works with categorical data too
                 plot_dataset <- tryCatch({
-                    # Primary approach: Use gtExtras with proper categorical data handling
-                    cat_vars <- myvars[sapply(mydata[myvars], function(x) is.factor(x) || is.character(x))]
+                    # DISPLAY copy of the selected columns (all factor/character
+                    # after the validation above). gtExtras::gt_plt_summary()
+                    # injects column names and factor levels into the overview as
+                    # raw HTML - gt's body-cell escaping does not apply there -
+                    # so both are escaped BEFORE the pipe. The raw names stay in
+                    # `myvars`/`mydata` for every data[[ ]] lookup. `clean_data[] <-`
+                    # keeps the original column names; as.data.frame(lapply())
+                    # mangled "Tumor Grade" to "Tumor.Grade" via check.names.
+                    clean_data <- mydata[myvars]
+                    clean_data[] <- lapply(clean_data, function(x) {
+                        if (is.character(x)) x <- as.factor(x)
+                        levels(x) <- htmltools::htmlEscape(levels(x))
+                        x
+                    })
+                    names(clean_data) <- htmltools::htmlEscape(names(clean_data))
 
-                    if (length(cat_vars) > 0) {
-                        clean_data <- mydata[cat_vars]
+                    # Use gtExtras::gt_plt_summary with proper configuration for categorical data
+                    gt_table <- clean_data %>%
+                        gtExtras::gt_plt_summary() %>%
+                        gt::tab_header(
+                            title = gt::md(glue::glue("**{title}**", title = .("Categorical Variables Summary"))),
+                            subtitle = .("Distribution and missing value analysis")
+                        ) %>%
+                        gt::tab_options(
+                            table.font.size = 12,
+                            heading.title.font.size = 14,
+                            heading.subtitle.font.size = 11,
+                            table.width = gt::pct(100)
+                        )
 
-                        # Convert character to factor for better handling
-                        clean_data <- as.data.frame(lapply(clean_data, function(x) {
-                            if (is.character(x)) as.factor(x) else x
-                        }))
-
-                        # Use gtExtras::gt_plt_summary with proper configuration for categorical data
-                        gt_table <- clean_data %>%
-                            gtExtras::gt_plt_summary() %>%
-                            gt::tab_header(
-                                title = gt::md(glue::glue("**{title}**", title = .("Categorical Variables Summary"))),
-                                subtitle = .("Distribution and missing value analysis")
-                            ) %>%
-                            gt::tab_options(
-                                table.font.size = 12,
-                                heading.title.font.size = 14,
-                                heading.subtitle.font.size = 11,
-                                table.width = gt::pct(100)
-                            )
-
-                        # Convert to HTML using proper gt method
-                        html_output <- gt::as_raw_html(gt_table)
-                        htmltools::HTML(html_output)
-                    } else {
-                        htmltools::HTML(glue::glue("<div style='padding: 15px; background-color: rgba(138, 155, 172, 0.06); border: 1px solid #dee2e6; border-radius: 4px; color: inherit;'><p>{msg}</p></div>",
-                            msg = .("No categorical variables found.")))
-                    }
+                    # Convert to HTML using proper gt method
+                    html_output <- gt::as_raw_html(gt_table)
+                    htmltools::HTML(html_output)
                 }, error = function(e) {
-                    # Enhanced fallback with better styling
+                    # The primary error is the reason the visual summary was
+                    # replaced; both fallbacks print it in their prefix.
+                    reason <- conditionMessage(e)
                     tryCatch({
-                        private$.gtExtras_style_fallback_cat(mydata, myvars)
+                        private$.gtExtras_style_fallback_cat(mydata, myvars, reason)
                     }, error = function(e2) {
                         # Final fallback to simple table. It is wrapped too: this
                         # handler runs OUTSIDE the tryCatch above, so an error
                         # raised here would escape .run() as a raw R error.
                         tryCatch({
-                            private$.create_simple_cat_summary_table(mydata, myvars)
+                            private$.create_simple_cat_summary_table(mydata, myvars, reason)
                         }, error = function(e3) {
                             htmltools::HTML(glue::glue(
                                 "<div style='padding: 15px; background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; border-radius: 4px; color: inherit;'><strong>{label}:</strong> {msg} ({detail})</div>",
@@ -326,27 +322,39 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
 
-        # Hide every managed panel at the top of .run(). Result items are only
-        # auto-cleared by clearWith, which watches OPTIONS - and `vars` is the
-        # only option this analysis has. Without an explicit reset, editing the
-        # data or applying a row filter leaves the previous run's summaries on
-        # screen while a validation branch prints an error above them.
+        # Hide every managed panel. Result items are only auto-cleared by
+        # clearWith, which watches OPTIONS - and `vars` is the only option this
+        # analysis has. Without an explicit reset, editing the data or applying
+        # a row filter leaves the previous run's summaries on screen.
         # Visibility is the whole mechanism: every panel is declared
         # `visible: false` in the .r.yaml, is hidden here, and is shown only by
         # a populate path that has just called setContent() with fresh content
         # - so nothing stale and no stray empty heading can ever render.
+        # Called from the welcome branch and after the fatal validation passes;
+        # fatal conditions use jmvcore::reject() and leave the pane as it was.
         # (`visible: (!vars)` is not an option: a leading `!` fails jmvcore's
         # visible-expression routing and the item becomes ALWAYS visible.)
         .resetOutputs = function() {
             for (item in c("todo", "text", "text1", "clinicalSummary",
-                           "reportSentences", "assumptions",
-                           "error", "dataWarnings")) {
+                           "reportSentences", "assumptions", "dataWarnings")) {
                 self$results[[item]]$setVisible(FALSE)
             }
         },
 
+        # Prefix for both fallback tables: they carry the same title as the
+        # gtExtras output but different columns and no distribution plots, so
+        # say plainly that this is the reduced version - and why. (The primary
+        # gtExtras error used to be discarded unread.)
+        .fallbackNotice = function(reason = NULL) {
+            msg <- .("The visual distribution summary could not be produced; counts only are shown below.")
+            if (!is.null(reason) && nzchar(reason))
+                msg <- paste(msg, glue::glue(.("Reason: {detail}"),
+                                             detail = htmltools::htmlEscape(reason)))
+            glue::glue("<p style='margin: 0 0 8px 0;'><em>{msg}</em></p>", msg = msg)
+        },
+
         # Simple categorical summary table without resource-intensive operations
-        .create_simple_cat_summary_table = function(dataset, var_list) {
+        .create_simple_cat_summary_table = function(dataset, var_list, reason = NULL) {
             # Filter to categorical/factor variables only
             cat_vars <- var_list[sapply(dataset[var_list], function(x) is.factor(x) || is.character(x))]
             
@@ -355,10 +363,8 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     msg = .("No categorical variables available for summary table."))))
             }
             
-            # Create simple HTML table. The heading says the same thing as the
-            # gtExtras output, so say plainly that this is the reduced version.
-            html <- glue::glue("<p style='margin: 0 0 8px 0;'><em>{msg}</em></p>",
-                msg = .("The visual distribution summary could not be produced; counts only are shown below."))
+            # Create simple HTML table.
+            html <- private$.fallbackNotice(reason)
             html <- paste0(html, "<table style='border-collapse: collapse; margin: 10px 0; width: 100%;'>")
             html <- paste0(html, "<tr style='background-color: rgba(138, 155, 172, 0.06); color: inherit;'>")
             html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("Variable"), "</th>")
@@ -683,7 +689,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         # Fallback with gtExtras-style appearance for categorical data
-        .gtExtras_style_fallback_cat = function(dataset, var_list) {
+        .gtExtras_style_fallback_cat = function(dataset, var_list, reason = NULL) {
             # Get categorical variables only
             cat_vars <- var_list[sapply(dataset[var_list], function(x) is.factor(x) || is.character(x))]
             
@@ -692,9 +698,13 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     msg = .("No categorical variables available for summary table."))))
             }
             
-            # Calculate comprehensive summary statistics for categorical data
+            # Calculate comprehensive summary statistics for categorical data.
+            # Variable names and level labels are html-escaped here, and the
+            # two columns are passed through gt with escape = FALSE below, so
+            # the escaping is this module's own (not gt's version-dependent
+            # body-cell behaviour) and is never applied twice.
             summary_stats <- data.frame(
-                Variable = cat_vars,
+                Variable = htmltools::htmlEscape(cat_vars),
                 Type = rep(.("categorical"), length(cat_vars)),
                 N = sapply(dataset[cat_vars], function(x) sum(!is.na(x))),
                 Missing = sapply(dataset[cat_vars], function(x) sum(is.na(x))),
@@ -708,7 +718,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (length(tbl) == 0) return("")
                     # Name every tied mode rather than letting which.max pick the
                     # first level in factor order and present it as the winner.
-                    paste(names(tbl)[tbl == max(tbl)], collapse = ", ")
+                    paste(htmltools::htmlEscape(names(tbl)[tbl == max(tbl)]), collapse = ", ")
                 }),
                 Most_Common_N = sapply(dataset[cat_vars], function(x) {
                     tbl <- table(x, useNA = "no")
@@ -720,6 +730,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Create gtExtras-style table for categorical data
             gt_table <- summary_stats %>%
                 gt::gt() %>%
+                gt::fmt_passthrough(columns = c("Variable", "Most_Common"), escape = FALSE) %>%
                 gt::tab_header(
                     title = gt::md(glue::glue("**{title}**", title = .("Categorical Variables Summary"))),
                     subtitle = gt::md(glue::glue("*{subtitle}*", subtitle = .("Comprehensive statistics for categorical variables")))
@@ -748,13 +759,9 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     heading.subtitle.font.size = 12
                 )
             
-            # Convert to HTML using the documented gt API (same as primary path).
-            # Prefixed with a plain statement that this is the fallback: it carries
-            # the same title as the gtExtras output but different columns and no
-            # distribution plots, so without this the substitution is invisible.
-            notice <- glue::glue("<p style='margin: 0 0 8px 0;'><em>{msg}</em></p>",
-                msg = .("The visual distribution summary could not be produced; counts only are shown below."))
-            return(htmltools::HTML(paste0(notice, gt::as_raw_html(gt_table))))
+            # Convert to HTML using the documented gt API (same as primary path),
+            # prefixed with the fallback notice.
+            return(htmltools::HTML(paste0(private$.fallbackNotice(reason), gt::as_raw_html(gt_table))))
         }
     )
 )

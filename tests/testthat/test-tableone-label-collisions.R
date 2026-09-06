@@ -67,17 +67,27 @@ test_that("collision labels use the compiled Turkish translations", {
   locale <- system.file("i18n/tr.json", package = "ClinicoPath")
   skip_if(!nzchar(locale), "Compiled Turkish catalog is required")
   ns <- environment(tableone)
-  d <- data.frame(g = factor(rep(c("Total", "NA", "Unknown", "N-Miss", NA), 4)))
-  for (style in c("t2", "t3", "t4")) {
+  translator <- jmvcore:::Translator$new(jsonlite::read_json(locale))
+  # The engine row labels (Unknown / N-Miss / Total) are translated too, so a
+  # collision happens when a category equals the TRANSLATED label, and a
+  # non-colliding table shows that translated label.
+  engine_labels <- vapply(c("Total", "Unknown", "N-Miss"), translator$translate, "")
+  run <- function(levels, style) {
+    d <- data.frame(g = factor(rep(c(levels, NA), 4)))
     analysis <- get("tableoneClass", ns)$new(data = d,
       options = get("tableoneOptions", ns)$new(vars = "g", sty = style))
-    options <- analysis$options
-    options$.__enclos_env__$private$.translator <-
-      jmvcore:::Translator$new(jsonlite::read_json(locale))
+    analysis$options$.__enclos_env__$private$.translator <- translator
     analysis$run()
-    content <- analysis$results[[paste0("tablestyle", substring(style, 2))]]$content
-    expect_match(content, "Eksik (NA)", fixed = TRUE)
+    analysis$results[[paste0("tablestyle", substring(style, 2))]]$content
+  }
+  for (style in c("t2", "t3", "t4")) {
+    content <- run(c(engine_labels, "NA"), style)
+    expect_match(content, "Eksik (NA)", fixed = TRUE, info = style)
     if (style == "t4") expect_match(content, "Toplam (t\u00fcm olgular)", fixed = TRUE)
+    plain <- gsub("<[^>]*>", " ", run(c("A", "B"), style))
+    expected <- switch(style, t2 = engine_labels[["Unknown"]],
+                       t3 = engine_labels[["N-Miss"]], t4 = engine_labels[["Total"]])
+    expect_match(plain, expected, fixed = TRUE, info = style)
   }
 })
 
