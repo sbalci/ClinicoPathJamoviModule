@@ -46,6 +46,7 @@ vartreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars,
+                default=NULL,
                 suggested=list(
                     "ordinal",
                     "nominal"),
@@ -618,7 +619,7 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 vartree <- function(
     data,
-    vars,
+    vars = NULL,
     percvar = NULL,
     percvarLevel,
     summaryvar = NULL,

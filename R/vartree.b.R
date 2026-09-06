@@ -192,7 +192,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (var in myvars) {
                     if (!var %in% names(mydata)) {
                         error_count <- error_count + 1
-                        private$.addNotice('ERROR', .('Variable Not Found'), jmvcore::format(.("Variable '{name}' not found in dataset. Please verify variable selection."), name = var))
+                        private$.addNotice('ERROR', .('Variable Not Found'), .fmt(.("Variable '{name}' not found in dataset. Please verify variable selection."), name = var))
                     }
                 }
 
@@ -210,7 +210,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (!is.null(self$options$percvarLevel) &&
                         !self$options$percvarLevel %in% levels(as.factor(mydata[[percvar]]))) {
                         available_levels <- paste(levels(as.factor(mydata[[percvar]])), collapse=", ")
-                        private$.addNotice('ERROR', .('Invalid Percentage Level'), jmvcore::format(
+                        private$.addNotice('ERROR', .('Invalid Percentage Level'), .fmt(
                             .("Selected percentage level '{level}' not present in percentage variable. Available levels: {available}"),
                             level = self$options$percvarLevel, available = available_levels))
                         return()
@@ -342,7 +342,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (excluded_n > 0) {
                     excluded_pct <- round(100 * excluded_n / original_n, 1)
 
-                    private$.addNotice('STRONG_WARNING', .('Case Exclusion'), jmvcore::format(
+                    private$.addNotice('STRONG_WARNING', .('Case Exclusion'), .fmt(
                         .('CASE EXCLUSION: {excluded} cases ({pct}%) excluded due to missing values. Original N={original}, Final N={final}. Tree counts and percentages reflect complete cases only. Consider implications for generalizability.'),
                         excluded = excluded_n, pct = excluded_pct, original = original_n, final = nrow(mydata)))
                 }
@@ -357,7 +357,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Small sample warning
             if (nrow(mydata) < 50) {
-                private$.addNotice('WARNING', .('Small Sample Size'), jmvcore::format(
+                private$.addNotice('WARNING', .('Small Sample Size'), .fmt(
                     .('Only {n} cases are available. Each additional variable splits those cases further, so the subgroups at the bottom of the tree will hold very few cases and their percentages move substantially with a single observation. N>=50 is a common rule of thumb for describing subgroups stably. Consider using fewer variables or collapsing levels so each node keeps a usable count.'),
                     n = nrow(mydata)))
             }
@@ -393,11 +393,11 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (max_combinations > 500) {
                 level_tmpl <- .("{name} ({n} levels)")
                 var_summary <- paste(vapply(seq_along(myvars), function(i)
-                    jmvcore::format(level_tmpl, name = myvars[i], n = var_level_counts[[i]]),
+                    .fmt(level_tmpl, name = myvars[i], n = var_level_counts[[i]]),
                     character(1)), collapse = ", ")
                 # %s, not %d: prod() returns a double and sprintf('%d', 2176782336)
                 # is an error, which would have crashed this very warning.
-                private$.addNotice('WARNING', .('Large Tree Complexity'), jmvcore::format(
+                private$.addNotice('WARNING', .('Large Tree Complexity'), .fmt(
                     .('The selected variables allow up to {possible} subgroup combinations ({variables}); {observed} of them contain at least one case. A tree this wide is hard to read on screen and to print. Consider: (1) using fewer variables, (2) collapsing variable levels, or (3) using the pruning options to focus on the larger branches.'),
                     possible = base::format(max_combinations, big.mark = ",", scientific = FALSE),
                     variables = var_summary, observed = observed_combinations))
@@ -416,7 +416,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .("These variables have more than 12 levels ({levels}), so the tree fans out into that many branches at that split and every branch below it holds only a few cases. Consider collapsing rare levels into an 'Other' category, or using the pruning options.")
                 else
                     .("This variable has more than 12 levels ({levels}), so the tree fans out into that many branches at that split and every branch below it holds only a few cases. Consider collapsing rare levels into an 'Other' category, or using the pruning options.")
-                private$.addNotice('WARNING', .('Variable With Many Levels'), jmvcore::format(wide_msg,
+                private$.addNotice('WARNING', .('Variable With Many Levels'), .fmt(wide_msg,
                     levels = paste(sprintf("'%s': %d", wide_labels, var_level_counts[wide_vars]), collapse = ", ")))
             }
 
@@ -445,13 +445,13 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # spec at all, and vtree draws the tree unchanged without a word. Say
             # which levels can be picked.
             if (!is.null(self$options$prunebelow) && is.null(xprunebelow)) {
-                private$.addNotice('WARNING', .('Prune-Below Level Not Selected'), jmvcore::format(
+                private$.addNotice('WARNING', .('Prune-Below Level Not Selected'), .fmt(
                     .("'{name}' is selected as the prune-below variable, but no level is chosen, so no branch is pruned. Pick Level 1 (and optionally Level 2) from: {levels}."),
                     name = self$options$prunebelow,
                     levels = paste(levels(as.factor(self$data[[self$options$prunebelow]])), collapse = ", ")))
             }
             if (!is.null(self$options$follow) && is.null(xfollow)) {
-                private$.addNotice('WARNING', .('Follow-Below Level Not Selected'), jmvcore::format(
+                private$.addNotice('WARNING', .('Follow-Below Level Not Selected'), .fmt(
                     .("'{name}' is selected as the follow-below variable, but no level is chosen, so the tree is drawn in full below every level. Pick Level 1 (and optionally Level 2) from: {levels}."),
                     name = self$options$follow,
                     levels = paste(levels(as.factor(self$data[[self$options$follow]])), collapse = ", ")))
@@ -465,7 +465,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!nm %in% myvars1) {
                     nm_label <- all_labels[[nm]]
                     if (is.null(nm_label) || !nzchar(nm_label)) nm_label <- nm
-                    private$.addNotice('WARNING', .('Prune / Follow Variable Not in the Tree'), jmvcore::format(
+                    private$.addNotice('WARNING', .('Prune / Follow Variable Not in the Tree'), .fmt(
                         .("'{name}' is selected as a prune-below or follow-below variable, but it is not one of the tree variables, so it has no effect on the figure. Add it to Variables, or clear the setting."),
                         name = nm_label))
                 }
@@ -532,7 +532,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 perc_level <- self$options$percvarLevel
                 perc_level_code <- gsub(" ", "_", perc_level, fixed = TRUE)
                 if (grepl("[^A-Za-z0-9~@#()_|,.]", perc_level_code)) {
-                    private$.addNotice('WARNING', .('Reference-Level Percentage Not Shown'), jmvcore::format(
+                    private$.addNotice('WARNING', .('Reference-Level Percentage Not Shown'), .fmt(
                         .("The level '{level}' contains characters that cannot be used in a tree summary; only letters, digits and the symbols ~ @ # ( ) _ | , . are accepted there. No reference-level percentage is drawn in the nodes. Recode that level to a name without '+', '-', '/' or '=' to display it."),
                         level = perc_level))
                 } else {
@@ -545,7 +545,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # percvar/percvarLevel alone do nothing: the spec is only built when
                 # 'Percentages' is on. Say so rather than leaving the tree silently
                 # unchanged (the interpretation panel used to claim it had worked).
-                private$.addNotice('WARNING', .('Reference-Level Percentage Not Shown'), jmvcore::format(
+                private$.addNotice('WARNING', .('Reference-Level Percentage Not Shown'), .fmt(
                     .("A reference variable ('{variable}') and level ('{level}') are selected, but the 'Percentages' option is switched off, so no percentage for that level is drawn in any node. Tick 'Percentages' to display it."),
                     variable = self$options$percvar, level = self$options$percvarLevel))
             }
@@ -580,7 +580,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 xsummary <- c(xsummary, summ_spec)
 
                 if (report_small_nodes && smallest_shown_n < 3) {
-                    private$.addNotice('WARNING', .('Mean and SD Shown for Very Small Subgroups'), jmvcore::format(
+                    private$.addNotice('WARNING', .('Mean and SD Shown for Very Small Subgroups'), .fmt(
                         .("The smallest subgroup displayed in this tree holds {n} case(s), and mean/SD for '{variable}' are printed there in the same form as for the large nodes. SD is undefined for a single case (vtree prints SD=NA) and a mean over two cases carries almost no precision. Mean and SD also describe only the non-missing values of '{variable}' within each node, independently of the missing-value exclusion setting. Read the node count next to each mean before using it."),
                         n = smallest_shown_n, variable = summary_label))
                 }
@@ -590,7 +590,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # to over-read, and it is this figure's headline output. Same gate as the
             # mean/SD notice above; 5 is the conventional cell-count floor.
             if (self$options$pct && report_small_pct_nodes && smallest_pct_shown_n < 5) {
-                private$.addNotice('WARNING', .('Percentages Shown for Very Small Subgroups'), jmvcore::format(
+                private$.addNotice('WARNING', .('Percentages Shown for Very Small Subgroups'), .fmt(
                     .('The smallest subgroup with a percentage in this tree holds {n} case(s). A percentage based on that many cases moves by a large amount with a single observation, and it is printed in the same form as a percentage from a large node. Read the count beside each percentage.'),
                     n = smallest_pct_shown_n))
             }
@@ -664,7 +664,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # second call below.
             results <- private$.quietVtree(
                 c(vtree_args, list(ptable = FALSE)),
-                onError = function(e) jmvcore::reject(jmvcore::format(
+                onError = function(e) jmvcore::reject(.fmt(
                     .("The variable tree could not be generated: {reason}. Try selecting fewer variables, or adjusting the pruning / follow options."),
                     reason = conditionMessage(e))))
 
@@ -676,18 +676,18 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 shown <- pruned$labels
                 if (length(shown) > 8)
                     shown <- c(shown[seq_len(8)],
-                               jmvcore::format(.("... and {n} more"), n = length(shown) - 8))
+                               .fmt(.("... and {n} more"), n = length(shown) - 8))
                 # Pattern / sequence trees prune whole combinations, NA ones included,
                 # and keep the full N as the percentage denominator; the hierarchical
                 # tree prunes nodes and exempts NA nodes while 'Valid percentages' is on.
                 if (pattern_mode) {
                     hidden_lines <- c(
-                        jmvcore::format(.("{nodes} pattern(s) holding {cases} case(s) in total are not shown, because 'Prune counts <' is set to {threshold}. In pattern / sequence mode the setting removes every complete combination held by fewer cases than that, including combinations with a missing value."),
+                        .fmt(.("{nodes} pattern(s) holding {cases} case(s) in total are not shown, because 'Prune counts <' is set to {threshold}. In pattern / sequence mode the setting removes every complete combination held by fewer cases than that, including combinations with a missing value."),
                                         nodes = pruned$nodes, cases = pruned$cases, threshold = xprunesmaller),
                         .("Percentages are still taken from the full N, so the displayed patterns do not add up to 100%."))
                 } else {
                     hidden_lines <- c(
-                        jmvcore::format(.("{nodes} node(s) holding {cases} case(s) are not shown, because 'Prune nodes smaller than' is set to {threshold}."),
+                        .fmt(.("{nodes} node(s) holding {cases} case(s) are not shown, because 'Prune nodes smaller than' is set to {threshold}."),
                                         nodes = pruned$nodes, cases = pruned$cases, threshold = xprunesmaller),
                         .("Counts within a branch will therefore not add up to the count above it."))
                 }
@@ -696,7 +696,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .("Branches hidden by the minimum-size setting"),
                     paste(c(
                         hidden_lines,
-                        jmvcore::format(.("Hidden: {hidden}"), hidden = paste(shown, collapse = "; ")),
+                        .fmt(.("Hidden: {hidden}"), hidden = paste(shown, collapse = "; ")),
                         if (!pattern_mode && isTRUE(self$options$vp) && pruned$min_shown > 0 &&
                             pruned$min_shown < xprunesmaller)
                             .("Missing-value (NA) nodes are exempt from the threshold while 'Valid percentages' is on, so an NA node holding fewer cases than the threshold is still drawn.")
@@ -708,7 +708,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # export as svg ----
             results1 <- tryCatch(
                 DiagrammeRsvg::export_svg(gv = results),
-                error = function(e) jmvcore::reject(jmvcore::format(
+                error = function(e) jmvcore::reject(.fmt(
                     .("The variable tree could not be rendered to SVG: {reason}."),
                     reason = conditionMessage(e))))
 
@@ -749,7 +749,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (inherits(ptable_df, "error")) {
                     self$results$text2$setContent("")
-                    private$.addNotice('WARNING', .('Pattern Table Not Available'), jmvcore::format(
+                    private$.addNotice('WARNING', .('Pattern Table Not Available'), .fmt(
                         .("The pattern table could not be built for this combination of variables and options ({reason}). The tree above is unaffected. Try fewer variables, or switch the pattern table off."),
                         reason = conditionMessage(ptable_df)))
                 } else {
@@ -793,11 +793,11 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Analysis completion notice (INFO). Reports the OBSERVED number of
             # combinations, not the Cartesian product of the levels.
-            complete_msg <- jmvcore::format(
+            complete_msg <- .fmt(
                 .('Tree built from {nvars} categorical variable(s) across N={n} observations. {combos} combination(s) of those variables occur in the data.'),
                 nvars = length(myvars), n = nrow(mydata), combos = observed_combinations)
             if (!is.null(pruned) && pruned$nodes > 0)
-                complete_msg <- paste(complete_msg, jmvcore::format(
+                complete_msg <- paste(complete_msg, .fmt(
                     .("{hidden} branch(es) are hidden by the minimum-size setting."), hidden = pruned$nodes))
             private$.addNotice('INFO', .('Analysis Complete'), complete_msg)
 
@@ -841,7 +841,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # appears nowhere in the tree. perc_spec_drawn is set at the point the spec
             # is appended, so it is the only condition that cannot drift out of step.
             if (isTRUE(perc_spec_drawn)) {
-                interp_parts <- c(interp_parts, paste0("\u{2022} ", jmvcore::format(
+                interp_parts <- c(interp_parts, paste0("\u{2022} ", .fmt(
                     .("Percentage calculated for the '{level}' level of '{variable}'"),
                     level = htmltools::htmlEscape(self$options$percvarLevel),
                     variable = htmltools::htmlEscape(self$options$percvar)), "<br>"))
@@ -922,7 +922,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(
                     nodes = length(gone),
                     cases = as.integer(sum(gone)),
-                    labels = vapply(seq_along(gone), function(i) jmvcore::format(label_tmpl,
+                    labels = vapply(seq_along(gone), function(i) .fmt(label_tmpl,
                         node = gsub("\r", " > ", names(gone)[i], fixed = TRUE),
                         count = as.integer(gone[[i]])), character(1)),
                     min_shown = min_kept,
@@ -975,7 +975,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         pruned_prefixes[[length(pruned_prefixes) + 1]] <- combo
                         n_nodes <- n_nodes + 1L
                         n_cases <- n_cases + as.integer(count)
-                        labels <- c(labels, jmvcore::format(label_tmpl,
+                        labels <- c(labels, .fmt(label_tmpl,
                                                             node = paste(combo, collapse = " > "),
                                                             count = as.integer(count)))
                     } else {
@@ -1088,9 +1088,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (n_vars == 1) {
                 var_text <- quoted[1]
             } else if (n_vars == 2) {
-                var_text <- jmvcore::format(.("{a} and {b}"), a = quoted[1], b = quoted[2])
+                var_text <- .fmt(.("{a} and {b}"), a = quoted[1], b = quoted[2])
             } else {
-                var_text <- jmvcore::format(.("{rest}, and {last}"),
+                var_text <- .fmt(.("{rest}, and {last}"),
                     rest = paste(quoted[seq_len(n_vars - 1)], collapse = ", "), last = quoted[n_vars])
             }
 
@@ -1105,7 +1105,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("Variable tree analysis examined {n} categorical variable ({vars}) across N={total} observations, in which {k} distinct subgroup combinations occurred.")
             else
                 .("Variable tree analysis examined {n} categorical variable ({vars}) across N={total} observations, in which {k} distinct subgroup combination occurred.")
-            sentence <- jmvcore::format(base_tmpl, n = n_vars, vars = var_text,
+            sentence <- .fmt(base_tmpl, n = n_vars, vars = var_text,
                                         total = final_n, k = observed_combinations)
 
             # Add exclusion note if applicable
@@ -1115,7 +1115,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .("Missing value exclusion removed {n} cases ({pct}%).")
                 else
                     .("Missing value exclusion removed {n} case ({pct}%).")
-                sentence <- paste(sentence, jmvcore::format(excl_tmpl, n = excluded_n, pct = excluded_pct))
+                sentence <- paste(sentence, .fmt(excl_tmpl, n = excluded_n, pct = excluded_pct))
             }
 
             # Pruning hides branches from the figure, so a sentence describing the
@@ -1131,7 +1131,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .("{nodes} subgroup holding fewer than {threshold} cases was not displayed ({cases} cases in total).")
                 else
                     .("{nodes} subgroup holding fewer than {threshold} cases was not displayed ({cases} case in total).")
-                sentence <- paste(sentence, jmvcore::format(pruned_tmpl,
+                sentence <- paste(sentence, .fmt(pruned_tmpl,
                     nodes = pruned$nodes, threshold = prune_threshold, cases = pruned$cases))
             }
 
@@ -1148,7 +1148,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .("Statistical summaries (mean, SD) for '{variable}' were displayed at leaf nodes only.")
                 else
                     .("Statistical summaries (mean, SD) for '{variable}' were displayed at all nodes.")
-                sentence <- paste(sentence, jmvcore::format(summary_tmpl, variable = self$options$summaryvar))
+                sentence <- paste(sentence, .fmt(summary_tmpl, variable = self$options$summaryvar))
             }
 
             return(sentence)

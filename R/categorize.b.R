@@ -363,7 +363,9 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             code <- paste0(
                 "# Categorize continuous variable\n",
-                "x <- data$", varname, "\n\n")
+                "x <- data$", varname, "\n",
+                "# Match the analysis: infinite observations are treated as missing\n",
+                "x[is.infinite(x)] <- NA\n\n")
 
             has_classInt <- requireNamespace("classInt", quietly = TRUE)
 

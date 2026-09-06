@@ -42,9 +42,10 @@ break points.}
 quantile, and jenks methods.}
 
 \item{breaks}{Comma-separated break points for manual binning (e.g., "0,
-25, 50, 75, 100"). Entries are sorted and duplicates removed, and the data
-minimum and maximum are added around them unless out-of-range exclusion is
-on.}
+25, 50, 75, 100"). Use a period as the decimal separator (2.5, not 2,5):
+the comma only separates break points. Entries are sorted and duplicates
+removed, and the data minimum and maximum are added around them unless
+out-of-range exclusion is on.}
 
 \item{sdmult}{Multiplier for standard deviation when using meansd method
 (default = 1).}

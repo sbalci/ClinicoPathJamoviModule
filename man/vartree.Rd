@@ -6,7 +6,7 @@
 \usage{
 vartree(
   data,
-  vars,
+  vars = NULL,
   percvar = NULL,
   percvarLevel,
   summaryvar = NULL,

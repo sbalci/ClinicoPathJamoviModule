@@ -1576,8 +1576,10 @@ a_yaml_files <- list.files(
 )
 
 # Cross-cutting Power menuGroup support:
-# Functions can use 'menuGroup: Power #<module>' (or 'PowerT #<module>' for TEST)
-# to appear under the Power menu while still being distributed to their submodule.
+# Functions can use 'menuGroup: Power #<module>' to appear under the Power menu
+# in ClinicoPath while still being distributed to their production submodule.
+# Functions with 'menuGroup: PowerT #<module>' (or plain 'PowerT') are test-routed
+# and distributed exclusively to the JamoviTest submodule.
 # The YAML comment (#<module>) is invisible to jamovi but visible to readLines().
 
 ## jjstatsplot module functions ----
@@ -1585,7 +1587,7 @@ a_yaml_files <- list.files(
 jjstatsplot_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
   lines <- readLines(f, warn = FALSE)
   any(grepl("menuGroup: JJStatsPlot$", lines)) ||
-  any(grepl("menuGroup: Power #jjstatsplot$", lines))
+  any(grepl("menuGroup:[[:space:]]*Power[[:space:]]+#jjstatsplot[[:space:]]*$", lines))
 })
 
 jjstatsplot_a_yaml_files <- gsub(pattern = "./jamovi/",
@@ -1601,7 +1603,7 @@ if (WIP) {
   jjstatsplot_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
     lines <- readLines(f, warn = FALSE)
     any(grepl("menuGroup: JJStatsPlot(Extra)?[[:space:]]*$", lines)) ||
-    any(grepl("menuGroup: Power #jjstatsplot[[:space:]]*$", lines))
+    any(grepl("menuGroup:[[:space:]]*Power[[:space:]]+#jjstatsplot[[:space:]]*$", lines))
   })
 
   jjstatsplot_a_yaml_files <- gsub(pattern = "./jamovi/",
@@ -1636,7 +1638,7 @@ if (WIP) {
 meddecide_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
   lines <- readLines(f, warn = FALSE)
   any(grepl("menuGroup: meddecide$", lines)) ||
-  any(grepl("menuGroup: Power #meddecide$", lines))
+  any(grepl("menuGroup:[[:space:]]*Power[[:space:]]+#meddecide[[:space:]]*$", lines))
 })
 meddecide_a_yaml_files <- gsub(pattern = "./jamovi/",
                                replacement = "",
@@ -1650,7 +1652,7 @@ if (WIP) {
   meddecide_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
     lines <- readLines(f, warn = FALSE)
     any(grepl("menuGroup: meddecide(Extra)?[[:space:]]*$", lines)) ||
-    any(grepl("menuGroup: Power #meddecide[[:space:]]*$", lines))
+    any(grepl("menuGroup:[[:space:]]*Power[[:space:]]+#meddecide[[:space:]]*$", lines))
   })
 
   meddecide_a_yaml_files <- gsub(pattern = "./jamovi/",
@@ -1686,7 +1688,7 @@ if (WIP) {
 jsurvival_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
   lines <- readLines(f, warn = FALSE)
   any(grepl("menuGroup: Survival$", lines)) ||
-  any(grepl("menuGroup: Power #jsurvival$", lines))
+  any(grepl("menuGroup:[[:space:]]*Power[[:space:]]+#jsurvival[[:space:]]*$", lines))
 })
 jsurvival_a_yaml_files <- gsub(pattern = "./jamovi/",
                                replacement = "",
@@ -1700,7 +1702,7 @@ if (WIP) {
   jsurvival_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
     lines <- readLines(f, warn = FALSE)
     any(grepl("menuGroup: Survival(Extra)?[[:space:]]*$", lines)) ||
-    any(grepl("menuGroup: Power #jsurvival[[:space:]]*$", lines))
+    any(grepl("menuGroup:[[:space:]]*Power[[:space:]]+#jsurvival[[:space:]]*$", lines))
   })
 
   jsurvival_a_yaml_files <- gsub(pattern = "./jamovi/",
@@ -1730,7 +1732,7 @@ clinicopath_pattern <- if (WIP) {
 ClinicoPathDescriptives_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
   lines <- readLines(f, warn = FALSE)
   any(grepl(clinicopath_pattern, lines)) ||
-  any(grepl("menuGroup: Power.*#ClinicoPathDescriptives", lines))
+  any(grepl("menuGroup:[[:space:]]*Power[[:space:]]+#ClinicoPathDescriptives[[:space:]]*$", lines))
 })
 
 ClinicoPathDescriptives_a_yaml_files <- gsub(pattern = "./jamovi/",
@@ -1754,7 +1756,7 @@ oncopath_pattern <- if (WIP) {
 OncoPath_a_yaml_files <- purrr::keep(a_yaml_files, function(f) {
   lines <- readLines(f, warn = FALSE)
   any(grepl(oncopath_pattern, lines)) ||
-  any(grepl("menuGroup: Power.*#OncoPath", lines))
+  any(grepl("menuGroup:[[:space:]]*Power[[:space:]]+#OncoPath[[:space:]]*$", lines))
 })
 
 OncoPath_a_yaml_files <- gsub(pattern = "./jamovi/",
@@ -1788,6 +1790,8 @@ if (TEST) {
       cat("  ✅ Found", length(test_files_cleaned), "test functions matching:", pattern, "\n")
     }
   }
+  
+  JamoviTest_modules <- unique(JamoviTest_modules)
   
   cat("  📊 Total TEST functions collected:", length(JamoviTest_modules), "\n")
   

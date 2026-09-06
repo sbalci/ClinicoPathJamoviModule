@@ -4,7 +4,7 @@
 \alias{.competingRiskUnavailable}
 \title{Message shown when an output is unavailable in competing-risks mode}
 \usage{
-.competingRiskUnavailable(feature)
+.competingRiskUnavailable(feature, self = NULL)
 }
 \arguments{
 \item{feature}{Display name of the output being blocked.}

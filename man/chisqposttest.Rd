@@ -80,9 +80,12 @@ box unchanged.}
 (typically 2.0 or 3.0). Used only when 'Residual significance criterion' is
 set to 'Fixed cutoff'.}
 
-\item{phiCI}{calculate bootstrap confidence intervals for the Phi
-coefficient using BCa method (Bias-Corrected and accelerated). Note: This
-is computationally intensive and may take longer for large tables.}
+\item{phiCI}{calculate bootstrap 95 percent confidence intervals (BCa
+method, bias-corrected and accelerated) for the pairwise effect size
+sqrt(chi-square / n), which is Cramer's V for a 2xC or Rx2 sub-table and
+equals the phi coefficient for a 2x2. Each interval is computed per
+comparison and is not adjusted for multiple testing. Note: This is
+computationally intensive and may take longer for large tables.}
 
 \item{seed}{Random seed for the bootstrap confidence intervals, so that the
 interval reported for a given table is reproducible. Change it to see how

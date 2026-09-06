@@ -833,15 +833,24 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # diagram, and the reading notice reports them separately.
             weighted <- engine == "ggalluvial" && has_weight
             flow_rows <- if (weighted) mydata[!is.na(mydata[[weight_var]]), , drop = FALSE] else mydata
-            path_key <- do.call(paste, c(
-                lapply(plot_vars, function(v) as.character(flow_rows[[v]])),
-                sep = " \u{2192} "))
-            flows <- as.data.frame(table(path = path_key), stringsAsFactors = FALSE)
-            names(flows)[2] <- "n"
-            flows$n <- as.integer(flows$n)
+            # Integer category codes form an unambiguous tuple key. Display text
+            # may itself contain the arrow separator and must not identify a group.
+            path_key <- do.call(paste, c(lapply(plot_vars, function(v) {
+                match(flow_rows[[v]], unique(flow_rows[[v]]))
+            }), sep = ":"))
+            group_id <- match(path_key, unique(path_key))
+            first_rows <- which(!duplicated(group_id))
+            path_labels <- do.call(paste, c(lapply(plot_vars, function(v) {
+                values <- as.character(flow_rows[[v]][first_rows])
+                if (any(grepl(" \u{2192} ", values, fixed = TRUE)))
+                    values <- encodeString(values, quote = '"')
+                values
+            }), sep = " \u{2192} "))
+            flows <- data.frame(path = path_labels, n = tabulate(group_id),
+                                stringsAsFactors = FALSE)
             if (weighted) {
-                w_sum <- tapply(flow_rows[[weight_var]], path_key, sum)
-                flows$w <- as.numeric(w_sum[flows$path])
+                w_sum <- tapply(flow_rows[[weight_var]], group_id, sum)
+                flows$w <- as.numeric(w_sum[as.character(seq_len(nrow(flows)))])
                 flows <- flows[order(-flows$w, -flows$n, flows$path), , drop = FALSE]
             } else {
                 flows$w <- NA_real_

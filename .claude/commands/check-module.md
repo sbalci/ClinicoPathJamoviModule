@@ -114,7 +114,7 @@ Also seen on the 2026-09-06 ClinicoPathDescriptives pass: a `type: Data` option 
 reads `self$data` directly never appears as `self$results$<name>` in `.b.R` (chisqposttest `plot`,
 declared `name:  plot` with two spaces, so an exact-string grep misses it); `private$.optionOr("name",
 default)` is constructed option access (outlierdetection); `switch(sty, arsenal = "tablestyle1", ...)`
-selects a result item by bare string (crosstable).
+selects a result item by bare string (crosstable). A second 2026-09-06 CPD pass added: "early `return()` without `.renderNotices()`" is a false positive wherever `.addNotice()` itself ends with `private$.renderNotices()` (all 9 CPD notice users) — read the helper before flagging; and a block-style `refs:` regex over-captures the following `- name:` items — resolve refs with a real YAML parse.
 
 ## Check Profiles
 

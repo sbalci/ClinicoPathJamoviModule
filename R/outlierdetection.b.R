@@ -443,6 +443,36 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 names(analysis_data) <- selected_vars
             }
 
+            # Convert to numeric with safe variable access.
+            # A bare as.numeric() on a factor returns LEVEL INDICES (1, 2, 3 ...),
+            # not the labels, so every downstream outlier statistic would be wrong
+            # by an unpredictable offset. `vars` is permitted:[numeric] so the GUI
+            # never sends a factor, but the R API can. Convert through the labels
+            # instead, and reject rather than silently analysing nonsense.
+            # (jmvcore::toNumeric() is not a substitute here -- it is a no-op on
+            # factors and characters, it only unwraps a `values` attribute.)
+            for (var in selected_vars) {
+                column <- analysis_data[[var]]
+                if (is.factor(column))
+                    column <- as.character(column)
+                converted <- suppressWarnings(as.numeric(column))
+                failed <- !is.na(column) & is.na(converted)
+                if (any(failed))
+                    jmvcore::reject(
+                        .fmt(
+                            .("Variable '{var}' contains {n} non-missing value(s) that cannot be converted to numbers, so outlier detection cannot run on it. Correct those values or select a continuous variable."),
+                            var = var,
+                            n = sum(failed)),
+                        code = "non_numeric_variable")
+                analysis_data[[var]] <- converted
+            }
+
+            # Infinities follow the same exclusion policy as missing observations.
+            analysis_data[] <- lapply(analysis_data, function(x) {
+                x[!is.finite(x)] <- NA_real_
+                x
+            })
+
             # Listwise deletion. Every count reported downstream - the plain-language
             # summary, the copy-ready report sentence, the exclusion table - is taken
             # from `original_n` below, i.e. from the COMPLETE CASES, so the rows lost
@@ -459,10 +489,10 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
             if (n_input > original_n) {
                 private$.accumulateMessage(sprintf(
-                    paste0('<strong>Rows Excluded For Missing Data:</strong> %d of %d rows (%.1f%%) ',
-                           'were dropped because at least one selected variable was missing. ',
+                    paste0('<strong>Rows Excluded For Missing or Infinite Data:</strong> %d of %d rows (%.1f%%) ',
+                           'were dropped because at least one selected variable was missing or infinite. ',
                            'The analysis, and every count reported below, refers to the %d ',
-                           'complete cases.'),
+                           'finite complete cases.'),
                     n_input - original_n, n_input,
                     100 * (n_input - original_n) / n_input, original_n))
             }
@@ -593,30 +623,6 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 private$.addWarningsBlock(error_msg)
                 private$.renderWarnings()
                 return()
-            }
-
-            # Convert to numeric with safe variable access.
-            # A bare as.numeric() on a factor returns LEVEL INDICES (1, 2, 3 ...),
-            # not the labels, so every downstream outlier statistic would be wrong
-            # by an unpredictable offset. `vars` is permitted:[numeric] so the GUI
-            # never sends a factor, but the R API can. Convert through the labels
-            # instead, and reject rather than silently analysing nonsense.
-            # (jmvcore::toNumeric() is not a substitute here -- it is a no-op on
-            # factors and characters, it only unwraps a `values` attribute.)
-            for (var in selected_vars) {
-                column <- analysis_data[[var]]
-                if (is.factor(column))
-                    column <- as.character(column)
-                converted <- suppressWarnings(as.numeric(column))
-                failed <- !is.na(column) & is.na(converted)
-                if (any(failed))
-                    jmvcore::reject(
-                        .fmt(
-                            .("Variable '{var}' contains {n} non-missing value(s) that cannot be converted to numbers, so outlier detection cannot run on it. Correct those values or select a continuous variable."),
-                            var = var,
-                            n = sum(failed)),
-                        code = "non_numeric_variable")
-                analysis_data[[var]] <- converted
             }
 
             # Initialize outlier_results variable
@@ -1779,7 +1785,8 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     "% of the observations analysed were flagged. At the threshold in force ",
                     "(", private$.threshold_in_force(), "), a large sample from a normal ",
                     "distribution would produce about ", base::format(round(expected_pct, 2), nsmall = 2),
-                    "% flags across ", ncol(data), " variable(s) by chance alone. The comparison ",
+                    "% flags across ", ncol(data), " variable(s), assuming independent variables. ",
+                    "Correlation changes this benchmark; it is not a calibrated expectation for dependent variables. The comparison ",
                     "between those two numbers, not the observed rate on its own, is what indicates ",
                     "whether the data carry more extreme values than the threshold anticipates.</li>",
                     if (n_analyzed < 500)

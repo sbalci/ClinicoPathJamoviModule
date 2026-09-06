@@ -327,9 +327,11 @@ test_that("the biomarker interpretation sentence is not truncated by the transla
     # jmvcore's .() treats ' [ctx]' as a msgctxt marker and drops everything from
     # the space-bracket on when no catalog entry matches, so
     # 'OR = 4.3 [2.1-8.7]) describes ...' lost its CI and its whole second half.
-    t <- pie_txt(jjpiestats(data = pie_wide(), dep = "resp", group = "arm",
-                            clinicalpreset = "biomarker",
-                            showInterpretation = TRUE)$interpretation$content)
+    # Raw content, not pie_txt(): the panel legitimately contains "p < 0.001",
+    # and the helper's tag-stripper would eat everything after that "<".
+    t <- as.character(jjpiestats(data = pie_wide(), dep = "resp", group = "arm",
+                                 clinicalpreset = "biomarker",
+                                 showInterpretation = TRUE)$interpretation$content)
     expect_match(t, "independent cohort", fixed = TRUE)
     expect_match(t, "95% CI", fixed = TRUE)
 })

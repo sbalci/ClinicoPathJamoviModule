@@ -1981,37 +1981,25 @@ vennClass <- if (requireNamespace('jmvcore'))
                         return()
                     }
 
-                    # Build membership data with the display names that will appear in the table header
-                    membership_data <- data.frame(Row = seq_len(nrow(mydata)))
-                    group_labels <- NULL
-                    for (safe_name in safe_names) {
-                        if (safe_name %in% names(mydata)) {
-                            display_name <- if (!is.null(name_mapping) && safe_name %in% names(name_mapping)) {
-                                name_mapping[[safe_name]]
-                            } else {
-                                safe_name
-                            }
-                            membership_data[[display_name]] <- ifelse(mydata[[safe_name]], "Yes", "No")
-                        }
-                    }
-
-                    set_columns <- names(membership_data)[names(membership_data) != "Row"]
-                    if (length(set_columns) > 0) {
-                        # Build the labels from a logical MATRIX. The previous
-                        # version indexed the data frame row by row
-                        # (membership_data[i, cols]), which is the expensive half
-                        # of a table that took 34s at n = 800.
-                        member_mat <- as.matrix(
-                            membership_data[, set_columns, drop = FALSE]) == "Yes"
-                        group_labels <- apply(member_mat, 1L, function(z) {
-                            if (!any(z)) "None" else paste(set_columns[z], collapse = " & ")
+                    set_columns <- safe_names[safe_names %in% names(mydata)]
+                    display_names <- vapply(set_columns, function(safe_name) {
+                        if (!is.null(name_mapping) && safe_name %in% names(name_mapping))
+                            as.character(name_mapping[[safe_name]]) else safe_name
+                    }, character(1))
+                    member_mat <- as.matrix(mydata[, set_columns, drop = FALSE])
+                    group_labels <- if (nrow(mydata) == 0L) character() else
+                        apply(member_mat, 1L, function(z) {
+                            if (!any(z)) "None" else paste(display_names[z], collapse = " & ")
                         })
-
-                        membership_data$Group <- group_labels
-                        membership_data <- membership_data[, c("Row", "Group", set_columns), drop = FALSE]
-                    } else {
-                        group_labels <- rep("None", nrow(membership_data))
-                    }
+                    if (length(row_numbers) != nrow(mydata) || anyNA(row_numbers))
+                        stop("Membership row identifiers do not match the analysed rows.")
+                    original_names <- c("Row", "Group", display_names)
+                    safe_col_names <- make.names(original_names, unique = TRUE)
+                    columns <- c(list(row_numbers, group_labels),
+                                 lapply(set_columns, function(v) ifelse(mydata[[v]], "Yes", "No")))
+                    names(columns) <- safe_col_names
+                    membership_data <- as.data.frame(columns, check.names = FALSE,
+                                                     stringsAsFactors = FALSE)
 
                     if (nrow(membership_data) == 0L) {
                         table$deleteRows()
@@ -2031,8 +2019,6 @@ vennClass <- if (requireNamespace('jmvcore'))
                     state_data <- membership_data
 
                     # Map display names to safe column identifiers used internally by jamovi
-                    original_names <- names(membership_data)
-                    safe_col_names <- make.names(original_names, unique = TRUE)
 
                     # Ensure required columns exist (add only when missing to avoid duplication)
                     existing_cols <- character(0)
@@ -2043,7 +2029,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             table$addColumn(
                                 name = safe_col_names[i],
                                 title = original_names[i],
-                                type = if (original_names[i] == "Row") "integer" else "text"
+                                type = if (i == 1L) "integer" else "text"
                             )
                             existing_cols <- c(existing_cols, safe_col_names[i])
                         } else {

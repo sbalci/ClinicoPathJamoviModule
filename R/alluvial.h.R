@@ -37,7 +37,8 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
-                vars)
+                vars,
+                default=NULL)
             private$..condensationvar <- jmvcore::OptionVariable$new(
                 "condensationvar",
                 condensationvar,
@@ -325,6 +326,7 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "maxvars",
                     "weight",
                     "engine",
+                    "fillGgalluvial",
                     "showFlowTable")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -472,7 +474,7 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @export
 alluvial <- function(
     data,
-    vars,
+    vars = NULL,
     condensationvar = NULL,
     excl = FALSE,
     marg = FALSE,

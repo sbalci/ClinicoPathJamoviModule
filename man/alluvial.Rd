@@ -6,7 +6,7 @@
 \usage{
 alluvial(
   data,
-  vars,
+  vars = NULL,
   condensationvar = NULL,
   excl = FALSE,
   marg = FALSE,

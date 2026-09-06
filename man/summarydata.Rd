@@ -6,7 +6,7 @@
 \usage{
 summarydata(
   data,
-  vars,
+  vars = NULL,
   distr = FALSE,
   decimal_places = 2,
   outliers = FALSE,
@@ -18,9 +18,8 @@ summarydata(
 \item{data}{The data as a data frame.}
 
 \item{vars}{A character vector naming the numeric variables from
-\code{data} to summarize. This argument is required when calling the
-analysis from R; in jamovi, select one or more variables in the options
-panel.}
+\code{data} to summarize. Until at least one variable is selected, the
+analysis shows a welcome panel with instructions instead of results.}
 
 \item{distr}{If TRUE, additional distribution diagnostics (Shapiro-Wilk
 test, skewness, and kurtosis) will be computed and explained.}

@@ -76,7 +76,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.renderNotices()
 
             # Every user-visible string is wrapped in .() with {} placeholders
-            # filled by jmvcore::format(); HTML structure stays outside the
+            # filled by .fmt(); HTML structure stays outside the
             # wrappers, and translated text that lands inside HTML is escaped.
             # Plot callbacks do not expose a safe cancellation point, but the
             # data aggregation below can be interrupted between phases.
@@ -155,7 +155,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "WARNING",
                     .("Some ages could not be used"),
-                    jmvcore::format(
+                    .fmt(
                         .("{n} observation(s) had an age that is negative, infinite or not a number and were left out of every count, percentage and bar. Check the '{column}' column: a negative age is a data-entry error, and text such as 'n/a' should be a missing value. The Data Summary lists them under 'Unusable ages'."),
                         n = n_invalid_age, column = age)
                 )
@@ -222,7 +222,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "ERROR",
                     .("Female and Male levels must be different"),
-                    jmvcore::format(
+                    .fmt(
                         .("The level '{level}' is selected for BOTH the female and the male side, so there is nothing to compare and no pyramid was drawn. Choose two different levels of '{gender}', or clear one or both selectors to let the analysis read the levels from their names."),
                         level = female_level, gender = gender)
                 )
@@ -239,7 +239,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "INFO",
                     .("Gender levels were read from the level names"),
-                    jmvcore::format(
+                    .fmt(
                         .("You did not set the gender levels, so they were matched on the level names of '{gender}': '{female}' was taken as female and '{male}' as male. The sides of the pyramid, the legend and the 'Female (n)' / 'Male (n)' table columns all follow that assignment. Use the 'Female level' and 'Male level' selectors to set it explicitly."),
                         gender = gender, female = female_level, male = male_level)
                 )
@@ -247,7 +247,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "STRONG_WARNING",
                     .("Gender levels were assigned by level order, not by name"),
-                    jmvcore::format(
+                    .fmt(
                         .("The levels of '{gender}' were not recognised as gender labels, so the first level ('{female}') was treated as FEMALE and the second ('{male}') as MALE. If your data are coded the other way round, the whole analysis is reversed with them: the left and right sides of the pyramid, the legend, and the 'Female (n)' and 'Male (n)' table columns. Set the 'Female level' and 'Male level' selectors to state the coding explicitly."),
                         gender = gender, female = female_level, male = male_level)
                 )
@@ -262,7 +262,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "STRONG_WARNING",
                     .("One gender level was filled in automatically"),
-                    jmvcore::format(template, level = auto_level)
+                    .fmt(template, level = auto_level)
                 )
             }
 
@@ -309,7 +309,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     .("No valid rows remain: all {nTotal} rows were excluded, and the largest single reason was a missing age or gender in the source data ({nReason} rows). Check the '{age}' and '{gender}' columns for empty cells.")
                 }
-                private$.rejectClean(jmvcore::format(
+                private$.rejectClean(.fmt(
                     template, nTotal = n_initial, nReason = reasons[[top]],
                     age = age, gender = gender))
             }
@@ -328,7 +328,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "STRONG_WARNING",
                     .("Some ages are above 120 years"),
-                    jmvcore::format(
+                    .fmt(
                         .("{n} observation(s) have an age above 120 years, the highest being {maxAge}. Values that large are usually a missing-value code such as 999, or an age recorded in months rather than years. They were not removed: they are counted in the highest age band of the pyramid. While the bands come from the bin width they are also built out to {maxAge} years, so the figure gains a long empty tail. Check the age column before reading the figure."),
                         n = n_implausible_age, maxAge = round(max_age, 2))
                 )
@@ -396,7 +396,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         private$.addNotice(
                             "WARNING",
                             .("Some custom age breaks could not be read"),
-                            jmvcore::format(
+                            .fmt(
                                 .("{nBad} of the {nAll} entries in 'Custom age breaks' are not numbers and were left out: {entries}. Enter the break points as plain numbers separated by commas, for example 0,18,45,65."),
                                 nBad = length(bad_entries), nAll = length(breaks_str),
                                 entries = paste(bad_entries, collapse = ", "))
@@ -407,7 +407,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         private$.addNotice(
                             "WARNING",
                             .("The custom age breaks could not be used"),
-                            jmvcore::format(
+                            .fmt(
                                 .("No entry in 'Custom age breaks' could be read as a number, so the age bands below come from the bin width ({width} years) and not from what you typed. Clear the box to remove this message, or enter the break points as plain numbers separated by commas, for example 0,18,45,65."),
                                 width = self$options$bin_width)
                         )
@@ -418,7 +418,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         private$.addNotice(
                             "INFO",
                             .("Custom age breaks are in use"),
-                            jmvcore::format(
+                            .fmt(
                                 .("The age bands come from the break points you typed ({breaks}, then open-ended). 'Bin width' is ignored while 'Custom age breaks' is filled in; clear that box to go back to bands of a fixed width. Ages below the lowest break are not shown in the pyramid and are counted under 'Outside age-break range' in the Data Summary."),
                                 breaks = paste(base::format(breaks_num, trim = TRUE, scientific = FALSE),
                                                collapse = ", "))
@@ -459,7 +459,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "INFO",
                     .("Right-closed bands do not apply to a preset age grouping"),
-                    jmvcore::format(
+                    .fmt(
                         .("'Age band boundaries' is set to right-closed, but the {preset} preset is defined by its source as left-closed bands, so the bands below are the preset's own (for the WHO/UN preset: 0-4, 5-9, ... 85+). Applying right-closure would have moved every boundary by one year and the result could no longer be described as {preset} age groups. The 'Age band boundaries' selector is greyed out while a preset is chosen: set 'Age group preset' back to 'Custom (use bin width)' to use right-closed bands, or to set that selector back to left-closed and remove this note."),
                         preset = preset_label)
                 )
@@ -476,7 +476,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "ERROR",
                     .("Too many age bands to draw"),
-                    jmvcore::format(
+                    .fmt(
                         .("The current settings produce {n} age bands over an age range ending at {maxAge} years. No table or figure was drawn: that many bands need one table row and two bars each, which takes a long time to render and cannot be read. Increase the bin width, type fewer custom breaks, or choose one of the age group presets - about 25 bands or fewer is readable at the size this plot is drawn."),
                         n = n_bands, maxAge = round(max_age, 2))
                 )
@@ -503,7 +503,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "WARNING",
                     .("The age bands cover different numbers of years"),
-                    jmvcore::format(
+                    .fmt(
                         .("The bands are not all the same width: '{widest}' spans {widestYears} year(s) while '{narrowest}' spans {narrowestYears} year(s). The bar lengths and the 'Female (%)' / 'Male (%)' columns are counts per band, not per year of age, so a wider band collects more people simply by covering more years and its bar is longer for that reason alone. Compare bands of equal width with each other, or divide a band's count by its width in years before comparing. Bands of one fixed width come from the 'Custom (use bin width)' preset."),
                         widest = labels[widest],
                         widestYears = base::format(band_widths[widest], trim = TRUE, scientific = FALSE),
@@ -554,7 +554,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "WARNING",
                     .("Many narrow age bands"),
-                    jmvcore::format(
+                    .fmt(
                         .("The current settings fill {nBands} age bands with {n} observations, an average of {perBand} observations per band. Bars that thin move by a large fraction of their height when one patient is added or removed, so the outline of the pyramid mostly reflects that variation. A wider bin width or one of the presets gives a more readable figure."),
                         nBands = n_occupied_bands, n = n_final,
                         perBand = round(n_final / n_occupied_bands, 1))
@@ -644,7 +644,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "STRONG_WARNING",
                     .("Only one gender group is present"),
-                    jmvcore::format(template, n = n_final)
+                    .fmt(template, n = n_final)
                 )
             }
 
@@ -652,7 +652,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "STRONG_WARNING",
                     .("Few observations behind each band"),
-                    jmvcore::format(
+                    .fmt(
                         .("The pyramid is built on {n} observations spread over {nBands} age band(s). Counts this small change by whole percentage points when a single case is added or removed, so the percentages in the table and the outline of the figure describe these particular cases and not a stable estimate of the age distribution they came from."),
                         n = n_final, nBands = n_occupied_bands)
                 )
@@ -662,7 +662,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.addNotice(
                         "WARNING",
                         .("Some age bands hold very few observations"),
-                        jmvcore::format(
+                        .fmt(
                             .("{nSparse} of the {nBands} occupied age bands hold fewer than 5 observations. The percentages shown for those bands move by a large step per case, so differences between neighbouring short bars are not informative. Widening the bin width pools them into steadier bands."),
                             nSparse = n_sparse, nBands = n_occupied_bands)
                     )
@@ -684,7 +684,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     "STRONG_WARNING",
                     .("A large share of the rows was excluded"),
-                    jmvcore::format(
+                    .fmt(
                         .("{nExcluded} of the {nTotal} rows ({pct}%) are not in this pyramid. The largest single reason was {reason} ({nReason} rows). Every count and percentage shown describes only the {nFinal} rows that remained, so the figure is representative of the whole dataset only if the excluded rows have the same age and gender make-up as the kept ones. The full breakdown is in the Data Summary."),
                         nExcluded = n_excluded_total, nTotal = n_initial,
                         pct = round(n_excluded_total / n_initial * 100, 1),
@@ -737,7 +737,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             pyramidTable$setNote(
                 "pct",
                 if (pct_base == "total") {
-                    jmvcore::format(
+                    .fmt(
                         .("Percentages are of all {n} analysed observations (the Female and Male columns together sum to 100%; the Total row shows each gender's share). Rounded per-bin percentages may not total exactly 100."),
                         n = n_final)
                 } else {
@@ -995,14 +995,14 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "text", x = 0, y = 0, hjust = 0.5, vjust = 0.5, size = 3.5,
                         label = paste(
                             wrap(.("The ggcharts pyramid could not be drawn.")),
-                            wrap(jmvcore::format(.("(ggcharts received {nRows} rows covering {nGroups} age group(s).)"),
+                            wrap(.fmt(.("(ggcharts received {nRows} rows covering {nGroups} age group(s).)"),
                                                  nRows = nrow(plotData), nGroups = n_groups)),
                             "",
                             wrap(.("The main Age Pyramid plot and the Population Data table above are complete and unaffected - only this second, optional plot is missing.")),
                             "",
                             wrap(.("What to try next: widen the age bin width (or choose a preset) so more than one age group is produced, and check that any custom bar colors are valid color names or #RRGGBB codes. If you do not need this view, clear the 'ggcharts pyramid' checkbox to hide it.")),
                             "",
-                            wrap(jmvcore::format(.("Technical detail from ggcharts: {message}"), message = e$message)),
+                            wrap(.fmt(.("Technical detail from ggcharts: {message}"), message = e$message)),
                             sep = "\n"
                         )
                     ) +
@@ -1115,6 +1115,11 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # giving breaks c(0, Inf) and the label "0+" instead of "0-4". Ensure at
             # least one finite step exists by extending to at least bin_width.
             upper_bound <- max(max_age, bin_width)
+            # Bound the sequence before allocating it, including overflow in the ratio.
+            n_bands <- floor(upper_bound / bin_width) + 1
+            if (!is.finite(n_bands) || n_bands > 200) {
+                private$.rejectClean(.("Too many age bands to draw. Increase the bin width, use at most 200 bands, or choose an age group preset."))
+            }
             c(seq(from = 0, to = upper_bound, by = bin_width), Inf)
         },
 
@@ -1261,7 +1266,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (is_single_gender) {
                 html <- paste0(html, row(.("Cohort type:"),
-                    esc(jmvcore::format(.("Single-gender ({level})"), level = single_gender_label)),
+                    esc(.fmt(.("Single-gender ({level})"), level = single_gender_label)),
                     "color: #ef8c2e;"))
             } else {
                 html <- paste0(html, row(.("Female level:"), esc(female_level)))

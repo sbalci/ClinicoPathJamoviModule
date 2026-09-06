@@ -450,8 +450,19 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                     # as paste()'s collapse=, returning ONE string instead of a
                     # per-row vector - the duplicate count stayed right while the
                     # evidence list below rendered empty.
-                    key_freq <- as.data.frame(table(
-                        do.call(paste, c(unname(as.list(analysis_data)), list(sep = "||")))))
+                    # Group by integer-coded tuples, not delimiter-bearing values.
+                    row_keys <- do.call(paste, c(lapply(analysis_data, function(x) {
+                        match(x, unique(x))
+                    }), sep = ":"))
+                    group_id <- match(row_keys, unique(row_keys))
+                    first_rows <- which(!duplicated(group_id))
+                    patterns <- do.call(paste, c(lapply(analysis_data, function(x) {
+                        values <- as.character(x[first_rows])
+                        if (any(grepl("||", values, fixed = TRUE), na.rm = TRUE))
+                            values <- encodeString(values, quote = '"')
+                        values
+                    }), sep = "||"))
+                    key_freq <- data.frame(Var1 = patterns, Freq = tabulate(group_id))
                     key_freq <- key_freq[key_freq$Freq > 1, ]
                     key_freq <- key_freq[order(-key_freq$Freq), ]
                     top_keys <- head(key_freq, 5)

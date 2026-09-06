@@ -1,10 +1,10 @@
 ---
 name: survivalPower
 title: Survival Power Analysis
-menuGroup: SurvivalT
-menuSubgroup: Design and Power Analysis
-menuTitle: Power Analysis
-menuSubtitle: Power analysis
+menuGroup: PowerT #jsurvival 
+menuSubgroup: Survival Power Analysis
+menuTitle: Survival Power Analysis
+menuSubtitle: Survival Power analysis
 version: '0.3.0'
 jas: '1.2'
 

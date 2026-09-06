@@ -503,6 +503,8 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "counts",
                     "excl",
                     "sig",
+                    "posthoc",
+                    "testSelection",
                     "copyReadySentences")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -611,9 +613,12 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param residualsCutoff Critical value for identifying significant residuals
 #'   (typically 2.0 or 3.0). Used only when 'Residual significance criterion' is
 #'   set to 'Fixed cutoff'.
-#' @param phiCI calculate bootstrap confidence intervals for the Phi
-#'   coefficient using BCa method (Bias-Corrected and accelerated). Note: This
-#'   is computationally intensive and may take longer for large tables.
+#' @param phiCI calculate bootstrap 95 percent confidence intervals (BCa
+#'   method, bias-corrected and accelerated) for the pairwise effect size
+#'   sqrt(chi-square / n), which is Cramer's V for a 2xC or Rx2 sub-table and
+#'   equals the phi coefficient for a 2x2. Each interval is computed per
+#'   comparison and is not adjusted for multiple testing. Note: This is
+#'   computationally intensive and may take longer for large tables.
 #' @param seed Random seed for the bootstrap confidence intervals, so that the
 #'   interval reported for a given table is reproducible. Change it to see how
 #'   much the interval depends on the resampling. Used only when bootstrap

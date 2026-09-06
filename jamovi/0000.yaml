@@ -4229,10 +4229,10 @@ analyses:
     name: survivalPower
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
-    menuSubgroup: Design and Power Analysis
-    menuTitle: Power Analysis
-    menuSubtitle: Power analysis
+    menuGroup: PowerT
+    menuSubgroup: Survival Power Analysis
+    menuTitle: Survival Power Analysis
+    menuSubtitle: Survival Power analysis
     description: >-
       Power analysis and sample size calculation for survival studies.
 

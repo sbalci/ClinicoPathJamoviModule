@@ -187,7 +187,8 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "classInt",
-                    "dichotomizing"))
+                    "dichotomizing",
+                    "AltmanRoyston2006"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -209,7 +210,10 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "sdmult",
                     "includelowest",
                     "rightclosed",
-                    "excl")))
+                    "excl",
+                    "newvarname",
+                    "addtodata",
+                    "ordered")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summaryText",
@@ -392,9 +396,10 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param nbins Number of categories to create (2-20). Used for equal,
 #'   quantile, and jenks methods.
 #' @param breaks Comma-separated break points for manual binning (e.g., "0,
-#'   25, 50, 75, 100"). Entries are sorted and duplicates removed, and the data
-#'   minimum and maximum are added around them unless out-of-range exclusion is
-#'   on.
+#'   25, 50, 75, 100"). Use a period as the decimal separator (2.5, not 2,5):
+#'   the comma only separates break points. Entries are sorted and duplicates
+#'   removed, and the data minimum and maximum are added around them unless
+#'   out-of-range exclusion is on.
 #' @param sdmult Multiplier for standard deviation when using meansd method
 #'   (default = 1).
 #' @param labels How to label the resulting categories.

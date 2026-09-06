@@ -73,7 +73,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 non_categorical <- myvars[!sapply(mydata[myvars], function(x) is.factor(x) || is.character(x))]
                 if (length(non_categorical) > 0) {
                     jmvcore::reject(
-                        jmvcore::format(
+                        .fmt(
                             .("Non-categorical variables detected: {vars}. Please select only categorical (factor or character) variables."),
                             vars = paste(non_categorical, collapse = ", ")),
                         code = "not_categorical")
@@ -90,7 +90,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (length(empty_vars) == length(myvars)) {
                     jmvcore::reject(
-                        jmvcore::format(
+                        .fmt(
                             .("Every selected variable was empty or all-missing, so there is nothing to summarise: {vars}. Select at least one variable that has observed categories."),
                             vars = paste(empty_vars, collapse = ", ")),
                         code = "all_empty")

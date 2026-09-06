@@ -1381,7 +1381,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # when the subtable is 2x2). It is nonnegative by construction, so it carries
         # no direction of association - the results column is labelled accordingly.
         .calculatePhiCI = function(subtable, conf_level = 0.95, n_boot = 999) {
-            if (!requireNamespace("boot", quietly = TRUE)) {
+            # BCa bootstrapping reconstructs cases and jackknifes them. Bound that
+            # work before rep(), and never truncate fractional frequency weights.
+            counts <- as.vector(subtable)
+            if (any(!is.finite(counts)) || any(counts < 0) ||
+                    any(counts != round(counts)) || sum(counts) < 2 ||
+                    sum(counts) > 2000 || !requireNamespace("boot", quietly = TRUE)) {
                 return("")
             }
 
@@ -1553,6 +1558,17 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.factor(data[[rows]])) data[[rows]] <- droplevels(data[[rows]])
             if (is.factor(data[[cols]])) data[[cols]] <- droplevels(data[[cols]])
 
+            if (!is.null(counts)) {
+                frequency <- suppressWarnings(as.numeric(as.character(data[[counts]])))
+                if (any(!is.finite(frequency)) || any(frequency < 0) ||
+                        any(frequency != round(frequency))) {
+                    msg <- .("Counts must be finite, non-negative whole numbers. No test was computed. Supply observed frequencies rather than fractional weights.")
+                    private$.addNotice("ERROR", .("Invalid frequency counts"), msg)
+                    self$results$todo$setContent(private$.errorBox(msg))
+                    return(NULL)
+                }
+            }
+
             # Create contingency table
             contTable <- try({
                 if (!is.null(counts)) {
@@ -1589,16 +1605,6 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 return(NULL)
             }
-
-            # C. Fractional weights are not frequencies. The statistic is computed on
-            # them as given (xtabs sums whatever it is handed), but the result is then
-            # not a table of observed cases, which is what every panel describes.
-            if (!is.null(counts) && show_warnings &&
-                any(abs(data[[counts]] - round(data[[counts]])) > 1e-8, na.rm = TRUE))
-                private$.addNotice(
-                    "WARNING",
-                    .("Counts are not whole numbers"),
-                    .("The counts variable contains non-integer values. A frequency table needs whole-number counts; the chi-square statistic was computed on the values as given, but they do not describe a table of observed cases."))
 
             return(contTable)
         },

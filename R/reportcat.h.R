@@ -43,8 +43,7 @@ reportcatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         text = function() private$.items[["text"]],
         text1 = function() private$.items[["text1"]],
         reportSentences = function() private$.items[["reportSentences"]],
-        dataWarnings = function() private$.items[["dataWarnings"]],
-        error = function() private$.items[["error"]]),
+        dataWarnings = function() private$.items[["dataWarnings"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -109,13 +108,6 @@ reportcatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Data Warnings",
                 visible=FALSE,
                 clearWith=list(
-                    "vars")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="error",
-                title="Error Message",
-                visible=FALSE,
-                clearWith=list(
                     "vars")))}))
 
 reportcatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -160,7 +152,6 @@ reportcatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$reportSentences} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataWarnings} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$error} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

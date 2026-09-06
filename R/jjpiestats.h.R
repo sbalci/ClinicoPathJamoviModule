@@ -306,17 +306,17 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="summary",
                 title="Analysis Summary",
-                visible="(showSummary)"))
+                visible="(showSummary || showexplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
                 title="Statistical Assumptions & Warnings",
-                visible="(showAssumptions)"))
+                visible="(showAssumptions || showexplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
                 title="Results Interpretation",
-                visible="(showInterpretation)"))
+                visible="(showInterpretation || showexplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="report",
@@ -334,7 +334,7 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=300,
                 renderFun=".plot4",
                 requiresData=TRUE,
-                visible="(grvar)"))
+                visible="(length(dep) > 0 && length(group) > 0 && length(grvar) > 0)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -343,7 +343,7 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=300,
                 renderFun=".plot2",
                 requiresData=TRUE,
-                visible="(group)"))
+                visible="(length(dep) > 0 && length(group) > 0)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot1",
@@ -361,7 +361,9 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=400,
                 renderFun=".plotDonut",
                 requiresData=TRUE,
-                visible="(addGGPubrDonut)"))}))
+                visible="(addGGPubrDonut && length(dep) > 0)",
+                refs=list(
+                    "ggpubr")))}))
 
 jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjpiestatsBase",
