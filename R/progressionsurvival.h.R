@@ -419,7 +419,8 @@ progressionsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Progression-Free Survival Analysis",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "SchemperSmith1996"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

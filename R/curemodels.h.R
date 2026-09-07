@@ -253,7 +253,8 @@ curemodelsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "npcure",
                     "cuRe",
                     "glue",
-                    "stringr"))
+                    "stringr",
+                    "SchemperSmith1996"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

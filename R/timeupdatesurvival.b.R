@@ -178,7 +178,10 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             # Basic model information
             n_total <- nrow(data)
             n_events <- sum(data$status)
-            median_followup <- median(data$time)
+            # Reverse Kaplan-Meier, not median(observed times) -- the latter is
+            # the median time to event-or-censoring. See .medianFollowUp() in
+            # R/survival_utils.R.
+            mfu <- .medianFollowUp(data$time, data$status == 0)
             n_covariates <- length(covariate_vars)
             
             summary_table$addRow(rowKey = "method", values = list(
@@ -203,8 +206,8 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             ))
             
             summary_table$addRow(rowKey = "followup", values = list(
-                characteristic = "Median Follow-up",
-                value = sprintf("%.2f", median_followup)
+                characteristic = .medianFollowUpLabel(mfu),
+                value = .medianFollowUpText(mfu)
             ))
             
             summary_table$addRow(rowKey = "covariates", values = list(

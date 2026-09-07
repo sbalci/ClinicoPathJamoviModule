@@ -765,7 +765,10 @@ pseudosurvivalClass <- R6::R6Class(
                 n_events <- sum(analysis_data$status)
                 n_censored <- n_obs - n_events
 
-                median_time <- median(analysis_data$time, na.rm = TRUE)
+                # Reverse Kaplan-Meier, not median(observed times) -- the
+                # latter is the median time to event-or-censoring. See
+                # .medianFollowUp() in R/survival_utils.R.
+                mfu <- .medianFollowUp(analysis_data$time, analysis_data$status == 0)
                 max_time <- max(analysis_data$time, na.rm = TRUE)
 
                 html <- paste0(html, "<h4>Data Summary</h4>")
@@ -773,9 +776,11 @@ pseudosurvivalClass <- R6::R6Class(
                 html <- paste0(html, "<tr><td><b>Total Observations:</b></td><td>", n_obs, "</td></tr>")
                 html <- paste0(html, "<tr><td><b>Events:</b></td><td>", n_events, " (", round(100 * n_events / n_obs, 1), "%)</td></tr>")
                 html <- paste0(html, "<tr><td><b>Censored:</b></td><td>", n_censored, " (", round(100 * n_censored / n_obs, 1), "%)</td></tr>")
-                html <- paste0(html, "<tr><td><b>Median Follow-up:</b></td><td>", round(median_time, 2), "</td></tr>")
+                html <- paste0(html, "<tr><td><b>", .medianFollowUpLabel(mfu), ":</b></td><td>",
+                               .medianFollowUpText(mfu), "</td></tr>")
                 html <- paste0(html, "<tr><td><b>Maximum Follow-up:</b></td><td>", round(max_time, 2), "</td></tr>")
                 html <- paste0(html, "</table>")
+                html <- paste0(html, .medianFollowUpExplanation(mfu))
 
                 # Analysis configuration
                 html <- paste0(html, "<h4>Analysis Configuration</h4>")

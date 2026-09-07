@@ -38,10 +38,13 @@ test_that("jjwithinstats handles data with high proportion of missing values", {
     dep2 = "week4",
     dep3 = "week12"
   )
-  expect_match(res$warnings$content, "incomplete cases removed")
+  # Progress notes (how many subjects survived listwise deletion) live under
+  # the Analysis Summary; the `warnings` panel is reserved for problems the
+  # user has to act on, and is hidden when there are none.
+  expect_match(res$summary$content, "incomplete cases removed")
   # the retained count must be the number of COMPLETE subjects, since a paired
   # analysis can only use subjects with every measurement present
-  expect_match(res$warnings$content,
+  expect_match(res$summary$content,
                paste0(sum(complete.cases(
                    test_data_missing[, c("baseline", "week4", "week12")])),
                    " subjects retained"))
@@ -427,7 +430,7 @@ test_that("jjwithinstats handles Inf and -Inf values", {
   )
   expect_s3_class(res, "jjwithinstatsResults")
   expect_match(res$warnings$content, "infinite or undefined measurement")
-  expect_match(res$warnings$content, "incomplete cases removed")
+  expect_match(res$summary$content, "incomplete cases removed")
 })
 
 test_that("jjwithinstats handles NaN values", {
@@ -448,5 +451,5 @@ test_that("jjwithinstats handles NaN values", {
     dep2 = "week4",
     dep3 = "week12"
   )
-  expect_match(res$warnings$content, "incomplete cases removed")
+  expect_match(res$summary$content, "incomplete cases removed")
 })

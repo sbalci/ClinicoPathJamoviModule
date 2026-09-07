@@ -1,4 +1,4 @@
-#' @title Violin Plots to Compare Within Group (Repeated Measures)
+#' @title Box-Violin Plots to Compare Within Groups
 #'
 #' @description
 #' Creates violin plots for within-subjects (repeated measures) analysis using
@@ -166,7 +166,11 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .data_hash = NULL,
         .options_hash = NULL,
         .messages = NULL,
+        .info_messages = NULL,
         .data_messages = NULL,
+        .data_info_messages = NULL,
+        .subtitle_cache = NULL,
+        .subtitle_cache_key = NULL,
 
         # Shared welcome / getting-started message (used by .init and .run) ----
         .welcomeMessage = function() {
@@ -228,8 +232,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         },
         
-        # Enhanced message management system (dual output: HTML + Notice)
-        .accumulateMessage = function(message, notice_type = "WARNING") {
+        # WARNING-grade messages only. These are the ones a user has to act on,
+        # so the "Messages" panel is reserved for them; procedural progress notes
+        # go to .accumulateInfoMessage() and are rendered under the summary
+        # instead. When every run filled this panel with "Processing 3
+        # measurements..." there was no visual difference between a healthy run
+        # and one reporting 60% missing data.
+        .accumulateMessage = function(message) {
             if (is.null(private$.messages)) {
                 private$.messages <- character()
             }
@@ -241,10 +250,31 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$warnings$setVisible(TRUE)
             }
         },
-        
+
+        # INFO-grade progress notes (how many measurements, how many subjects
+        # retained). Collected here and appended to the Analysis Summary by
+        # .run(); never routed to the warning panel.
+        .accumulateInfoMessage = function(message) {
+            if (is.null(private$.info_messages)) {
+                private$.info_messages <- character()
+            }
+            private$.info_messages <- append(private$.info_messages, message)
+        },
+
+        # Muted block appended to the Analysis Summary panel.
+        .renderInfoBlock = function() {
+            if (length(private$.info_messages) == 0) return("")
+            paste0(
+                "<div style='background-color: rgba(138, 155, 172, 0.06); padding:8px; ",
+                "margin-top:8px; color: inherit; font-size: 0.95em;'>",
+                paste(private$.info_messages, collapse = ""),
+                "</div>")
+        },
+
         # Reset messages for new analysis run
         .resetMessages = function() {
             private$.messages <- character()
+            private$.info_messages <- character()
             # Don't clear TODO here, as it might hold "Welcome" or "Ready"
             # warning content is cleared
             if (!is.null(self$results$warnings)) {
@@ -271,6 +301,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .accumulateDataMessage = function(message) {
             private$.data_messages <- append(private$.data_messages, message)
             private$.accumulateMessage(message)
+        },
+
+        # Same, for INFO-grade progress notes (cached separately so a cache hit
+        # replays each message at its own severity).
+        .accumulateDataInfoMessage = function(message) {
+            private$.data_info_messages <- append(private$.data_info_messages, message)
+            private$.accumulateInfoMessage(message)
         },
         
         # Name of the test that is ACTUALLY run. With TWO measurements the
@@ -307,7 +344,25 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #
         # Returns NULL when we should not take over, in which case the caller
         # leaves ggstatsplot to build its own subtitle.
+        # Memoised wrapper. .run() probes the takeover to decide whether to warn
+        # the user, and .plot() needs the expression itself; without this the
+        # robust bootstrap and the Bayesian sampler ran twice per cycle.
         .subtitleExpr = function(long_data, opts, num_measurements) {
+            key <- paste(private$.data_hash, private$.options_hash,
+                         num_measurements, sep = "|")
+            if (identical(private$.subtitle_cache_key, key)) {
+                private$.subtitleFallback <- private$.subtitle_cache$fallback
+                return(private$.subtitle_cache$expr)
+            }
+            private$.subtitleFallback <- NULL
+            expr <- private$.computeSubtitleExpr(long_data, opts, num_measurements)
+            private$.subtitle_cache <- list(expr = expr,
+                                            fallback = private$.subtitleFallback)
+            private$.subtitle_cache_key <- key
+            expr
+        },
+
+        .computeSubtitleExpr = function(long_data, opts, num_measurements) {
             if (!isTRUE(opts$resultssubtitle)) return(NULL)
             if (is.na(num_measurements) || num_measurements < 2) return(NULL)
             # Leave the Bayesian path to ggstatsplot: taking the subtitle over
@@ -335,6 +390,15 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             fn <- if (num_measurements <= 2) statsExpressions::two_sample_test
                   else                       statsExpressions::oneway_anova
+
+            # Seed HERE rather than at the call site. The Bayesian sampler and
+            # the robust bootstrap are stochastic, and this is reached from two
+            # places: .run()'s takeover probe and .plot(). Only .plot() used to
+            # set the seed, so once the result became memoised the cached value
+            # came from whichever caller ran first - the unseeded probe - and
+            # the "same analysis reports the same numbers" guarantee was lost.
+            if (opts$typestatistics %in% c("bayes", "robust"))
+                withr::local_seed(private$.STOCHASTIC_SEED)
 
             res <- tryCatch(
                 rlang::inject(fn(
@@ -369,26 +433,26 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Biomarker tracking: nonparametric, show individual trajectories
                     if (self$options$typestatistics == "parametric") {  # Only change if default
                         # Would need to update options through proper channels
-                        private$.accumulateMessage(.(" Biomarker preset: Consider using Nonparametric test for skewed biomarker data<br>"))
+                        private$.accumulateMessage(.("Biomarker preset: Consider using Nonparametric test for skewed biomarker data<br>"))
                     }
-                    private$.accumulateMessage(.(" <strong>Biomarker Tracking (Guidance Only):</strong> Optimized for laboratory values. Please manually ensure 'Nonparametric' is selected if data is skewed.<br>"))
+                    private$.accumulateMessage(.("<strong>Biomarker tracking (guidance only):</strong> Optimized for laboratory values. Please manually ensure 'Nonparametric' is selected if data is skewed.<br>"))
                 },
                 "treatment" = {
                     # Treatment response: parametric with pairwise comparisons
                     if (!self$options$pairwisecomparisons) {
-                        private$.accumulateMessage(.(" Treatment preset: Enable pairwise comparisons to identify when treatment effects occur<br>"))
+                        private$.accumulateMessage(.("Treatment preset: Enable pairwise comparisons to identify when treatment effects occur<br>"))
                     }
-                    private$.accumulateMessage(.(" <strong>Treatment Response:</strong> Optimized for clinical treatment monitoring<br>"))
+                    private$.accumulateMessage(.("<strong>Treatment response:</strong> Optimized for clinical treatment monitoring<br>"))
                 },
                 "laboratory" = {
                     # Laboratory values: robust with centrality plotting
                     if (self$options$typestatistics == "parametric") {
-                        private$.accumulateMessage(.(" Laboratory preset: Consider Robust test to handle outliers common in lab values<br>"))
+                        private$.accumulateMessage(.("Laboratory preset: Consider Robust test to handle outliers common in lab values<br>"))
                     }
                     if (!self$options$centralityplotting) {
-                        private$.accumulateMessage(.(" Laboratory preset: Enable centrality plotting to see overall trends<br>"))
+                        private$.accumulateMessage(.("Laboratory preset: Enable centrality plotting to see overall trends<br>"))
                     }
-                    private$.accumulateMessage(.(" <strong>Laboratory Values:</strong> Optimized for clinical lab value monitoring<br>"))
+                    private$.accumulateMessage(.("<strong>Laboratory values:</strong> Optimized for clinical lab value monitoring<br>"))
                 }
             )
         },
@@ -570,9 +634,12 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # (i.e. .run(), which calls .resetMessages() first). Render calls
                 # (.plot()/.init()) pass emit_messages = FALSE so warnings are
                 # not appended a second time and duplicated in the output.
-                if (emit_messages && !is.null(private$.data_messages)) {
+                if (emit_messages) {
                     for (msg in private$.data_messages) {
                         private$.accumulateMessage(msg)
+                    }
+                    for (msg in private$.data_info_messages) {
+                        private$.accumulateInfoMessage(msg)
                     }
                 }
                 return(private$.prepared_data)
@@ -580,10 +647,11 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Reset data messages for new processing
             private$.data_messages <- character()
+            private$.data_info_messages <- character()
             
             # Add processing feedback
-            private$.accumulateDataMessage(
-                glue::glue(.("<br>Processing {length(vars)} measurements for within-subjects analysis...<br>"))
+            private$.accumulateDataInfoMessage(
+                glue::glue(.("<br>Processing {length(vars)} measurements for within-subjects analysis.<br>"))
             )
             
             # Variables already validated above, proceed with data preparation
@@ -740,16 +808,16 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dropped_n <- n_rows - final_n
 
             if (dropped_n > 0) {
-                 private$.accumulateDataMessage(
-                    glue::glue(.("<br> <strong>Data Processing:</strong> {final_n} subjects retained. {dropped_n} incomplete cases removed.<br>"))
+                 private$.accumulateDataInfoMessage(
+                    glue::glue(.("<br><strong>Data Processing:</strong> {final_n} subjects retained. {dropped_n} incomplete cases removed.<br>"))
                 )
                  if (n_nonfinite > 0)
                      private$.accumulateDataMessage(
                         glue::glue(.("<br> <strong>Non-finite values:</strong> {n_nonfinite} infinite or undefined measurement(s) were treated as missing. Check the source data for division by zero or out-of-range entries.<br>"))
                     )
             } else {
-                 private$.accumulateDataMessage(
-                    glue::glue(.("<br> <strong>Data Processing:</strong> All {final_n} subjects retained (complete data).<br>"))
+                 private$.accumulateDataInfoMessage(
+                    glue::glue(.("<br><strong>Data Processing:</strong> All {final_n} subjects retained (complete data).<br>"))
                 )
             }
             
@@ -915,7 +983,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             # What to look for
-            guidance <- .(" <strong>What to look for:</strong><br>\u2022 A small p-value is evidence against the null under the model assumptions; it does not prove a treatment effect<br>\u2022 Compare effect estimates and uncertainty with a prespecified clinically important difference<br>\u2022 Individual trajectories reveal response patterns<br>\u2022 Outliers may indicate treatment non-responders or measurement errors")
+            guidance <- .("<strong>What to look for:</strong><br>\u2022 A small p-value is evidence against the null under the model assumptions; it does not prove a treatment effect<br>\u2022 Compare effect estimates and uncertainty with a prespecified clinically important difference<br>\u2022 Individual trajectories reveal response patterns<br>\u2022 Outliers may indicate treatment non-responders or measurement errors")
             
             interpretation_parts <- list(
                 paste0("<div style='background-color: rgba(138, 155, 172, 0.06);padding:15px;margin:10px 0;border-left:4px solid #007bff; color: inherit;'>"),
@@ -930,7 +998,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Generate analysis summary
-        .generateAnalysisSummary = function(opts, num_measurements, has_significance = NULL) {
+        .generateAnalysisSummary = function(opts, num_measurements) {
             summary_parts <- list()
             
             # Analysis overview
@@ -944,13 +1012,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Configuration summary
             config_items <- character()
             if (opts$pairwisecomparisons) {
-                config_items <- c(config_items, .(" Pairwise comparisons enabled"))
+                config_items <- c(config_items, .("Pairwise comparisons enabled"))
             }
             if (opts$centralityplotting) {
-                config_items <- c(config_items, .(" Central tendency displayed"))
+                config_items <- c(config_items, .("Central tendency displayed"))
             }
             if (opts$pointpath) {
-                config_items <- c(config_items, .(" Individual trajectories shown"))
+                config_items <- c(config_items, .("Individual trajectories shown"))
             }
             
             if (length(config_items) > 0) {
@@ -972,31 +1040,44 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Generate explanations ----
         .generateExplanations = function() {
-            self$results$explanations$setContent(
-                "<h3>Explanations</h3>
-                <p>
-                    This analysis compares repeated measurements from the same subjects (within-subjects design).
-                    It helps determine if there are significant differences between time points or conditions.
-                </p>
-                <p>
-                    <strong>Violin Plots:</strong> Show the distribution of data. Wider sections indicate more data points.
-                    <br>
-                    <strong>Box Plots:</strong> Show the median (middle line) and quartiles (box edges).
-                </p>
-                <p>
-                    <strong>Statistical Tests:</strong>
-                    <ul>
-                        <li><strong>Parametric (ANOVA/t-test):</strong> Assumes normal distribution. Tests for difference in means.</li>
-                        <li><strong>Nonparametric (Friedman/Wilcoxon):</strong> No distribution assumption. Tests for difference in medians.</li>
-                        <li><strong>Robust:</strong> Resistant to outliers. Uses trimmed means.</li>
-                        <li><strong>Bayesian:</strong> Provides evidence strength for/against the null hypothesis.</li>
-                    </ul>
-                </p>"
-            )
+            # One complete sentence per .() call - a translator needs the whole
+            # sentence, and .() must not contain newlines.
+            self$results$explanations$setContent(paste0(
+                "<h3>", .("Explanations"), "</h3>",
+                "<p>", .("This analysis compares repeated measurements taken from the same subjects (a within-subjects design)."),
+                " ", .("It tests whether the measurements differ across time points or conditions."), "</p>",
+                "<p><strong>", .("Violin plots:"), "</strong> ",
+                .("These show the distribution of the data; wider sections contain more observations."),
+                "<br><strong>", .("Box plots:"), "</strong> ",
+                .("These show the median (middle line) and the quartiles (box edges)."), "</p>",
+                "<p><strong>", .("Statistical tests:"), "</strong></p>",
+                "<ul>",
+                "<li><strong>", .("Parametric:"), "</strong> ",
+                .("A paired t-test for two measurements, or a repeated-measures ANOVA with a Greenhouse-Geisser sphericity correction for three or more. This assumes the within-subject differences are approximately normal."), "</li>",
+                "<li><strong>", .("Nonparametric:"), "</strong> ",
+                .("A Wilcoxon signed-rank test for two measurements, or a Friedman test for three or more. These make no distributional assumption."), "</li>",
+                "<li><strong>", .("Robust:"), "</strong> ",
+                .("A trimmed-means test that resists outliers, which are common in laboratory values."), "</li>",
+                "<li><strong>", .("Bayesian:"), "</strong> ",
+                .("This reports a Bayes factor, quantifying the evidence for and against the null hypothesis."), "</li>",
+                "</ul>",
+                "<p><strong>", .("Missing data:"), "</strong> ",
+                .("Only subjects with a value for every selected measurement are analysed, because a paired comparison needs complete records."), "</p>",
+                "<p><strong>", .("Note on the Wilcoxon p-value:"), "</strong> ",
+                .("The signed-rank p-value is computed from the normal approximation with a continuity correction, not from the exact permutation distribution that stats::wilcox.test uses by default, so it may differ from base R for small samples without ties."), "</p>"
+            ))
         },
 
         # run ----
         .run = function() {
+            # The explanations panel holds STATIC method text and its visibility
+            # is governed declaratively by `visible: (showExplanations)` in
+            # .r.yaml. Populate it unconditionally - when it was filled only in
+            # the variables-selected branch, the welcome screen showed an
+            # "Explanations" heading with an empty body (showExplanations
+            # defaults to true).
+            private$.generateExplanations()
+
             ## Initial Message ----
             if ( is.null(self$options$dep1) || is.null(self$options$dep2)) {
 
@@ -1029,8 +1110,11 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Check messages from presets and data quality each run
                 private$.applyClinicalPresets()
-                # Ensure data is prepared (and N messages generated)
-                private$.prepareData()
+                # Ensure data is prepared (and N messages generated).
+                # NULL means a blocking condition was hit (fewer than 3 complete
+                # cases, no rows left after cleaning, missing columns); the
+                # reason has been written to the Messages panel.
+                prepared <- private$.prepareData()
 
                 # Probe the subtitle takeover HERE, not in .plot(): .run() is the
                 # only place that composes the warnings HTML, so a flag set later
@@ -1059,14 +1143,32 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$results$summary)) {
                     self$results$summary$setVisible(visible = TRUE)
                 }
-                if (!is.null(self$results$warnings)) {
-                    self$results$warnings$setVisible(visible = TRUE)
-                }
+                # Visibility is decided at the end of .run(), once we know
+                # whether any warning-grade message was actually raised.
                 
                 # Generate clinical guidance for active analysis
                 vars <- c(self$options$dep1, self$options$dep2, 
                          self$options$dep3, self$options$dep4)
                 num_measurements <- sum(!sapply(vars, is.null))
+
+                # The effect-size selector offers four choices, but eta and omega
+                # are ANOVA-only quantities that statsExpressions' two-group test
+                # does not accept, so with TWO measurements they are coerced onto
+                # biased/unbiased (see .computeSubtitleExpr). Verified: at n = 40,
+                # 'eta' and 'omega' return values identical to 'biased' (Cohen's
+                # d_z = 1.27052) and 'unbiased' (Hedges' g_z = 1.24591). Say so,
+                # rather than letting the user believe they selected partial
+                # eta-squared and silently receive Cohen's d.
+                if (isTRUE(self$options$resultssubtitle) &&
+                    num_measurements <= 2 &&
+                    self$options$effsizetype %in% c("eta", "omega")) {
+                    private$.accumulateMessage(sprintf(
+                        .("<br><strong>Note:</strong> with two measurements the comparison is a paired t-test, for which partial eta-squared and omega-squared are not defined; '%s' has been reported as %s instead.<br>"),
+                        private$.safeHtmlOutput(self$options$effsizetype),
+                        if (identical(self$options$effsizetype, "eta"))
+                            .("Cohen's d") else .("Hedges' g")))
+                }
+
                 
                 # Generate clinical interpretation with error protection
                 tryCatch({
@@ -1082,24 +1184,34 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 tryCatch({
                     opts <- private$.prepareOptions()
                     analysis_summary <- private$.generateAnalysisSummary(opts, num_measurements)
-                    self$results$summary$setContent(analysis_summary)
+                    # Procedural progress notes ride along under the summary
+                    # rather than filling the warning panel.
+                    self$results$summary$setContent(
+                        paste0(analysis_summary, private$.renderInfoBlock()))
                 }, error = function(e) {
                     self$results$summary$setContent(.("<br>Analysis summary temporarily unavailable<br>"))
                 })
 
                 ### todo ----
-                todo <- sprintf(.("<br> Ready for analysis: Violin Plot comparing %d repeated measurements.<br><hr>"), 
-                               num_measurements)
+                # Do not announce readiness when the data never made it through
+                # preparation - the plot stays blank and the only explanation
+                # sits in the Messages panel, so "Ready for analysis" read as a
+                # contradiction of the warning directly above it.
+                todo <- if (is.null(prepared))
+                    .("<br>Analysis cannot proceed with the current data. See the Messages panel for the reason.<br><hr>")
+                else
+                    sprintf(.("<br> Ready for analysis: Violin Plot comparing %d repeated measurements.<br><hr>"),
+                            num_measurements)
 
                 self$results$todo$setContent(todo)
 
                 if (nrow(self$data) == 0)
                     jmvcore::reject(.("Data contains no (complete) rows"))
 
-                # Generate explanations if requested
-                if (self$options$showExplanations) {
-                    private$.generateExplanations()
-                }
+                # Show the Messages panel only when something needs acting on.
+                if (!is.null(self$results$warnings))
+                    self$results$warnings$setVisible(
+                        visible = length(private$.messages) > 0)
 
             }
         }
@@ -1368,7 +1480,27 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Add statistical comparisons
                 if (self$options$ggpubrAddStats && self$options$ggpubrPlotType != "line") {
-                    if (length(deps) > 2) {
+                    # ggpubr::stat_compare_means can only express the tests base R
+                    # exposes (t.test / wilcox.test), on TWO groups. It has no
+                    # robust or Bayesian test and no paired omnibus test. Use it
+                    # ONLY where it runs exactly the test the user selected;
+                    # otherwise annotate with the p-value from the same engine the
+                    # main figure uses, so the companion can never contradict it.
+                    ggpubr_method <- if (length(deps) == 2)
+                        switch(self$options$typestatistics,
+                               "parametric"    = "t.test",
+                               "nonparametric" = "wilcox.test",
+                               NULL)
+                    else
+                        NULL
+
+                    if (!is.null(ggpubr_method)) {
+                        plot <- plot + ggpubr::stat_compare_means(
+                            method = ggpubr_method,
+                            paired = TRUE,
+                            label = "p.signif"
+                        )
+                    } else {
                         # Pairwise t.test/wilcox.test cannot compare >2 groups and
                         # would error (previously swallowed by the empty handler).
                         # Use an omnibus test for a single global p-value.
@@ -1382,10 +1514,22 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # F_Fisher(1.76, 68.5) = 14.26, p = 1.61e-05 - two
                         # p-values ~8000x apart in one output window.
                         #
-                        # Annotate the CORRECT repeated-measures p-value instead,
-                        # computed by the same engine the main figure uses.
+                        # Annotate the CORRECT p-value instead, computed by the
+                        # same engine the main figure uses. Reached for 3+
+                        # measurements (no paired omnibus test in ggpubr) and for
+                        # the robust / Bayesian choices at any number of
+                        # measurements. Previously "robust" silently fell back to
+                        # a paired t-test: on a 30-subject example with outliers -
+                        # exactly why a user picks robust - the main panel showed
+                        # Yuen p = 0.025 (*) while this companion printed t-test
+                        # p = 0.35 (ns), two contradictory verdicts in one window.
+                        stat_fn <- if (length(deps) > 2)
+                            statsExpressions::oneway_anova
+                        else
+                            statsExpressions::two_sample_test
+
                         rm_res <- tryCatch(
-                            rlang::inject(statsExpressions::oneway_anova(
+                            rlang::inject(stat_fn(
                                 data       = transform(long_data,
                                                        .m = factor(Measurement, levels = deps),
                                                        .s = factor(Subject_ID)),
@@ -1398,35 +1542,21 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 conf.level = self$options$conflevel)),
                             error = function(e) NULL)
 
-                        if (!is.null(rm_res) && !is.null(rm_res$p.value) &&
-                            is.finite(rm_res$p.value)) {
+                        # as.data.frame first: `$` on an absent tibble column
+                        # warns, and the Bayesian result carries no p.value.
+                        if (!is.null(rm_res)) rm_res <- as.data.frame(rm_res)
+
+                        if (!is.null(rm_res) && "p.value" %in% names(rm_res) &&
+                            is.finite(rm_res$p.value[1])) {
                             plot <- plot + ggplot2::labs(subtitle = sprintf(
                                 .("%s: p = %s (n = %d subjects)"),
                                 private$.testLabel(self$options$typestatistics, length(deps)),
-                                format.pval(rm_res$p.value, digits = 3, eps = 1e-4),
+                                format.pval(rm_res$p.value[1], digits = 3, eps = 1e-4),
                                 length(unique(long_data$Subject_ID))))
                         } else {
                             plot <- plot + ggplot2::labs(subtitle = sprintf(
                                 .("%s - see the main figure for the test statistic"),
                                 private$.testLabel(self$options$typestatistics, length(deps))))
-                        }
-                    } else {
-                        # Two measurements: paired two-sample comparison
-                        test_method <- switch(
-                            self$options$typestatistics,
-                            "parametric" = "t.test",
-                            "nonparametric" = "wilcox.test",
-                            "robust" = "t.test",        # Fallback
-                            "bayes" = NULL,
-                            "t.test"                    # Default
-                        )
-
-                        if (!is.null(test_method)) {
-                            plot <- plot + ggpubr::stat_compare_means(
-                                method = test_method,
-                                paired = TRUE,
-                                label = "p.signif"
-                            )
                         }
                     }
                 }

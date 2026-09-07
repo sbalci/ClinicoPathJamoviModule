@@ -198,7 +198,10 @@
 #' @noRd
 NULL
 
-# Note: `.escapeVariableNames` lives in R/utils.R as the canonical definition.
+# Note: `.escapeVariableNames` lives in R/formula_utils.R as the canonical
+# definition. It was in R/utils.R until 2026-09-06, when commit 0247c20f split
+# the formula helpers out; it was dropped in that move and restored on
+# 2026-09-07. See tests/testthat/test-escape-variable-names.R.
 
 # Helper function to restore original variable names in finalfit output tables
 .restoreOriginalNamesInSurvivalTable <- function(table_data, name_mapping) {

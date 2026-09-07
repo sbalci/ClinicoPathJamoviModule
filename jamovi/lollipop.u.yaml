@@ -65,6 +65,7 @@ children:
         children:
           - type: ComboBox
             name: colorScheme
+            enable: (!conditionalColor && !useHighlight)
             label: Color scheme
           - type: ComboBox
             name: theme

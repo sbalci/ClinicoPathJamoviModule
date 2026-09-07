@@ -275,11 +275,18 @@ clinicalnomogramsClass <- R6::R6Class(
                     n_events <- sum(data[[status_var]])
                     event_rate <- n_events / nrow(data)
                     
+                    # Median FOLLOW-UP by reverse Kaplan-Meier, not
+                    # median(observed times): the latter is the median time to
+                    # event-or-censoring and understates the observation window
+                    # in a high-event cohort. See .medianFollowUp() in
+                    # R/survival_utils.R. status_var is normalised to 0/1 above.
+                    mfu <- .medianFollowUp(data[[time_var]], data[[status_var]] == 0)
                     private$data_info <- list(
                         n_total = nrow(data),
                         n_events = n_events,
                         event_rate = event_rate,
-                        median_followup = median(data[[time_var]])
+                        median_followup = mfu$value,
+                        median_followup_mfu = mfu
                     )
                     
                     private$variable_names <- list(
@@ -510,8 +517,10 @@ clinicalnomogramsClass <- R6::R6Class(
             if (nomogram_type == "survival_nomogram") {
                 html <- paste0(html, "<tr><td><b>Number of Events:</b></td><td>", info$n_events, 
                               " (", round(100 * info$event_rate, 1), "%)</td></tr>")
-                html <- paste0(html, "<tr><td><b>Median Follow-up:</b></td><td>", 
-                              round(info$median_followup, 2), " time units</td></tr>")
+                html <- paste0(html, "<tr><td><b>", .medianFollowUpLabel(info$median_followup_mfu),
+                              ":</b></td><td>",
+                              .medianFollowUpText(info$median_followup_mfu, "time units"),
+                              "</td></tr>")
             }
             
             html <- paste0(html, "</table>")

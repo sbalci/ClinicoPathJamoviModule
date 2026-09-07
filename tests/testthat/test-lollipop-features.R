@@ -20,7 +20,7 @@ test_that("lollipop handles warnings and validation correctly", {
     # Check if warnings panel is visible and contains expected message
     expect_true(results$notices$visible)
     html_content <- results$notices$content
-    expect_match(html_content, "Small sample size")
+    expect_match(html_content, "Small Sample Size")
     
     # Test 2: Duplicate Observations Warning (Aggregation = None)
     # -----------------------------------------------------------
@@ -38,8 +38,8 @@ test_that("lollipop handles warnings and validation correctly", {
     )
     
     html_content_dups <- results_dups$notices$content
-    expect_match(html_content_dups, "Multiple observations per group detected")
-    expect_match(html_content_dups, "Use aggregation")
+    expect_match(html_content_dups, "Duplicate Groups Detected")
+    expect_match(html_content_dups, "Data aggregation")
     
     # Test 3: No Duplicate Warning when Aggregation is Used
     # -----------------------------------------------------
@@ -77,7 +77,7 @@ test_that("lollipop handles warnings and validation correctly", {
     )
     
     html_content_color <- results_color$notices$content
-    expect_match(html_content_color, "Conditional coloring applied")
-    expect_match(html_content_color, "colored orange")
+    expect_match(html_content_color, "Conditional Coloring")
+    expect_match(html_content_color, "drawn in orange")
     
 })

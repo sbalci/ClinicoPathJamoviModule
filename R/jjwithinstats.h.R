@@ -39,7 +39,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             ggpubrAddStats = FALSE,
             ggpubrShowLines = FALSE,
             ggpubrAddPoints = FALSE,
-            showExplanations = TRUE, ...) {
+            showExplanations = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -249,7 +249,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..dep1)
             self$.addOption(private$..dep2)
@@ -375,7 +375,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 options=options,
                 name="",
-                title="Violin Plots to Compare Within Groups",
+                title="Box-Violin Plots to Compare Within Groups",
                 refs=list(
                     "ggstatsplot",
                     "statsExpressions",
@@ -522,7 +522,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjwithinstats",
-                version = c(1,0,8),
+                version = c(1,0,9),
                 options = options,
                 results = jjwithinstatsResults$new(options=options),
                 data = data,
@@ -640,7 +640,7 @@ jjwithinstats <- function(
     ggpubrAddStats = FALSE,
     ggpubrShowLines = FALSE,
     ggpubrAddPoints = FALSE,
-    showExplanations = TRUE) {
+    showExplanations = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjwithinstats requires jmvcore to be installed (restart may be required)")

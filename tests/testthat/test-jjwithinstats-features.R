@@ -31,7 +31,9 @@ test_that("jjwithinstats handles presets, N reporting, and ggpubr correctly", {
     
     # messages are now in warnings panel
     
-    html_content <- results$warnings$content
+    # Retention counts are INFO-grade and render under the Analysis Summary;
+    # `warnings` carries only messages the user must act on.
+    html_content <- results$summary$content
     expect_match(html_content, "18 subjects retained")
     expect_match(html_content, "2 incomplete cases removed")
     
@@ -45,7 +47,7 @@ test_that("jjwithinstats handles presets, N reporting, and ggpubr correctly", {
     )
     
     html_preset <- results_preset$warnings$content
-    expect_match(html_preset, "Biomarker Tracking \\(Guidance Only\\)")
+    expect_match(html_preset, "Biomarker tracking \\(guidance only\\)")
     
     # Test 3: ggpubr execution (Paired)
     # ---------------------------------

@@ -249,18 +249,19 @@ jjwithinstats(
 )
 
 # ═══════════════════════════════════════════════════════════
-# Example 13: Colorblind-Safe Palette
+# Example 13: Journal Colour Palette (publication plot)
 # ═══════════════════════════════════════════════════════════
-# Scenario: Accessible visualization
+# Scenario: Accessible visualization for submission
 
 jjwithinstats(
   data = jjwithinstats_qol,
   dep1 = "qol_baseline",
   dep2 = "qol_month1",
   dep3 = "qol_month3",
-  colorblindSafe = TRUE,
   centralityplotting = TRUE,
-  mytitle = "Colorblind-Safe QoL Plot"
+  addGGPubrPlot = TRUE,
+  ggpubrPalette = "npg",
+  mytitle = "QoL Over Time (NPG palette)"
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -295,7 +296,7 @@ jjwithinstats(
   centralitytype = "parametric",
   pointpath = TRUE,
   centralitypath = TRUE,
-  showexplanations = TRUE,
+  showExplanations = TRUE,
   resultssubtitle = TRUE,
   mytitle = "Comprehensive Tumor Response Analysis",
   xtitle = "Assessment Time",

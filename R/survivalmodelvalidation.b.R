@@ -262,13 +262,18 @@ survivalmodelvalidationClass <- R6::R6Class(
                 n_events <- sum(data[[status_var]])
                 event_rate <- n_events / n_complete
                 
+                # Median FOLLOW-UP by reverse Kaplan-Meier, not median(observed
+                # times) -- the latter is the median time to event-or-censoring.
+                # See .medianFollowUp() in R/survival_utils.R.
+                mfu <- .medianFollowUp(data[[time_var]], data[[status_var]] == 0)
                 private$data_info <- list(
                     n_total = n_total,
                     n_complete = n_complete,
                     n_missing = n_total - n_complete,
                     n_events = n_events,
                     event_rate = event_rate,
-                    median_followup = median(data[[time_var]]),
+                    median_followup = mfu$value,
+                    median_followup_mfu = mfu,
                     max_followup = max(data[[time_var]])
                 )
                 
@@ -306,7 +311,9 @@ survivalmodelvalidationClass <- R6::R6Class(
             html <- paste0(html, "<tr><td><b>Complete Cases:</b></td><td>", info$n_complete, " (", round(100 * info$n_complete / info$n_total, 1), "%)</td></tr>")
             html <- paste0(html, "<tr><td><b>Missing Data:</b></td><td>", info$n_missing, " (", round(100 * info$n_missing / info$n_total, 1), "%)</td></tr>")
             html <- paste0(html, "<tr><td><b>Events:</b></td><td>", info$n_events, " (", round(100 * info$event_rate, 1), "%)</td></tr>")
-            html <- paste0(html, "<tr><td><b>Median Follow-up:</b></td><td>", round(info$median_followup, 2), " time units</td></tr>")
+            html <- paste0(html, "<tr><td><b>", .medianFollowUpLabel(info$median_followup_mfu),
+                           ":</b></td><td>",
+                           .medianFollowUpText(info$median_followup_mfu, "time units"), "</td></tr>")
             html <- paste0(html, "<tr><td><b>Maximum Follow-up:</b></td><td>", round(info$max_followup, 2), " time units</td></tr>")
             html <- paste0(html, "</table>")
             

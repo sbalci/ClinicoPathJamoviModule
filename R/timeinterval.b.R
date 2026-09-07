@@ -1430,7 +1430,11 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # banner that fires on a correct analysis only teaches users to
                 # ignore banners. The diagnostic question is not "how many were
                 # excluded" but "is this landmark placed sensibly inside the
-                # follow-up this cohort actually has", which the median answers.
+                # intervals this cohort actually has", which the median answers.
+                # NB this is the median OBSERVED INTERVAL, not median follow-up:
+                # the two coincide only without censoring, and this analysis has
+                # no event indicator at all, so the reverse-Kaplan-Meier
+                # estimator used elsewhere in the module cannot apply here.
                 lm_median <- calculated_times$quality$median_interval
                 if (!is.null(lm_median) && is.finite(lm_median) && lm_median > 0 &&
                     landmark_info$landmark_time > lm_median) {
@@ -1441,7 +1445,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Conditional, not assertive, about selection: this analysis has no
                     # event indicator, so it cannot tell early death from recent accrual.
                     add_message('warning', .fmt(
-                        .("The {landmark} landmark is later than the median follow-up in these data ({median} {unit}), so more than half the cohort could not reach it and {excluded} of {total} observations were excluded. What remains is a subgroup defined by having been followed to the landmark, and the total person-time above is the denominator for that subgroup only: a rate computed from it answers \"among those still under observation at {amount}, how often did events occur\", not the same question for the cohort you enrolled. This analysis has no event indicator, so it cannot tell you whether the excluded participants had short follow-up because they died early or simply because they were enrolled recently - check that before interpreting the selection. Report the landmark, the number excluded and the reason alongside any rate taken from this analysis."),
+                        .("The {landmark} landmark is later than the median observed interval in these data ({median} {unit}), so more than half the cohort could not reach it and {excluded} of {total} observations were excluded. What remains is a subgroup defined by having been followed to the landmark, and the total person-time above is the denominator for that subgroup only: a rate computed from it answers \"among those still under observation at {amount}, how often did events occur\", not the same question for the cohort you enrolled. This analysis has no event indicator, so it cannot tell you whether the excluded participants had short follow-up because they died early or simply because they were enrolled recently - check that before interpreting the selection. Report the landmark, the number excluded and the reason alongside any rate taken from this analysis."),
                         landmark = lm_adj,
                         median = base::formatC(lm_median, format = "f", digits = 1),
                         unit = lm_unit,
@@ -1468,7 +1472,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(lm_median) && is.finite(lm_median) && lm_median > 0 &&
                     landmark_info$landmark_time < 0.05 * lm_median) {
                     add_message('warning', .fmt(
-                        .("The {landmark} landmark excluded no participants, because it is only {share}% of the median follow-up in these data ({median} {unit}). It still subtracted {amount} from every interval, so every duration and the total person-time below are that much smaller than the follow-up observed. Check that the landmark is expressed in the same unit as the results ({unit}): entering a value meant as months while the output unit is days is the usual cause."),
+                        .("The {landmark} landmark excluded no participants, because it is only {share}% of the median observed interval in these data ({median} {unit}). It still subtracted {amount} from every interval, so every duration and the total person-time below are that much smaller than the follow-up observed. Check that the landmark is expressed in the same unit as the results ({unit}): entering a value meant as months while the output unit is days is the usual cause."),
                         landmark = lm_adj,
                         share = base::formatC(100 * landmark_info$landmark_time / lm_median,
                                               format = "f", digits = 1),

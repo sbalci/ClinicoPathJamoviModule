@@ -1,30 +1,36 @@
 ---
 name: lollipop
 title: Lollipop Chart
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
 version: '1.0.8'
 jas: '1.2'
 
 description:
     main: Creates lollipop charts for categorical data visualization following R Graph Gallery best practices, with emphasis on clinical applications like patient timelines, treatment outcomes, and biomarker comparisons. Uses geom_segment() and geom_point() for optimal visual presentation.
+    # Kept commented, as in the great majority of this module's .a.yaml files:
+    # jmvtools renders `dontrun: true` as \donttest{}, which R CMD check RUNS
+    # under --run-donttest. The same examples live in the roxygen block of
+    # R/lollipop.b.R. They are kept correct here so that uncommenting works:
+    # `highlight` is a type: Level option, which can carry no default and is
+    # therefore a REQUIRED argument of the generated wrapper - every call must
+    # pass it, NULL included.
     # R:
     #     dontrun: true
     #     usage: |
-    #         # Load clinical lab data
-    #         clinical_lab_data <- read.csv("clinical_lab_data.csv")
-    #         # Or load from package: data("clinical_lab_data", package = "ClinicoPath")
-            
-    #         # Basic lollipop chart - Hemoglobin by treatment group
+    #         data("clinical_lab_data", package = "ClinicoPath")
+
+    #         # Mean haemoglobin by treatment group, largest first
     #         lollipop(
     #             data = clinical_lab_data,
     #             dep = "hemoglobin",
     #             group = "treatment_group",
+    #             highlight = NULL,
     #             sortBy = "value_desc",
-    #             title = "Hemoglobin Levels by Treatment"
+    #             title = "Hemoglobin by treatment"
     #         )
-            
-    #         # Highlighting severe disease cases - Albumin levels
+
+    #         # Highlight severe disease, horizontal layout
     #         lollipop(
     #             data = clinical_lab_data,
     #             dep = "albumin",
@@ -34,47 +40,35 @@ description:
     #             orientation = "horizontal",
     #             showValues = TRUE,
     #             colorScheme = "clinical",
-    #             title = "Albumin Levels by Disease Severity"
+    #             title = "Albumin by disease severity"
     #         )
-            
-    #         # Conditional coloring for abnormal creatinine (>1.2 mg/dL)
+
+    #         # Colour by a clinical threshold (creatinine > 1.2 mg/dL)
     #         lollipop(
     #             data = clinical_lab_data,
     #             dep = "creatinine",
     #             group = "age_group",
+    #             highlight = NULL,
     #             conditionalColor = TRUE,
     #             colorThreshold = 1.2,
     #             lineType = "dashed",
     #             sortBy = "value_asc",
-    #             title = "Creatinine by Age (Threshold: 1.2 mg/dL)"
+    #             title = "Creatinine by age (threshold 1.2 mg/dL)"
     #         )
-            
-    #         # Advanced - Platelet count with clinical baseline
+
+    #         # Platelet count against the lower normal limit as the baseline
     #         lollipop(
     #             data = clinical_lab_data,
     #             dep = "platelet_count",
     #             group = "hospital",
-    #             baseline = 150,  # Lower normal limit
+    #             baseline = 150,
     #             useHighlight = TRUE,
     #             highlight = "Hospital A",
     #             lineType = "dotted",
     #             pointSize = 4,
     #             showMean = TRUE,
     #             colorScheme = "clinical",
-    #             title = "Platelet Counts by Hospital (Normal >150)"
-    #         )
-            
-    #         # Compare WBC across multiple factors
-    #         lollipop(
-    #             data = clinical_lab_data,
-    #             dep = "white_blood_cells",
-    #             group = "treatment_group",
-    #             conditionalColor = TRUE,
-    #             colorThreshold = 11,  # Upper normal limit
-    #             orientation = "horizontal",
-    #             sortBy = "value_desc",
-    #             lineWidth = 2,
-    #             title = "WBC Count by Treatment (ULN: 11)"
+    #             title = "Platelet count by hospital (normal > 150)"
     #         )
 
 options:
@@ -102,7 +96,7 @@ options:
             The categorical variable for grouping (lollipop categories).
 
     - name: useHighlight
-      title: "Use highlight"
+      title: "Highlighting"
       type: Bool
       default: false
       description:
@@ -110,7 +104,7 @@ options:
             Enable or disable highlighting of specific levels in the plot.
 
     - name: highlight
-      title: 'Highlight Level'
+      title: 'Highlight level'
       type: Level
       variable: (group)
       description:
@@ -118,7 +112,7 @@ options:
             Specific level to highlight in the plot with different color/style. Only used when useHighlight is TRUE.
 
     - name: aggregation
-      title: 'Data Aggregation'
+      title: 'Data aggregation'
       type: List
       options:
         - title: No Aggregation (Plot All Points)
@@ -129,13 +123,13 @@ options:
           name: median
         - title: Sum
           name: sum
-      default: none
+      default: mean
       description:
           R: >
             How to aggregate multiple values per group. Use 'Mean' or 'Median' for typical clinical measurements, 'Sum' for counts. 'No Aggregation' will over-plot if multiple rows per group exist.
 
     - name: sortBy
-      title: 'Sort Order'
+      title: 'Sort order'
       type: List
       options:
         - title: Original Order
@@ -152,7 +146,7 @@ options:
             How to sort the lollipops in the chart.
 
     - name: orientation
-      title: 'Orientation'
+      title: 'Chart orientation'
       type: List
       options:
         - title: Vertical
@@ -165,7 +159,7 @@ options:
             Chart orientation (vertical or horizontal lollipops).
 
     - name: showValues
-      title: "Values"
+      title: "Value labels"
       type: Bool
       default: false
       description:
@@ -173,7 +167,7 @@ options:
             Whether to display value labels on the lollipops.
 
     - name: showMean
-      title: "Mean line"
+      title: "Mean reference line"
       type: Bool
       default: false
       description:
@@ -181,7 +175,7 @@ options:
             Whether to display a reference line at the mean of the plotted values (group summaries when aggregation is selected).
 
     - name: colorScheme
-      title: 'Color Scheme'
+      title: 'Color scheme'
       type: List
       options:
         - title: Default
@@ -202,7 +196,7 @@ options:
             modes use their own fixed colors.
 
     - name: theme
-      title: 'Plot Theme'
+      title: 'Plot theme'
       type: List
       options:
         - title: Default
@@ -219,7 +213,7 @@ options:
             Overall theme/appearance of the plot.
 
     - name: pointSize
-      title: 'Point Size'
+      title: 'Point size'
       type: Number
       default: 3
       min: 1
@@ -229,7 +223,7 @@ options:
             Size of the lollipop points.
 
     - name: lineWidth
-      title: 'Line Width'
+      title: 'Line width'
       type: Number
       default: 1
       min: 0.5
@@ -239,7 +233,7 @@ options:
             Width of the lollipop stems.
 
     - name: lineType
-      title: 'Line Type'
+      title: 'Line type'
       type: List
       options:
         - title: Solid
@@ -256,7 +250,7 @@ options:
             Type of line for lollipop stems.
 
     - name: baseline
-      title: 'Baseline Value'
+      title: 'Baseline value'
       type: Number
       default: 0
       description:
@@ -272,7 +266,7 @@ options:
             Enable coloring based on value thresholds.
 
     - name: colorThreshold
-      title: 'Color Threshold'
+      title: 'Color threshold'
       type: Number
       default: 0
       description:
@@ -280,7 +274,7 @@ options:
             Threshold value for conditional coloring (values above/below get different colors).
 
     - name: xlabel
-      title: 'X-axis Label'
+      title: 'X-axis label'
       type: String
       default: ''
       description:
@@ -288,7 +282,7 @@ options:
             Custom label for the x-axis.
 
     - name: ylabel
-      title: 'Y-axis Label'
+      title: 'Y-axis label'
       type: String
       default: ''
       description:
@@ -296,7 +290,7 @@ options:
             Custom label for the y-axis.
 
     - name: title
-      title: 'Plot Title'
+      title: 'Chart title'
       type: String
       default: ''
       description:
@@ -304,7 +298,7 @@ options:
             Custom title for the plot.
 
     - name: width
-      title: 'Plot Width'
+      title: 'Plot width'
       type: Integer
       default: 800
       min: 300
@@ -314,7 +308,7 @@ options:
             Width of the plot in pixels.
 
     - name: height
-      title: 'Plot Height'
+      title: 'Plot height'
       type: Integer
       default: 600
       min: 300

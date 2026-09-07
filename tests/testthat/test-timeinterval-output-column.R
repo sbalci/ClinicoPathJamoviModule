@@ -282,11 +282,16 @@ test_that("a landmark inside the observed follow-up does not warn", {
     expect_false(grepl("later than the median", strip_html(h$r$messages$content)))
 })
 
-test_that("a landmark past the median follow-up warns, without misusing 'guarantee-time'", {
+test_that("a landmark past the median observed interval warns, without misusing 'guarantee-time'", {
     h <- ti_run(mk_followup(), dx_date = "s", fu_date = "e", time_format = "ymd",
                 output_unit = "months", use_landmark = TRUE, landmark_time = 15)
     txt <- strip_html(h$r$messages$content)
-    expect_match(txt, "later than the median follow-up")
+    # "median observed interval", not "median follow-up": this analysis has no
+    # event indicator at all (zero outcome/status options in its .a.yaml), so
+    # the reverse-Kaplan-Meier follow-up estimator used elsewhere in the module
+    # cannot apply and the two quantities must not be conflated.
+    expect_match(txt, "later than the median observed interval")
+    expect_false(grepl("median follow-up", txt, fixed = TRUE))
     expect_match(txt, "denominator for that subgroup only")
     # Landmarking is the REMEDY for guarantee-time/immortal-time bias, not a
     # cause of it -- and the glossary panel in this same analysis says so.

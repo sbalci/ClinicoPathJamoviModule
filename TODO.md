@@ -47,8 +47,8 @@
 - jjbetweenstats
 - jjdotchart
 - jjdotplotstats
-jjwithinstats
-lollipop
+- jjwithinstats
+- lollipop
 raincloud
 
 ## Continuous × Continuous

@@ -359,7 +359,8 @@ clinicalnomogramsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "ClinicoPathJamoviModule",
                     "stringr",
                     "rms",
-                    "survival"))
+                    "survival",
+                    "SchemperSmith1996"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

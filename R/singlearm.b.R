@@ -498,24 +498,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                       scales::percent(upper), ", 95% CI]"))
       },
 
-      .medianFollowUp = function(time, status) {
-        # Reverse Kaplan-Meier (Schemper & Smith): the censoring indicator
-        # becomes the "event", so the estimate answers "how long was this
-        # cohort actually watched".
-        #
-        # This used to be median(observed times), which is the median time to
-        # event-or-censoring. In a cohort where most subjects have the event
-        # early that number is the median SURVIVAL, not the median follow-up,
-        # and it understates the observation window -- exactly the number a
-        # reader uses to judge whether a 5-year estimate is supported at all.
-        fallback <- list(value = stats::median(time, na.rm = TRUE), reverse = FALSE)
-        cens <- as.integer(!is.na(status) & status == 0)
-        if (sum(cens) == 0) return(fallback)
-        fit <- try(survival::survfit(survival::Surv(time, cens) ~ 1), silent = TRUE)
-        if (inherits(fit, "try-error")) return(fallback)
-        m <- unname(summary(fit)$table[["median"]])
-        if (is.na(m)) return(fallback)
-        list(value = m, reverse = TRUE)
+      # Reverse-Kaplan-Meier median follow-up. The estimator itself is shared --
+      # .medianFollowUp() in R/survival_utils.R -- because three analyses had
+      # each hand-copied it and fifteen more reported median(time) instead.
+      # This wrapper only maps THIS analysis's status coding onto the shared
+      # interface: 0 is censored, everything else is a terminal outcome.
+      .followUp = function(time, status) {
+        .medianFollowUp(time, as.integer(!is.na(status) & status == 0))
       },
 
       .safeExecute = function(expr, context = "analysis", silent = FALSE) {
@@ -736,8 +725,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         max_time <- max(time_vals, na.rm = TRUE)
 
         # Median FOLLOW-UP, by reverse Kaplan-Meier -- not median(time_vals),
-        # which is the median time to event-or-censoring. See .medianFollowUp().
-        mfu <- private$.medianFollowUp(time_vals, mydata[[myoutcome]])
+        # which is the median time to event-or-censoring. See .medianFollowUp()
+        # in R/survival_utils.R.
+        mfu <- private$.followUp(time_vals, mydata[[myoutcome]])
 
         # Data quality warnings.
         #
@@ -2951,12 +2941,16 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Calculate additional statistics
         mean_follow_up <- round(total_time / nrow(mydata), 2)
-        # Reverse Kaplan-Meier, not median(observed times) -- see .medianFollowUp().
-        mfu <- private$.medianFollowUp(mydata[[mytime]], mydata[[myoutcome]])
+        # Reverse Kaplan-Meier, not median(observed times) -- see
+        # .medianFollowUp() in R/survival_utils.R.
+        mfu <- private$.followUp(mydata[[mytime]], mydata[[myoutcome]])
         median_follow_up <- round(mfu$value, 2)
-        median_follow_up_label <- if (mfu$reverse)
-          "Median follow-up (reverse Kaplan-Meier)" else
-          "Median observed time (reverse Kaplan-Meier not estimable)"
+        median_follow_up_label <- .medianFollowUpLabel(mfu)
+        # What "median follow-up" means here, which estimator produced it, and
+        # the reference. Gated on this analysis's existing explanation toggle
+        # rather than adding a second option for one paragraph.
+        median_follow_up_note <- if (isTRUE(self$options$showExplanations))
+          .medianFollowUpExplanation(mfu, time_unit) else ""
                 # Create summary text with interpretation
         summary_html <- glue::glue(
           "
@@ -2978,6 +2972,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     <p>Total follow-up time: <b>{round(total_time, 1)} {time_unit}</b></p>
     <p>Mean follow-up time: <b>{mean_follow_up} {time_unit}</b></p>
     <p>{median_follow_up_label}: <b>{median_follow_up} {time_unit}</b></p>
+    {median_follow_up_note}
     <p>Number of events: <b>{total_events}</b> out of <b>{nrow(mydata)}</b> subjects</p>
     <p>Overall incidence rate: <b>{round(overall_rate, 2)}</b> per {rate_multiplier} person-{time_unit} [95% CI: {round(ci_lower, 2)}-{round(ci_upper, 2)}]</p>
     <p><i>Interpretation:</i> This is a crude occurrence/exposure rate, not the probability that an individual has the event. It is calculated as target events divided by observed person-time at risk. Under competing risks it is cause-specific and is not cumulative incidence. The interval is a Garwood interval conditional on a Poisson count model and does not account for unmeasured heterogeneity, informative censoring, or changes in the rate over follow-up.</p>

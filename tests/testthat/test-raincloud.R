@@ -68,7 +68,7 @@ describe("Raincloud Outlier Detection", {
     
     # Expect to find 1 outlier (the value 100)
     expect_true(grepl("<li><strong>A:</strong> 1 outliers detected</li>", outlier_html))
-    expect_true(grepl("<strong>Total outliers across all groups:</strong> 1", outlier_html))
+    expect_true(grepl("<strong>Total potential outliers in assessed groups:</strong> 1", outlier_html))
   })
 })
 

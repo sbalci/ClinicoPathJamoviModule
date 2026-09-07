@@ -220,7 +220,8 @@ timeupdatesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "timereg",
-                    "survival"))
+                    "survival",
+                    "SchemperSmith1996"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

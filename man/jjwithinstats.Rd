@@ -39,7 +39,7 @@ jjwithinstats(
   ggpubrAddStats = FALSE,
   ggpubrShowLines = FALSE,
   ggpubrAddPoints = FALSE,
-  showExplanations = TRUE
+  showExplanations = FALSE
 )
 }
 \arguments{

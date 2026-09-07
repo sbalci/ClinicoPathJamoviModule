@@ -182,7 +182,7 @@ test_that("lollipop detects over-plotting scenario", {
   test_data <- setup_aggregation_test_data()
   res <- lollipop(data = test_data, dep = "value", group = "group",
                   aggregation = "none", highlight = NULL)
-  expect_match(.lol_txt(res$notices$content), "Multiple observations per group")
+  expect_match(.lol_txt(res$notices$content), "Duplicate Groups Detected")
 })
 
 # ==============================================================================
@@ -334,7 +334,7 @@ test_that("lollipop handles invalid highlight level gracefully", {
   test_data <- setup_treatment_response_data()
   res <- lollipop(data = test_data, dep = "response_score", group = "treatment",
                   aggregation = "mean", useHighlight = TRUE, highlight = "NonExistentLevel")
-  expect_match(.lol_txt(res$notices$content), "not found in grouping variable")
+  expect_match(.lol_txt(res$notices$content), "does not occur in the grouping variable")
   # and it must still produce a chart rather than failing
   expect_gt(nrow(res$summary$asDF), 0)
 })

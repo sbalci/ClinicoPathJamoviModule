@@ -290,7 +290,8 @@ relativesurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "ClinicoPathJamoviModule",
                     "relsurv",
                     "rstpm2",
-                    "survival"))
+                    "survival",
+                    "SchemperSmith1996"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

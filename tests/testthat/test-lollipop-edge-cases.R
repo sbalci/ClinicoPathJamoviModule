@@ -307,16 +307,22 @@ test_that("lollipop handles very unequal group sizes", {
 
 test_that("lollipop handles non-existent highlight level", {
 
-  # Should either error or warn
-  expect_condition(
-    lollipop(
-      data = lollipop_test,
-      dep = "hemoglobin",
-      group = "treatment_group",
-      useHighlight = TRUE,
-      highlight = "NonexistentGroup"
-    )
+  # This used to assert expect_condition(), which passed only incidentally: the
+  # dplyr group_by/summarise pipeline in .calculateSummary() signalled a
+  # `dplyr_regroup` condition on every run. That was package chatter, not a
+  # message to the user, and it went away when the pipeline did. Assert the
+  # mechanism this analysis actually reports through - the notice panel.
+  res <- lollipop(
+    data = lollipop_test,
+    dep = "hemoglobin",
+    group = "treatment_group",
+    useHighlight = TRUE,
+    highlight = "NonexistentGroup"
   )
+  expect_match(as.character(res$notices$content),
+               "NonexistentGroup does not occur in the grouping variable")
+  # ...and the chart is still drawn, with highlighting simply switched off
+  expect_gt(nrow(res$plot$state$data), 0)
 })
 
 # ═══════════════════════════════════════════════════════════

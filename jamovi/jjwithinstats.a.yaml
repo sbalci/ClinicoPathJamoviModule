@@ -1,7 +1,7 @@
 ---
 name:  jjwithinstats
 title: Box-Violin Plots to Compare Within Groups
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: Repeated Continuous Measurements
 version: '1.0.8'
@@ -145,7 +145,7 @@ options:
             Helps identify if the group as a whole is improving, declining, or stable over time.
 
     - name: centralitytype
-      title: 'Centrality Type'
+      title: 'Centrality type'
       type: List
       options:
         - title: mean (parametric)
@@ -160,7 +160,7 @@ options:
 
 
     - name: clinicalpreset
-      title: 'Clinical Analysis Preset'
+      title: 'Clinical analysis preset'
       type: List
       options:
         - title: 'Custom (Manual Configuration)'
@@ -177,7 +177,7 @@ options:
             Choose a preset optimized for common clinical scenarios, or select Custom for manual configuration.
 
     - name: typestatistics
-      title: 'Statistical Test Type'
+      title: 'Statistical test type'
       type: List
       options:
         - title: 'Parametric (Normal Distribution)'
@@ -197,7 +197,7 @@ options:
             Bayesian: Provides evidence strength rather than p-values.
 
     - name: pairwisecomparisons
-      title: "Compare each time point pair"
+      title: "Pairwise comparisons"
       type: Bool
       default: false
       description:
@@ -206,7 +206,7 @@ options:
             Useful for identifying when changes occur during treatment or disease progression.
 
     - name: pairwisedisplay
-      title: 'Pairwise Display'
+      title: 'Pairwise display'
       type: List
       options:
         - title: significant
@@ -218,7 +218,7 @@ options:
       default: significant
 
     - name: padjustmethod
-      title: 'Adjustment Method'
+      title: 'Adjustment method'
       type: List
       options:
         - title: holm
@@ -240,7 +240,7 @@ options:
       default: holm
 
     - name: effsizetype
-      title: 'Effect Size Needed for Parametric Tests'
+      title: 'Effect size for parametric tests'
       type: List
       options:
         - title: biased
@@ -274,17 +274,17 @@ options:
       default: 'Within Group Comparison'
 
     - name: xtitle
-      title: X-Title
+      title: X-axis label
       type: String
       default: ''
 
     - name: ytitle
-      title: Y-Title
+      title: Y-axis label
       type: String
       default: ''
 
     - name: originaltheme
-      title: Add GGStatsPlot layer
+      title: ggstatsplot theme
       type: Bool
       default: false
 
@@ -302,7 +302,7 @@ options:
             Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
 
     - name: conflevel
-      title: Confidence Level
+      title: Confidence level
       type: Number
       default: 0.95
       min: 0.5
@@ -312,7 +312,7 @@ options:
             Confidence level for confidence intervals.
 
     - name: k
-      title: Decimal Places
+      title: Decimal places
       type: Integer
       default: 2
       min: 0
@@ -322,7 +322,7 @@ options:
             Number of decimal places for displaying statistics in the subtitle.
 
     - name: plotwidth
-      title: Plot Width
+      title: Plot width
       type: Integer
       default: 650
       min: 300
@@ -332,7 +332,7 @@ options:
             Width of the plot in pixels. Default is 650.
 
     - name: plotheight
-      title: Plot Height
+      title: Plot height
       type: Integer
       default: 450
       min: 300
@@ -342,7 +342,7 @@ options:
             Height of the plot in pixels. Default is 450.
 
     - name: addGGPubrPlot
-      title: Add ggpubr plot variant
+      title: Publication plot (ggpubr)
       type: Bool
       default: false
       description:
@@ -350,7 +350,7 @@ options:
             Add publication-ready plot using ggpubr package for within-subjects/paired data.
 
     - name: ggpubrPlotType
-      title: ggpubr Plot Type
+      title: ggpubr plot type
       type: List
       options:
         - title: Box Plot
@@ -367,7 +367,7 @@ options:
             Type of ggpubr plot for within-subjects data. Paired plot shows individual trajectories.
 
     - name: ggpubrPalette
-      title: ggpubr Color Palette
+      title: ggpubr colour palette
       type: List
       options:
         - title: Journal of Clinical Oncology (jco)
@@ -390,7 +390,7 @@ options:
             categorical palette has nothing to colour there.
 
     - name: ggpubrAddStats
-      title: Add statistical comparisons (ggpubr)
+      title: Statistical comparisons
       type: Bool
       default: false
       description:
@@ -406,7 +406,7 @@ options:
             Show individual subject trajectories for paired plot.
 
     - name: ggpubrAddPoints
-      title: Add individual points
+      title: Individual points
       type: Bool
       default: false
       description:
@@ -416,7 +416,7 @@ options:
     - name: showExplanations
       title: Explanations
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Show explanations of the statistical results.

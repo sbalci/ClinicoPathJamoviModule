@@ -10,7 +10,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             group = NULL,
             useHighlight = FALSE,
             highlight = NULL,
-            aggregation = "none",
+            aggregation = "mean",
             sortBy = "original",
             orientation = "vertical",
             showValues = FALSE,
@@ -66,7 +66,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "mean",
                     "median",
                     "sum"),
-                default="none")
+                default="mean")
             private$..sortBy <- jmvcore::OptionList$new(
                 "sortBy",
                 sortBy,
@@ -296,7 +296,7 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lollipop",
-                version = c(1,0,8),
+                version = c(1,0,9),
                 options = options,
                 results = lollipopResults$new(options=options),
                 data = data,
@@ -369,7 +369,7 @@ lollipop <- function(
     group,
     useHighlight = FALSE,
     highlight,
-    aggregation = "none",
+    aggregation = "mean",
     sortBy = "original",
     orientation = "vertical",
     showValues = FALSE,

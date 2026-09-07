@@ -284,7 +284,28 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         .runDataPrep = function(data) {
             
             if (self$options$derive_followup && "derived_followup_time" %in% names(data)) {
-                
+
+                # Mean/median/range below describe the DERIVED DURATION column.
+                # The median of that column is the median time to
+                # event-or-censoring, NOT the length of follow-up, so it is
+                # labelled as a duration. The actual follow-up figure needs the
+                # event indicator, and is reported by reverse Kaplan-Meier
+                # (Schemper & Smith 1996) whenever one has been supplied.
+                # See .medianFollowUp() in R/survival_utils.R.
+                mfu <- NULL
+                if (!is.null(self$options$event_var) &&
+                    self$options$event_var %in% names(data)) {
+                    ev <- jmvcore::toNumeric(data[[self$options$event_var]])
+                    mfu <- .medianFollowUp(data$derived_followup_time, ev == 0)
+                }
+                fu_line <- if (is.null(mfu)) paste0(
+                    "<li><strong>Median follow-up:</strong> not computed - ",
+                    "select an event variable. The median duration above is the ",
+                    "median time to event-or-censoring, which understates how ",
+                    "long the cohort was observed when events are common.</li>")
+                else paste0("<li><strong>", .medianFollowUpLabel(mfu), ":</strong> ",
+                            .medianFollowUpText(mfu, self$options$followup_units), "</li>")
+
                 # Create summary of derived data
                 summary_text <- paste(
                     "<h3> Data Preparation Summary</h3>",
@@ -299,7 +320,8 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                     "<ul>",
                     "<li><strong>N Patients:</strong>", nrow(data), "</li>",
                     "<li><strong>Mean Follow-up:</strong>", round(mean(data$derived_followup_time, na.rm = TRUE), 2), self$options$followup_units, "</li>",
-                    "<li><strong>Median Follow-up:</strong>", round(median(data$derived_followup_time, na.rm = TRUE), 2), self$options$followup_units, "</li>",
+                    "<li><strong>Median Derived Duration:</strong>", round(median(data$derived_followup_time, na.rm = TRUE), 2), self$options$followup_units, "</li>",
+                    fu_line,
                     "<li><strong>Range:</strong>", round(min(data$derived_followup_time, na.rm = TRUE), 2), "-", round(max(data$derived_followup_time, na.rm = TRUE), 2), self$options$followup_units, "</li>",
                     "</ul>",
                     sep = "\n"

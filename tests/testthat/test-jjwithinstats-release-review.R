@@ -149,9 +149,10 @@ test_that("missing data is deleted listwise and the exclusion is disclosed", {
     a <- jw_run(d)
     long <- a$.__enclos_env__$private$.prepared_data
     expect_equal(nrow(long) / 2, 34)
-    # the disclosure lives in `warnings`, not `todo`
-    expect_match(jw_text(a$results$warnings$content), "34 subjects retained", fixed = TRUE)
-    expect_match(jw_text(a$results$warnings$content), "6 incomplete cases removed", fixed = TRUE)
+    # retention counts are INFO-grade: they render under the Analysis Summary,
+    # not in `warnings` (which is reserved for actionable problems) and not in `todo`
+    expect_match(jw_text(a$results$summary$content), "34 subjects retained", fixed = TRUE)
+    expect_match(jw_text(a$results$summary$content), "6 incomplete cases removed", fixed = TRUE)
 
     # an NA in a column that is not part of the analysis must NOT drop a subject
     d2 <- jw_data(); d2$irrelevant <- c(NA, rep(1, nrow(d2) - 1))
@@ -206,7 +207,7 @@ test_that("the clinical presets offer guidance and survive the message reset", {
         expect_match(w, "preset", ignore.case = TRUE)
     }
     expect_match(jw_text(jw_run(d, clinicalpreset = "biomarker")$results$warnings$content),
-                 "Guidance Only", fixed = TRUE)
+                 "guidance only", fixed = TRUE)
     # custom adds no preset guidance
     expect_false(grepl("preset:", jw_text(jw_run(d, clinicalpreset = "custom")$results$warnings$content),
                        fixed = TRUE))
@@ -446,4 +447,107 @@ test_that("individual trajectories are drawn at every number of measurements", {
     expect_true("GeomPath" %in% jw_geoms(jw_run(d, pointpath = TRUE)))
     expect_true("GeomPath" %in% jw_geoms(jw_run(d, dep3 = "fup", pointpath = TRUE)))
     expect_false("GeomPath" %in% jw_geoms(jw_run(d, dep3 = "fup", pointpath = FALSE)))
+})
+
+
+# ---------------------------------------------------------------------------
+# Regressions fixed in the 2026-09-07 release review. Each of these shipped
+# broken at some point; the comment says what the user actually saw.
+# ---------------------------------------------------------------------------
+
+test_that("the ggpubr companion never annotates with a test the user did not pick", {
+    # ggpubr::stat_compare_means has no robust and no Bayesian test. "robust"
+    # used to fall back to a paired t-test, so on outlier-heavy data the main
+    # panel showed Yuen p = 0.025 (*) while the companion printed t-test
+    # p = 0.35 (ns) - two contradictory verdicts in one output window.
+    skip_if_not_installed("ggpubr")
+    set.seed(1); n <- 30
+    d <- data.frame(Pre = rnorm(n, 50, 5))
+    d$Post <- d$Pre - 4 + rnorm(n, 0, 3)
+    d$Post[1:4] <- d$Post[1:4] + 50          # outliers: the reason to pick robust
+
+    # The tracer expression is evaluated inside ggpubr's own frame, so it can
+    # only reach a counter that lexical scoping finds - i.e. one in globalenv,
+    # not a test_that local. Cleaned up on exit.
+    assign(".jw_sc", 0L, envir = globalenv())
+    suppressWarnings(suppressMessages(trace(ggpubr::stat_compare_means,
+        tracer = quote(assign(".jw_sc", get(".jw_sc", envir = globalenv()) + 1L,
+                              envir = globalenv())),
+        print = FALSE, where = asNamespace("ggpubr"))))
+    on.exit({
+        suppressWarnings(suppressMessages(untrace(ggpubr::stat_compare_means,
+                                 where = asNamespace("ggpubr"))))
+        suppressWarnings(rm(".jw_sc", envir = globalenv()))
+    }, add = TRUE)
+
+    render <- function(ty) {
+        assign(".jw_sc", 0L, envir = globalenv())
+        r <- jjwithinstats(data = d, dep1 = "Pre", dep2 = "Post",
+                           typestatistics = ty, addGGPubrPlot = TRUE,
+                           ggpubrAddStats = TRUE)
+        f <- tempfile(fileext = ".png"); grDevices::png(f, 700, 500)
+        on.exit(grDevices::dev.off(), add = TRUE)
+        suppressWarnings(r$ggpubrPlot$.render(width = 700, height = 500))
+        get(".jw_sc", envir = globalenv())
+    }
+    # ggpubr runs the chosen test only where it can express it faithfully
+    expect_gt(render("parametric"), 0)
+    expect_gt(render("nonparametric"), 0)
+    # robust / bayes must NOT reach stat_compare_means
+    expect_identical(render("robust"), 0L)
+    expect_identical(render("bayes"), 0L)
+})
+
+test_that("the Messages panel is reserved for problems the user must act on", {
+    d <- jw_data()
+    ok <- jw_run(d)
+    # a clean run raises nothing, so the panel is not shown at all
+    expect_false(isTRUE(ok$results$warnings$visible))
+    # ... while the retention count still reaches the user, under the summary
+    expect_match(jw_text(ok$results$summary$content), "subjects retained")
+
+    bad <- d; bad[[names(d)[2]]][1:round(nrow(d) * 0.6)] <- NA
+    res <- jw_run(bad)
+    expect_true(isTRUE(res$results$warnings$visible))
+    expect_match(jw_text(res$results$warnings$content), "High Missing Data")
+    # procedural chatter must not be mixed in with the actionable warning
+    expect_false(grepl("Processing", jw_text(res$results$warnings$content), fixed = TRUE))
+})
+
+test_that("memoising the subtitle does not break sampling reproducibility", {
+    # The subtitle is computed once and cached, but it is reached from BOTH
+    # .run()'s takeover probe and .plot(). Seeding only .plot() meant the cached
+    # value came from the unseeded probe and drifted between refreshes.
+    d <- jw_data()
+    for (ty in c("bayes", "robust")) {
+        s1 <- jw_subtitle(jw_run(d, typestatistics = ty, resultssubtitle = TRUE))
+        s2 <- jw_subtitle(jw_run(d, typestatistics = ty, resultssubtitle = TRUE))
+        expect_identical(s1, s2, info = ty)
+    }
+})
+
+test_that("an ANOVA-only effect size is disclosed when coerced for a paired test", {
+    # eta / omega are not defined for a two-group paired comparison, so they are
+    # coerced onto biased / unbiased. Verified numerically: 'eta' returns exactly
+    # Cohen's d_z and 'omega' exactly Hedges' g_z. The user must be told.
+    d <- jw_data()
+    for (e in c("eta", "omega")) {
+        w <- jw_text(jw_run(d, effsizetype = e, resultssubtitle = TRUE)$results$warnings$content)
+        expect_match(w, "not defined", fixed = TRUE)
+        expect_match(w, if (e == "eta") "Cohen's d" else "Hedges' g", fixed = TRUE)
+    }
+    # ... and NOT claimed when the choice is honoured as selected
+    expect_false(grepl("not defined",
+        jw_text(jw_run(d, effsizetype = "biased", resultssubtitle = TRUE)$results$warnings$content),
+        fixed = TRUE))
+})
+
+test_that("explanations panel is never visible-but-empty", {
+    d <- jw_data()
+    # welcome screen: no variables selected yet
+    r0 <- jjwithinstats(data = d, dep1 = names(d)[1], dep2 = NULL, showExplanations = TRUE)
+    expect_true(isTRUE(r0$explanations$visible))
+    expect_gt(nchar(as.character(r0$explanations$content)), 100)
+    # switched off -> hidden, declaratively
+    expect_false(isTRUE(jw_run(d, showExplanations = FALSE)$results$explanations$visible))
 })

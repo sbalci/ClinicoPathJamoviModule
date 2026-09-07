@@ -455,16 +455,28 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # analysis", and with days a 100-day median was never flagged at all.
                 # 6 months is the intended clinical threshold; express it in the
                 # active unit.
-                median_time <- median(data[[time_var]], na.rm = TRUE)
+                # The quantity graded here must be the FOLLOW-UP, by reverse
+                # Kaplan-Meier (Schemper & Smith 1996). It was median(time),
+                # which is the median time to event-or-censoring: in a
+                # high-event cohort that sits far below the true observation
+                # window, so this warning fired on cohorts whose follow-up was
+                # perfectly adequate. See .medianFollowUp() in
+                # R/survival_utils.R.
+                mfu <- .medianFollowUp(data[[time_var]], data[[outcome_var]] == 0)
+                median_time <- mfu$value
                 short_followup <- switch(self$options$timetypeoutput,
                     "days"   = 183,
                     "weeks"  = 26,
                     "months" = 6,
                     "years"  = 0.5,
                     6)
-                if (median_time < short_followup) {
-                    warnings <- append(warnings, glue::glue(
-                        .('Short median follow-up ({time} {units}). May be insufficient for meaningful survival analysis.'),
+                if (!is.na(median_time) && median_time < short_followup) {
+                    warnings <- append(warnings, if (isTRUE(mfu$reverse)) glue::glue(
+                        .('Short median follow-up ({time} {units}, reverse Kaplan-Meier). May be insufficient for meaningful survival analysis.'),
+                        time = round(median_time, 1),
+                        units = self$options$timetypeoutput
+                    ) else glue::glue(
+                        .('Short median observed time ({time} {units}). Median follow-up could not be estimated by reverse Kaplan-Meier, so this is the median time to event-or-censoring, which understates how long the cohort was observed. Interpret the adequacy of follow-up with that in mind.'),
                         time = round(median_time, 1),
                         units = self$options$timetypeoutput
                     ))

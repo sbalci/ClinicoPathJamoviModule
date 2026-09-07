@@ -1639,14 +1639,26 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Build copy-ready report sentence
                 n_total <- nrow(private$cure_data)
-                median_fu <- round(median(private$cure_data[[self$options$time]], na.rm = TRUE), 1)
+                # This sentence is copy-ready: it goes straight into a
+                # manuscript, so the follow-up figure has to be the reverse
+                # Kaplan-Meier estimate and not median(observed time), which is
+                # the median time to event-or-censoring. Status is either a
+                # factor (level 1 = censored) or numeric 0/1, matching the
+                # normalisation at .validateData(). See R/survival_utils.R.
+                status_col <- private$cure_data[[self$options$status]]
+                censored <- if (is.factor(status_col))
+                    as.numeric(status_col) == 1 else status_col == 0
+                mfu <- .medianFollowUp(private$cure_data[[self$options$time]], censored)
+                median_fu <- round(mfu$value, 1)
 
                 report_sentence <- sprintf(
-                    "Using a %s, the estimated cure fraction was %.1f%%%s, based on %d patients with a median follow-up of %.1f time units.",
-                    model_type_text, cure_fraction * 100, ci_note, n_total, median_fu
+                    "Using a %s, the estimated cure fraction was %.1f%%%s, based on %d patients with a %s of %.1f time units.",
+                    model_type_text, cure_fraction * 100, ci_note, n_total,
+                    tolower(.medianFollowUpLabel(mfu)), median_fu
                 )
 
                 interp_html <- paste0(interp_html,
+                    .medianFollowUpExplanation(mfu, "time units"),
                     "<h5>Report Sentence (copy-ready):</h5>",
                     "<div style='background-color: rgba(138, 155, 172, 0.06); padding:10px; border-left:3px solid #007bff; margin:8px 0; font-style:italic; color: inherit;'>",
                     report_sentence,

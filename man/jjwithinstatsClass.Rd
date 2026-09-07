@@ -2,7 +2,7 @@
 % Please edit documentation in R/jjwithinstats.b.R
 \name{jjwithinstatsClass}
 \alias{jjwithinstatsClass}
-\title{Violin Plots to Compare Within Group (Repeated Measures)}
+\title{Box-Violin Plots to Compare Within Groups}
 \value{
 A jamovi analysis object with violin plots, statistical tests, and
 clinical interpretation

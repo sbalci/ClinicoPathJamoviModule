@@ -274,6 +274,20 @@ modules:
           - ".quietly"
           - ".fmt"
           - "%||%"
+      # swimmerplot reports median follow-up by reverse Kaplan-Meier. The
+      # estimator is shared with jsurvival's singlearm/multisurvival, so it
+      # lives in survival_utils.R -- but the rest of that file is Fine-Gray and
+      # competing-risk machinery with no OncoPath caller. Extract just the
+      # follow-up symbols rather than shipping the whole file.
+      # .medianFollowUpText calls .fmtTimeLabel, so that comes too.
+      - source: "survival_utils.R"
+        destination: "survival_utils.R"
+        symbols:
+          - ".fmtTimeLabel"
+          - ".medianFollowUp"
+          - ".medianFollowUpLabel"
+          - ".medianFollowUpText"
+          - ".medianFollowUpExplanation"
     # Explicit removal matters because changing r_files alone does not delete a
     # helper copied by an earlier updateModules run.
     prune_r_files:

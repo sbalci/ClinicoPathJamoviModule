@@ -986,7 +986,15 @@ ihcsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 n_samples <- nrow(self$data)
                 n_events <- sum(self$data[[self$options$survivalEvent]] == 1, na.rm = TRUE)
-                median_followup <- median(self$data[[self$options$survivalTime]], na.rm = TRUE)
+                # Copy-ready report sentence, so the follow-up figure must be
+                # the reverse Kaplan-Meier estimate rather than median(observed
+                # time), which is the median time to event-or-censoring. The
+                # event level is 1, matching n_events just above. See
+                # .medianFollowUp() in R/survival_utils.R.
+                mfu <- .medianFollowUp(
+                    self$data[[self$options$survivalTime]],
+                    self$data[[self$options$survivalEvent]] != 1)
+                median_followup <- mfu$value
 
                 # Get log-rank p-value
                 tryCatch(
@@ -999,11 +1007,12 @@ ihcsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         report <- sprintf(
                             paste0(
-                                "In this cohort of %d patients with %d events (%.1f%%) and median follow-up of %.1f months, ",
+                                "In this cohort of %d patients with %d events (%.1f%%) and a %s of %.1f months, ",
                                 "IHC-based risk stratification using %s identified %d prognostic groups with %s ",
                                 "different survival outcomes (log-rank p = %.3f). %s"
                             ),
-                            n_samples, n_events, 100 * n_events / n_samples, median_followup,
+                            n_samples, n_events, 100 * n_events / n_samples,
+                            tolower(.medianFollowUpLabel(mfu)), median_followup,
                             htmltools::htmlEscape(paste(self$options$markers, collapse = ", ")),
                             length(levels(private$.risk_groups)),
                             if (p_val < 0.05) "significantly" else "non-significantly",

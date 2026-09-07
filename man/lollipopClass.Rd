@@ -42,31 +42,34 @@ Common clinical applications:
 }
 \examples{
 \dontrun{
-# Basic lollipop chart
+data("clinical_lab_data", package = "ClinicoPath")
+
+# Mean haemoglobin by treatment group
 result <- lollipop(
-  data = patient_data,
-  dep = "biomarker_level",
-  group = "patient_id",
+  data = clinical_lab_data,
+  dep = "hemoglobin",
+  group = "treatment_group",
   highlight = NULL
 )
 
-# Horizontal lollipop with sorting
+# Horizontal chart, largest value at the top, values labelled
 result <- lollipop(
-  data = treatment_data,
-  dep = "response_score",
-  group = "treatment_type",
+  data = clinical_lab_data,
+  dep = "albumin",
+  group = "disease_severity",
   sortBy = "value_desc",
   orientation = "horizontal",
   showValues = TRUE,
   highlight = NULL
 )
 
-# Clinical timeline with highlighting
+# Highlight one hospital, with a reference line at the mean
 result <- lollipop(
-  data = timeline_data,
-  dep = "days_to_event",
-  group = "patient_id",
-  highlight = "high_risk_patient",
+  data = clinical_lab_data,
+  dep = "platelet_count",
+  group = "hospital",
+  useHighlight = TRUE,
+  highlight = "Hospital A",
   showMean = TRUE
 )
 }

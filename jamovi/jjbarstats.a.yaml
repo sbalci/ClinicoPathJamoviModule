@@ -1,10 +1,10 @@
 ---
 name:  jjbarstats
 title: Bar Charts
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: 'Bar Charts, Grouped Bar Charts'
-version: '1.0.10'
+version: '1.0.8'
 jas: '1.2'
 
 description:

@@ -10,7 +10,7 @@ lollipop(
   group,
   useHighlight = FALSE,
   highlight,
-  aggregation = "none",
+  aggregation = "mean",
   sortBy = "original",
   orientation = "vertical",
   showValues = FALSE,

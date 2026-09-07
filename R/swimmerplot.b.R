@@ -1413,26 +1413,18 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 return(list(value = observed$value, method = "unrecognised"))
             }
 
-            # Reverse KM: censored patients become the "events".
-            reverse_status <- as.numeric(status %in% "censored")
+            # Reverse KM: censored patients become the "events". The estimator
+            # is shared -- .medianFollowUp() in R/survival_utils.R -- which also
+            # handles the not-estimable case (the reversed curve never reaching
+            # 50%) and reports why. Only the status CLASSIFICATION above is
+            # specific to this analysis, so only that stays here.
+            mfu <- .medianFollowUp(fu, as.numeric(status %in% "censored"))
+            if (!isTRUE(mfu$reverse))
+                return(c(observed, list(reason = mfu$reason)))
 
-            surv_obj <- tryCatch(
-                survival::Surv(time = fu, event = reverse_status),
-                error = function(e) NULL)
-            if (is.null(surv_obj)) return(observed)
-
-            km_fit <- tryCatch(survival::survfit(surv_obj ~ 1), error = function(e) NULL)
-            if (is.null(km_fit)) return(observed)
-
-            median_fu <- tryCatch(
-                stats::quantile(km_fit, probs = 0.5)$quantile,
-                error = function(e) NA_real_)
-
-            # quantile() returns NA (not an error) when the reverse curve never
-            # reaches 0.5 - too few censored patients to estimate it.
-            if (length(median_fu) == 0 || is.na(median_fu)) return(observed)
-
-            list(value = unname(median_fu), method = "reverse_km")
+            list(value = mfu$value, method = "reverse_km",
+                 ci_lower = mfu$ci_lower, ci_upper = mfu$ci_upper,
+                 n_total = mfu$n_total, n_censored = mfu$n_censored, reason = "")
         },
 
         # Map a censoring/event status value to "censored", "event", or NA.
@@ -1480,6 +1472,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # read as strong skew that was purely an artefact of mixing estimators.
                 median_followup_km = median_fu,
                 median_followup_method = median_fu_res$method,
+                # Reverse-KM median carries a confidence interval; the naive
+                # fallbacks do not, so these stay NA and the metrics table shows
+                # a blank rather than a fabricated interval.
+                median_followup_ci_lower = median_fu_res$ci_lower %||% NA_real_,
+                median_followup_ci_upper = median_fu_res$ci_upper %||% NA_real_,
+                median_followup_reason = median_fu_res$reason %||% "",
                 median_duration = if (length(valid_follow_up) > 0) stats::median(valid_follow_up) else NA_real_,
                 mean_duration = if (length(valid_follow_up) > 0) mean(valid_follow_up) else NA_real_,
                 sd_duration = if (length(valid_follow_up) > 1) stats::sd(valid_follow_up) else NA_real_,
@@ -2059,9 +2057,15 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         .("Median Follow-up Time (observed durations; no censoring information)")
                     ),
                     value = round(stats$median_followup_km, 2),
-                    ci = NA_character_,
+                    ci = if (!is.na(stats$median_followup_ci_lower %||% NA_real_) &&
+                             !is.na(stats$median_followup_ci_upper %||% NA_real_))
+                        sprintf("%.2f - %.2f", stats$median_followup_ci_lower,
+                                stats$median_followup_ci_upper) else NA_character_,
                     unit = self$options$timeUnit,
-                    interpretation = .("Central tendency of patient follow-up duration")
+                    interpretation = if (identical(stats$median_followup_method, "reverse_km"))
+                        .("Reverse Kaplan-Meier estimate (Schemper & Smith 1996): event and censoring roles are swapped, so this estimates how long patients would have been observed. The plain median of observed durations is the median time to event-or-censoring and understates follow-up when events are common.")
+                    else
+                        .("Plain median of the observed durations, because the reverse Kaplan-Meier estimate was not available. Read it as the median time to event-or-censoring, not as the length of follow-up.")
                 ),
                 list(
                     name = .("Interquartile Range (observed durations)"),

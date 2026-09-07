@@ -312,7 +312,8 @@ jiwillsurviveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ClinicoPathJamoviModule",
                     "survival",
                     "survminer",
-                    "RColorBrewer"))
+                    "RColorBrewer",
+                    "SchemperSmith1996"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

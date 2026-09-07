@@ -252,7 +252,13 @@ progressionsurvivalClass <- R6::R6Class(
             n_patients <- nrow(data)
             n_events <- sum(data$pfs_event, na.rm = TRUE)
             censoring_rate <- (1 - mean(data$pfs_event, na.rm = TRUE)) * 100
-            median_followup <- median(data$time[data$pfs_event == 0], na.rm = TRUE)
+            # Was median(data$time[data$pfs_event == 0]) -- the median among
+            # CENSORED patients only, which discards everyone who progressed and
+            # conditions on having survived long enough to still be at risk, so
+            # it OVERSTATES follow-up. Reverse Kaplan-Meier uses every patient.
+            # See .medianFollowUp() in R/survival_utils.R.
+            mfu <- .medianFollowUp(data$time, data$pfs_event == 0)
+            median_followup <- mfu$value
 
             analysis_type <- switch(self$options$analysis_type,
                 "standard_pfs" = "Standard PFS",
@@ -283,6 +289,24 @@ progressionsurvivalClass <- R6::R6Class(
                 progression_definition = progression_def,
                 censoring_rate = round(censoring_rate, 1)
             ))
+
+            summary_table$setNote("followup", paste0(
+                "<b>", .medianFollowUpLabel(mfu), ".</b> ",
+                if (isTRUE(mfu$reverse))
+                    paste0("Event and censoring roles are reversed and a Kaplan-Meier curve ",
+                           "fitted to the result, so this estimates how long patients ",
+                           "<i>would</i> have been followed (", mfu$n_censored, " of ",
+                           mfu$n_total, " were still under observation). Taking the median ",
+                           "among censored patients only would discard everyone who ",
+                           "progressed and overstate follow-up; taking the median of all ",
+                           "observed times understates it.")
+                else
+                    paste0("The reverse Kaplan-Meier median was not estimable because ",
+                           mfu$reason, ", so the plain median of observed times is shown. ",
+                           "Read it as the median time to progression-or-censoring, ",
+                           "<i>not</i> as the length of follow-up."),
+                "\n\nSchemper M, Smith TL. <i>Controlled Clinical Trials</i> ",
+                "1996;17(4):343-346. doi:10.1016/0197-2456(96)00075-X"))
         },
         .performSurvivalEstimation = function() {
             data <- private$.pfs_data

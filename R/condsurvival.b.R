@@ -187,7 +187,10 @@ condsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Overall statistics
                 n_total <- nrow(data)
                 n_events <- sum(data$status)
-                median_followup <- median(data$time)
+                # Reverse Kaplan-Meier, not median(observed times) -- the latter
+                # is the median time to event-or-censoring. See .medianFollowUp()
+                # in R/survival_utils.R.
+                mfu <- .medianFollowUp(data$time, data$status == 0)
                 event_rate <- (n_events / n_total) * 100
 
                 overview_table$addRow(rowKey = "n", values = list(
@@ -201,8 +204,8 @@ condsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 ))
 
                 overview_table$addRow(rowKey = "median_time", values = list(
-                    characteristic = "Median Follow-up Time",
-                    overall = sprintf("%.2f %s", median_followup, self$options$time_scale)
+                    characteristic = .medianFollowUpLabel(mfu),
+                    overall = .medianFollowUpText(mfu, self$options$time_scale)
                 ))
 
                 # Group-specific statistics if applicable

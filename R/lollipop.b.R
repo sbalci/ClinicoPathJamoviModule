@@ -31,31 +31,34 @@
 #' 
 #' @examples
 #' \dontrun{
-#' # Basic lollipop chart
+#' data("clinical_lab_data", package = "ClinicoPath")
+#'
+#' # Mean haemoglobin by treatment group
 #' result <- lollipop(
-#'   data = patient_data,
-#'   dep = "biomarker_level",
-#'   group = "patient_id",
+#'   data = clinical_lab_data,
+#'   dep = "hemoglobin",
+#'   group = "treatment_group",
 #'   highlight = NULL
 #' )
-#' 
-#' # Horizontal lollipop with sorting
+#'
+#' # Horizontal chart, largest value at the top, values labelled
 #' result <- lollipop(
-#'   data = treatment_data,
-#'   dep = "response_score",
-#'   group = "treatment_type",
+#'   data = clinical_lab_data,
+#'   dep = "albumin",
+#'   group = "disease_severity",
 #'   sortBy = "value_desc",
 #'   orientation = "horizontal",
 #'   showValues = TRUE,
 #'   highlight = NULL
 #' )
-#' 
-#' # Clinical timeline with highlighting
+#'
+#' # Highlight one hospital, with a reference line at the mean
 #' result <- lollipop(
-#'   data = timeline_data,
-#'   dep = "days_to_event",
-#'   group = "patient_id",
-#'   highlight = "high_risk_patient",
+#'   data = clinical_lab_data,
+#'   dep = "platelet_count",
+#'   group = "hospital",
+#'   useHighlight = TRUE,
+#'   highlight = "Hospital A",
 #'   showMean = TRUE
 #' )
 #' }
@@ -120,8 +123,12 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Placed before the missing-package early return below so every rowKey
             # exists on every path (setRow() on a missing rowKey aborts the run).
             summaryTable <- self$results$summary
+            # Under aggregation each plotted point is a group summary, not an
+            # observation, so "Number of Observations" would report 4 for a
+            # 20-row dataset. Name the row for what the number actually counts.
             summaryTable$addRow(rowKey = "n_obs", values = list(
-                statistic = .("Number of Observations")))
+                statistic = if (identical(self$options$aggregation, "none"))
+                    .("Number of Observations") else .("Number of Plotted Points")))
             summaryTable$addRow(rowKey = "n_groups", values = list(
                 statistic = .("Number of Groups")))
             summaryTable$addRow(rowKey = "mean", values = list(
@@ -142,19 +149,13 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
                 missing_packages <- c(missing_packages, "ggplot2")
             }
-            if (!requireNamespace("dplyr", quietly = TRUE)) {
-                missing_packages <- c(missing_packages, "dplyr")
-            }
 
             if (length(missing_packages) > 0) {
-                error_msg <- paste0(
-                    "The following required packages are not installed: ",
-                    paste(missing_packages, collapse = ", "),
-                    ". Please install them using: install.packages(c(",
-                    paste0("'", missing_packages, "'", collapse = ", "), "))"
-                )
+                error_msg <- jmvcore::format(
+                    .("The lollipop chart needs the following R packages, which are not installed: {packages}. Install them with install.packages() and re-run the analysis."),
+                    packages = paste(missing_packages, collapse = ", "))
 
-                private$.addNotice('ERROR', 'Missing Required Packages', error_msg)
+                private$.addNotice('ERROR', .("Missing Required Packages"), error_msg)
                 return()
             }
             
@@ -254,17 +255,18 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (self$options$conditionalColor) {
                     private$.addNotice(
                         'INFO',
-                        'Conditional Coloring',
-                        sprintf("Conditional coloring applied. Values > %.2f colored orange (above threshold), others blue (below).",
-                                self$options$colorThreshold)
+                        .("Conditional Coloring"),
+                        jmvcore::format(
+                            .("Values above {thr} are drawn in orange and the rest in blue, so colour encodes the threshold rather than the group."),
+                            thr = base::format(self$options$colorThreshold, digits = 3))
                     )
 
                     # Conditional coloring takes precedence over category highlighting
                     if (self$options$useHighlight) {
                         private$.addNotice(
                             'INFO',
-                            'Highlighting Ignored',
-                            "Conditional coloring is active, so category highlighting is ignored. Turn off conditional coloring to use highlighting."
+                            .("Highlighting Ignored"),
+                            .("Conditional colouring is active, so the highlighted category is not drawn differently; turn conditional colouring off to use highlighting.")
                         )
                     }
                 }
@@ -303,6 +305,18 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             })
         },
         
+        # The level to highlight, or NULL when highlighting is off or unset.
+        # .cleanData() and .plot() both need this and used to carry identical
+        # copies of the expression; one definition keeps them from drifting.
+        .activeHighlight = function() {
+            if (isTRUE(self$options$useHighlight) &&
+                !is.null(self$options$highlight) &&
+                !identical(self$options$highlight, ""))
+                self$options$highlight
+            else
+                NULL
+        },
+
         # Comprehensive data cleaning and validation
         .cleanData = function() {
             # Extract variables
@@ -350,8 +364,10 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (n_nonfinite > 0) {
                 private$.addNotice(
                     'WARNING',
-                    'Non-finite Values Removed',
-                    sprintf("%d row(s) held an infinite value (Inf or -Inf) for the dependent variable and were removed. Infinite values usually indicate a division by zero or an out-of-range entry.", n_nonfinite)
+                    .("Non-finite Values Removed"),
+                    jmvcore::format(
+                        .("{n} row(s) held an infinite value for the dependent variable and were removed; an infinite value usually means a division by zero or an out-of-range entry."),
+                        n = n_nonfinite)
                 )
             }
             
@@ -377,8 +393,10 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (n_groups > 50) {
                 private$.addNotice(
                     'WARNING',
-                    'Many Group Levels',
-                    sprintf("Grouping variable has more than 50 levels (%d levels detected). Consider reducing categories for better visualization.", n_groups)
+                    .("Many Group Levels"),
+                    jmvcore::format(
+                        .("The grouping variable has {n} levels, more than a single chart can label legibly; consider pooling categories or splitting the chart."),
+                        n = n_groups)
                 )
             }
             
@@ -400,8 +418,11 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 pct_removed <- round(100 * n_removed / complete_before, 1)
                 private$.addNotice(
                     'WARNING',
-                    'Missing Data Removed',
-                    sprintf("%d rows (%g%%) with missing values were removed from analysis.", n_removed, pct_removed)
+                    .("Missing Data Removed"),
+                    jmvcore::format(
+                        .("{n} rows ({pct}%) had a missing value in the selected variables and were removed before plotting."),
+                        n = n_removed,
+                        pct = pct_removed)
                 )
             }
             
@@ -413,21 +434,19 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (nlevels(data[[group_var]]) < 2)
                 jmvcore::reject(.("At least 2 groups with complete observations are required."))
 
-            # Validate highlight level if provided and highlighting is enabled
-            highlight_level <- if (self$options$useHighlight && !is.null(self$options$highlight) && self$options$highlight != "") {
-                self$options$highlight
-            } else {
-                NULL  # Disable highlighting if useHighlight is FALSE or highlight is empty
-            }
-
-            if (self$options$useHighlight && !is.null(highlight_level) && highlight_level != "" && !highlight_level %in% data[[group_var]]) {
+            # Warn about a highlight level that is not in the data. The level
+            # itself is NOT carried out of here: .plot() re-derives it from the
+            # options and degrades correctly via %in%, so the local assignment
+            # this block used to end with was dead.
+            highlight_level <- private$.activeHighlight()
+            if (!is.null(highlight_level) && !highlight_level %in% data[[group_var]]) {
                 private$.addNotice(
                     'WARNING',
-                    'Highlight Level Not Found',
-                    sprintf("Highlight level '%s' not found in grouping variable. Highlight will be ignored.",
-                            highlight_level)
+                    .("Highlight Level Not Found"),
+                    jmvcore::format(
+                        .("The level {level} does not occur in the grouping variable, so nothing is highlighted; pick a level that is present in the data."),
+                        level = highlight_level)
                 )
-                highlight_level <- NULL  # Disable highlighting for this case
             }
 
             # CRITICAL FIX: Check for duplicates and aggregate if requested
@@ -440,17 +459,27 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 groups_with_dups <- names(group_counts[group_counts > 1])
                 private$.addNotice(
                     'STRONG_WARNING',
-                    'Duplicate Groups Detected',
-                    sprintf(
-                        "Multiple observations per group detected (max=%d per group). Groups with duplicates: %s. Use aggregation (mean/median/sum) to avoid over-plotting and misleading visualization.",
-                        max_count,
-                        paste(head(groups_with_dups, 5), collapse = ", ")
-                    )
+                    .("Duplicate Groups Detected"),
+                    jmvcore::format(
+                        .("Some groups hold several observations (up to {n}, for example {groups}), and with no aggregation every one of them is drawn on the same stem, so the chart over-plots and hides how many points each lollipop stands for; choose Mean, Median or Sum under Data aggregation."),
+                        n = max_count,
+                        groups = paste(utils::head(groups_with_dups, 5), collapse = ", "))
                 )
             }
 
             source_n <- nrow(data)
             source_group_counts <- group_counts
+
+            # Within-group spread has to be measured on the RAW rows: once
+            # .aggregateData() collapses each group to a single point the
+            # dispersion it discarded is unrecoverable, and the chart shows no
+            # error bars to hint at it. Carry the largest within-group SD out
+            # with the data so .checkForMisuseAndWarnings() can disclose it.
+            source_max_within_sd <- if (any(group_counts > 1)) {
+                sds <- tapply(data[[dep_var]], data[[group_var]], stats::sd)
+                sds <- sds[is.finite(sds)]
+                if (length(sds)) max(sds) else NA_real_
+            } else NA_real_
 
             # Apply aggregation if requested
             if (self$options$aggregation != "none") {
@@ -464,6 +493,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             colnames(data) <- c("dependent", "group")
             attr(data, "source_n") <- source_n
             attr(data, "source_group_counts") <- source_group_counts
+            attr(data, "source_max_within_sd") <- source_max_within_sd
             
             return(data)
         },
@@ -477,27 +507,39 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (sort_method == "value_asc") {
                 # Sort by ascending values
                 data <- data[order(data[[dep_var]]), ]
-                # Relevel factor to match sorted order
-                data[[group_var]] <- factor(data[[group_var]], levels = unique(data[[group_var]]))
+                data[[group_var]] <- private$.relevelSorted(data[[group_var]])
             } else if (sort_method == "value_desc") {
                 # Sort by descending values
                 data <- data[order(-data[[dep_var]]), ]
-                # Relevel factor to match sorted order
-                data[[group_var]] <- factor(data[[group_var]], levels = unique(data[[group_var]]))
+                data[[group_var]] <- private$.relevelSorted(data[[group_var]])
             } else if (sort_method == "group_alpha") {
                 # Sort alphabetically by group
                 data <- data[order(as.character(data[[group_var]])), ]
-                # Relevel factor to match sorted order
-                data[[group_var]] <- factor(data[[group_var]], levels = unique(data[[group_var]]))
+                data[[group_var]] <- private$.relevelSorted(data[[group_var]])
             }
             # "original" keeps the original order (no releveling needed)
 
             return(data)
         },
 
+        # Relevel a grouping factor so ggplot draws it in the sorted row order.
+        #
+        # ggplot lays a discrete scale out in level order: left-to-right on x
+        # (vertical chart) but BOTTOM-to-top on y (horizontal chart). Using the
+        # row order verbatim therefore rendered a horizontal "descending" chart
+        # upside down - the largest value sat at the bottom and the chart read
+        # ascending from the top. Reverse the levels for the horizontal layout so
+        # the first sorted row is the TOP lollipop in both orientations.
+        .relevelSorted = function(group_values) {
+            lvls <- unique(as.character(group_values))
+            if (identical(self$options$orientation, "horizontal"))
+                lvls <- rev(lvls)
+            factor(as.character(group_values), levels = lvls)
+        },
+
         # Aggregate data by group to prevent over-plotting
         .aggregateData = function(data, dep_var, group_var, method) {
-            # Use dplyr-style aggregation
+            # stats::aggregate, one summary per group
             agg_func <- switch(method,
                 "mean" = function(x) mean(x, na.rm = TRUE),
                 "median" = function(x) median(x, na.rm = TRUE),
@@ -543,22 +585,31 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             summary_stats$dep_max <- max(dep_data, na.rm = TRUE)
             summary_stats$dep_range <- summary_stats$dep_max - summary_stats$dep_min
             
-            # Checkpoint before group-by operations which can be expensive for large datasets
+            # Checkpoint before the group scan, which can be expensive on large data
             private$.checkpoint(flush = FALSE)
-            
-            # Group information
-            group_summary <- data %>%
-                dplyr::group_by(group) %>%
-                dplyr::summarise(
-                    n = dplyr::n(),
-                    mean = mean(dependent, na.rm = TRUE),
-                    .groups = 'drop'
-                )
-            
-            summary_stats$group_names <- paste(unique(data$group), collapse = ", ")
-            summary_stats$groups_with_highest <- group_summary$group[which.max(group_summary$mean)]
-            summary_stats$groups_with_lowest <- group_summary$group[which.min(group_summary$mean)]
-            
+
+            # Highest / lowest group.
+            #
+            # These used to be which.max/which.min over the GROUP MEANS while
+            # "Value Range" two rows above reported the raw extremes - two bases
+            # in one table, and with aggregation off they could disagree with the
+            # chart itself. Group A holding {1, 100} and group B holding {60, 60}
+            # draws its tallest lollipop in A, but the mean picked B. Reading the
+            # extremes off the PLOTTED values instead makes the table agree with
+            # the picture, and is identical under aggregation (one row per group,
+            # so the plotted value IS the group summary).
+            #
+            # which.max also broke ties silently by position; name every tied
+            # group instead, so equal values are visible rather than arbitrated.
+            .tied_groups <- function(values, groups, target) {
+                hits <- unique(as.character(groups[!is.na(values) & values == target]))
+                paste(hits, collapse = ", ")
+            }
+            summary_stats$groups_with_highest <-
+                .tied_groups(dep_data, data$group, summary_stats$dep_max)
+            summary_stats$groups_with_lowest <-
+                .tied_groups(dep_data, data$group, summary_stats$dep_min)
+
             return(summary_stats)
         },
         
@@ -593,24 +644,53 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         # Advanced misuse detection and contextual warnings
         .checkForMisuseAndWarnings = function(data, summary_stats) {
-            # Check for too many groups relative to sample size
-            if (summary_stats$n_groups > summary_stats$source_n / 3) {
+            # Thinly replicated groups.
+            #
+            # The bare test n_groups > source_n / 3 is satisfied by ANY
+            # one-row-per-category dataset - which is the canonical lollipop
+            # input, not a problem - so it told every correct chart to "use a
+            # different visualization". Only complain when the data actually
+            # carries replicate observations and still averages under three per
+            # group, i.e. when the group means really are thinly estimated.
+            # A two-group chart with thin data is already covered by the small
+            # sample and unbalanced notices, and "The 2 groups hold 5
+            # observations" reads oddly next to them.
+            has_replicates <- summary_stats$source_n > summary_stats$n_groups
+            if (has_replicates && summary_stats$n_groups >= 3 &&
+                summary_stats$n_groups > summary_stats$source_n / 3) {
                 private$.addNotice(
                     'WARNING',
-                    'Many Groups vs Sample Size',
-                    sprintf("Many groups (%d) relative to sample size (%d). Consider grouping categories or using a different visualization.",
-                            summary_stats$n_groups, summary_stats$source_n)
+                    .("Thinly Replicated Groups"),
+                    jmvcore::format(
+                        .("The {groups} groups hold {raw} observations between them, fewer than three per group on average, so each plotted point rests on very little data; consider pooling categories or reporting the individual observations."),
+                        groups = summary_stats$n_groups,
+                        raw = summary_stats$source_n)
                 )
             }
 
-            # Check for highly skewed data
-            if (summary_stats$dep_range > 5 * summary_stats$dep_sd) {
-                private$.addNotice(
-                    'WARNING',
-                    'High Variability',
-                    sprintf("Data appears highly variable (range = %.2f, SD = %.2f). Consider log transformation or outlier investigation.",
-                            summary_stats$dep_range, summary_stats$dep_sd)
-                )
+            # Outliers.
+            #
+            # The previous test, range > 5 * SD, is not scale free: the expected
+            # range/SD ratio of a normal sample GROWS with n and crosses 5 near
+            # n = 130, so clean outlier-free data was told to "consider log
+            # transformation" purely for being large. Tukey's far-out rule
+            # (beyond 3 x IQR from the quartiles) is stable in n and flags the
+            # points a reader would actually call outlying.
+            dep_values <- data$dependent
+            quartiles <- stats::quantile(dep_values, c(0.25, 0.75), na.rm = TRUE, names = FALSE)
+            iqr <- quartiles[2] - quartiles[1]
+            if (is.finite(iqr) && iqr > 0) {
+                n_far_out <- sum(dep_values < quartiles[1] - 3 * iqr |
+                                 dep_values > quartiles[2] + 3 * iqr, na.rm = TRUE)
+                if (n_far_out > 0) {
+                    private$.addNotice(
+                        'WARNING',
+                        .("Extreme Values Present"),
+                        jmvcore::format(
+                            .("{n} plotted value(s) lie more than three interquartile ranges beyond the quartiles and will stretch the axis so the remaining lollipops look nearly equal; check these entries and consider a log scale."),
+                            n = n_far_out)
+                    )
+                }
             }
 
             # Check for groups with very different sample sizes
@@ -618,22 +698,108 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(group_counts)) group_counts <- table(droplevels(data$group))
             max_count <- max(group_counts)
             min_count <- min(group_counts)
-            if (max_count > 5 * min_count && length(group_counts) > 2) {
+            unbalanced <- max_count > 5 * min_count && length(group_counts) > 2
+            if (unbalanced) {
                 private$.addNotice(
                     'WARNING',
-                    'Unbalanced Group Sizes',
-                    sprintf("Unbalanced group sizes detected (range: %d to %d observations per group). Interpretation should account for different sample sizes.",
-                            min_count, max_count)
+                    .("Unbalanced Group Sizes"),
+                    jmvcore::format(
+                        .("Group sizes range from {lo} to {hi} observations, so the lollipops are not estimated with equal precision; read the sparsely sampled groups with more caution."),
+                        lo = min_count,
+                        hi = max_count)
                 )
+            }
+
+            aggregating <- !identical(self$options$aggregation, "none")
+
+            # The mean reference line averages whatever is PLOTTED. Under
+            # aggregation those are the group summaries, so the line is an
+            # unweighted mean of means: with 30/3/3 observations at 10/50/52 it
+            # is drawn at 37.3 while the grand mean of the raw data is 16.8. The
+            # user reads "Mean =" off the chart and has no way to see which one
+            # it is, so say so whenever the two can diverge materially.
+            if (self$options$showMean && aggregating && unbalanced) {
+                private$.addNotice(
+                    'STRONG_WARNING',
+                    .("Mean Line Averages the Group Summaries"),
+                    jmvcore::format(
+                        .("The mean reference line is the unweighted mean of the {groups} plotted group summaries, not the mean of the {raw} underlying observations; because the groups differ greatly in size these two means differ, and the line does not mark the overall average."),
+                        groups = summary_stats$n_groups,
+                        raw = summary_stats$source_n)
+                )
+            }
+
+            # Aggregation draws one point per group and no error bar, so a group
+            # whose observations are scattered looks exactly like a group whose
+            # observations agree. Disclose it when the discarded spread rivals
+            # the differences the chart is being used to show.
+            max_within_sd <- attr(data, "source_max_within_sd")
+            if (aggregating && !is.null(max_within_sd) && is.finite(max_within_sd) &&
+                is.finite(summary_stats$dep_range) && summary_stats$dep_range > 0 &&
+                max_within_sd > summary_stats$dep_range / 2) {
+                private$.addNotice(
+                    'WARNING',
+                    .("Aggregation Hides Within-Group Spread"),
+                    jmvcore::format(
+                        .("Observations within a single group vary by up to {sd} (one standard deviation), which is more than half the {span} spread between the plotted group summaries; each lollipop is a single point with no error bar, so the chart shows less disagreement than the data contains."),
+                        sd = base::format(max_within_sd, digits = 3),
+                        span = base::format(summary_stats$dep_range, digits = 3))
+                )
+            }
+
+            # Baseline misuse. A lollipop encodes its value as STEM LENGTH
+            # measured from the baseline, so the baseline decides how much of
+            # the chart carries information.
+            baseline <- self$options$baseline
+            if (is.numeric(baseline) && length(baseline) == 1 && is.finite(baseline) &&
+                is.finite(summary_stats$dep_min) && is.finite(summary_stats$dep_max)) {
+
+                # A baseline of zero splitting the data is the canonical
+                # diverging lollipop - change scores, log ratios, z-scores - and
+                # is exactly what the reader expects, so only a baseline the
+                # user actually typed is worth flagging here.
+                if (baseline != 0 &&
+                    baseline > summary_stats$dep_min && baseline < summary_stats$dep_max) {
+                    n_below <- sum(data$dependent < baseline, na.rm = TRUE)
+                    n_above <- sum(data$dependent > baseline, na.rm = TRUE)
+                    private$.addNotice(
+                        'WARNING',
+                        .("Baseline Falls Inside the Data Range"),
+                        jmvcore::format(
+                            .("The baseline of {base} sits inside the range of the data, so {above} lollipop(s) point one way and {below} point the other; stem length now shows distance from the baseline rather than magnitude, which is easy to misread."),
+                            base = base::format(baseline, digits = 3),
+                            above = n_above,
+                            below = n_below)
+                    )
+                } else {
+                    # Distance from the baseline to the far end of the data sets
+                    # the drawn span; the visible differences between lollipops
+                    # are only dep_range of that. A hemoglobin series of
+                    # 13.1-13.6 drawn from baseline 0 puts 96% of every stem
+                    # below the data, and all eight lollipops look identical.
+                    span <- max(abs(summary_stats$dep_max - baseline),
+                                abs(summary_stats$dep_min - baseline))
+                    if (is.finite(span) && span > 0 && summary_stats$dep_range / span < 0.25) {
+                        private$.addNotice(
+                            'WARNING',
+                            .("Baseline Far From the Data"),
+                            jmvcore::format(
+                                .("Measured from the baseline of {base}, the differences between groups occupy only {pct}% of each stem, so the lollipops look almost equal; set the baseline near the lower end of the data to make the comparison visible."),
+                                base = base::format(baseline, digits = 3),
+                                pct = round(100 * summary_stats$dep_range / span, 1))
+                        )
+                    }
+                }
             }
 
             # Check for small overall sample size
             if (summary_stats$source_n < 10) {
                 private$.addNotice(
                     'WARNING',
-                    'Small Sample Size',
-                    sprintf("Small sample size (n=%d). Results should be interpreted with caution.",
-                            summary_stats$source_n)
+                    .("Small Sample Size"),
+                    jmvcore::format(
+                        .("The chart rests on {n} observations in total, too few for the differences between groups to be stable; treat the ordering as provisional."),
+                        n = summary_stats$source_n)
                 )
             }
         },
@@ -651,7 +817,11 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.null(agg_method) && agg_method != "none") {
                 table$setNote(
                     "aggregation",
-                    sprintf("Statistics describe the plotted per-group %s values, not the raw observations.", agg_method)
+                    jmvcore::format(
+                        .("Statistics describe the {n} plotted per-group {method} values aggregated from {raw} observations, not the raw observations themselves."),
+                        n = summary_stats$n_observations,
+                        method = agg_method,
+                        raw = summary_stats$source_n)
                 )
             } else {
                 table$setNote("aggregation", NULL)
@@ -827,21 +997,17 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .plot = function(image, ggtheme, theme, ...) {
             # Get plot state (contains data + visual options)
             plot_state <- image$state
-            if (is.null(plot_state)) return()
+            if (is.null(plot_state)) return(FALSE)
 
             # Extract data from state
             plot_data <- plot_state$data
-            if (is.null(plot_data)) return()
+            if (is.null(plot_data) || nrow(plot_data) == 0) return(FALSE)
             
             # Get options
             orientation <- self$options$orientation
             show_values <- self$options$showValues
             show_mean <- self$options$showMean
-            highlight_level <- if (self$options$useHighlight && !is.null(self$options$highlight) && self$options$highlight != "") {
-                self$options$highlight
-            } else {
-                NULL  # Disable highlighting if useHighlight is FALSE or highlight is empty
-            }
+            highlight_level <- private$.activeHighlight()
             point_size <- self$options$pointSize
             line_width <- self$options$lineWidth
             line_type <- self$options$lineType
@@ -882,6 +1048,14 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Add mean line if requested
             if (show_mean) {
                 mean_value <- mean(plot_data$dependent, na.rm = TRUE)
+                # Under aggregation the plotted points ARE the group summaries,
+                # so this is a mean of means and not the overall average. A bare
+                # "Mean =" invites the reader to take it for the grand mean.
+                mean_label <- if (identical(self$options$aggregation, "none")) {
+                    jmvcore::format(.("Mean = {val}"), val = round(mean_value, 2))
+                } else {
+                    jmvcore::format(.("Mean of group values = {val}"), val = round(mean_value, 2))
+                }
                 if (orientation == "horizontal") {
                     p <- p + ggplot2::geom_vline(
                         xintercept = mean_value,
@@ -893,7 +1067,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         "text",
                         x = mean_value,
                         y = Inf,
-                        label = paste(.("Mean ="), round(mean_value, 2)),
+                        label = mean_label,
                         hjust = 1.1,
                         vjust = 1.5,
                         color = "red",
@@ -910,7 +1084,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         "text",
                         x = Inf,
                         y = mean_value,
-                        label = paste(.("Mean ="), round(mean_value, 2)),
+                        label = mean_label,
                         hjust = 1.1,
                         vjust = -0.5,
                         color = "red",
@@ -1005,13 +1179,17 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Build the argument list in option-declaration order.
             #
-            # Every variable-name option (single OptionVariable or multi-variable
-            # OptionVariables) is emitted as a deparse()'d string literal. deparse()
-            # produces valid, fully-escaped R for names containing spaces, quotes or
-            # backslashes (e.g. `Tumor Grade`); jmvcore's default sourcify would emit
-            # some of these as bare, unquoted symbols and yield invalid syntax.
-            # Detecting the option by CLASS (not by name) means any variable option
-            # added later is escaped automatically.
+            # Every TEXT option is emitted as a deparse()'d string literal.
+            # deparse() produces valid, fully-escaped R for any content - spaces,
+            # embedded double quotes, backslashes - whereas jmvcore's default
+            # sourcify wraps the raw value in quotes without escaping it, so a
+            # chart titled  Hb ("g/dL")  produced  title = "Hb ("g/dL")" , which
+            # does not parse. The test is on OptionString rather than
+            # OptionVariable because OptionVariable inherits from it: one check
+            # therefore covers variable names, factor Levels and the free-text
+            # title/xlabel/ylabel boxes alike, and any text option added later is
+            # escaped automatically. Values still equal to their declared default
+            # are skipped so the generated call stays as short as jmvcore's.
             #
             # Variables are NOT re-emitted through private$.asArgs() - doing so
             # previously duplicated them in the generated syntax (the "double
@@ -1021,9 +1199,9 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             for (option in private$.options$options) {
                 if (option$name == 'data')
                     next
-                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
+                if (inherits(option, 'OptionString') || inherits(option, 'OptionVariables')) {
                     val <- option$value
-                    if (!is.null(val) && length(val) > 0)
+                    if (!is.null(val) && length(val) > 0 && !identical(val, option$default))
                         args <- c(args, paste0(option$name, ' = ',
                                                paste0(deparse(val), collapse = '')))
                 } else {

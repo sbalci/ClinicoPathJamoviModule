@@ -1250,7 +1250,11 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             n_patients <- nrow(data)
             n_events <- sum(data$status_num, na.rm = TRUE)
-            median_fu <- round(median(data$time_years, na.rm = TRUE), 1)
+            # Reverse Kaplan-Meier, not median(observed times) -- the latter is
+            # the median time to event-or-censoring. status_num is 1 for death,
+            # 0 for censored (see .prepareData). See R/survival_utils.R.
+            mfu <- .medianFollowUp(data$time_years, data$status_num == 0)
+            median_fu <- round(mfu$value, 1)
             method_label <- private$.methodLabel()
 
             ratetable_labels <- c(
@@ -1278,7 +1282,8 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<p><b>Method:</b> ", method_label, "</p>",
                 "<p><b>Number of Patients:</b> ", n_patients, "</p>",
                 "<p><b>Number of Deaths:</b> ", n_events, "</p>",
-                "<p><b>Median Follow-up:</b> ", median_fu, " years</p>",
+                "<p><b>", .medianFollowUpLabel(mfu), ":</b> ",
+                .medianFollowUpText(mfu, "years"), "</p>",
                 "<p><b>Population Rate Table:</b> ", rt_label, "</p>",
                 "<p><b>Confidence Level:</b> ", self$options$confidence_level * 100, "%</p>"
             )

@@ -95,10 +95,16 @@ conditionalsurvivalClass <- R6::R6Class(
             # Check if condSURV package is available
             has_condsurv <- requireNamespace("condSURV", quietly = TRUE)
             
-            # Get conditioning time (0 or NULL = use median follow-up)
+            # Get conditioning time (0 or NULL = use median follow-up).
+            # Median follow-up means the reverse-Kaplan-Meier estimate
+            # (Schemper & Smith 1996), not median(time): the latter is the
+            # median time to event-or-censoring and anchors the conditioning
+            # point far too early in a high-event cohort. See .medianFollowUp()
+            # in R/survival_utils.R; it falls back to median(time) itself when
+            # the reversed curve is not estimable.
             condTime <- self$options$conditionTime
             if (is.null(condTime) || is.na(condTime) || condTime <= 0) {
-                condTime <- median(time, na.rm = TRUE)
+                condTime <- .medianFollowUp(time, status == 0)$value
             }
 
             # Get specific time points
@@ -213,10 +219,16 @@ conditionalsurvivalClass <- R6::R6Class(
                 status <- as.numeric(status) - 1
             }
 
-            # Get conditioning time (0 or NULL = use median follow-up)
+            # Get conditioning time (0 or NULL = use median follow-up).
+            # Median follow-up means the reverse-Kaplan-Meier estimate
+            # (Schemper & Smith 1996), not median(time): the latter is the
+            # median time to event-or-censoring and anchors the conditioning
+            # point far too early in a high-event cohort. See .medianFollowUp()
+            # in R/survival_utils.R; it falls back to median(time) itself when
+            # the reversed curve is not estimable.
             condTime <- self$options$conditionTime
             if (is.null(condTime) || is.na(condTime) || condTime <= 0) {
-                condTime <- median(time, na.rm = TRUE)
+                condTime <- .medianFollowUp(time, status == 0)$value
             }
 
             tryCatch({

@@ -643,7 +643,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "lubridate",
                     "rms",
                     "finalfit",
-                    "survminer"))
+                    "survminer",
+                    "SchemperSmith1996"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",

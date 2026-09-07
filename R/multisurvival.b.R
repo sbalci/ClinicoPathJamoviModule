@@ -1871,28 +1871,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # "how long was this cohort actually watched". median(mytime) is the
           # median time to event-or-censoring, which in a high-event cohort is
           # close to the median SURVIVAL and understates the observation window.
-          median_followup <- NA_real_
-          followup_is_reverse_km <- FALSE
           # In competing-risk mode "not the event of interest" includes the
           # competing event, which is a terminal outcome and not a censoring:
           # it has to be censored in the reverse-KM fit, not counted as its
-          # event, or the reported follow-up is understated.
+          # event, or the reported follow-up is understated. The estimator
+          # itself is shared -- .medianFollowUp() in R/survival_utils.R.
           cens <- if (is.factor(mydata$myoutcome) && "Censored" %in% levels(mydata$myoutcome))
             as.integer(!is.na(mydata$myoutcome) & mydata$myoutcome == "Censored")
           else
             as.integer(!is.na(event_indicator) & event_indicator == 0)
-          if (sum(cens) > 0) {
-            fit_fu <- try(survival::survfit(survival::Surv(mydata$mytime, cens) ~ 1), silent = TRUE)
-            if (!inherits(fit_fu, "try-error")) {
-              m_fu <- unname(summary(fit_fu)$table[["median"]])
-              if (!is.na(m_fu)) {
-                median_followup <- m_fu
-                followup_is_reverse_km <- TRUE
-              }
-            }
-          }
-          if (!followup_is_reverse_km)
-            median_followup <- median(mydata$mytime, na.rm = TRUE)
+          mfu <- .medianFollowUp(mydata$mytime, cens)
+          median_followup <- mfu$value
+          followup_is_reverse_km <- isTRUE(mfu$reverse)
           time_unit <- self$options$timetypeoutput
 
           # Reconcile against the recode disclosure shown just above.
@@ -1926,7 +1916,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               else
                 .("Analysis completed using %d observations with %d events (%.1f%% event rate). Median follow-up could not be estimated by reverse Kaplan-Meier; the median observed time (to event or censoring) was %.1f %s, which is not the same quantity."),
               n_obs, n_events, event_rate, median_followup, time_unit
-            ), recode_note)
+            ), recode_note,
+            # How the follow-up figure above was arrived at, and why it is not
+            # median(observed time). Gated on the analysis's existing
+            # explanation toggle.
+            if (isTRUE(self$options$showExplanations))
+              .medianFollowUpExplanation(mfu, time_unit) else "")
           )
         }, error = function(e) {
           # Notice Disabled

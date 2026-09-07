@@ -243,7 +243,11 @@ epidemiosurvivalClass <- R6::R6Class(
             total_events <- sum(data$event, na.rm = TRUE)
             total_person_years <- sum(data$time, na.rm = TRUE)
             incidence_rate <- (total_events / total_person_years) * 100000
-            median_followup <- median(data$time, na.rm = TRUE)
+            # Reverse Kaplan-Meier, not median(observed times) -- the latter is
+            # the median time to event-or-censoring. See .medianFollowUp() in
+            # R/survival_utils.R.
+            mfu <- .medianFollowUp(data$time, data$event == 0)
+            median_followup <- mfu$value
 
             # Determine study design
             study_design <- switch(self$options$cohort_design,
@@ -273,6 +277,27 @@ epidemiosurvivalClass <- R6::R6Class(
                 median_followup = round(median_followup, 2),
                 study_period = study_period
             ))
+
+            # Which estimator produced the follow-up figure, and why it is not
+            # median(observed time). Table notes accept a small HTML allow-list
+            # (i/em/b/strong/sub/sup); a paragraph break needs TWO newlines.
+            summary_table$setNote("followup", paste0(
+                "<b>", .medianFollowUpLabel(mfu), ".</b> ",
+                if (isTRUE(mfu$reverse))
+                    paste0("Estimated by reversing the roles of event and censoring and ",
+                           "fitting a Kaplan-Meier curve to the result, so it estimates how ",
+                           "long participants <i>would</i> have been followed (",
+                           mfu$n_censored, " of ", mfu$n_total,
+                           " were still under observation). The plain median of observed ",
+                           "times is the median time to event-or-censoring and understates ",
+                           "the observation window when events are common.")
+                else
+                    paste0("The reverse Kaplan-Meier median was not estimable because ",
+                           mfu$reason, ", so the plain median of observed times is shown ",
+                           "instead. Read it as the median time to event-or-censoring, ",
+                           "<i>not</i> as the length of follow-up."),
+                "\n\nSchemper M, Smith TL. <i>Controlled Clinical Trials</i> ",
+                "1996;17(4):343-346. doi:10.1016/0197-2456(96)00075-X"))
 
             private$.cohort_summary <- list(
                 n_participants = total_participants,

@@ -22912,7 +22912,16 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 n_patients <- nrow(inst_data)
                                 n_events <- sum(inst_data[[event_var]], na.rm = TRUE)
                                 event_rate <- n_events / n_patients
-                                median_follow_up <- median(inst_data[[time_var]], na.rm = TRUE)
+                                # Reverse Kaplan-Meier, not median(observed
+                                # times) -- the latter is the median time to
+                                # event-or-censoring. Per-institution follow-up
+                                # is compared across centres here, and the naive
+                                # estimator is biased by each centre's event
+                                # rate, so the comparison itself was distorted.
+                                # See .medianFollowUp() in R/survival_utils.R.
+                                median_follow_up <- .medianFollowUp(
+                                    inst_data[[time_var]],
+                                    inst_data[[event_var]] == 0)$value
 
                                 # Stage distribution per institution
                                 old_stage_dist <- table(inst_data[[old_stage]])
