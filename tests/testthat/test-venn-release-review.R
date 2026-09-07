@@ -1,3 +1,11 @@
+# The generated Options/Results classes and the backend R6 class are internal to the
+# ClinicoPath namespace: they are visible under devtools::load_all(export_all = TRUE)
+# but NOT on the search path of an installed build, which is what jamovi ships. Bind
+# them explicitly so this file tests the artifact that actually ships.
+vennClass <- getFromNamespace("vennClass", "ClinicoPath")
+vennOptions <- getFromNamespace("vennOptions", "ClinicoPath")
+vennResults <- getFromNamespace("vennResults", "ClinicoPath")
+
 # Regression cover for the defects found during the venn release review.
 # Each block fails against the pre-review backend.
 

@@ -481,6 +481,13 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                             .("Only %d subject(s) have repeated observations, so the longitudinal connections shown may not be meaningful."),
                             repeated_ids))
                     }
+                    n_timepoints <- length(x_levels)
+                    incomplete_ids <- sum(id_counts < n_timepoints)
+                    if (incomplete_ids > 0 && repeated_ids > 0) {
+                        private$.addAnalysisNote(sprintf(
+                            .("%d subject(s) have missing intermediate or follow-up time points and are partially connected or unconnected without imputation."),
+                            incomplete_ids))
+                    }
                 }
 
                 if (!is.null(self$options$trial_arms) && self$options$trial_arms != "") {
@@ -502,6 +509,27 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                             nLabels = length(time_labels),
                             nPoints = length(x_levels)))
                     }
+                }
+
+                # Large dataset jitter points performance advisory
+                if (nrow(analysis_data) > 20000 && isTRUE(self$options$show_dots)) {
+                    private$.addAnalysisNote(sprintf(
+                        .("The dataset contains %d observations. Rendering individual raw jitter points with transparency may increase render times; consider disabling data points or using boxplot/violin mode for faster display."),
+                        nrow(analysis_data)))
+                }
+
+                # Population declaration advisory
+                if (!is.null(self$options$population_type) && self$options$population_type != "itt" &&
+                    self$options$population_type != "all") {
+                    pop_decl <- switch(self$options$population_type,
+                        "pp" = "Per-Protocol",
+                        "mitt" = "Modified ITT",
+                        "at" = "As-Treated",
+                        self$options$population_type
+                    )
+                    private$.addAnalysisNote(sprintf(
+                        .("Population is declared as '%s'. This setting applies an analytical label to the study report; adherence and protocol deviations are assumed as specified by the investigator."),
+                        pop_decl))
                 }
 
                 # Plot-time fallbacks that make the figure differ from what was requested.
@@ -884,10 +912,21 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Add clinical cutoff line only when a non-zero cutoff is actually set
-                # (0 is the "unset" default; drawing a threshold at y=0 by default is wrong).
-                if (!is.null(self$options$clinical_cutoff) && is.numeric(self$options$clinical_cutoff) &&
+                # Add clinical cutoff line
+                show_cutoff <- FALSE
+                has_cutoff_toggle <- tryCatch(
+                    !is.null(self$options$show_clinical_cutoff) && isTRUE(self$options$show_clinical_cutoff),
+                    error = function(e) FALSE
+                )
+                if (has_cutoff_toggle) {
+                    show_cutoff <- TRUE
+                } else if (!is.null(self$options$clinical_cutoff) && is.numeric(self$options$clinical_cutoff) &&
                     !is.na(self$options$clinical_cutoff) && self$options$clinical_cutoff != 0) {
+                    show_cutoff <- TRUE
+                }
+
+                if (show_cutoff && !is.null(self$options$clinical_cutoff) &&
+                    is.numeric(self$options$clinical_cutoff) && !is.na(self$options$clinical_cutoff)) {
                     p <- p + ggplot2::geom_hline(
                         yintercept = self$options$clinical_cutoff,
                         linetype = "dashed",
@@ -907,7 +946,22 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Add reference range shading if specified
-                if (!is.null(self$options$reference_range_min) && !is.null(self$options$reference_range_max) &&
+                show_ref <- FALSE
+                has_ref_toggle <- tryCatch(
+                    !is.null(self$options$show_reference_range) && isTRUE(self$options$show_reference_range),
+                    error = function(e) FALSE
+                )
+                if (has_ref_toggle) {
+                    show_ref <- TRUE
+                } else if (!is.null(self$options$reference_range_min) && !is.null(self$options$reference_range_max) &&
+                    is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max) &&
+                    !is.na(self$options$reference_range_min) && !is.na(self$options$reference_range_max) &&
+                    self$options$reference_range_min < self$options$reference_range_max &&
+                    !(self$options$reference_range_min == 0 && self$options$reference_range_max == 0)) {
+                    show_ref <- TRUE
+                }
+
+                if (show_ref && !is.null(self$options$reference_range_min) && !is.null(self$options$reference_range_max) &&
                     is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max) &&
                     !is.na(self$options$reference_range_min) && !is.na(self$options$reference_range_max) &&
                     self$options$reference_range_min < self$options$reference_range_max) {

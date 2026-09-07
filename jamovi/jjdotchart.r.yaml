@@ -16,7 +16,6 @@ clearWith:
     - showSummaryTable
     - centralityplotting
     - centralitytype
-    - bfmessage
     - originaltheme
     - mytitle
     - xtitle

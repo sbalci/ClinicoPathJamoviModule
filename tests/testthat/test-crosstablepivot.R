@@ -9,7 +9,7 @@ test_that("crosstablepivot basic functionality", {
   data("histopathology", package = "ClinicoPath")
   
   # Test that function exists and has correct class structure
-  expect_true(exists("crosstablepivotClass"))
+  expect_true(exists("crosstablepivotClass", envir = asNamespace("ClinicoPath")))
   expect_true(is.function(crosstablepivot))
   
   # Note: Full functional tests pending resolution of YAML compilation issues

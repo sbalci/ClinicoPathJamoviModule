@@ -1335,12 +1335,21 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "freq"  # default
                 )
 
+                # UpSetR::upset() defaults to nsets = 5 and SILENTLY drops the smallest
+                # sets beyond that, then computes every intersection bar over the
+                # survivors only. The UI offers up to 7 sets, so the default made a
+                # 6- or 7-set panel display wrong numbers with no warning. Pass the
+                # actual set count; nintersects = NA keeps every observed combination.
+                nsets <- ncol(mydata2)
+
                 # Create UpSetR plot
                 # Note: For UpSetR, showAnnotations controls text visibility and scaling
                 if (showAnnotations) {
                     # Enhanced visibility: larger text and show intersection sizes
                     plot <- UpSetR::upset(
                         mydata2,
+                        nsets = nsets,
+                        nintersects = NA,
                         order.by = orderBy,
                         text.scale = c(1.5, 1.3, 1.2, 1.1, 2, 1),
                         show.numbers = "yes"
@@ -1349,6 +1358,8 @@ vennClass <- if (requireNamespace('jmvcore'))
                     # Minimal text: smaller scaling and hide numbers
                     plot <- UpSetR::upset(
                         mydata2,
+                        nsets = nsets,
+                        nintersects = NA,
                         order.by = orderBy,
                         text.scale = c(0.8, 0.8, 0.8, 0.8, 1, 0.6),
                         show.numbers = "no"

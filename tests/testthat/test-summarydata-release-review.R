@@ -280,7 +280,11 @@ test_that("the source schema requires vars in R and labels draft output honestly
   schema <- paste(readLines(schema_path, warn = FALSE), collapse = "\n")
   results <- paste(readLines(results_path, warn = FALSE), collapse = "\n")
 
-  expect_false("default" %in% names(vars_option))
+  # `vars` carries `default: NULL`: without it the generated wrapper makes the
+  # argument REQUIRED, so a programmatic call with no variables errors instead of
+  # returning the welcome panel. Assert the default is present and is NULL.
+  expect_true("default" %in% names(vars_option))
+  expect_null(vars_option$default)
   expect_match(schema, "title: \"Draft report sentences\"", fixed = TRUE)
   expect_match(results, "title: 'Draft Statistical Summary'", fixed = TRUE)
   expect_match(schema, "name: show_guidance", fixed = TRUE)

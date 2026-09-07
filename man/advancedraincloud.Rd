@@ -26,7 +26,9 @@ advancedraincloud(
   show_statistics = TRUE,
   show_comparisons = FALSE,
   show_interpretation = TRUE,
+  show_clinical_cutoff = FALSE,
   clinical_cutoff = 0,
+  show_reference_range = FALSE,
   reference_range_min = 0,
   reference_range_max = 0,
   show_mcid = FALSE,
@@ -105,8 +107,13 @@ updates.}
 \item{show_interpretation}{If TRUE, displays interpretation and feature
 guide.}
 
+\item{show_clinical_cutoff}{Display horizontal line for clinical threshold
+or decision boundary.}
+
 \item{clinical_cutoff}{Add horizontal line for clinical threshold or
 decision boundary.}
+
+\item{show_reference_range}{Display shaded area for normal reference range.}
 
 \item{reference_range_min}{Lower bound of normal reference range (shaded
 area).}

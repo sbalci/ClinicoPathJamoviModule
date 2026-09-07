@@ -26,7 +26,9 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             show_statistics = TRUE,
             show_comparisons = FALSE,
             show_interpretation = TRUE,
+            show_clinical_cutoff = FALSE,
             clinical_cutoff = 0,
+            show_reference_range = FALSE,
             reference_range_min = 0,
             reference_range_max = 0,
             show_mcid = FALSE,
@@ -188,10 +190,18 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 "show_interpretation",
                 show_interpretation,
                 default=TRUE)
+            private$..show_clinical_cutoff <- jmvcore::OptionBool$new(
+                "show_clinical_cutoff",
+                show_clinical_cutoff,
+                default=FALSE)
             private$..clinical_cutoff <- jmvcore::OptionNumber$new(
                 "clinical_cutoff",
                 clinical_cutoff,
                 default=0)
+            private$..show_reference_range <- jmvcore::OptionBool$new(
+                "show_reference_range",
+                show_reference_range,
+                default=FALSE)
             private$..reference_range_min <- jmvcore::OptionNumber$new(
                 "reference_range_min",
                 reference_range_min,
@@ -334,7 +344,9 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$.addOption(private$..show_statistics)
             self$.addOption(private$..show_comparisons)
             self$.addOption(private$..show_interpretation)
+            self$.addOption(private$..show_clinical_cutoff)
             self$.addOption(private$..clinical_cutoff)
+            self$.addOption(private$..show_reference_range)
             self$.addOption(private$..reference_range_min)
             self$.addOption(private$..reference_range_max)
             self$.addOption(private$..show_mcid)
@@ -380,7 +392,9 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         show_statistics = function() private$..show_statistics$value,
         show_comparisons = function() private$..show_comparisons$value,
         show_interpretation = function() private$..show_interpretation$value,
+        show_clinical_cutoff = function() private$..show_clinical_cutoff$value,
         clinical_cutoff = function() private$..clinical_cutoff$value,
+        show_reference_range = function() private$..show_reference_range$value,
         reference_range_min = function() private$..reference_range_min$value,
         reference_range_max = function() private$..reference_range_max$value,
         show_mcid = function() private$..show_mcid$value,
@@ -425,7 +439,9 @@ advancedraincloudOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
         ..show_statistics = NA,
         ..show_comparisons = NA,
         ..show_interpretation = NA,
+        ..show_clinical_cutoff = NA,
         ..clinical_cutoff = NA,
+        ..show_reference_range = NA,
         ..reference_range_min = NA,
         ..reference_range_max = NA,
         ..show_mcid = NA,
@@ -639,8 +655,11 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param show_comparisons If TRUE, performs statistical tests between groups.
 #' @param show_interpretation If TRUE, displays interpretation and feature
 #'   guide.
+#' @param show_clinical_cutoff Display horizontal line for clinical threshold
+#'   or decision boundary.
 #' @param clinical_cutoff Add horizontal line for clinical threshold or
 #'   decision boundary.
+#' @param show_reference_range Display shaded area for normal reference range.
 #' @param reference_range_min Lower bound of normal reference range (shaded
 #'   area).
 #' @param reference_range_max Upper bound of normal reference range (shaded
@@ -709,7 +728,9 @@ advancedraincloud <- function(
     show_statistics = TRUE,
     show_comparisons = FALSE,
     show_interpretation = TRUE,
+    show_clinical_cutoff = FALSE,
     clinical_cutoff = 0,
+    show_reference_range = FALSE,
     reference_range_min = 0,
     reference_range_max = 0,
     show_mcid = FALSE,
@@ -773,7 +794,9 @@ advancedraincloud <- function(
         show_statistics = show_statistics,
         show_comparisons = show_comparisons,
         show_interpretation = show_interpretation,
+        show_clinical_cutoff = show_clinical_cutoff,
         clinical_cutoff = clinical_cutoff,
+        show_reference_range = show_reference_range,
         reference_range_min = reference_range_min,
         reference_range_max = reference_range_max,
         show_mcid = show_mcid,

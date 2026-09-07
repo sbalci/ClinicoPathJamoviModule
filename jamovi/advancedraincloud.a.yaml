@@ -1,7 +1,7 @@
 ---
 name: advancedraincloud
 title: Advanced Raincloud Plot
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Categorical vs Continuous
 version: '1.0.8'
 jas: '1.2'
@@ -259,6 +259,14 @@ options:
           If TRUE, displays interpretation and feature guide.
 
     # Clinical Significance Options
+    - name: show_clinical_cutoff
+      title: Show Clinical Cutoff
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display horizontal line for clinical threshold or decision boundary.
+
     - name: clinical_cutoff
       title: Clinical Cutoff Value
       type: Number
@@ -266,6 +274,14 @@ options:
       description:
         R: >
           Add horizontal line for clinical threshold or decision boundary.
+
+    - name: show_reference_range
+      title: Show Reference Range
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display shaded area for normal reference range.
 
     - name: reference_range_min
       title: Reference Range Minimum

@@ -33,7 +33,6 @@
 | `showSummaryTable` | `Bool` | `TRUE` | Group summary table |
 | `centralityplotting` | `Bool` | `FALSE` | Also mark the centre of the plotted points |
 | `centralitytype` | `List` | `parametric` | Central Tendency Measure |
-| `bfmessage` | `Bool` | `FALSE` | Bayes factor interpretation |
 | `originaltheme` | `Bool` | `FALSE` | Original ggstatsplot theme |
 | `mytitle` | `String` | `` | Plot Title |
 | `xtitle` | `String` | `` | X-axis Label (Measurement) |

@@ -1,3 +1,10 @@
+# The generated Options/Results classes and the backend R6 class are internal to the
+# ClinicoPath namespace: they are visible under devtools::load_all(export_all = TRUE)
+# but NOT on the search path of an installed build, which is what jamovi ships. Bind
+# them explicitly so this file tests the artifact that actually ships.
+chisqposttestClass <- getFromNamespace("chisqposttestClass", "ClinicoPath")
+chisqposttestOptions <- getFromNamespace("chisqposttestOptions", "ClinicoPath")
+
 # ⚠️ WARNING: These tests only verify that the function runs without errors.
 # They do NOT validate statistical correctness of:
 # - Chi-square statistics

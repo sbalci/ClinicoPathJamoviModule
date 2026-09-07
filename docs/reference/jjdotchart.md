@@ -20,7 +20,6 @@ jjdotchart(
   showSummaryTable = TRUE,
   centralityplotting = FALSE,
   centralitytype = "parametric",
-  bfmessage = FALSE,
   originaltheme = FALSE,
   mytitle = "",
   xtitle = "",
@@ -114,10 +113,6 @@ jjdotchart(
   centre of the plotted points' is ticked. It affects that line ONLY -
   the plotted points always follow the Statistical Test. Leave it
   matching your Statistical Test unless you have a specific reason.
-
-- bfmessage:
-
-  Show the Bayes factor caption when the Bayesian test is selected.
 
 - originaltheme:
 

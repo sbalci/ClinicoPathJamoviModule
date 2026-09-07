@@ -123,8 +123,9 @@ outlierdetection(
 # Example 2: multivariate detection across correlated measurements.
 # NOTE: multivariate_methods = "mahalanobis_robust" is routed through the
 # bigutilsr package by performance; where bigutilsr is not available the
-# analysis reports that and produces no result. "mcd" needs only robustbase,
-# which ships with the module, so it is the portable robust alternative.
+# analysis reports that and produces no result. "mcd" is routed through
+# MASS::cov.mcd, which is a recommended package, so it is the portable
+# robust alternative.
 outlierdetection(
   data = histopathology,
   vars = c("MeasurementA", "MeasurementB", "OverallTime"),

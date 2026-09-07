@@ -98,7 +98,7 @@ test_that("Data Quality Assessment - Basic functionality and structure", {
   skip_if_not_installed('jmvReadWrite')
   
   # Test basic function exists and can be called
-  expect_true(exists("checkdataClass"))
+  expect_true(exists("checkdataClass", envir = asNamespace("ClinicoPath")))
   
   # checkdataClass$new() takes `options` (and `data`); calling it bare threw
   # "argument \"options\" is missing, with no default", so this asserted the

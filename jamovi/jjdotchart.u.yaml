@@ -60,9 +60,6 @@ children:
           - type: TextBox
             name: k
             format: number
-          - type: CheckBox
-            name: bfmessage
-            enable: (typestatistics:bayes)
   - type: CollapseBox
     label: Output
     collapsed: true

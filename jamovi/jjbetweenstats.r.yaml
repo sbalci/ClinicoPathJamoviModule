@@ -102,6 +102,9 @@ items:
       clearWith:
         - dep
         - group
+        - typestatistics
+        - varequal
+        - colorblindSafe
         - mytitle
         - xtitle
         - ytitle
@@ -121,6 +124,9 @@ items:
       clearWith:
         - dep
         - group
+        - typestatistics
+        - varequal
+        - colorblindSafe
         - grvar
         - mytitle
         - xtitle

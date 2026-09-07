@@ -161,3 +161,29 @@ test_that("two groups use Wilcoxon and match stats::wilcox.test", {
     expect_true(any(arc_cells(res$comparisons$content) ==
                     paste0("W = ", round(unname(w$statistic), 4))))
 })
+
+test_that("incomplete longitudinal trajectories are disclosed in analysis notes", {
+    d <- arc_long()
+    # Remove one observation so one subject has an incomplete trajectory
+    d <- d[-1, ]
+    res <- advancedraincloud(data = d, y_var = "y", x_var = "g", id_var = "id",
+                             show_longitudinal = TRUE)
+    expect_match(arc_txt(res$analysisNotes$content), "missing intermediate or follow-up")
+})
+
+test_that("population declaration is disclosed in analysis notes", {
+    d <- arc_two()
+    res <- advancedraincloud(data = d, y_var = "y", x_var = "g",
+                             population_type = "pp")
+    expect_match(arc_txt(res$analysisNotes$content), "Per-Protocol")
+})
+
+test_that("clinical cutoff line rendering logic executes without error for 0 and non-zero", {
+    d <- arc_two()
+    res1 <- advancedraincloud(data = d, y_var = "y", x_var = "g", clinical_cutoff = 11.5)
+    expect_s3_class(res1, "advancedraincloudResults")
+
+    res0 <- advancedraincloud(data = d, y_var = "y", x_var = "g", clinical_cutoff = 0)
+    expect_s3_class(res0, "advancedraincloudResults")
+})
+

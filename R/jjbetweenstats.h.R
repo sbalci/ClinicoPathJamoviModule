@@ -441,6 +441,9 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "dep",
                     "group",
+                    "typestatistics",
+                    "varequal",
+                    "colorblindSafe",
                     "mytitle",
                     "xtitle",
                     "ytitle",
@@ -460,6 +463,9 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "dep",
                     "group",
+                    "typestatistics",
+                    "varequal",
+                    "colorblindSafe",
                     "grvar",
                     "mytitle",
                     "xtitle",
@@ -477,7 +483,7 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjbetweenstats",
-                version = c(1,0,8),
+                version = c(1,0,9),
                 options = options,
                 results = jjbetweenstatsResults$new(options=options),
                 data = data,

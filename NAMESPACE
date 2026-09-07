@@ -1204,7 +1204,6 @@ importFrom(rms,
   val.surv,
   validate
 )
-importFrom(robustbase,covMcd)
 importFrom(rpart,
   prune,
   rpart,

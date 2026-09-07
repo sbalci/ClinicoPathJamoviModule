@@ -113,7 +113,7 @@ options:
             Specific multivariate method for outlier detection when multivariate category is selected.
             NOTE: "mahalanobis_robust" is computed through the bigutilsr package; where bigutilsr
             is not available the analysis says so and that choice produces no result. "mcd" gives a
-            robust multivariate distance through robustbase, which ships with the module.
+            robust multivariate distance through MASS, a recommended package that ships with R.
 
     - name: composite_threshold
       title: Composite score threshold

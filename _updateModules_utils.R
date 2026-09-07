@@ -1674,6 +1674,35 @@ prune_configured_module_imports <- function(module_dir, packages) {
   invisible(removable)
 }
 
+# Add Imports the usage scan cannot see.
+#
+# The import sync detects a dependency from `pkg::` calls, so a package used only
+# through `requireNamespace("pkg")` -- an optional capability guarded at run time --
+# is invisible to it and never reaches the submodule DESCRIPTION. jamovi installs a
+# module's Imports on first run and cannot fetch a missing package on demand, so a
+# guarded runtime dependency still has to be declared, or the capability is simply
+# dead for every user. (2026-09-07: ICS/ICSOutlier in outlierdetection.)
+add_configured_module_imports <- function(module_dir, packages) {
+  packages <- unlist(packages, use.names = FALSE)
+  if (length(packages) == 0L) return(invisible(character(0)))
+  if (!requireNamespace("desc", quietly = TRUE))
+    stop("The 'desc' package is required to add configured module imports")
+
+  description <- file.path(module_dir, "DESCRIPTION")
+  if (!file.exists(description)) stop("DESCRIPTION not found: ", description)
+  d <- desc::desc(file = description)
+  deps <- d$get_deps()
+  already <- deps$package[deps$type == "Imports"]
+  missing <- setdiff(packages, already)
+  for (package in missing) d$set_dep(package, type = "Imports")
+  if (length(missing) > 0L) {
+    d$write(file = description)
+    cat("  \U0001F4E6 Added guarded Imports: ",
+        paste(missing, collapse = ", "), "\n", sep = "")
+  }
+  invisible(missing)
+}
+
 message("✅ Module utilities loaded successfully")
 
 # ---------------------------------------------------------------------------

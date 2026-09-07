@@ -1,14 +1,14 @@
 
-# Manually source the files since we are running tests without full package load
-if (file.exists("../../R/categorize.h.R")) {
-  source("../../R/utils.R")   # .fmt(), used by the notice/error boxes
-  source("../../R/categorize.h.R")
-  source("../../R/categorize.b.R")
-} else if (file.exists("R/categorize.h.R")) {
-  source("R/utils.R")
-  source("R/categorize.h.R")
-  source("R/categorize.b.R")
-}
+# Use the installed package, never source() the backend files.
+# Sourcing R/categorize.b.R into this environment gives the copy globalenv() as its
+# enclosure, so the `.` translation function that the package imports from jmvcore is
+# not on its search path and every translated string fails with
+# `could not find function "."`. The sourced copy also is not the code that ships.
+library(ClinicoPath)
+
+# The generated Options/Results classes and the backend class are namespace-internal,
+# so bind them explicitly rather than relying on them being on the search path.
+categorizeClass <- getFromNamespace("categorizeClass", "ClinicoPath")
 
 test_that("categorize works with equal intervals", {
   skip_if_not_installed('jmvReadWrite')

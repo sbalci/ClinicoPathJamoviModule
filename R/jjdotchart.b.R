@@ -12,40 +12,61 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjdotchartBase,
     private = list(
 
-        # Every resampling path in this analysis runs under this seed. The
-        # error bars come from a datawizard bootstrap that ggstatsplot does not
-        # seed, so three identical calls returned three different intervals
+        # Every resampling path in this analysis runs under self$options$seed.
+        # The error bars come from a datawizard bootstrap that ggstatsplot does
+        # not seed, so three identical calls returned three different intervals
         # (group A conf.low 9.6999 / 9.7501 / 9.6782). In jamovi the analysis
         # re-runs on every option change, so unseeded bars visibly twitch when
         # the user toggles something unrelated - which reads as instability in
         # the data rather than in the renderer.
-        .SEED = 20250101L,
 
-        .noticeList = NULL,
+        .noticeList = list(),
         .inputsValid = FALSE,
-        # Reason the statistics engine produced nothing, if it did (see
-        # .engineFails). Set in .run(), where a notice can still be rendered.
-        .engineFailure = NULL,
         .prepared = NULL,
         .tab = NULL,
 
         # ---- notices (HTML, not jmvcore::Notice - those cannot serialise) ----
 
+        # Notices are stored with their severity and RE-SORTED on every render,
+        # so the panel always reads ERROR first. Appending in call order put the
+        # engine-failure ERROR - the one saying the chart carries no test result
+        # at all - underneath two INFOs and a WARNING, because it is raised last
+        # in .run(). Sorting here fixes the order for every notice at once
+        # rather than shuffling the call sites.
         .addNotice = function(message, type = "INFO") {
-            style <- switch(type,
-                "ERROR"   = list(fg = "#721c24", bg = "#f8d7da", br = "#f5c6cb"),
-                "WARNING" = list(fg = "#856404", bg = "#fff3cd", br = "#ffeaa7"),
-                                  list(fg = "#004085", bg = "#cce5ff", br = "#b8daff"))
-            private$.noticeList <- c(private$.noticeList, paste0(
-                "<div style='background-color:", style$bg,
-                "; border-left:4px solid ", style$br,
-                "; padding:12px; margin:8px 0; color:", style$fg, ";'>",
-                "<strong>", type, ":</strong> ", message, "</div>"))
-            self$results$notices$setContent(paste(private$.noticeList, collapse = "\n"))
+            private$.noticeList[[length(private$.noticeList) + 1L]] <-
+                list(type = type, message = message)
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return(invisible(NULL))
+            }
+            # order() is stable, so notices of equal severity keep call order.
+            tiers <- c("ERROR", "WARNING", "INFO")
+            rank <- vapply(private$.noticeList, function(n) {
+                i <- match(n$type, tiers); if (is.na(i)) length(tiers) else i
+            }, integer(1))
+
+            html <- vapply(private$.noticeList[order(rank)], function(n) {
+                style <- switch(n$type,
+                    "ERROR"   = list(fg = "#721c24", bg = "#f8d7da", br = "#f5c6cb"),
+                    "WARNING" = list(fg = "#856404", bg = "#fff3cd", br = "#ffeaa7"),
+                                      list(fg = "#004085", bg = "#cce5ff", br = "#b8daff"))
+                paste0(
+                    "<div style='background-color:", style$bg,
+                    "; border-left:4px solid ", style$br,
+                    "; padding:12px; margin:8px 0; color:", style$fg, ";'>",
+                    "<strong>", n$type, ":</strong> ", n$message, "</div>")
+            }, character(1))
+
+            self$results$notices$setContent(paste(html, collapse = "\n"))
         },
 
         .clearNotices = function() {
-            private$.noticeList <- NULL
+            private$.noticeList <- list()
             self$results$notices$setContent("")
         },
 
@@ -118,7 +139,13 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(self$options$grvar))
                 mydata[[self$options$grvar]] <- droplevels(as.factor(mydata[[self$options$grvar]]))
 
-            private$.prepared <- list(data = mydata, n_dropped = n0 - nrow(mydata),
+            # n_dropped counts ONLY the rows lost to missing values. Subtract
+            # n_inf, or the infinite rows are reported twice - once here as
+            # "missing" and again by their own notice (measured: 3 Inf values
+            # and zero NAs produced "3 row(s) with missing values were
+            # excluded" alongside "3 row(s) had an infinite value").
+            private$.prepared <- list(data = mydata,
+                                      n_dropped = n0 - nrow(mydata) - n_inf,
                                       n_inf = n_inf)
             private$.prepared
         },
@@ -222,7 +249,11 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     prep$n_inf, htmltools::htmlEscape(self$options$dep)), "WARNING")
 
             tab <- private$.groupTable(mydata)
-            k <- if (is.null(tab)) 0L else nrow(tab)
+            if (is.null(tab)) {
+                private$.addNotice("The group summaries could not be computed for this data. Check that the Measurement variable is numeric and that each group has usable observations.", "ERROR")
+                return(FALSE)
+            }
+            k <- nrow(tab)
 
             if (k < 2) {
                 private$.addNotice(sprintf(
@@ -240,6 +271,36 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(sprintf(
                     "With only %d groups, inference from their summaries is imprecise; treat the p-value and effect estimate with caution.",
                     k), "WARNING")
+
+            # Every group contributes ONE equally-weighted point regardless of
+            # how many observations stand behind it, and the summary of a
+            # one-observation group is that observation with a zero-width
+            # interval - drawn as the most precise point on a chart when it is
+            # the least certain. Measured on groups of 40/40/1: the single
+            # observation moved the mean of the summaries by 29 units and
+            # counted as one of only three values in the t-test.
+            # statsExpressions runs wilcox.test(exact = FALSE, correct = TRUE) -
+            # the normal approximation with a continuity correction - where base
+            # R's wilcox.test() defaults to the EXACT distribution for n < 50
+            # without ties. The test's n here is k, which this analysis keeps
+            # deliberately small, so the approximation is applied in exactly the
+            # regime it suits least. Measured at k = 10: exact p = 0.04883,
+            # reported p = 0.05279 - opposite sides of 0.05 (V = 47 either way).
+            if (identical(as.character(self$options$typestatistics), "nonparametric") && k < 50)
+                private$.addNotice(sprintf(
+                    "The Wilcoxon signed-rank p-value is computed by normal approximation with a continuity correction, not the exact distribution, so it can differ from R's wilcox.test() default at this size (k = %d). Near a 0.05 threshold the two can disagree; treat a borderline p-value as borderline.",
+                    k), "WARNING")
+
+            n_small <- sum(tab$n < 3)
+            if (n_small > 0)
+                private$.addNotice(sprintf(
+                    "%d group(s) have fewer than 3 observations. Their %s is unstable, a single-observation group is drawn with a zero-width interval, and each group still counts equally in the %s.",
+                    n_small, private$.summaryLabelLower(), private$.testLabel()), "WARNING")
+
+            if (min(tab$n) > 0 && max(tab$n) >= 10 * min(tab$n))
+                private$.addNotice(sprintf(
+                    "Group sizes are highly unequal (%d to %d observations), but every group contributes one equally-weighted point, so the smallest groups influence the result as much as the largest. Consider whether the sparse groups belong in this comparison.",
+                    min(tab$n), max(tab$n)), "WARNING")
 
             # Warn BEFORE the engine is asked, because this is the fixable cause.
             rng <- range(tab$value)
@@ -272,7 +333,6 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
             private$.clearNotices()
             private$.inputsValid <- FALSE
-            private$.engineFailure <- NULL
             private$.prepared <- NULL
             private$.tab <- NULL
 
@@ -309,11 +369,11 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Probe HERE, in .run(): a notice raised from a render callback is
             # discarded, because jamovi has already composed the results panel
             # by the time a figure is drawn.
-            private$.engineFailure <- private$.engineFails(tab$value)
-            if (!is.null(private$.engineFailure))
+            engineFailure <- private$.engineFails(tab$value)
+            if (!is.null(engineFailure))
                 private$.addNotice(sprintf(
                     "The statistics could not be computed for this data (%s), so the chart carries NO test result - only the points. This usually means the Reference Value is far from the group %ss; retain the scientifically prespecified reference value and consider a different inferential method.",
-                    htmltools::htmlEscape(private$.engineFailure),
+                    htmltools::htmlEscape(engineFailure),
                     private$.summaryLabelLower()), "ERROR")
         },
 
@@ -361,10 +421,23 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 title = if (nzchar(o$mytitle)) o$mytitle else NULL,
                 caption = cap,
                 type = o$typestatistics,
+                # Pinned, not left to the upstream default. The summary table
+                # passes tr = 0.2 explicitly to centrality_description; relying
+                # on ggdotplotstats' default here means one ggstatsplot release
+                # changing it silently desynchronises the table from the plot.
+                tr = 0.2,
                 test.value = o$testvalue,
                 conf.level = o$conflevel,
                 digits = o$k,
-                bf.message = isTRUE(o$bfmessage),
+                # Pinned off, not exposed. ggstatsplot honours bf.message only
+                # when type == "parametric" (ggstatsplot:::.subtitle_caption
+                # gates it on `bf.condition = type == "parametric"`), and when
+                # it fires ggdotplotstats does `caption <- stats$caption %||%
+                # caption` - the Bayes factor REPLACES the caption below, which
+                # is the only thing naming the reference line. A Bayes factor is
+                # available as a first-class choice via Statistical Test =
+                # Bayesian, which keeps the reference-line caption intact.
+                bf.message = FALSE,
                 results.subtitle = isTRUE(o$resultssubtitle),
                 centrality.plotting = isTRUE(o$centralityplotting),
                 centrality.type = o$centralitytype,

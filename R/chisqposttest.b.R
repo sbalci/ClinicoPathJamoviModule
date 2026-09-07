@@ -257,6 +257,30 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # judged untrustworthy, with nothing on screen to say the exact test had been
         # attempted and abandoned. Try the Monte Carlo exact test first, and if that
         # fails too, say which comparison fell back.
+        # Fisher's exact test for the WHOLE table, used when the user explicitly
+        # selects 'Always Fisher's exact'. Same disclosed fallback as the pairwise
+        # helper: exact first, Monte Carlo second, and a notice if both fail so the
+        # reported chi-square is never silently passed off as the exact test.
+        .fisherOmnibusPvalue = function(contTable) {
+            fisher_test <- try(stats::fisher.test(contTable), silent = TRUE)
+            if (!inherits(fisher_test, "try-error"))
+                return(list(p = fisher_test$p.value, method = "fisher"))
+
+            private$.checkpoint()
+            fisher_test <- try(
+                stats::fisher.test(contTable, simulate.p.value = TRUE, B = 2000),
+                silent = TRUE)
+            if (!inherits(fisher_test, "try-error"))
+                return(list(p = fisher_test$p.value, method = "fisher_mc"))
+
+            private$.addNotice(
+                "STRONG_WARNING",
+                .("The exact test could not be computed for the whole table"),
+                .("'Always Fisher's exact' is selected, but Fisher's exact test could not be computed for this table, and the Monte Carlo version of it failed as well. The Pearson chi-square result is shown instead. It relies on a large-sample approximation, so read it with that in mind, and consider merging sparse categories.")
+            )
+            return(NULL)
+        },
+
         .fisherPvalue = function(subtable, comparison_label) {
             fisher_test <- try(stats::fisher.test(subtable), silent = TRUE)
             if (!inherits(fisher_test, "try-error"))
@@ -1634,16 +1658,37 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.chisqQuiet(contTable, correct = FALSE),
                 error = function(e) jmvcore::reject(sprintf(failure_tpl, conditionMessage(e))))
 
-            # Add chi-square results to the table ----
-            self$results$chisqTable$setRow(
-                rowNo = 1,
-                values = list(
-                    stat = .("Pearson chi-square (no continuity correction)"),
-                    value = chiSqTest$statistic,
-                    df = chiSqTest$parameter,
-                    p = chiSqTest$p.value
-                )
+            # Add omnibus results to the table ----
+            #
+            # 'Always Fisher's exact' used to reach only the pairwise comparisons, so a
+            # user who followed the sparse-table warning and switched to it saw an
+            # unchanged omnibus p-value beside a warning still telling them to switch.
+            # Honour the explicit choice here as well. An exact test has no statistic
+            # and no degrees of freedom, so those cells are left empty; the residual
+            # analysis below keeps using the chi-square object, which is where
+            # standardized residuals are defined.
+            omnibus_values <- list(
+                stat = .("Pearson chi-square (no continuity correction)"),
+                value = chiSqTest$statistic,
+                df = chiSqTest$parameter,
+                p = chiSqTest$p.value
             )
+
+            if (identical(self$options$testSelection, "fisher")) {
+                fisher_omnibus <- private$.fisherOmnibusPvalue(contTable)
+                if (!is.null(fisher_omnibus))
+                    omnibus_values <- list(
+                        stat = if (identical(fisher_omnibus$method, "fisher_mc"))
+                                   .("Fisher's exact test (Monte Carlo, B = 2000)")
+                               else
+                                   .("Fisher's exact test"),
+                        value = NA_real_,
+                        df = NA_integer_,
+                        p = fisher_omnibus$p
+                    )
+            }
+
+            self$results$chisqTable$setRow(rowNo = 1, values = omnibus_values)
 
             # Disclose the correction choice: jamovi's own Contingency Tables applies
             # Yates' continuity correction to a 2x2 by default, so the same 2x2 table
@@ -2263,7 +2308,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "STRONG_WARNING",
                     .("Expected counts are too low for the chi-square approximation"),
                     sprintf(
-                        .("%d of %d cells (%.0f%%) have an expected count below 5, above the usual 20%% limit. The chi-square approximation breaks down in that situation, so the overall p-value above is not dependable. Fisher's exact test, or merging categories that are sparse for substantive reasons, gives a p-value that does not rely on the approximation. Turn on the Assumptions check panel for the per-cell detail."),
+                        .("%d of %d cells (%.0f%%) have an expected count below 5, above the usual 20%% limit. The chi-square approximation breaks down in that situation, so the overall p-value above is not dependable. Set 'Statistical test selection' to 'Always Fisher's exact' to replace it with an exact p-value that does not rely on the approximation, or merge categories that are sparse for substantive reasons. Turn on the Assumptions check panel for the per-cell detail."),
                         assumptions$low_expected_5, length(chiSqTest$expected), assumptions$prop_low_5 * 100))
             }
 

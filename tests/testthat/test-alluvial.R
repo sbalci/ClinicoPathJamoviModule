@@ -1,9 +1,16 @@
+# The generated Options/Results classes and the backend R6 class are internal to the
+# ClinicoPath namespace: they are visible under devtools::load_all(export_all = TRUE)
+# but NOT on the search path of an installed build, which is what jamovi ships. Bind
+# them explicitly so this file tests the artifact that actually ships.
+alluvialClass <- getFromNamespace("alluvialClass", "ClinicoPath")
+alluvialResults <- getFromNamespace("alluvialResults", "ClinicoPath")
+
 test_that("alluvial class exists and can be instantiated", {
     # Test that alluvial class exists
-    expect_true(exists("alluvialClass"))
+    expect_true(exists("alluvialClass", envir = asNamespace("ClinicoPath")))
     
     # Test that we can create an instance
-    if (exists("alluvialClass")) {
+    if (exists("alluvialClass", envir = asNamespace("ClinicoPath"))) {
         expect_true(inherits(alluvialClass, "R6ClassGenerator"))
     }
 })

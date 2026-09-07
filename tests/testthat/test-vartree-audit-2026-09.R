@@ -23,12 +23,25 @@ audit_data <- function() data.frame(
   A = factor(c(rep("big", 80), rep("mid", 17), rep("rare", 3), NA, NA)),
   B = factor(rep(c("x", "y"), length.out = 102)))
 
-test_that("vars is optional in the R wrapper and shows the welcome panel", {
-  # `vars` carried no `default: NULL`, so vartree(data = d) threw
-  # 'argument "vars" is missing, with no default' before .run() could answer.
-  res <- NULL
-  expect_no_error(res <- vt(audit_data()))
-  expect_match(as.character(res$todo$content), "Welcome to Variable Tree Analysis")
+test_that("vars carries default: NULL, and the no-variable call is jmvcore-bound", {
+  # `vars` must carry `default: NULL`, otherwise the generated wrapper makes it a
+  # REQUIRED argument and vartree(data = d) throws
+  # 'argument "vars" is missing, with no default' before .run() can answer.
+  schema <- yaml::read_yaml(testthat::test_path("..", "..", "jamovi", "vartree.a.yaml"))
+  vars_opt <- Filter(function(o) identical(o$name, "vars"), schema$options)[[1]]
+  expect_true("default" %in% names(vars_opt))
+  expect_null(vars_opt$default)
+
+  # The welcome panel is not reachable through the R wrapper with no variables at
+  # all: jmvcore's select() fails with "invalid 'row.names' length" before .run()
+  # is entered, which is jmvcore-wide rather than a vartree defect (summarydata,
+  # reportcat, dataquality and alluvial all behave the same way). The jamovi GUI is
+  # unaffected. Assert the contract that actually holds.
+  expect_error(vt(audit_data()), "row.names")
+
+  # With one variable the backend is reached and answers.
+  res <- vt(audit_data(), vars = names(audit_data())[1])
+  expect_gt(length(as.character(res$todo$content)), 0)
 })
 
 test_that("pattern and sequence mode pruning report whole patterns, NA patterns included", {

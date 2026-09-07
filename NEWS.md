@@ -2,6 +2,42 @@
 
 ## Unreleased — meddecide audit fixes (module 1.0.8.11)
 
+- `jjdotchart`: `/check-function` + `/check-function-full` + `/fix-function` pass. The
+  "Bayes factor interpretation" option was removed. `ggstatsplot` honours `bf.message`
+  only when `type == "parametric"` (`ggstatsplot:::.subtitle_caption` gates it on
+  `bf.condition = type == "parametric"`), but the checkbox was enabled only when the
+  Bayesian test was selected - so it was clickable exactly where it did nothing and greyed
+  out in the one mode where it fired, and its help text described the inverted behaviour as
+  intended. Where it did fire it was worse than useless: `ggdotplotstats` resolves
+  `caption <- stats$caption %||% caption`, so the Bayes factor REPLACED the caption, and
+  that caption is the only text naming the dashed reference line this analysis adds
+  (ggstatsplot draws no reference line of its own). A Bayes factor remains available as a
+  first-class choice via Statistical Test = Bayesian, which keeps the reference-line caption
+  intact. Two further fixes: rows dropped for an infinite measurement were also counted as
+  missing, so three `Inf` values and no `NA`s reported "3 row(s) with missing values were
+  excluded" next to "3 row(s) had an infinite value"; and notices now render sorted
+  ERROR -> WARNING -> INFO instead of in the order they were raised, which had put the
+  engine-failure error - the one saying the chart carries no test result at all - below two
+  informational notices and a warning. Regression tests cover all three, including that the
+  reference-line caption survives under every test type.
+  `/review-function` follow-up: groups are now checked for size. Every group
+  contributes ONE equally-weighted point however many observations stand behind
+  it, and a one-observation group is summarised as that observation with a
+  zero-width interval - the least certain estimate on the chart drawn as the most
+  precise one. Measured on groups of 40/40/1, the single observation moved the
+  mean of the summaries by 29 units while counting as one of only three values in
+  the t-test. Two warnings now fire: any group with fewer than 3 observations, and
+  group sizes differing by 10-fold or more. `tr` is pinned at 0.2 in the plot call
+  to match the value the summary table passes explicitly, so an upstream default
+  change cannot silently desynchronise the table from the figure. "Decimal Places"
+  is retitled "Decimal Places (plot annotation)": it sets the digits of the plot
+  subtitle only, because jamovi formats table numbers from its own global Number
+  format preference, which no analysis can override. Two option descriptions were
+  reworded to remove a sentence-level " - " that the header generator wrapped to
+  line start, where roxygen read it as a markdown bullet and swallowed the rest of
+  the sentence into an \itemize{} block in the help page (`k`, newly introduced,
+  and `typestatistics`, pre-existing).
+
 - `jjbarstats` 1.0.10: `/check-function` pass. The "Pairwise comparisons" and "Pairwise
   display" options were removed: `ggstatsplot::ggbarstats()` has no such arguments (its `...`
   is "currently ignored"), so no post-hoc test ever ran while the Analysis Summary, the

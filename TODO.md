@@ -38,14 +38,14 @@
 ## Categorical × Categorical
 
 - jjbarstats
-jjpiestats
-jjsegmentedtotalbar
+- jjpiestats
+- jjsegmentedtotalbar
 
 ## Categorical × Continuous
 
-advancedraincloud
-jjbetweenstats
-jjdotchart
+- advancedraincloud
+- jjbetweenstats
+- jjdotchart
 jjdotplotstats
 jjwithinstats
 lollipop
@@ -4253,12 +4253,12 @@ Fix = wrap each in parentheses (note `(!x)` is correct, `!(x)` is not):
 
 - [ ] `jamovi/advancedbarplot.u.yaml`   `stat_method`         `add_statistics` -> `(add_statistics)`
 - [ ] `jamovi/advancedbarplot.u.yaml`   `value_format`        `show_values` -> `(show_values)`
-- [ ] `jamovi/advancedraincloud.u.yaml` `mcid_value`          `show_mcid` -> `(show_mcid)`
-- [ ] `jamovi/advancedraincloud.u.yaml` `effect_size_type`    `show_effect_size` -> `(show_effect_size)`
-- [ ] `jamovi/advancedraincloud.u.yaml` `baseline_group`      `show_change_scores` -> `(show_change_scores)`
-- [ ] `jamovi/advancedraincloud.u.yaml` `responder_threshold` `show_change_scores` -> `(show_change_scores)`
-- [ ] `jamovi/advancedraincloud.u.yaml` `cv_band_1`           `show_cv_bands` -> `(show_cv_bands)`
-- [ ] `jamovi/advancedraincloud.u.yaml` `cv_band_2`           `show_cv_bands` -> `(show_cv_bands)`
+- [x] `jamovi/advancedraincloud.u.yaml` `mcid_value`          `show_mcid` -> `(show_mcid)`
+- [x] `jamovi/advancedraincloud.u.yaml` `effect_size_type`    `show_effect_size` -> `(show_effect_size)`
+- [x] `jamovi/advancedraincloud.u.yaml` `baseline_group`      `show_change_scores` -> `(show_change_scores)`
+- [x] `jamovi/advancedraincloud.u.yaml` `responder_threshold` `show_change_scores` -> `(show_change_scores)`
+- [x] `jamovi/advancedraincloud.u.yaml` `cv_band_1`           `show_cv_bands` -> `(show_cv_bands)`
+- [x] `jamovi/advancedraincloud.u.yaml` `cv_band_2`           `show_cv_bands` -> `(show_cv_bands)`
 - [ ] `jamovi/clinicalalerts.u.yaml`    `custom_thresholds`   `!use_clinical_defaults` -> `(!use_clinical_defaults)`
 
 Gate to add: the python walk in the audit transcript, or extend
@@ -4750,3 +4750,34 @@ Acceptance: every finding in the 14 per-function sections and the module-wide ga
 - [ ] Codex planning step skipped: MCP returned "gpt-6-astra requires a newer Codex CLI"; the audit report's per-finding root causes + fix pointers are the plan.
 - [ ] verify: parse all changed files; snapshot `R/*.h.R` + `jamovi/0000.yaml`; `jmvtools::prepare()`; `devtools::load_all()` + testthat for the 14; `jmvtools::i18nUpdate()` catalog refresh; `Rscript _updateModules.R`; NEWS.md entry.
 - note: menuGroup left at `Exploration` (not routed to JamoviTest) - moving all 14 would empty the shipped module on the next sync.
+
+## jjbetweenstats — out-of-scope observations (from /check-function, 2026-09-07)
+
+- [ ] **[i18n]** `R/jjbetweenstats.b.R` welcome `todo` string wraps a multi-line literal in
+  `.()` (embedded newlines + leading indentation), which the library-review gate forbids.
+  NOT reflowed here because the msgid is already registered in `jamovi/i18n/catalog.pot`,
+  `en.po` and `tr.po` — changing it orphans the Turkish translation. Fix together with a
+  catalog regeneration (`i18nUpdate` → fill → `msgfmt`).
+- [ ] **[plots]** `.applyTheme()` appends `scale_fill_viridis_d()`/`scale_color_viridis_d()`
+  on top of the scales ggstatsplot already set, so ticking "Use colorblind-safe palette"
+  emits "Scale for fill is already present..." into the Analysis Notes on every render.
+  Replace the scale instead of stacking it.
+- [ ] **[export]** `.generateCopyReadyReport()` renders a `<button onclick=
+  'navigator.clipboard.writeText(...)'>`. Script-driven clipboard writes do not survive
+  Word/PDF export and are unreliable in the results iframe — the button reads as broken.
+  Render the template as selectable text (e.g. a `<pre>`) instead.
+- [ ] **[perf]** `.prepareData()` now digests `self$data` values (was dim + names, which
+  missed cell edits). Measure on ~1e5 rows; if the digest is material next to the
+  ggstatsplot render, key on a cheaper column-wise summary rather than reverting.
+
+### jjbetweenstats — declined during /fix-function (2026-09-07), revisit separately
+
+- [ ] **[stats]** Assumption checks (Levene + Shapiro/skewness) run only when
+  `typestatistics == "parametric"`. The nonparametric path gets none, though Kruskal-Wallis
+  assumes similar distribution shapes across groups. Adding one is new statistical
+  functionality, not a bug fix — scope it deliberately.
+- [ ] **[docs]** `man/jjbetweenstats.Rd` has no `\examples`; the whole `description.R.usage`
+  block in the `.a.yaml` is commented out (43 lines), presumably to dodge
+  `R CMD check --run-donttest`. Decide whether to restore them behind `dontrun: true`.
+- [ ] **[ux]** `conflevel` allows `min: 0.5` (a 50% CI) and `ggpubrAddStats` is the only Bool
+  defaulting `true`. Both are judgment calls, not defects — confirm they are intended.

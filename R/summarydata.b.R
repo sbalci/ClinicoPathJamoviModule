@@ -291,7 +291,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                         # unavailable. Suppress only genuinely undefined moments.
                         if (moments_available) {
                             dist_text <- private$.fmtVar(
-                                .("<br><em>Distribution diagnostics for {variable}:</em> skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"),
+                                .("<br><em>Distribution diagnostics for {variable}:</em> skewness = {skewness}; kurtosis = {kurtosis} (Pearson, normal = 3). {assessment}"),
                                 myvar,
                                 skewness = skew_val,
                                 kurtosis = kurt_val,
@@ -310,7 +310,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                         # "p-value = < 0.001". Below the bound the relation belongs
                         # in the sentence, not in the value.
                         dist_text <- private$.fmtVar(
-                            .("<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value &lt; 0.001; skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"),
+                            .("<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value &lt; 0.001; skewness = {skewness}; kurtosis = {kurtosis} (Pearson, normal = 3). {assessment}"),
                             myvar,
                             skewness = skew_val,
                             kurtosis = kurt_val,
@@ -318,7 +318,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                         )
                     } else {
                         dist_text <- private$.fmtVar(
-                            .("<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value = {p}; skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"),
+                            .("<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value = {p}; skewness = {skewness}; kurtosis = {kurtosis} (Pearson, normal = 3). {assessment}"),
                             myvar,
                             p = private$.fmtP(p_val),
                             skewness = skew_val,

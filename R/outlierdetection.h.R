@@ -380,8 +380,8 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   detection when multivariate category is selected. NOTE:
 #'   "mahalanobis_robust" is computed through the bigutilsr package; where
 #'   bigutilsr is not available the analysis says so and that choice produces no
-#'   result. "mcd" gives a robust multivariate distance through robustbase,
-#'   which ships with the module.
+#'   result. "mcd" gives a robust multivariate distance through MASS, a
+#'   recommended package that ships with R.
 #' @param composite_threshold Threshold for composite outlier score (0.1-1.0).
 #'   Default 0.5 means observations  classified as outliers by at least half of
 #'   the methods are considered outliers. Applies to the composite and

@@ -199,6 +199,141 @@ test_that("results are reproducible across identical runs", {
 })
 
 
+test_that("variable names with spaces and punctuation survive the whole pipeline", {
+    # Names reach rlang::sym(), statsExpressions' returned tibble columns and
+    # the axis labels. as.data.frame() on that tibble must NOT make.names() the
+    # group/measurement columns, or cd[[grp]] would look up NULL.
+    d <- dc_many()
+    names(d) <- c("Ki-67 %", "Tumor Grade")
+    res <- jjdotchart(data = d, dep = "Ki-67 %", group = "Tumor Grade", testvalue = 10)
+
+    tab <- res$summary$asDF
+    expect_equal(nrow(tab), 10L)
+    expect_false(any(is.na(tab$value)))
+    expect_true(all(tab$n > 0))
+
+    r <- dc_render(res)
+    expect_true(isTRUE(r$ok))
+    expect_false(grepl("could not be drawn", r$txt, fixed = TRUE))
+    # The measurement name is the default x-axis label.
+    expect_match(r$txt, "Ki-67", fixed = TRUE)
+})
+
+test_that("infinite rows are not also counted as missing", {
+    # n_dropped is computed after BOTH filters, so it used to include the Inf
+    # rows: 3 Inf values and zero NAs reported "3 row(s) with missing values
+    # were excluded" alongside "3 row(s) had an infinite value".
+    d <- dc_many()
+    d$v[1:3] <- Inf
+    n <- dc_notices(jjdotchart(data = d, dep = "v", group = "g", testvalue = 10))
+    expect_match(n, "3 row\\(s\\) had an infinite value")
+    expect_false(grepl("row(s) with missing values", n, fixed = TRUE))
+
+    # 4 genuinely missing + 3 infinite must be reported as 4 and 3, not 7 and 3.
+    d2 <- dc_many()
+    d2$v[1:3] <- Inf
+    d2$v[10:13] <- NA
+    n2 <- dc_notices(jjdotchart(data = d2, dep = "v", group = "g", testvalue = 10))
+    expect_match(n2, "4 row\\(s\\) with missing values")
+    expect_match(n2, "3 row\\(s\\) had an infinite value")
+})
+
+test_that("notices are ordered ERROR first, whatever order they were raised in", {
+    # The engine-failure ERROR is raised last in .run(), after the INFO and
+    # WARNING from .validate(); it must still render at the top of the panel.
+    d <- dc_flat()
+    n <- dc_notices(jjdotchart(data = d, dep = "v", group = "g", testvalue = 0))
+    pos <- function(tag) regexpr(tag, n, fixed = TRUE)
+    if (pos("ERROR:") > 0) {
+        expect_true(pos("ERROR:") < pos("INFO:"))
+        if (pos("WARNING:") > 0) expect_true(pos("ERROR:") < pos("WARNING:"))
+    }
+    # WARNING always precedes INFO even though the INFO is raised first.
+    d2 <- dc_many()
+    n2 <- dc_notices(jjdotchart(data = d2, dep = "v", group = "g", testvalue = 0))
+    expect_true(regexpr("WARNING:", n2, fixed = TRUE) <
+                regexpr("INFO:", n2, fixed = TRUE))
+})
+
+test_that("the reference-line caption is never lost to a Bayes factor message", {
+    # bfmessage was removed: ggstatsplot honours bf.message only for
+    # type="parametric" and the Bayes factor REPLACES the caption, deleting the
+    # only text naming the reference line. Every test type must keep it.
+    d <- dc_many()
+    for (ty in c("parametric", "nonparametric", "robust", "bayes")) {
+        r <- dc_render(jjdotchart(data = d, dep = "v", group = "g",
+                                  testvalue = 10, typestatistics = ty))
+        expect_true(isTRUE(r$ok))
+        expect_match(r$txt, "Dashed red line", fixed = TRUE,
+                     info = paste("test type:", ty))
+    }
+})
+
+test_that("tiny and highly unequal groups are flagged", {
+    # Every group contributes ONE equally-weighted point whatever its n, and a
+    # one-observation group is drawn with a zero-width interval - the least
+    # certain estimate rendered as the most precise point on the chart.
+    d <- data.frame(
+        v = c(rnorm(40, 10, 1), rnorm(40, 12, 1), 99),
+        g = factor(rep(c("A", "B", "Rare"), c(40, 40, 1)))
+    )
+    n <- dc_notices(jjdotchart(data = d, dep = "v", group = "g", testvalue = 10))
+    expect_match(n, "fewer than 3 observations")
+    expect_match(n, "zero-width interval")
+    expect_match(n, "highly unequal")
+    expect_match(n, "40 observations")
+
+    # Balanced groups of adequate size must raise neither notice.
+    n2 <- dc_notices(jjdotchart(data = dc_many(), dep = "v", group = "g", testvalue = 10))
+    expect_false(grepl("fewer than 3 observations", n2, fixed = TRUE))
+    expect_false(grepl("highly unequal", n2, fixed = TRUE))
+})
+
+test_that("the robust summary in the table equals the plotted point", {
+    # .plotArgs pins tr = 0.2 rather than trusting ggdotplotstats' default; if
+    # upstream ever changes it the table and the figure would disagree.
+    d <- dc_skew()
+    tab <- jjdotchart(data = d, dep = "v", group = "g", testvalue = 12,
+                      typestatistics = "robust")$summary$asDF
+    p <- withr::with_seed(20250101, ggstatsplot::ggdotplotstats(
+        data = d, x = v, y = g, type = "robust", tr = 0.2,
+        test.value = 12, results.subtitle = FALSE))
+    plotted <- p$data$v[match(tab$grp, as.character(p$data$g))]
+    expect_equal(tab$value, plotted, tolerance = 1e-8)
+})
+
+test_that("the nonparametric p-value approximation is disclosed", {
+    # statsExpressions uses wilcox.test(exact = FALSE, correct = TRUE); base R
+    # defaults to the exact distribution below n = 50. At k = 10 that is
+    # p = 0.05279 vs 0.04883 - opposite sides of 0.05.
+    d <- dc_many()
+    n <- dc_notices(jjdotchart(data = d, dep = "v", group = "g",
+                               testvalue = 9.5, typestatistics = "nonparametric"))
+    expect_match(n, "normal approximation with a continuity correction")
+
+    # Not claimed for the other test types.
+    for (ty in c("parametric", "robust", "bayes")) {
+        n2 <- dc_notices(jjdotchart(data = d, dep = "v", group = "g",
+                                    testvalue = 9.5, typestatistics = ty))
+        expect_false(grepl("continuity correction", n2, fixed = TRUE),
+                     info = paste("test type:", ty))
+    }
+})
+
+test_that("the parametric test equals a hand stats::t.test on the k summaries", {
+    # The headline claim of this analysis: a one-sample test of the k group
+    # summaries. Verify the reported statistic IS that test, with df = k - 1.
+    d <- dc_many()
+    tab <- jjdotchart(data = d, dep = "v", group = "g", testvalue = 9.5)$summary$asDF
+    ht <- stats::t.test(tab$value, mu = 9.5)
+    expect_equal(unname(ht$parameter), nrow(tab) - 1)
+    ost <- withr::with_seed(20250101, statsExpressions::one_sample_test(
+        data = data.frame(.v = tab$value), x = .v, type = "parametric",
+        test.value = 9.5, conf.level = 0.95, digits = 5))
+    expect_equal(unname(ht$statistic), as.data.frame(ost)$statistic, tolerance = 1e-9)
+    expect_equal(ht$p.value, as.data.frame(ost)$p.value, tolerance = 1e-9)
+})
+
 # ---- split by ---------------------------------------------------------------
 
 test_that("the Split By chart renders, with and without a title", {

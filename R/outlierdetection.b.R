@@ -88,8 +88,9 @@
 #' # Example 2: multivariate detection across correlated measurements.
 #' # NOTE: multivariate_methods = "mahalanobis_robust" is routed through the
 #' # bigutilsr package by performance; where bigutilsr is not available the
-#' # analysis reports that and produces no result. "mcd" needs only robustbase,
-#' # which ships with the module, so it is the portable robust alternative.
+#' # analysis reports that and produces no result. "mcd" is routed through
+#' # MASS::cov.mcd, which is a recommended package, so it is the portable
+#' # robust alternative.
 #' outlierdetection(
 #'   data = histopathology,
 #'   vars = c("MeasurementA", "MeasurementB", "OverallTime"),
@@ -143,7 +144,6 @@
 #' @importFrom ggplot2 geom_point geom_hline scale_color_manual
 #' @importFrom performance check_outliers
 #' @importFrom dbscan optics lof
-#' @importFrom robustbase covMcd
 #
 # Every other call in this file is fully namespaced (htmltools::, stats::,
 # base::), so no further @importFrom tags: the ones that used to sit here
@@ -373,11 +373,15 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     ))
                 }
 
-                # Check for robustbase package for robust methods
+                # Check the package MCD actually needs. performance routes "mcd" to
+                # MASS::cov.mcd (see performance:::.check_outliers_mcd), not to
+                # robustbase::covMcd, so gating on robustbase tested the wrong
+                # dependency: it could block MCD when it would have worked, and let it
+                # through to fail with a raw error when MASS was the missing one.
                 if (multivariate_method == "mcd" &&
-                    !requireNamespace("robustbase", quietly = TRUE)) {
+                    !requireNamespace("MASS", quietly = TRUE)) {
                     private$.accumulateMessage(
-                        '<strong>Missing Package:</strong> The MCD method needs the robustbase package, which is not available in this session. It ships with the module, so this usually means a broken installation; meanwhile, choose Mahalanobis distance or a univariate method instead.'
+                        '<strong>Missing Package:</strong> The MCD method needs the MASS package, which is not available in this session. It is a recommended package that ships with R, so this usually means a broken installation; meanwhile, choose Mahalanobis distance or a univariate method instead.'
                     )
                 }
 
@@ -914,8 +918,9 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 }
                 
                 if (method == "mcd") {
-                    if (!requireNamespace("robustbase", quietly = TRUE)) {
-                        jmvcore::reject(.("The MCD method needs the robustbase package, which is not available in this session. Choose Mahalanobis distance or a univariate method instead, or reinstall the module."))
+                    # MASS, not robustbase: performance's MCD backend is MASS::cov.mcd.
+                    if (!requireNamespace("MASS", quietly = TRUE)) {
+                        jmvcore::reject(.("The MCD method needs the MASS package, which is not available in this session. Choose Mahalanobis distance or a univariate method instead, or reinstall the module."))
                     }
                 }
 
@@ -954,6 +959,29 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             }
             
             # Perform outlier detection
+            #
+            # Several of these methods are randomised: performance routes "mcd" to
+            # MASS::cov.mcd, which draws random subsets, and OPTICS/LOF neighbour
+            # search can tie-break randomly. Called unseeded, the same data returned
+            # a different set of flagged rows on consecutive runs (21 vs 22), which
+            # is unacceptable for a screening tool a clinician re-runs. Seed here
+            # with the same user-configurable seed the subsampling uses, and restore
+            # the caller's RNG state afterwards so nothing outside this call changes.
+            seed_val <- self$options$seed
+            if (is.null(seed_val)) seed_val <- 123
+            if (exists(".Random.seed", envir = .GlobalEnv)) {
+                .old_seed_detect <- get(".Random.seed", envir = .GlobalEnv)
+                on.exit(assign(".Random.seed", .old_seed_detect, envir = .GlobalEnv),
+                        add = TRUE)
+            } else {
+                on.exit(
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv),
+                    add = TRUE
+                )
+            }
+            set.seed(seed_val)
+
             private$.checkpoint()
             outlier_result <- performance::check_outliers(
                 data,
@@ -1029,10 +1057,10 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             methods <- c("zscore_robust", "iqr", "ci", "mahalanobis")
             missing <- character(0)
 
-            if (requireNamespace("robustbase", quietly = TRUE))
+            if (requireNamespace("MASS", quietly = TRUE))
                 methods <- c(methods, "mcd")
             else
-                missing <- c(missing, "minimum covariance determinant, which needs robustbase")
+                missing <- c(missing, "minimum covariance determinant, which needs MASS")
 
             if (requireNamespace("dbscan", quietly = TRUE))
                 methods <- c(methods, "optics", "lof")

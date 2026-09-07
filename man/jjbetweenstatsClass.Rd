@@ -2,12 +2,12 @@
 % Please edit documentation in R/jjbetweenstats.b.R
 \name{jjbetweenstatsClass}
 \alias{jjbetweenstatsClass}
-\title{Violin Plots to Compare Between Groups}
+\title{Box-Violin Plots to Compare Between Groups}
 \value{
 An \code{R6} class generator object for the \code{jjbetweenstatsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 }
 \description{
-Violin Plots to Compare Between Groups
+Box-Violin Plots to Compare Between Groups
 }
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{jjbetweenstatsBase} -> \code{jjbetweenstatsClass}

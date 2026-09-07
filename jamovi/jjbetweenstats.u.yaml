@@ -1,4 +1,4 @@
-title: Violin Plots to Compare Between Groups
+title: Box-Violin Plots to Compare Between Groups
 name: jjbetweenstats
 jus: '3.0'
 stage: 0
@@ -55,6 +55,7 @@ children:
                 format: number
               - type: CheckBox
                 name: bfmessage
+                enable: (typestatistics:parametric && resultssubtitle)
               - type: TextBox
                 name: k
                 format: number

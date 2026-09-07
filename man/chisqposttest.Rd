@@ -92,8 +92,10 @@ interval reported for a given table is reproducible. Change it to see how
 much the interval depends on the resampling. Used only when bootstrap
 confidence intervals are requested.}
 
-\item{testSelection}{method for selecting statistical test for pairwise
-comparisons}
+\item{testSelection}{Which test to use. Automatic applies Fisher's exact
+test to any pairwise comparison whose expected counts fall below 5. Always
+Fisher's exact applies it to the overall table as well as to every pairwise
+comparison.}
 
 \item{exportResults}{Export comprehensive analysis results to downloadable
 format for further analysis}

@@ -250,17 +250,24 @@ test_that("an adequately powered table keeps the chi-square subtitle", {
 })
 
 test_that("paired and Bayesian analyses are left alone", {
-    # McNemar is already the right test for paired data, and the Bayesian
-    # subtitle is not a chi-square - neither should be overwritten.
-    set.seed(5)
-    n <- 60
-    pre  <- sample(c("Pos", "Neg"), n, TRUE, prob = c(.4, .6))
-    post <- ifelse(pre == "Neg" & runif(n) < .35, "Pos",
-                   ifelse(pre == "Pos" & runif(n) < .1, "Neg", pre))
-    dp <- data.frame(pre = factor(pre), post = factor(post))
-    expect_match(pie_plot_txt(jjpiestats(data = dp, dep = "pre", group = "post",
-                                         paired = TRUE, resultssubtitle = TRUE)),
-                 "McNemar")
+    # McNemar is the right test for paired data WHEN its asymptotic assumption
+    # holds, and the Bayesian subtitle is not a chi-square - neither should be
+    # overwritten. This fixture has 55 discordant pairs, comfortably above the
+    # threshold, so McNemar must survive untouched.
+    #
+    # The earlier fixture here (set.seed(5), n = 60) had only 17 discordant
+    # pairs, where McNemar gives p = 0.0076 against an exact p = 0.0127 - i.e.
+    # anti-conservative, the very case the exact swap now covers. Asserting
+    # "McNemar" on that table asserted the wrong test.
+    dp <- data.frame(
+        pre  = factor(rep(c("Neg", "Neg", "Pos", "Pos"), times = c(40, 30, 25, 40))),
+        post = factor(rep(c("Neg", "Pos", "Neg", "Pos"), times = c(40, 30, 25, 40))))
+    tp <- table(dp$pre, dp$post)
+    expect_gte(tp[1, 2] + tp[2, 1], 25L)
+    t_paired <- pie_plot_txt(jjpiestats(data = dp, dep = "pre", group = "post",
+                                        paired = TRUE, resultssubtitle = TRUE))
+    expect_match(t_paired, "McNemar")
+    expect_false(grepl("exact", t_paired, fixed = TRUE))
 
     tb <- pie_plot_txt(jjpiestats(data = pie_sparse(), dep = "resp", group = "arm",
                                   typestatistics = "bayes", resultssubtitle = TRUE))
@@ -359,4 +366,102 @@ test_that("a paired request on a table that is not 2x2 says why nothing was draw
     n <- pie_notices(jjpiestats(data = d3, dep = "resp", group = "arm", paired = TRUE))
     expect_match(n, "Paired analysis not shown", fixed = TRUE)
     expect_match(n, "3\u00d72", fixed = TRUE)
+})
+
+test_that("the single-variable pie chart shows its goodness-of-fit subtitle", {
+    # `opts$ratio` partial-matched the sibling key `ratio_raw`, so an empty
+    # Expected-proportions box sent ratio = "" into ggpiestats(); the
+    # goodness-of-fit test errored inside statsExpressions, ggstatsplot
+    # swallowed the error, and plot1 rendered with no subtitle at all - which
+    # made digits, conflevel, bfmessage and proportiontest silent no-ops on
+    # that chart. The unpatched chart text was "62% 38% resp No Yes".
+    d <- data.frame(resp = factor(rep(c("Yes", "No"), c(60, 100))))
+    t <- pie_plot_txt(jjpiestats(data = d, dep = "resp",
+                                 resultssubtitle = TRUE), "plot1")
+    expect_match(t, "gof", fixed = TRUE)
+    expect_match(t, "160", fixed = TRUE)
+    t4 <- pie_plot_txt(jjpiestats(data = d, dep = "resp",
+                                  resultssubtitle = TRUE, digits = 4), "plot1")
+    expect_false(identical(t, t4))
+})
+
+# ---- McNemar: the discordant pairs, not the table total ---------------------
+
+# n = 206 but only 6 discordant pairs. The asymptotic McNemar the plotting
+# package runs (correct = FALSE) gives p = 0.1025; base R's corrected default
+# gives 0.2207; the exact binomial on the discordant pairs gives 0.2188. The
+# old guard only rejected a TOTAL below 10, so this table sailed through and
+# published p = 0.10 under the unqualified name "McNemar's test".
+pie_paired_sparse <- function() {
+    tb <- matrix(c(100, 5, 1, 100), 2, 2,
+                 dimnames = list(Pre = c("Neg", "Pos"), Post = c("Neg", "Pos")))
+    d <- as.data.frame(as.table(tb))
+    names(d) <- c("Pre", "Post", "n")
+    d
+}
+
+test_that("a paired 2x2 with too few discordant pairs reports the exact binomial", {
+    d <- pie_paired_sparse()
+    p_exact <- binom.test(1, 6, 0.5)$p.value      # b = 1, c = 5
+
+    n <- pie_notices(jjpiestats(data = d, dep = "Pre", group = "Post",
+                                counts = "n", paired = TRUE, resultssubtitle = TRUE))
+    expect_match(n, "Too few discordant pairs", fixed = TRUE)
+    expect_match(n, "Only 6 of the 206 pairs", fixed = TRUE)
+    expect_match(n, formatC(p_exact, format = "f", digits = 3), fixed = TRUE)
+
+    # and the figure carries the exact value, not the anti-conservative one
+    t <- pie_plot_txt(jjpiestats(data = d, dep = "Pre", group = "Post", counts = "n",
+                                 paired = TRUE, resultssubtitle = TRUE), "plot2")
+    expect_match(t, "exact")
+    expect_false(grepl("0.10", t, fixed = TRUE))
+})
+
+test_that("the Methods sentence names the exact test, or discloses the correction", {
+    # sparse discordants -> the exact test is what ran and what is shown
+    r <- pie_txt(jjpiestats(data = pie_paired_sparse(), dep = "Pre", group = "Post",
+                            counts = "n", paired = TRUE, resultssubtitle = TRUE,
+                            showexplanations = TRUE)$report$content)
+    expect_match(r, "McNemar's exact test", fixed = TRUE)
+
+    # enough discordants -> plain McNemar, but the missing continuity correction
+    # must be named or the number will not reproduce in base R
+    set.seed(4)
+    d2 <- data.frame(Pre = factor(sample(c("Neg", "Pos"), 200, TRUE)),
+                     Post = factor(sample(c("Neg", "Pos"), 200, TRUE)))
+    r2 <- pie_txt(jjpiestats(data = d2, dep = "Pre", group = "Post", paired = TRUE,
+                             showexplanations = TRUE)$report$content)
+    expect_match(r2, "without continuity correction", fixed = TRUE)
+})
+
+test_that("adequate discordant pairs do not trigger the exact swap", {
+    set.seed(5)
+    d <- data.frame(Pre = factor(sample(c("Neg", "Pos"), 300, TRUE)),
+                    Post = factor(sample(c("Neg", "Pos"), 300, TRUE)))
+    n <- pie_notices(jjpiestats(data = d, dep = "Pre", group = "Post", paired = TRUE))
+    expect_false(grepl("Too few discordant pairs", n, fixed = TRUE))
+})
+
+test_that("option changes on a reused analysis instance are not served from a stale cache", {
+    # .prepareOptions() cached without an invalidation key, so on the SAME R6
+    # instance - which is what jamovi reuses across option changes - it returned
+    # the first run's options forever and every renderer ignored later edits.
+    # The public wrapper builds a fresh analysis each call, so only the GUI saw it.
+    set.seed(1)
+    d <- data.frame(resp = factor(sample(c("Yes", "No"), 120, TRUE)),
+                    arm  = factor(sample(c("A", "B"), 120, TRUE)))
+    o <- ClinicoPath:::jjpiestatsOptions$new(dep = "resp", group = "arm",
+                                             digits = 2, typestatistics = "parametric")
+    a <- ClinicoPath:::jjpiestatsClass$new(options = o, data = d)
+    a$run()
+    priv <- a$.__enclos_env__$private
+    expect_equal(priv$.prepareOptions()$digits, 2)
+
+    for (op in o$.__enclos_env__$private$.options) {
+        if (op$name == "digits") op$value <- 5L
+        if (op$name == "typestatistics") op$value <- "bayes"
+    }
+    a$run()
+    expect_equal(priv$.prepareOptions()$digits, 5)
+    expect_equal(priv$.prepareOptions()$typestatistics, "bayes")
 })

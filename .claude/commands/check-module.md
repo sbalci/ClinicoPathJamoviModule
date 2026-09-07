@@ -115,6 +115,13 @@ reads `self$data` directly never appears as `self$results$<name>` in `.b.R` (chi
 declared `name:  plot` with two spaces, so an exact-string grep misses it); `private$.optionOr("name",
 default)` is constructed option access (outlierdetection); `switch(sty, arsenal = "tablestyle1", ...)`
 selects a result item by bare string (crosstable). A second 2026-09-06 CPD pass added: "early `return()` without `.renderNotices()`" is a false positive wherever `.addNotice()` itself ends with `private$.renderNotices()` (all 9 CPD notice users) — read the helper before flagging; and a block-style `refs:` regex over-captures the following `- name:` items — resolve refs with a real YAML parse.
+Release-profile lessons from the 2026-09-07 CPD pass: (1) run the suite against an `R CMD INSTALL` of the
+working tree, not `devtools::load_all()` — tests that `source()` `R/*.b.R` or assert `exists("<x>Class")`
+pass only under load_all and hide that the shipped artifact was never tested; (2) a batch `test_dir()`
+failure count is an UPPER BOUND — only 11 of 37 reproduced per-file, so re-run individually and confirm
+survivors by calling the wrapper directly; (3) differential runs are what catch library-default
+truncation (UpSetR `nsets = 5` silently dropped venn's 6th/7th set) — no schema check can see it;
+(4) one R process per agent: 14 concurrent package loads drove load average past 60 and cost ~25 min each.
 
 ## Check Profiles
 

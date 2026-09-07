@@ -623,8 +623,10 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   interval reported for a given table is reproducible. Change it to see how
 #'   much the interval depends on the resampling. Used only when bootstrap
 #'   confidence intervals are requested.
-#' @param testSelection method for selecting statistical test for pairwise
-#'   comparisons
+#' @param testSelection Which test to use. Automatic applies Fisher's exact
+#'   test to any pairwise comparison whose expected counts fall below 5. Always
+#'   Fisher's exact applies it to the overall table as well as to every pairwise
+#'   comparison.
 #' @param exportResults Export comprehensive analysis results to downloadable
 #'   format for further analysis
 #' @param showClinicalSummary Display natural-language summary of results for

@@ -548,7 +548,11 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                     .("The requested visual data quality plots cannot be drawn because the visdat package is not installed on this computer. All numeric checks above - missing values, duplicates, constant variables and outliers - are complete and unaffected. To get the plots, install the package with install.packages('visdat') and re-run the analysis; otherwise switch the plot options off to hide the empty plot areas.")
                 )
             }
-            visdat_results <- private$.generate_visdat_analysis(analysis_data, summary_rows)
+            # One argument: .generate_visdat_analysis() builds its narrative from the
+            # data and the plot options alone. It was briefly called with a second
+            # `summary_rows` argument, which made every plot option abort .run() with
+            # "unused argument (summary_rows)".
+            visdat_results <- private$.generate_visdat_analysis(analysis_data)
             quality_results$visual <- visdat_results
         }
 

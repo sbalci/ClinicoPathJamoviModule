@@ -19,7 +19,6 @@
 | `showSummaryTable` | UI Control `showSummaryTable` | `self$options$showSummaryTable` | Output item / Table |
 | `centralityplotting` | UI Control `centralityplotting` | `self$options$centralityplotting` | Output item / Table |
 | `centralitytype` | UI Control `centralitytype` | `self$options$centralitytype` | Output item / Table |
-| `bfmessage` | UI Control `bfmessage` | `self$options$bfmessage` | Output item / Table |
 | `originaltheme` | UI Control `originaltheme` | `self$options$originaltheme` | Output item / Table |
 | `mytitle` | UI Control `mytitle` | `self$options$mytitle` | Output item / Table |
 | `xtitle` | UI Control `xtitle` | `self$options$xtitle` | Output item / Table |

@@ -45,13 +45,13 @@
 # ==============================================
 
 
-new_version: "1.0.8.12"
-new_date: "2026-09-06"
+new_version: "1.0.8.13"
+new_date: "2026-09-07"
 quick: false
 TEST: false
 jjstatsplot: true
 jsurvival: false
-ClinicoPathDescriptives: true
+ClinicoPathDescriptives: false
 OncoPath: false
 meddecide: false
 
@@ -205,11 +205,27 @@ modules:
       - "tr.po"
     r_files:
       - "utils.R"
-    # vcd is declared in this module's Imports but no shipped R file uses it
-    # (2026-09-06 /audit-module). The sync only ever ADDS imports, so drop it here;
-    # also removed from R/zzz_imports.R + NAMESPACE by the prune step.
+    # Declared in this module's Imports but used by no shipped R file. The sync
+    # only ever ADDS imports, so drop them here; the prune step also removes them
+    # from R/zzz_imports.R + NAMESPACE.
+    #   vcd         - 2026-09-06 /audit-module
+    #   DescTools   - only reference is @importFrom DescTools BreslowDayTest in
+    #                 zzz_imports.R; BreslowDayTest has no caller in this module
+    #                 (its callers are agreement/categoricaladvanced, not shipped here)
+    #   robustbase  - outlierdetection's MCD path goes through performance, whose
+    #                 backend is MASS::cov.mcd; robustbase::covMcd was never called
+    #                 (2026-09-07 /check-module --profile=release)
     prune_imports:
       - "vcd"
+      - "DescTools"
+      - "robustbase"
+    # Used under requireNamespace() in outlierdetection, so the usage scan that
+    # drives the import sync cannot see them; declare them explicitly. jamovi
+    # installs Imports on first run and cannot fetch a missing package on demand,
+    # so an optional runtime dependency still belongs in Imports.
+    extra_imports:
+      - "ICS"
+      - "ICSOutlier"
     data_files:
       - "histopathology.rda"
       - "agepyramid_cancer.rda"

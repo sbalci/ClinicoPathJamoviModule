@@ -225,15 +225,17 @@ test_that("error paths write the notices panel as well as the red box", {
   expect_match(cq(d[0, ])$notices$content, "no \\(complete\\) rows")
 })
 
-test_that("non-integer counts raise a warning notice, whole-number counts do not", {
+test_that("non-integer counts are refused, whole-number counts are not", {
+  # X^2 on a weighted table scales with the total, so fractional weights would
+  # make the p-value a function of scale. They are refused rather than warned.
   d <- cq_data()
   agg <- as.data.frame(table(d$rows, d$cols), stringsAsFactors = TRUE)
   names(agg) <- c("rows", "cols", "n")
   ok <- chisqposttest(data = agg, rows = "rows", cols = "cols", counts = "n")
-  expect_false(grepl("not whole numbers", ok$notices$content))
+  expect_false(grepl("whole numbers", ok$notices$content))
   agg$n <- agg$n + 0.5
   frac <- chisqposttest(data = agg, rows = "rows", cols = "cols", counts = "n")
-  expect_match(frac$notices$content, "not whole numbers")
+  expect_match(frac$notices$content, "whole numbers")
 })
 
 test_that("every run ends with a one-line analysis summary", {

@@ -1,7 +1,13 @@
 
-# Source the necessary R files
-source("../../R/outlierdetection.h.R")
-source("../../R/outlierdetection.b.R")
+# Use the installed package. Sourcing R/outlierdetection.b.R into this environment
+# detaches it from namespace:ClinicoPath, so jmvcore's `.` translation function is
+# unreachable and translated strings fail with `could not find function "."`.
+library(ClinicoPath)
+
+# The generated Options class and the backend class are namespace-internal, so bind
+# them explicitly rather than relying on them being on the search path.
+outlierdetectionOptions <- getFromNamespace("outlierdetectionOptions", "ClinicoPath")
+outlierdetectionClass <- getFromNamespace("outlierdetectionClass", "ClinicoPath")
 
 test_that("warnings panel captures small sample size", {
   skip_if_not_installed('jmvReadWrite')

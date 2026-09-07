@@ -397,3 +397,123 @@ test_that("jjbetweenstats handles real clinical data structure", {
   # Should use all 120 observations (no NAs in biomarker_level or treatment_group)
   expect_true(!is.null(result))
 })
+
+# Regression: the ggpubr companion panel used to pick its test from the RAW
+# data, so a group level emptied by NA removal still counted. With 3 declared
+# levels but only 2 carrying data it labelled the 2-group panel "Anova" /
+# "Kruskal-Wallis" and, for the parametric case, silently discarded var.equal.
+test_that("ggpubr companion test is chosen from the analysed rows, not raw data", {
+  skip_if_not_installed("ClinicoPath")
+
+  dat <- data.frame(
+    g = factor(c("a", "a", "a", "b", "b", "b", "c", "c", "c")),
+    y = c(1, 2, 3, 5, 6, 7, NA, NA, NA)
+  )
+
+  opts <- ClinicoPath:::jjbetweenstatsOptions$new(
+    dep = "y", group = "g",
+    typestatistics = "parametric",
+    addGGPubrPlot = TRUE, ggpubrAddStats = TRUE
+  )
+  a <- ClinicoPath:::jjbetweenstatsClass$new(options = opts, data = dat)
+  priv <- a$.__enclos_env__$private
+
+  expect_equal(priv$.nGroupLevels(dat, "g"), 3L)            # raw: level c survives
+  expect_equal(priv$.nGroupLevels(priv$.prepareData(), "g"), 2L)  # analysed: it does not
+
+  # and the test actually run must be the two-group one
+  note <- priv$.ggpubrStatLayer(priv$.nGroupLevels(priv$.prepareData(), "g"))$note
+  expect_match(note, "t\\.test")
+})
+
+# Regression: the .prepareData() memo was keyed on dim()+names() only, so
+# editing a single cell in the jamovi spreadsheet was a cache hit and every
+# panel kept reporting the previous data.
+test_that("data cache invalidates when a cell value changes", {
+  skip_if_not_installed("ClinicoPath")
+
+  d1 <- data.frame(g = factor(c("a", "a", "b", "b")), y = c(1, 2, 3, 4))
+  d2 <- d1; d2$y[1] <- 99
+
+  key <- function(d) {
+    opts <- ClinicoPath:::jjbetweenstatsOptions$new(dep = "y", group = "g")
+    a <- ClinicoPath:::jjbetweenstatsClass$new(options = opts, data = d)
+    a$.__enclos_env__$private$.prepareData()
+    a$.__enclos_env__$private$.data_hash
+  }
+  expect_false(identical(key(d1), key(d2)))
+})
+
+# ---------------------------------------------------------------------------
+# Release-review numeric reference cases. Each expected value was computed in a
+# SEPARATE R session with ClinicoPath never attached, so nothing masks stats::
+# (this module re-exports `aov`, which shadows stats::aov once attached).
+# ---------------------------------------------------------------------------
+jb_rr_data <- function() {
+  set.seed(2026)
+  data.frame(y = c(rnorm(25, 10, 1.0), rnorm(40, 11.5, 3.0), rnorm(18, 13, 1.2)),
+             g = factor(rep(c("A", "B", "C"), times = c(25, 40, 18))))
+}
+jb_rr_expr <- function(data, ...) {
+  o <- ClinicoPath:::jjbetweenstatsOptions$new(dep = "y", group = "g",
+        resultssubtitle = TRUE, k = 4, ...)
+  a <- ClinicoPath:::jjbetweenstatsClass$new(options = o, data = data)
+  p <- a$.__enclos_env__$private
+  paste(deparse(p$.subtitleExpr(p$.prepareData(), "g", "y", p$.prepareOptions())),
+        collapse = "")
+}
+
+test_that("omnibus statistics match independent stats:: references", {
+  skip_if_not_installed("ClinicoPath")
+  d <- jb_rr_data()
+
+  # Welch ANOVA: stats::oneway.test(var.equal = FALSE)
+  s <- jb_rr_expr(d, typestatistics = "parametric", varequal = FALSE)
+  expect_match(s, "44.9350", fixed = TRUE)   # F
+  expect_match(s, "45.2998", fixed = TRUE)   # df2
+  expect_match(s, "Welch", fixed = TRUE)
+
+  # Fisher ANOVA: stats::oneway.test(var.equal = TRUE)
+  s <- jb_rr_expr(d, typestatistics = "parametric", varequal = TRUE)
+  expect_match(s, "14.9017", fixed = TRUE)   # F
+  expect_match(s, "Fisher", fixed = TRUE)
+
+  # Kruskal-Wallis: stats::kruskal.test
+  s <- jb_rr_expr(d, typestatistics = "nonparametric")
+  expect_match(s, "26.1693", fixed = TRUE)   # chi-squared
+})
+
+test_that("'Equal variances' selects Student/Fisher, not Welch", {
+  skip_if_not_installed("ClinicoPath")
+  d <- jb_rr_data()
+  expect_match(jb_rr_expr(d, typestatistics = "parametric", varequal = FALSE), "Welch",  fixed = TRUE)
+  expect_match(jb_rr_expr(d, typestatistics = "parametric", varequal = TRUE),  "Fisher", fixed = TRUE)
+})
+
+test_that("Bayesian ANOVA is detected as uncomputable for 3+ groups", {
+  skip_if_not_installed("ClinicoPath")
+  # Upstream statsExpressions/performance errors on the 3-group Bayesian ANOVA.
+  # The module must DETECT that rather than render a figure with no statistics.
+  mk <- function(d) {
+    o <- ClinicoPath:::jjbetweenstatsOptions$new(dep = "y", group = "g",
+          resultssubtitle = TRUE, typestatistics = "bayes")
+    a <- ClinicoPath:::jjbetweenstatsClass$new(options = o, data = d)
+    p <- a$.__enclos_env__$private
+    p$.bayesProbeFails(p$.prepareData(), "g", "y")
+  }
+  d3 <- jb_rr_data()
+  d2 <- droplevels(subset(d3, g %in% c("A", "B")))
+  expect_false(mk(d2))   # two groups: Bayesian t-test computes fine
+  expect_true(mk(d3))    # three groups: detected as unavailable
+})
+
+test_that("non-parametric p-value is disclosed as asymptotic", {
+  skip_if_not_installed("ClinicoPath")
+  d <- jb_rr_data()
+  o <- ClinicoPath:::jjbetweenstatsOptions$new(dep = "y", group = "g",
+        resultssubtitle = TRUE, typestatistics = "nonparametric")
+  a <- ClinicoPath:::jjbetweenstatsClass$new(options = o, data = d)
+  p <- a$.__enclos_env__$private
+  expect_match(p$.subtitleDiagnosticsHtml(p$.prepareData()),
+               "normal approximation", fixed = TRUE)
+})

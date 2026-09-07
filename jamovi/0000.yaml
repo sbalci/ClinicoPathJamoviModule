@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.8.12
+version: 1.0.8.13
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-09-06'
+date: '2026-09-07'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1192,7 +1192,7 @@ analyses:
   - title: Advanced Raincloud Plot
     name: advancedraincloud
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Advanced Raincloud Plot
     menuSubtitle: Longitudinal & Likert Support with ggrain
@@ -1755,7 +1755,7 @@ analyses:
   - title: Box-Violin Plots to Compare Between Groups
     name: jjbetweenstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Box-Violin Plots to Compare Between Groups
     menuSubtitle: Independent Samples
@@ -1798,7 +1798,7 @@ analyses:
   - title: Pie Charts
     name: jjpiestats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Categorical
     menuTitle: Pie Charts
     ribbon: analyses
@@ -2040,7 +2040,7 @@ analyses:
   - title: Segmented Total Bar Charts
     name: jjsegmentedtotalbar
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuTitle: Segmented Total Bar Charts
     menuSubgroup: Categorical vs Categorical
     menuSubtitle: 100% Stacked Bar Charts for Proportional Data
@@ -5872,7 +5872,7 @@ analyses:
     name: jjdotchart
     ns: ClinicoPath
     category: analyses
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Dot Chart (Summary vs Reference Value)
     description: |-

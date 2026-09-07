@@ -1369,7 +1369,8 @@ if (!WIP) {
     has_r_assets <- length(module_cfg$r_files) > 0L ||
       length(module_cfg$r_symbol_files) > 0L ||
       length(module_cfg$prune_r_files) > 0L ||
-      length(module_cfg$prune_imports) > 0L
+      length(module_cfg$prune_imports) > 0L ||
+      length(module_cfg$extra_imports) > 0L
     if (copy_r_files && has_r_assets) {
       cat("  📁 Copying", module_name, "R files...\n")
       r_dir <- file.path(module_dir, "R")
@@ -1393,6 +1394,7 @@ if (!WIP) {
           module_dir, main_repo_dir, module_cfg$r_symbol_files
         )
         prune_configured_module_imports(module_dir, module_cfg$prune_imports)
+        add_configured_module_imports(module_dir, module_cfg$extra_imports)
       }, error = function(e) {
         warning("⚠️ Error copying R files for ", module_name, ": ", e$message)
       })

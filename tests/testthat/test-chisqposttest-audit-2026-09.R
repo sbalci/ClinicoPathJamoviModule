@@ -27,32 +27,33 @@ audit_counts <- function(frac = 0) {
 cq <- function(d, ...) ClinicoPath::chisqposttest(data = d, rows = "rows", cols = "cols",
                                                   counts = NULL, ...)
 
-test_that("fractional weighted counts run to completion at every former %d site", {
-  # n < 20 hit the small-sample sprintf("%d") in .validateAssumptions() on
-  # EVERY run, so a fractional-weight table with n = 15.5 aborted outright
+test_that("fractional weighted counts are refused, whole-number counts run", {
+  # Superseded policy: fractional weights used to run with a warning. X^2 on a
+  # frequency-weighted table scales linearly with the total, so a fractional or
+  # rescaled weight makes the p-value a function of scale rather than of the
+  # association; survey weights need a Rao-Scott correction this analysis does
+  # not compute. They are now refused outright.
   small <- data.frame(rows = factor(c("A", "A", "B", "B")),
                       cols = factor(c("X", "Y", "X", "Y")),
                       n = c(4.5, 2.5, 3, 5.5))
   res <- ClinicoPath::chisqposttest(data = small, rows = "rows", cols = "cols",
                                     counts = "n", showAssumptionsCheck = TRUE)
-  expect_match(res$notices$content, "not whole numbers")
-  expect_match(res$notices$content, "Only 15.5 observations", fixed = TRUE)
-  expect_match(as.character(res$assumptionsCheck$content), "Sample size: 15.5", fixed = TRUE)
+  expect_match(res$notices$content, "whole numbers")
+  expect_match(as.character(res$todo$content), "whole numbers")
 
-  # n >= 20: the same crash fired from the Clinical summary, Report sentences
-  # and Assumptions panels
   res <- ClinicoPath::chisqposttest(data = audit_counts(0.5), rows = "rows", cols = "cols",
                                     counts = "n", showClinicalSummary = TRUE,
                                     copyReadySentences = TRUE, showAssumptionsCheck = TRUE,
                                     exportResults = TRUE)
-  expect_match(as.character(res$clinicalSummary$content), "n = 84.5", fixed = TRUE)
-  expect_match(as.character(res$reportSentences$content), "total sample size of 84.5", fixed = TRUE)
-  expect_match(as.character(res$assumptionsCheck$content), "Sample size: 84.5", fixed = TRUE)
+  expect_match(res$notices$content, "whole numbers")
+  # nothing downstream is computed from a refused table
+  expect_false(grepl("n = 84.5", as.character(res$clinicalSummary$content), fixed = TRUE))
 
-  # whole-number totals still print as integers
+  # whole-number totals still run and still print as integers
   res <- ClinicoPath::chisqposttest(data = audit_counts(0), rows = "rows", cols = "cols",
                                     counts = "n", copyReadySentences = TRUE)
-  expect_match(as.character(res$reportSentences$content), "total sample size of 80.", fixed = TRUE)
+  expect_match(as.character(res$reportSentences$content), "n = 80", fixed = TRUE)
+  expect_false(grepl("whole numbers", res$notices$content))
 })
 
 test_that("a mild expected-count violation gets a default-visible warning", {

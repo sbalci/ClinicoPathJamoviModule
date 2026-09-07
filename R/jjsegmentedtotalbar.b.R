@@ -22,7 +22,7 @@
 #' @importFrom ggplot2 theme_minimal theme_classic theme_bw labs scale_fill_brewer
 #' @importFrom ggplot2 scale_fill_viridis_d geom_text element_text theme element_rect
 #' @importFrom ggplot2 element_line margin scale_y_continuous scale_fill_manual
-#' @importFrom ggplot2 position_fill facet_wrap
+#' @importFrom ggplot2 position_fill facet_wrap vars
 #' @importFrom dplyr group_by summarise mutate arrange count ungroup filter slice pull
 #' @importFrom stats chisq.test xtabs
 #' @importFrom tidyr pivot_wider
@@ -242,6 +242,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             y_var <- self$options$y_var
             fill_var <- self$options$fill_var
             facet_var <- self$options$facet_var
+            if (is.null(facet_var) || identical(facet_var, "") || length(facet_var) == 0) {
+                facet_var <- NULL
+            }
 
             # Validate data
             if (nrow(data) == 0) {
@@ -1013,14 +1016,8 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 p <- p + ggplot2::coord_flip()
 
             # Faceting (simple)
-            # TODO (forward-looking): `facet_wrap(rlang::sym(...))` passes a bare
-            # symbol - works via ggplot2 tidy-eval coercion but is undocumented API.
-            # For forward-compat, prefer either:
-            #   facet_wrap(ggplot2::vars(!!rlang::sym(self$options$facet_var)), scales = "free_x")
-            #   or
-            #   facet_wrap(jmvcore::asFormula(paste0("~", jmvcore::composeTerm(self$options$facet_var))), scales = "free_x")
             if (!is.null(self$options$facet_var) && self$options$facet_var != "") {
-                p <- p + ggplot2::facet_wrap(rlang::sym(self$options$facet_var), scales = "free_x")
+                p <- p + ggplot2::facet_wrap(ggplot2::vars(!!rlang::sym(self$options$facet_var)), scales = "free_x")
             }
 
             # Percentage labels (simple, inline)

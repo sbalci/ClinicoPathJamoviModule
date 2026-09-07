@@ -1,4 +1,4 @@
-#' @title Violin Plots to Compare Between Groups
+#' @title Box-Violin Plots to Compare Between Groups
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore .
 #' @importFrom digest digest
@@ -75,6 +75,38 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 out <- c(out, paste0("<br>", sprintf(
                     .("Note: the plot subtitle fell back to the package default (%s), so 'Equal variances', 'Effect size type' and 'Decimal places' did not affect the reported statistic. Welch's variant and the default effect size were used."),
                     htmltools::htmlEscape(private$.subtitleFallback)), "<br>"))
+            }
+
+            # 'Equal variances' reaches the OMNIBUS test only. The pairwise
+            # brackets are computed inside ggstatsplot, and ggbetweenstats has
+            # no var.equal argument to forward (it was dropped in 1.0.0), so
+            # they always use the Welch-type (Games-Howell) comparison. Ticking
+            # the box on heteroscedastic data therefore produced a figure whose
+            # subtitle said Fisher F, p = 0.11 above brackets computed a
+            # different way - each correct for its own test, contradictory side
+            # by side, and neither labelled.
+            if (isTRUE(self$options$varequal) &&
+                isTRUE(self$options$pairwisecomparisons) &&
+                identical(self$options$typestatistics, "parametric") &&
+                !identical(self$options$pairwisedisplay, "none")) {
+                out <- c(out, paste0("<br>", .("Note: 'Equal variances' applies to the overall test only. The pairwise brackets are computed by ggstatsplot and always use the Welch-type (Games-Howell) comparison, which does not assume equal variances, so they may disagree with the overall result shown in the subtitle."), "<br>"))
+            }
+
+            # The non-parametric p-value is the NORMAL APPROXIMATION with
+            # continuity correction, not the exact Wilcoxon/Mann-Whitney test.
+            # Verified against stats::wilcox.test on n = 25/40 with no ties:
+            # statsExpressions reports 0.0045 (exact=FALSE), R's own default for
+            # that data is the exact test at 0.0040. Both are defensible, but a
+            # reader re-running wilcox.test() gets a different number, so say so.
+            if (identical(self$options$typestatistics, "nonparametric") &&
+                isTRUE(self$options$resultssubtitle)) {
+                out <- c(out, paste0("<br>", .("Note: the non-parametric p-value is computed from the normal approximation with a continuity correction, not the exact test. For small samples without ties, stats::wilcox.test() in R defaults to the exact test and may report a slightly different p-value."), "<br>"))
+            }
+
+            # A ticked 'Bayes factor message' that cannot produce a Bayes factor
+            # is otherwise silent - the box stays ticked and nothing appears.
+            if (isTRUE(private$.bfCaptionUnavailable(mydata))) {
+                out <- c(out, paste0("<br>", .("Note: 'Bayes factor message' has no effect here. A Bayes factor caption is available only for a parametric comparison of exactly two groups; for other statistical approaches, or three or more groups, no Bayes factor is reported."), "<br>"))
             }
 
             # The Split By figure is drawn by grouped_ggbetweenstats, which
@@ -374,6 +406,47 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             res$expression[[1]]
         },
 
+        # Bayes-factor caption for a frequentist test ("evidence for the null").
+        #
+        # Returns NULL whenever the caption is not applicable, in which case the
+        # figure carries none:
+        #   - the box is unticked, or subtitles are off
+        #   - a non-parametric / robust / Bayesian test is selected (upstream
+        #     emits no BF caption for those either)
+        #   - 3+ groups: the Bayesian ANOVA returns no expression at all with
+        #     the current statsExpressions, so there is no BF to report
+        .bfCaptionExpr = function(data, group_var, dep_var, opts) {
+            if (!isTRUE(opts$bfmessage) || !isTRUE(opts$resultssubtitle)) return(NULL)
+            if (!identical(opts$typestatistics, "parametric")) return(NULL)
+
+            n_lev <- private$.nGroupLevels(data, group_var)
+            if (is.na(n_lev) || n_lev != 2) return(NULL)
+
+            res <- tryCatch(
+                withBaseFormulaChar(rlang::inject(statsExpressions::two_sample_test(
+                    data       = data,
+                    x          = !!rlang::sym(group_var),
+                    y          = !!rlang::sym(dep_var),
+                    type       = "bayes",
+                    digits     = opts$k,
+                    conf.level = opts$conflevel))),
+                error = function(e) e)
+            if (inherits(res, "condition")) return(NULL)
+            if (is.null(res$expression) || length(res$expression) == 0) return(NULL)
+            res$expression[[1]]
+        },
+
+        # Is 'Bayes factor message' ticked in a configuration where no Bayes
+        # factor can be produced? Used to say so rather than leave a ticked box
+        # with no visible effect.
+        .bfCaptionUnavailable = function(data) {
+            if (!isTRUE(self$options$bfmessage) || !isTRUE(self$options$resultssubtitle))
+                return(FALSE)
+            if (!identical(self$options$typestatistics, "parametric")) return(TRUE)
+            n_lev <- private$.nGroupLevels(data, self$options$group)
+            is.na(n_lev) || n_lev != 2
+        },
+
         # Does the Bayesian test silently produce nothing for this data?
         #
         # ggstatsplot 1.0.0 swallows the upstream statsExpressions/performance
@@ -516,24 +589,24 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             body <- if (correction == "none") {
                 actual_alpha <- 1 - (1 - 0.05)^num_endpoints
                 sprintf(
-                    .(" <strong>CRITICAL: MULTIPLE ENDPOINT TESTING WITHOUT CORRECTION</strong><br>You are testing %d dependent variables simultaneously without adjustment. This inflates your family-wise error rate from 5%% to approximately %.1f%%.<br><strong>RECOMMENDATION:</strong> Select a correction method to see guidance, or interpret all p-values cautiously acknowledging this inflated error rate."),
+                    .("<strong>CRITICAL: MULTIPLE ENDPOINT TESTING WITHOUT CORRECTION</strong><br>You are testing %d dependent variables simultaneously without adjustment. This inflates your family-wise error rate from 5%% to approximately %.1f%%.<br><strong>RECOMMENDATION:</strong> Select a correction method to see guidance, or interpret all p-values cautiously acknowledging this inflated error rate."),
                     num_endpoints, actual_alpha * 100
                 )
             } else if (correction == "bonferroni") {
                 adjusted_alpha <- 0.05 / num_endpoints
                 sprintf(
-                    .(" <strong>Bonferroni Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control family-wise error rate at 5%%:<br>\u2022 <strong>Adjusted significance threshold: \u03b1 = %.4f</strong><br>\u2022 Compare each p-value from the plots below to %.4f (NOT 0.05)<br>\u2022 Only results with p < %.4f should be considered statistically significant<br>\u2022 Example: If cholesterol shows p = 0.03, it is NOT significant (0.03 > %.4f)<br> <strong>IMPORTANT:</strong> This correction is not applied automatically. You must manually compare reported p-values to the adjusted threshold."),
+                    .("<strong>Bonferroni Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control family-wise error rate at 5%%:<br>\u2022 <strong>Adjusted significance threshold: \u03b1 = %.4f</strong><br>\u2022 Compare each p-value from the plots below to %.4f (NOT 0.05)<br>\u2022 Only results with p < %.4f should be considered statistically significant<br>\u2022 Example: If cholesterol shows p = 0.03, it is NOT significant (0.03 > %.4f)<br> <strong>IMPORTANT:</strong> This correction is not applied automatically. You must manually compare reported p-values to the adjusted threshold."),
                     num_endpoints, adjusted_alpha, adjusted_alpha, adjusted_alpha, adjusted_alpha
                 )
             } else if (correction == "holm") {
                 sprintf(
-                    .(" <strong>Holm Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To apply Holm's step-down procedure:<br>1. Rank all p-values from smallest to largest<br>2. For the smallest p-value, use threshold: \u03b1 = 0.05/%d = %.4f<br>3. For the second smallest, use: \u03b1 = 0.05/%d = %.4f<br>4. Continue until a p-value fails to meet its threshold<br>5. All subsequent tests are considered non-significant<br> <strong>IMPORTANT:</strong> This correction requires manual application. Collect p-values from plots below and apply the step-down procedure."),
+                    .("<strong>Holm Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To apply Holm's step-down procedure:<br>1. Rank all p-values from smallest to largest<br>2. For the smallest p-value, use threshold: \u03b1 = 0.05/%d = %.4f<br>3. For the second smallest, use: \u03b1 = 0.05/%d = %.4f<br>4. Continue until a p-value fails to meet its threshold<br>5. All subsequent tests are considered non-significant<br> <strong>IMPORTANT:</strong> This correction requires manual application. Collect p-values from plots below and apply the step-down procedure."),
                     num_endpoints, num_endpoints, 0.05/num_endpoints,
                     num_endpoints - 1, 0.05/(num_endpoints - 1)
                 )
             } else if (correction == "fdr") {
                 sprintf(
-                    .(" <strong>FDR Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control false discovery rate at 5%% using Benjamini-Hochberg:<br>1. Rank all p-values from smallest to largest (p\u2081 \u2264 p\u2082 \u2264 ... \u2264 p%d)<br>2. Find the largest i where: p\u1d62 \u2264 (i/%d) \u00d7 0.05<br>3. Reject hypotheses 1 through i<br>4. Collect p-values from plots below and apply this procedure in external software (e.g., R's p.adjust() function)<br> <strong>IMPORTANT:</strong> FDR correction requires manual calculation. This analysis does not automatically adjust p-values."),
+                    .("<strong>FDR Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control false discovery rate at 5%% using Benjamini-Hochberg:<br>1. Rank all p-values from smallest to largest (p\u2081 \u2264 p\u2082 \u2264 ... \u2264 p%d)<br>2. Find the largest i where: p\u1d62 \u2264 (i/%d) \u00d7 0.05<br>3. Reject hypotheses 1 through i<br>4. Collect p-values from plots below and apply this procedure in external software (e.g., R's p.adjust() function)<br> <strong>IMPORTANT:</strong> FDR correction requires manual calculation. This analysis does not automatically adjust p-values."),
                     num_endpoints, num_endpoints, num_endpoints
                 )
             } else {
@@ -541,11 +614,14 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Colour the box by severity: red when uncorrected, amber otherwise.
+            # Translucent fills + `color: inherit`: an opaque light hex here left
+            # this - the single most severe warning the analysis emits - as pale
+            # text on near-white in jamovi's dark theme.
             border <- if (correction == "none") "#dc3545" else "#ffc107"
-            bg     <- if (correction == "none") "#ffe5e5" else "#fff3cd"
+            bg     <- if (correction == "none") "rgba(255, 33, 33, 0.12)" else "rgba(255, 202, 33, 0.23)"
             paste0(
                 "<div style='padding: 15px; background-color: ", bg,
-                "; border-left: 4px solid ", border, "; margin: 10px 0;'>",
+                "; border-left: 4px solid ", border, "; margin: 10px 0; color: inherit;'>",
                 "<p style='margin: 0;'>", body, "</p></div>"
             )
         },
@@ -574,7 +650,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 min_group_size <- if (length(group_counts)) min(group_counts) else 0L
 
                 if (min_group_size < 3) {
-                    warnings <- c(warnings, sprintf(.(" %s: Minimum group size is %d (recommend \u22653)"),
+                    warnings <- c(warnings, sprintf(.("%s: Minimum group size is %d (recommend \u22653)"),
                                                     htmltools::htmlEscape(var), min_group_size))
                 }
 
@@ -593,11 +669,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # heteroscedastic data.
                             if (!is.na(levene_p) && levene_p < 0.05) {
                                 warnings <- c(warnings, sprintf(
-                                    .(" %s: Variances differ significantly between groups (Levene's test p = %.3f)."),
+                                    .("%s: Variances differ significantly between groups (Levene's test p = %.3f)."),
                                     htmltools::htmlEscape(var), levene_p))
                                 if (isTRUE(self$options$varequal))
                                     warnings <- c(warnings, sprintf(
-                                        .(" %s: 'Equal variances' is ticked, so Student's test is being reported despite that. Untick it to use Welch's test, which does not assume equal variances."),
+                                        .("%s: 'Equal variances' is ticked, so Student's test is being reported despite that. Untick it to use Welch's test, which does not assume equal variances."),
                                         htmltools::htmlEscape(var)))
                             }
                         }
@@ -615,7 +691,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             p_val <- tryCatch(shapiro.test(group_subset)$p.value, error = function(e) 1)
                             if (p_val < 0.05) {
                                 warnings <- c(warnings, sprintf(
-                                    .(" %s: Data may not be normally distributed in group '%s' (Shapiro-Wilk p = %.3f, consider non-parametric)"),
+                                    .("%s: Data may not be normally distributed in group '%s' (Shapiro-Wilk p = %.3f, consider non-parametric)"),
                                     htmltools::htmlEscape(var), htmltools::htmlEscape(level), p_val
                                 ))
                             }
@@ -632,7 +708,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                             if (abs(skewness) > 1) {
                                 warnings <- c(warnings, sprintf(
-                                    .(" %s: Large sample (n = %d) in group '%s' shows substantial skewness (%.2f). Visual inspection recommended."),
+                                    .("%s: Large sample (n = %d) in group '%s' shows substantial skewness (%.2f). Visual inspection recommended."),
                                     htmltools::htmlEscape(var), n_subset, htmltools::htmlEscape(level), skewness
                                 ))
                             }
@@ -650,8 +726,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             current_hash <- digest::digest(list(
                 dep = self$options$dep,
                 group = self$options$group,
-                data_dim = dim(self$data),
-                col_names = names(self$data),
+                # Digest the VALUES, not just dim()/names(): keyed on shape
+                # alone, editing a cell in the spreadsheet was a cache hit and
+                # every panel kept reporting the previous data.
+                data = self$data,
                 grvar = self$options$grvar,
                 # Assumption diagnostics depend on the test type and the
                 # equal-variance flag, so include them: changing the test must
@@ -867,17 +945,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     # touching .GlobalEnv. (Outlier detection now uses exact quantiles, not sampling.)
     withr::local_preserve_seed()
 
-    # Generate explanatory content only when requested. Every one of these panels
-    # (about/summary/assumptions/interpretation/report) is hidden in the results
-    # unless showexplanations is TRUE, so computing them otherwise is wasted work.
-    if (self$options$showexplanations) {
-        private$.generateAboutContent()
-        private$.generateSummary()
-        private$.generateAssumptionsContent()
-        private$.generateInterpretationGuide()
-        private$.generateCopyReadyReport()
-    }
-
     # Initial Message ----
     if (is.null(self$options$dep) || is.null(self$options$group)) {
         todo <- .(
@@ -946,6 +1013,20 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Clinical results summary, computed in the run context so it survives
         # option-only re-renders (setting it during .plot render is discarded).
         private$.generateClinicalSummary()
+
+        # Explanatory content LAST. These panels name the test that was run and
+        # must see private$.bayesNoStatistic, which is only set by
+        # .subtitleDiagnosticsHtml() above - built earlier they announced
+        # "Bayesian ANOVA" for a run that produced no statistic at all, and the
+        # copy-ready Methods text said so too. Every one of them is hidden
+        # unless showexplanations is TRUE, so skip the work otherwise.
+        if (isTRUE(self$options$showexplanations)) {
+            private$.generateAboutContent()
+            private$.generateSummary()
+            private$.generateAssumptionsContent()
+            private$.generateInterpretationGuide()
+            private$.generateCopyReadyReport()
+        }
     }
 },
 .generateAboutContent = function() {
@@ -1002,7 +1083,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", htmltools::htmlEscape(self$options$group), "</p>",
         multi_var_note,  # Add multi-variable clarification
         "<p><strong>Sample Size:</strong> ", n_total, " observations across ", n_groups, " groups</p>",
-        "<p><strong>Statistical Method:</strong> ", test_method, "</p>",
+        # A Bayesian ANOVA on 3+ groups returns no expression at all with the
+        # current statsExpressions, so the figure carries no statistic. Naming
+        # the method without saying that let the reader assume a result exists.
+        "<p><strong>Statistical Method:</strong> ", test_method,
+        if (isTRUE(private$.bayesNoStatistic))
+            paste0(" ", .("- could not be computed for this data, so no test statistic, Bayes factor or effect size is available (see Data Diagnostics)"))
+        else "", "</p>",
         if (self$options$pairwisecomparisons && n_groups > 2) paste0(
             "<p><strong>Post-hoc Analysis:</strong> Pairwise comparisons with ",
             self$options$padjustmethod, " correction</p>"
@@ -1150,8 +1237,14 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 15px; border: 1px dashed #6c757d; margin: 10px 0; color: inherit;'>",
         "<h5>Methods:</h5>",
         "<p>A between-groups analysis was conducted to compare the levels of ", dep_vars,
-        " across ", n_groups, " groups of ", htmltools::htmlEscape(self$options$group), ". A ", test_method,
+        " across ", n_groups, " groups of ", htmltools::htmlEscape(self$options$group),
+        " (n = ", n_total, "). A ", test_method,
         " was used to test for significant differences. ",
+        # Never hand the user a Methods sentence asserting a test that returned
+        # nothing - this block is explicitly meant to be pasted into a paper.
+        if (isTRUE(private$.bayesNoStatistic))
+            paste0(.("NOTE: this test could not be computed for the present data - do not report it; choose a different statistical approach before using this text."), " ")
+        else "",
         
         if (self$options$pairwisecomparisons && n_groups > 2) {
             paste0("Post-hoc pairwise comparisons were conducted with ", 
@@ -1161,7 +1254,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         "Effect sizes are reported with ", round(100 * self$options$conflevel), "% confidence intervals; ",
         "significance was assessed at the conventional \u03b1 = 0.05.",
         "</p>",
-        
+
+        # The multiple-endpoint caveat was computed above and then dropped, so the
+        # text the user pastes into a manuscript omitted a warning the on-screen
+        # Analysis Summary does show.
+        multi_var_note,
+
         "<h5>Results:</h5>",
         paste0("<p>[Insert the statistics shown in ", stats_source, ": test statistic, p-value, effect size with CI]</p>"),
         # The example used to assert a significant difference, an F statistic and
@@ -1191,7 +1289,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Use shared validation helper ----
             if (!private$.validateInputs())
-                return()
+                return(FALSE)
 
             # Add checkpoint for user feedback
             private$.checkpoint()
@@ -1260,6 +1358,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(sub_expr) && !is.null(plot))
                     plot <- plot + ggplot2::labs(subtitle = sub_expr)
 
+                # Same treatment for the Bayes-factor caption: ggstatsplot only
+                # emits it alongside its own subtitle, which the takeover above
+                # switches off, so attach ours to the finished plot.
+                bf_expr <- private$.bfCaptionExpr(mydata, group, dep, opts)
+                if (!is.null(bf_expr) && !is.null(plot))
+                    plot <- plot + ggplot2::labs(caption = bf_expr)
+
                 # Apply theme using helper
                 plot <- private$.applyTheme(plot, opts, ggtheme)
             }
@@ -1319,6 +1424,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         pp <- private$.tryPlot(withBaseFormulaChar(do.call(ggstatsplot::ggbetweenstats, plot_args)))
                         if (!is.null(sub_expr) && !is.null(pp))
                             pp <- pp + ggplot2::labs(subtitle = sub_expr)
+                        bf_expr <- private$.bfCaptionExpr(
+                            mydata, group, rlang::as_string(y), opts)
+                        if (!is.null(bf_expr) && !is.null(pp))
+                            pp <- pp + ggplot2::labs(caption = bf_expr)
                         pp
                     }
                 )
@@ -1353,7 +1462,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Use shared validation helper with additional grouping check ----
             if (!private$.validateInputs() || is.null(self$options$grvar))
-                return()
+                return(FALSE)
 
             # Add checkpoint for user feedback
             private$.checkpoint()
@@ -1508,11 +1617,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plotGGPubr = function(image, ggtheme, theme, ...) {
             # Validate inputs
             if (!private$.validateInputs())
-                return()
+                return(FALSE)
 
             # Skip if ggpubr plot not requested
             if (!self$options$addGGPubrPlot)
-                return()
+                return(FALSE)
 
             private$.checkpoint()
 
@@ -1553,7 +1662,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Add statistical comparisons
                 if (self$options$ggpubrAddStats) {
                     sl <- private$.ggpubrStatLayer(
-                        private$.nGroupLevels(self$data, self$options$group))
+                        private$.nGroupLevels(mydata, self$options$group))
                     plot <- plot + sl$layer + ggplot2::labs(caption = sl$note)
                 }
 
@@ -1591,7 +1700,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     if (self$options$ggpubrAddStats) {
                         sl <- private$.ggpubrStatLayer(
-                            private$.nGroupLevels(self$data, self$options$group))
+                            private$.nGroupLevels(mydata, self$options$group))
                         p <- p + sl$layer + ggplot2::labs(caption = sl$note)
                     }
 
@@ -1608,11 +1717,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plotGGPubr2 = function(image, ggtheme, theme, ...) {
             # Validate inputs
             if (!private$.validateInputs())
-                return()
+                return(FALSE)
 
             # Skip if ggpubr plot not requested or no grouping variable
             if (!self$options$addGGPubrPlot || is.null(self$options$grvar))
-                return()
+                return(FALSE)
 
             private$.checkpoint()
 
@@ -1651,7 +1760,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (self$options$ggpubrAddStats) {
                     sl <- private$.ggpubrStatLayer(
-                        private$.nGroupLevels(self$data, self$options$group))
+                        private$.nGroupLevels(mydata, self$options$group))
                     plot <- plot + sl$layer + ggplot2::labs(caption = sl$note)
                 }
 
@@ -1688,7 +1797,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     if (self$options$ggpubrAddStats) {
                         sl <- private$.ggpubrStatLayer(
-                            private$.nGroupLevels(self$data, self$options$group))
+                            private$.nGroupLevels(mydata, self$options$group))
                         p <- p + sl$layer + ggplot2::labs(caption = sl$note)
                     }
 

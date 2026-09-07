@@ -57,6 +57,7 @@ items:
         - x_var
         - y_var
         - fill_var
+        - facet_var
         - exclude_missing
       columns:
         - name: categories
@@ -82,6 +83,8 @@ items:
         - x_var
         - y_var
         - fill_var
+        - facet_var
+        - sort_categories
         - exclude_missing
       columns:
         - name: category
@@ -112,6 +115,8 @@ items:
         - x_var
         - y_var
         - fill_var
+        - facet_var
+        - sort_categories
         - exclude_missing
       columns:
         - name: measure
@@ -128,6 +133,8 @@ items:
         - x_var
         - y_var
         - fill_var
+        - facet_var
+        - sort_categories
         - exclude_missing
 
     - name: clinical_summary
@@ -137,6 +144,8 @@ items:
         - x_var
         - y_var
         - fill_var
+        - facet_var
+        - sort_categories
         - exclude_missing
 
     - name: statistical_tests
@@ -187,7 +196,10 @@ items:
         - x_var
         - y_var
         - fill_var
+        - facet_var
         - exclude_missing
+        - y_is_count
+        - show_statistical_tests
 
     - name: explanations
       title: 'Explanations'

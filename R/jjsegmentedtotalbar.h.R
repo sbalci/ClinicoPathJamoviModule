@@ -478,6 +478,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "x_var",
                     "y_var",
                     "fill_var",
+                    "facet_var",
                     "exclude_missing"),
                 columns=list(
                     list(
@@ -508,6 +509,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "x_var",
                     "y_var",
                     "fill_var",
+                    "facet_var",
+                    "sort_categories",
                     "exclude_missing"),
                 columns=list(
                     list(
@@ -544,6 +547,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "x_var",
                     "y_var",
                     "fill_var",
+                    "facet_var",
+                    "sort_categories",
                     "exclude_missing"),
                 columns=list(
                     list(
@@ -562,6 +567,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "x_var",
                     "y_var",
                     "fill_var",
+                    "facet_var",
+                    "sort_categories",
                     "exclude_missing")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -571,6 +578,8 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "x_var",
                     "y_var",
                     "fill_var",
+                    "facet_var",
+                    "sort_categories",
                     "exclude_missing")))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -623,7 +632,10 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     "x_var",
                     "y_var",
                     "fill_var",
-                    "exclude_missing")))
+                    "facet_var",
+                    "exclude_missing",
+                    "y_is_count",
+                    "show_statistical_tests")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanations",

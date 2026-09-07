@@ -1,10 +1,10 @@
 ---
 name:  jjbetweenstats
 title: Box-Violin Plots to Compare Between Groups
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: 'Independent Samples'
-version: '1.0.8'
+version: '1.0.9'
 jas: '1.2'
 
 

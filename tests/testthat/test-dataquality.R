@@ -7,7 +7,7 @@ test_that("dataquality basic functionality", {
   data("histopathology", package = "ClinicoPath")
 
   # Test that function exists and has correct class structure
-  expect_true(exists("dataqualityClass"))
+  expect_true(exists("dataqualityClass", envir = asNamespace("ClinicoPath")))
   expect_true(is.function(dataquality))
 
   # Basic execution test

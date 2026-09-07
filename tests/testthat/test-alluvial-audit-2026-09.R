@@ -38,9 +38,26 @@ d3 <- data.frame(S = factor(sample(c("s1", "s2"), n, TRUE)),
                  G = factor(sample(c("g1", "g2", "g3"), n, TRUE)),
                  R = factor(sample(c("r1", "r2"), n, TRUE)))
 
-test_that("vars is optional for programmatic callers (default: NULL)", {
-  expect_no_error(res <- alluvial(data = d3))
-  expect_match(al_txt(res$todo$content), "Alluvial Diagrams")
+test_that("vars carries default: NULL, and the no-variable call is jmvcore-bound", {
+  # `vars` must carry `default: NULL`, otherwise the generated wrapper makes it a
+  # REQUIRED argument and a programmatic call fails with
+  # 'argument "vars" is missing, with no default'.
+  schema <- yaml::read_yaml(testthat::test_path("..", "..", "jamovi", "alluvial.a.yaml"))
+  vars_opt <- Filter(function(o) identical(o$name, "vars"), schema$options)[[1]]
+  expect_true("default" %in% names(vars_opt))
+  expect_null(vars_opt$default)
+
+  # The welcome panel itself cannot be reached through the R wrapper: when EVERY
+  # variable option is absent, jmvcore's select() fails with "invalid 'row.names'
+  # length" before .run() is entered. That is jmvcore-wide (summarydata, reportcat
+  # and dataquality behave identically), not an alluvial defect, and the jamovi GUI
+  # is unaffected because it always supplies a dataset context. Assert the contract
+  # that actually holds, so this test cannot silently pass for the wrong reason.
+  expect_error(alluvial(data = d3), "row.names")
+
+  # One variable is enough to reach the backend's own guidance path.
+  expect_no_error(res <- alluvial(data = d3, vars = names(d3)[1]))
+  expect_gt(length(al_txt(res$todo$content)), 0)
 })
 
 test_that("GG Alluvial axes carry the variable names, not continuous ticks", {

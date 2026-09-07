@@ -1,6 +1,6 @@
 test_that("agepyramid module loads correctly", {
   skip_if_not_installed('jmvReadWrite')
-  expect_true(exists("agepyramidClass"))
+  expect_true(exists("agepyramidClass", envir = asNamespace("ClinicoPath")))
   expect_true(is.function(agepyramid))
 })
 
