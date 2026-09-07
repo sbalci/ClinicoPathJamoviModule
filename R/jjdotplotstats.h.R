@@ -11,6 +11,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             grvar = NULL,
             typestatistics = "parametric",
             effsizetype = "biased",
+            pairwisedisplay = "significant",
+            padjustmethod = "holm",
             centralityplotting = FALSE,
             centralitytype = "parametric",
             mytitle = "",
@@ -25,6 +27,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             testvalueline = FALSE,
             centralityparameter = "mean",
             centralityk = 2,
+            seed = 42,
+            showexplanation = FALSE,
             plotwidth = 650,
             plotheight = 450, ...) {
 
@@ -76,6 +80,23 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "eta",
                     "omega"),
                 default="biased")
+            private$..pairwisedisplay <- jmvcore::OptionList$new(
+                "pairwisedisplay",
+                pairwisedisplay,
+                options=list(
+                    "significant",
+                    "all",
+                    "none"),
+                default="significant")
+            private$..padjustmethod <- jmvcore::OptionList$new(
+                "padjustmethod",
+                padjustmethod,
+                options=list(
+                    "holm",
+                    "fdr",
+                    "bonferroni",
+                    "none"),
+                default="holm")
             private$..centralityplotting <- jmvcore::OptionBool$new(
                 "centralityplotting",
                 centralityplotting,
@@ -147,6 +168,16 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 default=2,
                 min=0,
                 max=5)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=42,
+                min=1,
+                max=999999)
+            private$..showexplanation <- jmvcore::OptionBool$new(
+                "showexplanation",
+                showexplanation,
+                default=FALSE)
             private$..plotwidth <- jmvcore::OptionInteger$new(
                 "plotwidth",
                 plotwidth,
@@ -165,6 +196,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..grvar)
             self$.addOption(private$..typestatistics)
             self$.addOption(private$..effsizetype)
+            self$.addOption(private$..pairwisedisplay)
+            self$.addOption(private$..padjustmethod)
             self$.addOption(private$..centralityplotting)
             self$.addOption(private$..centralitytype)
             self$.addOption(private$..mytitle)
@@ -179,6 +212,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..testvalueline)
             self$.addOption(private$..centralityparameter)
             self$.addOption(private$..centralityk)
+            self$.addOption(private$..seed)
+            self$.addOption(private$..showexplanation)
             self$.addOption(private$..plotwidth)
             self$.addOption(private$..plotheight)
         }),
@@ -188,6 +223,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         grvar = function() private$..grvar$value,
         typestatistics = function() private$..typestatistics$value,
         effsizetype = function() private$..effsizetype$value,
+        pairwisedisplay = function() private$..pairwisedisplay$value,
+        padjustmethod = function() private$..padjustmethod$value,
         centralityplotting = function() private$..centralityplotting$value,
         centralitytype = function() private$..centralitytype$value,
         mytitle = function() private$..mytitle$value,
@@ -202,6 +239,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         testvalueline = function() private$..testvalueline$value,
         centralityparameter = function() private$..centralityparameter$value,
         centralityk = function() private$..centralityk$value,
+        seed = function() private$..seed$value,
+        showexplanation = function() private$..showexplanation$value,
         plotwidth = function() private$..plotwidth$value,
         plotheight = function() private$..plotheight$value),
     private = list(
@@ -210,6 +249,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..grvar = NA,
         ..typestatistics = NA,
         ..effsizetype = NA,
+        ..pairwisedisplay = NA,
+        ..padjustmethod = NA,
         ..centralityplotting = NA,
         ..centralitytype = NA,
         ..mytitle = NA,
@@ -224,6 +265,8 @@ jjdotplotstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..testvalueline = NA,
         ..centralityparameter = NA,
         ..centralityk = NA,
+        ..seed = NA,
+        ..showexplanation = NA,
         ..plotwidth = NA,
         ..plotheight = NA)
 )
@@ -234,6 +277,7 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     active = list(
         todo = function() private$.items[["todo"]],
         notices = function() private$.items[["notices"]],
+        explanation = function() private$.items[["explanation"]],
         plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]]),
     private = list(),
@@ -248,7 +292,6 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ggstatsplot",
                     "statsExpressions",
                     "ClinicoPathJamoviModule",
-                    "glue",
                     "digest"),
                 clearWith=list(
                     "dep",
@@ -270,6 +313,10 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "testvalueline",
                     "centralityparameter",
                     "centralityk",
+                    "pairwisedisplay",
+                    "padjustmethod",
+                    "seed",
+                    "showexplanation",
                     "plotwidth",
                     "plotheight"))
             self$add(jmvcore::Html$new(
@@ -280,10 +327,15 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="notices",
                 title="Notices"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanation",
+                title="Assumptions and Interpretation",
+                visible="(showexplanation)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`${dep} - {group} by {grvar}`",
+                title="`${dep} - ${group} by ${grvar}`",
                 width=800,
                 height=300,
                 renderFun=".plot2",
@@ -292,7 +344,7 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`${dep} - {group}`",
+                title="`${dep} - ${group}`",
                 width=400,
                 height=300,
                 renderFun=".plot",
@@ -306,7 +358,7 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjdotplotstats",
-                version = c(1,0,8),
+                version = c(1,0,9),
                 options = options,
                 results = jjdotplotstatsResults$new(options=options),
                 data = data,
@@ -349,12 +401,35 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param typestatistics Choose the appropriate statistical test: Parametric
 #'   (t-test) assumes normal distribution and equal variances; Nonparametric
 #'   (Mann-Whitney U) makes no distribution assumptions; Robust uses trimmed
-#'   means to handle outliers; Bayesian provides evidence strength via Bayes
-#'   factors.
-#' @param effsizetype Effect size quantifies practical significance: Cohen's d
-#'   shows standardized difference between groups (small=0.2, medium=0.5,
-#'   large=0.8); Hedge's g corrects for small samples; Eta/Omega-squared show
-#'   proportion of variance explained (small=0.01, medium=0.06, large=0.14).
+#'   means to handle outliers by trimming 20 percent from each tail; Bayesian
+#'   provides evidence strength via Bayes factors.
+#' @param effsizetype Effect size quantifies practical significance. Which
+#'   statistic you get depends on how many groups are compared, because the
+#'   underlying statistics package uses one vocabulary for a two-group test and
+#'   another for a three-or-more-group one. 'biased' and 'eta' both give Cohen's
+#'   d with two groups and partial eta-squared with three or more; 'unbiased'
+#'   and 'omega' both give Hedge's g with two groups and partial omega-squared
+#'   with three or more. Rules of thumb: d and g small=0.2, medium=0.5,
+#'   large=0.8; eta-squared and omega-squared small=0.01, medium=0.06,
+#'   large=0.14. Two limits: it applies to the parametric test only - the
+#'   nonparametric, robust and Bayesian tests each report one fixed effect size
+#'   of their own - and it reaches the single figure only, since the Split By
+#'   panels always use the statistics package default. The analysis says so when
+#'   either limit applies.
+#' @param pairwisedisplay Which post-hoc comparisons between individual pairs
+#'   of groups are drawn as brackets above the plot. The omnibus test tells you
+#'   only that the groups differ somewhere; these say which pairs. The test used
+#'   follows 'Statistical Test Type' - Games-Howell for the parametric family,
+#'   since it does not assume equal variances, Dunn for the nonparametric one.
+#'   Every p value is adjusted for multiple comparisons by the method selected
+#'   below.
+#' @param padjustmethod How the pairwise p values are corrected for testing
+#'   several pairs at once. Holm is uniformly more powerful than Bonferroni
+#'   while controlling the same family-wise error rate and is the sensible
+#'   default. Benjamini-Hochberg controls the false discovery rate instead,
+#'   which is a weaker guarantee but more powerful when many pairs are compared.
+#'   Choosing 'None' reports uncorrected p values and will overstate
+#'   significance; the analysis warns when it is selected.
 #' @param centralityplotting Display lines showing the central tendency (mean,
 #'   median, or trimmed mean) for each group. Helps visualize group differences
 #'   at a glance.
@@ -378,9 +453,13 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   such as an upper limit of normal. No hypothesis test is performed against
 #'   this value; it only draws a line, and only when 'Reference value line' is
 #'   ticked.
-#' @param bfmessage Display Bayes Factor interpretation (evidence strength)
-#'   when using Bayesian analysis. BF > 3 indicates moderate evidence, BF > 10
-#'   strong evidence.
+#' @param bfmessage Add a caption reporting the Bayes factor for the null
+#'   hypothesis alongside the usual test. It applies only to a parametric
+#'   comparison of exactly two groups: the statistics package defines no Bayes
+#'   factor for a three-or-more-group comparison, and with the Bayesian test
+#'   selected the subtitle already reports one. The analysis says which of these
+#'   applies whenever the box is ticked and no caption appears. A Bayes factor
+#'   above 3 indicates moderate evidence, above 10 strong evidence.
 #' @param conflevel Confidence level for intervals (0.95 = 95 percent
 #'   confidence interval). This represents the probability that the true
 #'   population parameter lies within the calculated interval. 95 percent is
@@ -391,13 +470,26 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param testvalueline Draw a dashed vertical line at 'Reference Line Value'.
 #'   Useful for marking a clinical threshold or a normal reference limit. This
 #'   is a visual annotation only.
-#' @param centralityparameter Which central tendency measure to show as a
-#'   vertical line on the plot. Mean is sensitive to outliers; median is more
-#'   robust for skewed data.
+#' @param centralityparameter Whether a central tendency line is drawn. Only
+#'   'none' has an effect of its own: it suppresses the line. 'mean' and
+#'   'median' both simply allow the line, and which statistic it marks is
+#'   decided by 'Central Tendency Measure' (centralitytype), not here -
+#'   selecting 'mean' while centralitytype is 'nonparametric' still draws the
+#'   median, and the analysis says so. Retained with all three levels so
+#'   existing scripts keep running.
 #' @param centralityk Deprecated and ignored. The statistics package no longer
 #'   accepts a separate precision for the centrality labels; they follow
 #'   'Statistical Precision (Decimal Places)'. Retained so existing scripts keep
 #'   running, and removed from the user interface.
+#' @param seed Seed for the resampling that the nonparametric and robust tests
+#'   use to build the effect size confidence interval. It is fixed so that a
+#'   figure re-rendered on the same data comes back identical; without it the
+#'   reported interval moved on every run. Change it only to confirm that a
+#'   borderline interval is not an artefact of one particular resample. It has
+#'   no effect on the parametric or Bayesian tests.
+#' @param showexplanation Show a panel that states the assumptions behind the
+#'   test that was run, reports the result as a sentence in plain language, and
+#'   gives a copy-ready methods line for a report.
 #' @param plotwidth Width of the plot in pixels. Larger values provide more
 #'   detail but may not fit well in reports. Default: 650 pixels.
 #' @param plotheight Height of the plot in pixels. Adjust based on number of
@@ -406,6 +498,7 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$explanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #' }
@@ -418,6 +511,8 @@ jjdotplotstats <- function(
     grvar = NULL,
     typestatistics = "parametric",
     effsizetype = "biased",
+    pairwisedisplay = "significant",
+    padjustmethod = "holm",
     centralityplotting = FALSE,
     centralitytype = "parametric",
     mytitle = "",
@@ -432,6 +527,8 @@ jjdotplotstats <- function(
     testvalueline = FALSE,
     centralityparameter = "mean",
     centralityk = 2,
+    seed = 42,
+    showexplanation = FALSE,
     plotwidth = 650,
     plotheight = 450) {
 
@@ -457,6 +554,8 @@ jjdotplotstats <- function(
         grvar = grvar,
         typestatistics = typestatistics,
         effsizetype = effsizetype,
+        pairwisedisplay = pairwisedisplay,
+        padjustmethod = padjustmethod,
         centralityplotting = centralityplotting,
         centralitytype = centralitytype,
         mytitle = mytitle,
@@ -471,6 +570,8 @@ jjdotplotstats <- function(
         testvalueline = testvalueline,
         centralityparameter = centralityparameter,
         centralityk = centralityk,
+        seed = seed,
+        showexplanation = showexplanation,
         plotwidth = plotwidth,
         plotheight = plotheight)
 

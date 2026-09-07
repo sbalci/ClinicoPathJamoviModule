@@ -263,7 +263,7 @@ test_that("jjdotplotstats handles all missing in one group", {
   notices <- function(r) gsub("<[^>]*>", "", r$notices$content)
   res <- jjdotplotstats(data = one_group_missing, dep = "tumor_reduction", group = "treatment")
   # The emptied group must be NAMED, not just absorbed into a smaller row count.
-  expect_match(res$todo$content, "Group\\(s\\) dropped")
+  expect_match(res$todo$content, "Groups dropped")
   expect_match(res$todo$content, "Control")
   expect_match(notices(res), "Comparing 2 groups")
 })
@@ -388,7 +388,7 @@ test_that("jjdotplotstats handles NaN values", {
   # actually sees instead - a stronger check than "some condition was raised".
   notices <- function(r) gsub("<[^>]*>", "", r$notices$content)
   res <- jjdotplotstats(data = nan_data, dep = "tumor_reduction", group = "treatment")
-  expect_match(res$todo$content, "rows excluded")   # NaN is dropped like NA
+  expect_match(res$todo$content, "Rows excluded")   # NaN is dropped like NA
   expect_match(notices(res), "Comparing 3 groups")
 })
 

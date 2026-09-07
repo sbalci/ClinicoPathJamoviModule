@@ -66,6 +66,7 @@ items:
     - name: explanations
       title: Explanations
       type: Html
+      visible: (showExplanations)
       clearWith:
         - showExplanations
 
@@ -136,6 +137,8 @@ items:
         - ggpubrAddStats
         - ggpubrShowLines
         - ggpubrAddPoints
+        - k
+        - conflevel
 
 
 

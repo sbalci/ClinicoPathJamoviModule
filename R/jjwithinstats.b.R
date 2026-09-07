@@ -972,7 +972,6 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Generate explanations ----
         .generateExplanations = function() {
-            self$results$explanations$setVisible(TRUE)
             self$results$explanations$setContent(
                 "<h3>Explanations</h3>
                 <p>

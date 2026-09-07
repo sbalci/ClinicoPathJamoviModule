@@ -46,7 +46,7 @@
 - advancedraincloud
 - jjbetweenstats
 - jjdotchart
-jjdotplotstats
+- jjdotplotstats
 jjwithinstats
 lollipop
 raincloud

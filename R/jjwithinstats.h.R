@@ -440,6 +440,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="explanations",
                 title="Explanations",
+                visible="(showExplanations)",
                 clearWith=list(
                     "showExplanations")))
             self$add(jmvcore::Image$new(
@@ -509,7 +510,9 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ggpubrPalette",
                     "ggpubrAddStats",
                     "ggpubrShowLines",
-                    "ggpubrAddPoints")))}))
+                    "ggpubrAddPoints",
+                    "k",
+                    "conflevel")))}))
 
 jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjwithinstatsBase",

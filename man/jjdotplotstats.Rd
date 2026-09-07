@@ -11,6 +11,8 @@ jjdotplotstats(
   grvar = NULL,
   typestatistics = "parametric",
   effsizetype = "biased",
+  pairwisedisplay = "significant",
+  padjustmethod = "holm",
   centralityplotting = FALSE,
   centralitytype = "parametric",
   mytitle = "",
@@ -25,6 +27,8 @@ jjdotplotstats(
   testvalueline = FALSE,
   centralityparameter = "mean",
   centralityk = 2,
+  seed = 42,
+  showexplanation = FALSE,
   plotwidth = 650,
   plotheight = 450
 )
@@ -44,13 +48,38 @@ each level of this variable (grouped analysis).}
 \item{typestatistics}{Choose the appropriate statistical test: Parametric
 (t-test) assumes normal distribution and equal variances; Nonparametric
 (Mann-Whitney U) makes no distribution assumptions; Robust uses trimmed
-means to handle outliers; Bayesian provides evidence strength via Bayes
-factors.}
+means to handle outliers by trimming 20 percent from each tail; Bayesian
+provides evidence strength via Bayes factors.}
 
-\item{effsizetype}{Effect size quantifies practical significance: Cohen's d
-shows standardized difference between groups (small=0.2, medium=0.5,
-large=0.8); Hedge's g corrects for small samples; Eta/Omega-squared show
-proportion of variance explained (small=0.01, medium=0.06, large=0.14).}
+\item{effsizetype}{Effect size quantifies practical significance. Which
+statistic you get depends on how many groups are compared, because the
+underlying statistics package uses one vocabulary for a two-group test and
+another for a three-or-more-group one. 'biased' and 'eta' both give Cohen's
+d with two groups and partial eta-squared with three or more; 'unbiased'
+and 'omega' both give Hedge's g with two groups and partial omega-squared
+with three or more. Rules of thumb: d and g small=0.2, medium=0.5,
+large=0.8; eta-squared and omega-squared small=0.01, medium=0.06,
+large=0.14. Two limits: it applies to the parametric test only - the
+nonparametric, robust and Bayesian tests each report one fixed effect size
+of their own - and it reaches the single figure only, since the Split By
+panels always use the statistics package default. The analysis says so when
+either limit applies.}
+
+\item{pairwisedisplay}{Which post-hoc comparisons between individual pairs
+of groups are drawn as brackets above the plot. The omnibus test tells you
+only that the groups differ somewhere; these say which pairs. The test used
+follows 'Statistical Test Type' - Games-Howell for the parametric family,
+since it does not assume equal variances, Dunn for the nonparametric one.
+Every p value is adjusted for multiple comparisons by the method selected
+below.}
+
+\item{padjustmethod}{How the pairwise p values are corrected for testing
+several pairs at once. Holm is uniformly more powerful than Bonferroni
+while controlling the same family-wise error rate and is the sensible
+default. Benjamini-Hochberg controls the false discovery rate instead,
+which is a weaker guarantee but more powerful when many pairs are compared.
+Choosing 'None' reports uncorrected p values and will overstate
+significance; the analysis warns when it is selected.}
 
 \item{centralityplotting}{Display lines showing the central tendency (mean,
 median, or trimmed mean) for each group. Helps visualize group differences
@@ -83,9 +112,13 @@ such as an upper limit of normal. No hypothesis test is performed against
 this value; it only draws a line, and only when 'Reference value line' is
 ticked.}
 
-\item{bfmessage}{Display Bayes Factor interpretation (evidence strength)
-when using Bayesian analysis. BF > 3 indicates moderate evidence, BF > 10
-strong evidence.}
+\item{bfmessage}{Add a caption reporting the Bayes factor for the null
+hypothesis alongside the usual test. It applies only to a parametric
+comparison of exactly two groups: the statistics package defines no Bayes
+factor for a three-or-more-group comparison, and with the Bayesian test
+selected the subtitle already reports one. The analysis says which of these
+applies whenever the box is ticked and no caption appears. A Bayes factor
+above 3 indicates moderate evidence, above 10 strong evidence.}
 
 \item{conflevel}{Confidence level for intervals (0.95 = 95 percent
 confidence interval). This represents the probability that the true
@@ -100,14 +133,29 @@ clinically meaningful.}
 Useful for marking a clinical threshold or a normal reference limit. This
 is a visual annotation only.}
 
-\item{centralityparameter}{Which central tendency measure to show as a
-vertical line on the plot. Mean is sensitive to outliers; median is more
-robust for skewed data.}
+\item{centralityparameter}{Whether a central tendency line is drawn. Only
+'none' has an effect of its own: it suppresses the line. 'mean' and
+'median' both simply allow the line, and which statistic it marks is
+decided by 'Central Tendency Measure' (centralitytype), not here -
+selecting 'mean' while centralitytype is 'nonparametric' still draws the
+median, and the analysis says so. Retained with all three levels so
+existing scripts keep running.}
 
 \item{centralityk}{Deprecated and ignored. The statistics package no longer
 accepts a separate precision for the centrality labels; they follow
 'Statistical Precision (Decimal Places)'. Retained so existing scripts keep
 running, and removed from the user interface.}
+
+\item{seed}{Seed for the resampling that the nonparametric and robust tests
+use to build the effect size confidence interval. It is fixed so that a
+figure re-rendered on the same data comes back identical; without it the
+reported interval moved on every run. Change it only to confirm that a
+borderline interval is not an artefact of one particular resample. It has
+no effect on the parametric or Bayesian tests.}
+
+\item{showexplanation}{Show a panel that states the assumptions behind the
+test that was run, reports the result as a sentence in plain language, and
+gives a copy-ready methods line for a report.}
 
 \item{plotwidth}{Width of the plot in pixels. Larger values provide more
 detail but may not fit well in reports. Default: 650 pixels.}
@@ -120,6 +168,7 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
+\code{results$explanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 }

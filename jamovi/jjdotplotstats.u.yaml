@@ -51,9 +51,11 @@ children:
             children:
               - type: ComboBox
                 name: effsizetype
-              - type: TextBox
-                name: testvalue
-                format: number
+              - type: ComboBox
+                name: pairwisedisplay
+              - type: ComboBox
+                name: padjustmethod
+                enable: (!pairwisedisplay:none)
               - type: TextBox
                 name: conflevel
                 format: number
@@ -75,8 +77,10 @@ children:
             children:
               - type: CheckBox
                 name: testvalueline
-              - type: ComboBox
-                name: centralityparameter
+              - type: TextBox
+                name: testvalue
+                format: number
+                enable: (testvalueline)
   - type: CollapseBox
     label: Centrality Options
     collapsed: true
@@ -90,6 +94,15 @@ children:
             children:
               - type: CheckBox
                 name: centralityplotting
+              # Moved here from "Plot Display > Reference Lines". Sitting in a
+              # different collapse box from centralitytype, it read as a second,
+              # competing mean/median selector; it is not one - only its "none"
+              # level does anything, and .prepareOptions() warns when the two
+              # disagree. Adjacent and in resolution order, the redundancy is at
+              # least visible.
+              - type: ComboBox
+                name: centralityparameter
+                enable: (centralityplotting)
               - type: ComboBox
                 name: centralitytype
                 enable: (centralityplotting)
@@ -122,6 +135,8 @@ children:
             children:
               - type: CheckBox
                 name: resultssubtitle
+              - type: CheckBox
+                name: showexplanation
               - type: CheckBox
                 name: originaltheme
       - type: Label
@@ -159,4 +174,14 @@ children:
                 format: number
               - type: TextBox
                 name: plotheight
+                format: number
+      - type: Label
+        label: Reproducibility
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: TextBox
+                name: seed
                 format: number

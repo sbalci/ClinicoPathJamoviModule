@@ -27,86 +27,11 @@ msgid ""
 "missing values, or exclude those rows, before comparing groups."
 msgstr ""
 
-#: R/jjbetweenstats.b.R
-msgid ""
-" %s: 'Equal variances' is ticked, so Student's test is being reported "
-"despite that. Untick it to use Welch's test, which does not assume equal "
-"variances."
-msgstr ""
-
-#: R/jjbetweenstats.b.R
-msgid ""
-" %s: Data may not be normally distributed in group '%s' (Shapiro-Wilk p = "
-"%.3f, consider non-parametric)"
-msgstr ""
-
-#: R/jjbetweenstats.b.R
-msgid ""
-" %s: Large sample (n = %d) in group '%s' shows substantial skewness (%.2f). "
-"Visual inspection recommended."
-msgstr ""
-
-#: R/jjbetweenstats.b.R
-msgid " %s: Minimum group size is %d (recommend ≥3)"
-msgstr ""
-
-#: R/jjbetweenstats.b.R
-msgid " %s: Variances differ significantly between groups (Levene's test p = %.3f)."
-msgstr ""
-
 #: R/jjwithinstats.b.R
 msgid ""
 " <strong>Biomarker Tracking (Guidance Only):</strong> Optimized for "
 "laboratory values. Please manually ensure 'Nonparametric' is selected if "
 "data is skewed.<br>"
-msgstr ""
-
-#: R/jjbetweenstats.b.R
-msgid ""
-" <strong>Bonferroni Correction Guidance (Manual Application "
-"Required):</strong><br>You are testing %d endpoints. To control family-wise "
-"error rate at 5%%:<br>• <strong>Adjusted significance threshold: α = "
-"%.4f</strong><br>• Compare each p-value from the plots below to %.4f (NOT "
-"0.05)<br>• Only results with p < %.4f should be considered statistically "
-"significant<br>• Example: If cholesterol shows p = 0.03, it is NOT "
-"significant (0.03 > %.4f)<br> <strong>IMPORTANT:</strong> This correction is "
-"not applied automatically. You must manually compare reported p-values to "
-"the adjusted threshold."
-msgstr ""
-
-#: R/jjbetweenstats.b.R
-msgid ""
-" <strong>CRITICAL: MULTIPLE ENDPOINT TESTING WITHOUT "
-"CORRECTION</strong><br>You are testing %d dependent variables simultaneously "
-"without adjustment. This inflates your family-wise error rate from 5%% to "
-"approximately %.1f%%.<br><strong>RECOMMENDATION:</strong> Select a "
-"correction method to see guidance, or interpret all p-values cautiously "
-"acknowledging this inflated error rate."
-msgstr ""
-
-#: R/jjbetweenstats.b.R
-msgid ""
-" <strong>FDR Correction Guidance (Manual Application "
-"Required):</strong><br>You are testing %d endpoints. To control false "
-"discovery rate at 5%% using Benjamini-Hochberg:<br>1. Rank all p-values from "
-"smallest to largest (p₁ ≤ p₂ ≤ ... ≤ p%d)<br>2. Find the largest i where: pᵢ "
-"≤ (i/%d) × 0.05<br>3. Reject hypotheses 1 through i<br>4. Collect p-values "
-"from plots below and apply this procedure in external software (e.g., R's "
-"p.adjust() function)<br> <strong>IMPORTANT:</strong> FDR correction requires "
-"manual calculation. This analysis does not automatically adjust p-values."
-msgstr ""
-
-#: R/jjbetweenstats.b.R
-msgid ""
-" <strong>Holm Correction Guidance (Manual Application "
-"Required):</strong><br>You are testing %d endpoints. To apply Holm's "
-"step-down procedure:<br>1. Rank all p-values from smallest to largest<br>2. "
-"For the smallest p-value, use threshold: α = 0.05/%d = %.4f<br>3. For the "
-"second smallest, use: α = 0.05/%d = %.4f<br>4. Continue until a p-value "
-"fails to meet its threshold<br>5. All subsequent tests are considered "
-"non-significant<br> <strong>IMPORTANT:</strong> This correction requires "
-"manual application. Collect p-values from plots below and apply the "
-"step-down procedure."
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -263,6 +188,12 @@ msgstr ""
 msgid "- Consider sensitivity analysis treating death as competing risk"
 msgstr ""
 
+#: R/jjbetweenstats.b.R
+msgid ""
+"- could not be computed for this data, so no test statistic, Bayes factor or "
+"effect size is available (see Data Diagnostics)"
+msgstr ""
+
 #: R/outcomeorganizer.b.R
 msgid "- Cox proportional hazards for multivariable analysis"
 msgstr ""
@@ -414,6 +345,13 @@ msgid ""
 "no branch is pruned. Pick Level 1 (and optionally Level 2) from: {levels}."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"'{name}' takes the same value ({value}) in every row, so there is no "
+"variation to compare between groups. Check that the correct variable is "
+"selected."
+msgstr ""
+
 #: R/alluvial.b.R
 msgid ""
 "'{weight}' must be numeric (current type: {type}). Select a numeric variable "
@@ -501,6 +439,22 @@ msgid ""
 "set that selector back to left-closed and remove this note."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid ""
+"'Always Fisher's exact' is selected, but Fisher's exact test could not be "
+"computed for this table, and the Monte Carlo version of it failed as well. "
+"The Pearson chi-square result is shown instead. It relies on a large-sample "
+"approximation, so read it with that in mind, and consider merging sparse "
+"categories."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"'Central Tendency Precision' no longer has any effect - the statistics "
+"package dropped that setting. Use 'Statistical Precision (Decimal Places)' "
+"instead; it controls the centrality labels too."
+msgstr ""
+
 #: package/analyses/jjridges.description
 #: jjridges/options.description.main
 msgid ""
@@ -541,6 +495,12 @@ msgid ""
 "relationships in clinical data such as disease subtypes, treatment outcomes, "
 "or risk category distributions. Each square represents a proportion of the "
 "total sample, making it easy to see relative frequencies across categories.'"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"'Effect Size Measure' applies to the parametric test only. The {test} test "
+"reports its own effect size instead, so your selection was not used."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -1222,6 +1182,12 @@ msgstr ""
 
 #: R/advancedraincloud.b.R
 msgid "{name} must be a positive numeric value."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"{names} had no usable measurements and were excluded from the comparison "
+"entirely."
 msgstr ""
 
 #: R/agepyramid.b.R
@@ -2065,10 +2031,11 @@ msgstr ""
 msgid ""
 "%d of %d cells (%.0f%%) have an expected count below 5, above the usual 20%% "
 "limit. The chi-square approximation breaks down in that situation, so the "
-"overall p-value above is not dependable. Fisher's exact test, or merging "
-"categories that are sparse for substantive reasons, gives a p-value that "
-"does not rely on the approximation. Turn on the Assumptions check panel for "
-"the per-cell detail."
+"overall p-value above is not dependable. Set 'Statistical test selection' to "
+"'Always Fisher's exact' to replace it with an exact p-value that does not "
+"rely on the approximation, or merge categories that are sparse for "
+"substantive reasons. Turn on the Assumptions check panel for the per-cell "
+"detail."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -2388,6 +2355,12 @@ msgid ""
 "mada's default single-study 0.5 correction is applied inside the models; "
 "choose a Zero-Cell Correction option to see how sensitive the pooled "
 "estimates are."
+msgstr ""
+
+#: R/advancedraincloud.b.R
+msgid ""
+"%d subject(s) have missing intermediate or follow-up time points and are "
+"partially connected or unconnected without imputation."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -2727,12 +2700,24 @@ msgstr ""
 msgid "%s, analysed separately within each level of %s"
 msgstr ""
 
+#: R/jjbetweenstats.b.R
+msgid ""
+"%s: 'Equal variances' is ticked, so Student's test is being reported despite "
+"that. Untick it to use Welch's test, which does not assume equal variances."
+msgstr ""
+
 #: R/outcomeorganizer.b.R
 msgid "%s: %d event(s), %d censored, %d competing, %d missing."
 msgstr ""
 
 #: R/agreement.b.R
 msgid "%s: %s"
+msgstr ""
+
+#: R/jjbetweenstats.b.R
+msgid ""
+"%s: Data may not be normally distributed in group '%s' (Shapiro-Wilk p = "
+"%.3f, consider non-parametric)"
 msgstr ""
 
 #: R/outcomeorganizer.b.R
@@ -2744,6 +2729,16 @@ msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid "%s: F(%d, %.0f) = %.2f, p = %.4g"
+msgstr ""
+
+#: R/jjbetweenstats.b.R
+msgid ""
+"%s: Large sample (n = %d) in group '%s' shows substantial skewness (%.2f). "
+"Visual inspection recommended."
+msgstr ""
+
+#: R/jjbetweenstats.b.R
+msgid "%s: Minimum group size is %d (recommend ≥3)"
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -2759,6 +2754,10 @@ msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid "%s: QM(%d) = %.2f, p = %.4g"
+msgstr ""
+
+#: R/jjbetweenstats.b.R
+msgid "%s: Variances differ significantly between groups (Levene's test p = %.3f)."
 msgstr ""
 
 #: R/agreement.b.R
@@ -2864,11 +2863,11 @@ msgid ""
 msgstr ""
 
 #: jjdotplotstats/results/plot2.title
-msgid "`${dep} - {group} by {grvar}`"
+msgid "`${dep} - ${group} by ${grvar}`"
 msgstr ""
 
 #: jjdotplotstats/results/plot.title
-msgid "`${dep} - {group}`"
+msgid "`${dep} - ${group}`"
 msgstr ""
 
 #: jjdotchart/results/plot2.title
@@ -3378,19 +3377,21 @@ msgstr ""
 #: R/summarydata.b.R
 msgid ""
 "<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value "
-"&lt; 0.001; skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"
+"&lt; 0.001; skewness = {skewness}; kurtosis = {kurtosis} (Pearson, normal = "
+"3). {assessment}"
 msgstr ""
 
 #: R/summarydata.b.R
 msgid ""
 "<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value = "
-"{p}; skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"
+"{p}; skewness = {skewness}; kurtosis = {kurtosis} (Pearson, normal = 3). "
+"{assessment}"
 msgstr ""
 
 #: R/summarydata.b.R
 msgid ""
 "<br><em>Distribution diagnostics for {variable}:</em> skewness = {skewness}; "
-"kurtosis = {kurtosis}. {assessment}"
+"kurtosis = {kurtosis} (Pearson, normal = 3). {assessment}"
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -4775,6 +4776,19 @@ msgstr ""
 msgid "<strong>Analysis:</strong> %s with %d measurements per subject"
 msgstr ""
 
+#: R/jjbetweenstats.b.R
+msgid ""
+"<strong>Bonferroni Correction Guidance (Manual Application "
+"Required):</strong><br>You are testing %d endpoints. To control family-wise "
+"error rate at 5%%:<br>• <strong>Adjusted significance threshold: α = "
+"%.4f</strong><br>• Compare each p-value from the plots below to %.4f (NOT "
+"0.05)<br>• Only results with p < %.4f should be considered statistically "
+"significant<br>• Example: If cholesterol shows p = 0.03, it is NOT "
+"significant (0.03 > %.4f)<br> <strong>IMPORTANT:</strong> This correction is "
+"not applied automatically. You must manually compare reported p-values to "
+"the adjusted threshold."
+msgstr ""
+
 #: R/checkdata.b.R
 msgid "<strong>Clinical Trials:</strong> Regulatory compliance and data monitoring"
 msgstr ""
@@ -4797,6 +4811,16 @@ msgstr ""
 msgid ""
 "<strong>Continuous Y-variable:</strong> The outcome variable should be "
 "numeric and measurable."
+msgstr ""
+
+#: R/jjbetweenstats.b.R
+msgid ""
+"<strong>CRITICAL: MULTIPLE ENDPOINT TESTING WITHOUT "
+"CORRECTION</strong><br>You are testing %d dependent variables simultaneously "
+"without adjustment. This inflates your family-wise error rate from 5%% to "
+"approximately %.1f%%.<br><strong>RECOMMENDATION:</strong> Select a "
+"correction method to see guidance, or interpret all p-values cautiously "
+"acknowledging this inflated error rate."
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -4822,6 +4846,18 @@ msgstr ""
 msgid "<strong>ER H-Score</strong> (0-300) or Percentage (0-100)"
 msgstr ""
 
+#: R/jjbetweenstats.b.R
+msgid ""
+"<strong>FDR Correction Guidance (Manual Application "
+"Required):</strong><br>You are testing %d endpoints. To control false "
+"discovery rate at 5%% using Benjamini-Hochberg:<br>1. Rank all p-values from "
+"smallest to largest (p₁ ≤ p₂ ≤ ... ≤ p%d)<br>2. Find the largest i where: pᵢ "
+"≤ (i/%d) × 0.05<br>3. Reject hypotheses 1 through i<br>4. Collect p-values "
+"from plots below and apply this procedure in external software (e.g., R's "
+"p.adjust() function)<br> <strong>IMPORTANT:</strong> FDR correction requires "
+"manual calculation. This analysis does not automatically adjust p-values."
+msgstr ""
+
 #: R/checkdata.b.R
 msgid "<strong>Grade A:</strong> Excellent quality - ready for analysis"
 msgstr ""
@@ -4840,6 +4876,19 @@ msgstr ""
 
 #: R/mageeequation.b.R
 msgid "<strong>HER2 Status</strong> (positive/negative)"
+msgstr ""
+
+#: R/jjbetweenstats.b.R
+msgid ""
+"<strong>Holm Correction Guidance (Manual Application "
+"Required):</strong><br>You are testing %d endpoints. To apply Holm's "
+"step-down procedure:<br>1. Rank all p-values from smallest to largest<br>2. "
+"For the smallest p-value, use threshold: α = 0.05/%d = %.4f<br>3. For the "
+"second smallest, use: α = 0.05/%d = %.4f<br>4. Continue until a p-value "
+"fails to meet its threshold<br>5. All subsequent tests are considered "
+"non-significant<br> <strong>IMPORTANT:</strong> This correction requires "
+"manual application. Collect p-values from plots below and apply the "
+"step-down procedure."
 msgstr ""
 
 #: R/linechart.b.R
@@ -6584,8 +6633,23 @@ msgstr ""
 msgid "A 3% discount rate means $100 next year is worth $97 today"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"A Bayes factor near 1 means the data do not discriminate between the "
+"hypotheses - which is different from evidence of no difference, and is worth "
+"stating explicitly when you report it."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "a Bayesian analysis of variance"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "a Bayesian contingency table analysis"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "a Bayesian t-test"
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -6607,6 +6671,12 @@ msgid ""
 "no better than chance."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"A centrality type is selected but centrality plotting is switched off, so "
+"the type setting has no effect."
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid ""
 "A chi-square test of independence, without continuity correction, was "
@@ -6625,6 +6695,13 @@ msgid ""
 "A clinical scoring system was developed using %s regression with %d "
 "predictors and %s. The %s scoring method was applied to convert model "
 "coefficients to integer points. "
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"A comparison of {outcome} across {groups} groups of {factor} was performed "
+"using {test}, with {effect} reported as the effect size and a {level} per "
+"cent {interval} interval. {pairwise}"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -6751,6 +6828,10 @@ msgid ""
 "A hazard ratio above 1 means a higher instantaneous event rate and below 1 a "
 "lower one. It is a rate ratio, not a ratio of cumulative risks and not a "
 "difference in survival time."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "a heteroscedastic one-way comparison of trimmed means"
 msgstr ""
 
 #: R/dataquality.b.R
@@ -11825,6 +11906,10 @@ msgstr ""
 msgid "All ordinal/binary"
 msgstr ""
 
+#: jjdotplotstats/options/pairwisedisplay/all.title
+msgid "All pairs"
+msgstr ""
+
 #: bayesiannetworkma/results/pairwiseComparisons.title
 msgid "All Pairwise Comparisons"
 msgstr ""
@@ -11876,12 +11961,6 @@ msgstr ""
 
 #: qualityoflife/options/comparison_domains/all_domains.title
 msgid "All QoL Domains"
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid ""
-"All ratio values must be positive (> 0). Negative or zero values are not "
-"allowed in proportion specifications. Using equal proportions as fallback."
 msgstr ""
 
 #: effectsize/results/results/comprehensiveEffectSizes.description
@@ -13404,6 +13483,10 @@ msgstr ""
 msgid "Analysis Summary in Plain Language"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "Analysis summary: {groups} groups, {total} total observations."
+msgstr ""
+
 #: ihcscoring/results/biomarkerspecific/biomarkerresults.description
 msgid "Analysis tailored to specific biomarker characteristics"
 msgstr ""
@@ -14919,6 +15002,14 @@ msgstr ""
 msgid "Assumptions and Caveats"
 msgstr ""
 
+#: jjdotplotstats/options/showexplanation.title
+msgid "Assumptions and interpretation"
+msgstr ""
+
+#: jjdotplotstats/results/explanation.title
+msgid "Assumptions and Interpretation"
+msgstr ""
+
 #: chisqposttest/options/showAssumptionsCheck.title
 msgid "Assumptions check"
 msgstr ""
@@ -15115,6 +15206,13 @@ msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid "At least two finite studies are required for %s"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"At least two groups with data are required for a comparison. Groups found "
+"with complete data: {found}. Please check for missing values or select "
+"different variables."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -17345,9 +17443,8 @@ msgstr ""
 msgid "Bayes Factor Analysis"
 msgstr ""
 
-#: jjdotchart/options/bfmessage.title
 #: jjdotplotstats/options/bfmessage.title
-msgid "Bayes factor interpretation"
+msgid "Bayes factor caption"
 msgstr ""
 
 #: jjbarstats/options/bfmessage.title
@@ -17863,6 +17960,10 @@ msgstr ""
 msgid "Before interpreting results, verify these assumptions:"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "Before you report this"
+msgstr ""
+
 #: grafify/options/experimental_design/before_after.title
 msgid "Before-After"
 msgstr ""
@@ -17985,6 +18086,14 @@ msgstr ""
 msgid ""
 "Benford's Law works best when data spans multiple orders of magnitude (e.g., "
 "values ranging from 10 to 1000+)."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Benjamini-Hochberg"
+msgstr ""
+
+#: jjdotplotstats/options/padjustmethod/fdr.title
+msgid "Benjamini-Hochberg (false discovery rate)"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -18563,6 +18672,10 @@ msgstr ""
 #: clinicalvalidation/results/bootstrapresults.columns.title
 #: simonmakuch/results/bootstrapValidation.columns.title
 msgid "Bias-Corrected"
+msgstr ""
+
+#: jjdotplotstats/options/effsizetype/unbiased.title
+msgid "Bias-corrected - Hedge's g with 2 groups, omega-squared with 3+"
 msgstr ""
 
 #: idi/options/bootstrap_method/bca.title
@@ -19624,6 +19737,7 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 #: R/jjcorrmat.b.R
+#: R/jjdotplotstats.b.R
 #: advancedanova/options/posthoc_method/bonferroni.title
 #: agreement/options/multipleTestCorrection/bonferroni.title
 #: categoricaladvanced/options/correction_method/bonferroni.title
@@ -19674,6 +19788,10 @@ msgstr ""
 
 #: jjbetweenstats/options/multiEndpointCorrection/bonferroni.title
 msgid "Bonferroni (manual guidance)"
+msgstr ""
+
+#: jjdotplotstats/options/padjustmethod/bonferroni.title
+msgid "Bonferroni (most conservative)"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -20806,6 +20924,7 @@ msgstr ""
 #: package/analyses/jjbetweenstats.title
 #: package/analyses/jjbetweenstats.menuTitle
 #: jjbetweenstats/options.title
+#: jjbetweenstats/ui.title
 #: jjbetweenstats/results.title
 msgid "Box-Violin Plots to Compare Between Groups"
 msgstr ""
@@ -24502,6 +24621,12 @@ msgstr ""
 
 #: jjwithinstats/options/centralitypath.title
 msgid "Centrality path"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Centrality plotting is enabled but the centrality parameter is set to none, "
+"so no centrality lines will be displayed."
 msgstr ""
 
 #: jjhistostats/ui[4][0].label
@@ -29741,6 +29866,7 @@ msgstr ""
 msgid "Cohen Kappa (Unweighted)"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
 #: advancedanova/results/tukey.columns.title
 #: advancedanova/results/gameshowell.columns.title
 #: advancedanova/results/dunnett.columns.title
@@ -29758,10 +29884,6 @@ msgstr ""
 
 #: psychopdaROC/results/effectSizeTable.columns.title
 msgid "Cohen's d (second)"
-msgstr ""
-
-#: jjdotplotstats/options/effsizetype/biased.title
-msgid "Cohen's d (standardized mean difference)"
 msgstr ""
 
 #: R/raincloud.b.R
@@ -31612,6 +31734,10 @@ msgid ""
 "index group. This approach, developed for antimicrobial and benefit-risk "
 "trials, avoids collapsing outcomes of differing severity into a single "
 "binary endpoint."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Comparing {groups} groups with N = {n} observations using a {test} test."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -34345,6 +34471,10 @@ msgstr ""
 #: labinterpret/results/interpretationTable.columns.title
 #: treatmenteffects/results/individual_effects.columns.title
 msgid "Confidence"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "confidence"
 msgstr ""
 
 #: ihcdiagnostic/results/differentialResults.columns.title
@@ -37794,10 +37924,6 @@ msgid ""
 "test."
 msgstr ""
 
-#: R/chisqposttest.b.R
-msgid "Counts are not whole numbers"
-msgstr ""
-
 #: R/decisioncurve.b.R
 msgid "Counts are projected to a population of {n} from the complete-case cohort."
 msgstr ""
@@ -37810,6 +37936,12 @@ msgstr ""
 
 #: agreement/options/heatmapShowCounts.title
 msgid "Counts in cells"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid ""
+"Counts must be finite, non-negative whole numbers. No test was computed. "
+"Supply observed frequencies rather than fractional weights."
 msgstr ""
 
 #: R/alluvial.b.R
@@ -39179,6 +39311,10 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "Creating riverplot object"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "credible"
 msgstr ""
 
 #: metaanalysis/results/networkResults.columns.title
@@ -41889,8 +42025,20 @@ msgid ""
 "selections."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Data contains no complete rows after filtering. Please check for missing "
+"values."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "Data contains no complete rows. Check the data."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Data contains no complete rows. Please check for missing values in your "
+"selected variables."
 msgstr ""
 
 #: R/nogoldstandard.b.R
@@ -42170,6 +42318,12 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "Data Processing Error:"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Data processing failed: {reason}. Please check your variable selections and "
+"try again."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -43169,7 +43323,6 @@ msgstr ""
 #: icccoeff/options/decimal_places.title
 #: jjbetweenstats/options/k.title
 #: jjcorrmat/options/k.title
-#: jjdotchart/options/k.title
 #: jjhistostats/options/digits.title
 #: jjscatterstats/options/k.title
 #: jjwithinstats/options/k.title
@@ -43185,6 +43338,10 @@ msgstr ""
 
 #: jjbarstats/ui[3][1][0]/digitsperc.label
 msgid "Decimal places (percentages)"
+msgstr ""
+
+#: jjdotchart/options/k.title
+msgid "Decimal Places (plot annotation)"
 msgstr ""
 
 #: jjbarstats/ui[3][1][0]/digits.label
@@ -44682,7 +44839,6 @@ msgstr ""
 
 #: package/analyses/advancedSurvivalPower.menuSubgroup
 #: package/analyses/classicalSurvivalPower.menuSubgroup
-#: package/analyses/survivalPower.menuSubgroup
 #: package/analyses/competingRisksPower.menuSubgroup
 #: package/analyses/comprehensiveSurvivalPower.menuSubgroup
 #: package/analyses/simpleSurvivalPower.menuSubgroup
@@ -44691,7 +44847,6 @@ msgstr ""
 #: competingRisksPower/options.menuSubgroup
 #: comprehensiveSurvivalPower/options.menuSubgroup
 #: simpleSurvivalPower/options.menuSubgroup
-#: survivalPower/options.menuSubgroup
 msgid "Design and Power Analysis"
 msgstr ""
 
@@ -50104,6 +50259,12 @@ msgstr ""
 msgid "Each category should have sufficient sample size for reliable percentages"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Each group is drawn as a violin (the shape of its distribution), a boxplot "
+"(median and quartiles) and its individual observations."
+msgstr ""
+
 #: R/jjwithinstats.b.R
 msgid ""
 "Each measurement must be a different variable ('{var}' is selected more than "
@@ -51355,6 +51516,10 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "Enable 'Show RECIST Thresholds' for clinical interpretation"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "Enable \"Statistical results\" to show that exact value on the chart."
 msgstr ""
 
 #: stagemigration/options/enableAccessibilityFeatures.description
@@ -53108,6 +53273,7 @@ msgstr ""
 
 #: R/categorize.b.R
 #: R/dataquality.b.R
+#: R/jjdotplotstats.b.R
 #: R/oddsratio.b.R
 #: R/timeinterval.b.R
 #: crosstable/results/errorNotice.title
@@ -53426,12 +53592,6 @@ msgid ""
 "Error parsing datetimes with format {fmt}. • Parser error: {msg} • Try "
 "selecting a different format. • Check that your data matches the selected "
 "format."
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid ""
-"Error parsing ratio specification: %s. Please use comma-separated decimal "
-"values (e.g., \"0.5,0.5\"). Using equal proportions as fallback."
 msgstr ""
 
 #: jjpubr/options/plotType/errorplot.title
@@ -53995,10 +54155,6 @@ msgstr ""
 msgid "Eta-squared"
 msgstr ""
 
-#: jjdotplotstats/options/effsizetype/eta.title
-msgid "Eta-squared (variance explained)"
-msgstr ""
-
 #: effectsize/options/measures_eta_squared.title
 #: nonparametric/options/effect_size_method/eta_squared.title
 msgid "Eta-squared (η²)"
@@ -54008,6 +54164,10 @@ msgstr ""
 msgid ""
 "Eta-squared can be used for 2 groups, but Cliff's Delta may provide more "
 "intuitive interpretation."
+msgstr ""
+
+#: jjdotplotstats/options/effsizetype/eta.title
+msgid "Eta-squared with 3+ groups (Cohen's d with 2 groups)"
 msgstr ""
 
 #: effectsize/results/results/varianceExplained.description
@@ -55092,6 +55252,10 @@ msgid ""
 "Every one of the %s patients is set to <i>%s</i> = each level in turn%s, a "
 "survival curve is predicted for each patient from the fitted model, and "
 "those curves are averaged. The procedure repeats for every level."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "every pair of groups"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -59367,6 +59531,10 @@ msgstr ""
 #: fragilityindex/options/testType/fisher.title
 #: gtsummary/options/testMethod/fisher.test.title
 msgid "Fisher's exact test"
+msgstr ""
+
+#: R/chisqposttest.b.R
+msgid "Fisher's exact test (Monte Carlo, B = 2000)"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -65161,6 +65329,20 @@ msgstr ""
 msgid "Groups defined by empirical quantiles of the Cox relative-risk score"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "Groups do NOT have to share the same spread."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Groups do NOT have to share the same spread. Welch's correction is used "
+"throughout, which is why the degrees of freedom are fractional."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Groups dropped"
+msgstr ""
+
 #: explainableai/results/globalexplanations/featureclusteringtable.description
 msgid "Groups of similar features"
 msgstr ""
@@ -65169,6 +65351,13 @@ msgstr ""
 #: grouplasso/results/nestedCVResults.columns.title
 #: sparsegrouplasso/results/comparisonTable.columns.title
 msgid "Groups Selected"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Groups should have a broadly similar distribution SHAPE if you want to read "
+"the result as a difference in medians; otherwise read it as stochastic "
+"dominance."
 msgstr ""
 
 #: R/jjridges.b.R
@@ -66189,10 +66378,7 @@ msgstr ""
 msgid "Hedge's g"
 msgstr ""
 
-#: jjdotplotstats/options/effsizetype/unbiased.title
-msgid "Hedge's g (unbiased, small samples)"
-msgstr ""
-
+#: R/jjdotplotstats.b.R
 #: advancedraincloud/options/effect_size_type/hedges_g.title
 #: effectsize/options/measures_hedges_g.title
 #: jextractggstats/options/effect_size_type/hedges_g.title
@@ -67507,6 +67693,7 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 #: R/jjcorrmat.b.R
+#: R/jjdotplotstats.b.R
 #: advancedanova/options/posthoc_method/holm.title
 #: agreement/options/multipleTestCorrection/holm.title
 #: categoricaladvanced/options/correction_method/holm.title
@@ -67554,6 +67741,10 @@ msgstr ""
 
 #: jjbetweenstats/options/multiEndpointCorrection/holm.title
 msgid "Holm (manual guidance)"
+msgstr ""
+
+#: jjdotplotstats/options/padjustmethod/holm.title
+msgid "Holm (recommended)"
 msgstr ""
 
 #: geemodel/options/posthoc_adjust/holm.title
@@ -69812,6 +70003,10 @@ msgstr ""
 #: stagemigration/ui[9][2]/forestImportanceType.label
 #: stagemigration/results/forestVariableImportance.columns.title
 msgid "Importance Type"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Important"
 msgstr ""
 
 #: R/venn.b.R
@@ -73783,6 +73978,10 @@ msgid ""
 "correct."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "Invalid frequency counts"
+msgstr ""
+
 #: R/survivalcont.b.R
 msgid "Invalid landmark time"
 msgstr ""
@@ -74499,7 +74698,19 @@ msgstr ""
 msgid "Jittered"
 msgstr ""
 
+#: package/analyses/advancedraincloud.menuGroup
+#: package/analyses/jjdotplotstats.menuGroup
+#: package/analyses/jjbetweenstats.menuGroup
+#: package/analyses/jjpiestats.menuGroup
 #: package/analyses/statsplot2.menuGroup
+#: package/analyses/jjsegmentedtotalbar.menuGroup
+#: package/analyses/jjdotchart.menuGroup
+#: advancedraincloud/options.menuGroup
+#: jjbetweenstats/options.menuGroup
+#: jjdotchart/options.menuGroup
+#: jjdotplotstats/options.menuGroup
+#: jjpiestats/options.menuGroup
+#: jjsegmentedtotalbar/options.menuGroup
 #: statsplot2/options.menuGroup
 msgid "JJStatsPlot"
 msgstr ""
@@ -74549,43 +74760,31 @@ msgstr ""
 
 #: package/analyses/hullplot.menuGroup
 #: package/analyses/raincloud.menuGroup
-#: package/analyses/advancedraincloud.menuGroup
 #: package/analyses/jjhistostats.menuGroup
 #: package/analyses/jjscatterstats.menuGroup
 #: package/analyses/jjsyndromicplot.menuGroup
 #: package/analyses/pcaloadingheatmap.menuGroup
 #: package/analyses/jjcorrmat.menuGroup
-#: package/analyses/jjdotplotstats.menuGroup
-#: package/analyses/jjbetweenstats.menuGroup
 #: package/analyses/jjwithinstats.menuGroup
 #: package/analyses/jjbarstats.menuGroup
-#: package/analyses/jjpiestats.menuGroup
 #: package/analyses/jwaffle.menuGroup
 #: package/analyses/linechart.menuGroup
 #: package/analyses/lollipop.menuGroup
 #: package/analyses/jjarcdiagram.menuGroup
 #: package/analyses/jjridges.menuGroup
 #: package/analyses/basegraphics.menuGroup
-#: package/analyses/jjsegmentedtotalbar.menuGroup
 #: package/analyses/jjpubr.menuGroup
 #: package/analyses/jjcoefstats.menuGroup
-#: package/analyses/jjdotchart.menuGroup
-#: advancedraincloud/options.menuGroup
 #: basegraphics/options.menuGroup
 #: hullplot/options.menuGroup
 #: jjarcdiagram/options.menuGroup
 #: jjbarstats/options.menuGroup
-#: jjbetweenstats/options.menuGroup
 #: jjcoefstats/options.menuGroup
 #: jjcorrmat/options.menuGroup
-#: jjdotchart/options.menuGroup
-#: jjdotplotstats/options.menuGroup
 #: jjhistostats/options.menuGroup
-#: jjpiestats/options.menuGroup
 #: jjpubr/options.menuGroup
 #: jjridges/options.menuGroup
 #: jjscatterstats/options.menuGroup
-#: jjsegmentedtotalbar/options.menuGroup
 #: jjsyndromicplot/options.menuGroup
 #: jjwithinstats/options.menuGroup
 #: jwaffle/options.menuGroup
@@ -76407,6 +76606,10 @@ msgstr ""
 #: riverplot/options/large_dataset_mode.title
 #: stagemigration/options/optimizeForLargeDatasets.title
 msgid "Large Dataset Optimization"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Large dataset processed in {seconds} seconds."
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -79063,6 +79266,14 @@ msgstr ""
 
 #: bayesianmetaanalysis/results/modelComparison.columns.title
 msgid "LOOIC"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Looking for a Cleveland dot chart - one summary point per group, tested "
+"against a reference value? Use 'Dot Chart (Summary vs Reference Value)' "
+"instead. This analysis uses every observation and compares the groups with "
+"each other."
 msgstr ""
 
 #: advancedSurvivalPower/options/loss_followup.title
@@ -81772,6 +81983,13 @@ msgstr ""
 msgid "MCMC Trace Plots"
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid ""
+"McNemar analysis requires paired categorical observations with matching "
+"category coding. Pairs must be independent of one another. An "
+"independent-samples Fisher test is not a replacement."
+msgstr ""
+
 #: package/analyses/contTablesPaired.menuSubtitle
 #: package/analyses/contTablesPaired.description
 #: contTablesPaired/options.menuSubtitle
@@ -81839,11 +82057,15 @@ msgid "McNemar χ²"
 msgstr ""
 
 #: R/jjpiestats.b.R
-msgid "McNemar's test"
+msgid "McNemar's exact test, a binomial test on the discordant pairs"
 msgstr ""
 
 #: outbreakanalysis/options/statistical_tests/mcnemar.title
 msgid "McNemar's Test (Matched)"
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid "McNemar's test without continuity correction"
 msgstr ""
 
 #: ncvregcox/options/penalty/MCP.title
@@ -81928,10 +82150,6 @@ msgstr ""
 
 #: jjdotplotstats/options/centralitytype/parametric.title
 msgid "Mean (average value, sensitive to outliers)"
-msgstr ""
-
-#: jjdotplotstats/options/centralityparameter/mean.title
-msgid "Mean (average, affected by outliers)"
 msgstr ""
 
 #: jjbetweenstats/options/centralitytype/parametric.title
@@ -82941,7 +83159,6 @@ msgid "Median (IQR)"
 msgstr ""
 
 #: jjdotplotstats/options/centralitytype/nonparametric.title
-#: jjdotplotstats/options/centralityparameter/median.title
 msgid "Median (middle value, robust to outliers)"
 msgstr ""
 
@@ -84477,10 +84694,6 @@ msgstr ""
 msgid "Method for selecting spline knots"
 msgstr ""
 
-#: chisqposttest/options/testSelection.description
-msgid "method for selecting statistical test for pairwise comparisons"
-msgstr ""
-
 #: qtwist/options/tau_selection.description
 msgid ""
 "Method for selecting time horizon (tau). User-specified allows manual entry; "
@@ -84810,6 +85023,10 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "Methods Section:"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Methods sentence you can copy"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -89567,6 +89784,7 @@ msgstr ""
 msgid "Multiple Comparison"
 msgstr ""
 
+#: jjdotplotstats/options/padjustmethod.title
 #: rmstregression/options/adjustment_method.title
 msgid "Multiple Comparison Adjustment"
 msgstr ""
@@ -91977,6 +92195,10 @@ msgstr ""
 msgid "No"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "no"
+msgstr ""
+
 #: R/swimmerplot.b.R
 msgid ""
 "No 'Custom Reference Date' provided; using 'Custom Reference Time' as an "
@@ -92016,6 +92238,10 @@ msgstr ""
 
 #: lollipop/options/aggregation/none.title
 msgid "No Aggregation (Plot All Points)"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "No Bayes factor caption is shown because {reason}."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -92359,6 +92585,12 @@ msgid ""
 "detected; this does not establish that they are the same"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"No distributional assumption. The test compares ranks, so it answers whether "
+"one group tends to give higher values, not whether the means differ."
+msgstr ""
+
 #: R/agepyramid.b.R
 msgid ""
 "No entry in 'Custom age breaks' could be read as a number, so the age bands "
@@ -92644,6 +92876,10 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "no pairwise comparisons (post-hoc method set to None)"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "No pairwise comparisons were drawn."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -93828,6 +94064,7 @@ msgstr ""
 #: jjarcdiagram/options/sortNodes/none.title
 #: jjcoefstats/options/pValueDisplay/none.title
 #: jjcorrmat/options/padjustmethod/none.title
+#: jjdotplotstats/options/pairwisedisplay/none.title
 #: jjpubr/options/legendPosition/none.title
 #: jjradarplot/options/legendPosition/none.title
 #: jjridges/options/p_adjust_method/none.title
@@ -93908,6 +94145,10 @@ msgstr ""
 
 #: jjdotplotstats/options/centralityparameter/none.title
 msgid "None (no central line)"
+msgstr ""
+
+#: jjdotplotstats/options/padjustmethod/none.title
+msgid "None (not recommended)"
 msgstr ""
 
 #: ihcsurvival/options/fdrMethod/none.title
@@ -94694,6 +94935,7 @@ msgstr ""
 #: R/categorize.b.R
 #: R/checkdata.b.R
 #: R/enhancedROC.b.R
+#: R/jjdotplotstats.b.R
 #: agreement/results/levelInfoTable.columns.title
 #: checkdata/results/outlierMethodSummary.columns.title
 #: exacttests/results/note.title
@@ -94730,6 +94972,21 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "NOTE:"
+msgstr ""
+
+#: R/jjbetweenstats.b.R
+msgid ""
+"Note: 'Bayes factor message' has no effect here. A Bayes factor caption is "
+"available only for a parametric comparison of exactly two groups; for other "
+"statistical approaches, or three or more groups, no Bayes factor is reported."
+msgstr ""
+
+#: R/jjbetweenstats.b.R
+msgid ""
+"Note: 'Equal variances' applies to the overall test only. The pairwise "
+"brackets are computed by ggstatsplot and always use the Welch-type "
+"(Games-Howell) comparison, which does not assume equal variances, so they "
+"may disagree with the overall result shown in the subtitle."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -94905,6 +95162,14 @@ msgstr ""
 
 #: R/jjbetweenstats.b.R
 msgid ""
+"Note: the non-parametric p-value is computed from the normal approximation "
+"with a continuity correction, not the exact test. For small samples without "
+"ties, stats::wilcox.test() in R defaults to the exact test and may report a "
+"slightly different p-value."
+msgstr ""
+
+#: R/jjbetweenstats.b.R
+msgid ""
 "Note: the plot subtitle fell back to the package default (%s), so 'Equal "
 "variances', 'Effect size type' and 'Decimal places' did not affect the "
 "reported statistic. Welch's variant and the default effect size were used."
@@ -94943,6 +95208,12 @@ msgid ""
 "estimate is 0 throughout. The asymptotic Aalen-Johansen interval degenerates "
 "to 0%-0% at this boundary and is therefore left blank; absence of observed "
 "events does not prove zero population risk."
+msgstr ""
+
+#: R/jjbetweenstats.b.R
+msgid ""
+"NOTE: this test could not be computed for the present data - do not report "
+"it; choose a different statistical approach before using this text."
 msgstr ""
 
 #: R/linechart.b.R
@@ -96738,6 +97009,23 @@ msgstr ""
 msgid "Observations are censored at a specified administrative date."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "Observations are independent."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Observations are independent. Repeated measurements on the same patient, or "
+"several blocks from one specimen, break this and need a paired or mixed "
+"model instead."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Observations are independent. With small groups, trimming 20 percent from "
+"each tail can leave very few values - check the per-group sizes."
+msgstr ""
+
 #: R/benford.b.R
 msgid ""
 "Observations falling in the 2 most-deviating leading-digit bins. This is bin "
@@ -97192,12 +97480,12 @@ msgstr ""
 msgid "Omega-squared"
 msgstr ""
 
-#: jjdotplotstats/options/effsizetype/omega.title
-msgid "Omega-squared (adjusted variance explained)"
-msgstr ""
-
 #: effectsize/options/measures_omega_squared.title
 msgid "Omega-squared (ω²)"
+msgstr ""
+
+#: jjdotplotstats/options/effsizetype/omega.title
+msgid "Omega-squared with 3+ groups (Hedge's g with 2 groups)"
 msgstr ""
 
 #: pathsampling/options/analysisContext/omentum.title
@@ -97210,6 +97498,10 @@ msgstr ""
 
 #: treatmentmeta/results/sensitivity.columns.title
 msgid "Omitted Study"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "omnibus comparison across all groups"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -97735,6 +98027,22 @@ msgid ""
 "survivors of that filtering. The levels you assigned (%s) cover every value "
 "that IS present, so this is missing data rather than a mis-selected level. "
 "Check that the outcome column is complete before reporting these numbers."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid ""
+"Only %d of the %d pairs are discordant. McNemar's chi-square is an "
+"asymptotic test on the discordant pairs alone, so below about 25 of them it "
+"is anti-conservative. The exact binomial test on those pairs gives "
+"<b>%s</b>; quote that value."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid ""
+"Only %d of the %d pairs disagree. McNemar's chi-square is an asymptotic test "
+"on the discordant pairs alone and is anti-conservative below about 25 of "
+"them, and the plotting package computes it without a continuity correction. "
+"The exact binomial test on the discordant pairs gives %s. %s"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -98955,6 +99263,10 @@ msgstr ""
 #: package/analyses/door.menuSubtitle
 #: door/options.menuSubtitle
 msgid "Ordinal Benefit-Risk Comparison of Two Groups"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "ordinal epsilon-squared"
 msgstr ""
 
 #: package/analyses/ordinalmixedmodel.title
@@ -102007,6 +102319,7 @@ msgstr ""
 #: jextractggstats/options/extract_components/pairwise_data.title
 #: jextractggstats/options/pairwise_comparisons.title
 #: jjbetweenstats/ui[1][2].label
+#: jjdotplotstats/options/pairwisedisplay.title
 #: jjwithinstats/ui[1][2].label
 #: mediansurvival/results/comparisonTable.title
 #: survival/ui[3][4].label
@@ -102027,6 +102340,20 @@ msgstr ""
 
 #: nonparametric/ui[3][0]/post_hoc.label
 msgid "Pairwise Comparisons (Post-hoc Tests)"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Pairwise comparisons are shown without any adjustment for multiple testing. "
+"With {groups} groups that is {pairs} comparisons, so even if no groups truly "
+"differ there is about a {risk} percent chance that at least one of them "
+"reaches significance. Use Holm unless you have a specific reason not to."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Pairwise comparisons between {which} are shown as brackets, with "
+"{adjustment} adjustment for multiple testing."
 msgstr ""
 
 #: enhancedROC/results/results/rocComparisons.description
@@ -102935,6 +103262,10 @@ msgstr ""
 msgid "Partial Effect Plots"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "partial eta-squared"
+msgstr ""
+
 #: effectsize/options/measures_partial_eta_squared.title
 msgid "Partial Eta-squared (ηₚ²)"
 msgstr ""
@@ -102969,6 +103300,10 @@ msgstr ""
 #: R/lassocox.b.R
 #: adaptivelasso/options/cv_measure/deviance.title
 msgid "Partial Likelihood Deviance"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "partial omega-squared"
 msgstr ""
 
 #: partialcorrelation/results/partialCorr.columns.title
@@ -108765,6 +109100,13 @@ msgstr ""
 msgid "Population Impact Measures"
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid ""
+"Population is declared as '%s'. This setting applies an analytical label to "
+"the study report; adherence and protocol deviations are assumed as specified "
+"by the investigator."
+msgstr ""
+
 #: excessmortality/options/expectedRate/population.title
 msgid "Population life tables"
 msgstr ""
@@ -109740,6 +110082,10 @@ msgid ""
 "fitting."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "Potential outliers detected in {name}: {count}."
+msgstr ""
+
 #: R/summarydata.b.R
 msgid ""
 "Potential outliers flagged using the IQR method (values beyond "
@@ -109821,19 +110167,15 @@ msgstr ""
 msgid "Power Advantage"
 msgstr ""
 
-#: package/analyses/survivalPower.menuTitle
 #: package/analyses/simpleSurvivalPower.menuTitle
 #: assayoptimization/options/power_analysis.title
 #: effectsize/options/power_analysis.title
 #: simpleSurvivalPower/options.menuTitle
-#: survivalPower/options.menuTitle
 msgid "Power Analysis"
 msgstr ""
 
-#: package/analyses/survivalPower.menuSubtitle
 #: ihcheterogeneity/options/power_analysis.title
 #: ihcheterogeneity/ui[3]/power_analysis.label
-#: survivalPower/options.menuSubtitle
 msgid "Power analysis"
 msgstr ""
 
@@ -110044,6 +110386,11 @@ msgstr ""
 
 #: clinicaltrialdesign/results/sensitivity_analysis.description
 msgid "Power/sample size sensitivity across parameter ranges"
+msgstr ""
+
+#: package/analyses/survivalPower.menuGroup
+#: survivalPower/options.menuGroup
+msgid "PowerT"
 msgstr ""
 
 #: jpps/results/correlation_comparison.columns.title
@@ -111667,6 +112014,10 @@ msgstr ""
 msgid "Prepare for Decision Curve Analysis"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "Preparing analysis options..."
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid "Preparing pie chart analysis options..."
 msgstr ""
@@ -112789,6 +113140,10 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Processing data for pie chart analysis..."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Processing data for the comparison..."
 msgstr ""
 
 #: nonparametricregression/options/multivariate_method/product.title
@@ -115516,6 +115871,7 @@ msgstr ""
 #: decisioncurve/ui[7][0]/seed.label
 #: enhancedROC/options/seed.title
 #: jjdotchart/options/seed.title
+#: jjdotplotstats/options/seed.title
 #: lassocox/options/random_seed.title
 #: lassocox/ui[6][0].label
 #: nogoldstandard/ui[2][0]/seed.label
@@ -116433,13 +116789,6 @@ msgstr ""
 msgid "Ratio of treatment to control group sizes (1 = balanced)."
 msgstr ""
 
-#: R/jjpiestats.b.R
-msgid ""
-"Ratio specification contains non-numeric values. Expected format: "
-"\"0.5,0.5\" for two equal groups or \"0.25,0.5,0.25\" for three groups. "
-"Using equal proportions as fallback."
-msgstr ""
-
 #: enhancedROC/options/imbalanceThreshold.description
 msgid "Ratio threshold for imbalance detection (e.g., 3.0 means 3:1 or 1:3 ratio)"
 msgstr ""
@@ -116460,12 +116809,6 @@ msgstr ""
 #: greyzoneroc/results/greyZoneBoundaries.columns.title
 #: rmstregression/results/tauSelection.columns.title
 msgid "Rationale"
-msgstr ""
-
-#: R/jjpiestats.b.R
-msgid ""
-"Ratios must sum to 1.0 but your values sum to %s. Example valid input: "
-"\"0.3,0.7\" (sums to 1.0). Using equal proportions as fallback."
 msgstr ""
 
 #: decision/results/rawCounts.title
@@ -116639,6 +116982,10 @@ msgstr ""
 
 #: R/decisioncombine.b.R
 msgid "Reading the columns"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Reading the figure"
 msgstr ""
 
 #: R/benford.b.R
@@ -119009,6 +119356,7 @@ msgstr ""
 msgid "Representativeness:"
 msgstr ""
 
+#: jjdotplotstats/ui[5][1].label
 #: permutationsurvival/ui[1][0][2].label
 #: treeadvanced/ui[6].label
 #: treemedical/ui[5].label
@@ -121307,6 +121655,10 @@ msgstr ""
 msgid "Robust"
 msgstr ""
 
+#: jjdotplotstats/options/typestatistics/robust.title
+msgid "Robust (20 percent trimmed means, handles outliers)"
+msgstr ""
+
 #: jjhistostats/options/typestatistics/robust.title
 msgid "Robust (bootstrap-t, trimmed mean)"
 msgstr ""
@@ -121334,10 +121686,6 @@ msgstr ""
 
 #: jjhistostats/options/centralitytype/robust.title
 msgid "Robust (Trimmed Mean)"
-msgstr ""
-
-#: jjdotplotstats/options/typestatistics/robust.title
-msgid "Robust (trimmed means, handles outliers)"
 msgstr ""
 
 #: jjbetweenstats/options/typestatistics/robust.title
@@ -122256,8 +122604,19 @@ msgstr ""
 msgid "Rows Excluded (Missing Data)"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Rows excluded because {name} held an infinite value: {count}. Infinite "
+"values usually indicate a division by zero or an out-of-range entry - check "
+"the source data."
+msgstr ""
+
 #: R/crosstable.b.R
 msgid "Rows excluded for missing values"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Rows excluded for missing values in the analysis variables: {dropped}."
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -122304,6 +122663,10 @@ msgid ""
 "ticked. Counting missing values as a category of their own would add a row "
 "or a column to the table and change the degrees of freedom of the chi-square "
 "test."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Rows with data: {kept} of {total} ({percent} percent)."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -124762,6 +125125,12 @@ msgstr ""
 msgid ""
 "Select a categorical variable, or group the values with Data > Transform "
 "first."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Select a continuous dependent variable and a categorical grouping variable "
+"to begin."
 msgstr ""
 
 #: survival/options/rcs_variable.description
@@ -127343,6 +127712,10 @@ msgstr ""
 msgid "Show Clinical Annotations"
 msgstr ""
 
+#: advancedraincloud/options/show_clinical_cutoff.title
+msgid "Show Clinical Cutoff"
+msgstr ""
+
 #: clinicalvalidationinteractive/options/show_clinical_guidance.title
 msgid "Show Clinical Decision Guidance"
 msgstr ""
@@ -128642,6 +129015,11 @@ msgstr ""
 msgid "Show Lesion-Level Table"
 msgstr ""
 
+#: jjdotplotstats/options/centralityparameter/mean.title
+#: jjdotplotstats/options/centralityparameter/median.title
+msgid "Show line (measure taken from Central Tendency Measure)"
+msgstr ""
+
 #: pathsampling/options/showLNAnalysis.title
 msgid "Show LN Ratio & Staging"
 msgstr ""
@@ -129549,6 +129927,10 @@ msgstr ""
 
 #: tidyplots/options/showReferenceLines.title
 msgid "Show Reference Lines"
+msgstr ""
+
+#: advancedraincloud/options/show_reference_range.title
+msgid "Show Reference Range"
 msgstr ""
 
 #: diagnosticsamplesize/options/show_references.title
@@ -131006,6 +131388,10 @@ msgstr ""
 msgid "Significant optimization potential; classifier may benefit from recalibration"
 msgstr ""
 
+#: jjdotplotstats/options/pairwisedisplay/significant.title
+msgid "Significant pairs only"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid "Significantly different"
 msgstr ""
@@ -131923,6 +132309,12 @@ msgstr ""
 msgid ""
 "Small to moderate sample size may limit generalizability to broader patient "
 "populations."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Small total sample size (N = {n}). Statistical tests may be unreliable below "
+"30 observations. Interpret the result cautiously or collect more data."
 msgstr ""
 
 #: vartree/options/useprunesmaller.title
@@ -139547,8 +139939,17 @@ msgid ""
 msgstr ""
 
 #: package/analyses/survivalPower.title
+#: package/analyses/survivalPower.menuSubgroup
+#: package/analyses/survivalPower.menuTitle
 #: survivalPower/options.title
+#: survivalPower/options.menuSubgroup
+#: survivalPower/options.menuTitle
 msgid "Survival Power Analysis"
+msgstr ""
+
+#: package/analyses/survivalPower.menuSubtitle
+#: survivalPower/options.menuSubtitle
+msgid "Survival Power analysis"
 msgstr ""
 
 #: clinicalprediction/results/survival_metrics.title
@@ -140014,7 +140415,6 @@ msgstr ""
 #: package/analyses/pcacox.menuGroup
 #: package/analyses/plscox.menuGroup
 #: package/analyses/conditionalsurvival.menuGroup
-#: package/analyses/survivalPower.menuGroup
 #: package/analyses/ncvregcox.menuGroup
 #: package/analyses/datevalidator.menuGroup
 #: package/analyses/groomecompare.menuGroup
@@ -140036,7 +140436,6 @@ msgstr ""
 #: relativesurvival/options.menuGroup
 #: rpasurvival/options.menuGroup
 #: sparsegrouplasso/options.menuGroup
-#: survivalPower/options.menuGroup
 #: timeroc/options.menuGroup
 msgid "SurvivalT"
 msgstr ""
@@ -142702,6 +143101,14 @@ msgid ""
 "%s. Choose the Custom preset if you want the values you entered to be used."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"The 'Effect Size Measure' setting does not reach the Split By panels: the "
+"statistics package computes one subtitle per panel internally and always "
+"uses its own default there. The single unsplit figure below honours your "
+"selection."
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "The 'Exclude missing values' box has no effect"
 msgstr ""
@@ -142765,6 +143172,13 @@ msgstr ""
 
 #: R/nonparametric.b.R
 msgid "The {} was conducted to compare groups."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"The {comparison} tells you that the groups differ, not by how much any one "
+"pair differs or whether that difference matters clinically. Read the effect "
+"size and its interval, not the p value alone."
 msgstr ""
 
 #: R/benford.b.R
@@ -143053,6 +143467,13 @@ msgstr ""
 msgid "the baseline visit must be present (default: time = 0)"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"The Bayes factor is computed against a default (Cauchy) prior on the effect "
+"size, not one elicited for your setting. Treat it as evidence strength under "
+"a conventional prior, not as a posterior probability that the groups differ."
+msgstr ""
+
 #: R/jjwithinstats.b.R
 msgid ""
 "the Bayes factor message is switched on, which ggstatsplot renders alongside "
@@ -143162,6 +143583,10 @@ msgid ""
 msgstr ""
 
 #: R/jjpiestats.b.R
+msgid "The chart subtitle reports that exact value."
+msgstr ""
+
+#: R/jjpiestats.b.R
 msgid ""
 "The chart subtitle still reports an uncorrected Pearson chi-square - no "
 "statistic option changes that, as the plotting package offers no exact test. "
@@ -143250,6 +143675,20 @@ msgid ""
 "low"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"The comparison is horizontal, so values run along the bottom axis and group "
+"labels down the side."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"The comparison uses 20 percent trimmed means, so the most extreme 20 percent "
+"at each end of every group is discarded before testing. This is the right "
+"choice when outliers are real measurements you do not want to delete but do "
+"not want to dominate the result either."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "The competing-risk CIF plot does not display {options}. The "
@@ -143279,6 +143718,14 @@ msgstr ""
 msgid ""
 "The confidence interval includes 1, so the data are compatible with no "
 "difference."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"The confidence interval on the effect size is obtained by resampling. It is "
+"computed with a fixed random seed ({seed}) so this figure reproduces "
+"exactly; change the seed under Plot Configuration to check that a borderline "
+"interval is not an artefact of one resample."
 msgstr ""
 
 #: R/dataquality.b.R
@@ -143372,13 +143819,6 @@ msgstr ""
 msgid ""
 "The counts variable '%s' does not exist in the data. Please select a valid "
 "numeric variable for counts."
-msgstr ""
-
-#: R/chisqposttest.b.R
-msgid ""
-"The counts variable contains non-integer values. A frequency table needs "
-"whole-number counts; the chi-square statistic was computed on the values as "
-"given, but they do not describe a table of observed cases."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -143635,6 +144075,13 @@ msgid ""
 "lower and higher marker values in this dataset."
 msgstr ""
 
+#: R/advancedraincloud.b.R
+msgid ""
+"The dataset contains %d observations. Rendering individual raw jitter points "
+"with transparency may increase render times; consider disabling data points "
+"or using boxplot/violin mode for faster display."
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The dataset contains no rows. Add data (or clear the active filter) and "
@@ -143854,6 +144301,19 @@ msgid ""
 "indicates a higher fitted subdistribution hazard for the event of interest."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"The effect size is estimated from the same Welch model as the test, so it "
+"will not match the value a classical equal-variance ANOVA reports for these "
+"data. That is expected, not an error."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"The effect size measure you selected could not be applied ({reason}), so the "
+"plot shows the statistics package default instead."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid ""
 "The endpoint of a decision path where final outcomes (costs, utilities) are "
@@ -143889,6 +144349,10 @@ msgid ""
 "Time Input Type to Date/Time (or supply numeric event times) to show them."
 msgstr ""
 
+#: R/chisqposttest.b.R
+msgid "The exact test could not be computed for the whole table"
+msgstr ""
+
 #: R/kappaSizeFixedN.b.R
 msgid "The expected lower bound for kappa is {bound}."
 msgstr ""
@@ -143899,6 +144363,10 @@ msgid ""
 "observes the anticipated kappa it will not be able to rule out agreement no "
 "better than chance. Enrol more subjects, add raters, or relax the "
 "significance level."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "the explanatory measure of effect size (xi)"
 msgstr ""
 
 #: R/survival.b.R
@@ -144254,6 +144722,7 @@ msgid ""
 msgstr ""
 
 #: R/crosstable.b.R
+#: R/jjdotplotstats.b.R
 msgid "the Kruskal-Wallis test"
 msgstr ""
 
@@ -144454,6 +144923,10 @@ msgstr ""
 msgid "The main variable to be plotted on the Y-axis."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "the Mann-Whitney U test"
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid ""
 "The maximum amount society is willing to pay for an additional unit of "
@@ -144488,9 +144961,15 @@ msgstr ""
 
 #: R/outlierdetection.b.R
 msgid ""
-"The MCD method needs the robustbase package, which is not available in this "
+"The MCD method needs the MASS package, which is not available in this "
 "session. Choose Mahalanobis distance or a univariate method instead, or "
 "reinstall the module."
+msgstr ""
+
+#: R/jjpiestats.b.R
+msgid ""
+"The McNemar chi-square reported by the plotting package is computed without "
+"a continuity correction, so it will not match the base R default."
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -144940,6 +145419,10 @@ msgid ""
 "analysis."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "the pairs that reached significance"
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid ""
 "The pairwise comparisons below were computed with the chi-square test and "
@@ -145001,6 +145484,13 @@ msgid ""
 "It is not a test of post-selection inference for the penalized estimator."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"The plot could not be drawn: {reason}. Check the dependent variable for "
+"constant values, extreme outliers or too few observations per group, or try "
+"a different statistical test."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "The point-scoring guide and the nomogram plot are shown below."
 msgstr ""
@@ -145038,6 +145528,10 @@ msgstr ""
 msgid ""
 "The post-hoc tests help identify which specific group combinations "
 "contribute to the significant overall effect."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "the posterior median difference"
 msgstr ""
 
 #: ppv/options/percTrue.description
@@ -145196,6 +145690,10 @@ msgid ""
 "Population Data table above are complete and unaffected. To get the ggcharts "
 "version, install the package with install.packages(\"ggcharts\") and re-run; "
 "otherwise clear the 'ggcharts pyramid' checkbox to hide the empty plot."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "the rank-biserial correlation"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -145378,6 +145876,10 @@ msgid ""
 "lowest risk groups."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "the robust (AKP) standardised difference"
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "the row and column variables"
 msgstr ""
@@ -145472,6 +145974,10 @@ msgid ""
 "less-penalized model was substituted."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "the selected effect size"
+msgstr ""
+
 #: R/outcomeorganizer.b.R
 msgid "the selected event type"
 msgstr ""
@@ -145528,6 +146034,10 @@ msgstr ""
 msgid ""
 "The selected stratification variable has fewer than two observed levels. The "
 "Cox model was not fitted."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "the selected test"
 msgstr ""
 
 #: R/raincloud.b.R
@@ -145701,6 +146211,12 @@ msgid ""
 "needs at least %s events and %s non-events, more distinct predicted "
 "probabilities than knots, and a converging fit. Reduce the number of knots "
 "or check the predictor. ICI, E50, E90 and Emax are left blank."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"The split figure could not be drawn: {reason}. Check that every level of the "
+"Split By variable has enough data in at least two groups."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -145978,6 +146494,13 @@ msgid ""
 "The UTC timezone setting applies only to the \"YYYY-MM-DD HH:MM:SS\" format, "
 "the only one carrying a time of day. These dates were read as \"{format}\", "
 "so they are calendar days and the timezone has no effect on the intervals."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"The values are roughly symmetric within each group. The test tolerates mild "
+"skew at these sample sizes but not a long tail or a floor/ceiling effect - "
+"read the violins."
 msgstr ""
 
 #: R/benford.b.R
@@ -146587,6 +147110,13 @@ msgid ""
 "assessment."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"This analysis compares a continuous variable across groups and draws the "
+"comparison horizontally, as a box-violin figure with the individual "
+"observations shown."
+msgstr ""
+
 #: R/tableone.b.R
 msgid ""
 "This analysis describes the overall cohort only. It does not compare groups "
@@ -146642,6 +147172,12 @@ msgid ""
 "This analysis has %d group(s) and %d fill level(s). The raincloud (ggrain) "
 "layer is skipped above 15 groups or 5 fill levels to keep the plot readable, "
 "in which case standard violin, boxplot and point layers are drawn instead."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"This analysis is built on the {pkg1} and {pkg2} packages; please cite jamovi "
+"and the packages listed below."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -150029,12 +150565,22 @@ msgstr ""
 msgid "Too few complete observations (%d). Need at least 10."
 msgstr ""
 
+#: R/jjpiestats.b.R
+msgid "Too few discordant pairs for McNemar"
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid "Too few non-degenerate predictor columns."
 msgstr ""
 
 #: R/agepyramid.b.R
 msgid "Too many age bands to draw"
+msgstr ""
+
+#: R/agepyramid.b.R
+msgid ""
+"Too many age bands to draw. Increase the bin width, use at most 200 bands, "
+"or choose an age group preset."
 msgstr ""
 
 #: R/alluvial.b.R
@@ -152819,6 +153365,7 @@ msgid ""
 msgstr ""
 
 #: R/jjbetweenstats.b.R
+#: R/jjdotplotstats.b.R
 msgid "two-group comparison"
 msgstr ""
 
@@ -153604,6 +154151,10 @@ msgstr ""
 
 #: waterfallrecist/results/recistSummary/responseDistribution.columns.title
 msgid "Unconfirmed (n)"
+msgstr ""
+
+#: jjdotplotstats/options/effsizetype/biased.title
+msgid "Uncorrected - Cohen's d with 2 groups, eta-squared with 3+"
 msgstr ""
 
 #: R/decision.b.R
@@ -156951,6 +157502,19 @@ msgstr ""
 msgid "Variable '{name}' not found in dataset. Please verify variable selection."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Variable '{name}' was not found in the data. Available variables are: "
+"{available}. Please select a valid continuous variable for the dependent "
+"variable."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Variable '{name}' was not found in the data. Available variables are: "
+"{available}. Please select a valid grouping variable."
+msgstr ""
+
 #: R/jjbarstats.b.R
 msgid ""
 "Variable '{var}' appears to be continuous ({n} unique values). Bar charts "
@@ -158781,6 +159345,13 @@ msgid ""
 "variable as continuous, or (3) collecting more data."
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid ""
+"Very small group sizes detected: the smallest is n = {n} in group '{group}'. "
+"Groups below 10 observations may produce unreliable test results. Consider "
+"combining groups or collecting more data."
+msgstr ""
+
 #: R/waterfall.b.R
 msgid "VERY SMALL SAMPLE"
 msgstr ""
@@ -158961,10 +159532,6 @@ msgstr ""
 #: jjwithinstats/results/plot.title
 #: vusanalysis/options/plot_type/violin.title
 msgid "Violin Plots"
-msgstr ""
-
-#: jjbetweenstats/ui.title
-msgid "Violin Plots to Compare Between Groups"
 msgstr ""
 
 #: jjwithinstats/results.title
@@ -159610,6 +160177,7 @@ msgstr ""
 #: R/categorize.b.R
 #: R/checkdata.b.R
 #: R/enhancedROC.b.R
+#: R/jjdotplotstats.b.R
 #: R/oddsratio.b.R
 #: R/reportcat.b.R
 #: R/timeinterval.b.R
@@ -159644,6 +160212,14 @@ msgstr ""
 
 #: R/sequentialtests.b.R
 msgid "WARNING: "
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Warning: {name} has fewer than 3 valid observations."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Warning: {name} has no variation - every value is the same."
 msgstr ""
 
 #: R/alluvial.b.R
@@ -160423,7 +160999,12 @@ msgstr ""
 msgid "Welch's Correction"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
+msgid "Welch's one-way analysis of variance"
+msgstr ""
+
 #: R/jjbetweenstats.b.R
+#: R/jjdotplotstats.b.R
 #: R/raincloud.b.R
 msgid "Welch's t-test"
 msgstr ""
@@ -160451,6 +161032,7 @@ msgstr ""
 msgid "Welcome screen shown when no variables selected"
 msgstr ""
 
+#: R/jjdotplotstats.b.R
 #: R/jjpiestats.b.R
 #: R/multisurvival.b.R
 #: R/oddsratio.b.R
@@ -160579,6 +161161,10 @@ msgstr ""
 
 #: R/vartree.b.R
 msgid "What it reports:"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "What this analysis assumes"
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -161029,6 +161615,13 @@ msgstr ""
 
 #: jextractggstats/options/extract_components.description
 msgid "Which statistical components to extract"
+msgstr ""
+
+#: chisqposttest/options/testSelection.description
+msgid ""
+"Which test to use. Automatic applies Fisher's exact test to any pairwise "
+"comparison whose expected counts fall below 5. Always Fisher's exact applies "
+"it to the overall table as well as to every pairwise comparison."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -162736,6 +163329,18 @@ msgstr ""
 
 #: sigmametrics/results/regulatoryCompliance.columns.title
 msgid "Your Result"
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid ""
+"Your two central-tendency settings disagree: 'Central Tendency Display' "
+"still carries the legacy value '{legacy}' while 'Central Tendency Measure' "
+"selects {selected}. The plot shows the {drawn}, because 'Central Tendency "
+"Display' only decides whether a line is drawn at all."
+msgstr ""
+
+#: R/jjdotplotstats.b.R
+msgid "Yuen's trimmed-mean test"
 msgstr ""
 
 #: datetimeconverter/options/datetime_format/ydm.title

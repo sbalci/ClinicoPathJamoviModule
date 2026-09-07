@@ -1740,7 +1740,7 @@ analyses:
   - title: Horizontal Box-Violin Comparison
     name: jjdotplotstats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Categorical vs Continuous
     menuTitle: Horizontal Box-Violin Comparison
     ribbon: analyses
