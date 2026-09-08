@@ -5,6 +5,8 @@
 #'
 #' @import jmvcore
 #' @importFrom caret confusionMatrix
+#' @importFrom boot boot boot.ci
+#' @importFrom htmltools htmlEscape
 #' @importFrom pROC roc
 #' @importFrom stats quantile binom.test glm predict
 #' @importFrom splines ns
