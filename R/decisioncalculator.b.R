@@ -76,7 +76,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     "</p></div><div style='font-size: 14px;'><p><strong>",
                     .("What this tool does:"),
                     "</strong></p><p>",
-                    .("Evaluates diagnostic-test performance by calculating sensitivity, specificity, predictive values, likelihood ratios, and advanced metrics from a 2×2 confusion matrix."),
+                    .("Evaluates diagnostic-test performance by calculating sensitivity, specificity, predictive values, likelihood ratios, and advanced metrics from a 2\u00d72 confusion matrix."),
                     "</p><p><strong>",
                     .("To get started:"),
                     "</strong></p><ol style='margin: 10px 0; padding-left: 25px;'><li>",

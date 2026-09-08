@@ -166,6 +166,8 @@ bootstrapNRI <- function(new_values, ref_values, actual,
 #' @param actual Binary outcome vector (0/1)
 #' @param direction Classification direction
 #' @param thresholds Risk category thresholds (NULL for continuous NRI)
+#' @param warn Emit a warning when the logistic calibration shows separation or
+#'   fails to converge. Set to `FALSE` inside bootstrap replicates.
 #' @return List containing NRI components
 computeNRI <- function(new_values, ref_values, actual,
                        direction = ">=", thresholds = NULL, warn = TRUE) {

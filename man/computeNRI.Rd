@@ -23,6 +23,9 @@ computeNRI(
 \item{direction}{Classification direction}
 
 \item{thresholds}{Risk category thresholds (NULL for continuous NRI)}
+
+\item{warn}{Emit a warning when the logistic calibration shows separation or
+fails to converge. Set to \code{FALSE} inside bootstrap replicates.}
 }
 \value{
 List containing NRI components
