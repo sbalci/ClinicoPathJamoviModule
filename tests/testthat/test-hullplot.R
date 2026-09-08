@@ -143,7 +143,7 @@ test_that("hullplot handles different hull parameters", {
       x_var = "annual_spending",
       y_var = "purchase_frequency",
       group_var = "segment",
-      hull_concavity = 0.5
+      hull_concavity = 1
     )
   })
   
@@ -424,6 +424,10 @@ test_that("hullplot integration features work correctly", {
 })
 
 test_that("hullplot handles edge cases", {
+  # Every other test in this file guards on the installed package; this one did
+  # not, so it was the single hard failure whenever ClinicoPath is not installed.
+  skip_if_not_installed("ClinicoPath")
+
   # Create minimal dataset
   minimal_data <- data.frame(
     x = c(1, 2, 3, 4, 5),
@@ -453,7 +457,7 @@ test_that("hullplot parameter validation works", {
       x_var = "annual_spending",
       y_var = "purchase_frequency",
       group_var = "segment",
-      hull_concavity = 0,  # Min value
+      hull_concavity = 1,  # Min value
       hull_alpha = 1,     # Max value
       point_alpha = 0.1   # Low value
     )

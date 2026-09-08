@@ -358,7 +358,7 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjdotplotstats",
-                version = c(1,0,9),
+                version = c(1,0,8),
                 options = options,
                 results = jjdotplotstatsResults$new(options=options),
                 data = data,

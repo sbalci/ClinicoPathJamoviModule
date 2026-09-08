@@ -4,10 +4,29 @@ title: Hull Plot
 jrs:   '1.1'
 
 items:
+    # Declared FIRST so errors and data-quality warnings render ABOVE the plot
+    # they qualify. They used to sit inside the interpretation guide, which is
+    # below the figure and below two optional tables.
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+          - x_var
+          - y_var
+          - group_var
+          - color_var
+          - size_var
+
     - name: todo
       title: Instructions
       type: Html
       visible: true
+      clearWith:
+          - x_var
+          - y_var
+          - group_var
+          - color_var
+          - size_var
 
     - name: plot
       title: Hull Plot
@@ -38,25 +57,55 @@ items:
       title: Group Statistics
       type: Html
       visible: (show_statistics)
+      clearWith:
+          - x_var
+          - y_var
+          - group_var
+          - color_var
+          - size_var
 
     - name: outliers
       title: Outlier Analysis
       type: Html
       visible: (outlier_detection)
+      clearWith:
+          - x_var
+          - y_var
+          - group_var
+          - color_var
+          - size_var
 
     - name: interpretation
       title: Interpretation Guide
       type: Html
+      clearWith:
+          - x_var
+          - y_var
+          - group_var
+          - color_var
+          - size_var
 
     - name: summary
       title: Natural Language Summary
       type: Html
       visible: (show_summary)
+      clearWith:
+          - x_var
+          - y_var
+          - group_var
+          - color_var
+          - size_var
 
     - name: assumptions
       title: Assumptions & Guidelines
       type: Html
       visible: (show_assumptions)
+      clearWith:
+          - x_var
+          - y_var
+          - group_var
+          - color_var
+          - size_var
 
 
 refs:

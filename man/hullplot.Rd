@@ -45,11 +45,12 @@ uses the grouping variable.}
 \item{size_var}{Optional continuous variable for sizing points based on
 values.}
 
-\item{hull_concavity}{Controls the concavity of hull polygons. Lower values
-follow the point cloud more closely; higher values approach the convex
-hull. The permitted range is 0-2 and the default of 2 matches ggforce; a
-true convex hull needs a much larger value than this range allows. Ignored
-when V8/concaveman are unavailable.}
+\item{hull_concavity}{Controls the concavity of hull polygons. A value of 1
+gives the most concave hull, which follows the point cloud closely; the
+hull approaches the convex hull as the value grows. The default of 2
+matches ggforce. Values below 1 are clamped by concaveman and are not
+permitted, and the upper bound of 20 is close enough to a convex hull for
+practical purposes. Ignored when V8/concaveman are unavailable.}
 
 \item{hull_alpha}{Transparency level for hull polygons. 0 = completely
 transparent, 1 = opaque.}
@@ -83,9 +84,13 @@ in each group using the 1.5 x IQR rule applied separately to the X and Y
 variables. Groups with fewer than 5 observations are reported as too small
 rather than given a count. Outliers are counted, not marked on the plot.}
 
-\item{confidence_ellipses}{If TRUE, adds model-based 95\\% data ellipses,
-assuming a multivariate t distribution. These describe data dispersion, not
-uncertainty in group means.}
+\item{confidence_ellipses}{If TRUE, adds model-based 95 percent data
+ellipses, assuming a multivariate t distribution. These describe data
+dispersion, not uncertainty in group means. Spelled out rather than written
+with a per-cent sign: jmvtools writes the sign into the .h.R roxygen as an
+escaped backslash-per-cent, roxygen2 escapes the backslash again, and the
+resulting live per-cent sign starts an Rd comment that silently eats the
+rest of that line of help text.}
 
 \item{show_summary}{If TRUE, displays a plain-language summary of the
 results with copy-ready text.}
@@ -96,6 +101,7 @@ and usage guidelines.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$statistics} \tab \tab \tab \tab \tab a html \cr
@@ -113,4 +119,43 @@ categorical variables,
 making it easy to identify customer segments, group membership, and data
 clusters.
 Based on the geom_mark_hull() function from ggforce package.
+}
+\examples{
+\donttest{
+# Basic hull plot: two continuous axes plus a grouping variable.
+data(hullplot_clusters)
+hullplot(
+    data = hullplot_clusters,
+    x_var = "x",
+    y_var = "y",
+    group_var = "cluster"
+)
+
+# Colour points by a second categorical variable and size them by a
+# continuous one. Both are optional.
+hullplot(
+    data = hullplot_clusters,
+    x_var = "x",
+    y_var = "y",
+    group_var = "cluster",
+    color_var = "response",
+    size_var = "biomarker"
+)
+
+# Clinical example with the optional explanatory panels turned on.
+# hull_concavity ranges from 1 (most concave) upwards toward a convex hull.
+data(hullplot_clinical)
+hullplot(
+    data = hullplot_clinical,
+    x_var = "tumor_volume",
+    y_var = "ki67_index",
+    group_var = "treatment_arm",
+    hull_concavity = 2,
+    color_palette = "clinical",
+    plot_theme = "clinical",
+    show_statistics = TRUE,
+    outlier_detection = TRUE,
+    show_summary = TRUE
+)
+}
 }

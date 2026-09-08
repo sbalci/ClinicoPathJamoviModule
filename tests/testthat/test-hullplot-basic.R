@@ -86,7 +86,7 @@ test_that("hullplot handles hull concavity parameter", {
 
   data(hullplot_test)
 
-  concavity_values <- c(0.5, 1.0, 1.5, 2.0)
+  concavity_values <- c(1.0, 1.5, 2.0, 10.0)
 
   for (conc in concavity_values) {
     result <- hullplot(

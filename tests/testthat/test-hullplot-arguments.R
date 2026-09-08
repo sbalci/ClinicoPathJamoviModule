@@ -10,7 +10,7 @@ data(hullplot_clinical)
 test_that("hullplot respects all hull aesthetic parameters", {
 
   combinations <- expand.grid(
-    hull_concavity = c(0.5, 1.5),
+    hull_concavity = c(1, 1.5),
     hull_alpha = c(0.2, 0.5),
     hull_expand = c(0.05, 0.1),
     stringsAsFactors = FALSE
@@ -343,7 +343,7 @@ test_that("hullplot handles maximal aesthetics configuration", {
     x_var = "x",
     y_var = "y",
     group_var = "cluster",
-    hull_concavity = 0.5,
+    hull_concavity = 1,
     hull_alpha = 0.8,
     hull_expand = 0.15,
     point_size = 4,
@@ -425,7 +425,7 @@ test_that("hullplot handles extreme concavity values", {
     x_var = "gene_a",
     y_var = "gene_b",
     group_var = "subtype",
-    hull_concavity = 0.5,
+    hull_concavity = 1,
     show_labels = TRUE
   )
   expect_s3_class(result_min, "hullplotResults")

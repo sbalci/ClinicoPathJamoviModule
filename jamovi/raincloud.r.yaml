@@ -3,10 +3,19 @@ name: raincloud
 title: Raincloud Plot
 jrs: '1.1'
 
+clearWith:
+    - dep_var
+    - group_var
+
 items:
     - name: todo
       title: Instructions
       type: Html
+      clearWith:
+        - dep_var
+        - group_var
+        - facet_var
+        - color_var
 
     - name: plot
       title: Raincloud Plot
@@ -14,33 +23,81 @@ items:
       width: 800
       height: 600
       renderFun: .plot
+      clearWith:
+        - dep_var
+        - group_var
+        - facet_var
+        - color_var
+        - show_violin
+        - show_boxplot
+        - show_dots
+        - dots_side
+        - violin_width
+        - box_width
+        - dots_size
+        - alpha_violin
+        - alpha_dots
+        - orientation
+        - color_palette
+        - plot_theme
+        - plot_title
+        - x_label
+        - y_label
+        - show_outliers
+        - log_transform
 
     - name: statistics
       title: Summary Statistics
       type: Html
       visible: (show_statistics)
+      clearWith:
+        - dep_var
+        - group_var
 
     - name: outliers
       title: Outlier Analysis
       type: Html
       visible: (show_outliers)
+      clearWith:
+        - dep_var
+        - group_var
+        - outlier_method
 
     - name: normality
       title: Normality Tests
       type: Html
       visible: (normality_test)
+      clearWith:
+        - dep_var
+        - group_var
 
     - name: comparison
       title: Group Comparisons
       type: Html
       visible: (comparison_test)
+      clearWith:
+        - dep_var
+        - group_var
+        - comparison_method
+        - adjust_method
+        - effect_size
 
     - name: interpretation
       title: Interpretation Guide
       type: Html
+      clearWith:
+        - dep_var
+        - group_var
+        - show_violin
+        - show_boxplot
+        - show_dots
+        - log_transform
 
 
 refs:
     - ClinicoPathJamoviModule
+    - ggdist
+    - ggplot2
 
 ...
+

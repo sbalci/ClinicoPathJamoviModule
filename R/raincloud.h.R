@@ -340,42 +340,97 @@ raincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Raincloud Plot",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "ggdist",
+                    "ggplot2"),
+                clearWith=list(
+                    "dep_var",
+                    "group_var"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Instructions"))
+                title="Instructions",
+                clearWith=list(
+                    "dep_var",
+                    "group_var",
+                    "facet_var",
+                    "color_var")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
                 title="Raincloud Plot",
                 width=800,
                 height=600,
-                renderFun=".plot"))
+                renderFun=".plot",
+                clearWith=list(
+                    "dep_var",
+                    "group_var",
+                    "facet_var",
+                    "color_var",
+                    "show_violin",
+                    "show_boxplot",
+                    "show_dots",
+                    "dots_side",
+                    "violin_width",
+                    "box_width",
+                    "dots_size",
+                    "alpha_violin",
+                    "alpha_dots",
+                    "orientation",
+                    "color_palette",
+                    "plot_theme",
+                    "plot_title",
+                    "x_label",
+                    "y_label",
+                    "show_outliers",
+                    "log_transform")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="statistics",
                 title="Summary Statistics",
-                visible="(show_statistics)"))
+                visible="(show_statistics)",
+                clearWith=list(
+                    "dep_var",
+                    "group_var")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="outliers",
                 title="Outlier Analysis",
-                visible="(show_outliers)"))
+                visible="(show_outliers)",
+                clearWith=list(
+                    "dep_var",
+                    "group_var",
+                    "outlier_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="normality",
                 title="Normality Tests",
-                visible="(normality_test)"))
+                visible="(normality_test)",
+                clearWith=list(
+                    "dep_var",
+                    "group_var")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="comparison",
                 title="Group Comparisons",
-                visible="(comparison_test)"))
+                visible="(comparison_test)",
+                clearWith=list(
+                    "dep_var",
+                    "group_var",
+                    "comparison_method",
+                    "adjust_method",
+                    "effect_size")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
-                title="Interpretation Guide"))}))
+                title="Interpretation Guide",
+                clearWith=list(
+                    "dep_var",
+                    "group_var",
+                    "show_violin",
+                    "show_boxplot",
+                    "show_dots",
+                    "log_transform")))}))
 
 raincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "raincloudBase",

@@ -589,7 +589,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     max_val = round(max(.data[[dep_var]], na.rm = TRUE), 3),
                     skewness = round(calc_skewness(.data[[dep_var]]), 3),
                     kurtosis = round(calc_kurtosis(.data[[dep_var]]), 3),
-                    .groups = 'drop'
+                    .groups = "drop"
                 )
             
             stats_html <- paste0(
@@ -661,7 +661,8 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     # though it had been checked. Mark it untestable instead.
                     s_dev <- sd(group_data, na.rm = TRUE)
                     if (!is.finite(s_dev) || s_dev == 0) {
-                        outliers_list[[group]] <- NA_integer_; next
+                        outliers_list[[group]] <- NA_integer_
+                        next
                     }
                     z_scores <- abs((group_data - mean(group_data, na.rm = TRUE)) / s_dev)
                     outliers <- which(z_scores > 3)
@@ -671,7 +672,8 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     # Same trap: MAD is 0 whenever more than half the values are
                     # identical, which is common for rounded lab data.
                     if (!is.finite(mad_val) || mad_val == 0) {
-                        outliers_list[[group]] <- NA_integer_; next
+                        outliers_list[[group]] <- NA_integer_
+                        next
                     }
                     modified_z <- 0.6745 * (group_data - median_val) / mad_val
                     outliers <- which(abs(modified_z) > 3.5)
@@ -884,7 +886,10 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                         sw_p <- private$.safe_shapiro_p(group_data)
                         if (!is.na(sw_p)) {
                             any_testable <- TRUE
-                            if (sw_p <= 0.05) { overall_normal <- FALSE; break }
+                            if (sw_p <= 0.05) {
+                                overall_normal <- FALSE
+                                break
+                            }
                         }
                     }
                     # Welch's ANOVA when the variances differ - it is the correct
@@ -892,7 +897,9 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     # they do not.
                     test_key <- if (overall_normal && any_testable) {
                         if (unequal_var) "welch" else "anova"
-                    } else "kruskal"
+                    } else {
+                        "kruskal"
+                    }
                 }
             } else {
                 test_key <- comparison_method  # ttest / wilcoxon / anova / kruskal
@@ -946,7 +953,6 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                         # is WELCH's. Pair it with the unpooled (Welch-consistent)
                         # standardiser rather than the pooled SD, which belongs to
                         # Student's t and would be a different estimator.
-                        n1 <- length(group1_data); n2 <- length(group2_data)
                         sd_unpooled <- sqrt((stats::var(group1_data) + stats::var(group2_data)) / 2)
                         d <- if (is.finite(sd_unpooled) && sd_unpooled > 0)
                             (mean(group1_data) - mean(group2_data)) / sd_unpooled else NA_real_
@@ -954,7 +960,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                             "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>",
                             .("Cohen's d (unpooled SD, matching Welch's t):"),
                             "</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>",
-                            if (is.na(d)) .("not estimable (zero variance)") else sprintf('%.3f', d),
+                            if (is.na(d)) .("not estimable (zero variance)") else sprintf("%.3f", d),
                             "</td></tr>")
                     }
                 }
@@ -1217,13 +1223,13 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             dep_var <- self$options$dep_var
 
             if (is.null(dep_var))
-                return('')
+                return("")
 
             # Emit every option EXACTLY ONCE via the base helper, which already
             # escapes variable names. Do NOT also emit dep_var/group_var manually:
             # .asArgs() iterates all options (including those two), so manual lines
             # would duplicate them and R would reject the repeated arguments.
-            args <- ''
+            args <- ""
             if (!is.null(private$.asArgs)) {
                 args <- private$.asArgs(incData = FALSE)
             }
@@ -1233,10 +1239,10 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
 
             # Build complete function call
-            if (args != '')
-                paste0(pkg_name, '::raincloud(\n    data = data,\n    ', args, ')')
+            if (args != "")
+                paste0(pkg_name, "::raincloud(\n    data = data,\n    ", args, ")")
             else
-                paste0(pkg_name, '::raincloud(\n    data = data)')
+                paste0(pkg_name, "::raincloud(\n    data = data)")
         }
     ) # End of public list
 )

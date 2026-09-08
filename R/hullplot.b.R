@@ -20,6 +20,60 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
         .prepared_data = NULL,
         .data_cache_key = NULL,
 
+        # Collected user-facing notices for the current run. Rendered into the
+        # `notices` result item, which is declared FIRST in hullplot.r.yaml so
+        # data-quality warnings appear ABOVE the figure they qualify. Previously
+        # they were buried in the interpretation guide, below the plot and below
+        # two optional tables.
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <-
+                list(type = type, title = title, content = content)
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                # Clear a panel left over from a previous run.
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Backgrounds are translucent rgba tints and body text is
+            # `color: inherit`, so the panel composites over either jamovi
+            # theme. Only the title takes a saturated colour, chosen to read
+            # against both a light and a dark ground.
+            typeStyles <- list(
+                ERROR          = list(color = "#dc2626", bg = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
+                STRONG_WARNING = list(color = "#ea580c", bg = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
+                WARNING        = list(color = "#ca8a04", bg = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
+                INFO           = list(color = "#2563eb", bg = "rgba(37, 99, 235, 0.08)", border = "#93c5fd")
+            )
+
+            # Most severe first, regardless of the order they were added in.
+            priority <- c(ERROR = 1, STRONG_WARNING = 2, WARNING = 3, INFO = 4)
+            types <- vapply(private$.noticeList, function(n) n$type, character(1))
+            ordered <- private$.noticeList[order(priority[types])]
+
+            html <- "<div style='margin: 10px 0;'>"
+            for (notice in ordered) {
+                style <- typeStyles[[notice$type]]
+                if (is.null(style)) style <- typeStyles$INFO
+                html <- paste0(html,
+                    "<div style='background-color: ", style$bg, "; ",
+                    "border-left: 4px solid ", style$border, "; ",
+                    "padding: 12px; margin: 8px 0; border-radius: 4px; color: inherit;'>",
+                    "<strong style='color: ", style$color, ";'>",
+                    htmltools::htmlEscape(notice$title), "</strong><br>",
+                    "<span style='color: inherit;'>",
+                    htmltools::htmlEscape(notice$content), "</span>",
+                    "</div>")
+            }
+            html <- paste0(html, "</div>")
+
+            self$results$notices$setContent(html)
+        },
+
         .prepare_data = function() {
             # CRITICAL FIX: Create cache key including data CONTENT hash
             # This prevents stale data after filtering/editing
@@ -109,7 +163,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             required_vars <- c(x_var, y_var, group_var)
             missing_vars <- required_vars[!required_vars %in% names(dataset)]
             if (length(missing_vars) > 0) {
-                jmvcore::reject("Variables not found in dataset: {missing}", missing = paste(missing_vars, collapse = ", "))
+                jmvcore::reject(.("Variables not found in dataset: {missing}"), missing = paste(missing_vars, collapse = ", "))
             }
 
             # Guard against the same variable appearing twice among x/y/group,
@@ -118,11 +172,11 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             # as the grouping variable silently converted the X axis to a
             # factor and plotted the wrong data with no error.
             if (x_var == y_var) {
-                jmvcore::reject("X-Axis and Y-Axis variables must be different (both are set to '{var}').", var = x_var)
+                jmvcore::reject(.("X-Axis and Y-Axis variables must be different (both are set to '{var}')."), var = x_var)
             }
             if (group_var == x_var || group_var == y_var) {
                 jmvcore::reject(
-                    "The Grouping Variable must differ from the X and Y variables ('{var}' is used for both). Grouping by an axis variable would place every distinct value in its own hull.",
+                    .("The Grouping Variable must differ from the X and Y variables ('{var}' is used for both). Grouping by an axis variable would place every distinct value in its own hull."),
                     var = group_var)
             }
 
@@ -180,7 +234,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             n_excluded <- n_before - nrow(plot_data)
 
             if (nrow(plot_data) == 0) {
-                jmvcore::reject("No complete cases found for the selected variables.")
+                jmvcore::reject(.("No complete cases found for the selected variables."))
             }
 
             # Convert group variable to factor. droplevels() matters: a level
@@ -200,32 +254,57 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             min_group_size <- 3
             small_groups <- names(group_counts[group_counts < min_group_size])
 
-            # Store validation warnings for later display
+            # Each entry carries its own severity so .run() can hand it straight
+            # to .addNotice() without a name-to-severity lookup that would have to
+            # be kept in step with this block.
             validation_warnings <- list()
 
             # Rows dropped above were previously invisible: the interpretation
             # panel reported the surviving N with no indication that anything
             # had been removed.
             if (n_excluded > 0) {
-                validation_warnings$excluded <- sprintf(
-                    "%d of %d rows (%s%%) were excluded because a selected variable was missing%s. %d rows were plotted.",
-                    n_excluded, n_before,
-                    base::format(round(100 * n_excluded / n_before, 1)),
-                    if (n_nonfinite > 0)
-                        sprintf(" or not a finite number (%d infinite/undefined value(s) found)", n_nonfinite)
-                    else "",
-                    nrow(plot_data))
+                validation_warnings$excluded <- list(
+                    type = "STRONG_WARNING",
+                    title = "Rows excluded from the plot",
+                    content = sprintf(
+                        "%d of %d rows (%s%%) were excluded because a selected variable was missing%s. %d rows were plotted.",
+                        n_excluded, n_before,
+                        base::format(round(100 * n_excluded / n_before, 1)),
+                        if (n_nonfinite > 0)
+                            sprintf(" or not a finite number (%d infinite/undefined value(s) found)", n_nonfinite)
+                        else "",
+                        nrow(plot_data)))
             }
 
             if (length(small_groups) > 0) {
-                validation_warnings$small_groups <- sprintf(
-                    "Groups with < %d points: %s. Hull boundaries may not be meaningful for these groups.",
-                    min_group_size, paste(small_groups, collapse = ", ")
-                )
+                validation_warnings$small_groups <- list(
+                    type = "WARNING",
+                    title = "Groups too small for a meaningful hull",
+                    content = sprintf(
+                        "Groups with fewer than %d points: %s. Hull boundaries may not be meaningful for these groups.",
+                        min_group_size, paste(small_groups, collapse = ", ")))
             }
 
             if (length(levels(plot_data[[group_var]])) > 10) {
-                validation_warnings$many_groups <- "More than 10 groups detected. Consider grouping similar categories for clearer visualization."
+                validation_warnings$many_groups <- list(
+                    type = "WARNING",
+                    title = "Many groups",
+                    content = "More than 10 groups detected. Consider grouping similar categories for clearer visualization.")
+            }
+
+            # The colour variable is cast to a factor and drawn with a discrete
+            # palette, so a continuous variable dropped here produces one legend
+            # key per distinct value rather than a colour gradient.
+            if (color_mapping != group_var && color_mapping %in% names(plot_data)) {
+                n_color_levels <- length(levels(plot_data[[color_mapping]]))
+                if (n_color_levels > 10) {
+                    validation_warnings$many_colors <- list(
+                        type = "WARNING",
+                        title = "Colour variable has many distinct values",
+                        content = sprintf(
+                            "The colour variable '%s' has %d distinct values, each drawn as a separate legend entry. Colour is treated as categorical here; choose a categorical variable, or leave it empty to colour by the grouping variable.",
+                            color_var, n_color_levels))
+                }
             }
 
             # Cache the prepared data
@@ -247,16 +326,24 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
 
         .run = function() {
 
+            # Reset per run: .addNotice() appends, so without this the same
+            # notice would accumulate once per run cycle. on.exit() renders them
+            # on EVERY exit path -- .run() has three early returns below, and a
+            # trailing .renderNotices() would silently drop the notices on all
+            # three.
+            private$.noticeList <- list()
+            on.exit(private$.renderNotices(), add = TRUE)
+
             # Check if required variables have been selected
             if (is.null(self$options$x_var) || is.null(self$options$y_var) || is.null(self$options$group_var) ||
                 self$options$x_var == "" || self$options$y_var == "" || self$options$group_var == "") {
                 intro_msg <- "
                 <div style='background-color: rgba(33, 152, 239, 0.13); padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;'>
-                <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Hull Plot Visualization!</h3>
+                <h3 style='color: inherit; margin-top: 0;'> Welcome to Hull Plot Visualization!</h3>
                 <p><strong>Create stunning cluster visualizations</strong> using ggforce hull polygons</p>
                 <p>Based on R-Bloggers tutorial: 'Make a Hull Plot to Visualize Clusters in ggplot2'</p>
 
-                <h4 style='color: #1976d2;'>Quick Start:</h4>
+                <h4 style='color: inherit;'>Quick Start:</h4>
                 <ol>
                 <li><strong>X-Axis Variable:</strong> Select a continuous variable for horizontal axis</li>
                 <li><strong>Y-Axis Variable:</strong> Select a continuous variable for vertical axis</li>
@@ -265,7 +352,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 <li><strong>Customize:</strong> Adjust hull appearance, colors, and themes</li>
                 </ol>
 
-                <h4 style='color: #1976d2;'>Perfect For:</h4>
+                <h4 style='color: inherit;'>Perfect For:</h4>
                 <ul>
                 <li><strong>Customer Segmentation:</strong> Visualize customer groups and segments</li>
                 <li><strong>Clinical Clusters:</strong> Show patient subgroups in clinical research</li>
@@ -273,7 +360,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 <li><strong>Research Presentation:</strong> Professional publication-ready plots</li>
                 </ul>
 
-                <p style='font-size: 12px; color: #555; margin-top: 20px;'>
+                <p style='font-size: 12px; color: inherit; opacity: 0.75; margin-top: 20px;'>
                  <em>Hull plots use ggforce::geom_mark_hull() to create polygonal boundaries around grouped data points</em>
                 </p>
                 </div>"
@@ -286,26 +373,21 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
 
             # Safely require ggforce and concaveman
             if (!requireNamespace("ggforce", quietly = TRUE)) {
-                error_msg <- "
-                <div style='color: red; background-color: rgba(255, 33, 67, 0.09); padding: 20px; border-radius: 8px;'>
-                <h4>ggforce Package Required</h4>
-                <p>The ggforce package is required for hull plot functionality.</p>
-                <p>Please install it using: <code>install.packages('ggforce')</code></p>
-                </div>"
-                self$results$interpretation$setContent(error_msg)
+                private$.addNotice(
+                    "ERROR",
+                    "The ggforce package is required",
+                    "Hull plots are drawn with ggforce::geom_mark_hull(). Install it with install.packages('ggforce') and re-run the analysis.")
                 return()
             }
 
             # Check for V8/concaveman availability and prepare note
             v8_available <- requireNamespace("V8", quietly = TRUE)
             concaveman_available <- requireNamespace("concaveman", quietly = TRUE)
-            fallback_note <- NULL
             if (!(v8_available && concaveman_available)) {
-                fallback_note <- paste0(
-                    "<div style='color: inherit; background-color: rgba(255, 202, 33, 0.23); padding: 12px; border-radius: 6px; margin: 12px 0;'>",
-                    "<strong>Concave hulls unavailable:</strong> V8/concaveman not installed. Showing convex hulls. ",
-                    "Install with <code>install.packages('V8'); install.packages('concaveman')</code> for concave hulls.",
-                    "</div>")
+                private$.addNotice(
+                    "INFO",
+                    "Concave hulls unavailable",
+                    "V8 and concaveman are not both installed, so convex hulls are drawn instead and the Hull Shape setting has no effect. Install them with install.packages(c('V8', 'concaveman')) for concave hulls.")
             }
 
             # Prepare data using cached method
@@ -314,13 +396,10 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 # All three variables are selected (checked above), so reaching
                 # here means the dataset is empty or absent. Previously every
                 # panel was simply left blank with no explanation.
-                self$results$todo$setContent(paste0(
-                    "<div style='background-color: rgba(255, 202, 33, 0.23); color: inherit; border-left: 4px solid #ffc107; ",
-                    "padding: 15px; border-radius: 4px;'>",
-                    "<h4 style='color: #856404; margin-top: 0;'>No data to plot</h4>",
-                    "<p style='color: #856404; margin: 5px 0;'>The dataset contains no rows. ",
-                    "Check any row filters that are active, and confirm the data has been loaded.</p>",
-                    "</div>"))
+                private$.addNotice(
+                    "ERROR",
+                    "No data to plot",
+                    "The dataset contains no rows. Check any row filters that are active, and confirm the data has been loaded.")
                 return()
             }
 
@@ -328,6 +407,29 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             x_var <- prepared$x_var
             y_var <- prepared$y_var
             group_var <- prepared$group_var
+
+            # Surface data-quality findings above the plot rather than inside the
+            # interpretation guide, which renders below it.
+            for (w in prepared$validation_warnings)
+                private$.addNotice(w$type, w$title, w$content)
+
+            # stat_ellipse() fits a multivariate t and needs at least 4 points; for
+            # smaller groups it silently draws nothing and emits "Too few points to
+            # calculate an ellipse" plus a "Removed 1 row" warning into jamovi's
+            # Analysis Notes, where it reads as unexplained package chatter. Say it
+            # here instead, and muffle those two in .plot().
+            if (self$options$confidence_ellipses) {
+                ellipse_counts <- table(plot_data[[group_var]])
+                too_small <- names(ellipse_counts[ellipse_counts < 4])
+                if (length(too_small) > 0) {
+                    private$.addNotice(
+                        "WARNING",
+                        "Some groups have no data ellipse",
+                        sprintf(
+                            "A 95 percent data ellipse needs at least 4 points, so no ellipse is drawn for: %s. The hull and the points for these groups are unaffected.",
+                            paste(too_small, collapse = ", ")))
+                }
+            }
 
             # Generate group statistics if requested
             if (self$options$show_statistics) {
@@ -353,33 +455,16 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 self$results$assumptions$setContent(assumptions_html)
             }
 
-            # Generate interpretation guide with validation warnings
-            interpretation_html <- private$.generate_interpretation_guide(plot_data, x_var, y_var, group_var, prepared$validation_warnings)
-            if (!is.null(fallback_note))
-                interpretation_html <- paste0(interpretation_html, fallback_note)
-            self$results$interpretation$setContent(interpretation_html)
+            # Data-quality warnings and the convex-hull fallback are notices now
+            # (rendered above the plot), so the guide carries explanation only.
+            self$results$interpretation$setContent(
+                private$.generate_interpretation_guide(plot_data, x_var, y_var, group_var))
 
-            # Set state for plot function
-            # Include appearance options in the state so the plot re-renders
-            # when they change. The cached `prepared` object only keys on
-            # data/variable selections, so without this the plot would not
-            # refresh when e.g. hull_alpha, color_palette or plot_theme change.
-            plot_state <- prepared
-            plot_state$options <- list(
-                hull_concavity      = self$options$hull_concavity,
-                hull_alpha          = self$options$hull_alpha,
-                hull_expand         = self$options$hull_expand,
-                show_labels         = self$options$show_labels,
-                point_size          = self$options$point_size,
-                point_alpha         = self$options$point_alpha,
-                color_palette       = self$options$color_palette,
-                plot_theme          = self$options$plot_theme,
-                plot_title          = self$options$plot_title,
-                x_label             = self$options$x_label,
-                y_label             = self$options$y_label,
-                confidence_ellipses = self$options$confidence_ellipses
-            )
-            self$results$plot$setState(plot_state)
+            # Set state for plot function. Appearance options are NOT copied in:
+            # .plot() reads self$options directly, and every appearance option is
+            # already listed in the plot's clearWith in hullplot.r.yaml, which is
+            # what triggers the re-render.
+            self$results$plot$setState(prepared)
 
         },
 
@@ -550,12 +635,13 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             y_label <- if (self$options$y_label != "") self$options$y_label else y_var
             plot_title <- if (self$options$plot_title != "") self$options$plot_title else "Hull Plot - Group Visualization"
             
+            # Legend titles are set by scale_fill_manual()/scale_colour_manual()
+            # above (they name the variable). Setting fill=/color= here would
+            # override those with a generic "Groups".
             p <- p + ggplot2::labs(
                 title = plot_title,
                 x = x_label,
-                y = y_label,
-                fill = "Groups",
-                color = if (color_mapping == group_var) "Groups" else self$options$color_var
+                y = y_label
             )
 
             # Add caption when falling back to convex hulls
@@ -571,7 +657,20 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 p <- p + ggplot2::labs(size = size_var)
             }
             
-            print(p)
+            # Muffle ONLY the two known ggplot2 notices that the notice panel now
+            # explains (see .run()). Everything else is left to reach the user:
+            # a blanket suppressWarnings() here would hide real render failures.
+            withCallingHandlers(
+                print(p),
+                message = function(cond) {
+                    if (grepl("Too few points to calculate an ellipse", conditionMessage(cond), fixed = TRUE))
+                        invokeRestart("muffleMessage")
+                },
+                warning = function(cond) {
+                    if (grepl("containing missing values or values outside the scale range",
+                              conditionMessage(cond), fixed = TRUE))
+                        invokeRestart("muffleWarning")
+                })
             TRUE
         },
 
@@ -621,6 +720,14 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             )
         },
 
+        # sd() is NA for a single observation, which rendered as a bare
+        # "5 \u00b1 NA". Report the absence rather than printing NA.
+        .meanSd = function(mean_value, sd_value) {
+            if (is.na(sd_value))
+                return(paste0(mean_value, " (SD not estimable, n = 1)"))
+            paste0(mean_value, " \u00b1 ", sd_value)
+        },
+
         .generate_group_statistics = function(data, x_var, y_var, group_var) {
             # Calculate group statistics
             group_stats <- data %>%
@@ -637,9 +744,9 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             # Create HTML table
             stats_html <- paste0(
                 "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
-                "<h3 style='color: #495057; margin-top: 0;'> Group Statistics Summary</h3>",
+                "<h3 style='color: inherit; margin-top: 0;'> Group Statistics Summary</h3>",
                 "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>",
-                "<thead><tr style='background-color: #6c757d; color: white;'>",
+                "<thead><tr style='background-color: inherit; opacity: 0.75; color: white;'>",
                 "<th style='padding: 12px; border: 1px solid #dee2e6;'>Group</th>",
                 "<th style='padding: 12px; border: 1px solid #dee2e6;'>N</th>",
                 "<th style='padding: 12px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(x_var), " Mean \u00b1 SD</th>",
@@ -648,20 +755,20 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             )
             
             for (i in seq_len(nrow(group_stats))) {
-                row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
+                row_bg <- if (i %% 2 == 0) "rgba(127, 127, 127, 0.10)" else "transparent"
                 stats_html <- paste0(stats_html,
                     "<tr style='background-color: ", row_bg, ";'>",
                     "<td style='padding: 10px; border: 1px solid #dee2e6;'><strong>", htmltools::htmlEscape(group_stats[[group_var]][i]), "</strong></td>",
                     "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$n[i], "</td>",
-                    "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$x_mean[i], " \u00b1 ", group_stats$x_sd[i], "</td>",
-                    "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$y_mean[i], " \u00b1 ", group_stats$y_sd[i], "</td>",
+                    "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", private$.meanSd(group_stats$x_mean[i], group_stats$x_sd[i]), "</td>",
+                    "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", private$.meanSd(group_stats$y_mean[i], group_stats$y_sd[i]), "</td>",
                     "</tr>"
                 )
             }
             
             stats_html <- paste0(stats_html, 
                 "</tbody></table>",
-                "<p style='font-size: 12px; color: #6c757d; margin-top: 15px;'>",
+                "<p style='font-size: 12px; color: inherit; opacity: 0.75; margin-top: 15px;'>",
                 "<em>Statistics calculated for ", nrow(data), " complete observations across ", nrow(group_stats), " groups.</em>",
                 "</p></div>"
             )
@@ -704,7 +811,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             
             outlier_html <- paste0(
                 "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 20px; border-radius: 8px; margin-bottom: 20px; color: inherit;'>",
-                "<h3 style='color: #856404; margin-top: 0;'> Outlier Detection (IQR Method)</h3>",
+                "<h3 style='color: inherit; margin-top: 0;'> Outlier Detection (IQR Method)</h3>",
                 "<ul>"
             )
             
@@ -726,44 +833,35 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             outlier_html <- paste0(outlier_html,
                 "</ul>",
                 "<p><strong>Total potential outliers in assessed groups:</strong> ", total_outliers, "</p>",
-                "<p style='font-size: 12px; color: #856404; margin-top: 15px;'>",
-                "<em>Outliers defined as points beyond 1.5 \u00d7 IQR from Q1/Q3. Consider investigating these points for data quality or interesting patterns.</em>",
+                "<p style='font-size: 12px; color: inherit; margin-top: 15px;'>",
+                "<em>Outliers are points beyond 1.5 \u00d7 IQR from Q1/Q3. The rule is applied to ",
+                "<strong>each axis separately</strong> and the two results are combined, so it finds points with an ",
+                "extreme X value or an extreme Y value. It does <strong>not</strong> test the X-Y combination: a point ",
+                "that sits far off the pattern the other points follow - visibly outside its hull - is not flagged if ",
+                "both of its coordinates are individually unremarkable. Read the plot alongside these counts, and ",
+                "consider investigating flagged points for data quality or interesting patterns.</em>",
                 "</p></div>"
             )
             
             return(outlier_html)
         },
 
-        .generate_interpretation_guide = function(data, x_var, y_var, group_var, validation_warnings = list()) {
+        .generate_interpretation_guide = function(data, x_var, y_var, group_var) {
             n_groups <- length(levels(data[[group_var]]))
             n_total <- nrow(data)
 
-            # Add validation warnings if any exist
-            warnings_html <- ""
-            if (length(validation_warnings) > 0) {
-                warnings_html <- paste0(
-                    "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px; color: inherit;'>",
-                    "<h4 style='color: #856404; margin-top: 0;'> Data Quality Warnings</h4>"
-                )
-                for (warning in validation_warnings) {
-                    warnings_html <- paste0(warnings_html, "<p style='color: #856404; margin: 5px 0;'>\u2022 ", htmltools::htmlEscape(warning), "</p>")
-                }
-                warnings_html <- paste0(warnings_html, "</div>")
-            }
-
             interpretation_html <- paste0(
-                warnings_html,
                 "<div style='background-color: rgba(33, 163, 188, 0.21); padding: 20px; border-radius: 8px; color: inherit;'>",
-                "<h3 style='color: #0c5460; margin-top: 0;'> Hull Plot Interpretation Guide</h3>",
+                "<h3 style='color: inherit; margin-top: 0;'> Hull Plot Interpretation Guide</h3>",
 
-                "<h4 style='color: #0c5460;'>Plot Summary:</h4>",
+                "<h4 style='color: inherit;'>Plot Summary:</h4>",
                 "<ul>",
                 "<li><strong>Variables:</strong> ", htmltools::htmlEscape(x_var), " (X-axis) vs ", htmltools::htmlEscape(y_var), " (Y-axis)</li>",
                 "<li><strong>Groups:</strong> ", n_groups, if (n_groups == 1) " group" else " groups", " defined by ", htmltools::htmlEscape(group_var), "</li>",
                 "<li><strong>Observations:</strong> ", n_total, " data points</li>",
                 "</ul>",
 
-                "<h4 style='color: #0c5460;'>How to Read Hull Plots:</h4>",
+                "<h4 style='color: inherit;'>How to Read Hull Plots:</h4>",
                 "<ul>",
                 "<li><strong>Data ellipses:</strong> Optional 95% ellipses describe model-based data dispersion, not confidence regions for the group means.</li>",
                 "<li><strong>Hull Boundaries:</strong> Polygonal areas show the extent of each group</li>",
@@ -772,7 +870,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<li><strong>Point Density:</strong> Clustered points within hulls show group cohesion</li>",
                 "</ul>",
 
-                "<h4 style='color: #0c5460;'>Clinical/Research Applications:</h4>",
+                "<h4 style='color: inherit;'>Clinical/Research Applications:</h4>",
                 "<ul>",
                 "<li><strong>Patient Segmentation:</strong> Identify distinct patient subgroups</li>",
                 "<li><strong>Treatment Response:</strong> Visualize how different treatments cluster</li>",
@@ -780,7 +878,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<li><strong>Quality Control:</strong> Detect unusual patterns or outliers</li>",
                 "</ul>",
 
-                "<p style='font-size: 12px; color: #0c5460; margin-top: 15px;'>",
+                "<p style='font-size: 12px; color: inherit; margin-top: 15px;'>",
                 "<em> Hull plots are excellent for presentations and publications as they clearly show group boundaries and relationships.</em>",
                 "</p></div>"
             )
@@ -807,7 +905,6 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
 
             if (n_groups < 2) {
                 # Single group - no inter-group distances to calculate
-                avg_distance <- NA
                 separation_quality <- "single cohort (no comparison available)"
             } else {
                 # Standardize each axis separately; changing units on one axis must
@@ -818,7 +915,15 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 if (all(is.finite(axis_sd) & axis_sd > 0)) {
                     centres <- as.matrix(group_stats[c("x_mean", "y_mean")])
                     centres <- sweep(centres, 2, axis_sd, "/")
-                    discrim_index <- mean(stats::dist(centres))
+                    # The CLOSEST pair decides whether the groups are actually
+                    # distinguishable. mean() let one distant group mask a fully
+                    # overlapping pair: with two identical groups plus a far
+                    # third, the mean of all pairs was 20.5 while the closest
+                    # pair was 0.10, and the summary - offered as copy-ready
+                    # manuscript text - called that "well-separated". mean() also
+                    # grows with the number of groups, so the same adjacent gap
+                    # scored 4.5 with two groups and 9.7 with six.
+                    discrim_index <- min(stats::dist(centres))
                 }
 
                 # Determine separation based on discriminability index
@@ -837,14 +942,15 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             # Generate copy-ready summary
             summary_html <- paste0(
                 "<div style='background-color: rgba(33, 159, 33, 0.1); border-left: 4px solid #28a745; padding: 20px; margin-bottom: 20px; border-radius: 4px; color: inherit;'>",
-                "<h3 style='color: #155724; margin-top: 0;'> Natural Language Summary</h3>",
+                "<h3 style='color: inherit; margin-top: 0;'> Natural Language Summary</h3>",
 
                 # Add disclaimer about descriptive nature
                 if (n_groups >= 2) paste0(
                     "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0; color: inherit;'>",
                     "<p style='margin: 0; font-size: 13px;'><strong> Note on 'Separation' Assessment:</strong> ",
                     "The descriptors '", separation_quality, "' are based on a descriptive heuristic (discriminability index = ",
-                    "mean centroid distance after dividing each axis by its mean within-group SD). ",
+                    "the smallest centroid distance between any two groups, after dividing each axis by its mean within-group SD). ",
+                    "It therefore describes the worst-separated pair, not the average pair. ",
                     "<strong>This is NOT a formal statistical test.</strong> ",
                     "Thresholds are arbitrary descriptive categories, not validated clinical cutoffs. ",
                     "For formal inference about group differences, use appropriate statistical tests (MANOVA, discriminant analysis, etc.).</p>",
@@ -852,7 +958,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 ) else "",
 
                 "<div style='background-color: rgba(255, 255, 255, 0.06); padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #c3e6cb; color: inherit;'>",
-                "<h4 style='color: #155724; margin-top: 0;'>Copy-Ready Text:</h4>",
+                "<h4 style='color: inherit; margin-top: 0;'>Copy-Ready Text:</h4>",
                 "<p style='font-family: \"Times New Roman\", serif; line-height: 1.6; margin: 0;'>",
                 # With a single group the comparative wording is not merely
                 # ungrammatical ("revealed 1 distinct groups"), it asserts a
@@ -870,14 +976,15 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     htmltools::htmlEscape(group_var), " classifications. ",
                     "The visualization shows the relationship between ", htmltools::htmlEscape(x_var),
                     " and ", htmltools::htmlEscape(y_var), " across ", n_total, " observations. ",
-                    "Standardized centroid separation is described as ", separation_quality, "; this does not measure hull overlap, ",
+                    "The closest pair of group centroids, measured in within-group SD units, is described as ",
+                    separation_quality, "; this describes centroid distance, not hull overlap, ",
                     "with hull boundaries clearly delineating the extent of each group's distribution.</strong>"
                 ),
                 "</p>",
                 "</div>",
 
-                "<h4 style='color: #155724;'>Key Findings:</h4>",
-                "<ul style='color: #155724;'>"
+                "<h4 style='color: inherit;'>Key Findings:</h4>",
+                "<ul style='color: inherit;'>"
             )
 
             # Add specific findings for each group
@@ -893,8 +1000,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             summary_html <- paste0(summary_html,
                 "</ul>",
 
-                "<h4 style='color: #155724;'>Clinical Interpretation:</h4>",
-                "<p style='color: #155724;'>",
+                "<h4 style='color: inherit;'>Clinical Interpretation:</h4>",
+                "<p style='color: inherit;'>",
                 "Hull plots are particularly valuable for identifying patient subgroups, treatment response patterns, ",
                 "and biomarker relationships. ",
                 # The trailing `else` used to catch the single-group case and
@@ -906,7 +1013,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     "Separation of sample centroids does not establish biological differences, treatment response, or diagnostic discrimination. Interpret the axes and group definitions in context and validate any clinical claim independently.",
                 "</p>",
 
-                "<p style='font-size: 11px; color: #6c757d; margin-top: 20px; font-style: italic;'>",
+                "<p style='font-size: 11px; color: inherit; opacity: 0.75; margin-top: 20px; font-style: italic;'>",
                 "This summary is generated automatically based on the hull plot visualization. ",
                 "Copy the text above for use in reports, presentations, or publications.",
                 "</p>",
@@ -919,26 +1026,26 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
         .generate_assumptions_guide = function() {
             assumptions_html <- paste0(
                 "<div style='background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ff9800; padding: 20px; margin-bottom: 20px; border-radius: 4px; color: inherit;'>",
-                "<h3 style='color: #e65100; margin-top: 0;'> Data Requirements & Assumptions</h3>",
+                "<h3 style='color: inherit; margin-top: 0;'> Data Requirements &amp; Assumptions</h3>",
 
-                "<h4 style='color: #e65100;'>Data Requirements:</h4>",
-                "<ul style='color: #e65100;'>",
-                "<li><strong>X & Y Variables:</strong> Continuous numeric variables (measurements, scores, biomarker levels)</li>",
+                "<h4 style='color: inherit;'>Data Requirements:</h4>",
+                "<ul style='color: inherit;'>",
+                "<li><strong>X &amp; Y Variables:</strong> Continuous numeric variables (measurements, scores, biomarker levels)</li>",
                 "<li><strong>Grouping Variable:</strong> Categorical variable (treatment groups, patient types, disease stages)</li>",
                 "<li><strong>Minimum Sample Size:</strong> At least 3 observations per group for meaningful hull boundaries</li>",
                 "<li><strong>Complete Cases:</strong> Missing values in key variables will be excluded from analysis</li>",
                 "</ul>",
 
-                "<h4 style='color: #e65100;'>Key Assumptions:</h4>",
-                "<ul style='color: #e65100;'>",
+                "<h4 style='color: inherit;'>Key Assumptions:</h4>",
+                "<ul style='color: inherit;'>",
                 "<li><strong>Meaningful Grouping:</strong> The grouping variable represents biologically or clinically relevant categories</li>",
                 "<li><strong>Scale Appropriateness:</strong> X and Y variables are on appropriate scales for comparison</li>",
                 "<li><strong>Data Independence:</strong> Observations should be independent (not repeated measures without appropriate handling)</li>",
                 "<li><strong>Outlier Consideration:</strong> Extreme outliers may distort hull boundaries and interpretation</li>",
                 "</ul>",
 
-                "<h4 style='color: #e65100;'>Best Practices:</h4>",
-                "<ul style='color: #e65100;'>",
+                "<h4 style='color: inherit;'>Best Practices:</h4>",
+                "<ul style='color: inherit;'>",
                 "<li><strong>Sample Size:</strong> Larger groups (n > 10) provide more stable hull boundaries</li>",
                 "<li><strong>Variable Selection:</strong> Choose variables that are expected to differentiate between groups</li>",
                 "<li><strong>Outlier Management:</strong> Review and investigate outliers before final interpretation</li>",
@@ -946,8 +1053,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<li><strong>Validation:</strong> Consider complementing with statistical tests for group differences</li>",
                 "</ul>",
 
-                "<h4 style='color: #e65100;'>When Hull Plots Are Most Useful:</h4>",
-                "<ul style='color: #e65100;'>",
+                "<h4 style='color: inherit;'>When Hull Plots Are Most Useful:</h4>",
+                "<ul style='color: inherit;'>",
                 "<li><strong>Exploratory Analysis:</strong> Initial investigation of group patterns and relationships</li>",
                 "<li><strong>Presentation:</strong> Clear visual communication of group boundaries to clinical audiences</li>",
                 "<li><strong>Hypothesis Generation:</strong> Identifying potential subgroups or response patterns</li>",
@@ -955,9 +1062,9 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "</ul>",
 
                 "<div style='background-color: rgba(255, 166, 33, 0.35); padding: 15px; border-radius: 6px; margin-top: 15px; border: 2px solid #ff9800; color: inherit;'>",
-                "<h4 style='color: #bf360c; margin-top: 0;'> Critical Reminder: Exploratory vs. Inferential Analysis</h4>",
-                "<p style='color: #bf360c; margin: 5px 0;'><strong>Hull plots are DESCRIPTIVE VISUALIZATIONS, not statistical tests.</strong></p>",
-                "<ul style='color: #bf360c; margin: 10px 0;'>",
+                "<h4 style='color: inherit; margin-top: 0;'> Critical Reminder: Exploratory vs. Inferential Analysis</h4>",
+                "<p style='color: inherit; margin: 5px 0;'><strong>Hull plots are DESCRIPTIVE VISUALIZATIONS, not statistical tests.</strong></p>",
+                "<ul style='color: inherit; margin: 10px 0;'>",
                 "<li><strong>Visual separation \u2260 statistical significance:</strong> Groups may appear separated in a hull plot but not differ significantly when tested formally</li>",
                 "<li><strong>Descriptive indices (e.g., 'well-separated') are heuristics:</strong> These use arbitrary thresholds, not validated statistical cutoffs</li>",
                 "<li><strong>Required for inference:</strong> Complement hull plots with appropriate statistical tests:",
@@ -969,7 +1076,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "</ul></li>",
                 "<li><strong>Best use case:</strong> Exploratory analysis, hypothesis generation, presentation of patterns</li>",
                 "</ul>",
-                "<p style='color: #bf360c; margin: 5px 0; font-style: italic;'>",
+                "<p style='color: inherit; margin: 5px 0; font-style: italic;'>",
                 "Never claim statistical significance based solely on hull plot appearance or separation descriptors.",
                 "</p>",
                 "</div>",

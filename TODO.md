@@ -49,11 +49,11 @@
 - jjdotplotstats
 - jjwithinstats
 - lollipop
-raincloud
+- raincloud
 
 ## Continuous × Continuous
 
-hullplot
+- hullplot
 jjcorrmat
 jjscatterstats
 
@@ -4781,3 +4781,57 @@ Acceptance: every finding in the 14 per-function sections and the module-wide ga
   `R CMD check --run-donttest`. Decide whether to restore them behind `dontrun: true`.
 - [ ] **[ux]** `conflevel` allows `min: 0.5` (a 50% CI) and `ggpubrAddStats` is the only Bool
   defaulting `true`. Both are judgment calls, not defects — confirm they are intended.
+
+### hullplot — remaining after /check-function + /check-function-full (2026-09-07)
+
+- [ ] **[theme]** Module-wide sweep: 43 `.b.R` files still set dark hex text
+  (`color: #0c5460`, `#155724`, `#856404`, `#e65100`, `#bf360c`, `#495057`) inside
+  `rgba()` translucent panels — unreadable in jamovi's dark theme.
+  `tools/theme_safe_html.py` reports these CLEAN (it only flags an opaque hex
+  *background* with no `color:`), so it needs a mirror-case rule before the sweep.
+  9 further files (`datetimeconverter`, `datevalidator`, `ggprism`, `groupedforest`,
+  `missingdata`, `raincloud`, `outlierdetection`, `summarydata2`, `tidydensity`)
+  build zebra table rows from an opaque `"#ffffff"`/`"#f8f9fa"` variable, which the
+  scanner also misses because the colour is not a literal in the `style=` string.
+  (hullplot itself is now clean.)
+- [ ] **[deps]** `hullplot.b.R` calls `requireNamespace("V8")` but `V8` is in neither
+  `Imports` nor `Suggests`. It currently arrives transitively via `concaveman`
+  (which *is* in `Imports`), so the guard works — decide whether to declare it or
+  drop the separate check and rely on `concaveman` alone.
+- [ ] **[i18n]** The four `jmvcore::reject()` messages are now `.()`-wrapped, but the
+  ~100 user-facing HTML strings (welcome panel, interpretation guide, assumptions
+  guide, copy-ready summary, notice titles and bodies) are still untranslatable.
+  Candidate for `/prepare-translation`; the catalog needs regenerating either way
+  now that four new msgids exist.
+- [ ] **[ux]** `group_var` and `color_var` permit `numeric`, and both are hard-cast to
+  a factor with a discrete palette, so a genuinely continuous variable gets one
+  legend key per distinct value. A WARNING notice now fires for both above 10
+  levels, which makes the failure visible rather than silent. Tightening
+  `permitted:` to `factor` would be stronger but would block legitimate
+  integer-coded groups typed as continuous. Decide deliberately.
+- [ ] **[results]** The stale-panel bug fixed in hullplot is latent across its siblings.
+  `jjscatterstats.r.yaml` declares `todo`, `presetInfo`, `explanations`, `warnings` and
+  `plot2` with **no `clearWith` at all**, which is exactly the shape that left hullplot
+  showing a previous variable selection's results underneath the "select your variables"
+  welcome panel. Sweep the `Continuous vs Continuous` subgroup (`jjcorrmat`, `jscattermore`,
+  `jjscatterstats`, `robustcorrelation`) and then the rest of JJStatsPlot.
+- [ ] **[stats]** hullplot's outlier detection is a **marginal** 1.5 x IQR rule applied to X
+  and Y separately, then unioned. The output panel now says so explicitly, which closes the
+  misleading-label problem, but the rule still cannot see a point that is unusual only in its
+  X-Y *combination*: on a perfectly correlated cloud a point at marginal z = (1.19, -1.23),
+  visibly outside its hull, is reported as "0 potential outliers". Switching to a per-group
+  Mahalanobis distance against a chi-square(2) cutoff would match what the plot shows and is
+  roughly four lines, but it changes what "outlier" MEANS in a clinical output, so it is a
+  deliberate statistical decision rather than a bug fix. Decide before the next release.
+- [ ] **[hygiene]** Four stale editor/agent backups are sitting in `R/`
+  (`decision.b.R.20260829-002026.bak`, `jjdotchart.b.R.bak-20260907-131327`,
+  `jjpiestats.b.R.bak-20260907-073841`, `jjpiestats.b.R.bak-20260907-100147`). `R CMD build`
+  only collects `.R/.r/.q/.s/.S` so they are inert, but they are easy to commit by accident.
+  Delete them or add the pattern to `.gitignore`.
+- [ ] **[build]** `jjbarstats`, `jjdotplotstats`, `jjwithinstats` and `lollipop` have a
+  committed `.h.R` whose `version = c(...)` is AHEAD of the `version:` in their
+  `.a.yaml` (1.0.10 / 1.0.9 vs 1.0.8). Any `jmvtools::prepare(".")` silently
+  rewrites those four headers *down* to 1.0.8 — it did so during this session and
+  the change was reverted as out of scope. Either bump the four `.a.yaml` versions
+  or accept the downgrade, but the drift will keep reappearing in unrelated diffs
+  until one of the two is done.

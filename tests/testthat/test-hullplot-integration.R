@@ -472,7 +472,7 @@ test_that("hullplot handles biomarker analysis workflow", {
 
 test_that("hullplot handles different concavity settings across datasets", {
 
-  concavity_values <- c(0.5, 1.0, 1.5, 2.0)
+  concavity_values <- c(1.0, 1.5, 2.0, 10.0)
 
   data(hullplot_clusters)
 
