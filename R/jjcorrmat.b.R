@@ -22,6 +22,13 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # outputs report the same draw.
         .BAYES_SEED = 20250101L,
 
+        # The seed actually used: the user's `bayesseed` when set, otherwise the
+        # historical literal above so existing saved analyses reproduce exactly.
+        .bayesSeed = function() {
+            s <- self$options$bayesseed
+            if (is.null(s) || is.na(s)) private$.BAYES_SEED else as.integer(s)
+        },
+
         # Cache for processed data and options to avoid redundant computation
         .processedData = NULL,
         .processedOptions = NULL,
@@ -66,22 +73,22 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (warning$type == "ERROR") {
                     warning_html <- paste0(warning_html,
                         "<div style='background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; padding: 10px; margin: 5px 0; border-radius: 4px; color: inherit;'>",
-                        "<strong style='color: #721c24;'> ERROR:</strong> <span style='color: #721c24;'>", warning$message, "</span>",
+                        "<strong style='color: inherit;'> ERROR:</strong> <span style='color: inherit;'>", warning$message, "</span>",
                         "</div>")
                 } else if (warning$type == "STRONG_WARNING") {
                     warning_html <- paste0(warning_html,
                         "<div style='background-color: rgba(255, 202, 33, 0.23); border-left: 4px solid #ff9800; padding: 10px; margin: 5px 0; border-radius: 4px; color: inherit;'>",
-                        "<strong style='color: #856404;'> STRONG WARNING:</strong> <span style='color: #856404;'>", warning$message, "</span>",
+                        "<strong style='color: inherit;'> STRONG WARNING:</strong> <span style='color: inherit;'>", warning$message, "</span>",
                         "</div>")
                 } else if (warning$type == "WARNING") {
                     warning_html <- paste0(warning_html,
                         "<div style='background-color: rgba(255, 203, 33, 0.14); border-left: 4px solid #ffc107; padding: 10px; margin: 5px 0; border-radius: 4px; color: inherit;'>",
-                        "<strong style='color: #664d03;'> WARNING:</strong> <span style='color: #664d03;'>", warning$message, "</span>",
+                        "<strong style='color: inherit;'> WARNING:</strong> <span style='color: inherit;'>", warning$message, "</span>",
                         "</div>")
                 } else if (warning$type == "INFO") {
                     warning_html <- paste0(warning_html,
                         "<div style='background-color: rgba(33, 163, 188, 0.21); border-left: 4px solid #0c5460; padding: 10px; margin: 5px 0; border-radius: 4px; color: inherit;'>",
-                        "<strong style='color: #0c5460;'> INFO:</strong> <span style='color: #0c5460;'>", warning$message, "</span>",
+                        "<strong style='color: inherit;'> INFO:</strong> <span style='color: inherit;'>", warning$message, "</span>",
                         "</div>")
                 }
             }
@@ -142,8 +149,6 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-            deplen <- length(self$options$dep)
-
             # Use configurable plot dimensions
             plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 600
             plotheight <- if (!is.null(self$options$plotheight)) self$options$plotheight else 450
@@ -197,7 +202,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (v in self$options$dep) {
                 nm <- resolve_name(v)
                 x <- jmvcore::toNumeric(mydata[[nm]])
-                if (!is.numeric(x)) jmvcore::reject("Correlation variables must be numeric.")
+                if (!is.numeric(x)) jmvcore::reject(.("Correlation variables must be numeric."))
                 x[!is.finite(x)] <- NA_real_
                 mydata[[nm]] <- x
             }
@@ -236,7 +241,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(self$options$dep) < 2)
                 return(FALSE)
             if (nrow(self$data) == 0) {
-                private$.addWarning("ERROR", 'Data contains no complete rows. Please check for missing values in selected variables.')
+                private$.addWarning("ERROR", .('Data contains no complete rows. Please check for missing values in selected variables.'))
                 return(FALSE)
             }
 
@@ -248,7 +253,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (var in self$options$dep) {
                 varname <- resolve_name(var)
                 if (!(varname %in% names(mydata))) {
-                    private$.addWarning("ERROR", sprintf('Variable "%s" not found in data. Please select valid variables and re-run.', htmltools::htmlEscape(var)))
+                    private$.addWarning("ERROR", sprintf(.('Variable "%s" not found in data. Please select valid variables and re-run.'), htmltools::htmlEscape(var)))
                     return(FALSE)
                 }
             }
@@ -290,12 +295,12 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Stop if correlating category codes
             if (length(factor_warnings) > 0) {
-                private$.addWarning("ERROR", sprintf('Correlation analysis requires numeric variables. The following are categorical: %s. Please select continuous numeric variables.', htmltools::htmlEscape(paste(factor_warnings, collapse = ', '))))
+                private$.addWarning("ERROR", sprintf(.('Correlation analysis requires numeric variables. The following are categorical: %s. Please select continuous numeric variables.'), htmltools::htmlEscape(paste(factor_warnings, collapse = ', '))))
                 return(FALSE)
             }
 
             if (numeric_vars < 2) {
-                private$.addWarning("ERROR", sprintf('Correlation analysis requires at least 2 numeric variables with sufficient variation. Found %d valid variable(s). Please select additional variables.', numeric_vars))
+                private$.addWarning("ERROR", sprintf(.('Correlation analysis requires at least 2 numeric variables with sufficient variation. Found %d valid variable(s). Please select additional variables.'), numeric_vars))
                 return(FALSE)
             }
 
@@ -313,6 +318,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$options$lowcolor, self$options$midcolor, self$options$highcolor,
                 self$options$title, self$options$subtitle, self$options$caption,
                 self$options$plotwidth, self$options$plotheight,
+                self$options$bayesseed, self$options$originaltheme,
                 collapse = "_"
             )
 
@@ -392,19 +398,24 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                          var1 = "Variable 1", var2 = "Variable 2") {
             if (is.na(r)) return(.("Unable to interpret correlation"))
 
-            # Determine correlation strength
-            strength <- if (abs(r) >= 0.7) .("strong")
-                       else if (abs(r) >= 0.5) .("moderate-to-strong")
-                       else if (abs(r) >= 0.3) .("moderate")
-                       else if (abs(r) >= 0.1) .("weak-to-moderate")
-                       else .("very weak")
-
-            # Determine direction
-            direction <- if (r > 0) .("positive") else .("negative")
+            # Strength and direction are ONE translatable phrase, not two words
+            # glued by sprintf. A translator handed the bare word "strong" (or
+            # "p") cannot see what it modifies, and languages that inflect the
+            # adjective for the noun cannot render the pair from two independent
+            # msgids. Each branch below is a complete phrase.
+            positive <- r > 0
+            strength_phrase <-
+                if (abs(r) >= 0.7)      { if (positive) .("strong positive") else .("strong negative") }
+                else if (abs(r) >= 0.5) { if (positive) .("moderate-to-strong positive") else .("moderate-to-strong negative") }
+                else if (abs(r) >= 0.3) { if (positive) .("moderate positive") else .("moderate negative") }
+                else if (abs(r) >= 0.1) { if (positive) .("weak-to-moderate positive") else .("weak-to-moderate negative") }
+                else                    { if (positive) .("very weak positive") else .("very weak negative") }
 
             # Determine the evidence statement. Bayesian analysis has no
-            # p-value, so the Bayes factor carries the evidence instead.
-            p_word <- if (adjusted) .("adjusted p") else .("p")
+            # p-value, so the Bayes factor carries the evidence instead. Each
+            # alternative is a whole clause: "p" and "adjusted p" were being
+            # spliced into a template, leaving the parenthesis and the operator
+            # stranded in a separate msgid.
             if (!is.na(bf) && is.na(p_value)) {
                 is_notable <- bf >= 3
                 significance <- sprintf(.("supported by a Bayes factor of %s"),
@@ -414,18 +425,24 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 significance <- .("of undetermined significance")
             } else {
                 is_notable <- p_value < alpha
-                significance <- if (p_value < 0.001)
-                        sprintf(.("statistically significant (%s < 0.001)"), p_word)
-                    else
-                        sprintf(.("%s (%s = %s)"),
-                                if (is_notable) .("statistically significant") else .("not statistically significant"),
-                                p_word, sprintf("%.3f", p_value))
+                pv <- sprintf("%.3f", p_value)
+                significance <-
+                    if (p_value < 0.001) {
+                        if (adjusted) .("statistically significant (adjusted p < 0.001)")
+                        else          .("statistically significant (p < 0.001)")
+                    } else if (is_notable) {
+                        if (adjusted) sprintf(.("statistically significant (adjusted p = %s)"), pv)
+                        else          sprintf(.("statistically significant (p = %s)"), pv)
+                    } else {
+                        if (adjusted) sprintf(.("not statistically significant (adjusted p = %s)"), pv)
+                        else          sprintf(.("not statistically significant (p = %s)"), pv)
+                    }
             }
 
             # Generate clinical interpretation
             interpretation <- sprintf(
-                .("A %s %s correlation (%s = %s) between %s and %s that is %s, using %s."),
-                strength, direction, symbol, sprintf("%.3f", r),
+                .("A %s correlation (%s = %s) between %s and %s that is %s, using %s."),
+                strength_phrase, symbol, sprintf("%.3f", r),
                 htmltools::htmlEscape(var1), htmltools::htmlEscape(var2),
                 significance, htmltools::htmlEscape(method)
             )
@@ -466,17 +483,17 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) nrow(self$data))
 
             if (effective_n < 20) {
-                private$.addWarning("STRONG_WARNING", sprintf('Small sample size (N = %d complete cases). Correlations with N < 20 may be unreliable. Consider collecting more data or interpreting results cautiously.', effective_n))
+                private$.addWarning("STRONG_WARNING", sprintf(.('Small sample size (N = %d complete cases). Correlations with N &lt; 20 may be unreliable. Consider collecting more data or interpreting results cautiously.'), effective_n))
             }
 
             # Check for too many variables (interpretation complexity)
             if (length(self$options$dep) > 10) {
-                private$.addWarning("WARNING", sprintf('Correlation matrix with %d variables may be complex to interpret. Consider focusing on key variables of interest.', length(self$options$dep)))
+                private$.addWarning("WARNING", sprintf(.('Correlation matrix with %d variables may be complex to interpret. Consider focusing on key variables of interest.'), length(self$options$dep)))
             }
 
             # Check partial correlations requirements
             if (self$options$partial && length(self$options$dep) < 3) {
-                private$.addWarning("WARNING", sprintf('Partial correlations require at least 3 variables to control for confounding. Found %d variable(s). Computing zero-order correlations instead.', length(self$options$dep)))
+                private$.addWarning("WARNING", sprintf(.('Partial correlations require at least 3 variables to control for confounding. Found %d variable(s). Computing zero-order correlations instead.'), length(self$options$dep)))
             }
 
             return(TRUE)
@@ -681,7 +698,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "\u2022 ", sprintf(.("Variables analyzed: %d"), n_vars), "<br>",
                 "\u2022 ", sprintf(.("Sample size: %s"), n_label), "<br>",
                 "\u2022 ", sprintf(.("Method: %s"), htmltools::htmlEscape(method_display)), "<br>",
-                "\u2022 ", sprintf(.("Correlation type: %s"), if (partial_on) .("Partial") else .("Zero-order")), "<br>",
+                "\u2022 ", if (partial_on) .("Correlation type: Partial") else .("Correlation type: Zero-order"), "<br>",
                 "\u2022 ", sprintf(.("Total correlations: %d"), n_corr), "</p>",
 
                 correlation_type_info,
@@ -753,6 +770,11 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         self$results$todo$setContent(private$.welcomeMessage())
 
+        # Every other exit renders the notices panel; this one returned before
+        # it, leaving an empty "Warnings and Notices" heading on screen beside
+        # the welcome message. With no notices collected, this hides it.
+        private$.displayWarnings()
+
         return()
 
     } else {
@@ -763,7 +785,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         self$results$todo$setContent(todo)
 
         if (nrow(self$data) == 0) {
-            private$.addWarning("ERROR", 'Data contains no complete rows after filtering. Please check for missing values.')
+            private$.addWarning("ERROR", .('Data contains no complete rows after filtering. Please check for missing values.'))
             private$.displayWarnings()
             return()
         }
@@ -817,19 +839,40 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 min(private$.pair_n), max(private$.pair_n), private$.n_before))
         }
 
+        # Multiplicity burden. A correlation matrix runs one test per PAIR, so
+        # the test count grows quadratically with the number of variables while
+        # the panel still shows a single "p" column per row. With 15 variables
+        # and no correction that is 105 tests, and on pure noise about six of
+        # them clear p < 0.05 - which reads as six findings. The table footnote
+        # said so quietly; anyone screening biomarkers needs it as a notice.
+        # Bayesian analysis has no p-value, so there is nothing to correct.
+        if (!identical(options_data$typestatistics, "bayes") &&
+            identical(options_data$padjustmethod, "none") &&
+            private$.n_valid_pairs > 1) {
+            expected_fp <- private$.n_valid_pairs * options_data$siglevel
+            private$.addWarning("STRONG_WARNING", sprintf(
+                .('No correction for multiple comparisons is applied across %d correlation tests at a threshold of %s, so about %s of them are expected to reach significance by chance alone. Select a p-value adjustment (Holm is the default) or report these as exploratory rather than confirmatory.'),
+                private$.n_valid_pairs,
+                base::format(options_data$siglevel),
+                base::format(round(expected_fp, 1))))
+        }
+
         # Completion notice. This lives here rather than in .plot() because
         # .run() is the only place that renders private$.warnings.
         # Count the coefficients actually produced, not the table rows: a
         # constant variable yields a row of NAs that was being counted as a
         # computed correlation.
         if (private$.n_valid_pairs > 0) {
-            corr_type <- if (isTRUE(options_data$partial))
-                .("partial") else .("zero-order")
-            private$.addWarning("INFO", sprintf(
-                .('Computed %d %s %s of %d variables.'),
-                private$.n_valid_pairs, corr_type,
-                private$.methodLabel(self$options$typestatistics),
-                length(options_data$myvars)))
+            private$.addWarning("INFO", if (isTRUE(options_data$partial))
+                sprintf(.('Computed %d partial %s of %d variables.'),
+                        private$.n_valid_pairs,
+                        private$.methodLabel(self$options$typestatistics),
+                        length(options_data$myvars))
+                else
+                sprintf(.('Computed %d zero-order %s of %d variables.'),
+                        private$.n_valid_pairs,
+                        private$.methodLabel(self$options$typestatistics),
+                        length(options_data$myvars)))
         }
 
         # Display all collected warnings at the end
@@ -908,6 +951,22 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 # both the unadjusted and the adjusted p-value are available; this reproduces
 # correlation::correlation's own adjustment exactly (verified against
 # stats::p.adjust for holm and bonferroni).
+# Subset a prepared frame to the selected variables and restore the
+# user-facing names. Every other code path (.init, .populateTable,
+# .generateInterpretation, .computeCorrelations) already resolves possibly
+# B64-encoded column names through .resolveName; the two plot methods were
+# the last ones indexing `mydata` with the RAW option names, which returns
+# nothing once jamovi encodes them. Renaming also keeps the figure's axis
+# labels identical to the table's Variable columns.
+.plotFrame = function(df, myvars, extra = NULL) {
+    resolved <- vapply(myvars, function(v) private$.resolveName(v, df), character(1))
+    if (!is.null(extra))
+        resolved <- c(resolved, private$.resolveName(extra, df))
+    out <- df[, resolved, drop = FALSE]
+    names(out) <- c(myvars, if (!is.null(extra)) extra)
+    out
+},
+
 .computeCorrelations = function(df, options_data) {
     myvars <- options_data$myvars
     resolved <- vapply(myvars, function(v) private$.resolveName(v, df), character(1))
@@ -976,7 +1035,24 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     # so the two settings are distinguishable in the output.
     add_rows_for_subset <- function(df, grp_label = "All") {
         res <- private$.computeCorrelations(df, options_data)
-        if (is.null(res)) return(invisible(NULL))
+        # Two ways a subset yields nothing. correlation::correlation ERRORS on
+        # a singular matrix (most often a partial correlation on collinear or
+        # missing-riddled data) and .computeCorrelations returns NULL; but on a
+        # subset with no usable rows it does NOT error - it returns a full set
+        # of rows carrying n = 0, r = NA and the method string "NA correlation",
+        # which were being added to the table as blank junk rows. Neither case
+        # said anything to the user. Rows that are only PARTLY NA (a constant
+        # variable among usable ones) are still shown; that case has its own
+        # warning and the blank rows are informative there.
+        if (is.null(res) || nrow(res) == 0 || all(is.na(res$r))) {
+            if (is.null(group))
+                private$.addWarning("ERROR", .('No correlations could be computed with the selected options. If partial correlations are switched on, check that the variables are not collinear and that enough complete rows remain.'))
+            else
+                private$.addWarning("WARNING", sprintf(
+                    .('No correlations could be computed for group "%s"; it is omitted from the table.'),
+                    htmltools::htmlEscape(as.character(grp_label))))
+            return(invisible(NULL))
+        }
         private$.pair_n <- c(private$.pair_n, res$n[!is.na(res$n)])
         private$.n_valid_pairs <- private$.n_valid_pairs + sum(!is.na(res$r))
         for (i in seq_len(nrow(res))) {
@@ -989,6 +1065,12 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     r         = res$r[i],
                     conf_low  = res$conf_low[i],
                     conf_high = res$conf_high[i],
+                    # Same numbers, two column pairs: only one pair is visible at
+                    # a time. Under `bayes` the interval is a CREDIBLE interval
+                    # from the posterior, not a confidence interval - the two are
+                    # different claims and were being shown under one header.
+                    cred_low  = res$conf_low[i],
+                    cred_high = res$conf_high[i],
                     p         = res$p[i],
                     p_adj     = res$p_adj[i],
                     bf        = res$bf[i],
@@ -1009,7 +1091,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         n_missing_group <- sum(is.na(grp_vals))
         if (n_missing_group > 0)
             private$.addWarning("WARNING", sprintf(
-                '%d row(s) have no value for the grouping variable and are excluded from the grouped correlation table.',
+                .('%d row(s) have no value for the grouping variable and are excluded from the grouped correlation table.'),
                 n_missing_group))
 
         lvls <- unique(grp_vals[!is.na(grp_vals)])
@@ -1025,7 +1107,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     # Say which p-value the plot uses to cross out cells, so the table and the
     # figure cannot be read as disagreeing.
     if (options_data$typestatistics == "bayes") {
-        table$setNote("padj", .("Bayesian correlations report the median posterior estimate and BF<sub>10</sub>; no p-value is defined."))
+        table$setNote("padj", .("Bayesian correlations report the median posterior estimate, a credible interval from the posterior (not a confidence interval) and BF<sub>10</sub>; no p-value is defined."))
     } else if (options_data$padjustmethod == "none") {
         table$setNote("padj", .("No correction for multiple comparisons was applied, so <b>p (adjusted)</b> repeats the unadjusted p-value. Each additional variable adds several pairwise tests."))
     } else {
@@ -1041,7 +1123,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 # seeding it would only disturb the caller's RNG).
 .withBayesSeed = function(typestatistics, expr) {
     if (identical(typestatistics, "bayes"))
-        withr::with_seed(private$.BAYES_SEED, expr)
+        withr::with_seed(private$.bayesSeed(), expr)
     else
         expr
 },
@@ -1115,7 +1197,6 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- private$.prepareData()
             options_data <- private$.prepareOptions()
         
-            typestatistics <- options_data$typestatistics
             myvars <- options_data$myvars
         
         
@@ -1127,13 +1208,11 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Skip heavy plotting in testthat runs; the table is populated once
             # in .run(), interpretation is still generated here.
-            if (Sys.getenv("TESTTHAT") == "true") {
-                private$.generateInterpretation(mydata, options_data)
+            if (Sys.getenv("TESTTHAT") == "true")
                 return(TRUE)
-            }
 
             plot <- private$.withBayesSeed(options_data$typestatistics, ggstatsplot::ggcorrmat(
-                data = mydata,
+                data = private$.plotFrame(mydata, myvars),
                 cor.vars = myvars,
                 cor.vars.names = NULL,
                 matrix.type = options_data$matrixtype,
@@ -1154,19 +1233,17 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 p.adjust.method = options_data$padjustmethod,
                 pch = "cross",
                 ggcorrplot.args = options_data$ggcorrplot.args,
-                package = "RColorBrewer",
-                palette = "Dark2",
                 colors = options_data$colors,
+                ggtheme = if (isTRUE(self$options$originaltheme))
+                              ggstatsplot::theme_ggstatsplot() else ggtheme,
                 ggplot.component = NULL,
                 title = options_data$title,
                 subtitle = options_data$subtitle,
                 caption = options_data$caption
             ))
 
-            # Correlation table is populated once in .run(); only the plot and
-            # interpretation are produced here.
-            # Generate clinical interpretation ----
-            private$.generateInterpretation(mydata, options_data)
+            # The correlation table AND the clinical interpretation are both
+            # produced once in .run(); only the figure is drawn here.
 
             # The completion notice is emitted from .run(), which is the only
             # place that renders private$.warnings. Adding it here appended to a
@@ -1197,7 +1274,6 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- private$.prepareData()
             options_data <- private$.prepareOptions()
 
-            typestatistics <- options_data$typestatistics
             myvars <- options_data$myvars
 
 
@@ -1223,13 +1299,11 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Checkpoint before expensive grouped correlation computation
                 private$.checkpoint()
 
-                if (Sys.getenv("TESTTHAT") == "true") {
-                    private$.generateInterpretation(mydata, options_data)
+                if (Sys.getenv("TESTTHAT") == "true")
                     return(TRUE)
-                }
 
                 plot2 <- private$.withBayesSeed(options_data$typestatistics, ggstatsplot::grouped_ggcorrmat(
-                    data = mydata,
+                    data = private$.plotFrame(mydata, myvars, extra = grvar),
                     cor.vars = myvars,
                     cor.vars.names = NULL,
                     grouping.var = !!rlang::sym(grvar),
@@ -1250,18 +1324,16 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     p.adjust.method = options_data$padjustmethod,
                     pch = "cross",
                     ggcorrplot.args = options_data$ggcorrplot.args,
-                    package = "RColorBrewer",
-                    palette = "Dark2",
                     colors = options_data$colors,
+                    ggtheme = if (isTRUE(self$options$originaltheme))
+                                  ggstatsplot::theme_ggstatsplot() else ggtheme,
                     ggplot.component = NULL
                 ))
 
             }
 
-            # Correlation table is populated once in .run(); only the grouped
-            # plot and interpretation are produced here.
-            # Generate clinical interpretation ----
-            private$.generateInterpretation(mydata, options_data)
+            # The correlation table AND the clinical interpretation are both
+            # produced once in .run(); only the figure is drawn here.
 
             # Print Plot ----
 

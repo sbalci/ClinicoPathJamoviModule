@@ -99,6 +99,7 @@ items:
           - sampleThreshold
           - sampleSize
           - seed
+          - originaltheme
 
 
 refs:

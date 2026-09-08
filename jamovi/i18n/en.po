@@ -27,46 +27,11 @@ msgid ""
 "missing values, or exclude those rows, before comparing groups."
 msgstr ""
 
-#: R/jjwithinstats.b.R
-msgid ""
-" <strong>Biomarker Tracking (Guidance Only):</strong> Optimized for "
-"laboratory values. Please manually ensure 'Nonparametric' is selected if "
-"data is skewed.<br>"
-msgstr ""
-
-#: R/jjwithinstats.b.R
-msgid ""
-" <strong>Laboratory Values:</strong> Optimized for clinical lab value "
-"monitoring<br>"
-msgstr ""
-
-#: R/jjwithinstats.b.R
-msgid ""
-" <strong>Treatment Response:</strong> Optimized for clinical treatment "
-"monitoring<br>"
-msgstr ""
-
-#: R/jjwithinstats.b.R
-msgid ""
-" <strong>What to look for:</strong><br>• A small p-value is evidence against "
-"the null under the model assumptions; it does not prove a treatment "
-"effect<br>• Compare effect estimates and uncertainty with a prespecified "
-"clinically important difference<br>• Individual trajectories reveal response "
-"patterns<br>• Outliers may indicate treatment non-responders or measurement "
-"errors"
-msgstr ""
-
 #: R/survival.b.R
 msgid ""
 " All times reported here are measured FROM the landmark, not from study "
 "entry, and all estimates are conditional on being event-free at the "
 "landmark. They are not comparable with unlandmarked survival times."
-msgstr ""
-
-#: R/jjwithinstats.b.R
-msgid ""
-" Biomarker preset: Consider using Nonparametric test for skewed biomarker "
-"data<br>"
 msgstr ""
 
 #: R/survival.b.R
@@ -87,10 +52,6 @@ msgstr ""
 msgid " categories across "
 msgstr ""
 
-#: R/jjwithinstats.b.R
-msgid " Central tendency displayed"
-msgstr ""
-
 #: R/riverplot.b.R
 msgid " different categories across "
 msgstr ""
@@ -105,20 +66,6 @@ msgstr ""
 msgid " Full state breakdown (of {total} coded records): {states}."
 msgstr ""
 
-#: R/jjwithinstats.b.R
-msgid " Individual trajectories shown"
-msgstr ""
-
-#: R/jjwithinstats.b.R
-msgid ""
-" Laboratory preset: Consider Robust test to handle outliers common in lab "
-"values<br>"
-msgstr ""
-
-#: R/jjwithinstats.b.R
-msgid " Laboratory preset: Enable centrality plotting to see overall trends<br>"
-msgstr ""
-
 #: R/jjarcdiagram.b.R
 msgid " nodes"
 msgstr ""
@@ -131,10 +78,6 @@ msgstr ""
 msgid ""
 " Outlier screening did not run for this variable, so the grade excludes it "
 "and says nothing about extreme values."
-msgstr ""
-
-#: R/jjwithinstats.b.R
-msgid " Pairwise comparisons enabled"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -156,12 +99,6 @@ msgstr ""
 msgid ""
 " Tip: Use this glossary as a quick reference when interpreting network "
 "statistics and visualizations."
-msgstr ""
-
-#: R/jjwithinstats.b.R
-msgid ""
-" Treatment preset: Enable pairwise comparisons to identify when treatment "
-"effects occur<br>"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -350,6 +287,10 @@ msgid ""
 "'{name}' takes the same value ({value}) in every row, so there is no "
 "variation to compare between groups. Check that the correct variable is "
 "selected."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "'{var}' takes the same value in every row"
 msgstr ""
 
 #: R/alluvial.b.R
@@ -1126,12 +1067,32 @@ msgstr ""
 msgid "{n} plausibility checks failed"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid ""
+"{n} plotted value(s) lie more than three interquartile ranges beyond the "
+"quartiles and will stretch the axis so the remaining lollipops look nearly "
+"equal; check these entries and consider a log scale."
+msgstr ""
+
 #: R/alluvial.b.R
 msgid "{n} row(s) had no value for the weight variable '{weight}' and were removed."
 msgstr ""
 
+#: R/lollipop.b.R
+msgid ""
+"{n} row(s) held an infinite value for the dependent variable and were "
+"removed; an infinite value usually means a division by zero or an "
+"out-of-range entry."
+msgstr ""
+
 #: R/reportcat.b.R
 msgid "{n} rows"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid ""
+"{n} rows ({pct}%) had a missing value in the selected variables and were "
+"removed before plotting."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -2296,6 +2257,12 @@ msgid ""
 "Interval End variables are not swapped."
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid ""
+"%d row(s) have no value for the grouping variable and are excluded from the "
+"grouped correlation table."
+msgstr ""
+
 #: R/linechart.b.R
 msgid ""
 "%d row(s) held infinite values (Inf or -Inf) and were excluded; %d rows were "
@@ -2485,10 +2452,6 @@ msgstr ""
 msgid ""
 "%s (%s = %.2f) - Regional measurements show moderate agreement with the "
 "reference region."
-msgstr ""
-
-#: R/jjcorrmat.b.R
-msgid "%s (%s = %s)"
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -2879,11 +2842,11 @@ msgid "`${dep} by {group}`"
 msgstr ""
 
 #: jjscatterstats/results/plot2.title
-msgid "`${dep} vs {group} by {grvar}`"
+msgid "`${dep} vs ${group} by ${grvar}`"
 msgstr ""
 
 #: jjscatterstats/results/plot.title
-msgid "`${dep} vs {group}`"
+msgid "`${dep} vs ${group}`"
 msgstr ""
 
 #: jjpiestats/results/plot1.title
@@ -3021,7 +2984,7 @@ msgid "`Pairwise Comparison Table - ${explanatory}`"
 msgstr ""
 
 #: jjscatterstats/results/plot3.title
-msgid "`Plot with Aesthetics - ${dep} vs {group}`"
+msgid "`Plot with Aesthetics - ${dep} vs ${group}`"
 msgstr ""
 
 #: survival/results/plot8.title
@@ -3146,6 +3109,16 @@ msgstr ""
 msgid "<= (lower values indicate positive class)"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>{pct}% of rows could not be used:</b> the correlation below is computed "
+"on {used} of {total} rows. The remaining {lost} have a missing or "
+"non-numeric value in '{xvar}' or '{yvar}'. Complete-case analysis assumes "
+"what is missing is unrelated to the relationship being measured; if the "
+"missingness is informative (sicker patients missing a lab value, say) this "
+"coefficient is biased."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "<b>95% CI</b> - pointwise interval for the incidence at that single time "
@@ -3157,6 +3130,20 @@ msgstr ""
 msgid ""
 "<b>Clinical Validation rows are heuristic screening flags, not clinical "
 "judgements.</b>"
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>Colour palette not applied:</b> the publication-ready panel draws a "
+"single ungrouped set of points, so there is no grouping for a journal "
+"palette to colour. Set a 'Split By' variable to see the palette take effect."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>Correlation not computed:</b> {reason}. A correlation needs at least 3 "
+"complete pairs and variation in both variables; the plot below shows the "
+"points but no coefficient is meaningful."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -3172,12 +3159,39 @@ msgid ""
 "shorter time to a risk that is over-stated."
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>Heavy ties in '{var}':</b> only {levels} distinct values across {n} "
+"observations. Spearman's p-value then falls back on a normal approximation "
+"rather than an exact test, and rho itself is attenuated by the ties. For a "
+"variable with this few levels, a test designed for ordered categories is "
+"usually the better choice."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "<b>No confidence interval is reported.</b> A valid interval for this "
 "quantile requires inverting a confidence band for the cumulative incidence "
 "curve, or bootstrapping; a pointwise variance at the median does not give "
 "one. The cells are left empty rather than filled with an approximation."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>Non-finite values removed:</b> {dropped} rows contained an infinite value "
+"(Inf or -Inf) in '{xvar}' or '{yvar}'. Infinite values are not missing "
+"values, so they pass the usual completeness checks while making every "
+"correlation undefined; they have been excluded and all statistics below are "
+"computed on the {kept} remaining rows."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>Non-finite values removed:</b> one row contained an infinite value (Inf "
+"or -Inf) in '{xvar}' or '{yvar}'. Infinite values are not missing values, so "
+"they pass the usual completeness checks while making every correlation "
+"undefined; it has been excluded and all statistics below are computed on the "
+"{kept} remaining rows."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -3193,11 +3207,80 @@ msgid ""
 "both events at that time."
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>One observation is driving this result:</b> dropping a single point "
+"changes the correlation from {full} to {dropped} (a shift of {delta}). A "
+"coefficient that depends this heavily on one patient should not be reported "
+"on its own - inspect that point on the plot, and consider the 'Robust "
+"(Winsorized Pearson)' or 'Nonparametric (Spearman)' test type, which are far "
+"less sensitive to it."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>One test per group, unadjusted.</b> Each of the {groups} panels shows its "
+"own correlation tested at the nominal level, with no correction for the fact "
+"that {groups} tests are being read together. If you are screening groups "
+"rather than testing one pre-specified comparison, adjust the p-values "
+"yourself (Holm or FDR over the {groups} values) before drawing conclusions."
+msgstr ""
+
 #: R/jjcorrmat.b.R
 msgid ""
 "<b>p (adjusted)</b> applies the %s correction across pairwise tests within "
 "each split panel (not across panels). This is the p-value the plot uses to "
 "mark cells as non-significant at %s."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>Shape mapping skipped:</b> '{var}' has {levels} levels and ggplot2 "
+"provides only 6 distinct shapes. Mapping it would have drawn no point at all "
+"for the surplus levels while the correlation still used every case. Use "
+"colour for a variable with this many levels, or group the rare categories."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>Small sample (n = {n}):</b> the confidence interval on this coefficient "
+"is wide, and a single unusual observation can move the estimate "
+"substantially. Report the interval, not just the point estimate."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>The panel below is not showing your analysis type.</b> The main plot runs "
+"a {method} correlation, which the publication-ready panel cannot draw; that "
+"panel instead reports an ordinary <b>{fallback}</b> coefficient computed on "
+"the same two variables. Quote the main plot's subtitle for the {method} "
+"result."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>The relationship is not a straight line:</b> a curved fit explains "
+"{quad}% of the variation where a straight one explains {lin}%. Spearman's "
+"rho measures only the monotonic part, so it understates a real association "
+"here - a coefficient near zero does NOT mean the two variables are "
+"unrelated. Read the scatter plot itself before concluding anything."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>The relationship is not a straight line:</b> a curved fit explains "
+"{quad}% of the variation where a straight one explains {lin}%. This "
+"correlation measures only the linear part, so it understates a real "
+"association here - a coefficient near zero does NOT mean the two variables "
+"are unrelated. Read the scatter plot itself before concluding anything."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<b>Very small sample (n = {n}):</b> a correlation estimated from fewer than "
+"10 pairs is extremely unstable - its confidence interval typically spans "
+"most of the range from -1 to 1, so a large coefficient here is not evidence "
+"of a large association. Treat this as descriptive only."
 msgstr ""
 
 #: R/crosstable.b.R
@@ -3221,18 +3304,6 @@ msgstr ""
 
 #: R/jjbetweenstats.b.R
 msgid "<br> {var} has {n_outliers} potential outlier(s) detected<br>"
-msgstr ""
-
-#: R/jjwithinstats.b.R
-msgid ""
-"<br> <strong>Data Processing:</strong> {final_n} subjects retained. "
-"{dropped_n} incomplete cases removed.<br>"
-msgstr ""
-
-#: R/jjwithinstats.b.R
-msgid ""
-"<br> <strong>Data Processing:</strong> All {final_n} subjects retained "
-"(complete data).<br>"
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -3419,6 +3490,31 @@ msgid ""
 msgstr ""
 
 #: R/jjwithinstats.b.R
+msgid ""
+"<br><strong>Data Processing:</strong> {final_n} subjects retained. "
+"{dropped_n} incomplete cases removed.<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid ""
+"<br><strong>Data Processing:</strong> All {final_n} subjects retained "
+"(complete data).<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid ""
+"<br><strong>Note:</strong> with two measurements the comparison is a paired "
+"t-test, for which partial eta-squared and omega-squared are not defined; "
+"'%s' has been reported as %s instead.<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid ""
+"<br>Analysis cannot proceed with the current data. See the Messages panel "
+"for the reason.<br><hr>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
 msgid "<br>Analysis summary temporarily unavailable<br>"
 msgstr ""
 
@@ -3442,9 +3538,7 @@ msgid ""
 msgstr ""
 
 #: R/jjwithinstats.b.R
-msgid ""
-"<br>Processing {length(vars)} measurements for within-subjects "
-"analysis...<br>"
+msgid "<br>Processing {length(vars)} measurements for within-subjects analysis.<br>"
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -4776,6 +4870,19 @@ msgstr ""
 msgid "<strong>Analysis:</strong> %s with %d measurements per subject"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid ""
+"<strong>Bayesian:</strong> reports a Bayes factor quantifying evidence "
+"strength."
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid ""
+"<strong>Biomarker tracking (guidance only):</strong> Optimized for "
+"laboratory values. Please manually ensure 'Nonparametric' is selected if "
+"data is skewed.<br>"
+msgstr ""
+
 #: R/jjbetweenstats.b.R
 msgid ""
 "<strong>Bonferroni Correction Guidance (Manual Application "
@@ -4811,6 +4918,10 @@ msgstr ""
 msgid ""
 "<strong>Continuous Y-variable:</strong> The outcome variable should be "
 "numeric and measurable."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "<strong>Correlation coefficient</strong> with p-value and confidence interval"
 msgstr ""
 
 #: R/jjbetweenstats.b.R
@@ -4950,10 +5061,20 @@ msgid ""
 "positive results are expected to be false positives. "
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid ""
+"<strong>Laboratory values:</strong> Optimized for clinical lab value "
+"monitoring<br>"
+msgstr ""
+
 #: R/linechart.b.R
 msgid ""
 "<strong>Linearity:</strong> The relationship between variables is "
 "approximately linear."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "<strong>Marginal distributions</strong> on both axes"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -4983,6 +5104,12 @@ msgid ""
 "specificity above zero and finite pooled estimates; here the pooled "
 "specificity is 0 or an estimate did not converge. Read the pooled "
 "specificity and its confidence interval in the summary above to see which."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"<strong>Nonparametric (Spearman):</strong> any monotonic relationship; "
+"ordinal scores, skewed lab values."
 msgstr ""
 
 #: R/linechart.b.R
@@ -5016,10 +5143,20 @@ msgid ""
 "methods: Z-score |z|>3, IQR 1.5{times}rule, Modified Z-score |z|>3.5)"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid ""
+"<strong>Parametric (Pearson):</strong> linear relationship, roughly normal "
+"data."
+msgstr ""
+
 #: R/checkdata.b.R
 msgid ""
 "<strong>Pattern Analysis:</strong> Missing data mechanisms and systematic "
 "issues"
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "<strong>Per-group panels</strong> when a Split By variable is set"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -5040,6 +5177,10 @@ msgstr ""
 
 #: R/checkdata.b.R
 msgid "<strong>Publication Preparation:</strong> Data quality documentation"
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "<strong>Publication-ready output</strong> in journal colour palettes"
 msgstr ""
 
 #: R/checkdata.b.R
@@ -5076,6 +5217,16 @@ msgid ""
 "accounted for"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid ""
+"<strong>Robust (Winsorized Pearson):</strong> pulls extreme values in before "
+"computing r; use when outliers dominate."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "<strong>Scatter plot</strong> with a fitted trend line and confidence band"
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid "<strong>Studies corrected:</strong> %d of %d (%s)"
 msgstr ""
@@ -5092,6 +5243,12 @@ msgid ""
 "processed variables"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid ""
+"<strong>Treatment response:</strong> Optimized for clinical treatment "
+"monitoring<br>"
+msgstr ""
+
 #: R/swimmerplot.b.R
 msgid ""
 "<strong>Usage:</strong> This text is formatted for direct use in manuscripts "
@@ -5103,6 +5260,16 @@ msgstr ""
 msgid ""
 "<strong>Variable to Check:</strong> Select any variable for quality "
 "assessment"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid ""
+"<strong>What to look for:</strong><br>• A small p-value is evidence against "
+"the null under the model assumptions; it does not prove a treatment "
+"effect<br>• Compare effect estimates and uncertainty with a prespecified "
+"clinically important difference<br>• Individual trajectories reveal response "
+"patterns<br>• Outliers may indicate treatment non-responders or measurement "
+"errors"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -6596,10 +6763,6 @@ msgstr ""
 msgid "A {strength} {direction} trend was detected (R² = {r2})."
 msgstr ""
 
-#: R/jjcorrmat.b.R
-msgid "A %s %s correlation (%s = %s) between %s and %s that is %s, using %s."
-msgstr ""
-
 #: R/raincloud.b.R
 msgid ""
 "A %s comparing %s did not find a statistically significant difference in %s "
@@ -6609,6 +6772,10 @@ msgstr ""
 
 #: R/raincloud.b.R
 msgid "A %s comparing %s found a statistically significant difference in %s (%s)."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "A %s correlation (%s = %s) between %s and %s that is %s, using %s."
 msgstr ""
 
 #: R/agreement.b.R
@@ -6979,6 +7146,13 @@ msgid ""
 "comparisons shown when there are three or more groups."
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid ""
+"A paired t-test for two measurements, or a repeated-measures ANOVA with a "
+"Greenhouse-Geisser sphericity correction for three or more. This assumes the "
+"within-subject differences are approximately normal."
+msgstr ""
+
 #: R/decisioncombine.b.R
 msgid ""
 "A PATTERN row (\"+/-\") is a mutually exclusive group of patients: those "
@@ -7303,6 +7477,12 @@ msgid ""
 "validation."
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid ""
+"A trimmed-means test that resists outliers, which are common in laboratory "
+"values."
+msgstr ""
+
 #: R/nogoldstandard.b.R
 msgid "A two-class conditional-independence mixture model for three or more tests."
 msgstr ""
@@ -7337,6 +7517,12 @@ msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "A way to model how patients move between different health states over time"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid ""
+"A Wilcoxon signed-rank test for two measurements, or a Friedman test for "
+"three or more. These make no distributional assumption."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -8536,10 +8722,6 @@ msgstr ""
 msgid "Add correlation"
 msgstr ""
 
-#: jjscatterstats/options/ggpubrAddCorr.title
-msgid "Add correlation (ggpubr)"
-msgstr ""
-
 #: jjpubr/options/addCorr.description.ui
 msgid "Add correlation coefficient and p-value (for scatter plots)"
 msgstr ""
@@ -8620,19 +8802,12 @@ msgid "Add ggpubr histogram"
 msgstr ""
 
 #: jjbetweenstats/options/addGGPubrPlot.title
-#: jjwithinstats/options/addGGPubrPlot.title
 msgid "Add ggpubr plot variant"
-msgstr ""
-
-#: jjscatterstats/options/addGGPubrPlot.title
-msgid "Add ggpubr scatter plot"
 msgstr ""
 
 #: jjbarstats/options/originaltheme.title
 #: jjbetweenstats/options/originaltheme.title
 #: jjpiestats/options/originaltheme.title
-#: jjscatterstats/options/originaltheme.title
-#: jjwithinstats/options/originaltheme.title
 msgid "Add GGStatsPlot layer"
 msgstr ""
 
@@ -8654,10 +8829,6 @@ msgstr ""
 
 #: jjpubr/options/addPoints.title
 msgid "Add Individual Points"
-msgstr ""
-
-#: jjwithinstats/options/ggpubrAddPoints.title
-msgid "Add individual points"
 msgstr ""
 
 #: jjbetweenstats/options/ggpubrAddPoints.title
@@ -8933,10 +9104,6 @@ msgstr ""
 msgid "Add smooth line"
 msgstr ""
 
-#: jjscatterstats/options/ggpubrAddSmooth.title
-msgid "Add smooth line (ggpubr)"
-msgstr ""
-
 #: tidyplots/options/addSmoother.title
 msgid "Add Smooth Trend Line"
 msgstr ""
@@ -8975,7 +9142,6 @@ msgid "Add statistical comparisons"
 msgstr ""
 
 #: jjbetweenstats/options/ggpubrAddStats.title
-#: jjwithinstats/options/ggpubrAddStats.title
 msgid "Add statistical comparisons (ggpubr)"
 msgstr ""
 
@@ -9356,6 +9522,12 @@ msgstr ""
 msgid "Additive Model"
 msgstr ""
 
+#: jjscatterstats/options/bfmessage.description.ui
+msgid ""
+"Adds a caption reporting the Bayes factor in favour of NO association. "
+"Applies to the parametric (Pearson) test only."
+msgstr ""
+
 #: R/decision.b.R
 msgid "Adds detailed clinical interpretation help to all result tables."
 msgstr ""
@@ -9625,10 +9797,6 @@ msgstr ""
 msgid "Adjusted p"
 msgstr ""
 
-#: R/jjcorrmat.b.R
-msgid "adjusted p"
-msgstr ""
-
 #: R/chisqposttest.b.R
 #: cochranq/results/pairwiseComparisons.columns.title
 #: friedmantest/results/pairwiseComparisons.columns.title
@@ -9760,7 +9928,6 @@ msgstr ""
 
 #: advancedtrials/results/multiplicity_adjustment.columns.title
 #: jjbetweenstats/options/padjustmethod.title
-#: jjwithinstats/options/padjustmethod.title
 #: mixedmodelanova/ui[3][1].label
 #: multisurvival/options/ac_method.title
 #: multisurvival/ui[6][1].label
@@ -9769,6 +9936,10 @@ msgstr ""
 #: survival/options/padjustmethod.title
 #: survivalfeaturerank/options/adjustMethod.title
 msgid "Adjustment Method"
+msgstr ""
+
+#: jjwithinstats/options/padjustmethod.title
+msgid "Adjustment method"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -11172,6 +11343,10 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "Aggregate trend charts"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Aggregation Hides Within-Group Spread"
 msgstr ""
 
 #: jjradarplot/options/aggregationMethod.title
@@ -16991,6 +17166,14 @@ msgstr ""
 msgid "Baseline event rate for binary outcomes"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Baseline Falls Inside the Data Range"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Baseline Far From the Data"
+msgstr ""
+
 #: marginalrecurrent/options/baseline_type.title
 #: marginalrecurrent/results/modelfit.columns.title
 msgid "Baseline Function"
@@ -17138,11 +17321,11 @@ msgstr ""
 msgid "Baseline VAF / ctDNA level"
 msgstr ""
 
-#: lollipop/options/baseline.title
 #: populationhealth/results/interventionAnalysisTable.columns.title
 msgid "Baseline Value"
 msgstr ""
 
+#: lollipop/options/baseline.title
 #: lollipop/ui[2][2]/baseline.label
 msgid "Baseline value"
 msgstr ""
@@ -17447,11 +17630,14 @@ msgstr ""
 msgid "Bayes factor caption"
 msgstr ""
 
+#: jjscatterstats/options/bfmessage.title
+msgid "Bayes factor for the null (BF01)"
+msgstr ""
+
 #: jjbarstats/options/bfmessage.title
 #: jjbetweenstats/options/bfmessage.title
 #: jjhistostats/options/bf.message.title
 #: jjpiestats/options/bfmessage.title
-#: jjscatterstats/options/bfmessage.title
 #: jjwithinstats/options/bfmessage.title
 msgid "Bayes factor message"
 msgstr ""
@@ -17474,6 +17660,7 @@ msgstr ""
 msgid "Bayes Factors Evolution"
 msgstr ""
 
+#: R/jjscatterstats.b.R
 #: jextractggstats/options/statistical_test/bayes.title
 #: jjbarstats/options/typestatistics/bayes.title
 #: jjridges/options/test_type/bayes.title
@@ -17612,8 +17799,9 @@ msgstr ""
 
 #: R/jjcorrmat.b.R
 msgid ""
-"Bayesian correlations report the median posterior estimate and "
-"BF<sub>10</sub>; no p-value is defined."
+"Bayesian correlations report the median posterior estimate, a credible "
+"interval from the posterior (not a confidence interval) and BF<sub>10</sub>; "
+"no p-value is defined."
 msgstr ""
 
 #: bayesianci/results/credibleIntervals.title
@@ -17825,6 +18013,10 @@ msgstr ""
 msgid "Bayesian repeated measures analysis"
 msgstr ""
 
+#: jjcorrmat/options/bayesseed.title
+msgid "Bayesian seed"
+msgstr ""
+
 #: bayesianclinical/options/analysis_type/survival_analysis.title
 msgid "Bayesian Survival Analysis"
 msgstr ""
@@ -17852,6 +18044,10 @@ msgstr ""
 #: package/analyses/spikeslabpriors.menuSubtitle
 #: spikeslabpriors/options.menuSubtitle
 msgid "Bayesian variable selection for high-dimensional data"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Bayesian:"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/bbc_blue.title
@@ -19239,6 +19435,12 @@ msgstr ""
 
 #: ihcscoring/results/cutoffplot.description
 msgid "Biomarker positivity rates across different thresholds"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid ""
+"Biomarker preset: Consider using Nonparametric test for skewed biomarker "
+"data<br>"
 msgstr ""
 
 #: advancedtrials/options/biomarker_prevalence.title
@@ -20690,6 +20892,10 @@ msgid ""
 "same data."
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid "Both scatterplot variables must be numeric."
+msgstr ""
+
 #: rocreg/options/covariate_effects/both.title
 msgid "Both Sensitivity and Specificity"
 msgstr ""
@@ -20704,6 +20910,10 @@ msgstr ""
 
 #: partialcorrelation/options/correlationType/both.title
 msgid "Both Types"
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "Both variables selected - the analysis runs automatically."
 msgstr ""
 
 #: patientdashboard/results/workflowAnalysisTable.columns.title
@@ -20899,6 +21109,10 @@ msgstr ""
 msgid "Box Plots with Individual Data Points"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "Box plots:"
+msgstr ""
+
 #: assayoptimization/options/design_type/box_behnken.title
 msgid "Box-Behnken Design"
 msgstr ""
@@ -20933,6 +21147,7 @@ msgstr ""
 #: package/analyses/jjwithinstats.menuTitle
 #: jjwithinstats/options.title
 #: jjwithinstats/ui.title
+#: jjwithinstats/results.title
 msgid "Box-Violin Plots to Compare Within Groups"
 msgstr ""
 
@@ -24562,6 +24777,10 @@ msgstr ""
 msgid "Central Tendency Display"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "Central tendency displayed"
+msgstr ""
+
 #: jjdotplotstats/options/centralityplotting.title
 msgid "Central tendency lines"
 msgstr ""
@@ -24569,10 +24788,6 @@ msgstr ""
 #: jjdotchart/options/centralitytype.title
 #: jjdotplotstats/options/centralitytype.title
 msgid "Central Tendency Measure"
-msgstr ""
-
-#: R/swimmerplot.b.R
-msgid "Central tendency of patient follow-up duration"
 msgstr ""
 
 #: jsummarytools/options/stats_to_include/central.title
@@ -24635,8 +24850,11 @@ msgstr ""
 
 #: jjbetweenstats/options/centralitytype.title
 #: jjhistostats/options/centralitytype.title
-#: jjwithinstats/options/centralitytype.title
 msgid "Centrality Type"
+msgstr ""
+
+#: jjwithinstats/options/centralitytype.title
+msgid "Centrality type"
 msgstr ""
 
 #: dendrogram/options/clusterMethod/centroid.title
@@ -24865,6 +25083,7 @@ msgstr ""
 msgid "Chart Options"
 msgstr ""
 
+#: lollipop/options/orientation.title
 #: lollipop/ui[1][0]/orientation.label
 msgid "Chart orientation"
 msgstr ""
@@ -24898,6 +25117,7 @@ msgstr ""
 #: jjsegmentedtotalbar/ui[5][0]/plot_title.label
 #: jwaffle/ui[2][0][0]/mytitle.label
 #: linechart/ui[4][0]/title.label
+#: lollipop/options/title.title
 #: lollipop/ui[4][0]/title.label
 msgid "Chart title"
 msgstr ""
@@ -25805,6 +26025,10 @@ msgstr ""
 msgid "Choosing a Plot Engine:"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid "Choosing a test"
+msgstr ""
+
 #: circos/results/plot.title
 msgid "Chord Diagram"
 msgstr ""
@@ -26701,8 +26925,11 @@ msgstr ""
 #: jjhistostats/options/clinicalPreset.title
 #: jjpiestats/options/clinicalpreset.title
 #: jjsegmentedtotalbar/options/analysis_preset.title
-#: jjwithinstats/options/clinicalpreset.title
 msgid "Clinical Analysis Preset"
+msgstr ""
+
+#: jjwithinstats/options/clinicalpreset.title
+msgid "Clinical analysis preset"
 msgstr ""
 
 #: advancedraincloud/results/clinical_report.title
@@ -29867,6 +30094,7 @@ msgid "Cohen Kappa (Unweighted)"
 msgstr ""
 
 #: R/jjdotplotstats.b.R
+#: R/jjwithinstats.b.R
 #: advancedanova/results/tukey.columns.title
 #: advancedanova/results/gameshowell.columns.title
 #: advancedanova/results/dunnett.columns.title
@@ -30301,10 +30529,9 @@ msgstr ""
 #: jggheatmap/options/color_scheme.title
 #: jjcoefstats/options/colorScheme.title
 #: jjcoefstats/ui[4][0]/colorScheme.label
-#: jjcorrmat/ui[3][0].label
+#: jjcorrmat/ui[4][0].label
 #: jjoncoplot/options/colorScheme.title
 #: jsjplot/options/colors.title
-#: lollipop/options/colorScheme.title
 #: riverplot/options/colorScheme.title
 #: studydiagram/options/color_scheme.title
 #: tidyplots/options/colorScheme.title
@@ -30315,6 +30542,7 @@ msgstr ""
 
 #: finegray/ui[3][1][0]/colorScheme.label
 #: linechart/ui[3][1]/colorPalette.label
+#: lollipop/options/colorScheme.title
 #: lollipop/ui[2][0]/colorScheme.label
 #: waterfall/options/colorScheme.title
 msgid "Color scheme"
@@ -30374,9 +30602,6 @@ msgid "Color Theme"
 msgstr ""
 
 #: lollipop/options/colorThreshold.title
-msgid "Color Threshold"
-msgstr ""
-
 #: lollipop/ui[3][0]/colorThreshold.label
 msgid "Color threshold"
 msgstr ""
@@ -31384,10 +31609,6 @@ msgstr ""
 
 #: survival/ui[9][1][0]/compare_distributions.label
 msgid "Compare distributions using AIC and BIC"
-msgstr ""
-
-#: jjwithinstats/options/pairwisecomparisons.title
-msgid "Compare each time point pair"
 msgstr ""
 
 #: survival/ui[9][1][0]/parametric_survival_plots.label
@@ -33829,7 +34050,11 @@ msgid "Compute Specificity"
 msgstr ""
 
 #: R/jjcorrmat.b.R
-msgid "Computed %d %s %s of %d variables."
+msgid "Computed %d partial %s of %d variables."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Computed %d zero-order %s of %d variables."
 msgstr ""
 
 #: R/dataquality.b.R
@@ -34252,6 +34477,16 @@ msgstr ""
 msgid "Conditional coloring"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Conditional Coloring"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid ""
+"Conditional colouring is active, so the highlighted category is not drawn "
+"differently; turn conditional colouring off to use highlighting."
+msgstr ""
+
 #: entropyanalysis/results/conditionalEntropyTable.title
 msgid "Conditional Entropy H(Y|X)"
 msgstr ""
@@ -34479,6 +34714,10 @@ msgstr ""
 
 #: ihcdiagnostic/results/differentialResults.columns.title
 msgid "Confidence (%)"
+msgstr ""
+
+#: jjcorrmat/options/conflevel.title
+msgid "Confidence / credible level"
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -34771,14 +35010,12 @@ msgstr ""
 #: jjbetweenstats/options/conflevel.title
 #: jjcoefstats/options/ciLevel.title
 #: jjcoefstats/ui[2][0]/ciLevel.label
-#: jjcorrmat/options/conflevel.title
 #: jjdotchart/options/conflevel.title
 #: jjdotplotstats/options/conflevel.title
 #: jjhistostats/options/conf.level.title
 #: jjpiestats/options/conflevel.title
 #: jjscatterstats/options/conflevel.title
 #: jjsegmentedtotalbar/options/confidence_level.title
-#: jjwithinstats/options/conflevel.title
 #: joinpoint/options/conf_level.title
 #: jointfrailty/options/confidence_level.title
 #: jsjplot/options/confidence_level.title
@@ -34909,6 +35146,7 @@ msgstr ""
 #: jcorrelation/options/ciWidth.title
 #: jjbarstats/ui[2][2][0]/conflevel.label
 #: jjsegmentedtotalbar/ui[7][0]/confidence_level.label
+#: jjwithinstats/options/conflevel.title
 #: partialcorrelation/options/ciWidth.title
 #: polychoriccorr/options/ciWidth.title
 #: polychoriccorr/ui[1][1]/ciWidth.label
@@ -37103,6 +37341,18 @@ msgid "Correlation Analysis Method"
 msgstr ""
 
 #: R/jjcorrmat.b.R
+msgid ""
+"Correlation analysis requires at least 2 numeric variables with sufficient "
+"variation. Found %d valid variable(s). Please select additional variables."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid ""
+"Correlation analysis requires numeric variables. The following are "
+"categorical: %s. Please select continuous numeric variables."
+msgstr ""
+
+#: R/jjcorrmat.b.R
 msgid "Correlation Analysis Summary"
 msgstr ""
 
@@ -37148,8 +37398,18 @@ msgstr ""
 msgid "Correlation between texture features"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid ""
+"Correlation between two continuous variables, with optional grouping, "
+"marginal distributions and publication-ready output."
+msgstr ""
+
 #: variablebiplot/options/biplotType/correlation.title
 msgid "Correlation Biplot"
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "Correlation calculation failed: {reason}"
 msgstr ""
 
 #: treatmentmeta/options/correlation.title
@@ -37158,6 +37418,10 @@ msgstr ""
 
 #: metaanalysis/options/effect_measure/correlation.title
 msgid "Correlation Coefficient (association strength)"
+msgstr ""
+
+#: jjscatterstats/options/ggpubrAddCorr.title
+msgid "Correlation coefficient (ggpubr)"
 msgstr ""
 
 #: treatmentmeta/options/outcome_type/correlation.title
@@ -37190,6 +37454,12 @@ msgstr ""
 
 #: imagingcorrelation/options/heatmap_visualization.title
 msgid "Correlation Heatmaps"
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"Correlation is not causation, and a coefficient assumes the relationship has "
+"the shape the test looks for - always read the scatter itself."
 msgstr ""
 
 #: autoeda/results/correlation_analysis.description
@@ -37238,6 +37508,12 @@ msgstr ""
 msgid "Correlation Matrix Variables"
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid ""
+"Correlation matrix with %d variables may be complex to interpret. Consider "
+"focusing on key variables of interest."
+msgstr ""
+
 #: jcorrelation/results/matrix.description
 msgid "correlation matrix with significance tests"
 msgstr ""
@@ -37277,6 +37553,10 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "Correlation metrics were not estimable with the available data. "
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "Correlation not computed (insufficient data)"
 msgstr ""
 
 #: conditionalgee/results/correlationStructure.title
@@ -37371,7 +37651,15 @@ msgid "Correlation type"
 msgstr ""
 
 #: R/jjcorrmat.b.R
-msgid "Correlation type: %s"
+msgid "Correlation type: Partial"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Correlation type: Zero-order"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Correlation variables must be numeric."
 msgstr ""
 
 #: imagingcorrelation/options/correlation_plots.title
@@ -39319,6 +39607,10 @@ msgstr ""
 
 #: metaanalysis/results/networkResults.columns.title
 msgid "Credible Interval"
+msgstr ""
+
+#: jjcorrmat/results/table.columns.superTitle
+msgid "Credible interval"
 msgstr ""
 
 #: bayesianmetaanalysis/options/credibleInterval.title
@@ -41951,9 +42243,6 @@ msgid "Data & Statistics"
 msgstr ""
 
 #: lollipop/options/aggregation.title
-msgid "Data Aggregation"
-msgstr ""
-
 #: lollipop/ui[1][0]/aggregation.label
 msgid "Data aggregation"
 msgstr ""
@@ -42025,6 +42314,7 @@ msgid ""
 "selections."
 msgstr ""
 
+#: R/jjcorrmat.b.R
 #: R/jjdotplotstats.b.R
 msgid ""
 "Data contains no complete rows after filtering. Please check for missing "
@@ -42033,6 +42323,12 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "Data contains no complete rows. Check the data."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid ""
+"Data contains no complete rows. Please check for missing values in selected "
+"variables."
 msgstr ""
 
 #: R/jjdotplotstats.b.R
@@ -43325,13 +43621,13 @@ msgstr ""
 #: jjcorrmat/options/k.title
 #: jjhistostats/options/digits.title
 #: jjscatterstats/options/k.title
-#: jjwithinstats/options/k.title
 #: jsummarytools/options/round_digits.title
 #: robustcorrelation/options/decimal_places.title
 #: timedependent/options/decimals.title
 msgid "Decimal Places"
 msgstr ""
 
+#: jjwithinstats/options/k.title
 #: summarydata/options/decimal_places.title
 msgid "Decimal places"
 msgstr ""
@@ -49886,6 +50182,16 @@ msgid ""
 "values as the strata."
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid ""
+"Drop a continuous variable into <strong>x-axis</strong> (e.g. biomarker "
+"level)."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "Drop a second continuous variable into <strong>y-axis</strong>."
+msgstr ""
+
 #: missingdataexplorer/options/dropout_analysis.title
 msgid "Dropout Analysis"
 msgstr ""
@@ -49963,6 +50269,10 @@ msgstr ""
 
 #: R/dataquality.b.R
 msgid "Duplicate Detection:"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Duplicate Groups Detected"
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -50972,6 +51282,10 @@ msgid ""
 "when testing interaction effects."
 msgstr ""
 
+#: jjwithinstats/options/effsizetype.title
+msgid "Effect size for parametric tests"
+msgstr ""
+
 #: effectsize/options/interpretation.title
 msgid "Effect Size Interpretation"
 msgstr ""
@@ -51027,7 +51341,6 @@ msgid "Effect Size Method"
 msgstr ""
 
 #: jjbetweenstats/options/effsizetype.title
-#: jjwithinstats/options/effsizetype.title
 msgid "Effect Size Needed for Parametric Tests"
 msgstr ""
 
@@ -56631,6 +56944,7 @@ msgstr ""
 msgid "Explanation Validation Plot"
 msgstr ""
 
+#: R/jjwithinstats.b.R
 #: decisioncompare/options/showExplanations.title
 #: distributionfit/options/showExplanations.title
 #: flexparametric/options/showExplanations.title
@@ -57782,6 +58096,10 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "EXTREME VALUES DETECTED"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Extreme Values Present"
 msgstr ""
 
 #: robustcorrelation/results/outlier_table.columns.title
@@ -63551,8 +63869,11 @@ msgstr ""
 
 #: jjbetweenstats/options/ggpubrPalette.title
 #: jjscatterstats/options/ggpubrPalette.title
-#: jjwithinstats/options/ggpubrPalette.title
 msgid "ggpubr Color Palette"
+msgstr ""
+
+#: jjwithinstats/options/ggpubrPalette.title
+msgid "ggpubr colour palette"
 msgstr ""
 
 #: jjhistostats/options/ggpubrPalette.title
@@ -63568,8 +63889,11 @@ msgid "ggpubr Plot"
 msgstr ""
 
 #: jjbetweenstats/options/ggpubrPlotType.title
-#: jjwithinstats/options/ggpubrPlotType.title
 msgid "ggpubr Plot Type"
+msgstr ""
+
+#: jjwithinstats/options/ggpubrPlotType.title
+msgid "ggpubr plot type"
 msgstr ""
 
 #: package/analyses/jjpubr.menuTitle
@@ -63587,7 +63911,12 @@ msgstr ""
 
 #: jjbarstats/ui[3][0][0]/originaltheme.label
 #: jjpiestats/ui[3][0][0]/originaltheme.label
+#: jjwithinstats/options/originaltheme.title
 msgid "ggstatsplot theme"
+msgstr ""
+
+#: jjscatterstats/options/originaltheme.title
+msgid "GGStatsPlot theme layer"
 msgstr ""
 
 #: swimmerplot/options/plotTheme/ggswim_dark.title
@@ -64870,6 +65199,13 @@ msgstr ""
 
 #: stagemigration/results/optimalCutpointAnalysis.columns.title
 msgid "Group Sizes"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid ""
+"Group sizes range from {lo} to {hi} observations, so the lollipops are not "
+"estimated with equal precision; read the sparsely sampled groups with more "
+"caution."
 msgstr ""
 
 #: hullplot/results/statistics.title
@@ -66379,6 +66715,7 @@ msgid "Hedge's g"
 msgstr ""
 
 #: R/jjdotplotstats.b.R
+#: R/jjwithinstats.b.R
 #: advancedraincloud/options/effect_size_type/hedges_g.title
 #: effectsize/options/measures_hedges_g.title
 #: jextractggstats/options/effect_size_type/hedges_g.title
@@ -67421,11 +67758,12 @@ msgid "Highlight clusters"
 msgstr ""
 
 #: lollipop/options/highlight.title
-msgid "Highlight Level"
-msgstr ""
-
 #: lollipop/ui[0][1]/highlight.label
 msgid "Highlight level"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Highlight Level Not Found"
 msgstr ""
 
 #: groupedbar/options/highlightmax.title
@@ -67476,8 +67814,13 @@ msgstr ""
 msgid "Highlight variables with missing values above this threshold."
 msgstr ""
 
+#: lollipop/options/useHighlight.title
 #: lollipop/ui[0][1]/useHighlight.label
 msgid "Highlighting"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Highlighting Ignored"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -70048,6 +70391,7 @@ msgstr ""
 #: enhancedROC/results/results/notices.title
 #: firthregression/results/notices.title
 #: grouplasso/results/notices.title
+#: hullplot/results/notices.title
 #: ihccluster/results/notices.title
 #: irecist/results/notices.title
 #: jjarcdiagram/results/notices.title
@@ -71573,6 +71917,10 @@ msgid ""
 "pathways and treatment response patterns."
 msgstr ""
 
+#: jjwithinstats/options/ggpubrAddPoints.title
+msgid "Individual points"
+msgstr ""
+
 #: explainableai/results/shapanalysis/shapwaterfallplot.description
 msgid "Individual prediction explanation"
 msgstr ""
@@ -71672,6 +72020,10 @@ msgstr ""
 msgid ""
 "Individual tracking assumes unique patient identifiers and accurate linkage "
 "across time points."
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Individual trajectories shown"
 msgstr ""
 
 #: jointmodeling/results/trajectoryPlot.title
@@ -74416,6 +74768,10 @@ msgid ""
 "when the event probability is 50%."
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "It tests whether the measurements differ across time points or conditions."
+msgstr ""
+
 #: relativesurvival/options/ratetable/italy.title
 msgid "Italian Population (WHO)"
 msgstr ""
@@ -74698,19 +75054,31 @@ msgstr ""
 msgid "Jittered"
 msgstr ""
 
+#: package/analyses/hullplot.menuGroup
+#: package/analyses/raincloud.menuGroup
 #: package/analyses/advancedraincloud.menuGroup
+#: package/analyses/jjcorrmat.menuGroup
 #: package/analyses/jjdotplotstats.menuGroup
 #: package/analyses/jjbetweenstats.menuGroup
+#: package/analyses/jjwithinstats.menuGroup
+#: package/analyses/jjbarstats.menuGroup
 #: package/analyses/jjpiestats.menuGroup
 #: package/analyses/statsplot2.menuGroup
+#: package/analyses/lollipop.menuGroup
 #: package/analyses/jjsegmentedtotalbar.menuGroup
 #: package/analyses/jjdotchart.menuGroup
 #: advancedraincloud/options.menuGroup
+#: hullplot/options.menuGroup
+#: jjbarstats/options.menuGroup
 #: jjbetweenstats/options.menuGroup
+#: jjcorrmat/options.menuGroup
 #: jjdotchart/options.menuGroup
 #: jjdotplotstats/options.menuGroup
 #: jjpiestats/options.menuGroup
 #: jjsegmentedtotalbar/options.menuGroup
+#: jjwithinstats/options.menuGroup
+#: lollipop/options.menuGroup
+#: raincloud/options.menuGroup
 #: statsplot2/options.menuGroup
 msgid "JJStatsPlot"
 msgstr ""
@@ -74758,40 +75126,28 @@ msgstr ""
 msgid "JJStatsPlotD"
 msgstr ""
 
-#: package/analyses/hullplot.menuGroup
-#: package/analyses/raincloud.menuGroup
 #: package/analyses/jjhistostats.menuGroup
 #: package/analyses/jjscatterstats.menuGroup
 #: package/analyses/jjsyndromicplot.menuGroup
 #: package/analyses/pcaloadingheatmap.menuGroup
-#: package/analyses/jjcorrmat.menuGroup
-#: package/analyses/jjwithinstats.menuGroup
-#: package/analyses/jjbarstats.menuGroup
 #: package/analyses/jwaffle.menuGroup
 #: package/analyses/linechart.menuGroup
-#: package/analyses/lollipop.menuGroup
 #: package/analyses/jjarcdiagram.menuGroup
 #: package/analyses/jjridges.menuGroup
 #: package/analyses/basegraphics.menuGroup
 #: package/analyses/jjpubr.menuGroup
 #: package/analyses/jjcoefstats.menuGroup
 #: basegraphics/options.menuGroup
-#: hullplot/options.menuGroup
 #: jjarcdiagram/options.menuGroup
-#: jjbarstats/options.menuGroup
 #: jjcoefstats/options.menuGroup
-#: jjcorrmat/options.menuGroup
 #: jjhistostats/options.menuGroup
 #: jjpubr/options.menuGroup
 #: jjridges/options.menuGroup
 #: jjscatterstats/options.menuGroup
 #: jjsyndromicplot/options.menuGroup
-#: jjwithinstats/options.menuGroup
 #: jwaffle/options.menuGroup
 #: linechart/options.menuGroup
-#: lollipop/options.menuGroup
 #: pcaloadingheatmap/options.menuGroup
-#: raincloud/options.menuGroup
 msgid "JJStatsPlotT"
 msgstr ""
 
@@ -76081,6 +76437,16 @@ msgstr ""
 #: methodvalidation/ui.title
 #: methodvalidation/results.title
 msgid "Laboratory Method Validation Protocols"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid ""
+"Laboratory preset: Consider Robust test to handle outliers common in lab "
+"values<br>"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Laboratory preset: Enable centrality plotting to see overall trends<br>"
 msgstr ""
 
 #: package/analyses/qualitycontrol.title
@@ -77965,22 +78331,25 @@ msgid "Line Transparency"
 msgstr ""
 
 #: basegraphics/options/line_type.title
-#: lollipop/options/lineType.title
 #: tidyplots/options/lineType.title
 #: tidyplots/ui[1][2].label
 msgid "Line Type"
 msgstr ""
 
+#: lollipop/options/lineType.title
 #: lollipop/ui[2][2]/lineType.label
 msgid "Line type"
 msgstr ""
 
 #: basegraphics/options/line_width.title
 #: jjradarplot/options/lineSize.title
-#: lollipop/options/lineWidth.title
 #: tidyplots/options/lineWidth.title
 #: tidyplots/ui[15][2].label
 msgid "Line Width"
+msgstr ""
+
+#: lollipop/options/lineWidth.title
+msgid "Line width"
 msgstr ""
 
 #: lollipop/ui[2][1]/lineWidth.label
@@ -80595,6 +80964,10 @@ msgstr ""
 msgid "Many categories - consider grouping"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Many Group Levels"
+msgstr ""
+
 #: R/agepyramid.b.R
 msgid "Many narrow age bands"
 msgstr ""
@@ -80665,6 +81038,10 @@ msgstr ""
 
 #: adaptivelasso/options/weight_method/correlation.title
 msgid "Marginal Correlation Weights"
+msgstr ""
+
+#: jjscatterstats/ui[7][1].label
+msgid "Marginal distributions (this panel only)"
 msgstr ""
 
 #: survivalbart/results/variableImportance.columns.title
@@ -82190,7 +82567,7 @@ msgid "Mean ± SD, Min-Max"
 msgstr ""
 
 #: R/lollipop.b.R
-msgid "Mean ="
+msgid "Mean = {val}"
 msgstr ""
 
 #: explainableai/results/shapanalysis/shapvaluestable.columns.title
@@ -82465,8 +82842,11 @@ msgstr ""
 
 #: jjridges/options/add_mean.title
 #: jjridges/ui[2][0]/add_mean.label
-#: lollipop/options/showMean.title
 msgid "Mean line"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Mean Line Averages the Group Summaries"
 msgstr ""
 
 #: lymphnoderatio/results/strataTable.columns.title
@@ -82487,6 +82867,10 @@ msgstr ""
 
 #: mixedeffectscox/results/hierarchicalStructure.columns.title
 msgid "Mean Obs"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Mean of group values = {val}"
 msgstr ""
 
 #: tidydensity/options/lognormal_meanlog.title
@@ -82583,6 +82967,7 @@ msgstr ""
 msgid "Mean Reference Area (μm²)"
 msgstr ""
 
+#: lollipop/options/showMean.title
 #: lollipop/ui[1][1]/showMean.label
 msgid "Mean reference line"
 msgstr ""
@@ -82818,6 +83203,13 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Measure of variability around the mean."
+msgstr ""
+
+#: R/lollipop.b.R
+msgid ""
+"Measured from the baseline of {base}, the differences between groups occupy "
+"only {pct}% of each stem, so the lollipops look almost equal; set the "
+"baseline near the lower end of the data to make the comparison visible."
 msgstr ""
 
 #: clinicalalerts/results/detailedAlerts.columns.title
@@ -86629,6 +87021,10 @@ msgstr ""
 msgid "Missing data patterns should be examined for potential bias"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Missing Data Removed"
+msgstr ""
+
 #: clinicalheatmap/results/dataSummary/missingData.title
 msgid "Missing Data Report"
 msgstr ""
@@ -86670,6 +87066,10 @@ msgstr ""
 
 #: multiplexanalysis/results/qualitycontrol/qcmetrics.description
 msgid "Missing data, outliers, and technical quality"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Missing data:"
 msgstr ""
 
 #: R/checkdata.b.R
@@ -86752,6 +87152,10 @@ msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid "Missing required columns for proportional-hazards SROC analysis"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid "Missing Required Packages"
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -88608,7 +89012,6 @@ msgstr ""
 #: R/decision.b.R
 #: R/diagnosticmeta.b.R
 #: R/enhancedROC.b.R
-#: R/jjcorrmat.b.R
 #: R/linechart.b.R
 msgid "moderate"
 msgstr ""
@@ -88739,6 +89142,10 @@ msgstr ""
 msgid "Moderate missing data were observed ({percent} of cases incomplete)."
 msgstr ""
 
+#: R/jjcorrmat.b.R
+msgid "moderate negative"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid "Moderate number of categories"
 msgstr ""
@@ -88755,6 +89162,10 @@ msgstr ""
 
 #: R/datetimeconverter.b.R
 msgid "Moderate Parsing Success Rate"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "moderate positive"
 msgstr ""
 
 #: R/checkdata.b.R
@@ -88793,7 +89204,11 @@ msgid "Moderate variability"
 msgstr ""
 
 #: R/jjcorrmat.b.R
-msgid "moderate-to-strong"
+msgid "moderate-to-strong negative"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "moderate-to-strong positive"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -91147,7 +91562,6 @@ msgstr ""
 msgid "Negative"
 msgstr ""
 
-#: R/jjcorrmat.b.R
 #: R/linechart.b.R
 msgid "negative"
 msgstr ""
@@ -92328,6 +92742,10 @@ msgstr ""
 msgid "No complete cases for the required variables."
 msgstr ""
 
+#: R/hullplot.b.R
+msgid "No complete cases found for the selected variables."
+msgstr ""
+
 #: R/lollipop.b.R
 msgid ""
 "No complete cases found. Please check for missing values in selected "
@@ -92439,9 +92857,30 @@ msgstr ""
 
 #: R/jjcorrmat.b.R
 msgid ""
+"No correction for multiple comparisons is applied across %d correlation "
+"tests at a threshold of %s, so about %s of them are expected to reach "
+"significance by chance alone. Select a p-value adjustment (Holm is the "
+"default) or report these as exploratory rather than confirmatory."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid ""
 "No correction for multiple comparisons was applied, so <b>p (adjusted)</b> "
 "repeats the unadjusted p-value. Each additional variable adds several "
 "pairwise tests."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid ""
+"No correlations could be computed for group \"%s\"; it is omitted from the "
+"table."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid ""
+"No correlations could be computed with the selected options. If partial "
+"correlations are switched on, check that the variables are not collinear and "
+"that enough complete rows remain."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -93739,6 +94178,10 @@ msgstr ""
 msgid "Non-finite values excluded"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Non-finite Values Removed"
+msgstr ""
+
 #: R/alluvial.b.R
 msgid "Non-finite Weights"
 msgstr ""
@@ -94292,6 +94735,10 @@ msgstr ""
 msgid "Nonparametric Model Options (npcure)"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "Nonparametric:"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid "Nonzero columns in the full model"
 msgstr ""
@@ -94776,10 +95223,17 @@ msgstr ""
 msgid "Not significantly different"
 msgstr ""
 
-#: R/jjcorrmat.b.R
 #: R/linechart.b.R
 #: R/survival.b.R
 msgid "not statistically significant"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "not statistically significant (adjusted p = %s)"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "not statistically significant (p = %s)"
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -94950,6 +95404,10 @@ msgstr ""
 
 #: R/checkdata.b.R
 msgid "NOTE ON THE CLINICAL PENALTY"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Note on the Wilcoxon p-value:"
 msgstr ""
 
 #: R/kappaSizeFixedN.b.R
@@ -96392,6 +96850,10 @@ msgid ""
 "require larger sample sizes to maintain overall Type I error."
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Number of Plotted Points"
+msgstr ""
+
 #: plscox/options/pls_components.title
 msgid "Number of PLS Components"
 msgstr ""
@@ -97051,6 +97513,14 @@ msgstr ""
 
 #: R/jjpiestats.b.R
 msgid "Observations should be independent"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid ""
+"Observations within a single group vary by up to {sd} (one standard "
+"deviation), which is more than half the {span} spread between the plotted "
+"group summaries; each lollipop is a single point with no error bar, so the "
+"chart shows less disagreement than the data contains."
 msgstr ""
 
 #: R/oddsratio.b.R
@@ -98161,6 +98631,12 @@ msgstr ""
 msgid "Only show labels for segments above this percentage threshold."
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid ""
+"Only subjects with a value for every selected measurement are analysed, "
+"because a paired comparison needs complete records."
+msgstr ""
+
 #: R/alluvial.b.R
 msgid ""
 "Only the first {shown} of {selected} selected variables are plotted, because "
@@ -99071,6 +99547,10 @@ msgid ""
 "simultaneously."
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid "Optionally set <strong>Split By</strong> to get one panel per group."
+msgstr ""
+
 #: alluvial/ui[1].label
 #: categorize/ui[3].label
 #: crosstable/ui[1].label
@@ -99359,10 +99839,6 @@ msgstr ""
 msgid "organ, used to apply the limit of two target lesions per organ"
 msgstr ""
 
-#: lollipop/options/orientation.title
-msgid "Orientation"
-msgstr ""
-
 #: enhancedfactorvariable/options/plotOrientation.description
 msgid "Orientation for factor level bar plots"
 msgstr ""
@@ -99458,8 +99934,11 @@ msgstr ""
 msgid "Original Functional"
 msgstr ""
 
+#: jjcorrmat/options/originaltheme.title
 #: jjdotchart/options/originaltheme.title
 #: jjdotplotstats/options/originaltheme.title
+#: jjhistostats/options/originaltheme.title
+#: statsplot2/options/originaltheme.title
 msgid "Original ggstatsplot theme"
 msgstr ""
 
@@ -101198,10 +101677,6 @@ msgstr ""
 msgid "Overview Summary"
 msgstr ""
 
-#: R/jjcorrmat.b.R
-msgid "p"
-msgstr ""
-
 #: agreement/results/allPairsKappaTable.columns.title
 #: groupedbar/results/posthoctests.columns.title
 #: jjcorrmat/results/table.columns.title
@@ -102329,6 +102804,7 @@ msgstr ""
 #: enhancedROC/options/pairwiseComparisons.title
 #: jjbetweenstats/options/pairwisecomparisons.title
 #: jjpubr/ui[3]/pairwiseComparisons.label
+#: jjwithinstats/options/pairwisecomparisons.title
 #: survival/options/pw.title
 #: survival/ui[3][4][0]/pw.label
 msgid "Pairwise comparisons"
@@ -102362,6 +102838,10 @@ msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "Pairwise comparisons disabled for high-cardinality table"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Pairwise comparisons enabled"
 msgstr ""
 
 #: R/jjridges.b.R
@@ -102422,8 +102902,11 @@ msgid ""
 msgstr ""
 
 #: jjbetweenstats/options/pairwisedisplay.title
-#: jjwithinstats/options/pairwisedisplay.title
 msgid "Pairwise Display"
+msgstr ""
+
+#: jjwithinstats/options/pairwisedisplay.title
+msgid "Pairwise display"
 msgstr ""
 
 #: ihccluster/options/handleMissing/pairwise.title
@@ -103069,6 +103552,10 @@ msgstr ""
 msgid "Parametric Tests"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "Parametric:"
+msgstr ""
+
 #: statsplot2/options/distribution.description.ui
 msgid ""
 "Parametric: Use for normally distributed continuous data. Nonparametric: "
@@ -103078,14 +103565,6 @@ msgstr ""
 
 #: R/datetimeconverter.b.R
 msgid "Parsing Error"
-msgstr ""
-
-#: R/jjcorrmat.b.R
-msgid "Partial"
-msgstr ""
-
-#: R/jjcorrmat.b.R
-msgid "partial"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -103217,6 +103696,12 @@ msgstr ""
 msgid ""
 "Partial correlations require at least 3 variables to control for confounding "
 "effects"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid ""
+"Partial correlations require at least 3 variables to control for "
+"confounding. Found %d variable(s). Computing zero-order correlations instead."
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -106817,6 +107302,10 @@ msgstr ""
 msgid "Physical Functioning Domains"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid "Pick a <strong>Statistical Test Type</strong> that suits the distribution."
+msgstr ""
+
 #: tidyplots/options/plotType/pie.title
 msgid "Pie Chart"
 msgstr ""
@@ -107024,6 +107513,13 @@ msgstr ""
 
 #: enhancedROC/results/results/analysisSummary.description
 msgid "Plain language summary of key findings"
+msgstr ""
+
+#: R/swimmerplot.b.R
+msgid ""
+"Plain median of the observed durations, because the reverse Kaplan-Meier "
+"estimate was not available. Read it as the median time to "
+"event-or-censoring, not as the length of follow-up."
 msgstr ""
 
 #: tumorgrowth/results/naturalLanguageSummary.title
@@ -107240,6 +107736,10 @@ msgstr ""
 msgid "Please cite jamovi and the packages as given below."
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid "Please cite jamovi and the packages listed in the references below."
+msgstr ""
+
 #: R/tableone.b.R
 msgid "Please cite the packages and jamovi as referenced below."
 msgstr ""
@@ -107366,7 +107866,7 @@ msgstr ""
 #: finegray/ui[3][1][0].label
 #: jjbarstats/ui[3].label
 #: jjbetweenstats/ui[3].label
-#: jjcorrmat/ui[3].label
+#: jjcorrmat/ui[4].label
 #: jjdotchart/ui[4].label
 #: jjdotplotstats/ui[4].label
 #: jjhistostats/ui[2].label
@@ -107455,7 +107955,7 @@ msgstr ""
 #: advancedraincloud/ui[1].label
 #: ggprism/ui[1].label
 #: jjbetweenstats/ui[4].label
-#: jjcorrmat/ui[4].label
+#: jjcorrmat/ui[5].label
 #: jjdotplotstats/ui[5].label
 #: jjhistostats/ui[5].label
 #: jjoncoplot/ui[2][0].label
@@ -107544,7 +108044,7 @@ msgstr ""
 
 #: clinicalheatmap/ui[9].label
 #: jjbetweenstats/ui[4][0].label
-#: jjcorrmat/ui[4][0].label
+#: jjcorrmat/ui[5][0].label
 #: jjdotplotstats/ui[5][0].label
 #: jjhistostats/ui[5][0].label
 #: jjoncoplot/ui[4][1].label
@@ -107606,7 +108106,6 @@ msgstr ""
 msgid "Plot engine"
 msgstr ""
 
-#: jjscatterstats/ui[7][1].label
 #: tidydensity/options/plot_enhancements.title
 msgid "Plot Enhancements"
 msgstr ""
@@ -107724,9 +108223,7 @@ msgstr ""
 #: jjscatterstats/options/plotheight.title
 #: jjsegmentedtotalbar/options/plot_height.title
 #: jjsyndromicplot/options/plotheight.title
-#: jjwithinstats/options/plotheight.title
 #: linechart/options/height.title
-#: lollipop/options/height.title
 #: pcacomponenttest/options/plotheight.title
 #: pcaloadingheatmap/options/plotheight.title
 #: pcaloadingtest/options/plotheight.title
@@ -107738,6 +108235,8 @@ msgstr ""
 
 #: enhancedROC/options/plotHeight.title
 #: jjridges/ui[7][0]/height.label
+#: jjwithinstats/options/plotheight.title
+#: lollipop/options/height.title
 msgid "Plot height"
 msgstr ""
 
@@ -107805,7 +108304,7 @@ msgid "Plot Interventions Avoided"
 msgstr ""
 
 #: jjbetweenstats/ui[3][1].label
-#: jjcorrmat/ui[3][1].label
+#: jjcorrmat/ui[4][2].label
 #: jjdotplotstats/ui[4][1].label
 #: jjhistostats/ui[2][0].label
 #: jjscatterstats/ui[2][0].label
@@ -108189,7 +108688,6 @@ msgstr ""
 #: jjcoefstats/ui[4][0]/plotTheme.label
 #: jviolin/options/themex.title
 #: linechart/options/theme.title
-#: lollipop/options/theme.title
 #: multiclassdiagnostics/options/plotTheme.title
 #: multiclassdiagnostics/ui[1][2][0]/plotTheme.label
 #: progressionsurvival/options/plot_theme.title
@@ -108201,6 +108699,7 @@ msgstr ""
 
 #: enhancedROC/options/plotTheme.title
 #: linechart/ui[3][0]/theme.label
+#: lollipop/options/theme.title
 #: lollipop/ui[2][0]/theme.label
 #: raincloud/ui[3][0]/plot_theme.label
 #: swimmerplot/options/plotTheme.title
@@ -108254,7 +108753,6 @@ msgstr ""
 #: jsjplot/options/title.title
 #: jvisr/options/title.title
 #: linechart/options/title.title
-#: lollipop/options/title.title
 #: raincloud/options/plot_title.title
 #: riverplot/options/mytitle.title
 #: tidyplots/options/plotTitle.title
@@ -108359,9 +108857,7 @@ msgstr ""
 #: jjscatterstats/options/plotwidth.title
 #: jjsegmentedtotalbar/options/plot_width.title
 #: jjsyndromicplot/options/plotwidth.title
-#: jjwithinstats/options/plotwidth.title
 #: linechart/options/width.title
-#: lollipop/options/width.title
 #: pcacomponenttest/options/plotwidth.title
 #: pcaloadingheatmap/options/plotwidth.title
 #: pcaloadingtest/options/plotwidth.title
@@ -108373,6 +108869,8 @@ msgstr ""
 
 #: enhancedROC/options/plotWidth.title
 #: jjridges/ui[7][0]/width.label
+#: jjwithinstats/options/plotwidth.title
+#: lollipop/options/width.title
 msgid "Plot width"
 msgstr ""
 
@@ -108655,7 +109153,6 @@ msgstr ""
 #: jjscatterstats/options/pointsize.title
 #: jscattermore/options/point_size.title
 #: jviolin/options/point_size.title
-#: lollipop/options/pointSize.title
 #: tidyplots/options/pointSize.title
 #: tidyplots/ui[15][0].label
 #: variablebiplot/options/pointSize.title
@@ -108663,6 +109160,7 @@ msgid "Point Size"
 msgstr ""
 
 #: R/advancedraincloud.b.R
+#: lollipop/options/pointSize.title
 msgid "Point size"
 msgstr ""
 
@@ -109274,7 +109772,6 @@ msgstr ""
 msgid "Position of vertical reference line"
 msgstr ""
 
-#: R/jjcorrmat.b.R
 #: R/linechart.b.R
 msgid "positive"
 msgstr ""
@@ -114415,6 +114912,10 @@ msgstr ""
 msgid "Publication Plot (ggpubr)"
 msgstr ""
 
+#: jjwithinstats/options/addGGPubrPlot.title
+msgid "Publication plot (ggpubr)"
+msgstr ""
+
 #: enhancedfactorvariable/options/outputFormat/publication.title
 #: enhancedfrequency/options/exportFormat/publication.title
 #: enhancedtables/options/table_theme/publication.title
@@ -114487,6 +114988,10 @@ msgstr ""
 #: jjbetweenstats/ui[5].label
 #: jjbetweenstats/results/ggpubrPlot.title
 msgid "Publication-Ready Plot (ggpubr)"
+msgstr ""
+
+#: jjscatterstats/options/addGGPubrPlot.title
+msgid "Publication-ready plot (ggpubr)"
 msgstr ""
 
 #: package/analyses/jjpubr.title
@@ -115344,6 +115849,10 @@ msgstr ""
 #: R/alluvial.b.R
 #: R/decision.b.R
 msgid "Quick Start"
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "Quick start"
 msgstr ""
 
 #: pathsampling/results/guidedInstructions.title
@@ -120539,6 +121048,14 @@ msgstr ""
 msgid "Reverse Color Palette"
 msgstr ""
 
+#: R/swimmerplot.b.R
+msgid ""
+"Reverse Kaplan-Meier estimate (Schemper & Smith 1996): event and censoring "
+"roles are swapped, so this estimates how long patients would have been "
+"observed. The plain median of observed durations is the median time to "
+"event-or-censoring and understates follow-up when events are common."
+msgstr ""
+
 #: concordanceindex/options/reverse_direction.title
 msgid "Reverse Predictor Direction"
 msgstr ""
@@ -121692,6 +122209,10 @@ msgstr ""
 msgid "Robust (Trimmed Means)"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid "robust (Winsorized Pearson)"
+msgstr ""
+
 #: jjscatterstats/options/typestatistics/robust.title
 msgid "Robust (Winsorized Pearson) - handles outliers well"
 msgstr ""
@@ -121928,6 +122449,10 @@ msgstr ""
 
 #: outlierdetection/options/univariate_methods/zscore_robust.title
 msgid "Robust Z-score (MAD-based)"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Robust:"
 msgstr ""
 
 #: bayesianclinical/results/sensitivity_to_priors.columns.title
@@ -123893,6 +124418,7 @@ msgstr ""
 msgid "Scaling Method"
 msgstr ""
 
+#: R/jjscatterstats.b.R
 #: package/analyses/jjscatterstats.title
 #: package/analyses/jjscatterstats.menuTitle
 #: basegraphics/options/plot_type/scatter.title
@@ -125204,6 +125730,10 @@ msgstr ""
 
 #: bbcplots/options/bbc_colors.description.ui
 msgid "Select BBC standard colors or create custom color schemes."
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "Select both variables to run the correlation."
 msgstr ""
 
 #: jjsegmentedtotalbar/options/x_var.description.jamovi
@@ -126950,6 +127480,10 @@ msgstr ""
 msgid "Setup Guidance"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid "Setup progress"
+msgstr ""
+
 #: venn/options/var7.description.jamovi
 msgid "Seventh variable for 7+ set analysis."
 msgstr ""
@@ -127338,8 +127872,16 @@ msgstr ""
 
 #: R/survivalcont.b.R
 msgid ""
-"Short median follow-up ({time} {units}). May be insufficient for meaningful "
-"survival analysis."
+"Short median follow-up ({time} {units}, reverse Kaplan-Meier). May be "
+"insufficient for meaningful survival analysis."
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"Short median observed time ({time} {units}). Median follow-up could not be "
+"estimated by reverse Kaplan-Meier, so this is the median time to "
+"event-or-censoring, which understates how long the cohort was observed. "
+"Interpret the adequacy of follow-up with that in mind."
 msgstr ""
 
 #: competingsurvival/options/showKMvsCIF.title
@@ -132212,6 +132754,7 @@ msgid "Small sample size"
 msgstr ""
 
 #: R/decisioncurve.b.R
+#: R/lollipop.b.R
 #: R/survivalcont.b.R
 #: R/vartree.b.R
 msgid "Small Sample Size"
@@ -132229,6 +132772,13 @@ msgstr ""
 msgid ""
 "Small sample size (n = {n}). Consider larger sample for more reliable "
 "cut-off analysis."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid ""
+"Small sample size (N = %d complete cases). Correlations with N &lt; 20 may "
+"be unreliable. Consider collecting more data or interpreting results "
+"cautiously."
 msgstr ""
 
 #: R/checkdata.b.R
@@ -132435,6 +132985,10 @@ msgstr ""
 #: smoothtimevary/results/effectsTable.title
 #: smoothtimevary/results/smoothEffectPlots.title
 msgid "Smooth Time-Varying Effects"
+msgstr ""
+
+#: jjscatterstats/options/ggpubrAddSmooth.title
+msgid "Smooth trend line (ggpubr)"
 msgstr ""
 
 #: linechart/ui[1][0]/smooth.label
@@ -132756,6 +133310,14 @@ msgstr ""
 msgid "Some groups have zero observations"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid ""
+"Some groups hold several observations (up to {n}, for example {groups}), and "
+"with no aggregation every one of them is drawn on the same stem, so the "
+"chart over-plots and hides how many points each lollipop stands for; choose "
+"Mean, Median or Sum under Data aggregation."
+msgstr ""
+
 #: R/survival.b.R
 msgid ""
 "Some hazard ratios are extreme (HR > 10 or < 0.1), which may indicate sparse "
@@ -132943,10 +133505,10 @@ msgid "Sort Nodes"
 msgstr ""
 
 #: jcomplexupset/options/sort_order.title
-#: lollipop/options/sortBy.title
 msgid "Sort Order"
 msgstr ""
 
+#: lollipop/options/sortBy.title
 #: lollipop/ui[1][0]/sortBy.label
 #: swimmerplot/options/sortOrder.title
 msgid "Sort order"
@@ -135862,6 +136424,10 @@ msgstr ""
 msgid "Statistical Comparison Table"
 msgstr ""
 
+#: jjwithinstats/options/ggpubrAddStats.title
+msgid "Statistical comparisons"
+msgstr ""
+
 #: ihcscoring/results/multiplecutoffs/comparisonstats.title
 msgid "Statistical Comparisons Across Cut-offs"
 msgstr ""
@@ -136443,8 +137009,11 @@ msgstr ""
 #: enhancedtables/options/test_type.title
 #: jjdotplotstats/options/typestatistics.title
 #: jjscatterstats/options/typestatistics.title
-#: jjwithinstats/options/typestatistics.title
 msgid "Statistical Test Type"
+msgstr ""
+
+#: jjwithinstats/options/typestatistics.title
+msgid "Statistical test type"
 msgstr ""
 
 #: simonmakuch/ui[5].label
@@ -136539,6 +137108,10 @@ msgstr ""
 msgid "STATISTICAL TESTS:"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid "Statistical tests:"
+msgstr ""
+
 #: spatialanalysis/ui[5][1].label
 msgid "Statistical threshold for detecting significant patterns (typical: 0.05 = 5%)"
 msgstr ""
@@ -136559,14 +137132,25 @@ msgstr ""
 msgid "Statistically distinct groups of co-expressed markers"
 msgstr ""
 
-#: R/jjcorrmat.b.R
 #: R/linechart.b.R
 #: R/survival.b.R
 msgid "statistically significant"
 msgstr ""
 
 #: R/jjcorrmat.b.R
-msgid "statistically significant (%s < 0.001)"
+msgid "statistically significant (adjusted p < 0.001)"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "statistically significant (adjusted p = %s)"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "statistically significant (p < 0.001)"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "statistically significant (p = %s)"
 msgstr ""
 
 #: R/nonparametric.b.R
@@ -136614,6 +137198,12 @@ msgstr ""
 
 #: jjscatterstats/ui[8][2].label
 msgid "Statistics & Lines"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid ""
+"Statistics describe the {n} plotted per-group {method} values aggregated "
+"from {raw} observations, not the raw observations themselves."
 msgstr ""
 
 #: enhancedtables/options/stats_categorical.title
@@ -137594,7 +138184,6 @@ msgid "STROBE Compliance"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
-#: R/jjcorrmat.b.R
 #: R/linechart.b.R
 msgid "strong"
 msgstr ""
@@ -137624,9 +138213,17 @@ msgid "Strong Heredity"
 msgstr ""
 
 #: R/jjcorrmat.b.R
+msgid "strong negative"
+msgstr ""
+
+#: R/jjcorrmat.b.R
 msgid ""
 "Strong partial correlations suggest a direct relationship that persists even "
 "after controlling for other factors"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "strong positive"
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -143193,21 +143790,28 @@ msgid ""
 "puts far more observations in each."
 msgstr ""
 
-#: R/timeinterval.b.R
+#: R/lollipop.b.R
 msgid ""
-"The {landmark} landmark excluded no participants, because it is only "
-"{share}% of the median follow-up in these data ({median} {unit}). It still "
-"subtracted {amount} from every interval, so every duration and the total "
-"person-time below are that much smaller than the follow-up observed. Check "
-"that the landmark is expressed in the same unit as the results ({unit}): "
-"entering a value meant as months while the output unit is days is the usual "
-"cause."
+"The {groups} groups hold {raw} observations between them, fewer than three "
+"per group on average, so each plotted point rests on very little data; "
+"consider pooling categories or reporting the individual observations."
 msgstr ""
 
 #: R/timeinterval.b.R
 msgid ""
-"The {landmark} landmark is later than the median follow-up in these data "
-"({median} {unit}), so more than half the cohort could not reach it and "
+"The {landmark} landmark excluded no participants, because it is only "
+"{share}% of the median observed interval in these data ({median} {unit}). It "
+"still subtracted {amount} from every interval, so every duration and the "
+"total person-time below are that much smaller than the follow-up observed. "
+"Check that the landmark is expressed in the same unit as the results "
+"({unit}): entering a value meant as months while the output unit is days is "
+"the usual cause."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid ""
+"The {landmark} landmark is later than the median observed interval in these "
+"data ({median} {unit}), so more than half the cohort could not reach it and "
 "{excluded} of {total} observations were excluded. What remains is a subgroup "
 "defined by having been followed to the landmark, and the total person-time "
 "above is the denominator for that subgroup only: a rate computed from it "
@@ -143463,6 +144067,13 @@ msgid ""
 "Bands of one fixed width come from the 'Custom (use bin width)' preset."
 msgstr ""
 
+#: R/lollipop.b.R
+msgid ""
+"The baseline of {base} sits inside the range of the data, so {above} "
+"lollipop(s) point one way and {below} point the other; stem length now shows "
+"distance from the baseline rather than magnitude, which is easy to misread."
+msgstr ""
+
 #: R/waterfallrecist.b.R
 msgid "the baseline visit must be present (default: time = 0)"
 msgstr ""
@@ -143580,6 +144191,12 @@ msgid ""
 "The categorized variable was added under the default name '{name}' as a "
 "nominal variable, because the requested name and measure type could not be "
 "applied ({reason})."
+msgstr ""
+
+#: R/lollipop.b.R
+msgid ""
+"The chart rests on {n} observations in total, too few for the differences "
+"between groups to be stable; treat the ordering as provisional."
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -144572,6 +145189,19 @@ msgid ""
 "levels present in the data."
 msgstr ""
 
+#: R/lollipop.b.R
+msgid ""
+"The grouping variable has {n} levels, more than a single chart can label "
+"legibly; consider pooling categories or splitting the chart."
+msgstr ""
+
+#: R/hullplot.b.R
+msgid ""
+"The Grouping Variable must differ from the X and Y variables ('{var}' is "
+"used for both). Grouping by an axis variable would place every distinct "
+"value in its own hull."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "The hazard ratio is the effect per one-unit increase, assuming a constant "
@@ -144806,6 +145436,12 @@ msgstr ""
 msgid "The level '{level}' is used as the positive/exposure category as specified."
 msgstr ""
 
+#: R/lollipop.b.R
+msgid ""
+"The level {level} does not occur in the grouping variable, so nothing is "
+"highlighted; pick a level that is present in the data."
+msgstr ""
+
 #: venn/options/var1true.description.jamovi
 msgid "The level in `var1` that represents the true condition."
 msgstr ""
@@ -144896,6 +145532,12 @@ msgid ""
 "Validate every cut-point in independent data before clinical use."
 msgstr ""
 
+#: R/lollipop.b.R
+msgid ""
+"The lollipop chart needs the following R packages, which are not installed: "
+"{packages}. Install them with install.packages() and re-run the analysis."
+msgstr ""
+
 #: R/categorize.b.R
 msgid "the lower boundary (mean - {k} SD)"
 msgstr ""
@@ -144970,6 +145612,14 @@ msgstr ""
 msgid ""
 "The McNemar chi-square reported by the plotting package is computed without "
 "a continuity correction, so it will not match the base R default."
+msgstr ""
+
+#: R/lollipop.b.R
+msgid ""
+"The mean reference line is the unweighted mean of the {groups} plotted group "
+"summaries, not the mean of the {raw} underlying observations; because the "
+"groups differ greatly in size these two means differ, and the line does not "
+"mark the overall average."
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -145674,6 +146324,15 @@ msgstr ""
 msgid "The proportional-hazards test plot could not be created: {message}"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid ""
+"The publication-ready panel is reporting a <b>{panel}</b> correlation while "
+"the main plot reports <b>{main}</b>, because 'Correlation method (ggpubr)' "
+"is set independently of 'Statistical Test Type'. Both coefficients are "
+"correct for this data, but they are different statistics - set the two to "
+"match unless you intend to show both."
+msgstr ""
+
 #: R/agepyramid.b.R
 msgid ""
 "The pyramid is built on {n} observations spread over {nBands} age band(s). "
@@ -146123,6 +146782,14 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "The Shapiro-Wilk test showed {verdict} (p = {p})."
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid ""
+"The signed-rank p-value is computed from the normal approximation with a "
+"continuity correction, not from the exact permutation distribution that "
+"stats::wilcox.test uses by default, so it may differ from base R for small "
+"samples without ties."
 msgstr ""
 
 #: R/kappaSizePower.b.R
@@ -146648,6 +147315,7 @@ msgid ""
 "independent, and that there is a relationship between the two variables."
 msgstr ""
 
+#: jjcorrmat/ui[4][1].label
 #: jjpubr/options/theme.title
 #: jjpubr/ui[6]/theme.label
 #: jscattermore/options/theme_style.title
@@ -146710,8 +147378,16 @@ msgid ""
 "process."
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid "there are only {n} complete pairs of values"
+msgstr ""
+
 #: R/jjsyndromicplot.b.R
 msgid "There is no loading above cutoff for {pc}"
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "there is only one complete pair of values"
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -146902,6 +147578,16 @@ msgid ""
 "validate them in a larger independent sample."
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid ""
+"These show the distribution of the data; wider sections contain more "
+"observations."
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "These show the median (middle line) and the quartiles (box edges)."
+msgstr ""
+
 #: R/summarydata.b.R
 msgid ""
 "These statistics help assess data distribution, identify unusual values, and "
@@ -147050,6 +147736,10 @@ msgstr ""
 msgid "Thin Plate Spline"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Thinly Replicated Groups"
+msgstr ""
+
 #: betabinomialdiagnostic/options/thin_factor.title
 #: survivalbart/options/n_thin.title
 msgid "Thinning Factor"
@@ -147115,6 +147805,12 @@ msgid ""
 "This analysis compares a continuous variable across groups and draws the "
 "comparison horizontally, as a box-violin figure with the individual "
 "observations shown."
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid ""
+"This analysis compares repeated measurements taken from the same subjects (a "
+"within-subjects design)."
 msgstr ""
 
 #: R/tableone.b.R
@@ -147777,6 +148473,12 @@ msgid ""
 "correlation."
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid ""
+"This reports a Bayes factor, quantifying the evidence for and against the "
+"null hypothesis."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "This represents the rate at which events occurred in your study population. "
@@ -148280,6 +148982,12 @@ msgstr ""
 
 #: ihcthreshold/results/summaryTable.columns.title
 msgid "Thresholds Tested"
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid ""
+"Tick <strong>Statistical results</strong> to print the coefficient on the "
+"plot."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -152203,6 +152911,12 @@ msgstr ""
 msgid "Treatment Pathway Plot"
 msgstr ""
 
+#: R/jjwithinstats.b.R
+msgid ""
+"Treatment preset: Enable pairwise comparisons to identify when treatment "
+"effects occur<br>"
+msgstr ""
+
 #: bayesiannetworkma/options/ranking_analysis.title
 msgid "Treatment Ranking Analysis"
 msgstr ""
@@ -154040,6 +154754,10 @@ msgstr ""
 msgid "Unanimous Only"
 msgstr ""
 
+#: R/lollipop.b.R
+msgid "Unbalanced Group Sizes"
+msgstr ""
+
 #: jjbetweenstats/options/effsizetype/unbiased.title
 #: jjwithinstats/options/effsizetype/unbiased.title
 msgid "unbiased"
@@ -155794,10 +156512,6 @@ msgstr ""
 msgid "Use Highest Posterior Density Intervals"
 msgstr ""
 
-#: lollipop/options/useHighlight.title
-msgid "Use highlight"
-msgstr ""
-
 #: R/riverplot.b.R
 msgid ""
 "Use individual trajectory patterns to develop personalized treatment "
@@ -157124,6 +157838,7 @@ msgid "Value Label Position"
 msgstr ""
 
 #: jjsegmentedtotalbar/ui[10][0]/flerlage_show_labels.label
+#: lollipop/options/showValues.title
 msgid "Value labels"
 msgstr ""
 
@@ -157222,7 +157937,6 @@ msgid "Value Variable Summary"
 msgstr ""
 
 #: alluvial/options/fill/values.title
-#: lollipop/options/showValues.title
 msgid "Values"
 msgstr ""
 
@@ -157236,6 +157950,12 @@ msgstr ""
 
 #: ihccluster/options/ratioHighCutoff.description
 msgid "Values >= this are classified as High"
+msgstr ""
+
+#: R/lollipop.b.R
+msgid ""
+"Values above {thr} are drawn in orange and the rest in blue, so colour "
+"encodes the threshold rather than the group."
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -157665,6 +158385,10 @@ msgid ""
 "Variable \"%s\" has %d missing values (%.1f%%). These observations will be "
 "excluded from analysis. Consider investigating the pattern of missingness "
 "and whether imputation is appropriate."
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "Variable \"%s\" not found in data. Please select valid variables and re-run."
 msgstr ""
 
 #: R/checkdata.b.R
@@ -158651,6 +159375,10 @@ msgstr ""
 msgid "Variables not found in data: {vars}"
 msgstr ""
 
+#: R/hullplot.b.R
+msgid "Variables not found in dataset: {missing}"
+msgstr ""
+
 #: R/dataquality.b.R
 msgid ""
 "Variables not found in dataset: {vars}. Please check variable names and try "
@@ -159448,7 +160176,11 @@ msgid "very strong"
 msgstr ""
 
 #: R/jjcorrmat.b.R
-msgid "very weak"
+msgid "very weak negative"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "very weak positive"
 msgstr ""
 
 #: R/waterfall.b.R
@@ -159534,16 +160266,16 @@ msgstr ""
 msgid "Violin Plots"
 msgstr ""
 
-#: jjwithinstats/results.title
-msgid "Violin Plots to Compare Within Groups"
-msgstr ""
-
 #: advancedanova/results/anovaplot.description
 msgid "Violin plots with boxplots and group means"
 msgstr ""
 
 #: nonparametric/results/violinplots.title
 msgid "Violin Plots with Distribution Shapes"
+msgstr ""
+
+#: R/jjwithinstats.b.R
+msgid "Violin plots:"
 msgstr ""
 
 #: jjridges/options/plot_type/violin_ridges.title
@@ -160463,7 +161195,11 @@ msgid "Weak Heredity"
 msgstr ""
 
 #: R/jjcorrmat.b.R
-msgid "weak-to-moderate"
+msgid "weak-to-moderate negative"
+msgstr ""
+
+#: R/jjcorrmat.b.R
+msgid "weak-to-moderate positive"
 msgstr ""
 
 #: adaptivetrialdesign/options/prior_type/weakly_informative.title
@@ -161256,6 +161992,10 @@ msgstr ""
 
 #: metaanalysis/options/effect_measure.title
 msgid "What type of effect are you combining?"
+msgstr ""
+
+#: R/jjscatterstats.b.R
+msgid "What you will get"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -162549,6 +163289,14 @@ msgstr ""
 msgid "x-axis (First Variable)"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid "x-axis (first variable)"
+msgstr ""
+
+#: R/hullplot.b.R
+msgid "X-Axis and Y-Axis variables must be different (both are set to '{var}')."
+msgstr ""
+
 #: advancedraincloud/options/x_label.title
 #: esquisseauto/options/xLabel.title
 #: ggprism/options/x_label.title
@@ -162571,13 +163319,14 @@ msgstr ""
 #: jjpubr/options/xlab.title
 #: jviolin/options/xlabel.title
 #: linechart/options/xlabel.title
-#: lollipop/options/xlabel.title
 msgid "X-axis Label"
 msgstr ""
 
 #: agepyramid/options/ggcharts_xlab.title
 #: jjpubr/ui[6]/xlab.label
+#: jjwithinstats/options/xtitle.title
 #: linechart/ui[4][1]/xlabel.label
+#: lollipop/options/xlabel.title
 #: lollipop/ui[4][1]/xlabel.label
 #: raincloud/ui[4][1]/x_label.label
 msgid "X-axis label"
@@ -162685,7 +163434,6 @@ msgstr ""
 
 #: jjbetweenstats/options/xtitle.title
 #: jjscatterstats/options/xtitle.title
-#: jjwithinstats/options/xtitle.title
 msgid "X-Title"
 msgstr ""
 
@@ -162838,6 +163586,10 @@ msgstr ""
 msgid "y-axis (Second Variable)"
 msgstr ""
 
+#: R/jjscatterstats.b.R
+msgid "y-axis (second variable)"
+msgstr ""
+
 #: survival/ui[4][2][0]/yend_plot.label
 #: survivalcont/ui[4][1][0]/yend_plot.label
 msgid "Y-axis End"
@@ -162861,12 +163613,13 @@ msgstr ""
 #: jjpubr/options/ylab.title
 #: jviolin/options/ylabel.title
 #: linechart/options/ylabel.title
-#: lollipop/options/ylabel.title
 msgid "Y-axis Label"
 msgstr ""
 
 #: jjpubr/ui[6]/ylab.label
+#: jjwithinstats/options/ytitle.title
 #: linechart/ui[4][1]/ylabel.label
+#: lollipop/options/ylabel.title
 #: lollipop/ui[4][1]/ylabel.label
 #: raincloud/ui[4][1]/y_label.label
 msgid "Y-axis label"
@@ -162976,7 +163729,6 @@ msgstr ""
 
 #: jjbetweenstats/options/ytitle.title
 #: jjscatterstats/options/ytitle.title
-#: jjwithinstats/options/ytitle.title
 msgid "Y-Title"
 msgstr ""
 
@@ -163540,14 +164292,6 @@ msgstr ""
 
 #: hierarchicalbayes/options/model_type/zero_inflated.title
 msgid "Zero-Inflated Model"
-msgstr ""
-
-#: R/jjcorrmat.b.R
-msgid "Zero-order"
-msgstr ""
-
-#: R/jjcorrmat.b.R
-msgid "zero-order"
 msgstr ""
 
 #: partialcorrelation/results/zeroOrder.title

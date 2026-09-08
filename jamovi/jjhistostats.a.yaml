@@ -475,5 +475,13 @@ options:
             Show empirical cumulative distribution function plot.
 
 
+    - name: originaltheme
+      title: Original ggstatsplot theme
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use the original ggstatsplot theme rather than jamovi's default.
+
 ...
 

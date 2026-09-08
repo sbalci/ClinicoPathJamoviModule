@@ -305,7 +305,7 @@ test_that("the grouped plot applies rug and theme to every panel, not just the l
     }
     grouped <- body_of("plot2")
     expect_true(any(grepl("plot <- plot & ggplot2::geom_rug", grouped, fixed = TRUE)))
-    expect_true(any(grepl("plot <- plot & ggplot2::theme_bw", grouped, fixed = TRUE)))
+    expect_true(any(grepl("plot <- plot & ggtheme", grouped, fixed = TRUE)))
     expect_false(any(grepl("plot <- plot + ggplot2::", grouped, fixed = TRUE)))
     # the ungrouped .plot builds a single ggplot, where `+` is correct and must stay
     expect_true(any(grepl("plot <- plot + ggplot2::geom_rug", body_of("plot"), fixed = TRUE)))
@@ -374,4 +374,358 @@ test_that("a grouped plot discloses that its per-panel p-values are unadjusted",
     # the message names the number of tests
     a <- sc_run(d, grvar = "g", resultssubtitle = TRUE)
     expect_match(warn_of(a), "4 panels", fixed = TRUE)
+})
+
+
+# --- production-profile pass -------------------------------------------------
+
+test_that("the aesthetics panel runs the analysis type the user picked, not a fallback", {
+    # It used to run stats::cor.test() behind a switch that DOWNGRADED two of the four
+    # types: "robust" silently became Spearman (labelled "robust unavailable", though
+    # WRS2 has been in Imports all along) and "bayes" silently became Pearson. The panel
+    # therefore contradicted the main plot sitting directly above it. Both now route
+    # through statsExpressions::corr_test -- the engine ggscatterstats itself calls -- so
+    # they agree by construction.
+    skip_if_not_installed("statsExpressions")
+    d <- xy()                                   # seed 42, n = 80
+    sub3 <- function(ty) {
+        a <- sc_run(d, colorvar = NULL, sizevar = NULL, labelvar = NULL,
+                    shapevar = NULL, alphavar = NULL, typestatistics = ty)
+        # force the aesthetics panel on with a colour mapping
+        a <- sc_run(cbind(d, col = factor(rep(c("a", "b"), length.out = nrow(d)))),
+                    colorvar = "col", typestatistics = ty)
+        f <- tempfile(fileext = ".png"); grDevices::png(f, 500, 400)
+        on.exit(try(grDevices::dev.off(), silent = TRUE), add = TRUE)
+        try(a$.__enclos_env__$private$.plot3(a$results$plot3,
+                                             ggtheme = ggplot2::theme_bw(), theme = NULL),
+            silent = TRUE)
+        grDevices::dev.off(); on.exit()
+        ggplot2::last_plot()$labels$subtitle
+    }
+
+    # each subtitle names the method that actually ran -- no "(unavailable)" apologies
+    expect_match(sub3("parametric"),    "Pearson correlation")
+    expect_match(sub3("nonparametric"), "Spearman correlation")
+    expect_match(sub3("robust"),        "Winsorized Pearson correlation")
+    expect_match(sub3("bayes"),         "Bayesian Pearson correlation")
+    expect_false(any(grepl("unavailable", c(sub3("robust"), sub3("bayes")), fixed = TRUE)))
+
+    # and the coefficient matches the engine the MAIN panel uses, to the printed digits
+    ref <- function(ty) as.numeric(as.data.frame(
+        statsExpressions::corr_test(data = d, x = x, y = y, type = ty))$estimate)
+    expect_match(sub3("robust"), sprintf("%.2f", ref("robust")), fixed = TRUE)
+    expect_match(sub3("nonparametric"), sprintf("%.2f", ref("nonparametric")), fixed = TRUE)
+
+    # the Bayesian panel reports a Bayes factor; it has no p-value to report
+    expect_match(sub3("bayes"), "BF10 = ", fixed = TRUE)
+    expect_false(grepl("p =", sub3("bayes"), fixed = TRUE))
+})
+
+
+test_that("variable names with spaces and punctuation survive every render path", {
+    # composeTerm()-style backtick quoting is wrong as a data[[ ]] key, and tidy-eval
+    # arguments need a symbol rather than a string. Both plot paths and the ggpubr panel
+    # are exercised here because each reaches its columns differently.
+    set.seed(7); n <- 60
+    d <- data.frame(`Tumor Size (mm)` = rnorm(n),
+                    `Grade / Stage`   = factor(rep(c("I", "II"), length.out = n)),
+                    check.names = FALSE)
+    d[["Overall Time"]] <- 0.6 * d[["Tumor Size (mm)"]] + rnorm(n, 0, 0.8)
+
+    o <- ClinicoPath:::jjscatterstatsOptions$new(
+        dep = "Tumor Size (mm)", group = "Overall Time", colorvar = "Grade / Stage",
+        grvar = "Grade / Stage", addGGPubrPlot = TRUE, ggpubrAddCorr = TRUE)
+    a <- ClinicoPath:::jjscatterstatsClass$new(options = o, data = d)
+    a$init()
+    expect_silent(a$.__enclos_env__$private$.run())
+
+    draw <- function(m, item) {
+        f <- tempfile(fileext = ".png"); grDevices::png(f, 500, 400)
+        on.exit(try(grDevices::dev.off(), silent = TRUE), add = TRUE)
+        err <- tryCatch({ a$.__enclos_env__$private[[m]](
+                              item, ggtheme = ggplot2::theme_bw(), theme = NULL); NULL },
+                        error = function(e) conditionMessage(e))
+        grDevices::dev.off(); on.exit()
+        err
+    }
+    expect_null(draw(".plot",       a$results$plot))
+    expect_null(draw(".plot2",      a$results$plot2))
+    expect_null(draw(".plot3",      a$results$plot3))
+    expect_null(draw(".plotGGPubr", a$results$ggpubrPlot))
+    # ggpubr builds facet/colour scales from the column NAME; a slash or space in it is
+    # the classic place a formula-based facet spec blows up.
+    expect_null(draw(".plotGGPubr2", a$results$ggpubrPlot2))
+
+    # the aesthetics subtitle reports a real coefficient, not NA, for these names
+    expect_false(grepl("NA", ggplot2::last_plot()$labels$subtitle %||% "", fixed = TRUE))
+
+    # and the generated syntax quotes them into valid, re-parseable R
+    expect_silent(parse(text = sub("^[A-Za-z.]+::", "", a$asSource())))
+})
+
+
+test_that("a labelled factor keeps its labels through the grouped and aesthetic panels", {
+    # jamovi hands ordinal columns over as factors carrying a `values` attribute; the
+    # panels must show the LABELS, not the underlying integer codes.
+    set.seed(11); n <- 80
+    g <- factor(rep(c("Low grade", "High grade"), length.out = n),
+                levels = c("Low grade", "High grade"))
+    d <- data.frame(x = rnorm(n), g = g)
+    d$y <- 0.6 * d$x + rnorm(n, 0, 0.8)
+
+    a <- sc_run(d, grvar = "g", colorvar = "g")
+    f <- tempfile(fileext = ".png"); grDevices::png(f, 900, 400)
+    try(a$.__enclos_env__$private$.plot2(a$results$plot2,
+                                         ggtheme = ggplot2::theme_bw(), theme = NULL),
+        silent = TRUE)
+    grDevices::dev.off()
+
+    b <- ggplot2::ggplot_build(ggplot2::last_plot())
+    expect_true(all(levels(d$g) %in% levels(droplevels(d$g))))
+    # the aesthetics panel maps the factor by label, preserving the declared level order
+    a3 <- sc_run(d, colorvar = "g")
+    f <- tempfile(fileext = ".png"); grDevices::png(f, 500, 400)
+    try(a3$.__enclos_env__$private$.plot3(a3$results$plot3,
+                                          ggtheme = ggplot2::theme_bw(), theme = NULL),
+        silent = TRUE)
+    grDevices::dev.off()
+    p3 <- ggplot2::last_plot()
+    expect_identical(levels(ggplot2::ggplot_build(p3)$plot$data$g), levels(g))
+})
+
+
+test_that("the welcome panel tracks setup progress and stays theme-safe", {
+    # Shown until both axis variables are chosen. Built as a decisionpanel-style intro:
+    # every tint is a translucent rgba() with `color: inherit`, because a hardcoded dark
+    # foreground is unreadable against jamovi's dark theme (the mirror of the opaque
+    # background case that tools/theme_safe_html.py catches).
+    wm <- function(...) {
+        o <- do.call(ClinicoPath:::jjscatterstatsOptions$new, list(...))
+        a <- ClinicoPath:::jjscatterstatsClass$new(
+            options = o, data = data.frame(x = 1:5, y = 1:5))
+        a$.__enclos_env__$private$.welcomeMessage()
+    }
+    none <- wm(dep = NULL, group = NULL)
+    half <- wm(dep = "x",  group = NULL)
+    both <- wm(dep = "x",  group = "y")
+
+    expect_true(grepl("[ ] x-axis", none, fixed = TRUE))
+    expect_true(grepl("[ ] y-axis", none, fixed = TRUE))
+    expect_true(grepl("[x] x-axis", half, fixed = TRUE))
+    expect_true(grepl("[ ] y-axis", half, fixed = TRUE))
+    expect_true(grepl("[x] y-axis", both, fixed = TRUE))
+
+    # no hardcoded foreground colour anywhere in the panel
+    expect_false(grepl("color: *#", none))
+    # well-formed, and only the five structural HTML entities
+    expect_identical(lengths(regmatches(none, gregexpr("<div",   none))),
+                     lengths(regmatches(none, gregexpr("</div>", none))))
+    expect_length(setdiff(unique(unlist(regmatches(none, gregexpr("&[a-zA-Z]+;", none)))),
+                          c("&lt;", "&gt;", "&amp;", "&quot;", "&apos;")), 0L)
+})
+
+
+# --- statistical guardrails (check-function-full audit, 2026-09-08) -----------
+# Each of these five was verified SILENT before the notices were added: the figure
+# and its p-value are what a clinician quotes, so a coefficient that is unstable,
+# outlier-driven, computed on half the cohort, or measuring the wrong shape of
+# relationship has to say so on screen.
+
+test_that("losing a large share of rows to missing data is disclosed", {
+    set.seed(1); n <- 200
+    d <- data.frame(x = rnorm(n)); d$y <- 0.6 * d$x + rnorm(n, 0, 0.8)
+    d$x[1:90] <- NA                                   # 110 of 200 pairs survive
+    w <- warn_of(sc_run(d))
+    expect_match(w, "45% of rows could not be used", fixed = TRUE)
+    expect_match(w, "110 of 200 rows", fixed = TRUE)
+
+    # under the 20% threshold it stays quiet rather than nagging
+    d2 <- data.frame(x = rnorm(n)); d2$y <- 0.6 * d2$x + rnorm(n, 0, 0.8)
+    d2$x[1:10] <- NA                                  # 5%
+    expect_false(grepl("could not be used", warn_of(sc_run(d2)), fixed = TRUE))
+})
+
+
+test_that("small samples are called out, in two tiers", {
+    mk <- function(n) { set.seed(n); d <- data.frame(x = rnorm(n))
+                        d$y <- 0.6 * d$x + rnorm(n, 0, 0.8); d }
+    expect_match(warn_of(sc_run(mk(8))),  "Very small sample (n = 8)",  fixed = TRUE)
+    expect_match(warn_of(sc_run(mk(25))), "Small sample (n = 25)",      fixed = TRUE)
+    # n >= 30 with clean data says nothing
+    expect_false(grepl("small sample", warn_of(sc_run(mk(150))), ignore.case = TRUE))
+})
+
+
+test_that("a coefficient driven by one observation is flagged, and points at the fix", {
+    # 40 points of pure noise plus one far-out point: Pearson goes from r = -0.17
+    # (p = 0.30) to r = 0.79 (p = 0.000006) on the strength of that single patient.
+    set.seed(4)
+    d <- data.frame(x = rnorm(40)); d$y <- rnorm(40)
+    d2 <- rbind(d, data.frame(x = 12, y = 12))
+    expect_lt(abs(cor(d$x, d$y)), 0.2)
+    expect_gt(cor(d2$x, d2$y), 0.7)
+
+    w <- warn_of(sc_run(d2))
+    expect_match(w, "One observation is driving this result", fixed = TRUE)
+    expect_match(w, "Robust (Winsorized Pearson)", fixed = TRUE)   # names the escape route
+
+    # the resistant methods are the escape route, so they must not be told to switch
+    fires <- function(ty) grepl("One observation is driving",
+                                warn_of(sc_run(d2, typestatistics = ty)), fixed = TRUE)
+    expect_true(fires("parametric")); expect_true(fires("bayes"))
+    expect_false(fires("robust"));    expect_false(fires("nonparametric"))
+
+    # clean data does not trip it
+    set.seed(11); c1 <- data.frame(x = rnorm(150)); c1$y <- 0.6 * c1$x + rnorm(150, 0, 0.8)
+    expect_false(grepl("One observation is driving", warn_of(sc_run(c1)), fixed = TRUE))
+})
+
+
+test_that("leave-one-out correlation matches refitting, to machine precision", {
+    # The notice uses an O(n) running-sums update rather than n refits; if that
+    # algebra were wrong it would invent influential points that do not exist.
+    set.seed(9)
+    for (n in c(10L, 37L, 200L)) {
+        x <- rnorm(n); y <- 0.4 * x + rnorm(n)
+        Sx <- sum(x); Sy <- sum(y); Sxx <- sum(x*x); Syy <- sum(y*y); Sxy <- sum(x*y)
+        m <- n - 1L
+        sx <- Sx - x; sy <- Sy - y; sxx <- Sxx - x*x; syy <- Syy - y*y; sxy <- Sxy - x*y
+        den <- sqrt(pmax(0, m*sxx - sx^2) * pmax(0, m*syy - sy^2))
+        fast <- ifelse(den > 0, (m*sxy - sx*sy) / den, NA_real_)
+        brute <- vapply(seq_len(n), function(i) cor(x[-i], y[-i]), numeric(1))
+        expect_equal(fast, brute)
+    }
+})
+
+
+test_that("a relationship the coefficient cannot see is flagged, without crying wolf", {
+    # A perfect U-shape gives Pearson r = 0.011, p = 0.93 -- "no association" for a
+    # deterministic relationship. This is the failure mode that matters.
+    set.seed(5)
+    u <- data.frame(x = seq(-3, 3, length.out = 60)); u$y <- u$x^2 + rnorm(60, 0, 0.5)
+    expect_lt(abs(cor(u$x, u$y)), 0.1)
+    expect_match(warn_of(sc_run(u)), "The relationship is not a straight line", fixed = TRUE)
+
+    # A MONOTONE curve is linear in ranks, so Spearman handles it and stays quiet...
+    set.seed(12); e <- data.frame(x = rnorm(150)); e$y <- exp(0.5 * e$x) + rnorm(150, 0, 0.1)
+    expect_false(grepl("not a straight line",
+                       warn_of(sc_run(e, typestatistics = "nonparametric")), fixed = TRUE))
+    # ...but the U-shape is non-monotone, so rho misses it too and the notice still fires
+    expect_match(warn_of(sc_run(u, typestatistics = "nonparametric")),
+                 "not a straight line", fixed = TRUE)
+
+    # Which variable the user drops on which axis is arbitrary, so the warning must
+    # not be: a quadratic in x fits y = x^2 perfectly, but the same cloud with the axes
+    # swapped needs x = +/-sqrt(y), which no quadratic in y can express. The probe fits
+    # both directions and keeps the stronger.
+    swapped <- function(dat, ...) {
+        o <- do.call(ClinicoPath:::jjscatterstatsOptions$new,
+                     utils::modifyList(list(dep = "x", group = "y"), list(...)))
+        a <- ClinicoPath:::jjscatterstatsClass$new(options = o, data = dat)
+        a$init(); tryCatch(a$.__enclos_env__$private$.run(), error = function(e) NULL)
+        warn_of(a)
+    }
+    expect_match(swapped(u), "not a straight line", fixed = TRUE)   # dep = x
+    expect_match(warn_of(sc_run(u)), "not a straight line", fixed = TRUE)  # dep = y
+
+    # clean linear data: silent, either orientation
+    set.seed(11); c1 <- data.frame(x = rnorm(150)); c1$y <- 0.6 * c1$x + rnorm(150, 0, 0.8)
+    expect_false(grepl("not a straight line", warn_of(sc_run(c1)), fixed = TRUE))
+    expect_false(grepl("not a straight line", swapped(c1), fixed = TRUE))
+})
+
+
+test_that("heavy ties under Spearman are surfaced", {
+    # cor.test() emits "Cannot compute exact p-value with ties" as an R warning,
+    # which jamovi never shows.
+    set.seed(6)
+    d <- data.frame(x = sample(1:3, 80, TRUE)); d$y <- sample(1:3, 80, TRUE)
+    w <- warn_of(sc_run(d, typestatistics = "nonparametric"))
+    expect_match(w, "Heavy ties", fixed = TRUE)
+    expect_match(w, "only 3 distinct values across 80 observations", fixed = TRUE)
+
+    # continuous data under Spearman, and the same tied data under Pearson, stay quiet
+    set.seed(11); c1 <- data.frame(x = rnorm(150)); c1$y <- 0.6 * c1$x + rnorm(150, 0, 0.8)
+    expect_false(grepl("Heavy ties",
+                       warn_of(sc_run(c1, typestatistics = "nonparametric")), fixed = TRUE))
+    expect_false(grepl("Heavy ties", warn_of(sc_run(d)), fixed = TRUE))
+})
+
+
+# --- review-function pass: schema, labelling and i18n -------------------------
+
+test_that("bfmessage is described and gated as what it actually does", {
+    # It was titled "Bayes factor message" and described as showing the BF "in the
+    # subtitle when using Bayesian analysis". Measured, every clause was wrong: it adds
+    # a CAPTION, it works under PARAMETRIC and is inert under Bayesian, and it reports
+    # BF01 -- evidence for the NULL, the reciprocal of the BF10 a reader assumes.
+    a_yaml <- paste(readLines("../../jamovi/jjscatterstats.a.yaml", warn = FALSE), collapse = "\n")
+    expect_match(a_yaml, "title: Bayes factor for the null (BF01)", fixed = TRUE)
+    expect_match(a_yaml, "RECIPROCAL of the more commonly quoted BF10", fixed = TRUE)
+    expect_match(a_yaml, "parametric (Pearson) test only", fixed = TRUE)
+    expect_false(grepl("display Bayes Factor in the subtitle when using Bayesian",
+                       a_yaml, fixed = TRUE))
+
+    # and the control is disabled where it does nothing
+    u_yaml <- paste(readLines("../../jamovi/jjscatterstats.u.yaml", warn = FALSE), collapse = "\n")
+    expect_match(u_yaml, "enable: (typestatistics:parametric)", fixed = TRUE)
+
+    # behaviour matches the description: a caption under parametric, nothing under bayes
+    set.seed(42); d <- xy(n = 60)
+    cap <- function(...) {
+        a <- sc_run(d, ...)
+        f <- tempfile(fileext = ".png"); grDevices::png(f, 520, 400)
+        on.exit(try(grDevices::dev.off(), silent = TRUE), add = TRUE)
+        try(a$.__enclos_env__$private$.plot(a$results$plot,
+                                            ggtheme = ggplot2::theme_bw(), theme = NULL),
+            silent = TRUE)
+        grDevices::dev.off(); on.exit()
+        !is.null(ggplot2::last_plot()$labels$caption)
+    }
+    expect_false(cap(typestatistics = "parametric", bfmessage = FALSE))
+    expect_true( cap(typestatistics = "parametric", bfmessage = TRUE))
+    expect_false(cap(typestatistics = "bayes",      bfmessage = TRUE))   # inert, hence gated
+})
+
+
+test_that("the statistical output is on by default", {
+    # resultssubtitle carries the coefficient, its CI, the p-value and n -- the whole
+    # statistical result. Defaulting it off left the default output of a correlation
+    # analysis with no subtitle at all (verified: NULL, not empty).
+    opts <- ClinicoPath:::jjscatterstatsOptions$new(dep = "x", group = "y")
+    expect_true(opts$resultssubtitle)
+})
+
+
+test_that("checkbox labels name the thing rather than the action", {
+    # The jamovi library reviewer flags leading Show/Enable/Include/Add verbs.
+    y <- yaml::read_yaml("../../jamovi/jjscatterstats.a.yaml")
+    verbs <- c("Show", "Enable", "Include", "Export", "Generate", "Add")
+    offenders <- Filter(Negate(is.null), lapply(y$options, function(o) {
+        t <- o$title
+        if (!is.null(t) && nzchar(t) && strsplit(t, " ")[[1]][1] %in% verbs) o$name else NULL
+    }))
+    expect_length(offenders, 0L)
+})
+
+
+test_that("every user-facing notice is translatable", {
+    # The notices are what a clinician reads when something is wrong with their data,
+    # so they must not be hardcoded English. Each payload has to reach .appendWarning()
+    # through .() (optionally via the .fmt() guard), never a bare paste0().
+    b <- paste(readLines("../../R/jjscatterstats.b.R", warn = FALSE), collapse = "\n")
+    expect_false(grepl("appendWarning(paste0", b, fixed = TRUE))
+
+    # jmvcore::format() silently drops placeholders containing "_", and a placeholder
+    # named s/st/str partial-matches its `str` formal and swallows the whole template.
+    expect_false(grepl("\\{[a-z]+_[a-z]+\\}", b))
+    expect_false(grepl("\\{(s|st|str)\\}", b))
+    # a trailing " [...]" in a .() string is treated as msgctxt and stripped from output
+    expect_false(grepl('\\.\\("[^"]* \\[', b))
+
+    # and the Turkish catalog carries them, with placeholders intact
+    po <- paste(readLines("../../jamovi/i18n/tr.po", warn = FALSE, encoding = "UTF-8"),
+                collapse = "\n")
+    expect_match(po, "One observation is driving this result", fixed = TRUE)
+    expect_match(po, "Bu sonucu tek bir g", fixed = TRUE)
 })

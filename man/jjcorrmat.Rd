@@ -9,6 +9,7 @@ jjcorrmat(
   dep,
   grvar = NULL,
   typestatistics = "parametric",
+  bayesseed = 20250101,
   matrixtype = "upper",
   matrixmethod = "square",
   siglevel = 0.05,
@@ -20,6 +21,7 @@ jjcorrmat(
   lowcolor = "#E69F00",
   midcolor = "white",
   highcolor = "#009E73",
+  originaltheme = FALSE,
   title = "",
   subtitle = "",
   caption = "",
@@ -43,6 +45,11 @@ uses Winsorized Pearson correlation (the most extreme 20 percent of
 observations in each tail are pulled in rather than removed), 'bayes'
 reports the median posterior estimate and BF10.}
 
+\item{bayesseed}{Seed for the Bayesian sampler. The Bayes factor and the
+median posterior estimate come from an MCMC draw, so a fixed seed keeps the
+table, the plot and repeat runs identical. Change it to confirm the result
+is stable across draws.}
+
 \item{matrixtype}{Display upper triangular, lower triangular or full
 matrix.}
 
@@ -52,7 +59,9 @@ used.}
 \item{siglevel}{Significance level for marking correlations as
 insignificant.}
 
-\item{conflevel}{Confidence level for confidence intervals.}
+\item{conflevel}{Level for the interval estimate. For the parametric,
+nonparametric and robust methods this is a confidence interval; for the
+Bayesian method it is a credible interval drawn from the posterior.}
 
 \item{padjustmethod}{Adjustment method for multiple comparisons.}
 
@@ -73,6 +82,9 @@ data for each pair.}
 \item{midcolor}{Color for mid (zero) correlation values.}
 
 \item{highcolor}{Color for high (positive) correlation values.}
+
+\item{originaltheme}{Use the original ggstatsplot theme rather than
+jamovi's default.}
 
 \item{title}{Title for the correlation matrix plot.}
 

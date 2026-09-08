@@ -1,7 +1,7 @@
 ---
 name:  jjscatterstats
 title: Scatter Plot
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Scatter Plot
 version: '1.0.8'
@@ -231,14 +231,19 @@ options:
 
 
     - name: originaltheme
-      title: Add GGStatsPlot layer
+      title: GGStatsPlot theme layer
       type: Bool
       default: false
 
     - name: resultssubtitle
       title: Statistical results
       type: Bool
-      default: false
+      # Deliberately NOT default:false. The module-wide "checkboxes default to false to
+      # reduce compute" policy does not fit here: this option carries the correlation
+      # coefficient, its confidence interval, the p-value and n -- the entire statistical
+      # output of a correlation analysis. With it off the default result is a scatter plot
+      # reporting no correlation at all (verified: the subtitle is absent, not empty).
+      default: true
 
     - name: conflevel
       title: Confidence Level
@@ -251,12 +256,20 @@ options:
             Confidence level for confidence intervals (between 0.50 and 0.999).
 
     - name: bfmessage
-      title: Bayes factor message
+      title: Bayes factor for the null (BF01)
       type: Bool
       default: false
       description:
+          ui: >
+            Adds a caption reporting the Bayes factor in favour of NO association.
+            Applies to the parametric (Pearson) test only.
           R: >
-            Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
+            Adds a caption below the plot reporting log(BF01), the Bayes factor in favour
+            of the NULL hypothesis of no association. Note the direction: BF01 is the
+            RECIPROCAL of the more commonly quoted BF10, so a large negative log(BF01) is
+            strong evidence FOR an association, not against it. This applies to the
+            parametric (Pearson) test only; under the Bayesian test type it has no effect,
+            because the Bayes factor already appears in the subtitle.
 
     - name: k
       title: Decimal Places
@@ -351,7 +364,7 @@ options:
             Height of the plot in pixels. Default is 450.
 
     - name: addGGPubrPlot
-      title: Add ggpubr scatter plot
+      title: Publication-ready plot (ggpubr)
       type: Bool
       default: false
       description:
@@ -380,7 +393,7 @@ options:
             Color palette for ggpubr scatter plot.
 
     - name: ggpubrAddCorr
-      title: Add correlation (ggpubr)
+      title: Correlation coefficient (ggpubr)
       type: Bool
       default: false
       description:
@@ -401,7 +414,7 @@ options:
             Method for correlation in ggpubr plot.
 
     - name: ggpubrAddSmooth
-      title: Add smooth line (ggpubr)
+      title: Smooth trend line (ggpubr)
       type: Bool
       default: false
       description:

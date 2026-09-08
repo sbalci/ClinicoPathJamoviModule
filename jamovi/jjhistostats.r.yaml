@@ -31,6 +31,7 @@ clearWith:
     - digits
     - showInterpretation
     - clinicalPreset
+    - originaltheme
 
 
 items:

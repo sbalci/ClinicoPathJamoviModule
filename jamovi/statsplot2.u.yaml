@@ -93,3 +93,8 @@ children:
             name: seed
             format: number
             label: Random seed
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: originaltheme

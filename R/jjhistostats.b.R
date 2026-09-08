@@ -227,7 +227,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             },
 
             # Shared plot generation function to eliminate duplication
-            .generateHistogram = function(data, x_var, options_data, aesthetics_data, grvar_sym = NULL) {
+            .generateHistogram = function(data, x_var, options_data, aesthetics_data, grvar_sym = NULL, ggtheme = NULL) {
                 # Checkpoint before expensive statistical plot generation
                 private$.checkpoint(flush = FALSE)
 
@@ -284,6 +284,12 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 if (!is.null(options_data$centrality.type)) {
                     base_args$centrality.type <- options_data$centrality.type
                 }
+
+                # Follow the host theme jamovi hands the renderer, unless the
+                # user asked for ggstatsplot's own. Set after the NULL-strip
+                # below would drop it, so it goes in first.
+                base_args$ggtheme <- if (isTRUE(self$options$originaltheme))
+                    ggstatsplot::theme_ggstatsplot() else ggtheme
 
                 # Remove NULL arguments to prevent conflicts
                 base_args <- base_args[!sapply(base_args, is.null)]
@@ -984,7 +990,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         data = mydata,
                         x_var = dep,
                         options_data = options_data,
-                        aesthetics_data = aesthetics_data
+                        aesthetics_data = aesthetics_data,
+                        ggtheme = ggtheme
                     )
                 }
 
@@ -1004,7 +1011,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                 data = mydata,
                                 x_var = x_var,
                                 options_data = options_data,
-                                aesthetics_data = aesthetics_data
+                                aesthetics_data = aesthetics_data,
+                                ggtheme = ggtheme
                             )
                         }
                     )
@@ -1077,7 +1085,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         x_var = dep,
                         options_data = options_data,
                         aesthetics_data = aesthetics_data,
-                        grvar_sym = rlang::sym(grvar)
+                        grvar_sym = rlang::sym(grvar),
+                        ggtheme = ggtheme
                     )
                 }
 
@@ -1098,7 +1107,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                 x_var = x_var,
                                 options_data = options_data,
                                 aesthetics_data = aesthetics_data,
-                                grvar_sym = rlang::sym(grvar)
+                                grvar_sym = rlang::sym(grvar),
+                                ggtheme = ggtheme
                             )
                         }
                     )

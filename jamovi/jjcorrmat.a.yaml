@@ -1,7 +1,7 @@
 ---
 name:  jjcorrmat
 title: Correlation Matrix
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Continuous vs Continuous
 # menuSubtitle: Correlation Matrix
 version: '1.0.8'
@@ -104,6 +104,19 @@ options:
             observations in each tail are pulled in rather than removed),
             'bayes' reports the median posterior estimate and BF10.
 
+    - name: bayesseed
+      title: Bayesian seed
+      type: Integer
+      default: 20250101
+      min: 1
+      max: 999999999
+      description:
+          R: >
+            Seed for the Bayesian sampler. The Bayes factor and the median
+            posterior estimate come from an MCMC draw, so a fixed seed keeps the
+            table, the plot and repeat runs identical. Change it to confirm the
+            result is stable across draws.
+
     - name: matrixtype
       title: Matrix Type
       type: List
@@ -143,14 +156,16 @@ options:
             Significance level for marking correlations as insignificant.
 
     - name: conflevel
-      title: Confidence Level
+      title: Confidence / credible level
       type: Number
       default: 0.95
       min: 0.5
       max: 0.999
       description:
           R: >
-            Confidence level for confidence intervals.
+            Level for the interval estimate. For the parametric, nonparametric
+            and robust methods this is a confidence interval; for the Bayesian
+            method it is a credible interval drawn from the posterior.
 
     - name: padjustmethod
       title: P-value Adjustment Method
@@ -253,6 +268,14 @@ options:
       description:
           R: >
             Color for high (positive) correlation values.
+
+    - name: originaltheme
+      title: Original ggstatsplot theme
+      type: Bool
+      default: false
+      description:
+          R: >
+            Use the original ggstatsplot theme rather than jamovi's default.
 
     - name: title
       title: Plot Title

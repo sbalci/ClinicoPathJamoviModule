@@ -846,7 +846,7 @@
         "long the cohort was watched. Taking the median among censored ",
         "subjects only has the opposite fault: it discards everyone who had ",
         "the event and overstates follow-up. The reverse Kaplan-Meier uses ",
-        "every subject &mdash; someone who died at 3 months contributes ",
+        "every subject \u{2014} someone who died at 3 months contributes ",
         "&quot;observed for at least 3 months&quot; rather than being ",
         "discarded or counted as short follow-up.</p>")
 

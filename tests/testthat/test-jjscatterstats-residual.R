@@ -26,7 +26,11 @@ rs_capture <- function(a, method, item) {
            envir = a$.__enclos_env__)
     f <- tempfile(fileext = ".png")
     grDevices::png(f, 800, 600)
-    err <- tryCatch({ a$.__enclos_env__$private[[method]](item); NULL },
+    # .plot/.plot2/.plot3 now apply jamovi's `ggtheme` (which the renderer supplies)
+    # instead of a hardcoded theme_bw(), so the harness must supply it too. The ggpubr
+    # methods take (image, ...) and absorb the extras harmlessly.
+    err <- tryCatch({ a$.__enclos_env__$private[[method]](
+                          item, ggtheme = ggplot2::theme_bw(), theme = NULL); NULL },
                     error = function(e) conditionMessage(e))
     grDevices::dev.off()
     if (exists("print", envir = a$.__enclos_env__, inherits = FALSE))

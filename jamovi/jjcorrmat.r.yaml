@@ -24,6 +24,8 @@ clearWith:
     - caption
     - plotwidth
     - plotheight
+    - bayesseed
+    - originaltheme
 
 
 items:
@@ -40,6 +42,7 @@ items:
     - name: interpretation
       title: Clinical Interpretation
       type: Html
+      visible: (showexplanations)
 
     - name:  about
       title: About
@@ -96,10 +99,22 @@ items:
             title: Lower
             type: number
             superTitle: Confidence interval
+            visible: (typestatistics:parametric || typestatistics:nonparametric || typestatistics:robust)
           - name: conf_high
             title: Upper
             type: number
             superTitle: Confidence interval
+            visible: (typestatistics:parametric || typestatistics:nonparametric || typestatistics:robust)
+          - name: cred_low
+            title: Lower
+            type: number
+            superTitle: Credible interval
+            visible: (typestatistics:bayes)
+          - name: cred_high
+            title: Upper
+            type: number
+            superTitle: Credible interval
+            visible: (typestatistics:bayes)
           - name: p
             title: p
             type: number
@@ -128,6 +143,7 @@ refs:
     - ggplot2
     - ggstatsplot
     - statsExpressions
+    - correlation
     - ClinicoPathJamoviModule
 
 

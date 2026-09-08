@@ -266,6 +266,7 @@ Collate:
     'data_decisioncompare_docs.R'
     'data_diagnosticmeta_docs.R'
     'data_groomecompare_docs.R'
+    'data_jjscatterstats_docs.R'
     'data_nogoldstandard_docs.R'
     'data_oddsratio_docs.R'
     'data_outcomeorganizer_docs.R'

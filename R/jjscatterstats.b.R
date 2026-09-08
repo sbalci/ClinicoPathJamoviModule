@@ -78,18 +78,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if ( is.null(self$options$dep) || is.null(self$options$group)) {
 
                 # todo ----
-                todo <- glue::glue(
-                "<br>Welcome to ClinicoPath
-                <br><br>
-                This tool will help you generate Scatter Plot with correlation analysis.
-                <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggscatterstats.html' target='_blank'>ggscatterstats</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggscatterstats.html' target='_blank'>grouped_ggscatterstats</a>.
-                <br>
-                Please cite jamovi and the packages as given below.
-                <br><hr>"
-                )
-
-                self$results$todo$setContent(todo)
+                self$results$todo$setContent(private$.welcomeMessage())
                 return()
 
             } else {
@@ -116,13 +105,8 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(self$options$grvar) && isTRUE(private$.option("resultssubtitle"))) {
                 n_groups <- length(unique(stats::na.omit(self$data[[self$options$grvar]])))
                 if (n_groups > 1)
-                    private$.appendWarning(paste0(
-                        " <b>One test per group, unadjusted.</b> Each of the ", n_groups,
-                        " panels shows its own correlation tested at the nominal level, with ",
-                        "no correction for the fact that ", n_groups, " tests are being read ",
-                        "together. If you are screening groups rather than testing one ",
-                        "pre-specified comparison, adjust the p-values yourself (Holm or FDR ",
-                        "over the ", n_groups, " values) before drawing conclusions."))
+                    private$.appendWarning(.fmt(.("<b>One test per group, unadjusted.</b> Each of the {groups} panels shows its own correlation tested at the nominal level, with no correction for the fact that {groups} tests are being read together. If you are screening groups rather than testing one pre-specified comparison, adjust the p-values yourself (Holm or FDR over the {groups} values) before drawing conclusions."),
+                        groups = n_groups))
             }
 
             # Degenerate-data check. The same test already existed in .plot3, but .plot3 only
@@ -132,6 +116,8 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # data through .plot3 correctly reported "Correlation not computed". Running the
             # check in .run() means it fires whichever plots are on screen.
             checkData <- private$.prepData()
+            private$.warnShapeLevels(checkData)
+            private$.warnGGPubrPalette()
             x_vals <- checkData[[self$options$dep]]
             y_vals <- checkData[[self$options$group]]
             if (!is.null(x_vals) && !is.null(y_vals)) {
@@ -142,24 +128,252 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 degenerate <- n_complete < 3 ||
                     length(unique(x_vals[complete])) < 2 ||
                     length(unique(y_vals[complete])) < 2
-                if (degenerate && ("warnings" %in% self$results$itemNames)) {
-                    reason <- if (n_complete < 3)
-                        paste0("only ", n_complete, " complete pair",
-                               if (n_complete == 1) "" else "s", " of values")
+                if (degenerate) {
+                    # Each branch is a complete translatable clause rather than a glued
+                    # fragment, so a translator can reorder it inside the sentence below.
+                    reason <- if (n_complete == 1)
+                        .("there is only one complete pair of values")
+                    else if (n_complete < 3)
+                        .fmt(.("there are only {n} complete pairs of values"), n = n_complete)
                     else if (length(unique(x_vals[complete])) < 2)
-                        paste0("'", self$options$dep, "' takes the same value in every row")
+                        .fmt(.("'{var}' takes the same value in every row"),
+                             var = htmltools::htmlEscape(self$options$dep))
                     else
-                        paste0("'", self$options$group, "' takes the same value in every row")
-                    current <- self$results$warnings$content
-                    if (is.null(current)) current <- ""
-                    self$results$warnings$setContent(paste0(current,
-                        "<p style='color:#856404;'> <b>Correlation not computed:</b> ", reason,
-                        ". A correlation needs at least 3 complete pairs and variation in both ",
-                        "variables; the plot below shows the points but no coefficient is ",
-                        "meaningful.</p>"))
-                    self$results$warnings$setVisible(TRUE)
+                        .fmt(.("'{var}' takes the same value in every row"),
+                             var = htmltools::htmlEscape(self$options$group))
+                    private$.appendWarning(.fmt(.("<b>Correlation not computed:</b> {reason}. A correlation needs at least 3 complete pairs and variation in both variables; the plot below shows the points but no coefficient is meaningful."),
+                        reason = reason))
                 }
             }
+
+            private$.warnStatisticalCaveats(checkData)
+        },
+
+        # Statistical guardrails for the reported coefficient. Every one of these was
+        # SILENT before (verified 2026-09-08 on purpose-built data), which matters because
+        # the figure and its p-value are what a clinician quotes.
+        #
+        # All five run from .run(), never from a render callback: jamovi has already
+        # composed and sent the results panel by the time an image is drawn.
+        .warnStatisticalCaveats = function(d) {
+            dep <- self$options$dep
+            grp <- self$options$group
+            if (is.null(dep) || is.null(grp)) return(invisible(NULL))
+            x <- d[[dep]]
+            y <- d[[grp]]
+            if (is.null(x) || is.null(y) || !is.numeric(x) || !is.numeric(y))
+                return(invisible(NULL))
+
+            ok <- is.finite(x) & is.finite(y)
+            n  <- sum(ok)
+            x <- x[ok]
+            y <- y[ok]
+            # Below 3 pairs, or with a constant axis, .run() has already said something
+            # strictly better; adding more here would just be noise.
+            if (n < 3 || length(unique(x)) < 2 || length(unique(y)) < 2)
+                return(invisible(NULL))
+
+            ty <- as.character(private$.option("typestatistics"))
+            rank_based <- identical(ty, "nonparametric")
+
+            # --- 1. Complete-case loss ---------------------------------------------
+            # n is disclosed only inside the plot subtitle, which is OFF by default, so
+            # a cohort could lose half its rows with nothing on screen saying so.
+            n_total <- nrow(self$data)
+            n_lost  <- n_total - n
+            if (n_total > 0 && n_lost > 0 && (n_lost / n_total) >= 0.20) {
+                private$.appendWarning(.fmt(.("<b>{pct}% of rows could not be used:</b> the correlation below is computed on {used} of {total} rows. The remaining {lost} have a missing or non-numeric value in '{xvar}' or '{yvar}'. Complete-case analysis assumes what is missing is unrelated to the relationship being measured; if the missingness is informative (sicker patients missing a lab value, say) this coefficient is biased."),
+                    pct = round(100 * n_lost / n_total), used = n, total = n_total,
+                    lost = n_lost, xvar = htmltools::htmlEscape(dep),
+                    yvar = htmltools::htmlEscape(grp)))
+            }
+
+            # --- 2. Small sample ---------------------------------------------------
+            # A correlation on a handful of points has a confidence interval so wide it
+            # is compatible with almost any conclusion.
+            if (n < 10) {
+                private$.appendWarning(.fmt(.("<b>Very small sample (n = {n}):</b> a correlation estimated from fewer than 10 pairs is extremely unstable - its confidence interval typically spans most of the range from -1 to 1, so a large coefficient here is not evidence of a large association. Treat this as descriptive only."),
+                    n = n))
+            } else if (n < 30) {
+                private$.appendWarning(.fmt(.("<b>Small sample (n = {n}):</b> the confidence interval on this coefficient is wide, and a single unusual observation can move the estimate substantially. Report the interval, not just the point estimate."),
+                    n = n))
+            }
+
+            # --- 3. Influence of a single observation ------------------------------
+            # Leave-one-out Pearson r from the running sums: subtracting one point's
+            # contribution is O(n) in total, so this stays cheap on large data rather
+            # than refitting n times. Only meaningful for the moment-based coefficients;
+            # rank methods are resistant by construction, which is the point of offering
+            # them, so the notice names that escape route. Winsorized Pearson counts as
+            # resistant too -- telling a user who already picked "Robust" to consider
+            # switching to Robust would be nonsense.
+            resistant <- ty %in% c("nonparametric", "robust")
+            if (n >= 10 && !resistant) {
+                Sx <- sum(x)
+                Sy <- sum(y)
+                Sxx <- sum(x * x)
+                Syy <- sum(y * y)
+                Sxy <- sum(x * y)
+                m <- n - 1L
+                sx <- Sx - x
+                sy <- Sy - y
+                sxx <- Sxx - x * x
+                syy <- Syy - y * y
+                sxy <- Sxy - x * y
+                den <- sqrt(pmax(0, m * sxx - sx^2) * pmax(0, m * syy - sy^2))
+                r_loo <- ifelse(den > 0, (m * sxy - sx * sy) / den, NA_real_)
+                r_full <- stats::cor(x, y)
+                delta <- suppressWarnings(max(abs(r_full - r_loo), na.rm = TRUE))
+                if (is.finite(delta) && delta > 0.2) {
+                    worst <- which.max(abs(r_full - r_loo))
+                    private$.appendWarning(.fmt(.("<b>One observation is driving this result:</b> dropping a single point changes the correlation from {full} to {dropped} (a shift of {delta}). A coefficient that depends this heavily on one patient should not be reported on its own - inspect that point on the plot, and consider the 'Robust (Winsorized Pearson)' or 'Nonparametric (Spearman)' test type, which are far less sensitive to it."),
+                        full = sprintf("%.2f", r_full),
+                        dropped = sprintf("%.2f", r_loo[worst]),
+                        delta = sprintf("%.2f", delta)))
+                }
+            }
+
+            # --- 4. Relationship is not the shape the test assumes ------------------
+            # Compared on RANKS when Spearman is selected: a monotone curve is linear in
+            # ranks and correctly stays quiet, while a non-monotone (U-shaped) one still
+            # fires - which is right, because rho is near zero there too. A quadratic
+            # term is the cheap, deterministic curvature probe; it will not detect every
+            # exotic shape, so the message points the user back at the plot.
+            if (n >= 20) {
+                xx <- if (rank_based) rank(x) else x
+                yy <- if (rank_based) rank(y) else y
+                r2_lin <- stats::cor(xx, yy)^2
+                # Fit the curve BOTH ways round and keep the stronger. A quadratic in
+                # xx only sees curvature along one axis: for y = x^2 it fits perfectly,
+                # but put the parabolic variable on the x-axis instead and the same
+                # cloud needs x = +/-sqrt(y), which no quadratic in y can express -- so a
+                # one-directional probe missed the identical data with the axes swapped.
+                # Which variable a user drops on which axis is arbitrary; the warning
+                # must not be.
+                r2_of <- function(a, b) {
+                    tryCatch(summary(stats::lm(b ~ a + I(a^2)))$r.squared,
+                             error = function(e) NA_real_)
+                }
+                r2_quad <- suppressWarnings(max(r2_of(xx, yy), r2_of(yy, xx), na.rm = TRUE))
+                if (is.finite(r2_quad) && (r2_quad - r2_lin) > 0.15) {
+                    # Two whole alternative sentences rather than a glued clause: the
+                    # rank and moment cases differ in more than one word once translated.
+                    private$.appendWarning(if (rank_based)
+                        .fmt(.("<b>The relationship is not a straight line:</b> a curved fit explains {quad}% of the variation where a straight one explains {lin}%. Spearman's rho measures only the monotonic part, so it understates a real association here - a coefficient near zero does NOT mean the two variables are unrelated. Read the scatter plot itself before concluding anything."),
+                             quad = round(100 * r2_quad), lin = round(100 * r2_lin))
+                    else
+                        .fmt(.("<b>The relationship is not a straight line:</b> a curved fit explains {quad}% of the variation where a straight one explains {lin}%. This correlation measures only the linear part, so it understates a real association here - a coefficient near zero does NOT mean the two variables are unrelated. Read the scatter plot itself before concluding anything."),
+                             quad = round(100 * r2_quad), lin = round(100 * r2_lin)))
+                }
+            }
+
+            # --- 5. Ties under Spearman --------------------------------------------
+            # cor.test() emits "Cannot compute exact p-value with ties" as an R warning,
+            # which jamovi never shows the user.
+            if (rank_based && n >= 10) {
+                d_x <- length(unique(x)) / n
+                d_y <- length(unique(y)) / n
+                if (min(d_x, d_y) < 0.5) {
+                    tied_var <- if (d_x <= d_y) dep else grp
+                    k_distinct <- if (d_x <= d_y) length(unique(x)) else length(unique(y))
+                    private$.appendWarning(.fmt(.("<b>Heavy ties in '{var}':</b> only {levels} distinct values across {n} observations. Spearman's p-value then falls back on a normal approximation rather than an exact test, and rho itself is attenuated by the ties. For a variable with this few levels, a test designed for ordered categories is usually the better choice."),
+                        var = htmltools::htmlEscape(tied_var),
+                        levels = k_distinct, n = n))
+                }
+            }
+
+            invisible(NULL)
+        },
+
+        # decisionpanel-style intro shown until both axis variables are chosen. Every
+        # panel is a translucent rgba() tint with `color: inherit` so it stays legible
+        # in jamovi's dark theme; no hardcoded foreground colours (see the module-wide
+        # theme-safety rule in vignettes/jamovi_library_review_guide.md).
+        .welcomeMessage = function() {
+            has_x <- !is.null(self$options$dep)
+            has_y <- !is.null(self$options$group)
+            tick <- function(ok) if (ok) "[x]" else "[ ]"
+
+            paste0(
+                "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
+
+                "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid rgba(128, 128, 128, 0.5); padding: 20px; margin-bottom: 20px; color: inherit;'>",
+                "<h2 style='margin: 0 0 10px 0; font-size: 20px;'>", .("Scatter Plot"), "</h2>",
+                "<p style='margin: 0; font-size: 14px;'>",
+                .("Correlation between two continuous variables, with optional grouping, marginal distributions and publication-ready output."),
+                "</p></div>",
+
+                "<div style='background-color: rgba(155, 155, 155, 0.06); border-left: 4px solid rgba(128, 128, 128, 0.6); padding: 15px; margin-bottom: 20px; color: inherit;'>",
+                "<h3 style='margin: 0 0 10px 0; font-size: 16px;'>", .("Setup progress"), "</h3>",
+                "<div style='margin-bottom: 6px;'>", tick(has_x), " ", .("x-axis (first variable)"), "</div>",
+                "<div style='margin-bottom: 6px;'>", tick(has_y), " ", .("y-axis (second variable)"), "</div>",
+                "<p style='margin: 10px 0 0 0;'>",
+                if (has_x && has_y) .("Both variables selected - the analysis runs automatically.")
+                else .("Select both variables to run the correlation."),
+                "</p></div>",
+
+                "<table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>",
+                "<tr><td style='width: 50%; border: 1px solid rgba(128, 128, 128, 0.4); padding: 15px; vertical-align: top;'>",
+                "<h4 style='margin: 0 0 10px 0; font-size: 15px;'>", .("Quick start"), "</h4>",
+                "<ol style='margin: 0; padding-left: 20px; font-size: 14px;'>",
+                "<li>", .("Drop a continuous variable into <strong>x-axis</strong> (e.g. biomarker level)."), "</li>",
+                "<li>", .("Drop a second continuous variable into <strong>y-axis</strong>."), "</li>",
+                "<li>", .("Optionally set <strong>Split By</strong> to get one panel per group."), "</li>",
+                "<li>", .("Pick a <strong>Statistical Test Type</strong> that suits the distribution."), "</li>",
+                "<li>", .("Tick <strong>Statistical results</strong> to print the coefficient on the plot."), "</li>",
+                "</ol></td>",
+                "<td style='width: 50%; border: 1px solid rgba(128, 128, 128, 0.4); padding: 15px; vertical-align: top;'>",
+                "<h4 style='margin: 0 0 10px 0; font-size: 15px;'>", .("What you will get"), "</h4>",
+                "<ul style='margin: 0; padding-left: 20px; font-size: 14px;'>",
+                "<li>", .("<strong>Scatter plot</strong> with a fitted trend line and confidence band"), "</li>",
+                "<li>", .("<strong>Correlation coefficient</strong> with p-value and confidence interval"), "</li>",
+                "<li>", .("<strong>Per-group panels</strong> when a Split By variable is set"), "</li>",
+                "<li>", .("<strong>Marginal distributions</strong> on both axes"), "</li>",
+                "<li>", .("<strong>Publication-ready output</strong> in journal colour palettes"), "</li>",
+                "</ul></td></tr></table>",
+
+                "<div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid rgba(128, 128, 128, 0.4); padding: 15px; color: inherit;'>",
+                "<h4 style='margin: 0 0 10px 0; font-size: 15px;'>", .("Choosing a test"), "</h4>",
+                "<ul style='margin: 0; padding-left: 20px; font-size: 14px;'>",
+                "<li>", .("<strong>Parametric (Pearson):</strong> linear relationship, roughly normal data."), "</li>",
+                "<li>", .("<strong>Nonparametric (Spearman):</strong> any monotonic relationship; ordinal scores, skewed lab values."), "</li>",
+                "<li>", .("<strong>Robust (Winsorized Pearson):</strong> pulls extreme values in before computing r; use when outliers dominate."), "</li>",
+                "<li>", .("<strong>Bayesian:</strong> reports a Bayes factor quantifying evidence strength."), "</li>",
+                "<li>", .("Correlation is not causation, and a coefficient assumes the relationship has the shape the test looks for - always read the scatter itself."), "</li>",
+                "</ul></div>",
+
+                "<p style='margin-top: 15px; font-size: 13px;'>",
+                .("Please cite jamovi and the packages listed in the references below."),
+                "</p></div>"
+            )
+        },
+
+        # Number of distinct non-missing levels of the shape variable, or 0 when none
+        # is selected. ggplot2's discrete shape palette carries only 6 values; beyond
+        # that it emits a console warning jamovi never shows and DROPS every point in
+        # the surplus levels (measured: 7 levels drew 103 of 120 points, 12 levels drew
+        # 60 of 120, while the correlation printed below used all 120).
+        .shapeLevels = function(d) {
+            v <- self$options$shapevar
+            if (is.null(v) || identical(v, "") || is.null(d[[v]])) return(0L)
+            length(unique(stats::na.omit(d[[v]])))
+        },
+
+        .warnShapeLevels = function(d) {
+            n <- private$.shapeLevels(d)
+            if (n <= 6) return(invisible(NULL))
+            private$.appendWarning(.fmt(.("<b>Shape mapping skipped:</b> '{var}' has {levels} levels and ggplot2 provides only 6 distinct shapes. Mapping it would have drawn no point at all for the surplus levels while the correlation still used every case. Use colour for a variable with this many levels, or group the rare categories."),
+                var = htmltools::htmlEscape(self$options$shapevar), levels = n))
+        },
+
+        # A journal palette needs something to colour. The ungrouped ggpubr panel plots
+        # one cloud, so there is no discrete scale: jco, npg and lancet rendered
+        # byte-identical output. Say so rather than leave a control that does nothing.
+        .warnGGPubrPalette = function() {
+            if (!isTRUE(private$.option("addGGPubrPlot"))) return(invisible(NULL))
+            if (!is.null(self$options$grvar)) return(invisible(NULL))
+            if (identical(private$.option("ggpubrPalette"), "jco")) return(invisible(NULL))
+            private$.appendWarning(.("<b>Colour palette not applied:</b> the publication-ready panel draws a single ungrouped set of points, so there is no grouping for a journal palette to colour. Set a 'Split By' variable to see the palette take effect."))
         },
 
         # Assemble the near-identical preset-notification HTML from a single
@@ -168,7 +382,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .presetMessage = function(title, items) {
             paste0(
                 "<div style='background-color: rgba(33, 152, 239, 0.13); border-left:4px solid #2196F3; padding:15px; margin:10px 0; color: inherit;'>",
-                "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: ", title, "</h4>",
+                # No explicit colour: #1976D2 is a mid blue that loses contrast against the dark
+                # theme's panel. The 4px blue left border already carries the "info" cue.
+                "<h4 style='margin-top:0;'> Clinical Preset Applied: ", title, "</h4>",
                 "<p><strong>The following settings have been automatically configured:</strong></p>",
                 "<ul>", paste0(items, collapse = ""), "</ul>",
                 "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
@@ -272,7 +488,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # and plot3 (set includeGrvar = TRUE for the grouped-plot default title).
         .resolveLabels = function(includeGrvar = FALSE) {
             if (!is.null(self$options$mytitle) && self$options$mytitle != "") {
-                title <- .fmt(self$options$mytitle)
+                title <- self$options$mytitle
             } else if (includeGrvar) {
                 title <- paste(self$options$dep, "vs", self$options$group, "by", self$options$grvar)
             } else {
@@ -280,13 +496,13 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (!is.null(self$options$xtitle) && self$options$xtitle != "") {
-                xtitle <- .fmt(self$options$xtitle)
+                xtitle <- self$options$xtitle
             } else {
                 xtitle <- self$options$dep
             }
 
             if (!is.null(self$options$ytitle) && self$options$ytitle != "") {
-                ytitle <- .fmt(self$options$ytitle)
+                ytitle <- self$options$ytitle
             } else {
                 ytitle <- self$options$group
             }
@@ -316,22 +532,24 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             d[[group]] <- jmvcore::toNumeric(d[[group]])
 
             if (!is.numeric(d[[dep]]) || !is.numeric(d[[group]]))
-                jmvcore::reject("Both scatterplot variables must be numeric.")
+                jmvcore::reject(.('Both scatterplot variables must be numeric.'))
 
             nonfinite <- (!is.na(d[[dep]]) & !is.finite(d[[dep]])) |
                          (!is.na(d[[group]]) & !is.finite(d[[group]]))
             n_dropped <- sum(nonfinite)
             if (n_dropped > 0) {
                 d <- d[!nonfinite, , drop = FALSE]
-                private$.appendWarning(paste0(
-                    " <b>Non-finite values removed:</b> ", n_dropped, " row",
-                    if (n_dropped == 1) "" else "s",
-                    " contained an infinite value (Inf or -Inf) in '",
-                    htmltools::htmlEscape(dep), "' or '", htmltools::htmlEscape(group),
-                    "'. Infinite values are not missing values, so they pass the usual ",
-                    "completeness checks while making every correlation undefined; they ",
-                    "have been excluded and all statistics below are computed on the ",
-                    nrow(d), " remaining rows."))
+                # Singular and plural are two whole alternative sentences, not a glued
+                # "row" + "s": jmvcore's .() has no ngettext, and plural rules differ by
+                # language. Without this the message read "1 rows".
+                private$.appendWarning(if (n_dropped == 1)
+                    .fmt(.("<b>Non-finite values removed:</b> one row contained an infinite value (Inf or -Inf) in '{xvar}' or '{yvar}'. Infinite values are not missing values, so they pass the usual completeness checks while making every correlation undefined; it has been excluded and all statistics below are computed on the {kept} remaining rows."),
+                         xvar = htmltools::htmlEscape(dep),
+                         yvar = htmltools::htmlEscape(group), kept = nrow(d))
+                else
+                    .fmt(.("<b>Non-finite values removed:</b> {dropped} rows contained an infinite value (Inf or -Inf) in '{xvar}' or '{yvar}'. Infinite values are not missing values, so they pass the usual completeness checks while making every correlation undefined; they have been excluded and all statistics below are computed on the {kept} remaining rows."),
+                         dropped = n_dropped, xvar = htmltools::htmlEscape(dep),
+                         yvar = htmltools::htmlEscape(group), kept = nrow(d)))
             }
             d
         },
@@ -412,7 +630,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (!private$.option("originaltheme")) {
-                plot <- plot + ggplot2::theme_bw()
+                plot <- plot + ggtheme
             } else {
                 plot <- plot + ggstatsplot::theme_ggstatsplot()
             }
@@ -536,7 +754,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (!private$.option("originaltheme")) {
-                plot <- plot & ggplot2::theme_bw()
+                plot <- plot & ggtheme
             } else {
                 plot <- plot & ggstatsplot::theme_ggstatsplot()
             }
@@ -601,20 +819,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # 12 levels drew 60 of 120, while the correlation printed below the plot
                 # was computed on all 120. A figure that silently omits half the cohort is
                 # worse than one without shapes, so map shape only when it can be honoured.
-                n_shape_levels <- length(unique(stats::na.omit(
-                    plotData[[self$options$shapevar]])))
-                if (n_shape_levels > 6) {
-                    private$.appendWarning(paste0(
-                        " <b>Shape mapping skipped:</b> '",
-                        htmltools::htmlEscape(self$options$shapevar), "' has ",
-                        n_shape_levels, " levels and ggplot2 provides only 6 distinct ",
-                        "shapes. Mapping it would have drawn no point at all for the ",
-                        "surplus levels while the correlation still used every case. ",
-                        "Use colour for a variable with this many levels, or group the ",
-                        "rare categories."))
-                } else {
+                # The notice for this lives in .run() (.warnShapeLevels): an Html item
+                # written from a render callback is never sent to the results panel.
+                if (private$.shapeLevels(plotData) <= 6)
                     point_aes$shape <- rlang::sym(self$options$shapevar)
-                }
             }
 
             if (!is.null(self$options$alphavar) && self$options$alphavar != "") {
@@ -676,65 +884,20 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # CRITICAL FIX: Add correlation annotation with proper method handling
+            # Correlation annotation. This used to run stats::cor.test() behind a
+            # switch that silently DOWNGRADED two of the four analysis types: "robust"
+            # fell back to Spearman ("robust unavailable" -- while WRS2 has been in
+            # Imports all along) and "bayes" fell back to Pearson. The panel therefore
+            # reported a different statistic from the main plot directly above it,
+            # under a label that admitted it only in parentheses.
+            #
+            # statsExpressions::corr_test is the engine ggscatterstats itself calls, so
+            # routing through it makes this subtitle agree with the main panel BY
+            # CONSTRUCTION for all four types. Verified on 80 points (seed 42):
+            # parametric r = 0.6682502, nonparametric rho = 0.6274965, robust
+            # (Winsorized Pearson) 0.5893926, bayes r = 0.6503592 / BF10 = 8.08e+08.
             tryCatch({
                 test_type <- private$.option("typestatistics")
-                cor_method <- "pearson"  # Default
-                method_label <- "Pearson"
-                warning_msg <- NULL
-
-                if (test_type == "parametric") {
-                    cor_method <- "pearson"
-                    method_label <- "Pearson"
-                } else if (test_type == "nonparametric") {
-                    cor_method <- "spearman"
-                    method_label <- "Spearman"
-                } else if (test_type == "robust") {
-                    # Robust correlation requires special packages
-                    if (requireNamespace("WRS2", quietly = TRUE)) {
-                        # Could use WRS2::pbcor for robust correlation
-                        # For now, fall back to Spearman with warning
-                        cor_method <- "spearman"
-                        method_label <- "Spearman (robust unavailable)"
-                        warning_msg <- paste0(
-                            " Robust correlation not fully implemented for enhanced plot. ",
-                            "Falling back to Spearman correlation. ",
-                            "For robust analysis, use the main ggstatsplot plot (plot 1)."
-                        )
-                    } else {
-                        cor_method <- "pearson"
-                        method_label <- "Pearson (robust unavailable)"
-                        warning_msg <- paste0(
-                            " Robust correlation requires WRS2 package which is not available. ",
-                            "Falling back to Pearson correlation."
-                        )
-                    }
-                } else if (test_type == "bayes" || test_type == "bayesian") {
-                    # Bayesian correlation requires BayesFactor package
-                    cor_method <- "pearson"
-                    method_label <- "Pearson (Bayesian unavailable)"
-                    warning_msg <- paste0(
-                        " Bayesian correlation not implemented for enhanced plot. ",
-                        "Falling back to Pearson correlation. ",
-                        "For Bayesian analysis, use the main ggstatsplot plot (plot 1)."
-                    )
-                } else {
-                    # Unknown method, default to Pearson with warning
-                    cor_method <- "pearson"
-                    method_label <- "Pearson (default)"
-                    warning_msg <- paste0(
-                        " Unknown correlation method '", test_type, "'. ",
-                        "Falling back to Pearson correlation."
-                    )
-                }
-
-                # Show warning if method was changed.
-                # The `warnings` Html output is declared in .r.yaml; the itemNames
-                # probe is retained as a defensive guard (jmvcore throws rather than
-                # returning NULL on access to an undefined results item).
-                if (!is.null(warning_msg)) {
-                    private$.appendWarning(warning_msg)
-                }
 
                 # Guard against degenerate input: correlation is undefined with
                 # fewer than 3 complete pairs or a constant (zero-variance) axis.
@@ -753,43 +916,49 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # used to setContent() the whole Warnings output, DELETING the
                     # multiplicity note and the run-level degenerate note and replacing them
                     # with a vaguer sentence.
-                    p <- p + ggplot2::labs(subtitle = "Correlation not computed (insufficient data)")
+                    p <- p + ggplot2::labs(subtitle = .("Correlation not computed (insufficient data)"))
                 } else {
-                    cor_result <- stats::cor.test(
-                        x_vals,
-                        y_vals,
-                        method = cor_method
-                    )
+                    # rlang::inject + sym(): corr_test is tidy-eval, so a column name held
+                    # in a variable must be spliced as a symbol. Works for names with
+                    # spaces and punctuation (verified on "Tumor Size" / "Overall Time").
+                    res <- as.data.frame(rlang::inject(statsExpressions::corr_test(
+                        data       = plotData,
+                        x          = !!rlang::sym(self$options$dep),
+                        y          = !!rlang::sym(self$options$group),
+                        type       = test_type,
+                        conf.level = self$options$conflevel
+                    )))
 
-                    # Symbol per method: the coefficient was printed as "r" whatever ran,
-                    # so a Spearman result was labelled with Pearson's symbol. Honour the
-                    # user's decimal-places option here too (it was hard-coded to 3), and
-                    # report n -- the panel gave a coefficient and a p-value with no
-                    # denominator anywhere in the analysis.
-                    cor_symbol <- switch(cor_method,
-                                         pearson  = "r",
-                                         spearman = "rho",
-                                         kendall  = "tau",
-                                         "r")
                     dp <- max(0L, min(5L, as.integer(self$options$k)))
-                    cor_text <- sprintf(
-                        paste0("%s: %s = %.", dp, "f, p %s %.", max(dp, 3L), "f, n = %d"),
-                        method_label,
-                        cor_symbol,
-                        cor_result$estimate,
-                        ifelse(cor_result$p.value < 0.001, "<", "="),
-                        ifelse(cor_result$p.value < 0.001, 0.001, cor_result$p.value),
-                        n_complete
-                    )
+                    # Symbol per method: the coefficient was printed as "r" whatever ran,
+                    # so a Spearman result was labelled with Pearson's symbol.
+                    cor_symbol <- switch(test_type,
+                                         nonparametric = "rho",
+                                         "r")
+                    est <- sprintf(paste0("%s = %.", dp, "f"), cor_symbol,
+                                   as.numeric(res$estimate))
 
-                    p <- p + ggplot2::labs(subtitle = cor_text)
+                    # Bayesian output has no p-value; it reports a Bayes factor instead.
+                    tail_txt <- if (identical(test_type, "bayes") && !is.null(res$bf10)) {
+                        sprintf(paste0("BF10 = %.", dp, "g"), as.numeric(res$bf10))
+                    } else {
+                        pv <- as.numeric(res$p.value)
+                        sprintf(paste0("p %s %.", max(dp, 3L), "f"),
+                                if (pv < 0.001) "<" else "=",
+                                if (pv < 0.001) 0.001 else pv)
+                    }
+
+                    n_used <- if (!is.null(res$n.obs)) as.integer(res$n.obs) else n_complete
+                    p <- p + ggplot2::labs(subtitle = paste0(
+                        as.character(res$method)[1], ": ", est, ", ", tail_txt,
+                        ", n = ", n_used))
                 }
             }, error = function(e) {
                 # If correlation fails, continue without it. Appended, not setContent():
                 # a bare setContent() here wiped every other notice off the panel.
                 # htmlEscape e$message since cor.test errors may include column-name fragments
-                private$.appendWarning(paste0(
-                    " Correlation calculation failed: ", htmltools::htmlEscape(e$message)))
+                private$.appendWarning(.fmt(.("Correlation calculation failed: {reason}"),
+                    reason = htmltools::htmlEscape(e$message)))
             })
 
             # Add labels
@@ -799,9 +968,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 y = ytitle
             )
 
-            # Apply theme
+            # Apply theme. jamovi's `ggtheme`, matching .plot/.plot2 -- a hardcoded
+            # theme_bw() here made this panel ignore the user's jamovi theme setting.
             if (!private$.option("originaltheme")) {
-                p <- p + ggplot2::theme_bw()
+                p <- p + ggtheme
             } else {
                 p <- p + ggstatsplot::theme_ggstatsplot()
             }
@@ -837,7 +1007,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(current)) current <- ""
             if (grepl(substr(html, 1, 40), current, fixed = TRUE)) return(invisible(NULL))
             self$results$warnings$setContent(
-                paste0(current, "<p style='color:#856404;'>", html, "</p>"))
+                paste0(current, "<p style='background-color: rgba(255, 193, 7, 0.14); ",
+                       "border-left: 4px solid #ffc107; padding: 8px 12px; margin: 6px 0; ",
+                       "color: inherit;'>", html, "</p>"))
             self$results$warnings$setVisible(TRUE)
             invisible(NULL)
         },
@@ -857,36 +1029,35 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # the user asked for. Measured: main plot Winsorized r = 0.06 (p = 0.31) beside
             # a ggpubr panel reporting r = 0.0739 (p = 0.2475), with nothing said.
             if (is.null(implied)) {
-                ty_label <- switch(ty, robust = "robust (Winsorized Pearson)",
-                                   bayes = "Bayesian", ty)
-                private$.appendWarning(paste0(
-                    " <b>The panel below is not showing your analysis type.</b> The main plot ",
-                    "runs a ", ty_label, " correlation, which the publication-ready panel ",
-                    "cannot draw; that panel instead reports an ordinary <b>", chosen,
-                    "</b> coefficient computed on the same two variables. Quote the main ",
-                    "plot's subtitle for the ", ty_label, " result."))
+                ty_label <- switch(ty,
+                                   robust = .("robust (Winsorized Pearson)"),
+                                   bayes = .("Bayesian"), ty)
+                private$.appendWarning(.fmt(.("<b>The panel below is not showing your analysis type.</b> The main plot runs a {method} correlation, which the publication-ready panel cannot draw; that panel instead reports an ordinary <b>{fallback}</b> coefficient computed on the same two variables. Quote the main plot's subtitle for the {method} result."),
+                    method = ty_label, fallback = chosen))
                 return(invisible(NULL))
             }
             if (identical(implied, chosen)) return(invisible(NULL))
 
-            msg <- paste0(
-                " The publication-ready panel is reporting a <b>", chosen,
-                "</b> correlation while the main plot reports <b>", implied,
-                "</b>, because 'Correlation method (ggpubr)' is set independently of ",
-                "'Statistical Test Type'. Both coefficients are correct for this data, but ",
-                "they are different statistics - set the two to match unless you intend to ",
-                "show both."
-            )
-            if ("warnings" %in% self$results$itemNames) {
-                current <- self$results$warnings$content
-                if (is.null(current)) current <- ""
-                if (!grepl("Correlation method (ggpubr)", current, fixed = TRUE)) {
-                    self$results$warnings$setContent(
-                        paste0(current, "<p style='color:#856404;'>", msg, "</p>"))
-                    self$results$warnings$setVisible(TRUE)
-                }
-            }
+            private$.appendWarning(.fmt(.("The publication-ready panel is reporting a <b>{panel}</b> correlation while the main plot reports <b>{main}</b>, because 'Correlation method (ggpubr)' is set independently of 'Statistical Test Type'. Both coefficients are correct for this data, but they are different statistics - set the two to match unless you intend to show both."),
+                panel = chosen, main = implied))
             invisible(NULL)
+        },
+
+        # ggpubr resolves x / y / color / facet.by by parse()ing the column NAME as R
+        # code (ggpubr:::create_aes -> parse(text = .)), so a perfectly ordinary jamovi
+        # column called "Tumor Size (mm)" is a syntax error, not a lookup miss:
+        #   Caused by error in `parse()`: <text>:1:7: unexpected symbol  1: Tumor Size
+        # Both publication panels died outright on any name that is not a syntactic R
+        # name -- spaces, parentheses, slashes, a leading digit. ggstatsplot handles
+        # these fine, so only this path needs the workaround.
+        #
+        # Returns the data with syntactic names plus the mapping, so the caller can
+        # restore the real names as axis/legend labels.
+        .ggpubrSafeNames = function(d) {
+            orig <- names(d)
+            safe <- make.names(orig, unique = TRUE)
+            names(d) <- safe
+            list(data = d, safe = stats::setNames(safe, orig))
         },
 
         .plotGGPubr = function(image, ...) {
@@ -905,11 +1076,15 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             dep <- self$options$dep
             group <- self$options$group
 
+            # See .ggpubrSafeNames: ggpubr parses the column name as R code.
+            sn <- private$.ggpubrSafeNames(mydata)
+            mydata <- sn$data
+
             # Build scatter plot arguments
             args <- list(
                 data = mydata,
-                x = dep,
-                y = group,
+                x = sn$safe[[dep]],
+                y = sn$safe[[group]],
                 palette = private$.option("ggpubrPalette")
             )
 
@@ -918,14 +1093,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # lancet rendered byte-identical output. Say so rather than leave a control that
             # visibly does nothing. The grouped panel below (which colours by the Split By
             # variable) does honour it.
-            if (is.null(self$options$grvar) &&
-                !identical(private$.option("ggpubrPalette"), "jco")) {
-                private$.appendWarning(paste0(
-                    " <b>Colour palette not applied:</b> the publication-ready panel draws a ",
-                    "single ungrouped set of points, so there is no grouping for a journal ",
-                    "palette to colour. Set a 'Split By' variable to see the palette take ",
-                    "effect."))
-            }
+            # Notice emitted from .run(); see .warnGGPubrPalette.
 
             # CRITICAL FIX: Implement ggpubrAddSmooth option
             # Build the 'add' parameter based on user selections
@@ -965,6 +1133,13 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$ggpubrAddCorr && self$options$ggpubrAddSmooth) {
                 plot <- plot + ggplot2::geom_smooth(method = "loess", se = TRUE)
             }
+
+            # Restore the labels: the plot was built against sanitised column names, and
+            # these panels previously ignored the Title / X-Title / Y-Title options
+            # entirely, so a custom axis label set for the main plot silently did not
+            # apply here. .resolveLabels() falls back to the variable names when blank.
+            lbl <- private$.resolveLabels(includeGrvar = FALSE)
+            plot <- plot + ggplot2::labs(title = lbl$title, x = lbl$xtitle, y = lbl$ytitle)
 
             # Apply theme
             plot <- plot + ggpubr::theme_pubr()
@@ -989,18 +1164,23 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             group <- self$options$group
             grvar <- self$options$grvar
 
+            # See .ggpubrSafeNames: ggpubr parses the column name as R code. This panel
+            # feeds the name into `color` and `facet.by` as well, so all three go through.
+            sn <- private$.ggpubrSafeNames(mydata)
+            mydata <- sn$data
+
             # Build scatter plot arguments with faceting
             args <- list(
                 data = mydata,
-                x = dep,
-                y = group,
+                x = sn$safe[[dep]],
+                y = sn$safe[[group]],
                 # `color = grvar` is what makes `palette` mean anything: ggpubr applies a
                 # discrete palette to a colour/fill scale, and without a mapping there is no
                 # scale to apply it to. Verified before this change: the jco, npg and lancet
                 # palettes produced BYTE-IDENTICAL png output.
-                color = grvar,
+                color = sn$safe[[grvar]],
                 palette = private$.option("ggpubrPalette"),
-                facet.by = grvar
+                facet.by = sn$safe[[grvar]]
             )
 
             # CRITICAL FIX: Implement ggpubrAddSmooth option
@@ -1041,6 +1221,11 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$ggpubrAddCorr && self$options$ggpubrAddSmooth) {
                 plot <- plot + ggplot2::geom_smooth(method = "loess", se = TRUE)
             }
+
+            # Restore the labels (see .plotGGPubr); the legend keeps the real grvar name.
+            lbl <- private$.resolveLabels(includeGrvar = TRUE)
+            plot <- plot + ggplot2::labs(title = lbl$title, x = lbl$xtitle,
+                                         y = lbl$ytitle, color = grvar)
 
             # Apply theme
             plot <- plot + ggpubr::theme_pubr()

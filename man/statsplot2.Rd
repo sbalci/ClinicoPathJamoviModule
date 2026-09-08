@@ -20,7 +20,8 @@ statsplot2(
   sampleLarge = FALSE,
   sampleThreshold = 10000,
   sampleSize = 5000,
-  seed = 42
+  seed = 42,
+  originaltheme = FALSE
 )
 }
 \arguments{
@@ -81,6 +82,9 @@ computed on the retained rows only.}
 'Sample large datasets' is enabled) and for any resampling inside the plot
 statistics (robust and Bayesian approaches). Change it to draw a different
 sample; the default (42) reproduces the previous fixed behaviour.}
+
+\item{originaltheme}{Use the original ggstatsplot theme rather than
+jamovi's default.}
 }
 \value{
 A results object containing:

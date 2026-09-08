@@ -73,6 +73,12 @@ children:
                 name: matrixtype
               - type: ComboBox
                 name: matrixmethod
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: bayesseed
+        format: number
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -96,6 +102,15 @@ children:
                 name: highcolor
                 format: string
                 width: large
+      - type: Label
+        label: Theme
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: originaltheme
       - type: Label
         label: Plot Labels
         fitToGrid: true

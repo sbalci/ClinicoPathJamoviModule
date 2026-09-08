@@ -22,7 +22,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             xtitle = "",
             ytitle = "",
             originaltheme = FALSE,
-            resultssubtitle = FALSE,
+            resultssubtitle = TRUE,
             conflevel = 0.95,
             bfmessage = FALSE,
             k = 2,
@@ -166,7 +166,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..resultssubtitle <- jmvcore::OptionBool$new(
                 "resultssubtitle",
                 resultssubtitle,
-                default=FALSE)
+                default=TRUE)
             private$..conflevel <- jmvcore::OptionNumber$new(
                 "conflevel",
                 conflevel,
@@ -442,7 +442,13 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ytitle",
                     "resultssubtitle",
                     "plotwidth",
-                    "plotheight"))
+                    "plotheight",
+                    "showExplanations",
+                    "addGGPubrPlot",
+                    "ggpubrPalette",
+                    "ggpubrAddCorr",
+                    "ggpubrCorrMethod",
+                    "ggpubrAddSmooth"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -465,7 +471,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
-                title="`${dep} vs {group} by {grvar}`",
+                title="`${dep} vs ${group} by ${grvar}`",
                 width=1200,
                 height=450,
                 renderFun=".plot2",
@@ -474,7 +480,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
-                title="`${dep} vs {group}`",
+                title="`${dep} vs ${group}`",
                 width=600,
                 height=450,
                 renderFun=".plot",
@@ -482,7 +488,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
-                title="`Plot with Aesthetics - ${dep} vs {group}`",
+                title="`Plot with Aesthetics - ${dep} vs ${group}`",
                 width=600,
                 height=450,
                 renderFun=".plot3",
@@ -592,8 +598,13 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param resultssubtitle .
 #' @param conflevel Confidence level for confidence intervals (between 0.50
 #'   and 0.999).
-#' @param bfmessage Whether to display Bayes Factor in the subtitle when using
-#'   Bayesian analysis.
+#' @param bfmessage Adds a caption below the plot reporting log(BF01), the
+#'   Bayes factor in favour of the NULL hypothesis of no association. Note the
+#'   direction: BF01 is the RECIPROCAL of the more commonly quoted BF10, so a
+#'   large negative log(BF01) is strong evidence FOR an association, not against
+#'   it. This applies to the parametric (Pearson) test only; under the Bayesian
+#'   test type it has no effect, because the Bayes factor already appears in the
+#'   subtitle.
 #' @param k Number of decimal places for displaying statistics in the
 #'   subtitle.
 #' @param marginal Whether to display marginal histogram plots on the axes
@@ -646,7 +657,7 @@ jjscatterstats <- function(
     xtitle = "",
     ytitle = "",
     originaltheme = FALSE,
-    resultssubtitle = FALSE,
+    resultssubtitle = TRUE,
     conflevel = 0.95,
     bfmessage = FALSE,
     k = 2,

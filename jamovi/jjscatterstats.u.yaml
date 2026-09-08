@@ -47,6 +47,7 @@ children:
                 format: number
               - type: CheckBox
                 name: bfmessage
+                enable: (typestatistics:parametric)
               - type: TextBox
                 name: k
                 format: number
@@ -84,6 +85,8 @@ children:
                 name: resultssubtitle
               - type: CheckBox
                 name: originaltheme
+              - type: CheckBox
+                name: showRugPlot
   - type: CollapseBox
     label: Point Aesthetics
     collapsed: true
@@ -112,6 +115,8 @@ children:
           - type: LayoutBox
             margin: large
             children:
+              - type: ComboBox
+                name: smoothMethod
               - type: TextBox
                 name: smoothlinesize
                 format: number
@@ -210,18 +215,14 @@ children:
                 maxItemCount: 1
                 isTarget: true
       - type: Label
-        label: Plot Enhancements
+        label: Marginal distributions (this panel only)
         fitToGrid: true
         children:
           - type: LayoutBox
             margin: large
             children:
-              - type: CheckBox
-                name: showRugPlot
               - type: ComboBox
                 name: marginalType
-              - type: ComboBox
-                name: smoothMethod
   - type: CollapseBox
     label: Publication Scatter Plots (ggpubr)
     collapsed: true
@@ -240,6 +241,7 @@ children:
               children:
                 - type: ComboBox
                   name: ggpubrPalette
+                  enable: (addGGPubrPlot)
       - type: Label
         label: Statistics & Lines
         fitToGrid: true
@@ -249,13 +251,16 @@ children:
               children:
                 - type: CheckBox
                   name: ggpubrAddCorr
+                  enable: (addGGPubrPlot)
                 - type: CheckBox
                   name: ggpubrAddSmooth
+                  enable: (addGGPubrPlot)
             - type: LayoutBox
               margin: large
               children:
                 - type: ComboBox
                   name: ggpubrCorrMethod
+                  enable: (addGGPubrPlot && ggpubrAddCorr)
   - type: CollapseBox
     label: Clinical Presets & Options
     collapsed: false

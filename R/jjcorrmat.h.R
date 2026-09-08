@@ -9,6 +9,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dep = NULL,
             grvar = NULL,
             typestatistics = "parametric",
+            bayesseed = 20250101,
             matrixtype = "upper",
             matrixmethod = "square",
             siglevel = 0.05,
@@ -20,6 +21,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             lowcolor = "#E69F00",
             midcolor = "white",
             highcolor = "#009E73",
+            originaltheme = FALSE,
             title = "",
             subtitle = "",
             caption = "",
@@ -58,6 +60,12 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "robust",
                     "bayes"),
                 default="parametric")
+            private$..bayesseed <- jmvcore::OptionInteger$new(
+                "bayesseed",
+                bayesseed,
+                default=20250101,
+                min=1,
+                max=999999999)
             private$..matrixtype <- jmvcore::OptionList$new(
                 "matrixtype",
                 matrixtype,
@@ -126,6 +134,10 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "highcolor",
                 highcolor,
                 default="#009E73")
+            private$..originaltheme <- jmvcore::OptionBool$new(
+                "originaltheme",
+                originaltheme,
+                default=FALSE)
             private$..title <- jmvcore::OptionString$new(
                 "title",
                 title,
@@ -158,6 +170,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
             self$.addOption(private$..typestatistics)
+            self$.addOption(private$..bayesseed)
             self$.addOption(private$..matrixtype)
             self$.addOption(private$..matrixmethod)
             self$.addOption(private$..siglevel)
@@ -169,6 +182,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..lowcolor)
             self$.addOption(private$..midcolor)
             self$.addOption(private$..highcolor)
+            self$.addOption(private$..originaltheme)
             self$.addOption(private$..title)
             self$.addOption(private$..subtitle)
             self$.addOption(private$..caption)
@@ -180,6 +194,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         dep = function() private$..dep$value,
         grvar = function() private$..grvar$value,
         typestatistics = function() private$..typestatistics$value,
+        bayesseed = function() private$..bayesseed$value,
         matrixtype = function() private$..matrixtype$value,
         matrixmethod = function() private$..matrixmethod$value,
         siglevel = function() private$..siglevel$value,
@@ -191,6 +206,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         lowcolor = function() private$..lowcolor$value,
         midcolor = function() private$..midcolor$value,
         highcolor = function() private$..highcolor$value,
+        originaltheme = function() private$..originaltheme$value,
         title = function() private$..title$value,
         subtitle = function() private$..subtitle$value,
         caption = function() private$..caption$value,
@@ -201,6 +217,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..dep = NA,
         ..grvar = NA,
         ..typestatistics = NA,
+        ..bayesseed = NA,
         ..matrixtype = NA,
         ..matrixmethod = NA,
         ..siglevel = NA,
@@ -212,6 +229,7 @@ jjcorrmatOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..lowcolor = NA,
         ..midcolor = NA,
         ..highcolor = NA,
+        ..originaltheme = NA,
         ..title = NA,
         ..subtitle = NA,
         ..caption = NA,
@@ -244,6 +262,7 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ggplot2",
                     "ggstatsplot",
                     "statsExpressions",
+                    "correlation",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep",
@@ -264,7 +283,9 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "subtitle",
                     "caption",
                     "plotwidth",
-                    "plotheight"))
+                    "plotheight",
+                    "bayesseed",
+                    "originaltheme"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -277,7 +298,8 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
-                title="Clinical Interpretation"))
+                title="Clinical Interpretation",
+                visible="(showexplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -338,12 +360,26 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="conf_low", 
                         `title`="Lower", 
                         `type`="number", 
-                        `superTitle`="Confidence interval"),
+                        `superTitle`="Confidence interval", 
+                        `visible`="(typestatistics:parametric || typestatistics:nonparametric || typestatistics:robust)"),
                     list(
                         `name`="conf_high", 
                         `title`="Upper", 
                         `type`="number", 
-                        `superTitle`="Confidence interval"),
+                        `superTitle`="Confidence interval", 
+                        `visible`="(typestatistics:parametric || typestatistics:nonparametric || typestatistics:robust)"),
+                    list(
+                        `name`="cred_low", 
+                        `title`="Lower", 
+                        `type`="number", 
+                        `superTitle`="Credible interval", 
+                        `visible`="(typestatistics:bayes)"),
+                    list(
+                        `name`="cred_high", 
+                        `title`="Upper", 
+                        `type`="number", 
+                        `superTitle`="Credible interval", 
+                        `visible`="(typestatistics:bayes)"),
                     list(
                         `name`="p", 
                         `title`="p", 
@@ -408,13 +444,19 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   uses Winsorized Pearson correlation (the most extreme 20 percent of
 #'   observations in each tail are pulled in rather than removed), 'bayes'
 #'   reports the median posterior estimate and BF10.
+#' @param bayesseed Seed for the Bayesian sampler. The Bayes factor and the
+#'   median posterior estimate come from an MCMC draw, so a fixed seed keeps the
+#'   table, the plot and repeat runs identical. Change it to confirm the result
+#'   is stable across draws.
 #' @param matrixtype Display upper triangular, lower triangular or full
 #'   matrix.
 #' @param matrixmethod The visualization method of correlation matrix to be
 #'   used.
 #' @param siglevel Significance level for marking correlations as
 #'   insignificant.
-#' @param conflevel Confidence level for confidence intervals.
+#' @param conflevel Level for the interval estimate. For the parametric,
+#'   nonparametric and robust methods this is a confidence interval; for the
+#'   Bayesian method it is a credible interval drawn from the posterior.
 #' @param padjustmethod Adjustment method for multiple comparisons.
 #' @param k Number of decimal places for the correlation coefficients printed
 #'   inside the plot. The correlation table is formatted by jamovi and is not
@@ -428,6 +470,8 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param lowcolor Color for low (negative) correlation values.
 #' @param midcolor Color for mid (zero) correlation values.
 #' @param highcolor Color for high (positive) correlation values.
+#' @param originaltheme Use the original ggstatsplot theme rather than
+#'   jamovi's default.
 #' @param title Title for the correlation matrix plot.
 #' @param subtitle Subtitle for the correlation matrix plot.
 #' @param caption Caption for the correlation matrix plot.
@@ -462,6 +506,7 @@ jjcorrmat <- function(
     dep,
     grvar = NULL,
     typestatistics = "parametric",
+    bayesseed = 20250101,
     matrixtype = "upper",
     matrixmethod = "square",
     siglevel = 0.05,
@@ -473,6 +518,7 @@ jjcorrmat <- function(
     lowcolor = "#E69F00",
     midcolor = "white",
     highcolor = "#009E73",
+    originaltheme = FALSE,
     title = "",
     subtitle = "",
     caption = "",
@@ -497,6 +543,7 @@ jjcorrmat <- function(
         dep = dep,
         grvar = grvar,
         typestatistics = typestatistics,
+        bayesseed = bayesseed,
         matrixtype = matrixtype,
         matrixmethod = matrixmethod,
         siglevel = siglevel,
@@ -508,6 +555,7 @@ jjcorrmat <- function(
         lowcolor = lowcolor,
         midcolor = midcolor,
         highcolor = highcolor,
+        originaltheme = originaltheme,
         title = title,
         subtitle = subtitle,
         caption = caption,

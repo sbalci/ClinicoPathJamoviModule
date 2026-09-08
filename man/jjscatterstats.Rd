@@ -22,7 +22,7 @@ jjscatterstats(
   xtitle = "",
   ytitle = "",
   originaltheme = FALSE,
-  resultssubtitle = FALSE,
+  resultssubtitle = TRUE,
   conflevel = 0.95,
   bfmessage = FALSE,
   k = 2,
@@ -107,8 +107,13 @@ quantifies evidence strength for clinical decision-making.}
 \item{conflevel}{Confidence level for confidence intervals (between 0.50
 and 0.999).}
 
-\item{bfmessage}{Whether to display Bayes Factor in the subtitle when using
-Bayesian analysis.}
+\item{bfmessage}{Adds a caption below the plot reporting log(BF01), the
+Bayes factor in favour of the NULL hypothesis of no association. Note the
+direction: BF01 is the RECIPROCAL of the more commonly quoted BF10, so a
+large negative log(BF01) is strong evidence FOR an association, not against
+it. This applies to the parametric (Pearson) test only; under the Bayesian
+test type it has no effect, because the Bayes factor already appears in the
+subtitle.}
 
 \item{k}{Number of decimal places for displaying statistics in the
 subtitle.}

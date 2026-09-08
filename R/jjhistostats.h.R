@@ -40,7 +40,8 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             addDistributionDiagnostics = FALSE,
             ggpubrDensityColor = "#0073C2FF",
             ggpubrShowQQ = FALSE,
-            ggpubrShowECDF = FALSE, ...) {
+            ggpubrShowECDF = FALSE,
+            originaltheme = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -232,6 +233,10 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "ggpubrShowECDF",
                 ggpubrShowECDF,
                 default=FALSE)
+            private$..originaltheme <- jmvcore::OptionBool$new(
+                "originaltheme",
+                originaltheme,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
@@ -268,6 +273,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..ggpubrDensityColor)
             self$.addOption(private$..ggpubrShowQQ)
             self$.addOption(private$..ggpubrShowECDF)
+            self$.addOption(private$..originaltheme)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -304,7 +310,8 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         addDistributionDiagnostics = function() private$..addDistributionDiagnostics$value,
         ggpubrDensityColor = function() private$..ggpubrDensityColor$value,
         ggpubrShowQQ = function() private$..ggpubrShowQQ$value,
-        ggpubrShowECDF = function() private$..ggpubrShowECDF$value),
+        ggpubrShowECDF = function() private$..ggpubrShowECDF$value,
+        originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..grvar = NA,
@@ -340,7 +347,8 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..addDistributionDiagnostics = NA,
         ..ggpubrDensityColor = NA,
         ..ggpubrShowQQ = NA,
-        ..ggpubrShowECDF = NA)
+        ..ggpubrShowECDF = NA,
+        ..originaltheme = NA)
 )
 
 jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -396,7 +404,8 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "caption",
                     "digits",
                     "showInterpretation",
-                    "clinicalPreset"))
+                    "clinicalPreset",
+                    "originaltheme"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -594,6 +603,8 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ggpubrDensityColor Fill color for density plot (hex code).
 #' @param ggpubrShowQQ Show QQ plot for normality assessment.
 #' @param ggpubrShowECDF Show empirical cumulative distribution function plot.
+#' @param originaltheme Use the original ggstatsplot theme rather than
+#'   jamovi's default.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -644,7 +655,8 @@ jjhistostats <- function(
     addDistributionDiagnostics = FALSE,
     ggpubrDensityColor = "#0073C2FF",
     ggpubrShowQQ = FALSE,
-    ggpubrShowECDF = FALSE) {
+    ggpubrShowECDF = FALSE,
+    originaltheme = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jjhistostats requires jmvcore to be installed (restart may be required)")
@@ -694,7 +706,8 @@ jjhistostats <- function(
         addDistributionDiagnostics = addDistributionDiagnostics,
         ggpubrDensityColor = ggpubrDensityColor,
         ggpubrShowQQ = ggpubrShowQQ,
-        ggpubrShowECDF = ggpubrShowECDF)
+        ggpubrShowECDF = ggpubrShowECDF,
+        originaltheme = originaltheme)
 
     analysis <- jjhistostatsClass$new(
         options = options,

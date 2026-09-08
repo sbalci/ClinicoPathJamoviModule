@@ -1503,6 +1503,20 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     plot <- private$.generatePlot(analysis_info, prepared_data)
                 }
                 
+                # Apply the host theme jamovi hands the renderer. This dispatcher
+                # builds the plot in ~8 different branches, so it is applied once
+                # here at the single print point rather than in each branch.
+                # `grouped_*` branches return a patchwork, which composes themes
+                # with `&`, not `+`; anything that is not a ggplot at all (a
+                # gtable, a grob) is left untouched.
+                if (!is.null(plot) && !isTRUE(self$options$originaltheme)) {
+                    plot <- tryCatch({
+                        if (inherits(plot, "patchwork")) plot & ggtheme
+                        else if (inherits(plot, "ggplot")) plot + ggtheme
+                        else plot
+                    }, error = function(e) plot)
+                }
+
                 # Return the plot
                 if (!is.null(plot)) {
                     # ggalluvial warns "Some strata appear at multiple axes" whenever the

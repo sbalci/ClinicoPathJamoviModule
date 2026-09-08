@@ -54,8 +54,8 @@
 ## Continuous × Continuous
 
 - hullplot
-jjcorrmat
-jjscatterstats
+- jjcorrmat
+- jjscatterstats
 
 ## Distribution
 
@@ -4835,3 +4835,27 @@ Acceptance: every finding in the 14 per-function sections and the module-wide ga
   the change was reverted as out of scope. Either bump the four `.a.yaml` versions
   or accept the downgrade, but the drift will keep reappearing in unrelated diffs
   until one of the two is done.
+- [x] **[data]** DONE 2026-09-08. Five bounded columns in two `jjscatterstats_*` demo
+  datasets held biologically impossible negative values (56 values total): a negative Ki-67
+  labelling index, a negative PD-L1 TPS, negative tumour mutational burden. Root cause was
+  two-fold in `data-raw/jjscatterstats_test_data.R`: some columns were never clamped, and
+  two that WERE clamped at creation had the clamp undone by a later `case_when` that
+  subtracted from them. Fixed with `pmax`/`pmin` at the right point (percentages bounded
+  0-100, rates/scores at 0). Verified: the four unaffected datasets regenerate
+  content-identical (clamping consumes no RNG), every designed correlation moves by at most
+  0.009, and `R/data_jjscatterstats_docs.R` now documents the real ranges.
+- [ ] **[docs]** Every `vignettes/<fn>_documentation.md` ("Feature Mapping Specification",
+  75 of them) is an UNFILLED template. All 37 rows of the jjscatterstats one read
+  `X | UI Control X | self$options$X | Output item / Table` -- the option name restated four
+  times, with a constant "Target Result Item" column -- so the table carries nothing that
+  `<fn>-documentation.md` does not already give with types and descriptions. Worse, each ends
+  in a pre-ticked "Verification Checklist" asserting the backend "references all declared
+  options safely" and that results "correspond to populated output containers"; for
+  jjscatterstats both claims were false on 2026-09-08 (the ggpubr panels hard-errored on any
+  non-syntactic column name, and .plot3 ran a different statistic than its label declared).
+  A checklist that ticks itself is worse than none. Either teach `/document-function` to fill
+  the mapping from the real `.u.yaml`/`.b.R`/`.r.yaml` wiring, or drop the artefact -- but it
+  is a module-wide decision: `README.Rmd` links `<fn>_documentation.html` for every function,
+  so deleting the files without updating those links breaks the published site.
+  (NOT a jjscatterstats duplicate: `-documentation.md` and `_documentation.md` are two
+  distinct `/document-function` outputs and all 75 functions carry both.)

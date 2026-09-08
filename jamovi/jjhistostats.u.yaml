@@ -242,3 +242,8 @@ children:
         name: ggpubrShowQQ
       - type: CheckBox
         name: ggpubrShowECDF
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: originaltheme

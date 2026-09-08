@@ -20,7 +20,8 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             sampleLarge = FALSE,
             sampleThreshold = 10000,
             sampleSize = 5000,
-            seed = 42, ...) {
+            seed = 42,
+            originaltheme = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -103,6 +104,10 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "seed",
                 seed,
                 default=42)
+            private$..originaltheme <- jmvcore::OptionBool$new(
+                "originaltheme",
+                originaltheme,
+                default=FALSE)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -119,6 +124,7 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..sampleThreshold)
             self$.addOption(private$..sampleSize)
             self$.addOption(private$..seed)
+            self$.addOption(private$..originaltheme)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -135,7 +141,8 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         sampleLarge = function() private$..sampleLarge$value,
         sampleThreshold = function() private$..sampleThreshold$value,
         sampleSize = function() private$..sampleSize$value,
-        seed = function() private$..seed$value),
+        seed = function() private$..seed$value,
+        originaltheme = function() private$..originaltheme$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -151,7 +158,8 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..sampleLarge = NA,
         ..sampleThreshold = NA,
         ..sampleSize = NA,
-        ..seed = NA)
+        ..seed = NA,
+        ..originaltheme = NA)
 )
 
 statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -268,7 +276,8 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "sampleLarge",
                     "sampleThreshold",
                     "sampleSize",
-                    "seed")))}))
+                    "seed",
+                    "originaltheme")))}))
 
 statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "statsplot2Base",
@@ -367,6 +376,8 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   'Sample large datasets' is enabled) and for any resampling inside the plot
 #'   statistics (robust and Bayesian approaches). Change it to draw a different
 #'   sample; the default (42) reproduces the previous fixed behaviour.
+#' @param originaltheme Use the original ggstatsplot theme rather than
+#'   jamovi's default.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
@@ -393,7 +404,8 @@ statsplot2 <- function(
     sampleLarge = FALSE,
     sampleThreshold = 10000,
     sampleSize = 5000,
-    seed = 42) {
+    seed = 42,
+    originaltheme = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("statsplot2 requires jmvcore to be installed (restart may be required)")
@@ -426,7 +438,8 @@ statsplot2 <- function(
         sampleLarge = sampleLarge,
         sampleThreshold = sampleThreshold,
         sampleSize = sampleSize,
-        seed = seed)
+        seed = seed,
+        originaltheme = originaltheme)
 
     analysis <- statsplot2Class$new(
         options = options,

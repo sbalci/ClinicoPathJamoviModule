@@ -40,7 +40,8 @@ jjhistostats(
   addDistributionDiagnostics = FALSE,
   ggpubrDensityColor = "#0073C2FF",
   ggpubrShowQQ = FALSE,
-  ggpubrShowECDF = FALSE
+  ggpubrShowECDF = FALSE,
+  originaltheme = FALSE
 )
 }
 \arguments{
@@ -158,6 +159,9 @@ distribution assessment using ggpubr.}
 \item{ggpubrShowQQ}{Show QQ plot for normality assessment.}
 
 \item{ggpubrShowECDF}{Show empirical cumulative distribution function plot.}
+
+\item{originaltheme}{Use the original ggstatsplot theme rather than
+jamovi's default.}
 }
 \value{
 A results object containing:

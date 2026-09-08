@@ -35,6 +35,12 @@ clearWith:
     - resultssubtitle
     - plotwidth
     - plotheight
+    - showExplanations
+    - addGGPubrPlot
+    - ggpubrPalette
+    - ggpubrAddCorr
+    - ggpubrCorrMethod
+    - ggpubrAddSmooth
 
 
 items:
@@ -59,7 +65,7 @@ items:
       visible: false
 
     - name: plot2
-      title: '`${dep} vs {group} by {grvar}`'
+      title: '`${dep} vs ${group} by ${grvar}`'
       type: Image
       width:  1200
       height: 450
@@ -68,7 +74,7 @@ items:
       visible: (grvar)
 
     - name: plot
-      title: '`${dep} vs {group}`'
+      title: '`${dep} vs ${group}`'
       type: Image
       width:  600
       height: 450
@@ -77,7 +83,7 @@ items:
 
 
     - name: plot3
-      title: '`Plot with Aesthetics - ${dep} vs {group}`'
+      title: '`Plot with Aesthetics - ${dep} vs ${group}`'
       type: Image
       width:  600
       height: 450

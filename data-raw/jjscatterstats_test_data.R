@@ -45,7 +45,8 @@ jjscatterstats_test <- tibble(
 
   # Moderate positive correlation (r ≈ 0.5) - protein expression and mutation burden
   protein_expression = rnorm(n, mean = 50, sd = 15),
-  mutation_burden = 3 + 0.4 * (protein_expression - 50) + rnorm(n, mean = 10, sd = 5),
+  # pmax(0): mutations/Mb is a non-negative rate. Unclamped this reached -8.04.
+  mutation_burden = pmax(0, 3 + 0.4 * (protein_expression - 50) + rnorm(n, mean = 10, sd = 5)),
 
   # Weak negative correlation (r ≈ -0.3) - immune score and tumor grade
   immune_score = rnorm(n, mean = 60, sd = 20),
@@ -72,6 +73,9 @@ jjscatterstats_test <- jjscatterstats_test %>%
       tumor_grade == "Grade 2" ~ immune_score,
       tumor_grade == "Grade 3" ~ immune_score - 15
     ),
+    # Clamp AFTER the grade adjustment: the Grade 3 arm subtracts 15 and drove the
+    # composite score to -6.08. No upper bound imposed -- it is an unbounded composite.
+    immune_score = pmax(0, immune_score),
 
     # Response score related to ki67 and treatment
     response_score = case_when(
@@ -252,11 +256,13 @@ jjscatterstats_expression <- tibble(
   tumor_suppressor_expression = pmax(3, pmin(13, tumor_suppressor)),
 
   # Weak positive: Proliferation marker (r ≈ 0.35)
-  ki67_protein = rnorm(n, mean = 25, sd = 12),
+  # A labelling index is a percentage of nuclei: 0-100. Unclamped this reached -7.83.
+  ki67_protein = pmax(0, pmin(100, rnorm(n, mean = 25, sd = 12))),
   pcna_protein = pmax(5, pmin(50, 20 + 0.25 * (ki67_protein - 25) + rnorm(n, 0, 8))),
 
   # Immune markers (moderate positive r ≈ 0.5)
-  pdl1_expression = rnorm(n, mean = 15, sd = 10),
+  # PD-L1 tumour proportion score is a percentage: 0-100. Unclamped this reached -7.14.
+  pdl1_expression = pmax(0, pmin(100, rnorm(n, mean = 15, sd = 10))),
   til_score = pmax(0, pmin(100, 30 + 1.2 * (pdl1_expression - 15) + rnorm(n, 0, 15))),
 
   # Mutation burden (independent of most markers)
@@ -278,7 +284,10 @@ jjscatterstats_expression <- jjscatterstats_expression %>%
       cancer_type == "Breast" ~ mutation_burden - 2,
       cancer_type == "Prostate" ~ mutation_burden - 3,
       TRUE ~ mutation_burden
-    )
+    ),
+    # The pmax(0, .) at creation is undone by the Breast/Prostate arms above, which
+    # subtract 2 and 3 -- so re-clamp here. This is why it reached -3.00.
+    mutation_burden = pmax(0, mutation_burden)
   )
 
 # ═══════════════════════════════════════════════════════════
