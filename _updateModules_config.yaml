@@ -125,6 +125,12 @@ modules:
       - "hullplot_survey_data.rda"
   meddecide:
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
+    prune_imports:
+      # meddecide's only htmltools use was htmlEscape, which jmvcore also exports.
+      # Importing both made `@import jmvcore` and `@importFrom htmltools htmlEscape`
+      # collide ("replacing previous import"). The analyses now call
+      # jmvcore::htmlEscape, so htmltools is no longer a meddecide dependency.
+      - "htmltools"
     i18n_files:
       - "catalog.pot"
       - "en.po"

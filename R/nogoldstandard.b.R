@@ -2131,7 +2131,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     "<div class='clinical-summary' style='background-color: rgba(33, 152, 255, 0.07); padding: 15px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
                     "<h4 style='color: inherit; margin-top: 0;'> ", .("Plain-Language Summary"), "</h4>",
                     "<p><strong>", .("Analysis:"), "</strong> ", method_label, "</p>",
-                    "<p><strong>", .("Tests analyzed:"), "</strong> ", paste(htmltools::htmlEscape(unlist(tests)), collapse = ", "), " (N=", n_tests, ")</p>",
+                    "<p><strong>", .("Tests analyzed:"), "</strong> ", paste(jmvcore::htmlEscape(unlist(tests)), collapse = ", "), " (N=", n_tests, ")</p>",
                     "<p><strong>", prev_label, "</strong> ", prev_pct,
                     if (rule_based) paste0(" <em>", .("(this is the share of cases satisfying the rule, not an estimate of disease prevalence)"), "</em>") else "",
                     "</p>",

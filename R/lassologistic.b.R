@@ -49,9 +49,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "border-left: 4px solid ", style$border, "; ",
                         "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
                         "<strong style='color: ", style$color, ";'>",
-                        htmltools::htmlEscape(notice$title), "</strong><br>",
+                        jmvcore::htmlEscape(notice$title), "</strong><br>",
                         "<span style='color: inherit;'>",
-                        htmltools::htmlEscape(notice$content), "</span>",
+                        jmvcore::htmlEscape(notice$content), "</span>",
                         "</div>"
                     )
                 }
@@ -139,7 +139,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # ── 1. Clean data ──────────────────────────────────────────────
                 data <- tryCatch(private$.cleanData(), error = function(e) {
-                    msg_html <- htmltools::htmlEscape(e$message)
+                    msg_html <- jmvcore::htmlEscape(e$message)
                     self$results$todo$setContent(paste0(
                         "<div class='alert alert-danger'><h4>Data Error</h4><p>", msg_html, "</p></div>"
                     ))
@@ -165,7 +165,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # ── 3. Fit LASSO model ─────────────────────────────────────────
                 fit_result <- tryCatch(private$.fitLasso(data), error = function(e) {
-                    msg_html <- htmltools::htmlEscape(e$message)
+                    msg_html <- jmvcore::htmlEscape(e$message)
                     self$results$todo$setContent(paste0(
                         "<div class='alert alert-danger'><h4>Model Fitting Error</h4><p>", msg_html, "</p></div>"
                     ))
@@ -2344,7 +2344,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 self$results$summaryText$setContent(
-                    paste0("<p>", htmltools::htmlEscape(report), "</p>")
+                    paste0("<p>", jmvcore::htmlEscape(report), "</p>")
                 )
             },
             .populateExplanations = function() {

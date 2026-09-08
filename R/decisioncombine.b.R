@@ -43,7 +43,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     "border-left: 4px solid #93c5fd; padding: 14px; margin: 10px 0; ",
                     "border-radius: 4px; color: inherit;'>",
                     "<h3 style='margin-top: 0; color: inherit;'>",
-                    htmltools::htmlEscape(title), "</h3>", body, "</div>"
+                    jmvcore::htmlEscape(title), "</h3>", body, "</div>"
                 )
             },
 
@@ -59,7 +59,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 li <- function(...) paste0("<li style='margin-bottom: 6px;'>", ..., "</li>")
-                esc <- function(x) htmltools::htmlEscape(x)
+                esc <- function(x) jmvcore::htmlEscape(x)
 
                 about <- paste0(
                     "<p>", esc(.("This analysis evaluates every way two or three diagnostic tests can be combined, scoring each against the reference standard on the same patients. With a single test selected it reports that one test alone, and the two row kinds described below do not arise.")), "</p>",
@@ -159,10 +159,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         "border-left: 4px solid ", style$border, "; ",
                         "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
                         "<strong style='color: ", style$color, ";'>",
-                        style$icon, " ", htmltools::htmlEscape(notice$title),
+                        style$icon, " ", jmvcore::htmlEscape(notice$title),
                         "</strong><br>",
                         "<span style='color: inherit;'>",
-                        htmltools::htmlEscape(notice$content),
+                        jmvcore::htmlEscape(notice$content),
                         "</span>",
                         "</div>"
                     )

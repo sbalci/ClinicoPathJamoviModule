@@ -356,7 +356,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           box <- paste0(
             "<div style='background-color: rgba(255, 202, 33, 0.23); color: inherit; padding: 10px; border-radius: 4px; margin-top: 10px;'>",
             "<strong>", .("Warnings:"), "</strong><ul>",
-            paste0("<li>", htmltools::htmlEscape(warnings), "</li>", collapse = ""),
+            paste0("<li>", jmvcore::htmlEscape(warnings), "</li>", collapse = ""),
             "</ul></div>")
         }
         self$results$runSummary$setContent(paste0(head, box, "</div>"))
@@ -2349,10 +2349,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "<p> The ROC analysis has been completed using the following specifications: ",
             "<p>\u{00A0}</p>",
             "<p> Measure Variable(s): ",
-            htmltools::htmlEscape(paste(unlist(self$options$dependentVars), collapse = ", ")),
+            jmvcore::htmlEscape(paste(unlist(self$options$dependentVars), collapse = ", ")),
             "</p>",
             "<p> Class Variable: ",
-            htmltools::htmlEscape(self$options$classVar),
+            jmvcore::htmlEscape(self$options$classVar),
             "</p>"
           )
 
@@ -2361,7 +2361,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             procedureNotes <- paste0(
               procedureNotes,
               "<p> Positive Class: ",
-              htmltools::htmlEscape(as.character(private$.resolvePositiveClass(
+              jmvcore::htmlEscape(as.character(private$.resolvePositiveClass(
                 self$data[[private$.escapeVar(self$options$classVar)]]))),
               " (assumed \u{2014} last level; none was selected)</p>"
             )
@@ -2369,7 +2369,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             procedureNotes <- paste0(
               procedureNotes,
               "<p> Positive Class: ",
-              htmltools::htmlEscape(self$options$positiveClass),
+              jmvcore::htmlEscape(self$options$positiveClass),
               "</p>"
             )
           }
@@ -2379,7 +2379,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             procedureNotes <- paste0(
               procedureNotes,
               "<p> Subgroup Variable: ",
-              htmltools::htmlEscape(self$options$subGroup),
+              jmvcore::htmlEscape(self$options$subGroup),
               "</p>"
             )
           }
@@ -2501,7 +2501,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           "<h4>Analysis Status</h4>",
           "<ul>",
           "<li><strong>Seed:</strong> ", self$options$seed, "</li>",
-          "<li><strong>Positive Class:</strong> ", htmltools::htmlEscape(positiveClass), " (Prevalence: ", round(prevalence * 100, 1), "%)</li>",
+          "<li><strong>Positive Class:</strong> ", jmvcore::htmlEscape(positiveClass), " (Prevalence: ", round(prevalence * 100, 1), "%)</li>",
           "<li><strong>Analysis Mode:</strong> ", tools::toTitleCase(self$options$clinicalMode), "</li>",
           "</ul>"
         )
@@ -3106,7 +3106,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   key = "delong_inverted",
                   note = paste0(
                     "Score direction was reversed for ",
-                    htmltools::htmlEscape(paste(inverted, collapse = ", ")),
+                    jmvcore::htmlEscape(paste(inverted, collapse = ", ")),
                     " so that DeLong's test could compare them on a common direction. Their AUCs ",
                     "in this table are <b>1 minus</b> the value shown in the main AUC table."),
                   init = FALSE)
@@ -3281,11 +3281,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (length(poor_disc_vars) > 0) {
           poor_disc_note <- paste0(
             "WARNING: AUC below 0.5 (worse than chance) for: ",
-            htmltools::htmlEscape(paste(poor_disc_vars, collapse = ", ")),
+            jmvcore::htmlEscape(paste(poor_disc_vars, collapse = ", ")),
             ". An AUC below 0.5 almost always means the marker is being read the wrong way ",
             "round rather than that it is useless: it separates the groups, but in the opposite ",
             "direction to the one assumed. Classification Direction is currently \"",
-            htmltools::htmlEscape(self$options$direction),
+            jmvcore::htmlEscape(self$options$direction),
             "\"; switching it to \"",
             if (identical(self$options$direction, ">=")) "&lt;=" else "&gt;=",
             "\" will give an AUC of 1 minus the value shown, with sensitivity and specificity ",
@@ -4778,7 +4778,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # name from OptionVariables. Without this escape, a column literally
         # named `<img src=x onerror=alert(1)>` would render as live HTML in the
         # `<th>` cell at L4240 since sensSpecTable is type:Html in .r.yaml.
-        Title <- htmltools::htmlEscape(Title)
+        Title <- jmvcore::htmlEscape(Title)
         res <- paste0(
           "<style type='text/css'>
         .tg  {border-collapse:collapse;border-spacing:0;border-width:1px;border-style:solid;border-color:black;}

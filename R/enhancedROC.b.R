@@ -6,7 +6,6 @@
 #' @import jmvcore
 #' @importFrom caret confusionMatrix
 #' @importFrom boot boot boot.ci
-#' @importFrom htmltools htmlEscape
 #' @importFrom pROC roc
 #' @importFrom stats quantile binom.test glm predict
 #' @importFrom splines ns
@@ -2630,10 +2629,10 @@ enhancedROCClass <- R6::R6Class(
             if (length(roc_objects) == 0) return(invisible(NULL))
             opt <- tryCatch(self$options$direction, error = function(e) "auto")
             pos <- tryCatch(private$.positiveClass, error = function(e) NULL)
-            pos <- if (is.null(pos) || !nzchar(as.character(pos))) "the positive class" else htmltools::htmlEscape(as.character(pos))
+            pos <- if (is.null(pos) || !nzchar(as.character(pos))) "the positive class" else jmvcore::htmlEscape(as.character(pos))
             parts <- vapply(names(roc_objects), function(nm) {
                 d <- roc_objects[[nm]]$direction
-                sprintf("%s values of %s", if (identical(d, "<")) "HIGHER" else "LOWER", htmltools::htmlEscape(nm))
+                sprintf("%s values of %s", if (identical(d, "<")) "HIGHER" else "LOWER", jmvcore::htmlEscape(nm))
             }, character(1))
             chosen <- if (identical(opt, "auto")) {
                 paste0("This was read from the data, not specified in advance \u{2014} set ",
