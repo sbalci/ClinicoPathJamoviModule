@@ -201,3 +201,94 @@ test_that("changing the preset rebuilds the option overrides", {
     expect_false(isTRUE(priv$.option("horizontal")))   # falls back to the real option
     expect_identical(priv$.option("plotTitle"), "")
 })
+
+
+# ---- reporting defects found in the 2026-09-08 release review -----------------
+
+# S, M, T with a strong two-hop route (10, 10) against a weak direct edge (1).
+# Under STRENGTH the two strong ties are the short path, so M bridges S and T.
+# Under DISTANCE the direct edge is the short path, so M bridges nothing.
+arc_bridge <- function() data.frame(
+    from = factor(c("S", "M", "S")),
+    to   = factor(c("M", "T", "T")),
+    w    = c(10, 10, 1))
+
+test_that("reciprocal weighting makes strong ties the short path", {
+    # Hand-derived: reciprocal distances are 0.1, 0.1, 1. S->T via M costs 0.2
+    # against 1 direct, so M lies on the only shortest path: betweenness(M) = 1.
+    n <- arc_stats(jjarcdiagram(data = arc_bridge(), source = "from", target = "to",
+                                weight = "w", showStats = TRUE, weightMode = "strength"))
+    expect_match(n, "Highest Betweenness:\\s*M")
+})
+
+test_that("distance mode routes over the short direct edge instead", {
+    # Distances 10, 10, 1. S->T direct costs 1 against 20 via M, so M lies on no
+    # shortest path: betweenness(M) = 0 and no node bridges anything.
+    n <- arc_stats(jjarcdiagram(data = arc_bridge(), source = "from", target = "to",
+                                weight = "w", showStats = TRUE, weightMode = "distance"))
+    # Betweenness is 0 for every node here. which.max() still returns one, and the
+    # panel used to name it and call it "an important bridge between different
+    # network regions" -- about a node with betweenness exactly 0.
+    expect_match(n, "Highest Betweenness:\\s*none")
+    expect_match(n, "no entity acts as a bridge")
+    expect_false(grepl("important bridge between different network regions", n, fixed = TRUE))
+})
+
+test_that("the copy-ready summary does not call a distant node a hub", {
+    # A has three edges of distance 1; E has one edge of distance 100. Summed
+    # weight makes E the maximum, but under a distance reading that means E is
+    # the most PERIPHERAL node. The summary is offered for pasting into
+    # manuscripts, so it must not assert the opposite of the data.
+    d <- data.frame(from = factor(c("A", "A", "A", "E")),
+                    to   = factor(c("B", "C", "D", "F")),
+                    w    = c(1, 1, 1, 100))
+    s <- arc_txt(jjarcdiagram(data = d, source = "from", target = "to", weight = "w",
+                              weightMode = "distance", showSummary = TRUE)$reportSentence$content)
+    expect_false(grepl("'E' emerged as the most highly connected hub", s, fixed = TRUE))
+    expect_match(s, "'A' has the most connections")
+    expect_match(s, "interpreted as distances")
+
+    # Strength mode is unaffected: there a large summed weight IS a strong hub.
+    s2 <- arc_txt(jjarcdiagram(data = d, source = "from", target = "to", weight = "w",
+                               weightMode = "strength", showSummary = TRUE)$reportSentence$content)
+    expect_match(s2, "'E' emerged as the most highly connected hub")
+})
+
+test_that("the distance caveat appears only in distance mode", {
+    d <- arc_net()
+    cav <- "marks the most peripheral entity"
+    expect_match(arc_stats(jjarcdiagram(data = d, source = "from", target = "to", weight = "w",
+                                        showStats = TRUE, weightMode = "distance")), cav)
+    expect_false(grepl(cav, arc_stats(jjarcdiagram(data = d, source = "from", target = "to",
+                                                   weight = "w", showStats = TRUE,
+                                                   weightMode = "strength"))))
+    # and never on an unweighted network, which has no weight mode at all
+    expect_false(grepl(cav, arc_stats(jjarcdiagram(data = d, source = "from", target = "to",
+                                                   showStats = TRUE))))
+})
+
+test_that("edge count and density state which edge set each uses", {
+    # 3 parallel A-B edges + 1 B-C. Density is computed on distinct node pairs
+    # (2 of 3 possible = 0.667); the edge count is the 4 rows. Printing both
+    # without saying so left the density irreproducible by the reader.
+    dup <- data.frame(from = factor(c("A", "A", "A", "B")),
+                      to   = factor(c("B", "B", "B", "C")))
+    n <- arc_stats(jjarcdiagram(data = dup, source = "from", target = "to",
+                                aggregateEdges = FALSE, showStats = TRUE))
+    expect_match(n, "Number of Edges:\\s*4 \\(2 distinct node pairs")
+    expect_match(n, "Network Density:\\s*0.6667")
+    # aggregated, the two coincide and the parenthetical is dropped
+    expect_match(arc_stats(jjarcdiagram(data = dup, source = "from", target = "to",
+                                        aggregateEdges = TRUE, showStats = TRUE)),
+                 "Number of Edges:\\s*2 ")
+})
+
+test_that("undirected reciprocal duplicates are reported without aggregation", {
+    # A->B and B->A are one undirected edge. The warn-only branch used an
+    # un-normalised key, so this network drew no duplicate warning while igraph
+    # still counted two parallel edges into degree and strength.
+    sym <- data.frame(from = factor(c("A", "B", "B")), to = factor(c("B", "A", "C")))
+    expect_match(arc_notices(jjarcdiagram(data = sym, source = "from", target = "to",
+                                          aggregateEdges = FALSE, directed = FALSE)),
+                 "duplicate edge")
+})

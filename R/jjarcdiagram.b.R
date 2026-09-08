@@ -1086,7 +1086,11 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     .("<h4>Centrality Measures:</h4>"),
                     "<ul>",
                     paste(.("<li><strong>Highest Degree:</strong>"), htmltools::htmlEscape(highest_degree_node), " (", round(max_degree, 2), " ", degree_label, ")</li>"),
-                    paste(.("<li><strong>Highest Betweenness:</strong>"), htmltools::htmlEscape(highest_betweenness_node), " (", round(max_betweenness, 2), ")</li>"),
+                    if (max_betweenness > 0) {
+                        paste(.("<li><strong>Highest Betweenness:</strong>"), htmltools::htmlEscape(highest_betweenness_node), " (", round(max_betweenness, 2), ")</li>")
+                    } else {
+                        .("<li><strong>Highest Betweenness:</strong> none (no node lies on a shortest path between two others)</li>")
+                    },
                     "</ul>",
                     sep = "\n"
                 )
@@ -1101,7 +1105,9 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         sprintf(.("<p><strong>Key Players:</strong> '%s' has the largest summed edge metric (%.2f %s).</p>"),
                                 htmltools::htmlEscape(highest_degree_node), max_degree, degree_label)
                     },
-                    if (highest_betweenness_node != highest_degree_node) {
+                    if (max_betweenness == 0) {
+                        .("<p><strong>Bridging:</strong> Betweenness is zero for every node, so no entity acts as a bridge here: each pair of connected entities is already joined by its own shortest path.</p>")
+                    } else if (highest_betweenness_node != highest_degree_node) {
                         sprintf(.("<p><strong> Bridge Entity:</strong> '%s' has the highest betweenness centrality, indicating it serves as an important bridge between different network regions.</p>"),
                                 htmltools::htmlEscape(highest_betweenness_node))
                     } else {
