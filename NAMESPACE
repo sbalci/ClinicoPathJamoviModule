@@ -1006,7 +1006,6 @@ importFrom(htmltools,
   h3,
   h4,
   h5,
-  htmlEscape,
   p,
   strong,
   tagList
