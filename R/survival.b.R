@@ -3902,7 +3902,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     } else {
                         # Use patchwork or gridExtra if available, otherwise just print first
                         if (requireNamespace("patchwork", quietly = TRUE)) {
-                            combined <- Reduce("+", plots)
+                            combined <- patchwork::wrap_plots(plots)
                             print(combined)
                         } else {
                             # Fallback: arrange with gridExtra

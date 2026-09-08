@@ -50,7 +50,7 @@ new_date: "2026-09-08"
 quick: false
 TEST: false
 jjstatsplot: false
-jsurvival: false
+jsurvival: true
 ClinicoPathDescriptives: false
 OncoPath: true
 meddecide: true

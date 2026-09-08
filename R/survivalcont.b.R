@@ -4445,7 +4445,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                     # Combine plots using patchwork if available, otherwise show first plot
                     if (requireNamespace("patchwork", quietly = TRUE)) {
-                        combined_plot <- (p1 + p2) / (p3 + p4)
+                        combined_plot <- patchwork::wrap_plots(p1, p2, p3, p4, ncol = 2)
                         print(combined_plot)
                     } else {
                         print(p1)

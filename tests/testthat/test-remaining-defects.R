@@ -100,7 +100,8 @@ test_that("failed bootstrap replicates become NA, not 0", {
 })
 
 test_that("bootstrapIDI p-value can never be exactly zero", {
-    bi <- get("bootstrapIDI", envir = .rd_ns, inherits = TRUE)
+    bi <- tryCatch(get("bootstrapIDI", envir = .rd_ns, inherits = TRUE), error = function(e) NULL)
+    skip_if(is.null(bi), "bootstrapIDI not available in this distribution")
     set.seed(9); n <- 200
     actual <- rbinom(n, 1, 0.4)
     ref <- rnorm(n) + actual * 0.5
