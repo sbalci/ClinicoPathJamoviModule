@@ -15,6 +15,9 @@ clearWith:
     - enableOneSampleTest
     - test.value
     - conf.level
+    - alternative
+    - trimlevel
+    - bfprior
     - bf.message
     - binfill
     - bincolor
@@ -101,6 +104,11 @@ items:
       height: 450
       renderFun: .plotGGPubr2
       requiresData: true
+      # jmvcore evaluates this in R (results$.update -> options$eval), NOT only in the
+      # client. `grvar` is a character/NULL, so a bare `&& grvar` dies with
+      # "invalid 'y' type in 'x && y'" and jamovi reports "Could not resolve".
+      # is.null() is required here; the bare-binding idiom used by `plot2` above only
+      # works for a single-term expression.
       visible: (addGGPubrPlot && !is.null(grvar))
       clearWith:
         - dep

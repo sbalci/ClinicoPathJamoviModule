@@ -220,13 +220,3 @@ may supply your own confirmation column). If your data list each lesion
 separately, use the lesion-level RECIST v1.1 analysis. It will be available
 in upcoming releases.
 }
-\examples{
-data('waterfall_test', package = 'ClinicoPath')
-
-waterfall(
-    data = waterfall_test,
-    patientID = 'patientID',
-    responseVar = 'best_response',
-    groupVar = 'treatment')
-
-}

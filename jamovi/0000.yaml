@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.8.13
+version: 1.0.8.14
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-09-07'
+date: '2026-09-08'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -1670,7 +1670,7 @@ analyses:
   - title: Histogram
     name: jjhistostats
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Distribution
     menuTitle: Histogram
     description: |
@@ -1810,7 +1810,7 @@ analyses:
   - title: Waffle Charts
     name: jwaffle
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Distribution
     menuTitle: Waffle Charts
     description: >
@@ -1858,7 +1858,7 @@ analyses:
   - title: Line Chart
     name: linechart
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Lines
     menuTitle: Line Chart
     menuSubtitle: Time Series and Trend Analysis
@@ -1909,7 +1909,7 @@ analyses:
   - title: Arc Diagram
     name: jjarcdiagram
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Network
     menuTitle: Arc Diagram
     description: >
@@ -1917,12 +1917,12 @@ analyses:
       package.'
     ribbon: analyses
     category: analyses
-  - title: Ridge Plot
+  - title: Advanced Ridge Plot
     name: jjridges
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlot
     menuSubgroup: Distribution
-    menuTitle: Ridge Plot
+    menuTitle: Advanced Ridge Plot
     menuSubtitle: Enhanced Ridgeline Visualization
     ribbon: analyses
     category: analyses

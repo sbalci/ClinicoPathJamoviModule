@@ -5,8 +5,6 @@ library(testthat)
 
 lc_todo <- function(res) gsub("[[:space:]]+", " ", gsub("<[^>]*>", " ", as.character(res$todo$content)))
 
-library(ggplot2)
-library(dplyr)
 
 # Helper functions for testing
 create_time_series_data <- function(n = 50, n_groups = 1, seed = 123) {
@@ -132,473 +130,20 @@ describe("linechart Basic Functionality", {
     })
   })
   
-  test_that("linechart handles grouped data correctly", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 60, n_groups = 3)
-    
-    # Validate grouped data structure
-    expect_true("treatment" %in% names(data))
-    expect_true(is.character(data$treatment) || is.factor(data$treatment))
-    expect_equal(length(unique(data$treatment)), 3)
-    
-    # Check that all groups have data
-    group_counts <- table(data$treatment)
-    expect_true(all(group_counts > 0))
-  })
   
-  test_that("linechart handles clinical laboratory data", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_clinical_lab_data(n = 42)
-    
-    # Validate clinical data structure
-    expect_true(all(c("visit_day", "hemoglobin_g_dl", "treatment_arm") %in% names(data)))
-    expect_true(is.numeric(data$visit_day))
-    expect_true(is.numeric(data$hemoglobin_g_dl))
-    expect_true(is.factor(data$treatment_arm))
-    
-    # Check realistic clinical ranges
-    expect_true(all(data$hemoglobin_g_dl >= 6 & data$hemoglobin_g_dl <= 18))
-  })
 })
 
 # Data validation tests
-describe("linechart Data Validation", {
-  
-  test_that("linechart validates variable existence", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 20)
-    
-    # Test that missing variables are detected
-    expect_error({
-      missing_vars <- setdiff(c("nonexistent_var"), names(data))
-      if (length(missing_vars) > 0) {
-        stop(paste("Variables not found in data:", paste(missing_vars, collapse = ", ")))
-      }
-    })
-  })
-  
-  test_that("linechart validates Y variable is numeric", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 20)
-    data$value <- as.character(data$value)
-    
-    # Test numeric conversion
-    y_data <- suppressWarnings(as.numeric(data$value))
-    expect_false(all(is.na(y_data)))
-    
-    # Test with non-numeric character data
-    data$value <- c("apple", "banana", "cherry")[1:nrow(data)]
-    y_data <- suppressWarnings(as.numeric(data$value))
-    expect_true(all(is.na(y_data)))
-  })
-  
-  test_that("linechart handles missing values appropriately", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 30)
-    
-    # Introduce missing values
-    data$value[c(5, 10, 15)] <- NA
-    data$time[c(2, 8)] <- NA
-    
-    # Test complete cases
-    complete_before <- nrow(data)
-    complete_data <- data[complete.cases(data), ]
-    complete_after <- nrow(complete_data)
-    
-    expect_true(complete_after < complete_before)
-    expect_true(complete_after > 0)
-  })
-  
-  test_that("linechart validates minimum data requirements", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    # Test with insufficient data
-    expect_error({
-      data <- data.frame(time = 1:2, value = c(1, 2))
-      if (nrow(data) < 3) {
-        stop("At least 3 complete observations are required for line chart analysis.")
-      }
-    })
-  })
-  
-  test_that("linechart validates Y variable variation", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 20)
-    data$value <- rep(10, nrow(data))  # No variation
-    
-    # Test for zero variation
-    expect_error({
-      if (var(data$value, na.rm = TRUE) == 0) {
-        stop("Y-axis variable has no variation (all values are identical).")
-      }
-    })
-  })
-})
 
 # Grouping and factor handling tests
-describe("linechart Grouping and Factors", {
-  
-  test_that("linechart handles factor grouping variables", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 60, n_groups = 4)
-    
-    # Test factor conversion
-    if (is.character(data$treatment)) {
-      data$treatment <- factor(data$treatment)
-    }
-    
-    expect_true(is.factor(data$treatment))
-    expect_equal(length(levels(data$treatment)), 4)
-  })
-  
-  test_that("linechart handles numeric X variables", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 30)
-    
-    # Test numeric X handling
-    expect_true(is.numeric(data$time))
-    expect_true(length(unique(data$time)) > 1)
-  })
-  
-  test_that("linechart handles character X variables", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 24)
-    
-    # Convert to character that looks numeric
-    data$time <- as.character(data$time)
-    
-    # Test conversion logic
-    unique_values <- unique(data$time)
-    if (all(grepl("^[0-9.-]+$", unique_values, perl = TRUE))) {
-      converted <- as.numeric(data$time)
-      expect_false(any(is.na(converted)))
-    }
-  })
-  
-  test_that("linechart handles ordered factor X variables", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 30)
-    
-    # Create ordered factor
-    data$time_category <- cut(data$time, breaks = 5, labels = c("Early", "Mid-Early", "Mid", "Mid-Late", "Late"))
-    data$time_category <- factor(data$time_category, ordered = TRUE)
-    
-    expect_true(is.ordered(data$time_category))
-  })
-  
-  test_that("linechart warns about too many groups", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 120)
-    
-    # Create many groups
-    data$many_groups <- factor(sample(1:15, nrow(data), replace = TRUE))
-    
-    # Test group count warning
-    n_groups <- length(unique(data$many_groups))
-    expect_warning({
-      if (n_groups > 10) {
-        warning("Grouping variable has more than 10 levels. Consider reducing groups for clarity.")
-      }
-    })
-  })
-})
 
 # Statistical analysis tests
-describe("linechart Statistical Analysis", {
-  
-  test_that("linechart calculates correlation statistics", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 50)
-    
-    # Test correlation calculation
-    cor_result <- cor.test(data$time, data$value, method = "pearson")
-    expect_true(is.numeric(cor_result$estimate))
-    expect_true(is.numeric(cor_result$p.value))
-    expect_true(length(cor_result$conf.int) == 2)
-    
-    # Test Spearman correlation
-    spearman_result <- cor.test(data$time, data$value, method = "spearman")
-    expect_true(is.numeric(spearman_result$estimate))
-    expect_true(is.numeric(spearman_result$p.value))
-  })
-  
-  test_that("linechart calculates regression statistics", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 40)
-    
-    # Test linear regression
-    lm_result <- lm(data$value ~ data$time)
-    expect_true(is.numeric(coef(lm_result)))
-    expect_equal(length(coef(lm_result)), 2)  # Intercept and slope
-    
-    # Test R-squared
-    r_squared <- summary(lm_result)$r.squared
-    expect_true(is.numeric(r_squared))
-    expect_true(r_squared >= 0 && r_squared <= 1)
-  })
-  
-  test_that("linechart handles ANOVA for categorical X", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 60)
-    
-    # Create categorical X variable
-    data$category <- factor(cut(data$time, breaks = 4, labels = c("Q1", "Q2", "Q3", "Q4")))
-    
-    # Test ANOVA
-    anova_result <- anova(lm(data$value ~ data$category))
-    expect_true(is.numeric(anova_result$`F value`[1]))
-    expect_true(is.numeric(anova_result$`Pr(>F)`[1]))
-  })
-  
-  test_that("linechart interprets correlation correctly", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    # Test correlation interpretation function
-    interpret_correlation <- function(r, p_value) {
-      if (is.na(r) || is.na(p_value)) return("Not available")
-      
-      sig_text <- if (p_value < 0.001) "***" else if (p_value < 0.01) "**" else if (p_value < 0.05) "*" else "ns"
-      
-      abs_r <- abs(r)
-      strength <- if (abs_r < 0.1) "negligible" else
-                 if (abs_r < 0.3) "weak" else
-                 if (abs_r < 0.5) "moderate" else
-                 if (abs_r < 0.7) "strong" else "very strong"
-      
-      direction <- if (r > 0) "positive" else "negative"
-      
-      return(paste0(strength, " ", direction, " correlation (", sig_text, ")"))
-    }
-    
-    # Test different correlation strengths
-    expect_equal(interpret_correlation(0.05, 0.8), "negligible positive correlation (ns)")
-    expect_equal(interpret_correlation(0.25, 0.03), "weak positive correlation (*)")
-    expect_equal(interpret_correlation(-0.45, 0.001), "moderate negative correlation (**)")
-    expect_equal(interpret_correlation(0.75, 0.0001), "very strong positive correlation (***)")
-    expect_equal(interpret_correlation(NA, 0.05), "Not available")
-  })
-})
 
 # Summary statistics tests
-describe("linechart Summary Statistics", {
-  
-  test_that("linechart calculates basic summary statistics", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 50)
-    
-    # Test Y variable statistics
-    y_stats <- list(
-      mean = mean(data$value, na.rm = TRUE),
-      median = median(data$value, na.rm = TRUE),
-      sd = sd(data$value, na.rm = TRUE),
-      min = min(data$value, na.rm = TRUE),
-      max = max(data$value, na.rm = TRUE)
-    )
-    
-    expect_true(all(sapply(y_stats, is.numeric)))
-    expect_true(all(sapply(y_stats, function(x) !is.na(x))))
-    expect_true(y_stats$min <= y_stats$median)
-    expect_true(y_stats$median <= y_stats$max)
-    expect_true(y_stats$sd >= 0)
-  })
-  
-  test_that("linechart calculates data characteristics", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 60, n_groups = 3)
-    
-    # Test data characteristics
-    n_observations <- nrow(data)
-    n_x_points <- length(unique(data$time))
-    n_groups <- length(unique(data$treatment))
-    
-    expect_equal(n_observations, 60)
-    expect_true(n_x_points > 1)
-    expect_equal(n_groups, 3)
-  })
-})
 
 # Color palette and theme tests
-describe("linechart Visual Customization", {
-  
-  test_that("linechart provides correct color palettes", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    # Test color palette function
-    get_color_palette <- function(n_colors, palette_name = "default") {
-      if (n_colors == 1) {
-        return("#2E86AB")
-      }
-      
-      switch(palette_name,
-        "default" = c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#7FB069", "#8E6C8A"),
-        "colorblind" = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00"),
-        "viridis" = c("#440154", "#31688e", "#35b779", "#fde725"),
-        "clinical" = c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"),
-        c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#7FB069", "#8E6C8A")
-      )[1:min(n_colors, 6)]
-    }
-    
-    # Test single color
-    single_color <- get_color_palette(1)
-    expect_equal(single_color, "#2E86AB")
-    
-    # Test multiple colors
-    default_colors <- get_color_palette(3, "default")
-    expect_equal(length(default_colors), 3)
-    expect_true(all(grepl("^#[0-9A-F]{6}$", default_colors, ignore.case = TRUE)))
-    
-    # Test colorblind palette
-    colorblind_colors <- get_color_palette(4, "colorblind")
-    expect_equal(length(colorblind_colors), 4)
-  })
-  
-  test_that("linechart provides plot themes", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    # Test theme selection
-    get_plot_theme <- function(theme_name = "default") {
-      base_theme <- switch(theme_name,
-        "default" = ggplot2::theme_gray(),
-        "minimal" = ggplot2::theme_minimal(),
-        "classic" = ggplot2::theme_classic(),
-        "publication" = ggplot2::theme_bw(),
-        ggplot2::theme_gray()
-      )
-      
-      return(base_theme)
-    }
-    
-    # Test different themes
-    themes <- c("default", "minimal", "classic", "publication")
-    for (theme_name in themes) {
-      theme_obj <- get_plot_theme(theme_name)
-      expect_true(inherits(theme_obj, "theme"))
-    }
-  })
-})
 
 # Edge cases and error handling tests
-describe("linechart Edge Cases", {
-  
-  test_that("linechart handles single time point", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    # Single time point should fail minimum requirement
-    expect_error({
-      data <- data.frame(time = 1, value = 10)
-      if (nrow(data) < 3) {
-        stop("At least 3 complete observations are required for line chart analysis.")
-      }
-    })
-  })
-  
-  test_that("linechart handles extreme values", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 30)
-    
-    # Add extreme values
-    data$value[1] <- 1000
-    data$value[2] <- -1000
-    
-    # Should still calculate statistics
-    expect_true(is.numeric(mean(data$value)))
-    expect_true(is.numeric(sd(data$value)))
-    expect_true(sd(data$value) > 0)
-  })
-  
-  test_that("linechart handles all same X values", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 20)
-    data$time <- rep(1, nrow(data))  # All same X values
-    
-    # This should still work but may not be very meaningful
-    expect_true(length(unique(data$time)) == 1)
-    expect_true(is.numeric(data$time))
-  })
-  
-  test_that("linechart handles reference line validation", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    # Test reference line validation
-    validate_refline <- function(refline_value) {
-      if (!is.null(refline_value) && !is.na(refline_value)) {
-        refline_numeric <- as.numeric(refline_value)
-        if (is.na(refline_numeric)) {
-          warning("Reference line value is not numeric and will be ignored.")
-          return(NULL)
-        }
-        return(refline_numeric)
-      }
-      return(NULL)
-    }
-    
-    # Test valid reference line
-    expect_equal(validate_refline(10), 10)
-    expect_equal(validate_refline("15"), 15)
-    expect_null(validate_refline(NULL))
-    expect_null(validate_refline(NA))
-    
-    # Test invalid reference line
-    expect_warning(validate_refline("abc"))
-  })
-  
-  test_that("linechart handles empty factor levels", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    data <- create_time_series_data(n = 30, n_groups = 3)
-    
-    # Remove one group entirely
-    data <- data[data$treatment != "Group_A", ]
-    data$treatment <- factor(data$treatment)  # This will drop unused levels
-    
-    # Should handle dropped levels
-    expect_true(length(levels(data$treatment)) == 2)
-    expect_true(all(levels(data$treatment) %in% unique(data$treatment)))
-  })
-})
 
 # Integration tests - ACTUALLY CALLING linechart()
 describe("linechart Integration", {
@@ -787,47 +332,66 @@ describe("linechart Integration", {
 })
 
 # Performance and scalability tests
-describe("linechart Performance", {
-  
-  test_that("linechart handles moderately large datasets", {
+
+# The three behaviours below previously had test_that blocks named after them
+# that never called linechart() - they re-implemented the check inline and
+# asserted base R. These call the analysis and assert on its actual output.
+
+describe("linechart Data Quality Reporting", {
+
+  test_that("linechart runs ANOVA for a categorical X variable", {
     skip_if_not_installed("jmvcore")
     skip_if_not_installed("ggplot2")
-    
-    # Test with larger dataset
-    data <- create_time_series_data(n = 500, n_groups = 5)
-    
-    expect_no_error({
-      # Basic statistics should compute quickly
-      summary_stats <- list(
-        n_observations = nrow(data),
-        n_groups = length(unique(data$treatment)),
-        y_mean = mean(data$value, na.rm = TRUE)
-      )
-      
-      expect_equal(summary_stats$n_observations, 500)
-      expect_equal(summary_stats$n_groups, 5)
-    })
-  })
-  
-  test_that("linechart handles many time points", {
-    skip_if_not_installed("jmvcore")
-    skip_if_not_installed("ggplot2")
-    
-    # High-resolution time series
-    n_points <- 200
+
+    set.seed(11)
     data <- data.frame(
-      time = seq(0, 24, length.out = n_points),
-      value = sin(seq(0, 4*pi, length.out = n_points)) + rnorm(n_points, 0, 0.1)
+      visit = factor(rep(c("Baseline", "Week4", "Week8"), each = 8)),
+      value = c(rnorm(8, 10), rnorm(8, 14), rnorm(8, 18))
     )
-    
-    expect_no_error({
-      # Should handle high resolution data
-      expect_equal(nrow(data), n_points)
-      expect_equal(length(unique(data$time)), n_points)
-      
-      # Correlation should still work
-      cor_result <- cor.test(data$time, data$value)
-      expect_true(is.numeric(cor_result$estimate))
-    })
+
+    res <- linechart(data = data, xvar = "visit", yvar = "value",
+                     trendline = TRUE)
+    df <- res$correlation$asDF
+
+    # The measure label now carries the degrees of freedom, so match the prefix
+    # rather than the whole string.
+    row <- df[grepl("ANOVA", df$measure), ]
+    expect_equal(nrow(row), 1L)
+    expect_equal(row$value,
+                 anova(lm(value ~ visit, data = data))$`F value`[1],
+                 tolerance = 1e-10)
+  })
+
+  test_that("linechart reports rows dropped for missing values", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("ggplot2")
+
+    data <- create_time_series_data(n = 30)
+    data$value[c(3, 9, 21)] <- NA
+
+    res <- linechart(data = data, xvar = "time", yvar = "value")
+
+    # The count reaches the user through the results panel, not warning().
+    expect_match(lc_todo(res), "excluded because of missing values")
+    expect_equal(res$summary$asDF$value[res$summary$asDF$statistic ==
+                   "Number of Observations"], "27")
+  })
+
+  test_that("linechart flags an unreadable number of groups", {
+    skip_if_not_installed("jmvcore")
+    skip_if_not_installed("ggplot2")
+
+    set.seed(12)
+    n_groups <- 9
+    data <- data.frame(
+      time  = rep(1:4, times = n_groups),
+      value = rnorm(4 * n_groups, 20, 3),
+      arm   = factor(rep(paste0("Arm_", LETTERS[1:n_groups]), each = 4))
+    )
+
+    res <- linechart(data = data, xvar = "time", yvar = "value",
+                     groupby = "arm")
+
+    expect_match(lc_todo(res), "Many groups detected \\(9\\)")
   })
 })

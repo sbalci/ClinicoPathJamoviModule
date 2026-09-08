@@ -65,7 +65,6 @@
 | `custom_annotations` | `String` | `` | Custom Annotations |
 | `width` | `Number` | `800` | Plot Width |
 | `height` | `Number` | `600` | Plot Height |
-| `dpi` | `Number` | `300` | Plot DPI |
 | `clinicalPreset` | `List` | `custom` | Clinical Preset |
 | `showAboutPanel` | `Bool` | `FALSE` | About panel |
 | `showAssumptions` | `Bool` | `FALSE` | Statistical assumptions |

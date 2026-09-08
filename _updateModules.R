@@ -545,7 +545,14 @@ update_yaml_a_files <- function(paths, version) {
 
 
 # Enhanced function to copy module files with comprehensive validation ----
-copy_module_files <- function(module_names, source_dir, dest_dir, file_extensions) {
+# `pkg_name`: when supplied, .a.yaml files are namespace-translated on the way out
+# (ClinicoPath -> pkg_name). The `usage:` examples in .a.yaml are what jmvtools
+# regenerates the .h.R roxygen and man/*.Rd from on EVERY prepare(), so leaving the
+# parent package name in the copied YAML re-breaks the submodule's examples
+# (`data('x', package = 'ClinicoPath')` -> package not installed) after any later
+# prepare(). Fixing it at the copy is the only place it stays fixed.
+copy_module_files <- function(module_names, source_dir, dest_dir, file_extensions,
+                              pkg_name = NULL) {
   if (length(module_names) == 0) {
     cat("  ⏭️ No modules to copy\n")
     return(list(copied = 0, skipped = 0, failed = 0))
@@ -576,7 +583,17 @@ copy_module_files <- function(module_names, source_dir, dest_dir, file_extension
       }
 
       tryCatch({
-        fs::file_copy(path = source_path, new_path = dest_path, overwrite = TRUE)
+        if (!is.null(pkg_name) && identical(ext, ".a.yaml")) {
+          txt <- readLines(source_path, warn = FALSE)
+          txt <- gsub("library(ClinicoPath)", paste0("library(", pkg_name, ")"), txt, fixed = TRUE)
+          txt <- gsub("ClinicoPath::", paste0(pkg_name, "::"), txt, fixed = TRUE)
+          # tolerates package="X" / package = 'X'; backreference keeps the quote style
+          txt <- gsub("package\\s*=\\s*(['\"])ClinicoPath\\1",
+                      paste0("package = \\1", pkg_name, "\\1"), txt)
+          writeLines(txt, dest_path)
+        } else {
+          fs::file_copy(path = source_path, new_path = dest_path, overwrite = TRUE)
+        }
         cat("  ✅ Copied: ", paste0(module_name, ext), "\n")
         copied_count <- copied_count + 1
       }, error = function(e) {
@@ -1931,7 +1948,8 @@ if (any(c(jjstatsplot_module, meddecide_module, jsurvival_module,
     jjstatsplot_modules,
     source_dir = file.path(main_repo_dir, "jamovi"),
     dest_dir = jamovi_dir,
-    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
+    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml"),
+    pkg_name = "jjstatsplot"
   )
   
   # Copy JavaScript and HTML assets
@@ -1975,7 +1993,8 @@ if (meddecide_module && length(meddecide_modules) > 0) {
     meddecide_modules,
     source_dir = file.path(main_repo_dir, "jamovi"),
     dest_dir = jamovi_dir,
-    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
+    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml"),
+    pkg_name = "meddecide"
   )
   
   # Copy JavaScript and HTML assets
@@ -2020,7 +2039,8 @@ if (jsurvival_module && length(jsurvival_modules) > 0) {
     jsurvival_modules,
     source_dir = file.path(main_repo_dir, "jamovi"),
     dest_dir = jamovi_dir,
-    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
+    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml"),
+    pkg_name = "jsurvival"
   )
   
   # Copy JavaScript and HTML assets
@@ -2065,7 +2085,8 @@ if (ClinicoPathDescriptives_module && length(ClinicoPathDescriptives_modules) > 
     ClinicoPathDescriptives_modules,
     source_dir = file.path(main_repo_dir, "jamovi"),
     dest_dir = jamovi_dir,
-    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
+    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml"),
+    pkg_name = "ClinicoPathDescriptives"
   )
   
   # Copy JavaScript and HTML assets
@@ -2110,7 +2131,8 @@ if (OncoPath_module && length(OncoPath_modules) > 0) {
     OncoPath_modules,
     source_dir = file.path(main_repo_dir, "jamovi"),
     dest_dir = jamovi_dir,
-    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
+    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml"),
+    pkg_name = "OncoPath"
   )
 
   # Copy JavaScript and HTML assets
@@ -2161,7 +2183,8 @@ if (TEST && modules_config$JamoviTest$enabled && length(JamoviTest_modules) > 0)
     JamoviTest_modules,
     source_dir = file.path(main_repo_dir, "jamovi"),
     dest_dir = jamovi_dir,
-    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml")
+    file_extensions = c(".a.yaml", ".r.yaml", ".u.yaml"),
+    pkg_name = "JamoviTest"
   )
   
   # Copy JavaScript and HTML assets

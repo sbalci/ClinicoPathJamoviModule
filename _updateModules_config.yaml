@@ -45,15 +45,15 @@
 # ==============================================
 
 
-new_version: "1.0.8.13"
-new_date: "2026-09-07"
+new_version: "1.0.8.14"
+new_date: "2026-09-08"
 quick: false
-TEST: false
+TEST: true
 jjstatsplot: true
-jsurvival: false
-ClinicoPathDescriptives: false
-OncoPath: false
-meddecide: false
+jsurvival: true
+ClinicoPathDescriptives: true
+OncoPath: true
+meddecide: true
 
 
 
@@ -292,7 +292,13 @@ modules:
     # helper copied by an earlier updateModules run.
     prune_r_files:
       - "recist_engine.R"
-      - "zzz_imports.R"
+    # NOTE: zzz_imports.R is deliberately NOT pruned here. OncoPath owns a
+    # hand-maintained R/zzz_imports.R (there is no umbrella source file, so
+    # nothing overwrites it). It exists because OncoPath's pkg:: calls all sit
+    # inside R6 method bodies, which R CMD check's installed-namespace scanner
+    # cannot walk -- without the @importFrom tags, ggrepel/grDevices/grid/
+    # patchwork/psych/rlang/stringr/survival/utils are all reported as unused
+    # Imports even though every one of them is called at runtime.
     # These remain legitimate umbrella dependencies but have no production
     # OncoPath call site. document() removes their stale NAMESPACE directives.
     prune_imports:

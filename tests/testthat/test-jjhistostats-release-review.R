@@ -77,13 +77,17 @@ test_that("a subtitle testing against zero is disclosed, however it arose", {
     expect_false(warned(hs_run(resultssubtitle = TRUE, enableOneSampleTest = TRUE, test.value = 5.2)))
     expect_false(warned(hs_run(resultssubtitle = FALSE)))
 
+    # NOTE: the two expect_match calls below pin the .a.yaml control TITLES on purpose -
+    # the message is only actionable if it names a control the user can actually find in
+    # the panel. If a title changes in jjhistostats.a.yaml, the message in .b.R and these
+    # assertions must change with it.
     # the message must name the test, and explain where the 0 came from
     a <- hs_run(resultssubtitle = TRUE, enableOneSampleTest = FALSE)
     expect_match(todo_of(a), "<strong>one-sample t-test</strong>", fixed = TRUE)
-    expect_match(todo_of(a), "'One-sample test' is switched off", fixed = TRUE)
+    expect_match(todo_of(a), "'Custom null value' is switched off", fixed = TRUE)
     # and must NOT repeat the old advice, which steered the user into the silent-null state
     expect_false(grepl("uncheck 'Enable One-Sample Test'", todo_of(a), fixed = TRUE))
-    expect_match(todo_of(a), "Switch off <strong>Statistical Results</strong>", fixed = TRUE)
+    expect_match(todo_of(a), "Switch off <strong>Statistical results</strong>", fixed = TRUE)
 })
 
 

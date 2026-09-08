@@ -49,7 +49,6 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             custom_annotations = "",
             width = 800,
             height = 600,
-            dpi = 300,
             clinicalPreset = "custom",
             showAboutPanel = FALSE,
             showAssumptions = FALSE, ...) {
@@ -312,12 +311,6 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=400,
                 max=1200,
                 default=600)
-            private$..dpi <- jmvcore::OptionNumber$new(
-                "dpi",
-                dpi,
-                min=72,
-                max=600,
-                default=300)
             private$..clinicalPreset <- jmvcore::OptionList$new(
                 "clinicalPreset",
                 clinicalPreset,
@@ -382,7 +375,6 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..custom_annotations)
             self$.addOption(private$..width)
             self$.addOption(private$..height)
-            self$.addOption(private$..dpi)
             self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..showAboutPanel)
             self$.addOption(private$..showAssumptions)
@@ -431,7 +423,6 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         custom_annotations = function() private$..custom_annotations$value,
         width = function() private$..width$value,
         height = function() private$..height$value,
-        dpi = function() private$..dpi$value,
         clinicalPreset = function() private$..clinicalPreset$value,
         showAboutPanel = function() private$..showAboutPanel$value,
         showAssumptions = function() private$..showAssumptions$value),
@@ -479,7 +470,6 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..custom_annotations = NA,
         ..width = NA,
         ..height = NA,
-        ..dpi = NA,
         ..clinicalPreset = NA,
         ..showAboutPanel = NA,
         ..showAssumptions = NA)
@@ -510,8 +500,11 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "ggridges",
-                    "ggstatsplot",
-                    "statsExpressions",
+                    "effectsize",
+                    "car",
+                    "WRS2",
+                    "boot",
+                    "BayesFactor",
                     "RGraphGallery"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -623,8 +616,7 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "show_facet_legend",
                     "add_sample_size",
                     "add_density_values",
-                    "custom_annotations",
-                    "dpi")))
+                    "custom_annotations")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="statistics",
@@ -767,7 +759,7 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 weightsSupport = 'auto')
         }))
 
-#' Ridge Plot
+#' Advanced Ridge Plot
 #'
 #' 'Create advanced ridgeline plots.
 #' Visualize distributions across groups with multiple style options, 
@@ -848,7 +840,6 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   'x,y,text;x2,y2,text2'.
 #' @param width Width of the plot in pixels.
 #' @param height Height of the plot in pixels.
-#' @param dpi Resolution for plot export.
 #' @param clinicalPreset Clinical analysis preset for ridge plots. Biomarker
 #'   Distribution: nonparametric tests with Cliff's delta. Treatment Response:
 #'   violin plots with Bonferroni correction. Age by Stage: parametric tests
@@ -925,7 +916,6 @@ jjridges <- function(
     custom_annotations = "",
     width = 800,
     height = 600,
-    dpi = 300,
     clinicalPreset = "custom",
     showAboutPanel = FALSE,
     showAssumptions = FALSE) {
@@ -993,7 +983,6 @@ jjridges <- function(
         custom_annotations = custom_annotations,
         width = width,
         height = height,
-        dpi = dpi,
         clinicalPreset = clinicalPreset,
         showAboutPanel = showAboutPanel,
         showAssumptions = showAssumptions)

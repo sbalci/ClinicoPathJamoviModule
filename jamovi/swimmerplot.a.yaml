@@ -11,19 +11,24 @@ description:
         Creates comprehensive swimmer plots using the ggswim package to visualize patient timelines,
         clinical events, milestones, and treatment responses. Features enhanced data validation
         and complete ggswim integration for professional clinical visualization.
-    R:
-        dontrun: false
-        usage: |
-            data('swimmer_data_raw', package = 'ClinicoPath')
+    # Kept commented, as in the great majority of this module's .a.yaml files:
+    # `dontrun: false` emits a BARE \examples{} block, so R CMD check runs it.
+    # swimmerplot ships to OncoPath, which does NOT carry swimmer_data_raw
+    # (only swimmerplot_sample), so the example fails there on every check.
+    # Kept correct here so that uncommenting works if the dataset is ever shipped.
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('swimmer_data_raw', package = 'ClinicoPath')
 
-            swimmerplot(
-                data = swimmer_data_raw,
-                patientID = 'PatientID',
-                startTime = 'StartTime',
-                endTime = 'EndTime',
-                responseVar = 'BestResponse',
-                timeType = 'raw',
-                timeUnit = 'months')
+    #         swimmerplot(
+    #             data = swimmer_data_raw,
+    #             patientID = 'PatientID',
+    #             startTime = 'StartTime',
+    #             endTime = 'EndTime',
+    #             responseVar = 'BestResponse',
+    #             timeType = 'raw',
+    #             timeUnit = 'months')
 
 options:
     # === Core Data Variables ===

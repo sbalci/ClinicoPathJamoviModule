@@ -1446,6 +1446,13 @@
         `title`="boot: R package", 
         `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=boot", 
         `url`="https://CRAN.R-project.org/package=boot"), 
+    `BayesFactor`=list(
+        `type`="software", 
+        `author`="Morey, R. D., & Rouder, J. N.", 
+        `year`=2024, 
+        `title`="BayesFactor: Computation of Bayes Factors for Common Designs", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=BayesFactor", 
+        `url`="https://CRAN.R-project.org/package=BayesFactor"), 
     `ResourceSelection`=list(
         `type`="software", 
         `author`="Subhash R. Lele, Jonah L. Keim, Peter Solymos", 

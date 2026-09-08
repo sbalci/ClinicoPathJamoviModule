@@ -858,16 +858,6 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' separately, use the lesion-level RECIST v1.1 analysis. It will be available 
 #' in upcoming releases.
 #' 
-#'
-#' @examples
-#' data('waterfall_test', package = 'ClinicoPath')
-#'
-#' waterfall(
-#'     data = waterfall_test,
-#'     patientID = 'patientID',
-#'     responseVar = 'best_response',
-#'     groupVar = 'treatment')
-#'
 #' @param data The data as a data frame.
 #' @param patientID Variable containing patient identifiers (e.g., PT001,
 #'   Patient_1, Study_ID). Each patient should have a unique identifier for

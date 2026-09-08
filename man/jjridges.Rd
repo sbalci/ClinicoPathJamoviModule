@@ -2,7 +2,7 @@
 % Please edit documentation in R/jjridges.h.R
 \name{jjridges}
 \alias{jjridges}
-\title{Ridge Plot}
+\title{Advanced Ridge Plot}
 \usage{
 jjridges(
   data,
@@ -49,7 +49,6 @@ jjridges(
   custom_annotations = "",
   width = 800,
   height = 600,
-  dpi = 300,
   clinicalPreset = "custom",
   showAboutPanel = FALSE,
   showAssumptions = FALSE
@@ -170,8 +169,6 @@ is specified.}
 \item{width}{Width of the plot in pixels.}
 
 \item{height}{Height of the plot in pixels.}
-
-\item{dpi}{Resolution for plot export.}
 
 \item{clinicalPreset}{Clinical analysis preset for ridge plots. Biomarker
 Distribution: nonparametric tests with Cliff's delta. Treatment Response:

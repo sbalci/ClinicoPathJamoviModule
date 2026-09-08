@@ -31,9 +31,11 @@ test_that("negative edge weights are rejected with an actionable message", {
                                      weight = "w", showStats = TRUE, weightMode = mode))
         n <- arc_notices(jjarcdiagram(data = d, source = "from", target = "to",
                                       weight = "w", showStats = TRUE, weightMode = mode))
-        expect_match(n, "Invalid edge weights", info = mode)
-        expect_match(n, "non-negative numeric values", info = mode)
-        expect_match(n, "every row", info = mode)   # tells the user what to do
+        expect_match(n, "Negative Edge Weights", info = mode)
+        expect_match(n, "2 of 10", info = mode)     # counts the user's rows, pre-aggregation
+        expect_match(n, "non-negative on every row", info = mode)
+        # tells the user what to do, rather than only that the input was refused
+        expect_match(n, "(1 + r) / 2", fixed = TRUE, info = mode)
     }
 })
 
@@ -45,7 +47,7 @@ test_that("a zero minimum weight no longer breaks Strength mode", {
                                  weight = "w", showStats = TRUE, weightMode = "strength"))
     res <- jjarcdiagram(data = d, source = "from", target = "to",
                         weight = "w", showStats = TRUE, weightMode = "strength")
-    expect_false(grepl("Invalid edge weights", arc_notices(res), fixed = TRUE))
+    expect_false(grepl("Negative Edge Weights", arc_notices(res), fixed = TRUE))
     expect_match(arc_stats(res), "Number of Nodes")
 })
 
@@ -64,7 +66,7 @@ test_that("ordinary positive weights run in both modes", {
     for (mode in c("strength", "distance")) {
         n <- arc_notices(jjarcdiagram(data = d, source = "from", target = "to",
                                       weight = "w", showStats = TRUE, weightMode = mode))
-        expect_false(grepl("Invalid edge weights", n, fixed = TRUE), info = mode)
+        expect_false(grepl("Negative Edge Weights", n, fixed = TRUE), info = mode)
         expect_false(grepl("Zero Edge Distances", n, fixed = TRUE), info = mode)
     }
 })
@@ -172,4 +174,30 @@ test_that("the network overview reads as grammatical English", {
     expect_false(grepl("sparsely connectivity", t, fixed = TRUE))
     expect_false(grepl("highly connectivity", t, fixed = TRUE))
     expect_match(t, "connected \\(density =")
+})
+
+
+# ---- preset overrides must not leak between preset selections ---------------
+
+test_that("changing the preset rebuilds the option overrides", {
+    # jamovi reuses one analysis instance across option changes, so an override
+    # recorded for a previously selected preset used to survive forever: after
+    # picking "Patient Similarity" the layout stayed horizontal back in "Custom
+    # Network", and once "Gene Interaction" had written a plot title, the title
+    # the user typed was ignored on every later run.
+    Class <- getFromNamespace("jjarcdiagramClass", "ClinicoPath")
+    Options <- getFromNamespace("jjarcdiagramOptions", "ClinicoPath")
+
+    opts <- Options$new(source = "from", target = "to", analysisPreset = "custom")
+    priv <- Class$new(options = opts, data = arc_net())$.__enclos_env__$private
+
+    # stand in for overrides recorded while another preset was selected
+    priv$overrides[["horizontal"]] <- TRUE
+    priv$overrides[["plotTitle"]] <- "Gene Interaction Network"
+
+    priv$.configurePresets()
+
+    expect_length(priv$overrides, 0)
+    expect_false(isTRUE(priv$.option("horizontal")))   # falls back to the real option
+    expect_identical(priv$.option("plotTitle"), "")
 })

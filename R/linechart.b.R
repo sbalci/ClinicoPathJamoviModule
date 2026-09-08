@@ -72,14 +72,6 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             formatC(signif(x, digits), format = "fg", flag = "#", digits = digits)
         },
 
-        # Read an option that may not exist in the compiled R/linechart.h.R yet.
-        # jmvcore's `$` ERRORS on an undeclared option rather than returning NULL,
-        # so an .a.yaml addition that has not been through jmvtools::prepare()
-        # would otherwise take the whole analysis down.
-        .optionOr = function(name, default) {
-            tryCatch(self$options[[name]], error = function(e) default)
-        },
-
         # Rows dropped during preparation, recorded so .checkDataQuality() can
         # report them in the results panel. warning() only reaches the R console.
         .n_excluded_missing   = 0L,
@@ -88,14 +80,14 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Initialize results and validate dependencies
         .init = function() {
-            # Validate parameters at initialization. Dependency checking is
-            # performed once at runtime in .run() (and again in the separate
-            # render phase in .plot()); no separate .init() check is needed.
-            private$.validateParameters()
-
             # Apply user-specified plot dimensions so the Width/Height options
-            # actually resize the rendered Image (bounds are enforced by
-            # .validateParameters() and by min/max in linechart.a.yaml).
+            # actually resize the rendered Image. Bounds come from min/max in
+            # linechart.a.yaml: jmvcore's own OptionInteger check rejects an
+            # out-of-range value before any code here runs ("width must be
+            # between 300 and 1200 (is 5000)"), which is why the module no longer
+            # carries its own .validateParameters() - it was unreachable.
+            # Dependency checking happens once at runtime in .run() (and again in
+            # the separate render phase in .plot()).
             self$results$plot$setSize(self$options$width, self$options$height)
 
             # The summary table has a fixed row set, so build the skeleton (rowKey
@@ -127,6 +119,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.showWelcomeMessage()
 
                 # Hide results until data is provided
+                self$results$naturalSummary$setVisible(FALSE)
                 self$results$summary$setVisible(FALSE)
                 self$results$correlation$setVisible(FALSE)
                 self$results$assumptions$setVisible(FALSE)
@@ -135,6 +128,17 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .run = function() {
+            # Two error channels, deliberately. A pre-flight failure - no data at
+            # all - cannot produce any results, so it is raised here, OUTSIDE the
+            # tryCatch below, and reaches jamovi's own error banner. Every
+            # validation reject() inside the pipeline (.cleanData(), and the
+            # dependency gate) is caught by .handleError(), which renders it in
+            # the `todo` panel together with a concrete recovery suggestion,
+            # because those failures are things the user can fix by changing a
+            # variable or the data. Both halves are pinned by tests: the empty
+            # dataset asserts expect_error(), the in-pipeline ones assert on the
+            # panel text. Do not merge them without changing those tests.
+            #
             # Early exits for missing data or variables.
             #
             # A bare return() here left the panel completely blank - no welcome
@@ -153,6 +157,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Hide welcome message and show results
             self$results$todo$setVisible(FALSE)
+            self$results$naturalSummary$setVisible(TRUE)
             self$results$summary$setVisible(TRUE)
             self$results$plot$setVisible(TRUE)
 
@@ -465,14 +470,8 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 # Add methodology note for interpretation
                 if (has_repeated_measures || !is.null(groupby)) {
-                    correlation_stats$independence_note <- paste0(
-                        " IMPORTANT LIMITATION: Statistics assume independent observations. ",
-                        "For longitudinal data with repeated measures, these statistics may ",
-                        "overstate significance. ",
-                        "Consider: (1) Aggregating to patient-level summaries (e.g., slope per patient), ",
-                        "(2) Using mixed-effects models in specialized software, or ",
-                        "(3) Interpreting p-values as exploratory descriptives only."
-                    )
+                    correlation_stats$independence_note <-
+                        .("IMPORTANT LIMITATION: these statistics assume independent observations. For longitudinal data with repeated measures they may overstate significance. Consider aggregating to patient-level summaries (for example a slope per patient), using mixed-effects models in specialised software, or interpreting the p-values as exploratory descriptives only.")
                 }
 
             } else {
@@ -483,6 +482,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     anova_result <- anova(lm(y_data ~ x_data))
                     correlation_stats$anova_f <- anova_result$`F value`[1]
                     correlation_stats$anova_p <- anova_result$`Pr(>F)`[1]
+                    # An F with no degrees of freedom cannot be interpreted or
+                    # reported, so carry both df alongside it.
+                    correlation_stats$anova_df1 <- anova_result$Df[1]
+                    correlation_stats$anova_df2 <- anova_result$Df[2]
                 }
             }
 
@@ -540,6 +543,9 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 table$addRow(rowKey = row_num, values = list(
                     measure = .("Pearson Correlation"),
                     value = correlation_stats$pearson_r,
+                    ci_lower = correlation_stats$pearson_ci_lower,
+                    ci_upper = correlation_stats$pearson_ci_upper,
+                    pvalue = correlation_stats$pearson_p,
                     interpretation = private$.interpretCorrelation(correlation_stats$pearson_r,
                                                                    correlation_stats$pearson_p,
                                                                    has_repeated_measures,
@@ -574,6 +580,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 table$addRow(rowKey = row_num, values = list(
                     measure = .("Regression Slope"),
                     value = correlation_stats$slope,
+                    pvalue = correlation_stats$regression_p,
                     interpretation = slope_interpretation
                 ))
                 row_num <- row_num + 1
@@ -609,6 +616,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 table$addRow(rowKey = row_num, values = list(
                     measure = .("Spearman Correlation (Rank-based)"),
                     value = correlation_stats$spearman_r,
+                    pvalue = correlation_stats$spearman_p,
                     interpretation = paste0(private$.interpretCorrelation(correlation_stats$spearman_r,
                                                                          correlation_stats$spearman_p,
                                                                          has_repeated_measures,
@@ -627,9 +635,17 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     .("No statistically significant differences between groups were detected (p \u2265 0.05). This result does not establish equivalence between the group means.")
                 }
 
+                anova_label <- if (!is.null(correlation_stats$anova_df1)) {
+                    .fmt(.("ANOVA F-statistic (df {df1}, {df2})"),
+                         df1 = correlation_stats$anova_df1,
+                         df2 = correlation_stats$anova_df2)
+                } else {
+                    .("ANOVA F-statistic")
+                }
                 table$addRow(rowKey = row_num, values = list(
-                    measure = .("ANOVA F-statistic"),
+                    measure = anova_label,
                     value = correlation_stats$anova_f,
+                    pvalue = correlation_stats$anova_p,
                     interpretation = anova_interpretation
                 ))
             }
@@ -732,7 +748,11 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.na(r) || is.na(p_value)) return(.("Not available"))
 
             # Significance levels with clinical interpretation
-            sig_text <- if (p_value < 0.001) "***" else if (p_value < 0.01) "**" else if (p_value < 0.05) "*" else "ns"
+            # Report the plain-language phrase, not an asterisk code. clinical_sig
+            # was already computed here and then thrown away, so the correlation
+            # table read "moderate positive correlation (**)" - a notation a
+            # clinician should not have to decode. The numeric p now has its own
+            # column, so the asterisks carried no information the table lacks.
             clinical_sig <- if (p_value < 0.05) .("statistically significant") else .("not statistically significant")
 
             # Strength label (single source of truth: .correlationStrength)
@@ -741,13 +761,15 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Create copy-ready interpretation
             correlation_is_zero <- isTRUE(all.equal(
                 unname(r), 0, tolerance = sqrt(.Machine$double.eps)))
+            # One translatable sentence with placeholders, not word fragments
+            # glued in English order - the same shape .generateCopyReadyCorrelation()
+            # already uses.
             base_interpretation <- if (correlation_is_zero) {
-                paste0(.("negligible correlation"), " (", sig_text, ")")
+                .fmt(.("negligible correlation, {sig}"), sig = clinical_sig)
             } else {
                 direction <- if (r > 0) .("positive") else .("negative")
-                paste0(
-                    strength, " ", direction, " ", .("correlation"),
-                    " (", sig_text, ")")
+                .fmt(.("{strength} {direction} correlation, {sig}"),
+                     strength = strength, direction = direction, sig = clinical_sig)
             }
 
             # Add clinical context
@@ -795,7 +817,6 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .populateAssumptions = function(data, correlation_stats = NULL) {
             xvar <- self$options$xvar
             yvar <- self$options$yvar
-            groupby <- self$options$groupby
 
             # Build assumptions content
             assumptions_html <- paste0(
@@ -829,7 +850,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # Simple linearity assessment using correlation vs polynomial fit
                     linear_r2 <- correlation_stats$r_squared
                     quadratic_model <- tryCatch({
-                        lm(y_data ~ poly(x_data, 2))
+                        lm(y_data ~ stats::poly(x_data, 2))
                     }, error = function(e) NULL)
 
                     if (!is.null(quadratic_model)) {
@@ -848,9 +869,34 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 # Check normality of residuals (basic)
+                homoscedasticity_check <- .("Homoscedasticity check not applicable for this analysis.")
                 normality_check <- if (is.numeric(x_data) && !is.null(correlation_stats$pearson_r)) {
                     lm_model <- lm(y_data ~ x_data)
                     residuals <- residuals(lm_model)
+
+                    # Homoscedasticity was listed below as a key assumption but was
+                    # never tested, so the panel asserted something it had not
+                    # checked. Screen it by rank-correlating the absolute residuals
+                    # against the fitted values: a reliable non-constant-variance
+                    # signal that needs no extra dependency (a Breusch-Pagan test
+                    # would pull in lmtest for no added value at these sample sizes).
+                    homoscedasticity_check <- if (length(residuals) >= 4) {
+                        bp <- tryCatch(
+                            suppressWarnings(cor.test(abs(residuals), stats::fitted(lm_model),
+                                                      method = "spearman", exact = FALSE)),
+                            error = function(e) NULL)
+                        if (is.null(bp) || is.na(bp$p.value)) {
+                            .("Unable to assess constant variance automatically.")
+                        } else if (bp$p.value <= 0.05) {
+                            .fmt(.("Residual spread changes with the fitted value (Spearman p = {p}), so the constant-variance assumption is doubtful. Confidence intervals and p-values from the linear fit may be too narrow."),
+                                 p = private$.fmtNum(bp$p.value))
+                        } else {
+                            .fmt(.("Residual spread looks constant across fitted values (Spearman p = {p})."),
+                                 p = private$.fmtNum(bp$p.value))
+                        }
+                    } else {
+                        .("Insufficient data to assess constant variance.")
+                    }
                     if (length(residuals) >= 3) {
                         shapiro_result <- tryCatch({
                             shapiro.test(residuals)
@@ -887,6 +933,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "<ul>",
                     "<li>", linearity_check, "</li>",
                     "<li>", normality_check, "</li>",
+                    "<li>", homoscedasticity_check, "</li>",
                     "</ul>",
                     "</div>",
                     "</div><br>"
@@ -965,7 +1012,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .plot = function(image, ggtheme, theme, ...) {
             # Get plot data
             plot_data <- image$state
-            if (is.null(plot_data)) return()
+            if (is.null(plot_data)) return(FALSE)
 
             private$.checkpoint()  # Checkpoint before plot generation
 
@@ -994,7 +1041,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Check dependencies at runtime
         .checkDependencies = function() {
-            required_packages <- c("ggplot2", "dplyr")
+            # ggplot2 only. dplyr used to be listed here but is never called
+            # anywhere in this analysis, so a missing dplyr aborted the run for a
+            # package it does not use.
+            required_packages <- c("ggplot2")
             missing_packages <- required_packages[!sapply(required_packages, requireNamespace, quietly = TRUE)]
 
             if (length(missing_packages) > 0) {
@@ -1012,25 +1062,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "<p>", gsub("\n", "<br>", error_msg), "</p>",
                     "</div>"
                 ))
-                jmvcore::reject(paste(missing_packages, collapse = ", "))
+                jmvcore::reject(.fmt(
+                    .("This analysis needs the {pkgs} package(s), which are not installed. Install them and run the analysis again."),
+                    pkgs = paste(missing_packages, collapse = ", ")))
             }
-        },
-
-        # Validate numeric parameters
-        .validateParameters = function() {
-            # Validate plot dimensions
-            if (!is.null(self$options$width)) {
-                if (self$options$width < 300 || self$options$width > 1200) {
-                    jmvcore::reject(.("Plot width must be between 300 and 1200 pixels. Current value will be ignored."), code="")
-                }
-            }
-            if (!is.null(self$options$height)) {
-                if (self$options$height < 300 || self$options$height > 1000) {
-                    jmvcore::reject(.("Plot height must be between 300 and 1000 pixels. Current value will be ignored."), code="")
-                }
-            }
-            # refline is a numeric Number option (bounded in linechart.a.yaml),
-            # so it can never be non-numeric here; no extra validation needed.
         },
 
         # Enhanced welcome message
@@ -1085,7 +1120,6 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Data quality and misuse detection
         .checkDataQuality = function(data) {
             xvar <- self$options$xvar
-            yvar <- self$options$yvar
             groupby <- self$options$groupby
 
             warnings <- c()
@@ -1138,7 +1172,9 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.null(groupby)) {
                 n_groups <- length(unique(data[[groupby]]))
                 if (n_groups > 8) {
-                    warnings <- c(warnings, paste(.("Warning: Many groups detected ("), n_groups, .("). Consider reducing groups or using faceting for clarity.")))
+                    warnings <- c(warnings, .fmt(
+                        .("Many groups detected ({n}). Consider reducing groups or using faceting for clarity."),
+                        n = n_groups))
                 }
 
                 # Check group balance
@@ -1392,23 +1428,11 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # the off-sentinel made the most common clinical reference line -
             # change from baseline, a difference, a log fold-change - impossible
             # to draw.
-            #
-            # The sentinel `NULL` below distinguishes "showRefline is not compiled
-            # yet" from "the user switched it off". Before jmvtools::prepare() runs
-            # the option does not exist, and defaulting it to FALSE would silently
-            # withdraw a feature that currently works; fall back to the legacy
-            # rule (draw when the value is non-zero) until the header catches up.
-            show <- private$.optionOr("showRefline", NULL)
+            if (!isTRUE(self$options$showRefline)) return(p)
 
             if (is.null(self$options$refline) || is.na(self$options$refline)) return(p)
             refline_value <- as.numeric(self$options$refline)
             if (is.na(refline_value)) return(p)
-
-            if (is.null(show)) {
-                if (refline_value == 0) return(p)     # legacy behaviour
-            } else if (!isTRUE(show)) {
-                return(p)
-            }
 
             refline_label <- if (!is.null(self$options$reflineLabel) &&
                                 nchar(self$options$reflineLabel) > 0) {

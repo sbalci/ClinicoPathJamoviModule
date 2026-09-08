@@ -73,25 +73,25 @@ on biological processes, and comorbidity networks on disease associations.}
 When enabled, nodes are shown as circles at their sorted positions.}
 
 \item{nodeSize}{Method for determining node sizes. 'Fixed' uses constant
-size, 'By Degree' scales nodes proportionally to their connectivity (number
+size, 'By degree' scales nodes proportionally to their connectivity (number
 of connections).}
 
 \item{nodeSizeValue}{Size of nodes when using fixed sizing, or base size
 multiplier when using degree-based sizing. Range: 0.1 to 10.}
 
 \item{sortNodes}{Order in which nodes are arranged along the baseline.
-'None' preserves original order, 'By Name' sorts alphabetically, 'By Group'
-clusters by categories, 'By Degree' orders by connectivity.}
+'None' preserves original order, 'By name' sorts alphabetically, 'By group'
+clusters by categories, 'By degree' orders by connectivity.}
 
 \item{sortDecreasing}{When sorting nodes, whether to use descending order.
-Only applies when Sort Nodes is not 'None'.}
+Only applies when Node order is not 'None'.}
 
 \item{horizontal}{Layout orientation of the arc diagram. When TRUE, nodes
 are arranged horizontally with arcs above. When FALSE, nodes are arranged
 vertically with arcs to the side.}
 
 \item{arcWidth}{Method for determining arc line widths. 'Fixed' uses
-constant width, 'By Weight' scales arc thickness proportionally to edge
+constant width, 'By weight' scales arc thickness proportionally to edge
 weights.}
 
 \item{arcWidthValue}{Width of arcs when using fixed sizing, or base width
@@ -106,12 +106,12 @@ direction from source to target) or undirected (edges represent
 bidirectional relationships).}
 
 \item{aggregateEdges}{"RECOMMENDED: Combine multiple edges between the same
-nodes by summing weights. Why it matters: Ensures network density <= 1.0
-(without aggregation, density can exceed 1.0) Prevents inflated centrality
-measures Provides accurate statistical summaries Example: If Gene A→Gene B
-appears 3 times with weights (2, 3, 5), aggregation creates a single edge
-with weight 10. When to disable: Only if you specifically need to preserve
-parallel edges for specialized analyses."}
+nodes by summing weights. Why it matters: Prevents inflated degree,
+strength and centrality measures (density is unaffected either way: it is
+computed on distinct node pairs) Provides accurate statistical summaries
+Example: If Gene A→Gene B appears 3 times with weights (2, 3, 5),
+aggregation creates a single edge with weight 10. When to disable: Only if
+you specifically need to preserve parallel edges for specialized analyses."}
 
 \item{weightMode}{"How edge weights should be interpreted for centrality
 calculations. STRENGTH mode (default): Higher values = stronger connections
@@ -124,7 +124,7 @@ clinical/biological networks use STRENGTH mode."}
 \item{arcColorMode}{How to color arcs when nodes are grouped. 'Source'
 colors arcs by source node's group, 'Target' by target node's group,
 'Gradient' creates a gradient from source to target colors. Only applies
-when Color Nodes by Group is enabled.}
+when Node color by group is enabled.}
 
 \item{colorByGroup}{When a grouping variable is specified, whether to
 color-code nodes by their group membership. Requires a group variable.}

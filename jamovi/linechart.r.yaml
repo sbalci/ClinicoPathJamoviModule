@@ -36,6 +36,18 @@ items:
         - name: value
           title: Value
           type: number
+        - name: ci_lower
+          title: Lower
+          superTitle: 95% Confidence Interval
+          type: number
+        - name: ci_upper
+          title: Upper
+          superTitle: 95% Confidence Interval
+          type: number
+        - name: pvalue
+          title: p
+          type: number
+          format: zto,pvalue
         - name: interpretation
           title: Interpretation
           type: text
@@ -62,6 +74,7 @@ items:
         - smooth
         - confidence
         - trendline
+        - showRefline
         - refline
         - reflineLabel
         - xlabel
@@ -71,6 +84,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - RCorTestDocumentation
+    - ggplot2
 
 
 ...

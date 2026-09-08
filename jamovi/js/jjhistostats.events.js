@@ -1,3 +1,23 @@
+// Controls whose name contains a dot (test.value, conf.level, bf.message) are keyed by
+// their LITERAL name in jamovi's control registry (this._ctrlOptions[e.name], matched with
+// an exact string compare), so they are only reachable with bracket notation. The previous
+// `ui.test_value` / `ui.conf_level` / `ui.bf_message` read an undefined property and threw
+// a TypeError, and because those calls were not wrapped in try/catch the handler aborted
+// there - so selecting a clinical preset set the first five controls and silently skipped
+// every colour below, and onChange_typestatistics never reached its guidance call.
+// Look the control up defensively so one unresolved name can never abort a whole handler.
+const ctrl = function(ui, name) {
+    return Object.prototype.hasOwnProperty.call(ui, name) ? ui[name] : null;
+};
+const setOpt = function(ui, name, value) {
+    const c = ctrl(ui, name);
+    if (c) c.setValue(value);
+};
+const getOpt = function(ui, name, fallback) {
+    const c = ctrl(ui, name);
+    return c ? c.value() : fallback;
+};
+
 const events = {
     // Clinical preset system with intelligent parameter configuration for histograms
     onChange_clinicalPreset: function(ui) {
@@ -11,9 +31,9 @@ const events = {
                 ui.centralitytype.setValue("parametric");
                 ui.resultssubtitle.setValue(true);
                 ui.showInterpretation.setValue(true);
-                ui.test_value.setValue(0);
-                ui.conf_level.setValue(0.95);
-                ui.bf_message.setValue(true);
+                setOpt(ui, 'test.value', 0);
+                setOpt(ui, 'conf.level', 0.95);
+                setOpt(ui, 'bf.message', true);
                 ui.binfill.setValue("#87CEEB");  // Light blue for lab values
                 ui.bincolor.setValue("#4682B4");  // Steel blue border
                 ui.binalpha.setValue(0.7);
@@ -27,9 +47,9 @@ const events = {
                 ui.centralitytype.setValue("nonparametric");
                 ui.resultssubtitle.setValue(true);
                 ui.showInterpretation.setValue(true);
-                ui.test_value.setValue(0);
-                ui.conf_level.setValue(0.95);
-                ui.bf_message.setValue(false);
+                setOpt(ui, 'test.value', 0);
+                setOpt(ui, 'conf.level', 0.95);
+                setOpt(ui, 'bf.message', false);
                 ui.binfill.setValue("#98FB98");  // Pale green for biomarkers
                 ui.bincolor.setValue("#228B22");  // Forest green border
                 ui.binalpha.setValue(0.75);
@@ -43,9 +63,9 @@ const events = {
                 ui.centralitytype.setValue("parametric");
                 ui.resultssubtitle.setValue(true);
                 ui.showInterpretation.setValue(false);  // Less interpretation needed for basic demographics
-                ui.test_value.setValue(0);
-                ui.conf_level.setValue(0.95);
-                ui.bf_message.setValue(false);
+                setOpt(ui, 'test.value', 0);
+                setOpt(ui, 'conf.level', 0.95);
+                setOpt(ui, 'bf.message', false);
                 ui.binfill.setValue("#FFB6C1");  // Light pink for demographics
                 ui.bincolor.setValue("#DC143C");  // Crimson border
                 ui.binalpha.setValue(0.6);
@@ -59,9 +79,9 @@ const events = {
                 ui.centralitytype.setValue("nonparametric");
                 ui.resultssubtitle.setValue(true);
                 ui.showInterpretation.setValue(true);
-                ui.test_value.setValue(0);
-                ui.conf_level.setValue(0.95);
-                ui.bf_message.setValue(false);
+                setOpt(ui, 'test.value', 0);
+                setOpt(ui, 'conf.level', 0.95);
+                setOpt(ui, 'bf.message', false);
                 ui.changebinwidth.setValue(true);
                 ui.binwidth.setValue(1.0);  // Unit bins for discrete scores
                 ui.binfill.setValue("#DDA0DD");  // Plum for pathology
@@ -70,9 +90,6 @@ const events = {
                 ui.centralitylinecolor.setValue("#9932CC");  // Dark orchid
                 break;
         }
-        
-        // Update guidance based on preset selection
-        this.updatePresetGuidance(ui, preset);
     },
 
     // Statistical type change with automatic parameter adjustment
@@ -82,59 +99,40 @@ const events = {
         switch(statType) {
             case "parametric":
                 ui.centralitytype.setValue("parametric");
-                ui.bf_message.setValue(true);
+                setOpt(ui, 'bf.message', true);
                 break;
             case "nonparametric":
                 ui.centralitytype.setValue("nonparametric");
-                ui.bf_message.setValue(false);
+                setOpt(ui, 'bf.message', false);
                 break;
             case "robust":
                 ui.centralitytype.setValue("robust");
-                ui.bf_message.setValue(false);
+                setOpt(ui, 'bf.message', false);
                 break;
             case "bayes":
                 ui.centralitytype.setValue("bayes");
-                ui.bf_message.setValue(true);
-                // Show performance warning for Bayesian analysis
-                this.showBayesianPerformanceWarning(ui);
+                setOpt(ui, 'bf.message', true);
                 break;
         }
-        
-        this.updateStatisticalGuidance(ui, statType);
     },
 
     // Bin width validation with clinical recommendations
     onChange_binwidth: function(ui) {
-        let binwidth = ui.binwidth.value();
-        let guidance = "";
-        
-        if (binwidth <= 0) {
+        // Only the clamp survives. The guidance strings this used to compute were written
+        // to `binwidth_guidance`, a control that exists in neither .u.yaml nor .a.yaml, so
+        // the setValue always threw into an empty catch and the user never saw any of it.
+        if (ui.binwidth.value() <= 0)
             ui.binwidth.setValue(0.1);
-            binwidth = 0.1;
-            guidance = "⚠️ Bin width must be positive";
-        } else if (binwidth < 0.1) {
-            guidance = "⚠️ Very small bins - may create noisy histogram";
-        } else if (binwidth > 10) {
-            guidance = "⚠️ Large bins may hide important distribution features";
-        } else {
-            guidance = "✅ Appropriate bin width for data visualization";
-        }
-        
-        try {
-            ui.binwidth_guidance.setValue(guidance);
-        } catch(e) {
-            // Fallback if dynamic guidance not supported
-        }
     },
 
     // Confidence level validation
     onChange_conf_level: function(ui) {
-        let conf = ui.conf_level.value();
+        let conf = getOpt(ui, 'conf.level', null);
         
         if (conf < 0.8) {
-            ui.conf_level.setValue(0.8);
+            setOpt(ui, 'conf.level', 0.8);
         } else if (conf > 0.99) {
-            ui.conf_level.setValue(0.99);
+            setOpt(ui, 'conf.level', 0.99);
         }
         
         // Standard confidence levels
@@ -147,22 +145,6 @@ const events = {
         }
     },
 
-    // Test value validation for clinical relevance
-    onChange_test_value: function(ui) {
-        let testValue = ui.test_value.value();
-        let guidance = "";
-        
-        if (testValue === 0) {
-            guidance = "ℹ️ Testing against zero (no effect)";
-        } else {
-            guidance = `ℹ️ Testing against clinically meaningful value: ${testValue}`;
-        }
-        
-        try {
-            ui.test_value_guidance.setValue(guidance);
-        } catch(e) {}
-    },
-
     // Digits validation for appropriate precision
     onChange_digits: function(ui) {
         let digits = ui.digits.value();
@@ -173,18 +155,6 @@ const events = {
             ui.digits.setValue(5);
         }
         
-        let guidance = "";
-        if (digits <= 1) {
-            guidance = "ℹ️ Low precision - appropriate for large values";
-        } else if (digits >= 4) {
-            guidance = "ℹ️ High precision - appropriate for small values";
-        } else {
-            guidance = "✅ Standard precision for most clinical data";
-        }
-        
-        try {
-            ui.digits_guidance.setValue(guidance);
-        } catch(e) {}
     },
 
     // Plot dimensions validation
@@ -229,18 +199,6 @@ const events = {
             ui.binalpha.setValue(1);
         }
         
-        let guidance = "";
-        if (alpha < 0.3) {
-            guidance = "⚠️ Very transparent - may be hard to see";
-        } else if (alpha > 0.9) {
-            guidance = "ℹ️ Nearly opaque - may hide overlapping features";
-        } else {
-            guidance = "✅ Good transparency for visualization";
-        }
-        
-        try {
-            ui.alpha_guidance.setValue(guidance);
-        } catch(e) {}
     },
 
     // Centrality line width validation
@@ -252,56 +210,6 @@ const events = {
         } else if (width > 5) {
             ui.centralitylinewidth.setValue(5);
         }
-    },
-
-    // Helper functions
-    updatePresetGuidance: function(ui, preset) {
-        let guidance = "";
-        
-        switch(preset) {
-            case "lab_values":
-                guidance = "✅ Configured for laboratory values: Parametric tests, normal distribution assumptions";
-                break;
-            case "biomarkers":
-                guidance = "✅ Configured for biomarkers: Nonparametric tests, robust to outliers";
-                break;
-            case "patient_chars":
-                guidance = "✅ Configured for demographics: Standard parametric approach";
-                break;
-            case "pathology_scores":
-                guidance = "✅ Configured for ordinal scores: Nonparametric tests, unit bins";
-                break;
-            case "custom":
-                guidance = "ℹ️ Custom configuration - adjust parameters manually";
-                break;
-        }
-        
-        try {
-            ui.preset_guidance.setValue(guidance);
-        } catch(e) {}
-    },
-
-    updateStatisticalGuidance: function(ui, statType) {
-        let guidance = "";
-        
-        switch(statType) {
-            case "parametric":
-                guidance = "ℹ️ Assumes normal distribution. Best for: lab values, measurements";
-                break;
-            case "nonparametric":
-                guidance = "ℹ️ No distribution assumptions. Best for: scores, skewed data";
-                break;
-            case "robust":
-                guidance = "ℹ️ Resistant to outliers. Best for: data with extreme values";
-                break;
-            case "bayes":
-                guidance = "⚠️ Bayesian inference with uncertainty quantification. <strong>WARNING: Very slow computation!</strong>";
-                break;
-        }
-        
-        try {
-            ui.statistical_guidance.setValue(guidance);
-        } catch(e) {}
     },
 
     getComplementaryColor: function(color) {
@@ -318,24 +226,6 @@ const events = {
         };
         
         return colorMap[color] || null;
-    },
-
-    showBayesianPerformanceWarning: function(ui) {
-        let warning = "⚠️ <strong>PERFORMANCE WARNING:</strong><br>" +
-                     "Bayesian analysis can take 30-60 seconds or more depending on data size.<br>" +
-                     "Consider using 'parametric' or 'nonparametric' for faster results.<br><br>" +
-                     "💡 <strong>Speed Tips:</strong><br>" +
-                     "• Use smaller datasets (&lt;1000 rows) when possible<br>" +
-                     "• Consider sampling your data first<br>" +
-                     "• Parametric tests often provide similar insights with instant results";
-        
-        try {
-            // Try to show warning in a guidance field
-            ui.bayesian_warning.setValue(warning);
-        } catch(e) {
-            // Fallback - could show in console or other UI element
-            console.warn("Bayesian analysis selected - expect slow performance");
-        }
     }
 };
 

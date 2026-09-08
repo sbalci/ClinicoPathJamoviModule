@@ -893,7 +893,6 @@ importFrom(grDevices,
   colorRampPalette,
   dev.off,
   hcl.colors,
-  hsv,
   pdf,
   png,
   rainbow,
@@ -1024,10 +1023,7 @@ importFrom(icenReg,
 )
 importFrom(igraph,
   betweenness,
-  blocks,
-  closeness,
-  is_connected,
-  max_degree
+  is_connected
 )
 importFrom(interval,icfit)
 importFrom(irr,

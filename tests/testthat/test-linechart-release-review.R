@@ -125,26 +125,13 @@ lc_plot_has <- function(label, ...) {
 test_that("a reference line at zero is reachable", {
     # 0 was the "no line" sentinel, which made the most common clinical reference
     # impossible to draw: change from baseline, a difference, and a log fold
-    # change all sit at zero. Skipped until showRefline reaches the R wrapper.
-    skip_if_not("showRefline" %in% names(formals(linechart)),
-                "showRefline not compiled yet - run jmvtools::prepare()")
+    # change all sit at zero. showRefline is now the sole gate.
     d <- lc_trend()
     expect_true(lc_plot_has("Threshold", data = d, xvar = "t", yvar = "y",
                             showRefline = TRUE, refline = 0))
     expect_false(lc_plot_has("Threshold", data = d, xvar = "t", yvar = "y",
                              showRefline = FALSE, refline = 0))
 })
-
-test_that("with the switch uncompiled, the legacy rule still applies", {
-    # Falling back to FALSE would silently withdraw a working feature between the
-    # .a.yaml edit and jmvtools::prepare(); the fallback is the OLD rule instead.
-    skip_if("showRefline" %in% names(formals(linechart)),
-            "showRefline is compiled - legacy fallback no longer in play")
-    d <- lc_trend()
-    expect_true(lc_plot_has("Threshold", data = d, xvar = "t", yvar = "y", refline = 5))
-    expect_false(lc_plot_has("Threshold", data = d, xvar = "t", yvar = "y", refline = 0))
-})
-
 
 # ---- statistics --------------------------------------------------------------
 
@@ -250,4 +237,89 @@ test_that("no source file calls a bare format() with base-format arguments", {
         if (length(hit)) offenders <- c(offenders, sprintf("%s:%s", basename(f), paste(hit, collapse = ",")))
     }
     expect_equal(offenders, character(0))
+})
+
+
+# ---- assumption checks -------------------------------------------------------
+
+test_that("the assumptions panel checks constant variance, not just claims it", {
+    # The panel listed Homoscedasticity as a key assumption but only ever tested
+    # linearity and normality, so it asserted something it had not checked.
+    lc_assum <- function(...) lc_txt(linechart(...)$assumptions$content)
+
+    # Fan-shaped residuals: spread grows with x, so the screen must fire.
+    set.seed(7)
+    n <- 80
+    x <- seq(1, 40, length.out = n)
+    hetero <- data.frame(t = x, y = 5 + 0.5 * x + rnorm(n, 0, x / 4))
+    expect_match(lc_assum(data = hetero, xvar = "t", yvar = "y", trendline = TRUE),
+                 "Residual spread changes with the fitted value")
+
+    # Constant-variance residuals: the screen must NOT fire.
+    set.seed(8)
+    homo <- data.frame(t = x, y = 5 + 0.5 * x + rnorm(n, 0, 2))
+    expect_match(lc_assum(data = homo, xvar = "t", yvar = "y", trendline = TRUE),
+                 "Residual spread looks constant")
+})
+
+test_that("the dependency gate lists no package the analysis never calls", {
+    # dplyr sat in .checkDependencies() but is called nowhere in linechart, so a
+    # missing dplyr aborted the run for a package it does not use. Source guard:
+    # a relative path would resolve against tests/testthat, so use test_path().
+    f <- testthat::test_path("..", "..", "R", "linechart.b.R")
+    skip_if_not(file.exists(f), "package sources not available")
+    L <- readLines(f, warn = FALSE)
+    code <- L[!grepl("^\\s*#", L)]
+    expect_false(any(grepl("dplyr", code, fixed = TRUE)))
+})
+
+
+# ---- reported statistics --------------------------------------------------
+
+test_that("every statistic the module computes is actually reported", {
+    # The CI, the slope p and the ANOVA df were all computed and then discarded,
+    # so the table showed r and an asterisk code and nothing a clinician could
+    # put in a report. Each new cell is asserted against base R.
+    set.seed(3)
+    d <- data.frame(t = 1:40, y = 2 + 0.4 * (1:40) + rnorm(40, 0, 3))
+    df <- linechart(data = d, xvar = "t", yvar = "y", trendline = TRUE)$correlation$asDF
+
+    ct  <- stats::cor.test(d$t, d$y, method = "pearson")
+    sp  <- suppressWarnings(stats::cor.test(d$t, d$y, method = "spearman"))
+    fit <- stats::lm(y ~ t, data = d)
+
+    pe <- df[df$measure == "Pearson Correlation", ]
+    expect_equal(pe$ci_lower, ct$conf.int[1], tolerance = 1e-10)
+    expect_equal(pe$ci_upper, ct$conf.int[2], tolerance = 1e-10)
+    expect_equal(pe$pvalue,   ct$p.value,     tolerance = 1e-10)
+
+    expect_equal(df$pvalue[df$measure == "Regression Slope"],
+                 unname(summary(fit)$coefficients[2, 4]), tolerance = 1e-10)
+    expect_equal(df$pvalue[df$measure == "Spearman Correlation (Rank-based)"],
+                 unname(sp$p.value), tolerance = 1e-10)
+})
+
+test_that("the ANOVA row carries its degrees of freedom and p-value", {
+    # "F = 146.9" with no df cannot be interpreted or reported.
+    set.seed(4)
+    dc <- data.frame(v = factor(rep(c("Base", "W4", "W8"), each = 10)),
+                     y = c(rnorm(10, 10), rnorm(10, 13), rnorm(10, 16)))
+    df <- linechart(data = dc, xvar = "v", yvar = "y", trendline = TRUE)$correlation$asDF
+    a  <- anova(lm(y ~ v, data = dc))
+
+    row <- df[grepl("ANOVA", df$measure), ]
+    expect_equal(nrow(row), 1L)
+    expect_match(row$measure, "df 2, 27", fixed = TRUE)
+    expect_equal(row$value,  a$`F value`[1], tolerance = 1e-10)
+    expect_equal(row$pvalue, a$`Pr(>F)`[1],  tolerance = 1e-10)
+})
+
+test_that("significance is stated in words, not as an asterisk code", {
+    set.seed(3)
+    d <- data.frame(t = 1:40, y = 2 + 0.4 * (1:40) + rnorm(40, 0, 3))
+    txt <- linechart(data = d, xvar = "t", yvar = "y",
+                     trendline = TRUE)$correlation$asDF
+    interp <- txt$interpretation[txt$measure == "Pearson Correlation"]
+    expect_match(interp, "statistically significant", fixed = TRUE)
+    expect_false(grepl("(***)", interp, fixed = TRUE))
 })

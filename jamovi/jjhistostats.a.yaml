@@ -1,10 +1,10 @@
 ---
 name:  jjhistostats
 title: Histogram
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Distribution
 # menuSubtitle: Histogram
-version: '1.0.8'
+version: '1.0.9'
 jas: '1.2'
 
 
@@ -65,7 +65,7 @@ options:
             lab values). Each variable will show its distribution shape and statistical properties.
 
     - name: grvar
-      title: 'Split By (Optional)'
+      title: 'Split by (optional)'
       type: Variable
       default: NULL
       suggested: [ ordinal, nominal ]
@@ -85,14 +85,14 @@ options:
 
 
     - name: typestatistics
-      title: 'Type of Statistic'
+      title: 'Type of statistic'
       type: List
       options:
         - title: Parametric (one-sample t-test)
           name: parametric
         - title: Nonparametric (Wilcoxon signed-rank)
           name: nonparametric
-        - title: Robust (bootstrap-t, trimmed mean)
+        - title: Robust (bootstrap-t on a trimmed mean)
           name: robust
         - title: Bayes (Bayesian one-sample t-test)
           name: bayes
@@ -130,7 +130,7 @@ options:
             Helpful for comparing typical values across groups or identifying distribution shifts.
 
     - name: changebinwidth
-      title: Change bin width
+      title: Manual bin width
       type: Bool
       default: false
       description:
@@ -142,12 +142,13 @@ options:
             visualization of biomarker ranges or lab value distributions.
 
     - name: binwidth
-      title: Bin Width (Default is max(x) - min(x) / sqrt(N))
+      title: Bin width
       type: Number
       default: 1.1
       description:
           R: >
             Manual bin width for histogram. Only used when changebinwidth is TRUE.
+            When left automatic, the width is max(x) - min(x) / sqrt(N).
             Smaller values create more bins, larger values create fewer bins.
 
 
@@ -182,7 +183,7 @@ options:
             screening and should be supplemented with formal statistical tests and domain expertise.
 
     - name: clinicalPreset
-      title: Clinical Analysis Preset
+      title: Clinical preset
       type: List
       options:
         - title: Custom (manual settings)
@@ -205,7 +206,7 @@ options:
             statistical methods and display options appropriate for that clinical context.
 
     - name: enableOneSampleTest
-      title: Use a custom null value
+      title: Custom null value
       type: Bool
       default: false
       description:
@@ -223,7 +224,7 @@ options:
             'Statistical Results' for a purely descriptive histogram.
 
     - name: test.value
-      title: Test Value
+      title: Test value
       type: Number
       default: 0
       description:
@@ -237,8 +238,66 @@ options:
             treatment threshold, population mean). WARNING: Using 0 is rarely clinically relevant
             for lab values, biomarkers, or patient measurements. Enter a meaningful reference value.
 
+    - name: alternative
+      title: Test direction
+      type: List
+      options:
+        - title: Two-sided
+          name: two.sided
+        - title: Greater than the test value
+          name: greater
+        - title: Less than the test value
+          name: less
+      default: two.sided
+      description:
+          R: >
+            Direction of the one-sample test. 'two.sided' asks whether the centre differs from
+            the test value in either direction; 'greater' and 'less' are one-sided. Two-sided is
+            the conventional default and the conservative choice - only pick a one-sided test if
+            the direction was specified before seeing the data.
+          ui: >
+            Whether the test asks if your variable differs from the Test value in either
+            direction (two-sided, the usual choice) or only in one direction. Choose a one-sided
+            test only if you decided the direction before looking at the data.
+
+    - name: trimlevel
+      title: Trim proportion
+      type: Number
+      default: 0.2
+      min: 0
+      max: 0.4
+      description:
+          R: >
+            Proportion trimmed from EACH tail for the robust test and the robust centrality
+            measure. The default of 0.2 discards the highest and lowest 20 percent of
+            observations. Only used when 'Type of statistic' is Robust, or when the centrality
+            measure is Robust.
+          ui: >
+            How much of each tail the Robust option discards before computing the mean. The
+            default 0.2 drops the top and bottom 20 percent. Raise it for heavier contamination,
+            lower it to keep more of the distribution - but note a real high-expressing subgroup
+            can be trimmed away.
+
+    - name: bfprior
+      title: Bayes prior scale
+      type: Number
+      default: 0.707
+      min: 0.1
+      max: 2
+      description:
+          R: >
+            Scale of the Cauchy prior on effect size for the Bayesian test (the 'r' scale).
+            The default 0.707 is JASP/BayesFactor's medium prior. A Bayes factor cannot be
+            interpreted or reproduced without knowing this value, so it is reported alongside
+            the result. Larger values place more prior mass on large effects, which lowers the
+            Bayes factor for small observed effects.
+          ui: >
+            Width of the prior for the Bayesian test. 0.707 is the standard 'medium' prior.
+            Because a Bayes factor depends on this choice, it is stated with the result - vary
+            it to check how sensitive your conclusion is to the prior.
+
     - name: conf.level
-      title: Confidence Level
+      title: Confidence level
       type: Number
       default: 0.95
       min: 0.5
@@ -250,7 +309,7 @@ options:
             disappeared with no message, and 0, which printed a zero-width "0 percent CI".
 
     - name: bf.message
-      title: Bayes factor message
+      title: Bayes factor
       type: Bool
       default: false
       description:
@@ -258,7 +317,7 @@ options:
             Whether to display Bayes Factor in the subtitle when using Bayesian analysis.
 
     - name: digits
-      title: Decimal Places
+      title: Decimal places
       type: Integer
       default: 2
       min: 0
@@ -268,7 +327,7 @@ options:
             Number of decimal places for displaying statistics in the subtitle.
 
     - name: xlab
-      title: X-axis Label
+      title: X-axis label
       type: String
       default: ''
       description:
@@ -276,7 +335,7 @@ options:
             Custom label for the x-axis. If empty, variable name will be used.
 
     - name: title
-      title: Plot Title
+      title: Plot title
       type: String
       default: ''
       description:
@@ -284,7 +343,7 @@ options:
             Title for the plot.
 
     - name: subtitle
-      title: Plot Subtitle
+      title: Plot subtitle
       type: String
       default: ''
       description:
@@ -292,7 +351,7 @@ options:
             Subtitle for the plot (overrides statistical results if provided).
 
     - name: caption
-      title: Plot Caption
+      title: Plot caption
       type: String
       default: ''
       description:
@@ -300,7 +359,7 @@ options:
             Caption text to display at the bottom of the plot.
 
     - name: centralitytype
-      title: Centrality Type
+      title: Centrality measure
       type: List
       options:
         - title: Default (follows test type)
@@ -322,7 +381,7 @@ options:
 # Histogram Aesthetics ----
 
     - name: binfill
-      title: Bin Fill Color
+      title: Bin fill color
       type: String
       default: 'skyblue'
       description:
@@ -330,7 +389,7 @@ options:
             Fill color for histogram bins.
 
     - name: bincolor
-      title: Bin Border Color
+      title: Bin border color
       type: String
       default: 'black'
       description:
@@ -338,7 +397,7 @@ options:
             Border color for histogram bins.
 
     - name: binalpha
-      title: Bin Transparency
+      title: Bin transparency
       type: Number
       default: 0.7
       min: 0
@@ -350,7 +409,7 @@ options:
 # Centrality Line Aesthetics ----
 
     - name: centralitylinecolor
-      title: Centrality Line Color
+      title: Centrality line color
       type: String
       default: 'blue'
       description:
@@ -358,7 +417,7 @@ options:
             Color of the vertical centrality line.
 
     - name: centralitylinewidth
-      title: Centrality Line Width
+      title: Centrality line width
       type: Number
       default: 1
       min: 0.1
@@ -368,7 +427,7 @@ options:
             Width of the vertical centrality line.
 
     - name: centralitylinetype
-      title: Centrality Line Type
+      title: Centrality line type
       type: List
       options:
         - title: Solid
@@ -391,7 +450,7 @@ options:
 # Plot Size Configuration ----
 
     - name: plotwidth
-      title: Plot Width
+      title: Plot width
       type: Integer
       default: 600
       min: 300
@@ -401,7 +460,7 @@ options:
             Width of each plot in pixels. Default is 600.
 
     - name: plotheight
-      title: Plot Height
+      title: Plot height
       type: Integer
       default: 450
       min: 300
@@ -411,7 +470,7 @@ options:
             Height of each plot in pixels. Default is 450.
 
     - name: addGGPubrPlot
-      title: Add ggpubr histogram
+      title: Publication-ready histogram
       type: Bool
       default: false
       description:
@@ -419,7 +478,7 @@ options:
             Add publication-ready histogram using ggpubr package.
 
     - name: ggpubrPalette
-      title: ggpubr Fill Color
+      title: Fill color
       type: String
       default: '#0073C2FF'
       description:
@@ -427,7 +486,7 @@ options:
             Fill color for ggpubr histogram (hex code).
 
     - name: ggpubrAddDensity
-      title: Add density curve (ggpubr)
+      title: Density curve
       type: Bool
       default: false
       description:
@@ -435,7 +494,7 @@ options:
             Add density curve overlay to ggpubr histogram.
 
     - name: ggpubrAddMean
-      title: Add mean line (ggpubr)
+      title: Mean line
       type: Bool
       default: false
       description:
@@ -443,7 +502,7 @@ options:
             Add vertical line at mean for ggpubr histogram.
 
     - name: addDistributionDiagnostics
-      title: Add distribution diagnostic plots
+      title: Distribution diagnostics
       type: Bool
       default: false
       description:
@@ -451,7 +510,7 @@ options:
             Add density plot, ECDF, and QQ plot for distribution assessment using ggpubr.
 
     - name: ggpubrDensityColor
-      title: Density Plot Fill Color
+      title: Density plot fill color
       type: String
       default: '#0073C2FF'
       description:

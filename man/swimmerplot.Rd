@@ -203,16 +203,3 @@ patient timelines, clinical events, milestones, and treatment responses.
 Features enhanced data validation and complete ggswim integration for
 professional clinical visualization.
 }
-\examples{
-data('swimmer_data_raw', package = 'ClinicoPath')
-
-swimmerplot(
-    data = swimmer_data_raw,
-    patientID = 'PatientID',
-    startTime = 'StartTime',
-    endTime = 'EndTime',
-    responseVar = 'BestResponse',
-    timeType = 'raw',
-    timeUnit = 'months')
-
-}

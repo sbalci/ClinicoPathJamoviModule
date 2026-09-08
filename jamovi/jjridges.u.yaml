@@ -181,6 +181,7 @@ children:
           - type: ComboBox
             name: legend_position
             label: Legend position
+            enable: (fill_var)
       - type: LayoutBox
         margin: large
         children:
@@ -243,10 +244,6 @@ children:
             name: height
             label: Plot height
             format: number
-          - type: TextBox
-            name: dpi
-            label: Plot DPI
-            format: number
   - type: CollapseBox
     label: Help & Guidance
     collapsed: true
@@ -265,3 +262,5 @@ children:
     children:
       - type: ComboBox
         name: clinicalPreset
+        events:
+          change: ./jjridges.events::onChange_clinicalPreset

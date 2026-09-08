@@ -17,6 +17,9 @@ jjhistostats(
   clinicalPreset = "custom",
   enableOneSampleTest = FALSE,
   test.value = 0,
+  alternative = "two.sided",
+  trimlevel = 0.2,
+  bfprior = 0.707,
   conf.level = 0.95,
   bf.message = FALSE,
   digits = 2,
@@ -69,8 +72,8 @@ nonparametric).}
 automatic bin width calculation will be used.}
 
 \item{binwidth}{Manual bin width for histogram. Only used when
-changebinwidth is TRUE. Smaller values create more bins, larger values
-create fewer bins.}
+changebinwidth is TRUE. When left automatic, the width is max(x) - min(x) /
+sqrt(N). Smaller values create more bins, larger values create fewer bins.}
 
 \item{resultssubtitle}{Whether to display statistical test results as
 subtitle in the plot, including the selected one-sample location test and
@@ -100,6 +103,24 @@ Only used when enableOneSampleTest is TRUE. Note: Testing against 0 is
 rarely clinically meaningful for most biomedical data. Consider using a
 clinically relevant threshold (e.g., reference range limit, treatment
 cutoff, or population norm) for meaningful hypothesis testing.}
+
+\item{alternative}{Direction of the one-sample test. 'two.sided' asks
+whether the centre differs from the test value in either direction;
+'greater' and 'less' are one-sided. Two-sided is the conventional default
+and the conservative choice - only pick a one-sided test if the direction
+was specified before seeing the data.}
+
+\item{trimlevel}{Proportion trimmed from EACH tail for the robust test and
+the robust centrality measure. The default of 0.2 discards the highest and
+lowest 20 percent of observations. Only used when 'Type of statistic' is
+Robust, or when the centrality measure is Robust.}
+
+\item{bfprior}{Scale of the Cauchy prior on effect size for the Bayesian
+test (the 'r' scale). The default 0.707 is JASP/BayesFactor's medium prior.
+A Bayes factor cannot be interpreted or reproduced without knowing this
+value, so it is reported alongside the result. Larger values place more
+prior mass on large effects, which lowers the Bayes factor for small
+observed effects.}
 
 \item{conf.level}{Confidence level for the interval reported in the plot
 subtitle, between 0.5 and 0.999. The old bounds allowed 1, at which the

@@ -1,7 +1,7 @@
 ---
 name: jjarcdiagram
 title: Arc Diagram
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Network
 version: '1.0.8'
 jas: '1.2'
@@ -67,7 +67,7 @@ options:
             The data as a data frame.
 
     - name: source
-      title: Source Node (From)
+      title: Source node (from)
       type: Variable
       default: NULL
       suggested: [ nominal ]
@@ -84,7 +84,7 @@ options:
             • Treatment pathways: Initial intervention
 
     - name: target
-      title: Target Node (To)
+      title: Target node (to)
       type: Variable
       default: NULL
       suggested: [ nominal ]
@@ -101,7 +101,7 @@ options:
             • Treatment pathways: Next intervention in sequence
 
     - name: weight
-      title: Edge Weight (Strength)
+      title: Edge weight (optional)
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
@@ -120,7 +120,7 @@ options:
             Leave empty for unweighted networks (all edges treated equally).
 
     - name: group
-      title: Node Categories (Color Coding)
+      title: Node categories (optional)
       type: Variable
       suggested: [ nominal ]
       permitted: [ factor ]
@@ -131,19 +131,19 @@ options:
             patient subtypes, disease categories, or functional classifications.
 
     - name: analysisPreset
-      title: Analysis Type
+      title: Analysis type
       type: List
       options:
         - name: custom
-          title: Custom Network
+          title: Custom network
         - name: gene_interaction  
-          title: Gene Interaction Network ( Recommended)
+          title: Gene interaction network (recommended)
         - name: patient_network
-          title: Patient Similarity Network ( Clinical)
+          title: Patient similarity network (clinical)
         - name: pathway_network
-          title: Biological Pathway Network ( Research)
+          title: Biological pathway network (research)
         - name: comorbidity_network
-          title: Disease Co-occurrence Network ( Epidemiology)
+          title: Disease co-occurrence network (epidemiology)
       default: custom
       description:
           R: >
@@ -160,20 +160,20 @@ options:
             Whether to display node points along the arc baseline. When enabled, nodes are shown as circles at their sorted positions.
 
     - name: nodeSize
-      title: Node Size
+      title: Node size
       type: List
       options:
         - title: Fixed
           name: fixed
-        - title: By Degree
+        - title: By degree
           name: degree
       default: fixed
       description:
           R: >
-            Method for determining node sizes. 'Fixed' uses constant size, 'By Degree' scales nodes proportionally to their connectivity (number of connections).
+            Method for determining node sizes. 'Fixed' uses constant size, 'By degree' scales nodes proportionally to their connectivity (number of connections).
 
     - name: nodeSizeValue
-      title: Fixed Node Size
+      title: Node size value
       type: Number
       default: 2
       min: 0.1
@@ -183,29 +183,29 @@ options:
             Size of nodes when using fixed sizing, or base size multiplier when using degree-based sizing. Range: 0.1 to 10.
 
     - name: sortNodes
-      title: Sort Nodes
+      title: Node order
       type: List
       options:
         - title: None
           name: none
-        - title: By Name
+        - title: By name
           name: name
-        - title: By Group
+        - title: By group
           name: group
-        - title: By Degree
+        - title: By degree
           name: degree
       default: none
       description:
           R: >
-            Order in which nodes are arranged along the baseline. 'None' preserves original order, 'By Name' sorts alphabetically, 'By Group' clusters by categories, 'By Degree' orders by connectivity.
+            Order in which nodes are arranged along the baseline. 'None' preserves original order, 'By name' sorts alphabetically, 'By group' clusters by categories, 'By degree' orders by connectivity.
 
     - name: sortDecreasing
-      title: Sort decreasing
+      title: Descending order
       type: Bool
       default: false
       description:
           R: >
-            When sorting nodes, whether to use descending order. Only applies when Sort Nodes is not 'None'.
+            When sorting nodes, whether to use descending order. Only applies when Node order is not 'None'.
 
     - name: horizontal
       title: Horizontal layout
@@ -216,20 +216,20 @@ options:
             Layout orientation of the arc diagram. When TRUE, nodes are arranged horizontally with arcs above. When FALSE, nodes are arranged vertically with arcs to the side.
 
     - name: arcWidth
-      title: Arc Width
+      title: Arc width
       type: List
       options:
         - title: Fixed
           name: fixed
-        - title: By Weight
+        - title: By weight
           name: weight
       default: fixed
       description:
           R: >
-            Method for determining arc line widths. 'Fixed' uses constant width, 'By Weight' scales arc thickness proportionally to edge weights.
+            Method for determining arc line widths. 'Fixed' uses constant width, 'By weight' scales arc thickness proportionally to edge weights.
 
     - name: arcWidthValue
-      title: Fixed Arc Width
+      title: Arc width value
       type: Number
       default: 1
       min: 0.1
@@ -239,7 +239,7 @@ options:
             Width of arcs when using fixed sizing, or base width when using weight-based sizing. Range: 0.1 to 5.
 
     - name: arcTransparency
-      title: Arc Transparency
+      title: Arc transparency
       type: Number
       default: 0.5
       min: 0
@@ -257,22 +257,22 @@ options:
             Whether to treat the network as directed (edges have direction from source to target) or undirected (edges represent bidirectional relationships).
 
     - name: aggregateEdges
-      title: Aggregate duplicate edges
+      title: Duplicate edge aggregation
       type: Bool
       default: true
       description:
           R: >
             "RECOMMENDED: Combine multiple edges between the same nodes by summing weights.
             Why it matters:
-            Ensures network density <= 1.0 (without aggregation, density can exceed 1.0)
-            Prevents inflated centrality measures
+            Prevents inflated degree, strength and centrality measures
+            (density is unaffected either way: it is computed on distinct node pairs)
             Provides accurate statistical summaries
             Example: If Gene A→Gene B appears 3 times with weights (2, 3, 5),
             aggregation creates a single edge with weight 10.
             When to disable: Only if you specifically need to preserve parallel edges for specialized analyses."
 
     - name: weightMode
-      title: Edge Weight Interpretation
+      title: Edge weight interpretation
       type: List
       options:
         - name: strength
@@ -292,24 +292,24 @@ options:
             Most clinical/biological networks use STRENGTH mode."
 
     - name: arcColorMode
-      title: Arc Coloring (for Groups)
+      title: Arc color
       type: List
       options:
         - name: source
-          title: Color by Source Node
+          title: By source node
         - name: target
-          title: Color by Target Node
+          title: By target node
         - name: gradient
-          title: Gradient (Source to Target)
+          title: Gradient (source to target)
       default: source
       description:
           R: >
             How to color arcs when nodes are grouped. 'Source' colors arcs by source node's group,
             'Target' by target node's group, 'Gradient' creates a gradient from source to target colors.
-            Only applies when Color Nodes by Group is enabled.
+            Only applies when Node color by group is enabled.
 
     - name: colorByGroup
-      title: Color nodes by group
+      title: Node color by group
       type: Bool
       default: false
       description:
@@ -333,7 +333,7 @@ options:
             Whether to display a color legend when nodes are colored by groups. Only appears when grouping variable is specified and color by group is enabled.
 
     - name: labelSize
-      title: Label Size
+      title: Label size
       type: Number
       default: 0.8
       min: 0.1
@@ -343,7 +343,7 @@ options:
             Size of node labels (text). 0.8 is standard size, values above 1.0 increase label size, below 1.0 decrease it. Range: 0.1 to 2.0.
 
     - name: plotTitle
-      title: Plot Title
+      title: Plot title
       type: String
       default: ""
       description:

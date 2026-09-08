@@ -85,12 +85,6 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
 
-        # === Helper: Escape Variable Names ===
-        .escapeVarName = function(var) {
-            if (is.null(var) || var == "") return(var)
-            jmvcore::composeTerm(var)
-        },
-        
         .option = function(option) {
             if (option %in% names(private$overrides)) {
                 return(private$overrides[[option]])
@@ -107,8 +101,16 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # private$overrides <- list(), this MUST be re-applied after every
         # .applyClinicalPreset() call (both .init and .run) or the legend is hidden.
         .applyAutoLegendOverride = function() {
+            # Only rescue the DEFAULT. This used to fire on any "none", so a user who
+            # deliberately chose "Legend position: none" with a fill variable had it
+            # rewritten to "right" and could never turn the legend off. self$options is
+            # the raw, user-visible value; if it is anything other than the shipped
+            # default the choice is deliberate and is left alone.
+            default_pos <- "none"
             if (!is.null(self$options$fill_var) &&
-                private$.option("legend_position") == "none") {
+                identical(self$options$legend_position, default_pos) &&
+                private$.option("legend_position") == "none" &&
+                isTRUE(self$options$show_fill_legend)) {
                 private$overrides$legend_position <- "right"
             }
         },
@@ -164,7 +166,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p><strong>", .("Export Options:"), "</strong></p>",
                     "<ul>",
                         "<li>", .("Adjust plot width and height in Export Options"), "</li>",
-                        "<li>", .("Set DPI for high-resolution output (300 DPI recommended for publications)"), "</li>",
+                        "<li>", .("Choose the export resolution in jamovi's Save Image As dialog"), "</li>",
                         "<li>", .("Use right-click \u2192 Save Image As for quick export"), "</li>",
                     "</ul>"
                 ))
@@ -314,8 +316,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .validateQuantiles = function(quantile_string) {
             tryCatch({
-                # Split and trim whitespace
-                vals <- as.numeric(trimws(strsplit(quantile_string, ",")[[1]]))
+                # suppressWarnings: the NA test below is the real check, and the raw
+                # "NAs introduced by coercion" warning otherwise reached the Analysis
+                # Notes panel duplicating the notice raised in the handler.
+                vals <- suppressWarnings(
+                    as.numeric(trimws(strsplit(quantile_string, ",")[[1]])))
                 
                 # Check for parsing errors
                 if (any(is.na(vals))) {
@@ -404,10 +409,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             text_summary <- paste0(
                 "<div style='background-color: rgba(255, 203, 33, 0.14); border:1px solid #ffc107; padding:15px; margin:10px 0; font-family:monospace; color: inherit;'>",
                 "<h4 style='color:#f57c00; margin-top:0;'> Copy-Ready Report Summary</h4>",
-                "<p style='font-size:11px; color:#666; margin-bottom:10px;'>",
+                "<p style='font-size:11px; opacity:0.75; margin-bottom:10px;'>",
                 "Select and copy the text below for inclusion in reports or presentations.",
                 "</p>",
-                "<div style='background:white; padding:12px; border:1px solid #ddd;'>"
+                "<div style='background-color: rgba(127, 127, 127, 0.08); color: inherit; padding:12px; border:1px solid rgba(127, 127, 127, 0.35);'>"
             )
 
             # Add header
@@ -467,10 +472,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     text_summary <- paste0(text_summary,
                         "<p>Method: ", method_line, "</p>",
                         if (length(unique(methods_used)) > 1)
-                            paste0("<p>Note: not every comparison used the same test. Comparisons ",
-                                   "whose normality or equal-variance check failed were switched ",
-                                   "to a rank-based test; the Method column of the statistical ",
-                                   "table records what each row used.</p>")
+                            paste0("<p>Note: not every comparison used the same test. Some ",
+                                   "comparisons fell back to a different method or could not ",
+                                   "be computed; the Method column of the statistical table ",
+                                   "records what each row actually used.</p>")
                         else "",
                         "<p>See full statistical table for p-values, effect sizes, and confidence intervals.</p>"
                     )
@@ -479,7 +484,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             text_summary <- paste0(text_summary,
                 "</div>",
-                "<p style='font-size:10px; color:#999; margin-top:10px;'>",
+                "<p style='font-size:10px; opacity:0.6; margin-top:10px;'>",
                 "Generated by ClinicoPath Advanced Ridge Plot Analysis",
                 "</p>",
                 "</div>"
@@ -554,7 +559,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 "<h4 style='color:#2e7d32;'>Publication Tips</h4>",
                 "<ul>",
-                "<li>Set DPI to 300 for journal submissions (Export Options)</li>",
+                "<li>Export at high resolution with right-click \u2192 Save image as (jamovi sets the resolution there)</li>",
                 "<li>Use colorblind-safe palettes (Clinical or Viridis)</li>",
                 "<li>Add boxplots inside ridges to show quartiles and outliers</li>",
                 "<li>Label axes clearly with units (e.g., 'Ki-67 Index (%)', 'Tumor Size (mm)')</li>",
@@ -585,7 +590,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Build assumptions based on test type
             html <- paste0(
                 "<div style='background-color: rgba(255, 202, 33, 0.23); border-left:4px solid #ffc107; padding:15px; margin:10px 0; color: inherit;'>",
-                "<h3 style='color:#856404; margin-top:0;'> Statistical Assumptions & Caveats</h3>",
+                "<h3 style='color:#856404; margin-top:0;'> Statistical Assumptions &amp; Caveats</h3>",
                 "<p><strong>Selected Test Type:</strong> ", tools::toTitleCase(gsub("_", " ", test_type)), "</p>"
             )
 
@@ -671,130 +676,132 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(html)
         },
 
-        # TODO (UX): L719 emits `warning(msg)` AND L723-728 sets `warnings$setContent`.
-        # Duplicate notification; keep only the panel since R warnings are not visible
-        # to the typical jamovi UI user.
+        # Single source of truth for the clinical presets: (option, value, label).
+        # jamovi/js/jjridges.events.js holds the SAME table so the GUI controls show the
+        # values that actually run; tests/testthat/test-jjridges-residual.R parses both
+        # files and fails if they ever drift apart.
+        .PRESETS = list(
+            biomarker_distribution = list(
+                list("plot_type",       "density_ridges",      "Plot type set to density_ridges"),
+                list("add_boxplot",     TRUE,                  "Boxplots enabled"),
+                list("add_quantiles",   TRUE,                  "Quantile lines enabled"),
+                list("quantiles",       "0.25, 0.5, 0.75",     "Quantiles 0.25, 0.5, 0.75"),
+                list("theme_style",     "theme_pubr",          "Publication theme"),
+                list("color_palette",   "clinical_colorblind", "Clinical palette"),
+                list("show_stats",      TRUE,                  "Statistics enabled"),
+                list("test_type",       "nonparametric",       "Nonparametric tests"),
+                list("effsize_type",    "cliff_delta",         "Cliff's delta effect size"),
+                list("p_adjust_method", "fdr",                 "FDR correction")),
+
+            treatment_response = list(
+                list("plot_type",       "violin_ridges",       "Plot type set to violin_ridges"),
+                list("show_stats",      TRUE,                  "Statistics enabled"),
+                list("test_type",       "nonparametric",       "Nonparametric tests"),
+                list("effsize_type",    "cliff_delta",         "Cliff's delta effect size"),
+                list("theme_style",     "theme_pubr",          "Publication theme"),
+                list("color_palette",   "clinical_colorblind", "Clinical palette"),
+                list("add_boxplot",     TRUE,                  "Boxplots enabled"),
+                list("p_adjust_method", "bonferroni",          "Bonferroni correction")),
+
+            age_by_stage = list(
+                list("plot_type",       "density_ridges",      "Plot type set to density_ridges"),
+                list("add_mean",        TRUE,                  "Mean lines enabled"),
+                list("add_median",      TRUE,                  "Median lines enabled"),
+                list("theme_style",     "theme_pubr",          "Publication theme"),
+                list("color_palette",   "viridis",             "Viridis palette"),
+                list("show_stats",      TRUE,                  "Statistics enabled"),
+                list("test_type",       "parametric",          "Parametric tests"),
+                list("effsize_type",    "d",                   "Cohen's d effect size")),
+
+            tumor_size_comparison = list(
+                list("plot_type",       "density_ridges",      "Plot type set to density_ridges"),
+                list("add_boxplot",     TRUE,                  "Boxplots enabled"),
+                list("add_quantiles",   TRUE,                  "Quantile lines enabled"),
+                list("quantiles",       "0.25, 0.5, 0.75",     "Quantiles 0.25, 0.5, 0.75"),
+                list("theme_style",     "theme_pubr",          "Publication theme"),
+                list("color_palette",   "clinical_colorblind", "Clinical palette"),
+                list("show_stats",      TRUE,                  "Statistics enabled"),
+                list("test_type",       "nonparametric",       "Nonparametric tests"),
+                list("effsize_type",    "hodges_lehmann",      "Hodges-Lehmann shift"),
+                list("p_adjust_method", "holm",                "Holm correction")),
+
+            lab_values_by_group = list(
+                list("plot_type",       "density_ridges",      "Plot type set to density_ridges"),
+                list("add_boxplot",     TRUE,                  "Boxplots enabled"),
+                list("theme_style",     "theme_pubr",          "Publication theme"),
+                list("color_palette",   "clinical_colorblind", "Clinical palette"),
+                list("show_stats",      TRUE,                  "Statistics enabled"),
+                list("test_type",       "robust",              "Robust tests"),
+                list("effsize_type",    "g",                   "Hedges' g effect size"),
+                list("p_adjust_method", "fdr",                 "FDR correction")),
+
+            survival_time_distribution = list(
+                list("plot_type",       "density_ridges",      "Plot type set to density_ridges"),
+                list("add_median",      TRUE,                  "Median lines enabled"),
+                list("add_quantiles",   TRUE,                  "Quantile lines enabled"),
+                list("quantiles",       "0.25, 0.5, 0.75",     "Quantiles 0.25, 0.5, 0.75"),
+                list("theme_style",     "theme_pubr",          "Publication theme"),
+                list("color_palette",   "Set2",                "Set2 palette"),
+                list("show_stats",      TRUE,                  "Statistics enabled"),
+                list("test_type",       "nonparametric",       "Nonparametric tests"),
+                list("effsize_type",    "hodges_lehmann",      "Hodges-Lehmann shift"),
+                list("p_adjust_method", "holm",                "Holm correction"))
+        ),
+
         .applyClinicalPreset = function() {
             preset <- self$options$clinicalPreset
             private$overrides <- list()
-            if (preset == "custom") {
+
+            spec <- private$.PRESETS[[preset]]
+            if (identical(preset, "custom") || is.null(spec))
                 return()
-            }
 
-            apply_override <- function(name, value, label = NULL) {
+            labels <- character(0)
+            for (entry in spec) {
+                name  <- entry[[1]]
+                value <- entry[[2]]
+                labels <- c(labels, entry[[3]])
+
                 opt <- self$options$option(name)
-                if (!is.null(opt) && !is.null(value)) {
-                    if (!identical(opt$value, value)) {
-                        # `private` is an environment reference, so plain `<-`
-                        # modifies private$overrides in place (identical to the
-                        # former `<<-`, without an enclosing-scope assignment).
-                        private$overrides[[name]] <- value
-                        attr(private$overrides[[name]], "label") <- if (!is.null(label)) label else paste0(name, " set to ", value)
-                    }
-                    # NOTE: do NOT write `opt$value <- value` here. jamovi option objects are
-                    # read-only at runtime; the override is already recorded in private$overrides
-                    # and read back via private$.option(name), so the mutation is both redundant
-                    # and a crash risk on strict jamovi builds.
-                }
+                if (is.null(opt))
+                    next
+
+                # In the jamovi GUI, jjridges.events.js has already written this value
+                # into the option, so the control the user sees agrees with what runs and
+                # nothing is recorded here. Callers from R get no JavaScript, so the value
+                # is recorded as an override and read back through private$.option().
+                #
+                # Do NOT write `opt$value <- value`: jamovi option objects are read-only at
+                # runtime and the assignment is a crash risk on strict builds.
+                if (!identical(opt$value, value))
+                    private$overrides[[name]] <- value
             }
 
-            # Clinical presets optimized for medical research
-            if (preset == "biomarker_distribution") {
-                # For comparing biomarker levels across patient groups
-                apply_override("plot_type", "density_ridges", "Plot type set to density_ridges")
-                apply_override("add_boxplot", TRUE, "Boxplots enabled")
-                apply_override("add_quantiles", TRUE, "Quantile lines enabled")
-                apply_override("quantiles", "0.25, 0.5, 0.75")
-                apply_override("theme_style", "theme_pubr", "Publication theme")
-                apply_override("color_palette", "clinical_colorblind", "Clinical palette")
-                apply_override("show_stats", TRUE, "Statistics enabled")
-                apply_override("test_type", "nonparametric", "Nonparametric tests")
-                apply_override("effsize_type", "cliff_delta", "Cliff's delta effect size")
-                apply_override("p_adjust_method", "fdr", "FDR correction")
+            preset_label <- tools::toTitleCase(gsub("_", " ", preset))
+            msg <- paste0("Clinical preset \u2014 ", preset_label, ": ",
+                          paste(labels, collapse = "; "), ".")
 
-            } else if (preset == "treatment_response") {
-                # For comparing treatment outcomes across groups
-                apply_override("plot_type", "violin_ridges", "Plot type set to violin_ridges")
-                apply_override("show_stats", TRUE, "Statistics enabled")
-                apply_override("test_type", "nonparametric", "Nonparametric tests")
-                apply_override("effsize_type", "cliff_delta", "Cliff's delta effect size")
-                apply_override("theme_style", "theme_pubr", "Publication theme")
-                apply_override("color_palette", "clinical_colorblind", "Clinical palette")
-                apply_override("add_boxplot", TRUE, "Boxplots enabled")
-                apply_override("p_adjust_method", "bonferroni", "Bonferroni correction")
-
-            } else if (preset == "age_by_stage") {
-                # For age distribution across disease stages
-                apply_override("plot_type", "density_ridges", "Plot type set to density_ridges")
-                apply_override("add_mean", TRUE, "Mean lines enabled")
-                apply_override("add_median", TRUE, "Median lines enabled")
-                apply_override("theme_style", "theme_pubr", "Publication theme")
-                apply_override("color_palette", "viridis", "Viridis palette")
-                apply_override("show_stats", TRUE, "Statistics enabled")
-                apply_override("test_type", "parametric", "Parametric tests")
-                apply_override("effsize_type", "d", "Cohen's d effect size")
-
-            } else if (preset == "tumor_size_comparison") {
-                # For tumor size/dimension comparisons
-                apply_override("plot_type", "density_ridges", "Plot type set to density_ridges")
-                apply_override("add_boxplot", TRUE, "Boxplots enabled")
-                apply_override("add_quantiles", TRUE, "Quantile lines enabled")
-                apply_override("quantiles", "0.25, 0.5, 0.75")
-                apply_override("theme_style", "theme_pubr", "Publication theme")
-                apply_override("color_palette", "clinical_colorblind", "Clinical palette")
-                apply_override("show_stats", TRUE, "Statistics enabled")
-                apply_override("test_type", "nonparametric", "Nonparametric tests")
-                apply_override("effsize_type", "hodges_lehmann", "Hodges-Lehmann shift")
-                apply_override("p_adjust_method", "holm", "Holm correction")
-
-            } else if (preset == "lab_values_by_group") {
-                # For laboratory values across patient groups
-                apply_override("plot_type", "density_ridges", "Plot type set to density_ridges")
-                apply_override("add_boxplot", TRUE, "Boxplots enabled")
-                apply_override("theme_style", "theme_pubr", "Publication theme")
-                apply_override("color_palette", "clinical_colorblind", "Clinical palette")
-                apply_override("show_stats", TRUE, "Statistics enabled")
-                apply_override("test_type", "robust", "Robust tests")
-                apply_override("effsize_type", "g", "Hedges' g effect size")
-                apply_override("p_adjust_method", "fdr", "FDR correction")
-
-            } else if (preset == "survival_time_distribution") {
-                # For survival time or time-to-event distributions
-                apply_override("plot_type", "density_ridges", "Plot type set to density_ridges")
-                apply_override("add_median", TRUE, "Median lines enabled")
-                apply_override("add_quantiles", TRUE, "Quantile lines enabled")
-                apply_override("quantiles", "0.25, 0.5, 0.75")
-                apply_override("theme_style", "theme_pubr", "Publication theme")
-                apply_override("color_palette", "Set2", "Set2 palette")
-                apply_override("show_stats", TRUE, "Statistics enabled")
-                apply_override("test_type", "nonparametric", "Nonparametric tests")
-                apply_override("effsize_type", "hodges_lehmann", "Hodges-Lehmann shift")
-                apply_override("p_adjust_method", "holm", "Holm correction")
-            }
-
+            # The banner is built from the preset TABLE, not from private$overrides. It used
+            # to be built from the overrides, so once the UI already carried the preset's
+            # values there was nothing to record and the banner vanished - exactly the case
+            # the events JS now creates for every GUI user.
             if (length(private$overrides) > 0) {
-                labels <- vapply(private$overrides, function(x) {
-                    lbl <- attr(x, "label")
-                    if (!is.null(lbl)) return(lbl)
-                    return(as.character(x))
-                }, character(1))
-                preset_label <- gsub("_", " ", preset)
-                preset_label <- tools::toTitleCase(preset_label)
-                msg <- paste0(
-                    "CLINICAL PRESET OVERRIDE: ", preset_label, " (",
-                    paste(labels, collapse = "; "),
-                    ")."
-                )
-
-                # Overwrite (do NOT prepend): this block is the only writer of the
-                # warnings panel and runs in both .init and .run, so prepending would
-                # duplicate the banner on every run. The former warning(msg) call was
-                # removed - R warnings are invisible to jamovi users and redundant
-                # with this panel.
-                html_msg <- paste0("<p style='color:#856404;'>", msg, "</p>")
-                self$results$warnings$setContent(html_msg)
-                self$results$warnings$setVisible(TRUE)
+                msg <- paste0(msg, " These values were applied by the analysis and may not ",
+                              "be reflected in the options panel.")
+            } else {
+                msg <- paste0(msg, " Change any of them individually in the options panel.")
             }
+
+            # Overwrite (do NOT prepend): this block is the only writer of the warnings
+            # panel and runs in both .init and .run, so prepending would duplicate the
+            # banner on every run. No background element here, so a fixed dark-brown
+            # foreground would be unreadable on jamovi's dark theme; carry the amber cue in
+            # a translucent tint and let the text colour come from the theme.
+            self$results$warnings$setContent(paste0(
+                "<p style='background-color: rgba(255, 193, 7, 0.16); ",
+                "border-left:4px solid #ffc107; padding:8px 12px; margin:10px 0; ",
+                "color: inherit;'>", msg, "</p>"))
+            self$results$warnings$setVisible(TRUE)
         },
 
         .run = function() {
@@ -1021,6 +1028,14 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                            " observations remain.")
                 )
             }
+
+            # Levels with no surviving rows (filtered out upstream, or never present)
+            # stay in the factor, and table() then counts them at 0. .validateData read
+            # that as "a group with fewer than 3 observations" and named a group the user
+            # cannot see anywhere in the output.
+            plot_data$y <- droplevels(plot_data$y)
+            if ("fill" %in% names(plot_data)) plot_data$fill <- droplevels(plot_data$fill)
+            if ("facet" %in% names(plot_data)) plot_data$facet <- droplevels(plot_data$facet)
 
             # Reverse order if requested
             if (self$options$reverse_order) {
@@ -1565,6 +1580,14 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateStatistics = function(data) {
             stats_table <- self$results$statistics
 
+            # jamovi reuses this R6 instance across option changes, and addRow() does not
+            # reject a rowKey it already holds. Without this the table grew by a full set of
+            # rows on every re-run (3 groups -> 3, 6, 9 rows) and asDF then threw
+            # "duplicate 'row.names' are not allowed", which .generateReportSummary catches
+            # and silently degrades. clearWith only covers the variable options, so any
+            # visual change (scale, alpha, theme) re-ran this with the old rows still there.
+            stats_table$deleteRows()
+
             # Build grouping variables: always include y, optionally add fill and facet
             grouping_vars <- "y"
             if (!is.null(self$options$fill_var) && "fill" %in% names(data)) {
@@ -1725,10 +1748,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                ": ", variance_note)))
                 }
 
+                # A failed normality check is REPORTED, not acted on: selecting the test
+                # from a diagnostic p-value inflates the type-I error of the test finally
+                # reported. Welch's t-test is run either way; .generateTests summarises the
+                # flagged comparisons in one notice (one per comparison floods the panel).
                 if (length(assumption_violations) > 0) {
-                    # Auto-suggest and switch to nonparametric for robustness.
-                    # Accumulate one line per comparison; a single summarized notice is
-                    # emitted in .generateTests (avoids flooding with many groups).
                     private$.assumptionSwitches <- c(
                         private$.assumptionSwitches,
                         paste0(
@@ -1737,21 +1761,14 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             ": ", paste(assumption_violations, collapse = "; ")
                         )
                     )
-
-                    test_result <- t.test(data1, data2)
-                    statistic <- test_result$statistic
-                    p_value <- test_result$p.value
-                    ci_lower <- test_result$conf.int[1]
-                    ci_upper <- test_result$conf.int[2]
-                    test_method <- "t-test"
-                } else {
-                    test_result <- t.test(data1, data2)
-                    statistic <- test_result$statistic
-                    p_value <- test_result$p.value
-                    ci_lower <- test_result$conf.int[1]
-                    ci_upper <- test_result$conf.int[2]
-                    test_method <- "t-test"
                 }
+
+                test_result <- t.test(data1, data2)
+                statistic <- test_result$statistic
+                p_value <- test_result$p.value
+                ci_lower <- test_result$conf.int[1]
+                ci_upper <- test_result$conf.int[2]
+                test_method <- "t-test"
 
             } else if (test_type == "nonparametric") {
                 test_result <- wilcox.test(data1, data2, conf.int = TRUE)
@@ -1923,8 +1940,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Measured: eta2 = 0.137 was reported as [0.038, 1.000]; the two-sided
                         # interval is [0.025, 0.288], which is a reportable result rather than
                         # an apparently useless one.
-                        result <- effectsize::eta_squared(model, ci = 0.95,
-                                                          alternative = "two.sided")
+                        # effectsize emits an informational message for one-way designs
+                        # ("partial eta squared is equivalent to eta squared"); jamovi surfaces it in
+                        # Analysis Notes, where it reads as a problem rather than a note.
+                        result <- suppressMessages(
+                            effectsize::eta_squared(model, ci = 0.95, alternative = "two.sided"))
                         effect_size <- as.numeric(result$Eta2)
                         ci_lower <- result$CI_low
                         ci_upper <- result$CI_high
@@ -1942,8 +1962,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         model <- aov(value ~ group, data = df)
                         # See the eta-squared branch above: two.sided, so this column means the
                         # same thing whichever effect size the user picked.
-                        result <- effectsize::omega_squared(model, ci = 0.95,
-                                                            alternative = "two.sided")
+                        # effectsize emits an informational message for one-way designs
+                        # ("partial omega squared is equivalent to omega squared"); jamovi surfaces it in
+                        # Analysis Notes, where it reads as a problem rather than a note.
+                        result <- suppressMessages(
+                            effectsize::omega_squared(model, ci = 0.95, alternative = "two.sided"))
                         effect_size <- as.numeric(result$Omega2)
                         ci_lower <- result$CI_low
                         ci_upper <- result$CI_high
@@ -2119,6 +2142,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .generateTests = function(data) {
             tests_table <- self$results$tests
+
+            # See .generateStatistics: addRow() accepts duplicate rowKeys, so the table has
+            # to be emptied before it is refilled or it accumulates across re-runs.
+            tests_table$deleteRows()
 
             # Reset the assumption-switch accumulator for this run
             private$.assumptionSwitches <- character(0)
@@ -2383,25 +2410,27 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
 
             plot <- image$state
+            if (is.null(plot))
+                return(FALSE)
 
-            if (!is.null(plot)) {
-                # Apply DPI setting for high-resolution output
-                dpi <- self$options$dpi
-                if (!is.null(dpi) && dpi > 0) {
-                    # Store current setting and guarantee restoration on exit
-                    old_dpi <- getOption("device.dpi", 72)
-                    on.exit(options(device.dpi = old_dpi), add = TRUE)
-                    # Set requested DPI
-                    options(device.dpi = dpi)
-                    # Print plot with new DPI
-                    print(plot)
-                } else {
-                    print(plot)
+            # There is no per-analysis DPI knob to set here. The former code assigned
+            # options(device.dpi = <n>) inside this renderer, which jamovi has already
+            # read by the time it calls us - the device is open. Measured: the rendered
+            # PNG was byte-identical and the same file size at 72 and at 600, while the
+            # About panel told users to set 300 for journal submission. The option was
+            # removed rather than left as a control that does nothing; resolution comes
+            # from jamovi's own right-click "Save image as" dialog.
+            #
+            # ggridges emits "Picking joint bandwidth of <x>" from print(); jamovi routes
+            # it to the Analysis Notes panel on EVERY render, where it reads as a problem.
+            withCallingHandlers(
+                print(plot),
+                message = function(m) {
+                    if (grepl("Picking joint bandwidth", conditionMessage(m), fixed = TRUE))
+                        invokeRestart("muffleMessage")
                 }
-                return(TRUE)
-            }
-
-            return(FALSE)
+            )
+            return(TRUE)
         },
         
         .calculateCliffsDelta = function(x, y) {

@@ -59,21 +59,21 @@
 
 ## Distribution
 
-jjhistostats
-jjridges
-jwaffle
+- jjhistostats
+- jjridges
+- jwaffle
 
 ## Lines / Network
 
-linechart
-jjarcdiagram
+- linechart
+- jjarcdiagram
 
 # jsurvival
 
 ## ClinicoPath Survival
 
 - multisurvival
-- singlearm 
+- singlearm
 - survival
 - survivalcont
 
@@ -2848,6 +2848,7 @@ variable names with spaces/punctuation/Unicode on both the raw-rows and the weig
 ### /fix-function 2026-09-05
 
 **Fixed** (regression tests in `test-chisqposttest-release-review.R`):
+
 - [bug] `.validateAssumptions()` overwrote a "severe" expected-count level with "moderate" whenever n < 20, so the
   panel colour and severity were wrong for exactly the tables that trigger both. Now escalate-only.
 - [bug] Fisher wording claimed a low-expected-count fallback even with "Always Fisher's exact" selected
@@ -2861,6 +2862,7 @@ variable names with spaces/punctuation/Unicode on both the raw-rows and the weig
 - [minor] `.plot()` returns `FALSE`, not `NULL`, when the plot option is off.
 
 **Follow-ups (out of scope)**:
+
 - [ ] [i18n] Catalog refresh (`jmvtools::i18nUpdate`) so `catalog.pot`/`tr.po` pick up the ~40 new msgids. Not run
       here: it regenerates the module-wide catalogs, which another session is also touching.
 - [ ] [i18n] `test_used` ("Chi-square", "Fisher's exact", "Fisher's exact (Monte Carlo)") doubles as a logic key
@@ -2887,7 +2889,7 @@ no validation against established packages. Regression tests appended to `test-c
 ### /review-function 2026-09-05
 
 **Fixed**: hardcoded `set.seed(42)` in `.calculatePhiCI()` replaced by a `seed` Integer option (default 42, `.a.yaml`
-+ `.u.yaml` TextBox enabled by `phiCI` + `posthocTable` clearWith); `is.null()` fallback keeps 42 until
+- `.u.yaml` TextBox enabled by `phiCI` + `posthocTable` clearWith); `is.null()` fallback keeps 42 until
 `jmvtools::prepare()` regenerates the header and wrapper. Unused `total_comparisons` assignment removed from
 `.robustPairwiseTestsChunked()`.
 
@@ -2896,6 +2898,7 @@ R wrapper gains `seed = 42` after the next `prepare()` + `document()`. Then veri
 bootstrap interval, a different seed still runs.
 
 **Follow-ups**:
+
 - [ ] [i18n] tr.po has 11 of 217 `.()` strings translated and 88 not yet in the catalog; run the catalog refresh and
       `/prepare-translation chisqposttest`.
 - [ ] [reporting] Pairwise table has no df column; a 2xC sub-table has C-1 df, so the chi-square statistic alone is
@@ -4411,6 +4414,7 @@ overwritten on the next module update, which is why three separate bumps of
 ## multisurvival — /review-function 2026-09-02, fixes applied by /fix-function --apply the same day
 
 Runtime-confirmed bugs (one-line fixes, none applied):
+
 - [x] [BUG] `R/multisurvival.b.R:5087` `.plotRiskGroups` competing-risk branch references undefined `cif_df` (data frame is `cif`) -> "object 'cif_df' not found" whenever risk groups are plotted on a Fine-Gray model. Fix: `max(cif$time, na.rm = TRUE)`.
 - [x] [BUG] `R/multisurvival.b.R:3517` `.nomogram` `rms::datadist(mydata[, var_names])` drops to a bare vector for ONE predictor -> nomogram silently blank ("variable x does not have limits defined by datadist"). Fix: `drop = FALSE`.
 - [x] [BUG] `R/multisurvival.b.R:2838` `.personTimeAnalysis` uses the option label (`Sex`) to index janitor-cleaned cleanData (`sex`) -> per-group person-time rows never appear for capitalised/spaced names. Fix: index with `cleaneddata$myexplanatory_labelled[1]`, keep the option value for the label.
@@ -4419,6 +4423,7 @@ Runtime-confirmed bugs (one-line fixes, none applied):
 - [x] [TEST] add regression tests using a CAPITALISED variable name (person-time group rows), a single-predictor nomogram, and Fine-Gray + plotRiskGroups render.
 
 Clinical/statistical text:
+
 - [x] `survMetricsTable` prints "Good/Acceptable/Limited discrimination" cut-offs while the glossary says there are no universal C-index cut-offs; drop the verdict words or align them.
 - [x] `.plot_adj` competing-risk branch ignores `byplot` (standard branch honours it).
 - [x] `.todo` welcome text says survival time must be "in months" and cites ggstatsplot (no longer used); `analysistype` description omits `dfs`; roxygen class doc claims ML / frailty / spline / decision-tree features that do not exist.
@@ -4427,6 +4432,7 @@ Clinical/statistical text:
 - [x] finalfit header cell literally reads "Dependent: Surv(mytime, myoutcome)"; relabel with the user's variable names.
 
 i18n / theme / hygiene:
+
 - [ ] 202/209 `.()` strings untranslated in tr.po; `.todo` and all seven "Understanding ..." panels plus `.populateInteractionTables` prose are outside `.()` entirely; 2 `.()` strings carry a leading space, 1 contains `\n`, several are paste0-glued fragments ("with", "out of").
 - [ ] dark hex heading colours (#856404, #0056b3, #1976D2, #34495e ...) on translucent tints in ~40 style attrs -> low contrast in dark theme; add `color: inherit`.
 - [x] `timetypedata` is in NO clearWith; `timetypeoutput` missing from survMetricsTable/nomogram_display/cox_phTable/riskScoreTable etc. (113 entries added). Still open: `plot_adj` clearWith lists options the renderer never reads.
@@ -4440,6 +4446,7 @@ i18n / theme / hygiene:
 ## multisurvival — implement review recommendations (2026-09-02)
 
 Phase 1 (behaviour + hygiene), each slice verified with parse + full multisurvival tests:
+
 - [x] Delete dead helpers (.formatErrorMessage, .sanitizeStringInput, .processDataInChunks, .competingRiskCumInc, .createHRTable, .restoreOriginalNamesInMultiSurvivalTable, .assessClinicalSignificance, uncalled .addExplanations/.setExplanationContent), unused constants, commented-out method blocks.
 - [x] Dark theme: `color: #hex` text on translucent tints -> `color: inherit` (keep borders).
 - [x] `seed` option (Integer, default 1234) wired to the optimism bootstrap.
@@ -4458,12 +4465,14 @@ Phase 2 (i18n):
 Verified independently (scratchpad scripts, not committed): finalfit and adjusted-Cox HR/CI strings equal `survival::coxph` (qnorm(0.975)); standardised adjusted-survival table equals manual g-computation via `survfit(newdata)` at every tabulated timepoint (<6e-4); optimism-corrected C-index reproducible with `seed` and equal to a hand-written Harrell bootstrap (apparent to 1e-8, optimism to 1e-6); landmark HRs equal coxph on the manually filtered/shifted data; DFS/OS/cause/compete event counts match the four-bucket coding; person-time overall and per-group rows equal hand sums; nomogram risk axis `1 - s0^exp(lp)` equals `survfit(cph, newdata)` to 1e-8.
 
 Fixed in this pass:
+
 - [x] `.run` completion notice: reverse-KM median follow-up counted competing events as censoring events in competing-risk mode (understated follow-up). Now only the `Censored` level is the reverse-KM event.
 - [x] `endplot` (default 60) silently truncated KM/adjusted curves when follow-up is longer (day-scale data cut at day 60). Info notice "Plot horizon shorter than follow-up" when `km || ac` and `endplot < max(mytime)`.
 - [x] `.a.yaml` `version:` 1.0.8 -> 1.0.9 (material changes since a665bbb17: seed option, dfs, notice consolidation, nomogram axes). Needs `jmvtools::prepare()` + `devtools::document()`.
 - [x] Regression tests appended to `tests/testthat/test-multisurvival-release-review.R` (reverse-KM competing censoring; plot-horizon notice present/absent).
 
 Still open (not blocking release):
+
 - [ ] `.plot`/`.plot3`/`.plotKM` grid.text fallback messages (~10) are outside `.()`; new notice strings above need `jmvtools::i18nUpdate("en"/"tr")`.
 - [ ] `.a.yaml` R `usage:` block is fully commented out, so `man/multisurvival.Rd` ships no example.
 - [ ] `sty` still lists a commented-out ggstatsplot style (`t2`) and `.r.yaml` carries `# visible: (sty:t2)`; harmless.
@@ -4484,6 +4493,7 @@ Still open (not blocking release):
 - [ ] Left as is (cosmetic): three vestigial bare `{ }` blocks in diagnosticmeta; `magrittr` in OncoPath Imports (pipes come through dplyr)
 
 ### Working notes
+
 - `jmvtools::prepare(".")` took 0.7 min today (memory said 20-25 min); document() timing in scratchpad/document.log
 - Harness for tests without an installed package: source R/utils.R + <fn>.h.R + <fn>.b.R, gsub("ClinicoPath:::?", "") in the test file, setwd("tests/testthat") for relative data/yaml paths
 
@@ -4503,6 +4513,7 @@ Still open (not blocking release):
 - [ ] test-decisioncurve.R and test-decisioncurve-comparison.R skip entirely under plain Rscript (`skip_on_cran()`); run with `NOT_CRAN=true`
 
 ### Working notes
+
 - jmvcore `.()` truncates any string at a space followed by `[` (translator msgctxt rule) — see memory `reference_jmvcore_translate_bracket_context_truncation`
 - `devtools::load_all()` + one test file took ~20 min per run in this session
 
@@ -4515,7 +4526,7 @@ Still open (not blocking release):
 - [x] `menuGroup: Exploration` -> `ExplorationT` (JamoviTest routing per CLAUDE.md). USER: move it back after testing.
 - [x] WON'T DO - `summary` rows are option-determined and the library audits flagged them for `.init()`, but three tests assert the table stays EMPTY when validation fails, and that is the correct UX: a red validation error above a table of named rows with blank counts reads as a half-finished analysis. `deleteRows()` in the reset block gives the same protection against row accumulation without that cost. Revisit only if the empty-on-failure behaviour is itself reconsidered.
 - [x] an explicit `<NA>` factor level (`addNA()`, `factor(exclude = NULL)`) was counted as a NEGATIVE, not as missing. Correction to the note filed in the first pass: the comparison does not return `NA` — `Ops.factor` compares level CODES, so `f == var1true` is plain `FALSE` for the NA-level case, `is.na()` is `FALSE` so `naOmit()` keeps the row, and the case inflated `falseCount` and the denominator of every percentage while the CASE EXCLUSION warning stayed silent. Measured on 5 cases with 2 NA-level: variable A reported 3/5 = 60% positive, actually 3/3 = 100% with 2 excluded. Fixed by re-levelling factors without the NA level before `naOmit()`, so the existing exclusion warning discloses them; regression test in `test-venn-release-review.R`. Reachable through the R API; jamovi's own UI does not create `<NA>` levels.
-- [x] optional variables 3-7 skipped the "contains only missing values" check that `var1`/`var2` get (`.validateVariables`); an all-NA optional variable errored with `Available levels: ` and an empty list instead of naming the real problem. Same branch added for 3-7; the stale `- allow skipping if all NA` comment above the loop (which said the opposite of what the code did) removed. Regression test added.
+- [x] optional variables 3-7 skipped the "contains only missing values" check that `var1`/`var2` get (`.validateVariables`); an all-NA optional variable errored with `Available levels:` and an empty list instead of naming the real problem. Same branch added for 3-7; the stale `- allow skipping if all NA` comment above the loop (which said the opposite of what the code did) removed. Regression test added.
 - [x] `membershipTable` was populated (up to 500 `addRow()` calls) even when hidden. `.generateMembershipTable` now returns straight after `.writeMembershipGroups()` when `showMembershipTable` is off, so the data output costs nothing extra. The Output write moved into that new helper, which is also where the failure notice lives.
 - [x] `test-venn-integration.R`: removed 12 `skip_if_not_installed("ClinicoPath")` guards plus a `skip_if_not_installed('jmvReadWrite')` that guarded nothing (ClinicoPath is not *installed* under `devtools::load_all()` or a sourced tree, so all 12 skipped silently in the normal dev loop). Un-skipping exposed that 11 of them asserted only `expect_s3_class(result, "vennResults")` despite names like "logical encoding is correct" and "percentage calculations match expected values" - every expected value was written in the comments and never asserted. Filled them in from those comments: 12 -> 45 expectations. Two setups were broken and are fixed: "all FALSE values" built `factor(rep("No", n))` with no "Yes" LEVEL, so it duplicated the absent-level test instead of testing the zero-positive path (levels now declared); "overlap counts" set the three `calculate*` toggles but never `showSetCalculations`, so the panel it asserted against was never built.
 
@@ -4544,6 +4555,7 @@ Clean: all 49 options wired and present in `.u.yaml`; all 19 results items popul
 - [ ] 8 of the 12 `jmvcore::reject()` messages are not wrapped in `.()` (the 7 per-variable "Error processing variable" rejects and the duplicate-variable reject) - part of the i18n item above, listed here because the library gate calls out `reject()` specifically.
 
 Verified during this review, not taken on faith:
+
 - one denominator across engines: ggVennDiagram region labels now read share-of-all-cases (A-only 28 of 100 = "28%"), not its native share-of-union (28/66 = 42.4%), so they agree with the summary table, the ggvenn labels and the ComplexUpset bar labels.
 - `sprintf`/`gettextf`: `sprintf_linter` CRASHES on this file (lintr `str2lang` cannot reconstruct the multi-line `sprintf` with an inline `if` at `.generateReportSentences`), so the check was done by walking the AST instead - 34 literal-format calls, 0 format/argument mismatches.
 - lintr's two R6 blind spots checked by hand: no `&`/`|` in any scalar `if()`/`while()` condition; `codetools::checkUsage` over every private and public method reports no undefined or unused locals beyond the injected `self`/`private`.
@@ -4558,6 +4570,7 @@ Verified during this review, not taken on faith:
 - [ ] `tools/ui_harness/render_ui.sh` CANNOT validate `enable:`/`visible:` binding expressions. Control-tested on venn: a deliberately malformed `enable: (regionLabels:percent |& broken` and an `enable: (noSuchOption)` both print exactly the same `placeholder present = false ; errors = undefined` as the correct file. The harness only detects the grey-skeleton / duplicate-control-name class, so a harness pass is NOT evidence that a binding expression parses. Worth stating in `vignettes/jamovi_library_review_guide.md`.
 
 Verified in this pass (independent references, not the code's own arithmetic):
+
 - 34 numeric comparisons in `scratchpad/verify_venn.R`, all MATCH, on n=250 / 3 sets. The reference formulation is deliberately different from the backend's: venn uses a logical matrix + `rowSums`, the check uses base-R set algebra over index sets (`Reduce(intersect/setdiff/union)`), plus `ComplexUpset::upset_data()` as a third opinion. Covered: per-variable true counts and percentages vs `table()`; all 4 intersections of orders 2-3; the 3 unique-member counts; the union; all 7 ggVennDiagram region counts AND percent labels; all 8 ComplexUpset exclusive-intersection sizes including "Outside of known sets".
 - Three apparent mismatches in the first run were all faults in the verification script, not the backend (a `grab()` regex matching the TAIL of "A &amp; B" for label "B", and a mis-keyed all-negative region). Corrected, then everything matched.
 - naming/case gate clean: `vennClass` is defined where the generated wrapper calls it, all 8 `venn.*` paths carry exact case, no case-colliding tracked paths, `test-zzz-analysis-file-naming.R` passes.
@@ -4658,6 +4671,7 @@ Verified in this pass (independent references, not the code's own arithmetic):
 
 - [x] fallback subtitle now "No statistical test is available for this combination"; `.safeHtmlOutput` escapes only the four structural characters (apostrophes and slashes rendered as `&#x27;`/`&#x2F;` in the sentence source).
 - [ ] USER: GUI smoke pass in jamovi (new Output/Advanced boxes, result sentence, dark theme), then `_updateModules.R` and remove the `T` menu suffix.
+
 ### statsplot2 release review (2026-09-06: /release-review-function statsplot2)
 
 - [x] verdict: ready after the two user actions below. Reference agreement extended to 20 quantities (Spearman, Mann-Whitney, robust t1way tr=0.2, Bayes t with rscale 0.707, Friedman, paired Wilcoxon, RM-ANOVA GG, Cramer's V adj.) - see report; the four p-values that differ from base R in the 4th decimal are exact-vs-asymptotic (statsExpressions always uses the asymptotic Wilcoxon) and t-approximation-vs-AS89 (Spearman).

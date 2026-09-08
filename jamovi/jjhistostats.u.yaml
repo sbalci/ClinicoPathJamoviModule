@@ -15,7 +15,7 @@ children:
             name: dep
             isTarget: true
       - type: TargetLayoutBox
-        label: Split By (Optional)
+        label: Split by (optional)
         children:
           - type: VariablesListBox
             name: grvar
@@ -26,7 +26,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Clinical Presets
+        label: Clinical presets
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -37,7 +37,7 @@ children:
                 events:
                   change: ./jjhistostats.events::onChange_clinicalPreset
       - type: Label
-        label: Statistical Analysis
+        label: Statistical analysis
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -48,74 +48,61 @@ children:
                 events:
                   change: ./jjhistostats.events::onChange_typestatistics
               - type: CheckBox
+                name: resultssubtitle
+              - type: CheckBox
                 name: enableOneSampleTest
                 children:
                   - type: TextBox
                     name: test.value
                     format: number
                     enable: (enableOneSampleTest)
-                    events:
-                      change: ./jjhistostats.events::onChange_test_value
               - type: TextBox
                 name: conf.level
                 format: number
+                enable: (resultssubtitle)
                 events:
                   change: ./jjhistostats.events::onChange_conf_level
               - type: CheckBox
                 name: bf.message
+                enable: (resultssubtitle)
               - type: TextBox
                 name: digits
                 format: number
+                enable: (resultssubtitle)
                 events:
                   change: ./jjhistostats.events::onChange_digits
-  - type: CollapseBox
-    label: Plot Appearance
-    collapsed: true
-    children:
-      - type: Label
-        label: Plot Labels
-        fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: TextBox
-                name: title
-                format: string
-                width: largest
-              - type: TextBox
-                name: subtitle
-                format: string
-                width: largest
-                # A leading "!" fails jmvcore's expression routing (the expression is
-                # returned as a raw truthy string), so this box was always enabled.
-                # `== false` is the idiom used elsewhere in the module.
-                enable: (resultssubtitle == false)
-              - type: TextBox
-                name: caption
-                format: string
-                width: largest
-              - type: TextBox
-                name: xlab
-                format: string
-                width: largest
-      - type: Label
-        label: Results Display
-        fitToGrid: true
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: resultssubtitle
               - type: CheckBox
                 name: showInterpretation
+      - type: Label
+        label: Test parameters
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: alternative
+                enable: (resultssubtitle)
+              # Gated on the statistic that actually consumes it.
+              - type: TextBox
+                name: trimlevel
+                format: number
+                enable: (typestatistics:robust || centralitytype:robust)
+              # Deliberately NOT gated: bf.message produces a Bayes factor for the
+              # PARAMETRIC test too, so the prior matters outside typestatistics:bayes.
+              # Gating on it would need `bf.message` inside a binding expression, and no
+              # .u.yaml in this module references a dotted option name that way - the same
+              # trap that made ui.bf_message inert in the events JS. Leaving the box live
+              # is harmless; the analysis discloses the prior whenever a BF runs.
+              - type: TextBox
+                name: bfprior
+                format: number
   - type: CollapseBox
-    label: Histogram Settings
+    label: Histogram
     collapsed: true
     children:
       - type: Label
-        label: Bin Configuration
+        label: Bins
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -131,7 +118,7 @@ children:
                     events:
                       change: ./jjhistostats.events::onChange_binwidth
       - type: Label
-        label: Histogram Aesthetics
+        label: Bin appearance
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -157,7 +144,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Centrality Settings
+        label: Measure
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -169,7 +156,7 @@ children:
                 name: centralitytype
                 enable: (centralityline)
       - type: Label
-        label: Line Appearance
+        label: Line appearance
         fitToGrid: true
         children:
           - type: LayoutBox
@@ -189,61 +176,91 @@ children:
                 name: centralitylinetype
                 enable: (centralityline)
   - type: CollapseBox
-    label: Plot Configuration
+    label: Plot Labels
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: title
+            format: string
+            width: largest
+          - type: TextBox
+            name: subtitle
+            format: string
+            width: largest
+            enable: (resultssubtitle == false)
+          - type: TextBox
+            name: caption
+            format: string
+            width: largest
+          - type: TextBox
+            name: xlab
+            format: string
+            width: largest
+  - type: CollapseBox
+    label: Plot Size and Theme
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: plotwidth
+            format: number
+            events:
+              change: ./jjhistostats.events::onChange_plotwidth
+          - type: TextBox
+            name: plotheight
+            format: number
+            events:
+              change: ./jjhistostats.events::onChange_plotheight
+          - type: CheckBox
+            name: originaltheme
+  - type: CollapseBox
+    label: Publication-Ready Plots (ggpubr)
     collapsed: true
     children:
       - type: Label
-        label: Plot Dimensions
+        label: Histogram
         fitToGrid: true
         children:
           - type: LayoutBox
             margin: large
             children:
+              # jamovi allows a CheckBox only ONE non-fragmented child, so the
+              # sub-options are siblings gated on the parent rather than nested under it.
+              - type: CheckBox
+                name: addGGPubrPlot
               - type: TextBox
-                name: plotwidth
-                format: number
-                events:
-                  change: ./jjhistostats.events::onChange_plotwidth
+                name: ggpubrPalette
+                format: string
+                width: large
+                enable: (addGGPubrPlot)
+              - type: CheckBox
+                name: ggpubrAddDensity
+                enable: (addGGPubrPlot)
+              - type: CheckBox
+                name: ggpubrAddMean
+                enable: (addGGPubrPlot)
+      - type: Label
+        label: Distribution diagnostics
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: addDistributionDiagnostics
               - type: TextBox
-                name: plotheight
-                format: number
-                events:
-                  change: ./jjhistostats.events::onChange_plotheight
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: addGGPubrPlot
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: ggpubrPalette
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: ggpubrAddDensity
-      - type: CheckBox
-        name: ggpubrAddMean
-      - type: CheckBox
-        name: addDistributionDiagnostics
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: ggpubrDensityColor
-        format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: ggpubrShowQQ
-      - type: CheckBox
-        name: ggpubrShowECDF
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: originaltheme
+                name: ggpubrDensityColor
+                format: string
+                width: large
+                enable: (addDistributionDiagnostics)
+              - type: CheckBox
+                name: ggpubrShowQQ
+                enable: (addDistributionDiagnostics)
+              - type: CheckBox
+                name: ggpubrShowECDF
+                enable: (addDistributionDiagnostics)

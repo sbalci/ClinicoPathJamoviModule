@@ -1,10 +1,10 @@
 ---
 name: linechart
 title: Line Chart
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Lines
 menuSubtitle: 'Time Series and Trend Analysis'
-version: '1.0.8'
+version: '1.0.9'
 jas: '1.2'
 
 description:
@@ -42,6 +42,12 @@ options:
     # no default". The GUI never hits this (it passes nothing positionally); any
     # programmatic caller does, including R CMD check --run-donttest on the
     # examples. Same trap that previously broke agreement() and diagnosticmeta().
+    #
+    # One wrapper-only limitation remains: linechart(data = df) with NO variables
+    # selected dies inside jmvcore's own select() with "invalid 'row.names'
+    # length" before any module code runs, so the welcome panel .init() writes
+    # for that state is reachable only in the GUI. linechart() with no data at
+    # all constructs fine. That is jmvcore behaviour, not a module bug.
     - name: xvar
       title: 'X-axis Variable'
       type: Variable
@@ -143,11 +149,16 @@ options:
       options:
         - title: Default
           name: default
-        - title: Colorblind Safe
+        - title: Colorblind safe (Okabe-Ito)
           name: colorblind
         - title: Viridis
           name: viridis
-        - title: Clinical
+        # "clinical" is matplotlib's tab10 palette. It was previously offered in
+        # the UI as "Clinical (Colorblind Safe)", which is wrong: tab10 puts
+        # #2ca02c (green) and #d62728 (red) at adjacent series 3 and 4 - the
+        # canonical red/green pair. Only the Okabe-Ito set above is designed for
+        # colour-vision deficiency.
+        - title: Clinical (tab10)
           name: clinical
       default: default
       description:

@@ -205,7 +205,8 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Line Chart",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "RCorTestDocumentation"))
+                    "RCorTestDocumentation",
+                    "ggplot2"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -244,6 +245,21 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Value", 
                         `type`="number"),
                     list(
+                        `name`="ci_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% Confidence Interval", 
+                        `type`="number"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% Confidence Interval", 
+                        `type`="number"),
+                    list(
+                        `name`="pvalue", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
                         `name`="interpretation", 
                         `title`="Interpretation", 
                         `type`="text"))))
@@ -270,6 +286,7 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "smooth",
                     "confidence",
                     "trendline",
+                    "showRefline",
                     "refline",
                     "reflineLabel",
                     "xlabel",
@@ -284,7 +301,7 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "linechart",
-                version = c(1,0,8),
+                version = c(1,0,9),
                 options = options,
                 results = linechartResults$new(options=options),
                 data = data,

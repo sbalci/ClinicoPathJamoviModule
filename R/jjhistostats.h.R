@@ -17,6 +17,9 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             clinicalPreset = "custom",
             enableOneSampleTest = FALSE,
             test.value = 0,
+            alternative = "two.sided",
+            trimlevel = 0.2,
+            bfprior = 0.707,
             conf.level = 0.95,
             bf.message = FALSE,
             digits = 2,
@@ -112,6 +115,26 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "test.value",
                 test.value,
                 default=0)
+            private$..alternative <- jmvcore::OptionList$new(
+                "alternative",
+                alternative,
+                options=list(
+                    "two.sided",
+                    "greater",
+                    "less"),
+                default="two.sided")
+            private$..trimlevel <- jmvcore::OptionNumber$new(
+                "trimlevel",
+                trimlevel,
+                default=0.2,
+                min=0,
+                max=0.4)
+            private$..bfprior <- jmvcore::OptionNumber$new(
+                "bfprior",
+                bfprior,
+                default=0.707,
+                min=0.1,
+                max=2)
             private$..conf.level <- jmvcore::OptionNumber$new(
                 "conf.level",
                 conf.level,
@@ -249,6 +272,9 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..enableOneSampleTest)
             self$.addOption(private$..test.value)
+            self$.addOption(private$..alternative)
+            self$.addOption(private$..trimlevel)
+            self$.addOption(private$..bfprior)
             self$.addOption(private$..conf.level)
             self$.addOption(private$..bf.message)
             self$.addOption(private$..digits)
@@ -287,6 +313,9 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         clinicalPreset = function() private$..clinicalPreset$value,
         enableOneSampleTest = function() private$..enableOneSampleTest$value,
         test.value = function() private$..test.value$value,
+        alternative = function() private$..alternative$value,
+        trimlevel = function() private$..trimlevel$value,
+        bfprior = function() private$..bfprior$value,
         conf.level = function() private$..conf.level$value,
         bf.message = function() private$..bf.message$value,
         digits = function() private$..digits$value,
@@ -324,6 +353,9 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..clinicalPreset = NA,
         ..enableOneSampleTest = NA,
         ..test.value = NA,
+        ..alternative = NA,
+        ..trimlevel = NA,
+        ..bfprior = NA,
         ..conf.level = NA,
         ..bf.message = NA,
         ..digits = NA,
@@ -389,6 +421,9 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "enableOneSampleTest",
                     "test.value",
                     "conf.level",
+                    "alternative",
+                    "trimlevel",
+                    "bfprior",
                     "bf.message",
                     "binfill",
                     "bincolor",
@@ -506,7 +541,7 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjhistostats",
-                version = c(1,0,8),
+                version = c(1,0,9),
                 options = options,
                 results = jjhistostatsResults$new(options=options),
                 data = data,
@@ -542,8 +577,8 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param changebinwidth Whether to manually specify the bin width. If FALSE,
 #'   automatic bin width calculation will be used.
 #' @param binwidth Manual bin width for histogram. Only used when
-#'   changebinwidth is TRUE. Smaller values create more bins, larger values
-#'   create fewer bins.
+#'   changebinwidth is TRUE. When left automatic, the width is max(x) - min(x) /
+#'   sqrt(N). Smaller values create more bins, larger values create fewer bins.
 #' @param resultssubtitle Whether to display statistical test results as
 #'   subtitle in the plot, including the selected one-sample location test and
 #'   descriptive statistics.
@@ -568,6 +603,21 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   rarely clinically meaningful for most biomedical data. Consider using a
 #'   clinically relevant threshold (e.g., reference range limit, treatment
 #'   cutoff, or population norm) for meaningful hypothesis testing.
+#' @param alternative Direction of the one-sample test. 'two.sided' asks
+#'   whether the centre differs from the test value in either direction;
+#'   'greater' and 'less' are one-sided. Two-sided is the conventional default
+#'   and the conservative choice - only pick a one-sided test if the direction
+#'   was specified before seeing the data.
+#' @param trimlevel Proportion trimmed from EACH tail for the robust test and
+#'   the robust centrality measure. The default of 0.2 discards the highest and
+#'   lowest 20 percent of observations. Only used when 'Type of statistic' is
+#'   Robust, or when the centrality measure is Robust.
+#' @param bfprior Scale of the Cauchy prior on effect size for the Bayesian
+#'   test (the 'r' scale). The default 0.707 is JASP/BayesFactor's medium prior.
+#'   A Bayes factor cannot be interpreted or reproduced without knowing this
+#'   value, so it is reported alongside the result. Larger values place more
+#'   prior mass on large effects, which lowers the Bayes factor for small
+#'   observed effects.
 #' @param conf.level Confidence level for the interval reported in the plot
 #'   subtitle, between 0.5 and 0.999. The old bounds allowed 1, at which the
 #'   entire statistical subtitle disappeared with no message, and 0, which
@@ -632,6 +682,9 @@ jjhistostats <- function(
     clinicalPreset = "custom",
     enableOneSampleTest = FALSE,
     test.value = 0,
+    alternative = "two.sided",
+    trimlevel = 0.2,
+    bfprior = 0.707,
     conf.level = 0.95,
     bf.message = FALSE,
     digits = 2,
@@ -683,6 +736,9 @@ jjhistostats <- function(
         clinicalPreset = clinicalPreset,
         enableOneSampleTest = enableOneSampleTest,
         test.value = test.value,
+        alternative = alternative,
+        trimlevel = trimlevel,
+        bfprior = bfprior,
         conf.level = conf.level,
         bf.message = bf.message,
         digits = digits,

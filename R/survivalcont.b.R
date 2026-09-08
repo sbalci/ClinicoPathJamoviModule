@@ -3363,8 +3363,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         .("Approximate minimum p-value search"),
                         sprintf(
                             .("The candidate space contains %s cut-off combinations. A reproducible random sample of %d unique combinations was evaluated using seed %d. The reported solution is approximate and must be validated independently."),
-                            format(total_combinations, scientific = total_combinations >= 1e6,
-                                   digits = 4, trim = TRUE),
+                            base::format(total_combinations, scientific = total_combinations >= 1e6,
+                                         digits = 4, trim = TRUE),
                             length(candidate_sets),
                             seed_val
                         )

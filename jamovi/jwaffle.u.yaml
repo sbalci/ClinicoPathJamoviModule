@@ -83,6 +83,7 @@ children:
                 format: string
                 label: Legend title
                 width: largest
+                enable: (show_legend)
 
   - type: CollapseBox
     label: Output Options

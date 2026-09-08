@@ -1,7 +1,7 @@
 ---
 name: jjridges
-title: Ridge Plot
-menuGroup: JJStatsPlotT
+title: Advanced Ridge Plot
+menuGroup: JJStatsPlot
 menuSubgroup: Distribution
 # menuSubtitle: 'Ridge Visualization'
 version: '1.0.8'
@@ -519,16 +519,6 @@ options:
       description:
           R: >
             Height of the plot in pixels.
-
-    - name: dpi
-      title: Plot DPI
-      type: Number
-      min: 72
-      max: 600
-      default: 300
-      description:
-          R: >
-            Resolution for plot export.
 
     - name: clinicalPreset
       title: Clinical Preset

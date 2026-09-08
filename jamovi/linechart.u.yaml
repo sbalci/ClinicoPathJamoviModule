@@ -81,33 +81,19 @@ children:
       - type: LayoutBox
         margin: large
         children:
+          # Option lists deliberately omitted: they are declared once in
+          # linechart.a.yaml. Re-declaring them here created a second source of
+          # truth that had already drifted (the `default` theme was "Default" in
+          # the R documentation but "Clinical (Recommended)" in the GUI).
           - type: ComboBox
             name: theme
             label: "Plot theme"
-            options:
-              - name: default
-                title: "Clinical (Recommended)"
-              - name: publication
-                title: "Publication Ready"
-              - name: minimal
-                title: "Minimal Clean"
-              - name: classic
-                title: "Classic"
       - type: LayoutBox
         margin: large
         children:
           - type: ComboBox
             name: colorPalette
             label: "Color scheme"
-            options:
-              - name: clinical
-                title: "Clinical (Colorblind Safe)"
-              - name: default
-                title: "Default"
-              - name: colorblind
-                title: "Colorblind Safe"
-              - name: viridis
-                title: "Viridis"
 
   - type: CollapseBox
     label: "Labels & Titles"

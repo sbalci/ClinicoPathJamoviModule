@@ -51,7 +51,6 @@
 | `custom_annotations` | UI Control `custom_annotations` | `self$options$custom_annotations` | Output item / Table |
 | `width` | UI Control `width` | `self$options$width` | Output item / Table |
 | `height` | UI Control `height` | `self$options$height` | Output item / Table |
-| `dpi` | UI Control `dpi` | `self$options$dpi` | Output item / Table |
 | `clinicalPreset` | UI Control `clinicalPreset` | `self$options$clinicalPreset` | Output item / Table |
 | `showAboutPanel` | UI Control `showAboutPanel` | `self$options$showAboutPanel` | Output item / Table |
 | `showAssumptions` | UI Control `showAssumptions` | `self$options$showAssumptions` | Output item / Table |

@@ -114,7 +114,6 @@ items:
         - add_sample_size
         - add_density_values
         - custom_annotations
-        - dpi
 
     - name: statistics
       title: Statistical Summary
@@ -222,8 +221,11 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - ggridges
-    - ggstatsplot
-    - statsExpressions
+    - effectsize
+    - car
+    - WRS2
+    - boot
+    - BayesFactor
     - RGraphGallery
 
 ...

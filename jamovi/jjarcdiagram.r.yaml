@@ -66,21 +66,57 @@ items:
       title: Network Statistics
       type: Html
       visible: (showStats)
+      clearWith:
+          - source
+          - target
+          - weight
+          - group
+          - directed
+          - aggregateEdges
+          - weightMode
+          - analysisPreset
 
     - name: assumptions
       title: Analysis Assumptions & Guidelines
       type: Html
       visible: (showAssumptions)
+      clearWith:
+          - source
+          - target
+          - weight
+          - group
+          - directed
+          - aggregateEdges
+          - weightMode
+          - analysisPreset
 
     - name: reportSentence
       title: Copy-Ready Summary
       type: Html
       visible: (showSummary)
+      clearWith:
+          - source
+          - target
+          - weight
+          - group
+          - directed
+          - aggregateEdges
+          - weightMode
+          - analysisPreset
 
     - name: glossary
       title: Network Analysis Glossary
       type: Html
       visible: (showGlossary)
+      clearWith:
+          - source
+          - target
+          - weight
+          - group
+          - directed
+          - aggregateEdges
+          - weightMode
+          - analysisPreset
 
 refs:
     - ClinicoPathJamoviModule
