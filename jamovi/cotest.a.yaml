@@ -4,7 +4,7 @@ title: Co-Testing Analysis
 menuGroup: meddecide
 menuSubgroup: Decision Calculators
 menuSubtitle: Two tests run in parallel
-version: '1.0.8'
+version: '1.0.81'
 jas: '1.2'
 
 description:

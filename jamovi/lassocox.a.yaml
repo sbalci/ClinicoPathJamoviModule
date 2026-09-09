@@ -5,7 +5,7 @@ menuGroup: Survival
 menuSubgroup: Penalized Cox Regression
 menuTitle: LASSO Cox
 menuSubtitle: Sparse Cox model development with cross-validated L1 penalization.
-version: '1.0.8'
+version: '1.0.81'
 jas: '1.2'
 
 description:
