@@ -359,7 +359,13 @@ test_that("chi-square chunk sizing and generated source handle both dimensions",
 })
 
 test_that("MCAR diagnostics have explicit safe preconditions", {
+  # The method is translated with jmvcore::.(), which resolves `self` from the
+  # caller frame; a private method pulled off the generator has no instance, so
+  # give its execution environment a minimal self before calling it detached.
   mcar_message <- dataqualityClass$private_methods$.mcarTestMessage
+  env <- new.env(parent = environment(mcar_message))
+  env$self <- list(options = list(translate = function(text, n = 1) text))
+  environment(mcar_message) <- env
   expect_match(
     mcar_message(data.frame(x = c(1, NA))),
     "at least two numeric variables",

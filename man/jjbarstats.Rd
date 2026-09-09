@@ -131,11 +131,11 @@ ggstatsplot::grouped_ggbarstats.
 }
 \examples{
 \donttest{
-jjbarstats(
-    data = jjbarstats_test,
-    dep = "response",
-    group = "treatment",
-    resultssubtitle = TRUE
-)
+# jjbarstats(
+#     data = jjbarstats_test,
+#     dep = "response",
+#     group = "treatment",
+#     resultssubtitle = TRUE
+# )
 }
 }

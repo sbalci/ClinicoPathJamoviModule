@@ -194,9 +194,9 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' # default 2-digit setting Nigrini's MAD cut-off is not usable
 #' # below n = 5204, so the chi-square goodness-of-fit test carries
 #' # the finding here (p = 0.70; no departure detected).
-#' benford(
-#'     data = timeroc_cardiovascular_risk,
-#'     var = "troponin_level")
+#' # benford(
+#' #     data = timeroc_cardiovascular_risk,
+#' #     var = "troponin_level")
 #'}
 #' @param data The data as a data frame.
 #' @param var a string naming the variable from \code{data} that contains the

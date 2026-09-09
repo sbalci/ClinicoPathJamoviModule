@@ -1883,7 +1883,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     "<td style='padding: 8px; border: 1px solid #ddd;'>", n_stable, " (", pct_fmt(n_stable), "%)</td></tr>",
                     "</table>",
                     "<p style='font-size: 12px; color: #856404; margin-top: 15px;'>",
-                    "<em>", .("Analysis uses each subject’s last available level after baseline, according to the group factor order. Change = follow-up minus baseline; percent change = 100 × change / absolute baseline. Zero baselines are excluded from the response percentage denominator. These thresholds describe change and do not establish clinical benefit."), "</em>",
+                    "<em>", .("Analysis uses each subject\u2019s last available level after baseline, according to the group factor order. Change = follow-up minus baseline; percent change = 100 \u00d7 change / absolute baseline. Zero baselines are excluded from the response percentage denominator. These thresholds describe change and do not establish clinical benefit."), "</em>",
                     "</p></div>"
                 )
 

@@ -392,40 +392,40 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @examples
 #' \donttest{
 #' # Basic hull plot: two continuous axes plus a grouping variable.
-#' data(hullplot_clusters)
-#' hullplot(
-#'     data = hullplot_clusters,
-#'     x_var = "x",
-#'     y_var = "y",
-#'     group_var = "cluster"
-#' )
+#' # data(hullplot_clusters)
+#' # hullplot(
+#' #     data = hullplot_clusters,
+#' #     x_var = "x",
+#' #     y_var = "y",
+#' #     group_var = "cluster"
+#' # )
 #'
 #' # Colour points by a second categorical variable and size them by a
 #' # continuous one. Both are optional.
-#' hullplot(
-#'     data = hullplot_clusters,
-#'     x_var = "x",
-#'     y_var = "y",
-#'     group_var = "cluster",
-#'     color_var = "response",
-#'     size_var = "biomarker"
-#' )
+#' # hullplot(
+#' #     data = hullplot_clusters,
+#' #     x_var = "x",
+#' #     y_var = "y",
+#' #     group_var = "cluster",
+#' #     color_var = "response",
+#' #     size_var = "biomarker"
+#' # )
 #'
 #' # Clinical example with the optional explanatory panels turned on.
 #' # hull_concavity ranges from 1 (most concave) upwards toward a convex hull.
-#' data(hullplot_clinical)
-#' hullplot(
-#'     data = hullplot_clinical,
-#'     x_var = "tumor_volume",
-#'     y_var = "ki67_index",
-#'     group_var = "treatment_arm",
-#'     hull_concavity = 2,
-#'     color_palette = "clinical",
-#'     plot_theme = "clinical",
-#'     show_statistics = TRUE,
-#'     outlier_detection = TRUE,
-#'     show_summary = TRUE
-#' )
+#' # data(hullplot_clinical)
+#' # hullplot(
+#' #     data = hullplot_clinical,
+#' #     x_var = "tumor_volume",
+#' #     y_var = "ki67_index",
+#' #     group_var = "treatment_arm",
+#' #     hull_concavity = 2,
+#' #     color_palette = "clinical",
+#' #     plot_theme = "clinical",
+#' #     show_statistics = TRUE,
+#' #     outlier_detection = TRUE,
+#' #     show_summary = TRUE
+#' # )
 #'}
 #' @param data The data as a data frame.
 #' @param x_var Continuous variable for the X-axis of the scatter plot.

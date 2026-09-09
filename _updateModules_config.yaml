@@ -49,9 +49,9 @@ new_version: "1.0.8.14"
 new_date: "2026-09-08"
 quick: false
 TEST: false
-jjstatsplot: false
+jjstatsplot: true
 jsurvival: true
-ClinicoPathDescriptives: false
+ClinicoPathDescriptives: true
 OncoPath: true
 meddecide: true
 

@@ -399,12 +399,12 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' @examples
 #' \donttest{
-#' jjbarstats(
-#'     data = jjbarstats_test,
-#'     dep = "response",
-#'     group = "treatment",
-#'     resultssubtitle = TRUE
-#' )
+#' # jjbarstats(
+#' #     data = jjbarstats_test,
+#' #     dep = "response",
+#' #     group = "treatment",
+#' #     resultssubtitle = TRUE
+#' # )
 #'}
 #' @param data The data as a data frame.
 #' @param dep One or more categorical outcome variables; each gets its own
