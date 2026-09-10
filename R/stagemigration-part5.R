@@ -3436,7 +3436,7 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 n_boot <- max(100L, min(5000L, as.integer(n_boot)))
                                 boot_concordances <- rep(NA_real_, n_boot)
                                 for (b in seq_len(n_boot)) {
-                                    if (b %% 100 == 0) private$.checkpoint()
+                                    if (b %% 25 == 0) private$.checkpoint()
                                     boot_indices <- sample(seq_along(time), replace = TRUE)
                                     boot_concordance <- private$.calculateHarrellCIndex(surv_obj[boot_indices], current_stage[boot_indices])
                                     boot_concordances[b] <- boot_concordance$concordance

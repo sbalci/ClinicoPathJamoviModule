@@ -2,6 +2,7 @@
 #' @importFrom survival survdiff
 #' @importFrom ggplot2 ggplot aes geom_line geom_hline geom_point geom_rect labs scale_y_continuous scale_color_manual theme element_text element_blank
 #' @importFrom scales percent_format
+#' @importFrom withr local_seed
 # Survival Power Analysis Module for Jamovi
 
 survivalPowerClass <- R6::R6Class(
@@ -117,6 +118,19 @@ survivalPowerClass <- R6::R6Class(
             fixed("study_duration_results", opts$analysis_type == "duration")
             fixed("non_inferiority_table", opts$test_type == "non_inferiority")
             fixed("sensitivity_analysis_table", opts$sensitivity_analysis)
+
+            dist_ok <- is.null(opts$survival_distribution) || opts$survival_distribution == "exponential"
+            if (isTRUE(opts$run_simulation_validation) &&
+                dist_ok &&
+                isTRUE(opts$analysis_type %in% c("sample_size", "power")) &&
+                isTRUE(opts$test_type %in% c("log_rank", "cox_regression"))) {
+                add_rows(
+                    self$results$simulation_validation_table,
+                    c("power", "events"),
+                    "metric",
+                    c("Statistical Power", "Expected Events")
+                )
+            }
 
             assumption_labels <- c(
                 distribution = "Survival Distribution", ph = "Proportional Hazards",
@@ -1413,16 +1427,6 @@ survivalPowerClass <- R6::R6Class(
             # Populate comparison table
             table <- self$results$simulation_validation_table
 
-            # Clear existing rows
-            tryCatch(
-                {
-                    table$deleteRows()
-                },
-                error = function(e) {
-                    # Table might be empty
-                }
-            )
-
             # Calculate agreement status
             diff <- abs(analytical_power - sim_results$empirical_power)
             agreement <- if (diff < 0.02) {
@@ -1435,15 +1439,19 @@ survivalPowerClass <- R6::R6Class(
                 "Poor (>= 10%)"
             }
 
-            # Add power comparison row
-            table$addRow(rowKey = "power", values = list(
+            power_values <- list(
                 metric = "Statistical Power",
                 analytical = analytical_power,
                 simulated = sim_results$empirical_power,
                 ci_lower = sim_results$ci_lower,
                 ci_upper = sim_results$ci_upper,
                 agreement = agreement
-            ))
+            )
+            if ("power" %in% table$rowKeys) {
+                table$setRow(rowKey = "power", values = power_values)
+            } else {
+                table$addRow(rowKey = "power", values = power_values)
+            }
 
             # Add expected events comparison
             # Calculate analytical expected events
@@ -1483,14 +1491,19 @@ survivalPowerClass <- R6::R6Class(
                     "Poor (>= 15%)"
                 }
 
-                table$addRow(rowKey = "events", values = list(
+                events_values <- list(
                     metric = "Expected Events",
                     analytical = analytical_events,
                     simulated = sim_results$avg_events,
                     ci_lower = NA,
                     ci_upper = NA,
                     agreement = events_agreement
-                ))
+                )
+                if ("events" %in% table$rowKeys) {
+                    table$setRow(rowKey = "events", values = events_values)
+                } else {
+                    table$addRow(rowKey = "events", values = events_values)
+                }
             }
 
             # Add table notes with convergence diagnostics
@@ -3961,9 +3974,11 @@ survivalPowerClass <- R6::R6Class(
 
             # Seed so the reported empirical power is reproducible across runs of an
             # unchanged design; without it the agreement verdict flips on noise alone.
+            # withr::local_seed sets the seed locally and restores session RNG on exit.
             sim_seed <- self$options$simulation_seed
+            if (is.null(sim_seed) && !is.null(self$options$seed)) sim_seed <- self$options$seed
             if (is.null(sim_seed) || !is.finite(sim_seed)) sim_seed <- 42
-            set.seed(as.integer(sim_seed))
+            withr::local_seed(as.integer(sim_seed))
 
             n_sims <- self$options$simulation_runs
             if (is.null(n_sims) || n_sims < 100) n_sims <- 1000 # Increased default

@@ -511,7 +511,6 @@ stagemigration_cutpointAnalysis <- function(data, stage_var, time_var, event_var
             # Check if maxstat package available for optimal cutpoint
             if (method == "maxstat" && !requireNamespace("maxstat", quietly = TRUE)) {
                 method <- "median"
-                warning("Package 'maxstat' not available, using median cutpoint")
             }
 
             # Get stage values

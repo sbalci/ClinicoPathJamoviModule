@@ -48,12 +48,13 @@
 new_version: "1.0.81.01"
 new_date: "2026-09-09"
 quick: false
-TEST: true
+TEST: false
 jjstatsplot: false
 jsurvival: false
 ClinicoPathDescriptives: false
 OncoPath: false
 meddecide: false
+ClinicoPath: false
 
 
 
@@ -73,6 +74,8 @@ modes:
   webpage: false
   commit_modules: false
   WIP: false
+  sync_analysis_versions: false # If false (default), preserves per-analysis versions in jamovi/*.a.yaml.
+                                # If true, forces .a.yaml version fields to match the package version.
   
   # File copying control modes
   copy_vignettes: false       # Enable/disable vignette file copying
@@ -316,11 +319,9 @@ modules:
       # menuGroup OncoPathD/T, and the one production analysis here
       # (ihcheterogeneity) does not use it. It stays in main + JamoviTest; re-add
       # if those IHC analyses are promoted to a production OncoPath menuGroup.
-      # stagemigration-*.R helpers are intentionally NOT shipped to production OncoPath:
-      # the stagemigration analysis is dev-routed to menuGroup OncoPathT (JamoviTest), so
-      # these files would be orphaned dead weight in the OncoPath release build. They stay
-      # in main + JamoviTest (see JamoviTest r_files below); re-add here when the analysis
-      # is promoted to a production OncoPath menuGroup.
+      # Companion R files (<analysis>-*.R, <analysis>_*.R) are now automatically
+      # discovered and copied by copy_module_files() based on menuGroup routing.
+      # Stale companions are also automatically pruned if an analysis is re-routed.
     data_files:
       - "histopathology.rda"
       - "waterfall_percentage_basic.rda"
@@ -340,34 +341,16 @@ modules:
     data_files:
       - "histopathology.rda"
     r_files:
+      # Shared utility files that do not belong to a single analysis.
+      # Note: Analysis-specific companion files (<analysis>-*.R, <analysis>_*.R)
+      # are now automatically copied by copy_module_files() whenever the analysis
+      # is routed to this module via its menuGroup.
       - "utils.R"
       - "formula_utils.R"
       - "survival_utils.R"
       - "error_handling.R"
-      - "survivalPower_distributions.R"
-      - "multisurvival-interactions.R"
-      - "multisurvival-metrics.R"
-      - "decisiongraph_utils.R"
       - "ihc_utilities.R"
-      - "psychopdaROC_utilities.R"
       - "nomogrammer.R"
-      - "stagemigration_helpers.R"
-      - "stagemigration-utils.R"
-      - "stagemigration-validation.R"
-      - "stagemigration-discrimination.R"
-      - "stagemigration-competing-risks.R"
-      - "stagemigration-part1.R"
-      - "stagemigration-part2.R"
-      - "stagemigration-part3.R"
-      - "stagemigration-part4.R"
-      - "stagemigration-part5.R"
-      - "recist_engine.R"
-      # Static/guidance HTML builders extracted from swimmerplot.b.R.
-      # Needed while swimmerplot is dev-routed here (menuGroup OncoPathT) and
-      # harmless otherwise.
-      - "swimmerplot_html.R"
-      # Needed whenever a ggstatsplot analysis is dev-routed here with a
-      # T-suffixed menuGroup (jjbetweenstats / jjdotplotstats / statsplot2).
       - "ggstatsplot_utils.R"
     vignette_files: []
     test_files: []

@@ -180,7 +180,7 @@ stagemigration_compareBootstrapCIndex <- function(data, old_stage, new_stage, ti
         c_diff_orig <- survival::concordance(new_cox_orig)$concordance - survival::concordance(old_cox_orig)$concordance
 
         for (i in 1:n_boot) {
-            if (!is.null(checkpoint_callback) && i %% 50 == 1) checkpoint_callback()
+            if (!is.null(checkpoint_callback) && (i %% 25 == 0 || i == 1)) checkpoint_callback()
             
             boot_idx <- sample(1:n, n, replace = TRUE)
             boot_data <- data[boot_idx, ]
@@ -517,6 +517,7 @@ stagemigration_calculateNRI <- function(data, options, time_points = NULL, check
         }
 
         boot <- vapply(seq_len(reps), function(b) {
+            if (!is.null(checkpoint_callback) && b %% 25 == 0) checkpoint_callback()
             i <- sample.int(n, n, replace = TRUE)
             stagemigration_ipcwNRI(cat_old[i], cat_new[i], time[i], event[i], time_point)[["nri"]]
         }, numeric(1))
@@ -583,7 +584,7 @@ stagemigration_calculateIDI <- function(data, options, checkpoint_callback = NUL
         n <- length(time)
         reps <- stagemigration_ipcwReps(options)
         boot <- vapply(seq_len(reps), function(b) {
-            if (!is.null(checkpoint_callback) && b %% 100 == 0) checkpoint_callback()
+            if (!is.null(checkpoint_callback) && b %% 25 == 0) checkpoint_callback()
             i <- sample.int(n, n, replace = TRUE)
             stagemigration_ipcwIDI(old_prob[i], new_prob[i], time[i], event[i], t_ref)[["idi"]]
         }, numeric(1))

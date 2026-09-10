@@ -4231,7 +4231,7 @@ analyses:
     name: survivalPower
     ns: ClinicoPath
     category: analyses
-    menuGroup: PowerT
+    menuGroup: Power
     menuSubgroup: Survival Power Analysis
     menuTitle: Survival Power Analysis
     menuSubtitle: Survival Power analysis

@@ -673,17 +673,14 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 stats::qnorm(1 - (1 - cl) / 2)
             },
             .init = function() {
-                # If core variables are not selected, show a welcome message and hide results.
+                # If core variables are not selected, show a welcome message
                 if (is.null(self$options$oldStage) || is.null(self$options$newStage) ||
                     is.null(self$options$survivalTime) || is.null(self$options$event)) {
-                    self$results$welcomeMessage$setVisible(TRUE)
-                } else {
-                    self$results$welcomeMessage$setVisible(FALSE)
+                    self$results$welcomeMessage$setContent(private$.generateWelcomeMessage())
                 }
 
                 # Set dynamic plot sizes based on plot type
                 if (self$options$showSurvivalCurves) {
-                    self$results$survivalCurves$setVisible(TRUE)
                     plot_type <- self$options$survivalPlotType
 
                     # Adjust size based on plot type and options
@@ -785,7 +782,6 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Validate base repetitions
                 if (is.null(baseReps) || !is.numeric(baseReps) || baseReps < 1) {
-                    warning("Invalid bootstrap repetitions in options, using default 1000")
                     baseReps <- 1000
                 }
 
@@ -1320,14 +1316,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         error_html <- paste0(error_html, "<li>", error, "</li>")
                     }
 
-                    error_html <- paste0(error_html, "</ul></div>")
-
-                    # Display in welcome message
-                    self$results$welcomeMessage$setContent(error_html)
-                    self$results$welcomeMessage$setVisible(TRUE)
-
-                    # Stop execution
-                    stop(paste("Data validation failed:", paste(validation_result$errors, collapse = "; ")))
+                    # Stop execution cleanly
+                    jmvcore::reject(paste("Data validation failed:", paste(validation_result$errors, collapse = "; ")))
                 }
 
                 # Surface validation findings as graded notices.
@@ -1688,7 +1678,6 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Check dependencies
                 if (is.null(self$options$oldStage) || is.null(self$options$newStage) ||
                     is.null(self$options$survivalTime) || is.null(self$options$event)) {
-                    warning("ROC Analysis requires staging and survival variables to be specified")
                     return(list(error = "Missing required variables for ROC Analysis"))
                 }
 
@@ -1930,7 +1919,6 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Check dependencies
                 if (is.null(self$options$oldStage) || is.null(self$options$newStage) ||
                     is.null(self$options$survivalTime) || is.null(self$options$event)) {
-                    warning("DCA requires staging and survival variables to be specified")
                     return(list(error = "Missing required variables for DCA"))
                 }
 
@@ -1939,9 +1927,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 time_var <- self$options$survivalTime
                 event_var <- "event_binary"
 
-                # Fit Cox models with consistent error handling
-                old_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage))
-                new_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage))
+                # Fit Cox models with consistent error handling (internal aliases prevent syntax errors with spaces)
+                old_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_old")
+                new_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_new")
 
                 old_cox <- private$.safeExecute(
                     {
@@ -2049,7 +2037,6 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Check dependencies
                 if (is.null(self$options$oldStage) || is.null(self$options$newStage) ||
                     is.null(self$options$survivalTime) || is.null(self$options$event)) {
-                    warning("Bootstrap validation requires staging and survival variables to be specified")
                     return(list(error = "Missing required variables for bootstrap validation"))
                 }
 
@@ -2067,9 +2054,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 bootstrap_function <- function(data, indices) {
                     boot_data <- data[indices, ]
 
-                    # Fit models on bootstrap sample
-                    old_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage))
-                    new_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage))
+                    # Fit models on bootstrap sample (internal aliases prevent syntax errors with spaces)
+                    old_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_old")
+                    new_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_new")
 
                     old_cox_boot <- private$.safeExecute(
                         {
@@ -2359,7 +2346,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                                 # Verify both models have the same initial log-likelihood (they should)
                                 if (abs(old_cox$loglik[1] - new_cox$loglik[1]) > 1e-6) {
-                                    warning("Old and new Cox models have different initial log-likelihoods - this suggests different datasets")
+                                    private$.addNotice("WARNING", .("Model log-likelihood"), .("Old and new Cox models have different initial log-likelihoods, suggesting different baseline data."))
                                 }
 
                             }
@@ -2367,7 +2354,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Validate that the null log-likelihood makes sense
                         if (ll_null > ll_fitted_old || ll_null > ll_fitted_new) {
-                            warning("Null model log-likelihood is greater than fitted model log-likelihood - this suggests a calculation error")
+                            private$.addNotice("WARNING", .("Model log-likelihood"), .("Null model log-likelihood is greater than fitted model log-likelihood."))
                         }
 
                         # Debug log-likelihood values with more detail
@@ -2585,8 +2572,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 homogeneity_results <- list()
 
                 # Test for old staging system
-                old_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage))
-                old_survdiff <- survdiff(old_formula, data = data)
+                old_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_old")
+                old_survdiff <- survival::survdiff(old_formula, data = data)
 
                 # Overall test
                 old_overall_p <- private$.survdiffP(old_survdiff)
@@ -2616,8 +2603,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
 
                 # Test for new staging system
-                new_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage))
-                new_survdiff <- survdiff(new_formula, data = data)
+                new_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_new")
+                new_survdiff <- survival::survdiff(new_formula, data = data)
 
                 new_overall_p <- private$.survdiffP(new_survdiff)
 
@@ -2662,8 +2649,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 data$stage_numeric <- as.integer(stage_factor)
 
                 # Fit Cox model with stage as continuous variable for trend test
-                trend_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~ stage_numeric"))
-                trend_cox <- try(coxph(trend_formula, data = data), silent = TRUE)
+                trend_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_numeric")
+                trend_cox <- try(survival::coxph(trend_formula, data = data), silent = TRUE)
 
                 if (!inherits(trend_cox, "try-error")) {
                     trend_p <- summary(trend_cox)$coefficients[1, "Pr(>|z|)"]
@@ -3413,11 +3400,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Show welcome message and exit
                     welcome_html <- private$.generateWelcomeMessage()
                     self$results$welcomeMessage$setContent(welcome_html)
-                    self$results$welcomeMessage$setVisible(TRUE)
                     return()
                 }
-
-                self$results$welcomeMessage$setVisible(FALSE)
 
                 # Validate option dependencies
                 dep_validation <- private$.validateOptionDependencies()

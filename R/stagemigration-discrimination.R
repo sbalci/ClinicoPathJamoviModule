@@ -263,7 +263,7 @@ stagemigration_bootstrapConcordance <- function(data, old_formula, new_formula,
 
         # Bootstrap sampling
         for (i in 1:n_boot) {
-            if (!is.null(checkpoint_callback) && i %% 50 == 1) {
+            if (!is.null(checkpoint_callback) && (i %% 25 == 0 || i == 1)) {
                 checkpoint_callback()
             }
 

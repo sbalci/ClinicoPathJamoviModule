@@ -49,7 +49,6 @@ stagemigration_escapeVar <- function(varname, backticks = TRUE) {
 #' @keywords internal
 stagemigration_convertLabelled <- function(data, vars, verbose = FALSE) {
     if (!requireNamespace("haven", quietly = TRUE)) {
-        warning("Package 'haven' not available. Labelled data conversion skipped.")
         return(data)
     }
 
@@ -246,9 +245,8 @@ stagemigration_safeExecute <- function(expr,
             # Log detailed error for debugging
             context_str <- if (!is.null(context)) paste0("[", context, "] ") else ""
 
-            # Show user-friendly warning if specified
+            # Suppress console warning in jamovi environment
             if (!is.null(warningMessage)) {
-                warning(warningMessage, call. = FALSE)
             }
         }
         return(errorReturn)

@@ -217,10 +217,12 @@ at each sample number. Visual model validation tool.}
 
 \item{autoSelectModel}{.}
 
-\item{autoDetectHeterogeneity}{Automatically analyze and report if sample
-types have significantly different detection probabilities. Requires Sample
-Type variable. Uses a heuristic warning if CV > 30 percent; this is not a
-formal test of significance.}
+\item{autoDetectHeterogeneity}{Report a heuristic warning when the CV of
+sample-type geometric first-detection estimates exceeds 30 percent.
+Requires Sample Type, at least 10 detected cases overall, and at least two
+groups with three detected cases each. This screen always uses inverse mean
+first-detection positions, independently of the selected prediction
+estimator; it is not a formal significance test.}
 }
 \value{
 A results object containing:

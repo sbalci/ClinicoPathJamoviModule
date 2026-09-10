@@ -1,7 +1,7 @@
 ---
 name: survivalPower
 title: Survival Power Analysis
-menuGroup: PowerT #jsurvival 
+menuGroup: Power
 menuSubgroup: Survival Power Analysis
 menuTitle: Survival Power Analysis
 menuSubtitle: Survival Power analysis

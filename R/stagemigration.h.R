@@ -2486,7 +2486,6 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ggplot2",
                     "timeROC",
                     "dcurves",
-                    "survival",
                     "viridis",
                     "gridExtra",
                     "coxme",
@@ -2514,6 +2513,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="welcomeMessage",
                 title="Welcome",
+                visible="(is.null(oldStage) || is.null(newStage) || is.null(survivalTime) || is.null(event))",
                 clearWith=list(
                     "oldStage",
                     "newStage",

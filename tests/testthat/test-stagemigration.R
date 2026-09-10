@@ -574,3 +574,33 @@ test_that("methods whose locals feed survival formulas run", {
   expect_equal(unname(pv$.calculateMedianSurvival(sub)),
                unname(summary(survival::survfit(survival::Surv(survival_time, event_binary) ~ 1, data = sub))$table["median"]))
 })
+
+test_that("space-bearing variable names work with DCA, bootstrap, homogeneity, and trend tests", {
+  skip_on_cran()
+  d <- sm_lung()
+  d_spaces <- data.frame(
+    `Old Stage` = d$old_stage,
+    `New Stage` = d$new_stage,
+    `OS Months` = d$survival_time,
+    `Vital Status` = d$event,
+    check.names = FALSE
+  )
+  res <- ClinicoPath::stagemigration(
+    data = d_spaces,
+    oldStage = "Old Stage",
+    newStage = "New Stage",
+    survivalTime = "OS Months",
+    event = "Vital Status",
+    eventLevel = "1",
+    performDCA = TRUE,
+    performBootstrap = TRUE,
+    bootstrapReps = 100,
+    performHomogeneityTests = TRUE,
+    performTrendTests = TRUE
+  )
+  expect_true(inherits(res, "stagemigrationResults"))
+  expect_false(is.null(res$dcaResults))
+  expect_false(is.null(res$bootstrapResults))
+  expect_false(is.null(res$homogeneityTests))
+  expect_false(is.null(res$trendTests))
+})

@@ -1793,3 +1793,71 @@ prune_orphan_analyses <- function(module_dir) {
   }
   invisible(length(dropped))
 }
+
+# ---------------------------------------------------------------------------
+# When an analysis changes its menuGroup in jamovi/<name>.a.yaml (e.g. from
+# OncoPathT to OncoPath, or from meddecide to meddecideT), it enters a new
+# module manifest and leaves the old module manifest.
+#
+# prune_stale_module_analyses() detects any analysis files in module_dir that
+# originated from the umbrella repository but are NO LONGER in the submodule's
+# active_module_names. It cleanly removes:
+#   1. jamovi/<name>.a.yaml, .r.yaml, .u.yaml
+#   2. R/<name>.b.R, .h.R
+#   3. Companion R files matching R/<name>[-_]*.R
+#   4. JS/HTML assets matching jamovi/js/<name>*.(js|html)
+# This prevents stale analyses and their companion files from lingering in
+# submodules after menuGroup re-routing.
+prune_stale_module_analyses <- function(module_dir, active_module_names, main_repo_dir) {
+  if (!dir.exists(module_dir)) return(invisible(character(0)))
+
+  jamovi_dir <- file.path(module_dir, "jamovi")
+  r_dir      <- file.path(module_dir, "R")
+  js_dir     <- file.path(module_dir, "jamovi", "js")
+
+  if (!dir.exists(jamovi_dir)) return(invisible(character(0)))
+
+  # Existing .a.yaml files in this submodule
+  existing_yaml <- list.files(jamovi_dir, pattern = "\\.a\\.yaml$", full.names = FALSE)
+  existing_analyses <- gsub("\\.a\\.yaml$", "", existing_yaml)
+
+  # All known umbrella analyses
+  umbrella_yaml <- list.files(file.path(main_repo_dir, "jamovi"), pattern = "\\.a\\.yaml$", full.names = FALSE)
+  umbrella_analyses <- gsub("\\.a\\.yaml$", "", umbrella_yaml)
+
+  # Stale analyses: umbrella analyses currently on disk in this submodule
+  # that are NO LONGER in active_module_names
+  stale_analyses <- setdiff(intersect(existing_analyses, umbrella_analyses), active_module_names)
+
+  if (length(stale_analyses) == 0L) return(invisible(character(0)))
+
+  cat("  \U0001F9F9 Pruning stale analyses re-routed out of this module: ",
+      paste(stale_analyses, collapse = ", "), "\n", sep = "")
+
+  for (sa in stale_analyses) {
+    # 1. YAML files in jamovi/
+    y_files <- file.path(jamovi_dir, paste0(sa, c(".a.yaml", ".r.yaml", ".u.yaml")))
+    y_present <- y_files[file.exists(y_files)]
+    if (length(y_present) > 0L) file.remove(y_present)
+
+    # 2. Main R backend files in R/
+    main_r <- file.path(r_dir, paste0(sa, c(".b.R", ".h.R")))
+    main_r_present <- main_r[file.exists(main_r)]
+    if (length(main_r_present) > 0L) file.remove(main_r_present)
+
+    # 3. Companion / split / helper R files in R/
+    comp_pattern <- paste0("^", sa, "[-_].*\\.[rR]$")
+    comp_files <- list.files(r_dir, pattern = comp_pattern, full.names = TRUE)
+    if (length(comp_files) > 0L) file.remove(comp_files)
+
+    # 4. JS/HTML assets in jamovi/js/
+    if (dir.exists(js_dir)) {
+      js_pattern <- paste0("^", sa, ".*\\.(js|html)$")
+      js_files <- list.files(js_dir, pattern = js_pattern, full.names = TRUE)
+      if (length(js_files) > 0L) file.remove(js_files)
+    }
+  }
+
+  invisible(stale_analyses)
+}
+

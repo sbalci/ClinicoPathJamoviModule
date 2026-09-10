@@ -104,6 +104,7 @@ jjstatsplot_module <- config$jjstatsplot %||% modes$jjstatsplot %||% FALSE
 jsurvival_module <- config$jsurvival %||% modes$jsurvival %||% FALSE
 ClinicoPathDescriptives_module <- config$ClinicoPathDescriptives %||% modes$ClinicoPathDescriptives %||% FALSE
 OncoPath_module <- config$OncoPath %||% modes$OncoPath %||% FALSE
+ClinicoPath_module <- config$ClinicoPath %||% config$main %||% config$update_main %||% modes$ClinicoPath %||% NULL
 
 # menuGroup suffix convention - patterns MUST be anchored.
 #
@@ -182,23 +183,23 @@ if (OncoPath_module) {
   cat("🔧 OncoPath enabled\n")
 }
 
-# Apply WIP mode overrides
+# Apply WIP mode overrides (respect explicit settings if provided in modes, otherwise apply safe defaults)
 if (WIP) {
-  quick <- FALSE
-  check <- FALSE
-  extended <- TRUE
-  webpage <- FALSE
-  commit_modules <- FALSE
+  if (is.null(modes$quick)) quick <- FALSE
+  if (is.null(modes$check)) check <- FALSE
+  if (is.null(modes$extended)) extended <- TRUE
+  if (is.null(modes$webpage)) webpage <- FALSE
+  if (is.null(modes$commit_modules)) commit_modules <- FALSE
   cat("🔧 WIP mode enabled - using sandbox environment\n")
 }
 
-# Apply TEST mode overrides
+# Apply TEST mode overrides (respect explicit settings if provided in modes, otherwise apply safe defaults)
 if (TEST) {
-  quick <- FALSE
-  check <- FALSE
-  extended <- TRUE
-  webpage <- FALSE
-  commit_modules <- FALSE
+  if (is.null(modes$quick)) quick <- FALSE
+  if (is.null(modes$check)) check <- FALSE
+  if (is.null(modes$extended)) extended <- TRUE
+  if (is.null(modes$webpage)) webpage <- FALSE
+  if (is.null(modes$commit_modules)) commit_modules <- FALSE
   cat("🧪 TEST mode enabled - creating standalone JamoviTest module\n")
   
   # Enable JamoviTest module when TEST mode is active
@@ -273,12 +274,12 @@ for (module_name in names(modules_config)) {
   }
 }
 
-if (module_validation_failed && !WIP && !TEST) {
-  stop("❌ Some module directories are invalid. Check configuration or enable WIP/TEST mode.")
+if (module_validation_failed && !WIP) {
+  stop("❌ Some module directories are invalid. Check configuration or enable WIP mode.")
 }
 
 # Handle JamoviTest module creation in TEST mode
-if (TEST && modules_config$JamoviTest$enabled) {
+if ((TEST || isTRUE(modules_config$JamoviTest$enabled))) {
   test_dir <- modules_config$JamoviTest$directory
   cat("\n🧪 Setting up JamoviTest module...\n")
   
@@ -413,6 +414,11 @@ if (WIP) {
 update_description_files <- function(paths, version, date) {
   cat("\n📝 Updating DESCRIPTION files...\n")
 
+  if (length(paths) == 0) {
+    cat("  ⏭️ No DESCRIPTION files to update (no matching enabled modules)\n")
+    return(invisible(0))
+  }
+
   version_pattern <- "Version:.*$"
   date_pattern <- "Date:.*$"
   version_replacement <- paste0("Version: ", version)
@@ -457,6 +463,10 @@ update_description_files <- function(paths, version, date) {
 # start of a line; anything else in the file is left alone.
 update_citation_files <- function(paths, version, date) {
   cat("\n📝 Updating CITATION.cff files...\n")
+  if (length(paths) == 0) {
+    cat("  ⏭️ No CITATION.cff files to update (no matching enabled modules)\n")
+    return(invisible(0))
+  }
   for (path in paths) {
     if (!file.exists(path)) next
     txt <- readLines(path, warn = FALSE)
@@ -473,6 +483,11 @@ update_citation_files <- function(paths, version, date) {
 # Enhanced function to update YAML files with validation
 update_yaml_0000_files <- function(paths, version, date) {
   cat("\n📝 Updating 0000.yaml files...\n")
+
+  if (length(paths) == 0) {
+    cat("  ⏭️ No 0000.yaml files to update (no matching enabled modules)\n")
+    return(invisible(0))
+  }
 
   version_pattern <- "version:.*$"
   date_pattern <- "date:.*$"
@@ -513,6 +528,11 @@ update_yaml_0000_files <- function(paths, version, date) {
 # Enhanced function to update analysis YAML files
 update_yaml_a_files <- function(paths, version) {
   cat("\n📝 Updating analysis .a.yaml files...\n")
+
+  if (length(paths) == 0) {
+    cat("  ⏭️ No analysis .a.yaml files to update (no matching enabled modules)\n")
+    return(invisible(0))
+  }
 
   version_pattern <- "version:.*$"
   valid_version <- paste(strsplit(version, "\\.")[[1]][1:3], collapse = ".")
@@ -601,6 +621,29 @@ copy_module_files <- function(module_names, source_dir, dest_dir, file_extension
         failed_count <- failed_count + 1
       })
     }
+
+    # Automatically discover and copy companion / split / helper R files for this analysis
+    # (e.g. <analysis>-part1.R, <analysis>_helpers.R, <analysis>-discrimination.R, etc.).
+    # These files are tied to the analysis and automatically follow its menuGroup routing.
+    if (".b.R" %in% file_extensions) {
+      companion_pattern <- paste0("^", module_name, "[-_].*\\.[rR]$")
+      companion_files <- list.files(source_dir, pattern = companion_pattern, full.names = FALSE)
+      # Exclude editor backups, temporary files, and generated headers (.h.R)
+      companion_files <- companion_files[!grepl("(\\.bak|~|\\.h\\.[rR]$)", companion_files, ignore.case = TRUE)]
+
+      for (comp_file in companion_files) {
+        comp_src <- file.path(source_dir, comp_file)
+        comp_dest <- file.path(dest_dir, comp_file)
+        tryCatch({
+          fs::file_copy(path = comp_src, new_path = comp_dest, overwrite = TRUE)
+          cat("  ✅ Copied companion R file: ", comp_file, " (for ", module_name, ")\n", sep = "")
+          copied_count <- copied_count + 1
+        }, error = function(e) {
+          warning("⚠️ Failed to copy companion file ", comp_file, ": ", e$message)
+          failed_count <- failed_count + 1
+        })
+      }
+    }
   }
 
   return(list(copied = copied_count, skipped = 0, failed = failed_count))
@@ -674,6 +717,28 @@ copy_module_files_enhanced <- function(module_names, source_dir, dest_dir, file_
         cat("  ✅ Copied:", paste0(module_name, ext), "\n")
       } else {
         failed_count <- failed_count + 1
+      }
+    }
+
+    # Automatically discover and copy companion / split / helper R files for this analysis
+    if (".b.R" %in% file_extensions) {
+      companion_pattern <- paste0("^", module_name, "[-_].*\\.[rR]$")
+      companion_files <- list.files(source_dir, pattern = companion_pattern, full.names = FALSE)
+      companion_files <- companion_files[!grepl("(\\.bak|~|\\.h\\.[rR]$)", companion_files, ignore.case = TRUE)]
+
+      for (comp_file in companion_files) {
+        comp_src <- file.path(source_dir, comp_file)
+        comp_dest <- file.path(dest_dir, comp_file)
+        comp_result <- with_error_handling({
+          fs::file_copy(path = comp_src, new_path = comp_dest, overwrite = TRUE)
+        }, paste("copying companion", comp_file), continue_on_error = TRUE)
+
+        if (comp_result$success) {
+          copied_count <- copied_count + 1
+          cat("  ✅ Copied companion R file:", comp_file, "(for", module_name, ")\n")
+        } else {
+          failed_count <- failed_count + 1
+        }
       }
     }
   }
@@ -1789,7 +1854,7 @@ OncoPath_modules <- OncoPath_a_yaml_files
 ## JamoviTest module functions (TEST mode) ----
 JamoviTest_modules <- c()
 
-if (TEST) {
+if (TEST || isTRUE(modules_config$JamoviTest$enabled)) {
   cat("\n🧪 Collecting TEST functions for JamoviTest module...\n")
   
   # Collect all test functions ending with 'T' from all categories
@@ -1826,7 +1891,10 @@ if (TEST) {
 # route to more than one submodule are a routing bug (hard stop); analyses that
 # route to none are reported (they are legitimately umbrella-only staging, e.g.
 # the undocumented '…D' suffix, so this is informational unless coverage_fail_on_gap).
-if (!TEST && (modes$check_distribution_coverage %||% TRUE)) {
+run_coverage_check <- modes$check_distribution_coverage %||%
+  (!TEST || any(c(jjstatsplot_module, meddecide_module, jsurvival_module,
+                  ClinicoPathDescriptives_module, OncoPath_module)))
+if (run_coverage_check) {
   all_analyses <- sub("\\.a\\.yaml$", "", basename(a_yaml_files))
   module_modules <- list(
     jjstatsplot = jjstatsplot_modules,
@@ -1842,77 +1910,104 @@ if (!TEST && (modes$check_distribution_coverage %||% TRUE)) {
 }
 
 
-# Update DESCRIPTION files ----
-description_paths <- c(
-  file.path(main_repo_dir, "DESCRIPTION"),
-  # Main repository
-  file.path(jjstatsplot_dir, "DESCRIPTION"),
-  # jjstatsplot repository
-  file.path(meddecide_dir, "DESCRIPTION"),
-  # meddecide repository
-  file.path(jsurvival_dir, "DESCRIPTION"),
-  # jsurvival repository
-  file.path(ClinicoPathDescriptives_dir, "DESCRIPTION"),   # ClinicoPathDescriptives repository
-  file.path(OncoPath_dir, "DESCRIPTION")   # OncoPath repository
-)
+# Update DESCRIPTION, CITATION, and YAML files ----
+# Only update package version and date fields for modules that are actually enabled!
+
+description_paths <- character(0)
+yaml_0000_paths   <- character(0)
+yaml_a_paths      <- character(0)
+
+# Check main umbrella repository toggle (ClinicoPath)
+# If not explicitly specified in config, update main umbrella package version/date
+# only when all production submodules are enabled (full release sync), and not in isolated TEST mode.
+if (is.null(ClinicoPath_module)) {
+  prod_modules_enabled <- c(jjstatsplot_module, meddecide_module, jsurvival_module,
+                            ClinicoPathDescriptives_module, OncoPath_module)
+  ClinicoPath_module <- all(prod_modules_enabled) && !TEST
+}
+
+if (isTRUE(ClinicoPath_module)) {
+  description_paths <- c(description_paths, file.path(main_repo_dir, "DESCRIPTION"))
+  yaml_0000_paths   <- c(yaml_0000_paths, file.path(main_repo_dir, "jamovi", "0000.yaml"))
+  all_prod_analyses <- c(jjstatsplot_modules, meddecide_modules, jsurvival_modules,
+                         ClinicoPathDescriptives_modules, OncoPath_modules)
+  yaml_a_paths      <- c(yaml_a_paths, file.path(main_repo_dir, "jamovi", paste0(all_prod_analyses, ".a.yaml")))
+}
+
+# Submodule: jjstatsplot
+if (jjstatsplot_module) {
+  description_paths <- c(description_paths, file.path(jjstatsplot_dir, "DESCRIPTION"))
+  yaml_0000_paths   <- c(yaml_0000_paths, file.path(jjstatsplot_dir, "jamovi", "0000.yaml"))
+  yaml_a_paths      <- c(yaml_a_paths, file.path(jjstatsplot_dir, "jamovi", paste0(jjstatsplot_modules, ".a.yaml")))
+}
+
+# Submodule: meddecide
+if (meddecide_module) {
+  description_paths <- c(description_paths, file.path(meddecide_dir, "DESCRIPTION"))
+  yaml_0000_paths   <- c(yaml_0000_paths, file.path(meddecide_dir, "jamovi", "0000.yaml"))
+  yaml_a_paths      <- c(yaml_a_paths, file.path(meddecide_dir, "jamovi", paste0(meddecide_modules, ".a.yaml")))
+}
+
+# Submodule: jsurvival
+if (jsurvival_module) {
+  description_paths <- c(description_paths, file.path(jsurvival_dir, "DESCRIPTION"))
+  yaml_0000_paths   <- c(yaml_0000_paths, file.path(jsurvival_dir, "jamovi", "0000.yaml"))
+  yaml_a_paths      <- c(yaml_a_paths, file.path(jsurvival_dir, "jamovi", paste0(jsurvival_modules, ".a.yaml")))
+}
+
+# Submodule: ClinicoPathDescriptives
+if (ClinicoPathDescriptives_module) {
+  description_paths <- c(description_paths, file.path(ClinicoPathDescriptives_dir, "DESCRIPTION"))
+  yaml_0000_paths   <- c(yaml_0000_paths, file.path(ClinicoPathDescriptives_dir, "jamovi", "0000.yaml"))
+  yaml_a_paths      <- c(yaml_a_paths, file.path(ClinicoPathDescriptives_dir, "jamovi", paste0(ClinicoPathDescriptives_modules, ".a.yaml")))
+}
+
+# Submodule: OncoPath
+if (OncoPath_module) {
+  description_paths <- c(description_paths, file.path(OncoPath_dir, "DESCRIPTION"))
+  yaml_0000_paths   <- c(yaml_0000_paths, file.path(OncoPath_dir, "jamovi", "0000.yaml"))
+  yaml_a_paths      <- c(yaml_a_paths, file.path(OncoPath_dir, "jamovi", paste0(OncoPath_modules, ".a.yaml")))
+}
+
+# Submodule: JamoviTest (TEST mode)
+if ((TEST || isTRUE(modules_config$JamoviTest$enabled)) && length(JamoviTest_modules) > 0) {
+  test_dir <- modules_config$JamoviTest$directory
+  if (!is.null(test_dir) && dir.exists(test_dir)) {
+    description_paths <- c(description_paths, file.path(test_dir, "DESCRIPTION"))
+    yaml_0000_paths   <- c(yaml_0000_paths, file.path(test_dir, "jamovi", "0000.yaml"))
+    yaml_a_paths      <- c(yaml_a_paths, file.path(test_dir, "jamovi", paste0(JamoviTest_modules, ".a.yaml")))
+  }
+}
+
+# Deduplicate and filter to existing files
+description_paths <- unique(description_paths[file.exists(description_paths)])
+yaml_0000_paths   <- unique(yaml_0000_paths[file.exists(yaml_0000_paths)])
+yaml_a_paths      <- unique(yaml_a_paths[file.exists(yaml_a_paths)])
+
+# Update DESCRIPTION files
 update_description_files(paths = description_paths,
                          version = new_version,
                          date = new_date)
 
-# CITATION.cff carries its own version/date and nothing was syncing them, so four
-# submodules were still advertising 1.0.0 (or 0.0.31.69) long after DESCRIPTION moved on.
-update_citation_files(paths = sub("DESCRIPTION$", "CITATION.cff", description_paths),
+# CITATION.cff carries its own version/date and is kept in step with DESCRIPTION
+citation_paths <- sub("DESCRIPTION$", "CITATION.cff", description_paths)
+update_citation_files(paths = citation_paths,
                       version = new_version,
                       date = new_date)
-
-
-# Update YAML files ----
-yaml_0000_paths <- c(
-  file.path(main_repo_dir, "jamovi", "0000.yaml"),
-  file.path(jjstatsplot_dir, "jamovi", "0000.yaml"),
-  file.path(meddecide_dir, "jamovi", "0000.yaml"),
-  file.path(jsurvival_dir, "jamovi", "0000.yaml"),
-  file.path(ClinicoPathDescriptives_dir, "jamovi", "0000.yaml"),
-  file.path(OncoPath_dir, "jamovi", "0000.yaml")
-)
-
-modules <- c(
-  jjstatsplot_modules,
-  meddecide_modules,
-  jsurvival_modules,
-  ClinicoPathDescriptives_modules,
-  OncoPath_modules
-)
-
-yaml_a_paths <- c(
-  file.path(main_repo_dir, "jamovi", paste0(modules, ".a.yaml")),
-  file.path(
-    jjstatsplot_dir,
-    "jamovi",
-    paste0(jjstatsplot_modules, ".a.yaml")
-  ),
-  file.path(meddecide_dir, "jamovi", paste0(meddecide_modules, ".a.yaml")),
-  file.path(jsurvival_dir, "jamovi", paste0(jsurvival_modules, ".a.yaml")),
-  file.path(
-    ClinicoPathDescriptives_dir,
-    "jamovi",
-    paste0(ClinicoPathDescriptives_modules, ".a.yaml")
-  ),
-  # OncoPath was missing from this list, so its analysis .a.yaml versions never got
-  # bumped -- they sat at 1.0.52 while its DESCRIPTION/0000.yaml moved to 1.0.53.01.
-  file.path(OncoPath_dir, "jamovi", paste0(OncoPath_modules, ".a.yaml"))
-)
-
-yaml_0000_paths <- yaml_0000_paths[file.exists(yaml_0000_paths)]
-yaml_a_paths <- yaml_a_paths[file.exists(yaml_a_paths)]
-
 
 # Update YAML files with new version
 update_yaml_0000_files(paths = yaml_0000_paths,
                        version = new_version,
                        date = new_date)
 
-update_yaml_a_files(paths = yaml_a_paths, version = new_version)
+# In jamovi, .a.yaml version: is the individual ANALYSIS version (see vignettes and release-review-function).
+# It is preserved unless sync_analysis_versions: true is explicitly requested.
+sync_analysis_versions <- modes$sync_analysis_versions %||% config$sync_analysis_versions %||% FALSE
+if (isTRUE(sync_analysis_versions)) {
+  update_yaml_a_files(paths = yaml_a_paths, version = new_version)
+} else {
+  cat("\n📝 Preserving individual analysis versions in .a.yaml files (sync_analysis_versions: false)\n")
+}
 
 
 # Copy module files with enhanced error handling ----
@@ -1927,6 +2022,9 @@ if (any(c(jjstatsplot_module, meddecide_module, jsurvival_module,
   # jjstatsplot_modules
   if (jjstatsplot_module && length(jjstatsplot_modules) > 0) {
   cat("\n📋 Processing jjstatsplot modules...\n")
+
+  # Prune stale analyses re-routed out of this module
+  prune_stale_module_analyses(jjstatsplot_dir, jjstatsplot_modules, main_repo_dir)
 
   # Copy R backend files
   copy_module_files(
@@ -1972,6 +2070,9 @@ if (any(c(jjstatsplot_module, meddecide_module, jsurvival_module,
 # meddecide_modules
 if (meddecide_module && length(meddecide_modules) > 0) {
   cat("\n🎩 Processing meddecide modules...\n")
+
+  # Prune stale analyses re-routed out of this module
+  prune_stale_module_analyses(meddecide_dir, meddecide_modules, main_repo_dir)
 
   # Copy R backend files
   copy_module_files(
@@ -2019,6 +2120,9 @@ if (meddecide_module && length(meddecide_modules) > 0) {
 if (jsurvival_module && length(jsurvival_modules) > 0) {
   cat("\n⚔️ Processing jsurvival modules...\n")
 
+  # Prune stale analyses re-routed out of this module
+  prune_stale_module_analyses(jsurvival_dir, jsurvival_modules, main_repo_dir)
+
   # Copy R backend files
   copy_module_files(
     jsurvival_modules,
@@ -2065,6 +2169,9 @@ if (jsurvival_module && length(jsurvival_modules) > 0) {
 if (ClinicoPathDescriptives_module && length(ClinicoPathDescriptives_modules) > 0) {
   cat("\n🔬 Processing ClinicoPathDescriptives modules...\n")
 
+  # Prune stale analyses re-routed out of this module
+  prune_stale_module_analyses(ClinicoPathDescriptives_dir, ClinicoPathDescriptives_modules, main_repo_dir)
+
   # Copy R backend files
   copy_module_files(
     ClinicoPathDescriptives_modules,
@@ -2110,6 +2217,9 @@ if (ClinicoPathDescriptives_module && length(ClinicoPathDescriptives_modules) > 
 # OncoPath_modules
 if (OncoPath_module && length(OncoPath_modules) > 0) {
   cat("\n🧬 Processing OncoPath modules...\n")
+
+  # Prune stale analyses re-routed out of this module
+  prune_stale_module_analyses(OncoPath_dir, OncoPath_modules, main_repo_dir)
 
   # Copy R backend files
   copy_module_files(
@@ -2158,10 +2268,13 @@ if (OncoPath_module && length(OncoPath_modules) > 0) {
 }
 
 # JamoviTest_modules (TEST mode only) - Process outside of the regular module block
-if (TEST && modules_config$JamoviTest$enabled && length(JamoviTest_modules) > 0) {
+if ((TEST || isTRUE(modules_config$JamoviTest$enabled)) && length(JamoviTest_modules) > 0) {
   cat("\n🧪 Processing JamoviTest modules...\n")
   
   test_dir <- modules_config$JamoviTest$directory
+
+  # Prune stale analyses re-routed out of this module
+  prune_stale_module_analyses(test_dir, JamoviTest_modules, main_repo_dir)
 
   # Copy R backend files
   copy_module_files(
@@ -2271,16 +2384,16 @@ if (!WIP & webpage) {
 # analysis yet -- enable it once it is, so a submodule's R CMD check does not go red.
 # Datasets are the other prerequisite: a copied test calling data(<x>, package = "<module>")
 # needs <x> in that module's data_files manifest.
-if (!TEST) {
+test_targets <- list()
+if (jjstatsplot_module) test_targets$jjstatsplot <- list(dir = jjstatsplot_dir, mods = jjstatsplot_modules)
+if (meddecide_module) test_targets$meddecide <- list(dir = meddecide_dir, mods = meddecide_modules)
+if (jsurvival_module) test_targets$jsurvival <- list(dir = jsurvival_dir, mods = jsurvival_modules)
+if (ClinicoPathDescriptives_module) test_targets$ClinicoPathDescriptives <- list(dir = ClinicoPathDescriptives_dir, mods = ClinicoPathDescriptives_modules)
+if (OncoPath_module) test_targets$OncoPath <- list(dir = OncoPath_dir, mods = OncoPath_modules)
+
+if (length(test_targets) > 0) {
   guard_template <- file.path(main_repo_dir, "_updateModules_test_dependency_guard.R")
   umbrella_tests <- file.path(main_repo_dir, "tests", "testthat")
-
-  test_targets <- list()
-  if (jjstatsplot_module) test_targets$jjstatsplot <- list(dir = jjstatsplot_dir, mods = jjstatsplot_modules)
-  if (meddecide_module) test_targets$meddecide <- list(dir = meddecide_dir, mods = meddecide_modules)
-  if (jsurvival_module) test_targets$jsurvival <- list(dir = jsurvival_dir, mods = jsurvival_modules)
-  if (ClinicoPathDescriptives_module) test_targets$ClinicoPathDescriptives <- list(dir = ClinicoPathDescriptives_dir, mods = ClinicoPathDescriptives_modules)
-  if (OncoPath_module) test_targets$OncoPath <- list(dir = OncoPath_dir, mods = OncoPath_modules)
 
   n_existing_tests <- function(module_dir) {
     td <- file.path(module_dir, "tests", "testthat")
@@ -2292,15 +2405,6 @@ if (!TEST) {
   cat("\n🧪 Distributing test infrastructure to submodules...\n")
   for (nm in names(test_targets)) {
     tt <- test_targets[[nm]]
-    # The dependency-guard test is self-contained and ALWAYS-GREEN (it is the runtime
-    # twin of the pkg::-vs-DESCRIPTION reconciliation check below, and skips cleanly
-    # under R CMD check). Ship it to EVERY submodule -- including ones that already
-    # have functional tests -- so the undeclared-dependency net (and its guarded/
-    # recommended-but-undeclared WARNING pass) exists everywhere. Historically this was
-    # skipped for submodules with pre-existing tests, which is exactly why meddecide
-    # never got the guard and its undeclared `glmnet` (lassologistic) slipped through.
-    # Only the umbrella's FULL functional suite (which can be red) stays gated behind
-    # copy_test_files.
     write_dependency_guard_test(tt$dir, guard_template)
     ensure_testthat_runner(tt$dir)
     if (copy_test_files) {
@@ -2320,11 +2424,8 @@ if (!TEST) {
 # Dependency reconciliation check (P0.2) ----
 # Now that each submodule's R/ has been refreshed from the umbrella, assert every
 # package used via `pkg::` in the distributed code is declared in that submodule's
-# DESCRIPTION. The existing NAMESPACE->DESCRIPTION sync is driven by the NAMESPACE
-# file and CANNOT see `pkg::` calls, so this is the net that catches hard-crash gaps
-# (e.g. cmprsk in jsurvival; vcd/lme4 in meddecide; haven in jjstatsplot; viridis
-# in ClinicoPathDescriptives). Runs before the slow prepare/install so it fails fast.
-if (!TEST && (modes$check_module_dependencies %||% TRUE)) {
+# DESCRIPTION. Runs for any enabled production submodules.
+if (modes$check_module_dependencies %||% TRUE) {
   dep_specs <- list()
   if (jjstatsplot_module) dep_specs$jjstatsplot <- jjstatsplot_dir
   if (meddecide_module) dep_specs$meddecide <- meddecide_dir
@@ -2339,10 +2440,8 @@ if (!TEST && (modes$check_module_dependencies %||% TRUE)) {
 
 # Shared helper distribution check ----
 # Sibling of the dependency check above, for the umbrella's OWN helpers rather than
-# external packages. A shipped .b.R that calls a helper whose defining file is not in
-# that module's `r_files` fails only in the SHIPPED module, at runtime, with
-# "could not find function" - the umbrella keeps working, so nothing here notices.
-if (!TEST && (modes$check_module_dependencies %||% TRUE)) {
+# external packages.
+if (modes$check_module_dependencies %||% TRUE) {
   helper_specs <- list()
   if (jjstatsplot_module) helper_specs$jjstatsplot <- list(directory = jjstatsplot_dir)
   if (meddecide_module) helper_specs$meddecide <- list(directory = meddecide_dir)
@@ -2496,6 +2595,12 @@ if (OncoPath_module) {
   cat("  ⏭️ OncoPath (disabled)\n")
 }
 
+if (ClinicoPath_module) {
+  cat("  ✅ ClinicoPath (main repository)\n")
+} else {
+  cat("  ⏭️ ClinicoPath (main repository disabled)\n")
+}
+
 cat("\n🎉 Module update process completed successfully!\n")
 # }
 
@@ -2529,14 +2634,14 @@ if (extended) {
       cat("  📝 Documenting...\n")
       devtools::document()
       
-      # NAMESPACE-DESCRIPTION synchronization for jjstatsplot
+      # NAMESPACE-DESCRIPTION synchronization for jjstatsplot (only re-prepare if sync is active)
       if (sync_namespace_description) {
         cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
         sync_namespace_with_description(jjstatsplot_dir, namespace_sync_dry_run)
+        jmvtools::prepare()
+        devtools::document()
       }
       
-      jmvtools::prepare()
-      devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       install_module_verified("jjstatsplot")
@@ -2584,14 +2689,14 @@ if (extended) {
       cat("  📝 Documenting...\n")
       devtools::document()
       
-      # NAMESPACE-DESCRIPTION synchronization for meddecide
+      # NAMESPACE-DESCRIPTION synchronization for meddecide (only re-prepare if sync is active)
       if (sync_namespace_description) {
         cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
         sync_namespace_with_description(meddecide_dir, namespace_sync_dry_run)
+        jmvtools::prepare()
+        devtools::document()
       }
       
-      jmvtools::prepare()
-      devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       install_module_verified("meddecide")
@@ -2639,14 +2744,14 @@ if (extended) {
       cat("  📝 Documenting...\n")
       devtools::document()
       
-      # NAMESPACE-DESCRIPTION synchronization for jsurvival
+      # NAMESPACE-DESCRIPTION synchronization for jsurvival (only re-prepare if sync is active)
       if (sync_namespace_description) {
         cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
         sync_namespace_with_description(jsurvival_dir, namespace_sync_dry_run)
+        jmvtools::prepare()
+        devtools::document()
       }
       
-      jmvtools::prepare()
-      devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       install_module_verified("jsurvival")
@@ -2694,14 +2799,14 @@ if (extended) {
       cat("  📝 Documenting...\n")
       devtools::document()
       
-      # NAMESPACE-DESCRIPTION synchronization for ClinicoPathDescriptives
+      # NAMESPACE-DESCRIPTION synchronization for ClinicoPathDescriptives (only re-prepare if sync is active)
       if (sync_namespace_description) {
         cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
         sync_namespace_with_description(ClinicoPathDescriptives_dir, namespace_sync_dry_run)
+        jmvtools::prepare()
+        devtools::document()
       }
       
-      jmvtools::prepare()
-      devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       install_module_verified("ClinicoPathDescriptives")
@@ -2749,14 +2854,13 @@ if (extended) {
       cat("  📝 Documenting...\n")
       devtools::document()
 
-      # NAMESPACE-DESCRIPTION synchronization for OncoPath
+      # NAMESPACE-DESCRIPTION synchronization for OncoPath (only re-prepare if sync is active)
       if (sync_namespace_description) {
         cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
         sync_namespace_with_description(OncoPath_dir, namespace_sync_dry_run)
+        jmvtools::prepare()
+        devtools::document()
       }
-
-      jmvtools::prepare()
-      devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       install_module_verified("OncoPath")
@@ -2793,7 +2897,7 @@ if (extended) {
   }
 
   # Process JamoviTest in TEST mode
-  if (TEST && modules_config$JamoviTest$enabled && length(JamoviTest_modules) > 0) {
+  if ((TEST || isTRUE(modules_config$JamoviTest$enabled)) && length(JamoviTest_modules) > 0) {
     cat("\n🧪 Processing JamoviTest package...\n")
     old_wd <- getwd()
     test_dir <- modules_config$JamoviTest$directory
@@ -2806,14 +2910,14 @@ if (extended) {
       cat("  📝 Documenting...\n")
       devtools::document()
       
-      # NAMESPACE-DESCRIPTION synchronization for JamoviTest
+      # NAMESPACE-DESCRIPTION synchronization for JamoviTest (only re-prepare if sync is active)
       if (sync_namespace_description) {
         cat("  🔄 Syncing NAMESPACE with DESCRIPTION...\n")
         sync_namespace_with_description(test_dir, namespace_sync_dry_run)
+        jmvtools::prepare()
+        devtools::document()
       }
       
-      jmvtools::prepare()
-      devtools::document()
       postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       install_module_verified("JamoviTest")
@@ -2828,7 +2932,7 @@ if (extended) {
     }, finally = {
       setwd(old_wd)
     })
-  } else if (TEST) {
+  } else if (TEST || isTRUE(modules_config$JamoviTest$enabled)) {
     cat("\n⏭️ Skipping JamoviTest package (no test functions found or disabled)\n")
   }
 
