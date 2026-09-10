@@ -256,9 +256,9 @@ marginalrecurrentResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="Marginal Models for Recurrent Events",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "reReg",
-                    "survival",
-                    "ClinicoPathJamoviModule"))
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

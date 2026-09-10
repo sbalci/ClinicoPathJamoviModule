@@ -85,8 +85,8 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - robins1986gformula
     - hernan2020whatif
-    - ClinicoPathJamoviModule
     - ggplot2
 ...

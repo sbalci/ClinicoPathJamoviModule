@@ -161,8 +161,8 @@ standardizedratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="Standardized Incidence / Mortality Ratio (SIR / SMR)",
                 refs=list(
-                    "breslowday1987",
                     "ClinicoPathJamoviModule",
+                    "breslowday1987",
                     "ggplot2"))
             self$add(jmvcore::Html$new(
                 options=options,

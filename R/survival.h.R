@@ -835,7 +835,10 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "survivalrwnahhas",
                     "survivalrviews",
                     "appliedsurvivalanalysisR",
-                    "lubridate"))
+                    "lubridate",
+                    "patchwork",
+                    "splines",
+                    "tools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
@@ -2764,7 +2767,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survival",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = survivalResults$new(options=options),
                 data = data,

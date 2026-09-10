@@ -70,6 +70,7 @@ items:
       visible: true
 
 refs:
-    - trialplots_highwind
     - ClinicoPathJamoviModule
+    - trialplots_highwind
+    - ggsci
 ...

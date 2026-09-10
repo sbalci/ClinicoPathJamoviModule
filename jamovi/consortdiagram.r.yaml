@@ -170,7 +170,6 @@ items:
       visible: (include_interpretation)
 
 refs:
-    - consort
     - ClinicoPathJamoviModule
-
+    - consort
 ...

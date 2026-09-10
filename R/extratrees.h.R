@@ -334,11 +334,12 @@ extratreesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Extremely Randomized Trees for Survival",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "survival",
                     "ranger",
                     "randomForestSRC",
-                    "ClinicoPathJamoviModule",
-                    "survival"))
+                    "survival",
+                    "graphics"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

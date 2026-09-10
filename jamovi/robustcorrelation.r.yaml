@@ -207,6 +207,7 @@ items:
         - plot_height
 
 refs:
+    - ClinicoPathJamoviModule
     - Hmisc
     - corrplot
     - ggplot2
@@ -215,9 +216,6 @@ refs:
     - robustbase
     - WRS2
     - boot
-    - ClinicoPathJamoviModule
-
-
     - WGCNA
     - glue
     - reshape2

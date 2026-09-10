@@ -114,8 +114,8 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - glue
     - survival
     - survminer
+    - survRM2
 ...

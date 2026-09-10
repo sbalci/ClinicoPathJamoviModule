@@ -4,7 +4,7 @@ title: Advanced TNM Stage Migration Analysis
 menuGroup: OncoPathT
 menuSubgroup: Stage Migration Analysis
 menuSubtitle: 'State-of-the-Art Staging System Validation'
-version: '0.0.31'
+version: '0.0.32'
 jas: '1.2'
 
 description:
@@ -43,7 +43,7 @@ options:
 
     # Core Variables (Enhanced with Clinical Examples)
     - name: oldStage
-      title: 'Original TNM Staging System'
+      title: 'Original TNM staging system'
       type: Variable
       suggested: [ordinal, nominal]
       permitted: [factor]
@@ -55,7 +55,7 @@ options:
         Should be coded as ordered factor with appropriate stage levels for meaningful comparison.
 
     - name: newStage
-      title: 'New/Revised TNM Staging System'
+      title: 'New/Revised TNM staging system'
       type: Variable
       suggested: [ordinal, nominal]
       permitted: [factor]
@@ -68,7 +68,7 @@ options:
         Should use the same coding structure as the original staging system for valid comparison.
 
     - name: survivalTime
-      title: 'Follow-up Time (months)'
+      title: 'Follow-up time (months)'
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
@@ -81,7 +81,7 @@ options:
         For disease-free survival, use time from treatment to recurrence or last follow-up.
 
     - name: event
-      title: 'Event Status (Death/Outcome)'
+      title: 'Event status (Death/Outcome)'
       type: Variable
       suggested: [ordinal, nominal, continuous]
       permitted: [factor, numeric]
@@ -267,7 +267,7 @@ options:
         1000 repetitions recommended for stable results.
 
     - name: performCrossValidation
-      title: 'Cross-Validation'
+      title: 'Cross-validation'
       type: Bool
       default: false
       description: >-
@@ -284,7 +284,7 @@ options:
         Number of folds for cross-validation when enabled.
 
     - name: institutionVariable
-      title: 'Institution Variable'
+      title: 'Institution variable'
       type: Variable
       suggested:
         - nominal
@@ -494,7 +494,7 @@ options:
 
     # Survival Plot Options
     - name: showSurvivalCurves
-      title: 'Show Survival Curves'
+      title: 'Survival Curves'
       type: Bool
       default: false
       description: >-
@@ -515,14 +515,14 @@ options:
         Controls display of survival curves for staging system comparison.
 
     - name: showConfidenceIntervals
-      title: 'Show Confidence Intervals'
+      title: 'Confidence Intervals'
       type: Bool
       default: false
       description: >-
         Display confidence intervals around survival curves and other estimates.
 
     - name: showRiskTables
-      title: 'Show Risk Tables'
+      title: 'Risk Tables'
       type: Bool
       default: false
       description: >-
@@ -560,7 +560,7 @@ options:
         Display detailed notes on statistical methods used and their interpretation.
 
     - name: includeEffectSizes
-      title: 'Include Effect Sizes'
+      title: 'Effect Sizes'
       type: Bool
       default: false
       description: >-
@@ -612,7 +612,7 @@ options:
         interpretation guidelines based on cancer-specific literature.
 
     - name: useOptimismCorrection
-      title: 'Apply Optimism Correction'
+      title: 'Optimism Correction'
       type: Bool
       default: false
       description: >-
@@ -620,8 +620,18 @@ options:
         validation to avoid overly optimistic estimates.
 
     # Multifactorial Analysis Options
+    - name: seed
+      title: 'Random seed'
+      type: Integer
+      default: 42
+      description: >-
+        Random seed set at the start of each run, so every resampling step (bootstrap
+        validation, cross-validation folds, SHAP subsampling, bootstrap model selection)
+        reproduces the same results for the same data and options. Change it to draw a
+        different resample.
+
     - name: enableMultifactorialAnalysis
-      title: 'Enable Multifactorial Analysis'
+      title: 'Multifactorial Analysis'
       type: Bool
       default: false
       description: >-
@@ -631,7 +641,7 @@ options:
         prognostic factors.
 
     - name: continuousCovariates
-      title: 'Continuous Covariates'
+      title: 'Continuous covariates'
       type: Variables
       suggested: [continuous]
       permitted: [numeric]
@@ -642,7 +652,7 @@ options:
       default: NULL
 
     - name: categoricalCovariates
-      title: 'Categorical Covariates'
+      title: 'Categorical covariates'
       type: Variables
       suggested: [ordinal, nominal]
       permitted: [factor]
@@ -703,7 +713,7 @@ options:
         staging system performance within subgroups.
 
     - name: showMultifactorialTables
-      title: 'Show Multifactorial Tables'
+      title: 'Multifactorial Tables'
       type: Bool
       default: false
       description: >-
@@ -711,7 +721,7 @@ options:
         including adjusted hazard ratios and model comparison statistics.
 
     - name: showAdjustedCIndexComparison
-      title: 'Show Adjusted C-index Comparison'
+      title: 'Adjusted C-index Comparison'
       type: Bool
       default: false
       description: >-
@@ -720,7 +730,7 @@ options:
         system after accounting for other prognostic factors.
 
     - name: showNestedModelTests
-      title: 'Show Nested Model Tests'
+      title: 'Nested Model Tests'
       type: Bool
       default: false
       description: >-
@@ -728,7 +738,7 @@ options:
         test the added value of each staging system over the baseline model.
 
     - name: showStepwiseResults
-      title: 'Show Stepwise Selection Results'
+      title: 'Stepwise Selection Results'
       type: Bool
       default: false
       description: >-
@@ -743,7 +753,7 @@ options:
         Include detailed explanations for results.
 
     - name: showAbbreviationGlossary
-      title: 'Show Abbreviation Glossary'
+      title: 'Abbreviation Glossary'
       type: Bool
       default: false
       description: >-
@@ -754,7 +764,7 @@ options:
 
     # Stage Migration Effect Options
     - name: calculateSME
-      title: 'Calculate Stage Migration Effect'
+      title: 'Stage Migration Effect'
       type: Bool
       default: false
       description: >-
@@ -766,7 +776,7 @@ options:
 
     # RMST Analysis Options
     - name: calculateRMST
-      title: 'Calculate RMST Metrics'
+      title: 'RMST Metrics'
       type: Bool
       default: false
       description: >-
@@ -778,7 +788,7 @@ options:
 
     # Competing Risks Analysis Options
     - name: performCompetingRisks
-      title: 'Perform Competing Risks Analysis'
+      title: 'Competing Risks Analysis'
       type: Bool
       default: false
       description: >-
@@ -789,7 +799,7 @@ options:
         outcome and standard survival analysis may be biased.
 
     - name: competingEventVar
-      title: 'Competing Event Variable'
+      title: 'Competing event variable'
       type: Variable
       suggested:
         - nominal
@@ -817,7 +827,7 @@ options:
         or measurements.
 
     - name: continuousStageVariable
-      title: 'Continuous Variable for Cut-point Analysis'
+      title: 'Continuous variable for cut-point analysis'
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
@@ -871,7 +881,7 @@ options:
         Bonferroni is most conservative; use when testing many cut-points.
 
     - name: validateCutpoint
-      title: 'Cross-validate Cut-point'
+      title: 'Cross-validate cut-point'
       type: Bool
       default: false
       description: >-
@@ -897,7 +907,7 @@ options:
         Number of bootstrap repetitions for cut-point validation.
 
     - name: generateStagingSystem
-      title: 'Generate New Staging System'
+      title: 'New Staging System'
       type: Bool
       default: false
       description: >-
@@ -943,7 +953,7 @@ options:
         patient predictions, comprehensive includes both approaches.
 
     - name: shapCovariates
-      title: 'Variables for SHAP Analysis'
+      title: 'Variables for SHAP analysis'
       type: Variables
       suggested: [continuous, ordinal, nominal]
       permitted: [numeric, factor]
@@ -994,7 +1004,7 @@ options:
 
     # TODO: Wire to .b.R - Gate SHAP summary and dependence plot generation
     - name: generateSHAPPlots
-      title: 'Generate SHAP Plots'
+      title: 'SHAP Plots'
       type: Bool
       default: false
       description: >-
@@ -1093,7 +1103,7 @@ options:
 
     # TODO: Wire to .b.R - Gate cumulative incidence function plot generation
     - name: generateCIFPlots
-      title: 'Generate CIF Plots'
+      title: 'CIF Plots'
       type: Bool
       default: false
       description: >-
@@ -1110,7 +1120,6 @@ options:
         across staging groups. Tests whether CIF curves differ significantly 
         between stages for each event type.
 
-    # TODO: Wire to .b.R - Pass confidence level to CIF computation instead of hardcoded 0.95
     - name: cifConfidenceLevel
       title: 'CIF Confidence Level'
       type: Number
@@ -1122,7 +1131,7 @@ options:
         and statistical tests.
 
     - name: competingRisksCovariates
-      title: 'Competing Risks Covariates'
+      title: 'Competing risks covariates'
       type: Variables
       suggested: [continuous, ordinal, nominal]
       permitted: [numeric, factor]
@@ -1151,7 +1160,7 @@ options:
         events when evaluating staging system performance.
 
     - name: generateCRSummary
-      title: 'Competing Risks Summary Table'
+      title: 'Competing risks summary table'
       type: Bool
       default: false
       description: >-
@@ -1193,7 +1202,7 @@ options:
         comparison.
 
     - name: stateVariable
-      title: 'Disease State Variable'
+      title: 'Disease state variable'
       type: Variable
       suggested:
         - nominal
@@ -1208,7 +1217,7 @@ options:
       default: null
 
     - name: transitionTimeVariable
-      title: 'Transition Time Variable'
+      title: 'Transition time variable'
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
@@ -1237,7 +1246,7 @@ options:
         outcomes in the disease process.
 
     - name: multiStateCovariates
-      title: 'Multi-State Covariates'
+      title: 'Multi-state covariates'
       type: Variables
       suggested: [continuous, ordinal, nominal]
       permitted: [numeric, factor]
@@ -1248,7 +1257,7 @@ options:
       default: null
 
     - name: calculateTransitionProbabilities
-      title: 'Calculate Transition Probabilities'
+      title: 'Transition Probabilities'
       type: Bool
       default: false
       description: >-
@@ -1266,7 +1275,7 @@ options:
         clinically relevant time points for disease monitoring.
 
     - name: generateTransitionMatrix
-      title: 'Generate Transition Matrix'
+      title: 'Transition Matrix'
       type: Bool
       default: false
       description: >-
@@ -1305,7 +1314,7 @@ options:
         intensive but provides robust model assessment.
 
     - name: generateMSMSummary
-      title: 'Multi-State Summary Table'
+      title: 'Multi-state summary table'
       type: Bool
       default: false
       description: >-
@@ -1376,7 +1385,7 @@ options:
         survival data depending on sample size.
 
     - name: forestCovariates
-      title: 'Forest Covariates'
+      title: 'Forest covariates'
       type: Variables
       suggested: [continuous, ordinal, nominal]
       permitted: [numeric, factor]
@@ -1387,7 +1396,7 @@ options:
       default: null
 
     - name: calculateVariableImportance
-      title: 'Calculate Variable Importance'
+      title: 'Variable Importance'
       type: Bool
       default: false
       description: >-
@@ -1433,7 +1442,7 @@ options:
         Use clinically relevant time points for staging comparison.
 
     - name: generateSurvivalPredictions
-      title: 'Generate Survival Predictions'
+      title: 'Survival Predictions'
       type: Bool
       default: false
       description: >-
@@ -1492,14 +1501,14 @@ options:
         clinical recommendations based on ensemble predictions.
 
     - name: rfAnalyzeOldStage
-      title: 'Analyze Old Staging System (RF)'
+      title: 'Analyze old staging system (RF)'
       type: Bool
       default: true
       description:
           R: Include old staging system in random forest analysis
 
     - name: rfAnalyzeNewStage
-      title: 'Analyze New Staging System (RF)'
+      title: 'Analyze new staging system (RF)'
       type: Bool
       default: true
       description:
@@ -1624,7 +1633,6 @@ options:
         with specified distributions, non-parametric uses Kaplan-Meier plateau 
         detection, both provides validation.
 
-    # TODO: Wire to .b.R - Pass confidence level to cure model CI computation instead of hardcoded 0.95
     - name: cureConfidenceLevel
       title: 'Confidence Level'
       type: Number
@@ -1679,7 +1687,7 @@ options:
         more sensitive to noise.
 
     - name: cureCovariates
-      title: 'Cure Model Covariates'
+      title: 'Cure model covariates'
       type: Variables
       suggested: [continuous, ordinal, nominal]
       permitted: [numeric, factor]
@@ -1741,7 +1749,7 @@ options:
           analysis.
 
     - name: intervalCensoringLeftTime
-      title: 'Left Interval Time Variable'
+      title: 'Left interval time variable'
       type: Variable
       suggested:
         - continuous
@@ -1755,7 +1763,7 @@ options:
       default: null
 
     - name: intervalCensoringRightTime
-      title: 'Right Interval Time Variable'  
+      title: 'Right interval time variable'
       type: Variable
       suggested:
         - continuous
@@ -1838,7 +1846,7 @@ options:
 
     # TODO: Wire to .b.R - Gate interval censoring diagnostic plots
     - name: intervalCensoringPlots
-      title: 'Generate Survival Plots'
+      title: 'Survival Plots'
       type: Bool
       default: false
       description:
@@ -1848,7 +1856,7 @@ options:
           plots between staging systems.
 
     - name: intervalCensoringDiagnostics
-      title: 'Model Diagnostics'
+      title: 'Model diagnostics'
       type: Bool
       default: false
       description:
@@ -1879,7 +1887,7 @@ options:
           Standard choices are 0.90, 0.95, or 0.99.
 
     - name: intervalCensoringAdjustVariables
-      title: 'Adjustment Variables'
+      title: 'Adjustment variables'
       type: Variables
       suggested:
         - continuous
@@ -1931,7 +1939,7 @@ options:
 
     # TODO: Wire to .b.R - Select covariates for informative censoring adjustment model
     - name: informativeCensoringCovariates
-      title: 'Censoring Mechanism Covariates'
+      title: 'Censoring mechanism covariates'
       type: Variables
       suggested:
         - continuous
@@ -1981,7 +1989,7 @@ options:
 
     # TODO: Wire to .b.R - Select variables for inverse probability weighting in censoring adjustment
     - name: informativeCensoringIPWVariables
-      title: 'IPW Model Variables'
+      title: 'IPW model variables'
       type: Variables
       suggested:
         - continuous
@@ -2043,7 +2051,7 @@ options:
 
     # TODO: Wire to .b.R - Gate informative censoring diagnostic plots
     - name: informativeCensoringPlots
-      title: 'Generate Diagnostic Plots'
+      title: 'Diagnostic Plots'
       type: Bool
       default: false
       description:
@@ -2142,7 +2150,6 @@ options:
           measures, especially important for heavily censored data where
           traditional standard errors may be unreliable.
 
-    # TODO: Wire to .b.R - Set bootstrap replicates for concordance probability CI
     - name: concordanceProbabilityBootstrapSamples
       title: 'Bootstrap Samples'
       type: Integer
@@ -2180,7 +2187,7 @@ options:
 
     # TODO: Wire to .b.R - Select covariates for adjusted concordance probability estimation
     - name: concordanceProbabilityAdjustVariables
-      title: 'Adjustment Variables'
+      title: 'Adjustment variables'
       type: Variables
       suggested:
         - continuous
@@ -2243,7 +2250,6 @@ options:
           endpoints that respects the clinical hierarchy of outcomes and provides
           intuitive interpretation for staging system evaluation.
 
-    # TODO: Wire to .b.R - Select composite endpoint hierarchy (death > progression > response)
     - name: winRatioEndpoints
       title: 'Endpoint Hierarchy'
       type: List
@@ -2264,9 +2270,8 @@ options:
           important endpoint, followed by disease-specific outcomes. The hierarchy
           determines how patient pairs are compared.
 
-    # TODO: Wire to .b.R - Specify death indicator variable for win ratio primary endpoint
     - name: winRatioDeathVariable
-      title: 'Death/Primary Endpoint Variable'
+      title: 'Death/Primary endpoint variable'
       type: Variable
       suggested:
         - nominal
@@ -2281,7 +2286,7 @@ options:
       default: null
 
     - name: winRatioSecondaryEndpoint
-      title: 'Secondary Endpoint Variable'
+      title: 'Secondary endpoint variable'
       type: Variable
       suggested:
         - nominal
@@ -2308,9 +2313,8 @@ options:
       description:
           R: Direction of improvement for secondary endpoint in win ratio
 
-    # TODO: Wire to .b.R - Specify tertiary endpoint variable in win ratio hierarchy
     - name: winRatioTertiaryEndpoint
-      title: 'Tertiary Endpoint Variable'
+      title: 'Tertiary endpoint variable'
       type: Variable
       suggested:
         - nominal
@@ -2325,9 +2329,8 @@ options:
           are tied. Can be binary or continuous.
       default: null
 
-    # TODO: Wire to .b.R - Specify time-to-event variables per endpoint in win ratio
     - name: winRatioTimeVariables
-      title: 'Time Variables for Endpoints'
+      title: 'Time variables for endpoints'
       type: Variables
       suggested:
         - continuous
@@ -2340,7 +2343,6 @@ options:
           time-to-event comparisons when endpoints are not binary.
       default: null
 
-    # TODO: Wire to .b.R - Select pair matching strategy: all-pairs vs stratified vs nearest-neighbor
     - name: winRatioMatchingStrategy
       title: 'Matching Strategy'
       type: List
@@ -2361,7 +2363,6 @@ options:
           pairs uses pre-specified matching. Stratified performs within-stage
           comparisons. Propensity matching balances baseline characteristics.
 
-    # TODO: Wire to .b.R - Select CI method: bootstrap vs asymptotic for win ratio
     - name: winRatioConfidenceMethod
       title: 'Confidence Interval Method'
       type: List
@@ -2379,7 +2380,6 @@ options:
           Bootstrap is most robust but computationally intensive. Asymptotic
           uses large sample theory. Permutation provides exact p-values.
 
-    # TODO: Wire to .b.R - Set bootstrap replicates for win ratio CI
     - name: winRatioBootstrapSamples
       title: 'Bootstrap Samples'
       type: Integer
@@ -2392,7 +2392,6 @@ options:
           when using bootstrap method. More samples provide more accurate
           intervals but increase computation time.
 
-    # TODO: Wire to .b.R - Pass confidence level to win ratio CI computation
     - name: winRatioConfidenceLevel
       title: 'Confidence Level'
       type: Number
@@ -2405,7 +2404,6 @@ options:
           tests. Standard choices are 0.90, 0.95, or 0.99 for 90 percent, 95 percent, or
           99 percent confidence intervals respectively.
 
-    # TODO: Wire to .b.R - Select tie-breaking strategy: next-endpoint vs split vs random
     - name: winRatioHandleTies
       title: 'Tie Handling Strategy'
       type: List
@@ -2433,7 +2431,6 @@ options:
           endpoint ordering impact, missing data influence, and robustness
           to matching strategy choices.
 
-    # TODO: Wire to .b.R - Enable generalized pairwise comparison extension of win ratio
     - name: winRatioGeneralizedPairwise
       title: 'Generalized Pairwise Comparison'
       type: Bool
@@ -2456,7 +2453,7 @@ options:
           center-specific random effects and clustering adjustments.
 
     - name: frailtyClusterVariable
-      title: 'Cluster Variable'
+      title: 'Cluster variable'
       type: Variable
       suggested:
         - nominal
@@ -2468,7 +2465,6 @@ options:
           heterogeneity and clustering effects in survival analysis.
       default: null
 
-    # TODO: Wire to .b.R - Select frailty distribution: gamma, gaussian, or log-normal
     - name: frailtyDistribution
       title: 'Frailty Distribution'
       type: List
@@ -2479,12 +2475,13 @@ options:
           title: 'Gaussian (Normal) Distribution'
         - name: log-normal
           title: 'Log-Normal Distribution'
-      default: gamma
+      default: log-normal
       description:
         R: >
           Distribution assumption for the frailty (random effects) terms.
-          Gamma distribution is most common and provides multiplicative 
-          frailty effects on the hazard function.
+          Log-normal (default) and Gaussian are the same model, a Gaussian random
+          effect on the log-hazard, fitted with coxme. Gamma is fitted with
+          coxph plus frailty() and currently reports the overview table only.
 
     - name: frailtyBootstrap
       title: 'Bootstrap Validation'
@@ -2508,18 +2505,16 @@ options:
           Higher values provide more stable estimates but increase 
           computational time.
 
-    # TODO: Wire to .b.R - Gate variance component decomposition table
     - name: frailtyVarianceComponents
       title: 'Variance Components Analysis'
       type: Bool
-      default: false
+      default: true
       description:
         R: >
           Analyze variance components to quantify the proportion of 
           total variation explained by cluster-level random effects 
           vs individual-level factors.
 
-    # TODO: Wire to .b.R - Gate heterogeneity test (LRT for frailty variance = 0)
     - name: frailtyHeterogeneityTest
       title: 'Heterogeneity Testing'
       type: Bool
@@ -2551,11 +2546,10 @@ options:
           distributions and model specifications using AIC/BIC criteria 
           and likelihood ratio tests.
 
-    # TODO: Wire to .b.R - Gate predictive accuracy metrics (C-index, Brier) for frailty models
     - name: frailtyPredictiveAccuracy
-      title: 'Predictive Accuracy Assessment'
+      title: 'Predictive accuracy assessment'
       type: Bool
-      default: false
+      default: true
       description:
         R: >
           Assess predictive accuracy of frailty models using cross-validation 
@@ -2563,7 +2557,7 @@ options:
           the data.
 
     - name: frailtyDiagnostics
-      title: 'Model Diagnostics'
+      title: 'Model diagnostics'
       type: Bool
       default: false
       description:

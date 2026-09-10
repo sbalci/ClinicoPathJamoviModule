@@ -312,7 +312,6 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=600,
                 requiresData=TRUE,
                 renderFun=".plotMain",
-                refs="jjoncoplot",
                 clearWith=list(
                     "geneVars",
                     "sampleVar",

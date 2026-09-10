@@ -258,9 +258,7 @@ items:
           - exportResults
 
 refs:
+    - ClinicoPathJamoviModule
     - reReg
     - survival
-    - ClinicoPathJamoviModule
-
-
 ...

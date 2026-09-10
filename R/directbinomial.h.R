@@ -174,9 +174,9 @@ directbinomialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Direct Binomial Regression for Competing Risks",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "timereg",
                     "cmprsk",
-                    "ClinicoPathJamoviModule",
                     "scales"))
             self$add(jmvcore::Html$new(
                 options=options,

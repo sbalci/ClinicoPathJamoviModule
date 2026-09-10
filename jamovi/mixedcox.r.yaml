@@ -371,9 +371,7 @@ items:
         - bootstrap_samples
 
 refs:
+    - ClinicoPathJamoviModule
     - coxme
     - survival
-    - ClinicoPathJamoviModule
-
-
 ...

@@ -73,11 +73,9 @@ items:
           - exp_transform
 
 refs:
+    - ClinicoPathJamoviModule
     - coefplot
     - jtools
     - ggplot2
-    - ClinicoPathJamoviModule
-
-
     - survival
 ...

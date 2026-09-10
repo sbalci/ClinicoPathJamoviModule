@@ -4,16 +4,25 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
     R6::R6Class(
         "pathsamplingClass",
         inherit = pathsamplingBase,
+        public = list(
+            initialize = function(options, data = NULL, datasetId = "", analysisId = "", revision = 0) {
+                # jmvcore cannot select zero columns from a nonempty provided frame.
+                if (is.data.frame(data) && length(options$varsRequired) == 0)
+                    data <- data.frame()
+                super$initialize(options = options, data = data, datasetId = datasetId,
+                    analysisId = analysisId, revision = revision)
+            }
+        ),
         private = list(
             # HTML Styling Constants (decisionpanel style)
             .styleConstants = list(
                 font = "font-family: Arial, sans-serif;",
                 lineHeight = "line-height: 1.4;",
-                colorPrimary = "color: #333;",
-                colorSecondary = "color: #666;",
+                colorPrimary = "color: inherit;",
+                colorSecondary = "color: inherit;",
                 bgLight = "background: rgba(88, 88, 88, 0.06); color: inherit;",
                 bgLighter = "background: rgba(155, 155, 155, 0.06); color: inherit;",
-                bgWhite = "background: white;",
+                bgWhite = "background: rgba(255, 255, 255, 0.10); color: inherit;",
                 borderPrimary = "border: 2px solid #333;",
                 borderSecondary = "border: 1px solid #ccc;",
                 borderLeft = "border-left: 4px solid #333;",
@@ -30,8 +39,8 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 margin10 = "margin: 10px 0;",
                 margin15 = "margin: 15px 0;",
                 margin20 = "margin: 20px 0;",
-                colorSuccess = "color: #155724;",
-                colorInfo = "color: #0c5460;"
+                colorSuccess = "color: inherit;",
+                colorInfo = "color: inherit;"
             ),
             .empiricalHeterogeneity = NULL,
             .totalSamplesData = NULL,
@@ -42,29 +51,972 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .positiveCassettesData = NULL,
             .maxPositiveSingleData = NULL,
 
+            .fixedTables = c("binomialTable", "recommendTable", "bootstrapTable",
+                "obsPredTable", "multifocalProbTable", "stageMigrationTable",
+                "distributionPatternTable", "empiricalCumulativeTable", "populationDetectionTable",
+                "hypergeometricTable", "hyperRecommendTable", "betaBinomialTable",
+                "betaBinomialRecommendTable", "lnrClassification", "ajccNStage", "adequacyByELN"),
+            .initTableRows = function() {
+                # Establish option-determined table shapes before slow estimation/resampling.
+                maxN <- self$options$maxSamples
+                nkeys <- paste0("n_", seq_len(maxN))
+                confkeys <- paste0("conf_", c(0.8, 0.9, 0.95, 0.99))
+                data <- self$data
+                present <- function(vars) all(vapply(vars,
+                    function(x) !is.null(self$options[[x]]), logical(1)))
+                core <- present(c("totalSamples", "firstDetection")) && nrow(data) > 0
+                if (core) {
+                    t <- private$.numericColumn(data, self$options$totalSamples)
+                    f <- private$.numericColumn(data, self$options$firstDetection)
+                    core <- any(private$.validCount(t, TRUE) & private$.validCount(f, TRUE) & f <= t)
+                }
+                add <- function(name, keys, enabled) {
+                    if (!enabled) return()
+                    table <- self$results$get(name)
+                    for (key in keys) table$addRow(rowKey = key, values = list())
+                }
+                # The binomial estimate can be required by a dependent output with its panel off.
+                add("binomialTable", nkeys, core)
+                add("recommendTable", confkeys, core)
+                add("bootstrapTable", as.list(seq_len(maxN)), core && self$options$showBootstrap)
+                add("obsPredTable", paste0("op_", seq_len(maxN)), core && self$options$showObsPred)
+                add("multifocalProbTable", as.list(seq_len(maxN)), core && self$options$showMultifocalAnalysis)
+                add("stageMigrationTable", paste0("group_", 1:3), core && self$options$showStageMigration && present("positiveCassettes"))
+                add("distributionPatternTable", c("predominant_single", "summed_effect", "diffuse"), core && self$options$showDistributionPattern && present(c("totalFoci", "maxPositiveSingle")))
+                add("empiricalCumulativeTable", nkeys, core && self$options$showEmpiricalCumulative)
+                add("populationDetectionTable", nkeys, core && self$options$showPopulationDetection)
+                finite <- present(c("totalPopulation", "successStates")) && nrow(data) > 0
+                if (finite) {
+                    n <- private$.numericColumn(data, self$options$totalPopulation)
+                    k <- private$.numericColumn(data, self$options$successStates)
+                    finite <- any(private$.validCount(n, TRUE) & private$.validCount(k) & k <= n)
+                }
+                add("hypergeometricTable", nkeys, finite && self$options$showHypergeometric)
+                add("hyperRecommendTable", confkeys, finite && self$options$showHypergeometric)
+                add("betaBinomialTable", nkeys, finite && self$options$showBetaBinomial)
+                add("betaBinomialRecommendTable", confkeys, finite && self$options$showBetaBinomial)
+                nodes <- present(c("totalLymphNodes", "positiveLymphNodes")) && self$options$showLNAnalysis &&
+                    self$options$lnrThreshold1 < self$options$lnrThreshold2 && nrow(data) > 0
+                if (nodes) {
+                    n <- private$.numericColumn(data, self$options$totalLymphNodes)
+                    k <- private$.numericColumn(data, self$options$positiveLymphNodes)
+                    nodes <- any(private$.validCount(n, TRUE) & private$.validCount(k) & k <= n)
+                }
+                add("lnrClassification", paste0("lnr_", 1:4), nodes)
+                add("ajccNStage", paste0("stage_", 1:3), nodes)
+                add("adequacyByELN", paste0("eln_", 1:5), nodes)
+            },
+            .deleteRows = function(table) {
+                table$deleteRows()
+                # Current jmvcore clears cells/keys but can retain display row names.
+                # An empty table then fails as.data.frame() after a previous populated run.
+                if (table$rowCount == 0 && length(table$names) > 0)
+                    table$.__enclos_env__$private$.rowNames <- character()
+            },
+            .clearTable = function(table) {
+                if (!table$name %in% private$.fixedTables) private$.deleteRows(table)
+            },
+            .putRow = function(table, rowKey, values) {
+                # Dynamic/result-dependent rows are created here; fixed rows already exist.
+                if (!any(vapply(table$rowKeys, identical, logical(1), rowKey)))
+                    table$addRow(rowKey = rowKey, values = values)
+                else table$setRow(rowKey = rowKey, values = values)
+            },
+            .estimateQ = function(first, total, positive = NULL) {
+                method <- self$options$estimationMethod
+                empirical <- method == "empirical" || (method == "auto" &&
+                    !is.null(positive) && self$options$analysisContext %in%
+                        c("general", "lymphnode", "omentum"))
+                result <- list(q = NA_real_, method = if (empirical) "empirical" else "geometric",
+                    cv = NA_real_, rejected = FALSE, n = 0L)
+                detected <- !is.na(first)
+                if (empirical) {
+                    if (is.null(positive)) return(result)
+                    keep <- detected & private$.validCount(total, TRUE) &
+                        private$.validCount(positive, TRUE) & positive <= total
+                    result$n <- sum(keep)
+                    if (!result$n) return(result)
+                    result$q <- sum(positive[keep]) / sum(total[keep])
+                    proportions <- positive[keep] / total[keep]
+                    if (length(proportions) >= 3L) {
+                        result$cv <- stats::sd(proportions) / mean(proportions)
+                        result$rejected <- is.finite(result$cv) && result$cv > 0.5
+                    }
+                    if (result$rejected) result$q <- NA_real_
+                } else {
+                    result$n <- sum(detected)
+                    if (result$n) result$q <- 1 / mean(first[detected])
+                }
+                result
+            },
+            .validCount = function(x, positive = FALSE) {
+                is.finite(x) & x >= ifelse(positive, 1, 0) &
+                    x <= .Machine$integer.max & x == floor(x)
+            },
+            .numericColumn = function(data, variable) {
+                x <- data[[variable]]
+                if (is.factor(x)) x <- as.character(x)
+                suppressWarnings(as.numeric(x))
+            },
+            .groupColumn = function(x) {
+                if (inherits(x, "haven_labelled") || !is.null(attr(x, "labels"))) {
+                    labels <- attr(x, "labels")
+                    values <- as.character(unclass(x))
+                    matched <- match(as.numeric(unclass(x)), unname(labels))
+                    values[!is.na(matched)] <- names(labels)[matched[!is.na(matched)]]
+                    return(factor(values, levels = unique(c(names(labels), values[!is.na(values)]))))
+                }
+                if (is.factor(x)) droplevels(x) else factor(x, levels = unique(x[!is.na(x)]))
+            },
+            .sampleCounts = function(data, variable, total) {
+                x <- private$.numericColumn(data, variable)
+                valid <- private$.validCount(x) & x <= total
+                if (any(!valid)) private$.addNotice("WARNING", jmvcore::.("Invalid positive sample counts"),
+                    jmvcore::format(jmvcore::.("{v1} cases excluded from positive-sample summaries because counts are missing, invalid or greater than total samples."), v1 = sprintf("%d", sum(!valid))))
+                x[!valid] <- NA_real_
+                x
+            },
+            .resetResults = function() {
+                private$.bootstrapCache <- NULL
+                private$.noticeList <- list()
+                private$.empiricalHeterogeneity <- NULL
+                private$.positiveCassettesData <- NULL
+                private$.bootstrapResults <- NULL
+                private$.pEstimate <- NULL
+                for (nm in self$results$itemNames) {
+                    item <- self$results$get(nm)
+                    if (inherits(item, "Table")) private$.deleteRows(item)
+                    else if (inherits(item, "Image")) item$setState(NULL)
+                    else if (!nm %in% c("welcome", "guidedInstructions", "conciseInstructions"))
+                        item$setContent("")
+                }
+                private$.initTableRows()
+            },
+            .checkOptionalInputs = function() {
+                requirements <- list(
+                    showTumorBurden = c("positiveCassettes"),
+                    showStageMigration = c("positiveCassettes"),
+                    showCorrelation = c("positiveCassettes"),
+                    showDistributionPattern = c("totalFoci", "maxPositiveSingle"),
+                    showStratifiedAnalysis = c("sampleType"),
+                    showSpatialClustering = c("positiveSamplesList"),
+                    showHypergeometric = c("totalPopulation", "successStates"),
+                    showBetaBinomial = c("totalPopulation", "successStates"),
+                    showLNAnalysis = c("totalLymphNodes", "positiveLymphNodes"),
+                    showEffectSizes = c("totalLymphNodes"))
+                labels <- c(positiveCassettes = jmvcore::.("Positive samples"), totalFoci = jmvcore::.("Total foci"),
+                    maxPositiveSingle = jmvcore::.("Maximum foci per slide"), sampleType = jmvcore::.("Sample type"),
+                    positiveSamplesList = jmvcore::.("Positive sample positions"), totalPopulation = jmvcore::.("Total population"),
+                    successStates = jmvcore::.("Success states"), totalLymphNodes = jmvcore::.("Total lymph nodes"),
+                    positiveLymphNodes = jmvcore::.("Positive lymph nodes"))
+                for (option in names(requirements)) {
+                    if (!self$options[[option]]) next
+                    missing <- requirements[[option]][vapply(requirements[[option]],
+                        function(x) is.null(self$options[[x]]), logical(1))]
+                    if (length(missing)) private$.addNotice("INFO", jmvcore::.("Additional inputs needed"),
+                        jmvcore::format(jmvcore::.("Select {inputs} to calculate the requested optional analysis."), inputs = paste(labels[missing], collapse = ", ")))
+                }
+            },
+            .planSamples = function(estimate = NA_real_) {
+                if (!self$options$showSampleSizePlanning) return()
+                target <- self$options$planningTargetProb
+                q <- self$options$planningAssumedQ
+                tab <- self$results$sampleSizePlanningTable
+                private$.clearTable(tab)
+                probabilities <- q
+                labels <- jmvcore::.("User-specified probability")
+                if (is.finite(estimate) && estimate > 0 && estimate <= 1) {
+                    probabilities <- c(probabilities, estimate)
+                    labels <- c(labels, jmvcore::.("Observed-positive approximation"))
+                }
+                for (i in seq_along(probabilities)) {
+                    qi <- probabilities[i]
+                    n <- if (qi == 1) 1 else ceiling(log1p(-target) / log1p(-qi))
+                    private$.putRow(tab, rowKey = if (i == 1) "user_spec" else "observed", values = list(
+                        scenario = labels[i], planningTargetProb = target, assumedQ = qi,
+                        nSamples = n, achievedProb = -expm1(n * log1p(-qi))))
+                }
+                self$results$sampleSizePlanningText$setContent(
+                    jmvcore::.("<p>Independent-trial planning uses ceiling(log(1-target)/log(1-q)) for at least one detection. A user-specified q requires no data. This calculation is not statistical power, a confidence interval or a validated clinical protocol; an observed-positive q inherits ascertainment limitations.</p>"))
+            },
+            .summarizeAdequacy = function() {
+                if (!self$options$showEffectSizes || is.null(self$options$totalLymphNodes)) return()
+                x <- private$.numericColumn(self$data, self$options$totalLymphNodes)
+                valid <- private$.validCount(x)
+                if (any(!valid)) private$.addNotice("WARNING", jmvcore::.("Invalid examined-node counts"),
+                    jmvcore::format(jmvcore::.("{v1} cases excluded from the adequacy summary because examined-node counts are missing or invalid."), v1 = sprintf("%d", sum(!valid))))
+                x <- x[valid]
+                text <- self$results$effectSizesText
+                text$setContent(jmvcore::.("<p>The descriptive proportion meeting the selected examined-node threshold has a 95% Wilson interval. No treatment or protocol effect is estimated. Choose a disease-appropriate threshold; counts alone do not establish adequate staging.</p>"))
+                if (!length(x)) return()
+                threshold <- self$options$adequacyThreshold
+                n <- length(x)
+                successes <- sum(x >= threshold)
+                phat <- successes / n
+                z <- stats::qnorm(0.975)
+                denominator <- 1 + z^2 / n
+                center <- (phat + z^2 / (2 * n)) / denominator
+                half <- z * sqrt(phat * (1 - phat) / n + z^2 / (4 * n^2)) / denominator
+                values <- list(
+                    list(measure = jmvcore::.("Cases with valid examined-node counts"), value = as.character(n), interpretation = jmvcore::.("Descriptive denominator")),
+                    list(measure = jmvcore::format(jmvcore::.("Cases with at least {v1} examined nodes"), v1 = sprintf("%d", threshold)), value = sprintf("%d/%d (%.1f%%)", successes, n, 100 * phat), interpretation = jmvcore::.("User-selected count threshold")),
+                    list(measure = jmvcore::.("95% Wilson confidence interval"), value = sprintf("%.1f%%-%.1f%%", 100 * max(0, center-half), 100 * min(1, center+half)), interpretation = jmvcore::.("Uncertainty in the observed proportion")),
+                    list(measure = jmvcore::.("Median examined nodes"), value = format(stats::median(x)), interpretation = jmvcore::.("Observed count")))
+                for (i in seq_along(values)) private$.putRow(self$results$effectSizesTable, rowKey = i, values = values[[i]])
+            },
+            .runFiniteModels = function() {
+                data <- self$data
+                validCases <- rep(TRUE, nrow(data))
+                invalidCases <- NULL
+                maxSamp <- self$options$maxSamples
+                addRecommendation <- function(...) invisible(NULL)
+                # === Hypergeometric Model Analysis ===
+                local({
+                if (self$options$showHypergeometric && !is.null(self$options$totalPopulation) && !is.null(self$options$successStates)) {
+                    # Get hypergeometric parameters
+
+                    totalPopulationData <- jmvcore::toNumeric(data[[self$options$totalPopulation]])
+                    successStatesData <- jmvcore::toNumeric(data[[self$options$successStates]])
+
+                    # Handle labelled data
+                    if (is.factor(totalPopulationData) || !is.null(attr(totalPopulationData, "labels"))) {
+                        totalPopulationData <- as.numeric(as.character(totalPopulationData))
+                    }
+                    if (is.factor(successStatesData) || !is.null(attr(successStatesData, "labels"))) {
+                        successStatesData <- as.numeric(as.character(successStatesData))
+                    }
+
+                    # Filter to valid cases
+                    totalPopulationData <- totalPopulationData[validCases]
+                    successStatesData <- successStatesData[validCases]
+                    if (!is.null(invalidCases)) {
+                        totalPopulationData <- totalPopulationData[!invalidCases]
+                        successStatesData <- successStatesData[!invalidCases]
+                    }
+
+                    target <- self$options$targetDetections # Minimum detections desired
+                    if (is.null(target) || is.na(target) || target < 1) {
+                        target <- 1
+                    }
+
+                    # Identify cases with complete hypergeometric inputs
+                    hyperValid <- !is.na(totalPopulationData) & !is.na(successStatesData)
+                    if (sum(hyperValid) == 0) {
+                        hypergeometricText <- self$results$hypergeometricText
+                        hypergeometricTable <- self$results$hypergeometricTable
+                        private$.clearTable(hypergeometricTable)
+                        hyperRecommendTable <- self$results$hyperRecommendTable
+                        private$.clearTable(hyperRecommendTable)
+                        if (self$options$showHypergeometric) {
+                            hypergeometricText$setContent(jmvcore::.("<p>No valid cases with total population and success counts were found for the hypergeometric model.</p>"))
+                        }
+                        private$.clearTable(hypergeometricTable)
+                        private$.clearTable(hyperRecommendTable)
+                        return()
+                    }
+
+                    N_values <- totalPopulationData[hyperValid]
+                    K_values <- successStatesData[hyperValid]
+
+                    hyperNotes <- character()
+
+                    # Enforce integer counts (hypergeometric requires discrete totals)
+                    if (any(abs(N_values - round(N_values)) > 1e-6, na.rm = TRUE)) {
+                        hyperNotes <- c(hyperNotes, jmvcore::.("Non-integer total population counts excluded"))
+                    }
+                    if (any(abs(K_values - round(K_values)) > 1e-6, na.rm = TRUE)) {
+                        hyperNotes <- c(hyperNotes, jmvcore::.("Non-integer positive counts excluded"))
+                    }
+
+                    N_int <- round(N_values)
+                    K_int <- round(K_values)
+
+                    # Remove impossible cases
+                    invalidHyper <- !is.finite(N_values) | !is.finite(K_values) |
+                        N_values != N_int | K_values != K_int |
+                        (N_int <= 0) | (K_int < 0) | (K_int > N_int)
+                    if (any(invalidHyper, na.rm = TRUE)) {
+                        removed <- sum(invalidHyper, na.rm = TRUE)
+                        hyperNotes <- c(hyperNotes, jmvcore::format(jmvcore::.("{v1} cases removed (invalid population/success counts)"), v1 = sprintf("%d", removed)))
+                        N_int <- N_int[!invalidHyper]
+                        K_int <- K_int[!invalidHyper]
+                    }
+
+                    if (length(N_int) == 0) {
+                        hypergeometricText <- self$results$hypergeometricText
+                        hypergeometricTable <- self$results$hypergeometricTable
+                        private$.clearTable(hypergeometricTable)
+                        hyperRecommendTable <- self$results$hyperRecommendTable
+                        private$.clearTable(hyperRecommendTable)
+                        if (self$options$showHypergeometric) {
+                            hypergeometricText$setContent(jmvcore::.("<p>All cases were removed because population/success counts were invalid for the hypergeometric model.</p>"))
+                        }
+                        private$.clearTable(hypergeometricTable)
+                        private$.clearTable(hyperRecommendTable)
+                        return()
+                    }
+
+                    positiveCaseIdx <- K_int > 0
+                    if (sum(positiveCaseIdx) == 0) {
+                        hypergeometricText <- self$results$hypergeometricText
+                        hypergeometricTable <- self$results$hypergeometricTable
+                        private$.clearTable(hypergeometricTable)
+                        hyperRecommendTable <- self$results$hyperRecommendTable
+                        private$.clearTable(hyperRecommendTable)
+                        note <- jmvcore::format(jmvcore::.("<p>No cases had at least {v1} positive observations, so the hypergeometric model could not be estimated.</p>"), v1 = sprintf("%d", target))
+                        if (self$options$showHypergeometric) {
+                            hypergeometricText$setContent(note)
+                        }
+                        private$.clearTable(hypergeometricTable)
+                        private$.clearTable(hyperRecommendTable)
+                        return()
+                    }
+                    removedZeroPos <- sum(!positiveCaseIdx)
+                    if (removedZeroPos > 0) {
+                        hyperNotes <- c(
+                            hyperNotes,
+                            jmvcore::format(jmvcore::.("{v1} cases excluded (no positive observations for conditional model)"), v1 = sprintf("%d", removedZeroPos))
+                        )
+                    }
+                    N_int <- N_int[positiveCaseIdx]
+                    K_int <- K_int[positiveCaseIdx]
+
+                    nHyperCases <- length(N_int)
+                    medianN <- stats::median(N_int)
+                    medianK <- stats::median(K_int)
+
+                    hypergeometricText <- self$results$hypergeometricText
+                    notesHtml <- if (length(hyperNotes) > 0) {
+                        jmvcore::format(jmvcore::.("<p><b>Data notes:</b> {v1}.</p>"), v1 = paste(hyperNotes, collapse = "; "))
+                    } else {
+                        ""
+                    }
+
+                    html <- jmvcore::format(jmvcore::.("<p><b>Hypergeometric model</b></p><p>Sampling without replacement is evaluated in {v1} positive cases. Median population size = {v2}; median positive count = {v3}.</p>{v4}<p>The probability of at least {v5} positives is calculated for each case and averaged. Draws are capped at each case's population size; cases with fewer positives than the target contribute zero.</p>"), v1 = sprintf("%d", nHyperCases), v2 = sprintf("%.0f", medianN), v3 = sprintf("%.0f", medianK), v4 = notesHtml, v5 = sprintf("%d", target), v6 = sprintf("%d", target), v7 = sprintf("%d", max(target - 1, 0)))
+                    if (self$options$showHypergeometric) {
+                        hypergeometricText$setContent(html)
+                    }
+
+                    # Pre-compute cumulative probabilities across cases
+                    hypergeometricTable <- self$results$hypergeometricTable
+                    private$.clearTable(hypergeometricTable)
+                    aggregatedProb <- rep(NA_real_, maxSamp)
+
+                    prevProb <- NA_real_
+                    for (n in 1:maxSamp) {
+                        draws <- pmin(n, N_int)
+
+                        caseProb <- vapply(seq_along(N_int), function(idx) {
+                            Ni <- N_int[idx]
+                            Ki <- K_int[idx]
+                            draw <- draws[idx]
+
+                            if (Ki <= 0 || target > draw) {
+                                return(0)
+                            }
+
+                            failures <- Ni - Ki
+                            if (target > 1) {
+                                probLess <- stats::phyper(target - 1, Ki, failures, draw)
+                            } else {
+                                probLess <- stats::dhyper(0, Ki, failures, draw)
+                            }
+
+                            1 - probLess
+                        }, numeric(1))
+
+                        if (all(is.na(caseProb))) {
+                            cumProb <- NA_real_
+                        } else {
+                            cumProb <- mean(caseProb, na.rm = TRUE)
+                        }
+
+                        aggregatedProb[n] <- cumProb
+
+                        marginal <- if (!is.na(cumProb) && !is.na(prevProb)) cumProb - prevProb else if (!is.na(cumProb) && is.na(prevProb)) cumProb else NA
+
+                        private$.putRow(hypergeometricTable, rowKey = paste0("n_", n), values = list(
+                            nSamples = n,
+                            cumProb = cumProb,
+                            marginalGain = marginal
+                        ))
+
+                        if (!is.na(cumProb)) prevProb <- cumProb
+                    }
+
+                    hyperDetail <- if (length(hyperNotes) > 0) paste(hyperNotes, collapse = "; ") else ""
+
+                    addRecommendation(
+                        method = "Hypergeometric",
+                        probVec = aggregatedProb,
+                        priority = 3,
+                        description = jmvcore::.("Finite population model (sampling without replacement)"),
+                        detail = hyperDetail
+                    )
+
+                    # Minimum samples for target confidence levels
+                    hyperRecommendTable <- self$results$hyperRecommendTable
+                    private$.clearTable(hyperRecommendTable)
+
+                    confLevels <- c(0.80, 0.90, 0.95, 0.99)
+                    for (i in seq_along(confLevels)) {
+                        conf <- confLevels[i]
+
+                        minSamples <- NA
+                        expectedYield <- NA
+
+                        idx <- which(!is.na(aggregatedProb) & aggregatedProb >= conf)[1]
+                        if (!is.na(idx)) {
+                            minSamples <- idx
+
+                            # Expected detections based on case-level probabilities
+                            caseExpected <- vapply(seq_along(N_int), function(idxCase) {
+                                Ni <- N_int[idxCase]
+                                Ki <- K_int[idxCase]
+                                draw <- min(minSamples, Ni)
+
+                                if (Ki <= 0 || draw <= 0) {
+                                    return(0)
+                                }
+
+                                # Expected detections under hypergeometric sampling with replacement adjustment
+                                expected <- draw * Ki / Ni
+
+                                # To respect user target, cap expected at target if target specified
+                                if (!is.null(target) && !is.na(target)) {
+                                    expected <- min(expected, target)
+                                }
+
+                                expected
+                            }, numeric(1))
+
+                            expectedYield <- mean(caseExpected, na.rm = TRUE)
+                        }
+
+                        private$.putRow(hyperRecommendTable, rowKey = paste0("conf_", i), values = list(
+                            confidence = conf,
+                            minSamples = minSamples,
+                            expectedYield = expectedYield
+                        ))
+                    }
+                }
+
+                })
+                local({
+                # === Beta-Binomial Model Analysis ===
+                if (self$options$showBetaBinomial && !is.null(self$options$totalPopulation) && !is.null(self$options$successStates)) {
+                    # Get data
+
+                    totalPopulationData <- jmvcore::toNumeric(data[[self$options$totalPopulation]])
+                    successStatesData <- jmvcore::toNumeric(data[[self$options$successStates]])
+
+                    # Handle labelled data (parity with the hypergeometric block above)
+                    if (is.factor(totalPopulationData) || !is.null(attr(totalPopulationData, "labels"))) {
+                        totalPopulationData <- as.numeric(as.character(totalPopulationData))
+                    }
+                    if (is.factor(successStatesData) || !is.null(attr(successStatesData, "labels"))) {
+                        successStatesData <- as.numeric(as.character(successStatesData))
+                    }
+
+                    # Filter to valid cases
+                    totalPopulationData <- totalPopulationData[validCases]
+                    successStatesData <- successStatesData[validCases]
+                    if (!is.null(invalidCases)) {
+                        totalPopulationData <- totalPopulationData[!invalidCases]
+                        successStatesData <- successStatesData[!invalidCases]
+                    }
+
+                    betaBinomNotes <- character()
+                    betaProceed <- TRUE
+
+                    betaValid <- !is.na(totalPopulationData) & !is.na(successStatesData)
+                    if (sum(betaValid) == 0) {
+                        betaBinomialText <- self$results$betaBinomialText
+                        betaBinomialTable <- self$results$betaBinomialTable
+                        private$.clearTable(betaBinomialTable)
+                        betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+                        private$.clearTable(betaBinomialRecommendTable)
+                        if (self$options$showBetaBinomial) {
+                            betaBinomialText$setContent(jmvcore::.("<p>No valid cases were available for the beta-binomial model (missing total population or success counts).</p>"))
+                        }
+                        private$.clearTable(betaBinomialTable)
+                        private$.clearTable(betaBinomialRecommendTable)
+                        betaProceed <- FALSE
+                    } else {
+                        totalPopulationData <- totalPopulationData[betaValid]
+                        successStatesData <- successStatesData[betaValid]
+
+                        invalidBeta <- !private$.validCount(totalPopulationData, positive = TRUE) |
+                            !private$.validCount(successStatesData) |
+                            (successStatesData > totalPopulationData)
+                        if (any(invalidBeta, na.rm = TRUE)) {
+                            removed <- sum(invalidBeta, na.rm = TRUE)
+                            betaBinomNotes <- c(betaBinomNotes, jmvcore::format(jmvcore::.("{v1} cases removed (invalid population/success counts)"), v1 = sprintf("%d", removed)))
+                            totalPopulationData <- totalPopulationData[!invalidBeta]
+                            successStatesData <- successStatesData[!invalidBeta]
+                        }
+
+                        if (length(totalPopulationData) == 0) {
+                            betaBinomialText <- self$results$betaBinomialText
+                            betaBinomialTable <- self$results$betaBinomialTable
+                            private$.clearTable(betaBinomialTable)
+                            betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+                            private$.clearTable(betaBinomialRecommendTable)
+                            if (self$options$showBetaBinomial) {
+                                betaBinomialText$setContent(jmvcore::.("<p>All cases were removed after validating total population and success counts.</p>"))
+                            }
+                            private$.clearTable(betaBinomialTable)
+                            private$.clearTable(betaBinomialRecommendTable)
+                            betaProceed <- FALSE
+                        }
+                    }
+
+                    if (betaProceed) {
+                        target <- self$options$targetDetections
+                        if (is.null(target) || is.na(target) || target < 1) {
+                            target <- 1
+                        }
+
+                        # Estimate alpha and beta using VGAM for proper N-weighted estimation
+                        # Previous unweighted method biased estimates when sample sizes varied
+                        alpha <- NA_real_
+                        beta <- NA_real_
+                        modelRejected <- FALSE
+
+                        # Check minimum requirements
+                        if (length(totalPopulationData) < 2) {
+                            betaBinomNotes <- c(betaBinomNotes, jmvcore::.("Insufficient cases for parameter estimation (need >=2)"))
+                            modelRejected <- TRUE
+                        } else if (!requireNamespace("VGAM", quietly = TRUE)) {
+                            betaBinomNotes <- c(betaBinomNotes, jmvcore::.("VGAM package required for beta-binomial analysis. Please install: install.packages('VGAM')"))
+                            modelRejected <- TRUE
+                        } else {
+                            # Use VGAM for proper maximum likelihood estimation with varying N
+                            betaData <- data.frame(
+                                success = successStatesData,
+                                fail = totalPopulationData - successStatesData,
+                                total = totalPopulationData
+                            )
+
+                            # Check for invalid data (negative failures)
+                            if (any(betaData$fail < 0, na.rm = TRUE)) {
+                                betaBinomNotes <- c(betaBinomNotes, jmvcore::.("Invalid data: success counts exceed total population in some cases"))
+                                modelRejected <- TRUE
+                            } else {
+                                tryCatch(
+                                    {
+                                        # Fit beta-binomial using VGAM (proper N-weighted MLE)
+                                        fitWarnings <- character()
+                                        fit <- withCallingHandlers(VGAM::vglm(
+                                            cbind(success, fail) ~ 1,
+                                            family = VGAM::betabinomial, data = betaData, trace = FALSE
+                                        ), warning = function(w) {
+                                            fitWarnings <<- c(fitWarnings, conditionMessage(w))
+                                            invokeRestart("muffleWarning")
+                                        })
+                                        if (length(fitWarnings)) {
+                                            private$.addNotice("WARNING", jmvcore::.("Beta-binomial fitting diagnostics"),
+                                                paste(unique(fitWarnings), collapse = "; "))
+                                            if (any(grepl("half-step|converg|inaccurate|iteration limit",
+                                                fitWarnings, ignore.case = TRUE))) {
+                                                stop(jmvcore::.("Beta-binomial fit did not converge reliably; predictions were withheld."))
+                                            }
+                                        }
+
+                                        # Extract shape parameters from the VGAM fit.
+                                        # NB: VGAM::Coef() (capital C) already returns the
+                                        # parameters on their NATURAL scale -- it applies the
+                                        # inverse link itself. It is coef() (lowercase) that
+                                        # returns linear-predictor coefficients on the logit
+                                        # scale. Passing Coef()'s output through
+                                        # logitlink(inverse = TRUE) transformed mu and rho a
+                                        # second time: a fit with mu = 0.481 was reported as
+                                        # plogis(0.481) = 0.618, and because rho lies in [0, 1]
+                                        # every rho was squashed into [0.5, 0.731] -- so a
+                                        # sample with no overdispersion at all (rho ~ 1e-36)
+                                        # was reported as rho = 0.5. alpha and beta are derived
+                                        # from both, so the whole beta-binomial fit was wrong.
+                                        # unname(): Coef() returns c(mu = , rho = ), and the
+                                        # names leak into downstream comparisons.
+                                        coefs <- VGAM::Coef(fit)
+                                        mu_fit <- unname(coefs[["mu"]])
+                                        rho_fit <- unname(coefs[["rho"]])
+
+                                        # Convert to alpha/beta parameterization
+                                        # rho = 1/(alpha + beta + 1), so alpha + beta = (1-rho)/rho
+                                        # mu = alpha/(alpha + beta)
+                                        if (rho_fit > 0 && rho_fit < 1) {
+                                            total_shape <- (1 - rho_fit) / rho_fit
+                                            alpha <- mu_fit * total_shape
+                                            beta <- (1 - mu_fit) * total_shape
+                                        } else {
+                                            betaBinomNotes <- c(betaBinomNotes, jmvcore::.("VGAM fit produced invalid rho (overdispersion parameter)"))
+                                            modelRejected <- TRUE
+                                        }
+
+                                        # Validate estimated parameters
+                                        if (!modelRejected && (!is.finite(alpha) || !is.finite(beta) || alpha <= 0 || beta <= 0)) {
+                                            betaBinomNotes <- c(
+                                                betaBinomNotes,
+                                                jmvcore::.("Parameter estimation failed (non-finite or negative values). Data may not fit beta-binomial distribution.")
+                                            )
+                                            modelRejected <- TRUE
+                                        } else if (!modelRejected) {
+                                            # Check for extremely skewed parameters
+                                            if (alpha < 0.01 || beta < 0.01) {
+                                                betaBinomNotes <- c(
+                                                    betaBinomNotes,
+                                                    jmvcore::format(jmvcore::.("CAUTION: Extreme parameter values (\u03b1={v1}, \u03b2={v2}) suggest poor model fit or extreme skew. Results should be interpreted with caution."), v1 = sprintf("%.4f", alpha), v2 = sprintf("%.4f", beta))
+                                                )
+                                            }
+
+                                            # Check for zero variance (all identical)
+                                            if (rho_fit < 0.001) {
+                                                betaBinomNotes <- c(
+                                                    betaBinomNotes,
+                                                    jmvcore::format(jmvcore::.("Very low overdispersion (\u03c1={v1}): Cases have nearly identical detection rates. Simple binomial model may be more appropriate."), v1 = sprintf("%.4f", rho_fit))
+                                                )
+                                            }
+
+                                            # Add note about N-weighted estimation
+                                            betaBinomNotes <- c(
+                                                betaBinomNotes,
+                                                jmvcore::format(jmvcore::.("Parameters estimated using N-weighted MLE via VGAM (\u03bc={v1}, \u03c1={v2}, \u03b1={v3}, \u03b2={v4})"), v1 = sprintf("%.3f", mu_fit), v2 = sprintf("%.4g", rho_fit), v3 = private$.fmtShape(alpha), v4 = private$.fmtShape(beta))
+                                            )
+                                        }
+                                    },
+                                    error = function(e) {
+                                        # `<<-`: the handler runs in its own frame, so a plain
+                                        # `<-` here would be discarded and the caller would go
+                                        # on to report beta-binomial results from a failed fit.
+                                        betaBinomNotes <<- c(
+                                            betaBinomNotes,
+                                            jmvcore::format(jmvcore::.("VGAM fitting failed: {v1}. Data may not fit beta-binomial distribution or may have convergence issues."), v1 = jmvcore::htmlEscape(conditionMessage(e)))
+                                        )
+                                        modelRejected <<- TRUE
+                                    }
+                                )
+                            }
+                        }
+
+                        # If model is rejected, skip beta-binomial analysis
+                        if (modelRejected) {
+                            betaBinomialText <- self$results$betaBinomialText
+                            betaBinomialTable <- self$results$betaBinomialTable
+                            private$.clearTable(betaBinomialTable)
+                            betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+                            private$.clearTable(betaBinomialRecommendTable)
+
+                            errorHtml <- jmvcore::format(jmvcore::.("<p><b>Beta-binomial predictions unavailable</b></p><p>{v7}</p><p>Review the fitting diagnostics and data before selecting another model. Resampling does not remove ascertainment bias.</p>"), v1 = private$.styleConstants$font, v2 = private$.styleConstants$bgLight, v3 = private$.styleConstants$borderWarning, v4 = private$.styleConstants$padding15, v5 = private$.styleConstants$fontSize15, v6 = private$.styleConstants$fontSize14, v7 = paste(betaBinomNotes, collapse = " "), v8 = private$.styleConstants$fontSize14, v9 = private$.styleConstants$fontSize14)
+
+                            if (self$options$showBetaBinomial) {
+                                betaBinomialText$setContent(errorHtml)
+                            }
+                            private$.clearTable(betaBinomialTable)
+                            private$.clearTable(betaBinomialRecommendTable)
+                            betaProceed <- FALSE
+                        }
+
+                        # Beta-Binomial Text (only if model is valid)
+                        if (!modelRejected) {
+                            betaBinomialText <- self$results$betaBinomialText
+                            extraText <- if (length(betaBinomNotes) > 0) {
+                                jmvcore::format(jmvcore::.("<p><b>Estimation notes:</b> {v1}.</p>"), v1 = paste(betaBinomNotes, collapse = "; "))
+                            } else {
+                                ""
+                            }
+
+                            # NB: a "Zhou J, et al. Beta-binomial model for lymph node yield.
+                            # Front Oncol. 2022;12:872527" reference was removed here on
+                            # 2026-09-09 -- it did not resolve in PubMed by citation lookup or
+                            # title search. The beta-binomial method itself is standard and does
+                            # not depend on it; re-add a source only once one is confirmed.
+                            html <- jmvcore::format(jmvcore::.("<p><b>Beta-binomial model</b></p><p>This model describes between-case variation in binomial sample positivity. It is not a finite-population correction or an interchangeable alternative to the hypergeometric estimand.</p><p>Estimated alpha = {v1}; beta = {v2}.</p>{v3}"), v1 = private$.fmtShape(alpha), v2 = private$.fmtShape(beta), v3 = extraText)
+                            if (self$options$showBetaBinomial) {
+                                betaBinomialText$setContent(html)
+                            }
+
+                            # Calculate beta-binomial probabilities
+                            betaBinomialTable <- self$results$betaBinomialTable
+                            private$.clearTable(betaBinomialTable)
+
+                            betaCumProb <- rep(NA_real_, maxSamp)
+                            prevProb <- 0
+
+                            # Beta-binomial PMF.
+                            # As the overdispersion rho -> 0 the beta-binomial converges to a
+                            # binomial with p = alpha/(alpha+beta), and alpha+beta = (1-rho)/rho
+                            # blows up. Past about 1e12 the two lbeta() terms cancel
+                            # catastrophically: at alpha+beta = 1e17 this returned 2980, and at
+                            # 1e18 it returned exactly 1 for every k -- a silent, finite,
+                            # positive answer that no downstream guard rejects. Below the
+                            # threshold the binomial limit is the numerically correct value
+                            # anyway (they agree to ~1e-8 relative at alpha+beta = 1e8).
+                            dbetabinom_pmf <- function(k, n, alpha, beta) {
+                                if (!is.finite(alpha) || !is.finite(beta) ||
+                                    (alpha + beta) > 1e12) {
+                                    return(stats::dbinom(k, n, alpha / (alpha + beta)))
+                                }
+                                exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
+                            }
+
+                            for (n in 1:maxSamp) {
+                                # P(detect >= target) using beta-binomial distribution
+                                # Calculate P(X < target) = sum of P(X=k) for k=0 to target-1
+                                prob_less_than_target <- 0
+                                for (k in 0:(target - 1)) {
+                                    if (k <= n) { # Can't have more successes than samples
+                                        prob_less_than_target <- prob_less_than_target + dbetabinom_pmf(k, n, alpha, beta)
+                                    }
+                                }
+                                # P(X >= target) = 1 - P(X < target)
+                                cumProb <- 1 - prob_less_than_target
+
+                                marginal <- cumProb - prevProb
+
+                                private$.putRow(betaBinomialTable, rowKey = paste0("n_", n), values = list(
+                                    nSamples = n,
+                                    cumProb = cumProb,
+                                    marginalGain = marginal
+                                ))
+
+                                prevProb <- cumProb
+                                betaCumProb[n] <- cumProb
+                            }
+
+                            # Minimum samples for target confidence levels
+                            betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+                            private$.clearTable(betaBinomialRecommendTable)
+
+                            addRecommendation(
+                                method = "Beta-binomial",
+                                probVec = betaCumProb,
+                                priority = 2,
+                                description = jmvcore::.("Beta-binomial mixture of sample positivity probabilities"),
+                                detail = if (length(betaBinomNotes) > 0) paste(betaBinomNotes, collapse = "; ") else ""
+                            )
+
+                            maxFeasible <- maxSamp
+
+                            confLevels <- c(0.80, 0.90, 0.95, 0.99)
+                            for (i in seq_along(confLevels)) {
+                                conf <- confLevels[i]
+
+                                minSamples <- NA
+                                expectedYield <- NA
+
+                                if (maxFeasible > 0) {
+                                    for (n in 1:maxFeasible) {
+                                        # Calculate P(X >= target) correctly
+                                        prob_less_than_target <- 0
+                                        for (k in 0:(target - 1)) {
+                                            if (k <= n) {
+                                                prob_less_than_target <- prob_less_than_target + dbetabinom_pmf(k, n, alpha, beta)
+                                            }
+                                        }
+                                        cumProb <- 1 - prob_less_than_target
+
+                                        if (cumProb >= conf) {
+                                            minSamples <- n
+                                            expectedYield <- n * alpha / (alpha + beta)
+                                            if (!is.null(target) && !is.na(target)) {
+                                                expectedYield <- expectedYield
+                                            }
+                                            break
+                                        }
+                                    }
+                                }
+
+                                private$.putRow(betaBinomialRecommendTable, rowKey = paste0("conf_", i), values = list(
+                                    confidence = conf,
+                                    minSamples = minSamples,
+                                    expectedYield = expectedYield
+                                ))
+                            }
+                        } # End if (!modelRejected)
+                    }
+                }
+
+                })
+            },
+            .runLymphNodes = function() {
+                data <- self$data
+                validCases <- rep(TRUE, nrow(data))
+                invalidCases <- NULL
+                # === Lymph Node Ratio and Staging Analysis ===
+                if (self$options$showLNAnalysis && !is.null(self$options$totalLymphNodes) && !is.null(self$options$positiveLymphNodes)) {
+                    # Get LN variables
+                    totalELN <- jmvcore::toNumeric(data[[self$options$totalLymphNodes]])
+                    positiveLN <- jmvcore::toNumeric(data[[self$options$positiveLymphNodes]])
+
+                    # Handle labelled data
+                    if (is.factor(totalELN) || !is.null(attr(totalELN, "labels"))) {
+                        totalELN <- as.numeric(as.character(totalELN))
+                    }
+                    if (is.factor(positiveLN) || !is.null(attr(positiveLN, "labels"))) {
+                        positiveLN <- as.numeric(as.character(positiveLN))
+                    }
+
+                    # Filter to valid cases
+                    totalELN <- totalELN[validCases]
+                    positiveLN <- positiveLN[validCases]
+                    if (!is.null(invalidCases)) {
+                        totalELN <- totalELN[!invalidCases]
+                        positiveLN <- positiveLN[!invalidCases]
+                    }
+
+                    keep <- private$.validCount(totalELN, positive = TRUE) &
+                        private$.validCount(positiveLN) & positiveLN <= totalELN
+                    if (any(!keep)) private$.addNotice("WARNING", jmvcore::.("Invalid lymph-node pairs"),
+                        jmvcore::format(jmvcore::.("{v1} cases excluded: counts must be complete nonnegative integers, total nodes must be positive, and positive nodes cannot exceed total nodes."), v1 = sprintf("%d", sum(!keep))))
+                    totalELN <- totalELN[keep]
+                    positiveLN <- positiveLN[keep]
+                    nCases <- length(totalELN)
+                    if (nCases == 0) {
+                        self$results$lnAnalysisText$setContent(jmvcore::.("No valid lymph-node pairs are available."))
+                        return()
+                    }
+                    if (self$options$lnrThreshold1 >= self$options$lnrThreshold2) {
+                        private$.addNotice("ERROR", jmvcore::.("Invalid LNR thresholds"),
+                            jmvcore::.("LNR threshold 1 must be smaller than threshold 2. Correct the thresholds to calculate LNR and staging results."))
+                        return()
+                    }
+                    # NB: a "Pu et al. 2021 (Johns Hopkins, n=1,837)" bullet and its reference
+                    # were removed here on 2026-09-09. Neither the citation
+                    # (Pu / J Natl Compr Canc Netw / 2021;19(9):1029-1036) nor its title resolved
+                    # in PubMed; the nearest real Pu N pancreatic lymph-node paper is Adv Ther
+                    # 2021;38(8):4258-4270 (PMID 34176089), a different study. It had been the
+                    # stated source of minELN=12 -- which Yoon 2025 independently supports and
+                    # which therefore still stands -- and of the LNR 0.1/0.3 cut-points, which
+                    # are now described in the panel as conventional defaults rather than
+                    # attributed to a study.
+                    # LN Analysis Text
+                    lnAnalysisText <- self$results$lnAnalysisText
+                    html <- jmvcore::.("<p><b>Lymph-node counts and ratios</b></p><p>LNR is positive nodes divided by examined nodes. The 0.1 and 0.3 defaults are adjustable descriptive cutoffs, not universal validated thresholds.</p><p>The N0/N1/N2 count grouping shown here uses 0, 1-3 and at least 4 positive nodes, as in pancreatic adenocarcinoma. It is not a general staging algorithm; use disease-specific staging rules.</p><p>Pancreatic sampling references: Tomlinson et al., Arch Surg. 2007;142:767-774; Yoon et al., Ann Surg Oncol. 2025, doi:10.1245/s10434-025-18029-7. Study-specific findings do not determine an individual false-N0 risk.</p>")
+                    if (self$options$showLNAnalysis) {
+                        lnAnalysisText$setContent(html)
+                    }
+
+                    # Calculate LNR
+                    LNR <- positiveLN / totalELN
+
+                    # Get user-specified thresholds
+                    threshold1 <- self$options$lnrThreshold1
+                    threshold2 <- self$options$lnrThreshold2
+
+                    # LNR Classification (Pu2021 thresholds: 0.1 and 0.3)
+                    lnrStage <- character(length(LNR))
+                    lnrRange <- character(length(LNR))
+                    lnrStage[LNR == 0] <- "LNR0"
+                    lnrRange[LNR == 0] <- "0.000"
+                    lnrStage[LNR > 0 & LNR <= threshold1] <- "LNR1"
+                    lnrRange[LNR > 0 & LNR <= threshold1] <- sprintf("0.001-%.3f", threshold1)
+                    lnrStage[LNR > threshold1 & LNR <= threshold2] <- "LNR2"
+                    lnrRange[LNR > threshold1 & LNR <= threshold2] <- sprintf("%.3f-%.3f", threshold1, threshold2)
+                    lnrStage[LNR > threshold2] <- "LNR3"
+                    lnrRange[LNR > threshold2] <- sprintf("%.3f-1.000", threshold2)
+
+                    # Populate LNR Classification Table
+                    lnrClassification <- self$results$lnrClassification
+                    private$.clearTable(lnrClassification)
+
+                    lnrGroups <- c("LNR0 (node-negative)", jmvcore::.("LNR1 (low burden)"), jmvcore::.("LNR2 (moderate burden)"), jmvcore::.("LNR3 (high burden)"))
+                    lnrRanges <- c(
+                        "0.000", sprintf("0.001-%.3f", threshold1),
+                        sprintf("%.3f-%.3f", threshold1, threshold2),
+                        sprintf("%.3f-1.000", threshold2)
+                    )
+
+                    for (i in 1:4) {
+                        cases_in_group <- sum(lnrStage == c("LNR0", "LNR1", "LNR2", "LNR3")[i], na.rm = TRUE)
+                        median_eln <- median(totalELN[lnrStage == c("LNR0", "LNR1", "LNR2", "LNR3")[i]], na.rm = TRUE)
+
+                        private$.putRow(lnrClassification, rowKey = paste0("lnr_", i), values = list(
+                            lnrStage = lnrGroups[i],
+                            lnrRange = lnrRanges[i],
+                            cases = cases_in_group,
+                            percent = cases_in_group / nCases,
+                            medianELN = if (!is.na(median_eln)) median_eln else NA
+                        ))
+                    }
+
+                    # AJCC N Stage Classification
+                    nStage <- character(length(positiveLN))
+                    nStage[positiveLN == 0] <- "N0"
+                    nStage[positiveLN >= 1 & positiveLN <= 3] <- "N1"
+                    nStage[positiveLN >= 4] <- "N2"
+
+                    # Populate AJCC N Stage Table
+                    ajccNStage <- self$results$ajccNStage
+                    private$.clearTable(ajccNStage)
+
+                    nStageGroups <- c("N0", "N1", "N2")
+                    nStageCriteria <- c(jmvcore::.("0 positive LN"), jmvcore::.("1-3 positive LN"), jmvcore::.(">=4 positive LN"))
+
+                    for (i in 1:3) {
+                        cases_in_stage <- sum(nStage == nStageGroups[i], na.rm = TRUE)
+                        median_eln_stage <- median(totalELN[nStage == nStageGroups[i]], na.rm = TRUE)
+
+                        private$.putRow(ajccNStage, rowKey = paste0("stage_", i), values = list(
+                            nStage = nStageGroups[i],
+                            criteria = nStageCriteria[i],
+                            cases = cases_in_stage,
+                            percent = cases_in_stage / nCases,
+                            medianELN = if (!is.na(median_eln_stage)) median_eln_stage else NA
+                        ))
+                    }
+
+                    # Adequacy Assessment by ELN Thresholds (Tomlinson2007 + Pu2021)
+                    adequacyByELN <- self$results$adequacyByELN
+                    private$.clearTable(adequacyByELN)
+
+                    # Define ELN groups (Tomlinson 2007, Yoon 2025)
+                    eln_group <- character(length(totalELN))
+                    eln_group[totalELN < 9] <- "<9 ELN"
+                    eln_group[totalELN >= 9 & totalELN < 12] <- "9-11 ELN"
+                    eln_group[totalELN >= 12 & totalELN < 16] <- "12-15 ELN"
+                    eln_group[totalELN >= 16 & totalELN < 22] <- "16-21 ELN"
+                    eln_group[totalELN >= 22] <- ">=22 ELN"
+
+                    elnGroups <- c("<9 ELN", "9-11 ELN", "12-15 ELN", "16-21 ELN", ">=22 ELN")
+                    comments <- c(
+                        jmvcore::.("Observed count below 9"), jmvcore::.("Observed count from 9 to 11"),
+                        jmvcore::.("Observed count from 12 to 15"), jmvcore::.("Observed count from 16 to 21"),
+                        jmvcore::.("Observed count of at least 22; no individual false-N0 risk estimated")
+                    )
+
+                    for (i in 1:5) {
+                        cases_in_eln <- sum(eln_group == elnGroups[i], na.rm = TRUE)
+                        npositive_in_eln <- sum(positiveLN[eln_group == elnGroups[i]] > 0, na.rm = TRUE)
+
+                        private$.putRow(adequacyByELN, rowKey = paste0("eln_", i), values = list(
+                            elnGroup = elnGroups[i],
+                            cases = cases_in_eln,
+                            percent = cases_in_eln / nCases,
+                            nPositive = npositive_in_eln,
+                            comment = comments[i]
+                        ))
+                    }
+                }
+
+            },
             # Helper to build combined styles
             .buildStyle = function(...) {
                 paste(..., collapse = " ")
             },
 
-            # TODO (correctness): `.escapeVar` corrupts column references for unusual column names.
-            # `gsub("[^A-Za-z0-9_]+", "_", make.names(x))` produces an identifier that does NOT
-            # match the original column. For a column named "weight (g)", .escapeVar returns
-            # "weight__g__" → `data[["weight__g__"]]` looks up a column that doesn't exist →
-            # NULL → downstream analysis silently fails or errors with a confusing message.
-            # The fix is to use `jmvcore::composeTerm(x)` for formula contexts (which produces
-            # `\`weight (g)\`` - valid R syntax) and `data[[self$options$X]]` directly for indexing.
-            # Substantial refactor across all .escapeVar call sites (L445/L446/L459/L464/L2792/L2793/L3018/L3019/etc.).
-            # Accidentally provides defense-in-depth against D-category XSS (broken lookups never
-            # reach setContent), but breaks the analysis for legitimate non-identifier column names.
-            # Utility function to escape variable names with special characters
-            .escapeVar = function(x) {
-                if (is.null(x) || length(x) == 0) {
-                    return(NULL)
+            # Beta-binomial shape parameters span an enormous range: alpha + beta is
+            # (1 - rho)/rho, so a sample with almost no overdispersion pushes them past
+            # 1e27, where "%.3f" prints a 27-digit integer with three meaningless
+            # decimals. Small values still read naturally.
+            .fmtShape = function(x) {
+                if (!is.finite(x)) {
+                    return(jmvcore::.("not estimable"))
                 }
-                # Convert to valid R names, replacing special chars with underscores
-                escaped <- gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-                return(escaped)
+                if (abs(x) >= 1e6) {
+                    return(formatC(x, format = "e", digits = 2))
+                }
+                formatC(x, format = "f", digits = 3)
             },
 
             # Notice collection helpers. A single Preformatted (plain-text) output item:
@@ -89,188 +1041,81 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Plain text only - notices avoid HTML by project convention; the Preformatted
                 # output item renders this literally (no markup, no injection surface).
-                blocks <- vapply(private$.noticeList, function(notice) {
+                priority <- c(ERROR = 1L, STRONG_WARNING = 2L, WARNING = 3L, INFO = 4L)
+                notices <- private$.noticeList[order(vapply(private$.noticeList,
+                    function(x) priority[[x$type]], integer(1)))]
+                blocks <- unique(vapply(notices, function(notice) {
                     prefix <- switch(notice$type,
                         ERROR          = "ERROR: ",
-                        STRONG_WARNING = "WARNING: ",
+                        STRONG_WARNING = jmvcore::.("STRONG WARNING:"),
                         WARNING        = "WARNING: ",
                         ""
                     )
                     paste0(prefix, notice$title, "\n", notice$content)
-                }, character(1))
+                }, character(1)))
 
                 self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
             },
             .init = function() {
+                private$.initTableRows()
                 # Welcome message when no variables selected
                 welcome <- self$results$welcome
-                welcomeHtml <- "
-            <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
-                <div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #333; padding: 20px; margin-bottom: 20px; color: inherit;'>
-                    <h2 style='margin: 0 0 10px 0; font-size: 18px; color: #333;'>Pathology Sampling Adequacy Analysis</h2>
-                    <p style='margin: 0; font-size: 14px; color: #666;'>Determine the minimum number of tissue samples required to detect lesions with specified confidence levels</p>
-                </div>
-
-                <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>
-                    <tr>
-                        <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>
-                            <h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'>Quick Start Guide</h4>
-                            <ol style='margin: 0; padding-left: 20px; font-size: 14px; color: #333;'>
-                                <li style='margin-bottom: 8px;'><strong>Select Required Variables:</strong>
-                                    <ul style='margin: 5px 0; padding-left: 20px;'>
-                                        <li>Total samples taken</li>
-                                        <li>Sample number where lesion first detected</li>
-                                    </ul>
-                                </li>
-                                <li style='margin-bottom: 8px;'><strong>Configure Analysis Parameters:</strong>
-                                    <ul style='margin: 5px 0; padding-left: 20px;'>
-                                        <li>Target confidence (default: 95%)</li>
-                                        <li>Maximum samples to evaluate (default: 10)</li>
-                                        <li>Bootstrap iterations (default: 10,000)</li>
-                                    </ul>
-                                </li>
-                                <li style='margin-bottom: 8px;'><strong>Optional Analyses:</strong> Enable tumor burden, LN analysis, or hypergeometric models as needed</li>
-                            </ol>
-                        </td>
-
-                        <td style='width: 50%; border: 1px solid #ccc; padding: 15px; vertical-align: top;'>
-                            <h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'>What You'll Get</h4>
-                            <ul style='margin: 0; padding-left: 20px; font-size: 14px; color: #333;'>
-                                <li style='margin-bottom: 8px;'><strong>Binomial probability model</strong> for theoretical detection rates</li>
-                                <li style='margin-bottom: 8px;'><strong>Bootstrap confidence intervals</strong> for empirical sensitivity estimates</li>
-                                <li style='margin-bottom: 8px;'><strong>Diagnostic yield curves</strong> showing cumulative detection probability</li>
-                                <li style='margin-bottom: 8px;'><strong>Clinical recommendations</strong> for minimum samples required</li>
-                                <li style='margin-bottom: 8px;'><strong>Specialized analyses</strong> for LN dissection, omentum sampling, and tumor burden</li>
-                            </ul>
-                        </td>
-                    </tr>
-                </table>
-
-                <div style='background-color: rgba(155, 155, 155, 0.06); border: 1px solid #ccc; padding: 15px; color: inherit;'>
-                    <h4 style='margin: 0 0 10px 0; font-size: 15px; color: #333;'>Statistical Methods</h4>
-                    <p style='margin: 0 0 10px 0; font-size: 14px; color: #333;'>
-                        <strong>Core Methods:</strong> Binomial probability models, Bootstrap resampling, Hypergeometric and Beta-Binomial models for finite populations
-                    </p>
-                    <p style='margin: 0; font-size: 13px; color: #666;'>
-                        <strong>Key References:</strong> Skala & Hagemann 2015 (omentum sampling), Tomlinson 2007, Pu 2021, Yoon 2025 (lymph node adequacy), Maglalang & Fadare 2025 (recent omentum literature)
-                    </p>
-                </div>
-            </div>"
+                welcomeHtml <- jmvcore::.("<p><b>Pathology sampling analysis</b></p><p>Describe recorded first-detection positions, model-based detection targets and uncertainty. Select total samples and first detection for the core analysis; independent planning, finite-population and node summaries use their own inputs.</p><p>Observed-positive detection is not independently validated disease sensitivity. Read the exclusions and model assumptions before using any result.</p>")
                 welcome$setContent(welcomeHtml)
 
                 # === Guided Instructions (Detailed Checklist) ===
                 if (self$options$showGuidedInstructions) {
                     guidedInstructions <- self$results$guidedInstructions
 
-                    guidedHtml <- sprintf(
-                        "<div style='%s'>
-                    <div style='%s'>
-                        <h3 style='%s'>Quick Start Checklist</h3>
-                        <ol style='%s'>
-                            <li style='margin: 8px 0;'>
-                                <strong>Select required variables:</strong>
-                                <ul style='%s'>
-                                    <li>Total samples taken (e.g., total_blocks, total_LN)</li>
-                                    <li>Sample where lesion first detected (e.g., first_positive_block)</li>
-                                    <li><em>Tip:</em> First detection = sample number (1, 2, 3...), NA if never detected</li>
-                                </ul>
-                            </li>
-                            <li style='margin: 8px 0;'>
-                                <strong>Set analysis parameters:</strong>
-                                <ul style='%s'>
-                                    <li>Target confidence: 95%% (standard for diagnostic tests)</li>
-                                    <li>Maximum samples: 10-20 (adjust based on your protocol)</li>
-                                </ul>
-                            </li>
-                            <li style='margin: 8px 0;'>
-                                <strong>Enable optional analyses</strong> (if applicable):
-                                <ul style='%s'>
-                                    <li>Tumor burden: Requires positive_cassettes variable</li>
-                                    <li>LN analysis: Requires total_lymph_nodes + positive_lymph_nodes</li>
-                                    <li>Omentum literature: Compares your data to published studies</li>
-                                </ul>
-                            </li>
-                            <li style='margin: 8px 0;'>
-                                <strong>Review results:</strong>
-                                <ul style='%s'>
-                                    <li>Data Summary: Verify case counts and detection rates</li>
-                                    <li>Binomial Model: Theoretical minimum samples required</li>
-                                    <li>Bootstrap Validation: Empirical sensitivity with confidence intervals</li>
-                                    <li>Clinical Recommendations: Evidence-based sampling protocol</li>
-                                </ul>
-                            </li>
-                        </ol>
-                    </div>
-
-                    <div style='%s'>
-                        <h4 style='%s'>Common Use Cases</h4>
-                        <ul style='%s'>
-                            <li><strong>Omentum sampling:</strong> Total blocks submitted, first block with tumor</li>
-                            <li><strong>Lymph node dissection:</strong> Total LN examined, first metastatic LN found</li>
-                            <li><strong>Serial sections:</strong> Total section levels, first level showing margin involvement</li>
-                        </ul>
-                    </div>
-                </div>",
-                        private$.styleConstants$font,
-                        private$.buildStyle(
+                    guidedHtml <- jmvcore::format(jmvcore::.("<p><b>Quick start</b></p><ol><li>Select total samples and first-detection position. Use NA when no lesion was observed; this does not prove disease absence.</li><li>Choose a descriptive detection target, maximum sample count and bootstrap iterations.</li><li>Optional count, sample-type, finite-population and node analyses require their own inputs.</li><li>Check exclusions, denominators and assumptions before interpreting the results. Independent planning and node analyses can run without first-detection data.</li></ol>"), v1 = private$.styleConstants$font, v2 = private$.buildStyle(
                             private$.styleConstants$bgLight,
                             private$.styleConstants$borderLeft,
                             private$.styleConstants$padding15,
                             private$.styleConstants$margin10
-                        ),
-                        private$.buildStyle(
+                        ), v3 = private$.buildStyle(
                             private$.styleConstants$colorPrimary,
                             private$.styleConstants$fontSize16,
                             "margin: 0 0 10px 0;"
-                        ),
-                        private$.buildStyle(
+                        ), v4 = private$.buildStyle(
                             "margin: 0;",
                             "padding-left: 20px;",
                             private$.styleConstants$fontSize14,
                             private$.styleConstants$colorPrimary
-                        ),
-                        private$.buildStyle(
+                        ), v5 = private$.buildStyle(
                             "margin: 5px 0;",
                             "padding-left: 20px;",
                             private$.styleConstants$fontSize14,
                             private$.styleConstants$colorSecondary
-                        ),
-                        private$.buildStyle(
+                        ), v6 = private$.buildStyle(
                             "margin: 5px 0;",
                             "padding-left: 20px;",
                             private$.styleConstants$fontSize14,
                             private$.styleConstants$colorSecondary
-                        ),
-                        private$.buildStyle(
+                        ), v7 = private$.buildStyle(
                             "margin: 5px 0;",
                             "padding-left: 20px;",
                             private$.styleConstants$fontSize14,
                             private$.styleConstants$colorSecondary
-                        ),
-                        private$.buildStyle(
+                        ), v8 = private$.buildStyle(
                             "margin: 5px 0;",
                             "padding-left: 20px;",
                             private$.styleConstants$fontSize14,
                             private$.styleConstants$colorSecondary
-                        ),
-                        private$.buildStyle(
+                        ), v9 = private$.buildStyle(
                             "background: rgba(255, 202, 33, 0.23); color: inherit;",
                             private$.styleConstants$borderSecondary,
                             private$.styleConstants$padding10,
                             private$.styleConstants$margin10
-                        ),
-                        private$.buildStyle(
+                        ), v10 = private$.buildStyle(
                             "color: #856404;",
                             private$.styleConstants$fontSize15,
                             "margin: 0 0 8px 0;"
-                        ),
-                        private$.buildStyle(
+                        ), v11 = private$.buildStyle(
                             "margin: 0;",
                             "padding-left: 20px;",
                             "color: #856404;",
                             private$.styleConstants$fontSize14
-                        )
-                    )
+                        ))
 
                     guidedInstructions$setContent(guidedHtml)
                 }
@@ -279,47 +1124,26 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (self$options$showConciseInstructions) {
                     conciseInstructions <- self$results$conciseInstructions
 
-                    conciseHtml <- sprintf(
-                        "<div style='%s'>
-                    <h3 style='%s %s'>Pathology Sampling Adequacy Analysis</h3>
-                    <p style='%s %s'>This analysis determines the minimum number of tissue samples
-                    (blocks, cassettes, sections, or lymph nodes) required to detect lesions with a
-                    specified confidence level.</p>
-
-                    <p style='%s %s'><b>Required Variables:</b></p>
-                    <ul style='%s %s'>
-                        <li><b>Total samples taken:</b> Total number submitted per case</li>
-                        <li><b>First detection:</b> Sample number where lesion first observed (NA if never detected)</li>
-                    </ul>
-
-                    <p style='%s %s'><b>Statistical Methods:</b> Binomial probability models,
-                    Bootstrap resampling, Hypergeometric and Beta-Binomial models for finite populations</p>
-                </div>",
-                        private$.styleConstants$font,
-                        private$.styleConstants$colorPrimary, private$.styleConstants$fontSize16,
-                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
-                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
-                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
-                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary
-                    )
+                    conciseHtml <- jmvcore::format(jmvcore::.("<p><b>About this analysis</b></p><p>This analysis describes first detections among eventually observed-positive cases. Select total samples and first-detection position, leaving the position missing when no lesion was observed. Model-based targets and resampling intervals do not establish clinical sampling adequacy.</p>"), v1 = private$.styleConstants$font, v2 = private$.styleConstants$colorPrimary, v3 = private$.styleConstants$fontSize16, v4 = private$.styleConstants$fontSize14, v5 = private$.styleConstants$colorPrimary, v6 = private$.styleConstants$fontSize14, v7 = private$.styleConstants$colorPrimary, v8 = private$.styleConstants$fontSize14, v9 = private$.styleConstants$colorPrimary, v10 = private$.styleConstants$fontSize14, v11 = private$.styleConstants$colorPrimary)
 
                     conciseInstructions$setContent(conciseHtml)
                 }
 
+                # Visibility of the welcome panel is declarative -- see `visible:` on the
+                # `welcome` item in pathsampling.r.yaml. The imperative setVisible() pair that
+                # used to live here disagreed with it (&& here vs. || in the schema), so
+                # selecting exactly one of the two required variables gave contradictory rules.
                 if (is.null(self$options$totalSamples) && is.null(self$options$firstDetection)) {
-                    welcome$setVisible(TRUE)
-                    # No variables selected - show welcome message only
                     return()
-                } else {
-                    welcome$setVisible(FALSE)
                 }
             },
             .run = function() {
-                private$.noticeList <- list()
-
-                if (is.null(self$options$totalSamples) && is.null(self$options$firstDetection)) {
-                    return()
-                }
+                private$.resetResults()
+                private$.planSamples()
+                private$.runFiniteModels()
+                private$.runLymphNodes()
+                private$.summarizeAdequacy()
+                private$.checkOptionalInputs()
 
 
                 # Get required variables
@@ -343,15 +1167,29 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 nBoot <- self$options$bootstrapIterations
                 analysisContext <- if (is.null(self$options$analysisContext)) "general" else self$options$analysisContext
 
+                # addRow() does not reject a duplicate rowKey, so a second .run() on the
+                # same instance -- what jamovi does whenever the user toggles an option that
+                # is not in this table's clearWith -- appended a second copy of every row and
+                # then failed with "non-unique values when setting 'row.names'". dataInfo is
+                # fetched at seven points (error paths and the main summary), so it is cleared
+                # once here rather than at each fetch.
+                private$.clearTable(self$results$dataInfo)
+
                 # Flag to skip Binomial model if assumptions violated
                 skipBinomial <- FALSE
+
+                # pForCalc is assigned inside `if (self$options$showBinomialModel)`, but the
+                # population-detection section reads it unconditionally. Both options default
+                # to FALSE, so ticking "Population-Level Detection Rates" on its own used to
+                # abort the whole analysis with "object 'pForCalc' not found".
+                pForCalc <- NA_real_
 
                 # Prepare recommendation collector to summarize minimum samples for target confidence
                 recommendations <- list()
                 addRecommendation <- function(method, probVec, priority, description, detail = NULL, ci = NULL) {
                     # Extend recommendation list with standardized fields and target-driven summary
                     if (length(probVec) == 0 || all(is.na(probVec))) {
-                        status <- "No valid probabilities available"
+                        status <- jmvcore::.("No valid probabilities available")
                         rec <- list(
                             method = method,
                             description = description,
@@ -371,7 +1209,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     validIdx <- which(!is.na(probVec))
                     if (length(validIdx) == 0) {
-                        status <- "No valid probabilities available"
+                        status <- jmvcore::.("No valid probabilities available")
                         rec <- list(
                             method = method,
                             description = description,
@@ -399,19 +1237,13 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     if (!is.na(targetIdx)) {
                         minSamples <- targetIdx
                         achievedProb <- probVec[targetIdx]
-                        status <- sprintf(
-                            "Meets target at %d samples (%.1f%%)",
-                            minSamples, achievedProb * 100
-                        )
+                        status <- jmvcore::format(jmvcore::.("Meets target at {v1} samples ({v2}%)"), v1 = sprintf("%d", minSamples), v2 = sprintf("%.1f", achievedProb * 100))
                     } else {
                         minSamples <- NA_integer_
                         achievedProb <- bestProb
                         status <- ifelse(length(validIdx) > 0,
-                            sprintf(
-                                "Target not reached; best %.1f%% at %d samples",
-                                bestProb * 100, bestIdx
-                            ),
-                            "Target not reached"
+                            jmvcore::format(jmvcore::.("Target not reached; best {v1}% at {v2} samples"), v1 = sprintf("%.1f", bestProb * 100), v2 = sprintf("%d", bestIdx)),
+                            jmvcore::.("Target not reached")
                         )
                     }
 
@@ -453,343 +1285,108 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Validate target confidence range
                 if (targetConf <= 0 || targetConf >= 1) {
                     dataInfo <- self$results$dataInfo
-                    dataInfo$addRow(rowKey = "error_conf", values = list(
+                    private$.putRow(dataInfo, rowKey = "error_conf", values = list(
                         measure = "ERROR",
-                        value = "Target confidence must be between 0 and 1"
+                        value = jmvcore::.("Target confidence must be between 0 and 1")
                     ))
+                    private$.addNotice(
+                        "ERROR",
+                        jmvcore::.("Invalid target confidence"),
+                        jmvcore::format(jmvcore::.("Target confidence must be strictly between 0 and 1; {v1} was supplied. Set it to a value such as 0.95 and re-run."), v1 = format(targetConf, trim = TRUE))
+                    )
                     return()
                 }
 
                 # Warning for extreme confidence levels
                 if (targetConf > 0.99) {
-                    interpretText <- self$results$interpretText
-                    warningHtml <- sprintf(
-                        "<div style='%s %s %s %s'>
-                    <p style='margin: 0; %s'><strong>WARNING: Extreme Confidence Level</strong></p>
-                    <p style='margin: 5px 0 0 0; %s'>
-                        Target confidence of %.1f%% is extremely high and may require impractical sample sizes.
-                        Standard diagnostic test sensitivity uses 95%%. Consider using 0.90-0.95 for clinical applicability.
-                    </p>
-                </div>",
-                        private$.styleConstants$font, private$.styleConstants$bgLight,
-                        private$.styleConstants$borderLeft, private$.styleConstants$padding10,
-                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
-                        private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary,
-                        targetConf * 100
+                    private$.addNotice(
+                        "WARNING",
+                        jmvcore::.("Extreme confidence level"),
+                        jmvcore::format(jmvcore::.("A target of {value}% may require an impractical number of samples. This is a descriptive target, not a clinical standard."), value = sprintf("%.1f", targetConf * 100))
                     )
-                    interpretText$setContent(warningHtml)
                 }
 
                 # Warning for insufficient bootstrap iterations
                 if (self$options$showBootstrap && nBoot < 1000) {
-                    interpretText <- self$results$interpretText
-                    warningHtml <- sprintf(
-                        "<div style='%s %s %s %s'>
-                    <p style='margin: 0; %s %s'><strong>WARNING: Low Bootstrap Iterations</strong></p>
-                    <p style='margin: 5px 0 0 0; %s %s'>
-                        Only %d bootstrap iterations specified. Confidence intervals may be unstable.
-                        Recommended: >=1,000 iterations for preliminary analysis, >=10,000 for publication.
-                    </p>
-                </div>",
-                        private$.styleConstants$font, private$.styleConstants$bgLight,
-                        private$.styleConstants$borderLeft, private$.styleConstants$padding10,
-                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
-                        private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary,
-                        nBoot
+                    private$.addNotice(
+                        "WARNING",
+                        jmvcore::.("Low bootstrap iterations"),
+                        jmvcore::format(jmvcore::.("Only {value} bootstrap iterations were requested. The percentile intervals may have noticeable Monte Carlo variation; increase iterations and assess stability."), value = nBoot)
                     )
-                    interpretText$setContent(warningHtml)
                 }
 
-                # Escape variable names for safe lookup
-                totalSamplesEsc <- private$.escapeVar(totalSamples)
-                firstDetectionEsc <- private$.escapeVar(firstDetection)
-
-                # Get data with escaped names
+                # One row mask keeps all core and optional columns aligned.
                 data <- self$data
-                totalSamplesData <- jmvcore::toNumeric(data[[totalSamplesEsc]])
-                firstDetectionData <- jmvcore::toNumeric(data[[firstDetectionEsc]])
-
-                # Get optional enhanced data
-                positiveCountData <- NULL
-                positiveSamplesListData <- NULL
-                sampleTypeData <- NULL
-
-                if (!is.null(positiveCount)) {
-                    positiveCountEsc <- private$.escapeVar(positiveCount)
-                    positiveCountData <- jmvcore::toNumeric(data[[positiveCountEsc]])
-                }
-
-                if (!is.null(positiveSamplesList)) {
-                    positiveSamplesListEsc <- private$.escapeVar(positiveSamplesList)
-                    positiveSamplesListData <- data[[positiveSamplesListEsc]]
-                }
-
-                if (!is.null(sampleType)) {
-                    sampleTypeEsc <- private$.escapeVar(sampleType)
-                    sampleTypeData <- data[[sampleTypeEsc]]
-                }
-
-                # Preserve raw inputs for reporting before exclusions
-                rawTotalSamplesData <- totalSamplesData
-                rawFirstDetectionData <- firstDetectionData
-                totalCasesInput <- length(rawTotalSamplesData)
-
-                # Handle labelled data (convert factors to numeric)
-                if (is.factor(totalSamplesData) || !is.null(attr(totalSamplesData, "labels"))) {
-                    totalSamplesData <- as.numeric(as.character(totalSamplesData))
-                }
-                if (is.factor(firstDetectionData) || !is.null(attr(firstDetectionData, "labels"))) {
-                    firstDetectionData <- as.numeric(as.character(firstDetectionData))
-                }
-
-                # Identify valid cases (allow missing first detection for non-detected lesions)
-                validCases <- !is.na(totalSamplesData)
-
-                # Track data quality notes before filtering
+                rawTotalSamplesData <- private$.numericColumn(data, totalSamples)
+                rawFirst <- private$.numericColumn(data, firstDetection)
+                totalCasesInput <- nrow(data)
+                nExcludedMissingTotal <- sum(is.na(rawTotalSamplesData))
+                validRows <- private$.validCount(rawTotalSamplesData, positive = TRUE) &
+                    (is.na(rawFirst) | (private$.validCount(rawFirst, positive = TRUE) &
+                    rawFirst <= rawTotalSamplesData))
+                nExcludedInvalidDetection <- sum(!is.na(rawFirst) &
+                    (!private$.validCount(rawFirst, positive = TRUE) |
+                    rawFirst > rawTotalSamplesData), na.rm = TRUE)
                 dataWarnings <- character()
-                nExcludedMissingTotal <- 0
-                if (any(!validCases)) {
-                    nExcludedMissingTotal <- sum(!validCases)
-                    dataWarnings <- c(
-                        dataWarnings,
-                        sprintf("%d cases removed due to missing total samples", nExcludedMissingTotal)
-                    )
+                if (any(!validRows)) {
+                    dataWarnings <- jmvcore::format(jmvcore::.("{v1} cases excluded because total samples or first-detection positions were missing or invalid."), v1 = sprintf("%d", sum(!validRows)))
+                    private$.addNotice("WARNING", jmvcore::.("Excluded invalid sampling data"), dataWarnings)
                 }
-
-                # Filter to valid cases
-                totalSamplesData <- totalSamplesData[validCases]
-                firstDetectionData <- firstDetectionData[validCases]
-
-                # Filter optional data
+                if (!is.null(sampleType)) data[[sampleType]] <- private$.groupColumn(data[[sampleType]])
+                data <- data[validRows, , drop = FALSE]
+                totalSamplesData <- rawTotalSamplesData[validRows]
+                firstDetectionData <- rawFirst[validRows]
+                validCases <- rep(TRUE, nrow(data))
+                invalidCases <- NULL
+                if (nrow(data) == 0) {
+                    private$.addNotice("ERROR", jmvcore::.("No analysable cases"),
+                        jmvcore::.("Supply at least one positive integer total sample count and a valid first-detection position, or a missing position if no lesion was detected."))
+                    return()
+                }
+                positiveCountData <- if (!is.null(positiveCount))
+                    private$.numericColumn(data, positiveCount) else NULL
+                positiveSamplesListData <- if (!is.null(positiveSamplesList))
+                    as.character(data[[positiveSamplesList]]) else NULL
+                sampleTypeData <- if (!is.null(sampleType))
+                    private$.groupColumn(data[[sampleType]]) else NULL
                 if (!is.null(positiveCountData)) {
-                    positiveCountData <- positiveCountData[validCases]
+                    badCount <- !private$.validCount(positiveCountData) |
+                        positiveCountData > totalSamplesData |
+                        (!is.na(firstDetectionData) & positiveCountData < 1) |
+                        (is.na(firstDetectionData) & positiveCountData > 0)
+                    if (any(badCount)) private$.addNotice("WARNING", jmvcore::.("Positive count exclusions"),
+                        jmvcore::format(jmvcore::.("{v1} cases have missing, invalid or inconsistent positive counts and are excluded from count-based estimation; their first-detection data remain available."), v1 = sprintf("%d", sum(badCount))))
+                    positiveCountData[badCount] <- NA_real_
                 }
                 if (!is.null(positiveSamplesListData)) {
-                    positiveSamplesListData <- positiveSamplesListData[validCases]
+                    badList <- vapply(seq_along(positiveSamplesListData), function(i) {
+                        x <- private$.parseSampleList(positiveSamplesListData[i])
+                        if (!length(x)) return(!is.na(firstDetectionData[i]))
+                        anyNA(x) || any(x > totalSamplesData[i]) ||
+                            is.na(firstDetectionData[i]) || min(x) != firstDetectionData[i] ||
+                            (!is.null(positiveCountData) && !is.na(positiveCountData[i]) &&
+                                length(x) != positiveCountData[i])
+                    }, logical(1))
+                    if (any(badList)) private$.addNotice("WARNING", jmvcore::.("Invalid positive sample lists"),
+                        jmvcore::format(jmvcore::.("{v1} lists excluded: use unique integer positions within the total count, consistent with first detection and the positive count when supplied."), v1 = sprintf("%d", sum(badList))))
+                    positiveSamplesListData[badList] <- NA_character_
                 }
-                if (!is.null(sampleTypeData)) {
-                    sampleTypeData <- sampleTypeData[validCases]
-                }
-
-                # ===== Edge Case Validation =====
-
-                # Error 1: No valid cases after removing missing total samples
-                if (length(totalSamplesData) == 0) {
-                    dataInfo <- self$results$dataInfo
-                    dataInfo$addRow(rowKey = "error_no_cases", values = list(
-                        measure = "ERROR",
-                        value = "No valid cases found. All cases have missing total samples."
-                    ))
-
-                    interpretText <- self$results$interpretText
-                    errorHtml <- sprintf(
-                        "<div style='%s %s %s %s'>
-                    <p style='margin: 0; %s'><strong> ERROR: No Valid Data</strong></p>
-                    <p style='margin: 10px 0 0 0; %s'>
-                        All %d cases in the dataset have missing values for total samples.
-                    </p>
-                    <p style='margin: 10px 0 0 0; %s'><strong>Required Actions:</strong></p>
-                    <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
-                        <li>Verify that the correct variable is selected for 'Total Samples'</li>
-                        <li>Check that the variable contains numeric data</li>
-                        <li>Ensure at least some cases have non-missing values</li>
-                    </ul>
-                </div>",
-                        private$.styleConstants$font, private$.styleConstants$bgLight,
-                        private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                        private$.styleConstants$fontSize15,
-                        private$.styleConstants$fontSize14, totalCasesInput,
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$fontSize14
-                    )
-                    interpretText$setContent(errorHtml)
-                    return()
-                }
-
-                # Check for invalid data: first detection > total samples
-                invalidCases <- !is.na(firstDetectionData) & (firstDetectionData > totalSamplesData)
-                nExcludedInvalidDetection <- 0
-                if (any(invalidCases)) {
-                    nExcludedInvalidDetection <- sum(invalidCases)
-                    totalSamplesData <- totalSamplesData[!invalidCases]
-                    firstDetectionData <- firstDetectionData[!invalidCases]
-
-                    # Filter optional data for invalid cases too
-                    if (!is.null(positiveCountData)) {
-                        positiveCountData <- positiveCountData[!invalidCases]
-                    }
-                    if (!is.null(positiveSamplesListData)) {
-                        positiveSamplesListData <- positiveSamplesListData[!invalidCases]
-                    }
-                    if (!is.null(sampleTypeData)) {
-                        sampleTypeData <- sampleTypeData[!invalidCases]
-                    }
-
-                    # Error 2: All remaining cases invalid after filtering
-                    if (length(firstDetectionData) == 0) {
-                        dataInfo <- self$results$dataInfo
-                        dataInfo$addRow(rowKey = "error_invalid_all", values = list(
-                            measure = "ERROR",
-                            value = "No valid cases remaining after removing data errors"
-                        ))
-
-                        interpretText <- self$results$interpretText
-                        errorHtml <- sprintf(
-                            "<div style='%s %s %s %s'>
-                        <p style='margin: 0; %s'><strong> ERROR: Data Quality Issues</strong></p>
-                        <p style='margin: 10px 0 0 0; %s'>
-                            All %d remaining cases have invalid data (first detection > total samples).
-                        </p>
-                        <p style='margin: 10px 0 0 0; %s'><strong>Common Causes:</strong></p>
-                        <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
-                            <li>First detection sample number exceeds total samples examined</li>
-                            <li>Incorrect variable mapping (check that variables are assigned correctly)</li>
-                            <li>Data entry errors in source data</li>
-                        </ul>
-                        <p style='margin: 10px 0 0 0; %s'><strong>Recommendation:</strong> Review source data for consistency.</p>
-                    </div>",
-                            private$.styleConstants$font, private$.styleConstants$bgLight,
-                            private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                            private$.styleConstants$fontSize15,
-                            private$.styleConstants$fontSize14, nExcludedInvalidDetection,
-                            private$.styleConstants$fontSize14,
-                            private$.styleConstants$fontSize14,
-                            private$.styleConstants$fontSize14
-                        )
-                        interpretText$setContent(errorHtml)
-                        return()
-                    }
-
-                    dataWarnings <- c(
-                        dataWarnings,
-                        sprintf("%d cases removed due to first detection exceeding total samples", nExcludedInvalidDetection)
-                    )
-                }
-
-                # Treat non-positive detection indices as censored (no lesion detected)
-                invalidNonPositive <- !is.na(firstDetectionData) & firstDetectionData < 1
-                if (any(invalidNonPositive)) {
-                    dataWarnings <- c(
-                        dataWarnings,
-                        sprintf("%d cases recorded first detection < 1; treated as no lesion detected", sum(invalidNonPositive))
-                    )
-                    firstDetectionData[invalidNonPositive] <- NA
-                }
-
-                # Check for negative total samples
-                negativeTotal <- totalSamplesData < 0
-                if (any(negativeTotal, na.rm = TRUE)) {
-                    nNegativeTotal <- sum(negativeTotal, na.rm = TRUE)
-                    dataWarnings <- c(
-                        dataWarnings,
-                        sprintf("%d cases with negative total samples removed", nNegativeTotal)
-                    )
-                    totalSamplesData <- totalSamplesData[!negativeTotal]
-                    firstDetectionData <- firstDetectionData[!negativeTotal]
-                    if (!is.null(positiveCountData)) {
-                        positiveCountData <- positiveCountData[!negativeTotal]
-                    }
-                    if (!is.null(positiveSamplesListData)) {
-                        positiveSamplesListData <- positiveSamplesListData[!negativeTotal]
-                    }
-                    if (!is.null(sampleTypeData)) {
-                        sampleTypeData <- sampleTypeData[!negativeTotal]
-                    }
-                }
-
-                # Check for invalid positive counts (negative or exceeds total)
-                if (!is.null(positiveCountData)) {
-                    invalidPositiveCount <- positiveCountData < 0 | positiveCountData > totalSamplesData
-                    if (any(invalidPositiveCount, na.rm = TRUE)) {
-                        nInvalidPosCount <- sum(invalidPositiveCount, na.rm = TRUE)
-                        dataWarnings <- c(
-                            dataWarnings,
-                            sprintf("%d cases with invalid positive count (negative or > total samples) excluded from empirical estimation", nInvalidPosCount)
-                        )
-                        # Set to NA rather than removing cases, to preserve other analyses
-                        positiveCountData[invalidPositiveCount] <- NA
-                    }
-                }
-
-                # Recalculate detected cases after cleaning
                 detectedCases <- !is.na(firstDetectionData)
                 nDetected <- sum(detectedCases)
-
-                # Error 3: Zero positive cases - cannot perform analysis
                 if (nDetected == 0) {
-                    dataInfo <- self$results$dataInfo
-                    nCases <- length(totalSamplesData)
-
-                    dataInfo$addRow(rowKey = "total_cases", values = list(
-                        measure = "Total cases analyzed",
-                        value = as.character(nCases)
-                    ))
-
-                    dataInfo$addRow(rowKey = "positive_cases", values = list(
-                        measure = "Cases with lesion detected",
-                        value = "0"
-                    ))
-
-                    dataInfo$addRow(rowKey = "error_no_positive", values = list(
-                        measure = "ERROR",
-                        value = "Cannot estimate detection probability without positive cases"
-                    ))
-
-                    interpretText <- self$results$interpretText
-                    errorHtml <- sprintf(
-                        "<div style='%s %s %s %s'>
-                    <p style='margin: 0; %s'><strong> ERROR: No Positive Cases</strong></p>
-                    <p style='margin: 10px 0 0 0; %s'>
-                        Analysis requires at least one case with detected lesions.
-                        Current dataset has %d cases, but zero cases show lesion detection.
-                    </p>
-                    <p style='margin: 10px 0 0 0; %s'><strong>This could mean:</strong></p>
-                    <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
-                        <li>All values in 'First Detection' variable are missing (NA)</li>
-                        <li>Incorrect variable selected for 'First Detection'</li>
-                        <li>Dataset truly contains no positive findings</li>
-                    </ul>
-                    <p style='margin: 10px 0 0 0; %s'><strong>Recommendation:</strong> Verify variable selection and data entry.</p>
-                    <p style='margin: 10px 0 0 0; %s'><strong>Note:</strong> This module estimates sampling adequacy from observed detection patterns.
-                    If no lesions are detected, estimation is not possible.</p>
-                </div>",
-                        private$.styleConstants$font, private$.styleConstants$bgLight,
-                        private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                        private$.styleConstants$fontSize15,
-                        private$.styleConstants$fontSize14, nCases,
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$fontSize14
-                    )
-                    interpretText$setContent(errorHtml)
+                    private$.addNotice("ERROR", jmvcore::.("No detected lesions"),
+                        jmvcore::.("No case records a first detection, so observed-positive detection curves cannot be estimated. Independent planning and lymph-node results remain available when requested."))
                     return()
                 }
-
+                private$.addNotice("STRONG_WARNING", jmvcore::.("Observed-positive cases only"),
+                    jmvcore::.("Detection curves and recommendations describe cases in which a lesion was eventually observed. Undetected disease and finite sampling windows are not identified by these data; results are not validated population sensitivity or a clinical rule-out guarantee. Geometric estimates are descriptive approximations to the observed first-detection distribution."))
                 # Warning 1: Small sample size (detected cases only)
                 if (nDetected < 10) {
-                    interpretText <- self$results$interpretText
-                    warningHtml <- sprintf(
-                        "<div style='%s %s %s %s'>
-                    <p style='margin: 0; %s'><strong> WARNING: Small Sample Size</strong></p>
-                    <p style='margin: 10px 0 0 0; %s'>
-                        Only %d cases with detected lesions. Results may be unreliable.
-                    </p>
-                    <p style='margin: 10px 0 0 0; %s'><strong>Recommendations:</strong></p>
-                    <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
-                        <li>Collect more cases for robust estimates (recommended: n >= 30 for bootstrap analysis)</li>
-                        <li>Interpret confidence intervals with caution</li>
-                        <li>Consider using 'Auto' estimation method which adapts to sample size</li>
-                    </ul>
-                </div>",
-                        private$.styleConstants$font, private$.styleConstants$bgLight,
-                        private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$fontSize14, nDetected,
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$fontSize14
+                    private$.addNotice(
+                        "WARNING",
+                        jmvcore::.("Small sample size"),
+                        jmvcore::format(jmvcore::.("Only {value} cases recorded a detected lesion. Estimates and bootstrap intervals may be unstable; assess the observation design and collect more cases before drawing conclusions."), value = nDetected)
                     )
-                    interpretText$setContent(warningHtml)
                 }
 
                 # Set seed if requested - save and restore global RNG state so subsequent
@@ -804,21 +1401,13 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         {
                             if (!is.null(old_seed)) {
                                 assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                            } else if (exists(".Random.seed", envir = .GlobalEnv)) {
+                                rm(".Random.seed", envir = .GlobalEnv)
                             }
                         },
                         add = TRUE
                     )
                     set.seed(self$options$seedValue)
-                }
-
-                # === Key Results Summary ===
-                keyResults <- self$results$keyResults
-                keyResultsHtml <- "<div style='padding: 15px; background-color: rgba(33, 154, 255, 0.1); border: 2px solid #b3d7ff; margin-bottom: 20px; color: inherit;'>
-                                <h3 style='margin: 0 0 10px 0; font-size: 16px; color: #0056b3;'>Key Results</h3>
-                                <p style='margin: 0; font-size: 14px; color: #0056b3;'>This section will be populated with the key findings from the analysis.</p>
-                             </div>"
-                if (self$options$showKeyResults) {
-                    keyResults$setContent(keyResultsHtml)
                 }
 
                 # === Data Summary ===
@@ -827,7 +1416,6 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 nCases <- length(totalSamplesData)
                 nNoDetection <- nCases - nDetected
 
-                totalSubmitted <- sum(totalSamplesData, na.rm = TRUE) # Total samples submitted (includes unexamined)
                 examinedDetected <- sum(firstDetectionData[detectedCases], na.rm = TRUE)
                 examinedNondetected <- sum(totalSamplesData[!detectedCases], na.rm = TRUE)
                 totalExamined <- examinedDetected + examinedNondetected # Samples actually examined across all cases
@@ -836,396 +1424,105 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 dataInfo <- self$results$dataInfo
 
-                totalSubmittedRaw <- sum(rawTotalSamplesData, na.rm = TRUE)
+                totalSubmittedRaw <- sum(rawTotalSamplesData[private$.validCount(rawTotalSamplesData, positive = TRUE)])
 
-                dataInfo$addRow(rowKey = "total_cases", values = list(
-                    measure = "Total cases supplied",
+                private$.putRow(dataInfo, rowKey = "total_cases", values = list(
+                    measure = jmvcore::.("Total cases supplied"),
                     value = as.character(totalCasesInput)
                 ))
 
-                dataInfo$addRow(rowKey = "cases_analyzed", values = list(
-                    measure = "Cases analyzed",
+                private$.putRow(dataInfo, rowKey = "cases_analyzed", values = list(
+                    measure = jmvcore::.("Cases analyzed"),
                     value = as.character(nCases)
                 ))
 
                 if (nExcludedMissingTotal > 0) {
-                    dataInfo$addRow(rowKey = "excluded_missing", values = list(
-                        measure = "Excluded: missing total samples",
+                    private$.putRow(dataInfo, rowKey = "excluded_missing", values = list(
+                        measure = jmvcore::.("Excluded: missing total samples"),
                         value = as.character(nExcludedMissingTotal)
                     ))
                 }
 
                 if (nExcludedInvalidDetection > 0) {
-                    dataInfo$addRow(rowKey = "excluded_invalid", values = list(
-                        measure = "Excluded: first detection > total",
+                    private$.putRow(dataInfo, rowKey = "excluded_invalid", values = list(
+                        measure = jmvcore::.("Excluded: first detection > total"),
                         value = as.character(nExcludedInvalidDetection)
                     ))
                 }
 
-                dataInfo$addRow(rowKey = "total_input", values = list(
-                    measure = "Total samples (input)",
-                    value = sprintf("%d (recorded)", totalSubmittedRaw)
+                private$.putRow(dataInfo, rowKey = "total_input", values = list(
+                    measure = jmvcore::.("Total samples (input)"),
+                    value = sprintf("%s (recorded)", format(totalSubmittedRaw, trim = TRUE))
                 ))
 
-                dataInfo$addRow(rowKey = "total_analyzed", values = list(
-                    measure = "Total samples analyzed",
-                    value = sprintf("%d (up to first detection)", totalExamined)
+                private$.putRow(dataInfo, rowKey = "total_analyzed", values = list(
+                    measure = jmvcore::.("Total samples analyzed"),
+                    value = jmvcore::format(jmvcore::.("{v1} (up to first detection)"), v1 = format(totalExamined, trim = TRUE))
                 ))
 
-                dataInfo$addRow(rowKey = "mean_samples", values = list(
-                    measure = "Mean samples per analyzed case",
+                private$.putRow(dataInfo, rowKey = "mean_samples", values = list(
+                    measure = jmvcore::.("Mean samples per analyzed case"),
                     value = sprintf("%.2f", meanSamplesPerCase)
                 ))
 
-                dataInfo$addRow(rowKey = "median_first", values = list(
-                    measure = "Median first detection",
-                    value = if (!is.na(medianFirst)) sprintf("%.0f", medianFirst) else "No lesions detected"
+                private$.putRow(dataInfo, rowKey = "median_first", values = list(
+                    measure = jmvcore::.("Median first detection"),
+                    value = if (!is.na(medianFirst)) sprintf("%.0f", medianFirst) else jmvcore::.("No lesions detected")
                 ))
 
-                dataInfo$addRow(rowKey = "no_detection", values = list(
-                    measure = "Cases without detected lesion",
+                private$.putRow(dataInfo, rowKey = "no_detection", values = list(
+                    measure = jmvcore::.("Cases without detected lesion"),
                     value = sprintf("%d", nNoDetection)
                 ))
 
                 if (length(dataWarnings) > 0) {
-                    dataInfo$addRow(rowKey = "data_notes", values = list(
-                        measure = "Data notes",
+                    private$.putRow(dataInfo, rowKey = "data_notes", values = list(
+                        measure = jmvcore::.("Data notes"),
                         value = paste(dataWarnings, collapse = "; ")
                     ))
                 }
 
                 # === Binomial Model ===
                 pEstimate <- NA_real_
-                estimationMethod <- "Not calculated"
+                estimationMethod <- jmvcore::.("Not calculated")
 
-                if (self$options$showBinomialModel) {
-                    # Determine which estimation method to use
-                    methodChoice <- self$options$estimationMethod
-                    contextSupportsEmpirical <- analysisContext %in% c("general", "lymphnode", "omentum")
-                    empiricalEligible <- !is.null(positiveCountData) && nDetected > 0 && contextSupportsEmpirical
-                    autoEmpirical <- (methodChoice == "auto") && empiricalEligible
-                    forceGeometricNote <- FALSE
-
-                    # Method 1: Empirical Proportion (preferred if positiveCount available)
-                    if ((methodChoice == "empirical" && !is.null(positiveCountData) && nDetected > 0) || autoEmpirical) {
-                        # Use empirical proportion: sum of positive samples / sum of total samples (positive cases only)
-                        positive_idx <- !is.na(firstDetectionData)
-                        total_samples_positive <- sum(totalSamplesData[positive_idx], na.rm = TRUE)
-                        total_positive_samples <- sum(positiveCountData[positive_idx], na.rm = TRUE)
-
-                        if (total_samples_positive > 0) {
-                            pEstimate <- total_positive_samples / total_samples_positive
-                            estimationMethod <- "Empirical Proportion (uses all positive samples)"
-
-                            # Store heterogeneity info for later warning (after dataQualityWarnings is initialized)
-                            private$.empiricalHeterogeneity <- NULL
-                            case_proportions <- positiveCountData[positive_idx] / totalSamplesData[positive_idx]
-                            case_proportions <- case_proportions[is.finite(case_proportions)]
-
-                            if (length(case_proportions) >= 3) {
-                                cv <- sd(case_proportions, na.rm = TRUE) / mean(case_proportions, na.rm = TRUE)
-
-                                if (!is.na(cv) && is.finite(cv)) {
-                                    if (cv > 0.5) {
-                                        # High heterogeneity - DISABLE BINOMIAL MODEL
-                                        private$.empiricalHeterogeneity <- sprintf(" HIGH HETEROGENEITY: Detection probability varies substantially across cases (CV=%.2f). Pooled estimate may not represent any individual case well. Consider stratified analysis or reporting case-specific estimates.", cv)
-
-                                        # CRITICAL FIX: Disable binomial model when independence violated
-                                        binomialText <- self$results$binomialText
-                                        binomialTable <- self$results$binomialTable
-                                        binomialRecommendTable <- self$results$binomialRecommendTable
-
-                                        fmt <- "<div style='%s %s %s %s'>
-                                        <p style='margin: 0; %s'><strong> Binomial Model Not Applicable</strong></p>
-                                        <p style='margin: 10px 0 0 0; %s'>
-                                            <b>High heterogeneity detected (CV=%.2f > 0.5)</b> indicates substantial variation in detection
-                                            probability across cases. This violates the binomial model's assumption of <b>independent,
-                                            identically distributed sampling</b>.
-                                        </p>
-                                        <p style='margin: 10px 0 0 0; %s'><strong>Why this matters:</strong></p>
-                                        <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
-                                            <li>Binomial model assumes each sample has the same detection probability</li>
-                                            <li>Your data shows detection probability varies %.0f%% (CV=%.2f)</li>
-                                            <li>Pooled binomial estimates would be misleading</li>
-                                        </ul>
-                                        <p style='margin: 10px 0 0 0; %s'><strong>Use instead:</strong></p>
-                                        <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
-                                            <li><b>Bootstrap Analysis:</b> Non-parametric resampling (no assumptions)</li>
-                                            <li><b>Beta-Binomial Model:</b> Accounts for case-to-case variation</li>
-                                            <li><b>Stratified Analysis:</b> Analyze subgroups separately</li>
-                                        </ul>
-                                    </div>"
-
-                                        errorHtml <- sprintf(
-                                            fmt,
-                                            private$.styleConstants$font, private$.styleConstants$bgLight,
-                                            private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                                            private$.styleConstants$fontSize15,
-                                            private$.styleConstants$fontSize14, cv,
-                                            private$.styleConstants$fontSize14,
-                                            private$.styleConstants$fontSize14, cv * 100, cv,
-                                            private$.styleConstants$fontSize14,
-                                            private$.styleConstants$fontSize14
-                                        )
-
-                                        if (self$options$showBinomialModel) {
-                                            binomialText$setContent(errorHtml)
-                                        }
-
-                                        # Skip binomial model entirely, but continue to other analyses
-                                        skipBinomial <- TRUE
-                                    } else if (cv > 0.3) {
-                                        # Moderate heterogeneity - warn but allow
-                                        private$.empiricalHeterogeneity <- sprintf(" MODERATE HETEROGENEITY: Detection probability shows moderate variation across cases (CV=%.2f). Interpret pooled estimate with caution.", cv)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    # Method 2: Geometric MLE (fallback or explicit choice)
-                    # Method 2: Geometric MLE (fallback or explicit choice)
-                    if (!skipBinomial && ((is.na(pEstimate) || methodChoice == "geometric" || (!contextSupportsEmpirical && methodChoice == "auto" && !is.null(positiveCountData))) && nDetected > 0)) {
-                        # Use geometric MLE: q = 1 / mean(first detection position)
-                        positive_first <- firstDetectionData[!is.na(firstDetectionData)]
-
-                        if (length(positive_first) > 0) {
-                            mean_first_detection <- mean(positive_first, na.rm = TRUE)
-                            if (mean_first_detection > 0) {
-                                pEstimate <- 1 / mean_first_detection
-                                if (methodChoice == "auto" && !contextSupportsEmpirical && !is.null(positiveCountData)) {
-                                    forceGeometricNote <- TRUE
-                                    estimationMethod <- "Geometric MLE (auto: empirical disabled for dependent sampling)"
-                                } else {
-                                    estimationMethod <- "Geometric MLE (first detection only)"
-                                }
-                            }
-                        }
-                    }
-
-                    # Validate probability estimate and warn on data quality issues
-                    # Validate probability estimate and warn on data quality issues
-                    dataQualityWarnings <- character(0)
-
-                    if (!skipBinomial) {
-                        pForCalc <- pEstimate
-
-                        # Add heterogeneity warning if detected during empirical estimation
-                        if (!is.null(private$.empiricalHeterogeneity)) {
-                            dataQualityWarnings <- c(dataQualityWarnings, private$.empiricalHeterogeneity)
-                        }
-
-                        if (is.na(pForCalc)) {
-                            pForCalc <- NA_real_
-                            dataQualityWarnings <- c(
-                                dataQualityWarnings,
-                                " Could not estimate detection probability from data"
-                            )
-                        } else if (pForCalc <= 0) {
-                            dataQualityWarnings <- c(
-                                dataQualityWarnings,
-                                " DATA QUALITY ISSUE: Estimated probability <= 0. Check for data entry errors or insufficient positive cases."
-                            )
-                            # Set to NA instead of 0 to avoid log(0) errors in downstream calculations
-                            pForCalc <- NA_real_
-                        } else if (pForCalc >= 1) {
-                            dataQualityWarnings <- c(
-                                dataQualityWarnings,
-                                " DATA QUALITY ISSUE: Estimated probability >= 1 (impossible). Possible causes: first detection always at position 1, or positive count exceeds total samples. Please verify data integrity."
-                            )
-                            # Cap at 0.9999 instead of 1 - 1e-12 to avoid extreme log calculations
-                            # This represents practical certainty while maintaining numeric stability
-                            pForCalc <- 0.9999
-                        } else if (pForCalc < 0.0001) {
-                            # Warn about very low probabilities that may cause numeric issues
-                            dataQualityWarnings <- c(
-                                dataQualityWarnings,
-                                sprintf(" CAUTION: Very low detection probability (%.6f). Predictions for high confidence levels may require impractical sample sizes.", pForCalc)
-                            )
-                        } else if (pForCalc > 0.99) {
-                            # Warn about very high probabilities
-                            dataQualityWarnings <- c(
-                                dataQualityWarnings,
-                                sprintf(" CAUTION: Very high detection probability (%.4f). This suggests near-certain detection in first sample, which may indicate data quality issues.", pForCalc)
-                            )
-                        }
-                    } else {
-                        pForCalc <- NA_real_
-                    }
-
-                    # Check for impossible positive counts
-                    if (!is.null(positiveCountData) && !is.null(totalSamplesData)) {
-                        invalid_counts <- positiveCountData > totalSamplesData
-                        if (any(invalid_counts, na.rm = TRUE)) {
-                            n_invalid <- sum(invalid_counts, na.rm = TRUE)
-                            dataQualityWarnings <- c(
-                                dataQualityWarnings,
-                                sprintf(" DATA ERROR: %d cases have positive count > total samples. These have been excluded from analysis.", n_invalid)
-                            )
-                        }
-                    }
-
+                needEstimate <- self$options$showBinomialModel || self$options$showDetectionCurve ||
+                    self$options$showModelFit || self$options$showObsPred ||
+                    self$options$showSampleSizePlanning || self$options$showMultifocalAnalysis ||
+                    self$options$showPopulationDetection || self$options$showProbabilityExplanation ||
+                    self$options$showEmpiricalCumulative || self$options$showStratifiedAnalysis
+                if (needEstimate) {
+                    estimate <- private$.estimateQ(firstDetectionData, totalSamplesData, positiveCountData)
+                    pEstimate <- pForCalc <- estimate$q
+                    skipBinomial <- estimate$rejected
+                    estimationMethod <- if (estimate$method == "empirical")
+                        jmvcore::.("Empirical Proportion (uses all positive samples)") else
+                        jmvcore::.("Detected-case geometric approximation")
                     binomialText <- self$results$binomialText
-
-                    # Context-specific warning for inappropriate use of binomial model
-                    binomialWarning <- ""
-
-                    if (analysisContext == "tumor") {
-                        binomialWarning <- sprintf(
-                            "<div style='background-color: rgba(255, 33, 67, 0.09); border: 1px solid #ef5350; padding: 12px; margin: 10px 0; border-radius: 4px; color: inherit;'>
-                        <p style='%s margin: 0;'><b> WARNING: Binomial Model May Underestimate Sensitivity for Tumor Sampling</b></p>
-                        <p style='%s margin: 8px 0 0 0;'>
-                            Sequential tumor samples (blocks) are <b>not independent</b> - they are serial sections through the same lesion
-                            with spatial clustering. The binomial model assumes each sample is an independent event, which leads to
-                            <b>systematic underestimation</b> of cumulative detection sensitivity.
-                        </p>
-                        <p style='%s margin: 8px 0 0 0;'>
-                            <b>Recommendation:</b> Use <b>Empirical Cumulative Detection</b> (non-parametric) with <b>Bootstrap CIs</b>
-                            instead. These methods correctly handle spatial dependence and are the gold standard for tumor block sampling adequacy.
-                        </p>
-                        <p style='%s margin: 8px 0 0 0;'>
-                            <em>Reference: See vignette 'Independent vs Dependent Sampling' for detailed explanation</em>
-                        </p>
-                    </div>",
-                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize12, private$.styleConstants$colorSecondary)
-                        )
-                    } else if (analysisContext == "margin") {
-                        binomialWarning <- sprintf(
-                            "<div style='background-color: rgba(255, 169, 33, 0.14); border: 1px solid #ff9800; padding: 12px; margin: 10px 0; border-radius: 4px; color: inherit;'>
-                        <p style='%s margin: 0;'><b> Caution: Margin samples may show spatial clustering</b></p>
-                        <p style='%s margin: 8px 0 0 0;'>
-                            Consider using empirical methods if margin positivity is geographically clustered.
-                        </p>
-                    </div>",
-                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary)
-                        )
+                    diagnostic <- ""
+                    if (skipBinomial) {
+                        diagnostic <- jmvcore::.("Binomial Model Not Applicable: the case-proportion CV exceeds 0.5. This screening heuristic is not a formal independence test.")
+                        private$.addNotice("STRONG_WARNING", jmvcore::.("Binomial predictions withheld"),
+                            jmvcore::.("The pooled case-proportion CV exceeds 0.5, so pooled binomial predictions are withheld. Subgroups are assessed separately using the same estimator and screening rule."))
+                    } else if (is.finite(estimate$cv) && estimate$cv > 0.3) {
+                        diagnostic <- jmvcore::.("MODERATE HETEROGENEITY: case-proportion CV exceeds 0.3. Interpret the pooled approximation with caution.")
+                        private$.addNotice("WARNING", jmvcore::.("Variation in case proportions"), diagnostic)
+                    } else if (!is.finite(pEstimate)) {
+                        diagnostic <- jmvcore::.("Could not estimate detection probability from the available inputs. Empirical estimation requires valid positive-count pairs among eventually detected cases.")
                     }
-
-                    # Add data quality warnings
-                    dataQualityWarningHTML <- ""
-                    if (length(dataQualityWarnings) > 0) {
-                        warningList <- paste(sprintf("<li>%s</li>", dataQualityWarnings), collapse = "\n")
-                        dataQualityWarningHTML <- sprintf(
-                            "<div style='background-color: rgba(255, 33, 67, 0.09); border: 2px solid #d32f2f; padding: 15px; margin: 10px 0; border-radius: 4px; color: inherit;'>
-                        <p style='%s margin: 0 0 10px 0;'><b> DATA QUALITY WARNINGS</b></p>
-                        <ul style='%s margin: 0;'>
-                            %s
-                        </ul>
-                    </div>",
-                            private$.buildStyle(private$.styleConstants$fontSize14, "color: #d32f2f; font-weight: bold;"),
-                            private$.buildStyle(private$.styleConstants$fontSize13, "color: #d32f2f;"),
-                            warningList
-                        )
-                    }
-
-                    # Calculate description based on data available
-                    if (!is.null(positiveCountData) && estimationMethod == "Empirical Proportion (uses all positive samples)") {
-                        positive_idx <- !is.na(firstDetectionData)
-                        total_samples_positive <- sum(totalSamplesData[positive_idx], na.rm = TRUE)
-                        total_positive_samples <- sum(positiveCountData[positive_idx], na.rm = TRUE)
-                        data_desc <- sprintf(
-                            "Based on %d positive cases with %d positive samples out of %d total samples examined.",
-                            nDetected, total_positive_samples, total_samples_positive
-                        )
-                    } else {
-                        positive_first <- firstDetectionData[!is.na(firstDetectionData)]
-                        mean_first <- if (length(positive_first) > 0) mean(positive_first, na.rm = TRUE) else NA
-                        data_desc <- sprintf(
-                            "Based on %d positive cases with mean first detection at sample %.2f.",
-                            nDetected, ifelse(is.na(mean_first), 0, mean_first)
-                        )
-                    }
-
-                    html <- sprintf(
-                        "<div style='%s'>
-                    %s
-                    %s
-                    <div style='%s'>
-                        <h4 style='%s'>Binomial Probability Model (Conditional Sensitivity)</h4>
-                        <p style='%s'>
-                            Estimated per-sample detection probability: <b style='%s'>q = %s</b>
-                        </p>
-                        <p style='%s'>
-                            <b>Estimation Method:</b> %s
-                        </p>
-                        <p style='%s'>
-                            %s
-                        </p>
-                        <p style='%s'>
-                            <b>Formula:</b> P(detect >= 1 in n samples | lesion present) = 1 - (1-q)<sup>n</sup>
-                        </p>
-                        <p style='%s'>
-                            <em>Note: This estimates sensitivity (detection given lesion is present), not population-level detection rate.</em>
-                        </p>
-                    </div>
-                </div>",
-                        private$.styleConstants$font,
-                        dataQualityWarningHTML, # Insert data quality warnings FIRST
-                        binomialWarning, # Insert context-specific warning
-                        private$.buildStyle(
-                            private$.styleConstants$bgLight,
-                            private$.styleConstants$borderLeft,
-                            private$.styleConstants$padding15,
-                            private$.styleConstants$margin10
-                        ),
-                        private$.buildStyle(
-                            private$.styleConstants$colorPrimary,
-                            private$.styleConstants$fontSize15,
-                            "margin: 0 0 10px 0;"
-                        ),
-                        private$.buildStyle(
-                            private$.styleConstants$fontSize14,
-                            private$.styleConstants$colorPrimary,
-                            "margin: 0 0 10px 0;"
-                        ),
-                        private$.styleConstants$colorPrimary,
-                        if (!is.na(pEstimate)) sprintf("%.4f", pEstimate) else "NA",
-                        private$.buildStyle(
-                            private$.styleConstants$fontSize14,
-                            private$.styleConstants$colorPrimary,
-                            "margin: 0 0 10px 0;"
-                        ),
-                        estimationMethod,
-                        private$.buildStyle(
-                            private$.styleConstants$fontSize14,
-                            private$.styleConstants$colorSecondary,
-                            "margin: 0 0 10px 0;"
-                        ),
-                        data_desc,
-                        private$.buildStyle(
-                            private$.styleConstants$fontSize14,
-                            private$.styleConstants$colorPrimary,
-                            "margin: 0 0 10px 0;"
-                        ),
-                        private$.buildStyle(
-                            private$.styleConstants$fontSize13,
-                            private$.styleConstants$colorSecondary,
-                            "margin: 0;"
-                        )
-                    )
                     if (self$options$showBinomialModel) {
-                        binomialText$setContent(html)
+                        binomialText$setContent(paste0(
+                            jmvcore::.("<p><b>Independent-trial approximation among eventually observed-positive cases</b></p>"),
+                            jmvcore::format(jmvcore::.("<p>Estimator: {v1}; q = {v2}; eligible cases = {v3}.</p>"), v1 = estimationMethod, v2 = if (is.finite(pEstimate)) sprintf("%.4f", pEstimate) else "NA", v3 = sprintf("%d", estimate$n)),
+                            jmvcore::.("<p>Modelled probability at n samples is 1 - (1-q)^n. This assumes independent trials with constant probability and does not correct unequal observation windows, missed disease or spatial dependence.</p>"),
+                            sprintf("<p>%s</p>", diagnostic)))
                     }
-
-                    # Surface estimator choice in the data summary so downstream tests/users can verify the assumption used
-                    dataInfo <- self$results$dataInfo
-                    dataInfo$addRow(rowKey = "binomial_method", values = list(
-                        measure = "Binomial estimator",
-                        value = estimationMethod
-                    ))
-                    if (forceGeometricNote) {
-                        dataInfo$addRow(rowKey = "binomial_method_note", values = list(
-                            measure = "Binomial note",
-                            value = "Empirical estimator disabled for dependent sampling contexts"
-                        ))
-                    }
+                    private$.putRow(dataInfo, "binomial_method", list(
+                        measure = jmvcore::.("Binomial estimator"), value = estimationMethod))
 
                     # Calculate detection probabilities for different sample sizes
                     binomialTable <- self$results$binomialTable
+                    private$.clearTable(binomialTable)
 
                     binomProbVec <- rep(NA_real_, maxSamp)
                     prevProb <- 0
@@ -1238,7 +1535,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             marginal <- cumProb - prevProb
                         }
 
-                        binomialTable$addRow(rowKey = paste0("n_", i), values = list(
+                        private$.putRow(binomialTable, rowKey = paste0("n_", i), values = list(
                             nSamples = i,
                             cumProb = cumProb,
                             marginalGain = marginal
@@ -1251,6 +1548,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Minimum samples for different confidence levels
                     recommendTable <- self$results$recommendTable
+                    private$.clearTable(recommendTable)
 
                     confLevels <- c(0.80, 0.90, 0.95, 0.99)
                     for (i in seq_along(confLevels)) {
@@ -1271,7 +1569,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             }
                         }
 
-                        recommendTable$addRow(rowKey = paste0("conf_", conf), values = list(
+                        private$.putRow(recommendTable, rowKey = paste0("conf_", conf), values = list(
                             confidence = conf,
                             minSamples = nMin
                         ))
@@ -1281,8 +1579,8 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         method = "Binomial",
                         probVec = binomProbVec,
                         priority = 4,
-                        description = "Independent detection probability model",
-                        detail = if (!is.na(pEstimate)) sprintf("p = %.4f", pEstimate) else "Per-sample probability unavailable"
+                        description = jmvcore::.("Independent detection probability model"),
+                        detail = if (!is.na(pEstimate)) sprintf("p = %.4f", pEstimate) else jmvcore::.("Per-sample probability unavailable")
                     )
                 }
 
@@ -1290,15 +1588,16 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (self$options$showHeterogeneityTest) {
                     heterogeneityText <- self$results$heterogeneityText
                     heterogeneityTable <- self$results$heterogeneityTest
+                    private$.clearTable(heterogeneityTable)
 
                     if (is.null(sampleTypeData)) {
-                        heterogeneityText$setContent("To test for heterogeneity, please specify a 'Sample Type' variable.")
+                        heterogeneityText$setContent(jmvcore::.("To test for heterogeneity, please specify a 'Sample Type' variable."))
                     } else {
                         het_results <- private$.testHeterogeneity(firstDetectionData, sampleTypeData)
 
                         if (!is.na(het_results$statistic)) {
-                            heterogeneityTable$addRow(rowKey = "het_test", values = list(
-                                test = "Likelihood Ratio Test",
+                            private$.putRow(heterogeneityTable, rowKey = "het_test", values = list(
+                                test = jmvcore::.("Likelihood Ratio Test"),
                                 statistic = het_results$statistic,
                                 df = het_results$df,
                                 pValue = het_results$pValue,
@@ -1306,17 +1605,10 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ))
 
                             # Add explanatory text
-                            html <- sprintf(
-                                "<div style='%s'>
-                            <p><strong>Interpretation:</strong> %s</p>
-                            <p>This test compares a single pooled detection probability (q) against group-specific probabilities.
-                            Significant heterogeneity suggests that different sample types have different detection rates and should be analyzed separately.</p>
-                        </div>",
-                                private$.styleConstants$font, het_results$interpretation
-                            )
+                            html <- jmvcore::format(jmvcore::.("<p><b>Group comparison:</b> {v2}</p><p>The likelihood-ratio test compares pooled and group-specific geometric working models among eventual detections. Unequal observation windows or sparse groups can undermine this approximation; the test does not establish clinical differences.</p>"), v1 = private$.styleConstants$font, v2 = het_results$interpretation)
                             heterogeneityText$setContent(html)
                         } else {
-                            heterogeneityText$setContent("Insufficient data for heterogeneity testing (requires n >= 10).")
+                            heterogeneityText$setContent(het_results$interpretation)
                         }
                     }
                 }
@@ -1325,15 +1617,18 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (self$options$showModelFit) {
                     modelFitText <- self$results$modelFitText
                     modelFitTable <- self$results$modelFitTable
+                    private$.clearTable(modelFitTable)
 
-                    if (is.na(pEstimate)) {
-                        modelFitText$setContent("Cannot assess model fit: detection probability (q) could not be estimated.")
+                    if (exists("estimate") && estimate$method != "geometric") {
+                        modelFitText$setContent(jmvcore::.("A goodness-of-fit p-value is available only for the detected-case geometric estimator. Empirical-count q is estimated from a different outcome and its test calibration has not been validated. Use the observed-versus-predicted table for descriptive comparison."))
+                    } else if (is.na(pEstimate)) {
+                        modelFitText$setContent(jmvcore::.("Cannot assess model fit: detection probability (q) could not be estimated."))
                     } else {
                         fit_results <- private$.testModelFit(firstDetectionData, pEstimate)
 
                         if (!is.na(fit_results$chiSquare)) {
-                            modelFitTable$addRow(rowKey = "fit_test", values = list(
-                                test = "Chi-Square Goodness of Fit",
+                            private$.putRow(modelFitTable, rowKey = "fit_test", values = list(
+                                test = jmvcore::.("Chi-Square Goodness of Fit"),
                                 chiSquare = fit_results$chiSquare,
                                 df = fit_results$df,
                                 pValue = fit_results$pValue,
@@ -1341,17 +1636,10 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ))
 
                             # Add explanatory text
-                            html <- sprintf(
-                                "<div style='%s'>
-                            <p><strong>Fit Quality:</strong> %s</p>
-                            <p>This test compares the observed distribution of first detection positions with the expected geometric distribution.
-                            A significant p-value (< 0.05) indicates poor fit, suggesting the geometric/binomial model assumptions may be violated (e.g., due to spatial clustering).</p>
-                        </div>",
-                                private$.styleConstants$font, fit_results$fitQuality
-                            )
+                            html <- jmvcore::format(jmvcore::.("<p><b>Model fit:</b> {v2}</p><p>The approximate chi-square test assesses an untruncated geometric working model among eventual detections. A large p-value does not establish model validity, independent sampling or clinical sensitivity. No p-value is calculated for empirical-count q.</p>"), v1 = private$.styleConstants$font, v2 = fit_results$fitQuality)
                             modelFitText$setContent(html)
                         } else {
-                            modelFitText$setContent("Insufficient data for model fit testing (requires n >= 10).")
+                            modelFitText$setContent(fit_results$fitQuality)
                         }
                     }
                 }
@@ -1360,15 +1648,17 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (self$options$showObsPred) {
                     obsPredText <- self$results$obsPredText
                     obsPredTable <- self$results$obsPredTable
+                    private$.clearTable(obsPredTable)
 
                     if (is.na(pEstimate)) {
-                        obsPredText$setContent("Cannot compare observed vs predicted: detection probability (q) could not be estimated.")
+                        private$.deleteRows(obsPredTable)
+                        obsPredText$setContent(jmvcore::.("Cannot compare observed vs predicted: detection probability (q) could not be estimated."))
                     } else {
                         op_results <- private$.calculateObsPred(firstDetectionData, pEstimate, maxSamp)
 
                         if (nrow(op_results) > 0) {
                             for (i in seq_len(nrow(op_results))) {
-                                obsPredTable$addRow(rowKey = paste0("op_", i), values = list(
+                                private$.putRow(obsPredTable, rowKey = paste0("op_", i), values = list(
                                     nSamples = op_results$nSamples[i],
                                     observed = op_results$observed[i],
                                     predicted = op_results$predicted[i],
@@ -1377,68 +1667,31 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 ))
                             }
 
-                            obsPredText$setContent("<p>Comparison of observed cumulative detection rates vs. model predictions. Large differences indicate model misfit.</p>")
+                            obsPredText$setContent(jmvcore::.("<p>Comparison of observed cumulative detection rates vs. model predictions. Large differences indicate model misfit.</p>"))
                         } else {
-                            obsPredText$setContent("No positive cases available for comparison.")
+                            obsPredText$setContent(jmvcore::.("No positive cases available for comparison."))
                         }
                     }
                 }
 
-                # === Power Analysis ===
-                if (self$options$showPowerAnalysis) {
-                    powerText <- self$results$powerAnalysisText
-                    powerTable <- self$results$powerTable
-
-                    targetPower <- self$options$targetPower
-                    targetQ <- self$options$targetDetectionProb
-
-                    # Scenario 1: User specified target q
-                    n_req_1 <- ceiling(log(1 - targetPower) / log(1 - targetQ))
-                    achieved_power_1 <- 1 - (1 - targetQ)^n_req_1
-
-                    powerTable$addRow(rowKey = "user_spec", values = list(
-                        scenario = "User Specified Target",
-                        targetPower = targetPower,
-                        probDetect = targetQ,
-                        nSamples = n_req_1,
-                        achievedPower = achieved_power_1
-                    ))
-
-                    # Scenario 2: Observed q (if available)
-                    if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
-                        n_req_2 <- ceiling(log(1 - targetPower) / log(1 - pEstimate))
-                        achieved_power_2 <- 1 - (1 - pEstimate)^n_req_2
-
-                        powerTable$addRow(rowKey = "observed", values = list(
-                            scenario = "Observed Data Estimate",
-                            targetPower = targetPower,
-                            probDetect = pEstimate,
-                            nSamples = n_req_2,
-                            achievedPower = achieved_power_2
-                        ))
-                    }
-
-                    html <- sprintf("<div style='%s'>
-                    <p><strong>Power Analysis:</strong> Calculates the number of samples needed to detect at least one lesion with %.0f%% probability (Power), assuming a per-sample detection probability (q).</p>
-                    <p>Formula: n = log(1 - Power) / log(1 - q)</p>
-                </div>", private$.styleConstants$font, targetPower * 100)
-                    powerText$setContent(html)
-                }
+                private$.planSamples(pEstimate)
 
                 # === Multi-Focal Analysis ===
                 if (self$options$showMultifocalAnalysis) {
                     multifocalText <- self$results$multifocalAnalysisText
                     multifocalTable <- self$results$multifocalProbTable
+                    private$.clearTable(multifocalTable)
 
-                    q_val <- if (!is.na(pEstimate) && pEstimate > 0) pEstimate else 0.1 # Default or fallback
+                    q_val <- pEstimate
+                    if (!is.finite(q_val)) private$.deleteRows(multifocalTable)
 
-                    for (i in 1:maxSamp) {
+                    for (i in if (is.finite(q_val)) seq_len(maxSamp) else integer()) {
                         # P(X >= k) = 1 - pbinom(k-1, n, p)
                         p_ge_1 <- 1 - pbinom(0, i, q_val)
                         p_ge_2 <- 1 - pbinom(1, i, q_val)
                         p_ge_3 <- 1 - pbinom(2, i, q_val)
 
-                        multifocalTable$addRow(rowKey = i, values = list(
+                        private$.putRow(multifocalTable, rowKey = i, values = list(
                             nSamples = i,
                             detectOne = p_ge_1,
                             detectTwo = p_ge_2,
@@ -1446,28 +1699,12 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         ))
                     }
 
-                    html <- sprintf("<div style='%s'>
-                    <p><strong>Multifocal Detection:</strong> Probability of detecting multiple lesions in 'n' samples, assuming per-sample detection probability q = %.3f.</p>
-                    <p>Useful for planning sampling when the goal is to find multiple foci (e.g., multifocal tumor).</p>
-                </div>", private$.styleConstants$font, q_val)
-                    multifocalText$setContent(html)
+                    html <- jmvcore::format(jmvcore::.("<p><b>Multiple positive samples</b></p><p>Probabilities use independent trials with q = {v2}. Several positive samples may come from the same focus; these probabilities do not count distinct anatomical lesions.</p>"), v1 = private$.styleConstants$font, v2 = sprintf("%.3f", q_val))
+                    multifocalText$setContent(if (is.finite(q_val)) html else jmvcore::.("Positive-sample predictions are unavailable because no applicable per-sample probability could be estimated."))
                 }
 
-                # === Automated Model Selection ===
                 if (self$options$autoSelectModel) {
-                    selectionText <- self$results$modelSelectionText
-
-                    # NOTE: the multi-model AIC/BIC comparison engine (.compareModels)
-                    # has not been implemented for this analysis. Rather than call an
-                    # undefined helper (which errors with "attempt to apply non-function"),
-                    # provide an honest message and direct the user to the individual
-                    # model outputs, which are computed with validated formulae.
-                    selectionText$setContent(sprintf("<div style='%s'>
-                        <p><strong>Automated model selection is not available in this version.</strong></p>
-                        <p>Compare models manually using the Binomial, Hypergeometric, and
-                        Beta-Binomial outputs above, and the Model Fit Assessment / Observed
-                        vs Predicted tables for goodness-of-fit.</p>
-                    </div>", private$.styleConstants$font))
+                    self$results$modelSelectionText$setContent(jmvcore::format(jmvcore::.("<p><b>Model applicability guide</b></p><p>Empirical curves describe {v1} eventual detections; the independent-trial approximation is {v2}. Hypergeometric sampling requires known finite counts and no replacement. Beta-binomial models describe between-case variation, not finite-population correction. Different estimands are not automatically ranked.</p>"), v1 = sprintf("%d", nDetected), v2 = if (is.finite(pEstimate)) jmvcore::.("estimated; assess independence and ascertainment before use") else jmvcore::.("unavailable or withheld")))
                 }
 
                 # === Auto-Detect Heterogeneity (Warning Only) ===
@@ -1475,281 +1712,21 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     auto_het <- private$.autoDetectHeterogeneity(firstDetectionData, sampleTypeData)
 
                     if (auto_het$warning) {
-                        # Add to interpretText if not already there
-                        interpretText <- self$results$interpretText
-                        currentContent <- interpretText$content
-                        if (is.null(currentContent)) currentContent <- ""
-
-                        warningHtml <- sprintf(
-                            "<div style='%s %s %s %s'>
-                        <p style='margin: 0; %s'><strong>%s</strong></p>
-                    </div>",
-                            private$.styleConstants$font, private$.styleConstants$bgLight,
-                            private$.styleConstants$borderWarning, private$.styleConstants$padding10,
-                            private$.styleConstants$fontSize14,
+                        # Goes to the notices item: the Statistical Interpretation section
+                        # later in .run() calls interpretText$setContent() unconditionally,
+                        # which would overwrite anything written here.
+                        private$.addNotice(
+                            "WARNING",
+                            jmvcore::.("Heterogeneity detected"),
                             auto_het$message
                         )
-
-                        # Prepend to existing content
-                        interpretText$setContent(paste(warningHtml, currentContent, sep = "<br>"))
                     }
                 }
 
-                # === Probability Explanation ===
-                probabilityExplanation <- self$results$probabilityExplanation
-
-                # Calculate prevalence and example probabilities
-                prevalence <- nDetected / nCases
-
-                # Use pEstimate if available, otherwise derive from observed first-detection data
-                qForExamples <- NA_real_
-                if (!is.na(pEstimate) && pEstimate > 0) {
-                    qForExamples <- pEstimate
-                } else {
-                    positive_first <- firstDetectionData[!is.na(firstDetectionData)]
-                    if (length(positive_first) > 0) {
-                        mean_first_detection <- mean(positive_first, na.rm = TRUE)
-                        if (is.finite(mean_first_detection) && mean_first_detection > 0) {
-                            qForExamples <- 1 / mean_first_detection
-                        }
-                    }
-                }
-
-                if (is.na(qForExamples) || qForExamples <= 0) {
-                    probabilityExplanation$setContent(
-                        sprintf(
-                            "<div style='%s %s %s'>\n                        <p style='%s'><strong>Insufficient detection data</strong></p>\n                        <p style='%s'>No positive cases with valid first detection positions were available, so example probabilities could not be calculated. Provide first detection data or additional positive cases to enable this narrative.</p>\n                    </div>",
-                            private$.styleConstants$font,
-                            private$.styleConstants$bgLight,
-                            private$.styleConstants$padding15,
-                            private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary)
-                        )
-                    )
-                    return()
-                }
-
-                # Calculate conditional probabilities (sensitivity)
-                conditional_3 <- 1 - (1 - qForExamples)^3
-                conditional_5 <- 1 - (1 - qForExamples)^5
-                conditional_10 <- 1 - (1 - qForExamples)^10
-
-                # Calculate population-level probabilities
-                population_3 <- prevalence * conditional_3
-                population_5 <- prevalence * conditional_5
-                population_10 <- prevalence * conditional_10
-
-                html <- sprintf(
-                    "<div style='%s'>
-                <h4 style='%s'> Two Ways to Measure Detection Performance</h4>
-
-                <p style='%s'>
-                    This analysis reports probabilities in two ways, depending on the clinical question:
-                </p>
-
-                <div style='%s'>
-                    <h5 style='%s'>
-                        1\u{20E3} Conditional Detection (Sensitivity) - \"If metastasis is present\"
-                    </h5>
-                    <p style='%s'>
-                        <strong>Clinical question:</strong> If metastasis is truly present, how many blocks do I need to detect it?
-                    </p>
-                    <p style='%s'>
-                        <strong>Best used for:</strong> Setting minimum blocks per tumour-positive case, validating adequacy targets, or counselling surgeons on block counts required to avoid false reassurance.
-                    </p>
-                    <p style='%s'>
-                        <strong>Formula:</strong> P(detect | metastasis present) = 1 - (1-q)<sup>n</sup>
-                    </p>
-                    <p style='%s'>
-                        <strong>In Your Data:</strong> Among %d cases <em>with</em> detected metastasis (q = %.3f):
-                    </p>
-                    <ul style='%s'>
-                        <li>With 3 samples: Detects %.1f%% of positive cases</li>
-                        <li>With 5 samples: Detects %.1f%% of positive cases</li>
-                        <li>With 10 samples: Detects %.1f%% of positive cases</li>
-                    </ul>
-                    <p style='%s'>
-                        <strong style='%s'>Clinical Use:</strong>
-                        <em>\"How many samples do I need to confidently rule out metastasis?\"</em>
-                        This is the probability shown in the <strong>Diagnostic Yield Curve</strong>.
-                    </p>
-                </div>
-
-                <div style='%s'>
-                    <h5 style='%s'>
-                        2\u{20E3} Population-Level Detection - \"Overall detection rate\"
-                    </h5>
-                    <p style='%s'>
-                        <strong>Clinical question:</strong> Across all specimens submitted (positive + negative), how often do we detect tumour with n blocks?
-                    </p>
-                    <p style='%s'>
-                        <strong>Best used for:</strong> Monitoring service-level performance, comparing surgeons/protocols, or highlighting when low prevalence - not sampling - limits detection.
-                    </p>
-                    <p style='%s'>
-                        <strong>Formula:</strong> P(detect overall) = Prevalence \u{00D7} Sensitivity = \u{03C0} \u{00D7} [1 - (1-q)<sup>n</sup>]
-                    </p>
-                    <p style='%s'>
-                        <strong>In Your Data:</strong> Observed prevalence = %.1f%% (%d/%d cases had metastasis):
-                    </p>
-                    <ul style='%s'>
-                        <li>With 3 samples: Detects metastasis in %.1f%% of all specimens</li>
-                        <li>With 5 samples: Detects metastasis in %.1f%% of all specimens</li>
-                        <li>With 10 samples: Detects metastasis in %.1f%% of all specimens</li>
-                    </ul>
-                    <p style='%s'>
-                        <strong style='%s'>Clinical Use:</strong>
-                        <em>\"What percentage of incoming specimens will test positive?\"</em>
-                        This is useful for workload planning and quality metrics.
-                    </p>
-                </div>
-
-                <div style='%s'>
-                    <p style='%s'>
-                        <strong> Important:</strong> These are fundamentally different quantities!
-                    </p>
-                    <p style='%s'>
-                        \u{2022} <strong>Conditional (sensitivity)</strong> assumes metastasis is present
-                    </p>
-                    <p style='%s'>
-                        \u{2022} <strong>Population-level</strong> includes cases without metastasis
-                    </p>
-                    <p style='%s'>
-                        The ratio between them equals the prevalence (%.1f%% in your data).
-                        This module focuses on <strong>conditional probability (sensitivity)</strong>
-                        because that's what determines sampling adequacy.
-                    </p>
-                </div>
-            </div>",
-                    private$.styleConstants$font,
-                    private$.buildStyle(
-                        private$.styleConstants$bgLighter,
-                        private$.styleConstants$borderSecondary,
-                        private$.styleConstants$padding20
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorPrimary,
-                        "margin: 0 0 15px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$bgWhite,
-                        private$.styleConstants$borderLeft,
-                        private$.styleConstants$padding15,
-                        private$.styleConstants$margin15
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$colorPrimary,
-                        private$.styleConstants$fontSize15,
-                        "margin: 0 0 10px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorPrimary,
-                        "margin: 0 0 8px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorSecondary,
-                        "margin: 0 0 8px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorSecondary,
-                        "margin: 0 0 8px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorSecondary,
-                        "margin: 0 0 8px 0;"
-                    ),
-                    nDetected, qForExamples,
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorSecondary,
-                        "margin: 0 0 8px 0; padding-left: 25px;"
-                    ),
-                    conditional_3 * 100, conditional_5 * 100, conditional_10 * 100,
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorPrimary,
-                        "margin: 0;"
-                    ),
-                    private$.styleConstants$colorSuccess,
-                    private$.buildStyle(
-                        private$.styleConstants$bgWhite,
-                        private$.styleConstants$borderLeft,
-                        private$.styleConstants$padding15,
-                        private$.styleConstants$margin15
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$colorPrimary,
-                        private$.styleConstants$fontSize15,
-                        "margin: 0 0 10px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorPrimary,
-                        "margin: 0 0 8px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorSecondary,
-                        "margin: 0 0 8px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorSecondary,
-                        "margin: 0 0 8px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorSecondary,
-                        "margin: 0 0 8px 0;"
-                    ),
-                    prevalence * 100, nDetected, nCases,
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorSecondary,
-                        "margin: 0 0 8px 0; padding-left: 25px;"
-                    ),
-                    population_3 * 100, population_5 * 100, population_10 * 100,
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorPrimary,
-                        "margin: 0;"
-                    ),
-                    private$.styleConstants$colorInfo,
-                    private$.buildStyle(
-                        private$.styleConstants$bgLight,
-                        private$.styleConstants$borderWarning,
-                        private$.styleConstants$padding15,
-                        private$.styleConstants$margin15
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$fontWeight700,
-                        "margin: 0 0 10px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorSecondary,
-                        "margin: 0 0 8px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorSecondary,
-                        "margin: 0 0 8px 0;"
-                    ),
-                    private$.buildStyle(
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorSecondary,
-                        "margin: 0;"
-                    ),
-                    prevalence * 100
-                )
-
-                if (!skipBinomial && self$options$showProbabilityExplanation) {
-                    probabilityExplanation$setContent(html)
+                if (self$options$showProbabilityExplanation) {
+                    observed <- vapply(c(3, 5, 10), function(n)
+                        mean(firstDetectionData[detectedCases] <= n), numeric(1))
+                    self$results$probabilityExplanation$setContent(jmvcore::format(jmvcore::.("<p><b>Two descriptive quantities</b></p><p>Among {v1} eventually detected cases, {v2}% were detected by three samples, {v3}% by five and {v4}% by ten. Multiplying these fractions by the observed-positive fraction ({v5}/{v6}) gives the fraction of all recorded cases detected at that position.</p><p>Neither quantity establishes true disease prevalence or sensitivity. Geometric approximations and bootstrap intervals do not correct missed disease, truncation, censoring or dependence.</p>"), v1 = sprintf("%d", nDetected), v2 = sprintf("%.1f", 100 * observed[1]), v3 = sprintf("%.1f", 100 * observed[2]), v4 = sprintf("%.1f", 100 * observed[3]), v5 = sprintf("%d", nDetected), v6 = sprintf("%d", length(firstDetectionData))))
                 }
 
                 # === Bootstrap Analysis ===
@@ -1757,124 +1734,50 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Validation: Check if we have enough positive cases for bootstrap
                     if (nDetected < 3) {
                         bootstrapText <- self$results$bootstrapText
-                        errorHtml <- sprintf(
-                            "<div style='%s %s %s %s'>
-                        <p style='margin: 0; %s'><strong> ERROR: Insufficient Data for Bootstrap</strong></p>
-                        <p style='margin: 10px 0 0 0; %s'>
-                            Bootstrap analysis requires at least 3 positive cases.
-                            Current dataset has only %d positive case%s.
-                        </p>
-                        <p style='margin: 10px 0 0 0; %s'><strong>Recommendation:</strong>
-                            Disable bootstrap analysis or collect more positive cases.</p>
-                    </div>",
-                            private$.styleConstants$font, private$.styleConstants$bgLight,
-                            private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                            private$.styleConstants$fontSize14,
-                            private$.styleConstants$fontSize14, nDetected, if (nDetected == 1) "" else "s",
-                            private$.styleConstants$fontSize14
-                        )
+                        errorHtml <- jmvcore::format(jmvcore::.("<p><b>Insufficient data for bootstrap</b></p><p>At least 3 eventually detected cases are required; {v7} are available. Collect more observations before interpreting resampling intervals.</p>"), v1 = private$.styleConstants$font, v2 = private$.styleConstants$bgLight, v3 = private$.styleConstants$borderWarning, v4 = private$.styleConstants$padding15, v5 = private$.styleConstants$fontSize14, v6 = private$.styleConstants$fontSize14, v7 = sprintf("%d", nDetected), v8 = if (nDetected == 1) "" else "s", v9 = private$.styleConstants$fontSize14)
                         bootstrapText$setContent(errorHtml)
                     } else {
                         bootstrapText <- self$results$bootstrapText
-                        html <- sprintf(
-                            "<div style='%s'>
-                    <div style='%s'>
-                        <h4 style='%s'>Bootstrap Resampling Analysis</h4>
-                        <p style='%s'>
-                            Empirical sensitivity estimates based on <b style='%s'>%d bootstrap iterations</b>.
-                        </p>
-                        <p style='%s'>
-                            This method resamples cases with replacement to estimate sensitivity and
-                            confidence intervals without parametric assumptions.
-                        </p>
-                        <p style='%s'>
-                            <b>Reference:</b> Skala SL, Hagemann IS. <em>Int J Gynecol Pathol.</em> 2015;34(4):374-378.
-                        </p>
-                    </div>
-                </div>",
-                            private$.styleConstants$font,
-                            private$.buildStyle(
+                        html <- jmvcore::format(jmvcore::.("<p><b>Bootstrap resampling</b></p><p>{v6} case-resampling iterations estimate the observed-positive detection curve and 95% percentile intervals. Cases are resampled independently; missed disease and unequal sampling windows are not corrected.</p>"), v1 = private$.styleConstants$font, v2 = private$.buildStyle(
                                 private$.styleConstants$bgLight,
                                 private$.styleConstants$borderLeft,
                                 private$.styleConstants$padding15,
                                 private$.styleConstants$margin10
-                            ),
-                            private$.buildStyle(
+                            ), v3 = private$.buildStyle(
                                 private$.styleConstants$colorPrimary,
                                 private$.styleConstants$fontSize15,
                                 "margin: 0 0 10px 0;"
-                            ),
-                            private$.buildStyle(
+                            ), v4 = private$.buildStyle(
                                 private$.styleConstants$fontSize14,
                                 private$.styleConstants$colorPrimary,
                                 "margin: 0 0 10px 0;"
-                            ),
-                            private$.styleConstants$colorPrimary,
-                            nBoot,
-                            private$.buildStyle(
+                            ), v5 = private$.styleConstants$colorPrimary, v6 = sprintf("%d", nBoot), v7 = private$.buildStyle(
                                 private$.styleConstants$fontSize14,
                                 private$.styleConstants$colorPrimary,
                                 "margin: 0 0 10px 0;"
-                            ),
-                            private$.buildStyle(
+                            ), v8 = private$.buildStyle(
                                 private$.styleConstants$fontSize14,
                                 private$.styleConstants$colorPrimary,
                                 "margin: 0;"
-                            )
-                        )
+                            ))
                         if (self$options$showBootstrap) {
                             bootstrapText$setContent(html)
                         }
 
-                        # Perform bootstrap
-                        bootstrapResults <- matrix(0, nrow = nBoot, ncol = maxSamp)
-
-                        bootstrapMeans <- rep(NA_real_, maxSamp)
-                        bootstrapCILower <- rep(NA_real_, maxSamp)
-                        bootstrapCIUpper <- rep(NA_real_, maxSamp)
-
-                        # Add checkpoint calls for progress (only for large iterations)
-                        if (nBoot >= 5000) {
-                            checkpointInterval <- floor(nBoot / 10) # Update every 10%
-                        } else {
-                            checkpointInterval <- nBoot + 1 # Don't checkpoint for small iterations
-                        }
-
-                        # Get positive cases only for bootstrap (conditional probability)
-                        # IMPORTANT: This creates SELECTION BIAS - only detected cases are resampled
-                        # Sensitivity estimates will be OVEROPTIMISTIC if any true positives were missed
-                        positiveCases <- !is.na(firstDetectionData)
-                        positiveIndices <- which(positiveCases)
-                        nPositiveCases <- length(positiveIndices)
-
-                        # Add CRITICAL WARNING about selection bias
-                        private$.addNotice(
-                            "STRONG_WARNING", "Bootstrap Selection Bias",
-                            " SELECTION BIAS WARNING: Bootstrap resamples only DETECTED cases. Sensitivity estimates assume 100% of true positives were detected and will be OVEROPTIMISTIC if any cases were missed. These are CONDITIONAL estimates (probability of detection given lesion was eventually found). For unbiased population-level sensitivity, you must provide gold-standard total positive count or use external validation. Interpret sample size recommendations conservatively."
-                        )
-
-                        # Perform bootstrap resampling
-
-                        for (iter in 1:nBoot) {
-                            # Progress checkpoint every 10%
-                            if (iter %% checkpointInterval == 0) {
-                                private$.checkpoint()
-                            }
-
-                            # Resample from POSITIVE cases only with replacement
-                            sampledPositiveIndices <- sample(positiveIndices, nPositiveCases, replace = TRUE)
-                            sampledFirst <- firstDetectionData[sampledPositiveIndices]
-
-                            # Calculate detection rate for each sample count (conditional)
-                            for (j in 1:maxSamp) {
-                                detected <- sum(!is.na(sampledFirst) & sampledFirst <= j)
-                                bootstrapResults[iter, j] <- detected / nPositiveCases
-                            }
-                        }
+                        private$.addNotice("STRONG_WARNING", jmvcore::.("Bootstrap Selection Bias"),
+                            jmvcore::.("Bootstrap resamples only eventually detected cases. Its intervals quantify variation in that conditional distribution; they do not correct missed disease, ascertainment bias or unequal sampling windows."))
+                        bootstrapResults <- private$.bootstrapCDF(firstDetectionData, maxSamp, nBoot)
 
                         # Store for plotting
                         private$.bootstrapResults <- bootstrapResults
+                        self$results$sensitivityPlot$setState(list(
+                            bootstrapResults = bootstrapResults,
+                            maxSamp = maxSamp,
+                            targetConfidence = self$options$targetConfidence,
+                            bootstrapIterations = self$options$bootstrapIterations
+                        ))
 
+                        bootstrapMeans <- bootstrapCILower <- bootstrapCIUpper <- numeric(maxSamp)
                         # Calculate summary statistics from bootstrap results
                         for (j in 1:maxSamp) {
                             bootstrapMeans[j] <- mean(bootstrapResults[, j], na.rm = TRUE)
@@ -1886,7 +1789,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         bootstrapTable <- self$results$bootstrapTable
 
                         # Clear existing rows (if any)
-                        # bootstrapTable$clearRows() # Not available in mock?
+                        private$.clearTable(bootstrapTable)
 
                         for (i in 1:maxSamp) {
                             meanVal <- bootstrapMeans[i]
@@ -1894,7 +1797,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ciUpper <- bootstrapCIUpper[i]
 
                             # Add row to table
-                            bootstrapTable$addRow(rowKey = i, values = list(
+                            private$.putRow(bootstrapTable, rowKey = i, values = list(
                                 nSamples = i,
                                 meanSens = meanVal,
                                 ciLower = ciLower,
@@ -1909,29 +1812,40 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         targetCandidates <- which(!is.na(bootstrapMeans) & bootstrapMeans >= targetConf)
                         bootstrapTargetIdx <- if (length(targetCandidates) > 0) targetCandidates[1] else NA_integer_
 
-                        ciTarget <- c(
-                            quantile(bootstrapMeansVec, probs = (1 - targetConf) / 2, na.rm = TRUE),
-                            quantile(bootstrapMeansVec, probs = 1 - (1 - targetConf) / 2, na.rm = TRUE)
-                        )
+                        ciTarget <- if (!is.na(bootstrapTargetIdx)) {
+                            c(bootstrapCILowerVec[bootstrapTargetIdx],
+                              bootstrapCIUpperVec[bootstrapTargetIdx])
+                        } else NULL
 
                         addRecommendation(
                             method = "Bootstrap",
                             probVec = bootstrapMeans,
                             priority = 1,
-                            description = "Empirical resampling of cases",
+                            description = jmvcore::.("Empirical resampling of cases"),
                             detail = sprintf("%d iterations", nBoot),
                             ci = ciTarget
                         )
                     } # End else block for bootstrap validation
                 }
 
-                # Store data for plotting
+                # Store data for plotting. Private fields alone are not enough: jamovi
+                # decides whether to re-render an image from its state, so the visual
+                # options each renderer reads must be part of the state too.
                 private$.totalSamplesData <- totalSamplesData
                 private$.firstDetectionData <- firstDetectionData
                 private$.pEstimate <- pEstimate
                 private$.maxSamp <- maxSamp
 
-                # Calculate observed conditional detection probability (sensitivity)
+                curveState <- list(
+                    firstDetection = firstDetectionData,
+                    pEstimate = pEstimate,
+                    maxSamp = maxSamp,
+                    targetConfidence = self$options$targetConfidence
+                )
+                self$results$detectionCurve$setState(curveState)
+                self$results$empiricalCumulativePlot$setState(curveState)
+
+                # Calculate observed conditional detection probability (observed-positive detection)
                 # Only among positive cases, not population-level
                 nPositiveCases <- sum(!is.na(firstDetectionData))
 
@@ -1946,25 +1860,17 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     method = "Empirical",
                     probVec = observedProbVec,
                     priority = 5,
-                    description = "Observed cumulative detection in dataset",
-                    detail = sprintf("Conditional probability among %d positive cases", nPositiveCases)
+                    description = jmvcore::.("Observed cumulative detection in dataset"),
+                    detail = jmvcore::format(jmvcore::.("Conditional probability among {v1} positive cases"), v1 = sprintf("%d", nPositiveCases))
                 )
 
                 obsPercents <- observedProbVec * 100
-                obs1 <- if (length(obsPercents) >= 1) obsPercents[1] else NA_real_
-                obs2 <- if (length(obsPercents) >= 2) obsPercents[2] else NA_real_
                 obs3 <- if (length(obsPercents) >= 3) obsPercents[3] else NA_real_
-                obs4 <- if (length(obsPercents) >= 4) obsPercents[4] else NA_real_
                 obsIndices <- seq_len(min(4, length(obsPercents)))
                 obsListHtml <- ""
                 if (length(obsIndices) > 0) {
                     obsListHtml <- paste(
-                        sprintf(
-                            "<li>%d sample%s: %.1f%%%%</li>",
-                            obsIndices,
-                            ifelse(obsIndices == 1, "", "s"),
-                            obsPercents[obsIndices]
-                        ),
+                        sprintf("<li>%d sample%s: %.1f%%</li>", obsIndices, ifelse(obsIndices == 1, "", "s"), obsPercents[obsIndices]),
                         collapse = ""
                     )
                 }
@@ -1978,8 +1884,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Get positive samples count data
                     positiveCassettesVar <- self$options$positiveCassettes
-                    positiveCassettesEsc <- private$.escapeVar(positiveCassettesVar)
-                    positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
+                    positiveCassettesData <- private$.sampleCounts(data, positiveCassettesVar, totalSamplesData)
 
                     # Handle factor/labelled data
                     if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, "labels"))) {
@@ -1994,37 +1899,15 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Store for other analyses
                     private$.positiveCassettesData <- positiveCassettesData
+                    self$results$correlationPlot$setState(list(
+                        totalSamples = totalSamplesData,
+                        positiveCassettes = positiveCassettesData
+                    ))
 
                     # === Explanatory Text ===
                     tumorBurdenText <- self$results$tumorBurdenText
 
-                    html <- sprintf(
-                        "<div style='%s'>
-                    <h4 style='%s'>Tumor Burden Analysis</h4>
-                    <p style='%s'>
-                        Analyzes the <strong>sample positivity ratio (SPR)</strong>: the proportion of samples
-                        containing tumor out of all samples examined per case.
-                    </p>
-                    <p style='%s'>
-                        SPR provides insights into:
-                    </p>
-                    <ul style='%s'>
-                        <li>Extent of tumor involvement beyond first detection</li>
-                        <li>Tumor distribution patterns (focal vs diffuse)</li>
-                        <li>Relationship between sampling intensity and detection completeness</li>
-                    </ul>
-                    <p style='%s'>
-                        <strong>Note:</strong> SPR is calculated only for cases with detected tumor.
-                        Higher SPR may indicate more extensive disease or better sampling.
-                    </p>
-                </div>",
-                        private$.buildStyle(private$.styleConstants$font),
-                        private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                        private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary)
-                    )
+                    html <- jmvcore::format(jmvcore::.("<p><b>Sample positivity ratio (SPR)</b></p><p>SPR is the proportion of examined samples containing tumor, calculated from valid count pairs among eventually detected cases. It describes sample positivity, not lesion volume, independent anatomical foci or detection completeness.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v6 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
                     if (self$options$showTumorBurden) {
                         tumorBurdenText$setContent(html)
@@ -2032,9 +1915,10 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # === Calculate SPR Statistics ===
                     tumorBurdenInfo <- self$results$tumorBurdenInfo
+                    private$.clearTable(tumorBurdenInfo)
 
                     # Filter to positive cases only
-                    positive_cases_idx <- !is.na(firstDetectionData)
+                    positive_cases_idx <- !is.na(firstDetectionData) & !is.na(positiveCassettesData)
                     spr_values <- positiveCassettesData[positive_cases_idx] / totalSamplesData[positive_cases_idx]
 
                     # Summary statistics
@@ -2051,33 +1935,34 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     overall_spr <- total_positive_samples / total_samples_positive_cases
 
                     # Populate statistics table
-                    tumorBurdenInfo$addRow(rowKey = "n_cases", values = list(
-                        measure = "Cases analyzed (with tumor)",
+                    private$.putRow(tumorBurdenInfo, rowKey = "n_cases", values = list(
+                        measure = jmvcore::.("Cases analyzed (with tumor)"),
                         value = sprintf("%d", n_positive_for_burden)
                     ))
 
-                    tumorBurdenInfo$addRow(rowKey = "mean_spr", values = list(
-                        measure = "Mean SPR",
+                    private$.putRow(tumorBurdenInfo, rowKey = "mean_spr", values = list(
+                        measure = jmvcore::.("Mean SPR"),
                         value = sprintf("%.3f (SD: %.3f)", mean_spr, sd_spr)
                     ))
 
-                    tumorBurdenInfo$addRow(rowKey = "median_spr", values = list(
-                        measure = "Median SPR",
+                    private$.putRow(tumorBurdenInfo, rowKey = "median_spr", values = list(
+                        measure = jmvcore::.("Median SPR"),
                         value = sprintf("%.3f", median_spr)
                     ))
 
-                    tumorBurdenInfo$addRow(rowKey = "range_spr", values = list(
-                        measure = "SPR range",
+                    private$.putRow(tumorBurdenInfo, rowKey = "range_spr", values = list(
+                        measure = jmvcore::.("SPR range"),
                         value = sprintf("%.3f - %.3f", min_spr, max_spr)
                     ))
 
-                    tumorBurdenInfo$addRow(rowKey = "overall_spr", values = list(
-                        measure = "Overall SPR (pooled)",
-                        value = sprintf("%.3f (%d / %d samples)", overall_spr, total_positive_samples, total_samples_positive_cases)
+                    private$.putRow(tumorBurdenInfo, rowKey = "overall_spr", values = list(
+                        measure = jmvcore::.("Overall SPR (pooled)"),
+                        value = sprintf("%.3f (%s / %s samples)", overall_spr, format(total_positive_samples, trim = TRUE), format(total_samples_positive_cases, trim = TRUE))
                     ))
 
                     # === Tumor Distribution Pattern Classification ===
                     cassetteDistribution <- self$results$cassetteDistribution
+                    private$.clearTable(cassetteDistribution)
 
                     # Classify based on number of positive samples
                     # Focal: 1 positive, Limited: 2-3 positive, Moderate: 4-6 positive, Extensive: 7+ positive
@@ -2090,15 +1975,15 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Add to table
                     if (n_focal > 0) {
-                        cassetteDistribution$addRow(rowKey = "focal", values = list(
-                            pattern = "Focal (1 positive sample)",
+                        private$.putRow(cassetteDistribution, rowKey = "focal", values = list(
+                            pattern = jmvcore::.("Focal (1 positive sample)"),
                             count = n_focal,
                             percent = n_focal / n_positive_for_burden
                         ))
                     }
 
                     if (n_limited > 0) {
-                        cassetteDistribution$addRow(rowKey = "limited", values = list(
+                        private$.putRow(cassetteDistribution, rowKey = "limited", values = list(
                             pattern = "Limited (2-3 positive)",
                             count = n_limited,
                             percent = n_limited / n_positive_for_burden
@@ -2106,7 +1991,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
 
                     if (n_moderate > 0) {
-                        cassetteDistribution$addRow(rowKey = "moderate", values = list(
+                        private$.putRow(cassetteDistribution, rowKey = "moderate", values = list(
                             pattern = "Moderate (4-6 positive)",
                             count = n_moderate,
                             percent = n_moderate / n_positive_for_burden
@@ -2114,7 +1999,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
 
                     if (n_extensive > 0) {
-                        cassetteDistribution$addRow(rowKey = "extensive", values = list(
+                        private$.putRow(cassetteDistribution, rowKey = "extensive", values = list(
                             pattern = "Extensive (7+ positive)",
                             count = n_extensive,
                             percent = n_extensive / n_positive_for_burden
@@ -2126,23 +2011,18 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     if (n_positive_for_burden >= 3) {
                         cor_result <- tryCatch(
                             {
-                                cor.test(totalSamplesData[positive_cases_idx],
+                                suppressWarnings(cor.test(totalSamplesData[positive_cases_idx],
                                     positiveCassettesData[positive_cases_idx],
                                     method = "spearman"
-                                )
+                                ))
                             },
                             error = function(e) NULL
                         )
 
                         if (!is.null(cor_result) && !is.na(cor_result$estimate)) {
-                            tumorBurdenInfo$addRow(rowKey = "correlation", values = list(
-                                measure = "Correlation (samples examined vs positive)",
-                                value = sprintf(
-                                    "\u{03C1} = %.3f (p %s %.3f)",
-                                    cor_result$estimate,
-                                    if (cor_result$p.value < 0.001) "<" else "=",
-                                    if (cor_result$p.value < 0.001) 0.001 else cor_result$p.value
-                                )
+                            private$.putRow(tumorBurdenInfo, rowKey = "correlation", values = list(
+                                measure = jmvcore::.("Correlation (samples examined vs positive)"),
+                                value = sprintf("\u{03C1} = %.3f (p %s %.3f)", cor_result$estimate, if (cor_result$p.value < 0.001) "<" else "=", if (cor_result$p.value < 0.001) 0.001 else cor_result$p.value)
                             ))
                         }
                     }
@@ -2155,14 +2035,13 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.checkpoint()
 
                     # Get positive samples data (reuse if already loaded from tumor burden)
-                    if (exists("positiveCassettesData", inherits = FALSE)) {
+                    if (!is.null(private$.positiveCassettesData)) {
                         # Already loaded in tumor burden section
                         positiveCassettesData <- private$.positiveCassettesData
                     } else {
                         # Load it now
                         positiveCassettesVar <- self$options$positiveCassettes
-                        positiveCassettesEsc <- private$.escapeVar(positiveCassettesVar)
-                        positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
+                        positiveCassettesData <- private$.sampleCounts(data, positiveCassettesVar, totalSamplesData)
 
                         if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, "labels"))) {
                             positiveCassettesData <- as.numeric(as.character(positiveCassettesData))
@@ -2177,27 +2056,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # === Explanatory Text ===
                     stageMigrationText <- self$results$stageMigrationText
 
-                    html <- sprintf(
-                        "<div style='%s'>
-                    <h4 style='%s'>Stage Migration Analysis</h4>
-                    <p style='%s'>
-                        Examines whether examining fewer samples leads to <strong>understaging</strong>
-                        (missing tumor present in later samples).
-                    </p>
-                    <p style='%s'>
-                        Compares detection rates between cases with fewer vs more samples examined.
-                        A significant difference suggests inadequate sampling may lead to false negatives.
-                    </p>
-                    <p style='%s'>
-                        <strong>Reference:</strong> Habib et al. (2024), Goess et al. (2024) - lymph node adequacy methods.
-                    </p>
-                </div>",
-                        private$.buildStyle(private$.styleConstants$font),
-                        private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                        private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary)
-                    )
+                    html <- jmvcore::format(jmvcore::.("<p><b>Observed detection by sampling intensity</b></p><p>This cross-sectional comparison describes positivity in cases with different numbers of examined samples. It does not identify individual understaging, establish causality, or estimate the effect of examining more samples.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
                     if (self$options$showStageMigration) {
                         stageMigrationText$setContent(html)
@@ -2205,37 +2064,38 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Analyze detection rates by cassette groups
                     stageMigrationTable <- self$results$stageMigrationTable
+                    private$.clearTable(stageMigrationTable)
 
                     # Define groups based on data quartiles or standard thresholds
                     # Using standard thresholds: <median, >=median
                     medianCassettes <- median(totalSamplesData)
 
                     # Group 1: Below median
-                    group1 <- totalSamplesData < medianCassettes
+                    group1 <- totalSamplesData < medianCassettes & !is.na(positiveCassettesData)
                     nGroup1 <- sum(group1)
                     nPosGroup1 <- sum(positiveCassettesData[group1] > 0)
                     rateGroup1 <- if (nGroup1 > 0) nPosGroup1 / nGroup1 else 0
 
                     # Group 2: At or above median
-                    group2 <- totalSamplesData >= medianCassettes
+                    group2 <- totalSamplesData >= medianCassettes & !is.na(positiveCassettesData)
                     nGroup2 <- sum(group2)
                     nPosGroup2 <- sum(positiveCassettesData[group2] > 0)
                     rateGroup2 <- if (nGroup2 > 0) nPosGroup2 / nGroup2 else 0
 
-                    stageMigrationTable$addRow(rowKey = "group_1", values = list(
-                        cassettes = sprintf("<%d", medianCassettes),
+                    private$.putRow(stageMigrationTable, rowKey = "group_1", values = list(
+                        cassettes = sprintf("<%s", format(medianCassettes, trim = TRUE)),
                         nCases = nGroup1,
                         nPositive = nPosGroup1,
                         positivityRate = rateGroup1
                     ))
-                    stageMigrationTable$addRow(rowKey = "group_2", values = list(
-                        cassettes = sprintf(">=%d", medianCassettes),
+                    private$.putRow(stageMigrationTable, rowKey = "group_2", values = list(
+                        cassettes = sprintf(">=%s", format(medianCassettes, trim = TRUE)),
                         nCases = nGroup2,
                         nPositive = nPosGroup2,
                         positivityRate = rateGroup2
                     ))
-                    stageMigrationTable$addRow(rowKey = "group_3", values = list(
-                        cassettes = "Absolute difference",
+                    private$.putRow(stageMigrationTable, rowKey = "group_3", values = list(
+                        cassettes = jmvcore::.("Absolute difference"),
                         nCases = NA,
                         nPositive = NA,
                         positivityRate = abs(rateGroup2 - rateGroup1)
@@ -2245,8 +2105,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # === Correlation Analysis ===
                 positiveCassettes <- self$options$positiveCassettes
                 if (self$options$showCorrelation && !is.null(positiveCassettes)) {
-                    positiveCassettesEsc <- private$.escapeVar(positiveCassettes)
-                    positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
+                    positiveCassettesData <- private$.sampleCounts(data, positiveCassettes, totalSamplesData)
 
                     if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, "labels"))) {
                         positiveCassettesData <- as.numeric(as.character(positiveCassettesData))
@@ -2257,82 +2116,95 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         positiveCassettesData <- positiveCassettesData[!invalidCases]
                     }
 
+                    self$results$correlationPlot$setState(list(
+                        totalSamples = totalSamplesData, positiveCassettes = positiveCassettesData))
                     correlationText <- self$results$correlationText
-                    html <- "<h4>Examined vs Positive Correlation</h4>
-                <p>Relationship between total cassettes examined and number of positive cassettes.</p>
-                <p>Positive correlation suggests more extensive sampling yields more detection.</p>"
-                    if (self$options$showCorrelation) {
-                        correlationText$setContent(html)
-                    }
-
-                    # Calculate correlation
-                    corTest <- cor.test(totalSamplesData, positiveCassettesData, method = "spearman")
+                    correlationText$setContent(jmvcore::.("<p><b>Examined versus positive samples</b></p><p>Correlation describes the association between examined and positive cassette counts. It does not establish that more sampling causes better detection.</p>"))
 
                     correlationStats <- self$results$correlationStats
-                    correlationStats$addRow(rowKey = "r_value", values = list(
-                        statistic = "Spearman's rho",
-                        value = sprintf("%.3f", corTest$estimate)
-                    ))
-                    correlationStats$addRow(rowKey = "p_value", values = list(
-                        statistic = "p-value",
-                        value = sprintf("%.4f", corTest$p.value)
-                    ))
-                    correlationStats$addRow(rowKey = "n_cases", values = list(
-                        statistic = "Interpretation",
-                        value = if (corTest$p.value < 0.05) {
-                            if (corTest$estimate > 0) "Significant positive correlation" else "Significant negative correlation"
+                    private$.clearTable(correlationStats)
+
+                    # A correlation needs variation in BOTH columns. Under a fixed sampling
+                    # protocol every case can have the same number of samples examined, and
+                    # cor.test() then returns rho = NA and p = NA -- which used to reach
+                    # `if (corTest$p.value < 0.05)` and abort the analysis with "missing value
+                    # where TRUE/FALSE needed".
+                    corPairs <- stats::complete.cases(totalSamplesData, positiveCassettesData)
+                    nCorPairs <- sum(corPairs)
+                    corTest <- NULL
+                    if (nCorPairs >= 3 &&
+                        stats::sd(totalSamplesData[corPairs]) > 0 &&
+                        stats::sd(positiveCassettesData[corPairs]) > 0) {
+                        corTest <- suppressWarnings(stats::cor.test(
+                            totalSamplesData[corPairs], positiveCassettesData[corPairs],
+                            method = "spearman"
+                        ))
+                    }
+
+                    if (is.null(corTest) || is.na(corTest$estimate) || is.na(corTest$p.value)) {
+                        reason <- if (nCorPairs < 3) {
+                            jmvcore::format(jmvcore::.("only {v1} complete pairs are available (at least 3 are needed)"), v1 = sprintf("%d", nCorPairs))
                         } else {
-                            "No significant correlation"
+                            jmvcore::.("one of the two variables takes the same value in every case, so there is no variation to correlate")
                         }
-                    ))
+                        private$.addNotice(
+                            "WARNING",
+                            jmvcore::.("Correlation not computed"),
+                            jmvcore::format(jmvcore::.("The examined-versus-positive correlation could not be estimated because {v1}."), v1 = reason)
+                        )
+                        private$.putRow(correlationStats, rowKey = "r_value", values = list(
+                            statistic = "Spearman's rho", value = jmvcore::.("Not estimable")
+                        ))
+                    } else {
+                        private$.putRow(correlationStats, rowKey = "r_value", values = list(
+                            statistic = "Spearman's rho",
+                            value = sprintf("%.3f", corTest$estimate)
+                        ))
+                        private$.putRow(correlationStats, rowKey = "p_value", values = list(
+                            statistic = "p-value",
+                            value = sprintf("%.4f", corTest$p.value)
+                        ))
+                        private$.putRow(correlationStats, rowKey = "n_cases", values = list(
+                            statistic = "Interpretation",
+                            value = if (corTest$p.value < 0.05) {
+                                if (corTest$estimate > 0) jmvcore::.("Significant positive correlation") else jmvcore::.("Significant negative correlation")
+                            } else {
+                                jmvcore::.("No significant correlation")
+                            }
+                        ))
+                    }
                 }
 
                 # === Distribution Pattern Analysis (Single vs Summed) ===
-                positiveCassettes <- self$options$positiveCassettes
+                totalFoci <- self$options$totalFoci
                 maxPositiveSingle <- self$options$maxPositiveSingle
 
-                if (self$options$showDistributionPattern && !is.null(positiveCassettes) && !is.null(maxPositiveSingle)) {
-                    # Get both variables
-                    positiveCassettesEsc <- private$.escapeVar(positiveCassettes)
-                    maxPositiveSingleEsc <- private$.escapeVar(maxPositiveSingle)
-
-                    positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
-                    maxPositiveSingleData <- jmvcore::toNumeric(data[[maxPositiveSingleEsc]])
-
-                    # Handle labelled data
-                    if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, "labels"))) {
-                        positiveCassettesData <- as.numeric(as.character(positiveCassettesData))
-                    }
-                    if (is.factor(maxPositiveSingleData) || !is.null(attr(maxPositiveSingleData, "labels"))) {
-                        maxPositiveSingleData <- as.numeric(as.character(maxPositiveSingleData))
-                    }
-
-                    # Filter to valid cases
-                    positiveCassettesData <- positiveCassettesData[validCases]
-                    maxPositiveSingleData <- maxPositiveSingleData[validCases]
-                    if (!is.null(invalidCases)) {
-                        positiveCassettesData <- positiveCassettesData[!invalidCases]
-                        maxPositiveSingleData <- maxPositiveSingleData[!invalidCases]
-                    }
-
+                if (self$options$showDistributionPattern && !is.null(totalFoci) && !is.null(maxPositiveSingle)) {
+                    positiveCassettesData <- private$.numericColumn(data, totalFoci)
+                    maxPositiveSingleData <- private$.numericColumn(data, maxPositiveSingle)
+                    keepFoci <- private$.validCount(positiveCassettesData) &
+                        private$.validCount(maxPositiveSingleData) &
+                        maxPositiveSingleData <= positiveCassettesData &
+                        ((positiveCassettesData == 0 & maxPositiveSingleData == 0) |
+                         (positiveCassettesData > 0 & maxPositiveSingleData > 0))
+                    if (any(!keepFoci)) private$.addNotice("WARNING", jmvcore::.("Invalid foci counts"),
+                        jmvcore::format(jmvcore::.("{v1} cases excluded from foci classification: provide complete integer counts, with maximum foci per slide no greater than total foci and consistent zero counts."), v1 = sprintf("%d", sum(!keepFoci))))
+                    positiveCassettesData <- positiveCassettesData[keepFoci]
+                    maxPositiveSingleData <- maxPositiveSingleData[keepFoci]
+                    nFociCases <- sum(keepFoci)
                     # Get threshold
                     threshold <- self$options$distributionThreshold
 
                     # Distribution Pattern Text
                     distributionPatternText <- self$results$distributionPatternText
-                    html <- sprintf("<h4>Distribution Pattern Analysis (Single vs Summed)</h4>
-                <p>Based on Ates et al. (2025), cases reaching >=%d foci on a <b>single cassette</b>
-                may have worse prognosis than those reaching >=%d only when <b>summing across cassettes</b>.</p>
-                <p>This analysis classifies cases by how they meet the threshold for substantial involvement.</p>
-                <p><b>Reference:</b> Ates D, et al. Lymphovascular Space Invasion in Endometrial Cancer.
-                <i>Mod Pathol.</i> 2025;38:100885.</p>", threshold, threshold)
+                    html <- jmvcore::format(jmvcore::.("<p><b>Single-slide versus summed foci</b></p><p>Cases are classified by whether the threshold of {v1} foci is met on one slide or {v2} foci is met only by summing slides. Counts must represent foci, not positive cassettes. This descriptive classification does not estimate prognosis.</p>"), v1 = sprintf("%d", threshold), v2 = sprintf("%d", threshold))
                     if (self$options$showDistributionPattern) {
                         distributionPatternText$setContent(html)
                     }
 
                     # Classify cases
                     # Focal: total < threshold
-                    # Substantial-single: max on single cassette >= threshold
+                    # Substantial-single: max on single slide >= threshold
                     # Substantial-summed: total >= threshold BUT max < threshold
 
                     focal <- positiveCassettesData < threshold
@@ -2345,25 +2217,27 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Distribution Pattern Table
                     distributionPatternTable <- self$results$distributionPatternTable
+                    private$.clearTable(distributionPatternTable)
 
-                    distributionPatternTable$addRow(rowKey = "predominant_single", values = list(
+                    private$.putRow(distributionPatternTable, rowKey = "predominant_single", values = list(
                         pattern = sprintf("Focal (<%d total)", threshold),
                         count = nFocal,
-                        percent = nFocal / nCases
+                        percent = nFocal / ifelse(nFociCases > 0, nFociCases, NA_real_)
                     ))
-                    distributionPatternTable$addRow(rowKey = "summed_effect", values = list(
-                        pattern = sprintf("Substantial on single cassette (>=%d on >=1 cassette)", threshold),
+                    private$.putRow(distributionPatternTable, rowKey = "summed_effect", values = list(
+                        pattern = jmvcore::format(jmvcore::.("Substantial on single slide (>={v1} on >=1 slide)"), v1 = sprintf("%d", threshold)),
                         count = nSubstantialSingle,
-                        percent = nSubstantialSingle / nCases
+                        percent = nSubstantialSingle / ifelse(nFociCases > 0, nFociCases, NA_real_)
                     ))
-                    distributionPatternTable$addRow(rowKey = "diffuse", values = list(
-                        pattern = sprintf("Substantial only when summed (>=%d total, <%d max)", threshold, threshold),
+                    private$.putRow(distributionPatternTable, rowKey = "diffuse", values = list(
+                        pattern = jmvcore::format(jmvcore::.("Substantial only when summed (>={v1} total, <{v2} max)"), v1 = sprintf("%d", threshold), v2 = sprintf("%d", threshold)),
                         count = nSubstantialSummed,
-                        percent = nSubstantialSummed / nCases
+                        percent = nSubstantialSummed / ifelse(nFociCases > 0, nFociCases, NA_real_)
                     ))
 
                     # Comparison statistics
                     distributionComparisonTable <- self$results$distributionComparisonTable
+                    private$.clearTable(distributionComparisonTable)
 
                     # Among substantial cases (total >= threshold)
                     substantialCases <- positiveCassettesData >= threshold
@@ -2373,41 +2247,41 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         pctSingleAmongSubstantial <- sum(substantialSingle, na.rm = TRUE) / nSubstantial * 100
                         pctSummedAmongSubstantial <- sum(substantialSummed, na.rm = TRUE) / nSubstantial * 100
 
-                        distributionComparisonTable$addRow(rowKey = "mean_single", values = list(
-                            measure = sprintf("Cases with >=%d foci (substantial)", threshold),
-                            value = sprintf("%d (%.1f%%)", nSubstantial, nSubstantial / nCases * 100)
+                        private$.putRow(distributionComparisonTable, rowKey = "mean_single", values = list(
+                            measure = jmvcore::format(jmvcore::.("Cases with >={v1} foci (substantial)"), v1 = sprintf("%d", threshold)),
+                            value = sprintf("%d (%.1f%%)", nSubstantial, nSubstantial / ifelse(nFociCases > 0, nFociCases, NA_real_) * 100)
                         ))
-                        distributionComparisonTable$addRow(rowKey = "max_single", values = list(
-                            measure = sprintf("  - Met on single cassette"),
+                        private$.putRow(distributionComparisonTable, rowKey = "max_single", values = list(
+                            measure = jmvcore::.("- Met on single slide"),
                             value = sprintf("%d (%.1f%% of substantial)", nSubstantialSingle, pctSingleAmongSubstantial)
                         ))
-                        distributionComparisonTable$addRow(rowKey = "mean_summed", values = list(
-                            measure = sprintf("  - Met only by summing"),
+                        private$.putRow(distributionComparisonTable, rowKey = "mean_summed", values = list(
+                            measure = jmvcore::.("- Met only by summing"),
                             value = sprintf("%d (%.1f%% of substantial)", nSubstantialSummed, pctSummedAmongSubstantial)
                         ))
 
-                        # Calculate mean max on single cassette for each group
+                        # Calculate mean max on single slide for each group
                         meanMaxSingle <- mean(maxPositiveSingleData[substantialSingle], na.rm = TRUE)
                         meanMaxSummed <- mean(maxPositiveSingleData[substantialSummed], na.rm = TRUE)
 
-                        distributionComparisonTable$addRow(rowKey = "predominance_ratio", values = list(
-                            measure = "Mean max foci per cassette (single group)",
+                        private$.putRow(distributionComparisonTable, rowKey = "predominance_ratio", values = list(
+                            measure = jmvcore::.("Mean max foci per slide (single group)"),
                             value = sprintf("%.1f", meanMaxSingle)
                         ))
-                        distributionComparisonTable$addRow(rowKey = "detection_yield", values = list(
-                            measure = "Mean max foci per cassette (summed group)",
+                        private$.putRow(distributionComparisonTable, rowKey = "detection_yield", values = list(
+                            measure = jmvcore::.("Mean max foci per slide (summed group)"),
                             value = sprintf("%.1f", meanMaxSummed)
                         ))
 
                         # Clinical interpretation
-                        distributionComparisonTable$addRow(rowKey = "clinical_relevance", values = list(
-                            measure = "Clinical significance",
-                            value = "Cases with >=5 on single cassette had worse survival (Ates 2025, p=.023)"
+                        private$.putRow(distributionComparisonTable, rowKey = "clinical_relevance", values = list(
+                            measure = jmvcore::.("Clinical significance"),
+                            value = jmvcore::.("This classification is descriptive; no survival effect is estimated from these data.")
                         ))
                     } else {
-                        distributionComparisonTable$addRow(rowKey = "mean_single", values = list(
-                            measure = "No substantial cases",
-                            value = sprintf("No cases with >=%d foci", threshold)
+                        private$.putRow(distributionComparisonTable, rowKey = "mean_single", values = list(
+                            measure = jmvcore::.("No substantial cases"),
+                            value = jmvcore::format(jmvcore::.("No cases with >={v1} foci"), v1 = sprintf("%d", threshold))
                         ))
                     }
 
@@ -2421,6 +2295,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     empiricalCumulativeText <- self$results$empiricalCumulativeText
                     empiricalCumulativeTable <- self$results$empiricalCumulativeTable
+                    private$.clearTable(empiricalCumulativeTable)
 
                     # Calculate empirical cumulative detection with bootstrap CIs
                     boot_results <- private$.bootstrapEmpiricalCumulative(
@@ -2433,46 +2308,13 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         contextNote <- ""
                         if (analysisContext == "tumor") {
-                            contextNote <- sprintf(
-                                "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffc107; padding: 12px; margin: 10px 0; border-radius: 4px; color: inherit;'>
-                            <p style='%s margin: 0;'><b> Note for Tumor Sampling:</b> Sequential tumor samples (blocks) are not independent -
-                            they represent serial sections through the same lesion. Spatial clustering of features like venous invasion (VI) or
-                            perineural invasion (PNI) is expected. The <b>empirical method is recommended</b> over parametric models (binomial/geometric)
-                            which assume independence. This non-parametric approach accurately reflects real-world detection patterns without
-                            distributional assumptions.</p>
-                            <p style='%s margin: 5px 0 0 0;'><em>Reference: Duan et al. 2023 - Histopathology (tissue sampling impact on VI detection)</em></p>
-                        </div>",
-                                private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
-                                private$.buildStyle(private$.styleConstants$fontSize12, private$.styleConstants$colorSecondary)
-                            )
+                            contextNote <- jmvcore::format(jmvcore::.("<p><b>Tumor sampling:</b> Spatial dependence can invalidate independent-trial predictions. Empirical curves describe the observed first detections; resampling does not correct missed disease or unequal observation windows.</p>"), v1 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary), v2 = private$.buildStyle(private$.styleConstants$fontSize12, private$.styleConstants$colorSecondary))
                         } else if (analysisContext == "margin") {
-                            contextNote <- sprintf(
-                                "<div style='background-color: rgba(33, 163, 188, 0.21); border: 1px solid #0c5460; padding: 12px; margin: 10px 0; border-radius: 4px; color: inherit;'>
-                            <p style='%s margin: 0;'><b> Note for Margin Sampling:</b> Margin samples may show spatial clustering -
-                            positive margins are often geographically close. Empirical approach recommended for accurate sensitivity estimates.</p>
-                        </div>",
-                                private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary)
-                            )
+                            contextNote <- jmvcore::format(jmvcore::.("<p><b>Margin sampling:</b> Nearby samples may be dependent. The observed detection curve does not validate margin clearance or a rule-out protocol.</p>"), v1 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary))
                         }
 
                         # Populate text
-                        html <- sprintf(
-                            "<div style='%s'>
-                        <h4 style='%s'>Empirical Cumulative Detection Analysis</h4>
-                        <p style='%s'>Non-parametric estimation of detection probability based on actual observed data.
-                        Does not assume geometric distribution - uses bootstrap resampling for confidence intervals.</p>
-                        <p style='%s'><b>Based on:</b> %d positive cases with first detection positions ranging from %.0f to %.0f.</p>
-                        %s
-                    </div>",
-                            private$.buildStyle(private$.styleConstants$font),
-                            private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                            nDetected,
-                            min(firstDetectionData, na.rm = TRUE),
-                            max(firstDetectionData, na.rm = TRUE),
-                            contextNote
-                        )
+                        html <- jmvcore::format(jmvcore::.("<p><b>Empirical cumulative detection</b></p><p>The curve describes {v5} eventually detected cases, with first-detection positions from {v6} to {v7}. Bootstrap intervals quantify case-resampling variation without imposing a geometric distribution.</p>{v8}"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = sprintf("%d", nDetected), v6 = sprintf("%.0f", min(firstDetectionData, na.rm = TRUE)), v7 = sprintf("%.0f", max(firstDetectionData, na.rm = TRUE)), v8 = contextNote)
 
                         if (self$options$showEmpiricalCumulative) {
                             empiricalCumulativeText$setContent(html)
@@ -2482,7 +2324,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         prev_cum <- 0
                         for (n in seq_len(nrow(boot_results))) {
                             incremental <- boot_results$mean[n] - prev_cum
-                            empiricalCumulativeTable$addRow(rowKey = paste0("n_", n), values = list(
+                            private$.putRow(empiricalCumulativeTable, rowKey = paste0("n_", n), values = list(
                                 nSamples = n,
                                 cumDetection = boot_results$mean[n],
                                 ciLower = boot_results$lower[n],
@@ -2500,49 +2342,41 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     incrementalYieldText <- self$results$incrementalYieldText
                     incrementalYieldTable <- self$results$incrementalYieldTable
+                    private$.clearTable(incrementalYieldTable)
 
                     # Calculate incremental yield
                     positive_idx <- !is.na(firstDetectionData)
                     positive_first <- firstDetectionData[positive_idx]
 
-                    incremental_data <- data.frame()
-                    for (n in 1:(maxSamp - 1)) {
-                        from_n <- sum(positive_first <= n, na.rm = TRUE) / length(positive_first)
-                        to_n <- sum(positive_first <= (n + 1), na.rm = TRUE) / length(positive_first)
-                        incremental <- to_n - from_n
-                        cases_per_100 <- incremental * 100
+                    if (maxSamp > 1) {
+                        for (n in seq_len(maxSamp - 1)) {
+                            from_n <- sum(positive_first <= n, na.rm = TRUE) / length(positive_first)
+                            to_n <- sum(positive_first <= (n + 1), na.rm = TRUE) / length(positive_first)
+                            incremental <- to_n - from_n
+                            cases_per_100 <- incremental * 100
 
-                        # Cost-benefit rating
-                        if (incremental >= 0.10) {
-                            rating <- "High value"
-                        } else if (incremental >= 0.05) {
-                            rating <- "Moderate value"
-                        } else if (incremental >= 0.02) {
-                            rating <- "Diminishing returns"
-                        } else {
-                            rating <- "Low yield"
+                            # Descriptive yield rating
+                            if (incremental >= 0.10) {
+                                rating <- jmvcore::.("Higher observed yield")
+                            } else if (incremental >= 0.05) {
+                                rating <- jmvcore::.("Moderate observed yield")
+                            } else if (incremental >= 0.02) {
+                                rating <- jmvcore::.("Diminishing returns")
+                            } else {
+                                rating <- jmvcore::.("Low yield")
+                            }
+
+                            private$.putRow(incrementalYieldTable, rowKey = paste0("n_", n), values = list(
+                                fromSamples = n,
+                                toSamples = n + 1,
+                                incrementalDetection = incremental,
+                                casesDetected = cases_per_100,
+                                costBenefit = rating
+                            ))
                         }
-
-                        incrementalYieldTable$addRow(rowKey = paste0("n_", n), values = list(
-                            fromSamples = n,
-                            toSamples = n + 1,
-                            incrementalDetection = incremental,
-                            casesDetected = cases_per_100,
-                            costBenefit = rating
-                        ))
                     }
 
-                    html <- sprintf(
-                        "<div style='%s'>
-                    <h4 style='%s'>Incremental Diagnostic Yield Analysis</h4>
-                    <p style='%s'>Marginal benefit of examining each additional sample. Helps identify the optimal stopping point where yield diminishes.</p>
-                    <p style='%s'><b>Interpretation:</b> High value (>=10%%), Moderate (5-10%%), Diminishing (<5%%), Low (<2%%).</p>
-                </div>",
-                        private$.buildStyle(private$.styleConstants$font),
-                        private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary)
-                    )
+                    html <- jmvcore::format(jmvcore::.("<p><b>Incremental observed yield</b></p><p>The table shows the added fraction of eventual detections at each sample position. Bands are descriptive: higher (at least 10%), moderate (5% to below 10%), diminishing (2% to below 5%) and low (below 2%). These bands include no costs or utilities and do not define a clinical stopping rule.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary))
 
                     if (self$options$showIncrementalYield) {
                         incrementalYieldText$setContent(html)
@@ -2555,28 +2389,15 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     stratifiedText <- self$results$stratifiedText
                     prevalenceTable <- self$results$prevalenceTable
+                    private$.clearTable(prevalenceTable)
                     stratifiedDetectionTable <- self$results$stratifiedDetectionTable
+                    private$.clearTable(stratifiedDetectionTable)
 
                     # Get unique sample types
-                    unique_types <- unique(sampleTypeData[!is.na(sampleTypeData)])
+                    unique_types <- levels(droplevels(sampleTypeData))
 
                     if (length(unique_types) > 0) {
-                        html <- sprintf(
-                            "<div style='%s'>
-                        <h4 style='%s'>Stratified Analysis by Sample Type</h4>
-                        <p style='%s'>Separate analysis for each sample type reveals differences in:</p>
-                        <ul style='%s'>
-                            <li><b>Prevalence:</b> Proportion of cases with positive findings</li>
-                            <li><b>Per-sample probability (q):</b> Detection probability given positivity</li>
-                            <li><b>Conditional detection:</b> P(detect | present) - diagnostic sensitivity</li>
-                            <li><b>Population detection:</b> P(detect overall) = prevalence \u{00D7} sensitivity</li>
-                        </ul>
-                    </div>",
-                            private$.buildStyle(private$.styleConstants$font),
-                            private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary)
-                        )
+                        html <- jmvcore::format(jmvcore::.("<p><b>Sample-type comparisons</b></p><p>Each group retains its recorded counts and observed-positive fraction. The selected estimator and the case-proportion screening rule are applied separately to each group. Groups without an eligible q retain their descriptive counts but receive no model predictions.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary))
 
                         if (self$options$showStratifiedAnalysis) {
                             stratifiedText$setContent(html)
@@ -2592,41 +2413,30 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             n_type_positive <- sum(type_positive_idx, na.rm = TRUE)
                             prevalence_type <- n_type_positive / n_type_total
 
-                            if (n_type_positive > 0) {
-                                # Calculate q for this type
-                                if (!is.null(positiveCountData)) {
-                                    q_type <- sum(positiveCountData[type_positive_idx], na.rm = TRUE) /
-                                        sum(totalSamplesData[type_positive_idx], na.rm = TRUE)
-                                } else {
-                                    q_type <- 1 / mean(firstDetectionData[type_positive_idx], na.rm = TRUE)
-                                }
-
-                                # Prevalence table
-                                prevalenceTable$addRow(rowKey = paste0("type_", type_row), values = list(
-                                    sampleType = as.character(type),
-                                    totalCases = n_type_total,
-                                    positiveCases = n_type_positive,
-                                    prevalence = prevalence_type,
-                                    qEstimate = q_type
-                                ))
-
-                                # Detection probability table (for key thresholds)
+                            groupEstimate <- private$.estimateQ(firstDetectionData[type_idx],
+                                totalSamplesData[type_idx],
+                                if (is.null(positiveCountData)) NULL else positiveCountData[type_idx])
+                            q_type <- groupEstimate$q
+                            private$.putRow(prevalenceTable, paste0("type_", type_row), list(
+                                sampleType = as.character(type), totalCases = n_type_total,
+                                positiveCases = n_type_positive, prevalence = prevalence_type,
+                                qEstimate = q_type))
+                            if (!is.finite(q_type)) {
+                                private$.addNotice("WARNING", jmvcore::.("Subgroup estimate unavailable"),
+                                    jmvcore::format(jmvcore::.("Sample type {v1}: q and model predictions are unavailable because no eligible detections/count pairs remain or the within-group case-proportion CV exceeds 0.5. Its observed case counts and positive fraction are retained."), v1 = type))
+                            } else {
                                 for (n in c(3, 5, 7, 10)) {
                                     if (n <= maxSamp) {
                                         conditional_det <- 1 - (1 - q_type)^n
-                                        population_det <- prevalence_type * conditional_det
-
-                                        stratifiedDetectionTable$addRow(rowKey = paste0(type, "_", n), values = list(
-                                            sampleType = as.character(type),
-                                            nSamples = n,
+                                        private$.putRow(stratifiedDetectionTable, paste0(type, "_", n), list(
+                                            sampleType = as.character(type), nSamples = n,
                                             conditionalDetection = conditional_det,
-                                            populationDetection = population_det
-                                        ))
+                                            populationDetection = prevalence_type * conditional_det))
                                     }
                                 }
-
-                                type_row <- type_row + 1
                             }
+                            type_row <- type_row + 1
+
                         }
                     }
                 }
@@ -2637,29 +2447,12 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     populationDetectionText <- self$results$populationDetectionText
                     populationDetectionTable <- self$results$populationDetectionTable
+                    private$.clearTable(populationDetectionTable)
 
                     # Calculate overall prevalence
                     prevalence <- nDetected / length(firstDetectionData)
 
-                    html <- sprintf(
-                        "<div style='%s'>
-                    <h4 style='%s'>Population-Level vs Conditional Detection</h4>
-                    <p style='%s'>Distinguishes between:</p>
-                    <ul style='%s'>
-                        <li><b>Conditional (Sensitivity):</b> P(detect | lesion present) - assumes disease exists</li>
-                        <li><b>Population (Overall):</b> P(detect in general) = prevalence \u{00D7} sensitivity</li>
-                    </ul>
-                    <p style='%s'><b>Observed prevalence:</b> %.1f%% (%d/%d cases positive)</p>
-                    <p style='%s'><em>Note:</em> Prevalence reflects this specific dataset and may not generalize.</p>
-                </div>",
-                        private$.buildStyle(private$.styleConstants$font),
-                        private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                        100 * prevalence, nDetected, length(firstDetectionData),
-                        private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary)
-                    )
+                    html <- jmvcore::format(jmvcore::.("<p><b>Recorded-case and conditional detection</b></p><p>The observed-positive fraction is {v6}% ({v7}/{v8} cases). Conditional predictions refer to eventual observation, not independently known disease. Multiplying by the recorded positive fraction gives a modelled fraction of recorded cases, not validated population sensitivity.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v6 = sprintf("%.1f", 100 * prevalence), v7 = sprintf("%d", nDetected), v8 = sprintf("%d", length(firstDetectionData)), v9 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
                     if (self$options$showPopulationDetection) {
                         populationDetectionText$setContent(html)
@@ -2671,7 +2464,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             conditional <- 1 - (1 - pForCalc)^n
                             population <- prevalence * conditional
 
-                            populationDetectionTable$addRow(rowKey = paste0("n_", n), values = list(
+                            private$.putRow(populationDetectionTable, rowKey = paste0("n_", n), values = list(
                                 nSamples = n,
                                 prevalence = prevalence,
                                 conditional = conditional,
@@ -2687,6 +2480,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     spatialClusteringText <- self$results$spatialClusteringText
                     clusteringTable <- self$results$clusteringTable
+                    private$.clearTable(clusteringTable)
 
                     # Parse sample lists and calculate clustering
                     clustering_indices <- numeric(length(positiveSamplesListData))
@@ -2713,44 +2507,27 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     n_total <- sum(!is.na(clustering_indices))
 
                     if (n_total > 0) {
-                        html <- sprintf(
-                            "<div style='%s'>
-                        <h4 style='%s'>Spatial Clustering Analysis</h4>
-                        <p style='%s'>Analyzes how positive samples are distributed spatially:</p>
-                        <ul style='%s'>
-                            <li><b>Clustered (index < 0.7):</b> Positive samples grouped together (focal/contiguous)</li>
-                            <li><b>Random (0.7-1.3):</b> Positive samples evenly distributed</li>
-                            <li><b>Dispersed (> 1.3):</b> Positive samples widely separated (multifocal)</li>
-                        </ul>
-                        <p style='%s'><b>Clinical significance:</b> Clustered patterns may allow more targeted sampling;
-                        dispersed patterns require broader sampling strategy.</p>
-                    </div>",
-                            private$.buildStyle(private$.styleConstants$font),
-                            private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary)
-                        )
+                        html <- jmvcore::format(jmvcore::.("<p><b>Sample-position clustering</b></p><p>The index compares mean gaps with their expectation under uniform random placement. Labels below 0.7, from 0.7 to 1.3, and above 1.3 are descriptive bands, not hypothesis tests. Sampling order need not represent anatomical distance; these groups do not establish focality or a sampling protocol.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary), v5 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
                         if (self$options$showSpatialClustering) {
                             spatialClusteringText$setContent(html)
                         }
 
                         # Populate table
-                        clusteringTable$addRow(rowKey = "clustered", values = list(
-                            pattern = "Clustered (focal)",
+                        private$.putRow(clusteringTable, rowKey = "clustered", values = list(
+                            pattern = jmvcore::.("Below reference gap (index < 0.7)"),
                             count = n_clustered,
                             percent = n_clustered / n_total,
                             meanClusterIndex = if (n_clustered > 0) mean(clustering_indices[clustered_idx], na.rm = TRUE) else NA
                         ))
-                        clusteringTable$addRow(rowKey = "random", values = list(
-                            pattern = "Random",
+                        private$.putRow(clusteringTable, rowKey = "random", values = list(
+                            pattern = jmvcore::.("Near reference gap (index 0.7-1.3)"),
                             count = n_random,
                             percent = n_random / n_total,
                             meanClusterIndex = if (n_random > 0) mean(clustering_indices[random_idx], na.rm = TRUE) else NA
                         ))
-                        clusteringTable$addRow(rowKey = "dispersed", values = list(
-                            pattern = "Dispersed (multifocal)",
+                        private$.putRow(clusteringTable, rowKey = "dispersed", values = list(
+                            pattern = jmvcore::.("Above reference gap (index > 1.3)"),
                             count = n_dispersed,
                             percent = n_dispersed / n_total,
                             meanClusterIndex = if (n_dispersed > 0) mean(clustering_indices[dispersed_idx], na.rm = TRUE) else NA
@@ -2764,6 +2541,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     multifocalText <- self$results$multifocalText
                     multifocalTable <- self$results$multifocalTable
+                    private$.clearTable(multifocalTable)
 
                     # Parse sample lists and estimate foci
                     foci_counts <- integer(length(positiveSamplesListData))
@@ -2788,19 +2566,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     n_total <- sum(!is.na(foci_counts))
 
                     if (n_total > 0) {
-                        html <- sprintf(
-                            "<div style='%s'>
-                        <h4 style='%s'>Multifocal Detection Analysis</h4>
-                        <p style='%s'>Estimates number of separate foci based on spatial distribution of positive samples.
-                        Gaps > 2 samples suggest separate foci.</p>
-                        <p style='%s'><b>Clinical note:</b> Multifocal involvement may indicate more advanced disease
-                        and can affect staging/treatment decisions.</p>
-                    </div>",
-                            private$.buildStyle(private$.styleConstants$font),
-                            private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary)
-                        )
+                        html <- jmvcore::format(jmvcore::.("<p><b>Heuristic foci count</b></p><p>A gap exceeding the user-selected threshold starts a new sample-position group. These groups are a sampling-order heuristic, not independently established anatomical lesions; they do not determine stage or treatment.</p>"), v1 = private$.buildStyle(private$.styleConstants$font), v2 = private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary), v3 = private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary), v4 = private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
 
                         if (self$options$showMultifocalAnalysis) {
                             multifocalText$setContent(html)
@@ -2808,869 +2574,29 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Populate table
                         if (n_unifocal > 0) {
-                            multifocalTable$addRow(rowKey = "single", values = list(
-                                fociCount = "Unifocal (1 focus)",
+                            private$.putRow(multifocalTable, rowKey = "single", values = list(
+                                fociCount = jmvcore::.("One sample-position group"),
                                 cases = n_unifocal,
                                 percent = n_unifocal / n_total,
                                 meanFirstDetection = mean(firstDetectionData[unifocal_idx], na.rm = TRUE)
                             ))
                         }
                         if (n_bifocal > 0) {
-                            multifocalTable$addRow(rowKey = "low_multi", values = list(
-                                fociCount = "Bifocal (2 foci)",
+                            private$.putRow(multifocalTable, rowKey = "low_multi", values = list(
+                                fociCount = jmvcore::.("Two sample-position groups"),
                                 cases = n_bifocal,
                                 percent = n_bifocal / n_total,
                                 meanFirstDetection = mean(firstDetectionData[bifocal_idx], na.rm = TRUE)
                             ))
                         }
                         if (n_multifocal > 0) {
-                            multifocalTable$addRow(rowKey = "high_multi", values = list(
-                                fociCount = "Multifocal (3+ foci)",
+                            private$.putRow(multifocalTable, rowKey = "high_multi", values = list(
+                                fociCount = jmvcore::.("Three or more sample-position groups"),
                                 cases = n_multifocal,
                                 percent = n_multifocal / n_total,
                                 meanFirstDetection = mean(firstDetectionData[multifocal_idx], na.rm = TRUE)
                             ))
                         }
-                    }
-                }
-
-                # === Hypergeometric Model Analysis ===
-                if (self$options$showHypergeometric && !is.null(self$options$totalPopulation) && !is.null(self$options$successStates)) {
-                    # Get hypergeometric parameters
-                    totalPopulationEsc <- private$.escapeVar(self$options$totalPopulation)
-                    successStatesEsc <- private$.escapeVar(self$options$successStates)
-
-                    totalPopulationData <- jmvcore::toNumeric(data[[totalPopulationEsc]])
-                    successStatesData <- jmvcore::toNumeric(data[[successStatesEsc]])
-
-                    # Handle labelled data
-                    if (is.factor(totalPopulationData) || !is.null(attr(totalPopulationData, "labels"))) {
-                        totalPopulationData <- as.numeric(as.character(totalPopulationData))
-                    }
-                    if (is.factor(successStatesData) || !is.null(attr(successStatesData, "labels"))) {
-                        successStatesData <- as.numeric(as.character(successStatesData))
-                    }
-
-                    # Filter to valid cases
-                    totalPopulationData <- totalPopulationData[validCases]
-                    successStatesData <- successStatesData[validCases]
-                    if (!is.null(invalidCases)) {
-                        totalPopulationData <- totalPopulationData[!invalidCases]
-                        successStatesData <- successStatesData[!invalidCases]
-                    }
-
-                    target <- self$options$targetDetections # Minimum detections desired
-                    if (is.null(target) || is.na(target) || target < 1) {
-                        target <- 1
-                    }
-
-                    # Identify cases with complete hypergeometric inputs
-                    hyperValid <- !is.na(totalPopulationData) & !is.na(successStatesData)
-                    if (sum(hyperValid) == 0) {
-                        hypergeometricText <- self$results$hypergeometricText
-                        hypergeometricTable <- self$results$hypergeometricTable
-                        hyperRecommendTable <- self$results$hyperRecommendTable
-                        if (self$options$showHypergeometric) {
-                            hypergeometricText$setContent("<p>No valid cases with total population and success counts were found for the hypergeometric model.</p>")
-                        }
-                        hypergeometricTable$clearRows()
-                        hyperRecommendTable$clearRows()
-                        return()
-                    }
-
-                    N_values <- totalPopulationData[hyperValid]
-                    K_values <- successStatesData[hyperValid]
-
-                    hyperNotes <- character()
-
-                    # Enforce integer counts (hypergeometric requires discrete totals)
-                    if (any(abs(N_values - round(N_values)) > 1e-6, na.rm = TRUE)) {
-                        hyperNotes <- c(hyperNotes, "Total population counts rounded to nearest integer")
-                    }
-                    if (any(abs(K_values - round(K_values)) > 1e-6, na.rm = TRUE)) {
-                        hyperNotes <- c(hyperNotes, "Positive counts rounded to nearest integer")
-                    }
-
-                    N_int <- round(N_values)
-                    K_int <- round(K_values)
-
-                    # Remove impossible cases
-                    invalidHyper <- (N_int <= 0) | (K_int < 0) | (K_int > N_int)
-                    if (any(invalidHyper, na.rm = TRUE)) {
-                        removed <- sum(invalidHyper, na.rm = TRUE)
-                        hyperNotes <- c(hyperNotes, sprintf("%d cases removed (invalid population/success counts)", removed))
-                        N_int <- N_int[!invalidHyper]
-                        K_int <- K_int[!invalidHyper]
-                    }
-
-                    if (length(N_int) == 0) {
-                        hypergeometricText <- self$results$hypergeometricText
-                        hypergeometricTable <- self$results$hypergeometricTable
-                        hyperRecommendTable <- self$results$hyperRecommendTable
-                        if (self$options$showHypergeometric) {
-                            hypergeometricText$setContent("<p>All cases were removed because population/success counts were invalid for the hypergeometric model.</p>")
-                        }
-                        hypergeometricTable$clearRows()
-                        hyperRecommendTable$clearRows()
-                        return()
-                    }
-
-                    positiveCaseIdx <- K_int >= target & K_int > 0
-                    if (sum(positiveCaseIdx) == 0) {
-                        hypergeometricText <- self$results$hypergeometricText
-                        hypergeometricTable <- self$results$hypergeometricTable
-                        hyperRecommendTable <- self$results$hyperRecommendTable
-                        note <- sprintf("<p>No cases had at least %d positive observations, so the hypergeometric model could not be estimated.</p>", target)
-                        if (self$options$showHypergeometric) {
-                            hypergeometricText$setContent(note)
-                        }
-                        hypergeometricTable$clearRows()
-                        hyperRecommendTable$clearRows()
-                        return()
-                    }
-                    removedZeroPos <- sum(!positiveCaseIdx)
-                    if (removedZeroPos > 0) {
-                        hyperNotes <- c(
-                            hyperNotes,
-                            sprintf("%d cases excluded (no positive observations for conditional model)", removedZeroPos)
-                        )
-                    }
-                    N_int <- N_int[positiveCaseIdx]
-                    K_int <- K_int[positiveCaseIdx]
-
-                    nHyperCases <- length(N_int)
-                    medianN <- stats::median(N_int)
-                    medianK <- stats::median(K_int)
-
-                    hypergeometricText <- self$results$hypergeometricText
-                    notesHtml <- if (length(hyperNotes) > 0) {
-                        sprintf("<p><b>Data notes:</b> %s.</p>", paste(hyperNotes, collapse = "; "))
-                    } else {
-                        ""
-                    }
-
-                    html <- sprintf(
-                        "<h4>Hypergeometric Probability Model</h4>
-                <p>Finite-population sampling without replacement (e.g., lymph node dissections) evaluated on %d positive cases.</p>
-                <p><b>Typical case:</b> median total nodes = %.0f, median positive nodes = %.0f.</p>
-                %s
-                <p><b>Model:</b> For each case i with population N<sub>i</sub> and positives K<sub>i</sub>, the probability of detecting >=%d positives after n draws is averaged across cases:</p>
-                <p style='margin-left: 15px;'>P(detect >= %d) = mean<sub>i</sub>[1 - \u{03A3}<sub>x=0</sub><sup>%d-1</sup> dhyper(x, K<sub>i</sub>, N<sub>i</sub>-K<sub>i</sub>, min(n, N<sub>i</sub>))]</p>
-                <p><b>Reference:</b> Orange-peeling LN dissection study (2025) - Hypergeometric adequacy thresholds.</p>",
-                        nHyperCases, medianN, medianK, notesHtml, target, target, max(target - 1, 0)
-                    )
-                    if (self$options$showHypergeometric) {
-                        hypergeometricText$setContent(html)
-                    }
-
-                    # Pre-compute cumulative probabilities across cases
-                    hypergeometricTable <- self$results$hypergeometricTable
-                    aggregatedProb <- rep(NA_real_, maxSamp)
-
-                    prevProb <- NA_real_
-                    for (n in 1:maxSamp) {
-                        draws <- pmin(n, N_int)
-
-                        caseProb <- vapply(seq_along(N_int), function(idx) {
-                            Ni <- N_int[idx]
-                            Ki <- K_int[idx]
-                            draw <- draws[idx]
-
-                            if (Ki <= 0 || target > draw) {
-                                return(0)
-                            }
-
-                            failures <- Ni - Ki
-                            if (target > 1) {
-                                probLess <- stats::phyper(target - 1, Ki, failures, draw)
-                            } else {
-                                probLess <- stats::dhyper(0, Ki, failures, draw)
-                            }
-
-                            1 - probLess
-                        }, numeric(1))
-
-                        if (all(is.na(caseProb))) {
-                            cumProb <- NA_real_
-                        } else {
-                            cumProb <- mean(caseProb, na.rm = TRUE)
-                        }
-
-                        aggregatedProb[n] <- cumProb
-
-                        marginal <- if (!is.na(cumProb) && !is.na(prevProb)) cumProb - prevProb else if (!is.na(cumProb) && is.na(prevProb)) cumProb else NA
-
-                        hypergeometricTable$addRow(rowKey = paste0("n_", n), values = list(
-                            nSamples = n,
-                            cumProb = cumProb,
-                            marginalGain = marginal
-                        ))
-
-                        if (!is.na(cumProb)) prevProb <- cumProb
-                    }
-
-                    hyperDetail <- if (length(hyperNotes) > 0) paste(hyperNotes, collapse = "; ") else ""
-
-                    addRecommendation(
-                        method = "Hypergeometric",
-                        probVec = aggregatedProb,
-                        priority = 3,
-                        description = "Finite population model (sampling without replacement)",
-                        detail = hyperDetail
-                    )
-
-                    # Minimum samples for target confidence levels
-                    hyperRecommendTable <- self$results$hyperRecommendTable
-
-                    confLevels <- c(0.80, 0.90, 0.95, 0.99)
-                    for (i in seq_along(confLevels)) {
-                        conf <- confLevels[i]
-
-                        minSamples <- NA
-                        expectedYield <- NA
-
-                        idx <- which(!is.na(aggregatedProb) & aggregatedProb >= conf)[1]
-                        if (!is.na(idx)) {
-                            minSamples <- idx
-
-                            # Expected detections based on case-level probabilities
-                            caseExpected <- vapply(seq_along(N_int), function(idxCase) {
-                                Ni <- N_int[idxCase]
-                                Ki <- K_int[idxCase]
-                                draw <- min(minSamples, Ni)
-
-                                if (Ki <= 0 || draw <= 0) {
-                                    return(0)
-                                }
-
-                                # Expected detections under hypergeometric sampling with replacement adjustment
-                                expected <- draw * Ki / Ni
-
-                                # To respect user target, cap expected at target if target specified
-                                if (!is.null(target) && !is.na(target)) {
-                                    expected <- min(expected, target)
-                                }
-
-                                expected
-                            }, numeric(1))
-
-                            expectedYield <- mean(caseExpected, na.rm = TRUE)
-                        }
-
-                        hyperRecommendTable$addRow(rowKey = paste0("conf_", i), values = list(
-                            confidence = conf,
-                            minSamples = minSamples,
-                            expectedYield = expectedYield
-                        ))
-                    }
-                }
-
-                # === Beta-Binomial Model Analysis ===
-                if (self$options$showBetaBinomial && !is.null(self$options$totalPopulation) && !is.null(self$options$successStates)) {
-                    # Get data
-                    totalPopulationEsc <- private$.escapeVar(self$options$totalPopulation)
-                    successStatesEsc <- private$.escapeVar(self$options$successStates)
-
-                    totalPopulationData <- jmvcore::toNumeric(data[[totalPopulationEsc]])
-                    successStatesData <- jmvcore::toNumeric(data[[successStatesEsc]])
-
-                    # Filter to valid cases
-                    totalPopulationData <- totalPopulationData[validCases]
-                    successStatesData <- successStatesData[validCases]
-                    if (!is.null(invalidCases)) {
-                        totalPopulationData <- totalPopulationData[!invalidCases]
-                        successStatesData <- successStatesData[!invalidCases]
-                    }
-
-                    betaBinomNotes <- character()
-                    betaProceed <- TRUE
-
-                    betaValid <- !is.na(totalPopulationData) & !is.na(successStatesData)
-                    if (sum(betaValid) == 0) {
-                        betaBinomialText <- self$results$betaBinomialText
-                        betaBinomialTable <- self$results$betaBinomialTable
-                        betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
-                        if (self$options$showBetaBinomial) {
-                            betaBinomialText$setContent("<p>No valid cases were available for the beta-binomial model (missing total population or success counts).</p>")
-                        }
-                        betaBinomialTable$clearRows()
-                        betaBinomialRecommendTable$clearRows()
-                        betaProceed <- FALSE
-                    } else {
-                        totalPopulationData <- totalPopulationData[betaValid]
-                        successStatesData <- successStatesData[betaValid]
-
-                        invalidBeta <- (totalPopulationData <= 0) | (successStatesData < 0) | (successStatesData > totalPopulationData)
-                        if (any(invalidBeta, na.rm = TRUE)) {
-                            removed <- sum(invalidBeta, na.rm = TRUE)
-                            betaBinomNotes <- c(betaBinomNotes, sprintf("%d cases removed (invalid population/success counts)", removed))
-                            totalPopulationData <- totalPopulationData[!invalidBeta]
-                            successStatesData <- successStatesData[!invalidBeta]
-                        }
-
-                        if (length(totalPopulationData) == 0) {
-                            betaBinomialText <- self$results$betaBinomialText
-                            betaBinomialTable <- self$results$betaBinomialTable
-                            betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
-                            if (self$options$showBetaBinomial) {
-                                betaBinomialText$setContent("<p>All cases were removed after validating total population and success counts.</p>")
-                            }
-                            betaBinomialTable$clearRows()
-                            betaBinomialRecommendTable$clearRows()
-                            betaProceed <- FALSE
-                        }
-                    }
-
-                    if (betaProceed) {
-                        target <- self$options$targetDetections
-                        if (is.null(target) || is.na(target) || target < 1) {
-                            target <- 1
-                        }
-
-                        # Estimate alpha and beta using VGAM for proper N-weighted estimation
-                        # Previous unweighted method biased estimates when sample sizes varied
-                        alpha <- NA_real_
-                        beta <- NA_real_
-                        modelRejected <- FALSE
-
-                        # Check minimum requirements
-                        if (length(totalPopulationData) < 2) {
-                            betaBinomNotes <- c(betaBinomNotes, " Insufficient cases for parameter estimation (need >=2)")
-                            modelRejected <- TRUE
-                        } else if (!requireNamespace("VGAM", quietly = TRUE)) {
-                            betaBinomNotes <- c(betaBinomNotes, " VGAM package required for beta-binomial analysis. Please install: install.packages('VGAM')")
-                            modelRejected <- TRUE
-                        } else {
-                            # Use VGAM for proper maximum likelihood estimation with varying N
-                            betaData <- data.frame(
-                                success = successStatesData,
-                                fail = totalPopulationData - successStatesData,
-                                total = totalPopulationData
-                            )
-
-                            # Check for invalid data (negative failures)
-                            if (any(betaData$fail < 0, na.rm = TRUE)) {
-                                betaBinomNotes <- c(betaBinomNotes, " Invalid data: success counts exceed total population in some cases")
-                                modelRejected <- TRUE
-                            } else {
-                                tryCatch(
-                                    {
-                                        # Fit beta-binomial using VGAM (proper N-weighted MLE)
-                                        fit <- VGAM::vglm(
-                                            cbind(success, fail) ~ 1,
-                                            family = VGAM::betabinomial,
-                                            data = betaData,
-                                            trace = FALSE
-                                        )
-
-                                        # Extract shape parameters from VGAM fit
-                                        # VGAM uses logit-link for rho and logit for mu
-                                        coefs <- VGAM::Coef(fit)
-
-                                        # Get mean and rho from fitted model
-                                        mu_fit <- VGAM::logitlink(coefs[1], inverse = TRUE)
-                                        rho_fit <- VGAM::logitlink(coefs[2], inverse = TRUE)
-
-                                        # Convert to alpha/beta parameterization
-                                        # rho = 1/(alpha + beta + 1), so alpha + beta = (1-rho)/rho
-                                        # mu = alpha/(alpha + beta)
-                                        if (rho_fit > 0 && rho_fit < 1) {
-                                            total_shape <- (1 - rho_fit) / rho_fit
-                                            alpha <- mu_fit * total_shape
-                                            beta <- (1 - mu_fit) * total_shape
-                                        } else {
-                                            betaBinomNotes <- c(betaBinomNotes, " VGAM fit produced invalid rho (overdispersion parameter)")
-                                            modelRejected <- TRUE
-                                        }
-
-                                        # Validate estimated parameters
-                                        if (!modelRejected && (!is.finite(alpha) || !is.finite(beta) || alpha <= 0 || beta <= 0)) {
-                                            betaBinomNotes <- c(
-                                                betaBinomNotes,
-                                                " Parameter estimation failed (non-finite or negative values). Data may not fit beta-binomial distribution."
-                                            )
-                                            modelRejected <- TRUE
-                                        } else if (!modelRejected) {
-                                            # Check for extremely skewed parameters
-                                            if (alpha < 0.01 || beta < 0.01) {
-                                                betaBinomNotes <- c(
-                                                    betaBinomNotes,
-                                                    sprintf(" CAUTION: Extreme parameter values (\u{03B1}=%.4f, \u{03B2}=%.4f) suggest poor model fit or extreme skew. Results should be interpreted with caution.", alpha, beta)
-                                                )
-                                            }
-
-                                            # Check for zero variance (all identical)
-                                            if (rho_fit < 0.001) {
-                                                betaBinomNotes <- c(
-                                                    betaBinomNotes,
-                                                    sprintf(" Very low overdispersion (\u{03C1}=%.4f): Cases have nearly identical detection rates. Simple binomial model may be more appropriate.", rho_fit)
-                                                )
-                                            }
-
-                                            # Add note about N-weighted estimation
-                                            betaBinomNotes <- c(
-                                                betaBinomNotes,
-                                                sprintf(" Parameters estimated using N-weighted MLE via VGAM (\u{03BC}=%.3f, \u{03C1}=%.3f, \u{03B1}=%.3f, \u{03B2}=%.3f)", mu_fit, rho_fit, alpha, beta)
-                                            )
-                                        }
-                                    },
-                                    error = function(e) {
-                                        betaBinomNotes <- c(
-                                            betaBinomNotes,
-                                            sprintf(" VGAM fitting failed: %s. Data may not fit beta-binomial distribution or may have convergence issues.", htmltools::htmlEscape(conditionMessage(e)))
-                                        )
-                                        modelRejected <- TRUE
-                                    }
-                                )
-                            }
-                        }
-
-                        # If model is rejected, skip beta-binomial analysis
-                        if (modelRejected) {
-                            betaBinomialText <- self$results$betaBinomialText
-                            betaBinomialTable <- self$results$betaBinomialTable
-                            betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
-
-                            errorHtml <- sprintf(
-                                "<div style='%s %s %s %s'>
-                            <p style='margin: 0; %s'><strong> Beta-Binomial Model Not Applicable</strong></p>
-                            <p style='margin: 10px 0 0 0; %s'>%s</p>
-                            <p style='margin: 10px 0 0 0; %s'><strong>Recommendation:</strong> Use alternative approaches:</p>
-                            <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
-                                <li>If variance = 0: Use standard binomial model</li>
-                                <li>If variance > theoretical max: Use stratified analysis or finite mixture models</li>
-                                <li>For heterogeneous populations: Consider bootstrap or empirical methods</li>
-                            </ul>
-                        </div>",
-                                private$.styleConstants$font, private$.styleConstants$bgLight,
-                                private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                                private$.styleConstants$fontSize15,
-                                private$.styleConstants$fontSize14, paste(betaBinomNotes, collapse = " "),
-                                private$.styleConstants$fontSize14,
-                                private$.styleConstants$fontSize14
-                            )
-
-                            if (self$options$showBetaBinomial) {
-                                betaBinomialText$setContent(errorHtml)
-                            }
-                            betaBinomialTable$clearRows()
-                            betaBinomialRecommendTable$clearRows()
-                            betaProceed <- FALSE
-                        }
-
-                        # Beta-Binomial Text (only if model is valid)
-                        if (!modelRejected) {
-                            betaBinomialText <- self$results$betaBinomialText
-                            extraText <- if (length(betaBinomNotes) > 0) {
-                                sprintf("<p><b>Estimation notes:</b> %s.</p>", paste(betaBinomNotes, collapse = "; "))
-                            } else {
-                                ""
-                            }
-
-                            html <- sprintf(
-                                "<h4>Beta-Binomial Probability Model</h4>
-                    <p>For <b>finite population sampling with overdispersion</b> (e.g., lymph node dissection where positivity varies between cases).</p>
-                    <p>This model is more robust than the hypergeometric model when there is case-by-case variability in the number of positive items.</p>
-                    <p><b>Model parameters (estimated from data):</b></p>
-                    <ul>
-                        <li>Alpha (\u{03B1}): %.3f</li>
-                        <li>Beta (\u{03B2}): %.3f</li>
-                    </ul>
-                    %s
-                    <p><b>Reference:</b> Zhou J, et al. Beta-binomial model for lymph node yield. <i>Front Oncol.</i> 2022;12:872527.</p>",
-                                alpha, beta, extraText
-                            )
-                            if (self$options$showBetaBinomial) {
-                                betaBinomialText$setContent(html)
-                            }
-
-                            # Calculate beta-binomial probabilities
-                            betaBinomialTable <- self$results$betaBinomialTable
-
-                            betaCumProb <- rep(NA_real_, maxSamp)
-                            prevProb <- 0
-
-                            # Beta-binomial PMF function
-                            dbetabinom_pmf <- function(k, n, alpha, beta) {
-                                exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
-                            }
-
-                            for (n in 1:maxSamp) {
-                                # P(detect >= target) using beta-binomial distribution
-                                # Calculate P(X < target) = sum of P(X=k) for k=0 to target-1
-                                prob_less_than_target <- 0
-                                for (k in 0:(target - 1)) {
-                                    if (k <= n) { # Can't have more successes than samples
-                                        prob_less_than_target <- prob_less_than_target + dbetabinom_pmf(k, n, alpha, beta)
-                                    }
-                                }
-                                # P(X >= target) = 1 - P(X < target)
-                                cumProb <- 1 - prob_less_than_target
-
-                                marginal <- cumProb - prevProb
-
-                                betaBinomialTable$addRow(rowKey = paste0("n_", n), values = list(
-                                    nSamples = n,
-                                    cumProb = cumProb,
-                                    marginalGain = marginal
-                                ))
-
-                                prevProb <- cumProb
-                                betaCumProb[n] <- cumProb
-                            }
-
-                            # Minimum samples for target confidence levels
-                            betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
-
-                            addRecommendation(
-                                method = "Beta-binomial",
-                                probVec = betaCumProb,
-                                priority = 2,
-                                description = "Overdispersed finite population model",
-                                detail = if (length(betaBinomNotes) > 0) paste(betaBinomNotes, collapse = "; ") else ""
-                            )
-
-                            maxFeasible <- floor(max(totalPopulationData, na.rm = TRUE))
-                            maxFeasible <- min(maxFeasible, maxSamp)
-
-                            confLevels <- c(0.80, 0.90, 0.95, 0.99)
-                            for (i in seq_along(confLevels)) {
-                                conf <- confLevels[i]
-
-                                minSamples <- NA
-                                expectedYield <- NA
-
-                                if (maxFeasible > 0) {
-                                    for (n in 1:maxFeasible) {
-                                        # Calculate P(X >= target) correctly
-                                        prob_less_than_target <- 0
-                                        for (k in 0:(target - 1)) {
-                                            if (k <= n) {
-                                                prob_less_than_target <- prob_less_than_target + dbetabinom_pmf(k, n, alpha, beta)
-                                            }
-                                        }
-                                        cumProb <- 1 - prob_less_than_target
-
-                                        if (cumProb >= conf) {
-                                            minSamples <- n
-                                            expectedYield <- n * alpha / (alpha + beta)
-                                            if (!is.null(target) && !is.na(target)) {
-                                                expectedYield <- min(expectedYield, target)
-                                            }
-                                            break
-                                        }
-                                    }
-                                }
-
-                                betaBinomialRecommendTable$addRow(rowKey = paste0("conf_", i), values = list(
-                                    confidence = conf,
-                                    minSamples = minSamples,
-                                    expectedYield = expectedYield
-                                ))
-                            }
-                        } # End if (!modelRejected)
-                    }
-                }
-
-                # === Lymph Node Ratio and Staging Analysis ===
-                if (self$options$showLNAnalysis && !is.null(self$options$totalLymphNodes) && !is.null(self$options$positiveLymphNodes)) {
-                    # Get LN variables
-                    totalLymphNodesEsc <- private$.escapeVar(self$options$totalLymphNodes)
-                    positiveLymphNodesEsc <- private$.escapeVar(self$options$positiveLymphNodes)
-
-                    totalELN <- jmvcore::toNumeric(data[[totalLymphNodesEsc]])
-                    positiveLN <- jmvcore::toNumeric(data[[positiveLymphNodesEsc]])
-
-                    # Handle labelled data
-                    if (is.factor(totalELN) || !is.null(attr(totalELN, "labels"))) {
-                        totalELN <- as.numeric(as.character(totalELN))
-                    }
-                    if (is.factor(positiveLN) || !is.null(attr(positiveLN, "labels"))) {
-                        positiveLN <- as.numeric(as.character(positiveLN))
-                    }
-
-                    # Filter to valid cases
-                    totalELN <- totalELN[validCases]
-                    positiveLN <- positiveLN[validCases]
-                    if (!is.null(invalidCases)) {
-                        totalELN <- totalELN[!invalidCases]
-                        positiveLN <- positiveLN[!invalidCases]
-                    }
-
-                    # LN Analysis Text
-                    lnAnalysisText <- self$results$lnAnalysisText
-                    html <- "<h4>Lymph Node Ratio and Staging Analysis</h4>
-                <p>Based on validated lymph node adequacy studies in pancreatic adenocarcinoma:</p>
-                <ul>
-                    <li><b>Tomlinson et al. 2007 (UCLA/SEER, n=1,150 pN0):</b> minELN=15
-                        <br>\u{2022} 8-month survival advantage (27 vs 19 mo, P<0.001), HR=0.63
-                        <br>\u{2022} 90% of pN1a disease detected with <=15 nodes</li>
-                    <li><b>Pu et al. 2021 (Johns Hopkins, n=1,837):</b> minELN=12
-                        <br>\u{2022} Binomial: P=1-(1-p)^n >=0.95 \u{2192} n=11.6 \u{2192} 12
-                        <br>\u{2022} LNR classification (X-tile: 0.1, 0.3), LNR superior when ELN 12-28</li>
-                    <li><b>Yoon et al. 2025 (Korean dual-cohort, n=1,252):</b> minELN=12-16
-                        <br>\u{2022} False N0 modeling: 16 LN \u{2192} 18.9% false N0 (exploration)
-                        <br>\u{2022} Independent validation: 12 LN \u{2192} 19.5% false N0 (validation)
-                        <br>\u{2022} Survival benefit up to 21 LNs in N0 patients</li>
-                </ul>
-                <p><b>False N0:</b> Probability of node-positive patient misclassified as N0 due to inadequate sampling</p>
-                <p><b>LNR:</b> Metastatic lymph nodes / Total examined lymph nodes</p>
-                <p><b>Consensus:</b> 12-16 lymph nodes optimal (12=minimum, 16=quality target)</p>
-                <p><b>References:</b>
-                <br>\u{2022} Tomlinson JS, et al. <i>Arch Surg.</i> 2007;142(8):767-774.
-                <br>\u{2022} Pu N, et al. <i>J Natl Compr Canc Netw.</i> 2021;19(9):1029-1036.
-                <br>\u{2022} Yoon SJ, et al. <i>Ann Surg Oncol.</i> 2025. doi:10.1245/s10434-025-18029-7</p>"
-                    if (self$options$showLNAnalysis) {
-                        lnAnalysisText$setContent(html)
-                    }
-
-                    # Calculate LNR
-                    LNR <- positiveLN / totalELN
-
-                    # Get user-specified thresholds
-                    threshold1 <- self$options$lnrThreshold1
-                    threshold2 <- self$options$lnrThreshold2
-
-                    # LNR Classification (Pu2021 thresholds: 0.1 and 0.3)
-                    lnrStage <- character(length(LNR))
-                    lnrRange <- character(length(LNR))
-                    lnrStage[LNR == 0] <- "LNR0"
-                    lnrRange[LNR == 0] <- "0.000"
-                    lnrStage[LNR > 0 & LNR <= threshold1] <- "LNR1"
-                    lnrRange[LNR > 0 & LNR <= threshold1] <- sprintf("0.001-%.3f", threshold1)
-                    lnrStage[LNR > threshold1 & LNR <= threshold2] <- "LNR2"
-                    lnrRange[LNR > threshold1 & LNR <= threshold2] <- sprintf("%.3f-%.3f", threshold1, threshold2)
-                    lnrStage[LNR > threshold2] <- "LNR3"
-                    lnrRange[LNR > threshold2] <- sprintf("%.3f-1.000", threshold2)
-
-                    # Populate LNR Classification Table
-                    lnrClassification <- self$results$lnrClassification
-
-                    lnrGroups <- c("LNR0 (node-negative)", "LNR1 (low burden)", "LNR2 (moderate burden)", "LNR3 (high burden)")
-                    lnrRanges <- c(
-                        "0.000", sprintf("0.001-%.3f", threshold1),
-                        sprintf("%.3f-%.3f", threshold1, threshold2),
-                        sprintf("%.3f-1.000", threshold2)
-                    )
-
-                    for (i in 1:4) {
-                        cases_in_group <- sum(lnrStage == c("LNR0", "LNR1", "LNR2", "LNR3")[i], na.rm = TRUE)
-                        median_eln <- median(totalELN[lnrStage == c("LNR0", "LNR1", "LNR2", "LNR3")[i]], na.rm = TRUE)
-
-                        lnrClassification$addRow(rowKey = paste0("lnr_", i), values = list(
-                            lnrStage = lnrGroups[i],
-                            lnrRange = lnrRanges[i],
-                            cases = cases_in_group,
-                            percent = cases_in_group / nCases,
-                            medianELN = if (!is.na(median_eln)) median_eln else NA
-                        ))
-                    }
-
-                    # AJCC N Stage Classification
-                    nStage <- character(length(positiveLN))
-                    nStage[positiveLN == 0] <- "N0"
-                    nStage[positiveLN >= 1 & positiveLN <= 3] <- "N1"
-                    nStage[positiveLN >= 4] <- "N2"
-
-                    # Populate AJCC N Stage Table
-                    ajccNStage <- self$results$ajccNStage
-
-                    nStageGroups <- c("N0", "N1", "N2")
-                    nStageCriteria <- c("0 positive LN", "1-3 positive LN", ">=4 positive LN")
-
-                    for (i in 1:3) {
-                        cases_in_stage <- sum(nStage == nStageGroups[i], na.rm = TRUE)
-                        median_eln_stage <- median(totalELN[nStage == nStageGroups[i]], na.rm = TRUE)
-
-                        ajccNStage$addRow(rowKey = paste0("stage_", i), values = list(
-                            nStage = nStageGroups[i],
-                            criteria = nStageCriteria[i],
-                            cases = cases_in_stage,
-                            percent = cases_in_stage / nCases,
-                            medianELN = if (!is.na(median_eln_stage)) median_eln_stage else NA
-                        ))
-                    }
-
-                    # Adequacy Assessment by ELN Thresholds (Tomlinson2007 + Pu2021)
-                    adequacyByELN <- self$results$adequacyByELN
-
-                    # Define ELN groups (Tomlinson 2007, Pu 2021, Yoon 2025)
-                    eln_group <- character(length(totalELN))
-                    eln_group[totalELN < 9] <- "<9 ELN"
-                    eln_group[totalELN >= 9 & totalELN < 12] <- "9-11 ELN"
-                    eln_group[totalELN >= 12 & totalELN < 16] <- "12-15 ELN"
-                    eln_group[totalELN >= 16 & totalELN < 22] <- "16-21 ELN"
-                    eln_group[totalELN >= 22] <- ">=22 ELN"
-
-                    elnGroups <- c("<9 ELN", "9-11 ELN", "12-15 ELN", "16-21 ELN", ">=22 ELN")
-                    comments <- c(
-                        "Inadequate (false N0 >30%)",
-                        "Marginal (false N0 20-30%)",
-                        "Adequate - Minimum (Pu2021/Yoon2025: 12 LN, false N0 ~20%)",
-                        "Adequate - Quality (Tomlinson2007/Yoon2025: 16 LN, false N0 13-19%)",
-                        "Excellent (false N0 <13%, diminishing returns)"
-                    )
-
-                    for (i in 1:5) {
-                        cases_in_eln <- sum(eln_group == elnGroups[i], na.rm = TRUE)
-                        npositive_in_eln <- sum(positiveLN[eln_group == elnGroups[i]] > 0, na.rm = TRUE)
-
-                        adequacyByELN$addRow(rowKey = paste0("eln_", i), values = list(
-                            elnGroup = elnGroups[i],
-                            cases = cases_in_eln,
-                            percent = cases_in_eln / nCases,
-                            nPositive = npositive_in_eln,
-                            comment = comments[i]
-                        ))
-                    }
-                }
-
-                # === Effect Size Measures ===
-                if (self$options$showEffectSizes && !is.null(self$options$totalLymphNodes)) {
-                    # Get total ELN data
-                    totalLymphNodesEsc <- private$.escapeVar(self$options$totalLymphNodes)
-                    totalELN <- jmvcore::toNumeric(data[[totalLymphNodesEsc]])
-
-                    # Handle labelled data
-                    if (is.factor(totalELN) || !is.null(attr(totalELN, "labels"))) {
-                        totalELN <- as.numeric(as.character(totalELN))
-                    }
-
-                    # Filter to valid cases
-                    totalELN <- totalELN[validCases]
-                    if (!is.null(invalidCases)) {
-                        totalELN <- totalELN[!invalidCases]
-                    }
-
-                    # Effect Size Text
-                    effectSizesText <- self$results$effectSizesText
-                    html <- "<h4>Effect Size Measures</h4>
-                <p>Non-parametric effect size measures for adequacy comparisons.</p>
-                <p><b>Measures:</b></p>
-                <ul>
-                    <li><b>Cliff's Delta:</b> Non-parametric effect size for ordinal data (range: -1 to +1)</li>
-                    <li><b>Hodges-Lehmann Estimator:</b> Robust median difference between groups</li>
-                    <li><b>Odds Ratio (OR):</b> Odds of achieving adequacy (>=12 LN)</li>
-                    <li><b>Relative Risk (RR):</b> Relative probability of adequacy</li>
-                    <li><b>Risk Difference (RD):</b> Absolute improvement in adequacy rate</li>
-                </ul>
-                <p><b>Interpretation Guidelines:</b></p>
-                <ul>
-                    <li>Cliff's Delta: |d| < 0.147 (negligible), 0.147-0.330 (small), 0.330-0.474 (medium), > 0.474 (large)</li>
-                    <li>OR: 1.0 (no effect), 1.5-3.0 (small-moderate), 3.0-9.0 (moderate-large), > 9.0 (large)</li>
-                </ul>"
-                    if (self$options$showEffectSizes) {
-                        effectSizesText$setContent(html)
-                    }
-
-                    # Define adequacy groups (e.g., <12 vs >=12 LN)
-                    adequate <- totalELN >= 12
-                    inadequate <- totalELN < 12
-
-                    # Cliff's Delta function
-                    cliff_delta <- function(x, y) {
-                        concordant <- sum(outer(x, y, ">"))
-                        discordant <- sum(outer(x, y, "<"))
-                        delta <- (concordant - discordant) / (length(x) * length(y))
-                        return(delta)
-                    }
-
-                    # Hodges-Lehmann estimator function
-                    hodges_lehmann <- function(x, y) {
-                        diffs <- outer(x, y, "-")
-                        median(diffs)
-                    }
-
-                    # Calculate effect sizes
-                    effectSizesTable <- self$results$effectSizesTable
-
-                    if (sum(adequate) > 0 && sum(inadequate) > 0) {
-                        # Cliff's Delta
-                        delta <- cliff_delta(totalELN[adequate], totalELN[inadequate])
-                        delta_interp <- if (abs(delta) < 0.147) "Negligible" else if (abs(delta) < 0.330) "Small" else if (abs(delta) < 0.474) "Medium" else "Large"
-
-                        effectSizesTable$addRow(rowKey = "cliff_delta", values = list(
-                            measure = "Cliff's Delta",
-                            value = sprintf("%.3f", delta),
-                            interpretation = delta_interp
-                        ))
-
-                        # Hodges-Lehmann Estimator
-                        hl_est <- hodges_lehmann(totalELN[adequate], totalELN[inadequate])
-                        effectSizesTable$addRow(rowKey = "hodges_lehmann", values = list(
-                            measure = "Hodges-Lehmann Estimator",
-                            value = sprintf("%.2f LN", hl_est),
-                            interpretation = "Median ELN difference"
-                        ))
-
-                        # Odds Ratio (OR) for achieving adequacy
-                        # Define outcome: achieved >=12 LN
-                        # Could compare by different grouping variables if available
-                        # For now, calculate overall adequacy rate
-                        adequacy_rate <- sum(adequate) / nCases
-                        inadequacy_rate <- sum(inadequate) / nCases
-
-                        if (adequacy_rate > 0 && inadequacy_rate > 0) {
-                            odds_adequate <- adequacy_rate / (1 - adequacy_rate)
-                            odds_inadequate <- inadequacy_rate / (1 - inadequacy_rate)
-                            OR <- odds_adequate / odds_inadequate
-                            OR_interp <- if (OR < 1.5) "Negligible" else if (OR < 3.0) "Small-moderate" else if (OR < 9.0) "Moderate-large" else "Large"
-
-                            effectSizesTable$addRow(rowKey = "odds_ratio", values = list(
-                                measure = "Odds Ratio (OR)",
-                                value = sprintf("%.2f", OR),
-                                interpretation = OR_interp
-                            ))
-
-                            # Relative Risk (RR)
-                            RR <- adequacy_rate / inadequacy_rate
-                            effectSizesTable$addRow(rowKey = "relative_risk", values = list(
-                                measure = "Relative Risk (RR)",
-                                value = sprintf("%.2f", RR),
-                                interpretation = sprintf("%.0f%% relative improvement", (RR - 1) * 100)
-                            ))
-
-                            # Risk Difference (RD)
-                            RD <- adequacy_rate - inadequacy_rate
-                            effectSizesTable$addRow(rowKey = "risk_diff", values = list(
-                                measure = "Risk Difference (RD)",
-                                value = sprintf("%.3f", RD),
-                                interpretation = sprintf("%.1f%% absolute improvement", RD * 100)
-                            ))
-                        } else {
-                            effectSizesTable$addRow(rowKey = "or_rr_rd_na", values = list(
-                                measure = "OR/RR/RD",
-                                value = "N/A",
-                                interpretation = "Insufficient variability in adequacy"
-                            ))
-                        }
-
-                        # Mean and median ELN comparison
-                        mean_adequate <- mean(totalELN[adequate], na.rm = TRUE)
-                        mean_inadequate <- mean(totalELN[inadequate], na.rm = TRUE)
-                        mean_diff <- mean_adequate - mean_inadequate
-
-                        effectSizesTable$addRow(rowKey = "mean_eln", values = list(
-                            measure = "Mean ELN Difference",
-                            value = sprintf("%.2f - %.2f = %.2f", mean_adequate, mean_inadequate, mean_diff),
-                            interpretation = "Adequate vs Inadequate group"
-                        ))
-
-                        median_adequate <- median(totalELN[adequate], na.rm = TRUE)
-                        median_inadequate <- median(totalELN[inadequate], na.rm = TRUE)
-                        median_diff <- median_adequate - median_inadequate
-
-                        effectSizesTable$addRow(rowKey = "median_eln", values = list(
-                            measure = "Median ELN Difference",
-                            value = sprintf("%.1f - %.1f = %.1f", median_adequate, median_inadequate, median_diff),
-                            interpretation = "Adequate vs Inadequate group"
-                        ))
-                    } else {
-                        effectSizesTable$addRow(rowKey = "insufficient", values = list(
-                            measure = "Effect Size Calculation",
-                            value = "N/A",
-                            interpretation = "Insufficient cases in one or both adequacy groups"
-                        ))
                     }
                 }
 
@@ -3731,40 +2657,24 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Context-specific recommendation text
                     contextHeader <- switch(analysisContext,
-                        "tumor" = "Tumor Sampling Recommendations",
-                        "lymphnode" = "Lymph Node Dissection Recommendations",
-                        "omentum" = "Omentum Sampling Recommendations",
-                        "margin" = "Margin Sampling Recommendations",
-                        "Clinical Recommendations" # default for general
+                        "tumor" = jmvcore::.("Tumor Sampling Recommendations"),
+                        "lymphnode" = jmvcore::.("Lymph Node Dissection Recommendations"),
+                        "omentum" = jmvcore::.("Omentum Sampling Recommendations"),
+                        "margin" = jmvcore::.("Margin Sampling Recommendations"),
+                        jmvcore::.("Clinical Recommendations") # default for general
                     )
 
                     contextExample <- switch(analysisContext,
-                        "tumor" = sprintf("<p style='font-size: 13px; color: #666; font-style: italic; margin: 10px 0;'>
-                        Example: To achieve 95%% sensitivity for detecting venous invasion (VI), examine at least %d tumor samples.
-                        This recommendation is based on empirical detection patterns from similar cases.</p>", rec$minSamples),
-                        "lymphnode" = sprintf("<p style='font-size: 13px; color: #666; font-style: italic; margin: 10px 0;'>
-                        Example: For adequate lymph node dissection with 95%% confidence, examine at least %d lymph nodes.</p>", rec$minSamples),
+                        "tumor" = jmvcore::format(jmvcore::.("<p><b>Example interpretation:</b> The selected descriptive target is reached at {v1} samples under the model assumptions. This is not a validated tumor-sampling minimum.</p>"), v1 = sprintf("%d", rec$minSamples)),
+                        "lymphnode" = jmvcore::format(jmvcore::.("<p><b>Example interpretation:</b> The selected descriptive target is reached at {v1} nodes under the model assumptions. This does not establish adequate dissection for an individual patient.</p>"), v1 = sprintf("%d", rec$minSamples)),
                         "" # default: no example
                     )
 
-                    html <- sprintf(
-                        "<h4>%s</h4>
-                <p><b>Recommended minimum samples for %.0f%% sensitivity:</b> %d (based on %s model)%s.</p>
-                <p>This plan achieves an estimated sensitivity of <b>%.1f%%</b> using the %s.</p>
-                %s",
-                        contextHeader,
-                        targetConf * 100,
-                        rec$minSamples,
-                        rec$method,
-                        detailSuffix,
-                        rec$achievedProb * 100,
-                        rec$description,
-                        contextExample
-                    )
+                    html <- jmvcore::format(jmvcore::.("<h4>{v1}</h4><p>The descriptive {v2}% target is reached at {v3} samples by the {v4} model{v5}, with an estimated observed-positive detection of {v6}% using {v7}.</p><p>This does not establish a patient-level sampling minimum.</p>{v8}"), v1 = contextHeader, v2 = sprintf("%.0f", targetConf * 100), v3 = sprintf("%d", rec$minSamples), v4 = rec$method, v5 = detailSuffix, v6 = sprintf("%.1f", rec$achievedProb * 100), v7 = rec$description, v8 = contextExample)
                     if (nzchar(obsListHtml)) {
                         html <- paste0(
                             html,
-                            "<p><b>Observed cumulative detection:</b></p><ul>",
+                            jmvcore::.("<p><b>Observed cumulative detection:</b></p><ul>"),
                             obsListHtml,
                             "</ul>"
                         )
@@ -3774,26 +2684,17 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
                     bestProb <- rec$bestProb * 100
                     bestSamples <- rec$bestN
-                    html <- sprintf(
-                        "<h4>Clinical Recommendations</h4>
-                <p>Target sensitivity of %.0f%% could not be achieved within the evaluated range.</p>
-                <p><b>Best observed performance:</b> %s model%s reached %.1f%% at %d samples.</p>",
-                        targetConf * 100,
-                        rec$method,
-                        detailSuffix,
-                        bestProb,
-                        bestSamples
-                    )
+                    html <- jmvcore::format(jmvcore::.("<p><b>Descriptive target not reached</b></p><p>The {v1}% target was not reached in the evaluated range. The {v2} model{v3} reached {v4}% at {v5} samples. This does not establish clinical sampling adequacy.</p>"), v1 = sprintf("%.0f", targetConf * 100), v2 = rec$method, v3 = detailSuffix, v4 = sprintf("%.1f", bestProb), v5 = sprintf("%d", bestSamples))
                     if (nzchar(obsListHtml)) {
                         html <- paste0(
                             html,
-                            "<p><b>Observed cumulative detection:</b></p><ul>",
+                            jmvcore::.("<p><b>Observed cumulative detection:</b></p><ul>"),
                             obsListHtml,
                             "</ul>"
                         )
                     }
                 } else {
-                    html <- "<p>No sufficient information to produce clinical recommendations.</p>"
+                    html <- jmvcore::.("<p>No sufficient information to produce clinical recommendations.</p>")
                 }
 
                 if (self$options$showRecommendText) {
@@ -3802,43 +2703,18 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 keyResults <- self$results$keyResults
 
-                targetLine <- sprintf(
-                    "<p style='%s %s'><b>Target confidence:</b> %.0f%%%%</p>",
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary,
-                    targetConf * 100
-                )
+                targetLine <- jmvcore::format(jmvcore::.("<p style='{v1} {v2}'><b>Target detection probability:</b> {v3}%</p>"), v1 = private$.styleConstants$fontSize14, v2 = private$.styleConstants$colorPrimary, v3 = sprintf("%.0f", targetConf * 100))
 
                 if (!is.null(primaryRecommendation) && nrow(primaryRecommendation) == 1) {
                     rec <- primaryRecommendation
                     detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
-                    primaryLine <- sprintf(
-                        "<p style='%s %s'><b>Recommended minimum samples:</b> %d (%s) achieving %.1f%%%% sensitivity%s.</p>",
-                        private$.styleConstants$fontSize15,
-                        private$.styleConstants$colorPrimary,
-                        rec$minSamples,
-                        rec$method,
-                        rec$achievedProb * 100,
-                        detailSuffix
-                    )
+                    primaryLine <- jmvcore::format(jmvcore::.("<p><b>Descriptive target sample count:</b> {v3} ({v4}), with {v5}% observed-positive detection{v6}.</p>"), v1 = private$.styleConstants$fontSize15, v2 = private$.styleConstants$colorPrimary, v3 = sprintf("%d", rec$minSamples), v4 = rec$method, v5 = sprintf("%.1f", rec$achievedProb * 100), v6 = detailSuffix)
                 } else if (!is.null(fallbackRecommendation) && nrow(fallbackRecommendation) == 1) {
                     rec <- fallbackRecommendation
                     detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
-                    primaryLine <- sprintf(
-                        "<p style='%s %s'><b>Target not reached:</b> Best performance is %.1f%%%% at %d samples using %s%s.</p>",
-                        private$.styleConstants$fontSize15,
-                        private$.styleConstants$colorPrimary,
-                        rec$bestProb * 100,
-                        rec$bestN,
-                        rec$method,
-                        detailSuffix
-                    )
+                    primaryLine <- jmvcore::format(jmvcore::.("<p><b>Target not reached:</b> Best modelled value is {v3}% at {v4} samples using {v5}{v6}.</p>"), v1 = private$.styleConstants$fontSize15, v2 = private$.styleConstants$colorPrimary, v3 = sprintf("%.1f", rec$bestProb * 100), v4 = sprintf("%d", rec$bestN), v5 = rec$method, v6 = detailSuffix)
                 } else {
-                    primaryLine <- sprintf(
-                        "<p style='%s %s'>No valid models were available to evaluate sampling adequacy.</p>",
-                        private$.styleConstants$fontSize15,
-                        private$.styleConstants$colorPrimary
-                    )
+                    primaryLine <- jmvcore::format(jmvcore::.("<p>No eligible model could estimate the descriptive sampling target.</p>"), v1 = private$.styleConstants$fontSize15, v2 = private$.styleConstants$colorPrimary)
                 }
 
                 methodListHtml <- ""
@@ -3847,279 +2723,36 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     for (i in seq_len(nrow(recommendationTable))) {
                         rec <- recommendationTable[i, ]
                         detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
-                        methodItems[i] <- sprintf(
-                            "<li><b>%s:</b> %s%s</li>",
-                            rec$method,
-                            rec$status,
-                            detailSuffix
-                        )
+                        methodItems[i] <- sprintf("<li><b>%s:</b> %s%s</li>", rec$method, rec$status, detailSuffix)
                     }
                     methodListHtml <- paste(methodItems, collapse = "")
                 }
 
                 comparisonSection <- if (nzchar(methodListHtml)) {
-                    sprintf(
-                        "<p style='%s %s'><b>Model comparison:</b></p><ul style='%s %s'>%s</ul>",
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorPrimary,
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$colorPrimary,
-                        methodListHtml
-                    )
+                    jmvcore::format(jmvcore::.("<p><b>Model comparison</b></p><ul>{v5}</ul>"), v1 = private$.styleConstants$fontSize14, v2 = private$.styleConstants$colorPrimary, v3 = private$.styleConstants$fontSize14, v4 = private$.styleConstants$colorPrimary, v5 = methodListHtml)
                 } else {
                     ""
                 }
 
-                keyResultsHtml <- sprintf(
-                    "<div style='%s %s %s %s %s'>%s%s%s</div>",
-                    private$.styleConstants$font,
-                    private$.styleConstants$bgLight,
-                    private$.styleConstants$borderPrimary,
-                    private$.styleConstants$padding15,
-                    private$.styleConstants$margin10,
-                    targetLine,
-                    primaryLine,
-                    comparisonSection
-                )
+                keyResultsHtml <- sprintf("<div style='%s %s %s %s %s'>%s%s%s</div>", private$.styleConstants$font, private$.styleConstants$bgLight, private$.styleConstants$borderPrimary, private$.styleConstants$padding15, private$.styleConstants$margin10, targetLine, primaryLine, comparisonSection)
 
                 if (self$options$showKeyResults) {
                     keyResults$setContent(keyResultsHtml)
                 }
 
-                # === Clinical Summary (Plain Language) ===
                 if (self$options$showClinicalSummary) {
-                    clinicalSummary <- self$results$clinicalSummary
-
-                    if (!self$options$showBootstrap || is.null(bootstrapMeansVec)) {
-                        # Provide basic summary without bootstrap
-                        perSampleText <- if (!is.na(pEstimate)) sprintf("%.1f%%", pEstimate * 100) else "Not estimated"
-                        medianDetectionText <- if (!is.na(medianFirst)) sprintf("%d", medianFirst) else "N/A"
-
-                        html <- sprintf(
-                            "<div style='%s %s %s %s'>
-                        <h3 style='%s %s margin: 0 0 15px 0;'>Clinical Summary</h3>
-                        <div style='%s %s %s %s'>
-                            <h4 style='%s %s margin: 0 0 10px 0;'>Study Overview</h4>
-                            <p style='%s margin: 0 0 5px 0;'>
-                                Analyzed <strong>%d cases</strong> with <strong>%d total samples</strong> (mean: %.2f samples per case).
-                            </p>
-                        </div>
-                        <div style='%s %s %s %s'>
-                            <h4 style='%s %s margin: 0 0 10px 0;'>Key Findings</h4>
-                            <ul style='margin: 0; padding-left: 20px; %s'>
-                                <li style='margin: 5px 0;'>Detection rate: <strong>%d of %d cases</strong> (%.1f%%%%)</li>
-                                <li style='margin: 5px 0;'>Median first detection: <strong>sample %s</strong></li>
-                                <li style='margin: 5px 0;'>Detection probability per sample: <strong>%s</strong></li>
-                            </ul>
-                        </div>
-                        <div style='%s %s %s %s'>
-                            <p style='%s margin: 0;'>
-                                <strong>Note:</strong> Enable 'Show Bootstrap Analysis' for detailed confidence intervals and sample size recommendations.
-                            </p>
-                        </div>
-                    </div>",
-                            private$.styleConstants$font, private$.styleConstants$bgLighter,
-                            private$.styleConstants$borderPrimary, private$.styleConstants$padding20,
-                            private$.styleConstants$colorPrimary, private$.styleConstants$fontSize18,
-                            private$.styleConstants$bgWhite, private$.styleConstants$borderSecondary,
-                            private$.styleConstants$padding15, private$.styleConstants$margin10,
-                            private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary,
-                            private$.styleConstants$fontSize14,
-                            nCases, totalExamined, meanSamplesPerCase,
-                            private$.styleConstants$bgWhite, private$.styleConstants$borderSecondary,
-                            private$.styleConstants$padding15, private$.styleConstants$margin10,
-                            private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary,
-                            private$.styleConstants$fontSize14,
-                            nDetected, nCases, (nDetected / nCases) * 100,
-                            medianDetectionText, perSampleText,
-                            private$.styleConstants$bgLight, private$.styleConstants$borderSecondary,
-                            private$.styleConstants$padding10, private$.styleConstants$margin10,
-                            private$.styleConstants$fontSize13
-                        )
-
-                        clinicalSummary$setContent(html)
-                    } else if (is.na(bootstrapTargetIdx) || length(bootstrapTargetIdx) == 0) {
-                        html <- sprintf(
-                            "<div style='%s %s %s %s'>
-                        <h3 style='%s %s margin: 0 0 15px 0;'>Clinical Summary</h3>
-                        <p style='%s margin: 0;'>
-                            Target confidence (%.0f%%) not achievable with evaluated sample sizes (maximum: %d).
-                            Consider increasing 'Maximum samples to evaluate' parameter.
-                        </p>
-                    </div>",
-                            private$.styleConstants$font, private$.styleConstants$bgLight,
-                            private$.styleConstants$borderPrimary, private$.styleConstants$padding15,
-                            private$.styleConstants$colorPrimary, private$.styleConstants$fontSize16,
-                            private$.styleConstants$fontSize14,
-                            targetConf * 100, maxSamp
-                        )
-
-                        clinicalSummary$setContent(html)
-                    } else {
-                        # Get key metrics (safe now)
-                        ciLower <- bootstrapCILowerVec[bootstrapTargetIdx]
-                        ciUpper <- bootstrapCIUpperVec[bootstrapTargetIdx]
-                        meanAtTarget <- bootstrapMeansVec[bootstrapTargetIdx]
-
-                        perSampleText <- if (!is.na(pEstimate)) sprintf("%.1f%%", pEstimate * 100) else "Not estimated"
-                        obs3Text <- if (!is.na(obs3)) sprintf("%.1f%%", obs3) else "Not available"
-
-                        outerStyle <- private$.buildStyle(
-                            private$.styleConstants$font,
-                            private$.styleConstants$bgLighter,
-                            private$.styleConstants$borderPrimary,
-                            private$.styleConstants$padding20,
-                            private$.styleConstants$margin20
-                        )
-                        headerStyle <- private$.buildStyle(
-                            private$.styleConstants$colorPrimary,
-                            private$.styleConstants$fontSize18,
-                            "margin: 0 0 15px 0;"
-                        )
-                        overviewDivStyle <- private$.buildStyle(
-                            private$.styleConstants$bgWhite,
-                            private$.styleConstants$borderSecondary,
-                            private$.styleConstants$padding15,
-                            private$.styleConstants$margin10
-                        )
-                        overviewHeadingStyle <- private$.buildStyle(
-                            private$.styleConstants$fontSize15,
-                            private$.styleConstants$colorPrimary,
-                            "margin: 0 0 10px 0;"
-                        )
-                        overviewBodyStyle <- private$.buildStyle(
-                            private$.styleConstants$fontSize14,
-                            private$.styleConstants$colorPrimary,
-                            "margin: 0 0 5px 0;"
-                        )
-                        overviewBodyText <- sprintf(
-                            "Pathology sampling adequacy analysis of <strong>%d cases</strong> to determine the minimum number of samples required to reliably detect lesions.",
-                            nCases
-                        )
-
-                        keyDivStyle <- private$.buildStyle(
-                            private$.styleConstants$bgWhite,
-                            private$.styleConstants$borderSecondary,
-                            private$.styleConstants$padding15,
-                            private$.styleConstants$margin10
-                        )
-                        keyHeadingStyle <- private$.buildStyle(
-                            private$.styleConstants$fontSize15,
-                            private$.styleConstants$colorPrimary,
-                            "margin: 0 0 10px 0;"
-                        )
-                        keyListStyle <- private$.buildStyle(
-                            "margin: 0;",
-                            "padding-left: 20px;",
-                            private$.styleConstants$fontSize14,
-                            private$.styleConstants$colorPrimary
-                        )
-                        bootstrapIterationsText <- sprintf("%.0fk", nBoot / 1000)
-                        bootstrapSensitivityText <- sprintf("%.1f%%", meanAtTarget * 100)
-                        bootstrapCIText <- sprintf("%.1f%%-%.1f%%", ciLower * 100, ciUpper * 100)
-                        keyFindingsItems <- paste0(
-                            sprintf("<li style='margin: 5px 0;'>Detection probability per sample: <strong>%s</strong></li>", perSampleText),
-                            sprintf("<li style='margin: 5px 0;'>Recommended samples for %.0f%%%% sensitivity: <strong>%d samples</strong></li>", targetConf * 100, bootstrapTargetIdx),
-                            sprintf("<li style='margin: 5px 0;'>Bootstrap validation (%s iterations): <strong>%s</strong> sensitivity (95%%%% CI: %s)</li>", bootstrapIterationsText, bootstrapSensitivityText, bootstrapCIText),
-                            sprintf("<li style='margin: 5px 0;'>First 3 samples detected: <strong>%s</strong> of all cases</li>", obs3Text)
-                        )
-
-                        reportDivStyle <- private$.buildStyle(
-                            private$.styleConstants$bgLight,
-                            private$.styleConstants$borderLeft,
-                            private$.styleConstants$padding10,
-                            private$.styleConstants$margin10
-                        )
-                        reportHeadingStyle <- private$.buildStyle(
-                            private$.styleConstants$fontSize13,
-                            private$.styleConstants$colorSecondary,
-                            "margin: 0 0 8px 0;"
-                        )
-                        reportInnerStyle <- private$.buildStyle(
-                            private$.styleConstants$bgWhite,
-                            private$.styleConstants$borderSecondary,
-                            private$.styleConstants$padding10,
-                            private$.styleConstants$margin10
-                        )
-                        reportParagraphStyle <- private$.buildStyle(
-                            private$.styleConstants$fontSize14,
-                            private$.styleConstants$colorPrimary,
-                            "margin: 0; font-style: italic;"
-                        )
-                        reportParagraph <- sprintf(
-                            "\"Sampling adequacy analysis of %d cases showed a per-sample detection probability of %s. To achieve %.0f%%%% sensitivity, a minimum of %d samples is recommended based on binomial probability modeling and bootstrap validation (%d iterations, 95%%%% CI: %.1f%%%%-%.1f%%%%). Observed data showed %s of lesions detected within first 3 samples.\"",
-                            nCases,
-                            perSampleText,
-                            targetConf * 100,
-                            bootstrapTargetIdx,
-                            nBoot,
-                            ciLower * 100,
-                            ciUpper * 100,
-                            obs3Text
-                        )
-
-                        recommendDivStyle <- private$.buildStyle(
-                            private$.styleConstants$bgLight,
-                            private$.styleConstants$borderPrimary,
-                            private$.styleConstants$padding15
-                        )
-                        recommendParagraphStyle <- private$.buildStyle(
-                            private$.styleConstants$fontSize15,
-                            private$.styleConstants$colorPrimary,
-                            "margin: 0;"
-                        )
-
-                        html <- paste0(
-                            "<div style='", outerStyle, "'>",
-                            "<h3 style='", headerStyle, "'>Clinical Summary</h3>",
-                            "<div style='", overviewDivStyle, "'>",
-                            "<p style='", overviewHeadingStyle, "'><strong>Analysis Overview:</strong></p>",
-                            "<p style='", overviewBodyStyle, "'>", overviewBodyText, "</p>",
-                            "</div>",
-                            "<div style='", keyDivStyle, "'>",
-                            "<p style='", keyHeadingStyle, "'><strong>Key Findings:</strong></p>",
-                            "<ul style='", keyListStyle, "'>", keyFindingsItems, "</ul>",
-                            "</div>",
-                            "<div style='", reportDivStyle, "'>",
-                            "<p style='", reportHeadingStyle, "'><em>Copy-ready text for reports:</em></p>",
-                            "<div style='", reportInnerStyle, "'>",
-                            "<p style='", reportParagraphStyle, "'>", reportParagraph, "</p>",
-                            "</div>",
-                            "</div>",
-                            "<div style='", recommendDivStyle, "'>",
-                            "<p style='", recommendParagraphStyle, "'><strong>Clinical Recommendation:</strong> Submit a minimum of <strong>",
-                            bootstrapTargetIdx, " samples</strong> to ensure adequate diagnostic sensitivity in routine practice.</p>",
-                            "</div>",
-                            "</div>"
-                        )
-
-                        clinicalSummary$setContent(html)
+                    summary <- jmvcore::format(jmvcore::.("<p>Of {v1} analyzed cases, {v2} recorded a lesion. The analysis describes the position at which these observed lesions were first detected.</p>"), v1 = sprintf("%d", nCases), v2 = sprintf("%d", nDetected))
+                    if (!is.na(bootstrapTargetIdx)) {
+                        summary <- paste0(summary, jmvcore::format(jmvcore::.("<p>The observed-positive bootstrap mean reaches the {v1}% target at {v2} samples (95% percentile interval at that position: {v3}%-{v4}%).</p>"), v1 = sprintf("%.0f", 100 * targetConf), v2 = sprintf("%d", bootstrapTargetIdx), v3 = sprintf("%.1f", 100 * bootstrapCILowerVec[bootstrapTargetIdx]), v4 = sprintf("%.1f", 100 * bootstrapCIUpperVec[bootstrapTargetIdx])))
                     }
+                    summary <- paste0(summary, jmvcore::.("<p>This is a descriptive sampling analysis, not a validated patient-level recommendation. Assess eventual-detection ascertainment, missed disease, unequal observation windows and dependence before applying results to a protocol. Independent probability models and node summaries have separate assumptions and denominators.</p>"))
+                    self$results$clinicalSummary$setContent(summary)
                 }
 
                 # === Statistical Interpretation ===
                 interpretText <- self$results$interpretText
 
-                html <- "<h4>Statistical Interpretation</h4>
-            <p>This analysis addresses the question: <i>How many tissue samples are necessary
-            to reliably detect a lesion?</i></p>
-
-            <p><b>Key Concepts:</b></p>
-            <ul>
-                <li><b>Sensitivity:</b> Probability of detecting the lesion if it is present</li>
-                <li><b>Cumulative detection probability:</b> Increases with each additional sample</li>
-                <li><b>Diminishing returns:</b> At some point, additional samples provide minimal gain</li>
-                <li><b>Target confidence:</b> User-selected detection probability used to determine minimum sampling</li>
-            </ul>
-
-            <p><b>Assumptions and Limitations:</b></p>
-            <ul>
-                <li><b>Complete cohorts:</b> Record every case in the dataset, including those with no detected lesion. Use <code>NA</code> for the first-detection column when a lesion is never observed so the model can treat the case as a confirmed negative.</li>
-                <li><b>Binomial model:</b> Assumes the per-sample detection probability is constant across all cases and samples. Heterogeneous disease burden can violate this assumption.</li>
-                <li><b>Hypergeometric model:</b> Requires per-case totals and positives. It still simplifies within-case variability; the beta-binomial model relaxes this by allowing overdispersion.</li>
-                <li><b>Residual false negatives:</b> Even when all submitted samples are examined, lesions may still be missed. The reported sensitivities therefore represent an upper bound conditional on the submitted material.</li>
-                <li><b>Bootstrap CIs:</b> Assume the analyzed sample is representative of the broader population of interest.</li>
-            </ul>"
+                html <- jmvcore::.("<p><b>Interpretation and limitations</b></p><p>These results describe recorded detections. A missing first-detection position records no observed lesion; this does not establish a confirmed disease-negative case.</p><p>Geometric/binomial models assume independent trials with constant probability. Finite-population models require known counts. Bootstrap intervals describe case-resampling variation and assume independent, representative cases.</p><p>Missed disease, dependence and unequal observation windows can bias interpretation. These results do not establish true sensitivity or a clinical rule-out guarantee.</p>")
 
                 if (self$options$showInterpretText) {
                     interpretText$setContent(html)
@@ -4133,70 +2766,34 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # === References ===
                 referencesText <- self$results$referencesText
 
-                html <- "<h4>Statistical Methods & References</h4>
-            <p><b>Methods:</b></p>
-            <ul>
-                <li>Binomial probability distribution for detection modeling</li>
-                <li>Hypergeometric probability distribution for finite population sampling</li>
-                <li>Beta-Binomial probability distribution for sampling with overdispersion</li>
-                <li>Bootstrap resampling with replacement (10,000 iterations default)</li>
-                <li>95% confidence intervals using percentile method</li>
-                <li>Lymph node ratio (LNR) classification with X-tile optimized cutpoints</li>
-                <li>Non-parametric effect size measures (Cliff's delta, Hodges-Lehmann)</li>
-            </ul>
-
-            <p><b>Key References:</b></p>
-            <ul>
-                <li><b>Lymph Node Adequacy & LNR Classification:</b>
-                    <ul>
-                        <li>Tomlinson JS, et al. Accuracy of Staging Node-Negative Pancreas Cancer.
-                            <i>Arch Surg.</i> 2007;142(8):767-774.
-                            <br><i>minELN=15, 8-month survival (SEER n=1,150, HR=0.63)</i></li>
-                        <li>Pu N, et al. An Artificial Neural Network Improves Prediction of Observed Survival
-                            in Patients with Pancreatic Cancer. <i>J Natl Compr Canc Netw.</i> 2021;19(9):1029-1036.
-                            <br><i>minELN=12, binomial model, LNR thresholds 0.1 & 0.3 (n=1,837)</i></li>
-                        <li>Yoon SJ, et al. Optimal Number of Lymph Nodes Retrieved to Lower False N0 Risk.
-                            <i>Ann Surg Oncol.</i> 2025. doi:10.1245/s10434-025-18029-7
-                            <br><i>minELN=12-16, false N0 modeling, Korean dual-cohort (n=1,252)</i></li>
-                    </ul>
-                </li>
-                <li><b>Sampling Adequacy Methods:</b>
-                    <ul>
-                        <li>Skala SL, Hagemann IS. Pathologic Sampling of the Omentum.
-                            <i>Int J Gynecol Pathol.</i> 2015;34(4):374-378.</li>
-                        <li>G\u{00F6}nen M, et al. Nodal Staging Score for Colon Cancer.
-                            <i>J Clin Oncol.</i> 2009;27(36):6166-6171.</li>
-                        <li>Zhou J, et al. Beta-binomial model for lymph node yield.
-                            <i>Front Oncol.</i> 2022;12:872527.</li>
-                        <li>Buderer NM. Statistical methodology for diagnostic test sample size.
-                            <i>Stat Med.</i> 1996;15(6):649-652.</li>
-                    </ul>
-                </li>
-                <li><b>Distribution Pattern Analysis:</b>
-                    <ul>
-                        <li>Ates D, et al. Lymphovascular Space Invasion in Endometrial Cancer.
-                            <i>Mod Pathol.</i> 2025;38:100885.
-                            <br><i>Single vs summed cassette distribution patterns</i></li>
-                    </ul>
-                </li>
-            </ul>"
+                html <- jmvcore::.("<p><b>Methods and references</b></p><p>Methods: geometric and binomial approximations; hypergeometric sampling without replacement; beta-binomial mixtures; case bootstrap percentile intervals; descriptive node counts with Wilson intervals; sample-position heuristics.</p><p>References: R statistical distribution documentation; VGAM package documentation; Skala and Hagemann, Int J Gynecol Pathol. 2015;34:374-378; Tomlinson et al., Arch Surg. 2007;142:767-774; Yoon et al., doi:10.1245/s10434-025-18029-7.</p><p>Literature citations are contextual; this analysis does not validate a disease-specific sampling protocol.</p>")
 
                 if (self$options$showReferencesText) {
                     referencesText$setContent(html)
                 }
+
+                # === Analysis summary ===
+                private$.addNotice(
+                    "INFO",
+                    jmvcore::.("Analysis complete"),
+                    jmvcore::format(jmvcore::.("Analysed {v1} of {v2} supplied cases; {v3} recorded a detected lesion. {v4}"), v1 = sprintf("%d", nCases), v2 = sprintf("%d", totalCasesInput), v3 = sprintf("%d", nDetected), v4 = if (identical(estimationMethod, jmvcore::.("Not calculated"))) ""
+                            else jmvcore::format(jmvcore::.("Per-sample detection probability estimated by {v1}."), v1 = estimationMethod))
+                )
             },
             .detectionCurve = function(image, ggtheme, theme, ...) {
-                if (is.null(private$.firstDetectionData)) {
-                    return()
+                state <- image$state
+                if (is.null(state) || is.null(state$firstDetection)) {
+                    return(FALSE)
                 }
 
-                firstDetectionData <- private$.firstDetectionData
-                pEstimate <- private$.pEstimate
-                maxSamp <- private$.maxSamp
+                firstDetectionData <- state$firstDetection
+                pEstimate <- state$pEstimate
+                maxSamp <- state$maxSamp
+                targetConfidence <- state$targetConfidence
                 nCases <- length(firstDetectionData)
                 nPositiveCases <- sum(!is.na(firstDetectionData))
 
-                # Calculate observed conditional probability (sensitivity)
+                # Calculate observed conditional probability (observed-positive detection)
                 # Only among positive cases, not population-level
                 nSamples <- 1:maxSamp
                 observedProb <- sapply(nSamples, function(n) {
@@ -4223,22 +2820,19 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     x = nSamples, y = Probability,
                     color = Type, linetype = Type
                 )) +
-                    ggplot2::geom_line(size = 1.2) +
+                    ggplot2::geom_line(linewidth = 1.2) +
                     ggplot2::geom_point(size = 3) +
                     ggplot2::geom_hline(
-                        yintercept = self$options$targetConfidence,
+                        yintercept = targetConfidence,
                         linetype = "dashed", color = "red", alpha = 0.5
                     ) +
                     ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
                     ggplot2::scale_x_continuous(breaks = nSamples) +
                     ggplot2::labs(
-                        title = "Diagnostic Yield Curve",
-                        subtitle = sprintf(
-                            "Target sensitivity: %.0f%% (red line)",
-                            self$options$targetConfidence * 100
-                        ),
-                        x = "Number of Samples",
-                        y = "Cumulative Detection Probability",
+                        title = jmvcore::.("Diagnostic Yield Curve"),
+                        subtitle = jmvcore::format(jmvcore::.("Target observed-positive detection: {v1}% (red line)"), v1 = sprintf("%.0f", targetConfidence * 100)),
+                        x = jmvcore::.("Number of Samples"),
+                        y = jmvcore::.("Cumulative Detection Probability"),
                         color = "Method",
                         linetype = "Method"
                     ) +
@@ -4253,12 +2847,13 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 TRUE
             },
             .sensitivityPlot = function(image, ggtheme, theme, ...) {
-                if (is.null(private$.bootstrapResults)) {
-                    return()
+                state <- image$state
+                if (is.null(state) || is.null(state$bootstrapResults)) {
+                    return(FALSE)
                 }
 
-                bootstrapResults <- private$.bootstrapResults
-                maxSamp <- private$.maxSamp
+                bootstrapResults <- state$bootstrapResults
+                maxSamp <- state$maxSamp
 
                 # Calculate statistics
                 nSamples <- 1:maxSamp
@@ -4278,22 +2873,19 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ggplot2::geom_ribbon(ggplot2::aes(ymin = ciLower, ymax = ciUpper),
                         alpha = 0.3, fill = "steelblue"
                     ) +
-                    ggplot2::geom_line(color = "steelblue", size = 1.2) +
+                    ggplot2::geom_line(color = "steelblue", linewidth = 1.2) +
                     ggplot2::geom_point(color = "steelblue", size = 3) +
                     ggplot2::geom_hline(
-                        yintercept = self$options$targetConfidence,
+                        yintercept = state$targetConfidence,
                         linetype = "dashed", color = "red", alpha = 0.5
                     ) +
                     ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
                     ggplot2::scale_x_continuous(breaks = nSamples) +
                     ggplot2::labs(
-                        title = "Bootstrap Sensitivity Estimates with 95% Confidence Intervals",
-                        subtitle = sprintf(
-                            "Based on %d bootstrap iterations",
-                            self$options$bootstrapIterations
-                        ),
-                        x = "Number of Samples",
-                        y = "Sensitivity (Detection Probability)"
+                        title = jmvcore::.("Bootstrap Observed-positive detection Estimates with 95% Confidence Intervals"),
+                        subtitle = jmvcore::format(jmvcore::.("Based on {v1} bootstrap iterations"), v1 = sprintf("%d", state$bootstrapIterations)),
+                        x = jmvcore::.("Number of Samples"),
+                        y = jmvcore::.("Observed-positive detection (Detection Probability)")
                     ) +
                     ggtheme +
                     ggplot2::theme(
@@ -4305,17 +2897,18 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 TRUE
             },
             .empiricalCumulativePlot = function(image, ggtheme, theme, ...) {
-                if (is.null(private$.firstDetectionData)) {
-                    return()
+                state <- image$state
+                if (is.null(state) || is.null(state$firstDetection)) {
+                    return(FALSE)
                 }
 
-                firstDetectionData <- private$.firstDetectionData
-                pEstimate <- private$.pEstimate
-                maxSamp <- private$.maxSamp
+                firstDetectionData <- state$firstDetection
+                pEstimate <- state$pEstimate
+                maxSamp <- state$maxSamp
                 nPositiveCases <- sum(!is.na(firstDetectionData))
 
                 if (nPositiveCases == 0) {
-                    return()
+                    return(FALSE)
                 }
 
                 # Calculate empirical cumulative detection (conditional - positive cases only)
@@ -4346,10 +2939,10 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     x = samples, y = probability,
                     color = method, linetype = method
                 )) +
-                    ggplot2::geom_line(size = 1.2) +
+                    ggplot2::geom_line(linewidth = 1.2) +
                     ggplot2::geom_point(size = 3) +
                     ggplot2::geom_hline(
-                        yintercept = self$options$targetConfidence,
+                        yintercept = state$targetConfidence,
                         linetype = "dashed", color = "red", alpha = 0.5
                     ) +
                     ggplot2::scale_y_continuous(
@@ -4367,14 +2960,10 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "Binomial Model" = "dashed"
                     )) +
                     ggplot2::labs(
-                        title = "Empirical Cumulative Detection vs Binomial Model",
-                        subtitle = sprintf(
-                            "Conditional probability (sensitivity) | %d positive cases | q = %.3f",
-                            nPositiveCases,
-                            ifelse(is.na(pEstimate), 0, pEstimate)
-                        ),
-                        x = "Number of Samples Examined",
-                        y = "Cumulative Detection Probability",
+                        title = jmvcore::.("Empirical Cumulative Detection vs Binomial Model"),
+                        subtitle = jmvcore::format(jmvcore::.("Conditional probability (observed-positive detection) | {v1} positive cases | q = {v2}"), v1 = sprintf("%d", nPositiveCases), v2 = sprintf("%.3f", ifelse(is.na(pEstimate), 0, pEstimate))),
+                        x = jmvcore::.("Number of Samples Examined"),
+                        y = jmvcore::.("Cumulative Detection Probability"),
                         color = "Method",
                         linetype = "Method"
                     ) +
@@ -4389,12 +2978,13 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 TRUE
             },
             .correlationPlot = function(image, ggtheme, theme, ...) {
-                if (is.null(private$.totalSamplesData) || is.null(private$.positiveCassettesData)) {
-                    return()
+                state <- image$state
+                if (is.null(state) || is.null(state$totalSamples) || is.null(state$positiveCassettes)) {
+                    return(FALSE)
                 }
 
-                totalSamplesData <- private$.totalSamplesData
-                positiveCassettesData <- private$.positiveCassettesData
+                totalSamplesData <- state$totalSamples
+                positiveCassettesData <- state$positiveCassettes
 
                 # Create data frame
                 plotData <- data.frame(
@@ -4403,20 +2993,25 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
 
                 # Calculate correlation
-                corTest <- cor.test(totalSamplesData, positiveCassettesData, method = "spearman")
+                # Same zero-variance trap as the correlation table: a constant column gives
+                # rho = NA, and the subtitle's "%.3f" would then print "NA".
+                corTest <- suppressWarnings(stats::cor.test(
+                    totalSamplesData, positiveCassettesData, method = "spearman"
+                ))
 
                 # Create scatter plot with regression line
                 p <- ggplot2::ggplot(plotData, ggplot2::aes(x = total, y = positive)) +
                     ggplot2::geom_point(alpha = 0.6, size = 3, color = "steelblue") +
                     ggplot2::geom_smooth(method = "lm", se = TRUE, color = "darkred", fill = "pink", alpha = 0.2) +
                     ggplot2::labs(
-                        title = "Correlation: Total Cassettes Examined vs Positive Cassettes",
-                        subtitle = sprintf(
-                            "Spearman's rho = %.3f, p = %.4f",
-                            corTest$estimate, corTest$p.value
-                        ),
-                        x = "Total Cassettes Examined",
-                        y = "Number of Positive Cassettes"
+                        title = jmvcore::.("Correlation: Total Cassettes Examined vs Positive Cassettes"),
+                        subtitle = if (is.na(corTest$estimate) || is.na(corTest$p.value)) {
+                            jmvcore::.("Spearman's rho not estimable (no variation in one of the two variables)")
+                        } else {
+                            sprintf("Spearman's rho = %.3f, p = %.4f", corTest$estimate, corTest$p.value)
+                        },
+                        x = jmvcore::.("Total Cassettes Examined"),
+                        y = jmvcore::.("Number of Positive Cassettes")
                     ) +
                     ggtheme +
                     ggplot2::theme(
@@ -4428,125 +3023,23 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 TRUE
             },
             .populateOmentumAnalysis = function() {
-                omentumText <- self$results$omentumText
-
-                html <- "<h4>Omentum Sampling Adequacy - Literature Comparison</h4>
-
-            <p><b>Recent Evidence:</b></p>
-            <ul>
-                <li><b>Maglalang & Fadare 2025 (UCSD, n=1,055):</b>
-                    <br>\u{2022} Grossly normal: 8.0% MPR, 1-2 blocks showed similar MPR to 5-6 blocks (P>.50)
-                    <br>\u{2022} Post-neoadjuvant: 19.0% MPR (5\u{00D7} higher, P=.03)
-                    <br>\u{2022} <b>Critical limitation:</b> No gold standard comparison, false negative rate unknown</li>
-                <li><b>ISGyP Guidelines (2019):</b> >=4 blocks for grossly normal omentum</li>
-                <li><b>Skala & Hagemann 2015 (n=44, simulation):</b>
-                    <br>\u{2022} 5 blocks \u{2192} 82% sensitivity
-                    <br>\u{2022} 10 blocks \u{2192} 95% sensitivity</li>
-            </ul>
-
-            <p><b>Risk-Stratified Recommendations:</b></p>
-            <table style='border-collapse: collapse; width: 100%;'>
-                <tr style='background-color: rgba(33, 33, 33, 0.07); color: inherit;'>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>Scenario</th>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>Maglalang MPR</th>
-                    <th style='border: 1px solid #ddd; padding: 8px;'>Recommended Blocks</th>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Grossly normal, no NACT</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>8.0%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>>=4 (guideline)</td>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Grossly normal, post-NACT</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>19.0%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>>=6 (high risk)</td>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Multifocal/diffuse abnormal</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>92.1%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>2-3 (high pre-test probability)</td>
-                </tr>
-                <tr>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>Focal abnormal</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>66.4%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>>=4 (heterogeneous)</td>
-                </tr>
-            </table>
-
-            <p><i><b>Note:</b> Maglalang's retrospective design cannot assess false negative rates.
-            Prospective validation with complete sampling gold standard is needed before reducing
-            sampling intensity below guideline recommendations.</i></p>
-
-            <p><b>References:</b></p>
-            <ul style='font-size: 12px;'>
-                <li>Maglalang NA, Fadare O. <i>Am J Clin Pathol.</i> 2025. doi:10.1093/ajcp/aqaf082</li>
-                <li>Malpica A, et al. <i>Int J Gynecol Pathol.</i> 2019;38:S9-S24 (ISGyP guideline)</li>
-                <li>Skala SL, Hagemann IS. <i>Int J Gynecol Pathol.</i> 2015;34:281-287</li>
-            </ul>"
-
-                if (self$options$showOmentumAnalysis) {
-                    omentumText$setContent(html)
-                }
-
-                # === Append Calculated Variables ===
-                if (self$options$appendVariables && !is.na(pEstimate)) {
-                    # Calculate recommended samples for target confidence
-                    rec_samples <- NA
-                    if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
-                        rec_samples <- ceiling(log1p(-targetConf) / log1p(-pEstimate))
-                    }
-
-                    # We use the filtered data for calculation
-                    # Note: In a full Jamovi implementation, this would need to be mapped back to original rows
-                    # or output via a specific Output object. Here we execute the logic to ensure correctness.
-
-                    # TODO (stub + security future-proof): `enhanced_data` is computed here but
-                    # never returned, stored on private fields, or written to any result output - 
-                    # dead/stub feature. `self$options$appendPrefix` is an OptionString (HIGH
-                    # attacker-controlled free text) flowing into column-name construction via
-                    # `paste0(prefix, "cumulative_prob_", i)` etc. inside .appendCalculatedVariables.
-                    # If a future maintainer wires this up to a result pane, user-supplied
-                    # `appendPrefix = "<script>alert(1)</script>"` would land in column-name strings
-                    # that flow into HTML. Either remove this dead block or htmlEscape the prefix
-                    # at the .appendCalculatedVariables boundary before column-name construction.
-                    enhanced_data <- private$.appendCalculatedVariables(
-                        data = data.frame(row_id = seq_along(firstDetectionData)), # Dummy df for context
-                        q_estimate = pEstimate,
-                        recommended_samples = rec_samples,
-                        first_detection = firstDetectionData,
-                        prefix = self$options$appendPrefix
-                    )
-                }
+                self$results$omentumText$setContent(
+                    jmvcore::.("<p><b>Omentum literature</b></p><p>Relevant studies include Maglalang and Fadare (2025; doi:10.1093/ajcp/aqaf082), Malpica et al. (2019; ISGyP recommendations), and Skala and Hagemann (2015; Int J Gynecol Pathol. 34:374-378). Review each study's population and design before applying its findings.</p><p>No patient-level minimum, false-negative rate or independent disease status is established here. These observations do not justify reducing sampling below a validated protocol.</p>"))
             },
 
             # ===== Helper Functions for Enhanced Analyses =====
 
             # Parse comma-separated sample list
             .parseSampleList = function(sampleListString) {
-                if (is.na(sampleListString) || sampleListString == "" ||
-                    is.null(sampleListString) || length(sampleListString) == 0) {
-                    return(integer(0))
-                }
-
-                # Handle both string and numeric input
-                str_val <- as.character(sampleListString)
-                if (str_val == "") {
-                    return(integer(0))
-                }
-
-                # Split and convert to integer
-                samples <- tryCatch(
-                    {
-                        as.integer(strsplit(str_val, ",")[[1]])
-                    },
-                    error = function(e) {
-                        integer(0)
-                    }
-                )
-
-                # Remove NAs and return
-                samples <- samples[!is.na(samples)]
-                return(samples)
+                if (is.null(sampleListString) || length(sampleListString) == 0 ||
+                    is.na(sampleListString) || !nzchar(trimws(as.character(sampleListString))))
+                    return(integer())
+                tokens <- trimws(strsplit(as.character(sampleListString), ",", fixed = TRUE)[[1]])
+                if (!all(grepl("^[0-9]+$", tokens))) return(NA_integer_)
+                samples <- suppressWarnings(as.numeric(tokens))
+                if (!all(private$.validCount(samples, positive = TRUE)) ||
+                    anyDuplicated(samples) || any(samples > .Machine$integer.max)) return(NA_integer_)
+                sort(as.integer(samples))
             },
 
             # Calculate clustering index for a list of positive samples
@@ -4559,9 +3052,20 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 distances <- diff(sorted_samples)
                 mean_distance <- mean(distances)
 
-                expected_distance <- totalSamples / length(positiveSamples)
+                # Expected mean gap between consecutive positives when k positions are drawn
+                # uniformly at random from 1..N. The k positions cut the sequence into k + 1
+                # spacings, each with expectation (N + 1)/(k + 1); the internal gaps that
+                # diff() returns share that expectation.
+                #
+                # The previous denominator was N/k, which is too large and made the index sit
+                # BELOW 1 under random placement -- systematically so as k falls. With k = 2
+                # positives (an everyday finding) the index averaged 0.67, and the module
+                # calls anything below 0.7 "clustered", so two randomly scattered positive
+                # blocks were reported as focal disease about half the time.
+                k <- length(positiveSamples)
+                expected_distance <- (totalSamples + 1) / (k + 1)
 
-                if (expected_distance == 0) {
+                if (!is.finite(expected_distance) || expected_distance <= 0) {
                     return(NA_real_)
                 }
 
@@ -4571,43 +3075,50 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             # Estimate number of foci from sample positions
             .estimateFociCount = function(positiveSamples) {
-                if (length(positiveSamples) <= 1) {
-                    return(1)
-                }
+                if (!length(positiveSamples)) return(0L)
+                if (anyNA(positiveSamples)) return(NA_integer_)
+                if (length(positiveSamples) == 1) return(1L)
 
                 sorted_samples <- sort(positiveSamples)
                 distances <- diff(sorted_samples)
 
-                # Count gaps > 2 as separate foci
-                gaps <- sum(distances > 2)
+                # A gap wider than fociGapThreshold starts a new focus. This was a bare
+                # literal 2 with no citation; it is a sampling-interval heuristic, so it
+                # belongs under the user's control rather than hard-coded.
+                gapThreshold <- self$options$fociGapThreshold
+                if (is.null(gapThreshold) || !is.finite(gapThreshold)) {
+                    gapThreshold <- 2
+                }
+
+                gaps <- sum(distances > gapThreshold)
                 foci <- gaps + 1
 
                 return(foci)
             },
 
+            .bootstrapCache = NULL,
+            .bootstrapCDF = function(first, maxN, nBoot) {
+                first <- first[!is.na(first)]
+                if (!length(first)) return(NULL)
+                key <- list(first = first, maxN = maxN, nBoot = nBoot)
+                if (identical(private$.bootstrapCache$key, key))
+                    return(private$.bootstrapCache$values)
+                values <- matrix(0, nrow = nBoot, ncol = maxN)
+                for (b in seq_len(nBoot)) {
+                    if (b %% 100L == 0L) private$.checkpoint()
+                    sampled <- first[sample.int(length(first), length(first), replace = TRUE)]
+                    counts <- tabulate(pmin(sampled, maxN + 1L), nbins = maxN + 1L)
+                    values[b, ] <- cumsum(counts)[seq_len(maxN)] / length(first)
+                }
+                private$.bootstrapCache <- list(key = key, values = values)
+                values
+            },
+
             # Bootstrap empirical cumulative detection
             .bootstrapEmpiricalCumulative = function(firstDetectionData, totalSamplesData,
                                                      maxN, nBoot = 10000) {
-                positive_idx <- !is.na(firstDetectionData)
-                positive_first <- firstDetectionData[positive_idx]
-                positive_total <- totalSamplesData[positive_idx]
-
-                if (length(positive_first) == 0) {
-                    return(NULL)
-                }
-
-                n_cases <- length(positive_first)
-                detection_matrix <- matrix(NA_real_, nrow = nBoot, ncol = maxN)
-
-                for (b in 1:nBoot) {
-                    boot_idx <- sample(n_cases, replace = TRUE)
-                    boot_first <- positive_first[boot_idx]
-
-                    for (n in 1:maxN) {
-                        detected <- sum(boot_first <= n, na.rm = TRUE)
-                        detection_matrix[b, n] <- detected / n_cases
-                    }
-                }
+                detection_matrix <- private$.bootstrapCDF(firstDetectionData, maxN, nBoot)
+                if (is.null(detection_matrix)) return(NULL)
 
                 # Calculate percentiles
                 ci_lower <- apply(detection_matrix, 2, quantile, probs = 0.025, na.rm = TRUE)
@@ -4639,20 +3150,22 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         statistic = NA,
                         df = NA,
                         pValue = NA,
-                        interpretation = "Insufficient data (n < 10)"
+                        interpretation = jmvcore::.("Insufficient data (n < 10)")
                     ))
                 }
 
+                if (length(unique(groups)) < 2) return(list(statistic = NA_real_,
+                    df = NA_real_, pValue = NA_real_, interpretation = jmvcore::.("At least two sample types are required.")))
                 # Calculate pooled q (H0: null model)
                 mean_first_pooled <- mean(first_detection, na.rm = TRUE)
                 q_pooled <- 1 / mean_first_pooled
 
                 # Log-likelihood for pooled model (geometric distribution)
-                ll_null <- sum(log(dgeom(first_detection - 1, q_pooled)), na.rm = TRUE)
+                ll_null <- sum(dgeom(first_detection - 1, q_pooled, log = TRUE))
 
                 # Calculate group-specific q (H1: alternative model)
                 ll_alt <- 0
-                unique_groups <- unique(groups)
+                unique_groups <- unique(as.character(groups))
                 n_groups <- length(unique_groups)
 
                 for (group in unique_groups) {
@@ -4660,7 +3173,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     if (length(group_data) > 0) {
                         mean_first_group <- mean(group_data, na.rm = TRUE)
                         q_group <- 1 / mean_first_group
-                        ll_alt <- ll_alt + sum(log(dgeom(group_data - 1, q_group)), na.rm = TRUE)
+                        ll_alt <- ll_alt + sum(dgeom(group_data - 1, q_group, log = TRUE))
                     }
                 }
 
@@ -4671,13 +3184,13 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Interpretation
                 if (p_value < 0.001) {
-                    interp <- "Strong evidence of heterogeneity (p < 0.001)"
+                    interp <- jmvcore::.("Strong evidence of heterogeneity (p < 0.001)")
                 } else if (p_value < 0.01) {
-                    interp <- "Significant heterogeneity detected (p < 0.01)"
+                    interp <- jmvcore::.("Significant heterogeneity detected (p < 0.01)")
                 } else if (p_value < 0.05) {
-                    interp <- "Moderate heterogeneity detected (p < 0.05)"
+                    interp <- jmvcore::.("Moderate heterogeneity detected (p < 0.05)")
                 } else {
-                    interp <- "No significant heterogeneity (p >= 0.05)"
+                    interp <- jmvcore::.("No evidence of heterogeneity at the 0.05 level; this does not establish homogeneity.")
                 }
 
                 list(
@@ -4692,19 +3205,6 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # 2. GEOMETRIC CI CALCULATION
             # ==============================================================================
 
-            .calculateGeometricCI = function(n_samples, q_mle, q_ci_lower, q_ci_upper) {
-                # Cumulative detection probability
-                prob_point <- 1 - (1 - q_mle)^n_samples
-                prob_lower <- 1 - (1 - q_ci_lower)^n_samples
-                prob_upper <- 1 - (1 - q_ci_upper)^n_samples
-
-                list(
-                    point = prob_point,
-                    lower = prob_lower,
-                    upper = prob_upper,
-                    method = "geometric"
-                )
-            },
 
             # ==============================================================================
             # 3. MODEL FIT ASSESSMENT
@@ -4719,47 +3219,64 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         chiSquare = NA,
                         df = NA,
                         pValue = NA,
-                        fitQuality = "Insufficient data"
+                        fitQuality = jmvcore::.("Insufficient data")
                     ))
                 }
 
-                # Get unique values and frequencies
-                first_vals <- sort(unique(first_detection))
-                observed <- sapply(first_vals, function(x) sum(first_detection == x))
-
-                # Expected frequencies under geometric distribution
+                # Bins must PARTITION the whole support of the geometric distribution,
+                # otherwise sum(expected) != sum(observed) and the statistic is inflated.
+                # The previous version binned only the OBSERVED values, silently discarding
+                # the mass above the largest one; on data drawn from exactly this model that
+                # rejected the fit in up to 86% of samples (q = 0.10, n = 30) against a
+                # nominal 5%. Bins are therefore 1, 2, ..., k plus an explicit ">= k+1" bin
+                # carrying P(X > k) = (1 - q)^k, which makes the expected counts sum to n.
                 n_total <- length(first_detection)
-                expected <- sapply(first_vals, function(x) {
-                    n_total * dgeom(x - 1, q_estimate)
-                })
+                k_max <- min(max(first_detection), 1000L)
+                observed <- tabulate(pmin(first_detection, k_max + 1L), nbins = k_max + 1L)
+                expected <- c(n_total * stats::dgeom(seq_len(k_max) - 1, q_estimate),
+                              n_total * (1 - q_estimate)^k_max)
 
-                # Combine small expected frequencies (< 5)
-                if (any(expected < 5)) {
-                    # Simple approach: group all rare categories
-                    keep_idx <- expected >= 5
-                    if (sum(keep_idx) > 1) {
-                        observed <- c(observed[keep_idx], sum(observed[!keep_idx]))
-                        expected <- c(expected[keep_idx], sum(expected[!keep_idx]))
-                    }
+                # Pool from the right until every expected count reaches 5, so the tail mass
+                # is folded into the last bin rather than dropped.
+                while (length(expected) > 2 && expected[length(expected)] < 5) {
+                    m <- length(expected)
+                    expected <- c(expected[seq_len(m - 2)], sum(expected[(m - 1):m]))
+                    observed <- c(observed[seq_len(m - 2)], sum(observed[(m - 1):m]))
+                }
+                # Any remaining sparse interior bins are pooled into the tail as well.
+                while (length(expected) > 2 && any(expected < 5)) {
+                    m <- length(expected)
+                    expected <- c(expected[seq_len(m - 2)], sum(expected[(m - 1):m]))
+                    observed <- c(observed[seq_len(m - 2)], sum(observed[(m - 1):m]))
                 }
 
                 # Chi-square goodness of fit
                 chi_sq <- sum((observed - expected)^2 / expected)
-                df <- length(observed) - 1 - 1 # -1 for total, -1 for estimated parameter
+                df <- length(observed) - 1 - 1 # -1 for the total, -1 for the estimated q
 
-                if (df < 1) df <- 1 # Minimum df = 1
+                if (df < 1) {
+                    # Not enough distinct bins to test anything. Reporting a fabricated
+                    # df = 1 here produced a fit verdict from a distribution that does
+                    # not apply; say so instead.
+                    return(list(
+                        chiSquare = NA,
+                        df = NA,
+                        pValue = NA,
+                        fitQuality = jmvcore::.("Not estimable (too few distinct detection positions)")
+                    ))
+                }
 
-                p_value <- pchisq(chi_sq, df, lower.tail = FALSE)
+                p_value <- stats::pchisq(chi_sq, df, lower.tail = FALSE)
 
                 # Fit quality assessment
                 if (p_value >= 0.10) {
-                    fit_quality <- "Good fit (p >= 0.10)"
+                    fit_quality <- jmvcore::.("No detected lack of fit (p >= 0.10); this does not establish model validity")
                 } else if (p_value >= 0.05) {
-                    fit_quality <- "Acceptable fit (p >= 0.05)"
+                    fit_quality <- jmvcore::.("No detected lack of fit (p >= 0.05); this does not establish model validity")
                 } else if (p_value >= 0.01) {
-                    fit_quality <- "Marginal fit (p < 0.05)"
+                    fit_quality <- jmvcore::.("Marginal fit (p < 0.05)")
                 } else {
-                    fit_quality <- "Poor fit (p < 0.01)"
+                    fit_quality <- jmvcore::.("Poor fit (p < 0.01)")
                 }
 
                 list(
@@ -4812,13 +3329,13 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Assessment
                     abs_diff <- abs(diff)
                     if (abs_diff < 0.05) {
-                        assess <- " Excellent fit"
+                        assess <- jmvcore::.("Excellent fit")
                     } else if (abs_diff < 0.10) {
-                        assess <- " Good fit"
+                        assess <- jmvcore::.("Good fit")
                     } else if (abs_diff < 0.15) {
-                        assess <- " Fair fit"
+                        assess <- jmvcore::.("Fair fit")
                     } else {
-                        assess <- " Poor fit"
+                        assess <- jmvcore::.("Poor fit")
                     }
 
                     results[i, ] <- list(i, obs, pred, diff, assess)
@@ -4827,68 +3344,6 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 results
             },
 
-            # ==============================================================================
-            # 5. APPEND CALCULATED VARIABLES
-            # ==============================================================================
-
-            .appendCalculatedVariables = function(data, q_estimate, recommended_samples,
-                                                  first_detection, prefix = "ps_") {
-                # Ensure data is a data frame
-                if (!is.data.frame(data)) {
-                    warning("Data must be a data frame for appendVariables")
-                    return(data)
-                }
-
-                n_rows <- nrow(data)
-
-                # 1. Add cumulative probabilities for common sample sizes
-                for (i in c(1, 2, 3, 4, 5, 7, 10)) {
-                    var_name <- paste0(prefix, "cumulative_prob_", i)
-                    prob <- 1 - (1 - q_estimate)^i
-                    data[[var_name]] <- rep(prob, n_rows)
-                }
-
-                # 2. Add detection category
-                detection_cat <- rep(NA_character_, n_rows)
-                for (idx in 1:n_rows) {
-                    fd <- first_detection[idx]
-                    if (is.na(fd)) {
-                        detection_cat[idx] <- "Negative"
-                    } else if (fd <= 2) {
-                        detection_cat[idx] <- "Early (1-2)"
-                    } else if (fd <= 5) {
-                        detection_cat[idx] <- "Standard (3-5)"
-                    } else {
-                        detection_cat[idx] <- "Late (>5)"
-                    }
-                }
-                data[[paste0(prefix, "detection_category")]] <- factor(
-                    detection_cat,
-                    levels = c("Early (1-2)", "Standard (3-5)", "Late (>5)", "Negative")
-                )
-
-                # 3. Add recommended samples (constant for all rows)
-                data[[paste0(prefix, "recommended_samples")]] <- rep(recommended_samples, n_rows)
-
-                # 4. Add "detected by N" flags
-                for (n in c(3, 5, 7, 10)) {
-                    var_name <- paste0(prefix, "detected_by_", n)
-                    detected <- !is.na(first_detection) & first_detection <= n
-                    data[[var_name]] <- detected
-                }
-
-                # 5. Add detection efficiency (how early detected relative to recommended)
-                efficiency <- rep(NA_real_, n_rows)
-                for (idx in 1:n_rows) {
-                    fd <- first_detection[idx]
-                    if (!is.na(fd) && !is.na(recommended_samples) && recommended_samples > 0) {
-                        efficiency[idx] <- fd / recommended_samples
-                    }
-                }
-                data[[paste0(prefix, "detection_efficiency")]] <- efficiency
-
-                return(data)
-            },
 
             # ==============================================================================
             # 6. AUTO-DETECT HETEROGENEITY (COMPOSITION ANALYSIS)
@@ -4903,12 +3358,12 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (length(first_detection) < 10) {
                     return(list(
                         warning = FALSE,
-                        message = "Insufficient data for heterogeneity assessment (n < 10)"
+                        message = jmvcore::.("Insufficient data for heterogeneity assessment (n < 10)")
                     ))
                 }
 
                 # Calculate q for each group
-                unique_groups <- unique(groups)
+                unique_groups <- unique(as.character(groups))
                 group_stats <- list()
                 q_values <- numeric(length(unique_groups))
 
@@ -4938,7 +3393,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (length(q_values) < 2) {
                     return(list(
                         warning = FALSE,
-                        message = "Only one group has sufficient data for q estimation"
+                        message = jmvcore::.("Only one group has sufficient data for q estimation")
                     ))
                 }
 
@@ -4953,15 +3408,9 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Create summary message
                 if (warning_flag) {
                     severity <- if (cv_q > 0.50) "HIGH" else "MODERATE"
-                    message <- sprintf(
-                        " %s heterogeneity detected (CV = %.2f). Detection probability varies substantially across groups. Consider stratified analysis.",
-                        severity, cv_q
-                    )
+                    message <- jmvcore::format(jmvcore::.("{v1} heterogeneity detected (CV = {v2}). Detection probability varies substantially across groups. Consider stratified analysis."), v1 = severity, v2 = sprintf("%.2f", cv_q))
                 } else {
-                    message <- sprintf(
-                        " Low heterogeneity (CV = %.2f). Pooled analysis is appropriate.",
-                        cv_q
-                    )
+                    message <- jmvcore::format(jmvcore::.("Low observed between-group variation (CV = {v1}); this does not establish independence or justify pooling."), v1 = sprintf("%.2f", cv_q))
                 }
 
                 list(

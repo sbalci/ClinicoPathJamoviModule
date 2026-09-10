@@ -123,6 +123,7 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - RColorBrewer
     - viridis
 ...

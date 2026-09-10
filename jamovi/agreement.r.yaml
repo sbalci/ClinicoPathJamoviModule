@@ -2151,9 +2151,15 @@ items:
           - showSampleSizeGuide
 
 refs:
+    - ClinicoPathJamoviModule
     - irr
     - PathologyKappa
-    - ClinicoPathJamoviModule
-
-
+    - DescTools
+    - graphics
+    - irrCAC
+    - kappaSize
+    - lme4
+    - lmerTest
+    - psych
+    - vcd
 ...

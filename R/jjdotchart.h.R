@@ -213,10 +213,10 @@ jjdotchartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Dot Chart (Summary vs Reference Value)",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggplot2",
                     "ggstatsplot",
-                    "statsExpressions",
-                    "ClinicoPathJamoviModule"),
+                    "statsExpressions"),
                 clearWith=list(
                     "seed",
                     "dep",
@@ -305,7 +305,7 @@ jjdotchartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjdotchart",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = jjdotchartResults$new(options=options),
                 data = data,

@@ -251,11 +251,11 @@ flexcompriskResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Flexible Competing Risks Models",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "riskRegression",
                     "survival",
                     "splines",
                     "randomForestSRC",
-                    "ClinicoPathJamoviModule",
                     "tools",
                     "scales"))
             self$add(jmvcore::Html$new(

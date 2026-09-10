@@ -550,14 +550,18 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Survival Analysis for Continuous Explanatory Variable",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "finalfit",
                     "survival",
                     "survminer",
                     "dichotomizing",
                     "survivaltutorial",
                     "survivalrwnahhas",
-                    "ClinicoPathJamoviModule",
-                    "SchemperSmith1996"))
+                    "SchemperSmith1996",
+                    "KMunicate",
+                    "lubridate",
+                    "patchwork",
+                    "rpart"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
@@ -2106,7 +2110,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survivalcont",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = survivalcontResults$new(options=options),
                 data = data,

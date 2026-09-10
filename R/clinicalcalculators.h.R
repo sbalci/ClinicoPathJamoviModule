@@ -498,7 +498,8 @@ clinicalcalculatorsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 title="Clinical Risk Calculators & Nomograms",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "rms"))
+                    "rms",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -298,7 +298,9 @@ recistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="RECIST 1.1 Multi-Lesion Aggregation")
+                title="RECIST 1.1 Multi-Lesion Aggregation",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="runSummary",

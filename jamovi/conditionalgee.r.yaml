@@ -245,9 +245,7 @@ items:
           - exportResults
 
 refs:
+    - ClinicoPathJamoviModule
     - geepack
     - survival
-    - ClinicoPathJamoviModule
-
-
 ...

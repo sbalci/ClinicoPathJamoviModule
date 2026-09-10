@@ -868,7 +868,9 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - psych
     - reticulate
+    - cutpointr
+    - maxstat
+    - survival
 ...

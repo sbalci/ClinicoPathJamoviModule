@@ -508,6 +508,7 @@ riverplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="River Plots & Alluvial Diagrams",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "riverplot",
                     "digest",
                     "stringr",

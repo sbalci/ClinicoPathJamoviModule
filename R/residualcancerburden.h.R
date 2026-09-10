@@ -262,9 +262,10 @@ residualcancerburdenResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 name="",
                 title="Residual Cancer Burden (RCB)",
                 refs=list(
-                    "symmans2007rcb",
                     "ClinicoPathJamoviModule",
-                    "ggplot2"))
+                    "symmans2007rcb",
+                    "ggplot2",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

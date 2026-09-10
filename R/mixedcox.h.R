@@ -419,9 +419,9 @@ mixedcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Mixed-Effects Cox Regression",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "coxme",
-                    "survival",
-                    "ClinicoPathJamoviModule"))
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

@@ -109,9 +109,11 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - ggplot2
     - ggstatsplot
     - statsExpressions
-    - ClinicoPathJamoviModule
-
+    - digest
+    - ggpubr
+    - tools
 ...

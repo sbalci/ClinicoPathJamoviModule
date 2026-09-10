@@ -491,11 +491,11 @@ decisionpanelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Decision Panel Optimization",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "rpart",
                     "partykit",
                     "DiagrammeR",
                     "ROCR",
-                    "ClinicoPathJamoviModule",
                     "parallel",
                     "digest",
                     "rpart.plot",

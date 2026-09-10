@@ -49,8 +49,6 @@ items:
           - multiple_testing
 
 refs:
-    - DescTools
     - ClinicoPathJamoviModule
-
-
+    - DescTools
 ...

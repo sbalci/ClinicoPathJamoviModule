@@ -31,8 +31,8 @@ items:
       type: Preformatted
 
 refs:
+    - ClinicoPathJamoviModule
     - retractcheck
     - rcrossref
-    - ClinicoPathJamoviModule
     - httr
 ...

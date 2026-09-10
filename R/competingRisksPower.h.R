@@ -268,9 +268,9 @@ competingRisksPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Competing Risks Power Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "cmprsk",
                     "survival",
-                    "ClinicoPathJamoviModule",
                     "scales"))
             self$add(jmvcore::Html$new(
                 options=options,

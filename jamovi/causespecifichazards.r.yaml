@@ -295,6 +295,7 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - survival
     - cmprsk
 ...

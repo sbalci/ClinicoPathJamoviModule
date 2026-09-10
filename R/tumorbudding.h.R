@@ -173,7 +173,8 @@ tumorbuddingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Tumor Budding (ITBCC)",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

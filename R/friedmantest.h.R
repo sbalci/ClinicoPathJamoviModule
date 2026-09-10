@@ -185,7 +185,8 @@ friedmantestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Friedman Test for Non-Parametric Repeated Measures",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "PMCMRplus"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

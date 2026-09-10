@@ -65,6 +65,7 @@ stagemigration(
   generateExecutiveSummary = FALSE,
   cancerType = "general",
   useOptimismCorrection = FALSE,
+  seed = 42,
   enableMultifactorialAnalysis = FALSE,
   continuousCovariates = NULL,
   categoricalCovariates = NULL,
@@ -219,14 +220,14 @@ stagemigration(
   winRatioGeneralizedPairwise = FALSE,
   performFrailtyModelsAnalysis = FALSE,
   frailtyClusterVariable = NULL,
-  frailtyDistribution = "gamma",
+  frailtyDistribution = "log-normal",
   frailtyBootstrap = FALSE,
   frailtyBootstrapSamples = 500,
-  frailtyVarianceComponents = FALSE,
+  frailtyVarianceComponents = TRUE,
   frailtyHeterogeneityTest = FALSE,
   frailtyClusterComparison = FALSE,
   frailtyModelSelection = FALSE,
-  frailtyPredictiveAccuracy = FALSE,
+  frailtyPredictiveAccuracy = TRUE,
   frailtyDiagnostics = FALSE,
   frailtyAdvancedInference = FALSE,
   performClinicalUtilityAnalysis = FALSE,
@@ -494,6 +495,11 @@ literature.}
 
 \item{useOptimismCorrection}{Apply optimism correction to performance
 metrics using bootstrap validation to avoid overly optimistic estimates.}
+
+\item{seed}{Random seed set at the start of each run, so every resampling
+step (bootstrap validation, cross-validation folds, SHAP subsampling,
+bootstrap model selection) reproduces the same results for the same data
+and options. Change it to draw a different resample.}
 
 \item{enableMultifactorialAnalysis}{Enable advanced multifactorial stage
 migration analysis that includes additional covariates in the comparison.
@@ -1174,8 +1180,10 @@ frailty modeling (e.g.,  hospital, center, surgeon). Used to account for
 unobserved  heterogeneity and clustering effects in survival analysis.}
 
 \item{frailtyDistribution}{Distribution assumption for the frailty (random
-effects) terms. Gamma distribution is most common and provides
-multiplicative  frailty effects on the hazard function.}
+effects) terms. Log-normal (default) and Gaussian are the same model, a
+Gaussian random effect on the log-hazard, fitted with coxme. Gamma is
+fitted with coxph plus frailty() and currently reports the overview table
+only.}
 
 \item{frailtyBootstrap}{Perform bootstrap validation for frailty model
 parameters and  variance components to assess model stability and provide
@@ -1267,10 +1275,9 @@ horizon and identify  optimal decision timing.}
 A results object containing:
 \tabular{llllll}{
 \code{results$welcomeMessage} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$copyReadyReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$guidedModeProgress} \tab \tab \tab \tab \tab a html \cr
-\code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$mydataview2} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$migrationOverviewExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$migrationOverview} \tab \tab \tab \tab \tab a table \cr
 \code{results$migrationMatrixExplanation} \tab \tab \tab \tab \tab a html \cr

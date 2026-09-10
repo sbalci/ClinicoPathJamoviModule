@@ -103,10 +103,12 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - ggstatsplot
     - ggalluvial
     - easyalluvial
-    - ClinicoPathJamoviModule
     - patchwork
     - cowplot
+    - jmv
+    - performance
 ...

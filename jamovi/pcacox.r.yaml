@@ -346,4 +346,5 @@ refs:
     - superpc
     - sparsepca
     - kernlab
+    - tools
 ...

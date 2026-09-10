@@ -261,4 +261,7 @@ items:
         - confirmationInterval
         - colorScheme
 
+
+refs:
+    - ClinicoPathJamoviModule
 ...

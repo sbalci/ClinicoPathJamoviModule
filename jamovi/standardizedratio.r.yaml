@@ -113,7 +113,7 @@ items:
 
 
 refs:
-    - breslowday1987
     - ClinicoPathJamoviModule
+    - breslowday1987
     - ggplot2
 ...

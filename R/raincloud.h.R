@@ -342,7 +342,10 @@ raincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "ggdist",
-                    "ggplot2"),
+                    "ggplot2",
+                    "ggprism",
+                    "moments",
+                    "viridis"),
                 clearWith=list(
                     "dep_var",
                     "group_var"))
@@ -440,7 +443,7 @@ raincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "raincloud",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = raincloudResults$new(options=options),
                 data = data,

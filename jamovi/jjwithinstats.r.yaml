@@ -143,9 +143,10 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - ggstatsplot
     - statsExpressions
     - ggpubr
-    - ClinicoPathJamoviModule
-
+    - digest
+    - haven
 ...

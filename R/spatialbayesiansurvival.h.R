@@ -547,7 +547,9 @@ spatialbayesiansurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE))
                 name="",
                 title="Analysis Results",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "spBayesSurv",
+                    "survival"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",

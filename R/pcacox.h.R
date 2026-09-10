@@ -329,7 +329,8 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "survival",
                     "superpc",
                     "sparsepca",
-                    "kernlab"))
+                    "kernlab",
+                    "tools"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",

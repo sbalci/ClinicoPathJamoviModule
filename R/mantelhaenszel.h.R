@@ -142,7 +142,9 @@ mantelhaenszelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 options=options,
                 name="",
-                title="Mantel-Haenszel Stratified Analysis")
+                title="Mantel-Haenszel Stratified Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="mh_summary",

@@ -319,7 +319,8 @@ featurequalityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Feature Quality Assessment",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "graphics"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

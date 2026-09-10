@@ -317,9 +317,8 @@ items:
       visible: (show_interpretation)
 
 refs:
+    - ClinicoPathJamoviModule
     - ggplot2
     - dplyr
     - tidyr
-    - ClinicoPathJamoviModule
-
 ...

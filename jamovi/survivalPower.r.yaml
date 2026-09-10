@@ -1,6 +1,6 @@
 ---
 name: survivalPower
-title: Power Analysis & Sample Size Calculation
+title: Survival Power Analysis
 jrs: '1.1'
 
 items:
@@ -40,17 +40,12 @@ items:
           - dropout_rate
           - ni_margin
           - ni_type
-          - competing_risk_rate
-          - competing_risk_hr
           - rmst_tau
           - rmst_difference
-          - snp_maf
-          - genetic_model
           - number_of_arms
           - multiple_comparisons
           - interim_analyses
           - alpha_spending
-          - stratification_factors
           - cluster_size
           - icc
           - sensitivity_analysis
@@ -83,17 +78,12 @@ items:
           - dropout_rate
           - ni_margin
           - ni_type
-          - competing_risk_rate
-          - competing_risk_hr
           - rmst_tau
           - rmst_difference
-          - snp_maf
-          - genetic_model
           - number_of_arms
           - multiple_comparisons
           - interim_analyses
           - alpha_spending
-          - stratification_factors
           - cluster_size
           - icc
           - sensitivity_analysis
@@ -191,17 +181,12 @@ items:
           - dropout_rate
           - ni_margin
           - ni_type
-          - competing_risk_rate
-          - competing_risk_hr
           - rmst_tau
           - rmst_difference
-          - snp_maf
-          - genetic_model
           - number_of_arms
           - multiple_comparisons
           - interim_analyses
           - alpha_spending
-          - stratification_factors
           - cluster_size
           - icc
           - sensitivity_analysis
@@ -244,17 +229,12 @@ items:
           - dropout_rate
           - ni_margin
           - ni_type
-          - competing_risk_rate
-          - competing_risk_hr
           - rmst_tau
           - rmst_difference
-          - snp_maf
-          - genetic_model
           - number_of_arms
           - multiple_comparisons
           - interim_analyses
           - alpha_spending
-          - stratification_factors
           - cluster_size
           - icc
           - sensitivity_analysis
@@ -297,17 +277,12 @@ items:
           - dropout_rate
           - ni_margin
           - ni_type
-          - competing_risk_rate
-          - competing_risk_hr
           - rmst_tau
           - rmst_difference
-          - snp_maf
-          - genetic_model
           - number_of_arms
           - multiple_comparisons
           - interim_analyses
           - alpha_spending
-          - stratification_factors
           - cluster_size
           - icc
           - sensitivity_analysis
@@ -350,17 +325,12 @@ items:
           - dropout_rate
           - ni_margin
           - ni_type
-          - competing_risk_rate
-          - competing_risk_hr
           - rmst_tau
           - rmst_difference
-          - snp_maf
-          - genetic_model
           - number_of_arms
           - multiple_comparisons
           - interim_analyses
           - alpha_spending
-          - stratification_factors
           - cluster_size
           - icc
           - sensitivity_analysis
@@ -403,17 +373,12 @@ items:
           - dropout_rate
           - ni_margin
           - ni_type
-          - competing_risk_rate
-          - competing_risk_hr
           - rmst_tau
           - rmst_difference
-          - snp_maf
-          - genetic_model
           - number_of_arms
           - multiple_comparisons
           - interim_analyses
           - alpha_spending
-          - stratification_factors
           - cluster_size
           - icc
           - sensitivity_analysis
@@ -431,45 +396,6 @@ items:
             type: text
           - name: recommendation
             title: 'Recommendation'
-            type: text
-
-    - name: competing_risks_table
-      title: 'Competing Risks Analysis'
-      type: Table
-      rows: 0
-      visible: (test_type=="competing_risks")
-      clearWith:
-          - clinical_preset
-          - analysis_type
-          - test_type
-          - effect_size
-          - alpha_level
-          - power_level
-          - allocation_ratio
-          - control_median_survival
-          - accrual_period
-          - follow_up_period
-          - dropout_rate
-          - competing_risk_rate
-          - competing_risk_hr
-      columns:
-          - name: risk_type
-            title: 'Risk Type'
-            type: text
-          - name: event_rate
-            title: 'Event Rate'
-            type: number
-          - name: hazard_ratio
-            title: 'Hazard Ratio'
-            type: number
-          - name: cumulative_incidence
-            title: 'Cumulative Incidence (%)'
-            type: number
-          - name: required_events
-            title: 'Required Events'
-            type: integer
-          - name: sample_size_impact
-            title: 'Sample Size Impact'
             type: text
 
     - name: non_inferiority_table
@@ -499,70 +425,6 @@ items:
             type: text
           - name: clinical_interpretation
             title: 'Clinical Interpretation'
-            type: text
-
-    - name: rmst_analysis_table
-      title: 'RMST Analysis Parameters'
-      type: Table
-      rows: 0
-      visible: (test_type=="rmst_test")
-      clearWith:
-          - clinical_preset
-          - analysis_type
-          - test_type
-          - effect_size
-          - alpha_level
-          - power_level
-          - control_median_survival
-          - rmst_tau
-          - rmst_difference
-      columns:
-          - name: parameter
-            title: 'Parameter'
-            type: text
-          - name: control_group
-            title: 'Control Group'
-            type: number
-          - name: treatment_group
-            title: 'Treatment Group'  
-            type: number
-          - name: difference
-            title: 'Difference'
-            type: number
-          - name: confidence_interval
-            title: '95% CI'
-            type: text
-
-    - name: snp_analysis_table
-      title: 'SNP-based Survival Analysis'
-      type: Table
-      rows: 0
-      visible: (test_type=="snp_survival")
-      clearWith:
-          - clinical_preset
-          - analysis_type
-          - test_type
-          - effect_size
-          - alpha_level
-          - power_level
-          - control_median_survival
-          - snp_maf
-          - genetic_model
-      columns:
-          - name: genetic_model
-            title: 'Genetic Model'
-            type: text
-          - name: maf
-            title: 'Minor Allele Frequency'
-            type: number
-          - name: genotype_frequencies
-            title: 'Genotype Frequencies'
-            type: text
-          - name: required_sample_size
-            title: 'Required Sample Size'
-            type: integer
-          - name: power_by_genotype
-            title: 'Power by Genotype'
             type: text
 
     - name: multi_arm_table
@@ -775,9 +637,10 @@ items:
     - name: clinical_interpretation
       title: Clinical Interpretation and Recommendations
       type: Html
-      visible: true
+      visible: (show_interpretation)
       clearWith:
           - clinical_preset
+          - show_interpretation
           - analysis_type
           - test_type
           - study_design
@@ -825,7 +688,7 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-    - powerSurvEpi
+    - LachinAndFoulkes1986
     - gsDesign
     - survival
     - ggplot2

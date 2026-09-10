@@ -292,5 +292,5 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
+    - PMCMRplus
 ...

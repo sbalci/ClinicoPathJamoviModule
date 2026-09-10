@@ -68,8 +68,7 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - gt
     - gtExtras
-    - ClinicoPathJamoviModule
-
 ...

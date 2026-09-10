@@ -314,7 +314,9 @@ survivalvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "survcomp",
                     "glue",
                     "timeROC",
-                    "pec"))
+                    "pec",
+                    "dcurves",
+                    "riskRegression"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

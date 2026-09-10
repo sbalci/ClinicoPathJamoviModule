@@ -167,8 +167,10 @@ items:
       type: Html
 
 refs:
+    - ClinicoPathJamoviModule
     - ggpubr
     - ggplot2
-    - ClinicoPathJamoviModule
-
+    - car
+    - ggExtra
+    - tools
 ...

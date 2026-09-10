@@ -305,9 +305,9 @@ jointfrailtyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Joint Frailty Models for Recurrent Events",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "frailtypack",
-                    "survival",
-                    "ClinicoPathJamoviModule"))
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

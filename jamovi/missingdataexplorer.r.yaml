@@ -117,4 +117,10 @@ items:
       clearWith:
           - analysis_vars
 
+
+refs:
+    - ClinicoPathJamoviModule
+    - mice
+    - naniar
+    - visdat
 ...

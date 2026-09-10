@@ -78,5 +78,6 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
+    - coin
+    - survminer
 ...

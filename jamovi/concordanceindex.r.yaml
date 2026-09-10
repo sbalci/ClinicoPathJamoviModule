@@ -264,4 +264,9 @@ items:
       type: Html
       visible: (show_interpretation)
 
+
+refs:
+    - ClinicoPathJamoviModule
+    - survival
+    - survminer
 ...

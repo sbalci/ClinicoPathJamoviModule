@@ -241,8 +241,9 @@ items:
           type: text
 
 refs:
+    - ClinicoPathJamoviModule
     - pROC
     - ggplot2
     - dplyr
-    - ClinicoPathJamoviModule
+    - FSA
 ...

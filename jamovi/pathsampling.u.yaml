@@ -27,7 +27,7 @@ children:
       - id
     children:
       - type: TargetLayoutBox
-        label: Total Samples (Required)
+        label: Total samples for first-detection analyses
         children:
           - type: VariablesListBox
             name: totalSamples
@@ -35,7 +35,7 @@ children:
             isTarget: true
             itemDropBehaviour: overwrite
       - type: TargetLayoutBox
-        label: First Detection (Required)
+        label: First-detection position for detection analyses
         children:
           - type: VariablesListBox
             name: firstDetection
@@ -88,8 +88,9 @@ children:
             name: showDetectionCurve
           - type: CheckBox
             name: showSensitivityCI
+            enable: (showBootstrap)
   - type: CollapseBox
-    label: Enhanced Detection (Requires Positive Count)
+    label: Observed-positive detection
     collapsed: true
     children:
       - type: VariableSupplier
@@ -118,7 +119,7 @@ children:
           - type: CheckBox
             name: showPopulationDetection
   - type: CollapseBox
-    label: Spatial & Multifocal Analyses (Requires Sample List)
+    label: Positive samples and spatial patterns
     collapsed: true
     children:
       - type: VariableSupplier
@@ -144,6 +145,10 @@ children:
             name: showSpatialClustering
           - type: CheckBox
             name: showMultifocalAnalysis
+          - type: TextBox
+            name: fociGapThreshold
+            format: number
+            enable: (showMultifocalAnalysis)
           - type: CheckBox
             name: autoSelectModel
   - type: CollapseBox
@@ -188,7 +193,15 @@ children:
                 isTarget: true
                 itemDropBehaviour: overwrite
           - type: TargetLayoutBox
-            label: Max Foci per Sample (optional)
+            label: Total foci across slides (optional)
+            children:
+              - type: VariablesListBox
+                name: totalFoci
+                maxItemCount: 1
+                isTarget: true
+                itemDropBehaviour: overwrite
+          - type: TargetLayoutBox
+            label: Maximum foci on one slide (optional)
             children:
               - type: VariablesListBox
                 name: maxPositiveSingle
@@ -215,7 +228,7 @@ children:
     collapsed: true
     children:
       - type: Label
-        label: Finite Population Models
+        label: Probability Models
         children:
           - type: VariableSupplier
             persistentItems: false
@@ -240,8 +253,6 @@ children:
           - type: LayoutBox
             margin: large
             children:
-              - type: ComboBox
-                name: modelType
               - type: CheckBox
                 name: showHypergeometric
               - type: CheckBox
@@ -249,7 +260,7 @@ children:
               - type: TextBox
                 name: targetDetections
                 format: number
-                enable: (showHypergeometric)
+                enable: (showHypergeometric || showBetaBinomial)
       - type: Label
         label: Lymph Node Analyses
         children:
@@ -288,6 +299,10 @@ children:
                 enable: (showLNAnalysis)
               - type: CheckBox
                 name: showEffectSizes
+              - type: TextBox
+                name: adequacyThreshold
+                format: number
+                enable: (showEffectSizes)
       - type: Label
         label: Literature-Based Analyses
         children:
@@ -304,21 +319,12 @@ children:
         margin: large
         children:
           - type: Label
-            label: Confidence Interval Method
-            children:
-              - type: ComboBox
-                name: ciMethod
-              - type: CheckBox
-                name: useGeometricCI
-          - type: Label
             label: Model Assessment
             children:
               - type: CheckBox
                 name: showModelFit
               - type: CheckBox
                 name: showObsPred
-              - type: CheckBox
-                name: showMarginalInterpretation
           - type: Label
             label: Heterogeneity Analysis
             children:
@@ -330,16 +336,15 @@ children:
             margin: large
             children:
               - type: CheckBox
-                name: showPowerAnalysis
-          - type: Label
-            label: Data Export Options
-            children:
-              - type: CheckBox
-                name: appendVariables
+                name: showSampleSizePlanning
               - type: TextBox
-                name: appendPrefix
-                format: string
-                enable: (appendVariables)
+                name: planningTargetProb
+                format: number
+                enable: (showSampleSizePlanning)
+              - type: TextBox
+                name: planningAssumedQ
+                format: number
+                enable: (showSampleSizePlanning)
   - type: CollapseBox
     label: Display Options
     collapsed: false
@@ -360,12 +365,6 @@ children:
                 name: showInterpretText
               - type: CheckBox
                 name: showReferencesText
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: targetPower
-        format: number
   - type: CollapseBox
     label: Advanced Options
     collapsed: true
@@ -379,9 +378,3 @@ children:
             name: seedValue
             format: number
             enable: (setSeed)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: targetDetectionProb
-        format: number

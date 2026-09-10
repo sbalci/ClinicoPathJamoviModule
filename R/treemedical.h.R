@@ -318,7 +318,8 @@ treemedicalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "rpart.plot",
                     "caret",
                     "pROC",
-                    "ggplot2"))
+                    "ggplot2",
+                    "parttree"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

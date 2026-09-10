@@ -341,7 +341,8 @@ jjcoefstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "ggplot2",
                     "broom",
                     "survival",
-                    "lme4"))
+                    "lme4",
+                    "broom.mixed"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

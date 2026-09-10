@@ -159,3 +159,7 @@ items:
       clearWith:
         - show_interpretation
         - data_format
+
+refs:
+    - ClinicoPathJamoviModule
+...

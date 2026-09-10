@@ -240,10 +240,9 @@ items:
       visible: (show_clinical_interpretation)
 
 refs:
+    - ClinicoPathJamoviModule
     - DiagTest3Grp
     - pROC
     - ggplot2
     - plotly
-    - ClinicoPathJamoviModule
-
 ...

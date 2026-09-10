@@ -123,11 +123,11 @@ items:
           format: zto
 
 refs:
+    - ClinicoPathJamoviModule
     - ggplot2
     - dplyr
     - survival
     - RColorBrewer
-    - ClinicoPathJamoviModule
     - viridis
     - scales
     - binom

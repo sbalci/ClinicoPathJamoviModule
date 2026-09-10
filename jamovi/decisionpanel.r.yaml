@@ -908,12 +908,11 @@ items:
         - minSpecificity
 
 refs:
+    - ClinicoPathJamoviModule
     - rpart
     - partykit
     - DiagrammeR
     - ROCR
-    - ClinicoPathJamoviModule
-
     - parallel
     - digest
     - rpart.plot

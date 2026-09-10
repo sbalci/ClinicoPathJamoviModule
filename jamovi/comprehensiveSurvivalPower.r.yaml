@@ -274,15 +274,14 @@ items:
         - statistical_method
 
 refs:
+    - ClinicoPathJamoviModule
     - gsDesign
     - powerSurvEpi
     - survival
     - survRM2
-    - ClinicoPathJamoviModule
     - NPHMC
     - survSNP
     - rpact
-
     - tools
     - scales
 ...

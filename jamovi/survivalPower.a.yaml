@@ -5,7 +5,7 @@ menuGroup: PowerT #jsurvival
 menuSubgroup: Survival Power Analysis
 menuTitle: Survival Power Analysis
 menuSubtitle: Survival Power analysis
-version: '0.3.0'
+version: '0.4.0'
 jas: '1.2'
 
 description:
@@ -80,15 +80,15 @@ options:
           - name: "cox_regression"
             title: "Cox Regression"
           - name: "competing_risks"
-            title: "Competing Risks"
+            title: "Competing Risks (not available yet)"
           - name: "rmst_test"
-            title: "RMST Comparison"
+            title: "RMST Comparison (not available yet)"
           - name: "non_inferiority"
             title: "Non-inferiority Trial"
           - name: "snp_survival"
-            title: "SNP-based Survival"
+            title: "SNP-based Survival (not available yet)"
           - name: "weighted_log_rank"
-            title: "Weighted Log-rank"
+            title: "Weighted Log-rank (not available yet)"
       default: "log_rank"
       description:
           R: Type of statistical test for power calculation
@@ -103,7 +103,7 @@ options:
           - name: "multi_arm"
             title: "Multi-arm Trial"
           - name: "crossover"
-            title: "Crossover Design"
+            title: "Crossover Design (not supported)"
           - name: "cluster_randomized"
             title: "Cluster Randomized"
           - name: "stratified"
@@ -154,7 +154,11 @@ options:
       min: 0.1
       max: 5.0
       description:
-          R: Expected effect size (HR, median ratio, or difference)
+          R: >
+            Expected effect size, interpreted according to Effect Size Type: a
+            hazard ratio, a median survival ratio (treatment/control), or a
+            survival probability difference read at the Additional Follow-up
+            time. For RMST Difference the RMST options are used instead.
 
     - name: alpha_level
       title: Type I Error Rate (Alpha)
@@ -258,11 +262,11 @@ options:
           - name: "uniform"
             title: "Uniform Accrual"
           - name: "linear_increasing"
-            title: "Linear Increasing"
+            title: "Linear Increasing (not available yet)"
           - name: "exponential"
-            title: "Exponential Ramp-up"
+            title: "Exponential Ramp-up (not available yet)"
           - name: "custom"
-            title: "Custom Pattern"
+            title: "Custom Pattern (not available yet)"
       default: "uniform"
       description:
           R: Pattern of patient accrual over time
@@ -291,33 +295,14 @@ options:
       type: List
       options:
           - name: "absolute_margin"
-            title: "Absolute Margin"
+            title: "Absolute Margin (not available yet)"
           - name: "relative_margin"
             title: "Relative Margin"
           - name: "retention_fraction"
-            title: "Retention of Effect Fraction"
+            title: "Retention of Effect Fraction (not available yet)"
       default: "relative_margin"
       description:
           R: Type of non-inferiority margin
-
-    # Competing Risks Parameters
-    - name: competing_risk_rate
-      title: Competing Risk Event Rate
-      type: Number
-      default: 0.1
-      min: 0.0
-      max: 0.9
-      description:
-          R: Annual rate of competing risk events
-
-    - name: competing_risk_hr
-      title: Competing Risk Hazard Ratio
-      type: Number
-      default: 1.0
-      min: 0.1
-      max: 5.0
-      description:
-          R: Treatment effect on competing risks
 
     # RMST Parameters
     - name: rmst_tau
@@ -338,34 +323,10 @@ options:
       description:
           R: Expected difference in restricted mean survival time
 
-    # SNP-based Parameters
-    - name: snp_maf
-      title: Minor Allele Frequency
-      type: Number
-      default: 0.3
-      min: 0.01
-      max: 0.5
-      description:
-          R: Minor allele frequency for SNP analysis
-
-    - name: genetic_model
-      title: Genetic Model
-      type: List
-      options:
-          - name: "additive"
-            title: "Additive Model"
-          - name: "dominant"
-            title: "Dominant Model"
-          - name: "recessive"
-            title: "Recessive Model"
-      default: "additive"
-      description:
-          R: Genetic inheritance model
-
     # Multi-arm Parameters
     - name: number_of_arms
       title: Number of Treatment Arms
-      type: Number
+      type: Integer
       default: 3
       min: 2
       max: 10
@@ -391,7 +352,7 @@ options:
     # Advanced Options
     - name: interim_analyses
       title: Number of Interim Analyses
-      type: Number
+      type: Integer
       default: 0
       min: 0
       max: 5
@@ -411,15 +372,6 @@ options:
       default: "none"
       description:
           R: Alpha spending function for interim analyses
-
-    - name: stratification_factors
-      title: Number of Stratification Factors
-      type: Number
-      default: 0
-      min: 0
-      max: 5
-      description:
-          R: Number of stratification factors
 
     - name: cluster_size
       title: Average Cluster Size
@@ -441,30 +393,32 @@ options:
 
     # Sensitivity Analysis
     - name: sensitivity_analysis
-      title: Sensitivity Analysis
+      title: Sensitivity analysis
       type: Bool
       default: false
       description:
           R: Perform sensitivity analysis across parameter ranges
 
     - name: run_simulation_validation
-      title: Run Simulation Validation
+      title: Simulation validation
       type: Bool
       default: false
       description:
           R: >
             Validate analytical power calculations using Monte Carlo simulation.
-            Currently validated for exponential log-rank settings only.
-            May take 10-60 seconds depending on simulation_runs setting.
+            Available for log-rank and Cox designs under the exponential
+            assumption. About 6 seconds at the default 2000 runs.
 
     - name: simulation_runs
       title: Simulation Runs
-      type: Number
-      default: 10000
+      type: Integer
+      default: 2000
       min: 1000
       max: 100000
       description:
-          R: Number of simulation runs for complex calculations
+          R: >
+            Number of Monte Carlo runs. The default of 2000 gives a Monte Carlo
+            standard error below 0.01 for power near 0.8.
 
     - name: simulation_seed
       title: Simulation Seed
@@ -477,29 +431,38 @@ options:
             variability.
 
     # Clinical-Friendly Output Options
+    - name: show_interpretation
+      title: Clinical interpretation and report sentence
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display the study summary, clinical interpretation, and a copy-ready
+            report sentence describing the design.
+
     - name: show_summary
-      title: Show Natural Language Summary
+      title: Plain-language summary
       type: Bool
       default: false
       description:
           R: Display plain-language summary of results
 
     - name: show_explanations
-      title: Show Educational Explanations
+      title: Educational explanations
       type: Bool
       default: false
       description:
           R: Display educational notes and guidance
 
     - name: show_glossary
-      title: Show Statistical Glossary
+      title: Statistical glossary
       type: Bool
       default: false
       description:
           R: Display glossary of statistical terms
 
     - name: guided_mode
-      title: Enable Guided Workflow
+      title: Guided workflow
       type: Bool
       default: false
       description:

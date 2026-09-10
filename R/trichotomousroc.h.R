@@ -321,11 +321,11 @@ trichotomousrocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Trichotomous (Three-way) ROC Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "DiagTest3Grp",
                     "pROC",
                     "ggplot2",
-                    "plotly",
-                    "ClinicoPathJamoviModule"))
+                    "plotly"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

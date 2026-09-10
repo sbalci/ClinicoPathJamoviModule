@@ -216,6 +216,7 @@ jjsyndromicplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Syndromic Plot (PCA Loadings)",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "glue",
                     "ggrepel"))
             self$add(jmvcore::Html$new(

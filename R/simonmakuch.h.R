@@ -446,8 +446,8 @@ simonmakuchResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Simon-Makuch Time-Dependent Survival Analysis",
                 refs=list(
-                    "simon1984",
                     "ClinicoPathJamoviModule",
+                    "simon1984",
                     "survival",
                     "survminer",
                     "ggplot2",

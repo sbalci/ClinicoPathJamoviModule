@@ -195,9 +195,7 @@ items:
       visible: (show_discordance_analysis && show_plots)
 
 refs:
+    - ClinicoPathJamoviModule
     - irr
     - ggplot2
-    - ClinicoPathJamoviModule
-
-
 ...

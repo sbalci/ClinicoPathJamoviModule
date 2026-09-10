@@ -1009,6 +1009,8 @@ refs:
     - cutpointr
     - pROC
     - plotROC
+    - MASS
+    - tools
     # - Cohen1988
     # - Hedges1981
     # - Faul2007

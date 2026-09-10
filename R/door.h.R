@@ -122,8 +122,8 @@ doorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Desirability of Outcome Ranking (DOOR)",
                 refs=list(
-                    "evans2015door",
                     "ClinicoPathJamoviModule",
+                    "evans2015door",
                     "ggplot2"))
             self$add(jmvcore::Html$new(
                 options=options,

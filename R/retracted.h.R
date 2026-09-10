@@ -66,9 +66,9 @@ retractedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Find Retracted Papers from DOI",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "retractcheck",
                     "rcrossref",
-                    "ClinicoPathJamoviModule",
                     "httr"))
             self$add(jmvcore::Html$new(
                 options=options,

@@ -447,8 +447,12 @@ clinicalheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Clinical Heatmap",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "tidyheatmaps",
-                    "grDevices"))
+                    "grDevices",
+                    "cluster",
+                    "survival",
+                    "survminer"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",

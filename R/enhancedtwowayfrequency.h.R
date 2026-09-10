@@ -255,7 +255,8 @@ enhancedtwowayfrequencyResults <- if (requireNamespace("jmvcore", quietly=TRUE))
                 name="",
                 title="Enhanced Two-Way Frequency Analysis Results",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "graphics"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

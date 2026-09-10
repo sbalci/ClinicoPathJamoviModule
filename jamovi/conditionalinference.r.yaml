@@ -129,11 +129,10 @@ items:
       requiresData: true
 
 refs:
+    - ClinicoPathJamoviModule
     - Hothorn2006
     - Strobl2007
     - survival
-    - ClinicoPathJamoviModule
-
     - survival
     - party
 ...

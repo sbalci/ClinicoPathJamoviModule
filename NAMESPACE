@@ -946,6 +946,7 @@ importFrom(grid,
 importFrom(gridExtra,grid.arrange)
 importFrom(gsDesign,
   gsDesign,
+  gsSurv,
   hrn2z,
   hrz2n,
   nEvents,
@@ -953,6 +954,7 @@ importFrom(gsDesign,
   nSurvival,
   sfHSD,
   sfLDOF,
+  sfLDPocock,
   sfPower,
   zn2hr
 )

@@ -9,19 +9,31 @@ items:
       type: Html
 
 
+      clearWith:
+        - vars
     - name: warnings
       title: Analysis Messages
       type: Html
       visible: true
+
       clearWith:
         - vars
+        - caseID
+        - useMetadataRows
         - multiraterMethod
         - wght
-
+        - pathologyContext
+        - outlierAnalysis
+        - gwetAC
+        - pabak
     - name: overviewTable
       title: Agreement Analysis Summary
       type: Table
       rows: 1
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
       columns:
         - name: cases
           title: 'Cases'
@@ -33,7 +45,7 @@ items:
           title: 'Categories'
           type: integer
         - name: overall_agreement
-          title: 'Overall Agreement %'
+          title: 'Complete Agreement %'
           type: number
           format: zto
         - name: primary_method
@@ -43,6 +55,15 @@ items:
     - name: kappaTable
       title: 'Kappa Statistics'
       type: Table
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - multiraterMethod
+        - wght
+        - exct
+        - fleissCI
+        - krippMethod
       columns:
         - name: method
           title: 'Method'
@@ -79,6 +100,11 @@ items:
       title: 'Intraclass Correlation Coefficients'
       type: Table
       visible: (icc)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - icc
       columns:
         - name: type
           title: 'ICC Type'
@@ -111,6 +137,12 @@ items:
       title: 'Pairwise Rater Agreements'
       type: Table
       visible: (pairwiseAnalysis)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - pairwiseAnalysis
+        - wght
       columns:
         - name: rater_pair
           title: 'Rater Pair'
@@ -143,6 +175,12 @@ items:
       title: 'Category-Specific Agreement'
       type: Table
       visible: (categoryAnalysis)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - categoryAnalysis
+        - referenceStandard
       columns:
         - name: category
           title: 'Category'
@@ -162,17 +200,22 @@ items:
           title: 'Sensitivity'
           type: number
           format: zto
-          visible: (pathologyContext)
+          visible: (pathologyContext || !is.null(referenceStandard))
         - name: specificity
           title: 'Specificity'
           type: number
           format: zto
-          visible: (pathologyContext)
+          visible: (pathologyContext || !is.null(referenceStandard))
 
     - name: outlierTable
       title: 'Cases with Poor Agreement'
       type: Table
       visible: (outlierAnalysis)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - outlierAnalysis
       columns:
         - name: case_id
           title: 'Case ID'
@@ -196,6 +239,12 @@ items:
       title: 'Diagnostic Accuracy by Rater'
       type: Table
       visible: (pathologyContext)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - pathologyContext
+        - referenceStandard
       columns:
         - name: rater
           title: 'Rater'
@@ -229,6 +278,19 @@ items:
       title: 'Diagnostic Style Clustering Results'
       type: Table
       visible: (performClustering)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
       columns:
         - name: rater
           title: 'Rater'
@@ -261,6 +323,19 @@ items:
       title: 'Diagnostic Style Group Summary'
       type: Table
       visible: (performClustering)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
       columns:
         - name: style_group
           title: 'Style Group'
@@ -292,6 +367,11 @@ items:
       title: 'Cases Distinguishing Diagnostic Styles'
       type: Table
       visible: (identifyDiscordantCases)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - identifyDiscordantCases
       columns:
         - name: case_id
           title: 'Case ID'
@@ -311,6 +391,15 @@ items:
       title: "Krippendorff's Alpha Results"
       type: Table
       visible: (kripp)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - kripp
+        - krippMethod
+        - bootstrap
+        - bootstrapSamples
+        - seed
       columns:
         - name: data_type
           title: 'Data Type'
@@ -337,6 +426,14 @@ items:
       title: 'Consensus Scoring Results'
       type: Table
       visible: (consensus && show_consensus_table)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - consensus
+        - consensus_method
+        - tie_breaking
+        - show_consensus_table
       columns:
         - name: case_id
           title: 'Case ID'
@@ -358,6 +455,13 @@ items:
       title: 'Consensus Summary Statistics'
       type: Table
       visible: (consensus)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - consensus
+        - consensus_method
+        - tie_breaking
       columns:
         - name: metric
           title: 'Metric'
@@ -393,6 +497,14 @@ items:
       renderFun: .heatmapPlot
       visible: (heatmap)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - heatmap
+        - heatmapDetails
+        - heatmapTheme
+        - wght
     - name: pairwisePlot
       title: 'Pairwise Agreement Plot'
       type: Image
@@ -401,6 +513,12 @@ items:
       renderFun: .pairwisePlot
       visible: (pairwiseAnalysis)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - pairwiseAnalysis
+        - wght
     - name: categoryPlot
       title: 'Category Agreement Plot'
       type: Image
@@ -409,6 +527,12 @@ items:
       renderFun: .categoryPlot
       visible: (categoryAnalysis)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - categoryAnalysis
+        - referenceStandard
     - name: confusionMatrixPlot
       title: 'Confusion Matrix'
       type: Image
@@ -417,6 +541,12 @@ items:
       renderFun: .confusionMatrixPlot
       visible: (pathologyContext)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - pathologyContext
+        - referenceStandard
     - name: diagnosticStyleDendrogram
       title: 'Diagnostic Style Dendrogram'
       type: Image
@@ -425,6 +555,19 @@ items:
       renderFun: .diagnosticStyleDendrogram
       visible: (performClustering)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
     - name: diagnosticStyleHeatmap
       title: 'Diagnostic Style Heatmap'
       type: Image
@@ -432,6 +575,21 @@ items:
       height: 600
       renderFun: .diagnosticStyleHeatmap
       visible: (performClustering && showClusteringHeatmap)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
+        - showClusteringHeatmap
+        - heatmapColorScheme
     - name: diagnosticStyleCombined
       title: 'Combined Dendrogram + Heatmap (Usubutun Style)'
       type: Image
@@ -440,14 +598,37 @@ items:
       renderFun: .diagnosticStyleCombined
       visible: (performClustering)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
     - name: raterFrequencyTables
       title: 'Individual Rater Frequencies'
       type: Group
       visible: (sft)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - sft
       items:
         - name: frequencyTable
           title: 'Frequency Distribution'
           type: Table
+          clearWith:
+            - vars
+            - caseID
+            - useMetadataRows
+            - sft
           columns:
             - name: rater
               title: 'Rater'
@@ -467,7 +648,11 @@ items:
       title: 'Cross-tabulation Matrix'
       type: Table
       visible: (sft)
-      clearWith: [vars]
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - sft
       columns:
         - name: rater1_category
           title: 'Category'
@@ -483,26 +668,50 @@ items:
       type: Html
       visible: (showClinicalSummary)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - showClinicalSummary
+        - multiraterMethod
+        - wght
     - name: reportTemplate
       title: Copy-Ready Report
       type: Html
       visible: (showClinicalSummary)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - showClinicalSummary
+        - multiraterMethod
+        - wght
     - name: aboutAnalysis
       title: About This Analysis
       type: Html
       visible: (showAboutAnalysis)
 
+      clearWith:
+        - showAboutAnalysis
     - name: assumptions
       title: Assumptions & Caveats
       type: Html
       visible: (showAssumptions)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - showAssumptions
     - name: weightedKappaGuide
       title: Weighted Kappa Guide
       type: Html
       visible: (showWeightedKappaGuide && wght != 'unweighted')
 
+      clearWith:
+        - showWeightedKappaGuide
+        - wght
     - name: statisticalGlossary
       title: Statistical Terms Glossary
       type: Html
@@ -518,11 +727,18 @@ items:
 
 
 
+      clearWith:
+        - showStatisticalGlossary
     # Enhanced Analysis Results
     - name: gwetACTable
       title: "Gwet's Agreement Coefficients"
       type: Table
       visible: (gwetAC)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - gwetAC
       columns:
         - name: coefficient
           title: 'Coefficient'
@@ -551,6 +767,11 @@ items:
       title: 'PABAK Analysis Results'
       type: Table
       visible: (pabak)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - pabak
       columns:
         - name: measure
           title: 'Measure'
@@ -575,34 +796,46 @@ items:
       title: 'Sample Size Planning Results'
       type: Table
       visible: (sampleSizePlanning)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - sampleSizePlanning
+        - targetKappa
+        - targetPrecision
       columns:
         - name: parameter
-          title: 'Parameter'
+          title: 'Raters'
           type: text
         - name: value
-          title: 'Value'
+          title: 'Required Cases'
           type: text
         - name: recommendation
-          title: 'Recommendation'
+          title: 'Assumptions'
           type: text
 
     - name: raterBiasTable
-      title: 'Rater Bias Analysis'
+      title: 'Rater Disagreement with Consensus'
       type: Table
       visible: (raterBiasAnalysis)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - raterBiasAnalysis
       columns:
         - name: rater
           title: 'Rater'
           type: text
         - name: bias_score
-          title: 'Bias Score'
+          title: 'Disagreement'
           type: number
           format: zto
         - name: tendency
           title: 'Systematic Tendency'
           type: text
         - name: severity
-          title: 'Bias Severity'
+          title: 'Disagreement Level'
           type: text
         - name: recommendation
           title: 'Recommendation'
@@ -612,6 +845,11 @@ items:
       title: 'Agreement Trend Analysis'
       type: Table
       visible: (agreementTrendAnalysis)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - agreementTrendAnalysis
       columns:
         - name: sequence_group
           title: 'Sequence Group'
@@ -635,12 +873,17 @@ items:
       title: 'Case Difficulty Analysis'
       type: Table
       visible: (caseDifficultyScoring)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - caseDifficultyScoring
       columns:
         - name: case_id
           title: 'Case ID'
           type: text
         - name: difficulty_score
-          title: 'Difficulty Score'
+          title: 'Difficulty (1 - Modal Share)'
           type: number
           format: zto
         - name: disagreement_pattern
@@ -650,7 +893,7 @@ items:
           title: 'Difficulty Level'
           type: text
         - name: rater_variability
-          title: 'Rater Variability'
+          title: 'Normalized Entropy'
           type: number
           format: zto
 
@@ -658,6 +901,13 @@ items:
       title: 'Agreement Stability Analysis'
       type: Table
       visible: (agreementStabilityAnalysis)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - agreementStabilityAnalysis
+        - bootstrapSamples
+        - seed
       columns:
         - name: statistic
           title: 'Statistic'
@@ -690,14 +940,24 @@ items:
       renderFun: .trendPlot
       visible: (agreementTrendAnalysis)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - agreementTrendAnalysis
     - name: biasPlot
-      title: 'Rater Bias Visualization'
+      title: 'Rater Disagreement with Consensus'
       type: Image
       width: 700
       height: 500
       renderFun: .biasPlot
       visible: (raterBiasAnalysis)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - raterBiasAnalysis
     - name: difficultyPlot
       title: 'Case Difficulty Distribution'
       type: Image
@@ -706,11 +966,21 @@ items:
       renderFun: .difficultyPlot
       visible: (caseDifficultyScoring)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - caseDifficultyScoring
     - name: inlineComments
       title: Statistical Commentary
       type: Html
       visible: (showInlineComments)
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - showInlineComments
     # ========================================================================
     # Clustering Analysis Results (Usubutun et al. 2012)
     # ========================================================================
@@ -719,6 +989,19 @@ items:
       title: 'Diagnostic Style Groups Summary'
       type: Table
       visible: (performClustering)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
       columns:
         - name: style_group
           title: 'Style Group'
@@ -749,6 +1032,19 @@ items:
       title: 'Diagnostic Patterns by Style Group'
       type: Table
       visible: (performClustering)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
       columns:
         - name: style_group
           title: 'Style Group'
@@ -771,6 +1067,19 @@ items:
       title: 'High-Disagreement Cases Between Style Groups'
       type: Table
       visible: (performClustering && identifyDiscordant)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
       columns:
         - name: case_id
           title: 'Case ID'
@@ -794,6 +1103,19 @@ items:
       title: 'Style Group Associations with Rater Characteristics'
       type: Table
       visible: (performClustering)
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
       columns:
         - name: characteristic
           title: 'Rater Characteristic'
@@ -821,6 +1143,19 @@ items:
       title: 'Style Group Agreement with Reference Standard'
       type: Table
       visible: (performClustering && !is.null(referenceStandard))
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
       columns:
         - name: style_group
           title: 'Style Group'
@@ -854,6 +1189,21 @@ items:
       visible: (performClustering && showClusteringHeatmap)
       description: 'Heatmap showing diagnostic patterns with dual dendrograms (raters and cases)'
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
+        - showClusteringHeatmap
+        - heatmapColorScheme
     - name: clusterDendrogram
       title: 'Rater Clustering Dendrogram'
       type: Image
@@ -863,6 +1213,19 @@ items:
       visible: (performClustering)
       description: 'Dendrogram showing hierarchical relationships between raters'
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
     - name: silhouettePlot
       title: 'Cluster Quality (Silhouette Plot)'
       type: Image
@@ -872,29 +1235,60 @@ items:
       visible: (performClustering)
       description: 'Silhouette plot showing cluster separation and cohesion'
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
     - name: clusteringInterpretation
       title: 'Clustering Analysis Interpretation Guide'
       type: Html
       visible: (performClustering && showClusteringInterpretation)
       description: 'Explanatory guide for understanding diagnostic style groups and cluster results'
 
+      clearWith:
+        - vars
+        - caseID
+        - useMetadataRows
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
+        - referenceStandard
+        - identifyDiscordant
+        - discordantThreshold
+        - raterCharacteristics
+        - showClusteringInterpretation
 refs:
+    - ClinicoPathJamoviModule
+    - LandisKoch1977
     - irr
+    - irrCAC
+    - vcd
+    - kappaSize
+    - rotondiDonnerKappaCI
     - psych
     - ICC
     - PathologyKappa
-    # - usubutun2012
-    - ClinicoPathJamoviModule
-
-
+    - usubutun2012
+    - cluster
     - ggdendro
     - gridExtra
     - grid
-    - stringr
-    - reshape2
-    - scales
-    - cluster
-    - viridisLite
     - grDevices
     - pheatmap
+    - reshape2
+    - scales
+    - stringr
+    - viridisLite
+
 ...

@@ -404,11 +404,11 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Histogram",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggplot2",
                     "ggstatsplot",
                     "statsExpressions",
-                    "ggpubr",
-                    "ClinicoPathJamoviModule"),
+                    "ggpubr"),
                 clearWith=list(
                     "dep",
                     "grvar",
@@ -541,7 +541,7 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjhistostats",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = jjhistostatsResults$new(options=options),
                 data = data,

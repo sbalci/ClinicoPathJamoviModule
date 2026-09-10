@@ -300,7 +300,12 @@ missingdataexplorerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
             super$initialize(
                 options=options,
                 name="",
-                title="Missing Data Pattern Explorer")
+                title="Missing Data Pattern Explorer",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "mice",
+                    "naniar",
+                    "visdat"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary_statistics",

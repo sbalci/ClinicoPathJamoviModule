@@ -133,9 +133,9 @@ interruptedtimeseriesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                 name="",
                 title="Interrupted Time Series Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "wagner2002its",
                     "bernal2017its",
-                    "ClinicoPathJamoviModule",
                     "sandwich",
                     "lmtest",
                     "ggplot2"))

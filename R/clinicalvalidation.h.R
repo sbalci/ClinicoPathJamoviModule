@@ -449,7 +449,9 @@ clinicalvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "ggplot2",
                     "stats",
                     "e1071",
-                    "tools"))
+                    "tools",
+                    "PRROC",
+                    "graphics"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

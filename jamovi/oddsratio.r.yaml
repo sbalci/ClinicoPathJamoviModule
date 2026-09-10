@@ -143,11 +143,12 @@ items:
           - outcome
 
 refs:
+    - ClinicoPathJamoviModule
     - finalfit
     - logistf
     - epiR
     - rms
     - survivaltutorial
-    - ClinicoPathJamoviModule
-
+    - graphics
+    - knitr
 ...

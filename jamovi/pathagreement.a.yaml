@@ -4,7 +4,7 @@ title: Pathology Interrater Reliability
 menuGroup: OncoPathT
 menuSubgroup: Agreement
 menuSubtitle: Agreement on Categorical and Ordinal Data
-version: '0.0.31'
+version: '0.1.0'
 jas: '1.2'
 
 description:
@@ -127,12 +127,14 @@ options:
             Weighted kappa accounts for the degree of disagreement.
 
     - name: exct
-      title: Exact Kappa (>=3 Variables)
+      title: Conger's exact kappa (3 or more raters)
       type: Bool
       default: false
       description:
           R: >
-            Use exact method for Fleiss' kappa calculation with 3 or more raters. More accurate but computationally intensive.
+            Report Conger's (1980) kappa instead of Fleiss' kappa for 3 or more
+            raters. Conger's kappa uses each rater's own category proportions;
+            it is a different estimator, not a more precise version of Fleiss' kappa.
 
     - name: multiraterMethod
       title: Multi-rater Agreement Method
@@ -196,7 +198,7 @@ options:
       title: Consensus Method
       type: List
       options:
-        - title: Majority Rule (>=50 percent)
+        - title: Majority rule (more than 50 percent)
           name: majority
         - title: Super Majority (>=2/3)
           name: super_majority
@@ -294,42 +296,6 @@ options:
           R: >
             Include rater background characteristics (experience, training, institution) in style analysis.
 
-    - name: experienceVar
-      title: Experience Variable
-      type: Variable
-      suggested: [continuous, ordinal, nominal]
-      default: null
-      description:
-          R: >
-            Optional variable containing rater experience information (years of experience, level of training, etc.)
-
-    - name: trainingVar
-      title: Training Variable  
-      type: Variable
-      suggested: [nominal, ordinal]
-      default: null
-      description:
-          R: >
-            Optional variable containing rater training institution or background information
-
-    - name: institutionVar
-      title: Institution Variable
-      type: Variable
-      suggested: [nominal]
-      default: null
-      description:
-          R: >
-            Optional variable containing rater current institution or location information
-
-    - name: specialtyVar
-      title: Specialty Variable
-      type: Variable
-      suggested: [nominal, ordinal]
-      default: null
-      description:
-          R: >
-            Optional variable containing rater medical specialty or subspecialty information
-
     - name: identifyDiscordantCases
       title: Identify Discordant Cases
       type: Bool
@@ -373,6 +339,16 @@ options:
       description:
           R: >
             Number of bootstrap samples for confidence interval calculation.
+
+    - name: seed
+      title: Random seed
+      type: Integer
+      min: 1
+      default: 42
+      description:
+          R: >
+            Seed for the bootstrap resampling (Krippendorff's alpha confidence
+            interval and agreement stability) so that results are reproducible.
 
     - name: pairwiseAnalysis
       title: Pairwise Rater Analysis
@@ -442,22 +418,22 @@ options:
             Target kappa value for sample size planning calculations.
 
     - name: targetPrecision
-      title: Target Precision (CI Width)
+      title: Target precision (half-width of the 95 percent CI)
       type: Number
       min: 0.01
       max: 0.5
       default: 0.1
       description:
           R: >
-            Target precision for confidence interval width in sample size planning.
+            Half-width of the 95 percent confidence interval for kappa that the study should achieve, for example 0.1 for kappa 0.8 +/- 0.1.
 
     - name: raterBiasAnalysis
-      title: Rater Bias Detection
+      title: Rater disagreement with consensus
       type: Bool
       default: false
       description:
           R: >
-            Analyze systematic tendencies and biases for each rater compared to the consensus or average ratings.
+            For each rater, the share of cases on which their rating differs from the most common rating of the other raters, with any systematic over- or under-use of a category.
 
     - name: agreementTrendAnalysis
       title: Agreement Trend Analysis
@@ -473,7 +449,7 @@ options:
       default: false
       description:
           R: >
-            Quantify inherent case difficulty based on inter-rater disagreement patterns and provide difficulty scores.
+            Difficulty of each case from the share of raters who chose the most common rating.
 
     - name: agreementStabilityAnalysis
       title: Agreement Stability Analysis
@@ -575,56 +551,6 @@ options:
             0.5 means at least 50 percent of raters disagreed with majority diagnosis.
 
     # Rater Characteristics (optional)
-    - name: raterExperience
-      title: 'Rater Experience (years)'
-      type: Variable
-      suggested:
-          - continuous
-      permitted:
-          - numeric
-      description:
-          R: >
-            Years of experience for each rater. Will be tested for association with style group membership.
-      default: NULL
-
-    - name: raterSpecialty
-      title: 'Rater Specialty/Practice Type'
-      type: Variable
-      suggested:
-          - nominal
-      permitted:
-          - factor
-      description:
-          R: >
-            Specialty or practice type (e.g., specialist vs generalist, subspecialty).
-            Will be tested for association with style group membership.
-      default: NULL
-
-    - name: raterInstitution
-      title: 'Rater Institution'
-      type: Variable
-      suggested:
-          - nominal
-      permitted:
-          - factor
-      description:
-          R: >
-            Training or current practice institution. Will be tested for association with style group membership.
-            Usubutun (2012) found no association, suggesting diagnostic style is personal rather than institutional.
-      default: NULL
-
-    - name: raterVolume
-      title: 'Rater Case Volume'
-      type: Variable
-      suggested:
-          - continuous
-      permitted:
-          - numeric
-      description:
-          R: >
-            Number of cases seen per month or year. Will be tested for association with style group membership.
-      default: NULL
-
     - name: referenceStandard
       title: 'Reference/Expert Standard (optional)'
       type: Variable
@@ -678,7 +604,7 @@ options:
     - name: showProgressIndicators
       title: Show Progress for Long Operations
       type: Bool
-      default: true
+      default: false
       description:
           R: >
             Display progress indicators for computationally intensive operations like bootstrap calculations.

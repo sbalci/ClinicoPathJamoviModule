@@ -425,9 +425,10 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - recist
     - trialplots_highwind
-    - ClinicoPathJamoviModule
-
-
+    - ggrepel
+    - patchwork
+    - survival
 ...

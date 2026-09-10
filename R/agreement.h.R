@@ -1512,9 +1512,17 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Interrater Reliability",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "irr",
                     "PathologyKappa",
-                    "ClinicoPathJamoviModule"))
+                    "DescTools",
+                    "graphics",
+                    "irrCAC",
+                    "kappaSize",
+                    "lme4",
+                    "lmerTest",
+                    "psych",
+                    "vcd"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -3882,7 +3890,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agreement",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = agreementResults$new(options=options),
                 data = data,

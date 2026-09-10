@@ -121,9 +121,7 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - easyalluvial
     - ggalluvial
-    - ClinicoPathJamoviModule
-
-
 ...

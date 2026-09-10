@@ -138,9 +138,10 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - ggstatsplot
     - statsExpressions
     - ggpubr
-    - ClinicoPathJamoviModule
-
+    - car
+    - digest
 ...

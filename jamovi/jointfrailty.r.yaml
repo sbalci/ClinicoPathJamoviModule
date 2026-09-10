@@ -339,9 +339,7 @@ items:
           - exportResults
 
 refs:
+    - ClinicoPathJamoviModule
     - frailtypack
     - survival
-    - ClinicoPathJamoviModule
-
-
 ...

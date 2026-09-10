@@ -233,3 +233,39 @@ test_that("linechart and lollipop summary tables fill their eight .init() rows",
   lol <- lollipop(data = lp, dep = "val", group = "lbl", highlight = NULL)
   expect_equal(lol$summary$rowCount, 8L)
 })
+
+
+test_that("survivalPower fills its .init() rows without a rowKey error", {
+  skip_if_not(exists("survivalPowerClass"), "survivalPower not loaded")
+  run_sp <- function(...) {
+    a <- survivalPowerClass$new(options = survivalPowerOptions$new(...), data = data.frame(x = 1))
+    suppressWarnings(a$run())
+    a$results
+  }
+
+  base <- run_sp(sensitivity_analysis = TRUE)
+  expect_equal(base$sample_size_results$rowCount, 6L)
+  expect_equal(base$sensitivity_analysis_table$rowCount, 4L)
+  expect_equal(base$assumptions_table$rowCount, 4L)
+  expect_equal(base$regulatory_table$rowCount, 4L)
+  expect_false(anyNA(base$sample_size_results$asDF$value))
+
+  expect_equal(run_sp(analysis_type = "power", sample_size_input = 400)$power_results$rowCount, 5L)
+  expect_equal(run_sp(analysis_type = "effect_size", sample_size_input = 400)$effect_size_results$rowCount, 5L)
+  expect_equal(run_sp(analysis_type = "duration", sample_size_input = 800)$study_duration_results$rowCount, 5L)
+
+  ni <- run_sp(test_type = "non_inferiority", ni_type = "relative_margin", effect_size = 1.0, alpha_level = 0.025)
+  expect_equal(ni$non_inferiority_table$rowCount, 4L)
+
+  seqd <- run_sp(test_type = "cox_regression", interim_analyses = 2, alpha_spending = "obrien_fleming")
+  expect_equal(seqd$interim_analysis_table$rowCount, 2L)
+  expect_equal(seqd$regulatory_table$rowCount, 5L)
+
+  arms <- run_sp(study_design = "multi_arm", number_of_arms = 4, multiple_comparisons = "bonferroni")
+  expect_equal(arms$multi_arm_table$rowCount, 3L)
+  expect_equal(arms$regulatory_table$rowCount, 5L)
+
+  # off-states: option-gated rows must not appear
+  expect_equal(run_sp()$sensitivity_analysis_table$rowCount, 0L)
+  expect_equal(run_sp(interim_analyses = 2, alpha_spending = "none")$interim_analysis_table$rowCount, 0L)
+})

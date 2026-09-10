@@ -188,7 +188,8 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "classInt",
                     "dichotomizing",
-                    "AltmanRoyston2006"))
+                    "AltmanRoyston2006",
+                    "questionr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -350,7 +351,7 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "categorize",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = categorizeResults$new(options=options),
                 data = data,

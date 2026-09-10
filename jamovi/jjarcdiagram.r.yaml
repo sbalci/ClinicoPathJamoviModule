@@ -121,5 +121,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - arcdiagram
-
+    - igraph
+    - viridisLite
 ...

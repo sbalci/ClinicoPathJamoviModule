@@ -360,7 +360,11 @@ clinicalnomogramsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "stringr",
                     "rms",
                     "survival",
-                    "SchemperSmith1996"))
+                    "SchemperSmith1996",
+                    "dcurves",
+                    "glmnet",
+                    "pROC",
+                    "timeROC"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -149,8 +149,8 @@ summarydata2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Summary of Continuous Variables",
                 refs=list(
-                    "gtExtras",
                     "ClinicoPathJamoviModule",
+                    "gtExtras",
                     "lubridate",
                     "moments",
                     "purrr",

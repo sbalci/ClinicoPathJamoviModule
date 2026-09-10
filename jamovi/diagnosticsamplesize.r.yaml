@@ -77,3 +77,7 @@ items:
       title: References
       type: Html
       visible: (show_references)
+
+refs:
+    - ClinicoPathJamoviModule
+...

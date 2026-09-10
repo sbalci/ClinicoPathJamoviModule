@@ -63,7 +63,7 @@ items:
 
 
 refs:
-    - vanderweele2017evalue
     - ClinicoPathJamoviModule
+    - vanderweele2017evalue
     - ggplot2
 ...

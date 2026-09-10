@@ -7,28 +7,86 @@ items:
     - name: notices
       title: Important Information
       type: Preformatted
-      clearWith:
+      clearWith: &pathsamplingInputs
+        - analysisContext
         - totalSamples
         - firstDetection
+        - positiveCount
+        - positiveSamplesList
+        - sampleType
         - targetConfidence
         - maxSamples
         - bootstrapIterations
+        - showBinomialModel
+        - showBootstrap
+        - showDetectionCurve
+        - showSensitivityCI
+        - setSeed
+        - seedValue
+        - positiveCassettes
+        - totalFoci
+        - adequacyThreshold
+        - maxPositiveSingle
+        - showTumorBurden
+        - showStageMigration
+        - showCorrelation
+        - showDistributionPattern
+        - distributionThreshold
+        - totalPopulation
+        - successStates
+        - targetDetections
+        - showHypergeometric
+        - showBetaBinomial
+        - totalLymphNodes
+        - positiveLymphNodes
+        - showLNAnalysis
+        - lnrThreshold1
+        - lnrThreshold2
+        - showEffectSizes
+        - showOmentumAnalysis
+        - showClinicalSummary
+        - showGuidedInstructions
+        - showConciseInstructions
+        - showEmpiricalCumulative
+        - showSpatialClustering
+        - showStratifiedAnalysis
+        - showPopulationDetection
+        - showIncrementalYield
+        - fociGapThreshold
+        - showMultifocalAnalysis
+        - showProbabilityExplanation
+        - showKeyResults
+        - showRecommendText
+        - showInterpretText
+        - showReferencesText
+        - estimationMethod
+        - showHeterogeneityTest
+        - showModelFit
+        - showObsPred
+        - showSampleSizePlanning
+        - planningTargetProb
+        - planningAssumedQ
+        - autoSelectModel
+        - autoDetectHeterogeneity
 
     # === WELCOME & DATA SUMMARY (Always First) ===
     - name: welcome
       title: ''
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (is.null(totalSamples) || is.null(firstDetection))
 
     # === DISPLAY OPTIONS: INSTRUCTIONS ===
     - name: guidedInstructions
       title: Quick Start Checklist
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showGuidedInstructions)
 
     - name: conciseInstructions
       title: Analysis Overview
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showConciseInstructions)
 
 
@@ -36,9 +94,7 @@ items:
     - name: dataInfo
       title: Data Summary
       type: Table
-      clearWith:
-        - totalSamples
-        - firstDetection
+      clearWith: *pathsamplingInputs
       columns:
         - name: measure
           title: Measure
@@ -55,39 +111,40 @@ items:
     - name: probabilityExplanation
       title: Understanding Detection Probabilities
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showProbabilityExplanation)
 
     - name: keyResults
       title: Key Results Summary
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showKeyResults)
 
     # === CORE ANALYSES: CLINICAL SUMMARY ===
     - name: clinicalSummary
-      title: Clinical Summary
+      title: Descriptive summary
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showClinicalSummary)
 
     # === CORE ANALYSES: BINOMIAL MODEL ===
     - name: binomialText
       title: Binomial Probability Model
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showBinomialModel)
 
     - name: binomialTable
       title: Binomial Model Predictions
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showBinomialModel)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - maxSamples
       columns:
         - name: nSamples
           title: 'Number of Samples'
           type: integer
         - name: cumProb
-          title: 'Sensitivity (P(detect | present))'
+          title: 'Detection among observed-positive cases (P(detect by n | eventually detected))'
           type: number
           format: 'pc'
         - name: marginalGain
@@ -96,43 +153,37 @@ items:
           format: 'pc'
 
     - name: recommendTable
-      title: Minimum Samples for Target Confidence
+      title: Samples for target detection probability
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showBinomialModel)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - targetConfidence
       columns:
         - name: confidence
-          title: 'Target Confidence'
+          title: 'Target detection probability'
           type: number
           format: 'pc'
         - name: minSamples
-          title: 'Minimum Samples Required'
+          title: 'Samples to reach target'
           type: integer
 
     # === CORE ANALYSES: BOOTSTRAP ===
     - name: bootstrapText
       title: Bootstrap Resampling Analysis
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showBootstrap)
 
     - name: bootstrapTable
-      title: Bootstrap Sensitivity Estimates (Conditional)
+      title: Bootstrap Detection among observed-positive cases Estimates (Conditional)
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showBootstrap)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - maxSamples
-        - bootstrapIterations
       columns:
         - name: nSamples
           title: 'Number of Samples'
           type: integer
         - name: meanSens
-          title: 'Mean Sensitivity (given present)'
+          title: 'Mean Detection among observed-positive cases (eventually detected)'
           type: number
           format: 'pc'
         - name: ciLower
@@ -148,6 +199,7 @@ items:
     - name: detectionCurve
       title: Diagnostic Yield Curve
       type: Image
+      clearWith: *pathsamplingInputs
       width: 600
       height: 450
       renderFun: .detectionCurve
@@ -155,8 +207,9 @@ items:
 
     # === CORE ANALYSES: SENSITIVITY CI ===
     - name: sensitivityPlot
-      title: Sensitivity with Confidence Intervals
+      title: Detection among observed-positive cases with Confidence Intervals
       type: Image
+      clearWith: *pathsamplingInputs
       width: 600
       height: 450
       renderFun: .sensitivityPlot
@@ -166,15 +219,14 @@ items:
     - name: heterogeneityText
       title: Heterogeneity Analysis
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showHeterogeneityTest)
 
     - name: heterogeneityTest
       title: Heterogeneity Test Results
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showHeterogeneityTest)
-      clearWith:
-        - sampleType
-        - firstDetection
       columns:
         - name: test
           title: 'Test'
@@ -196,15 +248,14 @@ items:
     - name: modelFitText
       title: Model Fit Assessment
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showModelFit)
 
     - name: modelFitTable
       title: Goodness of Fit Test
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showModelFit)
-      clearWith:
-        - totalSamples
-        - firstDetection
       columns:
         - name: test
           title: 'Test'
@@ -226,16 +277,14 @@ items:
     - name: obsPredText
       title: Observed vs Predicted Detection
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showObsPred)
 
     - name: obsPredTable
       title: Observed vs Predicted Comparison
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showObsPred)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - maxSamples
       columns:
         - name: nSamples
           title: 'Samples'
@@ -260,16 +309,14 @@ items:
     - name: empiricalCumulativeText
       title: Empirical Cumulative Detection Analysis
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showEmpiricalCumulative)
 
     - name: empiricalCumulativeTable
       title: Empirical Detection Rates by Sample Threshold
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showEmpiricalCumulative)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - positiveCount
       columns:
         - name: nSamples
           title: 'Samples Examined'
@@ -294,6 +341,7 @@ items:
     - name: empiricalCumulativePlot
       title: Empirical Cumulative Detection Curve
       type: Image
+      clearWith: *pathsamplingInputs
       width: 600
       height: 450
       renderFun: .empiricalCumulativePlot
@@ -303,16 +351,14 @@ items:
     - name: incrementalYieldText
       title: Incremental Diagnostic Yield Analysis
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showIncrementalYield)
 
     - name: incrementalYieldTable
       title: Marginal Benefit per Additional Sample
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showIncrementalYield)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - maxSamples
       columns:
         - name: fromSamples
           title: 'From N Samples'
@@ -328,33 +374,31 @@ items:
           title: 'Additional Cases per 100'
           type: number
         - name: costBenefit
-          title: 'Cost-Benefit Rating'
+          title: Descriptive yield band
           type: text
 
     # === ENHANCED DETECTION: POPULATION DETECTION ===
     - name: populationDetectionText
       title: Population-Level Detection Rates
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showPopulationDetection)
 
     - name: populationDetectionTable
       title: Conditional vs Population Detection
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showPopulationDetection)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - maxSamples
       columns:
         - name: nSamples
           title: 'Samples'
           type: integer
         - name: prevalence
-          title: 'Prevalence'
+          title: Observed-positive fraction
           type: number
           format: 'pc'
         - name: conditional
-          title: 'Sensitivity (given present)'
+          title: 'Detection among observed-positive cases (eventually detected)'
           type: number
           format: 'pc'
         - name: population
@@ -366,15 +410,14 @@ items:
     - name: spatialClusteringText
       title: Spatial Clustering Analysis
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showSpatialClustering)
 
     - name: clusteringTable
       title: Spatial Distribution Patterns
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showSpatialClustering)
-      clearWith:
-        - totalSamples
-        - positiveSamplesList
       columns:
         - name: pattern
           title: 'Pattern'
@@ -392,20 +435,19 @@ items:
 
     # === SPATIAL & MULTIFOCAL: MULTIFOCAL ANALYSIS ===
     - name: multifocalText
-      title: Multifocal Detection Analysis
+      title: Sample-position groups (heuristic)
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showMultifocalAnalysis)
 
     - name: multifocalTable
-      title: Number of Foci Distribution
+      title: Sample-position group counts
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showMultifocalAnalysis)
-      clearWith:
-        - totalSamples
-        - positiveSamplesList
       columns:
         - name: fociCount
-          title: 'Number of Foci'
+          title: 'Heuristic groups'
           type: text
         - name: cases
           title: 'Cases'
@@ -422,15 +464,14 @@ items:
     - name: stratifiedText
       title: Stratified Analysis by Sample Type
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showStratifiedAnalysis)
 
     - name: prevalenceTable
-      title: Prevalence by Sample Type
+      title: Observed-positive fraction by sample type
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showStratifiedAnalysis)
-      clearWith:
-        - sampleType
-        - firstDetection
       columns:
         - name: sampleType
           title: 'Sample Type'
@@ -442,7 +483,7 @@ items:
           title: 'Positive Cases'
           type: integer
         - name: prevalence
-          title: 'Prevalence'
+          title: Observed-positive fraction
           type: number
           format: 'pc'
         - name: qEstimate
@@ -452,11 +493,8 @@ items:
     - name: stratifiedDetectionTable
       title: Detection Probability by Sample Type and Threshold
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showStratifiedAnalysis)
-      clearWith:
-        - sampleType
-        - firstDetection
-        - maxSamples
       columns:
         - name: sampleType
           title: 'Sample Type'
@@ -465,11 +503,11 @@ items:
           title: 'Samples'
           type: integer
         - name: conditionalDetection
-          title: 'P(detect | present)'
+          title: 'P(detect by n | eventually detected)'
           type: number
           format: 'pc'
         - name: populationDetection
-          title: 'P(detect overall)'
+          title: 'Modelled detected fraction of recorded cases'
           type: number
           format: 'pc'
 
@@ -477,16 +515,14 @@ items:
     - name: tumorBurdenText
       title: Tumor Burden Analysis
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showTumorBurden)
 
     - name: tumorBurdenInfo
       title: Cassette Positivity Statistics
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showTumorBurden)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - positiveCassettes
       columns:
         - name: measure
           title: Measure
@@ -498,11 +534,8 @@ items:
     - name: cassetteDistribution
       title: Tumor Distribution Pattern
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showTumorBurden)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - positiveCassettes
       columns:
         - name: pattern
           title: Pattern
@@ -519,16 +552,14 @@ items:
     - name: stageMigrationText
       title: Stage Migration Analysis
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showStageMigration)
 
     - name: stageMigrationTable
       title: Detection Rates by Cassette Groups
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showStageMigration)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - positiveCassettes
       columns:
         - name: cassettes
           title: 'Cassettes Examined'
@@ -548,16 +579,14 @@ items:
     - name: correlationText
       title: Examined vs Positive Correlation
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showCorrelation)
 
     - name: correlationStats
       title: Correlation Statistics
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showCorrelation)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - positiveCassettes
       columns:
         - name: statistic
           title: Statistic
@@ -569,6 +598,7 @@ items:
     - name: correlationPlot
       title: Examined vs Positive Cassettes
       type: Image
+      clearWith: *pathsamplingInputs
       width: 600
       height: 450
       renderFun: .correlationPlot
@@ -578,18 +608,16 @@ items:
     - name: distributionPatternText
       title: Distribution Pattern Analysis (Single vs Summed)
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showDistributionPattern)
+      refs:
+        - ates2025
 
     - name: distributionPatternTable
       title: Distribution Pattern Classification
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showDistributionPattern)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - positiveCassettes
-        - maxPositiveSingle
-        - distributionThreshold
       columns:
         - name: pattern
           title: Distribution Pattern
@@ -605,13 +633,8 @@ items:
     - name: distributionComparisonTable
       title: Single vs Summed Comparison
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showDistributionPattern)
-      clearWith:
-        - totalSamples
-        - firstDetection
-        - positiveCassettes
-        - maxPositiveSingle
-        - distributionThreshold
       columns:
         - name: measure
           title: Measure
@@ -624,17 +647,14 @@ items:
     - name: hypergeometricText
       title: Hypergeometric Probability Model
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showHypergeometric)
 
     - name: hypergeometricTable
       title: Hypergeometric Model Predictions (Finite Population)
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showHypergeometric)
-      clearWith:
-        - totalPopulation
-        - successStates
-        - targetDetections
-        - maxSamples
       columns:
         - name: nSamples
           title: 'Number of Samples'
@@ -649,21 +669,17 @@ items:
           format: 'pc'
 
     - name: hyperRecommendTable
-      title: Minimum Samples for Target Confidence (Hypergeometric)
+      title: Samples for target detection probability (Hypergeometric)
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showHypergeometric)
-      clearWith:
-        - totalPopulation
-        - successStates
-        - targetDetections
-        - targetConfidence
       columns:
         - name: confidence
-          title: 'Target Confidence'
+          title: 'Target detection probability'
           type: number
           format: 'pc'
         - name: minSamples
-          title: 'Minimum Samples Required'
+          title: 'Samples to reach target'
           type: integer
         - name: expectedYield
           title: 'Expected Detections'
@@ -673,16 +689,16 @@ items:
     - name: betaBinomialText
       title: Beta-Binomial Probability Model
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showBetaBinomial)
+      refs:
+        - VGAM
 
     - name: betaBinomialTable
       title: Beta-Binomial Model Predictions (Overdispersed)
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showBetaBinomial)
-      clearWith:
-        - totalPopulation
-        - successStates
-        - maxSamples
       columns:
         - name: nSamples
           title: 'Number of Samples'
@@ -695,139 +711,108 @@ items:
           title: 'Marginal Gain'
           type: number
           format: 'pc'
+      refs:
+        - VGAM
 
     - name: betaBinomialRecommendTable
-      title: Minimum Samples for Target Confidence (Beta-Binomial)
+      title: Samples for target detection probability (Beta-Binomial)
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showBetaBinomial)
-      clearWith:
-        - totalPopulation
-        - successStates
-        - targetConfidence
       columns:
         - name: confidence
-          title: 'Target Confidence'
+          title: 'Target detection probability'
           type: number
           format: 'pc'
         - name: minSamples
-          title: 'Minimum Samples Required'
+          title: 'Samples to reach target'
           type: integer
         - name: expectedYield
           title: 'Expected Detections'
           type: number
 
     # === POWER ANALYSIS RESULTS ===
-    - name: powerAnalysisText
-      title: Power Analysis for Sample Size Planning
+    - name: sampleSizePlanningText
+      title: Sample Size for a Target Detection Probability
       type: Html
-      visible: (showPowerAnalysis)
+      clearWith: *pathsamplingInputs
+      visible: (showSampleSizePlanning)
 
-    - name: powerTable
-      title: Sample Size for Target Power
+    - name: sampleSizePlanningTable
+      title: Required Samples by Scenario
       type: Table
-      visible: (showPowerAnalysis)
-      clearWith:
-        - targetPower
-        - targetDetectionProb
+      clearWith: *pathsamplingInputs
+      visible: (showSampleSizePlanning)
       columns:
         - name: scenario
           title: 'Scenario'
           type: text
-        - name: targetPower
-          title: 'Target Power'
+        - name: planningTargetProb
+          title: 'Target cumulative probability'
           type: number
           format: 'pc'
-        - name: probDetect
-          title: 'Detection Probability (q)'
+        - name: assumedQ
+          title: 'Assumed per-sample probability (q)'
           type: number
           format: 'pc'
         - name: nSamples
           title: 'Required Samples'
           type: integer
-        - name: achievedPower
-          title: 'Achieved Power'
+        - name: achievedProb
+          title: 'Achieved cumulative probability'
           type: number
           format: 'pc'
 
     # === MULTIFOCAL ANALYSIS RESULTS ===
     - name: multifocalAnalysisText
-      title: Multifocal Disease Modeling
+      title: Independent Positive-sample Count Model
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showMultifocalAnalysis)
 
     - name: multifocalProbTable
-      title: Probability of Detecting Multiple Lesions
+      title: Probability of Multiple Positive Samples
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showMultifocalAnalysis)
-      clearWith:
-        - maxSamples
-        - firstDetection
       columns:
         - name: nSamples
           title: 'Samples'
           type: integer
         - name: detectOne
-          title: 'P(>=1 lesion)'
+          title: 'P(>=1 positive sample)'
           type: number
           format: 'pc'
         - name: detectTwo
-          title: 'P(>=2 lesions)'
+          title: 'P(>=2 positive samples)'
           type: number
           format: 'pc'
         - name: detectThree
-          title: 'P(>=3 lesions)'
+          title: 'P(>=3 positive samples)'
           type: number
           format: 'pc'
 
     # === AUTOMATED MODEL SELECTION ===
     - name: modelSelectionText
-      title: Automated Model Selection
+      title: Model Applicability Guide
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (autoSelectModel)
 
-    - name: modelComparisonTable
-      title: Model Fit Comparison
-      type: Table
-      visible: (autoSelectModel)
-      clearWith:
-        - totalSamples
-        - firstDetection
-      columns:
-        - name: model
-          title: 'Model'
-          type: text
-        - name: aic
-          title: 'AIC'
-          type: number
-        - name: bic
-          title: 'BIC'
-          type: number
-        - name: chisq
-          title: 'Chi-Square'
-          type: number
-        - name: pVal
-          title: 'p-value (GOF)'
-          type: number
-          format: 'zto,pvalue'
-        - name: recommendation
-          title: 'Recommendation'
-          type: text
-
-    # === SPECIALIZED MODELS: LYMPH NODE ANALYSIS ===
     - name: lnAnalysisText
       title: Lymph Node Ratio and Staging Analysis
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showLNAnalysis)
+      refs:
+        - tomlinson2007
+        - yoon2025
 
     - name: lnrClassification
       title: Lymph Node Ratio Classification
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showLNAnalysis)
-      clearWith:
-        - totalPopulation
-        - positiveLymphNodes
-        - lnrThreshold1
-        - lnrThreshold2
       columns:
         - name: lnrStage
           title: 'LNR Stage'
@@ -845,13 +830,15 @@ items:
         - name: medianELN
           title: 'Median ELN'
           type: number
+      refs:
+        - tomlinson2007
+        - yoon2025
 
     - name: ajccNStage
-      title: AJCC N Stage Distribution
+      title: AJCC N Stage Distribution (8th ed., pancreatic adenocarcinoma)
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showLNAnalysis)
-      clearWith:
-        - positiveLymphNodes
       columns:
         - name: nStage
           title: 'N Stage'
@@ -873,10 +860,8 @@ items:
     - name: adequacyByELN
       title: Adequacy Assessment by ELN Thresholds
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showLNAnalysis)
-      clearWith:
-        - totalPopulation
-        - positiveLymphNodes
       columns:
         - name: elnGroup
           title: 'ELN Group'
@@ -897,17 +882,19 @@ items:
 
     # === SPECIALIZED MODELS: EFFECT SIZES ===
     - name: effectSizesText
-      title: Effect Size Measures
+      title: Examined-node Count Summary
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showEffectSizes)
+      refs:
+        - tomlinson2007
+        - yoon2025
 
     - name: effectSizesTable
-      title: Effect Size Statistics
+      title: Examined-node Count Statistics
       type: Table
+      clearWith: *pathsamplingInputs
       visible: (showEffectSizes)
-      clearWith:
-        - totalPopulation
-        - positiveLymphNodes
       columns:
         - name: measure
           title: 'Measure'
@@ -923,20 +910,38 @@ items:
     - name: omentumText
       title: Omentum Sampling Literature
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showOmentumAnalysis)
+      refs:
+        - maglalang2025
+        - malpica2019
+        - skala2015
 
     # === DISPLAY OPTIONS: INTERPRETATION & RECOMMENDATIONS ===
     - name: recommendText
-      title: Clinical Recommendations
+      title: Descriptive sampling targets
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showRecommendText)
 
     - name: interpretText
       title: Statistical Interpretation
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showInterpretText)
 
     - name: referencesText
       title: Statistical Methods & References
       type: Html
+      clearWith: *pathsamplingInputs
       visible: (showReferencesText)
+      refs:
+        - gonen2009
+        - Buderer1996
+        - tomlinson2007
+        - yoon2025
+
+refs:
+    - ClinicoPathJamoviModule
+    - VGAM
+    - scales

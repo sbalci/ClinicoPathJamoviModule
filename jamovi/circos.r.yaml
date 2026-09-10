@@ -52,6 +52,7 @@ items:
 
 
 refs:
-    - gu2014circlize
     - ClinicoPathJamoviModule
+    - gu2014circlize
+    - circlize
 ...

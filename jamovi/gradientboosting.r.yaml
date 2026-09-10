@@ -121,12 +121,12 @@ items:
       requiresData: true
 
 refs:
+    - ClinicoPathJamoviModule
     - survival
     - mboost
     - gbm
     - xgboost
-    - ClinicoPathJamoviModule
-
     - survival
     - Matrix
+    - graphics
 ...

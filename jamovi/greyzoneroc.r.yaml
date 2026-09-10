@@ -263,10 +263,9 @@ items:
       visible: true
 
 refs:
+    - ClinicoPathJamoviModule
     - pROC
     - ggplot2
     - dplyr
     - boot
-    - ClinicoPathJamoviModule
-
 ...

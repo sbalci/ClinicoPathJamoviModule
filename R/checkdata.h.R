@@ -160,7 +160,8 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "leys2013",
                     "tukey1977",
                     "waldwolfowitz1940",
-                    "wilson1927"))
+                    "wilson1927",
+                    "naniar"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",
@@ -387,7 +388,7 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "checkdata",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = checkdataResults$new(options=options),
                 data = data,

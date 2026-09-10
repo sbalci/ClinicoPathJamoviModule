@@ -3,8 +3,21 @@ name: pathsampling
 title: Pathology Sampling Adequacy Analysis
 menuGroup: OncoPathT
 menuSubgroup: ClinicoPath Descriptives
-version: '1.0.0'
+version: '2.1.0'
 jas: '1.2'
+
+description:
+    main: >
+        Describe sampling detection among cases in which a lesion was eventually observed.
+        Empirical curves and geometric approximations do not identify missed disease,
+        correct finite sampling-window bias, or validate clinical rule-out sensitivity.
+        Independent planning, hypergeometric and beta-binomial models, and examined-node
+        summaries can run using their own inputs without first-detection data.
+        Positive-sample probabilities are not probabilities of distinct lesions.
+        The single-versus-summed classification uses total foci across slides, not
+        positive cassettes. The examined-node summary reports a proportion and Wilson
+        interval, not comparative effect sizes. Model applicability is described without
+        automatically ranking models with different estimands.
 
 options:
     - name: data
@@ -84,10 +97,11 @@ options:
         - ordinal
       permitted:
         - factor
+        - numeric
       default: NULL
 
     - name: targetConfidence
-      title: Target Confidence
+      title: Target detection probability
       type: Number
       min: 0.5
       max: 0.99
@@ -108,27 +122,27 @@ options:
       default: 10000
 
     - name: showBinomialModel
-      title: Show Binomial Model
+      title: Binomial model
       type: Bool
-      default: false
+      default: true
 
     - name: showBootstrap
-      title: Show Bootstrap Analysis
+      title: Bootstrap analysis
       type: Bool
       default: false
 
     - name: showDetectionCurve
-      title: Show Diagnostic Yield Curve
+      title: Diagnostic yield curve
       type: Bool
       default: false
 
     - name: showSensitivityCI
-      title: Show Sensitivity CI
+      title: Observed-positive detection confidence intervals
       type: Bool
       default: false
 
     - name: setSeed
-      title: Set Random Seed
+      title: Fixed random seed
       type: Bool
       default: false
 
@@ -147,8 +161,28 @@ options:
         - numeric
       default: NULL
 
+    - name: totalFoci
+      title: Total foci across slides
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: NULL
+      description: >
+        Total number of foci summed across slides, not the number of positive cassettes.
+        Used only for the single-versus-summed foci classification.
+
+    - name: adequacyThreshold
+      title: Examined-node count threshold
+      type: Integer
+      min: 1
+      max: 1000
+      default: 12
+      description: >
+        User-selected threshold for the descriptive examined-node summary.
+        The threshold alone does not establish adequate clinical staging.
+
     - name: maxPositiveSingle
-      title: Max Foci per Cassette (Optional)
+      title: Maximum foci on one slide (optional)
       type: Variable
       suggested:
         - continuous
@@ -157,22 +191,22 @@ options:
       default: NULL
 
     - name: showTumorBurden
-      title: Show Tumor Burden Analysis
+      title: Tumour burden (sample positivity ratio)
       type: Bool
       default: false
 
     - name: showStageMigration
-      title: Show Stage Migration Analysis
+      title: Stage migration analysis
       type: Bool
       default: false
 
     - name: showCorrelation
-      title: Show Correlation Plot
+      title: Examined vs positive correlation
       type: Bool
       default: false
 
     - name: showDistributionPattern
-      title: Show Distribution Pattern Analysis
+      title: Distribution pattern (single vs summed)
       type: Bool
       default: false
 
@@ -183,20 +217,8 @@ options:
       max: 20
       default: 5
 
-    - name: modelType
-      title: Model Type
-      type: List
-      options:
-        - name: binomial
-          title: Binomial (infinite population)
-        - name: hypergeometric
-          title: Hypergeometric (finite population)
-        - name: betabinomial
-          title: Beta-Binomial (finite population with overdispersion)
-      default: binomial
-
     - name: totalPopulation
-      title: Total Population (Finite Models)
+      title: Total population or binomial trials
       type: Variable
       suggested:
         - continuous
@@ -205,7 +227,7 @@ options:
       default: NULL
 
     - name: successStates
-      title: Success States (Finite Models)
+      title: Positive counts for probability models
       type: Variable
       suggested:
         - continuous
@@ -221,12 +243,12 @@ options:
       default: 1
 
     - name: showHypergeometric
-      title: Show Hypergeometric Model
+      title: Hypergeometric model
       type: Bool
       default: false
 
     - name: showBetaBinomial
-      title: Show Beta-Binomial Model
+      title: Beta-binomial model
       type: Bool
       default: false
 
@@ -249,7 +271,7 @@ options:
       default: NULL
 
     - name: showLNAnalysis
-      title: Show LN Ratio & Staging
+      title: Lymph node ratio and staging (pancreatic criteria)
       type: Bool
       default: false
 
@@ -268,22 +290,22 @@ options:
       default: 0.3
 
     - name: showEffectSizes
-      title: Show Effect Sizes
+      title: Examined-node count summary
       type: Bool
       default: false
 
     - name: showOmentumAnalysis
-      title: Show Omentum Analysis
+      title: Omentum sampling literature comparison
       type: Bool
       default: false
 
     - name: showClinicalSummary
-      title: Show Clinical Summary
+      title: Plain-language clinical summary
       type: Bool
       default: false
 
     - name: showGuidedInstructions
-      title: Show Guided Instructions (Detailed Checklist)
+      title: Guided instructions (detailed checklist)
       type: Bool
       default: false
       description: >
@@ -291,7 +313,7 @@ options:
         Best for first-time users and training.
 
     - name: showConciseInstructions
-      title: Show Concise Instructions (Brief Overview)
+      title: Concise instructions (brief overview)
       type: Bool
       default: false
       description: >
@@ -299,65 +321,76 @@ options:
         Best for experienced users.
 
     - name: showEmpiricalCumulative
-      title: Show Empirical Cumulative Detection
+      title: Empirical cumulative detection
       type: Bool
       default: false
 
     - name: showSpatialClustering
-      title: Show Spatial Clustering Analysis
+      title: Spatial clustering of positive samples
       type: Bool
       default: false
 
     - name: showStratifiedAnalysis
-      title: Show Stratified Analysis by Sample Type
+      title: Stratification by sample type
       type: Bool
       default: false
 
     - name: showPopulationDetection
-      title: Show Population-Level Detection Rates
+      title: Population-level detection rates
       type: Bool
       default: false
 
     - name: showIncrementalYield
-      title: Show Incremental Diagnostic Yield
+      title: Incremental diagnostic yield
       type: Bool
       default: false
 
+    - name: fociGapThreshold
+      title: Gap between positive samples that starts a new focus
+      type: Integer
+      min: 1
+      max: 20
+      default: 2
+      description: >
+        Two consecutive positive samples separated by more than this many sample positions are
+        counted as belonging to separate foci. The default of 2 is a heuristic, not a validated
+        cut-off; set it to match the block-sampling interval used in your laboratory.
+
     - name: showMultifocalAnalysis
-      title: Show Multifocal Detection Analysis
+      title: Positive-sample counts and heuristic foci
       type: Bool
       default: false
 
     - name: showProbabilityExplanation
-      title: Show Probability Explanation
+      title: Probability explanation
       type: Bool
       default: false
       description: >
         Show detailed explanation distinguishing conditional vs population-level detection probabilities.
 
     - name: showKeyResults
-      title: Show Key Results Summary
+      title: Key results summary
       type: Bool
-      default: false
+      default: true
       description: >
         Display a concise summary of key findings at the top of results.
 
     - name: showRecommendText
-      title: Show Clinical Recommendations
+      title: Clinical recommendations
       type: Bool
       default: false
       description: >
         Display context-specific clinical recommendations based on analysis results.
 
     - name: showInterpretText
-      title: Show Statistical Interpretation
+      title: Statistical interpretation
       type: Bool
       default: false
       description: >
         Show statistical interpretation and guidance for result interpretation.
 
     - name: showReferencesText
-      title: Show References & Methods
+      title: References and methods
       type: Bool
       default: false
       description: >
@@ -368,114 +401,69 @@ options:
       type: List
       options:
         - name: auto
-          title: Auto (use best available method)
+          title: Auto (counts in general, lymph-node and omentum contexts)
         - name: geometric
-          title: Geometric MLE (first detection only)
+          title: Detected-case geometric approximation
         - name: empirical
           title: Empirical Proportion (requires positive count)
       default: auto
 
     - name: showHeterogeneityTest
-      title: Show Heterogeneity Test
+      title: Heterogeneity test
       type: Bool
       default: false
       description: >
-        Test if detection probability varies significantly across sample types.
+        Test the geometric approximation across sample types among eventually detected cases.
         Only available when Sample Type variable is specified. Uses likelihood ratio test.
 
-    - name: useGeometricCI
-      title: Use Geometric CI When Needed
-      type: Bool
-      default: true
-      description: >
-        Use theoretical geometric model confidence intervals when bootstrap
-        shows ceiling effect (100 percent bounds). Provides more realistic uncertainty estimates.
-
-    - name: ciMethod
-      title: Confidence Interval Method
-      type: List
-      options:
-        - name: auto
-          title: Auto (choose best method)
-        - name: bootstrap
-          title: Bootstrap only
-        - name: geometric
-          title: Geometric model only
-        - name: both
-          title: Both (for comparison)
-      default: auto
-      description: >
-        Method for calculating confidence intervals. Auto selects geometric when bootstrap
-        shows ceiling effect, otherwise uses bootstrap.
-
     - name: showModelFit
-      title: Show Model Fit Assessment
+      title: Model fit assessment
       type: Bool
       default: false
       description: >
-        Perform goodness-of-fit test comparing observed vs predicted detection distribution.
-        Validates geometric/binomial model assumptions.
+        Approximate chi-square fit test for the detected-case geometric estimator only.
+        No p-value is reported for empirical-count estimation. This tests an untruncated
+        geometric working model, not disease ascertainment or clinical sensitivity.
 
     - name: showObsPred
-      title: Show Observed vs Predicted Table
+      title: Observed vs predicted detection
       type: Bool
       default: false
       description: >
         Compare observed detection rates with model predictions at each sample number.
         Visual model validation tool.
 
-    - name: showMarginalInterpretation
-      title: Interpret Marginal Benefits
-      type: Bool
-      default: true
-      description: >
-        Add cost-benefit interpretation to marginal gain analysis. Auto-enabled when
-        Show Binomial Model is checked.
-
-    - name: showPowerAnalysis
-      title: Show Power Analysis
+    - name: showSampleSizePlanning
+      title: Sample size for a target detection probability
       type: Bool
       default: false
 
-    - name: targetPower
-      title: Target Power
+    - name: planningTargetProb
+      title: Target cumulative detection probability
       type: Number
       min: 0.5
       max: 0.99
       default: 0.8
 
-    - name: targetDetectionProb
-      title: Target Detection Probability
+    - name: planningAssumedQ
+      title: Assumed per-sample detection probability
       type: Number
-      min: 0.5
-      max: 0.99
-      default: 0.95
+      min: 0.000001
+      max: 1.0
+      default: 0.1
 
     - name: autoSelectModel
-      title: Auto-Select Best Model
+      title: Model applicability guide
       type: Bool
       default: false
-
-    - name: appendVariables
-      title: Append Calculated Variables to Data
-      type: Bool
-      default: false
-      description: >
-        Add new columns to dataset with calculated detection probabilities and classifications.
-        Variables include cumulative probabilities, recommended sample counts, and detection categories.
-
-    - name: appendPrefix
-      title: Variable Name Prefix
-      type: String
-      default: "ps_"
-      description: >
-        Prefix for appended variable names (e.g., 'ps_' creates 'ps_cumulative_prob_5').
-        Only used when Append Variables is enabled.
 
     - name: autoDetectHeterogeneity
-      title: Auto-Detect Population Heterogeneity
+      title: Automatic heterogeneity detection
       type: Bool
       default: true
       description: >
-        Automatically analyze and report if sample types have significantly different
-        detection probabilities. Requires Sample Type variable. Warns if CV > 30 percent.
+        Report a heuristic warning when the CV of sample-type geometric first-detection
+        estimates exceeds 30 percent. Requires Sample Type, at least 10 detected cases
+        overall, and at least two groups with three detected cases each. This screen
+        always uses inverse mean first-detection positions, independently of the selected
+        prediction estimator; it is not a formal significance test.

@@ -230,10 +230,30 @@ stagemigration_validateData <- function(data, options,
     n_events <- sum(data$event_binary == 1)
     n_total <- nrow(data)
 
+    # Events-per-variable must count the degrees of freedom the Cox models actually spend.
+    # This was hardcoded to 2, but a stage factor with k levels uses k - 1 df, and each staging
+    # system is fitted as its own model -- so a 4-stage system spends 3 df, and multifactorial
+    # covariates add more. Undercounting overstated EPV and silenced the warning in exactly the
+    # small cohorts where it matters. Use the more demanding of the two models.
+    stage_df <- function(v) {
+        if (is.null(v) || !nzchar(v) || !(v %in% names(data))) return(0L)
+        max(1L, nlevels(droplevels(factor(data[[v]]))) - 1L)
+    }
+    n_predictors <- max(stage_df(old_stage), stage_df(new_stage), 1L)
+    if (isTRUE(options$enableMultifactorialAnalysis)) {
+        cont <- options$continuousCovariates
+        cont <- cont[!is.null(cont) & nzchar(cont) & cont %in% names(data)]
+        cats <- options$categoricalCovariates
+        cats <- cats[!is.null(cats) & nzchar(cats) & cats %in% names(data)]
+        n_predictors <- n_predictors + length(cont) +
+            sum(vapply(cats, function(v) max(1L, nlevels(droplevels(factor(data[[v]]))) - 1L), integer(1)))
+    }
+    validation_result$metadata$n_predictors_df <- n_predictors
+
     sample_check <- stagemigration_checkSampleSize(
         n = n_total,
         n_events = n_events,
-        n_predictors = 2,  # Basic: old_stage and new_stage
+        n_predictors = n_predictors,
         analysis_type = options$analysisType %||% "standard"
     )
 
@@ -248,8 +268,11 @@ stagemigration_validateData <- function(data, options,
 
     # Critical: block analysis if sample too small
     if (sample_check$level == "CRITICAL") {
+        # State the actual shortfall: an all-censored cohort of 700 patients used to be told its
+        # "sample size" was too small, which points the user at the wrong problem.
         validation_result$errors <- c(validation_result$errors,
-            "Sample size too small for meaningful analysis")
+            sprintf("Too few events for a meaningful analysis: %d events among %d patients; at least 10 events are needed.",
+                    as.integer(n_events), as.integer(n_total)))
         return(validation_result)
     }
 

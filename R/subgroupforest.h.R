@@ -181,10 +181,11 @@ subgroupforestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Subgroup Analysis Forest Plot",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "survival",
                     "forestplot",
                     "meta",
-                    "ClinicoPathJamoviModule"))
+                    "sandwich"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

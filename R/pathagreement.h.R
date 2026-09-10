@@ -28,15 +28,12 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             showStatisticalGlossary = FALSE,
             styleDistanceMetric = "agreement",
             raterCharacteristics = FALSE,
-            experienceVar = NULL,
-            trainingVar = NULL,
-            institutionVar = NULL,
-            specialtyVar = NULL,
             identifyDiscordantCases = FALSE,
             caseID = NULL,
             icc = FALSE,
             bootstrap = FALSE,
             bootstrapSamples = 1000,
+            seed = 42,
             pairwiseAnalysis = FALSE,
             categoryAnalysis = FALSE,
             outlierAnalysis = FALSE,
@@ -58,16 +55,12 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             heatmapColorScheme = "diagnostic",
             identifyDiscordant = FALSE,
             discordantThreshold = 0.5,
-            raterExperience = NULL,
-            raterSpecialty = NULL,
-            raterInstitution = NULL,
-            raterVolume = NULL,
             referenceStandard = NULL,
             useMetadataRows = FALSE,
             showInlineComments = FALSE,
             showClusteringInterpretation = FALSE,
             enhancedErrorGuidance = TRUE,
-            showProgressIndicators = TRUE, ...) {
+            showProgressIndicators = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -200,34 +193,6 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "raterCharacteristics",
                 raterCharacteristics,
                 default=FALSE)
-            private$..experienceVar <- jmvcore::OptionVariable$new(
-                "experienceVar",
-                experienceVar,
-                suggested=list(
-                    "continuous",
-                    "ordinal",
-                    "nominal"),
-                default=NULL)
-            private$..trainingVar <- jmvcore::OptionVariable$new(
-                "trainingVar",
-                trainingVar,
-                suggested=list(
-                    "nominal",
-                    "ordinal"),
-                default=NULL)
-            private$..institutionVar <- jmvcore::OptionVariable$new(
-                "institutionVar",
-                institutionVar,
-                suggested=list(
-                    "nominal"),
-                default=NULL)
-            private$..specialtyVar <- jmvcore::OptionVariable$new(
-                "specialtyVar",
-                specialtyVar,
-                suggested=list(
-                    "nominal",
-                    "ordinal"),
-                default=NULL)
             private$..identifyDiscordantCases <- jmvcore::OptionBool$new(
                 "identifyDiscordantCases",
                 identifyDiscordantCases,
@@ -253,6 +218,11 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 min=100,
                 max=5000,
                 default=1000)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                min=1,
+                default=42)
             private$..pairwiseAnalysis <- jmvcore::OptionBool$new(
                 "pairwiseAnalysis",
                 pairwiseAnalysis,
@@ -354,38 +324,6 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 min=0.2,
                 max=0.8,
                 default=0.5)
-            private$..raterExperience <- jmvcore::OptionVariable$new(
-                "raterExperience",
-                raterExperience,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"),
-                default=NULL)
-            private$..raterSpecialty <- jmvcore::OptionVariable$new(
-                "raterSpecialty",
-                raterSpecialty,
-                suggested=list(
-                    "nominal"),
-                permitted=list(
-                    "factor"),
-                default=NULL)
-            private$..raterInstitution <- jmvcore::OptionVariable$new(
-                "raterInstitution",
-                raterInstitution,
-                suggested=list(
-                    "nominal"),
-                permitted=list(
-                    "factor"),
-                default=NULL)
-            private$..raterVolume <- jmvcore::OptionVariable$new(
-                "raterVolume",
-                raterVolume,
-                suggested=list(
-                    "continuous"),
-                permitted=list(
-                    "numeric"),
-                default=NULL)
             private$..referenceStandard <- jmvcore::OptionVariable$new(
                 "referenceStandard",
                 referenceStandard,
@@ -414,7 +352,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..showProgressIndicators <- jmvcore::OptionBool$new(
                 "showProgressIndicators",
                 showProgressIndicators,
-                default=TRUE)
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sft)
@@ -438,15 +376,12 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..showStatisticalGlossary)
             self$.addOption(private$..styleDistanceMetric)
             self$.addOption(private$..raterCharacteristics)
-            self$.addOption(private$..experienceVar)
-            self$.addOption(private$..trainingVar)
-            self$.addOption(private$..institutionVar)
-            self$.addOption(private$..specialtyVar)
             self$.addOption(private$..identifyDiscordantCases)
             self$.addOption(private$..caseID)
             self$.addOption(private$..icc)
             self$.addOption(private$..bootstrap)
             self$.addOption(private$..bootstrapSamples)
+            self$.addOption(private$..seed)
             self$.addOption(private$..pairwiseAnalysis)
             self$.addOption(private$..categoryAnalysis)
             self$.addOption(private$..outlierAnalysis)
@@ -468,10 +403,6 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..heatmapColorScheme)
             self$.addOption(private$..identifyDiscordant)
             self$.addOption(private$..discordantThreshold)
-            self$.addOption(private$..raterExperience)
-            self$.addOption(private$..raterSpecialty)
-            self$.addOption(private$..raterInstitution)
-            self$.addOption(private$..raterVolume)
             self$.addOption(private$..referenceStandard)
             self$.addOption(private$..useMetadataRows)
             self$.addOption(private$..showInlineComments)
@@ -502,15 +433,12 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         showStatisticalGlossary = function() private$..showStatisticalGlossary$value,
         styleDistanceMetric = function() private$..styleDistanceMetric$value,
         raterCharacteristics = function() private$..raterCharacteristics$value,
-        experienceVar = function() private$..experienceVar$value,
-        trainingVar = function() private$..trainingVar$value,
-        institutionVar = function() private$..institutionVar$value,
-        specialtyVar = function() private$..specialtyVar$value,
         identifyDiscordantCases = function() private$..identifyDiscordantCases$value,
         caseID = function() private$..caseID$value,
         icc = function() private$..icc$value,
         bootstrap = function() private$..bootstrap$value,
         bootstrapSamples = function() private$..bootstrapSamples$value,
+        seed = function() private$..seed$value,
         pairwiseAnalysis = function() private$..pairwiseAnalysis$value,
         categoryAnalysis = function() private$..categoryAnalysis$value,
         outlierAnalysis = function() private$..outlierAnalysis$value,
@@ -532,10 +460,6 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         heatmapColorScheme = function() private$..heatmapColorScheme$value,
         identifyDiscordant = function() private$..identifyDiscordant$value,
         discordantThreshold = function() private$..discordantThreshold$value,
-        raterExperience = function() private$..raterExperience$value,
-        raterSpecialty = function() private$..raterSpecialty$value,
-        raterInstitution = function() private$..raterInstitution$value,
-        raterVolume = function() private$..raterVolume$value,
         referenceStandard = function() private$..referenceStandard$value,
         useMetadataRows = function() private$..useMetadataRows$value,
         showInlineComments = function() private$..showInlineComments$value,
@@ -565,15 +489,12 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..showStatisticalGlossary = NA,
         ..styleDistanceMetric = NA,
         ..raterCharacteristics = NA,
-        ..experienceVar = NA,
-        ..trainingVar = NA,
-        ..institutionVar = NA,
-        ..specialtyVar = NA,
         ..identifyDiscordantCases = NA,
         ..caseID = NA,
         ..icc = NA,
         ..bootstrap = NA,
         ..bootstrapSamples = NA,
+        ..seed = NA,
         ..pairwiseAnalysis = NA,
         ..categoryAnalysis = NA,
         ..outlierAnalysis = NA,
@@ -595,10 +516,6 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..heatmapColorScheme = NA,
         ..identifyDiscordant = NA,
         ..discordantThreshold = NA,
-        ..raterExperience = NA,
-        ..raterSpecialty = NA,
-        ..raterInstitution = NA,
-        ..raterVolume = NA,
         ..referenceStandard = NA,
         ..useMetadataRows = NA,
         ..showInlineComments = NA,
@@ -669,25 +586,33 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Pathology Interrater Reliability",
                 refs=list(
+                    "ClinicoPathJamoviModule",
+                    "LandisKoch1977",
                     "irr",
+                    "irrCAC",
+                    "vcd",
+                    "kappaSize",
+                    "rotondiDonnerKappaCI",
                     "psych",
                     "ICC",
                     "PathologyKappa",
-                    "ClinicoPathJamoviModule",
+                    "usubutun2012",
+                    "cluster",
                     "ggdendro",
                     "gridExtra",
                     "grid",
-                    "stringr",
+                    "grDevices",
+                    "pheatmap",
                     "reshape2",
                     "scales",
-                    "cluster",
-                    "viridisLite",
-                    "grDevices",
-                    "pheatmap"))
+                    "stringr",
+                    "viridisLite"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Getting Started"))
+                title="Getting Started",
+                clearWith=list(
+                    "vars")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="warnings",
@@ -695,13 +620,23 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 visible=TRUE,
                 clearWith=list(
                     "vars",
+                    "caseID",
+                    "useMetadataRows",
                     "multiraterMethod",
-                    "wght")))
+                    "wght",
+                    "pathologyContext",
+                    "outlierAnalysis",
+                    "gwetAC",
+                    "pabak")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="overviewTable",
                 title="Agreement Analysis Summary",
                 rows=1,
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows"),
                 columns=list(
                     list(
                         `name`="cases", 
@@ -717,7 +652,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="integer"),
                     list(
                         `name`="overall_agreement", 
-                        `title`="Overall Agreement %", 
+                        `title`="Complete Agreement %", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -728,6 +663,15 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="kappaTable",
                 title="Kappa Statistics",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "multiraterMethod",
+                    "wght",
+                    "exct",
+                    "fleissCI",
+                    "krippMethod"),
                 columns=list(
                     list(
                         `name`="method", 
@@ -772,6 +716,11 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="iccTable",
                 title="Intraclass Correlation Coefficients",
                 visible="(icc)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "icc"),
                 columns=list(
                     list(
                         `name`="type", 
@@ -811,6 +760,12 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="pairwiseTable",
                 title="Pairwise Rater Agreements",
                 visible="(pairwiseAnalysis)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "pairwiseAnalysis",
+                    "wght"),
                 columns=list(
                     list(
                         `name`="rater_pair", 
@@ -850,6 +805,12 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="categoryTable",
                 title="Category-Specific Agreement",
                 visible="(categoryAnalysis)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "categoryAnalysis",
+                    "referenceStandard"),
                 columns=list(
                     list(
                         `name`="category", 
@@ -874,18 +835,23 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `title`="Sensitivity", 
                         `type`="number", 
                         `format`="zto", 
-                        `visible`="(pathologyContext)"),
+                        `visible`="(pathologyContext || !is.null(referenceStandard))"),
                     list(
                         `name`="specificity", 
                         `title`="Specificity", 
                         `type`="number", 
                         `format`="zto", 
-                        `visible`="(pathologyContext)"))))
+                        `visible`="(pathologyContext || !is.null(referenceStandard))"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="outlierTable",
                 title="Cases with Poor Agreement",
                 visible="(outlierAnalysis)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "outlierAnalysis"),
                 columns=list(
                     list(
                         `name`="case_id", 
@@ -914,6 +880,12 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="diagnosticAccuracyTable",
                 title="Diagnostic Accuracy by Rater",
                 visible="(pathologyContext)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "pathologyContext",
+                    "referenceStandard"),
                 columns=list(
                     list(
                         `name`="rater", 
@@ -954,6 +926,19 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="diagnosticStyleTable",
                 title="Diagnostic Style Clustering Results",
                 visible="(performClustering)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics"),
                 columns=list(
                     list(
                         `name`="rater", 
@@ -993,6 +978,19 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="styleSummaryTable",
                 title="Diagnostic Style Group Summary",
                 visible="(performClustering)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics"),
                 columns=list(
                     list(
                         `name`="style_group", 
@@ -1031,6 +1029,11 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="discordantCasesTable",
                 title="Cases Distinguishing Diagnostic Styles",
                 visible="(identifyDiscordantCases)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "identifyDiscordantCases"),
                 columns=list(
                     list(
                         `name`="case_id", 
@@ -1054,6 +1057,15 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="krippTable",
                 title="Krippendorff's Alpha Results",
                 visible="(kripp)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "kripp",
+                    "krippMethod",
+                    "bootstrap",
+                    "bootstrapSamples",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="data_type", 
@@ -1085,6 +1097,14 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="consensusTable",
                 title="Consensus Scoring Results",
                 visible="(consensus && show_consensus_table)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "consensus",
+                    "consensus_method",
+                    "tie_breaking",
+                    "show_consensus_table"),
                 columns=list(
                     list(
                         `name`="case_id", 
@@ -1111,6 +1131,13 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="consensusSummary",
                 title="Consensus Summary Statistics",
                 visible="(consensus)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "consensus",
+                    "consensus_method",
+                    "tie_breaking"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -1132,7 +1159,15 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=800,
                 height=600,
                 renderFun=".heatmapPlot",
-                visible="(heatmap)"))
+                visible="(heatmap)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "heatmap",
+                    "heatmapDetails",
+                    "heatmapTheme",
+                    "wght")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="pairwisePlot",
@@ -1140,7 +1175,13 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".pairwisePlot",
-                visible="(pairwiseAnalysis)"))
+                visible="(pairwiseAnalysis)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "pairwiseAnalysis",
+                    "wght")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="categoryPlot",
@@ -1148,7 +1189,13 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".categoryPlot",
-                visible="(categoryAnalysis)"))
+                visible="(categoryAnalysis)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "categoryAnalysis",
+                    "referenceStandard")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="confusionMatrixPlot",
@@ -1156,7 +1203,13 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=600,
                 height=600,
                 renderFun=".confusionMatrixPlot",
-                visible="(pathologyContext)"))
+                visible="(pathologyContext)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "pathologyContext",
+                    "referenceStandard")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diagnosticStyleDendrogram",
@@ -1164,7 +1217,20 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=800,
                 height=600,
                 renderFun=".diagnosticStyleDendrogram",
-                visible="(performClustering)"))
+                visible="(performClustering)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diagnosticStyleHeatmap",
@@ -1172,7 +1238,22 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=800,
                 height=600,
                 renderFun=".diagnosticStyleHeatmap",
-                visible="(performClustering && showClusteringHeatmap)"))
+                visible="(performClustering && showClusteringHeatmap)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics",
+                    "showClusteringHeatmap",
+                    "heatmapColorScheme")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diagnosticStyleCombined",
@@ -1180,7 +1261,20 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=1000,
                 height=1000,
                 renderFun=".diagnosticStyleCombined",
-                visible="(performClustering)"))
+                visible="(performClustering)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics")))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -1191,11 +1285,21 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         super$initialize(
                             options=options,
                             name="raterFrequencyTables",
-                            title="Individual Rater Frequencies")
+                            title="Individual Rater Frequencies",
+                            clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "sft"))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="frequencyTable",
                             title="Frequency Distribution",
+                            clearWith=list(
+                                "vars",
+                                "caseID",
+                                "useMetadataRows",
+                                "sft"),
                             columns=list(
                                 list(
                                     `name`="rater", 
@@ -1220,7 +1324,10 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Cross-tabulation Matrix",
                 visible="(sft)",
                 clearWith=list(
-                    "vars"),
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "sft"),
                 columns=list(
                     list(
                         `name`="rater1_category", 
@@ -1234,37 +1341,68 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="clinicalSummary",
                 title="Clinical Summary",
-                visible="(showClinicalSummary)"))
+                visible="(showClinicalSummary)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "showClinicalSummary",
+                    "multiraterMethod",
+                    "wght")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportTemplate",
                 title="Copy-Ready Report",
-                visible="(showClinicalSummary)"))
+                visible="(showClinicalSummary)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "showClinicalSummary",
+                    "multiraterMethod",
+                    "wght")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
-                visible="(showAboutAnalysis)"))
+                visible="(showAboutAnalysis)",
+                clearWith=list(
+                    "showAboutAnalysis")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="assumptions",
                 title="Assumptions & Caveats",
-                visible="(showAssumptions)"))
+                visible="(showAssumptions)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "showAssumptions")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="weightedKappaGuide",
                 title="Weighted Kappa Guide",
-                visible="(showWeightedKappaGuide && wght != 'unweighted')"))
+                visible="(showWeightedKappaGuide && wght != 'unweighted')",
+                clearWith=list(
+                    "showWeightedKappaGuide",
+                    "wght")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="statisticalGlossary",
                 title="Statistical Terms Glossary",
-                visible="(showStatisticalGlossary)"))
+                visible="(showStatisticalGlossary)",
+                clearWith=list(
+                    "showStatisticalGlossary")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="gwetACTable",
                 title="Gwet's Agreement Coefficients",
                 visible="(gwetAC)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "gwetAC"),
                 columns=list(
                     list(
                         `name`="coefficient", 
@@ -1299,6 +1437,11 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="pabakTable",
                 title="PABAK Analysis Results",
                 visible="(pabak)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "pabak"),
                 columns=list(
                     list(
                         `name`="measure", 
@@ -1328,24 +1471,36 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="sampleSizeTable",
                 title="Sample Size Planning Results",
                 visible="(sampleSizePlanning)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "sampleSizePlanning",
+                    "targetKappa",
+                    "targetPrecision"),
                 columns=list(
                     list(
                         `name`="parameter", 
-                        `title`="Parameter", 
+                        `title`="Raters", 
                         `type`="text"),
                     list(
                         `name`="value", 
-                        `title`="Value", 
+                        `title`="Required Cases", 
                         `type`="text"),
                     list(
                         `name`="recommendation", 
-                        `title`="Recommendation", 
+                        `title`="Assumptions", 
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="raterBiasTable",
-                title="Rater Bias Analysis",
+                title="Rater Disagreement with Consensus",
                 visible="(raterBiasAnalysis)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "raterBiasAnalysis"),
                 columns=list(
                     list(
                         `name`="rater", 
@@ -1353,7 +1508,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text"),
                     list(
                         `name`="bias_score", 
-                        `title`="Bias Score", 
+                        `title`="Disagreement", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -1362,7 +1517,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text"),
                     list(
                         `name`="severity", 
-                        `title`="Bias Severity", 
+                        `title`="Disagreement Level", 
                         `type`="text"),
                     list(
                         `name`="recommendation", 
@@ -1373,6 +1528,11 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="agreementTrendTable",
                 title="Agreement Trend Analysis",
                 visible="(agreementTrendAnalysis)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "agreementTrendAnalysis"),
                 columns=list(
                     list(
                         `name`="sequence_group", 
@@ -1401,6 +1561,11 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="caseDifficultyTable",
                 title="Case Difficulty Analysis",
                 visible="(caseDifficultyScoring)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "caseDifficultyScoring"),
                 columns=list(
                     list(
                         `name`="case_id", 
@@ -1408,7 +1573,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text"),
                     list(
                         `name`="difficulty_score", 
-                        `title`="Difficulty Score", 
+                        `title`="Difficulty (1 - Modal Share)", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -1421,7 +1586,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="text"),
                     list(
                         `name`="rater_variability", 
-                        `title`="Rater Variability", 
+                        `title`="Normalized Entropy", 
                         `type`="number", 
                         `format`="zto"))))
             self$add(jmvcore::Table$new(
@@ -1429,6 +1594,13 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="stabilityTable",
                 title="Agreement Stability Analysis",
                 visible="(agreementStabilityAnalysis)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "agreementStabilityAnalysis",
+                    "bootstrapSamples",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="statistic", 
@@ -1465,15 +1637,25 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".trendPlot",
-                visible="(agreementTrendAnalysis)"))
+                visible="(agreementTrendAnalysis)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "agreementTrendAnalysis")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="biasPlot",
-                title="Rater Bias Visualization",
+                title="Rater Disagreement with Consensus",
                 width=700,
                 height=500,
                 renderFun=".biasPlot",
-                visible="(raterBiasAnalysis)"))
+                visible="(raterBiasAnalysis)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "raterBiasAnalysis")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="difficultyPlot",
@@ -1481,17 +1663,40 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".difficultyPlot",
-                visible="(caseDifficultyScoring)"))
+                visible="(caseDifficultyScoring)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "caseDifficultyScoring")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="inlineComments",
                 title="Statistical Commentary",
-                visible="(showInlineComments)"))
+                visible="(showInlineComments)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "showInlineComments")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="styleGroupSummary",
                 title="Diagnostic Style Groups Summary",
                 visible="(performClustering)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics"),
                 columns=list(
                     list(
                         `name`="style_group", 
@@ -1529,6 +1734,19 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="styleGroupProfiles",
                 title="Diagnostic Patterns by Style Group",
                 visible="(performClustering)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics"),
                 columns=list(
                     list(
                         `name`="style_group", 
@@ -1556,6 +1774,19 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="discordantCasesCluster",
                 title="High-Disagreement Cases Between Style Groups",
                 visible="(performClustering && identifyDiscordant)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics"),
                 columns=list(
                     list(
                         `name`="case_id", 
@@ -1584,6 +1815,19 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="characteristicAssociations",
                 title="Style Group Associations with Rater Characteristics",
                 visible="(performClustering)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics"),
                 columns=list(
                     list(
                         `name`="characteristic", 
@@ -1617,6 +1861,19 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="referenceComparison",
                 title="Style Group Agreement with Reference Standard",
                 visible="(performClustering && !is.null(referenceStandard))",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics"),
                 columns=list(
                     list(
                         `name`="style_group", 
@@ -1653,7 +1910,22 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=1000,
                 height=800,
                 renderFun=".clusteringHeatmap",
-                visible="(performClustering && showClusteringHeatmap)"))
+                visible="(performClustering && showClusteringHeatmap)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics",
+                    "showClusteringHeatmap",
+                    "heatmapColorScheme")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="clusterDendrogram",
@@ -1661,7 +1933,20 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=800,
                 height=600,
                 renderFun=".clusterDendrogram",
-                visible="(performClustering)"))
+                visible="(performClustering)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="silhouettePlot",
@@ -1669,12 +1954,39 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=700,
                 height=500,
                 renderFun=".silhouettePlot",
-                visible="(performClustering)"))
+                visible="(performClustering)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clusteringInterpretation",
                 title="Clustering Analysis Interpretation Guide",
-                visible="(performClustering && showClusteringInterpretation)"))}))
+                visible="(performClustering && showClusteringInterpretation)",
+                clearWith=list(
+                    "vars",
+                    "caseID",
+                    "useMetadataRows",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups",
+                    "referenceStandard",
+                    "identifyDiscordant",
+                    "discordantThreshold",
+                    "raterCharacteristics",
+                    "showClusteringInterpretation")))}))
 
 pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathagreementBase",
@@ -1684,7 +1996,7 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "pathagreement",
-                version = c(0,0,31),
+                version = c(0,1,0),
                 options = options,
                 results = pathagreementResults$new(options=options),
                 data = data,
@@ -1720,8 +2032,9 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param wght Weighting scheme for kappa analysis. Use 'squared' or 'equal'
 #'   only with ordinal variables. Weighted kappa accounts for the degree of
 #'   disagreement.
-#' @param exct Use exact method for Fleiss' kappa calculation with 3 or more
-#'   raters. More accurate but computationally intensive.
+#' @param exct Report Conger's (1980) kappa instead of Fleiss' kappa for 3 or
+#'   more raters. Conger's kappa uses each rater's own category proportions; it
+#'   is a different estimator, not a more precise version of Fleiss' kappa.
 #' @param multiraterMethod Choose specific method for multi-rater agreement
 #'   analysis or use automatic selection.
 #' @param fleissCI Calculate 95 percent confidence intervals for Fleiss' kappa
@@ -1752,14 +2065,6 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   similarity between raters for style clustering.
 #' @param raterCharacteristics Include rater background characteristics
 #'   (experience, training, institution) in style analysis.
-#' @param experienceVar Optional variable containing rater experience
-#'   information (years of experience, level of training, etc.)
-#' @param trainingVar Optional variable containing rater training institution
-#'   or background information
-#' @param institutionVar Optional variable containing rater current
-#'   institution or location information
-#' @param specialtyVar Optional variable containing rater medical specialty or
-#'   subspecialty information
 #' @param identifyDiscordantCases Identify cases that distinguish different
 #'   diagnostic styles - useful for training and consensus development.
 #' @param caseID Optional variable containing case identifiers. If not
@@ -1770,6 +2075,9 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Krippendorff's alpha and other statistics.
 #' @param bootstrapSamples Number of bootstrap samples for confidence interval
 #'   calculation.
+#' @param seed Seed for the bootstrap resampling (Krippendorff's alpha
+#'   confidence interval and agreement stability) so that results are
+#'   reproducible.
 #' @param pairwiseAnalysis Detailed analysis of agreement between each pair of
 #'   raters.
 #' @param categoryAnalysis Agreement analysis for each diagnostic category
@@ -1788,14 +2096,15 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   agreement studies with specified precision requirements.
 #' @param targetKappa Target kappa value for sample size planning
 #'   calculations.
-#' @param targetPrecision Target precision for confidence interval width in
-#'   sample size planning.
-#' @param raterBiasAnalysis Analyze systematic tendencies and biases for each
-#'   rater compared to the consensus or average ratings.
+#' @param targetPrecision Half-width of the 95 percent confidence interval for
+#'   kappa that the study should achieve, for example 0.1 for kappa 0.8 +/- 0.1.
+#' @param raterBiasAnalysis For each rater, the share of cases on which their
+#'   rating differs from the most common rating of the other raters, with any
+#'   systematic over- or under-use of a category.
 #' @param agreementTrendAnalysis Analyze how agreement changes over time or
 #'   case sequence, useful for training effect assessment.
-#' @param caseDifficultyScoring Quantify inherent case difficulty based on
-#'   inter-rater disagreement patterns and provide difficulty scores.
+#' @param caseDifficultyScoring Difficulty of each case from the share of
+#'   raters who chose the most common rating.
 #' @param agreementStabilityAnalysis Bootstrap-based stability measures to
 #'   assess the consistency of agreement statistics across different samples.
 #' @param performClustering Identify diagnostic style groups among raters
@@ -1820,17 +2129,6 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param discordantThreshold Minimum disagreement proportion for flagging
 #'   discordant cases. 0.5 means at least 50 percent of raters disagreed with
 #'   majority diagnosis.
-#' @param raterExperience Years of experience for each rater. Will be tested
-#'   for association with style group membership.
-#' @param raterSpecialty Specialty or practice type (e.g., specialist vs
-#'   generalist, subspecialty). Will be tested for association with style group
-#'   membership.
-#' @param raterInstitution Training or current practice institution. Will be
-#'   tested for association with style group membership. Usubutun (2012) found
-#'   no association, suggesting diagnostic style is personal rather than
-#'   institutional.
-#' @param raterVolume Number of cases seen per month or year. Will be tested
-#'   for association with style group membership.
 #' @param referenceStandard Expert consensus or reference standard diagnosis.
 #'   Used to compare style groups and identify which group aligns most closely
 #'   with expert judgment.
@@ -1932,15 +2230,12 @@ pathagreement <- function(
     showStatisticalGlossary = FALSE,
     styleDistanceMetric = "agreement",
     raterCharacteristics = FALSE,
-    experienceVar = NULL,
-    trainingVar = NULL,
-    institutionVar = NULL,
-    specialtyVar = NULL,
     identifyDiscordantCases = FALSE,
     caseID = NULL,
     icc = FALSE,
     bootstrap = FALSE,
     bootstrapSamples = 1000,
+    seed = 42,
     pairwiseAnalysis = FALSE,
     categoryAnalysis = FALSE,
     outlierAnalysis = FALSE,
@@ -1962,49 +2257,27 @@ pathagreement <- function(
     heatmapColorScheme = "diagnostic",
     identifyDiscordant = FALSE,
     discordantThreshold = 0.5,
-    raterExperience = NULL,
-    raterSpecialty = NULL,
-    raterInstitution = NULL,
-    raterVolume = NULL,
     referenceStandard = NULL,
     useMetadataRows = FALSE,
     showInlineComments = FALSE,
     showClusteringInterpretation = FALSE,
     enhancedErrorGuidance = TRUE,
-    showProgressIndicators = TRUE) {
+    showProgressIndicators = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("pathagreement requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
-    if ( ! missing(experienceVar)) experienceVar <- jmvcore::resolveQuo(jmvcore::enquo(experienceVar))
-    if ( ! missing(trainingVar)) trainingVar <- jmvcore::resolveQuo(jmvcore::enquo(trainingVar))
-    if ( ! missing(institutionVar)) institutionVar <- jmvcore::resolveQuo(jmvcore::enquo(institutionVar))
-    if ( ! missing(specialtyVar)) specialtyVar <- jmvcore::resolveQuo(jmvcore::enquo(specialtyVar))
     if ( ! missing(caseID)) caseID <- jmvcore::resolveQuo(jmvcore::enquo(caseID))
-    if ( ! missing(raterExperience)) raterExperience <- jmvcore::resolveQuo(jmvcore::enquo(raterExperience))
-    if ( ! missing(raterSpecialty)) raterSpecialty <- jmvcore::resolveQuo(jmvcore::enquo(raterSpecialty))
-    if ( ! missing(raterInstitution)) raterInstitution <- jmvcore::resolveQuo(jmvcore::enquo(raterInstitution))
-    if ( ! missing(raterVolume)) raterVolume <- jmvcore::resolveQuo(jmvcore::enquo(raterVolume))
     if ( ! missing(referenceStandard)) referenceStandard <- jmvcore::resolveQuo(jmvcore::enquo(referenceStandard))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
-            `if`( ! missing(experienceVar), experienceVar, NULL),
-            `if`( ! missing(trainingVar), trainingVar, NULL),
-            `if`( ! missing(institutionVar), institutionVar, NULL),
-            `if`( ! missing(specialtyVar), specialtyVar, NULL),
             `if`( ! missing(caseID), caseID, NULL),
-            `if`( ! missing(raterExperience), raterExperience, NULL),
-            `if`( ! missing(raterSpecialty), raterSpecialty, NULL),
-            `if`( ! missing(raterInstitution), raterInstitution, NULL),
-            `if`( ! missing(raterVolume), raterVolume, NULL),
             `if`( ! missing(referenceStandard), referenceStandard, NULL))
 
     for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in raterSpecialty) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in raterInstitution) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in referenceStandard) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- pathagreementOptions$new(
@@ -2030,15 +2303,12 @@ pathagreement <- function(
         showStatisticalGlossary = showStatisticalGlossary,
         styleDistanceMetric = styleDistanceMetric,
         raterCharacteristics = raterCharacteristics,
-        experienceVar = experienceVar,
-        trainingVar = trainingVar,
-        institutionVar = institutionVar,
-        specialtyVar = specialtyVar,
         identifyDiscordantCases = identifyDiscordantCases,
         caseID = caseID,
         icc = icc,
         bootstrap = bootstrap,
         bootstrapSamples = bootstrapSamples,
+        seed = seed,
         pairwiseAnalysis = pairwiseAnalysis,
         categoryAnalysis = categoryAnalysis,
         outlierAnalysis = outlierAnalysis,
@@ -2060,10 +2330,6 @@ pathagreement <- function(
         heatmapColorScheme = heatmapColorScheme,
         identifyDiscordant = identifyDiscordant,
         discordantThreshold = discordantThreshold,
-        raterExperience = raterExperience,
-        raterSpecialty = raterSpecialty,
-        raterInstitution = raterInstitution,
-        raterVolume = raterVolume,
         referenceStandard = referenceStandard,
         useMetadataRows = useMetadataRows,
         showInlineComments = showInlineComments,

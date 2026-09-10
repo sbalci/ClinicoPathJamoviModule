@@ -113,8 +113,8 @@ evalueResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="E-value for Unmeasured Confounding",
                 refs=list(
-                    "vanderweele2017evalue",
                     "ClinicoPathJamoviModule",
+                    "vanderweele2017evalue",
                     "ggplot2"))
             self$add(jmvcore::Html$new(
                 options=options,

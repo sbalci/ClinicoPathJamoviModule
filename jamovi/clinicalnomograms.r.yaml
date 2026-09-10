@@ -413,9 +413,12 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - stringr
     - rms
     - survival
     - SchemperSmith1996
+    - dcurves
+    - glmnet
+    - pROC
+    - timeROC
 ...

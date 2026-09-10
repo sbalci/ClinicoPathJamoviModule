@@ -209,11 +209,11 @@ toxicityprofileResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Treatment Toxicity Profile",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggplot2",
                     "dplyr",
                     "survival",
                     "RColorBrewer",
-                    "ClinicoPathJamoviModule",
                     "viridis",
                     "scales",
                     "binom"))

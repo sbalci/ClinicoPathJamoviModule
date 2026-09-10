@@ -277,7 +277,8 @@ tumorgrowthResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "ClinicoPathJamoviModule",
                     "nlme",
                     "glue",
-                    "stringr"))
+                    "stringr",
+                    "brms"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",

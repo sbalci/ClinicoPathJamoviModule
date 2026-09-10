@@ -227,5 +227,6 @@ refs:
     - boot
     - BayesFactor
     - RGraphGallery
-
+    - moments
+    - tools
 ...

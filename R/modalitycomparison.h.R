@@ -164,9 +164,9 @@ modalitycomparisonResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 name="",
                 title="Modality Comparison Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "irr",
-                    "ggplot2",
-                    "ClinicoPathJamoviModule"))
+                    "ggplot2"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

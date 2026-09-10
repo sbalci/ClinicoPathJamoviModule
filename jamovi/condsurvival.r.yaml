@@ -274,8 +274,8 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - survival
     - flexsurv
     - SchemperSmith1996
+    - graphics
 ...

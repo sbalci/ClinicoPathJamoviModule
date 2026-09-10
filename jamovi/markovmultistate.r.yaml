@@ -349,13 +349,11 @@ items:
           - estimationMethod
 
 refs:
+    - ClinicoPathJamoviModule
     - mstate
     - msm
     - survival
     - diagram
-    - ClinicoPathJamoviModule
-
-
     - gridExtra
     - tools
     - scales

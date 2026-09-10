@@ -1975,4 +1975,7 @@ refs:
     - survivalrviews
     - appliedsurvivalanalysisR
     - lubridate
+    - patchwork
+    - splines
+    - tools
 ...

@@ -479,7 +479,10 @@ costeffectivenessResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 options=options,
                 name="",
-                title="Cost-Effectiveness Analysis")
+                title="Cost-Effectiveness Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "graphics"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -366,7 +366,9 @@ survivalmodelvalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE))
                     "survival",
                     "boot",
                     "timeROC",
-                    "SchemperSmith1996"))
+                    "SchemperSmith1996",
+                    "dcurves",
+                    "pec"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

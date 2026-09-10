@@ -156,4 +156,9 @@ items:
       title: Interpretation Guide
       type: Html
       visible: True
+
+refs:
+    - ClinicoPathJamoviModule
+    - emmeans
+    - geepack
 ...

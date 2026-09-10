@@ -378,11 +378,11 @@ greyzonerocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Grey-zone (Fuzzy) ROC Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "pROC",
                     "ggplot2",
                     "dplyr",
-                    "boot",
-                    "ClinicoPathJamoviModule"))
+                    "boot"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

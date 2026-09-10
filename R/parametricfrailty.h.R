@@ -216,6 +216,7 @@ parametricfrailtyResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="Parametric Frailty Models",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "survival",
                     "frailtySurv"))
             self$add(jmvcore::Table$new(

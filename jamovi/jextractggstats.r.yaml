@@ -30,6 +30,6 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - ggstatsplot
+    - correlation
 ...

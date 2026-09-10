@@ -27,7 +27,7 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - scattermore
     - viridis
+    - digest
 ...

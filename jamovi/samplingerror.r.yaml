@@ -73,3 +73,7 @@ items:
       title: References
       type: Html
       visible: (showReferences)
+
+refs:
+    - ClinicoPathJamoviModule
+...

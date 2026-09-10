@@ -296,4 +296,6 @@ refs:
     - stats
     - e1071
     - tools
+    - PRROC
+    - graphics
 ...

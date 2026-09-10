@@ -121,7 +121,10 @@ roc2dResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Two-Dimensional ROC Analysis")
+                title="Two-Dimensional ROC Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "pROC"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

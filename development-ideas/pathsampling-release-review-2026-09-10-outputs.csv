@@ -1,0 +1,68 @@
+"result","type","title","visible","backend_lines","render","schema_line"
+"notices","Preformatted","Important Information","Always","1038, 1057","",7
+"welcome","Html","","(is.null(totalSamples) || is.null(firstDetection))","1062","",73
+"guidedInstructions","Html","Quick Start Checklist","(showGuidedInstructions)","1068","",80
+"conciseInstructions","Html","Analysis Overview","(showConciseInstructions)","1125","",86
+"dataInfo","Table","Data Summary","Always","1176, 1287, 1414, 1425","",94
+"probabilityExplanation","Html","Understanding Detection Probabilities","(showProbabilityExplanation)","1729","",111
+"keyResults","Html","Key Results Summary","(showKeyResults)","2704","",117
+"clinicalSummary","Html","Descriptive summary","(showClinicalSummary)","2749","",124
+"binomialText","Html","Binomial Probability Model","(showBinomialModel)","1501","",131
+"binomialTable","Table","Binomial Model Predictions","(showBinomialModel)","1524","",137
+"recommendTable","Table","Samples for target detection probability","(showBinomialModel)","1550","",155
+"bootstrapText","Html","Bootstrap Resampling Analysis","(showBootstrap)","1736, 1740","",170
+"bootstrapTable","Table","Bootstrap Detection among observed-positive cases Estimates (Conditional)","(showBootstrap)","1789","",176
+"detectionCurve","Image","Diagnostic Yield Curve","(showDetectionCurve)","1845",".detectionCurve",199
+"sensitivityPlot","Image","Detection among observed-positive cases with Confidence Intervals","(showSensitivityCI && showBootstrap)","1773",".sensitivityPlot",209
+"heterogeneityText","Html","Heterogeneity Analysis","(showHeterogeneityTest)","1589","",219
+"heterogeneityTest","Table","Heterogeneity Test Results","(showHeterogeneityTest)","1590","",225
+"modelFitText","Html","Model Fit Assessment","(showModelFit)","1618","",248
+"modelFitTable","Table","Goodness of Fit Test","(showModelFit)","1619","",254
+"obsPredText","Html","Observed vs Predicted Detection","(showObsPred)","1649","",277
+"obsPredTable","Table","Observed vs Predicted Comparison","(showObsPred)","1650","",283
+"empiricalCumulativeText","Html","Empirical Cumulative Detection Analysis","(showEmpiricalCumulative)","2296","",309
+"empiricalCumulativeTable","Table","Empirical Detection Rates by Sample Threshold","(showEmpiricalCumulative)","2297","",315
+"empiricalCumulativePlot","Image","Empirical Cumulative Detection Curve","(showEmpiricalCumulative)","1846",".empiricalCumulativePlot",341
+"incrementalYieldText","Html","Incremental Diagnostic Yield Analysis","(showIncrementalYield)","2343","",351
+"incrementalYieldTable","Table","Marginal Benefit per Additional Sample","(showIncrementalYield)","2344","",357
+"populationDetectionText","Html","Population-Level Detection Rates","(showPopulationDetection)","2448","",381
+"populationDetectionTable","Table","Conditional vs Population Detection","(showPopulationDetection)","2449","",387
+"spatialClusteringText","Html","Spatial Clustering Analysis","(showSpatialClustering)","2481","",410
+"clusteringTable","Table","Spatial Distribution Patterns","(showSpatialClustering)","2482","",416
+"multifocalText","Html","Sample-position groups (heuristic)","(showMultifocalAnalysis)","2542","",437
+"multifocalTable","Table","Sample-position group counts","(showMultifocalAnalysis)","2543","",443
+"stratifiedText","Html","Stratified Analysis by Sample Type","(showStratifiedAnalysis)","2390","",464
+"prevalenceTable","Table","Observed-positive fraction by sample type","(showStratifiedAnalysis)","2391","",470
+"stratifiedDetectionTable","Table","Detection Probability by Sample Type and Threshold","(showStratifiedAnalysis)","2393","",493
+"tumorBurdenText","Html","Tumor Burden Analysis","(showTumorBurden)","1908","",515
+"tumorBurdenInfo","Table","Cassette Positivity Statistics","(showTumorBurden)","1917","",521
+"cassetteDistribution","Table","Tumor Distribution Pattern","(showTumorBurden)","1964","",534
+"stageMigrationText","Html","Stage Migration Analysis","(showStageMigration)","2057","",552
+"stageMigrationTable","Table","Detection Rates by Cassette Groups","(showStageMigration)","2066","",558
+"correlationText","Html","Examined vs Positive Correlation","(showCorrelation)","2121","",579
+"correlationStats","Table","Correlation Statistics","(showCorrelation)","2124","",585
+"correlationPlot","Image","Examined vs Positive Cassettes","(showCorrelation)","1902, 2119",".correlationPlot",598
+"distributionPatternText","Html","Distribution Pattern Analysis (Single vs Summed)","(showDistributionPattern)","2199","",608
+"distributionPatternTable","Table","Distribution Pattern Classification","(showDistributionPattern)","2219","",616
+"distributionComparisonTable","Table","Single vs Summed Comparison","(showDistributionPattern)","2239","",633
+"hypergeometricText","Html","Hypergeometric Probability Model","(showHypergeometric)","305, 346, 361, 388","",647
+"hypergeometricTable","Table","Hypergeometric Model Predictions (Finite Population)","(showHypergeometric)","306, 347, 362, 401","",653
+"hyperRecommendTable","Table","Samples for target detection probability (Hypergeometric)","(showHypergeometric)","308, 349, 364, 458","",671
+"betaBinomialText","Html","Beta-Binomial Probability Model","(showBetaBinomial)","534, 560, 704, 722","",689
+"betaBinomialTable","Table","Beta-Binomial Model Predictions (Overdispersed)","(showBetaBinomial)","535, 561, 705, 740","",697
+"betaBinomialRecommendTable","Table","Samples for target detection probability (Beta-Binomial)","(showBetaBinomial)","537, 563, 707, 788","",717
+"sampleSizePlanningText","Html","Sample Size for a Target Detection Probability","(showSampleSizePlanning)","239","",735
+"sampleSizePlanningTable","Table","Required Samples by Scenario","(showSampleSizePlanning)","224","",741
+"multifocalAnalysisText","Html","Independent Positive-sample Count Model","(showMultifocalAnalysis)","1681","",767
+"multifocalProbTable","Table","Probability of Multiple Positive Samples","(showMultifocalAnalysis)","1682","",773
+"modelSelectionText","Html","Model Applicability Guide","(autoSelectModel)","1707","",796
+"lnAnalysisText","Html","Lymph Node Ratio and Staging Analysis","(showLNAnalysis)","876, 894","",802
+"lnrClassification","Table","Lymph Node Ratio Classification","(showLNAnalysis)","920","",811
+"ajccNStage","Table","AJCC N Stage Distribution (8th ed., pancreatic adenocarcinoma)","(showLNAnalysis)","950","",837
+"adequacyByELN","Table","Adequacy Assessment by ELN Thresholds","(showLNAnalysis)","970","",860
+"effectSizesText","Html","Examined-node Count Summary","(showEffectSizes)","249","",884
+"effectSizesTable","Table","Examined-node Count Statistics","(showEffectSizes)","265","",893
+"omentumText","Html","Omentum Sampling Literature","(showOmentumAnalysis)","3026","",910
+"recommendText","Html","Descriptive sampling targets","(showRecommendText)","2649","",921
+"interpretText","Html","Statistical Interpretation","(showInterpretText)","2753","",927
+"referencesText","Html","Statistical Methods & References","(showReferencesText)","2767","",933

@@ -15,20 +15,21 @@ pathsampling(
   targetConfidence = 0.95,
   maxSamples = 10,
   bootstrapIterations = 10000,
-  showBinomialModel = FALSE,
+  showBinomialModel = TRUE,
   showBootstrap = FALSE,
   showDetectionCurve = FALSE,
   showSensitivityCI = FALSE,
   setSeed = FALSE,
   seedValue = 42,
   positiveCassettes = NULL,
+  totalFoci = NULL,
+  adequacyThreshold = 12,
   maxPositiveSingle = NULL,
   showTumorBurden = FALSE,
   showStageMigration = FALSE,
   showCorrelation = FALSE,
   showDistributionPattern = FALSE,
   distributionThreshold = 5,
-  modelType = "binomial",
   totalPopulation = NULL,
   successStates = NULL,
   targetDetections = 1,
@@ -49,25 +50,21 @@ pathsampling(
   showStratifiedAnalysis = FALSE,
   showPopulationDetection = FALSE,
   showIncrementalYield = FALSE,
+  fociGapThreshold = 2,
   showMultifocalAnalysis = FALSE,
   showProbabilityExplanation = FALSE,
-  showKeyResults = FALSE,
+  showKeyResults = TRUE,
   showRecommendText = FALSE,
   showInterpretText = FALSE,
   showReferencesText = FALSE,
   estimationMethod = "auto",
   showHeterogeneityTest = FALSE,
-  useGeometricCI = TRUE,
-  ciMethod = "auto",
   showModelFit = FALSE,
   showObsPred = FALSE,
-  showMarginalInterpretation = TRUE,
-  showPowerAnalysis = FALSE,
-  targetPower = 0.8,
-  targetDetectionProb = 0.95,
+  showSampleSizePlanning = FALSE,
+  planningTargetProb = 0.8,
+  planningAssumedQ = 0.1,
   autoSelectModel = FALSE,
-  appendVariables = FALSE,
-  appendPrefix = "ps_",
   autoDetectHeterogeneity = TRUE
 )
 }
@@ -114,6 +111,14 @@ cases, enter the sequential sample number (1, 2, 3, etc.).}
 
 \item{positiveCassettes}{.}
 
+\item{totalFoci}{Total number of foci summed across slides, not the number
+of positive cassettes. Used only for the single-versus-summed foci
+classification.}
+
+\item{adequacyThreshold}{User-selected threshold for the descriptive
+examined-node summary. The threshold alone does not establish adequate
+clinical staging.}
+
 \item{maxPositiveSingle}{.}
 
 \item{showTumorBurden}{.}
@@ -125,8 +130,6 @@ cases, enter the sequential sample number (1, 2, 3, etc.).}
 \item{showDistributionPattern}{.}
 
 \item{distributionThreshold}{.}
-
-\item{modelType}{.}
 
 \item{totalPopulation}{.}
 
@@ -170,6 +173,11 @@ required variables and methods. Best for experienced users.}
 
 \item{showIncrementalYield}{.}
 
+\item{fociGapThreshold}{Two consecutive positive samples separated by more
+than this many sample positions are counted as belonging to separate foci.
+The default of 2 is a heuristic, not a validated cut-off; set it to match
+the block-sampling interval used in your laboratory.}
+
 \item{showMultifocalAnalysis}{.}
 
 \item{showProbabilityExplanation}{Show detailed explanation distinguishing
@@ -189,45 +197,30 @@ literature references.}
 
 \item{estimationMethod}{.}
 
-\item{showHeterogeneityTest}{Test if detection probability varies
-significantly across sample types. Only available when Sample Type variable
-is specified. Uses likelihood ratio test.}
+\item{showHeterogeneityTest}{Test the geometric approximation across sample
+types among eventually detected cases. Only available when Sample Type
+variable is specified. Uses likelihood ratio test.}
 
-\item{useGeometricCI}{Use theoretical geometric model confidence intervals
-when bootstrap shows ceiling effect (100 percent bounds). Provides more
-realistic uncertainty estimates.}
-
-\item{ciMethod}{Method for calculating confidence intervals. Auto selects
-geometric when bootstrap shows ceiling effect, otherwise uses bootstrap.}
-
-\item{showModelFit}{Perform goodness-of-fit test comparing observed vs
-predicted detection distribution. Validates geometric/binomial model
-assumptions.}
+\item{showModelFit}{Approximate chi-square fit test for the detected-case
+geometric estimator only. No p-value is reported for empirical-count
+estimation. This tests an untruncated geometric working model, not disease
+ascertainment or clinical sensitivity.}
 
 \item{showObsPred}{Compare observed detection rates with model predictions
 at each sample number. Visual model validation tool.}
 
-\item{showMarginalInterpretation}{Add cost-benefit interpretation to
-marginal gain analysis. Auto-enabled when Show Binomial Model is checked.}
+\item{showSampleSizePlanning}{.}
 
-\item{showPowerAnalysis}{.}
+\item{planningTargetProb}{.}
 
-\item{targetPower}{.}
-
-\item{targetDetectionProb}{.}
+\item{planningAssumedQ}{.}
 
 \item{autoSelectModel}{.}
 
-\item{appendVariables}{Add new columns to dataset with calculated detection
-probabilities and classifications. Variables include cumulative
-probabilities, recommended sample counts, and detection categories.}
-
-\item{appendPrefix}{Prefix for appended variable names (e.g., 'ps_' creates
-'ps_cumulative_prob_5'). Only used when Append Variables is enabled.}
-
 \item{autoDetectHeterogeneity}{Automatically analyze and report if sample
 types have significantly different detection probabilities. Requires Sample
-Type variable. Warns if CV > 30 percent.}
+Type variable. Uses a heuristic warning if CV > 30 percent; this is not a
+formal test of significance.}
 }
 \value{
 A results object containing:
@@ -284,12 +277,11 @@ A results object containing:
 \code{results$betaBinomialText} \tab \tab \tab \tab \tab a html \cr
 \code{results$betaBinomialTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$betaBinomialRecommendTable} \tab \tab \tab \tab \tab a table \cr
-\code{results$powerAnalysisText} \tab \tab \tab \tab \tab a html \cr
-\code{results$powerTable} \tab \tab \tab \tab \tab a table \cr
+\code{results$sampleSizePlanningText} \tab \tab \tab \tab \tab a html \cr
+\code{results$sampleSizePlanningTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$multifocalAnalysisText} \tab \tab \tab \tab \tab a html \cr
 \code{results$multifocalProbTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$modelSelectionText} \tab \tab \tab \tab \tab a html \cr
-\code{results$modelComparisonTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$lnAnalysisText} \tab \tab \tab \tab \tab a html \cr
 \code{results$lnrClassification} \tab \tab \tab \tab \tab a table \cr
 \code{results$ajccNStage} \tab \tab \tab \tab \tab a table \cr
@@ -309,5 +301,15 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$dataInfo)}
 }
 \description{
-Pathology Sampling Adequacy Analysis
+Describe sampling detection among cases in which a lesion was eventually
+observed. Empirical curves and geometric approximations do not identify
+missed disease, correct finite sampling-window bias, or validate clinical
+rule-out sensitivity. Independent planning, hypergeometric and
+beta-binomial models, and examined-node summaries can run using their own
+inputs without first-detection data. Positive-sample probabilities are not
+probabilities of distinct lesions. The single-versus-summed classification
+uses total foci across slides, not positive cassettes. The examined-node
+summary reports a proportion and Wilson interval, not comparative effect
+sizes. Model applicability is described without automatically ranking
+models with different estimands.
 }

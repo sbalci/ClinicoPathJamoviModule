@@ -179,7 +179,8 @@ ordinalmixedmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="Ordinal Mixed Models (Cumulative Link)",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "ordinal"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -635,16 +635,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Multivariable Survival Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "multivariable",
                     "survivaltutorial",
                     "survivalrwnahhas",
-                    "ClinicoPathJamoviModule",
                     "survival",
                     "lubridate",
                     "rms",
                     "finalfit",
                     "survminer",
-                    "SchemperSmith1996"))
+                    "SchemperSmith1996",
+                    "graphics",
+                    "knitr",
+                    "riskRegression"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="eventRecodeInfo",
@@ -2410,7 +2413,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "multisurvival",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = multisurvivalResults$new(options=options),
                 data = data,

@@ -244,10 +244,10 @@ conditionalinferenceResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 name="",
                 title="Conditional Inference Trees for Survival",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "Hothorn2006",
                     "Strobl2007",
                     "survival",
-                    "ClinicoPathJamoviModule",
                     "survival",
                     "party"))
             self$add(jmvcore::Html$new(

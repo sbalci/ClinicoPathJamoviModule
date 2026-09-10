@@ -222,4 +222,9 @@ items:
     type: Html
     visible: (exportEndpoints)
 
+
+refs:
+    - ClinicoPathJamoviModule
+    - survival
+    - survminer
 ...

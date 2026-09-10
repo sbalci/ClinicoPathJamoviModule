@@ -199,10 +199,11 @@ biomarkerresponseResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="Biomarker Response Association",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "pROC",
                     "ggplot2",
                     "dplyr",
-                    "ClinicoPathJamoviModule"))
+                    "FSA"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",

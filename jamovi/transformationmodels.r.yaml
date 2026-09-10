@@ -213,6 +213,8 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - survival
+    - MASS
+    - nortest
+    - tram
 ...

@@ -211,10 +211,8 @@ items:
           - competingRate2
 
 refs:
+    - ClinicoPathJamoviModule
     - cmprsk
     - survival
-    - ClinicoPathJamoviModule
-
-
     - scales
 ...

@@ -1,7 +1,7 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.81
+version: 1.0.81.01
 jms: '1.0'
 authors:
   - Serdar Balci
@@ -2502,15 +2502,17 @@ analyses:
     menuGroup: OncoPathT
     menuTitle: Pathology Sampling Adequacy Analysis
     description: >
-      Determines the minimum number of tissue samples (blocks, cassettes,
-      sections, or lymph nodes) required to detect lesions with specified
-      confidence levels. Uses binomial probability models and bootstrap
-      resampling to calculate diagnostic yield curves, sensitivity estimates,
-      and clinical recommendations. Essential for establishing sampling
-      protocols in omentum evaluation, lymph node dissection, and serial
-      sectioning studies. Based on statistical methods from Skala & Hagemann
-      2015, Gönen et al. 2009, and beta-binomial modeling approaches for
-      pathology sampling research.
+      Describe sampling detection among cases in which a lesion was eventually
+      observed. Empirical curves and geometric approximations do not identify
+      missed disease, correct finite sampling-window bias, or validate clinical
+      rule-out sensitivity. Independent planning, hypergeometric and
+      beta-binomial models, and examined-node summaries can run using their own
+      inputs without first-detection data. Positive-sample probabilities are not
+      probabilities of distinct lesions. The single-versus-summed classification
+      uses total foci across slides, not positive cassettes. The examined-node
+      summary reports a proportion and Wilson interval, not comparative effect
+      sizes. Model applicability is described without automatically ranking
+      models with different estimands.
     menuSubgroup: ClinicoPath Descriptives
   - title: Q-TWiST Analysis
     name: qtwist

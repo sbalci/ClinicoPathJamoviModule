@@ -242,12 +242,13 @@ jjtreemapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Treemap",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggplot2",
                     "treemap",
                     "ggfittext",
                     "dplyr",
                     "tibble",
-                    "ClinicoPathJamoviModule"),
+                    "digest"),
                 clearWith=list(
                     "group",
                     "size",

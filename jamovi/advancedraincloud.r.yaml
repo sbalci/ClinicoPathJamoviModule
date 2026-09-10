@@ -106,8 +106,9 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - ggplot2
     - ggrain
-    - ClinicoPathJamoviModule
-
+    - viridis
+    - viridisLite
 ...

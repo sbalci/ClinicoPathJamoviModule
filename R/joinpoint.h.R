@@ -128,8 +128,8 @@ joinpointResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Joinpoint Trend Analysis",
                 refs=list(
-                    "kim2000joinpoint",
                     "ClinicoPathJamoviModule",
+                    "kim2000joinpoint",
                     "segmented",
                     "ggplot2"))
             self$add(jmvcore::Html$new(

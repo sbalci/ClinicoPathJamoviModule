@@ -1,0 +1,2734 @@
+[
+  {
+    "key": "AalenJohansen1978",
+    "cites": [
+      "outcomeorganizer",
+      "singlearm"
+    ],
+    "doi": "",
+    "entry_author": "Aalen, O. O., & Johansen, S.",
+    "entry_title": "An Empirical Transition Matrix for Non-Homogeneous Markov Chains Based on Censored Observations",
+    "entry_year": 1978
+  },
+  {
+    "key": "AltmanBland1994",
+    "cites": [
+      "decisioncalculator"
+    ],
+    "doi": "10.1136/bmj.308.6943.1552",
+    "entry_author": "Altman, D. G., & Bland, J. M.",
+    "entry_title": "Diagnostic tests 1: Sensitivity and specificity",
+    "entry_year": 1994,
+    "cr_found": true,
+    "cr_title": "Statistics Notes: Diagnostic tests 1: sensitivity and specificity",
+    "cr_authors": [
+      "Altman, D G",
+      "Bland, J M"
+    ],
+    "cr_journal": "BMJ",
+    "cr_year": [
+      1994,
+      6,
+      11
+    ],
+    "cr_vol": "308",
+    "cr_issue": "6943",
+    "cr_page": "1552"
+  },
+  {
+    "key": "AltmanRoyston2006",
+    "cites": [
+      "categorize"
+    ],
+    "doi": "10.1136/bmj.332.7549.1080",
+    "entry_author": "Altman, D. G., & Royston, P.",
+    "entry_title": "The cost of dichotomising continuous variables.",
+    "entry_year": 2006,
+    "cr_found": true,
+    "cr_title": "The cost of dichotomising continuous variables",
+    "cr_authors": [
+      "Altman, Douglas G",
+      "Royston, Patrick"
+    ],
+    "cr_journal": "BMJ",
+    "cr_year": [
+      2006,
+      5,
+      4
+    ],
+    "cr_vol": "332",
+    "cr_issue": "7549",
+    "cr_page": "1080.1"
+  },
+  {
+    "key": "AustinLeeFine2016",
+    "cites": [
+      "outcomeorganizer",
+      "singlearm"
+    ],
+    "doi": "10.1161/CIRCULATIONAHA.115.017719",
+    "entry_author": "Austin, P. C., Lee, D. S., & Fine, J. P.",
+    "entry_title": "Introduction to the Analysis of Survival Data in the Presence of Competing Risks",
+    "entry_year": 2016,
+    "cr_found": true,
+    "cr_title": "Introduction to the Analysis of Survival Data in the Presence of Competing Risks",
+    "cr_authors": [
+      "Austin, Peter C.",
+      "Lee, Douglas S.",
+      "Fine, Jason P."
+    ],
+    "cr_journal": "Circulation",
+    "cr_year": [
+      2016,
+      2,
+      9
+    ],
+    "cr_vol": "133",
+    "cr_issue": "6",
+    "cr_page": "601-609"
+  },
+  {
+    "key": "AustinSteyerberg2019ICI",
+    "cites": [
+      "enhancedROC"
+    ],
+    "doi": "10.1002/sim.8281",
+    "entry_author": "Austin, P. C., & Steyerberg, E. W.",
+    "entry_title": "The Integrated Calibration Index (ICI) and related metrics for quantifying the calibration of logistic regression models",
+    "entry_year": 2019,
+    "cr_found": true,
+    "cr_title": "The Integrated Calibration Index (ICI) and related metrics for quantifying the calibration of logistic regression models",
+    "cr_authors": [
+      "Austin, Peter C.",
+      "Steyerberg, Ewout W."
+    ],
+    "cr_journal": "Statistics in Medicine",
+    "cr_year": [
+      2019,
+      7,
+      3
+    ],
+    "cr_vol": "38",
+    "cr_issue": "21",
+    "cr_page": "4051-4065"
+  },
+  {
+    "key": "BrookmeyerCrowley1982",
+    "cites": [
+      "singlearm"
+    ],
+    "doi": "10.2307/2530286",
+    "entry_author": "Brookmeyer, R., & Crowley, J.",
+    "entry_title": "A Confidence Interval for the Median Survival Time",
+    "entry_year": 1982,
+    "cr_found": true,
+    "cr_title": "A Confidence Interval for the Median Survival Time",
+    "cr_authors": [
+      "Brookmeyer, Ron",
+      "Crowley, John"
+    ],
+    "cr_journal": "Biometrics",
+    "cr_year": [
+      1982,
+      3
+    ],
+    "cr_vol": "38",
+    "cr_issue": "1",
+    "cr_page": "29"
+  },
+  {
+    "key": "Buderer1996",
+    "cites": [
+      "decisioncalculator"
+    ],
+    "doi": "10.1111/j.1553-2712.1996.tb03538.x",
+    "entry_author": "Buderer, N. M. F.",
+    "entry_title": "Statistical methodology: I. Incorporating the prevalence of disease into the sample size calculation for sensitivity and specificity",
+    "entry_year": 1996,
+    "cr_found": true,
+    "cr_title": "Statistical Methodology: I. Incorporating the Prevalence of Disease into the Sample Size Calculation for Sensitivity and Specificity",
+    "cr_authors": [
+      "Buderer, Nancy M. Fenn"
+    ],
+    "cr_journal": "Academic Emergency Medicine",
+    "cr_year": [
+      1996,
+      9
+    ],
+    "cr_vol": "3",
+    "cr_issue": "9",
+    "cr_page": "895-900"
+  },
+  {
+    "key": "Cleveland1979",
+    "cites": [
+      "singlearm"
+    ],
+    "doi": "10.1080/01621459.1979.10481038",
+    "entry_author": "Cleveland, W. S.",
+    "entry_title": "Robust Locally Weighted Regression and Smoothing Scatterplots",
+    "entry_year": 1979,
+    "cr_found": true,
+    "cr_title": "Robust Locally Weighted Regression and Smoothing Scatterplots",
+    "cr_authors": [
+      "Cleveland, William S."
+    ],
+    "cr_journal": "Journal of the American Statistical Association",
+    "cr_year": [
+      1979,
+      12
+    ],
+    "cr_vol": "74",
+    "cr_issue": "368",
+    "cr_page": "829-836"
+  },
+  {
+    "key": "CochraneDTAHandbook2023",
+    "cites": [
+      "diagnosticmeta"
+    ],
+    "doi": "10.1002/9781119756194",
+    "entry_author": "Deeks JJ, Bossuyt PM, Leeflang MM, Takwoingi Y, editors",
+    "entry_title": "Cochrane Handbook for Systematic Reviews of Diagnostic Test Accuracy",
+    "entry_year": 2023,
+    "cr_found": false,
+    "cr_title": "Cochrane Handbook for Systematic Reviews of Diagnostic Test Accuracy",
+    "cr_authors": [],
+    "cr_error": "list index out of range",
+    "doi_resolves": false,
+    "doi_error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "key": "Cohen1988",
+    "cites": [
+      "chisqposttest",
+      "psychopdaROC"
+    ],
+    "doi": "10.4324/9780203771587",
+    "entry_author": "Cohen, J.",
+    "entry_title": "Statistical Power Analysis for the Behavioral Sciences (2nd ed.)",
+    "entry_year": 1988,
+    "cr_found": false,
+    "cr_title": "Statistical Power Analysis for the Behavioral Sciences",
+    "cr_authors": [
+      "Cohen, Jacob"
+    ],
+    "cr_error": "list index out of range",
+    "doi_resolves": true,
+    "resolved_url": "https://www.taylorfrancis.com/books/mono/10.4324/9780203771587/statistical-power-analysis-behavioral-sciences-jacob-cohen"
+  },
+  {
+    "key": "ConditionalDependenceDiagnosticTests",
+    "cites": [
+      "cotest",
+      "sequentialtests"
+    ],
+    "doi": "10.1016/S0167-5877(00)00119-7",
+    "entry_author": "Gardner IA, Stryhn H, Lind P, Collins MT.",
+    "entry_title": "Conditional dependence between tests affects the diagnosis and surveillance of animal diseases",
+    "entry_year": 2000,
+    "cr_found": true,
+    "cr_title": "Conditional dependence between tests affects the diagnosis and surveillance of animal diseases",
+    "cr_authors": [
+      "Gardner, Ian A",
+      "Stryhn, Henrik",
+      "Lind, Peter",
+      "Collins, Michael T"
+    ],
+    "cr_journal": "Preventive Veterinary Medicine",
+    "cr_year": [
+      2000,
+      5
+    ],
+    "cr_vol": "45",
+    "cr_issue": "1-2",
+    "cr_page": "107-122"
+  },
+  {
+    "key": "Dafni2011",
+    "cites": [
+      "singlearm"
+    ],
+    "doi": "10.1161/CIRCOUTCOMES.110.957951",
+    "entry_author": "Dafni, U.",
+    "entry_title": "Landmark Analysis at the 25-Year Landmark Point",
+    "entry_year": 2011,
+    "cr_found": true,
+    "cr_title": "Landmark Analysis at the 25-Year Landmark Point",
+    "cr_authors": [
+      "Dafni, Urania"
+    ],
+    "cr_journal": "Circulation: Cardiovascular Quality and Outcomes",
+    "cr_year": [
+      2011,
+      5
+    ],
+    "cr_vol": "4",
+    "cr_issue": "3",
+    "cr_page": "363-371"
+  },
+  {
+    "key": "DeLong1988",
+    "cites": [
+      "psychopdaROC"
+    ],
+    "doi": "10.2307/2531595",
+    "entry_author": "DeLong, E. R., DeLong, D. M., & Clarke-Pearson, D. L.",
+    "entry_title": "Comparing the areas under two or more correlated receiver operating characteristic curves: a nonparametric approach",
+    "entry_year": 1988,
+    "cr_found": true,
+    "cr_title": "Comparing the Areas under Two or More Correlated Receiver Operating Characteristic Curves: A Nonparametric Approach",
+    "cr_authors": [
+      "DeLong, Elizabeth R.",
+      "DeLong, David M.",
+      "Clarke-Pearson, Daniel L."
+    ],
+    "cr_journal": "Biometrics",
+    "cr_year": [
+      1988,
+      9
+    ],
+    "cr_vol": "44",
+    "cr_issue": "3",
+    "cr_page": "837"
+  },
+  {
+    "key": "DeeksAltman2004",
+    "cites": [
+      "cotest",
+      "decisioncalculator"
+    ],
+    "doi": "10.1136/bmj.329.7458.168",
+    "entry_author": "Deeks, J. J., & Altman, D. G.",
+    "entry_title": "Diagnostic tests 4: Likelihood ratios",
+    "entry_year": 2004,
+    "cr_found": true,
+    "cr_title": "Diagnostic tests 4: likelihood ratios",
+    "cr_authors": [
+      "Deeks, Jonathan J",
+      "Altman, Douglas G"
+    ],
+    "cr_journal": "BMJ",
+    "cr_year": [
+      2004,
+      7,
+      15
+    ],
+    "cr_vol": "329",
+    "cr_issue": "7458",
+    "cr_page": "168-169"
+  },
+  {
+    "key": "DerSimonian1986",
+    "cites": [
+      "psychopdaROC"
+    ],
+    "doi": "10.1016/0197-2456(86)90046-2",
+    "entry_author": "DerSimonian, R., & Laird, N.",
+    "entry_title": "Meta-analysis in clinical trials",
+    "entry_year": 1986,
+    "cr_found": true,
+    "cr_title": "Meta-analysis in clinical trials",
+    "cr_authors": [
+      "DerSimonian, Rebecca",
+      "Laird, Nan"
+    ],
+    "cr_journal": "Controlled Clinical Trials",
+    "cr_year": [
+      1986,
+      9
+    ],
+    "cr_vol": "7",
+    "cr_issue": "3",
+    "cr_page": "177-188"
+  },
+  {
+    "key": "DiagnosticTests",
+    "cites": [
+      "cotest",
+      "decision",
+      "decisioncalculator",
+      "decisioncombine",
+      "decisioncompare",
+      "screeningcalculator"
+    ],
+    "doi": "10.1016/j.medj.2020.08.001",
+    "entry_author": "Stites EC, Wilen CB.",
+    "entry_title": "The Interpretation of SARS-CoV-2 Diagnostic Tests",
+    "entry_year": 2020,
+    "cr_found": true,
+    "cr_title": "The Interpretation of SARS-CoV-2 Diagnostic Tests",
+    "cr_authors": [
+      "Stites, Edward C.",
+      "Wilen, Craig B."
+    ],
+    "cr_journal": "Med",
+    "cr_year": [
+      2020,
+      12
+    ],
+    "cr_vol": "1",
+    "cr_issue": "1",
+    "cr_page": "78-89"
+  },
+  {
+    "key": "Fagan1975",
+    "cites": [
+      "cotest",
+      "decisioncalculator"
+    ],
+    "doi": "10.1056/NEJM197507312930513",
+    "entry_author": "Fagan, T. J.",
+    "entry_title": "Nomogram for Bayes theorem",
+    "entry_year": 1975,
+    "cr_found": true,
+    "cr_title": "Nomogram for Bayes's Theorem",
+    "cr_authors": [],
+    "cr_journal": "New England Journal of Medicine",
+    "cr_year": [
+      1975,
+      7,
+      31
+    ],
+    "cr_vol": "293",
+    "cr_issue": "5",
+    "cr_page": "257-257"
+  },
+  {
+    "key": "Fagan2",
+    "cites": [
+      "decision"
+    ],
+    "doi": "",
+    "entry_author": "Simon, S.",
+    "entry_title": "StATS: What is a Fagan nomogram?",
+    "entry_year": 2020
+  },
+  {
+    "key": "Faul2007",
+    "cites": [
+      "psychopdaROC"
+    ],
+    "doi": "10.3758/BF03193146",
+    "entry_author": "Faul, F., Erdfelder, E., Lang, A.-G., & Buchner, A.",
+    "entry_title": "G*Power 3: A flexible statistical power analysis program for the social, behavioral, and biomedical sciences",
+    "entry_year": 2007,
+    "cr_found": true,
+    "cr_title": "G*Power 3: A flexible statistical power analysis program for the social, behavioral, and biomedical sciences",
+    "cr_authors": [
+      "Faul, Franz",
+      "Erdfelder, Edgar",
+      "Lang, Albert-Georg",
+      "Buchner, Axel"
+    ],
+    "cr_journal": "Behavior Research Methods",
+    "cr_year": [
+      2007,
+      5
+    ],
+    "cr_vol": "39",
+    "cr_issue": "2",
+    "cr_page": "175-191"
+  },
+  {
+    "key": "FreedmanAndSchoenfeld1982",
+    "cites": [
+      "advancedSurvivalPower"
+    ],
+    "doi": "10.1002/sim.4780010204",
+    "entry_author": "Freedman, L. S.",
+    "entry_title": "Tables of the number of patients required in clinical trials using the logrank test",
+    "entry_year": 1982,
+    "cr_found": true,
+    "cr_title": "Tables of the number of patients required in clinical trials using the logrank test",
+    "cr_authors": [
+      "Freedman, L. S."
+    ],
+    "cr_journal": "Statistics in Medicine",
+    "cr_year": [
+      1982,
+      1
+    ],
+    "cr_vol": "1",
+    "cr_issue": "2",
+    "cr_page": "121-129"
+  },
+  {
+    "key": "Garwood1936",
+    "cites": [
+      "singlearm"
+    ],
+    "doi": "10.1093/biomet/28.3-4.437",
+    "entry_author": "Garwood, F.",
+    "entry_title": "Fiducial Limits for the Poisson Distribution",
+    "entry_year": 1936,
+    "cr_found": true,
+    "cr_title": "(i) Fiducial Limits for the Poisson Distribution",
+    "cr_authors": [
+      "GARWOOD, F."
+    ],
+    "cr_journal": "Biometrika",
+    "cr_year": [
+      1936,
+      12,
+      1
+    ],
+    "cr_vol": "28",
+    "cr_issue": "3-4",
+    "cr_page": "437-442"
+  },
+  {
+    "key": "Hedges1981",
+    "cites": [
+      "psychopdaROC"
+    ],
+    "doi": "10.3102/10769986006002107",
+    "entry_author": "Hedges, L. V.",
+    "entry_title": "Distribution theory for Glass's estimator of effect size and related estimators",
+    "entry_year": 1981,
+    "cr_found": true,
+    "cr_title": "Distribution Theory for Glass's Estimator of Effect size and Related Estimators",
+    "cr_authors": [
+      "Hedges, Larry V."
+    ],
+    "cr_journal": "Journal of Educational Statistics",
+    "cr_year": [
+      1981,
+      6
+    ],
+    "cr_vol": "6",
+    "cr_issue": "2",
+    "cr_page": "107-128"
+  },
+  {
+    "key": "Higgins2003",
+    "cites": [
+      "psychopdaROC"
+    ],
+    "doi": "10.1136/bmj.327.7414.557",
+    "entry_author": "Higgins, J. P. T., Thompson, S. G., Deeks, J. J., & Altman, D. G.",
+    "entry_title": "Measuring inconsistency in meta-analyses",
+    "entry_year": 2003,
+    "cr_found": true,
+    "cr_title": "Measuring inconsistency in meta-analyses",
+    "cr_authors": [
+      "Higgins, Julian P T",
+      "Thompson, Simon G",
+      "Deeks, Jonathan J",
+      "Altman, Douglas G"
+    ],
+    "cr_journal": "BMJ",
+    "cr_year": [
+      2003,
+      9,
+      4
+    ],
+    "cr_vol": "327",
+    "cr_issue": "7414",
+    "cr_page": "557-560"
+  },
+  {
+    "key": "Hothorn2006",
+    "cites": [
+      "conditionalinference"
+    ],
+    "doi": "10.1198/106186006X133933",
+    "entry_author": "Hothorn, T., Hornik, K., & Zeileis, A.",
+    "entry_title": "Unbiased recursive partitioning: A conditional inference framework",
+    "entry_year": 2006,
+    "cr_found": true,
+    "cr_title": "Unbiased Recursive Partitioning: A Conditional Inference Framework",
+    "cr_authors": [
+      "Hothorn, Torsten",
+      "Hornik, Kurt",
+      "Zeileis, Achim"
+    ],
+    "cr_journal": "Journal of Computational and Graphical Statistics",
+    "cr_year": [
+      2006,
+      9
+    ],
+    "cr_vol": "15",
+    "cr_issue": "3",
+    "cr_page": "651-674"
+  },
+  {
+    "key": "HuiWalter1980",
+    "cites": [
+      "decisioncalculator"
+    ],
+    "doi": "10.2307/2530502",
+    "entry_author": "Hui, S. L., & Walter, S. D.",
+    "entry_title": "Estimating the error rates of diagnostic tests",
+    "entry_year": 1980,
+    "cr_found": true,
+    "cr_title": "Multivariate Analysis of Variance in a Randomized Blocks Design when Covariance Matrices are Unequal",
+    "cr_authors": [
+      "Ben, M. S. Garcia",
+      "Yohai, V. J."
+    ],
+    "cr_journal": "Biometrics",
+    "cr_year": [
+      1980,
+      3
+    ],
+    "cr_vol": "36",
+    "cr_issue": "1",
+    "cr_page": "127"
+  },
+  {
+    "key": "KMunicate2",
+    "cites": [
+      "singlearm",
+      "survival",
+      "survivalcont"
+    ],
+    "doi": "10.1136/bmjopen-2019-030215",
+    "entry_author": "Morris TP, Jarvis CI, Cragg W, et al",
+    "entry_title": "Proposals on Kaplan-Meier plots in medical research and a survey of stakeholder views: KMunicate",
+    "entry_year": 2019,
+    "cr_found": true,
+    "cr_title": "Proposals on Kaplan\u2013Meier plots in medical research and a survey of stakeholder views: KMunicate",
+    "cr_authors": [
+      "Morris, Tim P",
+      "Jarvis, Christopher I",
+      "Cragg, William",
+      "Phillips, Patrick P J",
+      "Choodari-Oskooei, Babak",
+      "Sydes, Matthew R"
+    ],
+    "cr_journal": "BMJ Open",
+    "cr_year": [
+      2019,
+      9
+    ],
+    "cr_vol": "9",
+    "cr_issue": "9",
+    "cr_page": "e030215"
+  },
+  {
+    "key": "KaplanMeier1958",
+    "cites": [
+      "singlearm"
+    ],
+    "doi": "10.1080/01621459.1958.10501452",
+    "entry_author": "Kaplan, E. L., & Meier, P.",
+    "entry_title": "Nonparametric Estimation from Incomplete Observations",
+    "entry_year": 1958,
+    "cr_found": true,
+    "cr_title": "Nonparametric Estimation from Incomplete Observations",
+    "cr_authors": [
+      "Kaplan, E. L.",
+      "Meier, Paul"
+    ],
+    "cr_journal": "Journal of the American Statistical Association",
+    "cr_year": [
+      1958,
+      6
+    ],
+    "cr_vol": "53",
+    "cr_issue": "282",
+    "cr_page": "457-481"
+  },
+  {
+    "key": "Kerr2016DCA",
+    "cites": [
+      "decisioncurve"
+    ],
+    "doi": "10.1200/JCO.2015.65.5654",
+    "entry_author": "Kerr, K. F., Brown, M. D., Zhu, K., & Janes, H.",
+    "entry_title": "Assessing the clinical impact of risk prediction models with decision curves: guidance for correct interpretation and appropriate use",
+    "entry_year": 2016,
+    "cr_found": true,
+    "cr_title": "Assessing the Clinical Impact of Risk Prediction Models With Decision Curves: Guidance for Correct Interpretation and Appropriate Use",
+    "cr_authors": [
+      "Kerr, Kathleen F.",
+      "Brown, Marshall D.",
+      "Zhu, Kehao",
+      "Janes, Holly"
+    ],
+    "cr_journal": "Journal of Clinical Oncology",
+    "cr_year": [
+      2016,
+      7,
+      20
+    ],
+    "cr_vol": "34",
+    "cr_issue": "21",
+    "cr_page": "2534-2540"
+  },
+  {
+    "key": "Koo2016",
+    "cites": [
+      "icccoeff"
+    ],
+    "doi": "10.1016/j.jcm.2016.02.012",
+    "entry_author": "Koo, T. K., & Li, M. Y.",
+    "entry_title": "A guideline of selecting and reporting intraclass correlation coefficients for reliability research",
+    "entry_year": 2016,
+    "cr_found": true,
+    "cr_title": "A Guideline of Selecting and Reporting Intraclass Correlation Coefficients for Reliability Research",
+    "cr_authors": [
+      "Koo, Terry K.",
+      "Li, Mae Y."
+    ],
+    "cr_journal": "Journal of Chiropractic Medicine",
+    "cr_year": [
+      2016,
+      6
+    ],
+    "cr_vol": "15",
+    "cr_issue": "2",
+    "cr_page": "155-163"
+  },
+  {
+    "key": "Kruschke2014",
+    "cites": [
+      "psychopdaROC"
+    ],
+    "doi": "10.1016/C2012-0-00477-2",
+    "entry_author": "Kruschke, J. K.",
+    "entry_title": "Doing Bayesian Data Analysis: A Tutorial with R, JAGS, and Stan (2nd ed.)",
+    "entry_year": 2014,
+    "cr_found": false,
+    "cr_title": "Doing Bayesian Data Analysis",
+    "cr_authors": [],
+    "cr_error": "list index out of range",
+    "doi_resolves": true,
+    "resolved_url": "https://linkinghub.elsevier.com/retrieve/pii/C20120004772"
+  },
+  {
+    "key": "LachinAndFoulkes1986",
+    "cites": [
+      "advancedSurvivalPower"
+    ],
+    "doi": "10.2307/2531201",
+    "entry_author": "Lachin, J. M., & Foulkes, M. A.",
+    "entry_title": "Evaluation of sample size and power for analyses of survival with allowance for nonuniform patient entry, losses to follow-up, noncompliance, and stratification",
+    "entry_year": 1986,
+    "cr_found": true,
+    "cr_title": "Evaluation of Sample Size and Power for Analyses of Survival with Allowance for Nonuniform Patient Entry, Losses to Follow-Up, Noncompliance, and Stratification",
+    "cr_authors": [
+      "Lachin, John M.",
+      "Foulkes, Mary A."
+    ],
+    "cr_journal": "Biometrics",
+    "cr_year": [
+      1986,
+      9
+    ],
+    "cr_vol": "42",
+    "cr_issue": "3",
+    "cr_page": "507"
+  },
+  {
+    "key": "MandelBetensky2008",
+    "cites": [
+      "decisioncurve"
+    ],
+    "doi": "10.1016/j.csda.2007.07.005",
+    "entry_author": "Mandel, M., & Betensky, R. A.",
+    "entry_title": "Simultaneous confidence intervals based on the percentile bootstrap approach",
+    "entry_year": 2008,
+    "cr_found": true,
+    "cr_title": "Simultaneous confidence intervals based on the percentile bootstrap approach",
+    "cr_authors": [
+      "Mandel, Micha",
+      "Betensky, Rebecca A."
+    ],
+    "cr_journal": "Computational Statistics &amp; Data Analysis",
+    "cr_year": [
+      2008,
+      1
+    ],
+    "cr_vol": "52",
+    "cr_issue": "4",
+    "cr_page": "2158-2165"
+  },
+  {
+    "key": "Matthews1975",
+    "cites": [
+      "classification",
+      "modelperformance"
+    ],
+    "doi": "10.1016/0005-2795(75)90109-9",
+    "entry_author": "Matthews, B. W.",
+    "entry_title": "Comparison of the predicted and observed secondary structure of T4 phage lysozyme",
+    "entry_year": 1975,
+    "cr_found": true,
+    "cr_title": "Comparison of the predicted and observed secondary structure of T4 phage lysozyme",
+    "cr_authors": [
+      "Matthews, B.W."
+    ],
+    "cr_journal": "Biochimica et Biophysica Acta (BBA) - Protein Structure",
+    "cr_year": [
+      1975,
+      10
+    ],
+    "cr_vol": "405",
+    "cr_issue": "2",
+    "cr_page": "442-451"
+  },
+  {
+    "key": "McClish1989",
+    "cites": [
+      "psychopdaROC"
+    ],
+    "doi": "10.1177/0272989X8900900307",
+    "entry_author": "McClish, D. K.",
+    "entry_title": "Analyzing a portion of the ROC curve",
+    "entry_year": 1989,
+    "cr_found": true,
+    "cr_title": "Analyzing a Portion of the ROC Curve",
+    "cr_authors": [
+      "McClish, Donna Katzman"
+    ],
+    "cr_journal": "Medical Decision Making",
+    "cr_year": [
+      1989,
+      8
+    ],
+    "cr_vol": "9",
+    "cr_issue": "3",
+    "cr_page": "190-195"
+  },
+  {
+    "key": "McElreath2020",
+    "cites": [
+      "psychopdaROC"
+    ],
+    "doi": "10.1201/9780429029608",
+    "entry_author": "McElreath, R.",
+    "entry_title": "Statistical Rethinking: A Bayesian Course with Examples in R and Stan (2nd ed.)",
+    "entry_year": 2020,
+    "cr_found": false,
+    "cr_title": "Statistical Rethinking",
+    "cr_authors": [
+      "McElreath, Richard"
+    ],
+    "cr_error": "list index out of range",
+    "doi_resolves": true,
+    "resolved_url": "https://www.taylorfrancis.com/books/mono/10.1201/9780429029608/statistical-rethinking-richard-mcelreath"
+  },
+  {
+    "key": "McGraw1996",
+    "cites": [
+      "icccoeff"
+    ],
+    "doi": "10.1037/1082-989X.1.1.30",
+    "entry_author": "McGraw, K. O., & Wong, S. P.",
+    "entry_title": "Forming inferences about some intraclass correlation coefficients",
+    "entry_year": 1996,
+    "cr_found": true,
+    "cr_title": "Forming inferences about some intraclass correlation coefficients.",
+    "cr_authors": [
+      "McGraw, Kenneth O.",
+      "Wong, S. P."
+    ],
+    "cr_journal": "Psychological Methods",
+    "cr_year": [
+      1996,
+      3
+    ],
+    "cr_vol": "1",
+    "cr_issue": "1",
+    "cr_page": "30-46"
+  },
+  {
+    "key": "PathologyKappa",
+    "cites": [
+      "agreement",
+      "pathagreement"
+    ],
+    "doi": "10.1016/j.anndiagpath.2020.151557",
+    "entry_author": "Marchevsky, A. M., & Thunnissen, E.",
+    "entry_title": "Pathologists should probably forget about kappa. Percent agreement, diagnostic specificity and related metrics provide more clinically applicable measures of interobserver variability",
+    "entry_year": 2020,
+    "cr_found": true,
+    "cr_title": "CRABP2 and FABP5 expression levels in diseased and normal pancreas",
+    "cr_authors": [
+      "Hughes, Christine S.",
+      "ChinAleong, Jo-Anne",
+      "Kocher, Hemant M."
+    ],
+    "cr_journal": "Annals of Diagnostic Pathology",
+    "cr_year": [
+      2020,
+      8
+    ],
+    "cr_vol": "47",
+    "cr_issue": "",
+    "cr_page": "151557"
+  },
+  {
+    "key": "Pencina2008",
+    "cites": [
+      "psychopdaROC",
+      "stagemigration"
+    ],
+    "doi": "10.1002/sim.2929",
+    "entry_author": "Pencina, M. J., D'Agostino Sr, R. B., D'Agostino Jr, R. B., & Vasan, R. S.",
+    "entry_title": "Evaluating the added predictive ability of a new marker: from area under the ROC curve to reclassification and beyond",
+    "entry_year": 2008,
+    "cr_found": true,
+    "cr_title": "Evaluating the added predictive ability of a new marker: From area under the ROC curve to reclassification and beyond",
+    "cr_authors": [
+      "Pencina, Michael J.",
+      "D' Agostino, Ralph B.",
+      "D' Agostino, Ralph B.",
+      "Vasan, Ramachandran S."
+    ],
+    "cr_journal": "Statistics in Medicine",
+    "cr_year": [
+      2007,
+      6,
+      13
+    ],
+    "cr_vol": "27",
+    "cr_issue": "2",
+    "cr_page": "157-172"
+  },
+  {
+    "key": "Pencina2011",
+    "cites": [
+      "psychopdaROC"
+    ],
+    "doi": "10.1002/sim.4085",
+    "entry_author": "Pencina, M. J., D'Agostino Sr, R. B., & Steyerberg, E. W.",
+    "entry_title": "Extensions of net reclassification improvement calculations to measure usefulness of new biomarkers",
+    "entry_year": 2011,
+    "cr_found": true,
+    "cr_title": "Extensions of net reclassification improvement calculations to measure usefulness of new biomarkers",
+    "cr_authors": [
+      "Pencina, Michael J.",
+      "D'Agostino, Ralph B.",
+      "Steyerberg, Ewout W."
+    ],
+    "cr_journal": "Statistics in Medicine",
+    "cr_year": [
+      2010,
+      11,
+      5
+    ],
+    "cr_vol": "30",
+    "cr_issue": "1",
+    "cr_page": "11-21"
+  },
+  {
+    "key": "RoystonParmar2013",
+    "cites": [
+      "singlearm"
+    ],
+    "doi": "10.1186/1471-2288-13-152",
+    "entry_author": "Royston, P., & Parmar, M. K. B.",
+    "entry_title": "Restricted Mean Survival Time: An Alternative to the Hazard Ratio for the Design and Analysis of Randomized Trials with a Time-to-Event Outcome",
+    "entry_year": 2013,
+    "cr_found": true,
+    "cr_title": "Restricted mean survival time: an alternative to the hazard ratio for the design and analysis of randomized trials with a time-to-event outcome",
+    "cr_authors": [
+      "Royston, Patrick",
+      "Parmar, Mahesh KB"
+    ],
+    "cr_journal": "BMC Medical Research Methodology",
+    "cr_year": [
+      2013,
+      12
+    ],
+    "cr_vol": "13",
+    "cr_issue": "1",
+    "cr_page": ""
+  },
+  {
+    "key": "STARD2015",
+    "cites": [
+      "decisioncalculator",
+      "decisioncompare"
+    ],
+    "doi": "10.1136/bmj.h5527",
+    "entry_author": "Bossuyt, P. M., Reitsma, J. B., Bruns, D. E., et al.",
+    "entry_title": "STARD 2015: An updated list of essential items for reporting diagnostic accuracy studies",
+    "entry_year": 2015,
+    "cr_found": true,
+    "cr_title": "STARD 2015: an updated list of essential items for reporting diagnostic accuracy studies",
+    "cr_authors": [
+      "Bossuyt, Patrick M",
+      "Reitsma, Johannes B",
+      "Bruns, David E",
+      "Gatsonis, Constantine A",
+      "Glasziou, Paul P",
+      "Irwig, Les",
+      "Lijmer, Jeroen G",
+      "Moher, David",
+      "Rennie, Drummond",
+      "de Vet, Henrica C W",
+      "Kressel, Herbert Y",
+      "Rifai, Nader",
+      "Golub, Robert M",
+      "Altman, Douglas G",
+      "Hooft, Lotty",
+      "Korevaar, Dani\u00ebl A",
+      "Cohen, J\u00e9r\u00e9mie F"
+    ],
+    "cr_journal": "BMJ",
+    "cr_year": [
+      2015,
+      10,
+      28
+    ],
+    "cr_vol": "",
+    "cr_issue": "",
+    "cr_page": "h5527"
+  },
+  {
+    "key": "Saito2015",
+    "cites": [
+      "classification",
+      "clinicalvalidation",
+      "modelperformance",
+      "precisionrecall"
+    ],
+    "doi": "10.1371/journal.pone.0118432",
+    "entry_author": "Saito, T., & Rehmsmeier, M.",
+    "entry_title": "The precision-recall plot is more informative than the ROC plot when evaluating binary classifiers on imbalanced datasets",
+    "entry_year": 2015,
+    "cr_found": true,
+    "cr_title": "The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets",
+    "cr_authors": [
+      "Saito, Takaya",
+      "Rehmsmeier, Marc"
+    ],
+    "cr_journal": "PLOS ONE",
+    "cr_year": [
+      2015,
+      3,
+      4
+    ],
+    "cr_vol": "10",
+    "cr_issue": "3",
+    "cr_page": "e0118432"
+  },
+  {
+    "key": "SchemperSmith1996",
+    "cites": [
+      "clinicalnomograms",
+      "conditionalsurvival",
+      "condsurvival",
+      "curemodels",
+      "epidemiosurvival",
+      "ihcsurvival",
+      "jiwillsurvive",
+      "multisurvival",
+      "progressionsurvival",
+      "pseudosurvival",
+      "relativesurvival",
+      "singlearm",
+      "stagemigration",
+      "survivalcont",
+      "survivalmodelvalidation",
+      "swimmerplot",
+      "timeupdatesurvival"
+    ],
+    "doi": "10.1016/0197-2456(96)00075-X",
+    "entry_author": "Schemper, M., & Smith, T. L.",
+    "entry_title": "A Note on Quantifying Follow-up in Studies of Failure Time",
+    "entry_year": 1996,
+    "cr_found": true,
+    "cr_title": "A note on quantifying follow-up in studies of failure time",
+    "cr_authors": [
+      "Schemper, Michael",
+      "Smith, Terry L."
+    ],
+    "cr_journal": "Controlled Clinical Trials",
+    "cr_year": [
+      1996,
+      8
+    ],
+    "cr_vol": "17",
+    "cr_issue": "4",
+    "cr_page": "343-346"
+  },
+  {
+    "key": "Schoenfeld1983",
+    "cites": [
+      "advancedSurvivalPower"
+    ],
+    "doi": "10.2307/2531021",
+    "entry_author": "Schoenfeld, D. A.",
+    "entry_title": "Sample-size formula for the proportional-hazards regression model",
+    "entry_year": 1983,
+    "cr_found": true,
+    "cr_title": "Sample-Size Formula for the Proportional-Hazards Regression Model",
+    "cr_authors": [
+      "Schoenfeld, David A."
+    ],
+    "cr_journal": "Biometrics",
+    "cr_year": [
+      1983,
+      6
+    ],
+    "cr_vol": "39",
+    "cr_issue": "2",
+    "cr_page": "499"
+  },
+  {
+    "key": "Shrout1979",
+    "cites": [
+      "icccoeff"
+    ],
+    "doi": "10.1037/0033-2909.86.2.420",
+    "entry_author": "Shrout, P. E., & Fleiss, J. L.",
+    "entry_title": "Intraclass correlations: uses in assessing rater reliability",
+    "entry_year": 1979,
+    "cr_found": true,
+    "cr_title": "Intraclass correlations: Uses in assessing rater reliability.",
+    "cr_authors": [
+      "Shrout, Patrick E.",
+      "Fleiss, Joseph L."
+    ],
+    "cr_journal": "Psychological Bulletin",
+    "cr_year": [
+      1979
+    ],
+    "cr_vol": "86",
+    "cr_issue": "2",
+    "cr_page": "420-428"
+  },
+  {
+    "key": "Simon2011Coxnet",
+    "cites": [
+      "lassocox"
+    ],
+    "doi": "10.18637/jss.v039.i05",
+    "entry_author": "Simon, N., Friedman, J., Hastie, T., & Tibshirani, R.",
+    "entry_title": "Regularization paths for Cox's proportional hazards model via coordinate descent",
+    "entry_year": 2011,
+    "cr_found": true,
+    "cr_title": "Regularization Paths for Cox's Proportional Hazards Model via Coordinate Descent",
+    "cr_authors": [
+      "Simon, Noah",
+      "Friedman, Jerome",
+      "Hastie, Trevor",
+      "Tibshirani, Rob"
+    ],
+    "cr_journal": "Journal of Statistical Software",
+    "cr_year": [
+      2011
+    ],
+    "cr_vol": "39",
+    "cr_issue": "5",
+    "cr_page": ""
+  },
+  {
+    "key": "Steyerberg2003Validation",
+    "cites": [
+      "lassocox"
+    ],
+    "doi": "10.1016/S0895-4356(03)00047-7",
+    "entry_author": "Steyerberg, E. W., Bleeker, S. E., Moll, H. A., Grobbee, D. E., & Moons, K. G. M.",
+    "entry_title": "Internal and external validation of predictive models: a simulation study of bias and precision in small samples",
+    "entry_year": 2003,
+    "cr_found": true,
+    "cr_title": "Internal and external validation of predictive models: A simulation study of bias and precision in small samples",
+    "cr_authors": [
+      "Steyerberg, Ewout W",
+      "Bleeker, Sacha E",
+      "Moll, Henri\u00ebtte A",
+      "Grobbee, Diederick E",
+      "Moons, Karel G.M"
+    ],
+    "cr_journal": "Journal of Clinical Epidemiology",
+    "cr_year": [
+      2003,
+      5
+    ],
+    "cr_vol": "56",
+    "cr_issue": "5",
+    "cr_page": "441-447"
+  },
+  {
+    "key": "Steyerberg2010",
+    "cites": [
+      "psychopdaROC",
+      "stagemigration"
+    ],
+    "doi": "10.1097/EDE.0b013e3181c30fb2",
+    "entry_author": "Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., Pencina, M. J., & Kattan, M. W.",
+    "entry_title": "Assessing the performance of prediction models: a framework for traditional and novel measures",
+    "entry_year": 2010,
+    "cr_found": true,
+    "cr_title": "Assessing the Performance of Prediction Models",
+    "cr_authors": [
+      "Steyerberg, Ewout W.",
+      "Vickers, Andrew J.",
+      "Cook, Nancy R.",
+      "Gerds, Thomas",
+      "Gonen, Mithat",
+      "Obuchowski, Nancy",
+      "Pencina, Michael J.",
+      "Kattan, Michael W."
+    ],
+    "cr_journal": "Epidemiology",
+    "cr_year": [
+      2010,
+      1
+    ],
+    "cr_vol": "21",
+    "cr_issue": "1",
+    "cr_page": "128-138"
+  },
+  {
+    "key": "Strobl2007",
+    "cites": [
+      "conditionalinference"
+    ],
+    "doi": "10.1186/1471-2105-8-25",
+    "entry_author": "Strobl, C., Boulesteix, A.-L., Zeileis, A., & Hothorn, T.",
+    "entry_title": "Bias in random forest variable importance measures: Illustrations, sources and a solution",
+    "entry_year": 2007,
+    "cr_found": true,
+    "cr_title": "Bias in random forest variable importance measures: Illustrations, sources and a solution",
+    "cr_authors": [
+      "Strobl, Carolin",
+      "Boulesteix, Anne-Laure",
+      "Zeileis, Achim",
+      "Hothorn, Torsten"
+    ],
+    "cr_journal": "BMC Bioinformatics",
+    "cr_year": [
+      2007,
+      1,
+      25
+    ],
+    "cr_vol": "8",
+    "cr_issue": "1",
+    "cr_page": ""
+  },
+  {
+    "key": "Swamidass2010",
+    "cites": [
+      "enhancedROC"
+    ],
+    "doi": "10.1093/bioinformatics/btq140",
+    "entry_author": "Swamidass, S. J., Azencott, C.-A., Daily, K., & Baldi, P.",
+    "entry_title": "A CROC stronger than ROC: measuring, visualizing and optimizing early retrieval",
+    "entry_year": 2010,
+    "cr_found": true,
+    "cr_title": "A CROC stronger than ROC: measuring, visualizing and optimizing early retrieval",
+    "cr_authors": [
+      "Swamidass, S. Joshua",
+      "Azencott, Chlo\u00e9-Agathe",
+      "Daily, Kenny",
+      "Baldi, Pierre"
+    ],
+    "cr_journal": "Bioinformatics",
+    "cr_year": [
+      2010,
+      4,
+      7
+    ],
+    "cr_vol": "26",
+    "cr_issue": "10",
+    "cr_page": "1348-1356"
+  },
+  {
+    "key": "Taylor2018PostSelection",
+    "cites": [
+      "lassocox"
+    ],
+    "doi": "10.1002/cjs.11313",
+    "entry_author": "Taylor, J., & Tibshirani, R.",
+    "entry_title": "Post-selection inference for l1-penalized likelihood models",
+    "entry_year": 2018,
+    "cr_found": true,
+    "cr_title": "Post\u2010selection inference for \u2010penalized likelihood models",
+    "cr_authors": [
+      "Taylor, Jonathan",
+      "Tibshirani, Robert"
+    ],
+    "cr_journal": "Canadian Journal of Statistics",
+    "cr_year": [
+      2017,
+      3,
+      6
+    ],
+    "cr_vol": "46",
+    "cr_issue": "1",
+    "cr_page": "41-61"
+  },
+  {
+    "key": "Vickers2006",
+    "cites": [
+      "decisioncurve",
+      "psychopdaROC",
+      "stagemigration"
+    ],
+    "doi": "10.1177/0272989X06295361",
+    "entry_author": "Vickers, A. J., & Elkin, E. B.",
+    "entry_title": "Decision curve analysis: a novel method for evaluating prediction models",
+    "entry_year": 2006,
+    "cr_found": true,
+    "cr_title": "Decision Curve Analysis: A Novel Method for Evaluating Prediction Models",
+    "cr_authors": [
+      "Vickers, Andrew J.",
+      "Elkin, Elena B."
+    ],
+    "cr_journal": "Medical Decision Making",
+    "cr_year": [
+      2006,
+      11
+    ],
+    "cr_vol": "26",
+    "cr_issue": "6",
+    "cr_page": "565-574"
+  },
+  {
+    "key": "Vickers2019DCA",
+    "cites": [
+      "decisioncurve"
+    ],
+    "doi": "10.1186/s41512-019-0064-7",
+    "entry_author": "Vickers, A. J., Van Calster, B., & Steyerberg, E. W.",
+    "entry_title": "A simple, step-by-step guide to interpreting decision curve analysis",
+    "entry_year": 2019,
+    "cr_found": true,
+    "cr_title": "A simple, step-by-step guide to interpreting decision curve analysis",
+    "cr_authors": [
+      "Vickers, Andrew J.",
+      "van Calster, Ben",
+      "Steyerberg, Ewout W."
+    ],
+    "cr_journal": "Diagnostic and Prognostic Research",
+    "cr_year": [
+      2019,
+      10,
+      4
+    ],
+    "cr_vol": "3",
+    "cr_issue": "1",
+    "cr_page": ""
+  },
+  {
+    "key": "Vickers2023DCAInference",
+    "cites": [
+      "decisioncurve"
+    ],
+    "doi": "10.1186/s41512-023-00148-y",
+    "entry_author": "Vickers, A. J., Van Calster, B., Wynants, L., & Steyerberg, E. W.",
+    "entry_title": "Decision curve analysis: confidence intervals and hypothesis testing for net benefit",
+    "entry_year": 2023,
+    "cr_found": true,
+    "cr_title": "Decision curve analysis: confidence intervals and hypothesis testing for net benefit",
+    "cr_authors": [
+      "Vickers, Andrew J.",
+      "Van Claster, Ben",
+      "Wynants, Laure",
+      "Steyerberg, Ewout W."
+    ],
+    "cr_journal": "Diagnostic and Prognostic Research",
+    "cr_year": [
+      2023,
+      6,
+      6
+    ],
+    "cr_vol": "7",
+    "cr_issue": "1",
+    "cr_page": ""
+  },
+  {
+    "key": "agresti2013",
+    "cites": [
+      "chisqposttest"
+    ],
+    "doi": "",
+    "entry_author": "Agresti, A.",
+    "entry_title": "Categorical Data Analysis",
+    "entry_year": 2013
+  },
+  {
+    "key": "appliedsurvivalanalysisR",
+    "cites": [
+      "survival"
+    ],
+    "doi": "10.1007/978-3-319-31245-3",
+    "entry_author": "Dirk F. Moore",
+    "entry_title": "Applied Survival Analysis Using R",
+    "entry_year": 2016,
+    "cr_found": true,
+    "cr_title": "Applied Survival Analysis Using R",
+    "cr_authors": [
+      "Moore, Dirk F."
+    ],
+    "cr_journal": "Use R!",
+    "cr_year": [
+      2016
+    ],
+    "cr_vol": "",
+    "cr_issue": "",
+    "cr_page": ""
+  },
+  {
+    "key": "ates2025",
+    "cites": [
+      "pathsampling"
+    ],
+    "doi": "10.1016/j.modpat.2025.100885",
+    "entry_author": "Ates, D., et al.",
+    "entry_title": "Lymphovascular space invasion in endometrial cancer",
+    "entry_year": 2025,
+    "cr_found": true,
+    "cr_title": "Lymphovascular Space Invasion in Endometrial Cancer: Does it Matter Where and How Much to Sample? A Macroscopic Study of 208 Hysterectomies",
+    "cr_authors": [
+      "Ates, Deniz",
+      "Karahan, Sevilay",
+      "Oru\u00e7, Aleyna",
+      "Usubutun, Alp"
+    ],
+    "cr_journal": "Modern Pathology",
+    "cr_year": [
+      2025,
+      12
+    ],
+    "cr_vol": "38",
+    "cr_issue": "12",
+    "cr_page": "100885"
+  },
+  {
+    "key": "benjaminihochberg1995",
+    "cites": [
+      "chisqposttest"
+    ],
+    "doi": "10.1111/j.2517-6161.1995.tb02031.x",
+    "entry_author": "Benjamini, Y., & Hochberg, Y.",
+    "entry_title": "Controlling the false discovery rate: a practical and powerful approach to multiple testing",
+    "entry_year": 1995,
+    "cr_found": true,
+    "cr_title": "Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing",
+    "cr_authors": [
+      "Benjamini, Yoav",
+      "Hochberg, Yosef"
+    ],
+    "cr_journal": "Journal of the Royal Statistical Society Series B: Statistical Methodology",
+    "cr_year": [
+      1995,
+      1,
+      1
+    ],
+    "cr_vol": "57",
+    "cr_issue": "1",
+    "cr_page": "289-300"
+  },
+  {
+    "key": "bernal2017its",
+    "cites": [
+      "interruptedtimeseries"
+    ],
+    "doi": "10.1093/ije/dyw098",
+    "entry_author": "Bernal, J. L., Cummins, S., & Gasparrini, A.",
+    "entry_title": "Interrupted time series regression for the evaluation of public health interventions: a tutorial",
+    "entry_year": 2017,
+    "cr_found": true,
+    "cr_title": "Interrupted time series regression for the evaluation of public health interventions: a tutorial",
+    "cr_authors": [
+      "Lopez Bernal, James",
+      "Cummins, Steven",
+      "Gasparrini, Antonio"
+    ],
+    "cr_journal": "International Journal of Epidemiology",
+    "cr_year": [
+      2016,
+      6,
+      9
+    ],
+    "cr_vol": "",
+    "cr_issue": "",
+    "cr_page": "dyw098"
+  },
+  {
+    "key": "breslowday1987",
+    "cites": [
+      "standardizedratio"
+    ],
+    "doi": "",
+    "entry_author": "Breslow, N. E., & Day, N. E.",
+    "entry_title": "Statistical Methods in Cancer Research, Volume II: The Design and Analysis of Cohort Studies",
+    "entry_year": 1987
+  },
+  {
+    "key": "buderer1996",
+    "cites": [
+      "pathsampling"
+    ],
+    "doi": "10.1111/j.1553-2712.1996.tb03538.x",
+    "entry_author": "Buderer, N. M.",
+    "entry_title": "Statistical methodology: I. Incorporating the prevalence of disease into the sample size calculation for sensitivity and specificity",
+    "entry_year": 1996,
+    "cr_found": true,
+    "cr_title": "Statistical Methodology: I. Incorporating the Prevalence of Disease into the Sample Size Calculation for Sensitivity and Specificity",
+    "cr_authors": [
+      "Buderer, Nancy M. Fenn"
+    ],
+    "cr_journal": "Academic Emergency Medicine",
+    "cr_year": [
+      1996,
+      9
+    ],
+    "cr_vol": "3",
+    "cr_issue": "9",
+    "cr_page": "895-900"
+  },
+  {
+    "key": "cochran1950",
+    "cites": [
+      "decisioncompare"
+    ],
+    "doi": "10.1093/biomet/37.3-4.256",
+    "entry_author": "Cochran, W. G.",
+    "entry_title": "The comparison of percentages in matched samples",
+    "entry_year": 1950,
+    "cr_found": true,
+    "cr_title": "THE COMPARISON OF PERCENTAGES IN MATCHED SAMPLES",
+    "cr_authors": [
+      "COCHRAN, W. G."
+    ],
+    "cr_journal": "Biometrika",
+    "cr_year": [
+      1950,
+      12,
+      1
+    ],
+    "cr_vol": "37",
+    "cr_issue": "3-4",
+    "cr_page": "256-266"
+  },
+  {
+    "key": "cole2004",
+    "cites": [
+      "qtwist"
+    ],
+    "doi": "10.1200/JCO.2004.05.092",
+    "entry_author": "Cole, B. F., Gelber, R. D., Gelber, S., Coates, A. S., & Goldhirsch, A.",
+    "entry_title": "Quality-of-life-adjusted survival analysis (Q-TWiST) for evaluating adjuvant therapy of breast cancer",
+    "entry_year": 2004,
+    "cr_found": false,
+    "cr_error": "HTTP Error 404: Not Found",
+    "doi_resolves": false,
+    "doi_error": "HTTP Error 404: Not Found"
+  },
+  {
+    "key": "dichotomizing",
+    "cites": [
+      "categorize",
+      "survivalcont"
+    ],
+    "doi": "10.1002/sim.2331",
+    "entry_author": "Royston, P., Altman, D. G., & Sauerbrei, W.",
+    "entry_title": "Dichotomizing continuous predictors in multiple regression: a bad idea",
+    "entry_year": 2006,
+    "cr_found": true,
+    "cr_title": "Dichotomizing continuous predictors in multiple regression: a bad idea",
+    "cr_authors": [
+      "Royston, Patrick",
+      "Altman, Douglas G.",
+      "Sauerbrei, Willi"
+    ],
+    "cr_journal": "Statistics in Medicine",
+    "cr_year": [
+      2005,
+      10,
+      11
+    ],
+    "cr_vol": "25",
+    "cr_issue": "1",
+    "cr_page": "127-141"
+  },
+  {
+    "key": "dong2016winratio",
+    "cites": [
+      "winratio"
+    ],
+    "doi": "10.1002/pst.1763",
+    "entry_author": "Dong, G., Li, D., Ballerstedt, S., & Vandemeulebroecke, M.",
+    "entry_title": "A generalized analytic solution to the win ratio to analyze a composite endpoint considering the clinical importance order among components",
+    "entry_year": 2016,
+    "cr_found": true,
+    "cr_title": "A generalized analytic solution to the win ratio to analyze a composite endpoint considering the clinical importance order among components",
+    "cr_authors": [
+      "Dong, Gaohong",
+      "Li, Di",
+      "Ballerstedt, Steffen",
+      "Vandemeulebroecke, Marc"
+    ],
+    "cr_journal": "Pharmaceutical Statistics",
+    "cr_year": [
+      2016,
+      8,
+      2
+    ],
+    "cr_vol": "15",
+    "cr_issue": "5",
+    "cr_page": "430-437"
+  },
+  {
+    "key": "donnerEliasziwKappaGOF",
+    "cites": [
+      "kappaSizeCI",
+      "kappaSizeFixedN"
+    ],
+    "doi": "10.1002/sim.4780111109",
+    "entry_author": "Donner A, Eliasziw M.",
+    "entry_title": "A goodness-of-fit approach to inference procedures for the kappa statistic: confidence interval construction, significance-testing and sample size estimation",
+    "entry_year": 1992,
+    "cr_found": true,
+    "cr_title": "A goodness\u2010of\u2010fit approach to inference procedures for the kappa statistic: Confidence interval construction, significance\u2010testing and sample size estimation",
+    "cr_authors": [
+      "Donner, Allan",
+      "Eliasziw, Michael"
+    ],
+    "cr_journal": "Statistics in Medicine",
+    "cr_year": [
+      1992,
+      1
+    ],
+    "cr_vol": "11",
+    "cr_issue": "11",
+    "cr_page": "1511-1519"
+  },
+  {
+    "key": "evans2015door",
+    "cites": [
+      "door"
+    ],
+    "doi": "10.1093/cid/civ495",
+    "entry_author": "Evans, S. R., Rubin, D., Follmann, D., et al.",
+    "entry_title": "Desirability of Outcome Ranking (DOOR) and Response Adjusted for Duration of Antibiotic Risk (RADAR)",
+    "entry_year": 2015,
+    "cr_found": true,
+    "cr_title": "Desirability of Outcome Ranking (DOOR) and Response Adjusted for Duration of Antibiotic Risk (RADAR)",
+    "cr_authors": [
+      "Evans, Scott R.",
+      "Rubin, Daniel",
+      "Follmann, Dean",
+      "Pennello, Gene",
+      "Huskins, W. Charles",
+      "Powers, John H.",
+      "Schoenfeld, David",
+      "Chuang-Stein, Christy",
+      "Cosgrove, Sara E.",
+      "Fowler, Vance G.",
+      "Lautenbach, Ebbing",
+      "Chambers, Henry F."
+    ],
+    "cr_journal": "Clinical Infectious Diseases",
+    "cr_year": [
+      2015,
+      6,
+      25
+    ],
+    "cr_vol": "61",
+    "cr_issue": "5",
+    "cr_page": "800-806"
+  },
+  {
+    "key": "gelber1986",
+    "cites": [
+      "qtwist"
+    ],
+    "doi": "10.1200/JCO.1986.4.12.1772",
+    "entry_author": "Gelber, R. D., & Goldhirsch, A.",
+    "entry_title": "A new endpoint for the assessment of adjuvant therapy in postmenopausal women with operable breast cancer",
+    "entry_year": 1986,
+    "cr_found": true,
+    "cr_title": "A new endpoint for the assessment of adjuvant therapy in postmenopausal women with operable breast cancer.",
+    "cr_authors": [
+      "Gelber, R D",
+      "Goldhirsch, A"
+    ],
+    "cr_journal": "Journal of Clinical Oncology",
+    "cr_year": [
+      1986,
+      12
+    ],
+    "cr_vol": "4",
+    "cr_issue": "12",
+    "cr_page": "1772-1779"
+  },
+  {
+    "key": "glasziou1990",
+    "cites": [
+      "qtwist"
+    ],
+    "doi": "10.1002/sim.4780091106",
+    "entry_author": "Glasziou, P. P., Simes, R. J., & Gelber, R. D.",
+    "entry_title": "Quality adjusted survival analysis",
+    "entry_year": 1990,
+    "cr_found": true,
+    "cr_title": "Quality adjusted survival analysis",
+    "cr_authors": [
+      "Glasziou, P. P.",
+      "Simes, R. J.",
+      "Gelber, R. D."
+    ],
+    "cr_journal": "Statistics in Medicine",
+    "cr_year": [
+      1990,
+      11
+    ],
+    "cr_vol": "9",
+    "cr_issue": "11",
+    "cr_page": "1259-1276"
+  },
+  {
+    "key": "gonen2009",
+    "cites": [
+      "pathsampling"
+    ],
+    "doi": "10.1200/JCO.2009.23.7958",
+    "entry_author": "G\u00f6nen, M., Schrag, D., & Weiser, M. R.",
+    "entry_title": "Nodal staging score: a tool to assess adequate staging of node-negative colon cancer",
+    "entry_year": 2009,
+    "cr_found": true,
+    "cr_title": "Nodal Staging Score: A Tool to Assess Adequate Staging of Node-Negative Colon Cancer",
+    "cr_authors": [
+      "G\u00f6nen, Mithat",
+      "Schrag, Deborah",
+      "Weiser, Martin R."
+    ],
+    "cr_journal": "Journal of Clinical Oncology",
+    "cr_year": [
+      2009,
+      12,
+      20
+    ],
+    "cr_vol": "27",
+    "cr_issue": "36",
+    "cr_page": "6166-6171"
+  },
+  {
+    "key": "gu2014circlize",
+    "cites": [
+      "circos"
+    ],
+    "doi": "10.1093/bioinformatics/btu393",
+    "entry_author": "Gu, Z., Gu, L., Eils, R., Schlesner, M., & Brors, B.",
+    "entry_title": "circlize implements and enhances circular visualization in R",
+    "entry_year": 2014,
+    "cr_found": true,
+    "cr_title": "<i>circlize</i>\n                    implements and enhances circular visualization in R",
+    "cr_authors": [
+      "Gu, Zuguang",
+      "Gu, Lei",
+      "Eils, Roland",
+      "Schlesner, Matthias",
+      "Brors, Benedikt"
+    ],
+    "cr_journal": "Bioinformatics",
+    "cr_year": [
+      2014,
+      6,
+      14
+    ],
+    "cr_vol": "30",
+    "cr_issue": "19",
+    "cr_page": "2811-2812"
+  },
+  {
+    "key": "haldane1956",
+    "cites": [
+      "decisioncombine"
+    ],
+    "doi": "10.1111/j.1469-1809.1955.tb01285.x",
+    "entry_author": "Haldane, J. B. S.",
+    "entry_title": "The estimation and significance of the logarithm of a ratio of frequencies",
+    "entry_year": 1956,
+    "cr_found": true,
+    "cr_title": "THE ESTIMATION AND SIGNIFICANCE OF THE LOGARITHM OF A RATIO OF FREQUENCIES",
+    "cr_authors": [
+      "HALDANE, By J. B. S."
+    ],
+    "cr_journal": "Annals of Human Genetics",
+    "cr_year": [
+      1956,
+      5
+    ],
+    "cr_vol": "20",
+    "cr_issue": "4",
+    "cr_page": "309-311"
+  },
+  {
+    "key": "harrell2015",
+    "cites": [
+      "stagemigration"
+    ],
+    "doi": "10.1007/978-3-319-19425-7",
+    "entry_author": "Harrell Jr, F. E.",
+    "entry_title": "Regression Modeling Strategies (2nd ed.)",
+    "entry_year": 2015,
+    "cr_found": true,
+    "cr_title": "Regression Modeling Strategies",
+    "cr_authors": [
+      "Harrell ,, Frank E."
+    ],
+    "cr_journal": "Springer Series in Statistics",
+    "cr_year": [
+      2015
+    ],
+    "cr_vol": "",
+    "cr_issue": "",
+    "cr_page": ""
+  },
+  {
+    "key": "hernan2020whatif",
+    "cites": [
+      "gcomputation"
+    ],
+    "doi": "",
+    "entry_author": "Hern\u00e1n, M. A., & Robins, J. M.",
+    "entry_title": "Causal Inference: What If",
+    "entry_year": 2020
+  },
+  {
+    "key": "holm1979",
+    "cites": [
+      "chisqposttest",
+      "decisioncompare"
+    ],
+    "doi": "10.2307/4615733",
+    "entry_author": "Holm, S.",
+    "entry_title": "A simple sequentially rejective multiple test procedure",
+    "entry_year": 1979,
+    "cr_found": false,
+    "cr_error": "HTTP Error 404: Not Found",
+    "doi_resolves": false,
+    "doi_error": "HTTP Error 404: Not Found"
+  },
+  {
+    "key": "jaeschke1994",
+    "cites": [
+      "decisioncompare"
+    ],
+    "doi": "10.1001/jama.271.9.703",
+    "entry_author": "Jaeschke, R., Guyatt, G. H., Sackett, D. L., et al.",
+    "entry_title": "Users' guides to the medical literature. III. How to use an article about a diagnostic test. B. What are the results and will they help me in caring for my patients?",
+    "entry_year": 1994,
+    "cr_found": true,
+    "cr_title": "Users' Guides to the Medical Literature",
+    "cr_authors": [
+      "Jaeschke, Roman"
+    ],
+    "cr_journal": "JAMA",
+    "cr_year": [
+      1994,
+      3,
+      2
+    ],
+    "cr_vol": "271",
+    "cr_issue": "9",
+    "cr_page": "703"
+  },
+  {
+    "key": "kim2000joinpoint",
+    "cites": [
+      "joinpoint"
+    ],
+    "doi": "10.1002/(SICI)1097-0258(20000215)19:3<335::AID-SIM336>3.0.CO;2-Z",
+    "entry_author": "Kim, H. J., Fay, M. P., Feuer, E. J., & Midthune, D. N.",
+    "entry_title": "Permutation tests for joinpoint regression with applications to cancer rates",
+    "entry_year": 2000,
+    "cr_found": true,
+    "cr_title": "Permutation tests for joinpoint regression with applications to cancer rates",
+    "cr_authors": [
+      "Kim, Hyune-Ju",
+      "Fay, Michael P.",
+      "Feuer, Eric J.",
+      "Midthune, Douglas N."
+    ],
+    "cr_journal": "Statistics in Medicine",
+    "cr_year": [
+      2000,
+      2,
+      15
+    ],
+    "cr_vol": "19",
+    "cr_issue": "3",
+    "cr_page": "335-351"
+  },
+  {
+    "key": "leys2013",
+    "cites": [
+      "checkdata"
+    ],
+    "doi": "10.1016/j.jesp.2013.03.013",
+    "entry_author": "Leys, C., Ley, C., Klein, O., Bernard, P., & Licata, L.",
+    "entry_title": "Detecting outliers: do not use standard deviation around the mean, use absolute deviation around the median",
+    "entry_year": 2013,
+    "cr_found": true,
+    "cr_title": "Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median",
+    "cr_authors": [
+      "Leys, Christophe",
+      "Ley, Christophe",
+      "Klein, Olivier",
+      "Bernard, Philippe",
+      "Licata, Laurent"
+    ],
+    "cr_journal": "Journal of Experimental Social Psychology",
+    "cr_year": [
+      2013,
+      7
+    ],
+    "cr_vol": "49",
+    "cr_issue": "4",
+    "cr_page": "764-766"
+  },
+  {
+    "key": "maglalang2025",
+    "cites": [
+      "pathsampling"
+    ],
+    "doi": "10.1093/ajcp/aqaf082",
+    "entry_author": "Maglalang, N. A., & Fadare, O.",
+    "entry_title": "Omental sampling in gynecologic malignancies",
+    "entry_year": 2025,
+    "cr_found": true,
+    "cr_title": "Pathologic sampling of the omentum for neoplasms that involve the female genital tract: A retrospective analysis of 1055 cases",
+    "cr_authors": [
+      "Maglalang, Neil Allen",
+      "Fadare, Oluwole"
+    ],
+    "cr_journal": "American Journal of Clinical Pathology",
+    "cr_year": [
+      2025,
+      8,
+      10
+    ],
+    "cr_vol": "164",
+    "cr_issue": "4",
+    "cr_page": "581-588"
+  },
+  {
+    "key": "malpica2019",
+    "cites": [
+      "pathsampling"
+    ],
+    "doi": "10.1097/PGP.0000000000000552",
+    "entry_author": "Malpica, A., Euscher, E. D., Hecht, J. L., Ali-Fehmi, R., Quick, C. M., Singh, N., Horn, L. C., Alvarado-Cabrero, I., Matias-Guiu, X., Hirschowitz, L., Duggan, M., Ordi, J., Parkash, V., Mikami, Y., Ruhul Quddus, M., Zaino, R., Staats, P., Riazi, A., Ganesan, R., Otis, C. N., & Nucci, M. R.",
+    "entry_title": "Endometrial carcinoma, grossing and processing issues: recommendations of the International Society of Gynecologic Pathologists",
+    "entry_year": 2019,
+    "cr_found": true,
+    "cr_title": "Endometrial Carcinoma, Grossing and Processing Issues: Recommendations of the International Society of Gynecologic Pathologists",
+    "cr_authors": [
+      "Malpica, Anais",
+      "Euscher, Elizabeth D.",
+      "Hecht, Jonathan L.",
+      "Ali-Fehmi, Rouba",
+      "Quick, Charles M.",
+      "Singh, Naveena",
+      "Horn, Lars-Christian",
+      "Alvarado-Cabrero, Isabel",
+      "Matias-Guiu, Xavier",
+      "Hirschowitz, Lynn",
+      "Duggan, M\u00e1ire",
+      "Ordi, Jaume",
+      "Parkash, Vinita",
+      "Mikami, Yoshiki",
+      "Ruhul Quddus, M.",
+      "Zaino, Richard",
+      "Staebler, Annette",
+      "Zaloudek, Charles",
+      "McCluggage, W. Glenn",
+      "Oliva, Esther"
+    ],
+    "cr_journal": "International Journal of Gynecological Pathology",
+    "cr_year": [
+      2019,
+      1
+    ],
+    "cr_vol": "38",
+    "cr_issue": "Supplement 1",
+    "cr_page": "S9-S24"
+  },
+  {
+    "key": "mcmillan2013gps",
+    "cites": [
+      "hematologicindices"
+    ],
+    "doi": "10.1016/j.ctrv.2012.08.003",
+    "entry_author": "McMillan, D. C.",
+    "entry_title": "The systemic inflammation-based Glasgow Prognostic Score: a decade of experience in patients with cancer",
+    "entry_year": 2013,
+    "cr_found": true,
+    "cr_title": "The systemic inflammation-based Glasgow Prognostic Score: A decade of experience in patients with cancer",
+    "cr_authors": [
+      "McMillan, Donald C."
+    ],
+    "cr_journal": "Cancer Treatment Reviews",
+    "cr_year": [
+      2013,
+      8
+    ],
+    "cr_vol": "39",
+    "cr_issue": "5",
+    "cr_page": "534-540"
+  },
+  {
+    "key": "mcnemar1947",
+    "cites": [
+      "decisioncompare"
+    ],
+    "doi": "10.1007/BF02295996",
+    "entry_author": "McNemar, Q.",
+    "entry_title": "Note on the sampling error of the difference between correlated proportions or percentages",
+    "entry_year": 1947,
+    "cr_found": true,
+    "cr_title": "Note on the Sampling Error of the Difference Between Correlated Proportions or Percentages",
+    "cr_authors": [
+      "McNemar, Quinn"
+    ],
+    "cr_journal": "Psychometrika",
+    "cr_year": [
+      1947,
+      6
+    ],
+    "cr_vol": "12",
+    "cr_issue": "2",
+    "cr_page": "153-157"
+  },
+  {
+    "key": "multivariable",
+    "cites": [
+      "multisurvival"
+    ],
+    "doi": "10.2105/AJPH.2012.300897",
+    "entry_author": "Hidalgo B, Goodman M.",
+    "entry_title": "Multivariate or Multivariable Regression?",
+    "entry_year": 2013,
+    "cr_found": true,
+    "cr_title": "Multivariate or Multivariable Regression?",
+    "cr_authors": [
+      "Hidalgo, Bertha",
+      "Goodman, Melody"
+    ],
+    "cr_journal": "American Journal of Public Health",
+    "cr_year": [
+      2013,
+      1
+    ],
+    "cr_vol": "103",
+    "cr_issue": "1",
+    "cr_page": "39-40"
+  },
+  {
+    "key": "naniar",
+    "cites": [
+      "checkdata",
+      "dataquality",
+      "missingdataexplorer"
+    ],
+    "doi": "10.18637/jss.v105.i07",
+    "entry_author": "Tierney, N. J., Cook, D., McBain, M., & Fay, C.",
+    "entry_title": "Expanding tidy data principles to facilitate missing data exploration, visualization and assessment of imputations",
+    "entry_year": 2023,
+    "cr_found": true,
+    "cr_title": "Expanding Tidy Data Principles to Facilitate Missing Data Exploration, Visualization and Assessment of Imputations",
+    "cr_authors": [
+      "Tierney, Nicholas",
+      "Cook, Dianne"
+    ],
+    "cr_journal": "Journal of Statistical Software",
+    "cr_year": [
+      2023
+    ],
+    "cr_vol": "105",
+    "cr_issue": "7",
+    "cr_page": ""
+  },
+  {
+    "key": "newcombe1998paired",
+    "cites": [
+      "decisioncompare"
+    ],
+    "doi": "10.1002/(SICI)1097-0258(19981130)17:22<2635::AID-SIM954>3.0.CO;2-C",
+    "entry_author": "Newcombe, R. G.",
+    "entry_title": "Improved confidence intervals for the difference between binomial proportions based on paired data",
+    "entry_year": 1998,
+    "cr_found": true,
+    "cr_title": "Improved confidence intervals for the difference between binomial proportions based on paired data",
+    "cr_authors": [
+      "Newcombe, Robert G."
+    ],
+    "cr_journal": "Statistics in Medicine",
+    "cr_year": [
+      1998,
+      11,
+      30
+    ],
+    "cr_vol": "17",
+    "cr_issue": "22",
+    "cr_page": "2635-2650"
+  },
+  {
+    "key": "obrien1979",
+    "cites": [
+      "gsdesign"
+    ],
+    "doi": "10.2307/2530245",
+    "entry_author": "O'Brien, P. C., & Fleming, T. R.",
+    "entry_title": "A multiple testing procedure for clinical trials",
+    "entry_year": 1979,
+    "cr_found": true,
+    "cr_title": "A Multiple Testing Procedure for Clinical Trials",
+    "cr_authors": [
+      "O'Brien, Peter C.",
+      "Fleming, Thomas R."
+    ],
+    "cr_journal": "Biometrics",
+    "cr_year": [
+      1979,
+      9
+    ],
+    "cr_vol": "35",
+    "cr_issue": "3",
+    "cr_page": "549"
+  },
+  {
+    "key": "onodera1984pni",
+    "cites": [
+      "hematologicindices"
+    ],
+    "doi": "",
+    "entry_author": "Onodera, T., Goseki, N., & Kosaki, G.",
+    "entry_title": "Prognostic nutritional index in gastrointestinal surgery of malnourished cancer patients",
+    "entry_year": 1984
+  },
+  {
+    "key": "pocock2012winratio",
+    "cites": [
+      "winratio"
+    ],
+    "doi": "10.1093/eurheartj/ehr352",
+    "entry_author": "Pocock, S. J., Ariti, C. A., Collier, T. J., & Wang, D.",
+    "entry_title": "The win ratio: a new approach to the analysis of composite endpoints in clinical trials based on clinical priorities",
+    "entry_year": 2012,
+    "cr_found": true,
+    "cr_title": "The win ratio: a new approach to the analysis of composite endpoints in clinical trials based on clinical priorities",
+    "cr_authors": [
+      "Pocock, S. J.",
+      "Ariti, C. A.",
+      "Collier, T. J.",
+      "Wang, D."
+    ],
+    "cr_journal": "European Heart Journal",
+    "cr_year": [
+      2011,
+      9,
+      6
+    ],
+    "cr_vol": "33",
+    "cr_issue": "2",
+    "cr_page": "176-182"
+  },
+  {
+    "key": "recist",
+    "cites": [
+      "swimmerplot",
+      "waterfall"
+    ],
+    "doi": "10.1016/j.ejca.2008.10.026",
+    "entry_author": "Eisenhauer EA, Therasse P, Bogaerts J, Schwartz LH, Sargent D, Ford R, Dancey J, Arbuck S, Gwyther S, Mooney M, Rubinstein L, Shankar L, Dodd L, Kaplan R, Lacombe D, Verweij J.",
+    "entry_title": "New response evaluation criteria in solid tumours: revised RECIST guideline (version 1.1).",
+    "entry_year": 2009,
+    "cr_found": true,
+    "cr_title": "New response evaluation criteria in solid tumours: Revised RECIST guideline (version 1.1)",
+    "cr_authors": [
+      "Eisenhauer, E.A.",
+      "Therasse, P.",
+      "Bogaerts, J.",
+      "Schwartz, L.H.",
+      "Sargent, D.",
+      "Ford, R.",
+      "Dancey, J.",
+      "Arbuck, S.",
+      "Gwyther, S.",
+      "Mooney, M.",
+      "Rubinstein, L.",
+      "Shankar, L.",
+      "Dodd, L.",
+      "Kaplan, R.",
+      "Lacombe, D.",
+      "Verweij, J."
+    ],
+    "cr_journal": "European Journal of Cancer",
+    "cr_year": [
+      2009,
+      1
+    ],
+    "cr_vol": "45",
+    "cr_issue": "2",
+    "cr_page": "228-247"
+  },
+  {
+    "key": "remark",
+    "cites": [
+      "clinicalnomograms"
+    ],
+    "doi": "10.1038/sj.bjc.6602678",
+    "entry_author": "McShane, L. M., Altman, D. G., Sauerbrei, W., Taube, S. E., Gion, M., & Clark, G. M.",
+    "entry_title": "Reporting recommendations for tumour marker prognostic studies (REMARK)",
+    "entry_year": 2005,
+    "cr_found": true,
+    "cr_title": "REporting recommendations for tumour MARKer prognostic studies (REMARK)",
+    "cr_authors": [
+      ", ",
+      "McShane, L M",
+      "Altman, D G",
+      "Sauerbrei, W",
+      "Taube, S E",
+      "Gion, M",
+      "Clark, G M"
+    ],
+    "cr_journal": "British Journal of Cancer",
+    "cr_year": [
+      2005,
+      8
+    ],
+    "cr_vol": "93",
+    "cr_issue": "4",
+    "cr_page": "387-391"
+  },
+  {
+    "key": "revicki2006",
+    "cites": [
+      "qtwist"
+    ],
+    "doi": "10.1016/S0895-4356(00)00213-9",
+    "entry_author": "Revicki, D. A., Osoba, D., Fairclough, D., Barofsky, I., Berzon, R., Leidy, N. K., & Rothman, M.",
+    "entry_title": "Recommendations on health-related quality of life research to support labeling and promotional claims in the United States",
+    "entry_year": 2000,
+    "cr_found": false,
+    "cr_error": "HTTP Error 404: Not Found",
+    "doi_resolves": false,
+    "doi_error": "HTTP Error 404: Not Found"
+  },
+  {
+    "key": "robins1986gformula",
+    "cites": [
+      "gcomputation"
+    ],
+    "doi": "10.1016/0270-0255(86)90088-6",
+    "entry_author": "Robins, J.",
+    "entry_title": "A new approach to causal inference in mortality studies with a sustained exposure period - application to control of the healthy worker survivor effect",
+    "entry_year": 1986,
+    "cr_found": true,
+    "cr_title": "A new approach to causal inference in mortality studies with a sustained exposure period\u2014application to control of the healthy worker survivor effect",
+    "cr_authors": [
+      "Robins, James"
+    ],
+    "cr_journal": "Mathematical Modelling",
+    "cr_year": [
+      1986
+    ],
+    "cr_vol": "7",
+    "cr_issue": "9-12",
+    "cr_page": "1393-1512"
+  },
+  {
+    "key": "rotondiDonnerKappaCI",
+    "cites": [
+      "kappaSizeCI",
+      "kappaSizeFixedN"
+    ],
+    "doi": "10.1016/j.jclinepi.2011.10.019",
+    "entry_author": "Rotondi MA, Donner A.",
+    "entry_title": "A confidence interval approach to sample size estimation for interobserver agreement studies with multiple raters and outcomes",
+    "entry_year": 2012,
+    "cr_found": true,
+    "cr_title": "A confidence interval approach to sample size estimation for interobserver agreement studies with multiple raters and outcomes",
+    "cr_authors": [
+      "Rotondi, Michael A.",
+      "Donner, Allan"
+    ],
+    "cr_journal": "Journal of Clinical Epidemiology",
+    "cr_year": [
+      2012,
+      7
+    ],
+    "cr_vol": "65",
+    "cr_issue": "7",
+    "cr_page": "778-784"
+  },
+  {
+    "key": "sharpe2015",
+    "cites": [
+      "chisqposttest"
+    ],
+    "doi": "10.7275/tbfa-x148",
+    "entry_author": "Sharpe, D.",
+    "entry_title": "Your chi-square test is statistically significant: Now what?",
+    "entry_year": 2015,
+    "cr_found": false,
+    "cr_error": "HTTP Error 404: Not Found",
+    "doi_resolves": true,
+    "resolved_url": "https://openpublishing.library.umass.edu/pare/article/id/1485/"
+  },
+  {
+    "key": "simon1984",
+    "cites": [
+      "simonmakuch"
+    ],
+    "doi": "10.1002/sim.4780030106",
+    "entry_author": "Simon R, Makuch RW",
+    "entry_title": "A non-parametric graphical representation of the relationship between survival and the occurrence of an event: application to responder versus non-responder bias",
+    "entry_year": 1984,
+    "cr_found": true,
+    "cr_title": "A non\u2010parametric graphical representation of the relationship between survival and the occurrence of an event: Application to responder versus non\u2010responder bias",
+    "cr_authors": [
+      "Simon, Richard",
+      "Makuch, Robert W."
+    ],
+    "cr_journal": "Statistics in Medicine",
+    "cr_year": [
+      1984,
+      1
+    ],
+    "cr_vol": "3",
+    "cr_issue": "1",
+    "cr_page": "35-44"
+  },
+  {
+    "key": "skala2015",
+    "cites": [
+      "pathsampling"
+    ],
+    "doi": "10.1097/PGP.0000000000000144",
+    "entry_author": "Skala, S. L., & Hagemann, I. S.",
+    "entry_title": "Optimal sampling of grossly normal omentum in staging of gynecologic malignancies",
+    "entry_year": 2015,
+    "cr_found": true,
+    "cr_title": "Discovery of a Cell",
+    "cr_authors": [
+      "Kurman, Robert J.",
+      "Shih, Ie-Ming"
+    ],
+    "cr_journal": "International Journal of Gynecological Pathology",
+    "cr_year": [
+      2014,
+      7
+    ],
+    "cr_vol": "33",
+    "cr_issue": "4",
+    "cr_page": "339-347"
+  },
+  {
+    "key": "statsExpressions",
+    "cites": [
+      "jjbarstats",
+      "jjbetweenstats",
+      "jjcoefstats",
+      "jjcorrmat",
+      "jjdotchart",
+      "jjdotplotstats",
+      "jjhistostats",
+      "jjpiestats",
+      "jjscatterstats",
+      "jjwithinstats"
+    ],
+    "doi": "10.21105/joss.03236",
+    "entry_author": "Patil, I.",
+    "entry_title": "statsExpressions: R Package for Tidy Dataframes and Expressions with Statistical Details",
+    "entry_year": 2021,
+    "cr_found": true,
+    "cr_title": "statsExpressions: R Package for Tidy Dataframes and Expressions with Statistical Details",
+    "cr_authors": [
+      "Patil, Indrajeet"
+    ],
+    "cr_journal": "Journal of Open Source Software",
+    "cr_year": [
+      2021,
+      5,
+      20
+    ],
+    "cr_vol": "6",
+    "cr_issue": "61",
+    "cr_page": "3236"
+  },
+  {
+    "key": "survivalrviews",
+    "cites": [
+      "survival"
+    ],
+    "doi": "",
+    "entry_author": "Rickert, J.",
+    "entry_title": "Survival Analysis with R",
+    "entry_year": 2017
+  },
+  {
+    "key": "survivaltutorial",
+    "cites": [
+      "multisurvival",
+      "oddsratio",
+      "outcomeorganizer",
+      "singlearm",
+      "survival",
+      "survivalcont"
+    ],
+    "doi": "",
+    "entry_author": "Zabor, E. C.",
+    "entry_title": "Survival analysis in R: A detailed tutorial on conducting survival analyses in R",
+    "entry_year": 2025
+  },
+  {
+    "key": "symmans2007rcb",
+    "cites": [
+      "residualcancerburden"
+    ],
+    "doi": "10.1200/JCO.2007.10.6823",
+    "entry_author": "Symmans, W. F., Peintinger, F., Hatzis, C., et al.",
+    "entry_title": "Measurement of residual breast cancer burden to predict survival after neoadjuvant chemotherapy",
+    "entry_year": 2007,
+    "cr_found": true,
+    "cr_title": "Measurement of Residual Breast Cancer Burden to Predict Survival After Neoadjuvant Chemotherapy",
+    "cr_authors": [
+      "Symmans, W. Fraser",
+      "Peintinger, Florentia",
+      "Hatzis, Christos",
+      "Rajan, Radhika",
+      "Kuerer, Henry",
+      "Valero, Vicente",
+      "Assad, Lina",
+      "Poniecka, Anna",
+      "Hennessy, Bryan",
+      "Green, Marjorie",
+      "Buzdar, Aman U.",
+      "Singletary, S. Eva",
+      "Hortobagyi, Gabriel N.",
+      "Pusztai, Lajos"
+    ],
+    "cr_journal": "Journal of Clinical Oncology",
+    "cr_year": [
+      2007,
+      10,
+      1
+    ],
+    "cr_vol": "25",
+    "cr_issue": "28",
+    "cr_page": "4414-4422"
+  },
+  {
+    "key": "timereg",
+    "cites": [
+      "aalenhazard",
+      "directbinomial",
+      "simonmakuch",
+      "smoothtimevary",
+      "timedependent",
+      "timeupdatedsurvival",
+      "timeupdatesurvival"
+    ],
+    "doi": "10.18637/jss.v038.i02",
+    "entry_author": "Scheike T, Zhang M",
+    "entry_title": "\u201cAnalyzing Competing Risk Data Using the R timereg Package.\u201d https://www.jstatsoft.org/v38/i02/",
+    "entry_year": 2011,
+    "cr_found": true,
+    "cr_title": "Analyzing Competing Risk Data Using the<i>R</i><b>timereg</b>Package",
+    "cr_authors": [
+      "Scheike, Thomas H.",
+      "Zhang, Mei-Jie"
+    ],
+    "cr_journal": "Journal of Statistical Software",
+    "cr_year": [
+      2011
+    ],
+    "cr_vol": "38",
+    "cr_issue": "2",
+    "cr_page": ""
+  },
+  {
+    "key": "tomlinson2007",
+    "cites": [
+      "pathsampling"
+    ],
+    "doi": "10.1001/archsurg.142.8.767",
+    "entry_author": "Tomlinson, J. S., Jain, S., Bentrem, D. J., Sekeris, E. G., Maggard, M. A., Hines, O. J., Reber, H. A., & Ko, C. Y.",
+    "entry_title": "Accuracy of staging node-negative pancreas cancer: a potential quality measure",
+    "entry_year": 2007,
+    "cr_found": true,
+    "cr_title": "Accuracy of Staging Node-Negative Pancreas Cancer",
+    "cr_authors": [
+      "Tomlinson, James S."
+    ],
+    "cr_journal": "Archives of Surgery",
+    "cr_year": [
+      2007,
+      8,
+      1
+    ],
+    "cr_vol": "142",
+    "cr_issue": "8",
+    "cr_page": "767"
+  },
+  {
+    "key": "tripod",
+    "cites": [
+      "clinicalnomograms",
+      "lassocox"
+    ],
+    "doi": "10.7326/M14-0697",
+    "entry_author": "Collins, G. S., Reitsma, J. B., Altman, D. G., & Moons, K. G. M.",
+    "entry_title": "Transparent Reporting of a multivariable prediction model for Individual Prognosis Or Diagnosis (TRIPOD): the TRIPOD statement",
+    "entry_year": 2015,
+    "cr_found": true,
+    "cr_title": "Transparent Reporting of a multivariable prediction model for Individual Prognosis Or Diagnosis (TRIPOD): The TRIPOD Statement",
+    "cr_authors": [
+      "Collins, Gary S.",
+      "Reitsma, Johannes B.",
+      "Altman, Douglas G.",
+      "Moons, Karel G.M."
+    ],
+    "cr_journal": "Annals of Internal Medicine",
+    "cr_year": [
+      2015,
+      1,
+      6
+    ],
+    "cr_vol": "162",
+    "cr_issue": "1",
+    "cr_page": "55-63"
+  },
+  {
+    "key": "tukey1977",
+    "cites": [
+      "checkdata"
+    ],
+    "doi": "",
+    "entry_author": "Tukey, J. W.",
+    "entry_title": "Exploratory Data Analysis",
+    "entry_year": 1977
+  },
+  {
+    "key": "vanderweele2017evalue",
+    "cites": [
+      "evalue"
+    ],
+    "doi": "10.7326/M16-2607",
+    "entry_author": "VanderWeele, T. J., & Ding, P.",
+    "entry_title": "Sensitivity analysis in observational research: introducing the E-value",
+    "entry_year": 2017,
+    "cr_found": true,
+    "cr_title": "Sensitivity Analysis in Observational Research: Introducing the E-Value",
+    "cr_authors": [
+      "VanderWeele, Tyler J.",
+      "Ding, Peng"
+    ],
+    "cr_journal": "Annals of Internal Medicine",
+    "cr_year": [
+      2017,
+      8,
+      15
+    ],
+    "cr_vol": "167",
+    "cr_issue": "4",
+    "cr_page": "268-274"
+  },
+  {
+    "key": "wagner2002its",
+    "cites": [
+      "interruptedtimeseries"
+    ],
+    "doi": "10.1046/j.1365-2710.2002.00430.x",
+    "entry_author": "Wagner, A. K., Soumerai, S. B., Zhang, F., & Ross-Degnan, D.",
+    "entry_title": "Segmented regression analysis of interrupted time series studies in medication use research",
+    "entry_year": 2002,
+    "cr_found": true,
+    "cr_title": "Segmented regression analysis of interrupted time series studies in medication use research",
+    "cr_authors": [
+      "Wagner, A. K.",
+      "Soumerai, S. B.",
+      "Zhang, F.",
+      "Ross-Degnan, D."
+    ],
+    "cr_journal": "Journal of Clinical Pharmacy and Therapeutics",
+    "cr_year": [
+      2002,
+      8
+    ],
+    "cr_vol": "27",
+    "cr_issue": "4",
+    "cr_page": "299-309"
+  },
+  {
+    "key": "waldwolfowitz1940",
+    "cites": [
+      "checkdata"
+    ],
+    "doi": "10.1214/aoms/1177731909",
+    "entry_author": "Wald, A., & Wolfowitz, J.",
+    "entry_title": "On a test whether two samples are from the same population",
+    "entry_year": 1940,
+    "cr_found": true,
+    "cr_title": "On a Test Whether Two Samples are from the Same Population",
+    "cr_authors": [
+      "Wald, A.",
+      "Wolfowitz, J."
+    ],
+    "cr_journal": "The Annals of Mathematical Statistics",
+    "cr_year": [
+      1940,
+      6
+    ],
+    "cr_vol": "11",
+    "cr_issue": "2",
+    "cr_page": "147-162"
+  },
+  {
+    "key": "walsh2014fragility",
+    "cites": [
+      "fragilityindex"
+    ],
+    "doi": "10.1016/j.jclinepi.2013.10.019",
+    "entry_author": "Walsh, M., Srinathan, S. K., McAuley, D. F., et al.",
+    "entry_title": "The statistical significance of randomized controlled trial results is frequently fragile: a case for a Fragility Index",
+    "entry_year": 2014,
+    "cr_found": true,
+    "cr_title": "The statistical significance of randomized controlled trial results is frequently fragile: a case for a Fragility Index",
+    "cr_authors": [
+      "Walsh, Michael",
+      "Srinathan, Sadeesh K.",
+      "McAuley, Daniel F.",
+      "Mrkobrada, Marko",
+      "Levine, Oren",
+      "Ribic, Christine",
+      "Molnar, Amber O.",
+      "Dattani, Neil D.",
+      "Burke, Andrew",
+      "Guyatt, Gordon",
+      "Thabane, Lehana",
+      "Walter, Stephen D.",
+      "Pogue, Janice",
+      "Devereaux, P.J."
+    ],
+    "cr_journal": "Journal of Clinical Epidemiology",
+    "cr_year": [
+      2014,
+      6
+    ],
+    "cr_vol": "67",
+    "cr_issue": "6",
+    "cr_page": "622-628"
+  },
+  {
+    "key": "whoisinthisstudy",
+    "cites": [
+      "tableone"
+    ],
+    "doi": "10.1016/j.jclinepi.2019.06.011",
+    "entry_author": "Hayes-Larson E, Kezios KL, Mooney SJ, Lovasi G.",
+    "entry_title": "Who is in this study, anyway? Guidelines for a useful Table 1.",
+    "entry_year": 2019,
+    "cr_found": true,
+    "cr_title": "Who is in this study, anyway? Guidelines for a useful Table\u00a01",
+    "cr_authors": [
+      "Hayes-Larson, Eleanor",
+      "Kezios, Katrina L.",
+      "Mooney, Stephen J.",
+      "Lovasi, Gina"
+    ],
+    "cr_journal": "Journal of Clinical Epidemiology",
+    "cr_year": [
+      2019,
+      10
+    ],
+    "cr_vol": "114",
+    "cr_issue": "",
+    "cr_page": "125-132"
+  },
+  {
+    "key": "wilson1927",
+    "cites": [
+      "checkdata",
+      "decisioncombine",
+      "decisioncompare"
+    ],
+    "doi": "10.1080/01621459.1927.10502953",
+    "entry_author": "Wilson, E. B.",
+    "entry_title": "Probable inference, the law of succession, and statistical inference",
+    "entry_year": 1927,
+    "cr_found": true,
+    "cr_title": "Probable Inference, the Law of Succession, and Statistical Inference",
+    "cr_authors": [
+      "Wilson, Edwin B."
+    ],
+    "cr_journal": "Journal of the American Statistical Association",
+    "cr_year": [
+      1927,
+      6
+    ],
+    "cr_vol": "22",
+    "cr_issue": "158",
+    "cr_page": "209-212"
+  },
+  {
+    "key": "yangdalton2012",
+    "cites": [
+      "crosstable"
+    ],
+    "doi": "",
+    "entry_author": "Yang, D., & Dalton, J. E.",
+    "entry_title": "A unified approach to measuring the effect size between two groups using SAS",
+    "entry_year": 2012
+  },
+  {
+    "key": "yoon2025",
+    "cites": [
+      "pathsampling"
+    ],
+    "doi": "10.1245/s10434-025-18029-7",
+    "entry_author": "Yoon, S. J., Hong, S. S., Park, B., Kim, S. H., Kang, C. M., Kim, K. S., Shin, S. H., Han, I. W., Heo, J. S., Hwang, H. K., & Kim, H.",
+    "entry_title": "Optimal number of lymph nodes retrieved to lower the risk of false N0 for patients with pancreatic cancer undergoing curative surgery",
+    "entry_year": 2025,
+    "cr_found": true,
+    "cr_title": "Optimal Number of Lymph Nodes Retrieved to Lower the Risk of False N0 for Patients with Pancreatic Cancer Undergoing Curative Surgery",
+    "cr_authors": [
+      "Yoon, So Jeong",
+      "Hong, Seung Soo",
+      "Park, Boram",
+      "Kim, Sung Hyun",
+      "Kang, Chang Moo",
+      "Kim, Kyung Sik",
+      "Shin, Sang Hyun",
+      "Han, In Woong",
+      "Heo, Jin Seok",
+      "Hwang, Ho Kyoung",
+      "Kim, Hongbeom"
+    ],
+    "cr_journal": "Annals of Surgical Oncology",
+    "cr_year": [
+      2025,
+      8,
+      23
+    ],
+    "cr_vol": "32",
+    "cr_issue": "12",
+    "cr_page": "8894-8902"
+  },
+  {
+    "key": "youden1950",
+    "cites": [
+      "decisioncombine"
+    ],
+    "doi": "10.1002/1097-0142(1950)3:1<32::AID-CNCR2820030106>3.0.CO;2-3",
+    "entry_author": "Youden, W. J.",
+    "entry_title": "Index for rating diagnostic tests",
+    "entry_year": 1950,
+    "cr_found": true,
+    "cr_title": "Index for rating diagnostic tests",
+    "cr_authors": [
+      "Youden, W. J."
+    ],
+    "cr_journal": "Cancer",
+    "cr_year": [
+      1950
+    ],
+    "cr_vol": "3",
+    "cr_issue": "1",
+    "cr_page": "32-35"
+  }
+]

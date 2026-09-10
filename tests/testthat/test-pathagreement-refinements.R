@@ -1,11 +1,13 @@
 context("pathagreement refinements")
 
-# Source necessary files
-testthat::source_test_helpers(env = environment())
-. <- function(x) x # Dummy translation function
-
-source('/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/pathagreement.b.R', local = TRUE)
-source('/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/pathagreement.h.R', local = TRUE)
+# Bind the internal classes from the package namespace. This file used to source
+# R/pathagreement.b.R and .h.R by an absolute /Users/... path (unrunnable on any
+# other machine) with a dummy `.` translation function; getFromNamespace() works
+# under devtools::load_all() and against an installed build.
+pathagreementOptions <- getFromNamespace("pathagreementOptions", "ClinicoPath")
+pathagreementResults <- getFromNamespace("pathagreementResults", "ClinicoPath")
+pathagreementClass <- getFromNamespace("pathagreementClass", "ClinicoPath")
+set.seed(20260910)
 
 # Helper to create data
 create_test_data <- function(n_rows = 50, n_raters = 3, type = "nominal", missing_prop = 0) {
@@ -87,7 +89,7 @@ test_that("Missing data warning triggers", {
     
     content <- analysis$results$warnings$content
     expect_true(grepl("High missing data", content))
-    expect_true(grepl("excluded due to missing ratings", content))
+    expect_true(grepl("excluded because of missing ratings", content))
 })
 
 test_that("Clustering requirement warning", {
@@ -115,6 +117,6 @@ test_that("Clustering requirement warning", {
     analysis$run()
     
     content <- analysis$results$warnings$content
-    expect_true(grepl("Too few cases", content))
-    expect_true(grepl("reliable clustering. Skipped", content))
+    expect_true(grepl("Rater clustering needs at least 5 cases", content))
+    expect_true(grepl("it was skipped", content))
 })

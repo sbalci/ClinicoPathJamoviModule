@@ -202,7 +202,7 @@ stagemigration(
 \keyword{survival}
 \keyword{validation,}
 \section{Super classes}{
-\code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{stagemigrationBase} -> \code{stagemigrationClass}
+\code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{stagemigrationBase} -> \code{stagemigrationPart1} -> \code{stagemigrationPart2} -> \code{stagemigrationPart3} -> \code{stagemigrationPart4} -> \code{stagemigrationPart5} -> \code{stagemigrationClass}
 }
 \section{Methods}{
 \subsection{Public methods}{

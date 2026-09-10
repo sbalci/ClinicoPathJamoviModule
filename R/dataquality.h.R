@@ -134,7 +134,9 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "visdat",
                     "naniar",
                     "dplyr",
-                    "ggplot2"))
+                    "ggplot2",
+                    "caret",
+                    "mice"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
@@ -241,7 +243,7 @@ dataqualityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "dataquality",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = dataqualityResults$new(options=options),
                 data = data,

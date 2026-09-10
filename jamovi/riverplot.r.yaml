@@ -150,6 +150,7 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - riverplot
     - digest
     - stringr

@@ -393,13 +393,11 @@ items:
           - estimationMethod
 
 refs:
+    - ClinicoPathJamoviModule
     - SemiMarkov
     - survival
     - ReliabilityTheory
     - flexsurv
-    - ClinicoPathJamoviModule
-
-
     - gridExtra
     - tools
     - scales

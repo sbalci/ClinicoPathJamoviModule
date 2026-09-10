@@ -410,7 +410,8 @@ recurrentsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 title="Recurrent Event Survival Analysis",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "stringr"))
+                    "stringr",
+                    "reReg"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

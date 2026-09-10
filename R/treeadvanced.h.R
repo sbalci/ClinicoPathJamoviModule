@@ -570,7 +570,8 @@ treeadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "randomForest",
                     "Boruta",
                     "ggplot2",
-                    "stats"))
+                    "stats",
+                    "parttree"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

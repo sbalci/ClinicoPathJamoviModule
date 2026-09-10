@@ -118,7 +118,8 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - survival
-
     - pROC
     - DescTools
+    - ResourceSelection
+    - rms
 ...

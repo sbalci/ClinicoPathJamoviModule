@@ -148,7 +148,8 @@ items:
 
 
 refs:
-    - symmans2007rcb
     - ClinicoPathJamoviModule
+    - symmans2007rcb
     - ggplot2
+    - survival
 ...

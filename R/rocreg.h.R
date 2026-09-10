@@ -312,7 +312,10 @@ rocregResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="ROC Regression (Covariate-Adjusted ROC)")
+                title="ROC Regression (Covariate-Adjusted ROC)",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "pROC"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

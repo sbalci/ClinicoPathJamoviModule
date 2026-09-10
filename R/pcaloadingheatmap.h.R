@@ -178,6 +178,7 @@ pcaloadingheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="PCA Loading Heatmap & Barmap",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "glue"))
             self$add(jmvcore::Preformatted$new(
                 options=options,

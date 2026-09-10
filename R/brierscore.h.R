@@ -386,7 +386,12 @@ brierscoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Brier Score & Integrated Brier Score")
+                title="Brier Score & Integrated Brier Score",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "pec",
+                    "riskRegression",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

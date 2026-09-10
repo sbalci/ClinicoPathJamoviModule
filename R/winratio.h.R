@@ -234,9 +234,9 @@ winratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Win Ratio for Hierarchical Composite Endpoints",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "pocock2012winratio",
                     "dong2016winratio",
-                    "ClinicoPathJamoviModule",
                     "glue",
                     "ggplot2",
                     "scales"))

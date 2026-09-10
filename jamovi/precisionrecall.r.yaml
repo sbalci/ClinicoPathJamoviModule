@@ -97,7 +97,7 @@ items:
         - positiveClass
 
 refs:
+    - ClinicoPathJamoviModule
     - Saito2015
     - Davis2006
-
 ...

@@ -334,7 +334,8 @@ basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "graphics",
                     "grDevices",
                     "janitor",
-                    "labelled"))
+                    "labelled",
+                    "haven"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",

@@ -1,4 +1,4 @@
-title: Power Analysis & Sample Size Calculation
+title: Survival Power Analysis
 name: survivalPower
 jus: '3.0'
 stage: 0
@@ -39,8 +39,8 @@ children:
           - type: TextBox
             name: effect_size
             format: number
-            suffix: "(HR < 1 favors treatment)"
-            label: "Effect Size (Hazard Ratio)"
+            suffix: "(interpreted per Effect Size Type)"
+            label: "Effect Size"
           - type: TextBox
             name: alpha_level
             format: number
@@ -117,28 +117,13 @@ children:
             name: ni_type
             enable: (test_type=="non_inferiority")
           - type: TextBox
-            name: competing_risk_rate
-            format: number
-            enable: (test_type=="competing_risks")
-          - type: TextBox
-            name: competing_risk_hr
-            format: number
-            enable: (test_type=="competing_risks")
-          - type: TextBox
             name: rmst_tau
             format: number
-            enable: (test_type=="rmst_test")
+            enable: (test_type:rmst_test || effect_size_type:rmst_difference)
           - type: TextBox
             name: rmst_difference
             format: number
-            enable: (test_type=="rmst_test")
-          - type: TextBox
-            name: snp_maf
-            format: number
-            enable: (test_type=="snp_survival")
-          - type: ComboBox
-            name: genetic_model
-            enable: (test_type=="snp_survival")
+            enable: (test_type:rmst_test || effect_size_type:rmst_difference)
 
   - type: CollapseBox
     label: Advanced Options
@@ -168,15 +153,12 @@ children:
           - type: ComboBox
             name: alpha_spending
             enable: (interim_analyses>0)
-          - type: TextBox
-            name: stratification_factors
-            format: number
           - type: CheckBox
             name: sensitivity_analysis
-            label: "Perform Sensitivity Analysis"
+            label: "Sensitivity analysis"
           - type: CheckBox
             name: run_simulation_validation
-            label: "Run Simulation Validation"
+            label: "Simulation validation"
             enable: (analysis_type=='sample_size' || analysis_type=='power')
           - type: TextBox
             name: simulation_runs
@@ -195,14 +177,17 @@ children:
         margin: large
         children:
           - type: CheckBox
+            name: show_interpretation
+            label: "Clinical interpretation and report sentence"
+          - type: CheckBox
             name: show_summary
-            label: "Show Plain Language Summary"
+            label: "Plain-language summary"
           - type: CheckBox
             name: show_explanations
-            label: "Show Educational Explanations"
+            label: "Educational explanations"
           - type: CheckBox
             name: show_glossary
-            label: "Show Statistical Glossary"
+            label: "Statistical glossary"
           - type: CheckBox
             name: guided_mode
-            label: "Enable Guided Workflow"
+            label: "Guided workflow"

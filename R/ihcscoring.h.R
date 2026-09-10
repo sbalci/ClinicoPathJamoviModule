@@ -623,7 +623,10 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "psych",
-                    "reticulate"))
+                    "reticulate",
+                    "cutpointr",
+                    "maxstat",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",

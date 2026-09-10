@@ -454,6 +454,7 @@ groupedbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Grouped Bar Chart Comparison",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "RColorBrewer",
                     "viridis"))
             self$add(jmvcore::Html$new(

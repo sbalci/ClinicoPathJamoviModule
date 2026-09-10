@@ -377,10 +377,12 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Box-Violin Plots to Compare Within Groups",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggstatsplot",
                     "statsExpressions",
                     "ggpubr",
-                    "ClinicoPathJamoviModule"),
+                    "digest",
+                    "haven"),
                 clearWith=list(
                     "dep1",
                     "dep2",
@@ -522,7 +524,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjwithinstats",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = jjwithinstatsResults$new(options=options),
                 data = data,

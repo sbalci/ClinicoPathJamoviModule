@@ -280,4 +280,11 @@ items:
         - indicator_types
         - factor_score_method
         - standardize_scores
+
+refs:
+    - ClinicoPathJamoviModule
+    - lavaan
+    - semPlot
+    - survival
+    - survminer
 ...

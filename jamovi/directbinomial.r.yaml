@@ -199,10 +199,8 @@ items:
           - covs
 
 refs:
+    - ClinicoPathJamoviModule
     - timereg
     - cmprsk
-    - ClinicoPathJamoviModule
-
-
     - scales
 ...

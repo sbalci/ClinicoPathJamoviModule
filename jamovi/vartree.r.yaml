@@ -189,7 +189,7 @@ items:
 
 
 refs:
-    - vtree
     - ClinicoPathJamoviModule
-
+    - vtree
+    - DiagrammeR
 ...

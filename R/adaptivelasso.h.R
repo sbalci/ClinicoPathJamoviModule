@@ -478,7 +478,8 @@ adaptivelassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "glmnet",
                     "parallel",
                     "doParallel",
-                    "foreach"))
+                    "foreach",
+                    "graphics"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

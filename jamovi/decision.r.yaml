@@ -618,8 +618,9 @@ items:
 
 
 refs:
-    - DiagnosticTests
     - ClinicoPathJamoviModule
+    - DiagnosticTests
     - epiR
-
+    - forcats
+    - htmlTable
 ...

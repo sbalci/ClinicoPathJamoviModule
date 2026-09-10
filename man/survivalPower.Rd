@@ -25,23 +25,19 @@ survivalPower(
   dropout_rate = 0.05,
   ni_margin = 1.25,
   ni_type = "relative_margin",
-  competing_risk_rate = 0.1,
-  competing_risk_hr = 1,
   rmst_tau = 36,
   rmst_difference = 3,
-  snp_maf = 0.3,
-  genetic_model = "additive",
   number_of_arms = 3,
   multiple_comparisons = "dunnett",
   interim_analyses = 0,
   alpha_spending = "none",
-  stratification_factors = 0,
   cluster_size = 50,
   icc = 0.05,
   sensitivity_analysis = FALSE,
   run_simulation_validation = FALSE,
-  simulation_runs = 10000,
+  simulation_runs = 2000,
   simulation_seed = 42,
+  show_interpretation = FALSE,
   show_summary = FALSE,
   show_explanations = FALSE,
   show_glossary = FALSE,
@@ -63,7 +59,10 @@ values.}
 
 \item{effect_size_type}{Type of effect size specification}
 
-\item{effect_size}{Expected effect size (HR, median ratio, or difference)}
+\item{effect_size}{Expected effect size, interpreted according to Effect
+Size Type: a hazard ratio, a median survival ratio (treatment/control), or
+a survival probability difference read at the Additional Follow-up time.
+For RMST Difference the RMST options are used instead.}
 
 \item{alpha_level}{Significance level (two-sided)}
 
@@ -96,17 +95,9 @@ rather than returning a number the formulas cannot justify.}
 
 \item{ni_type}{Type of non-inferiority margin}
 
-\item{competing_risk_rate}{Annual rate of competing risk events}
-
-\item{competing_risk_hr}{Treatment effect on competing risks}
-
 \item{rmst_tau}{Restriction time for RMST analysis}
 
 \item{rmst_difference}{Expected difference in restricted mean survival time}
-
-\item{snp_maf}{Minor allele frequency for SNP analysis}
-
-\item{genetic_model}{Genetic inheritance model}
 
 \item{number_of_arms}{Total number of treatment arms (including control)}
 
@@ -116,8 +107,6 @@ rather than returning a number the formulas cannot justify.}
 
 \item{alpha_spending}{Alpha spending function for interim analyses}
 
-\item{stratification_factors}{Number of stratification factors}
-
 \item{cluster_size}{Average cluster size for cluster randomized trials}
 
 \item{icc}{ICC for cluster randomized trials}
@@ -126,14 +115,18 @@ rather than returning a number the formulas cannot justify.}
 ranges}
 
 \item{run_simulation_validation}{Validate analytical power calculations
-using Monte Carlo simulation. Currently validated for exponential log-rank
-settings only. May take 10-60 seconds depending on simulation_runs setting.}
+using Monte Carlo simulation. Available for log-rank and Cox designs under
+the exponential assumption. About 6 seconds at the default 2000 runs.}
 
-\item{simulation_runs}{Number of simulation runs for complex calculations}
+\item{simulation_runs}{Number of Monte Carlo runs. The default of 2000
+gives a Monte Carlo standard error below 0.01 for power near 0.8.}
 
 \item{simulation_seed}{Random seed for the Monte Carlo validation, so the
 simulated power is reproducible across runs. Change it to inspect Monte
 Carlo variability.}
+
+\item{show_interpretation}{Display the study summary, clinical
+interpretation, and a copy-ready report sentence describing the design.}
 
 \item{show_summary}{Display plain-language summary of results}
 
@@ -155,10 +148,7 @@ A results object containing:
 \code{results$effect_size_results} \tab \tab \tab \tab \tab a table \cr
 \code{results$study_duration_results} \tab \tab \tab \tab \tab a table \cr
 \code{results$assumptions_table} \tab \tab \tab \tab \tab a table \cr
-\code{results$competing_risks_table} \tab \tab \tab \tab \tab a table \cr
 \code{results$non_inferiority_table} \tab \tab \tab \tab \tab a table \cr
-\code{results$rmst_analysis_table} \tab \tab \tab \tab \tab a table \cr
-\code{results$snp_analysis_table} \tab \tab \tab \tab \tab a table \cr
 \code{results$multi_arm_table} \tab \tab \tab \tab \tab a table \cr
 \code{results$interim_analysis_table} \tab \tab \tab \tab \tab a table \cr
 \code{results$sensitivity_analysis_table} \tab \tab \tab \tab \tab a table \cr

@@ -260,5 +260,6 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
+    - spBayesSurv
+    - survival
 ...

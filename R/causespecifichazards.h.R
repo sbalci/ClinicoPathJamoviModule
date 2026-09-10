@@ -198,6 +198,7 @@ causespecifichazardsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 name="",
                 title="Cause-Specific Hazards Models",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "survival",
                     "cmprsk"))
             self$add(jmvcore::Table$new(

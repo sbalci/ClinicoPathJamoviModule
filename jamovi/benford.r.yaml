@@ -97,7 +97,7 @@ items:
           - digits
 
 refs:
-    - benford.analysis
     - ClinicoPathJamoviModule
-
+    - benford.analysis
+    - graphics
 ...

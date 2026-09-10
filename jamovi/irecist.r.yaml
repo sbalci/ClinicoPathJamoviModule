@@ -336,4 +336,7 @@ items:
     type: Html
     visible: (showAssumptions)
 
+
+refs:
+    - ClinicoPathJamoviModule
 ...

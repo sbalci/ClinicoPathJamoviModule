@@ -151,6 +151,7 @@ jcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Correlation Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "correlation",
                     "report",
                     "corrplot",
@@ -158,7 +159,6 @@ jcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "qgraph",
                     "igraph",
                     "ggraph",
-                    "ClinicoPathJamoviModule",
                     "stringr"))
             self$add(jmvcore::Table$new(
                 options=options,

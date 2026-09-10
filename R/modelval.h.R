@@ -174,7 +174,8 @@ modelvalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "pROC",
                     "rms",
-                    "dcurves"))
+                    "dcurves",
+                    "graphics"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="validationSummary",

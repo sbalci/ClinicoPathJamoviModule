@@ -1,5 +1,65 @@
 # ClinicoPath News
 
+
+## Unreleased — pathsampling release review (analysis 1.0.0 -> 2.0.0)
+
+- `pathsampling`: `/check-function`, `/check-function-full`, `/fix-function`, `/review-function`
+  and `/release-review-function` pass. **Breaking:** three options were renamed because their
+  names asserted something the code does not do. `showPowerAnalysis` -> `showSampleSizePlanning`,
+  `targetPower` -> `planningTargetProb`, `targetDetectionProb` -> `planningAssumedQ`. The panel
+  computed `n = log(1 - target)/log(1 - q)` — a cumulative detection probability with no null
+  hypothesis and no type-II error — and labelled it "power", which in a clinical tool implies a
+  sample-size calculation for a hypothesis test. It is also numerically identical to the Clinical
+  Recommendations table. `targetDetectionProb` was in fact the *assumed* per-sample q, not a
+  target. A saved `.omv` written against the old keys will not map, hence the major bump.
+- `pathsampling` statistics: the goodness-of-fit test binned only the observed first-detection
+  values, discarding the geometric's tail mass so the expected counts did not sum to n, and then
+  clamped `df < 1` to 1. On data drawn from exactly the model under test it rejected the fit in
+  up to 86.5% of samples (q = 0.10, n = 30) against a nominal 5%. Bins now partition the full
+  support (1..k plus an explicit ">= k+1" bin carrying (1-q)^k) and df < 1 reports "not
+  estimable". Measured over 12 (q, n) cells x 600 replicates the false-rejection rate is now
+  4.3-9.3%, and power against a misspecified model is unchanged at 100%.
+- `pathsampling` statistics: the spatial clustering index divided the mean gap between positive
+  samples by `N/k`, but the expected gap for k positions drawn uniformly from 1..N is
+  `(N+1)/(k+1)`. Under random placement the index averaged 0.67 at k = 2, and the module calls
+  anything below 0.7 "clustered" — so two randomly scattered positive blocks were reported as
+  focal disease about half the time. Now centred on 1.00 (0.980-1.005 across N in {10,20,50},
+  k in {2,3,5,8}).
+- `pathsampling` statistics: `VGAM::Coef()` already returns beta-binomial parameters on the
+  natural scale; the code applied `logitlink(inverse = TRUE)` on top, so every mu and rho was
+  transformed twice (mu 0.481 reported as 0.618, and rho — bounded in [0,1] — squashed into
+  [0.5, 0.731], meaning zero overdispersion read as 0.5). Also, as rho -> 0 the pmf's two
+  `lbeta()` terms cancel catastrophically: at alpha+beta = 1e18 it returned exactly 1 for every
+  k. It now falls back to the binomial limit above 1e12.
+- `pathsampling` crashes fixed: `showPopulationDetection` on its own died with "object 'pForCalc'
+  not found" (assigned only inside `if (showBinomialModel)`); 13 `clearRows()` calls hit a method
+  jmvcore's Table does not have, killing every model-rejection path; `showCorrelation` died on a
+  constant column, which a fixed sampling protocol produces routinely; and 24 tables accumulated
+  duplicate rowKeys on every option toggle until `as.data.frame()` failed on non-unique row names.
+- `pathsampling` defaults: `showBinomialModel` and `showKeyResults` now default to TRUE. With
+  everything off the analysis populated 3 of 67 outputs and the recommended sample size — the
+  result the analysis is named for — required finding one checkbox among 33. This is a deliberate
+  departure from the module's `defaults_false` convention, pinned by a regression test.
+- `pathsampling` citations: the analysis previously cited nothing through `refs:`. Every
+  citation in its panels was checked against PubMed. Eight verified and are now in
+  `00refs.yaml` and cited on the items that use them: Tomlinson 2007, Yoon 2025, Malpica 2019,
+  Skala 2015, Maglalang 2025, Ates 2025, Gonen 2009 and Buderer 1996, plus the `VGAM` and
+  `scales` package refs. Buderer was mis-cited as *Stat Med* 1996;15(6):649-652 and has been
+  corrected to the real paper, *Acad Emerg Med* 1996;3(9):895-900 (PMID 8870764). Two citations
+  did not resolve by citation lookup or title search and have been REMOVED: "Pu N, et al. An
+  Artificial Neural Network Improves Prediction of Observed Survival in Patients with Pancreatic
+  Cancer. J Natl Compr Canc Netw. 2021;19(9):1029-1036" and "Zhou J, et al. Beta-binomial model
+  for lymph node yield. Front Oncol. 2022;12:872527". The Pu entry had been the stated source of
+  two things: minELN=12, which Yoon 2025 independently supports and which therefore stands; and
+  the LNR 0.1/0.3 cut-points, which are the module's defaults and are now described in the panel
+  as conventional starting values rather than attributed to a study.
+- `pathsampling` also: `.escapeVar()` removed (it rewrote "Total Blocks" to "Total_Blocks" and
+  looked up a column that does not exist); labelled-data handling brought to parity in the
+  beta-binomial branch; four fatal validations now raise ERROR notices instead of hiding the
+  error in a table cell; warnings that were overwritten by a later `setContent()` rerouted to the
+  notices panel; the foci-separation gap exposed as `fociGapThreshold` instead of a bare literal;
+  all 34 checkbox titles renamed to name the thing rather than the action.
+
 ## Unreleased — meddecide audit fixes (module 1.0.8.11)
 
 - `jjdotchart`: `/check-function` + `/check-function-full` + `/fix-function` pass. The

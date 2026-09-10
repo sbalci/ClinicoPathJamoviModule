@@ -505,7 +505,9 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "WRS2",
                     "boot",
                     "BayesFactor",
-                    "RGraphGallery"))
+                    "RGraphGallery",
+                    "moments",
+                    "tools"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
@@ -746,7 +748,7 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjridges",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = jjridgesResults$new(options=options),
                 data = data,

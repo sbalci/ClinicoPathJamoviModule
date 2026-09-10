@@ -516,11 +516,10 @@ items:
           - showModelDiagnostics
 
 refs:
-    - simon1984
     - ClinicoPathJamoviModule
+    - simon1984
     - survival
     - survminer
     - ggplot2
     - timereg
-
 ...

@@ -209,7 +209,13 @@ latentbiomarkerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 options=options,
                 name="",
-                title="Latent Biomarker Construct + Cox Regression")
+                title="Latent Biomarker Construct + Cox Regression",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "lavaan",
+                    "semPlot",
+                    "survival",
+                    "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",

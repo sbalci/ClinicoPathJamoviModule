@@ -260,9 +260,9 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Alluvial Diagrams",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "easyalluvial",
-                    "ggalluvial",
-                    "ClinicoPathJamoviModule"))
+                    "ggalluvial"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
@@ -389,7 +389,7 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "alluvial",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = alluvialResults$new(options=options),
                 data = data,

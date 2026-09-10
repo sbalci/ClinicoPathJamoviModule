@@ -15,13 +15,13 @@ items:
       requiresData: true
 
 refs:
+    - ClinicoPathJamoviModule
     - ggplot2
     - treemap
     - ggfittext
     - dplyr
     - tibble
-    - ClinicoPathJamoviModule
-
+    - digest
 clearWith:
     - group
     - size

@@ -498,11 +498,11 @@ comprehensiveSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRU
                 name="",
                 title="Comprehensive Survival Power Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "gsDesign",
                     "powerSurvEpi",
                     "survival",
                     "survRM2",
-                    "ClinicoPathJamoviModule",
                     "NPHMC",
                     "survSNP",
                     "rpact",

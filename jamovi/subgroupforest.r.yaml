@@ -128,8 +128,9 @@ items:
           - confidenceLevel
 
 refs:
+    - ClinicoPathJamoviModule
     - survival
     - forestplot
     - meta
-    - ClinicoPathJamoviModule
+    - sandwich
 ...

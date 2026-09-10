@@ -361,7 +361,10 @@ ordinalrocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Ordinal ROC Analysis")
+                title="Ordinal ROC Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "MASS"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

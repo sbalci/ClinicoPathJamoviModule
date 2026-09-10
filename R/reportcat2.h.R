@@ -70,9 +70,9 @@ reportcat2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Summary of Categorical Variables",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "report",
                     "gtExtras",
-                    "ClinicoPathJamoviModule",
                     "tibble",
                     "glue",
                     "scales",

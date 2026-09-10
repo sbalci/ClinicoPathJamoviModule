@@ -516,7 +516,12 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Venn Diagram",
                 refs=list(
-                    "ClinicoPathJamoviModule"),
+                    "ClinicoPathJamoviModule",
+                    "ComplexUpset",
+                    "UpSetR",
+                    "ggVennDiagram",
+                    "ggvenn",
+                    "viridis"),
                 clearWith=list(
                     "show_ggvenn",
                     "show_ggVennDiagram",
@@ -736,7 +741,7 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "venn",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = vennResults$new(options=options),
                 data = data,

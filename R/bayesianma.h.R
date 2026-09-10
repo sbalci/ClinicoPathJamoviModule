@@ -445,7 +445,8 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Analysis Results",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "coda"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

@@ -473,10 +473,10 @@ segmentationmetricsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Segmentation Metrics (Dice, IoU, Hausdorff)",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggplot2",
                     "dplyr",
-                    "tidyr",
-                    "ClinicoPathJamoviModule"))
+                    "tidyr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

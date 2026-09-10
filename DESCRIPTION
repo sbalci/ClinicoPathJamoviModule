@@ -1,7 +1,7 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 1.0.81
+Version: 1.0.81.01
 Date: 2026-09-09
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre", "cph"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
@@ -813,6 +813,11 @@ Collate:
     'splinehazard.h.R'
     'stagemigration-competing-risks.R'
     'stagemigration-discrimination.R'
+    'stagemigration-part1.R'
+    'stagemigration-part2.R'
+    'stagemigration-part3.R'
+    'stagemigration-part4.R'
+    'stagemigration-part5.R'
     'stagemigration-utils.R'
     'stagemigration-validation.R'
     'stagemigration_helpers.R'

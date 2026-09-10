@@ -35,10 +35,8 @@ items:
       visible: (pivot_export && summary_format:pivot)
 
 refs:
-    - gtExtras
     - ClinicoPathJamoviModule
-
-
+    - gtExtras
     - lubridate
     - moments
     - purrr

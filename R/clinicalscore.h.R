@@ -276,7 +276,8 @@ clinicalscoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "ClinicoPathJamoviModule",
                     "rms",
                     "pROC",
-                    "survival"))
+                    "survival",
+                    "MASS"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

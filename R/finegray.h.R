@@ -261,13 +261,13 @@ finegrayResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Fine-Gray Competing Risks Regression",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "cmprsk",
                     "riskRegression",
                     "tidycmprsk",
                     "survival",
                     "ggplot2",
-                    "dplyr",
-                    "ClinicoPathJamoviModule"))
+                    "dplyr"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

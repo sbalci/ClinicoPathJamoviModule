@@ -302,7 +302,9 @@ modelperformanceResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "ClinicoPathJamoviModule",
                     "survival",
                     "pROC",
-                    "DescTools"))
+                    "DescTools",
+                    "ResourceSelection",
+                    "rms"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

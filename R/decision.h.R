@@ -213,9 +213,11 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Medical Decision",
                 refs=list(
-                    "DiagnosticTests",
                     "ClinicoPathJamoviModule",
-                    "epiR"))
+                    "DiagnosticTests",
+                    "epiR",
+                    "forcats",
+                    "htmlTable"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -718,7 +720,7 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "decision",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = decisionResults$new(options=options),
                 data = data,

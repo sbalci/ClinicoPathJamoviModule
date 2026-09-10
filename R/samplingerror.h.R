@@ -176,7 +176,9 @@ samplingerrorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 options=options,
                 name="",
-                title="Sampling Error & Efficiency Calculator")
+                title="Sampling Error & Efficiency Calculator",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="errorSummary",

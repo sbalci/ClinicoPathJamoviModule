@@ -988,7 +988,6 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - proxy
     - cluster
     - FactoMineR
@@ -1004,4 +1003,5 @@ refs:
     - viridis
     - corrplot
     - pheatmap
+    - graphics
 ...

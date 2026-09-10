@@ -63,8 +63,9 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Benford Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "benford.analysis",
-                    "ClinicoPathJamoviModule"))
+                    "graphics"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -162,7 +163,7 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "benford",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = benfordResults$new(options=options),
                 data = data,

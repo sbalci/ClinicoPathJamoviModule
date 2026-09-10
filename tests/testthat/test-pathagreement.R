@@ -8,7 +8,7 @@ test_that("pathagreement works with two raters (Cohen's kappa)", {
   skip_if_not_installed('jmvReadWrite')
 
   # Load test data
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   # Test basic two-rater analysis
   expect_error(
@@ -24,7 +24,7 @@ test_that("pathagreement works with two raters (Cohen's kappa)", {
 test_that("pathagreement works with multiple raters (Fleiss' kappa)", {
 
   # Load test data
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   # Test multi-rater analysis
   expect_error(
@@ -39,7 +39,7 @@ test_that("pathagreement works with multiple raters (Fleiss' kappa)", {
 
 test_that("pathagreement works with 3 raters", {
 
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   expect_error(
     pathagreement(
@@ -57,7 +57,7 @@ test_that("pathagreement works with 3 raters", {
 
 test_that("pathagreement works with weighted kappa - squared weights", {
 
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   expect_error(
     pathagreement(
@@ -72,7 +72,7 @@ test_that("pathagreement works with weighted kappa - squared weights", {
 
 test_that("pathagreement works with weighted kappa - equal/linear weights", {
 
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   expect_error(
     pathagreement(
@@ -91,7 +91,7 @@ test_that("pathagreement works with weighted kappa - equal/linear weights", {
 
 test_that("pathagreement works with Fleiss' kappa method", {
 
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   expect_error(
     pathagreement(
@@ -107,7 +107,7 @@ test_that("pathagreement works with Fleiss' kappa method", {
 
 test_that("pathagreement works with Krippendorff's alpha - nominal", {
 
-  data("pathagreement_melanoma", package = "ClinicoPath")
+  pathagreement_melanoma <- pa_test_data("pathagreement_melanoma")
 
   expect_error(
     pathagreement(
@@ -124,7 +124,7 @@ test_that("pathagreement works with Krippendorff's alpha - nominal", {
 
 test_that("pathagreement works with Krippendorff's alpha - ordinal", {
 
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   expect_error(
     pathagreement(
@@ -145,7 +145,7 @@ test_that("pathagreement works with Krippendorff's alpha - ordinal", {
 
 test_that("pathagreement works with frequency tables", {
 
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   expect_error(
     pathagreement(
@@ -160,7 +160,7 @@ test_that("pathagreement works with frequency tables", {
 
 test_that("pathagreement works with heatmap visualization", {
 
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   expect_error(
     pathagreement(
@@ -176,7 +176,7 @@ test_that("pathagreement works with heatmap visualization", {
 
 test_that("pathagreement works with different heatmap themes", {
 
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   themes <- c("viridis", "plasma", "cividis", "bwr", "ryg")
 
@@ -201,7 +201,7 @@ test_that("pathagreement works with different heatmap themes", {
 
 test_that("pathagreement works with majority consensus", {
 
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   expect_error(
     pathagreement(
@@ -218,7 +218,7 @@ test_that("pathagreement works with majority consensus", {
 
 test_that("pathagreement works with super majority consensus", {
 
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   expect_error(
     pathagreement(
@@ -234,7 +234,7 @@ test_that("pathagreement works with super majority consensus", {
 
 test_that("pathagreement works with unanimous consensus", {
 
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   expect_error(
     pathagreement(
@@ -254,7 +254,7 @@ test_that("pathagreement works with unanimous consensus", {
 
 test_that("pathagreement works with diagnostic style clustering", {
 
-  data("pathagreement_clustering", package = "ClinicoPath")
+  pathagreement_clustering <- pa_test_data("pathagreement_clustering")
 
   rater_vars <- LETTERS[1:12]
 
@@ -273,7 +273,7 @@ test_that("pathagreement works with diagnostic style clustering", {
 
 test_that("pathagreement works with different clustering methods", {
 
-  data("pathagreement_clustering", package = "ClinicoPath")
+  pathagreement_clustering <- pa_test_data("pathagreement_clustering")
 
   rater_vars <- LETTERS[1:12]
   methods <- c("ward", "complete", "average")
@@ -296,7 +296,7 @@ test_that("pathagreement works with different clustering methods", {
 
 test_that("pathagreement works with auto-select number of groups", {
 
-  data("pathagreement_clustering", package = "ClinicoPath")
+  pathagreement_clustering <- pa_test_data("pathagreement_clustering")
 
   rater_vars <- LETTERS[1:12]
 
@@ -314,7 +314,7 @@ test_that("pathagreement works with auto-select number of groups", {
 
 test_that("pathagreement works with discordant case identification", {
 
-  data("pathagreement_clustering", package = "ClinicoPath")
+  pathagreement_clustering <- pa_test_data("pathagreement_clustering")
 
   rater_vars <- LETTERS[1:12]
 
@@ -337,7 +337,7 @@ test_that("pathagreement works with discordant case identification", {
 
 test_that("pathagreement works with ICC calculation", {
 
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   expect_error(
     pathagreement(
@@ -352,7 +352,7 @@ test_that("pathagreement works with ICC calculation", {
 
 test_that("pathagreement works with pairwise analysis", {
 
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   expect_error(
     pathagreement(
@@ -367,7 +367,7 @@ test_that("pathagreement works with pairwise analysis", {
 
 test_that("pathagreement works with category-specific agreement", {
 
-  data("pathagreement_multi_raters", package = "ClinicoPath")
+  pathagreement_multi_raters <- pa_test_data("pathagreement_multi_raters")
 
   expect_error(
     pathagreement(
@@ -382,7 +382,7 @@ test_that("pathagreement works with category-specific agreement", {
 
 test_that("pathagreement works with Gwet's AC coefficients", {
 
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   expect_error(
     pathagreement(
@@ -397,7 +397,7 @@ test_that("pathagreement works with Gwet's AC coefficients", {
 
 test_that("pathagreement works with PABAK", {
 
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   expect_error(
     pathagreement(
@@ -416,7 +416,7 @@ test_that("pathagreement works with PABAK", {
 
 test_that("pathagreement handles perfect agreement", {
 
-  data("pathagreement_perfect", package = "ClinicoPath")
+  pathagreement_perfect <- pa_test_data("pathagreement_perfect")
 
   expect_error(
     pathagreement(
@@ -430,7 +430,7 @@ test_that("pathagreement handles perfect agreement", {
 
 test_that("pathagreement handles complete disagreement", {
 
-  data("pathagreement_disagreement", package = "ClinicoPath")
+  pathagreement_disagreement <- pa_test_data("pathagreement_disagreement")
 
   expect_error(
     pathagreement(
@@ -444,7 +444,7 @@ test_that("pathagreement handles complete disagreement", {
 
 test_that("pathagreement handles missing data", {
 
-  data("pathagreement_missing", package = "ClinicoPath")
+  pathagreement_missing <- pa_test_data("pathagreement_missing")
 
   expect_error(
     pathagreement(
@@ -458,7 +458,7 @@ test_that("pathagreement handles missing data", {
 
 test_that("pathagreement handles single case", {
 
-  data("pathagreement_single", package = "ClinicoPath")
+  pathagreement_single <- pa_test_data("pathagreement_single")
 
   # Single case should either work or give informative error
   result <- tryCatch(
@@ -486,7 +486,7 @@ test_that("pathagreement handles single case", {
 
 test_that("pathagreement works with clinical summary", {
 
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   expect_error(
     pathagreement(
@@ -501,7 +501,7 @@ test_that("pathagreement works with clinical summary", {
 
 test_that("pathagreement works with about analysis", {
 
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   expect_error(
     pathagreement(
@@ -516,7 +516,7 @@ test_that("pathagreement works with about analysis", {
 
 test_that("pathagreement works with assumptions display", {
 
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   expect_error(
     pathagreement(
@@ -535,7 +535,7 @@ test_that("pathagreement works with assumptions display", {
 
 test_that("pathagreement works with comprehensive dataset - all features", {
 
-  data("pathagreement_comprehensive", package = "ClinicoPath")
+  pathagreement_comprehensive <- pa_test_data("pathagreement_comprehensive")
 
   rater_vars <- paste0("Pathologist_", LETTERS[1:8])
 
@@ -563,7 +563,7 @@ test_that("pathagreement works with comprehensive dataset - all features", {
 
 test_that("pathagreement works with reference standard comparison", {
 
-  data("pathagreement_breast", package = "ClinicoPath")
+  pathagreement_breast <- pa_test_data("pathagreement_breast")
 
   rater_vars <- paste0("Path_", 1:6)
 
@@ -584,7 +584,7 @@ test_that("pathagreement works with reference standard comparison", {
 
 test_that("pathagreement returns correct structure", {
 
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   result <- pathagreement(
     data = pathagreement_two_raters,
@@ -602,7 +602,7 @@ test_that("pathagreement returns correct structure", {
 
 test_that("pathagreement handles errors appropriately", {
 
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   # Test with missing vars parameter
   expect_error(
@@ -636,7 +636,7 @@ test_that("pathagreement handles errors appropriately", {
 
 test_that("pathagreement correctly handles nominal data", {
 
-  data("pathagreement_melanoma", package = "ClinicoPath")
+  pathagreement_melanoma <- pa_test_data("pathagreement_melanoma")
 
   # Nominal data should use unweighted kappa
   expect_error(
@@ -652,7 +652,7 @@ test_that("pathagreement correctly handles nominal data", {
 
 test_that("pathagreement correctly handles ordinal data", {
 
-  data("pathagreement_two_raters", package = "ClinicoPath")
+  pathagreement_two_raters <- pa_test_data("pathagreement_two_raters")
 
   # Ordinal data can use weighted kappa
   expect_error(

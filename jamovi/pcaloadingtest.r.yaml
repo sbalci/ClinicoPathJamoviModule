@@ -145,6 +145,7 @@ items:
         - plotheight
 
 refs:
+    - ClinicoPathJamoviModule
     - glue
     - pracma
     - dplyr

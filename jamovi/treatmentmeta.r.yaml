@@ -549,5 +549,7 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
+    - meta
+    - metaBMA
+    - metafor
 ...

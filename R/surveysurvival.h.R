@@ -350,10 +350,10 @@ surveysurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Survey-Weighted Survival Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "survey",
                     "survival",
-                    "survminer",
-                    "ClinicoPathJamoviModule"))
+                    "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

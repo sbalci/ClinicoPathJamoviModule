@@ -161,7 +161,8 @@ ihcadvancedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "ClinicoPathJamoviModule",
                     "cluster",
                     "parallel",
-                    "grDevices"))
+                    "grDevices",
+                    "graphics"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

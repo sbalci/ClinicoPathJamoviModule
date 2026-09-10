@@ -77,8 +77,9 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - ggplot2
     - waffle
-    - ClinicoPathJamoviModule
-
+    - digest
+    - haven
 ...

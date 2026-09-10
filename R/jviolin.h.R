@@ -303,10 +303,11 @@ jviolinResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Violin Plot",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggplot2",
                     "RGraphGallery",
                     "hrbrthemes",
-                    "ClinicoPathJamoviModule"))
+                    "digest"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

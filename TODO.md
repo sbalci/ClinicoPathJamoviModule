@@ -4873,3 +4873,96 @@ Acceptance: every finding in the 14 per-function sections and the module-wide ga
   so deleting the files without updating those links breaks the published site.
   (NOT a jjscatterstats duplicate: `-documentation.md` and `_documentation.md` are two
   distinct `/document-function` outputs and all 75 functions carry both.)
+
+## From /check-function pathsampling (2026-09-09)
+
+- [ ] **[test-infra, module-wide]** The generated test template is wrong in two ways, in ~195
+      `tests/testthat/test-*.R` files. (a) `expect_true(is.list(model))` and
+      `expect_true(inherits(model, 'jmvcoreClass'))` — a jamovi analysis returns an R6
+      `<fn>Results` object (`Group` / `ResultsElement` / `R6`); both assertions are always
+      FALSE. (b) The "Verify and Export OMV" block calls `jmvReadWrite::write_omv(model, path)`,
+      but `write_omv()`'s first argument is `dtaFrm`, a *data frame* — passing a results object
+      always errors with "Input data are either not a data frame or have incorrect dimensions".
+      These stay invisible wherever the analysis crashes earlier in the same `test_that()`.
+      Fix the generator, then re-emit. Corrected in `test-pathsampling.R` only.
+- [ ] **[generated]** 61 `R/*.h.R` files still carry `version = c(1,0,8)` while DESCRIPTION is
+      1.0.81. `jmvtools::prepare(".")` refreshes them all; reverted here to keep this change set
+      scoped to pathsampling.
+- [ ] **[i18n]** `R/pathsampling.b.R` has zero `.()` translation calls — every user-facing
+      string is untranslated. Run `/prepare-translation pathsampling`.
+- [ ] **[cleanup]** `pathsampling.b.R` is 4.9k lines with a ~3.8k-line `.run()`; the
+      `.styleConstants` + `.buildStyle` layer costs ~350 lines of plumbing to emit CSS that a
+      single `<style>` block would carry. See the ponytail-review notes from the same session.
+- [ ] **[stats, module-wide]** `VGAM::Coef()` (capital C) returns parameters on the NATURAL
+      scale; only `coef()` (lowercase) is on the link scale. `pathsampling` applied
+      `logitlink(inverse = TRUE)` on top of `Coef()`, double-transforming every beta-binomial
+      mu and rho (mu 0.481 reported as 0.618; rho, being in [0,1], always squashed into
+      [0.5, 0.731], so zero overdispersion read as 0.5). Fixed here — grep the rest of the
+      module for the same pattern: `grep -rn 'logitlink(.*Coef(' R/`.
+- [ ] **[feature]** `appendVariables` / `appendPrefix` were removed: `enhanced_data` was computed
+      and discarded (the file's own TODO said so), and the block sat inside
+      `.populateOmentumAnalysis()` referencing `.run()` locals, so it could never have worked. A
+      differential run confirmed zero observable effect. To do this properly jamovi needs a
+      `type: Output` option in the `.a.yaml`, which writes columns back to the spreadsheet —
+      re-add it that way if the feature is still wanted, and `htmlEscape` the user-supplied
+      prefix before it reaches any column-name string.
+- [ ] **[dead code]** The `targetConf <= 0 || targetConf >= 1` branch in `.b.R` is unreachable:
+      the schema clamps `targetConfidence` to [0.5, 0.99], so both the wrapper and the GUI
+      reject out-of-range values first. Harmless defence in depth; delete if tidying.
+- [ ] **[citations]** `pathsampling` cites 0 references via `refs:` while siblings cite 1-6
+      (`waterfall` 1, `decision` 5, `survival` 5, `crosstable` 6). Tomlinson 2007, Pu 2021,
+      Yoon 2025, Malpica 2019, Maglalang 2025, Skala 2015, Ates 2025 and Zhou 2022 all appear
+      in the panel HTML but are absent from `jamovi/00refs.yaml`, so they never reach jamovi's
+      reference list or any export. Run `/update-refs pathsampling`.
+- [ ] **[module-wide]** `compilerMode: tame` is set in neither this module's `jamovi/0000.yaml`
+      nor the `meddecide` sibling. The library reviewer checks for it. Module-level decision.
+
+## Out-of-scope findings from the survivalPower release review (2026-09-10)
+
+- [ ] **[refs]** `jamovi/00refs.yaml`: `Schoenfeld1983`, `lan1983`, `obrien1979`, `pocock1977` have `url: null`.
+      Add verified DOIs so analyses can cite the method papers without failing the library gate
+      (survivalPower cites `LachinAndFoulkes1986` + `gsDesign` in the meantime).
+- [ ] **[plots]** Module-wide sweep for `ggplot(...) + ... + if (cond) { plot <- plot + layer }`: the layer is
+      silently dropped while the renderer returns TRUE (found in survivalPower's sensitivity plot).
+      Candidates: `grep -nE '\+\s*$' -A3 R/*.b.R | grep -E '^\S+-\s+if \('`.
+- [ ] **[lifecycle]** Module-wide sweep for `private$.checkpoint()` inside `tryCatch(error = ...)`: the restart is
+      an error-class condition and is swallowed unless re-raised with `if (identical(e$code, "restart")) stop(e)`.
+      Only `decisioncurve.b.R` and `survivalPower.b.R` re-raise today.
+- [ ] **[i18n]** `jamovi/i18n/*` were not regenerated for survivalPower's renamed titles because the catalogs
+      carry other uncommitted edits; run `jmvtools::i18nUpdate()` (no argument) once those are committed.
+
+## stagemigration: review action items applied (2026-09-10)
+
+- [x] Clinical NRI row restored (`threshold = risk_threshold`)
+- [x] Time-dependent ROC: timeROC slot indexed by time, `sqrt(SE)` removed, paired `timeROC::compare`, `survival` attached around timeROC calls
+- [x] NRI / IDI censoring-weighted (IPCW) with pooled risk tertiles and bootstrap SE; IDI table CI/p-value now populated
+- [x] Fine-Gray: Aalen-Johansen CIF columns, complete-case design matrix, coefficients matched by name, fit failures noticed
+- [x] Analysis-type skips and analysis failures -> notices; 59 debug `message()` calls removed
+- [x] `seed` option (all resampling); added to 131 `clearWith` lists
+- [x] Duplicate visibility key, 4 `seq_len` fixes, 92 unused locals removed (formula-string locals kept)
+- [x] 11 stray UI controls placed in their groups; action-verb labels renamed; sentence-case control labels
+- [x] Dark-theme: 79 low-contrast text colours, 4 white panels, 1 gradient
+- [x] Deleted dead `test_stagemigration.R`, `test_stagemigration_minimal.R` (kept `skip_on_cran()`: `devtools::test()` sets NOT_CRAN)
+- [x] 132 backend strings wrapped in `.()`; catalogs refreshed (`i18nUpdate` en/tr, `catalog.pot` synced)
+- [x] Backend split: `stagemigration.b.R` + `stagemigration-part1..5.R` (R6 chain, identical method source)
+- [ ] Turkish msgstr for 1,248 untranslated stagemigration entries (needs clinical translation review)
+- [ ] Resync JamoviTest (`Rscript _updateModules.R`) - part files added to its r_files
+- [ ] Tooling that reads only `R/<fn>.b.R` (playbook greps, theme_safe_html.py, check_state_guards.py) does not see the part files
+
+Results: corrections suite 39 tests / 118 expectations; test-stagemigration.R 18/26 (NOT_CRAN); rendering contract 4/6; runtime battery (ROC = timeROC, NRI/IDI = helper, Fine-Gray = cmprsk, seed reproducible, formula-string methods populate); `prepare()` and `document()` clean.
+
+## stagemigration: release review (2026-09-10)
+
+- [x] Restored 29 deleted assignments used only inside formulas (Will Rogers, survival-comparison plots, frailty, cut-point, homogeneity); guard test added
+- [x] Migration direction: one `.stageDirection()` scale; undefined (with notice) when the two systems' label sets differ; label-based "unchanged"
+- [x] Likelihood-ratio table: nested tests through the combined model (was a negative non-nested statistic with another test's p)
+- [x] C-index difference: paired variance via survival::concordance(old, new) (was independence / Spearman heuristic)
+- [x] Statistical summary: removed hardcoded 0.0178, "[-0.0341, +0.0698]", p = 0.501
+- [x] Enhanced LR table duplicated rows; Fisher rows mislabelled; chi-square p "< 2.22e-16"
+- [x] RMST, Stage Migration Effect and glossary computed without advancedMigrationAnalysis (tables were empty)
+- [x] All-censored cohort message; `curePlateauThreshold` labelled not implemented; glossary white panels theme-safe; harrell2015 url; analysis version 0.0.32
+- [ ] User: run `jmvtools::prepare()` then `devtools::document()` (a.yaml version bump; 00refs.yaml url)
+- [ ] `git add` R/stagemigration-part1..5.R before committing (listed in Collate)
+- [ ] Turkish msgstr for new/changed stagemigration strings; 288 addRow calls outside .init(); advanced tier (~15 min) not exercised end to end
+
+Results: test-stagemigration.R 27 tests / 45 expectations; statistical-corrections 45 / 164; rendering contract 4 / 6; release battery: RMST = survival rmean at module tau, nested LR = anova(), paired C-index CI/p = concordance(old, new), direction/edge cases as specified, no leaked warnings.

@@ -194,4 +194,8 @@ items:
       title: MR Assumptions Check
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
+    - MendelianRandomization
 ...

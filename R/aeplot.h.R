@@ -211,8 +211,9 @@ aeplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Adverse Events Butterfly Plot",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "trialplots_highwind",
-                    "ClinicoPathJamoviModule"))
+                    "ggsci"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

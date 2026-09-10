@@ -396,10 +396,8 @@ items:
         - design_type
 
 refs:
+    - ClinicoPathJamoviModule
     - survey
     - survival
     - survminer
-    - ClinicoPathJamoviModule
-
-
 ...

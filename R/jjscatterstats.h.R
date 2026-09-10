@@ -407,11 +407,14 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Scatter Plot",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggplot2",
                     "ggstatsplot",
                     "statsExpressions",
                     "ggpubr",
-                    "ClinicoPathJamoviModule"),
+                    "ggExtra",
+                    "ggrepel",
+                    "patchwork"),
                 clearWith=list(
                     "clinicalPreset",
                     "dep",
@@ -536,7 +539,7 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjscatterstats",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = jjscatterstatsResults$new(options=options),
                 data = data,

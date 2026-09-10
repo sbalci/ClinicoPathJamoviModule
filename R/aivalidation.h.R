@@ -163,7 +163,10 @@ aivalidationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 options=options,
                 name="",
-                title="AI Model Validation")
+                title="AI Model Validation",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "pROC"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

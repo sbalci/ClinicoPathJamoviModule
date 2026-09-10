@@ -489,9 +489,11 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="Advanced Raincloud Plot",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggplot2",
                     "ggrain",
-                    "ClinicoPathJamoviModule"),
+                    "viridis",
+                    "viridisLite"),
                 clearWith=list(
                     "y_var",
                     "x_var",
@@ -597,7 +599,7 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "advancedraincloud",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = advancedraincloudResults$new(options=options),
                 data = data,

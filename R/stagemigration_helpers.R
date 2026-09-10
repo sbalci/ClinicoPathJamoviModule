@@ -10,6 +10,21 @@
 #'   `error` element containing the error message.
 #' @keywords internal
 
+# Two-sided normal critical value from the user's confidenceLevel option.
+# Falls back to 95% when the option is unavailable (e.g. a direct helper call).
+stagemigration_zcrit <- function(options) {
+    cl <- tryCatch(options$confidenceLevel, error = function(e) NULL)
+    if (is.null(cl) || !is.finite(cl) || cl <= 0 || cl >= 1) cl <- 0.95
+    stats::qnorm(1 - (1 - cl) / 2)
+}
+
+# Matching two-sided quantile probabilities for percentile bootstrap intervals.
+stagemigration_ciprobs <- function(options) {
+    cl <- tryCatch(options$confidenceLevel, error = function(e) NULL)
+    if (is.null(cl) || !is.finite(cl) || cl <= 0 || cl >= 1) cl <- 0.95
+    c((1 - cl) / 2, 1 - (1 - cl) / 2)
+}
+
 stagemigration_calculateAdvancedMetrics <- function(data, options, checkpoint_callback = NULL) {
     # Advanced discrimination and calibration metrics with comprehensive error handling
     
@@ -43,43 +58,22 @@ stagemigration_calculateAdvancedMetrics <- function(data, options, checkpoint_ca
         c_improvement <- new_c - old_c
         c_improvement_pct <- if (old_c > 0) (c_improvement / old_c) * 100 else NA
 
-        # --- CORRECTION FOR INDEPENDENCE ASSUMPTION ---
-        
-        old_lp <- stats::predict(old_cox, type = "lp")
-        new_lp <- stats::predict(new_cox, type = "lp")
-        surv_obj <- survival::Surv(data[[time_var]], data[[event_var]])
-        
-        # Default values
+        # --- Paired variance of the C-index difference ---
+        # Both C-indices rank the same patients, so the difference needs their covariance.
+        # survival::concordance(old_cox, new_cox) returns the joint variance matrix of the two
+        # estimates (the same estimator as the per-model C-index above). The former code derived
+        # the covariance from the Spearman correlation of the linear predictors, which is not a
+        # variance of the concordance statistic: on the bundled cohort it reported p < 0.001 where
+        # the paired test gives p = 0.002.
         diff_se <- NA
         p_value <- NA
-        
-        # Try to use Hmisc::rcorrp.cens
-        hmisc_result <- tryCatch({
-            res <- Hmisc::rcorrp.cens(old_lp, new_lp, surv_obj)
-            NULL 
-        }, error = function(e) {
-            NULL
-        })
-        
-        
-        # Manual Correlation Correction (Improved)
-        valid_idx <- complete.cases(old_lp, new_lp)
-        if (sum(valid_idx) > 10) {
-            r_correlation <- cor(old_lp[valid_idx], new_lp[valid_idx], method = "spearman")
-        } else {
-            r_correlation <- 0
-        }
-        r_correlation <- max(-1, min(1, if(is.na(r_correlation)) 0 else r_correlation))
-
-        if (old_var >= 0 && new_var >= 0) {
-            old_se_val <- sqrt(old_var)
-            new_se_val <- sqrt(new_var)
-            covariance_term <- 2 * r_correlation * old_se_val * new_se_val
-            diff_var <- old_var + new_var - covariance_term
-            diff_var <- max(0, diff_var)
-            diff_se <- sqrt(diff_var)
-            z_stat <- if (diff_se > 0) c_improvement / diff_se else NA
-            p_value <- if (!is.na(z_stat)) 2 * (1 - pnorm(abs(z_stat))) else NA
+        paired <- tryCatch(survival::concordance(old_cox, new_cox), error = function(e) NULL)
+        if (!is.null(paired) && is.matrix(paired$var) && all(dim(paired$var) == 2)) {
+            diff_var <- drop(c(-1, 1) %*% paired$var %*% c(-1, 1))
+            if (is.finite(diff_var) && diff_var > 0) {
+                diff_se <- sqrt(diff_var)
+                p_value <- 2 * stats::pnorm(-abs(c_improvement / diff_se))
+            }
         }
 
         use_bootstrap <- options$analysisType %in% c("comprehensive", "publication") && options$performBootstrap
@@ -91,7 +85,8 @@ stagemigration_calculateAdvancedMetrics <- function(data, options, checkpoint_ca
             c_bootstrap <- stagemigration_compareBootstrapCIndex(
                 data, old_stage, new_stage, time_var, event_var,
                 n_boot = options$bootstrapReps %||% 200,
-                checkpoint_callback = checkpoint_callback
+                checkpoint_callback = checkpoint_callback,
+                options = options
             )
             p_value <- c_bootstrap$p_value
             diff_se <- c_bootstrap$se
@@ -99,8 +94,8 @@ stagemigration_calculateAdvancedMetrics <- function(data, options, checkpoint_ca
             c_improvement_ci_upper <- c_bootstrap$ci_upper
         } else { 
              if (!is.na(c_improvement) && !is.na(diff_se)) {
-                c_improvement_ci_lower <- c_improvement - 1.96 * diff_se
-                c_improvement_ci_upper <- c_improvement + 1.96 * diff_se
+                c_improvement_ci_lower <- c_improvement - stagemigration_zcrit(options) * diff_se
+                c_improvement_ci_upper <- c_improvement + stagemigration_zcrit(options) * diff_se
             }
         }
 
@@ -111,17 +106,27 @@ stagemigration_calculateAdvancedMetrics <- function(data, options, checkpoint_ca
         bic_new <- BIC(new_cox)
         bic_improvement <- bic_old - bic_new
 
+        # Nested likelihood-ratio tests through the Cox model that holds BOTH classifications.
+        # The two staging systems are not nested in each other, so no LR test compares them
+        # directly. The former code reported lr_new - lr_old, which reduces to
+        # 2 * (logLik(old) - logLik(new)) and is negative whenever the new system fits better, next
+        # to the p-value of a different test. Each system is instead tested for the prognostic
+        # information it adds to the other; p_value is "new staging adds to the original".
         lr_test <- tryCatch({
             combined_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `",
                                                 old_stage, "` + `", new_stage, "`", sep=""))
             combined_cox <- survival::coxph(combined_formula, data = data)
-            lr_new <- 2 * (combined_cox$loglik[2] - new_cox$loglik[2])
-            df_new <- length(stats::coef(combined_cox)) - length(stats::coef(new_cox))
-            p_new <- pchisq(lr_new, df_new, lower.tail = FALSE)
-            lr_old <- 2 * (combined_cox$loglik[2] - old_cox$loglik[2])
-            list(lr_stat = lr_new - lr_old, df = df_new, p_value = p_new)
+            n_coef <- function(fit) sum(!is.na(stats::coef(fit)))
+            nested <- function(reduced) {
+                stat <- 2 * (combined_cox$loglik[2] - reduced$loglik[2])
+                df <- n_coef(combined_cox) - n_coef(reduced)
+                list(stat = stat, df = df, p = if (df > 0) stats::pchisq(stat, df, lower.tail = FALSE) else NA_real_)
+            }
+            new_adds <- nested(old_cox)
+            old_adds <- nested(new_cox)
+            list(new_adds = new_adds, old_adds = old_adds, p_value = new_adds$p)
         }, error = function(e) {
-            list(lr_stat = NA, df = NA, p_value = NA)
+            list(new_adds = NULL, old_adds = NULL, p_value = NA)
         })
 
         linear_trend_test <- stagemigration_calculateLinearTrendTest(data, old_stage, new_stage, time_var, event_var)
@@ -156,12 +161,11 @@ stagemigration_calculateAdvancedMetrics <- function(data, options, checkpoint_ca
         return(res)
 
     }, error = function(e) {
-        message("ERROR in calculateAdvancedMetrics: ", e$message)
         return(list(error = e$message))
     })
 }
 
-stagemigration_compareBootstrapCIndex <- function(data, old_stage, new_stage, time_var, event_var, n_boot = 200, checkpoint_callback = NULL) {
+stagemigration_compareBootstrapCIndex <- function(data, old_stage, new_stage, time_var, event_var, n_boot = 200, checkpoint_callback = NULL, options = NULL) {
     # Bootstrap comparison of C-indices for correlated data
     tryCatch({
         n <- nrow(data)
@@ -207,10 +211,16 @@ stagemigration_compareBootstrapCIndex <- function(data, old_stage, new_stage, ti
         # P-value (Two-sided)
         # Probability that 0 is outside the distribution relative to the mean difference?
         # Or simply: 2 * min(P(diff > 0), P(diff < 0))
-        p_value <- 2 * min(mean(c_diffs <= 0), mean(c_diffs >= 0))
+        # <= and >= both count exact zeros, which are common when C-index differences
+        # come from a few discrete stage levels, so this could return p > 1 (e.g. 1.4).
+        # Split the ties between the two tails and cap at 1.
+        p_zero <- mean(c_diffs == 0)
+        p_value <- min(1, 2 * min(mean(c_diffs < 0) + 0.5 * p_zero,
+                                  mean(c_diffs > 0) + 0.5 * p_zero))
         
-        ci_lower <- quantile(c_diffs, 0.025, na.rm = TRUE)
-        ci_upper <- quantile(c_diffs, 0.975, na.rm = TRUE)
+        ci_probs <- stagemigration_ciprobs(options)
+        ci_lower <- quantile(c_diffs, ci_probs[1], na.rm = TRUE)
+        ci_upper <- quantile(c_diffs, ci_probs[2], na.rm = TRUE)
 
         list(
             c_diff = c_diff_orig,
@@ -240,13 +250,54 @@ stagemigration_calculateLinearTrendTest <- function(data, old_stage, new_stage, 
             
             trend_cox <- survival::coxph(surv_obj ~ stage_scores, data = trend_data)
             s <- summary(trend_cox)
-            list(stat = s$waldtest["test"], p_value = s$waldtest["pvalue"])
+            # The renderer reads coefficient, n_stages and interpretation. They were never
+            # set here, so the Linear Trend Test table always showed two blank columns and
+            # "Unable to interpret" on both rows.
+            coefval <- unname(stats::coef(trend_cox)[1])
+            pval <- unname(s$waldtest["pvalue"])
+            list(
+                stat = unname(s$waldtest["test"]),
+                p_value = pval,
+                coefficient = coefval,
+                n_stages = length(stages),
+                interpretation = if (!is.finite(pval)) {
+                    "Not estimable"
+                } else if (pval >= 0.05) {
+                    "No significant monotonic trend across stages"
+                } else if (coefval > 0) {
+                    "Significant increasing hazard across ordered stages"
+                } else {
+                    "Significant decreasing hazard across ordered stages"
+                }
+            )
         }
         
         old_trend <- .calc(old_stage)
         new_trend <- .calc(new_stage)
-        
-        list(old_trend = old_trend, new_trend = new_trend)
+
+        # The renderer also looks for a `comparison` element, which was never produced,
+        # so the "Overall Comparison" row never appeared.
+        comparison <- local({
+            op <- old_trend$p_value; np <- new_trend$p_value
+            oc <- old_trend$coefficient; nc <- new_trend$coefficient
+            if (!is.finite(op) || !is.finite(np)) {
+                list(interpretation = "Trend comparison not estimable")
+            } else {
+                list(
+                    old_p = op, new_p = np,
+                    old_coefficient = oc, new_coefficient = nc,
+                    interpretation = if (abs(nc %||% 0) > abs(oc %||% 0)) {
+                        "New staging shows the steeper monotonic gradient"
+                    } else if (abs(nc %||% 0) < abs(oc %||% 0)) {
+                        "Original staging shows the steeper monotonic gradient"
+                    } else {
+                        "Both systems show a comparable monotonic gradient"
+                    }
+                )
+            }
+        })
+
+        list(old_trend = old_trend, new_trend = new_trend, comparison = comparison)
     }, error = function(e) list(old_trend=list(p_value=NA), new_trend=list(p_value=NA)))
 }
 
@@ -321,8 +372,91 @@ stagemigration_calculatePseudoR2 <- function(old_cox, new_cox, data, options) {
     }, error = function(e) NULL)
 }
 
+# ---------------------------------------------------------------------------------------------
+# Censoring-weighted (IPCW) NRI and IDI at a time horizon t.
+#
+# Status at t is known for patients with an event by t (cases) and for patients followed beyond t
+# (controls); it is unknown for patients censored before t. The former estimators dropped those
+# patients (NRI) or, for IDI, used ever-event status regardless of t, counting patients censored
+# early as non-events. Both are biased when follow-up is incomplete. Each informative patient is
+# instead weighted by the inverse probability of remaining uncensored, 1/G(T-) for cases and 1/G(t)
+# for controls, with G the Kaplan-Meier estimate of the censoring distribution (Uno et al. 2007;
+# Pencina et al. 2011). With no censoring before t every weight is 1 and the estimators reduce to
+# the complete-case ones.
+#
+# Uncertainty: patients are resampled with their predicted risks held fixed and the weights are
+# re-estimated in each resample; the CI is estimate +/- z * bootstrap SE. Uncertainty from fitting
+# the Cox models is not propagated.
+# ---------------------------------------------------------------------------------------------
+stagemigration_ipcwWeights <- function(time, event, t) {
+    cens <- survival::survfit(survival::Surv(time, 1 - event) ~ 1)
+    G <- function(u, left) {
+        idx <- findInterval(u, cens$time, left.open = left)
+        out <- rep(1, length(u))
+        out[idx > 0] <- cens$surv[idx[idx > 0]]
+        out
+    }
+    case <- !is.na(time) & !is.na(event) & time <= t & event == 1
+    control <- !is.na(time) & time > t
+    w <- numeric(length(time))
+    w[case] <- 1 / G(time[case], TRUE)
+    w[control] <- 1 / G(t, FALSE)
+    w[!is.finite(w)] <- 0
+    list(w = w, case = case, control = control, g_t = G(t, FALSE))
+}
+
+stagemigration_ipcwNRI <- function(cat_old, cat_new, time, event, t) {
+    wt <- stagemigration_ipcwWeights(time, event, t)
+    ok <- !is.na(cat_old) & !is.na(cat_new)
+    wc <- wt$w * (wt$case & ok)
+    wn <- wt$w * (wt$control & ok)
+    if (sum(wc) <= 0 || sum(wn) <= 0) {
+        return(c(nri = NA_real_, nri_events = NA_real_, nri_nonevents = NA_real_))
+    }
+    up <- ok & cat_new > cat_old
+    down <- ok & cat_new < cat_old
+    up[is.na(up)] <- FALSE
+    down[is.na(down)] <- FALSE
+    nri_e <- (sum(wc[up]) - sum(wc[down])) / sum(wc)
+    nri_ne <- (sum(wn[down]) - sum(wn[up])) / sum(wn)
+    c(nri = nri_e + nri_ne, nri_events = nri_e, nri_nonevents = nri_ne)
+}
+
+stagemigration_ipcwIDI <- function(p_old, p_new, time, event, t) {
+    wt <- stagemigration_ipcwWeights(time, event, t)
+    ok <- is.finite(p_old) & is.finite(p_new)
+    wc <- wt$w * (wt$case & ok)
+    wn <- wt$w * (wt$control & ok)
+    if (sum(wc) <= 0 || sum(wn) <= 0) {
+        return(c(idi = NA_real_, old_events = NA_real_, old_nonevents = NA_real_, new_events = NA_real_, new_nonevents = NA_real_))
+    }
+    wmean <- function(p, ww) sum(ww[ok] * p[ok]) / sum(ww[ok])
+    oe <- wmean(p_old, wc)
+    on <- wmean(p_old, wn)
+    ne <- wmean(p_new, wc)
+    nn <- wmean(p_new, wn)
+    c(idi = (ne - nn) - (oe - on), old_events = oe, old_nonevents = on, new_events = ne, new_nonevents = nn)
+}
+
+stagemigration_ipcwReps <- function(options) {
+    r <- suppressWarnings(as.integer(options$bootstrapReps))
+    if (length(r) != 1 || is.na(r)) r <- 500L
+    max(200L, min(2000L, r))
+}
+
+stagemigration_coxRiskAt <- function(model, t, newdata) {
+    surv_fit <- survival::survfit(model)
+    idx <- findInterval(t, surv_fit$time)
+    S0_t <- if (idx == 0) 1 else surv_fit$surv[idx]
+    lp <- stats::predict(model, newdata = newdata, type = "lp")
+    1 - (S0_t^exp(lp))
+}
+
 stagemigration_calculateNRI <- function(data, options, time_points = NULL, checkpoint_callback = NULL) {
-    # Net Reclassification Improvement
+    # Censoring-weighted Net Reclassification Improvement at each time horizon (see above).
+    # Risk categories are tertiles of the POOLED predicted risks: one set of cut-points for both
+    # systems. Separate tertiles per system (the former approach) put a third of each system's
+    # patients in every category by construction, so "moving up" compared ranks, not risk.
     if (!isTRUE(options$calculateNRI)) return(NULL)
 
     old_stage <- options$oldStage
@@ -339,101 +473,77 @@ stagemigration_calculateNRI <- function(data, options, time_points = NULL, check
     }
     if (length(time_points) == 0) time_points <- c(12, 24, 60)
 
-    old_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
-    new_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
+    old_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep = ""))
+    new_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep = ""))
 
-    tryCatch({
-        cox_original <- survival::coxph(old_formula, data = data)
-        cox_modified <- survival::coxph(new_formula, data = data)
-    }, error = function(e) return(list(error = "Failed to fit Cox models for NRI")))
+    # The former tryCatch(..., error = function(e) return(list(error = ...))) returned from the
+    # handler only, so a failed fit carried on with undefined models.
+    fits <- tryCatch(
+        list(old = survival::coxph(old_formula, data = data), new = survival::coxph(new_formula, data = data)),
+        error = function(e) NULL
+    )
+    if (is.null(fits)) return(list(error = "Failed to fit Cox models for NRI"))
 
+    time <- data[[time_var]]
+    event <- data[[event_var]]
+    n <- length(time)
+    reps <- stagemigration_ipcwReps(options)
+    z <- stagemigration_zcrit(options)
     nri_results <- list()
-
-    get_risk_at_t <- function(model, t, newdata) {
-        surv_fit <- survival::survfit(model)
-        idx <- findInterval(t, surv_fit$time)
-        S0_t <- if (idx == 0) 1 else surv_fit$surv[idx]
-        lp <- stats::predict(model, newdata = newdata, type = "lp")
-        1 - (S0_t ^ exp(lp))
-    }
 
     for (time_point in time_points) {
         if (!is.null(checkpoint_callback)) checkpoint_callback()
-        
-        if (time_point > max(data[[time_var]], na.rm = TRUE)) next
+        key <- paste0("t", time_point)
+        if (time_point > max(time, na.rm = TRUE)) next
 
-        risk_original <- get_risk_at_t(cox_original, time_point, data)
-        risk_modified <- get_risk_at_t(cox_modified, time_point, data)
+        risk_old <- stagemigration_coxRiskAt(fits$old, time_point, data)
+        risk_new <- stagemigration_coxRiskAt(fits$new, time_point, data)
+        cuts <- unique(stats::quantile(c(risk_old, risk_new), probs = c(0, 1 / 3, 2 / 3, 1), na.rm = TRUE, names = FALSE))
+        if (length(cuts) < 3) {
+            nri_results[[key]] <- list(time_point = time_point, error = "Predicted risks are too concentrated to form risk categories")
+            next
+        }
+        cat_old <- cut(risk_old, breaks = cuts, include.lowest = TRUE, labels = FALSE)
+        cat_new <- cut(risk_new, breaks = cuts, include.lowest = TRUE, labels = FALSE)
 
-        is_event <- data[[time_var]] <= time_point & data[[event_var]] == 1
-        is_nonevent <- data[[time_var]] > time_point
-        
-        events_idx <- which(is_event)
-        nonevents_idx <- which(is_nonevent)
-        
-        if (length(events_idx) == 0 || length(nonevents_idx) == 0) {
-            nri_results[[paste0("t", time_point)]] <- list(time_point = time_point, error = "Insufficient events/non-events")
+        wt <- stagemigration_ipcwWeights(time, event, time_point)
+        ok <- !is.na(cat_old) & !is.na(cat_new)
+        n_cases <- sum(wt$case & ok)
+        n_controls <- sum(wt$control & ok)
+        est <- stagemigration_ipcwNRI(cat_old, cat_new, time, event, time_point)
+        if (n_cases == 0 || n_controls == 0 || !is.finite(est[["nri"]])) {
+            nri_results[[key]] <- list(time_point = time_point, error = "Insufficient events/non-events")
             next
         }
 
-        risk_cuts_original <- quantile(risk_original, probs = c(0, 1/3, 2/3, 1), na.rm = TRUE)
-        risk_cuts_modified <- quantile(risk_modified, probs = c(0, 1/3, 2/3, 1), na.rm = TRUE)
+        boot <- vapply(seq_len(reps), function(b) {
+            i <- sample.int(n, n, replace = TRUE)
+            stagemigration_ipcwNRI(cat_old[i], cat_new[i], time[i], event[i], time_point)[["nri"]]
+        }, numeric(1))
+        se <- stats::sd(boot, na.rm = TRUE)
+        nri <- est[["nri"]]
 
-        if(length(unique(risk_cuts_original)) < 4) risk_cuts_original <- unique(quantile(risk_original, probs = seq(0, 1, length.out = length(unique(risk_original))+1), na.rm = TRUE))
-        if(length(unique(risk_cuts_modified)) < 4) risk_cuts_modified <- unique(quantile(risk_modified, probs = seq(0, 1, length.out = length(unique(risk_modified))+1), na.rm = TRUE))
-        if(length(risk_cuts_original) < 2) risk_cuts_original <- c(0, 0.5, 1)
-        if(length(risk_cuts_modified) < 2) risk_cuts_modified <- c(0, 0.5, 1)
-
-        risk_cat_original <- cut(risk_original, breaks = risk_cuts_original, include.lowest = TRUE, labels = FALSE)
-        risk_cat_modified <- cut(risk_modified, breaks = risk_cuts_modified, include.lowest = TRUE, labels = FALSE)
-
-        risk_cat_orig_events <- risk_cat_original[events_idx]
-        risk_cat_mod_events <- risk_cat_modified[events_idx]
-        
-        improved_events <- sum(risk_cat_mod_events > risk_cat_orig_events, na.rm = TRUE)
-        worsened_events <- sum(risk_cat_mod_events < risk_cat_orig_events, na.rm = TRUE)
-        n_events_valid <- length(risk_cat_orig_events)
-        
-        nri_events <- (improved_events - worsened_events) / n_events_valid
-
-        risk_cat_orig_nonevents <- risk_cat_original[nonevents_idx]
-        risk_cat_mod_nonevents <- risk_cat_modified[nonevents_idx]
-        
-        improved_nonevents <- sum(risk_cat_mod_nonevents < risk_cat_orig_nonevents, na.rm = TRUE)
-        worsened_nonevents <- sum(risk_cat_mod_nonevents > risk_cat_orig_nonevents, na.rm = TRUE)
-        n_nonevents_valid <- length(risk_cat_orig_nonevents)
-        
-        nri_non_events <- (improved_nonevents - worsened_nonevents) / n_nonevents_valid
-
-        nri_total <- nri_events + nri_non_events
-
-        var_events <- (improved_events + worsened_events) / (n_events_valid^2) - (nri_events^2 / n_events_valid)
-        var_nonevents <- (improved_nonevents + worsened_nonevents) / (n_nonevents_valid^2) - (nri_non_events^2 / n_nonevents_valid)
-        
-        se_nri <- sqrt(max(0, var_events) + max(0, var_nonevents))
-        
-        ci_lower <- nri_total - 1.96 * se_nri
-        ci_upper <- nri_total + 1.96 * se_nri
-        z_score <- if (se_nri > 0) nri_total / se_nri else 0
-        p_value <- if (se_nri > 0) 2 * (1 - pnorm(abs(z_score))) else 1
-
-        nri_results[[paste0("t", time_point)]] <- list(
+        nri_results[[key]] <- list(
             time_point = time_point,
-            nri_overall = nri_total,
-            nri_events = nri_events,
-            nri_nonevents = nri_non_events,
-            ci_lower = ci_lower,
-            ci_upper = ci_upper,
-            p_value = p_value,
-            total_events = n_events_valid,
-            total_patients = n_events_valid + n_nonevents_valid
+            nri_overall = nri,
+            nri_events = est[["nri_events"]],
+            nri_nonevents = est[["nri_nonevents"]],
+            se = se,
+            ci_lower = nri - z * se,
+            ci_upper = nri + z * se,
+            p_value = if (is.finite(se) && se > 0) 2 * stats::pnorm(-abs(nri / se)) else NA_real_,
+            total_events = n_cases,
+            total_patients = n_cases + n_controls,
+            censored_before_t = sum(!wt$case & !wt$control),
+            method = "IPCW"
         )
     }
     return(nri_results)
 }
 
 stagemigration_calculateIDI <- function(data, options, checkpoint_callback = NULL) {
-    # Integrated Discrimination Improvement
+    # Censoring-weighted Integrated Discrimination Improvement at the last NRI time point
+    # (default 60 months), capped at the longest follow-up (see above).
     if (!isTRUE(options$calculateIDI)) return(NULL)
 
     old_stage <- options$oldStage
@@ -441,130 +551,65 @@ stagemigration_calculateIDI <- function(data, options, checkpoint_callback = NUL
     time_var <- options$survivalTime
     event_var <- "event_binary"
 
-    old_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
-    new_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
+    old_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep = ""))
+    new_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep = ""))
 
     tryCatch({
         old_cox <- survival::coxph(old_formula, data = data)
         new_cox <- survival::coxph(new_formula, data = data)
-        
-        # Calculate risk at median follow-up or specified time point for IDI
-        # Standard IDI for survival should use risk estimates (1-St)
-        time_points_str <- options$nriTimePoints
-        t_ref <- 60 # Default 5-year
-        if (!is.null(time_points_str)) {
-             tp <- as.numeric(unlist(strsplit(time_points_str, "\\s*,\\s*")))
-             if (length(tp) > 0) t_ref <- tp[length(tp)] # Use last time point
-        }
-        
-        # Ensure t_ref is within observed range
-        max_time <- max(data[[time_var]], na.rm = TRUE)
-        if (t_ref > max_time) t_ref <- max_time
-        
-        get_risk <- function(model, t, newdata) {
-            surv_fit <- survival::survfit(model)
-            idx <- findInterval(t, surv_fit$time)
-            S0_t <- if (idx == 0) 1 else surv_fit$surv[idx]
-            lp <- stats::predict(model, newdata = newdata, type = "lp")
-            1 - (S0_t ^ exp(lp))
-        }
 
-        old_prob <- get_risk(old_cox, t_ref, data)
-        new_prob <- get_risk(new_cox, t_ref, data)
-        
-        events <- data[[event_var]]
-        
-        old_disc_events <- mean(old_prob[events == 1], na.rm = TRUE)
-        old_disc_nonevents <- mean(old_prob[events == 0], na.rm = TRUE)
-        old_disc_slope <- old_disc_events - old_disc_nonevents
-        
-        new_disc_events <- mean(new_prob[events == 1], na.rm = TRUE)
-        new_disc_nonevents <- mean(new_prob[events == 0], na.rm = TRUE)
-        new_disc_slope <- new_disc_events - new_disc_nonevents
-        
-        idi <- new_disc_slope - old_disc_slope
-        
-        n_events <- sum(events == 1, na.rm = TRUE)
-        n_nonevents <- sum(events == 0, na.rm = TRUE)
-        
-        var_old_events <- if (n_events > 1) var(old_prob[events == 1], na.rm = TRUE) / n_events else 0
-        var_old_nonevents <- if (n_nonevents > 1) var(old_prob[events == 0], na.rm = TRUE) / n_nonevents else 0
-        var_new_events <- if (n_events > 1) var(new_prob[events == 1], na.rm = TRUE) / n_events else 0
-        var_new_nonevents <- if (n_nonevents > 1) var(new_prob[events == 0], na.rm = TRUE) / n_nonevents else 0
-        
-        se_idi <- sqrt((var_new_events + var_new_nonevents) + (var_old_events + var_old_nonevents))
-        
-        ci_lower <- idi - 1.96 * se_idi
-        ci_upper <- idi + 1.96 * se_idi
-        
-        z_score <- if (se_idi > 0) idi / se_idi else 0
-        p_value <- if (se_idi > 0) 2 * (1 - pnorm(abs(z_score))) else 1
-        
-        idi_bootstrap <- NULL
-        if (isTRUE(options$performBootstrap) && (n_events + n_nonevents) > 50) {
-             # We might need to expose .bootstrapIDI logic too or just inline it here or assume it's available? 
-             # It was a private method. I will add a simplified version here.
-             idi_bootstrap <- stagemigration_bootstrapIDI(data, old_formula, new_formula, options$bootstrapReps, checkpoint_callback)
+        t_ref <- 60
+        time_points_str <- options$nriTimePoints
+        if (!is.null(time_points_str)) {
+            tp <- suppressWarnings(as.numeric(unlist(strsplit(time_points_str, "\\s*,\\s*"))))
+            tp <- tp[!is.na(tp)]
+            if (length(tp) > 0) t_ref <- tp[length(tp)]
         }
-        
+        time <- data[[time_var]]
+        event <- data[[event_var]]
+        max_time <- max(time, na.rm = TRUE)
+        if (t_ref > max_time) t_ref <- max_time
+
+        old_prob <- stagemigration_coxRiskAt(old_cox, t_ref, data)
+        new_prob <- stagemigration_coxRiskAt(new_cox, t_ref, data)
+
+        wt <- stagemigration_ipcwWeights(time, event, t_ref)
+        if (wt$g_t < 0.05) {
+            return(list(error = sprintf("Fewer than 5%% of patients remain uncensored at %s months, too few for a censoring-weighted IDI.", format(t_ref))))
+        }
+        est <- stagemigration_ipcwIDI(old_prob, new_prob, time, event, t_ref)
+        if (!is.finite(est[["idi"]])) return(list(error = "Insufficient events/non-events for IDI"))
+
+        n <- length(time)
+        reps <- stagemigration_ipcwReps(options)
+        boot <- vapply(seq_len(reps), function(b) {
+            if (!is.null(checkpoint_callback) && b %% 100 == 0) checkpoint_callback()
+            i <- sample.int(n, n, replace = TRUE)
+            stagemigration_ipcwIDI(old_prob[i], new_prob[i], time[i], event[i], t_ref)[["idi"]]
+        }, numeric(1))
+        se_idi <- stats::sd(boot, na.rm = TRUE)
+        idi <- est[["idi"]]
+        z <- stagemigration_zcrit(options)
+        ok <- is.finite(old_prob) & is.finite(new_prob)
+
         list(
             idi = idi,
             idi_se = se_idi,
-            idi_ci_lower = ci_lower,
-            idi_ci_upper = ci_upper,
-            idi_p_value = p_value,
-            old_discrimination_slope = old_disc_slope,
-            new_discrimination_slope = new_disc_slope,
-            old_prob_events = old_disc_events,
-            old_prob_nonevents = old_disc_nonevents,
-            new_prob_events = new_disc_events,
-            new_prob_nonevents = new_disc_nonevents,
-            n_events = n_events,
-            n_non_events = n_nonevents,
-            idi_bootstrap = idi_bootstrap
+            idi_ci_lower = idi - z * se_idi,
+            idi_ci_upper = idi + z * se_idi,
+            idi_p_value = if (is.finite(se_idi) && se_idi > 0) 2 * stats::pnorm(-abs(idi / se_idi)) else NA_real_,
+            old_discrimination_slope = est[["old_events"]] - est[["old_nonevents"]],
+            new_discrimination_slope = est[["new_events"]] - est[["new_nonevents"]],
+            old_prob_events = est[["old_events"]],
+            old_prob_nonevents = est[["old_nonevents"]],
+            new_prob_events = est[["new_events"]],
+            new_prob_nonevents = est[["new_nonevents"]],
+            n_events = sum(wt$case & ok),
+            n_non_events = sum(wt$control & ok),
+            censored_before_t = sum(!wt$case & !wt$control),
+            time_point = t_ref,
+            method = "IPCW",
+            idi_bootstrap = NULL
         )
-    }, error = function(e) list(error = e$message))
-}
-
-stagemigration_bootstrapIDI <- function(data, old_formula, new_formula, reps = 200, checkpoint_callback = NULL) {
-    # Bootstrap for IDI
-    if (!requireNamespace("boot", quietly=TRUE)) return(NULL)
-    
-    if (is.null(reps)) reps <- 200
-    if (reps > 500) reps <- 500 # Limit
-    
-    boot_fn <- function(data, indices) {
-        boot_data <- data[indices, ]
-        tryCatch({
-            old_c <- survival::coxph(old_formula, data = boot_data)
-            new_c <- survival::coxph(new_formula, data = boot_data)
-            
-            # Use same risk estimation as main IDI
-            # Note: t_ref should ideally be passed in but we'll approximate with 60 or max
-            t_ref <- 60
-            max_t <- max(boot_data[[all.vars(old_formula)[1]]], na.rm=TRUE) 
-            if (t_ref > max_t) t_ref <- max_t
-            
-            get_risk_boot <- function(model, t, newdata) {
-                surv_fit <- survival::survfit(model)
-                idx <- findInterval(t, surv_fit$time)
-                S0_t <- if (idx == 0) 1 else surv_fit$surv[idx]
-                lp <- stats::predict(model, newdata = newdata, type = "lp")
-                1 - (S0_t ^ exp(lp))
-            }
-            
-            old_p <- get_risk_boot(old_c, t_ref, boot_data)
-            new_p <- get_risk_boot(new_c, t_ref, boot_data)
-            
-            ev <- boot_data[["event_binary"]]
-            old_slope <- mean(old_p[ev==1], na.rm=TRUE) - mean(old_p[ev==0], na.rm=TRUE)
-            new_slope <- mean(new_p[ev==1], na.rm=TRUE) - mean(new_p[ev==0], na.rm=TRUE)
-            new_slope - old_slope
-        }, error = function(e) NA)
-    }
-    
-    tryCatch({
-        boot_res <- boot::boot(data = data, statistic = boot_fn, R = reps)
-        boot::boot.ci(boot_res, type = "perc")
-    }, error = function(e) NULL)
+    }, error = function(e) list(error = conditionMessage(e)))
 }

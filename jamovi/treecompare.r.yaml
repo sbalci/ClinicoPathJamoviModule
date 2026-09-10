@@ -157,8 +157,8 @@ refs:
     - caret
     - pROC
     - ggplot2
-
     - xgboost
     - party
     - parallel
+    - parttree
 ...

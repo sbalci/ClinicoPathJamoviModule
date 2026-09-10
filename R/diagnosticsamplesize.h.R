@@ -155,7 +155,9 @@ diagnosticsamplesizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
             super$initialize(
                 options=options,
                 name="",
-                title="Diagnostic Test Sample Size Calculator")
+                title="Diagnostic Test Sample Size Calculator",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="sample_size_summary",

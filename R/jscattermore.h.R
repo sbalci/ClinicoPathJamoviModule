@@ -273,7 +273,8 @@ jscattermoreResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "scattermore",
-                    "viridis"))
+                    "viridis",
+                    "digest"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",

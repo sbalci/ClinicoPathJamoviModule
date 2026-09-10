@@ -26,23 +26,19 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             dropout_rate = 0.05,
             ni_margin = 1.25,
             ni_type = "relative_margin",
-            competing_risk_rate = 0.1,
-            competing_risk_hr = 1,
             rmst_tau = 36,
             rmst_difference = 3,
-            snp_maf = 0.3,
-            genetic_model = "additive",
             number_of_arms = 3,
             multiple_comparisons = "dunnett",
             interim_analyses = 0,
             alpha_spending = "none",
-            stratification_factors = 0,
             cluster_size = 50,
             icc = 0.05,
             sensitivity_analysis = FALSE,
             run_simulation_validation = FALSE,
-            simulation_runs = 10000,
+            simulation_runs = 2000,
             simulation_seed = 42,
+            show_interpretation = FALSE,
             show_summary = FALSE,
             show_explanations = FALSE,
             show_glossary = FALSE,
@@ -207,18 +203,6 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "relative_margin",
                     "retention_fraction"),
                 default="relative_margin")
-            private$..competing_risk_rate <- jmvcore::OptionNumber$new(
-                "competing_risk_rate",
-                competing_risk_rate,
-                default=0.1,
-                min=0,
-                max=0.9)
-            private$..competing_risk_hr <- jmvcore::OptionNumber$new(
-                "competing_risk_hr",
-                competing_risk_hr,
-                default=1,
-                min=0.1,
-                max=5)
             private$..rmst_tau <- jmvcore::OptionNumber$new(
                 "rmst_tau",
                 rmst_tau,
@@ -231,21 +215,7 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 default=3,
                 min=0.1,
                 max=60)
-            private$..snp_maf <- jmvcore::OptionNumber$new(
-                "snp_maf",
-                snp_maf,
-                default=0.3,
-                min=0.01,
-                max=0.5)
-            private$..genetic_model <- jmvcore::OptionList$new(
-                "genetic_model",
-                genetic_model,
-                options=list(
-                    "additive",
-                    "dominant",
-                    "recessive"),
-                default="additive")
-            private$..number_of_arms <- jmvcore::OptionNumber$new(
+            private$..number_of_arms <- jmvcore::OptionInteger$new(
                 "number_of_arms",
                 number_of_arms,
                 default=3,
@@ -260,7 +230,7 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "holm",
                     "dunnett"),
                 default="dunnett")
-            private$..interim_analyses <- jmvcore::OptionNumber$new(
+            private$..interim_analyses <- jmvcore::OptionInteger$new(
                 "interim_analyses",
                 interim_analyses,
                 default=0,
@@ -274,12 +244,6 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "obrien_fleming",
                     "pocock"),
                 default="none")
-            private$..stratification_factors <- jmvcore::OptionNumber$new(
-                "stratification_factors",
-                stratification_factors,
-                default=0,
-                min=0,
-                max=5)
             private$..cluster_size <- jmvcore::OptionNumber$new(
                 "cluster_size",
                 cluster_size,
@@ -300,16 +264,20 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "run_simulation_validation",
                 run_simulation_validation,
                 default=FALSE)
-            private$..simulation_runs <- jmvcore::OptionNumber$new(
+            private$..simulation_runs <- jmvcore::OptionInteger$new(
                 "simulation_runs",
                 simulation_runs,
-                default=10000,
+                default=2000,
                 min=1000,
                 max=100000)
             private$..simulation_seed <- jmvcore::OptionInteger$new(
                 "simulation_seed",
                 simulation_seed,
                 default=42)
+            private$..show_interpretation <- jmvcore::OptionBool$new(
+                "show_interpretation",
+                show_interpretation,
+                default=FALSE)
             private$..show_summary <- jmvcore::OptionBool$new(
                 "show_summary",
                 show_summary,
@@ -347,23 +315,19 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..dropout_rate)
             self$.addOption(private$..ni_margin)
             self$.addOption(private$..ni_type)
-            self$.addOption(private$..competing_risk_rate)
-            self$.addOption(private$..competing_risk_hr)
             self$.addOption(private$..rmst_tau)
             self$.addOption(private$..rmst_difference)
-            self$.addOption(private$..snp_maf)
-            self$.addOption(private$..genetic_model)
             self$.addOption(private$..number_of_arms)
             self$.addOption(private$..multiple_comparisons)
             self$.addOption(private$..interim_analyses)
             self$.addOption(private$..alpha_spending)
-            self$.addOption(private$..stratification_factors)
             self$.addOption(private$..cluster_size)
             self$.addOption(private$..icc)
             self$.addOption(private$..sensitivity_analysis)
             self$.addOption(private$..run_simulation_validation)
             self$.addOption(private$..simulation_runs)
             self$.addOption(private$..simulation_seed)
+            self$.addOption(private$..show_interpretation)
             self$.addOption(private$..show_summary)
             self$.addOption(private$..show_explanations)
             self$.addOption(private$..show_glossary)
@@ -390,23 +354,19 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         dropout_rate = function() private$..dropout_rate$value,
         ni_margin = function() private$..ni_margin$value,
         ni_type = function() private$..ni_type$value,
-        competing_risk_rate = function() private$..competing_risk_rate$value,
-        competing_risk_hr = function() private$..competing_risk_hr$value,
         rmst_tau = function() private$..rmst_tau$value,
         rmst_difference = function() private$..rmst_difference$value,
-        snp_maf = function() private$..snp_maf$value,
-        genetic_model = function() private$..genetic_model$value,
         number_of_arms = function() private$..number_of_arms$value,
         multiple_comparisons = function() private$..multiple_comparisons$value,
         interim_analyses = function() private$..interim_analyses$value,
         alpha_spending = function() private$..alpha_spending$value,
-        stratification_factors = function() private$..stratification_factors$value,
         cluster_size = function() private$..cluster_size$value,
         icc = function() private$..icc$value,
         sensitivity_analysis = function() private$..sensitivity_analysis$value,
         run_simulation_validation = function() private$..run_simulation_validation$value,
         simulation_runs = function() private$..simulation_runs$value,
         simulation_seed = function() private$..simulation_seed$value,
+        show_interpretation = function() private$..show_interpretation$value,
         show_summary = function() private$..show_summary$value,
         show_explanations = function() private$..show_explanations$value,
         show_glossary = function() private$..show_glossary$value,
@@ -432,23 +392,19 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..dropout_rate = NA,
         ..ni_margin = NA,
         ..ni_type = NA,
-        ..competing_risk_rate = NA,
-        ..competing_risk_hr = NA,
         ..rmst_tau = NA,
         ..rmst_difference = NA,
-        ..snp_maf = NA,
-        ..genetic_model = NA,
         ..number_of_arms = NA,
         ..multiple_comparisons = NA,
         ..interim_analyses = NA,
         ..alpha_spending = NA,
-        ..stratification_factors = NA,
         ..cluster_size = NA,
         ..icc = NA,
         ..sensitivity_analysis = NA,
         ..run_simulation_validation = NA,
         ..simulation_runs = NA,
         ..simulation_seed = NA,
+        ..show_interpretation = NA,
         ..show_summary = NA,
         ..show_explanations = NA,
         ..show_glossary = NA,
@@ -468,10 +424,7 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         effect_size_results = function() private$.items[["effect_size_results"]],
         study_duration_results = function() private$.items[["study_duration_results"]],
         assumptions_table = function() private$.items[["assumptions_table"]],
-        competing_risks_table = function() private$.items[["competing_risks_table"]],
         non_inferiority_table = function() private$.items[["non_inferiority_table"]],
-        rmst_analysis_table = function() private$.items[["rmst_analysis_table"]],
-        snp_analysis_table = function() private$.items[["snp_analysis_table"]],
         multi_arm_table = function() private$.items[["multi_arm_table"]],
         interim_analysis_table = function() private$.items[["interim_analysis_table"]],
         sensitivity_analysis_table = function() private$.items[["sensitivity_analysis_table"]],
@@ -492,10 +445,10 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 options=options,
                 name="",
-                title="Power Analysis & Sample Size Calculation",
+                title="Survival Power Analysis",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "powerSurvEpi",
+                    "LachinAndFoulkes1986",
                     "gsDesign",
                     "survival",
                     "ggplot2",
@@ -537,17 +490,12 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dropout_rate",
                     "ni_margin",
                     "ni_type",
-                    "competing_risk_rate",
-                    "competing_risk_hr",
                     "rmst_tau",
                     "rmst_difference",
-                    "snp_maf",
-                    "genetic_model",
                     "number_of_arms",
                     "multiple_comparisons",
                     "interim_analyses",
                     "alpha_spending",
-                    "stratification_factors",
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
@@ -580,17 +528,12 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dropout_rate",
                     "ni_margin",
                     "ni_type",
-                    "competing_risk_rate",
-                    "competing_risk_hr",
                     "rmst_tau",
                     "rmst_difference",
-                    "snp_maf",
-                    "genetic_model",
                     "number_of_arms",
                     "multiple_comparisons",
                     "interim_analyses",
                     "alpha_spending",
-                    "stratification_factors",
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
@@ -701,17 +644,12 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dropout_rate",
                     "ni_margin",
                     "ni_type",
-                    "competing_risk_rate",
-                    "competing_risk_hr",
                     "rmst_tau",
                     "rmst_difference",
-                    "snp_maf",
-                    "genetic_model",
                     "number_of_arms",
                     "multiple_comparisons",
                     "interim_analyses",
                     "alpha_spending",
-                    "stratification_factors",
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
@@ -757,17 +695,12 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dropout_rate",
                     "ni_margin",
                     "ni_type",
-                    "competing_risk_rate",
-                    "competing_risk_hr",
                     "rmst_tau",
                     "rmst_difference",
-                    "snp_maf",
-                    "genetic_model",
                     "number_of_arms",
                     "multiple_comparisons",
                     "interim_analyses",
                     "alpha_spending",
-                    "stratification_factors",
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
@@ -813,17 +746,12 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dropout_rate",
                     "ni_margin",
                     "ni_type",
-                    "competing_risk_rate",
-                    "competing_risk_hr",
                     "rmst_tau",
                     "rmst_difference",
-                    "snp_maf",
-                    "genetic_model",
                     "number_of_arms",
                     "multiple_comparisons",
                     "interim_analyses",
                     "alpha_spending",
-                    "stratification_factors",
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
@@ -869,17 +797,12 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dropout_rate",
                     "ni_margin",
                     "ni_type",
-                    "competing_risk_rate",
-                    "competing_risk_hr",
                     "rmst_tau",
                     "rmst_difference",
-                    "snp_maf",
-                    "genetic_model",
                     "number_of_arms",
                     "multiple_comparisons",
                     "interim_analyses",
                     "alpha_spending",
-                    "stratification_factors",
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
@@ -925,17 +848,12 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dropout_rate",
                     "ni_margin",
                     "ni_type",
-                    "competing_risk_rate",
-                    "competing_risk_hr",
                     "rmst_tau",
                     "rmst_difference",
-                    "snp_maf",
-                    "genetic_model",
                     "number_of_arms",
                     "multiple_comparisons",
                     "interim_analyses",
                     "alpha_spending",
-                    "stratification_factors",
                     "cluster_size",
                     "icc",
                     "sensitivity_analysis",
@@ -957,51 +875,6 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="recommendation", 
                         `title`="Recommendation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="competing_risks_table",
-                title="Competing Risks Analysis",
-                rows=0,
-                visible="(test_type==\"competing_risks\")",
-                clearWith=list(
-                    "clinical_preset",
-                    "analysis_type",
-                    "test_type",
-                    "effect_size",
-                    "alpha_level",
-                    "power_level",
-                    "allocation_ratio",
-                    "control_median_survival",
-                    "accrual_period",
-                    "follow_up_period",
-                    "dropout_rate",
-                    "competing_risk_rate",
-                    "competing_risk_hr"),
-                columns=list(
-                    list(
-                        `name`="risk_type", 
-                        `title`="Risk Type", 
-                        `type`="text"),
-                    list(
-                        `name`="event_rate", 
-                        `title`="Event Rate", 
-                        `type`="number"),
-                    list(
-                        `name`="hazard_ratio", 
-                        `title`="Hazard Ratio", 
-                        `type`="number"),
-                    list(
-                        `name`="cumulative_incidence", 
-                        `title`="Cumulative Incidence (%)", 
-                        `type`="number"),
-                    list(
-                        `name`="required_events", 
-                        `title`="Required Events", 
-                        `type`="integer"),
-                    list(
-                        `name`="sample_size_impact", 
-                        `title`="Sample Size Impact", 
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -1035,80 +908,6 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="clinical_interpretation", 
                         `title`="Clinical Interpretation", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="rmst_analysis_table",
-                title="RMST Analysis Parameters",
-                rows=0,
-                visible="(test_type==\"rmst_test\")",
-                clearWith=list(
-                    "clinical_preset",
-                    "analysis_type",
-                    "test_type",
-                    "effect_size",
-                    "alpha_level",
-                    "power_level",
-                    "control_median_survival",
-                    "rmst_tau",
-                    "rmst_difference"),
-                columns=list(
-                    list(
-                        `name`="parameter", 
-                        `title`="Parameter", 
-                        `type`="text"),
-                    list(
-                        `name`="control_group", 
-                        `title`="Control Group", 
-                        `type`="number"),
-                    list(
-                        `name`="treatment_group", 
-                        `title`="Treatment Group", 
-                        `type`="number"),
-                    list(
-                        `name`="difference", 
-                        `title`="Difference", 
-                        `type`="number"),
-                    list(
-                        `name`="confidence_interval", 
-                        `title`="95% CI", 
-                        `type`="text"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="snp_analysis_table",
-                title="SNP-based Survival Analysis",
-                rows=0,
-                visible="(test_type==\"snp_survival\")",
-                clearWith=list(
-                    "clinical_preset",
-                    "analysis_type",
-                    "test_type",
-                    "effect_size",
-                    "alpha_level",
-                    "power_level",
-                    "control_median_survival",
-                    "snp_maf",
-                    "genetic_model"),
-                columns=list(
-                    list(
-                        `name`="genetic_model", 
-                        `title`="Genetic Model", 
-                        `type`="text"),
-                    list(
-                        `name`="maf", 
-                        `title`="Minor Allele Frequency", 
-                        `type`="number"),
-                    list(
-                        `name`="genotype_frequencies", 
-                        `title`="Genotype Frequencies", 
-                        `type`="text"),
-                    list(
-                        `name`="required_sample_size", 
-                        `title`="Required Sample Size", 
-                        `type`="integer"),
-                    list(
-                        `name`="power_by_genotype", 
-                        `title`="Power by Genotype", 
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -1340,9 +1139,10 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="clinical_interpretation",
                 title="Clinical Interpretation and Recommendations",
-                visible=TRUE,
+                visible="(show_interpretation)",
                 clearWith=list(
                     "clinical_preset",
+                    "show_interpretation",
                     "analysis_type",
                     "test_type",
                     "study_design",
@@ -1396,7 +1196,7 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survivalPower",
-                version = c(0,3,0),
+                version = c(0,4,0),
                 options = options,
                 results = survivalPowerResults$new(options=options),
                 data = data,
@@ -1428,7 +1228,10 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param study_design Overall study design type
 #' @param primary_endpoint Primary survival endpoint
 #' @param effect_size_type Type of effect size specification
-#' @param effect_size Expected effect size (HR, median ratio, or difference)
+#' @param effect_size Expected effect size, interpreted according to Effect
+#'   Size Type: a hazard ratio, a median survival ratio (treatment/control), or
+#'   a survival probability difference read at the Additional Follow-up time.
+#'   For RMST Difference the RMST options are used instead.
 #' @param alpha_level Significance level (two-sided)
 #' @param power_level Desired statistical power
 #' @param allocation_ratio Ratio of control to experimental group sizes
@@ -1447,28 +1250,26 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param dropout_rate Annual rate of loss to follow-up
 #' @param ni_margin Non-inferiority margin (hazard ratio scale)
 #' @param ni_type Type of non-inferiority margin
-#' @param competing_risk_rate Annual rate of competing risk events
-#' @param competing_risk_hr Treatment effect on competing risks
 #' @param rmst_tau Restriction time for RMST analysis
 #' @param rmst_difference Expected difference in restricted mean survival time
-#' @param snp_maf Minor allele frequency for SNP analysis
-#' @param genetic_model Genetic inheritance model
 #' @param number_of_arms Total number of treatment arms (including control)
 #' @param multiple_comparisons Method for multiple comparisons adjustment
 #' @param interim_analyses Number of planned interim analyses
 #' @param alpha_spending Alpha spending function for interim analyses
-#' @param stratification_factors Number of stratification factors
 #' @param cluster_size Average cluster size for cluster randomized trials
 #' @param icc ICC for cluster randomized trials
 #' @param sensitivity_analysis Perform sensitivity analysis across parameter
 #'   ranges
 #' @param run_simulation_validation Validate analytical power calculations
-#'   using Monte Carlo simulation. Currently validated for exponential log-rank
-#'   settings only. May take 10-60 seconds depending on simulation_runs setting.
-#' @param simulation_runs Number of simulation runs for complex calculations
+#'   using Monte Carlo simulation. Available for log-rank and Cox designs under
+#'   the exponential assumption. About 6 seconds at the default 2000 runs.
+#' @param simulation_runs Number of Monte Carlo runs. The default of 2000
+#'   gives a Monte Carlo standard error below 0.01 for power near 0.8.
 #' @param simulation_seed Random seed for the Monte Carlo validation, so the
 #'   simulated power is reproducible across runs. Change it to inspect Monte
 #'   Carlo variability.
+#' @param show_interpretation Display the study summary, clinical
+#'   interpretation, and a copy-ready report sentence describing the design.
 #' @param show_summary Display plain-language summary of results
 #' @param show_explanations Display educational notes and guidance
 #' @param show_glossary Display glossary of statistical terms
@@ -1484,10 +1285,7 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$effect_size_results} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$study_duration_results} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$assumptions_table} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$competing_risks_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$non_inferiority_table} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$rmst_analysis_table} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$snp_analysis_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multi_arm_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interim_analysis_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$sensitivity_analysis_table} \tab \tab \tab \tab \tab a table \cr
@@ -1532,23 +1330,19 @@ survivalPower <- function(
     dropout_rate = 0.05,
     ni_margin = 1.25,
     ni_type = "relative_margin",
-    competing_risk_rate = 0.1,
-    competing_risk_hr = 1,
     rmst_tau = 36,
     rmst_difference = 3,
-    snp_maf = 0.3,
-    genetic_model = "additive",
     number_of_arms = 3,
     multiple_comparisons = "dunnett",
     interim_analyses = 0,
     alpha_spending = "none",
-    stratification_factors = 0,
     cluster_size = 50,
     icc = 0.05,
     sensitivity_analysis = FALSE,
     run_simulation_validation = FALSE,
-    simulation_runs = 10000,
+    simulation_runs = 2000,
     simulation_seed = 42,
+    show_interpretation = FALSE,
     show_summary = FALSE,
     show_explanations = FALSE,
     show_glossary = FALSE,
@@ -1579,23 +1373,19 @@ survivalPower <- function(
         dropout_rate = dropout_rate,
         ni_margin = ni_margin,
         ni_type = ni_type,
-        competing_risk_rate = competing_risk_rate,
-        competing_risk_hr = competing_risk_hr,
         rmst_tau = rmst_tau,
         rmst_difference = rmst_difference,
-        snp_maf = snp_maf,
-        genetic_model = genetic_model,
         number_of_arms = number_of_arms,
         multiple_comparisons = multiple_comparisons,
         interim_analyses = interim_analyses,
         alpha_spending = alpha_spending,
-        stratification_factors = stratification_factors,
         cluster_size = cluster_size,
         icc = icc,
         sensitivity_analysis = sensitivity_analysis,
         run_simulation_validation = run_simulation_validation,
         simulation_runs = simulation_runs,
         simulation_seed = simulation_seed,
+        show_interpretation = show_interpretation,
         show_summary = show_summary,
         show_explanations = show_explanations,
         show_glossary = show_glossary,

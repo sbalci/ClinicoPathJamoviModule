@@ -28,15 +28,12 @@ pathagreement(
   showStatisticalGlossary = FALSE,
   styleDistanceMetric = "agreement",
   raterCharacteristics = FALSE,
-  experienceVar = NULL,
-  trainingVar = NULL,
-  institutionVar = NULL,
-  specialtyVar = NULL,
   identifyDiscordantCases = FALSE,
   caseID = NULL,
   icc = FALSE,
   bootstrap = FALSE,
   bootstrapSamples = 1000,
+  seed = 42,
   pairwiseAnalysis = FALSE,
   categoryAnalysis = FALSE,
   outlierAnalysis = FALSE,
@@ -58,16 +55,12 @@ pathagreement(
   heatmapColorScheme = "diagnostic",
   identifyDiscordant = FALSE,
   discordantThreshold = 0.5,
-  raterExperience = NULL,
-  raterSpecialty = NULL,
-  raterInstitution = NULL,
-  raterVolume = NULL,
   referenceStandard = NULL,
   useMetadataRows = FALSE,
   showInlineComments = FALSE,
   showClusteringInterpretation = FALSE,
   enhancedErrorGuidance = TRUE,
-  showProgressIndicators = TRUE
+  showProgressIndicators = FALSE
 )
 }
 \arguments{
@@ -94,8 +87,9 @@ visualization.}
 only with ordinal variables. Weighted kappa accounts for the degree of
 disagreement.}
 
-\item{exct}{Use exact method for Fleiss' kappa calculation with 3 or more
-raters. More accurate but computationally intensive.}
+\item{exct}{Report Conger's (1980) kappa instead of Fleiss' kappa for 3 or
+more raters. Conger's kappa uses each rater's own category proportions; it
+is a different estimator, not a more precise version of Fleiss' kappa.}
 
 \item{multiraterMethod}{Choose specific method for multi-rater agreement
 analysis or use automatic selection.}
@@ -142,18 +136,6 @@ similarity between raters for style clustering.}
 \item{raterCharacteristics}{Include rater background characteristics
 (experience, training, institution) in style analysis.}
 
-\item{experienceVar}{Optional variable containing rater experience
-information (years of experience, level of training, etc.)}
-
-\item{trainingVar}{Optional variable containing rater training institution
-or background information}
-
-\item{institutionVar}{Optional variable containing rater current
-institution or location information}
-
-\item{specialtyVar}{Optional variable containing rater medical specialty or
-subspecialty information}
-
 \item{identifyDiscordantCases}{Identify cases that distinguish different
 diagnostic styles - useful for training and consensus development.}
 
@@ -168,6 +150,10 @@ Krippendorff's alpha and other statistics.}
 
 \item{bootstrapSamples}{Number of bootstrap samples for confidence interval
 calculation.}
+
+\item{seed}{Seed for the bootstrap resampling (Krippendorff's alpha
+confidence interval and agreement stability) so that results are
+reproducible.}
 
 \item{pairwiseAnalysis}{Detailed analysis of agreement between each pair of
 raters.}
@@ -195,17 +181,18 @@ agreement studies with specified precision requirements.}
 \item{targetKappa}{Target kappa value for sample size planning
 calculations.}
 
-\item{targetPrecision}{Target precision for confidence interval width in
-sample size planning.}
+\item{targetPrecision}{Half-width of the 95 percent confidence interval for
+kappa that the study should achieve, for example 0.1 for kappa 0.8 +/- 0.1.}
 
-\item{raterBiasAnalysis}{Analyze systematic tendencies and biases for each
-rater compared to the consensus or average ratings.}
+\item{raterBiasAnalysis}{For each rater, the share of cases on which their
+rating differs from the most common rating of the other raters, with any
+systematic over- or under-use of a category.}
 
 \item{agreementTrendAnalysis}{Analyze how agreement changes over time or
 case sequence, useful for training effect assessment.}
 
-\item{caseDifficultyScoring}{Quantify inherent case difficulty based on
-inter-rater disagreement patterns and provide difficulty scores.}
+\item{caseDifficultyScoring}{Difficulty of each case from the share of
+raters who chose the most common rating.}
 
 \item{agreementStabilityAnalysis}{Bootstrap-based stability measures to
 assess the consistency of agreement statistics across different samples.}
@@ -239,21 +226,6 @@ training and quality assurance discussions.}
 \item{discordantThreshold}{Minimum disagreement proportion for flagging
 discordant cases. 0.5 means at least 50 percent of raters disagreed with
 majority diagnosis.}
-
-\item{raterExperience}{Years of experience for each rater. Will be tested
-for association with style group membership.}
-
-\item{raterSpecialty}{Specialty or practice type (e.g., specialist vs
-generalist, subspecialty). Will be tested for association with style group
-membership.}
-
-\item{raterInstitution}{Training or current practice institution. Will be
-tested for association with style group membership. Usubutun (2012) found
-no association, suggesting diagnostic style is personal rather than
-institutional.}
-
-\item{raterVolume}{Number of cases seen per month or year. Will be tested
-for association with style group membership.}
 
 \item{referenceStandard}{Expert consensus or reference standard diagnosis.
 Used to compare style groups and identify which group aligns most closely

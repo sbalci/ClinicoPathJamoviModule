@@ -101,5 +101,6 @@ items:
         - plotheight
 
 refs:
+    - ClinicoPathJamoviModule
     - glue
     - ggrepel

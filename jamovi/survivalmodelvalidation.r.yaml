@@ -322,10 +322,11 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - stringr
     - survival
     - boot
     - timeROC
     - SchemperSmith1996
+    - dcurves
+    - pec
 ...

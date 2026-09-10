@@ -122,7 +122,6 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - janitor
     - labelled
     - glue
@@ -132,5 +131,5 @@ refs:
     - broom
     - survival
     - lme4
-
+    - broom.mixed
 ...

@@ -373,10 +373,10 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - survival
     - glmnet
     - parallel
     - doParallel
     - foreach
+    - graphics
 ...

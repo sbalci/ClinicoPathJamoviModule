@@ -32,7 +32,6 @@ items:
       height: 600
       requiresData: true
       renderFun: .plotMain
-      refs: jjoncoplot
       clearWith:
         - geneVars
         - sampleVar

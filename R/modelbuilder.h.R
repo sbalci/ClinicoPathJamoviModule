@@ -470,12 +470,12 @@ modelbuilderResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="Prediction Model Builder",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "glmnet",
                     "rms",
                     "pROC",
                     "mice",
-                    "VIM",
-                    "ClinicoPathJamoviModule"))
+                    "VIM"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

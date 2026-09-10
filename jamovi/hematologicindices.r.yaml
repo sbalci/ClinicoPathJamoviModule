@@ -146,8 +146,9 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - onodera1984pni
     - mcmillan2013gps
-    - ClinicoPathJamoviModule
     - ggplot2
+    - survival
 ...

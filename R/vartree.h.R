@@ -315,8 +315,9 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Variable Tree",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "vtree",
-                    "ClinicoPathJamoviModule"))
+                    "DiagrammeR"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
@@ -508,7 +509,7 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "vartree",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = vartreeResults$new(options=options),
                 data = data,

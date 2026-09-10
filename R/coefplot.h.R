@@ -296,10 +296,10 @@ coefplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Coefficient Plots",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "coefplot",
                     "jtools",
                     "ggplot2",
-                    "ClinicoPathJamoviModule",
                     "survival"))
             self$add(jmvcore::Html$new(
                 options=options,

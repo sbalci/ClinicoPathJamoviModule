@@ -41,10 +41,9 @@ items:
           - group
 
 refs:
+    - ClinicoPathJamoviModule
     - ggplot2
     - RGraphGallery
     - hrbrthemes
-    - ClinicoPathJamoviModule
-
-
+    - digest
 ...

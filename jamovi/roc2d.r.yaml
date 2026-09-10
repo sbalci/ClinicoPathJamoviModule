@@ -97,4 +97,8 @@ items:
       title: Interpretation
       type: Html
       visible: (show_interpretation)
+
+refs:
+    - ClinicoPathJamoviModule
+    - pROC
 ...

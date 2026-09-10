@@ -142,9 +142,9 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - pocock2012winratio
     - dong2016winratio
-    - ClinicoPathJamoviModule
     - glue
     - ggplot2
     - scales

@@ -21,12 +21,9 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - report
     - gtExtras
-    - ClinicoPathJamoviModule
-
-
-
     - tibble
     - glue
     - scales

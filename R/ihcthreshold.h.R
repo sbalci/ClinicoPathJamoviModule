@@ -217,7 +217,9 @@ ihcthresholdResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 options=options,
                 name="",
-                title="IHC Threshold Determination")
+                title="IHC Threshold Determination",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summaryTable",

@@ -104,8 +104,8 @@ items:
 
 
 refs:
-    - kim2000joinpoint
     - ClinicoPathJamoviModule
+    - kim2000joinpoint
     - segmented
     - ggplot2
 ...

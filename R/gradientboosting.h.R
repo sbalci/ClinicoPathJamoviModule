@@ -304,13 +304,14 @@ gradientboostingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="",
                 title="Gradient Boosting for Survival Analysis",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "survival",
                     "mboost",
                     "gbm",
                     "xgboost",
-                    "ClinicoPathJamoviModule",
                     "survival",
-                    "Matrix"))
+                    "Matrix",
+                    "graphics"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

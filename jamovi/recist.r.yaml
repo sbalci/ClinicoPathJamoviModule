@@ -310,4 +310,7 @@ items:
     type: Html
     visible: (showReference)
 
+
+refs:
+    - ClinicoPathJamoviModule
 ...

@@ -258,7 +258,8 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="IHC Heterogeneity Analysis",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "psych"))
+                    "psych",
+                    "devtools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -688,7 +689,7 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "ihcheterogeneity",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = ihcheterogeneityResults$new(options=options),
                 data = data,

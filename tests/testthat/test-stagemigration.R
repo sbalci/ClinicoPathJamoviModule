@@ -449,3 +449,128 @@ test_that("the removed clinical-preset option is gone from the schema", {
                    clinicalPreset = "routine_clinical"),
     "unused argument")
 })
+
+# ═══════════════════════════════════════════════════════════════════════
+# RELEASE REVIEW (2026-09-10): reference values and clinical edge cases
+# Each numeric check is against survival / hand computation, not the module.
+# ═══════════════════════════════════════════════════════════════════════
+
+sm_lung <- function() {
+  e <- new.env()
+  load(testthat::test_path("..", "..", "data", "stagemigration_lung_cancer.rda"), envir = e)
+  d <- e$lung[, c("old_stage", "new_stage", "survival_time", "event")]
+  d$old_stage <- factor(as.character(d$old_stage))
+  d$new_stage <- factor(as.character(d$new_stage))
+  d
+}
+sm_run <- function(data, ...) {
+  ClinicoPath::stagemigration(data = data, oldStage = "old_stage", newStage = "new_stage",
+                              survivalTime = "survival_time", event = "event", eventLevel = "1", ...)
+}
+
+test_that("migration overview counts match a direct cross-tabulation", {
+  skip_on_cran()
+  d <- sm_lung()
+  ov <- sm_run(d)$migrationOverview$asDF
+  oi <- match(as.character(d$old_stage), levels(d$old_stage))
+  ni <- match(as.character(d$new_stage), levels(d$old_stage))
+  expect_equal(as.numeric(as.character(ov$value)),
+               c(nrow(d), sum(oi == ni), sum(oi != ni), sum(ni > oi), sum(ni < oi)))
+})
+
+test_that("C-index difference CI and p-value use the paired variance", {
+  skip_on_cran()
+  d <- sm_lung()
+  res <- sm_run(d, showStatisticalComparison = TRUE, showConcordanceComparison = TRUE)
+  fo <- survival::coxph(survival::Surv(survival_time, event) ~ old_stage, data = d)
+  fn <- survival::coxph(survival::Surv(survival_time, event) ~ new_stage, data = d)
+  cc <- survival::concordance(fo, fn)
+  diff <- cc$concordance[2] - cc$concordance[1]
+  se <- sqrt(drop(c(-1, 1) %*% cc$var %*% c(-1, 1)))
+  sc <- res$statisticalComparison$asDF
+  ci <- as.numeric(regmatches(sc$ci[sc$metric == "C-index Improvement"], gregexpr("[-+]?[0-9.]+", sc$ci[sc$metric == "C-index Improvement"]))[[1]])
+  # the table prints 4 decimals, so compare on an absolute scale
+  expect_true(all(abs(ci - unname(c(diff - qnorm(0.975) * se, diff + qnorm(0.975) * se))) < 1e-4))
+  cmp <- res$concordanceComparison$asDF
+  expect_identical(as.character(cmp$p_value[cmp$Model == "New Staging"]), sprintf("%.3f", 2 * pnorm(-abs(diff / se))))
+})
+
+test_that("likelihood-ratio rows are nested tests through the combined model", {
+  skip_on_cran()
+  d <- sm_lung()
+  lt <- sm_run(d, performLikelihoodTests = TRUE)$likelihoodTests$asDF
+  expect_equal(nrow(lt), 2)
+  fo <- survival::coxph(survival::Surv(survival_time, event) ~ old_stage, data = d)
+  fn <- survival::coxph(survival::Surv(survival_time, event) ~ new_stage, data = d)
+  both <- survival::coxph(survival::Surv(survival_time, event) ~ old_stage + new_stage, data = d)
+  expect_equal(as.numeric(lt$Chi_Square), c(anova(fo, both)[2, "Chisq"], anova(fn, both)[2, "Chisq"]), tolerance = 1e-6)
+  expect_true(all(as.numeric(lt$Chi_Square) >= 0))
+})
+
+test_that("statistical summary reports the computed C-index difference, not constants", {
+  skip_on_cran()
+  d <- sm_lung()
+  ss <- sm_run(d, showStatisticalSummary = TRUE)$statisticalSummary$asDF
+  row <- ss[ss$Method == "C-index Improvement", ]
+  cc <- survival::concordance(survival::coxph(survival::Surv(survival_time, event) ~ old_stage, data = d),
+                              survival::coxph(survival::Surv(survival_time, event) ~ new_stage, data = d))
+  expect_identical(as.character(row$Result), sprintf("%.4f", cc$concordance[2] - cc$concordance[1]))
+  expect_false(identical(as.character(row$CI), "[-0.0341, +0.0698]"))
+  expect_false(isTRUE(all.equal(as.numeric(row$p_value), 0.501)))
+})
+
+test_that("migration summary describes the Monte Carlo Fisher test honestly", {
+  skip_on_cran()
+  ms <- sm_run(sm_lung(), showMigrationSummary = TRUE)$migrationSummary$asDF
+  expect_match(as.character(ms$value[ms$statistic == "Fisher's Exact Test"]), "Monte Carlo")
+  expect_false(grepl("e-16", as.character(ms$value[ms$statistic == "Chi-square p-value"]), fixed = TRUE))
+})
+
+test_that("different stage label sets leave the direction of migration undefined", {
+  skip_on_cran()
+  d <- sm_lung()
+  set.seed(5)
+  ns <- as.character(d$new_stage)
+  ii <- ns == "Stage II"
+  ns[ii] <- sample(c("Stage IIA", "Stage IIB"), sum(ii), replace = TRUE)
+  d$new_stage <- factor(ns)
+  res <- sm_run(d)
+  ov <- res$migrationOverview$asDF
+  expect_identical(as.character(ov$value[ov$statistic == "Upstaged"]), "Not defined")
+  expect_equal(as.numeric(as.character(ov$value[ov$statistic == "Unchanged Stage"])), sum(as.character(d$old_stage) == ns))
+  expect_match(res$notices$content, "Direction of migration not determined", fixed = TRUE)
+})
+
+test_that("an all-censored cohort fails with an events message", {
+  skip_on_cran()
+  d <- sm_lung()
+  d$event <- 0
+  expect_error(sm_run(d), "Too few events")
+})
+
+test_that("special-character names and a labelled factor event give the same counts", {
+  skip_on_cran()
+  d <- sm_lung()
+  d5 <- data.frame(`Old Stage (AJCC7)` = d$old_stage, `New Stage` = d$new_stage, `OS months` = d$survival_time,
+                   `Vital status` = factor(ifelse(d$event == 1, "Dead", "Alive"), levels = c("Alive", "Dead")), check.names = FALSE)
+  res <- ClinicoPath::stagemigration(data = d5, oldStage = "Old Stage (AJCC7)", newStage = "New Stage", survivalTime = "OS months",
+                                     event = "Vital status", eventLevel = "Dead")
+  expect_equal(as.numeric(as.character(res$migrationOverview$asDF$value[1])), nrow(d))
+  expect_match(res$notices$content, sprintf("with %d events", sum(d$event == 1)), fixed = TRUE)
+})
+
+test_that("methods whose locals feed survival formulas run", {
+  skip_on_cran()
+  d <- sm_lung()
+  d$event_binary <- as.integer(d$event == 1)
+  opts <- ClinicoPath:::stagemigrationOptions$new(oldStage = "old_stage", newStage = "new_stage", survivalTime = "survival_time",
+                                                 event = "event", eventLevel = "1")
+  a <- ClinicoPath:::stagemigrationClass$new(options = opts, data = d)
+  a$init()
+  pv <- a$.__enclos_env__$private
+  wr <- pv$.calculateWillRogersEffect(d, "Stage II", "Stage III", 27)
+  expect_true(is.list(wr) && nzchar(wr$Will_Rogers_Evidence))
+  sub <- d[d$new_stage == "Stage II", ]
+  expect_equal(unname(pv$.calculateMedianSurvival(sub)),
+               unname(summary(survival::survfit(survival::Surv(survival_time, event_binary) ~ 1, data = sub))$table["median"]))
+})

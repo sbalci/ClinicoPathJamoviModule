@@ -408,4 +408,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - psych
+    - devtools
 ...

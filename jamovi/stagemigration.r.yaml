@@ -14,6 +14,20 @@ items:
           - survivalTime
           - event
           - eventLevel
+          - seed
+
+    # Notices: data-validation and sub-analysis findings, rendered by .renderNotices()
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+          - oldStage
+          - newStage
+          - survivalTime
+          - event
+          - eventLevel
+          - analysisType
+          - seed
 
     # Copy-Ready Clinical Report (New Feature)
     - name: copyReadyReport
@@ -27,6 +41,7 @@ items:
           - event
           - eventLevel
           - analysisType
+          - seed
 
     # Guided Mode Progress Indicator (New Feature)
     - name: guidedModeProgress
@@ -39,23 +54,13 @@ items:
           - survivalTime
           - event
           - eventLevel
-
-    # Debugging Information
-    - name: mydataview
-      title: mydataview
-      type: Preformatted
-      visible: false
-
-    - name: mydataview2
-      title: mydataview2
-      type: Preformatted
-      visible: false
+          - seed
 
     # Migration Overview Explanation
     - name: migrationOverviewExplanation
       title: Understanding the Migration Overview
       type: Html
-      visible: false
+      visible: (showMigrationOverview && showExplanations)
       clearWith:
           - showMigrationOverview
 
@@ -70,6 +75,7 @@ items:
           - survivalTime
           - event
           - eventLevel
+          - seed
       columns:
           - name: statistic
             title: "Statistic"
@@ -86,7 +92,7 @@ items:
     - name: migrationMatrixExplanation
       title: Understanding the Migration Matrix
       type: Html
-      visible: false
+      visible: (showMigrationMatrix && showExplanations)
       clearWith:
           - showMigrationMatrix
 
@@ -98,6 +104,7 @@ items:
       clearWith:
           - oldStage
           - newStage
+          - seed
       columns:
         - name: .name
           title: "Original Stage"
@@ -110,7 +117,7 @@ items:
     - name: stageDistributionExplanation
       title: Understanding Stage Distribution Changes
       type: Html
-      visible: false
+      visible: (showStageDistribution && showExplanations)
       clearWith:
           - showStageDistribution
 
@@ -122,6 +129,7 @@ items:
       clearWith:
           - oldStage
           - newStage
+          - seed
       columns:
           - name: stage
             title: "Stage"
@@ -149,7 +157,7 @@ items:
     - name: migrationSummaryExplanation
       title: Understanding Statistical Tests for Migration
       type: Html
-      visible: false
+      visible: (showMigrationSummary && showExplanations)
       clearWith:
           - showMigrationSummary
 
@@ -164,6 +172,7 @@ items:
           - survivalTime
           - event
           - eventLevel
+          - seed
       columns:
           - name: statistic
             title: "Statistic"
@@ -178,7 +187,7 @@ items:
     - name: statisticalComparisonExplanation
       title: Understanding Statistical Comparison Metrics
       type: Html
-      visible: false
+      visible: (showStatisticalComparison && showExplanations)
       clearWith:
           - showStatisticalComparison
 
@@ -193,6 +202,7 @@ items:
           - survivalTime
           - event
           - eventLevel
+          - seed
       columns:
           - name: metric
             title: "Metric"
@@ -214,7 +224,7 @@ items:
     - name: concordanceComparisonExplanation
       title: Understanding Concordance (C-Index) Analysis
       type: Html
-      visible: false
+      visible: (showConcordanceComparison && showExplanations)
       clearWith:
           - showConcordanceComparison
 
@@ -229,6 +239,8 @@ items:
           - survivalTime
           - event
           - eventLevel
+          - confidenceLevel
+          - seed
       columns:
           - name: Model
             title: "Model"
@@ -262,7 +274,7 @@ items:
     - name: nriResultsExplanation
       title: Understanding Net Reclassification Improvement (NRI)
       type: Html
-      visible: false
+      visible: (calculateNRI && showExplanations)
       clearWith:
           - calculateNRI
 
@@ -279,6 +291,8 @@ items:
           - eventLevel
           - calculateNRI
           - nriTimePoints
+          - confidenceLevel
+          - seed
       columns:
           - name: TimePoint
             title: "Time Point (months)"
@@ -312,7 +326,7 @@ items:
     - name: idiResultsExplanation
       title: Understanding Integrated Discrimination Improvement (IDI)
       type: Html
-      visible: false
+      visible: (calculateIDI && showExplanations)
       clearWith:
           - calculateIDI
 
@@ -328,6 +342,8 @@ items:
           - event
           - eventLevel
           - calculateIDI
+          - confidenceLevel
+          - seed
       columns:
           - name: IDI
             title: "IDI"
@@ -362,6 +378,8 @@ items:
           - eventLevel
           - calculateIDI
           - nriTimePoints
+          - confidenceLevel
+          - seed
       columns:
           - name: Metric
             title: "Metric"
@@ -408,6 +426,7 @@ items:
           - categoricalCovariates
           - multifactorialComparisonType
           - baselineModel
+          - confidenceLevel
       columns:
           - name: Model
             title: "Model"
@@ -455,6 +474,7 @@ items:
           - enableMultifactorialAnalysis
           - continuousCovariates
           - categoricalCovariates
+          - confidenceLevel
       columns:
           - name: Comparison
             title: "Comparison"
@@ -659,6 +679,7 @@ items:
           - continuousCovariates
           - categoricalCovariates
           - nriTimePoints
+          - seed
       columns:
           - name: TimePoint
             title: "Time Point (months)"
@@ -703,6 +724,7 @@ items:
           - eventLevel
           - continuousCovariates
           - categoricalCovariates
+          - seed
       columns:
           - name: Model
             title: "Model"
@@ -745,6 +767,7 @@ items:
           - continuousCovariates
           - categoricalCovariates
           - nriTimePoints
+          - seed
       columns:
           - name: Time_Point
             title: "Time Point (months)"
@@ -782,6 +805,7 @@ items:
           - eventLevel
           - performROCAnalysis
           - rocTimePoints
+          - seed
       columns:
           - name: TimePoint
             title: "Time Point (months)"
@@ -816,6 +840,8 @@ items:
           - eventLevel
           - advancedMigrationAnalysis
           - nriTimePoints
+          - confidenceLevel
+          - seed
       columns:
           - name: Metric
             title: "Metric"
@@ -852,7 +878,7 @@ items:
     - name: dcaResultsExplanation
       title: Understanding Decision Curve Analysis (DCA)
       type: Html
-      visible: false
+      visible: (performDCA && showExplanations)
       clearWith:
           - performDCA
 
@@ -867,6 +893,7 @@ items:
           - event
           - eventLevel
           - performDCA
+          - seed
       columns:
           - name: Threshold
             title: "Threshold"
@@ -889,7 +916,7 @@ items:
     - name: pseudoR2ResultsExplanation
       title: Understanding Pseudo R-squared Measures
       type: Html
-      visible: false
+      visible: (calculatePseudoR2 && showExplanations)
       clearWith:
           - calculatePseudoR2
 
@@ -905,6 +932,7 @@ items:
           - event
           - eventLevel
           - calculatePseudoR2
+          - seed
       columns:
           - name: Measure
             title: "Measure"
@@ -949,6 +977,7 @@ items:
           - eventLevel
           - showDecisionCurves
           - performDCA
+          - seed
 
     # Bootstrap Validation Results
     - name: bootstrapResults
@@ -963,6 +992,8 @@ items:
           - eventLevel
           - performBootstrap
           - bootstrapReps
+          - confidenceLevel
+          - seed
       columns:
           - name: Metric
             title: "Metric"
@@ -1030,6 +1061,7 @@ items:
           - event
           - eventLevel
           - showWillRogersAnalysis
+          - seed
       columns:
           - name: Stage
             title: "Stage"
@@ -1073,6 +1105,7 @@ items:
           - event
           - eventLevel
           - performLikelihoodTests
+          - seed
       columns:
           - name: Test
             title: "Test"
@@ -1109,6 +1142,7 @@ items:
           - event
           - eventLevel
           - performLikelihoodTests
+          - seed
       columns:
           - name: Staging_System
             title: "Staging System"
@@ -1139,7 +1173,7 @@ items:
     - name: homogeneityTestsExplanation
       title: Understanding Stage Homogeneity Tests
       type: Html
-      visible: false
+      visible: (performHomogeneityTests && showExplanations)
       clearWith:
           - performHomogeneityTests
 
@@ -1155,6 +1189,7 @@ items:
           - event
           - eventLevel
           - performHomogeneityTests
+          - seed
       columns:
           - name: Stage
             title: "Stage"
@@ -1175,7 +1210,7 @@ items:
     - name: trendTestsExplanation
       title: Understanding Stage Trend Analysis
       type: Html
-      visible: false
+      visible: (performTrendTests && showExplanations)
       clearWith:
           - performTrendTests
 
@@ -1191,6 +1226,7 @@ items:
           - event
           - eventLevel
           - performTrendTests
+          - seed
       columns:
           - name: System
             title: "Staging System"
@@ -1231,6 +1267,7 @@ items:
           - eventLevel
           - showClinicalInterpretation
           - cancerType
+          - seed
       columns:
           - name: Metric
             title: "Metric"
@@ -1265,6 +1302,7 @@ items:
           - event
           - eventLevel
           - generateExecutiveSummary
+          - seed
       columns:
           - name: Category
             title: "Category"
@@ -1299,6 +1337,8 @@ items:
           - event
           - eventLevel
           - showStatisticalSummary
+          - confidenceLevel
+          - seed
       columns:
           - name: Method
             title: "Method"
@@ -1321,7 +1361,7 @@ items:
     - name: effectSizesExplanation
       title: Understanding Effect Sizes
       type: Html
-      visible: false
+      visible: (includeEffectSizes && showExplanations)
       clearWith:
           - includeEffectSizes
 
@@ -1337,6 +1377,7 @@ items:
           - event
           - eventLevel
           - includeEffectSizes
+          - seed
       columns:
           - name: Measure
             title: "Measure"
@@ -1385,6 +1426,7 @@ items:
           - oldStage
           - newStage
           - showMigrationHeatmap
+          - seed
 
 
     # # Sankey Diagram Explanation
@@ -1407,6 +1449,7 @@ items:
           - oldStage
           - newStage
           - showSankeyDiagram
+          - seed
 
 
 
@@ -1437,6 +1480,7 @@ items:
           - eventLevel
           - showROCComparison
           - rocTimePoints
+          - seed
 
     # Forest Plot Explanation
     - name: forestPlotExplanation
@@ -1461,6 +1505,7 @@ items:
           - event
           - eventLevel
           - showForestPlot
+          - seed
 
     # Calibration Analysis Explanation
     - name: calibrationAnalysisExplanation
@@ -1482,6 +1527,8 @@ items:
           - event
           - eventLevel
           - performCalibration
+          - confidenceLevel
+          - seed
       columns:
           - name: Model
             title: "Model"
@@ -1541,12 +1588,13 @@ items:
           - eventLevel
           - showCalibrationPlots
           - performCalibration
+          - seed
 
     # Advanced Migration Analysis Explanation
     - name: advancedMigrationExplanation
       title: Understanding Advanced Migration Analysis
       type: Html
-      visible: false
+      visible: (advancedMigrationAnalysis && showExplanations)
       clearWith:
           - advancedMigrationAnalysis
 
@@ -1562,6 +1610,7 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - seed
       columns:
           - name: System
             title: "Staging System"
@@ -1592,6 +1641,7 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - seed
       columns:
           - name: Migration_Pattern
             title: "Migration Pattern"
@@ -1629,6 +1679,7 @@ items:
           - event
           - eventLevel
           - showWillRogersVisualization
+          - seed
 
     # Migration Survival Comparison
     - name: migrationSurvivalComparison
@@ -1645,6 +1696,7 @@ items:
           - event
           - eventLevel
           - showMigrationSurvivalComparison
+          - seed
 
     # Enhanced Will Rogers Analysis
     - name: willRogersEnhancedAnalysis
@@ -1658,6 +1710,8 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - confidenceLevel
+          - seed
       columns:
           - name: Stage
             title: "Stage"
@@ -1704,6 +1758,7 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - seed
       columns:
           - name: Stage
             title: "Stage"
@@ -1753,6 +1808,8 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - confidenceLevel
+          - seed
       columns:
           - name: Old_Stage
             title: "Original Stage"
@@ -1792,6 +1849,7 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - seed
       columns:
           - name: Measure
             title: "Measure"
@@ -1828,6 +1886,8 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - confidenceLevel
+          - seed
       columns:
           - name: Metric
             title: "Metric"
@@ -1864,6 +1924,7 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - seed
       columns:
           - name: Variable
             title: "Staging System"
@@ -1898,6 +1959,7 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - seed
       columns:
           - name: Diagnostic
             title: "Diagnostic"
@@ -1925,6 +1987,7 @@ items:
           - eventLevel
           - advancedMigrationAnalysis
           - nriTimePoints
+          - seed
       columns:
           - name: Time_Point
             title: "Time Point (months)"
@@ -1981,6 +2044,7 @@ items:
           - showConfidenceIntervals
           - showRiskTables
           - plotTimeRange
+          - seed
 
 
 
@@ -2004,6 +2068,7 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - seed
       columns:
           - name: Analysis_Category
             title: "Analysis Category"
@@ -2054,6 +2119,7 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - seed
       columns:
           - name: Criterion
             title: "Assessment Criterion"
@@ -2080,6 +2146,7 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - seed
       columns:
           - name: Category
             title: "Category"
@@ -2103,6 +2170,7 @@ items:
           - oldStage
           - newStage
           - advancedMigrationAnalysis
+          - seed
       columns:
           - name: Pattern_Type
             title: "Pattern Type"
@@ -2134,6 +2202,7 @@ items:
           - eventLevel
           - advancedMigrationAnalysis
           - cancerType
+          - seed
       columns:
           - name: Landmark_Time
             title: "Landmark Time (months)"
@@ -2171,6 +2240,7 @@ items:
           - newStage
           - advancedMigrationAnalysis
           - showMigrationHeatmap
+          - seed
       columns:
           - name: Stage
             title: "Stage"
@@ -2204,6 +2274,7 @@ items:
           - event
           - eventLevel
           - advancedMigrationAnalysis
+          - seed
 
     # Abbreviation Glossary
     - name: abbreviationGlossary
@@ -2234,6 +2305,8 @@ items:
           - eventLevel
           - performCrossValidation
           - cvFolds
+          - confidenceLevel
+          - seed
       columns:
           - name: Fold
             title: "Fold"
@@ -2308,6 +2381,7 @@ items:
           - performCrossValidation
           - cvFolds
           - institutionVariable
+          - seed
       width: 600
       height: 400
 
@@ -2323,6 +2397,7 @@ items:
           - event
           - eventLevel
           - showStatisticalComparison
+          - seed
       columns:
           - name: Model
             title: "Staging System"
@@ -2365,6 +2440,7 @@ items:
           - event
           - eventLevel
           - calculateSME
+          - seed
       columns:
           - name: Timepoint
             title: "Timepoint"
@@ -2392,6 +2468,7 @@ items:
           - event
           - eventLevel
           - calculateSME
+          - seed
       columns:
           - name: Metric
             title: "Metric"
@@ -2420,6 +2497,8 @@ items:
           - event
           - eventLevel
           - calculateRMST
+          - confidenceLevel
+          - seed
       columns:
           - name: Staging_System
             title: "Staging System"
@@ -2434,13 +2513,25 @@ items:
             title: "Events"
             type: integer
           - name: RMST_Months
-            title: "RMST (months)"
+            title: "RMST"
             type: number
-            format: zto,pvalue
+            format: sf:4
+          - name: RMST_SE
+            title: "SE"
+            type: number
+            format: sf:3
+          - name: RMST_CI_Lower
+            title: "CI Lower"
+            type: number
+            format: sf:4
+          - name: RMST_CI_Upper
+            title: "CI Upper"
+            type: number
+            format: sf:4
           - name: Median_Survival
             title: "Median Survival"
             type: number
-            format: zto,pvalue
+            format: sf:4
 
     # RMST Comparison Table
     - name: rmstComparison
@@ -2454,6 +2545,7 @@ items:
           - event
           - eventLevel
           - calculateRMST
+          - seed
       columns:
           - name: System
             title: "System"
@@ -2486,6 +2578,7 @@ items:
           - eventLevel
           - performCompetingRisks
           - competingEventVar
+          - seed
       columns:
           - name: Staging_System
             title: "Staging System"
@@ -2527,6 +2620,7 @@ items:
           - eventLevel
           - performCompetingRisks
           - competingEventVar
+          - seed
       columns:
           - name: System
             title: "System"
@@ -2558,6 +2652,7 @@ items:
           - cutpointMethod
           - cutpointRange
           - multipleTestingCorrection
+          - confidenceLevel
       columns:
           - name: Method
             title: "Method"
@@ -2630,6 +2725,7 @@ items:
           - performOptimalCutpoint
           - generateStagingSystem
           - stagingSystemLevels
+          - confidenceLevel
       columns:
           - name: Stage
             title: "Stage"
@@ -2674,6 +2770,7 @@ items:
           - performSHAPAnalysis
           - shapCovariates
           - shapAnalysisType
+          - seed
       columns:
           - name: Feature
             title: "Feature"
@@ -2713,6 +2810,7 @@ items:
           - performSHAPAnalysis
           - shapPatientProfiles
           - shapSampleSize
+          - seed
       columns:
           - name: Patient_ID
             title: "Patient"
@@ -2821,6 +2919,8 @@ items:
           - eventLevel
           - performCompetingRisksAdvanced
           - competingRisksCovariates
+          - confidenceLevel
+          - seed
       columns:
           - name: Staging_System
             title: "Staging System"
@@ -2872,6 +2972,8 @@ items:
           - event
           - eventLevel
           - performCompetingRisksAdvanced
+          - confidenceLevel
+          - seed
       columns:
           - name: Event_Type
             title: "Event Type"
@@ -2915,6 +3017,8 @@ items:
           - eventLevel
           - performCompetingRisksAdvanced
           - cifTimePoints
+          - confidenceLevel
+          - seed
       columns:
           - name: Time_Point
             title: "Time (months)"
@@ -2967,6 +3071,8 @@ items:
           - event
           - eventLevel
           - performCompetingRisksAdvanced
+          - confidenceLevel
+          - seed
       columns:
           - name: Event_Type
             title: "Event Type"
@@ -3019,6 +3125,7 @@ items:
           - event
           - eventLevel
           - performCompetingRisksAdvanced
+          - seed
       columns:
           - name: Analysis_Component
             title: "Analysis Component"
@@ -3053,6 +3160,8 @@ items:
           - transitionTimeVariable
           - performMultiStateAnalysis
           - multiStateModel
+          - confidenceLevel
+          - seed
       columns:
           - name: From_State
             title: "From State"
@@ -3097,6 +3206,8 @@ items:
           - stateVariable
           - performMultiStateAnalysis
           - multiStateTimePoints
+          - confidenceLevel
+          - seed
       columns:
           - name: Time_Point
             title: "Time (months)"
@@ -3151,6 +3262,8 @@ items:
           - stateVariable
           - performMultiStateAnalysis
           - multiStateTimePoints
+          - confidenceLevel
+          - seed
       columns:
           - name: Time_Point
             title: "Time (months)"
@@ -3191,6 +3304,7 @@ items:
           - stateVariable
           - performMultiStateAnalysis
           - multiStateModel
+          - seed
       columns:
           - name: Model_Component
             title: "Model Component"
@@ -3221,6 +3335,7 @@ items:
           - newStage
           - stateVariable
           - performMultiStateAnalysis
+          - seed
       columns:
           - name: Analysis_Component
             title: "Analysis Component"
@@ -3253,6 +3368,7 @@ items:
           - performRandomForestAnalysis
           - forestCovariates
           - forestImportanceType
+          - seed
       columns:
           - name: Variable
             title: "Variable"
@@ -3292,6 +3408,8 @@ items:
           - performRandomForestAnalysis
           - forestModelType
           - forestNTrees
+          - confidenceLevel
+          - seed
       columns:
           - name: Model_Type
             title: "Model Type"
@@ -3336,6 +3454,8 @@ items:
           - newStage
           - performRandomForestAnalysis
           - forestPredictionTimePoints
+          - confidenceLevel
+          - seed
       columns:
           - name: Time_Point
             title: "Time (months)"
@@ -3378,6 +3498,7 @@ items:
           - newStage
           - performRandomForestAnalysis
           - forestStagingComparison
+          - seed
       columns:
           - name: Metric
             title: "Performance Metric"
@@ -3421,6 +3542,7 @@ items:
           - oldStage
           - newStage
           - performRandomForestAnalysis
+          - seed
       columns:
           - name: Analysis_Component
             title: "Analysis Component"
@@ -3453,6 +3575,7 @@ items:
           - oldStage
           - newStage
           - performRandomForestAnalysis
+          - seed
       columns:
           - name: Summary_Component
             title: "Analysis Component"
@@ -3483,6 +3606,8 @@ items:
           - oldStage
           - newStage
           - performCureModelAnalysis
+          - confidenceLevel
+          - seed
       columns:
           - name: Staging_System
             title: "Staging System"
@@ -3525,6 +3650,7 @@ items:
           - oldStage
           - newStage
           - performCureModelAnalysis
+          - seed
       columns:
           - name: Staging_System
             title: "Staging System"
@@ -3573,6 +3699,7 @@ items:
           - oldStage
           - newStage
           - performCureModelAnalysis
+          - seed
       columns:
           - name: Comparison_Metric
             title: "Comparison Metric"
@@ -3611,6 +3738,7 @@ items:
           - oldStage
           - newStage
           - performCureModelAnalysis
+          - seed
       columns:
           - name: Analysis_Component
             title: "Analysis Component"
@@ -3643,6 +3771,8 @@ items:
           - oldStage
           - newStage
           - performCureModelAnalysis
+          - confidenceLevel
+          - seed
       columns:
           - name: Parameter
             title: "Parameter"
@@ -3688,6 +3818,7 @@ items:
           - oldStage
           - newStage
           - performCureModelAnalysis
+          - seed
       columns:
           - name: Analysis_Component
             title: "Analysis Component"
@@ -3718,6 +3849,7 @@ items:
         - intervalCensoringRightTime
         - intervalCensoringModel
         - intervalCensoringDistribution
+        - seed
       columns:
         - name: Characteristic
           title: "Characteristic"
@@ -3741,6 +3873,8 @@ items:
         - intervalCensoringModel
         - intervalCensoringBootstrap
         - intervalCensoringPredictionTime
+        - confidenceLevel
+        - seed
       columns:
         - name: Stage
           title: "Stage"
@@ -3773,6 +3907,8 @@ items:
         - intervalCensoringModel
         - intervalCensoringDistribution
         - intervalCensoringAdjustVariables
+        - confidenceLevel
+        - seed
       columns:
         - name: Parameter
           title: "Parameter"
@@ -3807,6 +3943,7 @@ items:
         - performIntervalCensoringAnalysis
         - intervalCensoringCompareStages
         - intervalCensoringModel
+        - seed
       columns:
         - name: Model
           title: "Staging System"
@@ -3841,6 +3978,7 @@ items:
         - performIntervalCensoringAnalysis
         - intervalCensoringDiagnostics
         - intervalCensoringModel
+        - seed
       columns:
         - name: Diagnostic
           title: "Diagnostic Test"
@@ -3867,6 +4005,7 @@ items:
         - event
         - survivalTime
         - performIntervalCensoringAnalysis
+        - seed
       columns:
         - name: Finding
           title: "Key Finding"
@@ -3892,6 +4031,7 @@ items:
         - performInformativeCensoringAnalysis
         - informativeCensoringTestMethod
         - informativeCensoringAdjustmentMethod
+        - seed
       columns:
         - name: Characteristic
           title: "Characteristic"
@@ -3914,6 +4054,7 @@ items:
         - performInformativeCensoringAnalysis
         - informativeCensoringTestMethod
         - informativeCensoringAlpha
+        - seed
       columns:
         - name: Test_Method
           title: "Test Method"
@@ -3944,6 +4085,7 @@ items:
         - survivalTime
         - performInformativeCensoringAnalysis
         - informativeCensoringCompareStages
+        - seed
       columns:
         - name: Stage
           title: "Stage"
@@ -3981,6 +4123,8 @@ items:
         - performInformativeCensoringAnalysis
         - informativeCensoringAdjustmentMethod
         - informativeCensoringBootstrap
+        - confidenceLevel
+        - seed
       columns:
         - name: Stage
           title: "Stage"
@@ -4015,6 +4159,7 @@ items:
         - performInformativeCensoringAnalysis
         - informativeCensoringSensitivityRange
         - informativeCensoringAdjustmentMethod
+        - seed
       columns:
         - name: Sensitivity_Parameter
           title: "Sensitivity Parameter"
@@ -4045,6 +4190,7 @@ items:
         - survivalTime
         - performInformativeCensoringAnalysis
         - informativeCensoringTestMethod
+        - seed
       columns:
         - name: Diagnostic
           title: "Diagnostic Measure"
@@ -4068,6 +4214,7 @@ items:
         - event
         - survivalTime
         - performInformativeCensoringAnalysis
+        - seed
       columns:
         - name: Finding
           title: "Key Finding"
@@ -4095,6 +4242,7 @@ items:
         - concordanceProbabilityCompareStages
         - concordanceProbabilityMethods
         - concordanceProbabilityWeighting
+        - seed
       columns:
         - name: Characteristic
           title: "Characteristic"
@@ -4119,6 +4267,8 @@ items:
         - concordanceProbabilityCompareStages
         - concordanceProbabilityMethods
         - concordanceProbabilityBootstrap
+        - confidenceLevel
+        - seed
       columns:
         - name: Method
           title: "Method"
@@ -4156,6 +4306,8 @@ items:
         - performConcordanceProbabilityAnalysis
         - concordanceProbabilityTimePoints
         - concordanceProbabilityMethods
+        - confidenceLevel
+        - seed
       columns:
         - name: Staging_System
           title: "Staging System"
@@ -4193,6 +4345,7 @@ items:
         - performConcordanceProbabilityAnalysis
         - concordanceProbabilityCompareStages
         - concordanceProbabilityAlpha
+        - seed
       columns:
         - name: Method
           title: "Method"
@@ -4232,6 +4385,7 @@ items:
         - survivalTime
         - performConcordanceProbabilityAnalysis
         - concordanceProbabilityRobustnessAnalysis
+        - seed
       columns:
         - name: Analysis_Type
           title: "Analysis Type"
@@ -4262,6 +4416,7 @@ items:
         - survivalTime
         - performConcordanceProbabilityAnalysis
         - concordanceProbabilityDiagnostics
+        - seed
       columns:
         - name: Diagnostic
           title: "Diagnostic Measure"
@@ -4285,6 +4440,7 @@ items:
         - event
         - survivalTime
         - performConcordanceProbabilityAnalysis
+        - seed
       columns:
         - name: Finding
           title: "Key Finding"
@@ -4310,6 +4466,7 @@ items:
         - performWinRatioAnalysis
         - winRatioEndpoints
         - winRatioMatchingStrategy
+        - seed
       columns:
         - name: Characteristic
           title: "Characteristic"
@@ -4332,6 +4489,8 @@ items:
         - performWinRatioAnalysis
         - winRatioDeathVariable
         - winRatioSecondaryEndpoint
+        - confidenceLevel
+        - seed
       columns:
         - name: Comparison
           title: "Comparison"
@@ -4371,6 +4530,7 @@ items:
         - survivalTime
         - performWinRatioAnalysis
         - winRatioEndpoints
+        - seed
       columns:
         - name: Endpoint
           title: "Endpoint"
@@ -4407,6 +4567,8 @@ items:
         - survivalTime
         - performWinRatioAnalysis
         - winRatioMatchingStrategy
+        - confidenceLevel
+        - seed
       columns:
         - name: Stage
           title: "Stage"
@@ -4440,6 +4602,8 @@ items:
         - survivalTime
         - performWinRatioAnalysis
         - winRatioSensitivityAnalysis
+        - confidenceLevel
+        - seed
       columns:
         - name: Analysis_Type
           title: "Analysis Type"
@@ -4473,6 +4637,8 @@ items:
         - survivalTime
         - performWinRatioAnalysis
         - winRatioGeneralizedPairwise
+        - confidenceLevel
+        - seed
       columns:
         - name: Metric
           title: "Metric"
@@ -4502,6 +4668,7 @@ items:
         - event
         - survivalTime
         - performWinRatioAnalysis
+        - seed
       columns:
         - name: Finding
           title: "Key Finding"
@@ -4526,6 +4693,7 @@ items:
         - oldStage
         - newStage
         - frailtyClusterVariable
+        - seed
       columns:
         - name: Analysis
           title: "Analysis Component"
@@ -4565,6 +4733,7 @@ items:
         - oldStage
         - newStage
         - frailtyClusterVariable
+        - seed
       columns:
         - name: StagingSystem
           title: "Staging System"
@@ -4602,13 +4771,14 @@ items:
     - name: frailtyModelsVarianceComponents
       title: Frailty Models - Variance Components Analysis
       type: Table
-      visible: (performFrailtyModelsAnalysis)
+      visible: (performFrailtyModelsAnalysis && frailtyVarianceComponents)
       clearWith:
         - survivalTime
         - event
         - oldStage
         - newStage
         - frailtyClusterVariable
+        - seed
       columns:
         - name: Component
           title: "Variance Component"
@@ -4646,6 +4816,7 @@ items:
         - oldStage
         - newStage
         - frailtyClusterVariable
+        - seed
       columns:
         - name: Cluster
           title: "Cluster/Institution"
@@ -4690,6 +4861,8 @@ items:
         - oldStage
         - newStage
         - frailtyClusterVariable
+        - confidenceLevel
+        - seed
       columns:
         - name: Parameter
           title: "Parameter"
@@ -4736,6 +4909,7 @@ items:
         - oldStage
         - newStage
         - frailtyClusterVariable
+        - seed
       columns:
         - name: Diagnostic
           title: "Diagnostic Test"
@@ -4770,6 +4944,7 @@ items:
         - oldStage
         - newStage
         - frailtyClusterVariable
+        - seed
       columns:
         - name: Finding
           title: "Key Finding"
@@ -4802,6 +4977,7 @@ items:
         - event
         - oldStage
         - newStage
+        - seed
       columns:
         - name: Analysis
           title: "Analysis Component"
@@ -4839,6 +5015,7 @@ items:
         - event
         - oldStage
         - newStage
+        - seed
       columns:
         - name: StagingSystem
           title: "Staging System"
@@ -4884,6 +5061,8 @@ items:
         - event
         - oldStage
         - newStage
+        - confidenceLevel
+        - seed
       columns:
         - name: StagingSystem
           title: "Staging System"
@@ -4931,6 +5110,7 @@ items:
         - event
         - oldStage
         - newStage
+        - seed
       columns:
         - name: RiskThreshold
           title: "Risk Threshold (%)"
@@ -4976,6 +5156,7 @@ items:
         - event
         - oldStage
         - newStage
+        - seed
       columns:
         - name: TimePoint
           title: "Time Point (months)"
@@ -5019,6 +5200,8 @@ items:
         - event
         - oldStage
         - newStage
+        - confidenceLevel
+        - seed
       columns:
         - name: Metric
           title: "Clinical Utility Metric"
@@ -5063,6 +5246,7 @@ items:
         - event
         - oldStage
         - newStage
+        - seed
       columns:
         - name: Finding
           title: "Key Finding"
@@ -5112,7 +5296,6 @@ refs:
     - grid
     - rms
     - splines
-    - networkD3
     - ggalluvial
     - patchwork
     - cmprsk

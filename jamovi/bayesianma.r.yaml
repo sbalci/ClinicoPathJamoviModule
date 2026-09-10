@@ -477,5 +477,5 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
+    - coda
 ...

@@ -1,0 +1,739 @@
+{
+  "BART": {
+    "exists": true,
+    "author": "Robert McCulloch , Rodney Sparapani , Robert Gramacy , Matthew Pratola , Charles Spanbauer , Martyn Plummer , Nicky Best , Kate Cowles , Karen Vines",
+    "year": 2026,
+    "title": "BART: Bayesian Additive Regression Trees",
+    "version": "2.9.10",
+    "publisher": "[R package version 2.9.10]. Retrieved from https://CRAN.R-project.org/package=BART",
+    "url": "https://CRAN.R-project.org/package=BART"
+  },
+  "BiocManager": {
+    "exists": true,
+    "author": "Martin Morgan (ORCID: ), Marcel Ramos (ORCID: )",
+    "year": 2025,
+    "title": "BiocManager: Access the Bioconductor Project Package Repository",
+    "version": "1.30.27",
+    "publisher": "[R package version 1.30.27]. Retrieved from https://CRAN.R-project.org/package=BiocManager",
+    "url": "https://CRAN.R-project.org/package=BiocManager"
+  },
+  "BoomSpikeSlab": {
+    "exists": true,
+    "author": "Steven L. Scott",
+    "year": 2025,
+    "title": "BoomSpikeSlab: MCMC for Spike and Slab Regression",
+    "version": "1.2.7",
+    "publisher": "[R package version 1.2.7]. Retrieved from https://CRAN.R-project.org/package=BoomSpikeSlab",
+    "url": "https://CRAN.R-project.org/package=BoomSpikeSlab"
+  },
+  "Boruta": {
+    "exists": true,
+    "author": "Miron Bartosz Kursa (ORCID: ), Witold Remigiusz Rudnicki",
+    "year": 2026,
+    "title": "Boruta: Wrapper Algorithm for All Relevant Feature Selection",
+    "version": "10.0.0",
+    "publisher": "[R package version 10.0.0]. Retrieved from https://CRAN.R-project.org/package=Boruta",
+    "url": "https://CRAN.R-project.org/package=Boruta"
+  },
+  "DecisionCurve": {
+    "exists": true,
+    "author": "Marshall Brown",
+    "year": 2017,
+    "title": "DecisionCurve: Calculate and Plot Decision Curves",
+    "version": "1.4",
+    "publisher": "[R package version 1.4]. Retrieved from https://CRAN.R-project.org/package=DecisionCurve",
+    "url": "https://CRAN.R-project.org/package=DecisionCurve"
+  },
+  "DiagTest3Grp": {
+    "exists": true,
+    "author": "Jingqin Luo, Chengjie Xiong",
+    "year": 2014,
+    "title": "DiagTest3Grp: Diagnostic test summary measures for three ordinal groups",
+    "version": "1.6",
+    "publisher": "[R package version 1.6]. Retrieved from https://CRAN.R-project.org/package=DiagTest3Grp",
+    "url": "https://CRAN.R-project.org/package=DiagTest3Grp"
+  },
+  "DiagrammeRsvg": {
+    "exists": true,
+    "author": "Richard Iannone",
+    "year": 2016,
+    "title": "DiagrammeRsvg: Export DiagrammeR Graphviz Graphs as SVG",
+    "version": "0.1",
+    "publisher": "[R package version 0.1]. Retrieved from https://CRAN.R-project.org/package=DiagrammeRsvg",
+    "url": "https://CRAN.R-project.org/package=DiagrammeRsvg"
+  },
+  "FSA": {
+    "exists": true,
+    "author": "Derek H. Ogle , Jason C. Doll , A. Powell Wheeler , Alexis Dinno (Provided base functionality of dunnTest())",
+    "year": 2026,
+    "title": "FSA: Simple Fisheries Stock Assessment Methods",
+    "version": "0.10.1",
+    "publisher": "[R package version 0.10.1]. Retrieved from https://CRAN.R-project.org/package=FSA",
+    "url": "https://CRAN.R-project.org/package=FSA"
+  },
+  "ICC": {
+    "exists": true,
+    "author": "Matthew Wolak",
+    "year": 2022,
+    "title": "ICC: Facilitating Estimation of the Intraclass Correlation Coefficient",
+    "version": "2.4.0",
+    "publisher": "[R package version 2.4.0]. Retrieved from https://CRAN.R-project.org/package=ICC",
+    "url": "https://CRAN.R-project.org/package=ICC"
+  },
+  "JMbayes2": {
+    "exists": true,
+    "author": "Dimitris Rizopoulos (ORCID: ), Pedro Miranda-Afonso (ORCID: ), Grigorios Papageorgiou",
+    "year": 2026,
+    "title": "JMbayes2: Extended Joint Models for Longitudinal and Time-to-Event Data",
+    "version": "0.6-0",
+    "publisher": "[R package version 0.6-0]. Retrieved from https://CRAN.R-project.org/package=JMbayes2",
+    "url": "https://CRAN.R-project.org/package=JMbayes2"
+  },
+  "Kendall": {
+    "exists": true,
+    "author": "A.I. McLeod",
+    "year": 2025,
+    "title": "Kendall: Kendall Rank Correlation and Mann-Kendall Trend Test",
+    "version": "2.2.2",
+    "publisher": "[R package version 2.2.2]. Retrieved from https://CRAN.R-project.org/package=Kendall",
+    "url": "https://CRAN.R-project.org/package=Kendall"
+  },
+  "MendelianRandomization": {
+    "exists": true,
+    "author": "Stephen Burgess (), Olena Yavorska , James Staley (), Fernando Hartwig (), Jim Broadbent (), Christopher Foley (), Andrew Grant , Amy Mason (), Ting Ye (), Haoran Xue (), Zhaotong Lin (), Siqi Xu , Ashish Patel (), Hyunseung Kang , Sheng Wang , Ville Karhunen ()",
+    "year": 2024,
+    "title": "MendelianRandomization: Mendelian Randomization Package",
+    "version": "0.10.0",
+    "publisher": "[R package version 0.10.0]. Retrieved from https://CRAN.R-project.org/package=MendelianRandomization",
+    "url": "https://CRAN.R-project.org/package=MendelianRandomization"
+  },
+  "NPHMC": {
+    "exists": true,
+    "author": "Chao Cai , Songfeng Wang , Wenbin Lu , Jiajia Zhang",
+    "year": 2025,
+    "title": "NPHMC: Sample Size Calculation for the Proportional Hazards Mixture Cure Model",
+    "version": "2.4.2",
+    "publisher": "[R package version 2.4.2]. Retrieved from https://CRAN.R-project.org/package=NPHMC",
+    "url": "https://CRAN.R-project.org/package=NPHMC"
+  },
+  "PRROC": {
+    "exists": true,
+    "author": "Jan Grau , Jens Keilwagen",
+    "year": 2025,
+    "title": "PRROC: Precision-Recall and ROC Curves for Weighted and Unweighted Data",
+    "version": "1.4",
+    "publisher": "[R package version 1.4]. Retrieved from https://CRAN.R-project.org/package=PRROC",
+    "url": "https://CRAN.R-project.org/package=PRROC"
+  },
+  "ReliabilityTheory": {
+    "exists": true,
+    "author": "Louis Aslett",
+    "year": 2024,
+    "title": "ReliabilityTheory: Structural Reliability Analysis",
+    "version": "0.3.1",
+    "publisher": "[R package version 0.3.1]. Retrieved from https://CRAN.R-project.org/package=ReliabilityTheory",
+    "url": "https://CRAN.R-project.org/package=ReliabilityTheory"
+  },
+  "Rtsne": {
+    "exists": true,
+    "author": "Jesse Krijthe , Laurens van der Maaten (Author of original C++ code)",
+    "year": 2023,
+    "title": "Rtsne: T-Distributed Stochastic Neighbor Embedding using a Barnes-Hut Implementation",
+    "version": "0.17",
+    "publisher": "[R package version 0.17]. Retrieved from https://CRAN.R-project.org/package=Rtsne",
+    "url": "https://CRAN.R-project.org/package=Rtsne"
+  },
+  "SemiMarkov": {
+    "exists": true,
+    "author": "Agnieszka Listwon-Krol, Philippe Saint-Pierre",
+    "year": 2019,
+    "title": "SemiMarkov: Multi-States Semi-Markov Models",
+    "version": "1.4.6",
+    "publisher": "[R package version 1.4.6]. Retrieved from https://CRAN.R-project.org/package=SemiMarkov",
+    "url": "https://CRAN.R-project.org/package=SemiMarkov"
+  },
+  "VIM": {
+    "exists": true,
+    "author": "Matthias Templ , Alexander Kowarik (ORCID: ), Andreas Alfons , Johannes Gussenbauer , Nina Niederhametner , Eileen Vattheuer , Gregor de Cillia , Bernd Prantner , Wolfgang Rannetbauer",
+    "year": 2026,
+    "title": "VIM: Visualization and Imputation of Missing Values",
+    "version": "7.3.0",
+    "publisher": "[R package version 7.3.0]. Retrieved from https://CRAN.R-project.org/package=VIM",
+    "url": "https://CRAN.R-project.org/package=VIM"
+  },
+  "WGCNA": {
+    "exists": true,
+    "author": "Peter Langfelder , Steve Horvath , Chaochao Cai , Jun Dong , Jeremy Miller , Lin Song , Andy Yip , Bin Zhang",
+    "year": 2026,
+    "title": "WGCNA: Weighted Correlation Network Analysis",
+    "version": "1.74",
+    "publisher": "[R package version 1.74]. Retrieved from https://CRAN.R-project.org/package=WGCNA",
+    "url": "https://CRAN.R-project.org/package=WGCNA"
+  },
+  "aftgee": {
+    "exists": true,
+    "author": "Sy Han Chiou , Sangwook Kang , Jun Yan",
+    "year": 2024,
+    "title": "aftgee: Accelerated Failure Time Model with Generalized Estimating Equations",
+    "version": "1.2.1",
+    "publisher": "[R package version 1.2.1]. Retrieved from https://CRAN.R-project.org/package=aftgee",
+    "url": "https://CRAN.R-project.org/package=aftgee"
+  },
+  "betareg": {
+    "exists": true,
+    "author": "Achim Zeileis (ORCID: ), Francisco Cribari-Neto (ORCID: ), Bettina Gr\u00fcn (ORCID: ), Ioannis Kosmidis (ORCID: ), Alexandre B. Simas (earlier version by), Andrea V. Rocha (earlier version by)",
+    "year": 2026,
+    "title": "betareg: Beta Regression",
+    "version": "3.2-6",
+    "publisher": "[R package version 3.2-6]. Retrieved from https://CRAN.R-project.org/package=betareg",
+    "url": "https://CRAN.R-project.org/package=betareg"
+  },
+  "broom.mixed": {
+    "exists": true,
+    "author": "Ben Bolker (ORCID: ), David Robinson , Dieter Menne , Jonah Gabry , Paul Buerkner , Christopher Hua , William Petry (ORCID: ), Joshua Wiley (ORCID: ), Patrick Kennedy , Eduard Sz\u00f6cs (ORCID: , sponsor: BASF SE), Indrajeet Patil , Vincent Arel-Bundock (ORCID: ), Bill Denney , Cory Brunson , Joe Wasserman (ORCID: ), Alexey Stukalov , Matthieu Bruneaux",
+    "year": 2026,
+    "title": "broom.mixed: Tidying Methods for Mixed Models",
+    "version": "0.2.9.7",
+    "publisher": "[R package version 0.2.9.7]. Retrieved from https://CRAN.R-project.org/package=broom.mixed",
+    "url": "https://CRAN.R-project.org/package=broom.mixed"
+  },
+  "ca": {
+    "exists": true,
+    "author": "Michael Greenacre , Oleg Nenadic , Michael Friendly",
+    "year": 2020,
+    "title": "ca: Simple, Multiple and Joint Correspondence Analysis",
+    "version": "0.71.1",
+    "publisher": "[R package version 0.71.1]. Retrieved from https://CRAN.R-project.org/package=ca",
+    "url": "https://CRAN.R-project.org/package=ca"
+  },
+  "clinfun": {
+    "exists": true,
+    "author": "Venkatraman E. Seshan , Karissa Whiting",
+    "year": 2026,
+    "title": "clinfun: Clinical Trial Design and Data Analysis Functions",
+    "version": "1.1.6",
+    "publisher": "[R package version 1.1.6]. Retrieved from https://CRAN.R-project.org/package=clinfun",
+    "url": "https://CRAN.R-project.org/package=clinfun"
+  },
+  "coda": {
+    "exists": true,
+    "author": "Martyn Plummer , Nicky Best , Kate Cowles , Karen Vines , Deepayan Sarkar , Douglas Bates , Russell Almond , Arni Magnusson",
+    "year": 2024,
+    "title": "coda: Output Analysis and Diagnostics for MCMC",
+    "version": "0.19-4.1",
+    "publisher": "[R package version 0.19-4.1]. Retrieved from https://CRAN.R-project.org/package=coda",
+    "url": "https://CRAN.R-project.org/package=coda"
+  },
+  "coin": {
+    "exists": true,
+    "author": "Torsten Hothorn (ORCID: ), Henric Winell (ORCID: ), Kurt Hornik (ORCID: ), Mark A. van de Wiel (ORCID: ), Achim Zeileis (ORCID: )",
+    "year": 2026,
+    "title": "coin: Conditional Inference Procedures in a Permutation Test Framework",
+    "version": "1.4-5",
+    "publisher": "[R package version 1.4-5]. Retrieved from https://CRAN.R-project.org/package=coin",
+    "url": "https://CRAN.R-project.org/package=coin"
+  },
+  "consort": {
+    "exists": true,
+    "author": "Alim Dayim (ORCID: )",
+    "year": 2026,
+    "title": "consort: Create Consort Diagram",
+    "version": "1.2.3",
+    "publisher": "[R package version 1.2.3]. Retrieved from https://CRAN.R-project.org/package=consort",
+    "url": "https://CRAN.R-project.org/package=consort"
+  },
+  "coxrobust": {
+    "exists": true,
+    "author": "Tadeusz Bednarski , Filip Borowicz , Shana Scogin (ORCID: )",
+    "year": 2025,
+    "title": "coxrobust: Fit Robustly Proportional Hazards Regression Model",
+    "version": "1.0.2",
+    "publisher": "[R package version 1.0.2]. Retrieved from https://CRAN.R-project.org/package=coxrobust",
+    "url": "https://CRAN.R-project.org/package=coxrobust"
+  },
+  "data.table": {
+    "exists": true,
+    "author": "Tyson Barrett (ORCID: ), Matt Dowle , Arun Srinivasan , Jan Gorecki , Michael Chirico (ORCID: ), Toby Hocking (ORCID: ), Benjamin Schwendinger (ORCID: ), Ivan Krylov (ORCID: ), Pasha Stetsenko , Tom Short , Steve Lianoglou , Eduard Antonyan , Markus Bonsch , Hugh Parsonage , Scott Ritchie , Kun Ren , Xianying Tan , Rick Saporta , Otto Seiskari , Xianghui Dong , Michel Lang , Watal Iwasaki , Seth Wenchel , Karl Broman , Tobias Schmidt , David Arenburg , Ethan Smith , Francois Cocquemas , Matthieu Gomez , Philippe Chataignon , Nello Blaser , Dmitry Selivanov , Andrey Riabushenko , Cheng Lee , Declan Groves , Daniel Possenriede , Felipe Parages , Denes Toth , Mus Yaramaz-David , Ayappan Perumal , James Sams , Martin Morgan , Michael Quinn , @javrucebo (GitHub user), Marc Halperin , Roy Storey , Manish Saraswat , Morgan Jacob , Michael Schubmehl , Davis Vaughan , Leonardo Silvestri , Jim Hester , Anthony Damico , Sebastian Freundt , David Simons , Elliott Sales de Andrade , Cole Miller , Jens Peder Meldgaard , Vaclav Tlapak , Kevin Ushey , Dirk Eddelbuettel , Tony Fischetti , Ofek Shilon , Vadim Khotilovich , Hadley Wickham , Bennet Becker , Kyle Haynes , Boniface Christian Kamgang , Olivier Delmarcell , Josh O'Brien , Dereck Mezquita (ORCID: ), Michael Czekanski , Dmitry Shemetov , Nitish Jha , Joshua Wu , Iago Gin\u00e9-V\u00e1zquez , Anirban Chetia , Doris Amoakohene , Angel Feliz , Michael Young , Mark Seeto , Philippe Grosjean , Vincent Runge , Christian Wia , Elise Maign\u00e9 , Vincent Rocher , Vijay Lulla , Alja\u017e Sluga , Bill Evans , Reino Bruner , @badasahog (GitHub user), Vinit Thakur , Mukul Kumar , Ildik\u00f3 Czeller , Manmita Das , Tarun Thammisetty , Marco Colombo (ORCID: ), Tim Taylor (ORCID: )",
+    "year": 2026,
+    "title": "data.table: Extension of `data.frame`",
+    "version": "1.18.6.1",
+    "publisher": "[R package version 1.18.6.1]. Retrieved from https://CRAN.R-project.org/package=data.table",
+    "url": "https://CRAN.R-project.org/package=data.table"
+  },
+  "esquisse": {
+    "exists": true,
+    "author": "Fanny Meyer , Victor Perrier , Ian Carroll (Faceting support), Xiangnan Dang (Facets rows and cols, X/Y limits), Nicolas Bevacqua (author of dragula JavaScript library), Daybrush (Younkue Choi) (author of moveable JavaScript library), Zeno Rocha (author of clipboard JavaScript library)",
+    "year": 2025,
+    "title": "esquisse: Explore and Visualize Your Data Interactively",
+    "version": "2.1.0",
+    "publisher": "[R package version 2.1.0]. Retrieved from https://CRAN.R-project.org/package=esquisse",
+    "url": "https://CRAN.R-project.org/package=esquisse"
+  },
+  "fastshap": {
+    "exists": true,
+    "author": "Brandon Greenwell ()",
+    "year": 2024,
+    "title": "fastshap: Fast Approximate Shapley Values",
+    "version": "0.1.1",
+    "publisher": "[R package version 0.1.1]. Retrieved from https://CRAN.R-project.org/package=fastshap",
+    "url": "https://CRAN.R-project.org/package=fastshap"
+  },
+  "fmsb": {
+    "exists": true,
+    "author": "Minato Nakazawa",
+    "year": 2024,
+    "title": "fmsb: Functions for Medical Statistics Book with some Demographic Data",
+    "version": "0.7.6",
+    "publisher": "[R package version 0.7.6]. Retrieved from https://CRAN.R-project.org/package=fmsb",
+    "url": "https://CRAN.R-project.org/package=fmsb"
+  },
+  "forestmodel": {
+    "exists": true,
+    "author": "Nick Kennedy",
+    "year": 2020,
+    "title": "forestmodel: Forest Plots from Regression Models",
+    "version": "0.6.2",
+    "publisher": "[R package version 0.6.2]. Retrieved from https://CRAN.R-project.org/package=forestmodel",
+    "url": "https://CRAN.R-project.org/package=forestmodel"
+  },
+  "forestplot": {
+    "exists": true,
+    "author": "Max Gordon , Thomas Lumley",
+    "year": 2026,
+    "title": "forestplot: Advanced Forest Plot Using 'grid' Graphics",
+    "version": "3.2.0",
+    "publisher": "[R package version 3.2.0]. Retrieved from https://CRAN.R-project.org/package=forestplot",
+    "url": "https://CRAN.R-project.org/package=forestplot"
+  },
+  "frailtySurv": {
+    "exists": true,
+    "author": "Vinnie Monaco , Malka Gorfine , Li Hsu",
+    "year": 2023,
+    "title": "frailtySurv: General Semiparametric Shared Frailty Model",
+    "version": "1.3.8",
+    "publisher": "[R package version 1.3.8]. Retrieved from https://CRAN.R-project.org/package=frailtySurv",
+    "url": "https://CRAN.R-project.org/package=frailtySurv"
+  },
+  "gbm": {
+    "exists": true,
+    "author": "Greg Ridgeway (ORCID: ), Daniel Edwards , Brian Kriegler , Stefan Schroedl , Harry Southworth , Brandon Greenwell (ORCID: ), Bradley Boehmke (ORCID: ), Jay Cunningham , GBM Developers (https://github.com/gbm-developers)",
+    "year": 2026,
+    "title": "gbm: Generalized Boosted Regression Models",
+    "version": "2.3.1",
+    "publisher": "[R package version 2.3.1]. Retrieved from https://CRAN.R-project.org/package=gbm",
+    "url": "https://CRAN.R-project.org/package=gbm"
+  },
+  "ggExtra": {
+    "exists": true,
+    "author": "Dean Attali , Christopher Baker",
+    "year": 2025,
+    "title": "ggExtra: Add Marginal Histograms to 'ggplot2', and More 'ggplot2' Enhancements",
+    "version": "0.11.0",
+    "publisher": "[R package version 0.11.0]. Retrieved from https://CRAN.R-project.org/package=ggExtra",
+    "url": "https://CRAN.R-project.org/package=ggExtra"
+  },
+  "ggdist": {
+    "exists": true,
+    "author": "Matthew Kay , Brenton M. Wiernik",
+    "year": 2025,
+    "title": "ggdist: Visualizations of Distributions and Uncertainty",
+    "version": "3.3.3",
+    "publisher": "[R package version 3.3.3]. Retrieved from https://CRAN.R-project.org/package=ggdist",
+    "url": "https://CRAN.R-project.org/package=ggdist"
+  },
+  "ggfittext": {
+    "exists": true,
+    "author": "David Wilkins , Brady Johnston",
+    "year": 2026,
+    "title": "ggfittext: Fit Text Inside a Box in 'ggplot2'",
+    "version": "0.10.4",
+    "publisher": "[R package version 0.10.4]. Retrieved from https://CRAN.R-project.org/package=ggfittext",
+    "url": "https://CRAN.R-project.org/package=ggfittext"
+  },
+  "ggpattern": {
+    "exists": true,
+    "author": "Mike FC , Trevor L. Davis (ORCID: ), ggplot2 authors",
+    "year": 2026,
+    "title": "ggpattern: 'ggplot2' Pattern Geoms",
+    "version": "1.3.1",
+    "publisher": "[R package version 1.3.1]. Retrieved from https://CRAN.R-project.org/package=ggpattern",
+    "url": "https://CRAN.R-project.org/package=ggpattern"
+  },
+  "ggsci": {
+    "exists": true,
+    "author": "Nan Xiao (ORCID: ), Joshua Cook , Clara J\u00e9gousse , Hui Chen , Miaozhu Li , iTerm2-Color-Schemes contributors (iTerm2-Color-Schemes project), Winston Chang (staticimports.R)",
+    "year": 2026,
+    "title": "ggsci: Scientific Journal and Sci-Fi Themed Color Palettes for 'ggplot2'",
+    "version": "5.2.0",
+    "publisher": "[R package version 5.2.0]. Retrieved from https://CRAN.R-project.org/package=ggsci",
+    "url": "https://CRAN.R-project.org/package=ggsci"
+  },
+  "ggstream": {
+    "exists": true,
+    "author": "David Sjoberg",
+    "year": 2021,
+    "title": "ggstream: Create Streamplots in 'ggplot2'",
+    "version": "0.1.0",
+    "publisher": "[R package version 0.1.0]. Retrieved from https://CRAN.R-project.org/package=ggstream",
+    "url": "https://CRAN.R-project.org/package=ggstream"
+  },
+  "ggthemes": {
+    "exists": true,
+    "author": "Jeffrey B. Arnold (), Gergely Daroczi , Bo Werth , Brian Weitzner , Joshua Kunst , Baptiste Auguie , Bob Rudis , Hadley Wickham (Code from the ggplot2 package.), Justin Talbot (Code from the labeling package), Joshua London",
+    "year": 2026,
+    "title": "ggthemes: Extra Themes, Scales and Geoms for 'ggplot2'",
+    "version": "6.0.0",
+    "publisher": "[R package version 6.0.0]. Retrieved from https://CRAN.R-project.org/package=ggthemes",
+    "url": "https://CRAN.R-project.org/package=ggthemes"
+  },
+  "grplasso": {
+    "exists": true,
+    "author": "Lukas Meier",
+    "year": 2020,
+    "title": "grplasso: Fitting User-Specified Models with Group Lasso Penalty",
+    "version": "0.4-7",
+    "publisher": "[R package version 0.4-7]. Retrieved from https://CRAN.R-project.org/package=grplasso",
+    "url": "https://CRAN.R-project.org/package=grplasso"
+  },
+  "gsDesign2": {
+    "exists": true,
+    "author": "Keaven Anderson , Yujie Zhao , Yilong Zhang , John Blischak , Yihui Xie , Nan Xiao , Jianxiao Yang , Amin Shirazi , Ruixue Wang , Yi Cui , Ping Yang , Xin Tong Li , Chenxiang Li , Hiroaki Fukuda , Hongtao Zhang , Yalin Zhu , Shiyu Zhang , Dickson Wanjau , Merck & Co., Inc., Rahway, NJ, USA and its affiliates (ROR: )",
+    "year": 2026,
+    "title": "gsDesign2: Group Sequential Design with Non-Constant Effect",
+    "version": "1.2.0",
+    "publisher": "[R package version 1.2.0]. Retrieved from https://CRAN.R-project.org/package=gsDesign2",
+    "url": "https://CRAN.R-project.org/package=gsDesign2"
+  },
+  "htmlTable": {
+    "exists": true,
+    "author": "Max Gordon , Stephen Gragg , Peter Konings",
+    "year": 2026,
+    "title": "htmlTable: Advanced Tables for Markdown/HTML",
+    "version": "2.5.0",
+    "publisher": "[R package version 2.5.0]. Retrieved from https://CRAN.R-project.org/package=htmlTable",
+    "url": "https://CRAN.R-project.org/package=htmlTable"
+  },
+  "irrCAC": {
+    "exists": true,
+    "author": "Kilem L. Gwet",
+    "year": 2026,
+    "title": "irrCAC: Computing the Extent of Agreement among Raters with Chance-Corrected Agreement Coefficient (CAC)",
+    "version": "1.4",
+    "publisher": "[R package version 1.4]. Retrieved from https://CRAN.R-project.org/package=irrCAC",
+    "url": "https://CRAN.R-project.org/package=irrCAC"
+  },
+  "jmv": {
+    "exists": true,
+    "author": "Ravi Selker , Jonathon Love , Damian Dropmann , Victor Moreno , Maurizio Agosti , Sebastian Jentschke",
+    "year": 2026,
+    "title": "jmv: The 'jamovi' Analyses",
+    "version": "2.8.0",
+    "publisher": "[R package version 2.8.0]. Retrieved from https://CRAN.R-project.org/package=jmv",
+    "url": "https://CRAN.R-project.org/package=jmv"
+  },
+  "joineR": {
+    "exists": true,
+    "author": "Pete Philipson (ORCID: ), Ines Sousa (ORCID: ), Peter J. Diggle (ORCID: ), Paula Williamson (ORCID: ), Ruwanthi Kolamunnage-Dona (ORCID: ), Robin Henderson , Graeme L. Hickey (ORCID: ), Maria Sudell , Medical Research Council (Grant numbers: G0400615 and MR/M013227/1)",
+    "year": 2026,
+    "title": "joineR: Joint Modelling of Repeated Measurements and Time-to-Event Data",
+    "version": "1.2.9",
+    "publisher": "[R package version 1.2.9]. Retrieved from https://CRAN.R-project.org/package=joineR",
+    "url": "https://CRAN.R-project.org/package=joineR"
+  },
+  "klaR": {
+    "exists": true,
+    "author": "Christian Roever , Nils Raabe , Karsten Luebke , Uwe Ligges , Gero Szepannek , Marc Zentgraf , David Meyer",
+    "year": 2026,
+    "title": "klaR: Classification and Visualization",
+    "version": "1.7-4",
+    "publisher": "[R package version 1.7-4]. Retrieved from https://CRAN.R-project.org/package=klaR",
+    "url": "https://CRAN.R-project.org/package=klaR"
+  },
+  "lm.beta": {
+    "exists": true,
+    "author": "Stefan Behrendt",
+    "year": 2025,
+    "title": "lm.beta: Add Standardized Regression Coefficients to Linear-Model-Objects",
+    "version": "1.7-3",
+    "publisher": "[R package version 1.7-3]. Retrieved from https://CRAN.R-project.org/package=lm.beta",
+    "url": "https://CRAN.R-project.org/package=lm.beta"
+  },
+  "lmerTest": {
+    "exists": true,
+    "author": "Alexandra Kuznetsova , Per Bruun Brockhoff , Rune Haubo Bojesen Christensen (ORCID: ), Sofie P\u00f8denphant Jensen",
+    "year": 2026,
+    "title": "lmerTest: Tests in Linear Mixed Effects Models",
+    "version": "3.2-1",
+    "publisher": "[R package version 3.2-1]. Retrieved from https://CRAN.R-project.org/package=lmerTest",
+    "url": "https://CRAN.R-project.org/package=lmerTest"
+  },
+  "mcr": {
+    "exists": true,
+    "author": "Sergej Potapov (), Fabian Model , Andre Schuetzenmeister (), Ekaterina Manuilova , Florian Dufey (), Jakob Raymaekers (), Venkatraman E. Seshan , Roche",
+    "year": 2024,
+    "title": "mcr: Method Comparison Regression",
+    "version": "1.3.3.1",
+    "publisher": "[R package version 1.3.3.1]. Retrieved from https://CRAN.R-project.org/package=mcr",
+    "url": "https://CRAN.R-project.org/package=mcr"
+  },
+  "mediation": {
+    "exists": true,
+    "author": "Dustin Tingley , Teppei Yamamoto , Kentaro Hirose , Luke Keele , Kosuke Imai , Minh Trinh , Weihuang Wong",
+    "year": 2025,
+    "title": "mediation: Causal Mediation Analysis",
+    "version": "4.5.1",
+    "publisher": "[R package version 4.5.1]. Retrieved from https://CRAN.R-project.org/package=mediation",
+    "url": "https://CRAN.R-project.org/package=mediation"
+  },
+  "metaBMA": {
+    "exists": true,
+    "author": "Daniel W. Heck (), Quentin F. Gronau , Eric-Jan Wagenmakers , Indrajeet Patil ()",
+    "year": 2023,
+    "title": "metaBMA: Bayesian Model Averaging for Random and Fixed Effects Meta-Analysis",
+    "version": "0.6.9",
+    "publisher": "[R package version 0.6.9]. Retrieved from https://CRAN.R-project.org/package=metaBMA",
+    "url": "https://CRAN.R-project.org/package=metaBMA"
+  },
+  "mixOmics": {
+    "exists": true,
+    "author": "Kim-Anh Le Cao, Florian Rohart, Ignacio Gonzalez, Sebastien Dejean with key contributors Benoit Gautier, Francois Bartolo and contributions from Pierre Monget, Jeff Coquery, FangZou Yao, Benoit Liquet.",
+    "year": 2018,
+    "title": "mixOmics: Omics Data Integration Project",
+    "version": "6.3.2",
+    "publisher": "[R package version 6.3.2]. Retrieved from https://CRAN.R-project.org/package=mixOmics",
+    "url": "https://CRAN.R-project.org/package=mixOmics"
+  },
+  "msm": {
+    "exists": true,
+    "author": "Christopher Jackson",
+    "year": 2024,
+    "title": "msm: Multi-State Markov and Hidden Markov Models in Continuous Time",
+    "version": "1.8.2",
+    "publisher": "[R package version 1.8.2]. Retrieved from https://CRAN.R-project.org/package=msm",
+    "url": "https://CRAN.R-project.org/package=msm"
+  },
+  "nremotes": {
+    "exists": false,
+    "error": "HTTP Error 404: Not Found"
+  },
+  "nricens": {
+    "exists": true,
+    "author": "Eisuke Inoue",
+    "year": 2018,
+    "title": "nricens: NRI for Risk Prediction Models with Time to Event and Binary Response Data",
+    "version": "1.6",
+    "publisher": "[R package version 1.6]. Retrieved from https://CRAN.R-project.org/package=nricens",
+    "url": "https://CRAN.R-project.org/package=nricens"
+  },
+  "ordinal": {
+    "exists": true,
+    "author": "Rune Haubo Bojesen Christensen (ORCID: )",
+    "year": 2026,
+    "title": "ordinal: Regression Models for Ordinal Data",
+    "version": "2026.7-26",
+    "publisher": "[R package version 2026.7-26]. Retrieved from https://CRAN.R-project.org/package=ordinal",
+    "url": "https://CRAN.R-project.org/package=ordinal"
+  },
+  "palmerpenguins": {
+    "exists": true,
+    "author": "Allison Horst (), Alison Hill (), Kristen Gorman ()",
+    "year": 2022,
+    "title": "palmerpenguins: Palmer Archipelago (Antarctica) Penguin Data",
+    "version": "0.1.1",
+    "publisher": "[R package version 0.1.1]. Retrieved from https://CRAN.R-project.org/package=palmerpenguins",
+    "url": "https://CRAN.R-project.org/package=palmerpenguins"
+  },
+  "parttree": {
+    "exists": true,
+    "author": "Grant McDermott (ORCID: ), Achim Zeileis (ORCID: ), Brian Heseung Kim (ORCID: ), Julia Silge (ORCID: )",
+    "year": 2026,
+    "title": "parttree: Visualize Simple 2-D Decision Tree Partitions",
+    "version": "0.1.3",
+    "publisher": "[R package version 0.1.3]. Retrieved from https://CRAN.R-project.org/package=parttree",
+    "url": "https://CRAN.R-project.org/package=parttree"
+  },
+  "penalized": {
+    "exists": true,
+    "author": "Jelle Goeman , Rosa Meijer , Nimisha Chaturvedi , Matthew Lueder",
+    "year": 2025,
+    "title": "penalized: L1 (Lasso and Fused Lasso) and L2 (Ridge) Penalized Estimation in GLMs and in the Cox Model",
+    "version": "0.9-53",
+    "publisher": "[R package version 0.9-53]. Retrieved from https://CRAN.R-project.org/package=penalized",
+    "url": "https://CRAN.R-project.org/package=penalized"
+  },
+  "ppsr": {
+    "exists": true,
+    "author": "Paul van der Laken",
+    "year": 2024,
+    "title": "ppsr: Predictive Power Score",
+    "version": "0.0.5",
+    "publisher": "[R package version 0.0.5]. Retrieved from https://CRAN.R-project.org/package=ppsr",
+    "url": "https://CRAN.R-project.org/package=ppsr"
+  },
+  "questionr": {
+    "exists": true,
+    "author": "Julien Barnier , Fran\u00e7ois Briatte , Joseph Larmarange",
+    "year": 2026,
+    "title": "questionr: Functions to Make Surveys Processing Easier",
+    "version": "0.8.2",
+    "publisher": "[R package version 0.8.2]. Retrieved from https://CRAN.R-project.org/package=questionr",
+    "url": "https://CRAN.R-project.org/package=questionr"
+  },
+  "regplot": {
+    "exists": true,
+    "author": "Roger Marshall",
+    "year": 2020,
+    "title": "regplot: Enhanced Regression Nomogram Plot",
+    "version": "1.1",
+    "publisher": "[R package version 1.1]. Retrieved from https://CRAN.R-project.org/package=regplot",
+    "url": "https://CRAN.R-project.org/package=regplot"
+  },
+  "riverplot": {
+    "exists": true,
+    "author": "January Weiner",
+    "year": 2021,
+    "title": "riverplot: Sankey or Ribbon Plots",
+    "version": "0.10",
+    "publisher": "[R package version 0.10]. Retrieved from https://CRAN.R-project.org/package=riverplot",
+    "url": "https://CRAN.R-project.org/package=riverplot"
+  },
+  "rmda": {
+    "exists": true,
+    "author": "Marshall Brown",
+    "year": 2018,
+    "title": "rmda: Risk Model Decision Analysis",
+    "version": "1.6",
+    "publisher": "[R package version 1.6]. Retrieved from https://CRAN.R-project.org/package=rmda",
+    "url": "https://CRAN.R-project.org/package=rmda"
+  },
+  "rpact": {
+    "exists": true,
+    "author": "Gernot Wassmer (ORCID: ), Friedrich Pahlke (ORCID: ), Till Jensen , Daniel Sabanes Bove (ORCID: ), Stephen Schueuerhuis (ORCID: ), Tobias Muetze (ORCID: ), RPACT GmbH",
+    "year": 2026,
+    "title": "rpact: Confirmatory Adaptive Clinical Trial Design and Analysis",
+    "version": "4.4.0",
+    "publisher": "[R package version 4.4.0]. Retrieved from https://CRAN.R-project.org/package=rpact",
+    "url": "https://CRAN.R-project.org/package=rpact"
+  },
+  "scattermore": {
+    "exists": true,
+    "author": "Tereza Kulichova , Mirek Kratochvil ()",
+    "year": 2023,
+    "title": "scattermore: Scatterplots with More Points",
+    "version": "1.2",
+    "publisher": "[R package version 1.2]. Retrieved from https://CRAN.R-project.org/package=scattermore",
+    "url": "https://CRAN.R-project.org/package=scattermore"
+  },
+  "sjPlot": {
+    "exists": true,
+    "author": "Daniel L\u00fcdecke (ORCID: ), Alexander Bartel (ORCID: ), Carsten Schwemmer , Chuck Powell (ORCID: ), Amir Djalovski , Johannes Titz (ORCID: )",
+    "year": 2025,
+    "title": "sjPlot: Data Visualization for Statistics in Social Science",
+    "version": "2.9.0",
+    "publisher": "[R package version 2.9.0]. Retrieved from https://CRAN.R-project.org/package=sjPlot",
+    "url": "https://CRAN.R-project.org/package=sjPlot"
+  },
+  "spBayesSurv": {
+    "exists": true,
+    "author": "Haiming Zhou , Timothy Hanson",
+    "year": 2025,
+    "title": "spBayesSurv: Bayesian Modeling and Analysis of Spatially Correlated Survival Data",
+    "version": "1.1.9",
+    "publisher": "[R package version 1.1.9]. Retrieved from https://CRAN.R-project.org/package=spBayesSurv",
+    "url": "https://CRAN.R-project.org/package=spBayesSurv"
+  },
+  "spdep": {
+    "exists": true,
+    "author": "Roger Bivand (ORCID: , ROR: ), Micah Altman , Luc Anselin , Renato Assun\u00e7\u00e3o , Anil Bera , Olaf Berke , F. Guillaume Blanchet , Marilia Carvalho , Bjarke Christensen , Yongwan Chun , Carsten Dormann , St\u00e9phane Dray , Dewey Dunnington (ORCID: ), Virgilio G\u00f3mez-Rubio , Malabika Koley , Tomasz Kossowski (ORCID: ), Elias Krainski , Pierre Legendre , Nicholas Lewin-Koh , Angela Li , Giovanni Millo , Werner Mueller , Hisaji Ono , Josiah Parry (ORCID: ), Pedro Peres-Neto , Micha\u0142 Pietrzak (ORCID: ), Gianfranco Piras , Markus Reder , Jeff Sauer , Michael Tiefelsdorf , Ren\u00e9 Westerholt , Justyna Wilk (ORCID: ), Levi Wolf , Danlin Yu",
+    "year": 2026,
+    "title": "spdep: Spatial Dependence: Weighting Schemes, Statistics",
+    "version": "1.4-2",
+    "publisher": "[R package version 1.4-2]. Retrieved from https://CRAN.R-project.org/package=spdep",
+    "url": "https://CRAN.R-project.org/package=spdep"
+  },
+  "survSNP": {
+    "exists": true,
+    "author": "Kouros Owzar, Zhiguo Li, Nancy Cox, Sin-Ho Jung and Chanhee Yi",
+    "year": 2023,
+    "title": "survSNP: Power Calculations for SNP Studies with Censored Outcomes",
+    "version": "0.26",
+    "publisher": "[R package version 0.26]. Retrieved from https://CRAN.R-project.org/package=survSNP",
+    "url": "https://CRAN.R-project.org/package=survSNP"
+  },
+  "survivalsvm": {
+    "exists": true,
+    "author": "Cesaire J. K. Fouodo",
+    "year": 2025,
+    "title": "survivalsvm: Survival Support Vector Analysis",
+    "version": "0.0.6",
+    "publisher": "[R package version 0.0.6]. Retrieved from https://CRAN.R-project.org/package=survivalsvm",
+    "url": "https://CRAN.R-project.org/package=survivalsvm"
+  },
+  "tidyHeatmap": {
+    "exists": true,
+    "author": "Stefano Mangiola , Anthony Papenfuss",
+    "year": 2025,
+    "title": "tidyHeatmap: A Tidy Implementation of Heatmap",
+    "version": "1.13.1",
+    "publisher": "[R package version 1.13.1]. Retrieved from https://CRAN.R-project.org/package=tidyHeatmap",
+    "url": "https://CRAN.R-project.org/package=tidyHeatmap"
+  },
+  "tidycmprsk": {
+    "exists": true,
+    "author": "Daniel D. Sjoberg (ORCID: ), Teng Fei (ORCID: )",
+    "year": 2026,
+    "title": "tidycmprsk: Competing Risks Estimation",
+    "version": "1.1.2",
+    "publisher": "[R package version 1.1.2]. Retrieved from https://CRAN.R-project.org/package=tidycmprsk",
+    "url": "https://CRAN.R-project.org/package=tidycmprsk"
+  },
+  "tram": {
+    "exists": true,
+    "author": "Torsten Hothorn (ORCID: ), Luisa Barbanti (ORCID: ), Sandra Siegfried (ORCID: ), Lucas Kook (ORCID: ), Susanne Dandl (ORCID: ), Brian Ripley , Bill Venables , Douglas M. Bates , Nadja Klein",
+    "year": 2026,
+    "title": "tram: Transformation Models",
+    "version": "1.4-5",
+    "publisher": "[R package version 1.4-5]. Retrieved from https://CRAN.R-project.org/package=tram",
+    "url": "https://CRAN.R-project.org/package=tram"
+  },
+  "treemap": {
+    "exists": true,
+    "author": "Martijn Tennekes , Peter Ellis",
+    "year": 2023,
+    "title": "treemap: Treemap Visualization",
+    "version": "2.4-4",
+    "publisher": "[R package version 2.4-4]. Retrieved from https://CRAN.R-project.org/package=treemap",
+    "url": "https://CRAN.R-project.org/package=treemap"
+  },
+  "umap": {
+    "exists": true,
+    "author": "Tomasz Konopka",
+    "year": 2023,
+    "title": "umap: Uniform Manifold Approximation and Projection",
+    "version": "0.2.10.0",
+    "publisher": "[R package version 0.2.10.0]. Retrieved from https://CRAN.R-project.org/package=umap",
+    "url": "https://CRAN.R-project.org/package=umap"
+  },
+  "visR": {
+    "exists": true,
+    "author": "Mark Baillie , Diego Saldana , Charlotta Fruechtenicht , Marc Vandemeulebroecke , Thanos Siadimas , Pawel Kawski , Steven Haesendonckx , James Black , Pelagia Alexandra Papadopoulou , Tim Treis , Rebecca Albrecht , Ardalan Mirshani , Daniel D. Sjoberg ()",
+    "year": 2024,
+    "title": "visR: Clinical Graphs and Tables Adhering to Graphical Principles",
+    "version": "0.4.1",
+    "publisher": "[R package version 0.4.1]. Retrieved from https://CRAN.R-project.org/package=visR",
+    "url": "https://CRAN.R-project.org/package=visR"
+  },
+  "xgboost": {
+    "exists": true,
+    "author": "Tianqi Chen , Tong He , Michael Benesty , Vadim Khotilovich , Yuan Tang (ORCID: ), Hyunsu Cho , Kailong Chen , Rory Mitchell , Ignacio Cano , Tianyi Zhou , Mu Li , Junyuan Xie , Min Lin , Yifeng Geng , Yutian Li , Jiaming Yuan , David Cortes , XGBoost contributors (base XGBoost implementation)",
+    "year": 2026,
+    "title": "xgboost: Extreme Gradient Boosting",
+    "version": "3.2.1.1",
+    "publisher": "[R package version 3.2.1.1]. Retrieved from https://CRAN.R-project.org/package=xgboost",
+    "url": "https://CRAN.R-project.org/package=xgboost"
+  },
+  "jjstatsplot": {
+    "exists": false,
+    "error": "HTTP Error 404: Not Found"
+  }
+}

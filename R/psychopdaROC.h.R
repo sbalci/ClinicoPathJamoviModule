@@ -800,7 +800,9 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "ClinicoPathJamoviModule",
                     "cutpointr",
                     "pROC",
-                    "plotROC"))
+                    "plotROC",
+                    "MASS",
+                    "tools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -1883,7 +1885,7 @@ psychopdaROCBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "psychopdaROC",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = psychopdaROCResults$new(options=options),
                 data = data,

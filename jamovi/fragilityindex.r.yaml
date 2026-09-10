@@ -122,8 +122,8 @@ items:
 
 
 refs:
-    - walsh2014fragility
     - ClinicoPathJamoviModule
+    - walsh2014fragility
     - glue
     - ggplot2
 ...

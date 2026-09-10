@@ -184,7 +184,8 @@ lymphnoderatioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Lymph Node Ratio",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "ggplot2"))
+                    "ggplot2",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

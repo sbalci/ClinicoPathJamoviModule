@@ -272,7 +272,8 @@ lassocoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "Simon2011Coxnet",
                     "Taylor2018PostSelection",
                     "Steyerberg2003Validation",
-                    "tripod"))
+                    "tripod",
+                    "Matrix"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -722,7 +723,7 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lassocox",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = lassocoxResults$new(options=options),
                 data = data,

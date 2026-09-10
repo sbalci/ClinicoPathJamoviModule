@@ -184,4 +184,8 @@ items:
 #
 # See git history for full implementations of these features.
 # ============================================================================
+
+refs:
+    - ClinicoPathJamoviModule
+    - pROC
 ...

@@ -170,6 +170,7 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="PCA Loading Significance Test",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "glue",
                     "pracma",
                     "dplyr"))

@@ -79,9 +79,8 @@ items:
       requiresData: true
 
 refs:
+    - ClinicoPathJamoviModule
     - ggplot2
     - ggstatsplot
     - statsExpressions
-    - ClinicoPathJamoviModule
-
 ...

@@ -310,11 +310,11 @@ markovmultistateResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="",
                 title="Markov Multi-State Models",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "mstate",
                     "msm",
                     "survival",
                     "diagram",
-                    "ClinicoPathJamoviModule",
                     "gridExtra",
                     "tools",
                     "scales"))

@@ -82,6 +82,7 @@ items:
       visible: (plots && plotType:network)
 
 refs:
+    - ClinicoPathJamoviModule
     - correlation
     - report
     - corrplot
@@ -89,7 +90,5 @@ refs:
     - qgraph
     - igraph
     - ggraph
-    - ClinicoPathJamoviModule
-
     - stringr
 ...

@@ -166,10 +166,9 @@ items:
     #   type:  Preformatted
 
 refs:
+    - ClinicoPathJamoviModule
     - ggplot2
     - ggstatsplot
     - statsExpressions
     - ggpubr
-    - ClinicoPathJamoviModule
-
 ...

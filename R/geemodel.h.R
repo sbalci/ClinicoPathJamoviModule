@@ -176,7 +176,11 @@ geemodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Generalized Estimating Equations")
+                title="Generalized Estimating Equations",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "emmeans",
+                    "geepack"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

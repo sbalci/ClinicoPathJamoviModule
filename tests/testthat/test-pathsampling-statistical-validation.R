@@ -310,46 +310,36 @@ test_that("Hodges-Lehmann estimator matches manual calculation", {
 # ==============================================================================
 
 test_that("Clustering index calculation", {
-  # We need to test the logic, but this is a custom heuristic
-  # Expected behavior:
-  # - clustering_index < 1 means clustering (shorter distances than expected)
-  # - clustering_index = 1 means random spacing
-  # - clustering_index > 1 means dispersed (longer distances than expected)
+  # This previously reimplemented the formula inline, so it passed regardless of what the
+  # module did. It now calls the real method.
+  ci <- getFromNamespace("pathsamplingClass", "ClinicoPath")$private_methods$.calculateClusteringIndex
 
-  # Test case 1: Evenly spaced samples
-  positiveSamples <- c(1, 3, 5, 7, 9)  # spacing = 2
-  totalSamples <- 10
+  # Interpretation: < 1 clustered, 1 random, > 1 dispersed.
+  # The reference gap is (N + 1)/(k + 1) -- the expected spacing when k positions are drawn
+  # uniformly from 1..N. The old denominator N/k was too large, which pushed the index below
+  # 1 even for randomly scattered positives.
 
-  # Expected distance = 10 / 5 = 2
-  # Mean distance = mean(c(2,2,2,2)) = 2
-  # Index = 2 / 2 = 1.0
+  # Tightly clustered: five adjacent positives out of twenty samples.
+  expect_lt(ci(c(1, 2, 3, 4, 5), 20), 0.7)
+  expect_equal(ci(c(1, 2, 3, 4, 5), 20), 1 / (21 / 6), tolerance = 1e-10)
 
-  sorted_samples <- sort(positiveSamples)
-  distances <- diff(sorted_samples)
-  mean_distance <- mean(distances)
-  expected_distance <- totalSamples / length(positiveSamples)
-  clustering_index <- mean_distance / expected_distance
+  # Dispersed: positives at the two extremes only.
+  expect_gt(ci(c(1, 20), 20), 1.3)
 
-  expect_equal(clustering_index, 1.0, tolerance = 1e-10,
-               info = "Evenly spaced samples should have clustering index = 1")
+  # Fewer than two positives cannot define a gap.
+  expect_true(is.na(ci(c(3), 20)))
 
-  # Test case 2: Clustered samples
-  positiveSamples <- c(1, 2, 3, 4, 5)  # spacing = 1
-  totalSamples <- 20
-
-  # Expected distance = 20 / 5 = 4
-  # Mean distance = mean(c(1,1,1,1)) = 1
-  # Index = 1 / 4 = 0.25
-
-  sorted_samples <- sort(positiveSamples)
-  distances <- diff(sorted_samples)
-  mean_distance <- mean(distances)
-  expected_distance <- totalSamples / length(positiveSamples)
-  clustering_index <- mean_distance / expected_distance
-
-  expect_lt(clustering_index, 1.0)
-  expect_equal(clustering_index, 0.25, tolerance = 1e-10)
+  # The calibration property that matters: under uniform random placement the index must
+  # centre on 1, including at k = 2 where the old formula averaged ~0.67 and so labelled
+  # randomly scattered positives as "clustered".
+  set.seed(99)
+  for (k in c(2, 3, 5)) {
+    m <- mean(replicate(2000, ci(sample(seq_len(30), k), 30)))
+    expect_gt(m, 0.93)
+    expect_lt(m, 1.07)
+  }
 })
+
 
 test_that("Foci count estimation", {
   # The logic counts gaps > 2 as separate foci
@@ -445,61 +435,45 @@ test_that("Bootstrap empirical cumulative produces valid confidence intervals", 
 test_that("Beta-Binomial model produces reasonable recommendations", {
   skip_if_not_installed("VGAM")
 
-  # Create test data for pathsampling analysis
+  # This used to reimplement a method-of-moments estimator inline instead of calling
+  # pathsampling(). On this fixture the raw rho came out NEGATIVE (-0.052,
+  # underdispersion), was clamped to 0, and alpha <- p_mean * (1 - 0) / 0 gave Inf --
+  # which sailed past `expect_true(alpha > 0)` and produced a NaN cumProb. It now
+  # drives the real analysis, which handles the rho -> 0 limit.
   testData <- data.frame(
-    case_id = paste0("Case", 1:20),
-    samples_examined = c(15, 18, 20, 12, 25, 22, 16, 19, 21, 17,
+    totalSamples    = c(15, 18, 20, 12, 25, 22, 16, 19, 21, 17,
                         14, 23, 18, 20, 16, 19, 21, 15, 24, 18),
-    positive_samples = c(3, 4, 5, 2, 6, 5, 3, 4, 5, 3,
+    successStates   = c(3, 4, 5, 2, 6, 5, 3, 4, 5, 3,
                         2, 5, 4, 4, 3, 4, 5, 3, 6, 4),
-    total_population = rep(30, 20),  # For Beta-Binomial
-    first_detection_pos = c(2, 1, 3, 2, 1, 2, 3, 2, 1, 2,
-                           3, 1, 2, 2, 3, 2, 1, 2, 1, 2)
+    totalPopulation = rep(30L, 20),
+    firstDetection  = c(2, 1, 3, 2, 1, 2, 3, 2, 1, 2,
+                        3, 1, 2, 2, 3, 2, 1, 2, 1, 2)
   )
 
-  # Test that we can run the analysis without errors
-  # (This would require the full jamovi module to be available)
-  # For now, we verify the mathematical components are correct
+  res <- pathsampling(
+    data             = testData,
+    totalSamples     = 'totalSamples',
+    firstDetection   = 'firstDetection',
+    totalPopulation  = 'totalPopulation',
+    successStates    = 'successStates',
+    showBetaBinomial = TRUE,
+    showBootstrap    = FALSE
+  )
 
-  # Calculate alpha and beta from empirical data
-  p_mean <- mean(testData$positive_samples / testData$samples_examined)
-  p_var <- var(testData$positive_samples / testData$samples_examined)
-  n_mean <- mean(testData$samples_examined)
+  tbl <- as.data.frame(res$betaBinomialTable)
+  expect_gt(nrow(tbl), 0)
 
-  # Method of moments estimation for beta-binomial
-  if (p_var < p_mean * (1 - p_mean)) {
-    rho <- (p_var - p_mean * (1 - p_mean) / n_mean) / (p_mean * (1 - p_mean) * (n_mean - 1) / n_mean)
-    rho <- max(0, min(1, rho))  # Constrain to [0,1]
-  } else {
-    rho <- 0
-  }
+  # Every cumulative probability must be a real probability -- this is what went NaN.
+  expect_true(all(is.finite(tbl$cumProb)))
+  expect_true(all(tbl$cumProb >= 0 & tbl$cumProb <= 1))
 
-  alpha <- p_mean * (1 - rho) / rho
-  beta <- (1 - p_mean) * (1 - rho) / rho
+  # And it must be non-decreasing in the number of samples.
+  expect_false(is.unsorted(tbl$cumProb))
 
-  # Verify parameters are positive
-  expect_true(alpha > 0, info = "Alpha should be positive")
-  expect_true(beta > 0, info = "Beta should be positive")
-
-  # Verify beta-binomial probabilities are valid
-  dbetabinom_pmf <- function(k, n, alpha, beta) {
-    exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
-  }
-
-  n_test <- 20
-  target <- 3
-
-  prob_less_than_target <- 0
-  for (k in 0:(target - 1)) {
-    if (k <= n_test) {
-      prob_less_than_target <- prob_less_than_target + dbetabinom_pmf(k, n_test, alpha, beta)
-    }
-  }
-  cumProb <- 1 - prob_less_than_target
-
-  expect_true(cumProb >= 0 && cumProb <= 1,
-              info = "Cumulative probability should be valid")
+  # Shape parameters explode as rho -> 0; they must not be printed as a 27-digit float.
+  expect_no_match(res$betaBinomialText$content, '[0-9]{15}\\.[0-9]{3}')
 })
+
 
 # ==============================================================================
 # EDGE CASES AND ERROR HANDLING

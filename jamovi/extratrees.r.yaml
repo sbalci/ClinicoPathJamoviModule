@@ -108,10 +108,10 @@ items:
       requiresData: true
 
 refs:
+    - ClinicoPathJamoviModule
     - survival
     - ranger
     - randomForestSRC
-    - ClinicoPathJamoviModule
-
     - survival
+    - graphics
 ...

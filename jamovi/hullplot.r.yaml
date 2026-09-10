@@ -111,5 +111,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - ggforce
-
+    - digest
+    - viridis
 ...

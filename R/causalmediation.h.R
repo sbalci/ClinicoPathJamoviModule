@@ -322,7 +322,11 @@ causalmediationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 options=options,
                 name="",
-                title="Causal Mediation Analysis")
+                title="Causal Mediation Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "hdmax2",
+                    "mediation"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

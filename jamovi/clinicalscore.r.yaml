@@ -380,4 +380,5 @@ refs:
     - rms
     - pROC
     - survival
+    - MASS
 ...

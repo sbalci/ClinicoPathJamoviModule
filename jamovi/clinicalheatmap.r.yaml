@@ -306,6 +306,10 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - tidyheatmaps
     - grDevices
+    - cluster
+    - survival
+    - survminer
 ...

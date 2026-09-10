@@ -178,8 +178,8 @@ fragilityindexResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Fragility Index for Dichotomous Outcomes",
                 refs=list(
-                    "walsh2014fragility",
                     "ClinicoPathJamoviModule",
+                    "walsh2014fragility",
                     "glue",
                     "ggplot2"))
             self$add(jmvcore::Html$new(

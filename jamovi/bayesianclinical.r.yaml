@@ -350,5 +350,5 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
+    - BayesFactor
 ...

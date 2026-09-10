@@ -255,6 +255,7 @@ robustcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="",
                 title="Robust Correlation Methods",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "Hmisc",
                     "corrplot",
                     "ggplot2",
@@ -263,7 +264,6 @@ robustcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "robustbase",
                     "WRS2",
                     "boot",
-                    "ClinicoPathJamoviModule",
                     "WGCNA",
                     "glue",
                     "reshape2",

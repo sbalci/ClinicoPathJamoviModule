@@ -98,6 +98,8 @@ refs:
     - ClinicoPathJamoviModule
     - ggdist
     - ggplot2
-
+    - ggprism
+    - moments
+    - viridis
 ...
 

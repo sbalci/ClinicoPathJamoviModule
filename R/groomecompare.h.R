@@ -204,7 +204,11 @@ groomecompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="Groome Staging System Comparison",
                 refs=list(
-                    "survival"))
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "fmsb",
+                    "graphics",
+                    "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

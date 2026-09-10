@@ -295,9 +295,9 @@ conditionalgeeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Conditional GEE for Recurrent Events Gap Times",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "geepack",
-                    "survival",
-                    "ClinicoPathJamoviModule"))
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

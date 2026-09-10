@@ -258,7 +258,11 @@ survivalendpointsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             super$initialize(
                 options=options,
                 name="",
-                title="Survival Endpoint Derivation")
+                title="Survival Endpoint Derivation",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "survminer"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",

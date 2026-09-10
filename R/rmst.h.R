@@ -202,7 +202,8 @@ rmstResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "glue",
                     "survival",
-                    "survminer"))
+                    "survminer",
+                    "survRM2"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

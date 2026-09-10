@@ -258,10 +258,11 @@ hematologicindicesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 name="",
                 title="Hematologic Prognostic Indices",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "onodera1984pni",
                     "mcmillan2013gps",
-                    "ClinicoPathJamoviModule",
-                    "ggplot2"))
+                    "ggplot2",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

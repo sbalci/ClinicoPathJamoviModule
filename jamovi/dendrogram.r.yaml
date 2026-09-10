@@ -94,8 +94,6 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
-
     - BiocManager
     - tibble
     - tidyr
@@ -109,4 +107,5 @@ refs:
     - viridis
     - RColorBrewer
     - grDevices
+    - tools
 ...

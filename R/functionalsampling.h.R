@@ -153,7 +153,9 @@ functionalsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             super$initialize(
                 options=options,
                 name="",
-                title="Functional Sampling - Rare Event Analysis")
+                title="Functional Sampling - Rare Event Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",

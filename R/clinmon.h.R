@@ -201,8 +201,8 @@ clinmonResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Clinical Hemodynamic Monitoring",
                 refs=list(
-                    "clintools",
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "clintools"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

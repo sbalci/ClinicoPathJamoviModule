@@ -250,13 +250,11 @@ items:
           - event
 
 refs:
+    - ClinicoPathJamoviModule
     - riskRegression
     - survival
     - splines
     - randomForestSRC
-    - ClinicoPathJamoviModule
-
-
     - tools
     - scales
 ...

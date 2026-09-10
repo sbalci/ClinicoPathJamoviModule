@@ -131,10 +131,12 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - ggplot2
     - ggstatsplot
     - statsExpressions
     - ggpubr
-    - ClinicoPathJamoviModule
-
+    - ggExtra
+    - ggrepel
+    - patchwork
 ...

@@ -65,6 +65,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             generateExecutiveSummary = FALSE,
             cancerType = "general",
             useOptimismCorrection = FALSE,
+            seed = 42,
             enableMultifactorialAnalysis = FALSE,
             continuousCovariates = NULL,
             categoricalCovariates = NULL,
@@ -219,14 +220,14 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             winRatioGeneralizedPairwise = FALSE,
             performFrailtyModelsAnalysis = FALSE,
             frailtyClusterVariable = NULL,
-            frailtyDistribution = "gamma",
+            frailtyDistribution = "log-normal",
             frailtyBootstrap = FALSE,
             frailtyBootstrapSamples = 500,
-            frailtyVarianceComponents = FALSE,
+            frailtyVarianceComponents = TRUE,
             frailtyHeterogeneityTest = FALSE,
             frailtyClusterComparison = FALSE,
             frailtyModelSelection = FALSE,
-            frailtyPredictiveAccuracy = FALSE,
+            frailtyPredictiveAccuracy = TRUE,
             frailtyDiagnostics = FALSE,
             frailtyAdvancedInference = FALSE,
             performClinicalUtilityAnalysis = FALSE,
@@ -542,6 +543,10 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "useOptimismCorrection",
                 useOptimismCorrection,
                 default=FALSE)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=42)
             private$..enableMultifactorialAnalysis <- jmvcore::OptionBool$new(
                 "enableMultifactorialAnalysis",
                 enableMultifactorialAnalysis,
@@ -1458,7 +1463,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "gamma",
                     "gaussian",
                     "log-normal"),
-                default="gamma")
+                default="log-normal")
             private$..frailtyBootstrap <- jmvcore::OptionBool$new(
                 "frailtyBootstrap",
                 frailtyBootstrap,
@@ -1472,7 +1477,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..frailtyVarianceComponents <- jmvcore::OptionBool$new(
                 "frailtyVarianceComponents",
                 frailtyVarianceComponents,
-                default=FALSE)
+                default=TRUE)
             private$..frailtyHeterogeneityTest <- jmvcore::OptionBool$new(
                 "frailtyHeterogeneityTest",
                 frailtyHeterogeneityTest,
@@ -1488,7 +1493,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             private$..frailtyPredictiveAccuracy <- jmvcore::OptionBool$new(
                 "frailtyPredictiveAccuracy",
                 frailtyPredictiveAccuracy,
-                default=FALSE)
+                default=TRUE)
             private$..frailtyDiagnostics <- jmvcore::OptionBool$new(
                 "frailtyDiagnostics",
                 frailtyDiagnostics,
@@ -1620,6 +1625,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..generateExecutiveSummary)
             self$.addOption(private$..cancerType)
             self$.addOption(private$..useOptimismCorrection)
+            self$.addOption(private$..seed)
             self$.addOption(private$..enableMultifactorialAnalysis)
             self$.addOption(private$..continuousCovariates)
             self$.addOption(private$..categoricalCovariates)
@@ -1857,6 +1863,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         generateExecutiveSummary = function() private$..generateExecutiveSummary$value,
         cancerType = function() private$..cancerType$value,
         useOptimismCorrection = function() private$..useOptimismCorrection$value,
+        seed = function() private$..seed$value,
         enableMultifactorialAnalysis = function() private$..enableMultifactorialAnalysis$value,
         continuousCovariates = function() private$..continuousCovariates$value,
         categoricalCovariates = function() private$..categoricalCovariates$value,
@@ -2093,6 +2100,7 @@ stagemigrationOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..generateExecutiveSummary = NA,
         ..cancerType = NA,
         ..useOptimismCorrection = NA,
+        ..seed = NA,
         ..enableMultifactorialAnalysis = NA,
         ..continuousCovariates = NA,
         ..categoricalCovariates = NA,
@@ -2276,10 +2284,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Group,
     active = list(
         welcomeMessage = function() private$.items[["welcomeMessage"]],
+        notices = function() private$.items[["notices"]],
         copyReadyReport = function() private$.items[["copyReadyReport"]],
         guidedModeProgress = function() private$.items[["guidedModeProgress"]],
-        mydataview = function() private$.items[["mydataview"]],
-        mydataview2 = function() private$.items[["mydataview2"]],
         migrationOverviewExplanation = function() private$.items[["migrationOverviewExplanation"]],
         migrationOverview = function() private$.items[["migrationOverview"]],
         migrationMatrixExplanation = function() private$.items[["migrationMatrixExplanation"]],
@@ -2493,7 +2500,6 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "grid",
                     "rms",
                     "splines",
-                    "networkD3",
                     "ggalluvial",
                     "patchwork",
                     "cmprsk",
@@ -2513,7 +2519,20 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "newStage",
                     "survivalTime",
                     "event",
-                    "eventLevel")))
+                    "eventLevel",
+                    "seed")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "oldStage",
+                    "newStage",
+                    "survivalTime",
+                    "event",
+                    "eventLevel",
+                    "analysisType",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="copyReadyReport",
@@ -2525,7 +2544,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "analysisType")))
+                    "analysisType",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="guidedModeProgress",
@@ -2536,22 +2556,13 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "newStage",
                     "survivalTime",
                     "event",
-                    "eventLevel")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview",
-                title="mydataview",
-                visible=FALSE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="mydataview2",
-                title="mydataview2",
-                visible=FALSE))
+                    "eventLevel",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="migrationOverviewExplanation",
                 title="Understanding the Migration Overview",
-                visible=FALSE,
+                visible="(showMigrationOverview && showExplanations)",
                 clearWith=list(
                     "showMigrationOverview")))
             self$add(jmvcore::Table$new(
@@ -2564,7 +2575,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "newStage",
                     "survivalTime",
                     "event",
-                    "eventLevel"),
+                    "eventLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="statistic", 
@@ -2582,7 +2594,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="migrationMatrixExplanation",
                 title="Understanding the Migration Matrix",
-                visible=FALSE,
+                visible="(showMigrationMatrix && showExplanations)",
                 clearWith=list(
                     "showMigrationMatrix")))
             self$add(jmvcore::Table$new(
@@ -2592,7 +2604,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 visible="(showMigrationMatrix)",
                 clearWith=list(
                     "oldStage",
-                    "newStage"),
+                    "newStage",
+                    "seed"),
                 columns=list(
                     list(
                         `name`=".name", 
@@ -2602,7 +2615,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="stageDistributionExplanation",
                 title="Understanding Stage Distribution Changes",
-                visible=FALSE,
+                visible="(showStageDistribution && showExplanations)",
                 clearWith=list(
                     "showStageDistribution")))
             self$add(jmvcore::Table$new(
@@ -2612,7 +2625,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 visible="(showStageDistribution)",
                 clearWith=list(
                     "oldStage",
-                    "newStage"),
+                    "newStage",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="stage", 
@@ -2642,7 +2656,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="migrationSummaryExplanation",
                 title="Understanding Statistical Tests for Migration",
-                visible=FALSE,
+                visible="(showMigrationSummary && showExplanations)",
                 clearWith=list(
                     "showMigrationSummary")))
             self$add(jmvcore::Table$new(
@@ -2655,7 +2669,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "newStage",
                     "survivalTime",
                     "event",
-                    "eventLevel"),
+                    "eventLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="statistic", 
@@ -2669,7 +2684,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="statisticalComparisonExplanation",
                 title="Understanding Statistical Comparison Metrics",
-                visible=FALSE,
+                visible="(showStatisticalComparison && showExplanations)",
                 clearWith=list(
                     "showStatisticalComparison")))
             self$add(jmvcore::Table$new(
@@ -2682,7 +2697,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "newStage",
                     "survivalTime",
                     "event",
-                    "eventLevel"),
+                    "eventLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -2704,7 +2720,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="concordanceComparisonExplanation",
                 title="Understanding Concordance (C-Index) Analysis",
-                visible=FALSE,
+                visible="(showConcordanceComparison && showExplanations)",
                 clearWith=list(
                     "showConcordanceComparison")))
             self$add(jmvcore::Table$new(
@@ -2717,7 +2733,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "newStage",
                     "survivalTime",
                     "event",
-                    "eventLevel"),
+                    "eventLevel",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Model", 
@@ -2757,7 +2775,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="nriResultsExplanation",
                 title="Understanding Net Reclassification Improvement (NRI)",
-                visible=FALSE,
+                visible="(calculateNRI && showExplanations)",
                 clearWith=list(
                     "calculateNRI")))
             self$add(jmvcore::Table$new(
@@ -2772,7 +2790,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "calculateNRI",
-                    "nriTimePoints"),
+                    "nriTimePoints",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="TimePoint", 
@@ -2812,7 +2832,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="idiResultsExplanation",
                 title="Understanding Integrated Discrimination Improvement (IDI)",
-                visible=FALSE,
+                visible="(calculateIDI && showExplanations)",
                 clearWith=list(
                     "calculateIDI")))
             self$add(jmvcore::Table$new(
@@ -2826,7 +2846,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "calculateIDI"),
+                    "calculateIDI",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="IDI", 
@@ -2864,7 +2886,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "calculateIDI",
-                    "nriTimePoints"),
+                    "nriTimePoints",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Metric", 
@@ -2915,7 +2939,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "continuousCovariates",
                     "categoricalCovariates",
                     "multifactorialComparisonType",
-                    "baselineModel"),
+                    "baselineModel",
+                    "confidenceLevel"),
                 columns=list(
                     list(
                         `name`="Model", 
@@ -2967,7 +2992,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "enableMultifactorialAnalysis",
                     "continuousCovariates",
-                    "categoricalCovariates"),
+                    "categoricalCovariates",
+                    "confidenceLevel"),
                 columns=list(
                     list(
                         `name`="Comparison", 
@@ -3188,7 +3214,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "eventLevel",
                     "continuousCovariates",
                     "categoricalCovariates",
-                    "nriTimePoints"),
+                    "nriTimePoints",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="TimePoint", 
@@ -3239,7 +3266,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "continuousCovariates",
-                    "categoricalCovariates"),
+                    "categoricalCovariates",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Model", 
@@ -3287,7 +3315,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "eventLevel",
                     "continuousCovariates",
                     "categoricalCovariates",
-                    "nriTimePoints"),
+                    "nriTimePoints",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Time_Point", 
@@ -3329,7 +3358,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "performROCAnalysis",
-                    "rocTimePoints"),
+                    "rocTimePoints",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="TimePoint", 
@@ -3367,7 +3397,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "advancedMigrationAnalysis",
-                    "nriTimePoints"),
+                    "nriTimePoints",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Metric", 
@@ -3411,7 +3443,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="dcaResultsExplanation",
                 title="Understanding Decision Curve Analysis (DCA)",
-                visible=FALSE,
+                visible="(performDCA && showExplanations)",
                 clearWith=list(
                     "performDCA")))
             self$add(jmvcore::Table$new(
@@ -3425,7 +3457,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "performDCA"),
+                    "performDCA",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Threshold", 
@@ -3451,7 +3484,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="pseudoR2ResultsExplanation",
                 title="Understanding Pseudo R-squared Measures",
-                visible=FALSE,
+                visible="(calculatePseudoR2 && showExplanations)",
                 clearWith=list(
                     "calculatePseudoR2")))
             self$add(jmvcore::Table$new(
@@ -3465,7 +3498,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "calculatePseudoR2"),
+                    "calculatePseudoR2",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Measure", 
@@ -3512,7 +3546,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "showDecisionCurves",
-                    "performDCA")))
+                    "performDCA",
+                    "seed")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="bootstrapResults",
@@ -3525,7 +3560,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "performBootstrap",
-                    "bootstrapReps"),
+                    "bootstrapReps",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Metric", 
@@ -3599,7 +3636,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "showWillRogersAnalysis"),
+                    "showWillRogersAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Stage", 
@@ -3646,7 +3684,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "performLikelihoodTests"),
+                    "performLikelihoodTests",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Test", 
@@ -3684,7 +3723,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "performLikelihoodTests"),
+                    "performLikelihoodTests",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Staging_System", 
@@ -3721,7 +3761,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="homogeneityTestsExplanation",
                 title="Understanding Stage Homogeneity Tests",
-                visible=FALSE,
+                visible="(performHomogeneityTests && showExplanations)",
                 clearWith=list(
                     "performHomogeneityTests")))
             self$add(jmvcore::Table$new(
@@ -3735,7 +3775,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "performHomogeneityTests"),
+                    "performHomogeneityTests",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Stage", 
@@ -3759,7 +3800,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="trendTestsExplanation",
                 title="Understanding Stage Trend Analysis",
-                visible=FALSE,
+                visible="(performTrendTests && showExplanations)",
                 clearWith=list(
                     "performTrendTests")))
             self$add(jmvcore::Table$new(
@@ -3773,7 +3814,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "performTrendTests"),
+                    "performTrendTests",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="System", 
@@ -3816,7 +3858,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "showClinicalInterpretation",
-                    "cancerType"),
+                    "cancerType",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Metric", 
@@ -3852,7 +3895,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "generateExecutiveSummary"),
+                    "generateExecutiveSummary",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Category", 
@@ -3888,7 +3932,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "showStatisticalSummary"),
+                    "showStatisticalSummary",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Method", 
@@ -3915,7 +3961,7 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="effectSizesExplanation",
                 title="Understanding Effect Sizes",
-                visible=FALSE,
+                visible="(includeEffectSizes && showExplanations)",
                 clearWith=list(
                     "includeEffectSizes")))
             self$add(jmvcore::Table$new(
@@ -3929,7 +3975,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "includeEffectSizes"),
+                    "includeEffectSizes",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Measure", 
@@ -3977,7 +4024,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "oldStage",
                     "newStage",
-                    "showMigrationHeatmap")))
+                    "showMigrationHeatmap",
+                    "seed")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="sankeyDiagram",
@@ -3989,7 +4037,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "oldStage",
                     "newStage",
-                    "showSankeyDiagram")))
+                    "showSankeyDiagram",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="rocComparisonExplanation",
@@ -4012,7 +4061,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "showROCComparison",
-                    "rocTimePoints")))
+                    "rocTimePoints",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="forestPlotExplanation",
@@ -4034,7 +4084,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "showForestPlot")))
+                    "showForestPlot",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="calibrationAnalysisExplanation",
@@ -4053,7 +4104,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "performCalibration"),
+                    "performCalibration",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Model", 
@@ -4119,12 +4172,13 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "showCalibrationPlots",
-                    "performCalibration")))
+                    "performCalibration",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="advancedMigrationExplanation",
                 title="Understanding Advanced Migration Analysis",
-                visible=FALSE,
+                visible="(advancedMigrationAnalysis && showExplanations)",
                 clearWith=list(
                     "advancedMigrationAnalysis")))
             self$add(jmvcore::Table$new(
@@ -4138,7 +4192,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="System", 
@@ -4172,7 +4227,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Migration_Pattern", 
@@ -4214,7 +4270,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "showWillRogersVisualization")))
+                    "showWillRogersVisualization",
+                    "seed")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="migrationSurvivalComparison",
@@ -4229,7 +4286,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "showMigrationSurvivalComparison")))
+                    "showMigrationSurvivalComparison",
+                    "seed")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="willRogersEnhancedAnalysis",
@@ -4241,7 +4299,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Stage", 
@@ -4295,7 +4355,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Stage", 
@@ -4353,7 +4414,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Old_Stage", 
@@ -4398,7 +4461,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Measure", 
@@ -4439,7 +4503,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Metric", 
@@ -4480,7 +4546,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Variable", 
@@ -4519,7 +4586,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Diagnostic", 
@@ -4549,7 +4617,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "advancedMigrationAnalysis",
-                    "nriTimePoints"),
+                    "nriTimePoints",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Time_Point", 
@@ -4609,7 +4678,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalPlotType",
                     "showConfidenceIntervals",
                     "showRiskTables",
-                    "plotTimeRange")))
+                    "plotTimeRange",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dashboardExplanation",
@@ -4628,7 +4698,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Analysis_Category", 
@@ -4680,7 +4751,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Criterion", 
@@ -4709,7 +4781,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Category", 
@@ -4735,7 +4808,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "oldStage",
                     "newStage",
-                    "advancedMigrationAnalysis"),
+                    "advancedMigrationAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Pattern_Type", 
@@ -4770,7 +4844,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "advancedMigrationAnalysis",
-                    "cancerType"),
+                    "cancerType",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Landmark_Time", 
@@ -4813,7 +4888,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "oldStage",
                     "newStage",
                     "advancedMigrationAnalysis",
-                    "showMigrationHeatmap"),
+                    "showMigrationHeatmap",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Stage", 
@@ -4851,7 +4927,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "advancedMigrationAnalysis")))
+                    "advancedMigrationAnalysis",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="abbreviationGlossary",
@@ -4878,7 +4955,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "performCrossValidation",
-                    "cvFolds"),
+                    "cvFolds",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Fold", 
@@ -4967,7 +5046,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "eventLevel",
                     "performCrossValidation",
                     "cvFolds",
-                    "institutionVariable"),
+                    "institutionVariable",
+                    "seed"),
                 width=600,
                 height=400))
             self$add(jmvcore::Table$new(
@@ -4981,7 +5061,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "showStatisticalComparison"),
+                    "showStatisticalComparison",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Model", 
@@ -5027,7 +5108,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "calculateSME"),
+                    "calculateSME",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Timepoint", 
@@ -5057,7 +5139,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "calculateSME"),
+                    "calculateSME",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Metric", 
@@ -5085,7 +5168,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "calculateRMST"),
+                    "calculateRMST",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Staging_System", 
@@ -5105,14 +5190,29 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `type`="integer"),
                     list(
                         `name`="RMST_Months", 
-                        `title`="RMST (months)", 
+                        `title`="RMST", 
                         `type`="number", 
-                        `format`="zto,pvalue"),
+                        `format`="sf:4"),
+                    list(
+                        `name`="RMST_SE", 
+                        `title`="SE", 
+                        `type`="number", 
+                        `format`="sf:3"),
+                    list(
+                        `name`="RMST_CI_Lower", 
+                        `title`="CI Lower", 
+                        `type`="number", 
+                        `format`="sf:4"),
+                    list(
+                        `name`="RMST_CI_Upper", 
+                        `title`="CI Upper", 
+                        `type`="number", 
+                        `format`="sf:4"),
                     list(
                         `name`="Median_Survival", 
                         `title`="Median Survival", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))
+                        `format`="sf:4"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rmstComparison",
@@ -5124,7 +5224,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "calculateRMST"),
+                    "calculateRMST",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="System", 
@@ -5157,7 +5258,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "performCompetingRisks",
-                    "competingEventVar"),
+                    "competingEventVar",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Staging_System", 
@@ -5205,7 +5307,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "performCompetingRisks",
-                    "competingEventVar"),
+                    "competingEventVar",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="System", 
@@ -5240,7 +5343,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "performOptimalCutpoint",
                     "cutpointMethod",
                     "cutpointRange",
-                    "multipleTestingCorrection"),
+                    "multipleTestingCorrection",
+                    "confidenceLevel"),
                 columns=list(
                     list(
                         `name`="Method", 
@@ -5324,7 +5428,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "continuousStageVariable",
                     "performOptimalCutpoint",
                     "generateStagingSystem",
-                    "stagingSystemLevels"),
+                    "stagingSystemLevels",
+                    "confidenceLevel"),
                 columns=list(
                     list(
                         `name`="Stage", 
@@ -5375,7 +5480,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "eventLevel",
                     "performSHAPAnalysis",
                     "shapCovariates",
-                    "shapAnalysisType"),
+                    "shapAnalysisType",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Feature", 
@@ -5421,7 +5527,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "newStage",
                     "performSHAPAnalysis",
                     "shapPatientProfiles",
-                    "shapSampleSize"),
+                    "shapSampleSize",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Patient_ID", 
@@ -5545,7 +5652,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "performCompetingRisksAdvanced",
-                    "competingRisksCovariates"),
+                    "competingRisksCovariates",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Staging_System", 
@@ -5605,7 +5714,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "performCompetingRisksAdvanced"),
+                    "performCompetingRisksAdvanced",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Event_Type", 
@@ -5655,7 +5766,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "eventLevel",
                     "performCompetingRisksAdvanced",
-                    "cifTimePoints"),
+                    "cifTimePoints",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Time_Point", 
@@ -5716,7 +5829,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "performCompetingRisksAdvanced"),
+                    "performCompetingRisksAdvanced",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Event_Type", 
@@ -5777,7 +5892,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "eventLevel",
-                    "performCompetingRisksAdvanced"),
+                    "performCompetingRisksAdvanced",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Analysis_Component", 
@@ -5814,7 +5930,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "stateVariable",
                     "transitionTimeVariable",
                     "performMultiStateAnalysis",
-                    "multiStateModel"),
+                    "multiStateModel",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="From_State", 
@@ -5866,7 +5984,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "newStage",
                     "stateVariable",
                     "performMultiStateAnalysis",
-                    "multiStateTimePoints"),
+                    "multiStateTimePoints",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Time_Point", 
@@ -5930,7 +6050,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "newStage",
                     "stateVariable",
                     "performMultiStateAnalysis",
-                    "multiStateTimePoints"),
+                    "multiStateTimePoints",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Time_Point", 
@@ -5977,7 +6099,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "newStage",
                     "stateVariable",
                     "performMultiStateAnalysis",
-                    "multiStateModel"),
+                    "multiStateModel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Model_Component", 
@@ -6012,7 +6135,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "oldStage",
                     "newStage",
                     "stateVariable",
-                    "performMultiStateAnalysis"),
+                    "performMultiStateAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Analysis_Component", 
@@ -6046,7 +6170,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "performRandomForestAnalysis",
                     "forestCovariates",
-                    "forestImportanceType"),
+                    "forestImportanceType",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Variable", 
@@ -6092,7 +6217,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "newStage",
                     "performRandomForestAnalysis",
                     "forestModelType",
-                    "forestNTrees"),
+                    "forestNTrees",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Model_Type", 
@@ -6144,7 +6271,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "oldStage",
                     "newStage",
                     "performRandomForestAnalysis",
-                    "forestPredictionTimePoints"),
+                    "forestPredictionTimePoints",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Time_Point", 
@@ -6194,7 +6323,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "oldStage",
                     "newStage",
                     "performRandomForestAnalysis",
-                    "forestStagingComparison"),
+                    "forestStagingComparison",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Metric", 
@@ -6245,7 +6375,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "oldStage",
                     "newStage",
-                    "performRandomForestAnalysis"),
+                    "performRandomForestAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Analysis_Component", 
@@ -6283,7 +6414,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "oldStage",
                     "newStage",
-                    "performRandomForestAnalysis"),
+                    "performRandomForestAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Summary_Component", 
@@ -6313,7 +6445,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "oldStage",
                     "newStage",
-                    "performCureModelAnalysis"),
+                    "performCureModelAnalysis",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Staging_System", 
@@ -6363,7 +6497,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "oldStage",
                     "newStage",
-                    "performCureModelAnalysis"),
+                    "performCureModelAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Staging_System", 
@@ -6420,7 +6555,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "oldStage",
                     "newStage",
-                    "performCureModelAnalysis"),
+                    "performCureModelAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Comparison_Metric", 
@@ -6465,7 +6601,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "oldStage",
                     "newStage",
-                    "performCureModelAnalysis"),
+                    "performCureModelAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Analysis_Component", 
@@ -6503,7 +6640,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "oldStage",
                     "newStage",
-                    "performCureModelAnalysis"),
+                    "performCureModelAnalysis",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Parameter", 
@@ -6556,7 +6695,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "oldStage",
                     "newStage",
-                    "performCureModelAnalysis"),
+                    "performCureModelAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Analysis_Component", 
@@ -6591,7 +6731,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "intervalCensoringLeftTime",
                     "intervalCensoringRightTime",
                     "intervalCensoringModel",
-                    "intervalCensoringDistribution"),
+                    "intervalCensoringDistribution",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Characteristic", 
@@ -6617,7 +6758,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "performIntervalCensoringAnalysis",
                     "intervalCensoringModel",
                     "intervalCensoringBootstrap",
-                    "intervalCensoringPredictionTime"),
+                    "intervalCensoringPredictionTime",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Stage", 
@@ -6655,7 +6798,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "performIntervalCensoringAnalysis",
                     "intervalCensoringModel",
                     "intervalCensoringDistribution",
-                    "intervalCensoringAdjustVariables"),
+                    "intervalCensoringAdjustVariables",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Parameter", 
@@ -6696,7 +6841,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "performIntervalCensoringAnalysis",
                     "intervalCensoringCompareStages",
-                    "intervalCensoringModel"),
+                    "intervalCensoringModel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Model", 
@@ -6737,7 +6883,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "performIntervalCensoringAnalysis",
                     "intervalCensoringDiagnostics",
-                    "intervalCensoringModel"),
+                    "intervalCensoringModel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Diagnostic", 
@@ -6768,7 +6915,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "oldStage",
                     "event",
                     "survivalTime",
-                    "performIntervalCensoringAnalysis"),
+                    "performIntervalCensoringAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Finding", 
@@ -6797,7 +6945,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "performInformativeCensoringAnalysis",
                     "informativeCensoringTestMethod",
-                    "informativeCensoringAdjustmentMethod"),
+                    "informativeCensoringAdjustmentMethod",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Characteristic", 
@@ -6822,7 +6971,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "performInformativeCensoringAnalysis",
                     "informativeCensoringTestMethod",
-                    "informativeCensoringAlpha"),
+                    "informativeCensoringAlpha",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Test_Method", 
@@ -6858,7 +7008,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "survivalTime",
                     "performInformativeCensoringAnalysis",
-                    "informativeCensoringCompareStages"),
+                    "informativeCensoringCompareStages",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Stage", 
@@ -6903,7 +7054,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "performInformativeCensoringAnalysis",
                     "informativeCensoringAdjustmentMethod",
-                    "informativeCensoringBootstrap"),
+                    "informativeCensoringBootstrap",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Stage", 
@@ -6944,7 +7097,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "performInformativeCensoringAnalysis",
                     "informativeCensoringSensitivityRange",
-                    "informativeCensoringAdjustmentMethod"),
+                    "informativeCensoringAdjustmentMethod",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Sensitivity_Parameter", 
@@ -6980,7 +7134,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "survivalTime",
                     "performInformativeCensoringAnalysis",
-                    "informativeCensoringTestMethod"),
+                    "informativeCensoringTestMethod",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Diagnostic", 
@@ -7007,7 +7162,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "oldStage",
                     "event",
                     "survivalTime",
-                    "performInformativeCensoringAnalysis"),
+                    "performInformativeCensoringAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Finding", 
@@ -7038,7 +7194,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "performConcordanceProbabilityAnalysis",
                     "concordanceProbabilityCompareStages",
                     "concordanceProbabilityMethods",
-                    "concordanceProbabilityWeighting"),
+                    "concordanceProbabilityWeighting",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Characteristic", 
@@ -7065,7 +7222,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "performConcordanceProbabilityAnalysis",
                     "concordanceProbabilityCompareStages",
                     "concordanceProbabilityMethods",
-                    "concordanceProbabilityBootstrap"),
+                    "concordanceProbabilityBootstrap",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Method", 
@@ -7110,7 +7269,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "performConcordanceProbabilityAnalysis",
                     "concordanceProbabilityTimePoints",
-                    "concordanceProbabilityMethods"),
+                    "concordanceProbabilityMethods",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Staging_System", 
@@ -7155,7 +7316,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "performConcordanceProbabilityAnalysis",
                     "concordanceProbabilityCompareStages",
-                    "concordanceProbabilityAlpha"),
+                    "concordanceProbabilityAlpha",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Method", 
@@ -7203,7 +7365,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "survivalTime",
                     "performConcordanceProbabilityAnalysis",
-                    "concordanceProbabilityRobustnessAnalysis"),
+                    "concordanceProbabilityRobustnessAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Analysis_Type", 
@@ -7239,7 +7402,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "survivalTime",
                     "performConcordanceProbabilityAnalysis",
-                    "concordanceProbabilityDiagnostics"),
+                    "concordanceProbabilityDiagnostics",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Diagnostic", 
@@ -7266,7 +7430,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "oldStage",
                     "event",
                     "survivalTime",
-                    "performConcordanceProbabilityAnalysis"),
+                    "performConcordanceProbabilityAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Finding", 
@@ -7295,7 +7460,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "performWinRatioAnalysis",
                     "winRatioEndpoints",
-                    "winRatioMatchingStrategy"),
+                    "winRatioMatchingStrategy",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Characteristic", 
@@ -7320,7 +7486,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "performWinRatioAnalysis",
                     "winRatioDeathVariable",
-                    "winRatioSecondaryEndpoint"),
+                    "winRatioSecondaryEndpoint",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Comparison", 
@@ -7368,7 +7536,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "survivalTime",
                     "performWinRatioAnalysis",
-                    "winRatioEndpoints"),
+                    "winRatioEndpoints",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Endpoint", 
@@ -7412,7 +7581,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "survivalTime",
                     "performWinRatioAnalysis",
-                    "winRatioMatchingStrategy"),
+                    "winRatioMatchingStrategy",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Stage", 
@@ -7452,7 +7623,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "survivalTime",
                     "performWinRatioAnalysis",
-                    "winRatioSensitivityAnalysis"),
+                    "winRatioSensitivityAnalysis",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Analysis_Type", 
@@ -7492,7 +7665,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "survivalTime",
                     "performWinRatioAnalysis",
-                    "winRatioGeneralizedPairwise"),
+                    "winRatioGeneralizedPairwise",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Metric", 
@@ -7527,7 +7702,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "oldStage",
                     "event",
                     "survivalTime",
-                    "performWinRatioAnalysis"),
+                    "performWinRatioAnalysis",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Finding", 
@@ -7555,7 +7731,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "oldStage",
                     "newStage",
-                    "frailtyClusterVariable"),
+                    "frailtyClusterVariable",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Analysis", 
@@ -7602,7 +7779,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "oldStage",
                     "newStage",
-                    "frailtyClusterVariable"),
+                    "frailtyClusterVariable",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="StagingSystem", 
@@ -7649,13 +7827,14 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="frailtyModelsVarianceComponents",
                 title="Frailty Models - Variance Components Analysis",
-                visible="(performFrailtyModelsAnalysis)",
+                visible="(performFrailtyModelsAnalysis && frailtyVarianceComponents)",
                 clearWith=list(
                     "survivalTime",
                     "event",
                     "oldStage",
                     "newStage",
-                    "frailtyClusterVariable"),
+                    "frailtyClusterVariable",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Component", 
@@ -7699,7 +7878,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "oldStage",
                     "newStage",
-                    "frailtyClusterVariable"),
+                    "frailtyClusterVariable",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Cluster", 
@@ -7752,7 +7932,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "oldStage",
                     "newStage",
-                    "frailtyClusterVariable"),
+                    "frailtyClusterVariable",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Parameter", 
@@ -7807,7 +7989,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "oldStage",
                     "newStage",
-                    "frailtyClusterVariable"),
+                    "frailtyClusterVariable",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Diagnostic", 
@@ -7848,7 +8031,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "event",
                     "oldStage",
                     "newStage",
-                    "frailtyClusterVariable"),
+                    "frailtyClusterVariable",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Finding", 
@@ -7887,7 +8071,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "oldStage",
-                    "newStage"),
+                    "newStage",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Analysis", 
@@ -7932,7 +8117,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "oldStage",
-                    "newStage"),
+                    "newStage",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="StagingSystem", 
@@ -7986,7 +8172,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "oldStage",
-                    "newStage"),
+                    "newStage",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="StagingSystem", 
@@ -8043,7 +8231,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "oldStage",
-                    "newStage"),
+                    "newStage",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="RiskThreshold", 
@@ -8097,7 +8286,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "oldStage",
-                    "newStage"),
+                    "newStage",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="TimePoint", 
@@ -8149,7 +8339,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "oldStage",
-                    "newStage"),
+                    "newStage",
+                    "confidenceLevel",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Metric", 
@@ -8202,7 +8394,8 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "survivalTime",
                     "event",
                     "oldStage",
-                    "newStage"),
+                    "newStage",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="Finding", 
@@ -8241,7 +8434,7 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "stagemigration",
-                version = c(0,0,31),
+                version = c(0,0,32),
                 options = options,
                 results = stagemigrationResults$new(options=options),
                 data = data,
@@ -8455,6 +8648,10 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   literature.
 #' @param useOptimismCorrection Apply optimism correction to performance
 #'   metrics using bootstrap validation to avoid overly optimistic estimates.
+#' @param seed Random seed set at the start of each run, so every resampling
+#'   step (bootstrap validation, cross-validation folds, SHAP subsampling,
+#'   bootstrap model selection) reproduces the same results for the same data
+#'   and options. Change it to draw a different resample.
 #' @param enableMultifactorialAnalysis Enable advanced multifactorial stage
 #'   migration analysis that includes additional covariates in the comparison.
 #'   This allows for adjusted comparisons between staging systems after
@@ -8980,8 +9177,10 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   frailty modeling (e.g.,  hospital, center, surgeon). Used to account for
 #'   unobserved  heterogeneity and clustering effects in survival analysis.
 #' @param frailtyDistribution Distribution assumption for the frailty (random
-#'   effects) terms. Gamma distribution is most common and provides
-#'   multiplicative  frailty effects on the hazard function.
+#'   effects) terms. Log-normal (default) and Gaussian are the same model, a
+#'   Gaussian random effect on the log-hazard, fitted with coxme. Gamma is
+#'   fitted with coxph plus frailty() and currently reports the overview table
+#'   only.
 #' @param frailtyBootstrap Perform bootstrap validation for frailty model
 #'   parameters and  variance components to assess model stability and provide
 #'   robust confidence intervals.
@@ -9050,10 +9249,9 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcomeMessage} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$copyReadyReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$guidedModeProgress} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$mydataview} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$mydataview2} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$migrationOverviewExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$migrationOverview} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$migrationMatrixExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -9305,6 +9503,7 @@ stagemigration <- function(
     generateExecutiveSummary = FALSE,
     cancerType = "general",
     useOptimismCorrection = FALSE,
+    seed = 42,
     enableMultifactorialAnalysis = FALSE,
     continuousCovariates = NULL,
     categoricalCovariates = NULL,
@@ -9459,14 +9658,14 @@ stagemigration <- function(
     winRatioGeneralizedPairwise = FALSE,
     performFrailtyModelsAnalysis = FALSE,
     frailtyClusterVariable = NULL,
-    frailtyDistribution = "gamma",
+    frailtyDistribution = "log-normal",
     frailtyBootstrap = FALSE,
     frailtyBootstrapSamples = 500,
-    frailtyVarianceComponents = FALSE,
+    frailtyVarianceComponents = TRUE,
     frailtyHeterogeneityTest = FALSE,
     frailtyClusterComparison = FALSE,
     frailtyModelSelection = FALSE,
-    frailtyPredictiveAccuracy = FALSE,
+    frailtyPredictiveAccuracy = TRUE,
     frailtyDiagnostics = FALSE,
     frailtyAdvancedInference = FALSE,
     performClinicalUtilityAnalysis = FALSE,
@@ -9607,6 +9806,7 @@ stagemigration <- function(
         generateExecutiveSummary = generateExecutiveSummary,
         cancerType = cancerType,
         useOptimismCorrection = useOptimismCorrection,
+        seed = seed,
         enableMultifactorialAnalysis = enableMultifactorialAnalysis,
         continuousCovariates = continuousCovariates,
         categoricalCovariates = categoricalCovariates,

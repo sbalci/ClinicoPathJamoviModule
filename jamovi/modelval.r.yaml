@@ -136,4 +136,5 @@ refs:
     - pROC
     - rms
     - dcurves
+    - graphics
 ...

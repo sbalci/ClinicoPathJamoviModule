@@ -204,4 +204,7 @@ items:
       title: Interpretation Guide
       type: Html
       visible: true
+
+refs:
+    - ClinicoPathJamoviModule
 ...

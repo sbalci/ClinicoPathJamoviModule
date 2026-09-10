@@ -1,3 +1,12 @@
+# ggplot2 aesthetics name data-frame columns by bare symbol; declare them so
+# R CMD check does not report "no visible binding for global variable".
+utils::globalVariables(c(
+    "Var1", "Var2", "value", "pair", "lo", "hi", "band", "category", "label",
+    "reference", "observed", "on_dark", "x", "y", "xend", "yend", "xmin", "xmax",
+    "ymin", "ymax", "Rater", "Case", "Diagnosis", "group", "rater", "bias",
+    "severity", "score", "level", "case", "diagnosis"
+))
+
 #' @title Pathology Interrater Reliability Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
@@ -38,71 +47,14 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .messages = NULL,
             .style_clustering_results = NULL,
             .rater_metadata = NULL,
-
-            # Variable name handling utilities
-            .escapeVar = function(x) {
-                # Convert problematic variable names to safe R identifiers
-                # Handles spaces, special characters, Unicode, etc.
-                if (is.null(x) || length(x) == 0) {
-                    return(NULL)
-                }
-                gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-            },
-            .cleanVarNames = function(df) {
-                # Clean all variable names while preserving originals
-                orig_names <- names(df)
-                clean_names <- sapply(orig_names, private$.escapeVar)
-                names(df) <- clean_names
-                attr(df, "original_names") <- orig_names
-                attr(df, "name_mapping") <- setNames(orig_names, clean_names)
-                return(df)
-            },
-            .getOriginalName = function(clean_name, df = NULL) {
-                # Reverse lookup for display purposes
-                if (!is.null(df)) {
-                    name_map <- attr(df, "name_mapping")
-                    if (!is.null(name_map) && clean_name %in% names(name_map)) {
-                        return(name_map[[clean_name]])
-                    }
-                }
-                return(clean_name)
-            },
-            .extractLabels = function(data, vars) {
-                # Extract and preserve factor labels from labelled variables
-                labels <- lapply(vars, function(v) {
-                    col <- data[[v]]
-                    if (is.factor(col)) {
-                        attr(col, "labels", exact = TRUE) %||% levels(col)
-                    } else {
-                        NULL
-                    }
-                })
-                names(labels) <- vars
-                return(labels)
-            },
-            .formatWithLabels = function(value, var, labels_list) {
-                # Use labels when displaying categorical values
-                labels <- labels_list[[var]]
-                if (!is.null(labels) && value %in% names(labels)) {
-                    return(labels[value])
-                } else {
-                    return(value)
-                }
-            },
+            .retained_rows = NULL,
 
             # Initialization
             .init = function() {
-                private$.setupInitialVisibility()
                 private$.checkDependencies()
                 if (private$.shouldShowWelcome()) {
                     private$.handleWelcomeAndEducation()
                 }
-            },
-
-            # Setup initial visibility settings
-            .setupInitialVisibility = function() {
-                # Hide crosstab table initially - will be shown only for exactly 2 raters
-                self$results$crosstabTable$setVisible(FALSE)
             },
 
             # Check package dependencies
@@ -162,11 +114,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         private$.generateWeightedKappaGuide()
                     }
                     self$results$todo$setVisible(TRUE)
-                    jmvcore::reject("Agreement analysis requires at least 2 raters.")
+                    jmvcore::reject(.("Agreement analysis requires at least 2 raters."))
                 }
 
                 if (nrow(self$data) < 2) {
-                    jmvcore::reject("Agreement analysis requires at least 2 cases (observations).")
+                    jmvcore::reject(.("Agreement analysis requires at least 2 cases (observations)."))
                 }
 
                 # Enhanced data validation
@@ -228,41 +180,45 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     private$.performStabilityAnalysis()
                 }
 
-                # if (self$options$pairwiseAnalysis) {
-                #     private$.performPairwiseAnalysis()
-                # }
+                if (self$options$pairwiseAnalysis) {
+                    private$.checkpoint()
+                    private$.performPairwiseAnalysis()
+                }
 
-                # if (self$options$categoryAnalysis) {
-                #     private$.performCategoryAnalysis()
-                # }
+                if (self$options$categoryAnalysis) {
+                    private$.checkpoint()
+                    private$.performCategoryAnalysis()
+                }
 
-                # if (self$options$outlierAnalysis) {
-                #     private$.performOutlierAnalysis()
-                # }
+                if (self$options$outlierAnalysis) {
+                    private$.performOutlierAnalysis()
+                }
 
-                # if (self$options$pathologyContext) {
-                #     private$.performPathologyAnalysis()
-                # }
+                if (self$options$pathologyContext) {
+                    private$.performPathologyAnalysis()
+                }
 
                 # if (self$options$showInterpretation) {
                 #     private$.showInterpretationGuidelines()
                 # }
 
+                # Rater clustering (Usubutun et al. 2012). One prerequisite check
+                # covers both clustering paths - the diagnostic-style path used to
+                # run with no check at all.
                 if (self$options$performClustering) {
-                    # Checkpoint before computationally intensive style analysis
-                    private$.checkpoint()
-                    private$.performDiagnosticStyleAnalysis()
-                }
-
-                # Perform clustering analysis (Usubutun et al. 2012)
-                if (self$options$performClustering) {
-                    # Clustering Prerequisites Check
-                    if (private$.n_raters < 2) {
-                        private$.accumulateMessage("Clustering Analysis requires at least 2 raters. Skipped.")
-                    } else if (private$.n_cases < 5) { # Arbitrary low limit
-                        private$.accumulateMessage("Too few cases (N<5) for reliable clustering. Skipped.")
+                    if (private$.n_raters < 3) {
+                        private$.accumulateMessage(.("Rater clustering needs at least 3 raters, so it was skipped."))
+                    } else if (private$.n_cases < 5) {
+                        private$.accumulateMessage(.("Rater clustering needs at least 5 cases, so it was skipped."))
                     } else {
-                        # Checkpoint before computationally intensive clustering
+                        if (!self$options$autoSelectGroups && self$options$nStyleGroups > private$.styleGroupCount()) {
+                            private$.accumulateMessage(jmvcore::format(
+                                .("{groups} style groups were requested for {raters} raters; {used} were used, the most possible without every rater forming its own group."),
+                                groups = self$options$nStyleGroups, raters = private$.n_raters, used = private$.styleGroupCount()
+                            ))
+                        }
+                        private$.checkpoint()
+                        private$.performDiagnosticStyleAnalysis()
                         private$.checkpoint()
                         private$.performClusteringAnalysis()
                     }
@@ -311,6 +267,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     self$results$weightedKappaGuide$setVisible(FALSE)
                 }
 
+                if (self$options$showStatisticalGlossary) {
+                    private$.generateStatisticalGlossary()
+                }
+
                 # Generate inline statistical comments if requested
                 if (self$options$showInlineComments) {
                     private$.generateInlineComments()
@@ -318,40 +278,57 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     self$results$inlineComments$setVisible(FALSE)
                 }
 
-                # Populate warnings panel
-                if (!is.null(private$.messages) && length(private$.messages) > 0) {
-                    self$results$warnings$setContent(paste(
-                        "<div class='alert alert-warning'>",
-                        "<h6>Analysis Messages</h6>",
-                        "<ul>",
-                        paste(paste0("<li>", private$.messages, "</li>"), collapse = ""),
-                        "</ul></div>",
-                        sep = ""
-                    ))
-                } else {
-                    self$results$warnings$setVisible(FALSE)
-                }
+                private$.renderMessages()
             },
+            # The messages panel used to be written ONCE, at the very end of
+            # .run(). Every message accumulated before one of the earlier
+            # return()/jmvcore::reject() paths was therefore discarded, and the
+            # user saw a blank panel instead of "reverted to unweighted kappa" or
+            # "high missing data". Render on every append instead, so a message
+            # survives whatever .run() does next. .resetMessages() clears the list
+            # each run and the whole list is re-rendered, so this is idempotent
+            # rather than accumulating duplicates across runs.
+            #
+            # Messages interpolate VARIABLE NAMES, which are user data; the old
+            # writer pasted them into <li> unescaped.
             .accumulateMessage = function(msg) {
                 private$.messages <- c(private$.messages, msg)
+                private$.renderMessages()
+            },
+            .renderMessages = function() {
+                item <- self$results$warnings
+                if (is.null(item)) {
+                    return()
+                }
+                if (length(private$.messages) == 0) {
+                    item$setContent("")
+                    item$setVisible(FALSE)
+                    return()
+                }
+                item$setContent(paste0(
+                    "<div style='background-color: rgba(255, 169, 33, 0.14); border-left: 4px solid #f57c00; padding: 10px 14px; color: inherit;'>",
+                    "<ul style='margin: 0; padding-left: 20px;'>",
+                    paste0("<li>", jmvcore::htmlEscape(private$.messages), "</li>", collapse = ""),
+                    "</ul></div>"
+                ))
+                item$setVisible(TRUE)
             },
 
-            # TODO (data hygiene): only `.messages` is reset at start of each `.run()` via this
-            # helper. The other 4+ persistent private fields (.data_matrix, .categories, .n_cases,
-            # .n_raters, .rater_metadata) are populated in `.prepareData()` but never explicitly
-            # cleared - if a later run's `.validateData()` rejects at L2281 (factor check) BEFORE
-            # `.prepareData()` updates them, the prior run's values linger in private state.
-            # No exploit path to a user-data-controlled HTML sink today (reject bails out before
-            # any setContent reads them), but defense-in-depth would reset all 5 fields here.
-            # See [R/outbreakanalysis.b.R:84-100](R/outbreakanalysis.b.R#L84-L100) for the canonical
-            # 10-field-reset pattern in this codebase.
+            # Clear derived data before validation, including data used by renderers.
             .resetMessages = function() {
                 private$.messages <- NULL
-                # Initialize with empty string to avoid NULL error in checks
-                if (!is.null(self$results$warnings)) {
-                    self$results$warnings$setContent("")
-                    self$results$warnings$setVisible(TRUE)
-                }
+                private$.data_matrix <- NULL
+                private$.categories <- NULL
+                private$.n_cases <- 0
+                private$.n_raters <- 0
+                private$.rater_metadata <- NULL
+                private$.retained_rows <- integer()
+                private$.rater_names <- NULL
+                private$.agreement_results <- NULL
+                private$.pairwise_results <- NULL
+                private$.category_results <- NULL
+                private$.style_clustering_results <- NULL
+                private$.renderMessages()
             },
 
             # Data preparation
@@ -362,6 +339,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Extract data matrix
                 data_subset <- self$data[rater_vars]
+                retained_rows <- which(!private$.metadataRowFlags())
 
                 # Extract metadata rows if enabled
                 if (self$options$useMetadataRows && !is.null(self$options$caseID)) {
@@ -374,18 +352,20 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Check for missing data warnings
                 original_n <- nrow(data_subset)
-                data_subset <- data_subset[complete.cases(data_subset), , drop = FALSE]
+                complete_rows <- complete.cases(data_subset)
+                data_subset <- data_subset[complete_rows, , drop = FALSE]
+                private$.retained_rows <- retained_rows[complete_rows]
                 final_n <- nrow(data_subset)
 
                 if (original_n > 0) {
                     missing_prop <- (original_n - final_n) / original_n
                     if (missing_prop > 0.2) {
-                        private$.accumulateMessage(sprintf("High missing data: %.1f%% of cases excluded due to missing ratings. Results may be biased.", missing_prop * 100))
+                        private$.accumulateMessage(jmvcore::format(.("High missing data: {pct}% of cases were excluded because of missing ratings. Results may be biased."), pct = sprintf("%.1f", missing_prop * 100)))
                     }
                 }
 
                 if (nrow(data_subset) == 0) {
-                    jmvcore::reject("No complete cases found. Please check for missing values.")
+                    jmvcore::reject(.("No complete cases found. Please check for missing values."))
                 }
 
                 private$.data_matrix <- data_subset
@@ -409,7 +389,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         private$.checkpoint(flush = FALSE)
                     }
 
-                    case_values <- as.character(private$.data_matrix[i, ])
+                    case_values <- private$.rowLabels(private$.data_matrix, i)
                     if (length(unique(case_values)) == 1) {
                         agreement_count <- agreement_count + 1
                     }
@@ -418,11 +398,17 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 overall_agreement <- (agreement_count / total_cases) * 100
 
                 # Determine primary method
-                primary_method <- if (private$.n_raters == 2) {
+                primary_method <- if (self$options$multiraterMethod == "krippendorff") {
+                    .("Krippendorff's Alpha")
+                } else if (private$.n_raters == 2 || self$options$multiraterMethod == "cohen") {
                     .("Cohen's Kappa")
+                } else if (self$options$exct) {
+                    .("Conger's Kappa")
                 } else {
                     .("Fleiss' Kappa")
                 }
+
+                self$results$overviewTable$setNote("complete", .("Complete agreement: cases on which every rater gave the same rating. Pairwise agreement (used by PABAK and the trend plot) is higher whenever there are more than 2 raters."))
 
                 # Prevalence Effect Check (Kappa Paradox)
                 # If Agreement is High (>80%) but Kappa is Low (<0.4), warn user
@@ -440,7 +426,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     if (length(cat_counts) > 1) {
                         props <- prop.table(cat_counts)
                         if (max(props) > 0.8) {
-                            private$.accumulateMessage(sprintf("Data is highly imbalanced (one category > 80%%). Kappa may be low despite high agreement (Paradox). Consider Gwet's AC1."))
+                            private$.accumulateMessage(.("Data are highly imbalanced (one category exceeds 80%). Kappa may be low despite high agreement (the kappa paradox); consider Gwet's AC1."))
                         }
                     }
                 }
@@ -459,6 +445,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             # Kappa analysis
             .performKappaAnalysis = function() {
                 kappa_table <- self$results$kappaTable
+                # No clearWith on this table, and addRow() does not reject a
+                # duplicate rowKey - without this, changing an option re-runs
+                # .run() and appends a second set of rows.
+                kappa_table$deleteRows()
+                kappa_table$setNote("kripp", NULL)
                 method <- self$options$multiraterMethod
 
                 # Determine analysis method based on user selection or automatic
@@ -478,7 +469,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     private$.performFleissKappa(kappa_table)
                 } else if (method == "fleiss" && private$.n_raters < 3) {
                     # Error check for Fleiss with < 3 raters
-                    private$.accumulateMessage("Fleiss' kappa requires 3 or more raters. Falling back to Cohen's kappa (pairwise analysis recommended for detail).")
+                    private$.accumulateMessage(.("Fleiss' kappa requires 3 or more raters. Falling back to Cohen's kappa (pairwise analysis recommended for detail)."))
                     private$.performCohensKappa(kappa_table)
                 } else if (method == "krippendorff") {
                     # Force Krippendorff's alpha (will be calculated in separate method)
@@ -491,6 +482,50 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         private$.performFleissKappa(kappa_table)
                     }
                 }
+            },
+
+            # Non-null asymptotic SE for Cohen's kappa.
+            #
+            # irr::kappa2()$statistic is the H0:kappa=0 test statistic, built
+            # from the NULL SE, so the old se = kappa/z produced confidence
+            # intervals that were too narrow (and blew up as kappa -> 0).
+            # vcd::Kappa() returns the non-null ASE - the correct SE for a Wald
+            # interval - and agrees with psych::cohen.kappa(). Returns NULL for
+            # degenerate tables (e.g. perfect agreement), in which case no CI is
+            # reported rather than a wrong one.
+            #
+            # Level order must come from the FACTOR LEVELS: vcd lays its
+            # Equal-Spacing / Fleiss-Cohen weight matrix over the table in column
+            # order, so an alphabetical order applies ordinal weights to a
+            # scrambled scale (Low/Moderate/High sorts to High/Low/Moderate).
+            .kappaASE = function(pair, wght) {
+                a <- as.character(pair[[1]])
+                b <- as.character(pair[[2]])
+                lv <- if (is.factor(pair[[1]]) || is.factor(pair[[2]])) {
+                    union(levels(as.factor(pair[[1]])), levels(as.factor(pair[[2]])))
+                } else {
+                    sort(unique(c(a, b)))
+                }
+                lv <- lv[lv %in% c(a, b)]
+                if (length(lv) < 2) {
+                    return(NULL)
+                }
+                tryCatch(
+                    {
+                        tab <- table(factor(a, levels = lv), factor(b, levels = lv))
+                        vk <- if (identical(wght, "equal")) {
+                            vcd::Kappa(tab, weights = "Equal-Spacing")
+                        } else if (identical(wght, "squared")) {
+                            vcd::Kappa(tab, weights = "Fleiss-Cohen")
+                        } else {
+                            vcd::Kappa(tab)
+                        }
+                        comp <- if (identical(wght, "unweighted")) vk$Unweighted else vk$Weighted
+                        ase <- unname(comp[["ASE"]])
+                        if (is.na(ase) || ase <= 0) NULL else ase
+                    },
+                    error = function(e) NULL
+                )
             },
 
             # Cohen's kappa (2 raters)
@@ -506,7 +541,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     if (!all(var_types)) {
                         # Instead of error, fallback to unweighted kappa with explanation
                         wght <- "unweighted"
-                        private$.accumulateMessage("Weighted kappa requested but variables are not ordinal. Analysis reverted to unweighted kappa.")
+                        private$.accumulateMessage(.("Weighted kappa requested but variables are not ordinal. Analysis reverted to unweighted kappa."))
                         interpretation_note <- .("Note: Weighted kappa requires ordinal variables. Analysis performed with unweighted kappa instead.")
                     } else {
                         interpretation_note <- ""
@@ -515,44 +550,32 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     interpretation_note <- ""
                 }
 
+                # Cohen's kappa is defined for exactly 2 raters and
+                # irr::kappa2() hard-stops above that. When the user forces
+                # Cohen with 3+ raters, report a row per rater pair (the old code
+                # passed the whole matrix and crashed with irr's raw
+                # "Number of raters exeeds 2" message).
+                if (private$.n_raters > 2) {
+                    return(private$.performPairwiseCohensKappa(table, wght, interpretation_note))
+                }
+
                 # Calculate Cohen's kappa
                 result <- irr::kappa2(private$.data_matrix, weight = wght)
 
                 # Interpretation
                 interpretation <- private$.interpretKappa(result$value)
 
-                # Validate variance estimate and calculate standard error
+                # Confidence interval from the NON-NULL asymptotic SE.
                 se_value <- NA
                 ci_lower <- NA
                 ci_upper <- NA
-
-                # Calculate confidence intervals only if requested
                 if (show_ci) {
-                    # Calculate standard error from z-statistic if available
-                    # For Cohen's kappa: SE = kappa / z_statistic
-                    if (!is.null(result$statistic) && is.numeric(result$statistic) &&
-                        !is.na(result$statistic) && result$statistic != 0 &&
-                        !is.null(result$value) && is.numeric(result$value) && !is.na(result$value)) {
-                        se_value <- abs(result$value / result$statistic)
-                        ci_lower <- result$value - qnorm((1 + conf_level) / 2) * se_value
-                        ci_upper <- result$value + qnorm((1 + conf_level) / 2) * se_value
-                    } else {
-                        # Fallback: try to extract variance from different possible structures
-                        var_kappa <- NULL
-                        if (!is.null(result$var.kappa)) {
-                            var_kappa <- result$var.kappa
-                        } else if (!is.null(result$variance)) {
-                            var_kappa <- result$variance
-                        } else if (!is.null(result$se) && is.numeric(result$se)) {
-                            var_kappa <- result$se^2
-                        }
-
-                        if (!is.null(var_kappa) && is.numeric(var_kappa) &&
-                            length(var_kappa) > 0 && !is.na(var_kappa) && var_kappa >= 0) {
-                            se_value <- sqrt(var_kappa)
-                            ci_lower <- result$value - qnorm((1 + conf_level) / 2) * se_value
-                            ci_upper <- result$value + qnorm((1 + conf_level) / 2) * se_value
-                        }
+                    ase <- private$.kappaASE(private$.data_matrix[, 1:2, drop = FALSE], wght)
+                    if (!is.null(ase)) {
+                        se_value <- ase
+                        zc <- qnorm((1 + conf_level) / 2)
+                        ci_lower <- max(-1, result$value - zc * se_value)
+                        ci_upper <- min(1, result$value + zc * se_value)
                     }
                 }
 
@@ -573,52 +596,95 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 ))
             },
 
+            # One Cohen's kappa row per rater pair, used when the user selects
+            # Cohen with more than 2 raters.
+            .performPairwiseCohensKappa = function(table, wght, interpretation_note) {
+                nm <- private$.rater_names
+                show_ci <- self$options$fleissCI
+                conf_level <- 0.95
+                zc <- qnorm((1 + conf_level) / 2)
+
+                private$.accumulateMessage(.("Cohen's kappa is defined for 2 raters; one kappa is reported per rater pair. Use Fleiss' kappa or Krippendorff's alpha for a single overall coefficient."))
+
+                for (i in seq_len(private$.n_raters - 1)) {
+                    for (j in (i + 1):private$.n_raters) {
+                        private$.checkpoint(flush = FALSE)
+                        pair <- private$.data_matrix[, c(i, j), drop = FALSE]
+                        res <- tryCatch(irr::kappa2(pair, weight = wght), error = function(e) NULL)
+                        if (is.null(res)) {
+                            next
+                        }
+
+                        se_value <- NA
+                        ci_lower <- NA
+                        ci_upper <- NA
+                        if (show_ci) {
+                            ase <- private$.kappaASE(pair, wght)
+                            if (!is.null(ase)) {
+                                se_value <- ase
+                                ci_lower <- max(-1, res$value - zc * ase)
+                                ci_upper <- min(1, res$value + zc * ase)
+                            }
+                        }
+
+                        interpretation <- private$.interpretKappa(res$value)
+                        table$addRow(
+                            rowKey = paste0("cohens_", i, "_", j),
+                            values = list(
+                                method = jmvcore::format("Cohen's Kappa: {} vs {}", nm[i], nm[j]),
+                                kappa = res$value,
+                                se = se_value,
+                                ci_lower = ci_lower,
+                                ci_upper = ci_upper,
+                                z = res$statistic,
+                                p = res$p.value,
+                                interpretation = if (interpretation_note != "") paste(interpretation, interpretation_note, sep = ". ") else interpretation
+                            )
+                        )
+                    }
+                }
+            },
+
             # Krippendorff's Alpha as primary method
             .performKrippendorffForKappa = function(table) {
                 kripp_method <- self$options$krippMethod
 
-                # Prepare data in the format expected by krippendorff.alpha
-                data_for_kripp <- t(private$.data_matrix)
+                # This used to call krippendorff.alpha(), which is not exported by
+                # any package the module imports (and is not in NAMESPACE), so the
+                # try() ALWAYS failed and the row was silently published with
+                # alpha = NA - i.e. selecting Krippendorff as the primary method
+                # produced no result at all. The shared .krippendorffAlpha() helper
+                # computes it with irr::kripp.alpha(); alpha has no closed-form
+                # standard error, so the interval columns stay empty here.
+                res <- tryCatch(private$.krippendorffAlpha(kripp_method), error = function(e) NULL)
 
-                # Calculate Krippendorff's alpha
-                result <- try(
-                    {
-                        if (kripp_method == "nominal") {
-                            krippendorff.alpha(data_for_kripp, level = "nominal")
-                        } else if (kripp_method == "ordinal") {
-                            krippendorff.alpha(data_for_kripp, level = "ordinal")
-                        } else if (kripp_method == "interval") {
-                            krippendorff.alpha(data_for_kripp, level = "interval")
-                        } else if (kripp_method == "ratio") {
-                            krippendorff.alpha(data_for_kripp, level = "ratio")
-                        } else {
-                            krippendorff.alpha(data_for_kripp, level = "nominal")
-                        }
-                    },
-                    silent = TRUE
-                )
-
-                if (inherits(result, "try-error")) {
-                    # Fallback to basic calculation
-                    alpha_value <- NA
-                } else {
-                    alpha_value <- result$value
+                if (is.null(res)) {
+                    private$.accumulateMessage(.("Krippendorff's alpha could not be calculated for these data. Falling back to the kappa appropriate for the number of raters."))
+                    if (private$.n_raters == 2) {
+                        return(private$.performCohensKappa(table))
+                    }
+                    return(private$.performFleissKappa(table))
                 }
 
-                # Interpretation
-                interpretation <- private$.interpretKappa(alpha_value)
+                private$.noteKrippDowngrade(res, kripp_method)
+                alpha_value <- res$alpha
+                se_value <- res$se
+                zc <- qnorm(0.975)
+                ci_lower <- if (is.na(se_value)) NA else max(-1, alpha_value - zc * se_value)
+                ci_upper <- if (is.na(se_value)) NA else min(1, alpha_value + zc * se_value)
+                z_value <- if (is.na(se_value) || se_value <= 0) NA else alpha_value / se_value
 
-                # Add to table
                 table$addRow(rowKey = "krippendorff", values = list(
-                    method = paste0("Krippendorff's Alpha (", stringr::str_to_title(kripp_method), ")"),
+                    method = jmvcore::format("Krippendorff's Alpha ({})", stringr::str_to_title(kripp_method)),
                     kappa = alpha_value,
-                    se = NA,
-                    ci_lower = NA,
-                    ci_upper = NA,
-                    z = NA,
-                    p = NA,
-                    interpretation = interpretation
+                    se = se_value,
+                    ci_lower = ci_lower,
+                    ci_upper = ci_upper,
+                    z = z_value,
+                    p = res$p,
+                    interpretation = private$.interpretKappa(alpha_value)
                 ))
+                table$setNote("kripp", .("Krippendorff's alpha has no closed-form standard error. For a confidence interval, enable Krippendorff's alpha with bootstrap confidence intervals."))
             },
 
             # Fleiss' kappa (3+ raters)
@@ -626,6 +692,13 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 exact <- self$options$exct
                 show_ci <- self$options$fleissCI
                 conf_level <- 0.95 # self$options$confidenceLevel
+
+                # Fleiss' kappa has no weighted form. Selecting "Squared"/"Equal"
+                # weights and 3+ raters used to silently produce an UNWEIGHTED
+                # coefficient with no indication that the weight was dropped.
+                if (self$options$wght != "unweighted") {
+                    private$.accumulateMessage(.("Fleiss' kappa has no weighted form, so the selected kappa weights were not applied. For a weighted ordinal coefficient use Krippendorff's alpha (ordinal) or Gwet's AC2."))
+                }
 
                 # Calculate Fleiss' kappa
                 result <- irr::kappam.fleiss(private$.data_matrix, exact = exact, detail = TRUE)
@@ -638,21 +711,30 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 ci_lower <- NA
                 ci_upper <- NA
 
-                # Calculate confidence intervals only if requested
+                # Confidence interval from the NON-NULL asymptotic SE.
+                # irr::kappam.fleiss()$statistic is the H0:kappa=0 z, so
+                # se = kappa/z recovers the NULL SE and yields an interval that
+                # is too narrow. irrCAC returns the published non-null SE for the
+                # estimator actually reported: fleiss.kappa.raw() for Fleiss' kappa,
+                # conger.kappa.raw() for Conger's kappa (exact = TRUE).
                 if (show_ci) {
-                    # Calculate standard error from z-statistic if available (same method as Cohen's kappa)
-                    if (!is.null(result$statistic) && is.numeric(result$statistic) &&
-                        !is.na(result$statistic) && result$statistic != 0 &&
-                        !is.null(result$value) && is.numeric(result$value) && !is.na(result$value)) {
-                        se_value <- abs(result$value / result$statistic)
-                        ci_lower <- result$value - qnorm((1 + conf_level) / 2) * se_value
-                        ci_upper <- result$value + qnorm((1 + conf_level) / 2) * se_value
+                    se_value <- tryCatch(
+                        as.numeric((if (exact) irrCAC::conger.kappa.raw else irrCAC::fleiss.kappa.raw)(private$.data_matrix)$est$coeff.se),
+                        error = function(e) NA_real_
+                    )
+                    if (!is.na(se_value) && se_value > 0 && !is.na(result$value)) {
+                        zc <- qnorm((1 + conf_level) / 2)
+                        ci_lower <- max(-1, result$value - zc * se_value)
+                        ci_upper <- min(1, result$value + zc * se_value)
+                    } else {
+                        se_value <- NA
                     }
                 }
 
                 # Determine method name based on exact calculation
                 method_name <- if (exact) {
-                    .("Fleiss' Kappa (Exact)")
+                    # irr's exact = TRUE is Conger's (1980) kappa, a different estimator
+                    .("Conger's Kappa (exact)")
                 } else {
                     .("Fleiss' Kappa")
                 }
@@ -677,103 +759,114 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             # # ICC analysis - commented out for future release
             .performICCAnalysis = function() {
                 icc_table <- self$results$iccTable
-                conf_level <- 0.95
+                icc_table$deleteRows()
+                dm <- private$.data_matrix
 
-                tryCatch(
-                    {
-                        # Convert data to numeric for ICC (ordinal data assumed)
-                        numeric_data <- apply(private$.data_matrix, 2, function(x) as.numeric(as.factor(x)))
+                # ICC needs an interval-like scale; it is meaningless for nominal
+                # categories, so it runs only on ordered factors.
+                if (!all(vapply(dm, is.ordered, logical(1)))) {
+                    icc_table$setNote("icc", .("ICC needs ordinal ratings (ordered factors), so it was not calculated. For nominal categories use Fleiss' kappa or Krippendorff's alpha."))
+                    return()
+                }
 
-                        # Calculate ICC using psych package
-                        icc_results <- psych::ICC(numeric_data, alpha = 1 - conf_level)
-
-                        # Add ICC results to table
-                        if (!is.null(icc_results) && !is.null(icc_results$results)) {
-                            # Add ICC(2,1) - single rater, random raters
-                            icc_table$addRow(rowKey = "ICC21", values = list(
-                                type = "ICC(2,1)",
-                                icc_value = icc_results$results["ICC2", "ICC"],
-                                ci_lower = icc_results$results["ICC2", "lower bound"],
-                                ci_upper = icc_results$results["ICC2", "upper bound"],
-                                f_value = icc_results$results["ICC2", "F"],
-                                p = icc_results$results["ICC2", "p"],
-                                interpretation = private$.interpretICCValue(icc_results$results["ICC2", "ICC"])
-                            ))
-                        }
-                    },
-                    error = function(e) {
-                        # Add error row if ICC calculation fails
-                        icc_table$addRow(rowKey = "error", values = list(
-                            type = .("ICC Error"),
-                            icc_value = NaN,
-                            ci_lower = NaN,
-                            ci_upper = NaN,
-                            f_value = NaN,
-                            p = NaN,
-                            interpretation = paste(.("ICC calculation failed:"), e$message)
-                        ))
-                    }
+                # Two defects fixed here:
+                # 1. apply() turned the factors into text and as.factor() re-sorted them
+                #    ALPHABETICALLY, so Benign < Atypical < Malignant was scored as
+                #    Atypical < Benign < Malignant (ICC 0.44 instead of 0.70 on test data).
+                # 2. psych >= 2 names the result rows "Single_random_raters" etc., so
+                #    results["ICC2", ] was NA and the table was always empty.
+                codes <- vapply(dm, as.integer, integer(nrow(dm)))
+                res <- tryCatch(
+                    suppressMessages(psych::ICC(codes, alpha = 0.05, lmer = FALSE))$results,
+                    error = function(e) e
                 )
+                row <- if (inherits(res, "error")) NULL else res[res$type == "ICC2", , drop = FALSE]
+                if (is.null(row) || nrow(row) != 1) {
+                    icc_table$addRow(rowKey = "error", values = list(
+                        type = .("ICC Error"),
+                        icc_value = NaN, ci_lower = NaN, ci_upper = NaN, f_value = NaN, p = NaN,
+                        interpretation = if (inherits(res, "error")) {
+                            jmvcore::format(.("ICC calculation failed: {reason}"), reason = conditionMessage(res))
+                        } else {
+                            .("ICC calculation failed.")
+                        }
+                    ))
+                    return()
+                }
+
+                icc_table$addRow(rowKey = "ICC21", values = list(
+                    type = .("ICC(2,1): two-way random, absolute agreement, single rater"),
+                    icc_value = row$ICC,
+                    ci_lower = row[["lower bound"]],
+                    ci_upper = row[["upper bound"]],
+                    f_value = row$F,
+                    p = row$p,
+                    interpretation = private$.interpretICCValue(row$ICC)
+                ))
+                icc_table$setNote("icc", .("Ratings were coded 1, 2, 3, ... in the order of the factor levels; ICC treats adjacent categories as equally spaced."))
             },
 
             # Krippendorff's alpha analysis
             .performKrippendorffAnalysis = function() {
                 kripp_table <- self$results$krippTable
+                kripp_table$deleteRows()
                 kripp_method <- self$options$krippMethod
-                bootstrap <- self$options$bootstrap # Use user-specified bootstrap option
 
-
-                # Try to calculate Krippendorff's alpha
-                alpha_value <- NaN
-                interpretation <- .("Krippendorff's alpha calculation failed")
-
-                tryCatch(
-                    {
-                        # Convert data to format expected by Krippendorff's alpha
-                        # Data should be in format: rows = raters, columns = subjects
-                        kripp_data <- t(private$.data_matrix)
-
-                        # Try using irr package kripp.alpha function
-                        if (requireNamespace("irr", quietly = TRUE) && exists("kripp.alpha", where = asNamespace("irr"))) {
-                            # Convert method name to irr package format
-                            method_map <- list(
-                                "nominal" = "nominal",
-                                "ordinal" = "ordinal",
-                                "interval" = "interval",
-                                "ratio" = "ratio"
-                            )
-                            irr_method <- method_map[[kripp_method]] %||% "nominal"
-
-                            result <- irr::kripp.alpha(kripp_data, method = irr_method)
-                            if (!is.null(result) && !is.null(result$value) && is.numeric(result$value) && !is.na(result$value)) {
-                                alpha_value <- result$value
-                                interpretation <- private$.interpretKrippendorff(alpha_value)
-                            }
+                # This used irr::kripp.alpha() on category LABELS, which it coerces to
+                # numbers ("NAs introduced by coercion") and orders alphabetically for
+                # ordinal distances. The shared helper passes codes in factor-level order.
+                res <- tryCatch(private$.krippendorffAlpha(kripp_method), error = function(e) e)
+                if (inherits(res, "error") || !is.finite(res$alpha)) {
+                    kripp_table$addRow(rowKey = "kripp", values = list(
+                        data_type = kripp_method,
+                        alpha = NaN,
+                        interpretation = if (inherits(res, "error")) {
+                            jmvcore::format(.("Krippendorff's alpha could not be calculated: {reason}"), reason = conditionMessage(res))
                         } else {
-                            # Fallback: basic implementation for nominal data
-                            if (kripp_method == "nominal") {
-                                alpha_value <- private$.calculateBasicKrippendorffNominal(kripp_data)
-                                if (!is.na(alpha_value)) {
-                                    interpretation <- private$.interpretKrippendorff(alpha_value)
-                                }
-                            } else {
-                                interpretation <- .("Krippendorff's alpha for non-nominal data requires full irr package implementation")
-                            }
+                            .("Krippendorff's alpha could not be calculated for these data.")
                         }
-                    },
-                    error = function(e) {
-                        alpha_value <<- NaN
-                        interpretation <<- paste(.("Error calculating Krippendorff's alpha:"), e$message)
-                    }
-                )
+                    ))
+                    return()
+                }
+                private$.noteKrippDowngrade(res, kripp_method)
 
-                # Add result to table
+                # "Bootstrap Confidence Intervals" used to compute nothing - it only
+                # wrote NaN into the interval cells. Resample CASES (the unit of
+                # analysis), recompute alpha on the full category set, and report the
+                # percentile interval.
+                ci <- c(NA_real_, NA_real_)
+                if (self$options$bootstrap) {
+                    withr::local_seed(self$options$seed) # reproducible; restores the RNG on exit
+                    dm <- private$.data_matrix
+                    labels <- private$.categoryLabels(dm)
+                    n_boot <- self$options$bootstrapSamples
+                    boots <- numeric(n_boot)
+                    for (b in seq_len(n_boot)) {
+                        if (b %% 50 == 0) {
+                            private$.checkpoint(flush = FALSE)
+                        }
+                        idx <- sample.int(nrow(dm), nrow(dm), replace = TRUE)
+                        boots[b] <- tryCatch(
+                            private$.krippendorffAlpha(kripp_method, dm[idx, , drop = FALSE], labels)$alpha,
+                            error = function(e) NA_real_
+                        )
+                    }
+                    boots <- boots[is.finite(boots)]
+                    if (length(boots) >= 20) {
+                        ci <- stats::quantile(boots, c(0.025, 0.975), names = FALSE)
+                    }
+                    kripp_table$setNote("boot", jmvcore::format(
+                        .("95% percentile bootstrap interval from {resamples} case resamples (seed {seed})."),
+                        resamples = n_boot, seed = self$options$seed
+                    ))
+                }
+
                 kripp_table$addRow(rowKey = "kripp", values = list(
                     data_type = kripp_method,
-                    alpha = alpha_value,
-                    ci_lower = if (bootstrap) NaN else NULL,
-                    ci_upper = if (bootstrap) NaN else NULL,
-                    interpretation = interpretation
+                    alpha = res$alpha,
+                    ci_lower = if (self$options$bootstrap) ci[1] else NULL,
+                    ci_upper = if (self$options$bootstrap) ci[2] else NULL,
+                    interpretation = private$.interpretKrippendorff(res$alpha)
                 ))
             },
 
@@ -792,12 +885,15 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Calculate summary statistics
                 total_cases <- private$.n_cases
-                consensus_achieved <- sum(!is.na(consensus_results$consensus_scores))
+                # Only genuine threshold consensus counts; ties resolved by the
+                # tie-breaking rule are reported separately.
+                consensus_achieved <- sum(consensus_results$agreement_levels %in% c(.("Unanimous"), .("Super Majority"), .("Majority")))
                 unanimous_cases <- sum(consensus_results$agreement_levels == .("Unanimous"), na.rm = TRUE)
                 majority_cases <- sum(consensus_results$agreement_levels == .("Majority"), na.rm = TRUE)
                 super_majority_cases <- sum(consensus_results$agreement_levels == .("Super Majority"), na.rm = TRUE)
-                tied_cases <- sum(consensus_results$agreement_levels == .("Tie"), na.rm = TRUE)
-                no_consensus_cases <- sum(consensus_results$agreement_levels == .("No Consensus"), na.rm = TRUE)
+                tied_cases <- sum(consensus_results$agreement_levels %in% c(.("Tie"), .("Tie: arbitration needed")))
+                resolved_ties <- sum(consensus_results$agreement_levels == .("Tie resolved by overall most common rating"))
+                no_consensus_cases <- total_cases - consensus_achieved - tied_cases - resolved_ties
 
                 # Add summary rows
                 summary_table$addRow(rowKey = "total", values = list(
@@ -830,7 +926,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 if (majority_cases > 0) {
                     summary_table$addRow(rowKey = "majority", values = list(
-                        metric = .("Majority (>=50%)"),
+                        metric = .("Majority (more than half)"),
                         value = as.character(majority_cases),
                         percentage = round((majority_cases / total_cases) * 100, 1)
                     ))
@@ -838,9 +934,17 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 if (tied_cases > 0) {
                     summary_table$addRow(rowKey = "tied", values = list(
-                        metric = .("Tied Cases"),
+                        metric = if (tie_breaking == "arbitration") .("Ties needing arbitration") else .("Tied Cases"),
                         value = as.character(tied_cases),
                         percentage = round((tied_cases / total_cases) * 100, 1)
+                    ))
+                }
+
+                if (resolved_ties > 0) {
+                    summary_table$addRow(rowKey = "resolved_ties", values = list(
+                        metric = .("Ties resolved by overall most common rating"),
+                        value = as.character(resolved_ties),
+                        percentage = round((resolved_ties / total_cases) * 100, 1)
                     ))
                 }
 
@@ -857,16 +961,16 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     consensus_table <- self$results$consensusTable
 
                     for (i in 1:private$.n_cases) {
-                        case_id <- paste("Case", i)
+                        case_id <- private$.caseLabels()[i]
                         consensus_score <- consensus_results$consensus_scores[i]
                         agreement_level <- consensus_results$agreement_levels[i]
                         n_agreeing <- consensus_results$n_agreeing[i]
 
                         # Format individual rater scores
-                        case_scores <- as.character(private$.data_matrix[i, ])
+                        case_scores <- private$.rowLabels(private$.data_matrix, i)
                         rater_scores_text <- paste(paste(private$.rater_names, case_scores, sep = ": "), collapse = ", ")
 
-                        consensus_table$addRow(rowKey = case_id, values = list(
+                        consensus_table$addRow(rowKey = i, values = list(
                             case_id = case_id,
                             consensus_score = if (is.na(consensus_score)) .("No consensus") else as.character(consensus_score),
                             agreement_level = agreement_level,
@@ -889,61 +993,49 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Calculate consensus threshold
                 threshold <- switch(method,
-                    "majority" = ceiling(n_raters / 2),
+                    # strictly more than half: 2 of 4 raters is not a majority
+                    "majority" = floor(n_raters / 2) + 1,
                     "super_majority" = ceiling(n_raters * 2 / 3),
                     "unanimous" = n_raters
                 )
 
+                all_scores <- unlist(lapply(data_matrix, as.character), use.names = FALSE)
+                global_counts <- table(all_scores)
+                global_mode <- names(global_counts)[which.max(global_counts)]
+
                 for (i in 1:n_cases) {
-                    case_scores <- as.character(data_matrix[i, ])
+                    case_scores <- private$.rowLabels(data_matrix, i)
                     score_counts <- table(case_scores)
                     max_count <- max(score_counts)
                     mode_scores <- names(score_counts)[score_counts == max_count]
 
-                    # Check if consensus threshold is met
-                    if (max_count >= threshold) {
-                        if (length(mode_scores) == 1) {
-                            # Single consensus score
-                            consensus_scores[i] <- mode_scores[1]
-                            n_agreeing[i] <- max_count
-
-                            # Determine agreement level
-                            if (max_count == n_raters) {
-                                agreement_levels[i] <- .("Unanimous")
-                            } else if (max_count >= ceiling(n_raters * 2 / 3)) {
-                                agreement_levels[i] <- .("Super Majority")
-                            } else {
-                                agreement_levels[i] <- .("Majority")
-                            }
+                    # Consensus = one rating reaches the threshold. With a strict majority
+                    # a tie can never reach it, so tie-breaking applies to TIED cases that
+                    # miss consensus (it used to sit inside the threshold branch, where a
+                    # 2-2 split among 4 raters counted as a "majority").
+                    if (max_count >= threshold && length(mode_scores) == 1) {
+                        consensus_scores[i] <- mode_scores[1]
+                        n_agreeing[i] <- max_count
+                        if (max_count == n_raters) {
+                            agreement_levels[i] <- .("Unanimous")
+                        } else if (max_count >= ceiling(n_raters * 2 / 3)) {
+                            agreement_levels[i] <- .("Super Majority")
                         } else {
-                            # Tie at consensus level - handle based on tie_breaking method
+                            agreement_levels[i] <- .("Majority")
+                        }
+                    } else if (length(mode_scores) > 1) {
+                        n_agreeing[i] <- max_count
+                        if (tie_breaking == "arbitration") {
+                            agreement_levels[i] <- .("Tie: arbitration needed")
+                        } else if (tie_breaking == "global_mode" && global_mode %in% mode_scores) {
+                            consensus_scores[i] <- global_mode
+                            agreement_levels[i] <- .("Tie resolved by overall most common rating")
+                        } else {
                             agreement_levels[i] <- .("Tie")
-                            n_agreeing[i] <- max_count
-
-                            if (tie_breaking == "arbitration") {
-                                consensus_scores[i] <- "ARBITRATION_NEEDED"
-                            } else if (tie_breaking == "global_mode") {
-                                # Use most frequent category across all cases
-                                all_scores <- as.character(as.matrix(data_matrix))
-                                global_counts <- table(all_scores)
-                                global_mode <- names(global_counts)[which.max(global_counts)]
-
-                                # If one of the tied scores matches global mode, use it
-                                if (global_mode %in% mode_scores) {
-                                    consensus_scores[i] <- global_mode
-                                    agreement_levels[i] <- paste(agreement_levels[i], "(Resolved)")
-                                }
-                            }
-                            # If tie_breaking == "exclude", leave as NA (default)
                         }
                     } else {
-                        # No consensus reached
                         n_agreeing[i] <- max_count
-                        if (length(mode_scores) == 1) {
-                            agreement_levels[i] <- paste(.("Insufficient"), " (", max_count, "/", n_raters, ")", sep = "")
-                        } else {
-                            agreement_levels[i] <- paste(.("Multiple ties"), " (", max_count, "/", n_raters, ")", sep = "")
-                        }
+                        agreement_levels[i] <- jmvcore::format(.("Insufficient ({agreeing}/{raters})"), agreeing = max_count, raters = n_raters)
                     }
                 }
 
@@ -1174,45 +1266,26 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 style_table <- self$results$diagnosticStyleTable
 
-                # Create distance matrix between raters based on diagnostic patterns
-                distance_matrix <- private$.calculateRaterDistanceMatrix()
-
-                # Perform hierarchical clustering
-                cluster_method <- self$options$clusteringMethod
-                hc <- hclust(distance_matrix, method = cluster_method)
-
-                # Cut dendrogram to get specified number of groups
-                n_groups <- self$options$nStyleGroups
-                style_groups <- cutree(hc, k = n_groups)
+                # Every table and plot must describe the same fitted clustering.
+                clustering_result <- private$.performRaterClustering()
+                private$.style_clustering_results <- clustering_result
+                style_groups <- clustering_result$cluster_assignments
 
                 # Populate style clustering results table
                 rater_names <- private$.rater_names
+                not_specified <- .("Not specified")
                 for (i in seq_along(rater_names)) {
-                    # Calculate rater characteristics if available
-                    experience <- if (self$options$raterCharacteristics && !is.null(self$options$experienceVar)) {
-                        # Extract from experienceVar if available
-                        as.character(self$data[[self$options$experienceVar]][i])
-                    } else {
-                        "Not specified"
-                    }
-
-                    training <- if (self$options$raterCharacteristics && !is.null(self$options$trainingVar)) {
-                        as.character(self$data[[self$options$trainingVar]][i])
-                    } else {
-                        "Not specified"
-                    }
-
-                    institution <- if (self$options$raterCharacteristics && !is.null(self$options$institutionVar)) {
-                        as.character(self$data[[self$options$institutionVar]][i])
-                    } else {
-                        "Not specified"
-                    }
-
-                    specialty <- if (self$options$raterCharacteristics && !is.null(self$options$specialtyVar)) {
-                        as.character(self$data[[self$options$specialtyVar]][i])
-                    } else {
-                        "Not specified"
-                    }
+                    # Rater attributes come from META_ rows (private$.rater_metadata),
+                    # keyed by rater name. The removed experienceVar/trainingVar/...
+                    # options indexed a CASE column by RATER position, so rater 1 was
+                    # given case row 1's value.
+                    rater_meta <- vapply(c("experience", "training", "institution", "specialty"),
+                        function(key) private$.raterMeta(key, rater_names[i]), character(1))
+                    rater_meta[is.na(rater_meta)] <- not_specified
+                    experience <- rater_meta[["experience"]]
+                    training <- rater_meta[["training"]]
+                    institution <- rater_meta[["institution"]]
+                    specialty <- rater_meta[["specialty"]]
 
                     # Calculate agreement with other raters in same style group
                     same_group_raters <- which(style_groups == style_groups[i] & seq_along(rater_names) != i)
@@ -1233,13 +1306,6 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     ))
                 }
 
-                # Store clustering results for visualization
-                private$.style_clustering_results <- list(
-                    hclust = hc,
-                    groups = style_groups,
-                    distance_matrix = distance_matrix
-                )
-
                 # Generate style summary
                 private$.generateStyleSummary(style_groups)
 
@@ -1256,6 +1322,14 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 n_raters <- private$.n_raters
                 n_cases <- private$.n_cases
 
+                labels <- private$.categoryLabels(data_matrix)
+                numeric_ratings <- lapply(data_matrix, function(x) match(as.character(x), labels))
+                if (distance_metric == "correlation" &&
+                    any(vapply(numeric_ratings, function(x) stats::sd(x) == 0, logical(1)))) {
+                    private$.accumulateMessage(.("Correlation distance requires variation in every rater's ratings. Percentage disagreement distance was used because at least one rater is constant."))
+                    distance_metric <- "agreement"
+                }
+
                 # Initialize distance matrix
                 dist_matrix <- matrix(0, nrow = n_raters, ncol = n_raters)
                 rownames(dist_matrix) <- private$.rater_names
@@ -1266,19 +1340,19 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     for (j in (i + 1):n_raters) {
                         if (distance_metric == "agreement") {
                             # Percentage disagreement (1 - percentage agreement)
-                            agreement_count <- sum(data_matrix[, i] == data_matrix[, j])
+                            agreement_count <- sum(as.character(data_matrix[, i]) == as.character(data_matrix[, j]))
                             agreement_percent <- agreement_count / n_cases
                             distance <- 1 - agreement_percent
                         } else if (distance_metric == "correlation") {
                             # Convert to numeric for correlation
-                            rater_i <- as.numeric(as.factor(data_matrix[, i]))
-                            rater_j <- as.numeric(as.factor(data_matrix[, j]))
+                            rater_i <- numeric_ratings[[i]]
+                            rater_j <- numeric_ratings[[j]]
                             correlation <- cor(rater_i, rater_j, use = "complete.obs")
                             distance <- 1 - abs(correlation)
                         } else { # euclidean
                             # Euclidean distance on numeric coding
-                            rater_i <- as.numeric(as.factor(data_matrix[, i]))
-                            rater_j <- as.numeric(as.factor(data_matrix[, j]))
+                            rater_i <- numeric_ratings[[i]]
+                            rater_j <- numeric_ratings[[j]]
                             distance <- sqrt(sum((rater_i - rater_j)^2)) / n_cases
                         }
 
@@ -1305,7 +1379,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 for (other_index in same_group_indices) {
                     other_data <- data_matrix[, other_index]
-                    agreement_count <- sum(rater_data == other_data)
+                    agreement_count <- sum(as.character(rater_data) == as.character(other_data))
                     agreement_percent <- (agreement_count / length(rater_data)) * 100
                     total_agreement <- total_agreement + agreement_percent
                     n_comparisons <- n_comparisons + 1
@@ -1335,7 +1409,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                                 rater_i <- group_members[i]
                                 rater_j <- group_members[j]
 
-                                agreement_count <- sum(private$.data_matrix[, rater_i] == private$.data_matrix[, rater_j])
+                                agreement_count <- sum(as.character(private$.data_matrix[, rater_i]) == as.character(private$.data_matrix[, rater_j]))
                                 agreement_percent <- (agreement_count / private$.n_cases) * 100
                                 total_agreement <- total_agreement + agreement_percent
                                 n_pairs <- n_pairs + 1
@@ -1353,29 +1427,14 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     group_institution <- .("Mixed")
 
                     if (self$options$raterCharacteristics) {
-                        # Analyze experience distribution
-                        if (!is.null(self$options$experienceVar)) {
-                            exp_values <- self$data[[self$options$experienceVar]][group_members]
-                            if (length(unique(exp_values)) == 1) {
-                                group_experience <- as.character(unique(exp_values))
-                            }
+                        members <- private$.rater_names[group_members]
+                        shared_value <- function(key, fallback) {
+                            vals <- stats::na.omit(private$.raterMeta(key, members))
+                            if (length(vals) > 0 && length(unique(vals)) == 1) vals[[1]] else fallback
                         }
-
-                        # Analyze training distribution
-                        if (!is.null(self$options$trainingVar)) {
-                            train_values <- self$data[[self$options$trainingVar]][group_members]
-                            if (length(unique(train_values)) == 1) {
-                                group_training <- as.character(unique(train_values))
-                            }
-                        }
-
-                        # Analyze institution distribution
-                        if (!is.null(self$options$institutionVar)) {
-                            inst_values <- self$data[[self$options$institutionVar]][group_members]
-                            if (length(unique(inst_values)) == 1) {
-                                group_institution <- as.character(unique(inst_values))
-                            }
-                        }
+                        group_experience <- shared_value("experience", group_experience)
+                        group_training <- shared_value("training", group_training)
+                        group_institution <- shared_value("institution", group_institution)
                     }
 
                     style_summary_table$addRow(rowKey = paste("Style", group), values = list(
@@ -1402,7 +1461,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 case_discord_scores <- numeric(n_cases)
 
                 for (case_idx in 1:n_cases) {
-                    case_diagnoses <- as.character(data_matrix[case_idx, ])
+                    case_diagnoses <- private$.rowLabels(data_matrix, case_idx)
 
                     # Calculate between-group disagreement
                     group_diagnoses <- list()
@@ -1435,13 +1494,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 discordant_indices <- which(case_discord_scores >= threshold & case_discord_scores > 0)
 
                 for (idx in discordant_indices) {
-                    case_id <- if (!is.null(self$options$caseID)) {
-                        as.character(self$data[[self$options$caseID]][idx])
-                    } else {
-                        paste("Case", idx)
-                    }
+                    case_id <- private$.caseLabels()[idx]
 
-                    case_diagnoses <- as.character(data_matrix[idx, ])
+                    case_diagnoses <- private$.rowLabels(data_matrix, idx)
 
                     # Show diagnosis by style group
                     group_diagnoses_str <- ""
@@ -1455,7 +1510,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         )
                     }
 
-                    discordant_table$addRow(rowKey = case_id, values = list(
+                    discordant_table$addRow(rowKey = idx, values = list(
                         case_id = case_id,
                         discord_score = case_discord_scores[idx],
                         style_group_diagnoses = group_diagnoses_str,
@@ -1522,7 +1577,6 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # First, we need to dynamically add columns for each category
                 for (category in all_categories) {
-                    col_name <- paste0("cat_", gsub("[^A-Za-z0-9]", "_", category))
                     # Note: jamovi tables have fixed columns, so we'll use a simpler approach
                 }
 
@@ -1583,90 +1637,421 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
                 return(.("Almost Perfect"))
             },
-            .calculateBasicKrippendorffNominal = function(kripp_data) {
-                tryCatch(
-                    {
-                        # Remove rows with all NA values
-                        valid_rows <- apply(kripp_data, 1, function(x) !all(is.na(x)))
-                        if (sum(valid_rows) < 2) {
-                            return(NaN)
-                        }
+            # One case's ratings as LABELS. as.character(<data.frame>[i, ]) returns
+            # factor level CODES, so raters coding Benign/EIN in different level
+            # orders both read "1" and a disagreement was counted as agreement; it
+            # also made "global_mode" tie-breaking compare codes with labels and
+            # never resolve anything.
+            .rowLabels = function(df, i) {
+                vapply(df[i, , drop = FALSE], as.character, character(1))
+            },
 
-                        kripp_data <- kripp_data[valid_rows, , drop = FALSE]
+            # META_ rows (case ID "META_experience", ...) carry rater attributes.
+            .metadataRowFlags = function() {
+                id <- self$options$caseID
+                if (!isTRUE(self$options$useMetadataRows) || is.null(id) || !id %in% names(self$data)) {
+                    return(rep(FALSE, nrow(self$data)))
+                }
+                grepl("^META_", as.character(self$data[[id]]), ignore.case = TRUE)
+            },
 
-                        # Calculate observed disagreement
-                        total_pairs <- 0
-                        disagreements <- 0
-
-                        for (i in seq_len(nrow(kripp_data))) {
-                            for (j in seq_len(nrow(kripp_data))) {
-                                if (i != j) {
-                                    for (k in seq_len(ncol(kripp_data))) {
-                                        if (!is.na(kripp_data[i, k]) && !is.na(kripp_data[j, k])) {
-                                            total_pairs <- total_pairs + 1
-                                            if (kripp_data[i, k] != kripp_data[j, k]) {
-                                                disagreements <- disagreements + 1
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (total_pairs == 0) {
-                            return(NaN)
-                        }
-                        observed_disagreement <- disagreements / total_pairs
-
-                        # Calculate expected disagreement (marginal probabilities)
-                        all_values <- as.vector(kripp_data)
-                        all_values <- all_values[!is.na(all_values)]
-                        if (length(all_values) == 0) {
-                            return(NaN)
-                        }
-
-                        value_counts <- table(all_values)
-                        value_probs <- value_counts / sum(value_counts)
-
-                        expected_disagreement <- 1 - sum(value_probs^2)
-
-                        if (expected_disagreement == 0) {
-                            return(NaN)
-                        }
-
-                        # Krippendorff's alpha = 1 - (observed disagreement / expected disagreement)
-                        alpha <- 1 - (observed_disagreement / expected_disagreement)
-                        return(alpha)
-                    },
-                    error = function(e) {
-                        return(NaN)
+            # Drop META_ rows from a frame row-aligned with self$data. Their values
+            # ("25", "GYN") became levels of every rater factor, so categories such
+            # as "25" were analysed and weighted-kappa spacing changed. Only levels
+            # that occur SOLELY in META_ rows are removed - a declared but unused
+            # category must survive because it changes weighted kappa.
+            .dropMetadataRows = function(df) {
+                meta <- private$.metadataRowFlags()
+                if (!any(meta)) {
+                    return(df)
+                }
+                out <- df[!meta, , drop = FALSE]
+                for (col in names(out)) {
+                    if (!is.factor(out[[col]])) {
+                        next
                     }
+                    meta_only <- setdiff(
+                        stats::na.omit(unique(as.character(df[[col]][meta]))),
+                        unique(as.character(out[[col]]))
+                    )
+                    if (length(meta_only) > 0) {
+                        out[[col]] <- factor(
+                            as.character(out[[col]]),
+                            levels = setdiff(levels(out[[col]]), meta_only),
+                            ordered = is.ordered(out[[col]])
+                        )
+                    }
+                }
+                out
+            },
+
+            .raterMeta = function(key, raters) {
+                v <- private$.rater_metadata[[key]]
+                if (!isTRUE(self$options$raterCharacteristics) || is.null(v)) {
+                    return(rep(NA_character_, length(raters)))
+                }
+                unname(as.character(v[raters]))
+            },
+
+            # cutree() needs k <= n raters, and cluster::silhouette() returns a bare
+            # NA (not a matrix) when every cluster is a singleton, i.e. k == n. With
+            # the default of 3 groups that crashed every 3-rater study. n - 1 is the
+            # largest meaningful partition.
+            .styleGroupCount = function() {
+                min(self$options$nStyleGroups, private$.n_raters - 1)
+            },
+
+            # Category order for irrCAC's ordinal weights.
+            #
+            # irrCAC sorts categ.labels alphabetically when none are supplied, so
+            # Benign < Atypical < Malignant was weighted as Atypical < Benign <
+            # Malignant. On a test set ordinal Krippendorff's alpha read 0.595
+            # instead of 0.042 and Gwet's AC2 0.562 instead of 0.123. The factor
+            # levels carry the real order.
+            .categoryLabels = function(dm = private$.data_matrix) {
+                lv <- unique(unlist(lapply(dm, function(col) {
+                    if (is.factor(col)) levels(col) else sort(unique(as.character(col)))
+                }), use.names = FALSE))
+                used <- unique(stats::na.omit(unlist(lapply(dm, as.character), use.names = FALSE)))
+                lv[lv %in% used]
+            },
+
+            # Krippendorff's alpha, shared by the primary-method row and the
+            # dedicated table, via irr::kripp.alpha() on a raters x units NUMERIC
+            # matrix. Checked against Krippendorff's (2011) published worked example
+            # (nominal .743, ordinal .815, interval .849, ratio .797): irr matches all
+            # four. irrCAC's krippen.alpha.raw() does not - its "ordinal"/"linear"
+            # weights are Gwet's, giving .834 and .800 - so it is not used here.
+            # Codes follow the factor-level order, which ordinal distances depend on;
+            # interval and ratio use the category values and need numeric categories.
+            .krippendorffAlpha = function(level, dm = private$.data_matrix, labels = private$.categoryLabels(dm)) {
+                numeric_labels <- length(labels) > 0 && !anyNA(suppressWarnings(as.numeric(labels)))
+                method <- if (level %in% c("nominal", "ordinal", "interval", "ratio")) level else "nominal"
+                if (method %in% c("interval", "ratio") && !numeric_labels) {
+                    method <- "ordinal"
+                }
+                to_number <- if (method %in% c("interval", "ratio")) {
+                    function(col) as.numeric(as.character(col))
+                } else {
+                    function(col) as.numeric(match(as.character(col), labels))
+                }
+                # matrix(..., nrow) keeps the orientation when dm has a single row
+                m <- t(matrix(vapply(dm, to_number, numeric(nrow(dm))), nrow = nrow(dm)))
+                list(
+                    alpha = as.numeric(irr::kripp.alpha(m, method = method)$value),
+                    se = NA_real_,
+                    p = NA_real_,
+                    downgraded = level %in% c("interval", "ratio") && !numeric_labels
                 )
             },
-            .interpretICC = function(icc) {
-                if (is.na(icc)) {
-                    return("Cannot calculate")
+
+            .noteKrippDowngrade = function(res, level) {
+                if (isTRUE(res$downgraded)) {
+                    private$.accumulateMessage(jmvcore::format(
+                        .("{scale} Krippendorff's alpha needs numeric categories; these categories are labels, so ordinal distances were used."),
+                        scale = stringr::str_to_title(level)
+                    ))
                 }
-                if (icc < 0.50) {
-                    return("Poor")
-                }
-                if (icc < 0.75) {
-                    return("Moderate")
-                }
-                if (icc < 0.90) {
-                    return("Good")
-                }
-                return("Excellent")
             },
-            .getICCTypeDescription = function(icc_type) {
-                switch(icc_type,
-                    "ICC1" = "ICC(1,1) - Single Measures, Absolute Agreement",
-                    "ICC2" = "ICC(2,1) - Single Measures, Consistency",
-                    "ICC3" = "ICC(3,1) - Single Measures, Consistency (Fixed Raters)",
-                    "ICC1k" = "ICC(1,k) - Average Measures, Absolute Agreement",
-                    "ICC2k" = "ICC(2,k) - Average Measures, Consistency",
-                    "ICC3k" = "ICC(3,k) - Average Measures, Consistency (Fixed Raters)"
+
+            # Rows kept by .prepareData(), used to line a reference-standard or
+            # case-ID column up with .data_matrix after complete-case filtering.
+            .keptRows = function() {
+                private$.retained_rows
+            },
+
+            .caseLabels = function() {
+                rows <- private$.keptRows()
+                labels <- paste(.("Case"), rows)
+                id <- self$options$caseID
+                if (!is.null(id) && length(id) > 0 && id %in% names(self$data)) {
+                    supplied <- as.character(self$data[[id]][rows])
+                    present <- !is.na(supplied) & nzchar(supplied)
+                    labels[present] <- supplied[present]
+                }
+                labels
+            },
+
+            # Cohen's kappa for every rater pair.
+            .pairwiseKappaResults = function() {
+                dm <- private$.data_matrix
+                nm <- private$.rater_names
+                n <- private$.n_raters
+                wght <- self$options$wght
+                if (!all(vapply(dm, is.ordered, logical(1)))) {
+                    wght <- "unweighted"
+                }
+                zc <- qnorm(0.975)
+
+                out <- list()
+                for (i in seq_len(n - 1)) {
+                    for (j in (i + 1):n) {
+                        pair <- dm[, c(i, j), drop = FALSE]
+                        agreement_percent <- mean(as.character(pair[[1]]) == as.character(pair[[2]])) * 100
+                        res <- tryCatch(irr::kappa2(pair, weight = wght), error = function(e) NULL)
+                        if (is.null(res)) {
+                            next
+                        }
+                        ase <- private$.kappaASE(pair, wght)
+                        out[[length(out) + 1]] <- data.frame(
+                            pair = paste(nm[i], "vs", nm[j]),
+                            i = i, j = j,
+                            agreement_percent = agreement_percent,
+                            kappa = res$value,
+                            se = if (is.null(ase)) NA_real_ else ase,
+                            ci_lower = if (is.null(ase)) NA_real_ else max(-1, res$value - zc * ase),
+                            ci_upper = if (is.null(ase)) NA_real_ else min(1, res$value + zc * ase),
+                            p = res$p.value,
+                            interpretation = private$.interpretKappa(res$value),
+                            stringsAsFactors = FALSE
+                        )
+                    }
+                }
+                if (length(out) == 0) {
+                    return(NULL)
+                }
+                do.call(rbind, out)
+            },
+
+            .performPairwiseAnalysis = function() {
+                tbl <- self$results$pairwiseTable
+                tbl$deleteRows()
+                res <- private$.pairwiseKappaResults()
+                if (is.null(res)) {
+                    return()
+                }
+                for (r in seq_len(nrow(res))) {
+                    tbl$addRow(rowKey = res$pair[r], values = list(
+                        rater_pair = res$pair[r],
+                        agreement_percent = res$agreement_percent[r],
+                        kappa = res$kappa[r],
+                        ci_lower = res$ci_lower[r],
+                        ci_upper = res$ci_upper[r],
+                        p = res$p[r],
+                        interpretation = res$interpretation[r]
+                    ))
+                }
+                tbl$setNote("ci", .("Confidence intervals use the non-null asymptotic standard error (vcd::Kappa), which is the appropriate standard error for an interval; a blank interval means the rating table was degenerate."))
+                tbl$setNote("p", .("Each p-value tests kappa = 0 for one pair and is not adjusted for multiple comparisons; judge pairs by their kappa and confidence interval."))
+            },
+
+            # One-vs-rest agreement for each rating category.
+            #
+            # Frequency is the number of CASES in which at least one rater used
+            # the category. Category kappa collapses the ratings to
+            # "this category / not this category" and re-runs the estimator
+            # appropriate for the rater count.
+            .categoryAgreementResults = function() {
+                dm <- private$.data_matrix
+                cats <- levels(droplevels(as.factor(unlist(dm, use.names = FALSE))))
+                chr <- as.data.frame(lapply(dm, as.character), stringsAsFactors = FALSE)
+                gold <- private$.referenceStandardValues()
+
+                out <- list()
+                for (cat in cats) {
+                    hit <- as.data.frame(lapply(chr, function(col) col == cat))
+                    frequency <- sum(apply(hit, 1, any))
+                    agreement_percent <- mean(apply(hit, 1, function(r) length(unique(r)) == 1)) * 100
+
+                    bin <- as.data.frame(lapply(hit, function(col) factor(ifelse(col, "yes", "no"), levels = c("no", "yes"))))
+                    kappa <- tryCatch(
+                        if (ncol(bin) == 2) irr::kappa2(bin)$value else irr::kappam.fleiss(bin)$value,
+                        error = function(e) NA_real_
+                    )
+
+                    sens <- NA_real_
+                    spec <- NA_real_
+                    if (!is.null(gold)) {
+                        observed <- !is.na(gold)
+                        gpos <- observed & as.character(gold) == cat
+                        gneg <- observed & as.character(gold) != cat
+                        # Averaged over raters: each rater is scored against the
+                        # reference standard for this one category.
+                        sens <- mean(vapply(chr, function(col) {
+                            if (sum(gpos) == 0) NA_real_ else mean(col[gpos] == cat)
+                        }, numeric(1)), na.rm = TRUE)
+                        spec <- mean(vapply(chr, function(col) {
+                            if (sum(gneg) == 0) NA_real_ else mean(col[gneg] != cat)
+                        }, numeric(1)), na.rm = TRUE)
+                    }
+
+                    out[[length(out) + 1]] <- data.frame(
+                        category = cat, frequency = frequency,
+                        agreement_percent = agreement_percent, kappa = kappa,
+                        sensitivity = sens, specificity = spec,
+                        stringsAsFactors = FALSE
+                    )
+                }
+                if (length(out) == 0) {
+                    return(NULL)
+                }
+                do.call(rbind, out)
+            },
+
+            .performCategoryAnalysis = function() {
+                tbl <- self$results$categoryTable
+                tbl$deleteRows()
+                res <- private$.categoryAgreementResults()
+                if (is.null(res)) {
+                    return()
+                }
+                for (r in seq_len(nrow(res))) {
+                    tbl$addRow(rowKey = res$category[r], values = list(
+                        category = res$category[r],
+                        frequency = res$frequency[r],
+                        agreement_percent = res$agreement_percent[r],
+                        kappa = res$kappa[r],
+                        sensitivity = res$sensitivity[r],
+                        specificity = res$specificity[r]
+                    ))
+                }
+                note <- .("Category kappa collapses the ratings to \u{201C}this category vs. all others\u{201D}. Frequency counts cases in which at least one rater used the category.")
+                if (all(is.na(res$sensitivity))) {
+                    note <- paste0(note, "\n\n", .("Sensitivity and specificity require a reference/expert standard variable."))
+                }
+                tbl$setNote("cat", note)
+            },
+
+            # Reference standard aligned to the rows kept in .data_matrix.
+            .referenceStandardValues = function() {
+                var <- self$options$referenceStandard
+                if (is.null(var) || length(var) == 0 || !var %in% names(self$data)) {
+                    return(NULL)
+                }
+                rows <- private$.keptRows()
+                if (anyNA(rows) || length(rows) != nrow(private$.data_matrix)) {
+                    return(NULL)
+                }
+                self$data[[var]][rows]
+            },
+
+            # Cases the raters disagree on most.
+            .outlierCaseResults = function() {
+                dm <- private$.data_matrix
+                n_raters <- private$.n_raters
+                chr <- t(apply(dm, 1, as.character))
+
+                disagreement <- apply(chr, 1, function(vals) {
+                    counts <- table(vals)
+                    n_raters - max(counts)
+                })
+                consensus <- apply(chr, 1, function(vals) {
+                    counts <- sort(table(vals), decreasing = TRUE)
+                    if (length(counts) > 1 && counts[[1]] == counts[[2]]) .("Tied") else names(counts)[1]
+                })
+
+                keep <- which(disagreement > 0)
+                if (length(keep) == 0) {
+                    return(NULL)
+                }
+                # Worst cases first, capped so a large study does not publish one
+                # row per case.
+                keep <- keep[order(-disagreement[keep])]
+                keep <- utils::head(keep, 50L)
+
+                ids <- private$.caseLabels()
+
+                data.frame(
+                    case_id = ids[keep],
+                    disagreement_count = as.integer(disagreement[keep]),
+                    agreement_score = 1 - (disagreement[keep] / n_raters),
+                    rater_assignments = apply(chr[keep, , drop = FALSE], 1, paste, collapse = ", "),
+                    consensus_diagnosis = consensus[keep],
+                    stringsAsFactors = FALSE
                 )
+            },
+
+            .performOutlierAnalysis = function() {
+                tbl <- self$results$outlierTable
+                tbl$deleteRows()
+                res <- private$.outlierCaseResults()
+                if (is.null(res)) {
+                    private$.accumulateMessage(.("All raters agreed on every case, so there are no discordant cases to list."))
+                    return()
+                }
+                for (r in seq_len(nrow(res))) {
+                    tbl$addRow(rowKey = r, values = as.list(res[r, ]))
+                }
+                tbl$setNote("outlier", .("Cases with at least one dissenting rater, worst first (at most 50 shown). Agreement score is the proportion of raters who chose the modal rating."))
+            },
+
+            # Per-rater accuracy against the reference/expert standard.
+            #
+            # Sensitivity/specificity/PPV/NPV are only defined per class on a
+            # multi-category scale, so they are MACRO-AVERAGED over the
+            # categories present in the reference standard (each category scored
+            # one-vs-rest, then averaged unweighted). The table carries a note
+            # saying so - reporting a single unqualified number would imply a
+            # binary test.
+            .referenceAccuracyResults = function() {
+                gold <- private$.referenceStandardValues()
+                if (is.null(gold)) {
+                    return(NULL)
+                }
+                dm <- private$.data_matrix
+                nm <- private$.rater_names
+                gold_chr <- as.character(gold)
+                ok <- !is.na(gold_chr)
+                if (sum(ok) < 2) {
+                    return(NULL)
+                }
+                cats <- sort(unique(gold_chr[ok]))
+
+                out <- list()
+                for (i in seq_along(nm)) {
+                    private$.checkpoint(flush = FALSE)
+                    rater <- as.character(dm[[i]])[ok]
+                    g <- gold_chr[ok]
+
+                    accuracy <- mean(rater == g) * 100
+                    per_cat <- vapply(cats, function(cat) {
+                        tp <- sum(rater == cat & g == cat)
+                        fp <- sum(rater == cat & g != cat)
+                        fn <- sum(rater != cat & g == cat)
+                        tn <- sum(rater != cat & g != cat)
+                        c(
+                            sens = if ((tp + fn) == 0) NA_real_ else tp / (tp + fn),
+                            spec = if ((tn + fp) == 0) NA_real_ else tn / (tn + fp),
+                            ppv  = if ((tp + fp) == 0) NA_real_ else tp / (tp + fp),
+                            npv  = if ((tn + fn) == 0) NA_real_ else tn / (tn + fn)
+                        )
+                    }, numeric(4))
+
+                    lv <- union(levels(as.factor(g)), levels(as.factor(rater)))
+                    kappa_vs_gold <- tryCatch(
+                        irr::kappa2(data.frame(
+                            gold = factor(g, levels = lv),
+                            rater = factor(rater, levels = lv)
+                        ))$value,
+                        error = function(e) NA_real_
+                    )
+
+                    out[[length(out) + 1]] <- data.frame(
+                        rater = nm[i],
+                        accuracy = accuracy,
+                        sensitivity = mean(per_cat["sens", ], na.rm = TRUE) * 100,
+                        specificity = mean(per_cat["spec", ], na.rm = TRUE) * 100,
+                        ppv = mean(per_cat["ppv", ], na.rm = TRUE) * 100,
+                        npv = mean(per_cat["npv", ], na.rm = TRUE) * 100,
+                        kappa_vs_gold = kappa_vs_gold,
+                        stringsAsFactors = FALSE
+                    )
+                }
+                do.call(rbind, out)
+            },
+
+            .performPathologyAnalysis = function() {
+                tbl <- self$results$diagnosticAccuracyTable
+                tbl$deleteRows()
+                res <- private$.referenceAccuracyResults()
+                if (is.null(res)) {
+                    private$.accumulateMessage(.("Diagnostic accuracy metrics need a reference/expert standard variable. Assign one to see per-rater accuracy and the confusion matrix."))
+                    return()
+                }
+                for (r in seq_len(nrow(res))) {
+                    tbl$addRow(rowKey = res$rater[r], values = as.list(res[r, ]))
+                }
+                tbl$setNote("macro", .("Sensitivity, specificity, PPV and NPV are macro-averaged over the categories of the reference standard (each scored one-vs-rest, then averaged). Accuracy is the percentage of cases the rater classified exactly as the reference standard."))
             },
 
             # Visualization functions
@@ -1682,11 +2067,15 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 rownames(agreement_matrix) <- rater_names
                 colnames(agreement_matrix) <- rater_names
 
+                # Weighted kappa only for ordinal ratings, as in the kappa table; on
+                # nominal categories the weights imposed an order that does not exist.
+                heatmap_weight <- if (all(vapply(private$.data_matrix, is.ordered, logical(1)))) self$options$wght else "unweighted"
+
                 # Fill matrix with pairwise kappa values
                 for (i in 1:(n_raters - 1)) {
                     for (j in (i + 1):n_raters) {
                         pair_data <- private$.data_matrix[, c(i, j)]
-                        kappa_result <- irr::kappa2(pair_data, weight = self$options$wght)
+                        kappa_result <- irr::kappa2(pair_data, weight = heatmap_weight)
                         agreement_matrix[i, j] <- kappa_result$value
                         agreement_matrix[j, i] <- kappa_result$value
                     }
@@ -1714,7 +2103,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Apply color scale based on theme
-                if (self$options$heatmapTheme %in% c("viridis", "plasma")) {
+                if (self$options$heatmapTheme %in% c("viridis", "plasma", "cividis")) {
                     p <- p + scale_fill_viridis_c(option = self$options$heatmapTheme, name = "Kappa")
                 } else {
                     p <- p + scale_fill_gradient2(
@@ -1735,43 +2124,202 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 TRUE
             },
 
-            # Pairwise plot - placeholder (renderFun .pairwisePlot is declared in
-            # .r.yaml with visible:(pairwiseAnalysis); the method MUST exist or
-            # jamovi's do.call(private[[funName]], ...) crashes with
-            # "attempt to apply non-function" when the image becomes visible.
+            # Landis & Koch bands, used to colour the agreement plots
+            # consistently with .interpretKappa().
+            .kappaBands = function() {
+                list(
+                    breaks = c(-1, 0.20, 0.40, 0.60, 0.80, 1),
+                    labels = c(.("Slight"), .("Fair"), .("Moderate"), .("Substantial"), .("Almost perfect")),
+                    colors = c("#d73027", "#fc8d59", "#fee090", "#91bfdb", "#4575b4")
+                )
+            },
+            .kappaBandFactor = function(x) {
+                b <- private$.kappaBands()
+                cut(x, breaks = b$breaks, labels = b$labels, include.lowest = TRUE)
+            },
+            # Every renderer runs on resize and on .omv reopen, including after
+            # .run() returned early - so each one re-checks its option and its
+            # data instead of trusting private state to be populated.
+            .plotUnavailable = function(msg) {
+                p <- ggplot2::ggplot() +
+                    ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5, label = msg), size = 5) +
+                    ggplot2::xlim(0, 1) +
+                    ggplot2::ylim(0, 1) +
+                    ggplot2::theme_void()
+                print(p)
+                TRUE
+            },
+
+            # Forest plot of Cohen's kappa for every rater pair.
             .pairwisePlot = function(image, ggtheme, theme, ...) {
-                # Placeholder for pairwise agreement plot
-                p <- ggplot() +
-                    geom_text(aes(x = 0.5, y = 0.5, label = "Pairwise Agreement Plot\n(Implementation pending)"),
-                             size = 6) +
-                    xlim(0, 1) + ylim(0, 1) +
-                    theme_void()
+                if (!self$options$pairwiseAnalysis || is.null(private$.data_matrix)) {
+                    return(FALSE)
+                }
+                if (is.null(private$.n_raters) || private$.n_raters < 2) {
+                    return(private$.plotUnavailable(.("Select at least 2 raters.")))
+                }
+                res <- private$.pairwiseKappaResults()
+                if (is.null(res)) {
+                    return(private$.plotUnavailable(.("Pairwise kappa could not be calculated for these raters.")))
+                }
+
+                b <- private$.kappaBands()
+                res$pair <- factor(res$pair, levels = rev(res$pair[order(res$kappa)]))
+                res$band <- private$.kappaBandFactor(res$kappa)
+                # Fall back to the point estimate when vcd could not return a
+                # finite ASE, so the bar still draws.
+                res$lo <- ifelse(is.na(res$ci_lower), res$kappa, res$ci_lower)
+                res$hi <- ifelse(is.na(res$ci_upper), res$kappa, res$ci_upper)
+
+                p <- ggplot2::ggplot(res, ggplot2::aes(x = kappa, y = pair)) +
+                    ggplot2::geom_vline(xintercept = c(0.20, 0.40, 0.60, 0.80),
+                        linetype = "dotted", colour = "grey60") +
+                    ggplot2::geom_errorbarh(ggplot2::aes(xmin = lo, xmax = hi),
+                        height = 0.18, colour = "grey35") +
+                    ggplot2::geom_point(ggplot2::aes(fill = band), shape = 21, size = 4, colour = "grey20") +
+                    ggtheme +
+                    ggplot2::scale_fill_manual(values = stats::setNames(b$colors, b$labels),
+                        drop = TRUE, name = .("Agreement")) +
+                    ggplot2::scale_x_continuous(limits = c(min(-0.05, min(res$lo, na.rm = TRUE)), 1)) +
+                    ggplot2::labs(
+                        title = .("Cohen's Kappa by Rater Pair"),
+                        subtitle = .("95% CI; dotted lines: Landis & Koch cutoffs"),
+                        x = .("Kappa"), y = NULL
+                    ) +
+                    # Five band labels do not fit on one row at the declared
+                    # 700px width - they were clipped at the right edge.
+                    ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1)) +
+                    ggplot2::theme(legend.position = "bottom", legend.title = ggplot2::element_blank())
+
                 print(p)
                 TRUE
             },
 
-            # Category plot - placeholder (renderFun .categoryPlot declared in
-            # .r.yaml with visible:(categoryAnalysis); method must exist to avoid crash).
+            # Category-specific agreement: one bar per rating category.
             .categoryPlot = function(image, ggtheme, theme, ...) {
-                # Placeholder for category agreement plot
-                p <- ggplot() +
-                    geom_text(aes(x = 0.5, y = 0.5, label = "Category Agreement Plot\n(Implementation pending)"),
-                             size = 6) +
-                    xlim(0, 1) + ylim(0, 1) +
-                    theme_void()
+                if (!self$options$categoryAnalysis || is.null(private$.data_matrix)) {
+                    return(FALSE)
+                }
+                res <- private$.categoryAgreementResults()
+                if (is.null(res) || all(is.na(res$kappa))) {
+                    return(private$.plotUnavailable(.("Category-specific agreement could not be calculated for these data.")))
+                }
+
+                b <- private$.kappaBands()
+                res$category <- factor(res$category, levels = rev(res$category))
+                res$band <- private$.kappaBandFactor(res$kappa)
+                res$label <- sprintf("%.2f (n=%d)", res$kappa, res$frequency)
+
+                p <- ggplot2::ggplot(res, ggplot2::aes(x = kappa, y = category, fill = band)) +
+                    ggplot2::geom_vline(xintercept = c(0.20, 0.40, 0.60, 0.80),
+                        linetype = "dotted", colour = "grey60") +
+                    ggplot2::geom_col(width = 0.65, colour = "grey20") +
+                    ggplot2::geom_text(ggplot2::aes(label = label),
+                        hjust = -0.12, size = 3.4, colour = "grey20") +
+                    ggtheme +
+                    ggplot2::scale_fill_manual(values = stats::setNames(b$colors, b$labels),
+                        drop = TRUE, name = .("Agreement")) +
+                    ggplot2::scale_x_continuous(limits = c(min(0, min(res$kappa, na.rm = TRUE)), 1.15),
+                        breaks = seq(0, 1, 0.2)) +
+                    ggplot2::labs(
+                        title = .("Agreement Within Each Rating Category"),
+                        subtitle = .("Kappa for \u{201C}this category vs. all others\u{201D}; n = cases using it"),
+                        x = .("Category kappa"), y = NULL
+                    ) +
+                    ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1)) +
+                    ggplot2::theme(legend.position = "bottom", legend.title = ggplot2::element_blank())
+
                 print(p)
                 TRUE
             },
 
-            # Confusion matrix plot - placeholder (renderFun .confusionMatrixPlot
-            # declared in .r.yaml with visible:(pathologyContext); method must exist to avoid crash).
+            # Confusion matrix against the reference/expert standard. With no
+            # reference standard selected, the first two raters are cross-
+            # tabulated instead and the title says so.
             .confusionMatrixPlot = function(image, ggtheme, theme, ...) {
-                # Placeholder for confusion matrix plot
-                p <- ggplot() +
-                    geom_text(aes(x = 0.5, y = 0.5, label = "Confusion Matrix Plot\n(Implementation pending)"),
-                             size = 6) +
-                    xlim(0, 1) + ylim(0, 1) +
-                    theme_void()
+                if (!self$options$pathologyContext || is.null(private$.data_matrix)) {
+                    return(FALSE)
+                }
+                if (is.null(private$.n_raters) || private$.n_raters < 2) {
+                    return(private$.plotUnavailable(.("Select at least 2 raters.")))
+                }
+                dm <- private$.data_matrix
+                gold <- private$.referenceStandardValues()
+
+                if (!is.null(gold)) {
+                    x_src <- gold
+                    y_src <- dm[[1]]
+                    x_lab <- .("Reference standard")
+                    y_lab <- private$.rater_names[1]
+                    sub <- .("First rater against the reference standard")
+                } else {
+                    x_src <- dm[[1]]
+                    y_src <- dm[[2]]
+                    x_lab <- private$.rater_names[1]
+                    y_lab <- private$.rater_names[2]
+                    sub <- .("No reference standard selected: first two raters")
+                }
+                x_vals <- as.character(x_src)
+                y_vals <- as.character(y_src)
+
+                ok <- !is.na(x_vals) & !is.na(y_vals)
+                if (sum(ok) < 1) {
+                    return(private$.plotUnavailable(.("No complete pairs to cross-tabulate.")))
+                }
+
+                # Category order must come from the FACTOR LEVELS, never sort().
+                # On an ordinal grading scale sort() gives Atypical/Benign/Malignant
+                # instead of Benign/Atypical/Malignant, which scrambles the axes and
+                # makes the highlighted diagonal meaningless.
+                lv <- union(levels(as.factor(x_src)), levels(as.factor(y_src)))
+                lv <- lv[lv %in% c(x_vals[ok], y_vals[ok])]
+                if (length(lv) < 2) {
+                    return(private$.plotUnavailable(.("At least 2 rating categories are needed for a confusion matrix.")))
+                }
+                tab <- table(
+                    factor(y_vals[ok], levels = rev(lv)),
+                    factor(x_vals[ok], levels = lv)
+                )
+                df <- as.data.frame(tab, stringsAsFactors = FALSE)
+                # as.data.frame(<table>) runs make.names() over the dimnames, so
+                # name the columns explicitly rather than relying on Var1/Var2.
+                names(df) <- c("observed", "reference", "n")
+                df$observed <- factor(df$observed, levels = rev(lv))
+                df$reference <- factor(df$reference, levels = lv)
+                df$pct <- df$n / sum(df$n) * 100
+                df$label <- ifelse(df$n == 0, "", sprintf("%d\n(%.1f%%)", df$n, df$pct))
+                df$diagonal <- as.character(df$observed) == as.character(df$reference)
+                # The dark end of the viridis ramp swallows dark text, so the busiest
+                # cells - the ones a reader actually looks at - get a light label.
+                df$on_dark <- df$n > max(df$n) * 0.5
+
+                # ggtheme goes BEFORE the scales. jamovi's ggtheme is a LIST that
+                # carries its own default DISCRETE colour/fill scales, so appending
+                # it last replaces scale_fill_viridis_c() and the render dies with
+                # "Continuous value supplied to a discrete scale". Same trap as
+                # R/chisqposttest.b.R:2610.
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = reference, y = observed, fill = n)) +
+                    ggplot2::geom_tile(colour = "white", linewidth = 0.6) +
+                    ggplot2::geom_tile(
+                        data = df[df$diagonal, , drop = FALSE],
+                        colour = "grey15", linewidth = 1.1, fill = NA
+                    ) +
+                    ggplot2::geom_text(ggplot2::aes(label = label, colour = on_dark), size = 3.4) +
+                    ggtheme +
+                    ggplot2::scale_colour_manual(
+                        values = c(`FALSE` = "grey10", `TRUE` = "white"), guide = "none"
+                    ) +
+                    ggplot2::scale_fill_viridis_c(option = "viridis", direction = -1, name = .("Cases")) +
+                    ggplot2::labs(
+                        title = .("Confusion Matrix"),
+                        subtitle = sub,
+                        x = x_lab, y = y_lab
+                    ) +
+                    ggplot2::theme(
+                        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                        panel.grid = ggplot2::element_blank()
+                    )
+
                 print(p)
                 TRUE
             },
@@ -1938,7 +2486,6 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 data_matrix <- private$.data_matrix
                 style_groups <- private$.style_clustering_results$groups
                 rater_names <- private$.rater_names
-                categories <- private$.categories
                 n_cases <- private$.n_cases
 
                 # Load required packages
@@ -2143,7 +2690,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 # Check if n_groups is valid
                 if (is.null(n_groups) || length(n_groups) == 0 || n_groups < 2) {
                     # Fallback to option value or default to 3
-                    n_groups <- self$options$nStyleGroups
+                    n_groups <- private$.styleGroupCount()
                     if (is.null(n_groups) || length(n_groups) == 0 || n_groups < 2) {
                         n_groups <- 3
                     }
@@ -2392,24 +2939,30 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .validateData = function() {
                 # Check for factor variables
                 var_names <- self$options$vars
+                # Validate CASE rows only: META_ rows hold rater attributes (years,
+                # specialty) that would otherwise read as extra categories.
+                vdata <- private$.dropMetadataRows(self$data[var_names])
                 non_factors <- c()
 
                 for (var_name in var_names) {
-                    var_data <- self$data[[var_name]]
+                    var_data <- vdata[[var_name]]
                     if (!is.factor(var_data)) {
                         non_factors <- c(non_factors, var_name)
                     }
                 }
 
                 if (length(non_factors) > 0) {
+                    # reject(formats, code = NULL, ...): the value used to land in
+                    # `code`, so the user saw a literal "{}".
                     jmvcore::reject(
-                        "The following variables are not factors: {}. Please convert them to factors before analysis.",
+                        .("The following variables are not factors: {}. Please convert them to factors before analysis."),
+                        code = NULL,
                         paste(non_factors, collapse = ", ")
                     )
                 }
 
                 # Check for consistent categories across raters
-                all_levels <- lapply(var_names, function(var) levels(self$data[[var]]))
+                all_levels <- lapply(var_names, function(var) levels(vdata[[var]]))
                 reference_levels <- all_levels[[1]]
 
                 inconsistent_vars <- c()
@@ -2420,48 +2973,46 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 if (length(inconsistent_vars) > 0) {
-                    warning(paste0(
-                        "The following variables have different factor levels than the first variable: ",
-                        paste(inconsistent_vars, collapse = ", "),
-                        ". This may affect agreement calculations."
+                    private$.accumulateMessage(jmvcore::format(
+                        .("The following raters have different factor levels than the first rater: {raters}. This may affect agreement calculations."),
+                        raters = paste(inconsistent_vars, collapse = ", ")
                     ))
                 }
 
                 # Check for sufficient data
-                complete_cases <- sum(complete.cases(self$data[var_names]))
+                complete_cases <- sum(complete.cases(vdata[var_names]))
                 if (complete_cases < 10) {
-                    warning(
-                        "Very few complete cases (n=", complete_cases,
-                        "). Results may be unreliable."
-                    )
+                    private$.accumulateMessage(jmvcore::format(
+                        .("Very few complete cases (n={n}). Results may be unreliable."),
+                        n = complete_cases
+                    ))
                 }
 
                 # Check for empty categories
                 for (var_name in var_names) {
-                    var_data <- self$data[[var_name]]
+                    var_data <- vdata[[var_name]]
                     empty_levels <- levels(var_data)[!levels(var_data) %in% var_data]
                     if (length(empty_levels) > 0) {
-                        warning(paste0(
-                            "Variable '", var_name, "' has unused factor levels: ",
-                            paste(empty_levels, collapse = ", "),
-                            ". Consider using droplevels() to remove them."
+                        private$.accumulateMessage(jmvcore::format(
+                            .("Rater {rater} has categories that were never used: {unused}. Unused categories change the spacing of weighted kappa."),
+                            rater = var_name, unused = paste(empty_levels, collapse = ", ")
                         ))
                     }
                 }
 
                 # Check for single-category data across all raters
-                all_data <- unlist(lapply(var_names, function(v) as.character(self$data[[v]])))
+                all_data <- unlist(lapply(var_names, function(v) as.character(vdata[[v]])))
                 unique_total <- length(unique(na.omit(all_data)))
                 if (unique_total < 2) {
-                    jmvcore::reject("Agreement analysis requires at least 2 categories across all raters.")
+                    jmvcore::reject(.("Agreement analysis requires at least 2 categories across all raters."))
                 }
 
                 # Warn if individual raters have single category
                 for (var_name in var_names) {
-                    var_data <- self$data[[var_name]]
+                    var_data <- vdata[[var_name]]
                     unique_values <- length(unique(var_data[!is.na(var_data)]))
                     if (unique_values < 2) {
-                        warning(paste0("Variable '", var_name, "' has only 1 unique value(s). Results for metrics requiring category variation may be unreliable."))
+                        private$.accumulateMessage(jmvcore::format(.("Rater {rater} used only 1 category. Results for metrics requiring category variation may be unreliable."), rater = var_name))
                     }
                 }
             },
@@ -2478,102 +3029,15 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 if (length(missing_packages) > 0) {
+                    # reject(formats, code = NULL, ...): the value used to land in
+                    # `code`, so the user saw a literal "{}".
                     jmvcore::reject(
-                        "The following required packages are missing: {}. Please install them using install.packages()",
+                        .("The following required packages are missing: {}. Please install them using install.packages()"),
+                        code = NULL,
                         paste(missing_packages, collapse = ", ")
                     )
                 }
             },
-
-            # Alternative heatmap visualization (percentage agreement)
-            .heatmapPlotPercentage = function(image, ggtheme, theme, ...) {
-                if (!self$options$heatmap || is.null(private$.data_matrix)) {
-                    return(FALSE)
-                }
-
-                # Create pairwise agreement matrix
-                n_raters <- ncol(private$.data_matrix)
-                rater_names <- colnames(private$.data_matrix)
-
-                # Initialize agreement matrix
-                agreement_matrix <- matrix(NA,
-                    nrow = n_raters, ncol = n_raters,
-                    dimnames = list(rater_names, rater_names)
-                )
-
-                # Fill diagonal with 1.0 (perfect self-agreement)
-                diag(agreement_matrix) <- 1.0
-
-                # Calculate pairwise agreements using optimized approach
-                private$.checkpoint(flush = FALSE)
-
-                # Use optimized calculation method based on dataset size
-                if (n_raters > 10 && nrow(private$.data_matrix) > 200) {
-                    # For very large datasets, use outer product approach
-                    agreement_matrix <- private$.calculateAgreementMatrixOptimized(private$.data_matrix, rater_names)
-                } else {
-                    # For moderate datasets, use simple pairwise calculation
-                    for (i in 1:(n_raters - 1)) {
-                        for (j in (i + 1):n_raters) {
-                            agreement_pct <- mean(private$.data_matrix[, i] == private$.data_matrix[, j], na.rm = TRUE)
-                            agreement_matrix[i, j] <- agreement_matrix[j, i] <- agreement_pct
-                        }
-                    }
-                }
-
-                # Convert to long format for ggplot
-                agreement_df <- expand.grid(Rater1 = rater_names, Rater2 = rater_names, stringsAsFactors = FALSE)
-                agreement_df$Agreement <- as.numeric(agreement_matrix)
-
-                # Create base heatmap with theme selection
-                theme_option <- self$options$heatmapTheme
-
-                # Define color-blind-safe color scales
-                color_scale <- switch(theme_option,
-                    "viridis" = scale_fill_viridis_c(name = "Agreement", labels = scales::percent_format(), option = "viridis"),
-                    "plasma" = scale_fill_viridis_c(name = "Agreement", labels = scales::percent_format(), option = "plasma"),
-                    "cividis" = scale_fill_viridis_c(name = "Agreement", labels = scales::percent_format(), option = "cividis"),
-                    "bwr" = scale_fill_gradient2(
-                        low = "#2166ac", mid = "#f7f7f7", high = "#b2182b",
-                        midpoint = 0.5, name = "Agreement", labels = scales::percent_format()
-                    ),
-                    "ryg" = scale_fill_gradient2(
-                        low = "#d73027", mid = "#fee08b", high = "#1a9850",
-                        midpoint = 0.5, name = "Agreement", labels = scales::percent_format()
-                    ),
-                    # Default to viridis if unknown theme
-                    scale_fill_viridis_c(name = "Agreement", labels = scales::percent_format(), option = "viridis")
-                )
-
-                p <- ggplot(agreement_df, aes(x = Rater1, y = Rater2, fill = Agreement)) +
-                    geom_tile(color = "white", size = 0.5) +
-                    color_scale +
-                    labs(
-                        title = "Inter-rater Agreement Heatmap",
-                        x = "Rater", y = "Rater"
-                    ) +
-                    theme_minimal() +
-                    theme(
-                        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-                        axis.text.y = element_text(hjust = 1),
-                        plot.title = element_text(hjust = 0.5),
-                        legend.position = "right"
-                    )
-
-                # Add text annotations if heatmapDetails is enabled
-                if (self$options$heatmapDetails) {
-                    p <- p + geom_text(aes(label = scales::percent(Agreement, accuracy = 1)),
-                        color = "black", size = 3
-                    )
-                }
-
-                print(p)
-                return(TRUE)
-            },
-
-            # ============================================================================
-            # CLINICAL SUMMARY AND EDUCATIONAL CONTENT
-            # ============================================================================
 
             .showWelcomeMessage = function() {
                 # Create clean, accessible welcome message similar to decisionpanel
@@ -2634,28 +3098,41 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<ul style='margin: 0; padding-left: 20px; font-size: 14px;'>",
                     "<li><strong>Sample size:</strong> At least 30 cases recommended for reliable kappa estimates</li>",
                     "<li><strong>Category balance:</strong> Avoid rare categories (<5% of cases) if possible</li>",
-                    "<li><strong>Interpretation:</strong> \u{03BA} < 0.4 = poor/fair, 0.4-0.6 = moderate, 0.6-0.8 = good, >0.8 = excellent</li>",
+                    "<li><strong>Interpretation:</strong> Landis &amp; Koch (1977) bands for \u{03BA}: 0.20 or less slight, 0.21-0.40 fair, 0.41-0.60 moderate, 0.61-0.80 substantial, above 0.80 almost perfect. These are descriptive conventions, not clinical thresholds</li>",
                     "<li><strong>Clinical context:</strong> Consider the clinical consequences of disagreement when interpreting results</li>",
                     "</ul></div></div>"
                 )
 
                 self$results$todo$setContent(welcome_html)
             },
+            # A panel the user switched on must not silently disappear; say why it is
+            # empty instead of hiding it.
+            .clinicalSummaryUnavailable = function() {
+                self$results$clinicalSummary$setContent(paste0(
+                    "<p style='color: inherit;'>",
+                    .("A clinical summary could not be generated because no kappa result is available for these data."),
+                    "</p>"
+                ))
+            },
             .generateClinicalSummary = function() {
                 # Generate clinical summary only if analysis has been performed
                 if (is.null(private$.data_matrix) || is.null(private$.n_raters) || private$.n_raters < 2) {
-                    self$results$clinicalSummary$setVisible(FALSE)
+                    private$.clinicalSummaryUnavailable()
                     return()
                 }
 
                 # Get main kappa result from the kappa table
                 kappa_table <- self$results$kappaTable
                 if (kappa_table$rowCount == 0) {
-                    self$results$clinicalSummary$setVisible(FALSE)
+                    private$.clinicalSummaryUnavailable()
                     return()
                 }
 
-                # Extract kappa value and interpretation from first row using row index
+                # Extract kappa value and interpretation from first row using row index.
+                # Table$getCell() returns a jmvcore Cell object, not the value: reading
+                # it without $value made as.numeric() fail, so this summary was never
+                # generated (it used to be hidden silently) and the report sentence
+                # never carried its confidence interval.
                 # Try to safely get the first row from the kappa table
                 kappa_val <- NA
                 interpretation <- ""
@@ -2670,10 +3147,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                             first_key <- kappa_table$rowKeys[[1]]
 
                             # For regular jamovi tables, try accessing columns directly
-                            kappa_cell <- kappa_table$getCell(rowKey = first_key, "kappa")
-                            interpretation <- kappa_table$getCell(rowKey = first_key, "interpretation")
-                            method_name <- kappa_table$getCell(rowKey = first_key, "method")
-                            p_value <- kappa_table$getCell(rowKey = first_key, "p")
+                            kappa_cell <- kappa_table$getCell(rowKey = first_key, "kappa")$value
+                            interpretation <- kappa_table$getCell(rowKey = first_key, "interpretation")$value
+                            method_name <- kappa_table$getCell(rowKey = first_key, "method")$value
+                            p_value <- kappa_table$getCell(rowKey = first_key, "p")$value
 
                             # Convert kappa_cell to numeric if it's not already
                             if (!is.null(kappa_cell)) {
@@ -2696,14 +3173,14 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     error = function(e) {
                         # If table access fails, don't show clinical summary
                         message("Could not access kappa table data: ", e$message)
-                        self$results$clinicalSummary$setVisible(FALSE)
+                        private$.clinicalSummaryUnavailable()
                         return(NULL)
                     }
                 )
 
                 # Check if we got valid data (handle vector case)
                 if (is.null(kappa_val) || length(kappa_val) == 0 || all(is.na(kappa_val))) {
-                    self$results$clinicalSummary$setVisible(FALSE)
+                    private$.clinicalSummaryUnavailable()
                     return()
                 }
 
@@ -2716,7 +3193,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Final check that kappa_val is a valid numeric value
                 if (!is.numeric(kappa_val) || is.na(kappa_val)) {
-                    self$results$clinicalSummary$setVisible(FALSE)
+                    private$.clinicalSummaryUnavailable()
                     return()
                 }
                 if (length(interpretation) > 1) {
@@ -2736,7 +3213,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     {
                         if (overview_table$rowCount > 0 && length(overview_table$rowKeys) > 0) {
                             first_overview_key <- overview_table$rowKeys[[1]]
-                            overall_agreement <- overview_table$getCell(rowKey = first_overview_key, "overall_agreement")
+                            overall_agreement <- overview_table$getCell(rowKey = first_overview_key, "overall_agreement")$value
                             # Handle vector case
                             if (length(overall_agreement) > 1) {
                                 overall_agreement <- overall_agreement[1]
@@ -2762,18 +3239,18 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
                     "<div style='background-color: rgba(138, 138, 138, 0.06); border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #333; font-size: 15px;'>Key Findings</h4>",
-                    "<p style='margin: 0 0 10px 0; font-size: 14px;'><strong>", method_name, ":</strong> \u{03BA} = ",
+                    "<p style='margin: 0 0 10px 0; font-size: 14px;'><strong>", method_name, ":</strong> ",
                     round(kappa_val, 3), " (", interpretation, ")</p>",
                     if (!is.na(overall_agreement)) {
                         paste0(
-                            "<p style='margin: 0 0 10px 0; font-size: 14px;'><strong>Overall Agreement:</strong> ",
+                            "<p style='margin: 0 0 10px 0; font-size: 14px;'><strong>Complete agreement (all raters identical):</strong> ",
                             round(overall_agreement, 1), "%</p>"
                         )
                     } else {
                         ""
                     },
                     "<p style='margin: 0; font-size: 14px;'><strong>Statistical Significance:</strong> ",
-                    if (p_value < 0.001) "p < 0.001" else paste0("p = ", round(p_value, 3)), "</p>",
+                    if (is.na(p_value)) .("not available") else if (p_value < 0.001) "p < 0.001" else paste0("p = ", round(p_value, 3)), "</p>",
                     "</div>",
                     "<div style='background-color: rgba(255, 203, 33, 0.14); border: 1px solid #ffa000; padding: 15px; color: inherit;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #f57c00; font-size: 15px;'>Clinical Interpretation</h4>",
@@ -2797,8 +3274,8 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     tryCatch(
                         {
                             first_key <- kappa_table$rowKeys[[1]]
-                            ci_lower <- kappa_table$getCell(rowKey = first_key, "ci_lower")
-                            ci_upper <- kappa_table$getCell(rowKey = first_key, "ci_upper")
+                            ci_lower <- kappa_table$getCell(rowKey = first_key, "ci_lower")$value
+                            ci_upper <- kappa_table$getCell(rowKey = first_key, "ci_upper")$value
                             if (!is.na(ci_lower) && !is.na(ci_upper)) {
                                 ci_text <- sprintf(", 95%% CI %.3f-%.3f", ci_lower, ci_upper)
                             }
@@ -2818,17 +3295,36 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     sprintf(", p = %.3f", p_value)
                 }
 
-                # Generate main result sentence
-                main_sentence <- if (!is.na(kappa_val)) {
+                # Generate main result sentence.
+                # Name the estimate by the method actually reported: the primary row can
+                # be Krippendorff's alpha (not kappa) or, when Cohen's kappa is forced with
+                # more than 2 raters, a single rater pair. The sentence used to say
+                # "kappa" and "for the 5 raters" in both cases.
+                pair <- if (grepl(" vs ", method_name, fixed = TRUE)) sub("^[^:]*: ", "", method_name) else NA_character_
+                estimate_label <- if (grepl("Krippendorff", method_name, fixed = TRUE)) "\u{03B1}" else "\u{03BA}"
+                main_sentence <- if (!is.na(kappa_val) && is.na(pair)) {
                     sprintf(
-                        .("Inter-rater agreement was %s (\u{03BA} = %.3f%s%s), indicating %s reliability for the %d raters evaluating %d cases."),
+                        .("Inter-rater agreement was %s (%s = %.3f%s%s), indicating %s reliability for the %d raters evaluating %d cases."),
                         tolower(interpretation),
+                        estimate_label,
                         kappa_val,
                         ci_text,
                         p_text,
                         tolower(interpretation),
                         private$.n_raters,
                         private$.n_cases
+                    )
+                } else if (!is.na(kappa_val)) {
+                    sprintf(
+                        .("Agreement between %s was %s (%s = %.3f%s%s) across %d cases. This is one of several rater pairs (%d raters in total); report the pairwise results rather than this pair alone."),
+                        pair,
+                        tolower(interpretation),
+                        estimate_label,
+                        kappa_val,
+                        ci_text,
+                        p_text,
+                        private$.n_cases,
+                        private$.n_raters
                     )
                 } else {
                     sprintf(
@@ -2840,7 +3336,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Add overall agreement if available
                 overall_sentence <- if (!is.na(overall_agreement)) {
-                    sprintf(.("Overall percentage agreement was %.1f%%."), overall_agreement)
+                    jmvcore::format(.("All raters gave the same rating in {pct}% of cases."), pct = sprintf("%.1f", overall_agreement))
                 } else {
                     ""
                 }
@@ -2850,15 +3346,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Clinical recommendation based on kappa value
                 recommendation <- if (!is.na(kappa_val)) {
-                    if (kappa_val >= 0.8) {
-                        .("This level of agreement is excellent and suitable for all clinical applications including critical diagnoses.")
-                    } else if (kappa_val >= 0.6) {
-                        .("This level of agreement is good and suitable for most clinical and research applications.")
-                    } else if (kappa_val >= 0.4) {
-                        .("This level of agreement is moderate and may be acceptable for some clinical applications but consider additional training for critical diagnoses.")
-                    } else {
-                        .("This level of agreement is poor to fair and requires improvement through additional training or revised criteria before clinical use.")
-                    }
+                    band <- private$.interpretKappa(kappa_val)
+                    jmvcore::format(
+                        .("By the Landis and Koch (1977) convention this is {band} agreement; whether it is adequate depends on the confidence interval, the prevalence of each category and the clinical consequence of a disagreement."),
+                        band = tolower(band)
+                    )
                 } else {
                     .("Agreement could not be assessed - review data quality and sample size requirements.")
                 }
@@ -2900,24 +3392,31 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 self$results$reportTemplate$setContent(report_html)
                 self$results$reportTemplate$setVisible(TRUE)
             },
+            # Interpretation text follows the same Landis & Koch bands as the kappa
+            # table. It used a third scheme (poor/fair/moderate/good/excellent) and
+            # told users that kappa >= 0.8 was "suitable for all clinical
+            # applications including critical diagnoses" - a claim the point estimate
+            # cannot support without its interval, the category prevalence and the
+            # clinical consequence of a disagreement.
             .getClinicalInterpretation = function(kappa) {
                 if (is.na(kappa)) {
                     return(.("Could not calculate reliable agreement measure. Check your data for sufficient cases and category distribution."))
                 }
-
-                if (kappa < 0) {
-                    return(.("Agreement is worse than chance - raters systematically disagree. Review rating criteria and consider additional training."))
-                } else if (kappa < 0.20) {
-                    return(.("Agreement is <strong>poor</strong> - raters are essentially making independent judgments. Consider revising diagnostic criteria, providing additional training, or using consensus panels for critical diagnoses."))
-                } else if (kappa < 0.40) {
-                    return(.("Agreement is <strong>fair</strong> - some consistency between raters but significant disagreement remains. Review cases with disagreement and consider standardizing evaluation procedures."))
-                } else if (kappa < 0.60) {
-                    return(.("Agreement is <strong>moderate</strong> - acceptable for many clinical applications but may need improvement for critical diagnoses. Consider additional training or clearer diagnostic guidelines."))
-                } else if (kappa < 0.80) {
-                    return(.("Agreement is <strong>good</strong> - suitable for most clinical and research applications. This level indicates reliable inter-rater consistency."))
+                caution <- .("Kappa bands are descriptive conventions (Landis and Koch 1977), not clinical thresholds; judge adequacy from the confidence interval, the prevalence of each category and the consequence of a disagreement.")
+                band <- if (kappa < 0) {
+                    .("Agreement is <strong>worse than chance</strong>; raters systematically disagree. Review the rating criteria.")
+                } else if (kappa <= 0.20) {
+                    .("Agreement is <strong>slight</strong>; raters are close to making independent judgments.")
+                } else if (kappa <= 0.40) {
+                    .("Agreement is <strong>fair</strong>; there is some consistency but substantial disagreement remains.")
+                } else if (kappa <= 0.60) {
+                    .("Agreement is <strong>moderate</strong>.")
+                } else if (kappa <= 0.80) {
+                    .("Agreement is <strong>substantial</strong>.")
                 } else {
-                    return(.("Agreement is <strong>excellent</strong> - raters show high consistency, suitable for all clinical applications including critical diagnoses and research studies."))
+                    .("Agreement is <strong>almost perfect</strong>.")
                 }
+                paste(band, caution)
             },
             .generateAboutAnalysis = function() {
                 about_html <- paste0(
@@ -3190,7 +3689,6 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .calculateAgreementMatrixOptimized = function(data_matrix, rater_names) {
                 # Optimized agreement matrix calculation for large datasets
                 n_raters <- ncol(data_matrix)
-                n_cases <- nrow(data_matrix)
 
                 # Initialize matrix
                 agreement_matrix <- matrix(1.0,
@@ -3225,6 +3723,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 gwet_table <- self$results$gwetACTable
+                gwet_table$deleteRows()
 
                 tryCatch(
                     {
@@ -3233,12 +3732,12 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         ac1_result <- private$.calculateGwetAC1()
 
                         # Calculate AC2 (second-order agreement coefficient)
-                        # AC2 accounts for rater heterogeneity
+                        # AC2 applies ordinal weights to AC1
                         ac2_result <- private$.calculateGwetAC2()
 
                         # Add AC1 result
                         gwet_table$addRow(rowKey = "AC1", values = list(
-                            coefficient = "Gwet's AC1",
+                            coefficient = .("Gwet's AC1"),
                             value = ac1_result$estimate,
                             se = ac1_result$se,
                             ci_lower = ac1_result$ci_lower,
@@ -3248,12 +3747,12 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                         # Add AC2 result
                         gwet_table$addRow(rowKey = "AC2", values = list(
-                            coefficient = "Gwet's AC2",
+                            coefficient = ac2_result$label,
                             value = ac2_result$estimate,
                             se = ac2_result$se,
                             ci_lower = ac2_result$ci_lower,
                             ci_upper = ac2_result$ci_upper,
-                            interpretation = private$.interpretGwetAC(ac2_result$estimate, "AC2")
+                            interpretation = private$.interpretGwetAC(ac2_result$estimate, if (isTRUE(ac2_result$weighted)) "AC2" else "AC2-unweighted")
                         ))
 
                         gwet_table$setVisible(TRUE)
@@ -3281,81 +3780,45 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 )
             },
 
-            # Calculate Gwet's AC1 coefficient
+            # Gwet's agreement coefficients.
+            #
+            # The previous hand-rolled implementation was not AC1/AC2 at all:
+            # it used Pe = 1/k (that is Bennett's S / Brennan-Prediger) for "AC1"
+            # and Pe = sum(p_k^2) (that is Scott's pi) for "AC2", derived k from
+            # as.vector(<data.frame>) - which returns the LIST OF COLUMNS, so k
+            # was the rater count, not the category count - and paired both with
+            # an ad-hoc SE and a hardcoded 1.96 multiplier. irrCAC (already in
+            # Imports) implements Gwet (2008) exactly: AC1 is the unweighted
+            # coefficient, AC2 the weighted one, and it returns the published
+            # standard error.
+            .gwetCoefficient = function(weights) {
+                res <- irrCAC::gwet.ac1.raw(private$.data_matrix, weights = weights, categ.labels = private$.categoryLabels())$est
+                est <- as.numeric(res$coeff.val)
+                se <- as.numeric(res$coeff.se)
+                zc <- stats::qnorm(0.975)
+                list(
+                    estimate = est,
+                    se = se,
+                    ci_lower = max(-1, est - zc * se),
+                    ci_upper = min(1, est + zc * se)
+                )
+            },
             .calculateGwetAC1 = function() {
-                # AC1 coefficient implementation
-                # This addresses the prevalence problem in kappa statistics
-                data_matrix <- private$.data_matrix
-                n_cases <- nrow(data_matrix)
-                n_raters <- ncol(data_matrix)
-
-                # Calculate observed agreement
-                observed_agreement <- private$.calculateOverallAgreement()
-
-                # Calculate expected agreement under AC1 assumptions
-                # AC1 assumes uniform distribution across categories
-                all_categories <- unique(as.vector(data_matrix))
-                all_categories <- all_categories[!is.na(all_categories)]
-                k_categories <- length(all_categories)
-
-                # Expected agreement = 1/k for uniform distribution
-                expected_agreement <- 1 / k_categories
-
-                # AC1 coefficient
-                ac1 <- (observed_agreement - expected_agreement) / (1 - expected_agreement)
-
-                # Standard error calculation (simplified)
-                se_ac1 <- sqrt((observed_agreement * (1 - observed_agreement)) / (n_cases * (1 - expected_agreement)^2))
-
-                # Confidence intervals
-                ci_lower <- max(-1, ac1 - 1.96 * se_ac1)
-                ci_upper <- min(1, ac1 + 1.96 * se_ac1)
-
-                return(list(
-                    estimate = ac1,
-                    se = se_ac1,
-                    ci_lower = ci_lower,
-                    ci_upper = ci_upper
-                ))
+                private$.gwetCoefficient("unweighted")
             },
 
-            # Calculate Gwet's AC2 coefficient
+            # AC2 is the WEIGHTED AC1. Ordinal weights are only meaningful when
+            # the raters are ordered factors; on a nominal scale AC2 collapses to
+            # AC1, so return the unweighted coefficient rather than inventing an
+            # order.
             .calculateGwetAC2 = function() {
-                # AC2 coefficient - accounts for rater characteristics
-                data_matrix <- private$.data_matrix
-                n_cases <- nrow(data_matrix)
-                n_raters <- ncol(data_matrix)
-
-                # Calculate observed agreement
-                observed_agreement <- private$.calculateOverallAgreement()
-
-                # Calculate marginal probabilities for each category
-                all_ratings <- as.vector(data_matrix)
-                all_ratings <- all_ratings[!is.na(all_ratings)]
-                category_probs <- table(all_ratings) / length(all_ratings)
-
-                # Expected agreement under AC2 (quadratic weighting of marginals)
-                expected_agreement <- sum(category_probs^2)
-
-                # AC2 coefficient
-                ac2 <- (observed_agreement - expected_agreement) / (1 - expected_agreement)
-
-                # Standard error (approximation)
-                se_ac2 <- sqrt((observed_agreement * (1 - observed_agreement)) / (n_cases * (1 - expected_agreement)^2))
-
-                # Confidence intervals
-                ci_lower <- max(-1, ac2 - 1.96 * se_ac2)
-                ci_upper <- min(1, ac2 + 1.96 * se_ac2)
-
-                return(list(
-                    estimate = ac2,
-                    se = se_ac2,
-                    ci_lower = ci_lower,
-                    ci_upper = ci_upper
-                ))
+                is_ordinal <- all(vapply(private$.data_matrix, is.ordered, logical(1)))
+                out <- private$.gwetCoefficient(if (is_ordinal) "ordinal" else "unweighted")
+                out$label <- if (is_ordinal) .("Gwet's AC2 (ordinal weights)") else .("Gwet's AC2 (unweighted; equals AC1 on a nominal scale)")
+                out$weighted <- is_ordinal
+                out
             },
 
-            # Interpret Gwet's Agreement Coefficients
             .interpretGwetAC = function(coefficient_value, type = "AC1") {
                 if (is.na(coefficient_value) || !is.numeric(coefficient_value)) {
                     return("Cannot interpret invalid coefficient value")
@@ -3377,11 +3840,13 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Add coefficient-specific notes
-                note <- if (type == "AC1") {
-                    " (robust to prevalence effects)"
-                } else {
-                    " (accounts for rater heterogeneity)"
-                }
+                # AC2 is AC1 with ordinal weights; it says nothing about rater
+                # heterogeneity, which the old note claimed.
+                note <- switch(type,
+                    "AC1" = " (less affected by prevalence than kappa)",
+                    "AC2" = " (ordinal weights give partial credit for near-miss ratings)",
+                    " (unweighted: identical to AC1 for nominal ratings)"
+                )
 
                 return(paste0(interpretation, note))
             },
@@ -3393,6 +3858,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 pabak_table <- self$results$pabakTable
+                pabak_table$deleteRows()
 
                 tryCatch(
                     {
@@ -3404,7 +3870,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                         # Add results to table
                         pabak_table$addRow(rowKey = "overall", values = list(
-                            measure = "Overall Agreement",
+                            measure = .("Pairwise agreement (Po)"),
                             value = pabak_result$observed_agreement,
                             standard_kappa = standard_kappa$kappa,
                             adjusted_kappa = pabak_result$pabak,
@@ -3435,61 +3901,51 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             },
 
             # Calculate PABAK coefficient
+            # PABAK / Brennan-Prediger.
+            #
+            # PABAK = 2*Po - 1 is the TWO-CATEGORY special case. The general
+            # prevalence-and-bias-adjusted coefficient is (q*Po - 1)/(q - 1) for
+            # q categories, so the old formula understated agreement on every
+            # multi-category pathology scale (3-grade dysplasia, 4-tier Gleason,
+            # ...). The old code also silently used only the FIRST TWO raters
+            # while labelling the row "Overall Agreement". irrCAC::bp.coeff.raw
+            # is the published Brennan-Prediger estimator and handles any number
+            # of raters and categories, with a real standard error.
             .calculatePABAK = function() {
-                data_matrix <- private$.data_matrix
-                n_cases <- nrow(data_matrix)
-
-                # For PABAK, we need pairwise agreements
-                # This is a simplified implementation for the first pair of raters
-                if (ncol(data_matrix) < 2) {
-                    jmvcore::reject("PABAK requires at least 2 raters")
+                if (ncol(private$.data_matrix) < 2) {
+                    jmvcore::reject(.("PABAK requires at least 2 raters."))
                 }
-
-                rater1 <- data_matrix[, 1]
-                rater2 <- data_matrix[, 2]
-
-                # Remove missing values
-                valid_indices <- !is.na(rater1) & !is.na(rater2)
-                rater1 <- rater1[valid_indices]
-                rater2 <- rater2[valid_indices]
-                n_valid <- length(rater1)
-
-                # Calculate observed agreement
-                observed_agreement <- sum(rater1 == rater2) / n_valid
-
-                # PABAK = 2 * observed_agreement - 1
-                # This adjusts for prevalence by assuming equal marginal distributions
-                pabak <- 2 * observed_agreement - 1
-
-                return(list(
-                    observed_agreement = observed_agreement,
-                    pabak = pabak
-                ))
+                res <- irrCAC::bp.coeff.raw(private$.data_matrix)$est
+                list(
+                    observed_agreement = as.numeric(res$pa),
+                    pabak = as.numeric(res$coeff.val),
+                    se = as.numeric(res$coeff.se)
+                )
             },
 
-            # Calculate standard kappa for comparison
+            # Unadjusted kappa, shown next to PABAK so the user can see how much
+            # of the coefficient is prevalence/bias.
+            #
+            # cbind(<factor>, <factor>) used to be passed to irr::kappa2; cbind
+            # drops the factors to their INTEGER LEVEL CODES, so two raters with
+            # different level sets were compared on codes that meant different
+            # things. Keep the data frame (kappa2 then uses the factor levels)
+            # and match the estimator to the rater count, since PABAK itself now
+            # covers all raters.
             .calculateStandardKappa = function() {
                 data_matrix <- private$.data_matrix
-
-                if (ncol(data_matrix) >= 2) {
-                    rater1 <- data_matrix[, 1]
-                    rater2 <- data_matrix[, 2]
-
-                    # Use irr package if available
-                    if (requireNamespace("irr", quietly = TRUE)) {
-                        kappa_result <- tryCatch(
-                            {
-                                irr::kappa2(cbind(rater1, rater2))
-                            },
-                            error = function(e) {
-                                list(value = NaN)
-                            }
-                        )
-                        return(list(kappa = kappa_result$value))
-                    }
+                if (ncol(data_matrix) < 2) {
+                    return(list(kappa = NaN))
                 }
-
-                return(list(kappa = NaN))
+                kappa_result <- tryCatch(
+                    if (ncol(data_matrix) == 2) {
+                        irr::kappa2(data_matrix[, 1:2, drop = FALSE])
+                    } else {
+                        irr::kappam.fleiss(data_matrix)
+                    },
+                    error = function(e) list(value = NaN)
+                )
+                list(kappa = kappa_result$value)
             },
 
             # Interpret PABAK vs standard kappa
@@ -3552,6 +4008,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                             ))
                         }
 
+                        sample_size_table$setNote("method", .("Cases needed so the 95% confidence interval for kappa has the target half-width (Rotondi and Donner 2012, kappaSize), assuming the category proportions observed in these data. Supported for 2 to 6 raters."))
                         sample_size_table$setVisible(TRUE)
                     },
                     error = function(e) {
@@ -3574,42 +4031,61 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             },
 
             # Calculate sample size requirements
+            # Precision-based sample size for kappa (Rotondi & Donner 2012, kappaSize).
+            #
+            # The previous formula, (z_a + z_b)^2 * k(1 - k) / precision^2, treated
+            # kappa as a binomial proportion, put a power term into a precision
+            # problem, ignored the category proportions, divided by 3 "for 3 raters"
+            # and multiplied by 1.2 "for multiple testing". For kappa 0.8 +/- 0.1 it
+            # gave 126 and 42 cases where 196-534 and 120-358 are needed.
             .calculateSampleSizeRequirements = function(target_kappa, target_precision) {
-                # Sample size calculation for kappa studies
-                # Based on formula: n = (Z_alpha/2 + Z_beta)^2 * SE^2 / delta^2
+                labels <- private$.categoryLabels()
+                values <- unlist(lapply(private$.data_matrix, as.character), use.names = FALSE)
+                props <- as.numeric(table(factor(values, levels = labels))) / length(values)
+                n_categories <- length(props)
+                kappa0 <- min(max(target_kappa, 0.01), 0.98)
+                lower <- max(kappa0 - target_precision, 0.001)
+                upper <- min(kappa0 + target_precision, 0.999)
+                prop_text <- paste(sprintf("%s %.0f%%", labels, 100 * props), collapse = ", ")
 
-                z_alpha <- 1.96 # 95% confidence level
-                power <- 0.80 # 80% power
-                z_beta <- qnorm(power)
-
+                size_fun <- switch(as.character(n_categories),
+                    "2" = kappaSize::CIBinary,
+                    "3" = kappaSize::CI3Cats,
+                    "4" = kappaSize::CI4Cats,
+                    "5" = kappaSize::CI5Cats,
+                    NULL
+                )
                 results <- list()
+                if (is.null(size_fun)) {
+                    results[[.("Not available")]] <- list(
+                        n_required = "-",
+                        recommendation = jmvcore::format(
+                            .("Sample size planning supports 2 to 5 rating categories; these data have {categories}."),
+                            categories = n_categories
+                        )
+                    )
+                    return(results)
+                }
 
-                # For 2 raters
-                se_2raters <- sqrt((target_kappa * (1 - target_kappa)) / target_precision^2)
-                n_2raters <- ceiling((z_alpha + z_beta)^2 * se_2raters^2)
-
-                results[["2 Raters"]] <- list(
-                    n_required = paste0(n_2raters, " cases"),
-                    recommendation = paste0("For \u{03BA} = ", target_kappa, " with \u{00B1}", target_precision, " precision")
-                )
-
-                # For 3 raters (Fleiss' kappa)
-                se_3raters <- sqrt((target_kappa * (1 - target_kappa)) / (3 * target_precision^2))
-                n_3raters <- ceiling((z_alpha + z_beta)^2 * se_3raters^2)
-
-                results[["3 Raters"]] <- list(
-                    n_required = paste0(n_3raters, " cases"),
-                    recommendation = paste0("For Fleiss' \u{03BA} = ", target_kappa, " with \u{00B1}", target_precision, " precision")
-                )
-
-                # Conservative estimate for multiple comparisons
-                n_conservative <- ceiling(n_2raters * 1.2)
-                results[["Conservative Estimate"]] <- list(
-                    n_required = paste0(n_conservative, " cases"),
-                    recommendation = "Accounts for multiple testing and dropouts"
-                )
-
-                return(results)
+                rater_counts <- sort(unique(c(2, 3, min(max(private$.n_raters, 2), 6))))
+                for (raters in rater_counts) {
+                    n <- tryCatch(
+                        size_fun(
+                            kappa0 = kappa0, kappaL = lower, kappaU = upper,
+                            props = if (n_categories == 2) props[1] else props,
+                            raters = raters, alpha = 0.05
+                        )$n,
+                        error = function(e) NA
+                    )
+                    results[[jmvcore::format(.("{count} raters"), count = raters)]] <- list(
+                        n_required = if (is.na(n)) "-" else jmvcore::format(.("{cases} cases"), cases = n),
+                        recommendation = jmvcore::format(
+                            .("95% CI for kappa {kappa}: {lower} to {upper}; category proportions {props}"),
+                            kappa = kappa0, lower = round(lower, 3), upper = round(upper, 3), props = prop_text
+                        )
+                    )
+                }
+                results
             },
 
             # Rater Bias Detection Analysis
@@ -3660,69 +4136,63 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             },
 
             # Detect systematic biases in rater behavior
+            # Each rater compared with the OTHER raters.
+            #
+            # The modal rating used to include the rater's own vote, so raters partly
+            # agreed with themselves, and with 2 raters the "consensus" on a split case
+            # was whichever label table() listed first - one rater of a pair always
+            # looked unbiased. A rater now agrees with a case when their rating is among
+            # the most common ratings of the other raters.
             .detectRaterBias = function() {
-                data_matrix <- private$.data_matrix
-                n_cases <- nrow(data_matrix)
-                n_raters <- ncol(data_matrix)
                 rater_names <- private$.rater_names
-
+                labels <- as.data.frame(lapply(private$.data_matrix, as.character), stringsAsFactors = FALSE)
                 results <- list()
-
-                # Calculate overall mode/consensus for each case
-                case_consensus <- apply(data_matrix, 1, function(row) {
-                    valid_ratings <- row[!is.na(row)]
-                    if (length(valid_ratings) > 0) {
-                        # Return the most frequent rating (mode)
-                        tbl <- table(valid_ratings)
-                        names(tbl)[which.max(tbl)]
-                    } else {
-                        NA
-                    }
-                })
-
-                # Analyze each rater's tendency
-                for (i in seq_len(n_raters)) {
-                    rater_ratings <- data_matrix[, i]
-                    rater_name <- rater_names[i]
-
-                    # Calculate bias score (deviation from consensus)
-                    valid_cases <- !is.na(rater_ratings) & !is.na(case_consensus)
-
-                    if (sum(valid_cases) > 0) {
-                        agreements <- rater_ratings[valid_cases] == case_consensus[valid_cases]
-                        bias_score <- 1 - mean(agreements) # Higher = more biased
-
-                        # Determine systematic tendency
-                        rater_dist <- table(rater_ratings[valid_cases])
-                        consensus_dist <- table(case_consensus[valid_cases])
-
-                        # Compare distributions to identify tendency
-                        tendency <- private$.identifyRaterTendency(rater_dist, consensus_dist)
-
-                        # Classify severity
-                        severity <- if (bias_score < 0.1) {
-                            "Minimal bias"
-                        } else if (bias_score < 0.2) {
-                            "Mild bias"
-                        } else if (bias_score < 0.3) {
-                            "Moderate bias"
-                        } else {
-                            "Severe bias"
+                for (i in seq_along(rater_names)) {
+                    own <- labels[[i]]
+                    others <- labels[, -i, drop = FALSE]
+                    agree <- rep(NA, length(own))
+                    others_mode <- rep(NA_character_, length(own))
+                    for (u in seq_along(own)) {
+                        v <- unlist(others[u, ], use.names = FALSE)
+                        v <- v[!is.na(v)]
+                        if (is.na(own[u]) || length(v) == 0) {
+                            next
                         }
-
-                        # Generate recommendation
-                        recommendation <- private$.generateBiasRecommendation(bias_score, tendency)
-
-                        results[[rater_name]] <- list(
-                            bias_score = bias_score,
-                            tendency = tendency,
-                            severity = severity,
-                            recommendation = recommendation
-                        )
+                        counts <- table(v)
+                        modes <- names(counts)[counts == max(counts)]
+                        agree[u] <- own[u] %in% modes
+                        if (length(modes) == 1) {
+                            others_mode[u] <- modes
+                        }
                     }
+                    ok <- !is.na(agree)
+                    if (!any(ok)) {
+                        next
+                    }
+                    score <- 1 - mean(agree[ok])
+                    keep <- ok & !is.na(others_mode)
+                    tendency <- if (any(keep)) {
+                        private$.identifyRaterTendency(table(own[keep]), table(others_mode[keep]))
+                    } else {
+                        "No clear systematic tendency"
+                    }
+                    severity <- if (score < 0.1) {
+                        "Minimal disagreement"
+                    } else if (score < 0.2) {
+                        "Mild disagreement"
+                    } else if (score < 0.3) {
+                        "Moderate disagreement"
+                    } else {
+                        "Marked disagreement"
+                    }
+                    results[[rater_names[i]]] <- list(
+                        bias_score = score,
+                        tendency = tendency,
+                        severity = severity,
+                        recommendation = private$.generateBiasRecommendation(score, tendency)
+                    )
                 }
-
-                return(results)
+                results
             },
 
             # Identify rater tendency patterns
@@ -3836,14 +4306,14 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     results[[group_name]] <- list(
                         agreement_percent = group_agreement$percent,
                         kappa = group_kappa,
-                        trend_direction = "Calculating...",
-                        significance = "Calculating..."
+                        trend_direction = .("Insufficient data"),
+                        significance = .("Cannot assess")
                     )
                 }
 
                 # Calculate overall trend
-                if (length(group_agreements) >= 3) {
-                    trend_test <- private$.calculateTrendSignificance(group_agreements)
+                if (n_cases >= 10) {
+                    trend_test <- private$.calculateTrendSignificance(data_matrix)
 
                     # Update trend information for all groups
                     for (group_name in names(results)) {
@@ -3861,7 +4331,6 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 total_agreements <- 0
 
                 n_cases <- nrow(group_data)
-                n_raters <- ncol(group_data)
 
                 for (case_idx in seq_len(n_cases)) {
                     case_ratings <- group_data[case_idx, ]
@@ -3894,62 +4363,55 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
             # Calculate kappa for a group (simplified)
             .calculateGroupKappa = function(group_data) {
-                # Simplified kappa calculation for trend analysis
-                if (ncol(group_data) >= 2) {
-                    # Use first two raters for consistency
-                    rater1 <- group_data[, 1]
-                    rater2 <- group_data[, 2]
-
-                    valid_idx <- !is.na(rater1) & !is.na(rater2)
-                    if (sum(valid_idx) >= 5) { # Minimum cases for meaningful kappa
-                        if (requireNamespace("irr", quietly = TRUE)) {
-                            kappa_result <- tryCatch(
-                                {
-                                    irr::kappa2(cbind(rater1[valid_idx], rater2[valid_idx]))
-                                },
-                                error = function(e) list(value = NA)
-                            )
-                            return(kappa_result$value)
-                        }
-                    }
+                # Kappa over ALL raters, matching the group's agreement column. This
+                # used only raters 1-2 without saying so - a group could show 79%
+                # all-rater agreement beside kappa = 1.00 - and passed
+                # cbind(<factor>, <factor>), i.e. integer level codes, to kappa2.
+                ok <- stats::complete.cases(group_data)
+                if (ncol(group_data) < 2 || sum(ok) < 5) {
+                    return(NA_real_)
                 }
-                return(NA)
+                gd <- group_data[ok, , drop = FALSE]
+                tryCatch(
+                    if (ncol(gd) == 2) irr::kappa2(gd)$value else irr::kappam.fleiss(gd)$value,
+                    error = function(e) NA_real_
+                )
             },
 
             # Test for significant trend in agreement over time
-            .calculateTrendSignificance = function(group_agreements) {
-                # Simple trend test using correlation with sequence
-                sequence <- seq_along(group_agreements)
-
-                if (length(group_agreements) >= 3 && !all(is.na(group_agreements))) {
-                    correlation <- cor(sequence, group_agreements, use = "complete.obs")
-
-                    # Simple trend assessment
-                    direction <- if (is.na(correlation)) {
-                        "No clear trend"
-                    } else if (abs(correlation) < 0.3) {
-                        "Stable agreement"
-                    } else if (correlation > 0.3) {
-                        "Improving agreement"
-                    } else {
-                        "Declining agreement"
+            .calculateTrendSignificance = function(data_matrix) {
+                # A real test on CASE-level agreement. This labelled the correlation
+                # of 3-5 group means "Improving agreement" / "Moderate trend" by |r|
+                # alone - no test; with 5 points r = 0.4 has p ~ 0.5.
+                per_case <- vapply(seq_len(nrow(data_matrix)), function(i) {
+                    v <- private$.rowLabels(data_matrix, i)
+                    v <- v[!is.na(v)]
+                    if (length(v) < 2) {
+                        return(NA_real_)
                     }
-
-                    # Significance assessment (simplified)
-                    significance <- if (is.na(correlation)) {
-                        "Cannot assess"
-                    } else if (abs(correlation) > 0.6) {
-                        "Strong trend"
-                    } else if (abs(correlation) > 0.3) {
-                        "Moderate trend"
-                    } else {
-                        "Weak trend"
-                    }
-
-                    return(list(direction = direction, significance = significance))
+                    counts <- table(v)
+                    sum(counts * (counts - 1)) / (length(v) * (length(v) - 1))
+                }, numeric(1))
+                ok <- !is.na(per_case)
+                if (sum(ok) < 10 || stats::sd(per_case[ok]) == 0) {
+                    return(list(direction = .("Insufficient data"), significance = .("Cannot assess")))
                 }
-
-                return(list(direction = "Insufficient data", significance = "Cannot assess"))
+                ct <- suppressWarnings(stats::cor.test(which(ok), per_case[ok], method = "spearman", exact = FALSE))
+                rho <- unname(ct$estimate)
+                direction <- if (ct$p.value >= 0.05) {
+                    .("No significant trend")
+                } else if (rho > 0) {
+                    .("Improving agreement")
+                } else {
+                    .("Declining agreement")
+                }
+                list(
+                    direction = direction,
+                    significance = jmvcore::format(
+                        .("Spearman rho = {rho}, p = {pvalue}, across cases in data order"),
+                        rho = sprintf("%.2f", rho), pvalue = format.pval(ct$p.value, digits = 2)
+                    )
+                )
             },
 
             # Case Difficulty Analysis
@@ -3964,10 +4426,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     {
                         difficulty_results <- private$.analyzeCaseDifficulty()
 
-                        for (case_id in names(difficulty_results)) {
-                            case_info <- difficulty_results[[case_id]]
+                        for (i in seq_along(difficulty_results)) {
+                            case_id <- names(difficulty_results)[i]
+                            case_info <- difficulty_results[[i]]
 
-                            difficulty_table$addRow(rowKey = case_id, values = list(
+                            difficulty_table$addRow(rowKey = i, values = list(
                                 case_id = case_id,
                                 difficulty_score = case_info$difficulty_score,
                                 disagreement_pattern = case_info$disagreement_pattern,
@@ -4004,21 +4467,22 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .analyzeCaseDifficulty = function() {
                 data_matrix <- private$.data_matrix
                 n_cases <- nrow(data_matrix)
-                n_raters <- ncol(data_matrix)
 
                 results <- list()
 
+                k_scale <- length(private$.categoryLabels())
                 for (case_idx in seq_len(n_cases)) {
                     case_ratings <- data_matrix[case_idx, ]
                     valid_ratings <- case_ratings[!is.na(case_ratings)]
 
                     if (length(valid_ratings) >= 2) {
-                        case_id <- paste0("Case_", case_idx)
+                        case_id <- private$.caseLabels()[case_idx]
 
                         # Calculate difficulty metrics
-                        difficulty_metrics <- private$.calculateCaseDifficultyMetrics(valid_ratings)
+                        difficulty_metrics <- private$.calculateCaseDifficultyMetrics(valid_ratings, k_scale)
 
-                        results[[case_id]] <- difficulty_metrics
+                        results[[length(results) + 1L]] <- difficulty_metrics
+                        names(results)[length(results)] <- case_id
                     }
                 }
 
@@ -4026,44 +4490,35 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             },
 
             # Calculate difficulty metrics for a single case
-            .calculateCaseDifficultyMetrics = function(ratings) {
-                # Difficulty score based on disagreement entropy
+            # The level used to come from rating entropy normalised by the categories
+            # USED IN THAT CASE, cut at 0.2/0.4/0.7. Entropy reacts strongly to a single
+            # dissent: 9 of 10 raters agreeing scored 0.47 and was labelled "Difficult
+            # (significant disagreement)" beside the pattern "Mostly agreement with
+            # some dissent". Score and level now come from the share of raters choosing
+            # the modal rating; entropy, normalised by the whole scale, is kept as the
+            # variability column.
+            .calculateCaseDifficultyMetrics = function(ratings, k_scale) {
                 rating_table <- table(ratings)
-                rating_props <- rating_table / sum(rating_table)
+                modal_share <- max(rating_table) / sum(rating_table)
+                props <- rating_table / sum(rating_table)
+                entropy <- -sum(props * log2(props))
 
-                # Entropy-based difficulty (higher entropy = more difficult)
-                entropy <- -sum(rating_props * log2(rating_props))
-                max_entropy <- log2(length(rating_table)) # Maximum possible entropy
-                difficulty_score <- if (max_entropy > 0) entropy / max_entropy else 0
-
-                # Rater variability (coefficient of variation if ratings are numeric)
-                if (all(is.numeric(ratings) | (is.character(ratings) && all(ratings %in% c("1", "2", "3", "4", "5"))))) {
-                    numeric_ratings <- as.numeric(ratings)
-                    rater_variability <- sd(numeric_ratings, na.rm = TRUE) / mean(numeric_ratings, na.rm = TRUE)
-                } else {
-                    rater_variability <- difficulty_score # Use entropy as proxy for categorical data
-                }
-
-                # Disagreement pattern description
-                disagreement_pattern <- private$.describeDisagreementPattern(rating_table)
-
-                # Difficulty level classification
-                difficulty_level <- if (difficulty_score < 0.2) {
+                difficulty_level <- if (modal_share >= 0.9) {
                     "Easy (high consensus)"
-                } else if (difficulty_score < 0.4) {
+                } else if (modal_share >= 0.7) {
                     "Moderate difficulty"
-                } else if (difficulty_score < 0.7) {
+                } else if (modal_share > 0.5) {
                     "Difficult (significant disagreement)"
                 } else {
                     "Very difficult (high disagreement)"
                 }
 
-                return(list(
-                    difficulty_score = round(difficulty_score, 3),
-                    disagreement_pattern = disagreement_pattern,
+                list(
+                    difficulty_score = round(1 - modal_share, 3),
+                    disagreement_pattern = private$.describeDisagreementPattern(rating_table),
                     difficulty_level = difficulty_level,
-                    rater_variability = round(rater_variability, 3)
-                ))
+                    rater_variability = round(entropy / log2(max(k_scale, 2)), 3)
+                )
             },
 
             # Describe disagreement patterns
@@ -4101,7 +4556,11 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                             stat_info <- stability_results[[statistic_name]]
 
                             stability_table$addRow(rowKey = statistic_name, values = list(
-                                statistic = statistic_name,
+                                statistic = switch(statistic_name,
+                                    overall_agreement = .("Pairwise agreement"),
+                                    kappa = if (private$.n_raters == 2) .("Cohen's kappa") else .("Fleiss' kappa"),
+                                    statistic_name
+                                ),
                                 original_value = stat_info$original,
                                 bootstrap_mean = stat_info$bootstrap_mean,
                                 bootstrap_se = stat_info$bootstrap_se,
@@ -4110,6 +4569,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                             ))
                         }
 
+                        stability_table$setNote("index", .("Stability index = |bootstrap mean / bootstrap SE|. It is small whenever the statistic is close to zero, even when estimated precisely, so read the bootstrap SE and interval rather than the index alone."))
                         stability_table$setVisible(TRUE)
                     },
                     error = function(e) {
@@ -4136,6 +4596,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
             # Perform bootstrap stability analysis
             .performBootstrapStability = function() {
+                withr::local_seed(self$options$seed) # reproducible; restores the RNG on exit
                 data_matrix <- private$.data_matrix
                 n_cases <- nrow(data_matrix)
                 # Use user-specified bootstrap samples, with validation
@@ -4186,8 +4647,14 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                             0
                         }
 
-                        # Interpretation
-                        interpretation <- private$.interpretStability(stability_index, bootstrap_se)
+                        # Report the bootstrap interval. Labels from the index ("Very
+                        # stable" > 10 ... "Unstable" < 2) conflated size with precision:
+                        # a kappa of -0.002 with SE 0.04 was called "Unstable".
+                        ci <- stats::quantile(bootstrap_values, c(0.025, 0.975), names = FALSE)
+                        interpretation <- jmvcore::format(
+                            .("95% bootstrap interval {lower} to {upper}"),
+                            lower = sprintf("%.3f", ci[1]), upper = sprintf("%.3f", ci[2])
+                        )
 
                         results[[stat_name]] <- list(
                             original = original_value,
@@ -4210,13 +4677,20 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 ))
             },
 
+            # Overall (pairwise) agreement on the analysis data matrix.
+            # Previously called but never defined - every caller
+            # (.calculateGwetAC1/.calculateGwetAC2/.calculateOriginalStatistics)
+            # died with "attempt to apply non-function".
+            .calculateOverallAgreement = function() {
+                private$.calculateOverallAgreementFromMatrix(private$.data_matrix)
+            },
+
             # Calculate overall agreement from data matrix
             .calculateOverallAgreementFromMatrix = function(data_matrix) {
                 total_agreements <- 0
                 total_comparisons <- 0
 
                 n_cases <- nrow(data_matrix)
-                n_raters <- ncol(data_matrix)
 
                 for (case_idx in seq_len(n_cases)) {
                     case_ratings <- data_matrix[case_idx, ]
@@ -4240,57 +4714,23 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             },
 
             # Calculate kappa from data matrix (simplified)
+            # Kappa over ALL raters (Cohen for 2, Fleiss for 3 or more). This used
+            # raters 1 and 2 only, via cbind(<factor>, <factor>) - integer level
+            # codes - so a 4-rater study's stability row ignored two raters.
             .calculateKappaFromMatrix = function(data_matrix) {
-                if (ncol(data_matrix) >= 2) {
-                    rater1 <- data_matrix[, 1]
-                    rater2 <- data_matrix[, 2]
-
-                    valid_idx <- !is.na(rater1) & !is.na(rater2)
-                    if (sum(valid_idx) >= 3) {
-                        if (requireNamespace("irr", quietly = TRUE)) {
-                            kappa_result <- tryCatch(
-                                {
-                                    irr::kappa2(cbind(rater1[valid_idx], rater2[valid_idx]))
-                                },
-                                error = function(e) list(value = NA)
-                            )
-                            return(kappa_result$value)
-                        }
-                    }
+                dm <- data_matrix[stats::complete.cases(data_matrix), , drop = FALSE]
+                if (ncol(dm) < 2 || nrow(dm) < 3) {
+                    return(NA_real_)
                 }
-                return(NA)
+                tryCatch(
+                    if (ncol(dm) == 2) irr::kappa2(dm)$value else irr::kappam.fleiss(dm)$value,
+                    error = function(e) NA_real_
+                )
             },
 
             # Simple kappa calculation for original stats
             .calculateSimpleKappa = function() {
                 return(private$.calculateKappaFromMatrix(private$.data_matrix))
-            },
-
-            # Interpret stability metrics
-            .interpretStability = function(stability_index, bootstrap_se) {
-                if (is.na(stability_index) || is.na(bootstrap_se)) {
-                    return("Cannot assess stability")
-                }
-
-                stability_level <- if (stability_index > 10) {
-                    "Very stable"
-                } else if (stability_index > 5) {
-                    "Stable"
-                } else if (stability_index > 2) {
-                    "Moderately stable"
-                } else {
-                    "Unstable"
-                }
-
-                se_interpretation <- if (bootstrap_se < 0.05) {
-                    "low variability"
-                } else if (bootstrap_se < 0.1) {
-                    "moderate variability"
-                } else {
-                    "high variability"
-                }
-
-                return(paste0(stability_level, " (", se_interpretation, ")"))
             },
 
             # Generate inline statistical comments
@@ -4383,8 +4823,8 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     },
                     "",
                     "<strong>Clinical Significance:</strong>",
-                    "\u{2022} Values >0.60 generally acceptable for clinical decisions",
-                    "\u{2022} Values >0.80 excellent for critical diagnoses",
+                    "\u{2022} Landis &amp; Koch bands are descriptive conventions, not clinical acceptability thresholds",
+                    "\u{2022} The agreement required depends on the clinical consequence of a disagreement",
                     "\u{2022} Consider confidence intervals - wide CIs suggest instability"
                 )
 
@@ -4465,132 +4905,153 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 return(list(
                     n_cases = nrow(data_matrix),
                     n_raters = ncol(data_matrix),
-                    n_categories = length(unique(as.vector(data_matrix[!is.na(data_matrix)])))
+                    # as.vector(<data.frame>) returns the LIST OF COLUMNS, so this
+                    # counted raters, not categories.
+                    n_categories = length(unique(stats::na.omit(unlist(data_matrix, use.names = FALSE))))
                 ))
             },
 
             # Plot rendering functions for new visualizations
             .trendPlot = function(image, ggtheme, theme, ...) {
-                if (!self$options$agreementTrendAnalysis) {
-                    return()
+                if (!self$options$agreementTrendAnalysis || is.null(private$.data_matrix)) {
+                    return(FALSE)
                 }
-
-                # Generate trend plot
-                plot <- private$.createTrendVisualization()
-                print(plot)
+                p <- private$.createTrendVisualization(ggtheme)
+                if (is.null(p)) {
+                    return(private$.plotUnavailable(.("Too few cases to split into more than one case group.")))
+                }
+                print(p)
                 TRUE
             },
             .biasPlot = function(image, ggtheme, theme, ...) {
-                if (!self$options$raterBiasAnalysis) {
-                    return()
+                if (!self$options$raterBiasAnalysis || is.null(private$.data_matrix)) {
+                    return(FALSE)
                 }
-
-                # Generate bias visualization
-                plot <- private$.createBiasVisualization()
-                print(plot)
+                p <- private$.createBiasVisualization(ggtheme)
+                if (is.null(p)) {
+                    return(private$.plotUnavailable(.("Rater bias could not be calculated for these data.")))
+                }
+                print(p)
                 TRUE
             },
             .difficultyPlot = function(image, ggtheme, theme, ...) {
-                if (!self$options$caseDifficultyScoring) {
-                    return()
+                if (!self$options$caseDifficultyScoring || is.null(private$.data_matrix)) {
+                    return(FALSE)
                 }
-
-                # Generate difficulty distribution plot
-                plot <- private$.createDifficultyVisualization()
-                print(plot)
+                p <- private$.createDifficultyVisualization(ggtheme)
+                if (is.null(p)) {
+                    return(private$.plotUnavailable(.("Case difficulty could not be calculated for these data.")))
+                }
+                print(p)
                 TRUE
             },
 
-            # Create trend visualization
-            .createTrendVisualization = function() {
-                # Simple trend visualization implementation
-                if (!requireNamespace("ggplot2", quietly = TRUE)) {
-                    return(ggplot2::ggplot() +
-                        ggplot2::ggtitle("ggplot2 package required"))
+            # ---- Trend / bias / difficulty plots ------------------------------
+            #
+            # These three plotted HARDCODED numbers - c(0.65, ..., 0.85), four
+            # invented "Rater 1-4" bias scores, and runif(50) difficulty scores -
+            # under authoritative titles, next to tables computed from the real
+            # data. They now plot the producer each table uses. ggtheme goes before
+            # the scales: it carries its own discrete fill scale.
+            .createTrendVisualization = function(ggtheme) {
+                res <- private$.analyzeAgreementTrends()
+                if (length(res) < 2) {
+                    return(NULL)
                 }
-
-                # Placeholder data - in full implementation, use actual trend results
-                trend_data <- data.frame(
-                    sequence_group = 1:5,
-                    agreement = c(0.65, 0.72, 0.78, 0.81, 0.85),
-                    group_label = paste("Group", 1:5)
+                df <- data.frame(
+                    group = factor(names(res), levels = names(res)),
+                    agreement = vapply(res, function(x) as.numeric(x$agreement_percent), numeric(1)),
+                    kappa = vapply(res, function(x) as.numeric(x$kappa), numeric(1))
                 )
-
-                ggplot2::ggplot(trend_data, ggplot2::aes(x = sequence_group, y = agreement)) +
-                    ggplot2::geom_line(color = "#1976d2", size = 1.2) +
-                    ggplot2::geom_point(color = "#1976d2", size = 3) +
+                df$label <- ifelse(is.na(df$kappa), "", sprintf("\u{03BA} = %.2f", df$kappa))
+                trend <- res[[1]]$trend_direction
+                subtitle <- if (is.null(trend) || identical(trend, "Calculating...")) {
+                    .("Pairwise agreement in consecutive case groups")
+                } else {
+                    jmvcore::format(.("Trend: {direction}"), direction = trend)
+                }
+                ggplot2::ggplot(df, ggplot2::aes(x = group, y = agreement, group = 1)) +
+                    ggplot2::geom_line(linewidth = 0.9, colour = "#2166ac") +
+                    ggplot2::geom_point(size = 3, colour = "#2166ac") +
+                    ggplot2::geom_text(ggplot2::aes(label = label), vjust = -1.1, size = 3.3) +
+                    ggtheme +
+                    ggplot2::coord_cartesian(ylim = c(0, 105)) +
                     ggplot2::labs(
-                        title = "Agreement Trend Over Case Sequence",
-                        x = "Case Group",
-                        y = "Agreement Proportion",
-                        caption = "Shows how agreement changes across sequential case groups"
-                    ) +
-                    ggplot2::theme_minimal() +
-                    ggplot2::theme(
-                        plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
-                        plot.caption = ggplot2::element_text(hjust = 0.5, style = "italic")
+                        title = .("Agreement Across Sequential Case Groups"),
+                        subtitle = subtitle,
+                        x = .("Case group (data order)"),
+                        y = .("Pairwise agreement (%)")
                     )
             },
 
-            # Create bias visualization
-            .createBiasVisualization = function() {
-                if (!requireNamespace("ggplot2", quietly = TRUE)) {
-                    return(ggplot2::ggplot() +
-                        ggplot2::ggtitle("ggplot2 package required"))
+            .createBiasVisualization = function(ggtheme) {
+                res <- private$.detectRaterBias()
+                if (length(res) == 0) {
+                    return(NULL)
                 }
-
-                # Placeholder visualization
-                bias_data <- data.frame(
-                    rater = paste("Rater", 1:4),
-                    bias_score = c(0.15, 0.08, 0.22, 0.12),
-                    severity = c("Mild", "Minimal", "Moderate", "Mild")
+                severity_levels <- c("Minimal disagreement", "Mild disagreement", "Moderate disagreement", "Marked disagreement")
+                # Short legend labels: the full wording is in the table, and the long
+                # labels were clipped at the declared 700px width.
+                short_names <- c(.("Minimal"), .("Mild"), .("Moderate"), .("Marked"))
+                full <- vapply(res, function(x) as.character(x$severity), character(1))
+                df <- data.frame(
+                    rater = factor(names(res), levels = names(res)),
+                    bias = vapply(res, function(x) as.numeric(x$bias_score), numeric(1)),
+                    severity = factor(short_names[match(full, severity_levels)], levels = short_names)
                 )
-
-                ggplot2::ggplot(bias_data, ggplot2::aes(x = rater, y = bias_score, fill = severity)) +
-                    ggplot2::geom_col() +
-                    ggplot2::scale_fill_manual(values = c("Minimal" = "#4caf50", "Mild" = "#ff9800", "Moderate" = "#f44336")) +
-                    ggplot2::labs(
-                        title = "Rater Bias Detection Results",
-                        x = "Rater",
-                        y = "Bias Score",
-                        fill = "Bias Severity",
-                        caption = "Higher scores indicate greater systematic bias from consensus"
+                ggplot2::ggplot(df, ggplot2::aes(x = rater, y = bias, fill = severity)) +
+                    ggplot2::geom_hline(yintercept = c(0.1, 0.2, 0.3), linetype = "dotted", colour = "grey60") +
+                    ggplot2::geom_col(width = 0.7, colour = "grey20") +
+                    ggtheme +
+                    ggplot2::scale_fill_manual(
+                        values = stats::setNames(c("#4575b4", "#91bfdb", "#fc8d59", "#d73027"), short_names),
+                        drop = TRUE, name = NULL
                     ) +
-                    ggplot2::theme_minimal() +
+                    ggplot2::coord_cartesian(ylim = c(0, max(0.35, max(df$bias, na.rm = TRUE) * 1.1))) +
+                    ggplot2::labs(
+                        title = .("Disagreement with the Other Raters"),
+                        subtitle = .("Share of cases differing from the other raters"),
+                        x = NULL, y = .("Disagreement")
+                    ) +
                     ggplot2::theme(
-                        plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
-                        plot.caption = ggplot2::element_text(hjust = 0.5, style = "italic")
+                        legend.position = "bottom",
+                        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
                     )
             },
 
-            # Create difficulty visualization
-            .createDifficultyVisualization = function() {
-                if (!requireNamespace("ggplot2", quietly = TRUE)) {
-                    return(ggplot2::ggplot() +
-                        ggplot2::ggtitle("ggplot2 package required"))
+            .createDifficultyVisualization = function(ggtheme) {
+                res <- private$.analyzeCaseDifficulty()
+                if (length(res) == 0) {
+                    return(NULL)
                 }
-
-                # Placeholder visualization
-                difficulty_data <- data.frame(
-                    difficulty_score = runif(50, 0, 1),
-                    difficulty_level = sample(c("Easy", "Moderate", "Difficult", "Very Difficult"), 50, replace = TRUE)
+                level_names <- c(
+                    "Easy (high consensus)", "Moderate difficulty",
+                    "Difficult (significant disagreement)", "Very difficult (high disagreement)"
                 )
-
-                ggplot2::ggplot(difficulty_data, ggplot2::aes(x = difficulty_score, fill = difficulty_level)) +
-                    ggplot2::geom_histogram(bins = 20, alpha = 0.7) +
-                    ggplot2::scale_fill_brewer(type = "seq", palette = "YlOrRd") +
-                    ggplot2::labs(
-                        title = "Case Difficulty Score Distribution",
-                        x = "Difficulty Score",
-                        y = "Number of Cases",
-                        fill = "Difficulty Level",
-                        caption = "Based on rater disagreement patterns and entropy"
+                # Short legend labels: the full wording is in the table, and it was
+                # clipped at the declared 700px width.
+                short_names <- c(.("Easy"), .("Moderate"), .("Difficult"), .("Very difficult"))
+                full <- vapply(res, function(x) as.character(x$difficulty_level), character(1))
+                df <- data.frame(
+                    score = vapply(res, function(x) as.numeric(x$difficulty_score), numeric(1)),
+                    level = factor(short_names[match(full, level_names)], levels = short_names)
+                )
+                ggplot2::ggplot(df, ggplot2::aes(x = score, fill = level)) +
+                    ggplot2::geom_histogram(breaks = seq(0, 1, by = 0.05), colour = "grey20", linewidth = 0.2) +
+                    ggtheme +
+                    ggplot2::scale_fill_manual(
+                        values = stats::setNames(c("#4575b4", "#91bfdb", "#fc8d59", "#d73027"), short_names),
+                        drop = TRUE, name = NULL
                     ) +
-                    ggplot2::theme_minimal() +
-                    ggplot2::theme(
-                        plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
-                        plot.caption = ggplot2::element_text(hjust = 0.5, style = "italic")
-                    )
+                    ggplot2::coord_cartesian(xlim = c(0, 1)) +
+                    ggplot2::labs(
+                        title = .("Case Difficulty Distribution"),
+                        subtitle = jmvcore::format(.("Share of raters differing from the modal rating, {cases} cases"), cases = nrow(df)),
+                        x = .("Difficulty score (0 = full consensus)"),
+                        y = .("Cases")
+                    ) +
+                    ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1)) +
+                    ggplot2::theme(legend.position = "bottom")
             },
 
             # Interpret ICC values using standard guidelines
@@ -4631,13 +5092,16 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 if (private$.n_raters < 3) {
                     self$results$styleGroupSummary$setNote(
                         "note",
-                        "Clustering requires at least 3 raters"
+                        .("Clustering requires at least 3 raters.")
                     )
                     return()
                 }
 
                 # Perform hierarchical clustering
-                clustering_result <- private$.performRaterClustering()
+                clustering_result <- private$.style_clustering_results
+                if (is.null(clustering_result)) {
+                    clustering_result <- private$.performRaterClustering()
+                }
 
                 # Store results
                 private$.style_clustering_results <- clustering_result
@@ -4686,10 +5150,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Separate metadata from case data
                 metadata_indices <- which(metadata_rows)
-                case_indices <- which(!metadata_rows)
 
                 # Extract case data (non-metadata rows)
-                case_data <- data_subset[case_indices, , drop = FALSE]
+                case_data <- private$.dropMetadataRows(data_subset)
 
                 # Parse metadata
                 rater_metadata <- list()
@@ -4701,14 +5164,17 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     meta_type <- tolower(trimws(meta_type))
 
                     # Extract values for each rater
-                    rater_values <- as.character(full_data[idx, private$.rater_names])
+                    # as.character(<data.frame>[idx, cols]) returns factor level CODES,
+                    # so META_experience used to read as level indices, not years.
+                    rater_values <- vapply(full_data[idx, private$.rater_names, drop = FALSE], as.character, character(1))
                     names(rater_values) <- private$.rater_names
 
                     # Try to convert to numeric if possible (for experience, volume)
                     if (meta_type %in% c("experience", "volume", "years", "age")) {
                         numeric_values <- suppressWarnings(as.numeric(rater_values))
                         if (!all(is.na(numeric_values))) {
-                            rater_values <- numeric_values
+                            # as.numeric() drops names; .raterMeta() looks values up by rater name
+                            rater_values <- stats::setNames(numeric_values, names(rater_values))
                         }
                     }
 
@@ -4739,24 +5205,24 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                             # Percentage agreement
                             rater_i <- private$.data_matrix[[i]]
                             rater_j <- private$.data_matrix[[j]]
-                            agreement_matrix[i, j] <- mean(rater_i == rater_j, na.rm = TRUE)
+                            agreement_matrix[i, j] <- mean(as.character(rater_i) == as.character(rater_j), na.rm = TRUE)
                         }
                     }
                 }
 
-                # Convert to distance matrix (1 - agreement)
-                distance_matrix <- as.dist(1 - agreement_matrix)
+                distance_matrix <- private$.calculateRaterDistanceMatrix()
 
                 # Perform hierarchical clustering
                 linkage_method <- self$options$clusteringMethod
-                hc <- hclust(distance_matrix, method = linkage_method)
+                hc_method <- if (identical(linkage_method, "ward")) "ward.D" else linkage_method
+                hc <- hclust(distance_matrix, method = hc_method)
 
                 # Determine number of clusters
                 if (self$options$autoSelectGroups) {
                     # Use silhouette method
                     k_optimal <- private$.selectOptimalK(distance_matrix, hc)
                 } else {
-                    k_optimal <- self$options$nStyleGroups
+                    k_optimal <- private$.styleGroupCount()
                 }
 
                 # Cut tree to get cluster assignments
@@ -4964,7 +5430,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # For each case, calculate disagreement between groups
                 for (i in 1:private$.n_cases) {
-                    case_diagnoses <- as.character(private$.data_matrix[i, ])
+                    case_diagnoses <- private$.rowLabels(private$.data_matrix, i)
 
                     # Calculate entropy of diagnoses in this case
                     diagnosis_freq <- table(case_diagnoses)
@@ -5013,7 +5479,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         table$addRow(rowKey = i, values = list(
-                            case_id = as.character(i),
+                            case_id = private$.caseLabels()[i],
                             disagreement_score = max_disagreement,
                             entropy = entropy,
                             style_group_patterns = paste(group_patterns, collapse = "; "),
@@ -5040,38 +5506,14 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         display_name <- paste0(toupper(substring(meta_name, 1, 1)), substring(meta_name, 2))
                         characteristics_data[[display_name]] <- private$.rater_metadata[[meta_name]]
                     }
-                } else {
-                    # Fall back to using variable options
-                    if (!is.null(self$options$raterExperience)) {
-                        char_data <- self$data[[self$options$raterExperience]]
-                        if (length(char_data) == private$.n_raters) {
-                            characteristics_data[["Experience"]] <- char_data
-                        }
-                    }
-                    if (!is.null(self$options$raterSpecialty)) {
-                        char_data <- self$data[[self$options$raterSpecialty]]
-                        if (length(char_data) == private$.n_raters) {
-                            characteristics_data[["Specialty"]] <- char_data
-                        }
-                    }
-                    if (!is.null(self$options$raterInstitution)) {
-                        char_data <- self$data[[self$options$raterInstitution]]
-                        if (length(char_data) == private$.n_raters) {
-                            characteristics_data[["Institution"]] <- char_data
-                        }
-                    }
-                    if (!is.null(self$options$raterVolume)) {
-                        char_data <- self$data[[self$options$raterVolume]]
-                        if (length(char_data) == private$.n_raters) {
-                            characteristics_data[["Case Volume"]] <- char_data
-                        }
-                    }
                 }
 
                 if (length(characteristics_data) == 0) {
-                    table$setNote("note", "No rater characteristics provided for association testing")
+                    table$setNote("note", .("No rater characteristics found. Add META_ rows (for example META_experience) to the dataset, select the case ID variable, and enable metadata rows."))
                     return()
                 }
+
+                table$setNote("design", .("Each test uses one value per rater, so the sample size is the number of raters; p-values are not adjusted across characteristics. Categorical characteristics use Fisher's exact test (10,000 simulations, seeded) when any expected count is below 5; effect size is Cramer's V, or epsilon-squared for numeric characteristics."))
 
                 # Test each characteristic
                 for (char_name in names(characteristics_data)) {
@@ -5091,121 +5533,79 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             },
 
             # Statistical test for characteristic-cluster association
+            # Association between a rater characteristic and style-group membership.
+            #
+            # The categorical branch used fisher.test()$statistic, which does not exist
+            # for an r x c table; the effect size became numeric(0), interpretation
+            # threw "argument is of length zero", the tryCatch returned NULL and the
+            # row disappeared (institution never appeared on the shipped META_ data).
+            # Fisher was also chosen by OBSERVED counts < 5 and its simulated p-value
+            # was unseeded, so it changed on every run.
             .testCharacteristicAssociation = function(char_data, clusters, char_name) {
-                # Determine if continuous or categorical
-                is_numeric <- is.numeric(char_data)
-
-                if (is_numeric) {
-                    # Kruskal-Wallis test for continuous data
-                    tryCatch(
-                        {
-                            test <- kruskal.test(char_data ~ clusters)
-
-                            # Effect size: eta-squared
-                            effect_size <- test$statistic / (length(char_data) - 1)
-
-                            interpretation <- private$.interpretAssociation(
-                                test$p.value,
-                                effect_size,
-                                is_numeric
-                            )
-
-                            return(list(
-                                characteristic = char_name,
-                                test_statistic = test$statistic,
-                                df = test$parameter,
-                                p_value = test$p.value,
-                                effect_size = effect_size,
-                                interpretation = interpretation
-                            ))
-                        },
-                        error = function(e) {
-                            return(NULL)
-                        }
-                    )
-                } else {
-                    # Chi-square or Fisher's exact test for categorical data
-                    tryCatch(
-                        {
-                            contingency_table <- table(char_data, clusters)
-
-                            # Check expected frequencies
-                            if (any(contingency_table < 5)) {
-                                # Use Fisher's exact test
-                                test <- fisher.test(contingency_table, simulate.p.value = TRUE)
-                                effect_size <- sqrt(test$statistic / sum(contingency_table))
-
-                                interpretation <- private$.interpretAssociation(
-                                    test$p.value,
-                                    effect_size,
-                                    is_numeric = FALSE
-                                )
-
-                                return(list(
-                                    characteristic = char_name,
-                                    test_statistic = NA,
-                                    df = NA,
-                                    p_value = test$p.value,
-                                    effect_size = effect_size,
-                                    interpretation = interpretation
-                                ))
-                            } else {
-                                # Use Chi-square test
-                                test <- chisq.test(contingency_table)
-
-                                # Cramér's V effect size
-                                n <- sum(contingency_table)
-                                min_dim <- min(nrow(contingency_table), ncol(contingency_table)) - 1
-                                effect_size <- sqrt(test$statistic / (n * min_dim))
-
-                                interpretation <- private$.interpretAssociation(
-                                    test$p.value,
-                                    effect_size,
-                                    is_numeric = FALSE
-                                )
-
-                                return(list(
-                                    characteristic = char_name,
-                                    test_statistic = test$statistic,
-                                    df = test$parameter,
-                                    p_value = test$p.value,
-                                    effect_size = effect_size,
-                                    interpretation = interpretation
-                                ))
-                            }
-                        },
-                        error = function(e) {
-                            return(NULL)
-                        }
-                    )
+                if (is.numeric(char_data)) {
+                    test <- tryCatch(stats::kruskal.test(char_data ~ factor(clusters)), error = function(e) NULL)
+                    if (is.null(test)) {
+                        return(NULL)
+                    }
+                    # epsilon-squared for Kruskal-Wallis: H / (n - 1)
+                    effect_size <- unname(test$statistic) / (length(char_data) - 1)
+                    return(list(
+                        characteristic = char_name,
+                        test_statistic = unname(test$statistic),
+                        df = unname(test$parameter),
+                        p_value = test$p.value,
+                        effect_size = effect_size,
+                        interpretation = private$.interpretAssociation(test$p.value, effect_size, TRUE)
+                    ))
                 }
+
+                tab <- table(as.character(char_data), clusters)
+                if (nrow(tab) < 2 || ncol(tab) < 2) {
+                    return(NULL)
+                }
+                chi <- suppressWarnings(stats::chisq.test(tab, correct = FALSE))
+                cramers_v <- sqrt(unname(chi$statistic) / (sum(tab) * (min(dim(tab)) - 1)))
+                if (any(chi$expected < 5)) {
+                    test <- withr::with_seed(self$options$seed, stats::fisher.test(tab, simulate.p.value = TRUE, B = 10000))
+                    statistic <- NA_real_
+                    df <- NA_real_
+                } else {
+                    test <- chi
+                    statistic <- unname(chi$statistic)
+                    df <- unname(chi$parameter)
+                }
+                list(
+                    characteristic = char_name,
+                    test_statistic = statistic,
+                    df = df,
+                    p_value = test$p.value,
+                    effect_size = cramers_v,
+                    interpretation = private$.interpretAssociation(test$p.value, cramers_v, FALSE)
+                )
             },
 
             # Interpret association test results
             .interpretAssociation = function(p_value, effect_size, is_numeric) {
-                sig_text <- if (p_value < 0.001) {
-                    "highly significant"
-                } else if (p_value < 0.01) {
-                    "significant"
-                } else if (p_value < 0.05) {
-                    "marginally significant"
-                } else {
-                    "not significant"
+                if (length(p_value) != 1 || is.na(p_value)) {
+                    return(.("Association could not be tested"))
                 }
-
-                effect_text <- if (is.na(effect_size)) {
+                sig_text <- if (p_value < 0.05) {
+                    jmvcore::format(.("p = {p}"), p = format.pval(p_value, digits = 2, eps = 0.001))
+                } else {
+                    jmvcore::format(.("not significant, p = {p}"), p = format.pval(p_value, digits = 2))
+                }
+                effect_text <- if (length(effect_size) != 1 || is.na(effect_size)) {
                     ""
                 } else if (effect_size < 0.1) {
-                    ", negligible effect"
+                    .("negligible effect")
                 } else if (effect_size < 0.3) {
-                    ", small effect"
+                    .("small effect")
                 } else if (effect_size < 0.5) {
-                    ", moderate effect"
+                    .("moderate effect")
                 } else {
-                    ", large effect"
+                    .("large effect")
                 }
-
-                return(paste0("Association ", sig_text, effect_text))
+                if (nzchar(effect_text)) paste0(sig_text, "; ", effect_text) else sig_text
             },
 
             # Compare style groups with reference standard
@@ -5218,11 +5618,13 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Get reference standard data
-                ref_data <- self$data[[ref_var]]
-                if (length(ref_data) != private$.n_cases) {
-                    table$setNote("note", "Reference standard length does not match number of cases")
+                ref_data <- private$.referenceStandardValues()
+                valid_reference <- !is.na(ref_data)
+                if (is.null(ref_data) || sum(valid_reference) < 2) {
+                    table$setNote("note", .("Reference comparison requires at least two retained cases with reference ratings."))
                     return()
                 }
+                ref_data <- as.character(ref_data[valid_reference])
 
                 cluster_assignments <- clustering_result$cluster_assignments
                 n_clusters <- clustering_result$n_clusters
@@ -5232,14 +5634,13 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     cluster_members <- which(cluster_assignments == k)
 
                     # Get diagnoses from this group
-                    group_diagnoses_list <- private$.data_matrix[, cluster_members, drop = FALSE]
 
                     # Calculate kappa for each rater in group vs reference
                     kappa_values <- numeric()
                     agreement_values <- numeric()
 
                     for (rater_idx in cluster_members) {
-                        rater_diagnoses <- private$.data_matrix[[rater_idx]]
+                        rater_diagnoses <- as.character(private$.data_matrix[[rater_idx]])[valid_reference]
 
                         # Calculate Cohen's kappa
                         tryCatch(
@@ -5523,42 +5924,6 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 TRUE
             }
-        ), # End of private list
-        public = list(
-            #' @description
-            #' Generate R source code for Pathology Agreement analysis
-            #' @return Character string with R syntax for reproducible analysis
-            asSource = function() {
-                vars <- self$options$vars
-                if (is.null(vars) || length(vars) == 0) {
-                    return("")
-                }
-
-                # Build vars argument - .fmt(..., context = "R") produces a valid R
-                # string literal that handles embedded quotes/backslashes correctly. This is the
-                # idiomatic G-category codegen escape (replaces a manual paste0('"', v, '"') wrap
-                # that corrupted the syntax pane when column names contained " or \).
-                vars_arg <- paste0("vars = c(", paste(sapply(vars, function(v) .fmt("{}", v, context = "R")), collapse = ", "), ")")
-
-                # Get other arguments using base helper (if available)
-                args <- ""
-                if (!is.null(private$.asArgs)) {
-                    args <- private$.asArgs(incData = FALSE)
-                }
-                if (args != "") {
-                    args <- paste0(",\n    ", args)
-                }
-
-                # Get package name dynamically
-                pkg_name <- utils::packageName()
-                if (is.null(pkg_name)) pkg_name <- "ClinicoPath" # fallback
-
-                # Build complete function call
-                paste0(
-                    pkg_name, "::pathagreement(\n    data = data,\n    ",
-                    vars_arg, args, ")"
-                )
-            }
-        ) # End of public list
+        ) # End of private list
     )
 }

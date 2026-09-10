@@ -181,7 +181,9 @@ mediansurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="Median Survival Comparisons",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "coin",
+                    "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

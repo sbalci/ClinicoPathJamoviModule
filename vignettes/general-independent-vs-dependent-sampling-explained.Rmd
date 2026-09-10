@@ -13,648 +13,173 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.width = 7,
-  fig.height = 5
-)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-# Overview
+# What the analysis estimates
 
-This vignette explains the fundamental statistical difference between **independent sampling** (e.g., lymph node dissection) and **dependent sampling** (e.g., sequential tumor block sectioning), and why this distinction matters for pathology sampling adequacy analysis.
+`pathsampling` describes sampling and detection in the supplied cases. Its first-detection
+curves use cases in which a lesion was eventually recorded. A missing first-detection position
+means that no detection was recorded; it does not establish an independently verified
+negative disease status. The recorded positive fraction and the conditional detection curve
+therefore do not identify sensitivity in a population with known disease status.
 
-**Key Message**: The statistical methods you choose for sampling adequacy analysis must match your sampling structure. Using independence-based models (binomial/geometric) for dependent samples (tumor blocks) leads to systematic underestimation of cumulative sensitivity.
+The observation window matters. Cases examined for different numbers of samples may have
+different opportunities for detection. Neither a geometric fit to observed detections nor
+resampling those detections recovers lesions missed throughout the available window.
 
----
+# Independence is an assumption about outcomes
 
-# Independent vs Dependent Sampling: Core Concepts
+Separate anatomical structures are not necessarily statistically independent. Lymph nodes
+from the same case can share disease burden, and consecutive tissue samples can share tissue
+features. Sampling without replacement also differs from independent Bernoulli sampling.
+Choose a model using the sampling design and its assumptions, rather than anatomy alone.
 
-## Independent Sampling (e.g., Lymph Node Dissection)
-
-### Scenario
-
-Examining 12 lymph nodes for metastases in a colorectal cancer resection.
-
-### Key Characteristic
-
-Each lymph node is a **separate anatomic structure** with independent probability of containing metastasis.
-
-### Statistical Properties
-
-```
-P(LN #7 is positive) is INDEPENDENT of P(LN #3 is positive)
-P(detect metastasis in first 5 LNs) = 1 - (1-p)^5  [binomial/geometric]
-```
-
-### Appropriate Models
-
-- ✅ **Binomial distribution**: Models independent Bernoulli trials
-- ✅ **Geometric distribution**: Models "first success" in sequence of independent trials
-- ✅ Per-sample detection probability `p` is meaningful and estimable
-
-### Example Calculation
+For independent trials with the same positive probability `q`, the probability of at least one
+positive result in `n` trials is `1 - (1 - q)^n`. The geometric distribution describes the position
+of the first positive result under the same assumptions. R counts failures before the first
+success, so its geometric quantile needs one added to obtain a sample position.
 
 ```{r independent_example}
-# If p = 0.15 (15% per-LN metastasis rate)
-p <- 0.15
-n_ln <- 12
-
-# Probability of finding >=1 positive LN in 12 examined:
-prob_detect <- 1 - (1 - p)^n_ln
-cat(sprintf(
-  "Probability of detecting metastasis in %d LNs: %.1f%%\n",
-  n_ln, prob_detect * 100
-))
-
-# This is VALID because LNs are independent
+q <- 0.2
+n <- 5
+stats::pbinom(0, size = n, prob = q, lower.tail = FALSE)
+stats::qgeom(0.95, prob = q) + 1
 ```
 
-### Visual Representation
+These give a probability of 0.67232 and a model-based target position of 14. The latter is a
+calculation under the assumed `q`, not a validated clinical sampling requirement.
 
-```
-LN1  LN2  LN3  LN4  LN5  LN6  ...  LN12
- ●    ○    ○    ●    ○    ○   ...   ○
- ↑                ↑
-Independent events - one being positive doesn't affect others
-```
+## Dependence can change detection in either direction
 
----
+Dependence does not imply systematic underestimation by the independence model. Consider two
+trials, each with marginal positive probability 0.2. If their outcomes always agree, their
+probability of any positive result is 0.2. If positive results are mutually exclusive, it is 0.4.
+Independence gives 0.36, between these two possibilities.
 
-## Dependent Sampling (e.g., Tumor Block Sectioning)
-
-### Scenario
-
-Examining 8 sequential blocks from a colorectal tumor for venous invasion (VI).
-
-### Key Characteristic
-
-Blocks are **serial sections** through the same lesion with **spatial clustering**.
-
-### Statistical Properties
-
-```
-P(Block #7 shows VI) is HIGHLY DEPENDENT on P(Block #6 shows VI)
-If VI is present, it occupies a CONTIGUOUS region in 3D space
-Blocks are ~5mm apart - if VI is in block 3, likely also in blocks 2 and 4
-```
-
-### Why Independence Assumption Fails
-
-#### 1. Spatial Autocorrelation
-
-- VI/EMVI are continuous vascular structures
-- If block 3 cuts through a vein with tumor emboli, adjacent blocks (2, 4) likely also cut same vein
-- Blocks are NOT independent samples from a population
-
-#### 2. Fixed Total Prevalence
-
-- A tumor either HAS venous invasion or it DOESN'T (binary truth)
-- If 8 blocks are examined and VI is found in block 2, the question is NOT "will block 5 also have VI?" but rather "will block 5 DETECT the VI we know exists?"
-- This is fundamentally different from LNs where each LN is a separate entity
-
-#### 3. Detection = Sampling Coverage, Not Prevalence
-
-```
-Lymph nodes:  "What % of LNs have metastases?"
-Tumor blocks: "How many blocks do we need to detect VI if it's present?"
-```
-
-### Visual Representation
-
-```
-Tumor (sagittal view):
-Block:  1    2    3    4    5    6    7    8
-        |    |    |    |    |    |    |    |
-        ○────●════●════●────○────○────○────○
-             └─VI region (contiguous)─┘
-
-If VI is present, it spans multiple adjacent blocks (clustered)
-NOT randomly distributed across blocks
-```
-
-### Consequence of Using Binomial Model Incorrectly
-
-```{r dependent_wrong_model}
-# WRONG approach for tumor blocks:
-# Assume p = 0.35 (because 35% sensitivity at 1 block in Duan 2023)
-p_wrong <- 0.35
-n_blocks <- 6
-
-# Predict sensitivity at 6 blocks using binomial model:
-predicted_sens <- 1 - (1 - p_wrong)^n_blocks
-cat(sprintf(
-  "Binomial prediction at %d blocks: %.1f%%\n",
-  n_blocks, predicted_sens * 100
-))
-
-# But Duan 2023 observed: 95% sensitivity at 6 blocks!
-observed_sens <- 0.95
-cat(sprintf(
-  "Observed sensitivity at %d blocks: %.1f%%\n",
-  n_blocks, observed_sens * 100
-))
-
-cat(sprintf(
-  "\nUnderestimation: %.1f percentage points\n",
-  (observed_sens - predicted_sens) * 100
-))
-```
-
-**Why?** Because blocks are NOT independent. The binomial model underestimates cumulative sensitivity for clustered outcomes.
-
----
-
-# How Dependent Sampling Affects Statistical Analysis
-
-## 1. Probability Estimation
-
-### Independent (Lymph Nodes)
-
-- Can estimate `p` (per-LN metastasis rate) from data
-- `p` is a biological parameter (metastatic spread rate)
-- Use maximum likelihood: `p_hat = (# positive LNs) / (# total LNs examined)`
-
-### Dependent (Tumor Blocks)
-
-- `p` (per-block detection probability) is NOT a biological parameter - it's a **sampling artifact**
-- Depends on:
-  - Block thickness (3 µm vs 5 µm sections)
-  - Section interval (every 5mm vs every 2mm)
-  - VI extent/size (small focus vs large vessel)
-  - Spatial distribution (clustered vs diffuse)
-- Geometric MLE from "first detection" is **biased downward** when samples are clustered
-
-### Example of Bias
-
-```{r estimation_bias}
-# True data: VI detected first in blocks: 1, 1, 2, 3, 1, 4, 2
-first_detection <- c(1, 1, 2, 3, 1, 4, 2)
-
-# Geometric MLE assuming independence:
-p_hat_geometric <- 1 / mean(first_detection)
-cat(sprintf("Geometric MLE: p = %.2f\n", p_hat_geometric))
-
-# But this assumes independence!
-# In reality, if VI is large and central, it might be detected in block 1
-# simply because block 1 cuts through the deepest invasion point
-# NOT because p=0.50 per-block detection probability
-```
-
----
-
-## 2. Variance and Confidence Intervals
-
-### Independent (Lymph Nodes)
-
-- Variance follows binomial formula: `Var(X) = n*p*(1-p)`
-- CIs can use normal approximation or Wilson score
-- Straightforward calculation
-
-### Dependent (Tumor Blocks)
-
-- **Overdispersion**: Variance is LARGER than binomial prediction
-  - `Var(X) > n*p*(1-p)` due to clustering
-- If you use binomial CIs, you get **falsely narrow intervals** (overconfident)
-
-### Example: CI Width Comparison
-
-```{r ci_comparison}
-# Observed: 95% sensitivity at 6 blocks (113/119 VI+ cases detected)
-n_cases <- 119
-n_detected <- 113
-observed_sensitivity <- n_detected / n_cases
-
-# Binomial 95% CI (WRONG for dependent samples)
-binom_ci <- binom::binom.confint(n_detected, n_cases,
-  conf.level = 0.95,
-  methods = "wilson"
+```{r dependence_example}
+data.frame(
+  relationship = c("Always agree", "Independent", "Mutually exclusive positives"),
+  probability_any_positive = c(0.2, 1 - (1 - 0.2)^2, 0.2 + 0.2)
 )
-cat("Binomial Wilson 95% CI:\n")
-cat(sprintf(
-  "  [%.1f%%, %.1f%%]  ← TOO NARROW (assumes independence)\n",
-  binom_ci$lower * 100, binom_ci$upper * 100
-))
-
-# Bootstrap 95% CI (CORRECT for dependent samples)
-# Simulated bootstrap result (would use actual case-level resampling)
-bootstrap_lower <- 0.872
-bootstrap_upper <- 0.995
-cat("\nBootstrap 95% CI:\n")
-cat(sprintf(
-  "  [%.1f%%, %.1f%%]  ← WIDER (accounts for case-level variation)\n",
-  bootstrap_lower * 100, bootstrap_upper * 100
-))
-
-cat("\nWhy wider?\n")
-cat("Some cases have VI in blocks 1-3 (early detection, clustered anteriorly)\n")
-cat("Some cases have VI in blocks 6-8 (late detection, clustered posteriorly)\n")
-cat("This heterogeneity inflates variance beyond binomial expectation\n")
 ```
 
----
+These are probability examples, not assumptions about a particular tissue or disease.
 
-## 3. Extrapolation Beyond Observed Data
+## Selecting observed detections changes the fitted distribution
 
-### Independent (Lymph Nodes)
+Suppose the underlying first positive position follows a geometric distribution with `q = 0.1`,
+but observation stops after five samples. Fitting `1 / mean(first position)` only to the detected
+cases estimates from a truncated distribution. Even with infinitely many cases, that estimate
+need not equal the underlying `q`.
 
-- Safe to extrapolate: "If 12 LNs give 85% sensitivity, what about 20 LNs?"
-- Use binomial formula: `1 - (1-p)^20`
-- Assumes same `p` applies to additional LNs (reasonable if dissection is random)
-
-### Dependent (Tumor Blocks)
-
-- **Unsafe** to extrapolate beyond observed maximum
-- Sensitivity curve **plateaus** at some point (all VI that CAN be detected IS detected)
-- Adding more blocks beyond plateau yields **zero incremental benefit**
-
-### Example: Plateau Effect
-
-```{r plateau_effect, fig.height=4}
-# Duan 2023 observed sensitivity
-blocks <- 1:10
-observed_sens <- c(0.296, 0.626, 0.757, 0.878, 0.930, 0.983, 1.000, 1.000, NA, NA)
-
-# Binomial model prediction (extrapolated)
-p_est <- 0.35
-binomial_pred <- 1 - (1 - p_est)^blocks
-
-# Plot
-plot(blocks, observed_sens,
-  type = "b", pch = 19, col = "blue",
-  ylim = c(0, 1), xlab = "Number of Blocks",
-  ylab = "Cumulative Sensitivity",
-  main = "Observed vs Binomial Prediction: Plateau Effect"
+```{r observation_window}
+positions <- 1:5
+mass <- stats::dgeom(positions - 1, prob = 0.1)
+probability_detected_by_five <- sum(mass)
+mean_position_among_detected <- sum(positions * mass) / sum(mass)
+c(
+  underlying_q = 0.1,
+  detected_fraction = probability_detected_by_five,
+  inverse_observed_mean = 1 / mean_position_among_detected
 )
-lines(blocks, binomial_pred, type = "l", lty = 2, col = "red", lwd = 2)
-abline(h = 1.0, lty = 3, col = "gray")
-legend("bottomright",
-  c("Observed (Duan 2023)", "Binomial Model", "100% Sensitivity"),
-  col = c("blue", "red", "gray"), lty = c(1, 2, 3), pch = c(19, NA, NA)
+```
+
+The detected fraction is about 0.410. The inverse observed mean is about 0.358. This illustrates
+why the analysis labels its fitted first-detection curve as an observed-positive working model.
+It does not fit a censoring or ascertainment model.
+
+# Methods available in pathsampling
+
+| Output | Inputs and interpretation | Main limitation |
+|---|---|---|
+| Binomial/geometric prediction | A fitted per-sample `q`; probability of at least one positive sample | Constant-probability independence working model; observed-detection selection can bias the fitted `q` |
+| Empirical cumulative curve and bootstrap | First-detection positions among eventually observed positives | Describes this selected cohort; does not correct unequal observation windows or missed lesions |
+| Hypergeometric prediction | Known finite population `N` and positive count `K`; sampling without replacement | Requires those counts to be meaningful for the proposed sampling design |
+| Beta-binomial prediction | Paired positive and total counts; fitted variation across case probabilities | Exchangeability and distributional assumptions remain; fitted parameters must be identifiable |
+| Node-count adequacy summary | Fraction meeting a user-selected node-count threshold, with a Wilson interval | Describes compliance with the selected threshold, not a survival benefit or validated disease-specific requirement |
+| Sample-position groups and gap indices | Lists of positive sample positions and a gap threshold | Sampling order is not anatomical distance; these heuristics do not establish lesions, stage, or treatment |
+
+Hypergeometric probabilities are averaged across all eligible cases with equal case weights.
+A case with fewer positive states than the requested detection target contributes probability
+zero; it is not removed merely because the target is impossible in that case.
+
+The beta-binomial model estimates a distribution of case probabilities from paired counts.
+Warnings or fitting failures are reported, and failed fits do not produce predictions.
+
+## Selecting the estimator
+
+With `estimationMethod = "auto"`, the general, lymph-node, and omentum contexts use eligible
+positive counts when supplied; otherwise they use the detected-case geometric estimate. Tumor
+and margin contexts use the geometric estimate. Explicit `"geometric"` and `"empirical"` choices
+are honored. Explicit empirical estimation requires eligible paired counts and does not
+silently substitute the geometric estimator.
+
+For count-based estimation, the numerator and denominator use the same eligible detected-case
+rows. The analysis screens the coefficient of variation of the case-level positive proportions:
+values above 0.3 produce a caution and values above 0.5 withhold the single-`q` predictions.
+These cutoffs are heuristic screens, not a validated model-selection test. Subgroup estimates
+use the selected estimator and the same screen within each group. Groups without an eligible
+estimate retain their recorded counts and positive fraction.
+
+The separate automatic between-group warning is enabled by default. It screens the CV of
+inverse mean first-detection positions across sample types, irrespective of the prediction
+estimator. It requires at least 10 detected cases overall and two groups with at least three
+detected cases each. A CV above 0.3 triggers this descriptive warning, not a significance test.
+
+The approximate chi-square goodness-of-fit calculation is available only for the detected-case
+geometric estimator, after pooling sparse expected bins. It is a check of an untruncated working
+model, conditional on the supplied detections. It does not validate independence, ascertainment,
+or an empirical-count estimate of `q`.
+
+## Bootstrap uncertainty
+
+Bootstrap intervals resample complete observed-positive cases and evaluate the cumulative curve
+at each sample position. The two bootstrap displays share their resamples. These intervals
+reflect variation within that cohort; they are not assumption-free intervals for clinical
+sensitivity. Correlation between cases would also require a resampling design that the current
+analysis does not provide.
+
+Use `setSeed = TRUE` and a specified `seedValue` for reproducible resampling. The analysis restores
+the calling session's random-number state. The default is 10,000 bootstrap iterations when
+bootstrap output is enabled. All reported bootstrap and Wilson intervals use a fixed 95% level;
+`targetConfidence` specifies the target detection probability, not the interval confidence level.
+
+# Preparing data and using the options
+
+Use one row per case and integer counts. First-detection positions must lie between one and the
+total number of examined samples; leave the position missing when detection was not recorded.
+Positive counts must not exceed their paired totals. Invalid rows are excluded from the affected
+calculation with an explanation, while row alignment is retained for optional variables.
+
+Provide actual total foci through `totalFoci` for comparisons with the largest count in one
+sample (`maxPositiveSingle`). Positive cassettes and foci have different units and are not
+interchangeable. Lists of positive sample positions support sequence heuristics only.
+
+Finite-population models, lymph-node summaries, and planning with an assumed `q` can run using
+their own inputs without selecting first-detection variables. Advanced displays remain optional.
+The model applicability guide explains available methods; it does not automatically establish
+which model is clinically valid.
+
+```{r analysis_example, eval = FALSE}
+ClinicoPath::pathsampling(
+  data = cases,
+  totalSamples = "samples_examined",
+  firstDetection = "first_positive_position",
+  estimationMethod = "geometric",
+  showBootstrap = TRUE,
+  bootstrapIterations = 10000,
+  setSeed = TRUE,
+  seedValue = 42
 )
-text(9, 0.986, "Plateau at 7 blocks", pos = 3, cex = 0.8)
-text(9, 0.95, "Binomial overestimates\nbeyond observed range", pos = 1, cex = 0.8, col = "red")
 ```
 
-**Why plateau?**
-The 5% of VI+ cases missed at 6 blocks have **microinvasion** or **peripheral VI** that won't be captured by standard perpendicular sectioning, regardless of how many blocks you examine.
-
----
-
-## 4. Recommended Sample Size
-
-### Independent (Lymph Nodes)
-
-- Can use power calculations: "To detect metastasis with 95% confidence if true rate is 15%, examine N LNs"
-- Formula: `n = log(1-target_conf) / log(1-p)`
-- Mathematically clean
-
-```{r sample_size_ln}
-# Calculate required LNs for 95% detection confidence
-target_conf <- 0.95
-p_metastasis <- 0.15
-
-n_required <- ceiling(log(1 - target_conf) / log(1 - p_metastasis))
-cat(sprintf("Required LNs: %d\n", n_required))
-cat(sprintf(
-  "Validation: 1 - (1-%.2f)^%d = %.1f%%\n",
-  p_metastasis, n_required,
-  (1 - (1 - p_metastasis)^n_required) * 100
-))
-```
-
-### Dependent (Tumor Blocks)
-
-- **Must use empirical data** from similar cases
-- No closed-form solution
-- Recommendation: "Examine >=6 blocks to achieve 95% sensitivity **based on observed data from 217 cases**" (Duan 2023)
-- Caveat: Assumes your sectioning protocol matches Duan 2023 (perpendicular, 5mm intervals, elastin stain)
-
----
-
-# How `pathsampling` Module Handles Dependence
-
-The `pathsampling` module offers **three methods** with different suitability for dependent vs independent sampling.
-
-## Method 1: Binomial/Geometric Model (`showBinomialModel`)
-
-### When to Use
-
-- ✅ **Lymph node dissection** (independent samples)
-- ✅ **Omentum sections** IF sampled from distant regions (>=5cm apart)
-- ❌ **Tumor blocks** (dependent samples) - **will underestimate sensitivity**
-
-### Warning Now Added
-
-When `analysisContext == "tumor"`, the module displays:
-
-> ⚠️ **Note for Tumor Sampling**: Sequential tumor samples (blocks) are not independent - they represent serial sections through the same lesion. Spatial clustering of features like venous invasion (VI) or perineural invasion (PNI) is expected. The **empirical method is recommended** over parametric models (binomial/geometric) which assume independence.
-> *Reference: Duan et al. 2023 - Histopathology (tissue sampling impact on VI detection)*
-
----
-
-## Method 2: Empirical Cumulative Detection (`showEmpiricalCumulative`)
-
-### How It Works
-
-**Non-parametric**: No distributional assumptions
-
-For each N (1, 2, 3, ..., max), counts how many positive cases were detected by block N:
-
-```
-Sensitivity at N blocks = (# detected by block N) / (# total positive cases)
-```
-
-Handles dependence automatically because it uses **observed data**, not theoretical model.
-
-### Example Calculation
-
-```{r empirical_method}
-# Example: 5 VI+ cases with first detection blocks: [1, 2, 2, 5, 7]
-first_detection_example <- c(1, 2, 2, 5, 7)
-n_positive <- length(first_detection_example)
-
-# Calculate empirical cumulative detection for N=1 to 8
-max_blocks <- 8
-empirical_sensitivity <- sapply(1:max_blocks, function(n) {
-  detected <- sum(first_detection_example <= n)
-  detected / n_positive
-})
-
-# Display results
-results_df <- data.frame(
-  Blocks = 1:max_blocks,
-  Detected = sapply(1:max_blocks, function(n) sum(first_detection_example <= n)),
-  Total_Positive = n_positive,
-  Sensitivity = sprintf("%.1f%%", empirical_sensitivity * 100)
-)
-print(results_df)
-```
-
-### Why It Handles Dependence Correctly
-
-```
-At N=2 blocks:
-empirical_prob[2] = sum(c(1,2,2,5,7) <= 2) / 5 = 3/5 = 60%
-
-This is TRUE sensitivity from data - doesn't assume independence.
-If VI is clustered in blocks 1-2 for some cases and 5-7 for others,
-empirical method captures that heterogeneity without modeling it.
-```
-
-### When to Use
-
-- ✅ **Always safe** for both independent and dependent sampling
-- ✅ **Tumor blocks** (primary recommendation)
-- ✅ **Any sampling where independence is uncertain**
-
----
-
-## Method 3: Bootstrap Confidence Intervals (`showBootstrap`)
-
-### Why Bootstrap is Correct for Dependent Samples
-
-**Key insight**: Bootstrap resamples at **case level**, not block level
-
-Each bootstrap sample preserves **within-case dependence structure**:
-
-```
-Original data: 3 cases
-- Case A: VI first in block 1 (large, anterior invasion)
-- Case B: VI first in block 6 (small, posterior invasion)
-- Case C: VI first in block 2 (moderate, central)
-
-Bootstrap iteration 1: [A, A, C]  # Case A sampled twice
-Bootstrap iteration 2: [B, C, C]
-Bootstrap iteration 3: [A, B, A]
-...
-
-Each iteration preserves the spatial pattern WITHIN each case.
-CIs reflect uncertainty about which TYPES of cases you might encounter,
-not uncertainty about whether block 3 is independent of block 2.
-```
-
-### Algorithm
-
-```{r bootstrap_algorithm, eval=FALSE}
-# Pseudo-code for bootstrap CI calculation (from pathsampling.b.R)
-for (b in 1:nBoot) {
-  boot_idx <- sample(n_cases, replace = TRUE) # Resample CASES
-  boot_first <- positive_first[boot_idx]
-
-  for (n in 1:maxN) {
-    detected <- sum(boot_first <= n, na.rm = TRUE)
-    detection_matrix[b, n] <- detected / n_cases
-  }
-}
-
-ci_lower <- apply(detection_matrix, 2, quantile, probs = 0.025)
-ci_upper <- apply(detection_matrix, 2, quantile, probs = 0.975)
-```
-
-### When to Use
-
-- ✅ **Tumor blocks** (strongly recommended)
-- ✅ **Any dependent sampling** (margin sections, serial biopsies)
-- ✅ **Lymph nodes** (okay, though exact/Wilson methods also valid)
-
----
-
-# Practical Impact: Duan 2023 Case Study
-
-## Study Overview
-
-**Reference**: Duan K, et al. (2023). Impact of tissue sampling on detection of venous invasion in colorectal cancer. *Histopathology*. doi:10.1111/his.15030
-
-- N = 217 CRC resections
-- 55% VI+, 37% EMVI+
-- Standardized protocol: minimum 8 tumor blocks, perpendicular sectioning, elastin stain
-- **Question**: How many blocks needed for 95% VI detection sensitivity?
-
-## Analysis Using Wrong Model (Binomial)
-
-```{r duan_wrong_analysis}
-# Estimate p from first detection distribution
-# (Simplified - actual data would use all 119 VI+ cases)
-observed_sensitivity_1_block <- 0.296
-p_hat <- observed_sensitivity_1_block # Crude estimate
-
-# Predict sensitivity at different block counts using binomial
-blocks_tested <- c(1, 2, 3, 4, 5, 6, 7, 8)
-binomial_predictions <- 1 - (1 - p_hat)^blocks_tested
-
-# Duan 2023 observed values
-observed_values <- c(0.296, 0.626, 0.757, 0.878, 0.930, 0.983, 1.000, 1.000)
-
-# Compare
-comparison_df <- data.frame(
-  Blocks = blocks_tested,
-  Binomial_Prediction = sprintf("%.1f%%", binomial_predictions * 100),
-  Observed_Duan = sprintf("%.1f%%", observed_values * 100),
-  Error = sprintf("%.1f pp", (observed_values - binomial_predictions) * 100)
-)
-print(comparison_df)
-
-cat("\nConclusion using WRONG model:\n")
-cat(sprintf(
-  "Binomial predicts %.1f%% at 6 blocks (UNDERESTIMATE)\n",
-  binomial_predictions[6] * 100
-))
-cat(sprintf("Observed: %.1f%% at 6 blocks\n", observed_values[6] * 100))
-cat(sprintf(
-  "Error: %.1f percentage points\n",
-  (observed_values[6] - binomial_predictions[6]) * 100
-))
-```
-
-## Analysis Using Correct Method (Empirical)
-
-```{r duan_correct_analysis}
-# For each block count, directly count detections from observed data
-# (Using Duan 2023 reported values)
-
-cases_vi_positive <- 119
-
-detected_by_block <- data.frame(
-  Blocks = 1:8,
-  Detected = c(34, 72, 87, 101, 107, 113, 115, 115), # From Duan Fig 4A
-  Total = cases_vi_positive
-)
-
-detected_by_block$Sensitivity <- detected_by_block$Detected / detected_by_block$Total
-detected_by_block$Sensitivity_Pct <- sprintf("%.1f%%", detected_by_block$Sensitivity * 100)
-
-print(detected_by_block[, c("Blocks", "Detected", "Total", "Sensitivity_Pct")])
-
-cat("\nConclusion using CORRECT method:\n")
-cat("No modeling assumptions - just observed data\n")
-cat("Automatically accounts for clustering, heterogeneity, spatial patterns\n")
-cat(sprintf(
-  "\nRecommendation: Examine >=6 blocks to achieve %.1f%% sensitivity\n",
-  detected_by_block$Sensitivity[6] * 100
-))
-```
-
----
-
-# When Does Independence Matter Less?
-
-## Scenarios Where Binomial Approximation May Be Acceptable
-
-### 1. Very Sparse Features
-
-If VI is extremely rare (5% prevalence) AND small (single focus), spatial clustering is minimal:
-- Each block has ~5% independent chance of containing THE focus
-- But this is rare in practice (Duan: 55% VI+)
-
-### 2. Widely Spaced Samples
-
-If blocks are 2-3 cm apart (not standard), they may sample independent tumor regions:
-- Downside: Miss intermediate VI foci
-- Not recommended for standard sampling protocols
-
-### 3. Diffuse/Multifocal VI
-
-If VI is scattered throughout tumor (not contiguous), approaches independence:
-- But this is not typical VI morphology
-- Most VI/EMVI is continuous along vascular structures
-
----
-
-# Summary & Recommendations
-
-## Key Principles
-
-| Aspect | Independent (LN) | Dependent (Tumor Blocks) |
-|--------|-----------------|-------------------------|
-| **Structure** | Separate anatomic units | Serial sections of same lesion |
-| **Spatial relationship** | Random/unrelated | Contiguous/clustered |
-| **Appropriate model** | Binomial/Geometric ✅ | Empirical ✅, Bootstrap ✅ |
-| **Inappropriate model** | Empirical okay but inefficient | Binomial ❌ (underestimates) |
-| **Variance** | Var = n·p·(1-p) | Var > n·p·(1-p) (overdispersion) |
-| **Extrapolation** | Safe beyond observed N | Unsafe (plateaus) |
-| **Per-sample probability p** | Biologically meaningful | Artifact of sectioning protocol |
-| **CI method** | Wilson/exact okay | Bootstrap strongly preferred |
-
-## Practical Guidance for `pathsampling` Module Users
-
-### For Tumor Block Analysis
-
-1. ✅ **Set Analysis Context**: "Tumor Sampling (VI/EMVI/PNI/Budding)"
-2. ✅ **Enable**: "Show Empirical Cumulative Detection"
-3. ✅ **Enable**: "Show Bootstrap Analysis"
-4. ❌ **Do NOT rely on**: Binomial model predictions beyond observed data
-5. ✅ **Report methodology**: "We used non-parametric empirical sensitivity curves with bootstrap 95% CIs (10,000 iterations) to account for spatial clustering of VI within tumor blocks."
-
-### For Lymph Node Analysis
-
-1. ✅ **Set Analysis Context**: "Lymph Node Dissection"
-2. ✅ **Use either**: Binomial model OR Empirical (both valid)
-3. ✅ **Bootstrap CIs** are still good practice (robust to violations)
-4. ✅ **Extrapolation** beyond observed N is reasonable
-
-### When Uncertain About Independence
-
-**Default to empirical + bootstrap**. These methods are:
-- Always valid (both independent and dependent)
-- Non-parametric (no distributional assumptions)
-- Robust to model misspecification
-- Widely accepted in medical literature
-
----
-
-# Example: Using `pathsampling` with Duan 2023 Dataset
-
-```{r example_usage, eval=FALSE}
-# Load the example dataset
-devtools::load_all(".")
-data(duan2023_vi_blocks)
-
-# In jamovi:
-# 1. Analyses → OncoPathT → ClinicoPath Descriptives →
-#    Pathology Sampling Adequacy Analysis
-#
-# 2. Settings:
-#    - Analysis Context: Tumor Sampling (VI/EMVI/PNI/Budding)
-#    - Total Samples: blocks_examined
-#    - First Detection: first_vi_block
-#    - Target Confidence: 0.95
-#    - Maximum Samples: 8
-#    - ✓ Show Empirical Cumulative Detection
-#    - ✓ Show Bootstrap Analysis (10000 iterations)
-#
-# 3. Expected output:
-#    - Empirical sensitivity table with 95% bootstrap CIs
-#    - Warning about non-independence of tumor blocks
-#    - Recommendation: "Examine >=6 blocks for 95% sensitivity"
-#    - Sensitivity curve plot with target threshold line
-```
-
----
-
-# References
-
-1. **Duan K, Chow B, Tsui W, et al.** (2023). Impact of tissue sampling on detection of venous invasion in colorectal cancer: a prospective analysis. *Histopathology*. doi:10.1111/his.15030
-
-2. **Efron B, Tibshirani RJ** (1993). *An Introduction to the Bootstrap*. Chapman & Hall/CRC.
-
-3. **Wilson EB** (1927). Probable inference, the law of succession, and statistical inference. *Journal of the American Statistical Association*, 22(158), 209-212.
-
-4. **Gelman A, Hill J** (2006). *Data Analysis Using Regression and Multilevel/Hierarchical Models*. Cambridge University Press. (Chapter on clustered/hierarchical data)
-
-5. **Skala SL, Hagemann IS** (2015). Evaluation of omentum as a site of metastatic disease in patients undergoing cytoreductive surgery for peritoneal carcinomatosis. *American Journal of Surgical Pathology*, 39(5), 674-680.
-
----
-
-# Session Information
-
-```{r session_info}
-sessionInfo()
-```
-
----
-
-**Document generated**: `r Sys.Date()`
-**ClinicoPath module version**: 0.0.33
-**Vignette author**: ClinicoPath Development Team
+Interpret the outputs alongside the observation design and independently justified clinical
+criteria. Descriptive yield bands, node thresholds, and sample-position groups do not establish
+a stopping rule, disease stage, or a treatment recommendation.
+
+# Statistical references
+
+The probability definitions and R conventions are documented in the official R manuals for the
+[geometric distribution](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Geometric.html)
+and the [hypergeometric distribution](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Hypergeometric.html).

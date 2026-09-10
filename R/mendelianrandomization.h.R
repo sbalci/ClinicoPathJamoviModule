@@ -355,7 +355,10 @@ mendelianrandomizationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) 
             super$initialize(
                 options=options,
                 name="",
-                title="Mendelian Randomization")
+                title="Mendelian Randomization",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "MendelianRandomization"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

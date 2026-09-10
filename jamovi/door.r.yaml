@@ -91,7 +91,7 @@ items:
 
 
 refs:
-    - evans2015door
     - ClinicoPathJamoviModule
+    - evans2015door
     - ggplot2
 ...

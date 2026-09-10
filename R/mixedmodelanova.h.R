@@ -222,7 +222,13 @@ mixedmodelanovaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 options=options,
                 name="",
-                title="Mixed Model ANOVA")
+                title="Mixed Model ANOVA",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "emmeans",
+                    "graphics",
+                    "lme4",
+                    "lmerTest"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="model_info",

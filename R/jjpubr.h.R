@@ -351,9 +351,12 @@ jjpubrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Publication-Ready Plots (ggpubr)",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "ggpubr",
                     "ggplot2",
-                    "ClinicoPathJamoviModule"))
+                    "car",
+                    "ggExtra",
+                    "tools"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",

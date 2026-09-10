@@ -292,7 +292,11 @@ generalizedrocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 options=options,
                 name="",
-                title="Generalized ROC Analysis")
+                title="Generalized ROC Analysis",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "graphics",
+                    "tram"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructionsText",

@@ -45,7 +45,6 @@ test_that('pathsampling analysis works', {
     showCorrelation = FALSE,
     showDistributionPattern = FALSE,
     distributionThreshold = 5,
-    modelType = 'binomial',
     totalPopulation = 'totalPopulation',
     successStates = 'successStates',
     targetDetections = 1,
@@ -74,33 +73,29 @@ test_that('pathsampling analysis works', {
     showReferencesText = FALSE,
     estimationMethod = 'auto',
     showHeterogeneityTest = FALSE,
-    useGeometricCI = TRUE,
-    ciMethod = 'auto',
     showModelFit = FALSE,
     showObsPred = FALSE,
-    showMarginalInterpretation = TRUE,
-    showPowerAnalysis = FALSE,
-    targetPower = 0.8,
-    targetDetectionProb = 0.95,
+    showSampleSizePlanning = FALSE,
+    planningTargetProb = 0.8,
+    planningAssumedQ = 0.95,
     autoSelectModel = FALSE,
-    appendVariables = FALSE,
     autoDetectHeterogeneity = TRUE
     )
   })
 
-  # Verify and Export OMV
-  expect_true(is.list(model))
-  expect_true(inherits(model, 'jmvcoreClass'))
+  # Verify and Export OMV.
+  # NOTE: the generated test template asserted is.list(model) and
+  # inherits(model, 'jmvcoreClass'); a jamovi analysis actually returns an R6
+  # <fn>Results object (Group / ResultsElement / R6), so both were always false.
+  # They only surfaced here once the analysis stopped crashing before reaching them.
+  expect_s3_class(model, 'pathsamplingResults')
+  expect_true(inherits(model, 'R6'))
 
-  # Define output path
-  omv_path <- file.path('omv_output', 'pathsampling.omv')
-  if (!dir.exists('omv_output')) dir.create('omv_output')
-
-  # Attempt to write OMV
-  expect_no_error({
-    jmvReadWrite::write_omv(model, omv_path)
-  })
-
-  expect_true(file.exists(omv_path))
+  # The generated template also called jmvReadWrite::write_omv(model, ...) here.
+  # write_omv()'s first argument is `dtaFrm` -- a data frame -- so handing it an
+  # analysis results object always failed with "Input data are either not a data
+  # frame or have incorrect dimensions". Dropped rather than left permanently red;
+  # it asserted nothing about pathsampling. See TODO.md (module-wide: the same
+  # block is in ~195 generated test files).
 })
 

@@ -173,6 +173,7 @@ precisionrecallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="",
                 title="Precision-Recall Curve",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "Saito2015",
                     "Davis2006"))
             self$add(jmvcore::Html$new(

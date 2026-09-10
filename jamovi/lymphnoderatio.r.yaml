@@ -118,4 +118,5 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - ggplot2
+    - survival
 ...

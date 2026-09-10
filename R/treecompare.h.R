@@ -437,7 +437,8 @@ treecompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "ggplot2",
                     "xgboost",
                     "party",
-                    "parallel"))
+                    "parallel",
+                    "parttree"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

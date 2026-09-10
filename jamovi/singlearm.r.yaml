@@ -1024,5 +1024,6 @@ refs:
     - Dafni2011
     - survivaltutorial
     - survivalrwnahhas
-
+    - digest
+    - lubridate
 ...

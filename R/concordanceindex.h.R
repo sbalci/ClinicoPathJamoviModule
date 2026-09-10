@@ -386,7 +386,11 @@ concordanceindexResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             super$initialize(
                 options=options,
                 name="",
-                title="Concordance Index (Harrell's C-index)")
+                title="Concordance Index (Harrell's C-index)",
+                refs=list(
+                    "ClinicoPathJamoviModule",
+                    "survival",
+                    "survminer"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",

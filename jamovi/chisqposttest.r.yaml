@@ -265,12 +265,13 @@ items:
           - residualsCutoff
 
 refs:
-    - Cohen1988
     - ClinicoPathJamoviModule
+    - Cohen1988
     - chisq.posthoc.test
     - agresti2013
     - sharpe2015
     - holm1979
     - benjaminihochberg1995
-
+    - boot
+    - pwr
 ...

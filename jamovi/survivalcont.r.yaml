@@ -1593,11 +1593,15 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - finalfit
     - survival
     - survminer
     - dichotomizing
     - survivaltutorial
     - survivalrwnahhas
-    - ClinicoPathJamoviModule
     - SchemperSmith1996
+    - KMunicate
+    - lubridate
+    - patchwork
+    - rpart

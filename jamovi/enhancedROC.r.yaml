@@ -1081,5 +1081,7 @@ refs:
     - Swamidass2010
     - pROC
     - AustinSteyerberg2019ICI
-
+    - boot
+    - caret
+    - splines
 ...

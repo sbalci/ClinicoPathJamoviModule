@@ -292,15 +292,13 @@ items:
           - followupTime
 
 refs:
+    - ClinicoPathJamoviModule
     - survival
     - survminer
     - finalfit
     - cmprsk
     - mstate
     - survivaltutorial
-    - ClinicoPathJamoviModule
-
-
     - janitor
     - labelled
     - glue

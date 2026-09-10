@@ -192,7 +192,8 @@ ctdnadynamicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="",
                 title="ctDNA / MRD Dynamics",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

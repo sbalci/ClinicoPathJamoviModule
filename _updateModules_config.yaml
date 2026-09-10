@@ -45,15 +45,15 @@
 # ==============================================
 
 
-new_version: "1.0.81"
+new_version: "1.0.81.01"
 new_date: "2026-09-09"
 quick: false
 TEST: true
-jjstatsplot: true
-jsurvival: true
-ClinicoPathDescriptives: true
-OncoPath: true
-meddecide: true
+jjstatsplot: false
+jsurvival: false
+ClinicoPathDescriptives: false
+OncoPath: false
+meddecide: false
 
 
 
@@ -356,6 +356,11 @@ modules:
       - "stagemigration-validation.R"
       - "stagemigration-discrimination.R"
       - "stagemigration-competing-risks.R"
+      - "stagemigration-part1.R"
+      - "stagemigration-part2.R"
+      - "stagemigration-part3.R"
+      - "stagemigration-part4.R"
+      - "stagemigration-part5.R"
       - "recist_engine.R"
       # Static/guidance HTML builders extracted from swimmerplot.b.R.
       # Needed while swimmerplot is dev-routed here (menuGroup OncoPathT) and

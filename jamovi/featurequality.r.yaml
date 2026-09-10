@@ -320,5 +320,5 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
+    - graphics
 ...

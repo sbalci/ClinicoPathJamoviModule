@@ -1955,14 +1955,17 @@ items:
           - outcome
 
 refs:
+    - ClinicoPathJamoviModule
     - multivariable
     - survivaltutorial
     - survivalrwnahhas
-    - ClinicoPathJamoviModule
     - survival
     - lubridate
     - rms
     - finalfit
     - survminer
     - SchemperSmith1996
+    - graphics
+    - knitr
+    - riskRegression
 ...

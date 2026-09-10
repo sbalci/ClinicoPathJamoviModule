@@ -105,9 +105,9 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - wagner2002its
     - bernal2017its
-    - ClinicoPathJamoviModule
     - sandwich
     - lmtest
     - ggplot2

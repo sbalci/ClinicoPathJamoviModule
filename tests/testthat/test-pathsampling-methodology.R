@@ -46,7 +46,7 @@ test_that("Beta-binomial estimation differs from unweighted when N varies", {
     )
 
     coefs <- VGAM::Coef(fit)
-    mu_fit <- VGAM::logitlink(coefs[1], inverse = TRUE)
+    mu_fit <- unname(coefs[["mu"]])   # Coef() is already on the natural scale
 
     # Verify mu is closer to weighted mean (0.48) than unweighted (0.40)
     expect_true(abs(mu_fit - 0.48125) < 0.05,
@@ -78,7 +78,7 @@ test_that("Beta-binomial with equal N gives similar weighted/unweighted", {
     )
 
     coefs <- VGAM::Coef(fit)
-    mu_fit <- VGAM::logitlink(coefs[1], inverse = TRUE)
+    mu_fit <- unname(coefs[["mu"]])   # Coef() is already on the natural scale
 
     # With equal N, should match simple mean
     simple_mean <- mean(testData$success / testData$total_pop)
@@ -113,7 +113,7 @@ test_that("Beta-binomial extreme case: one large N dominates", {
     )
 
     coefs <- VGAM::Coef(fit)
-    mu_fit <- VGAM::logitlink(coefs[1], inverse = TRUE)
+    mu_fit <- unname(coefs[["mu"]])   # Coef() is already on the natural scale
 
     # Should be near 0.50 (large study), NOT 0.30 (unweighted)
     expect_true(mu_fit > 0.45,
@@ -204,23 +204,54 @@ test_that("Binomial model ALLOWED when CV < 0.5 (low heterogeneity)", {
 })
 
 test_that("Binomial model warned when 0.3 < CV < 0.5 (moderate heterogeneity)", {
-    # Create data with moderate heterogeneity
-    set.seed(123)
-    testData <- data.frame(
-        case_id = paste0("Case", 1:20),
-        total_samples = rep(20, 20),
-        positive_count = round(runif(20, min = 7, max = 13)),  # Moderate variation
-        first_detection = sample(1:10, 20, replace = TRUE)
+    # This previously only generated random data and asserted its own CV landed in a
+    # band -- it never called pathsampling(), and the runif() fixture actually gave
+    # CV = 0.19. Deterministic fixtures now drive the analysis and check the warning.
+    total <- rep(20L, 20)
+    first <- rep(c(1L, 2L, 3L, 4L), 5)
+
+    moderate <- data.frame(
+        totalSamples   = total,
+        firstDetection = first,
+        positiveCount  = c(3, 4, 4, 5, 5, 6, 6, 7, 7, 8,
+                           12, 13, 13, 14, 14, 15, 15, 16, 16, 17)
     )
+    cv_mod <- sd(moderate$positiveCount / total) / mean(moderate$positiveCount / total)
+    expect_gt(cv_mod, 0.3)
+    expect_lt(cv_mod, 0.5)
 
-    # Calculate CV
-    proportions <- testData$positive_count / testData$total_samples
-    cv <- sd(proportions) / mean(proportions)
+    res <- pathsampling(
+        data              = moderate,
+        totalSamples      = 'totalSamples',
+        firstDetection    = 'firstDetection',
+        positiveCount     = 'positiveCount',
+        estimationMethod  = 'empirical',
+        showBinomialModel = TRUE,
+        showBootstrap     = FALSE
+    )
+    expect_match(res$binomialText$content, 'MODERATE HETEROGENEITY')
+    # Moderate heterogeneity warns but must NOT disable the model.
+    expect_no_match(res$binomialText$content, 'Binomial Model Not Applicable')
 
-    # Verify it's in moderate range
-    # (This may need adjustment based on random seed)
-    expect_true(cv > 0.2 && cv < 0.6,
-                info = sprintf("Test data CV=%.2f should be moderate", cv))
+    # Above CV 0.5 the model is disabled outright.
+    high <- data.frame(
+        totalSamples   = total,
+        firstDetection = first,
+        positiveCount  = c(1, 1, 2, 2, 2, 3, 3, 3, 4, 4,
+                           16, 17, 17, 18, 18, 19, 19, 19, 20, 20)
+    )
+    expect_gt(sd(high$positiveCount / total) / mean(high$positiveCount / total), 0.5)
+
+    res2 <- pathsampling(
+        data              = high,
+        totalSamples      = 'totalSamples',
+        firstDetection    = 'firstDetection',
+        positiveCount     = 'positiveCount',
+        estimationMethod  = 'empirical',
+        showBinomialModel = TRUE,
+        showBootstrap     = FALSE
+    )
+    expect_match(res2$binomialText$content, 'Binomial Model Not Applicable')
 })
 
 # ==============================================================================
@@ -270,8 +301,8 @@ test_that("All fixes work together: VGAM + warnings + enforcement", {
 
     # Extract parameters
     coefs <- VGAM::Coef(fit)
-    mu_fit <- VGAM::logitlink(coefs[1], inverse = TRUE)
-    rho_fit <- VGAM::logitlink(coefs[2], inverse = TRUE)
+    mu_fit <- unname(coefs[["mu"]])   # Coef() is already on the natural scale
+    rho_fit <- unname(coefs[["rho"]]) # Coef() is already on the natural scale
 
     expect_true(is.finite(mu_fit) && mu_fit > 0 && mu_fit < 1)
     expect_true(is.finite(rho_fit) && rho_fit > 0 && rho_fit < 1)
@@ -330,9 +361,8 @@ test_that("Zero variance detected correctly", {
     )
 
     coefs <- VGAM::Coef(fit)
-    rho_fit <- VGAM::logitlink(coefs[2], inverse = TRUE)
+    rho_fit <- unname(coefs[["rho"]]) # Coef() is already on the natural scale
 
     # With no variance, rho should be very small
-    expect_lt(rho_fit, 0.01,
-              info = sprintf("Zero variance should give rho < 0.01, got %.4f", rho_fit))
+    expect_lt(rho_fit, 0.01)   # NB: expect_lt() takes no `info` argument
 })

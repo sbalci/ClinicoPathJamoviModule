@@ -277,8 +277,11 @@ rpasurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="",
                 title="Recursive Partitioning Analysis for Survival",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "survival",
-                    "rpart"))
+                    "rpart",
+                    "rpart.plot",
+                    "survminer"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

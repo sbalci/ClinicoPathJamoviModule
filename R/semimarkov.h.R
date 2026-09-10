@@ -328,11 +328,11 @@ semimarkovResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Semi-Markov Models",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "SemiMarkov",
                     "survival",
                     "ReliabilityTheory",
                     "flexsurv",
-                    "ClinicoPathJamoviModule",
                     "gridExtra",
                     "tools",
                     "scales"))

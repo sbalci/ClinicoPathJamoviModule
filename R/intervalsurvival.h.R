@@ -286,7 +286,8 @@ intervalsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Interval-Censored Survival Analysis",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "stringr"))
+                    "stringr",
+                    "survival"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

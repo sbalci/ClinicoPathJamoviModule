@@ -33,6 +33,6 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
     - sjPlot
+    - digest
 ...

@@ -140,11 +140,11 @@ items:
 
 
 refs:
+    - ClinicoPathJamoviModule
     - ggplot2
     - ggstatsplot
     - statsExpressions
     - correlation
-    - ClinicoPathJamoviModule
-
-
+    - WRS2
+    - digest
 ...

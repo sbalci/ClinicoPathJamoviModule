@@ -393,4 +393,6 @@ refs:
     - ggswim
     - recist
     - SchemperSmith1996
+    - data.table
+    - lubridate
 ...

@@ -247,7 +247,8 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "Fagan1975",
                     "STARD2015",
                     "Buderer1996",
-                    "HuiWalter1980"))
+                    "HuiWalter1980",
+                    "epiR"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
@@ -680,7 +681,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 package = "ClinicoPath",
                 name = "decisioncalculator",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = decisioncalculatorResults$new(options=options),
                 data = data,

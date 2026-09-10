@@ -59,7 +59,6 @@ stagemigration_convertLabelled <- function(data, vars, verbose = FALSE) {
         # Check if variable is labelled
         if (inherits(data[[var]], "haven_labelled")) {
             if (verbose) {
-                message("Converting labelled variable: ", var)
             }
 
             # Convert to factor, preserving both labels and values
@@ -68,7 +67,6 @@ stagemigration_convertLabelled <- function(data, vars, verbose = FALSE) {
         } else if (inherits(data[[var]], c("labelled", "labelled_spss"))) {
             # Handle other labelled types
             if (verbose) {
-                message("Converting labelled variable: ", var)
             }
             data[[var]] <- haven::as_factor(data[[var]])
         }
@@ -124,11 +122,9 @@ stagemigration_validateStagingVars <- function(data, old_stage_var, new_stage_va
     # Ensure factor type
     if (!is.factor(data[[old_stage_var]])) {
         data[[old_stage_var]] <- as.factor(data[[old_stage_var]])
-        if (verbose) message("Converted ", old_stage_var, " to factor")
     }
     if (!is.factor(data[[new_stage_var]])) {
         data[[new_stage_var]] <- as.factor(data[[new_stage_var]])
-        if (verbose) message("Converted ", new_stage_var, " to factor")
     }
 
     # Get levels
@@ -249,7 +245,6 @@ stagemigration_safeExecute <- function(expr,
         if (!silent) {
             # Log detailed error for debugging
             context_str <- if (!is.null(context)) paste0("[", context, "] ") else ""
-            message(paste0("DEBUG: ", context_str, errorMessage, " - ", e$message))
 
             # Show user-friendly warning if specified
             if (!is.null(warningMessage)) {
@@ -261,7 +256,6 @@ stagemigration_safeExecute <- function(expr,
         # Capture warnings but let execution continue
         if (!silent) {
             context_str <- if (!is.null(context)) paste0("[", context, "] ") else ""
-            message(paste0("Warning in ", context_str, errorMessage, ": ", w$message))
         }
         # Re-evaluate the expression suppressing the warning
         suppressWarnings(expr)
@@ -359,26 +353,26 @@ stagemigration_checkSampleSize <- function(n, n_events, n_predictors = 2,
     if (n_events < 10) {
         result$level <- "CRITICAL"
         result$messages <- c(result$messages,
-            paste("CRITICAL: Only", n_events, "events - results unreliable"))
+            sprintf("Only %d events; results are unreliable", as.integer(n_events)))
         result$recommendations <- c(result$recommendations,
             "Collect more data or consider descriptive analysis only")
     } else if (n_events < 20) {
         result$level <- "POOR"
         result$messages <- c(result$messages,
-            paste("WARNING:", n_events, "events - minimal for basic analysis"))
+            sprintf("%d events: the minimum for a basic analysis", as.integer(n_events)))
         result$recommendations <- c(result$recommendations,
             "Results should be interpreted with caution",
             "Avoid complex models and bootstrap validation")
     } else if (n_events < min_events) {
         result$level <- "MARGINAL"
         result$messages <- c(result$messages,
-            paste("NOTICE:", n_events, "events - adequate for", analysis_type, "analysis"))
+            sprintf("%d events, below the %d recommended for a %s analysis", as.integer(n_events), as.integer(min_events), analysis_type))
         result$adequate <- TRUE
     } else {
         result$level <- "ADEQUATE"
         result$adequate <- TRUE
         result$messages <- c(result$messages,
-            paste("Sample size adequate:", n_events, "events"))
+            sprintf("Sample size adequate: %d events", as.integer(n_events)))
     }
 
     # Check events per variable

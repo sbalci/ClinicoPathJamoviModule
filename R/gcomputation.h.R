@@ -157,9 +157,9 @@ gcomputationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 name="",
                 title="G-computation (Parametric G-formula)",
                 refs=list(
+                    "ClinicoPathJamoviModule",
                     "robins1986gformula",
                     "hernan2020whatif",
-                    "ClinicoPathJamoviModule",
                     "ggplot2"))
             self$add(jmvcore::Html$new(
                 options=options,

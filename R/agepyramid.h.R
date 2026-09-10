@@ -256,7 +256,8 @@ agepyramidResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Age Pyramid",
                 refs=list(
-                    "ClinicoPathJamoviModule"))
+                    "ClinicoPathJamoviModule",
+                    "ggcharts"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
@@ -384,7 +385,7 @@ agepyramidBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agepyramid",
-                version = c(1,0,8),
+                version = c(1,0,81),
                 options = options,
                 results = agepyramidResults$new(options=options),
                 data = data,
