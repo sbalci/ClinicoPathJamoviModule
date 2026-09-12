@@ -119,11 +119,7 @@ survivalPowerClass <- R6::R6Class(
             fixed("non_inferiority_table", opts$test_type == "non_inferiority")
             fixed("sensitivity_analysis_table", opts$sensitivity_analysis)
 
-            dist_ok <- is.null(opts$survival_distribution) || opts$survival_distribution == "exponential"
-            if (isTRUE(opts$run_simulation_validation) &&
-                dist_ok &&
-                isTRUE(opts$analysis_type %in% c("sample_size", "power")) &&
-                isTRUE(opts$test_type %in% c("log_rank", "cox_regression"))) {
+            if (isTRUE(opts$run_simulation_validation) && private$.simulation_applicable()) {
                 add_rows(
                     self$results$simulation_validation_table,
                     c("power", "events"),
@@ -163,7 +159,7 @@ survivalPowerClass <- R6::R6Class(
             # Filled only when the Monte Carlo run is both requested and applicable.
             if (isTRUE(self$options$sensitivity_analysis) &&
                 isTRUE(self$options$run_simulation_validation) &&
-                isTRUE(self$options$test_type %in% c("log_rank", "cox_regression"))) {
+                private$.simulation_applicable()) {
                 keys <- c(keys, "simulation")
             }
             keys
@@ -178,15 +174,33 @@ survivalPowerClass <- R6::R6Class(
         },
         .run = function() {
             private$.noticeList <- list()
+            private$.renderNotices()
             private$simulation_cache <- NULL
             private$primary_result_cache <- NULL
             private$primary_numbers <- list()
+            private$calculated_sample_size <- NULL
+
+            # Html restores its content even when clearWith marks it unfilled.
+            # Clear requested narratives before validation can return early.
+            html_outputs <- c(
+                show_interpretation = "clinical_interpretation",
+                show_summary = "natural_language_summary",
+                show_explanations = "educational_explanations",
+                show_glossary = "statistical_glossary",
+                guided_mode = "guided_workflow"
+            )
+            for (option in names(html_outputs)) {
+                if (isTRUE(self$options[[option]])) {
+                    self$results$get(html_outputs[[option]])$setContent("")
+                }
+            }
 
             # Main analysis runner
             if (is.null(self$options$analysis_type) ||
                 is.null(self$options$test_type)) {
                 return()
             }
+            private$.update_instructions()
 
             # Validate inputs (notices are added via private$.addNotice)
             validation_result <- private$.validate_inputs()
@@ -203,6 +217,17 @@ survivalPowerClass <- R6::R6Class(
 
             # Perform analysis
             private$.populate_power_summary()
+            result_key <- switch(self$options$analysis_type,
+                sample_size = "n", power = "power", effect_size = "hr_detectable",
+                duration = "duration"
+            )
+            value <- private$primary_numbers[[result_key]]
+            if (length(value) != 1L || !is.finite(value)) {
+                private$.addNotice(
+                    "ERROR", "Calculation Not Available", private$.calculate_primary_result()
+                )
+                return()
+            }
             private$.perform_power_analysis()
             private$.populate_simulation_comparison() # New: simulation validation
             private$.populate_assumptions()
@@ -417,7 +442,7 @@ survivalPowerClass <- R6::R6Class(
                 # non-inferiority test is one-sided by construction.
                 private$.addNotice("INFO", "One-sided Alpha for Non-inferiority", sprintf(
                     "Non-inferiority is tested one-sided at alpha = %.3f \u{2022} Regulatory submissions conventionally use one-sided 0.025 (enter 0.025 here)",
-                    self$options$alpha_level
+                    private$.one_sided_alpha()
                 ))
             }
 
@@ -691,7 +716,9 @@ survivalPowerClass <- R6::R6Class(
                     return(result)
                 },
                 error = function(e) {
-                    return(paste("Error in calculation:", e$message))
+                    if (identical(e$code, "restart")) stop(e)
+                    private$primary_result_cache <- paste("Error in calculation:", e$message)
+                    return(private$primary_result_cache)
                 }
             )
         },
@@ -1045,6 +1072,7 @@ survivalPowerClass <- R6::R6Class(
 
                         # Fallback / Standard calculation
                         events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
+                        events_needed <- ceiling(events_needed * private$.sequential_inflation(power))
 
                         event_probs <- private$.overall_event_probability(
                             lambda_control = lambda_control,
@@ -1118,12 +1146,14 @@ survivalPowerClass <- R6::R6Class(
                             dropout_rate = self$options$dropout_rate
                         )$total
 
-                        power_calc <- private$.power_from_events(
-                            events = expected_events,
-                            hr = hr,
-                            alpha = alpha,
-                            allocation_ratio = allocation_ratio
-                        )
+                        power_calc <- private$.sequential_power(function(f) {
+                            private$.power_from_events(
+                                events = expected_events / f,
+                                hr = hr,
+                                alpha = alpha,
+                                allocation_ratio = allocation_ratio
+                            )
+                        })
 
                         private$primary_numbers$power <- power_calc
                         private$primary_numbers$events <- expected_events
@@ -1187,7 +1217,7 @@ survivalPowerClass <- R6::R6Class(
         },
         .calculate_non_inferiority = function() {
             analysis_type <- self$options$analysis_type
-            alpha <- self$options$alpha_level
+            alpha <- private$.one_sided_alpha()
             power <- self$options$power_level
             hr_true <- private$.get_effect_hr()
             accrual_period <- self$options$accrual_period
@@ -1255,6 +1285,7 @@ survivalPowerClass <- R6::R6Class(
 
                 private$primary_numbers$n <- n_total
                 private$primary_numbers$events <- events_needed
+                private$calculated_sample_size <- n_total
 
                 return(paste(
                     "Total Sample Size:", n_total,
@@ -1447,11 +1478,7 @@ survivalPowerClass <- R6::R6Class(
                 ci_upper = sim_results$ci_upper,
                 agreement = agreement
             )
-            if ("power" %in% table$rowKeys) {
-                table$setRow(rowKey = "power", values = power_values)
-            } else {
-                table$addRow(rowKey = "power", values = power_values)
-            }
+            table$setRow(rowKey = "power", values = power_values)
 
             # Add expected events comparison
             # Calculate analytical expected events
@@ -1499,11 +1526,7 @@ survivalPowerClass <- R6::R6Class(
                     ci_upper = NA,
                     agreement = events_agreement
                 )
-                if ("events" %in% table$rowKeys) {
-                    table$setRow(rowKey = "events", values = events_values)
-                } else {
-                    table$addRow(rowKey = "events", values = events_values)
-                }
+                table$setRow(rowKey = "events", values = events_values)
             }
 
             # Add table notes with convergence diagnostics
@@ -1776,7 +1799,7 @@ survivalPowerClass <- R6::R6Class(
             # Calculate actual non-inferiority parameters
             ni_margin <- self$options$ni_margin
             ni_type <- self$options$ni_type
-            alpha <- self$options$alpha_level
+            alpha <- private$.one_sided_alpha()
             hr <- private$.get_effect_hr()
 
             # Get calculated sample size if this is a sample size analysis
@@ -1892,34 +1915,16 @@ survivalPowerClass <- R6::R6Class(
             n_exp <- calculated_n / (ratio + num_arms - 1)
             n_control <- n_exp * ratio
 
-            lambda_control <- log(2) / self$options$control_median_survival
             hr_effect <- private$.get_effect_hr()
 
             # Each comparison uses the shared control plus its own arm.
-            comparison_events <- private$.expected_events_from_sample(
-                n_total = n_control + n_exp,
-                lambda_control = lambda_control,
-                hr = hr_effect,
-                allocation_ratio = ratio,
-                accrual_period = self$options$accrual_period,
-                follow_up_period = self$options$follow_up_period,
-                dropout_rate = self$options$dropout_rate
-            )$total
-
-            pairwise_power <- private$.sequential_power(function(f) {
-                private$.power_from_events(
-                    events = comparison_events / f,
-                    hr = hr_effect,
-                    alpha = adjusted_alpha,
-                    allocation_ratio = ratio
-                )
-            })
+            pairwise_power <- private$.basic_power_calc(n_control + n_exp, hr_effect, adjusted_alpha)
             individual_power <- round(pairwise_power * 100, 1)
 
             # Disjunctive power: P(at least one comparison rejects) when every
             # experimental arm truly has the assumed hazard ratio. The test
             # statistics are correlated because they share the control arm --
-            # rho = n_control / (n_control + n_exp) under equal experimental arms
+            # rho = n_exp / (n_control + n_exp) under equal experimental arms
             # -- so the previous 1 - (1 - p)^(k-1) (independence) and the
             # "adjustment factor" multipliers (1/(k-1), 1/sqrt(k-1), 0.9, 0.85)
             # were both fabrications rather than probabilities.
@@ -1927,7 +1932,7 @@ survivalPowerClass <- R6::R6Class(
                 pairwise_power = pairwise_power,
                 alpha = adjusted_alpha,
                 n_comparisons = num_arms - 1,
-                rho = n_control / (n_control + n_exp)
+                rho = n_exp / (n_control + n_exp)
             )
 
             comparisons <- list()
@@ -2143,9 +2148,8 @@ survivalPowerClass <- R6::R6Class(
         # a crude 0.67 average-follow-up approximation with no dropout while the
         # base came from the exact headline calculation, so the table reported a
         # "change" produced by the two formulas rather than by the parameter.
-        # Fixed-design analytic formula: the design-effect, shared-control and
-        # group-sequential multipliers are common to base and scenario and cancel in
-        # the relative change.
+        # Design factors must also enter power scenarios: they do not cancel
+        # inside the normal probability function.
         .sensitivity_value = function(hr = private$.get_effect_hr(),
                                       alpha = self$options$alpha_level,
                                       accrual = self$options$accrual_period,
@@ -2165,32 +2169,46 @@ survivalPowerClass <- R6::R6Class(
             lambda_c <- log(2) / median
             props <- private$.allocation_props(ratio)
             info_fraction <- props$control * props$treatment
+            adjustment <- private$.adjust_sample_for_design()
+            design_factor <- adjustment$design_effect * adjustment$arm_factor
+            inflation <- private$.sequential_inflation(power, alpha)
+            alpha_adj <- private$.adjust_alpha_for_multiplicity(alpha)
+            n_input <- n_input / design_factor
 
             if (isTRUE(self$options$test_type == "non_inferiority")) {
                 margin <- self$options$ni_margin
                 if (!is.finite(margin) || hr >= margin) {
                     return(NA_real_)
                 }
-                z_alpha <- qnorm(1 - alpha) # one-sided, as in .calculate_non_inferiority()
+                z_alpha <- qnorm(1 - alpha_adj)
                 log_effect <- log(hr) - log(margin)
                 if (analysis_type == "sample_size") {
                     events <- ceiling((z_alpha + qnorm(power))^2 / (log_effect^2 * info_fraction))
-                    return(private$.sample_size_from_events(events, lambda_c, hr, ratio, accrual, follow_up, dropout))
+                    events <- ceiling(events * inflation)
+                    n <- private$.sample_size_from_events(events, lambda_c, hr, ratio,
+                                                          accrual, follow_up, dropout)
+                    return(ceiling(n * design_factor))
                 }
                 events <- private$.expected_events_from_sample(n_input, lambda_c, hr, ratio, accrual, follow_up, dropout)$total
-                return(pnorm(-z_alpha - sqrt(private$.information_from_events(events, ratio)) * log_effect))
+                return(private$.sequential_power(function(f) {
+                    pnorm(-z_alpha - sqrt(private$.information_from_events(events, ratio) / f) * log_effect)
+                }, alpha))
             }
 
             if (hr == 1) {
                 return(NA_real_)
             }
-            alpha_adj <- private$.adjust_alpha_for_multiplicity(alpha)
             if (analysis_type == "sample_size") {
                 events <- private$.events_needed_log_rank(hr, alpha_adj, power, ratio)
-                return(private$.sample_size_from_events(events, lambda_c, hr, ratio, accrual, follow_up, dropout))
+                events <- ceiling(events * inflation)
+                n <- private$.sample_size_from_events(events, lambda_c, hr, ratio,
+                                                      accrual, follow_up, dropout)
+                return(ceiling(n * design_factor))
             }
             events <- private$.expected_events_from_sample(n_input, lambda_c, hr, ratio, accrual, follow_up, dropout)$total
-            private$.power_from_events(events, hr, alpha_adj, ratio)
+            private$.sequential_power(function(f) {
+                private$.power_from_events(events / f, hr, alpha_adj, ratio)
+            }, alpha)
         },
         .calculate_sensitivity_impact = function(param_name, new_value) {
             tryCatch(
@@ -3033,12 +3051,14 @@ survivalPowerClass <- R6::R6Class(
                     pnorm(-z_alpha - sqrt(info / f) * (log(hr) - log(hr_margin)))
                 })
             } else {
-                power <- private$.power_from_events(
-                    events = expected_events,
-                    hr = hr,
-                    alpha = alpha,
-                    allocation_ratio = self$options$allocation_ratio
-                )
+                power <- private$.sequential_power(function(f) {
+                    private$.power_from_events(
+                        events = expected_events / f,
+                        hr = hr,
+                        alpha = alpha,
+                        allocation_ratio = self$options$allocation_ratio
+                    )
+                })
             }
             max(0, min(1, power))
         },
@@ -3065,6 +3085,7 @@ survivalPowerClass <- R6::R6Class(
                     power = power,
                     ratio = self$options$allocation_ratio
                 )
+                events_needed <- ceiling(events_needed * private$.sequential_inflation(power))
             }
 
             lambda_control <- log(2) / self$options$control_median_survival
@@ -3631,7 +3652,7 @@ survivalPowerClass <- R6::R6Class(
             events * props$control * props$treatment
         },
         .power_from_events = function(events, hr, alpha, allocation_ratio) {
-            if (is.null(events) || events <= 0 || is.null(hr) || hr <= 0 || hr == 1) {
+            if (is.null(events) || events <= 0 || is.null(hr) || hr <= 0) {
                 return(0)
             }
 
@@ -3642,7 +3663,9 @@ survivalPowerClass <- R6::R6Class(
 
             z_alpha <- qnorm(1 - alpha / 2)
             z <- sqrt(info) * abs(log(hr))
-            pnorm(z - z_alpha)
+            # Both rejection tails are needed near the null: HR = 1 has power
+            # alpha, and the opposite tail remains nonzero for small effects.
+            pnorm(z - z_alpha) + pnorm(-z - z_alpha)
         },
         .sample_size_from_events = function(events_needed, lambda_control, hr, allocation_ratio, accrual_period, follow_up_period, dropout_rate) {
             probs <- private$.overall_event_probability(lambda_control, hr, allocation_ratio, accrual_period, follow_up_period, dropout_rate)
@@ -3733,7 +3756,8 @@ survivalPowerClass <- R6::R6Class(
         # do not pass through the design point they are drawn to illustrate.
         .design_scale = function() {
             adj <- private$.adjust_sample_for_design()
-            adj$design_effect * adj$arm_factor * private$.sequential_inflation()
+            # Sequential information is handled once, inside the calculation helpers.
+            adj$design_effect * adj$arm_factor
         },
         # Hazard-ratio grid for the curves, centred on the assumed effect and
         # always on one side of 1. HR = 1 has no finite sample size (the log-rank
@@ -3821,11 +3845,12 @@ survivalPowerClass <- R6::R6Class(
         # reproduces .events_needed_log_rank's qnorm(1 - alpha/2).
         # One-sided alpha of the test being planned: half the multiplicity-adjusted
         # two-sided level for superiority, alpha_level itself for non-inferiority.
-        .one_sided_alpha = function() {
+        .one_sided_alpha = function(alpha = self$options$alpha_level) {
+            alpha <- private$.adjust_alpha_for_multiplicity(alpha)
             if (isTRUE(self$options$test_type == "non_inferiority")) {
-                self$options$alpha_level
+                alpha
             } else {
-                private$.adjust_alpha_for_multiplicity(self$options$alpha_level) / 2
+                alpha / 2
             }
         },
         # Information-scale group-sequential design (n.fix = 1). Boundaries, alpha
@@ -3835,7 +3860,7 @@ survivalPowerClass <- R6::R6Class(
         # non-inferiority, where a gsSurv call at the assumed HR of 1 has no effect
         # to design for and failed. Efficacy-only (test.type = 1): the options
         # expose an alpha-spending function and no futility rule.
-        .gs_info_design = function(power = self$options$power_level) {
+        .gs_info_design = function(power = self$options$power_level, alpha = self$options$alpha_level) {
             if (!requireNamespace("gsDesign", quietly = TRUE)) {
                 return(NULL)
             }
@@ -3843,7 +3868,7 @@ survivalPowerClass <- R6::R6Class(
                 !isTRUE(self$options$alpha_spending %in% c("obrien_fleming", "pocock"))) {
                 return(NULL)
             }
-            one_sided <- private$.one_sided_alpha()
+            one_sided <- private$.one_sided_alpha(alpha)
             if (!is.finite(power) || power <= one_sided || power >= 1) {
                 return(NULL)
             }
@@ -3859,31 +3884,31 @@ survivalPowerClass <- R6::R6Class(
         },
         # Factor by which the sequential design's maximum information exceeds the
         # fixed design's at the same alpha and power; 1 without interim looks.
-        .sequential_inflation = function(power = self$options$power_level) {
-            design <- private$.gs_info_design(power)
+        .sequential_inflation = function(power = self$options$power_level, alpha = self$options$alpha_level) {
+            design <- private$.gs_info_design(power, alpha)
             if (is.null(design)) 1 else max(design$n.I)
         },
         # Power of the sequential design, given fixed_power(f): the fixed-design
         # power when the available information is divided by f. The inflation
         # itself depends on the power being solved for, so solve
         # p = fixed_power(inflation(p)).
-        .sequential_power = function(fixed_power) {
-            if (is.null(private$.gs_info_design())) {
+        .sequential_power = function(fixed_power, alpha = self$options$alpha_level) {
+            if (is.null(private$.gs_info_design(alpha = alpha))) {
                 return(fixed_power(1))
             }
-            lo <- private$.one_sided_alpha() + 0.01
+            lo <- private$.one_sided_alpha(alpha) + 0.01
             hi <- 0.999
-            gap <- function(p) fixed_power(private$.sequential_inflation(p)) - p
+            gap <- function(p) fixed_power(private$.sequential_inflation(p, alpha)) - p
             g_lo <- gap(lo)
             g_hi <- gap(hi)
             if (!is.finite(g_lo) || !is.finite(g_hi)) {
                 return(NA_real_)
             }
             if (g_lo <= 0) {
-                return(fixed_power(private$.sequential_inflation(lo)))
+                return(fixed_power(private$.sequential_inflation(lo, alpha)))
             }
             if (g_hi >= 0) {
-                return(fixed_power(private$.sequential_inflation(hi)))
+                return(fixed_power(private$.sequential_inflation(hi, alpha)))
             }
             uniroot(gap, c(lo, hi))$root
         },
@@ -3948,6 +3973,13 @@ survivalPowerClass <- R6::R6Class(
             k <- nrow(design$eNC)
             sum(design$eNC[k, ]) + sum(design$eNE[k, ])
         },
+        .simulation_applicable = function() {
+            isTRUE(self$options$analysis_type %in% c("sample_size", "power")) &&
+                isTRUE(self$options$test_type %in% c("log_rank", "cox_regression")) &&
+                isTRUE(self$options$survival_distribution == "exponential") &&
+                isTRUE(self$options$study_design %in% c("two_arm_parallel", "stratified")) &&
+                isTRUE(self$options$interim_analyses == 0)
+        },
         .run_simulation_analysis = function() {
             # Enhanced simulation-based power analysis with convergence diagnostics
             if (!self$options$run_simulation_validation) {
@@ -3960,10 +3992,10 @@ survivalPowerClass <- R6::R6Class(
             # Schoenfeld arithmetic) but not for non-inferiority, where the table
             # agreed with itself while disagreeing with the one-sided NI power
             # reported above it.
-            if (!isTRUE(self$options$test_type %in% c("log_rank", "cox_regression"))) {
+            if (!private$.simulation_applicable()) {
                 private$.addNotice(
                     "INFO", "Simulation Validation Not Applicable",
-                    "Monte Carlo validation simulates a two-sided superiority log-rank test \u{2022} It is available for log-rank and Cox designs, not for non-inferiority"
+                    "Monte Carlo validation requires a fixed two-arm log-rank or Cox sample-size or power calculation with exponential survival. Multi-arm, cluster-randomized, group-sequential and non-inferiority designs are not simulated."
                 )
                 return(NULL)
             }
@@ -3976,7 +4008,6 @@ survivalPowerClass <- R6::R6Class(
             # unchanged design; without it the agreement verdict flips on noise alone.
             # withr::local_seed sets the seed locally and restores session RNG on exit.
             sim_seed <- self$options$simulation_seed
-            if (is.null(sim_seed) && !is.null(self$options$seed)) sim_seed <- self$options$seed
             if (is.null(sim_seed) || !is.finite(sim_seed)) sim_seed <- 42
             withr::local_seed(as.integer(sim_seed))
 

@@ -45,6 +45,20 @@ test_that("a disagreement is not counted as agreement when level orders differ",
     expect_equal(r$overviewTable$asDF$overall_agreement, 0)
 })
 
+test_that("ordinal methods are disabled when raters declare different level orders", {
+    d <- data.frame(
+        r1 = ordered(rep(c("Benign", "EIN"), 10), levels = c("Benign", "EIN")),
+        r2 = ordered(rep(c("Benign", "EIN"), 10), levels = c("EIN", "Benign"))
+    )
+    result <- pa_run(d, vars = names(d), wght = "equal", icc = TRUE, gwetAC = TRUE)
+
+    expect_match(result$warnings$content, "different category order")
+    expect_match(result$warnings$content, "reverted to unweighted kappa")
+    expect_equal(result$iccTable$rowCount, 0)
+    gwet <- result$gwetACTable$asDF
+    expect_equal(gwet$value[1], gwet$value[2])
+})
+
 test_that("global_mode tie-breaking resolves ties that miss the majority", {
     lv <- c("Benign", "Atypical", "Malignant")
     set.seed(9)
@@ -77,6 +91,76 @@ test_that("ordinal Krippendorff's alpha and Gwet's AC2 use the factor level orde
     expect_equal(gw$value[grepl("AC2", gw$coefficient)], expected_ac2, tolerance = 1e-4)
 })
 
+test_that("weighted Cohen kappa uses the declared ordinal level order", {
+    lv <- c("Benign", "Atypical", "Malignant")
+    d <- data.frame(
+        r1 = factor(c(rep("Benign", 20), rep("Atypical", 10), rep("Malignant", 10)),
+                    lv, ordered = TRUE),
+        r2 = factor(c(rep("Atypical", 10), rep("Malignant", 10),
+                      rep("Atypical", 10), rep("Malignant", 10)),
+                    lv, ordered = TRUE)
+    )
+    result <- pa_run(d, vars = names(d), wght = "equal")$kappaTable$asDF$kappa
+    expected <- irr::kappa2(
+        as.data.frame(lapply(d, as.integer)),
+        weight = "equal"
+    )$value
+    alphabetized <- irr::kappa2(d, weight = "equal")$value
+
+    expect_false(isTRUE(all.equal(expected, alphabetized)))
+    expect_equal(result, expected, tolerance = 1e-8)
+})
+
+test_that("factor labels survive category summaries and style profiles", {
+    lv <- c("Benign", "Atypical", "Malignant")
+    d <- pa_ratings(n = 40, raters = 4, levels = lv)
+    result <- pa_run(
+        d,
+        vars = names(d),
+        categoryAnalysis = TRUE,
+        performClustering = TRUE,
+        nStyleGroups = 2
+    )
+
+    expect_setequal(result$categoryTable$asDF$category, lv)
+    expect_setequal(result$styleGroupProfiles$asDF$category, lv)
+    expect_equal(sum(result$styleGroupProfiles$asDF$frequency), nrow(d) * ncol(d))
+})
+
+test_that("Gwet confidence intervals use irrCAC's t reference distribution", {
+    d <- pa_ratings(n = 12, raters = 3)
+    result <- pa_run(d, vars = names(d), gwetAC = TRUE)$gwetACTable$asDF
+    lv <- c("Benign", "Atypical", "Malignant")
+    expected <- irrCAC::gwet.ac1.raw(
+        d,
+        weights = "unweighted",
+        categ.labels = lv
+    )$est
+    critical <- stats::qt(0.975, df = nrow(d) - 1)
+    lower <- max(-1, expected$coeff.val - critical * expected$coeff.se)
+    upper <- min(1, expected$coeff.val + critical * expected$coeff.se)
+
+    expect_equal(result$ci_lower[result$coefficient == "Gwet's AC1"], lower)
+    expect_equal(result$ci_upper[result$coefficient == "Gwet's AC1"], upper)
+})
+
+test_that("rater names are escaped in HTML summaries", {
+    d <- pa_ratings(n = 30, raters = 3)
+    unsafe <- "<img src=x onerror=alert(1)>"
+    names(d)[1] <- unsafe
+    result <- pa_run(
+        d,
+        vars = names(d),
+        multiraterMethod = "cohen",
+        showClinicalSummary = TRUE
+    )
+
+    expect_false(grepl(unsafe, result$clinicalSummary$content, fixed = TRUE))
+    expect_false(grepl(unsafe, result$reportTemplate$content, fixed = TRUE))
+    expect_match(result$clinicalSummary$content, "&lt;img", fixed = TRUE)
+    expect_match(result$reportTemplate$content, "&lt;img", fixed = TRUE)
+})
+
 test_that("Krippendorff's alpha reproduces Krippendorff's (2011) published worked example", {
     # 4 observers x 12 units with missing data. irrCAC gives .834 / .800 for
     # ordinal / interval, which is why the module computes alpha with irr.
@@ -94,6 +178,24 @@ test_that("Krippendorff's alpha reproduces Krippendorff's (2011) published worke
     }
 })
 
+test_that("Krippendorff interpretations use alpha-specific reliability guidelines", {
+    data <- pa_ratings()
+    helper <- pa_private(data, vars = paste0("r", 1:3))$private$.interpretKrippendorff
+
+    expect_match(helper(0.666), "Below the conventional 0.667")
+    expect_match(helper(0.667), "Tentative conclusions")
+    expect_match(helper(0.799), "Tentative conclusions")
+    expect_match(helper(0.800), "Meets the conventional 0.80")
+
+    result <- pa_run(
+        data, vars = paste0("r", 1:3),
+        multiraterMethod = "krippendorff", kripp = TRUE
+    )
+    expected <- helper(result$krippTable$asDF$alpha)
+    expect_equal(result$kappaTable$asDF$interpretation, expected)
+    expect_equal(result$krippTable$asDF$interpretation, expected)
+})
+
 test_that("Krippendorff bootstrap produces a real interval", {
     r <- pa_run(pa_ratings(n = 80), vars = paste0("r", 1:3), kripp = TRUE,
                 bootstrap = TRUE, bootstrapSamples = 200)
@@ -101,6 +203,110 @@ test_that("Krippendorff bootstrap produces a real interval", {
     expect_true(is.finite(k$ci_lower) && is.finite(k$ci_upper))
     expect_lt(k$ci_lower, k$alpha)
     expect_gt(k$ci_upper, k$alpha)
+})
+
+test_that("Krippendorff uses partially rated cases", {
+    lv <- c("A", "B", "C")
+    d <- data.frame(
+        r1 = factor(c("A", "A", "B", "B", "C", "C"), lv),
+        r2 = factor(c("A", NA, "B", "C", "C", NA), lv),
+        r3 = factor(c("A", "B", NA, "C", "B", "C"), lv)
+    )
+    result <- pa_run(d, vars = names(d), kripp = TRUE)
+    encoded <- t(vapply(d, as.integer, integer(nrow(d))))
+    expected <- irr::kripp.alpha(encoded, method = "nominal")$value
+
+    expect_equal(result$krippTable$asDF$alpha, expected, tolerance = 1e-8)
+    expect_match(result$krippTable$notes$data$note, "including 3 partially rated cases")
+})
+
+test_that("Krippendorff remains available when no row is complete", {
+    lv <- c("A", "B")
+    d <- data.frame(
+        r1 = factor(c("A", NA, "A", "B"), lv),
+        r2 = factor(c("A", "A", NA, "B"), lv),
+        r3 = factor(c(NA, "A", "B", NA), lv)
+    )
+    result <- pa_run(
+        d, vars = names(d), multiraterMethod = "krippendorff", kripp = TRUE
+    )
+
+    expect_true(is.finite(result$kappaTable$asDF$kappa))
+    expect_true(is.finite(result$krippTable$asDF$alpha))
+    expect_match(result$warnings$content, "No case is complete")
+})
+
+test_that("pairwise Cohen analyses use pair-specific available cases", {
+    lv <- c("A", "B")
+    data <- data.frame(
+        r1 = factor(c("A", "A", "B", "B", "A", "A", "B", "B", rep(NA, 4)), lv),
+        r2 = factor(c("A", "B", "B", "B", rep(NA, 4), "A", "A", "B", "B"), lv),
+        r3 = factor(c(rep(NA, 4), "A", "B", "B", "B", "A", "B", "B", "B"), lv)
+    )
+    result <- pa_run(
+        data, vars = names(data), multiraterMethod = "cohen",
+        pairwiseAnalysis = TRUE, sft = TRUE
+    )
+    observed <- result$pairwiseTable$asDF
+
+    expect_equal(nrow(observed), 3)
+    expect_equal(result$kappaTable$rowCount, 3)
+    expect_equal(result$kappaTable$asDF$kappa, observed$kappa)
+    expect_match(result$warnings$content, "support partially observed ratings used the available data")
+    expect_match(result$kappaTable$notes$pairwise_n$note, "r1 vs r2: 4")
+    expect_match(result$pairwiseTable$notes$pairwise_n$note, "r1 vs r2: 4")
+    frequencies <- result$raterFrequencyTables$frequencyTable$asDF
+    frequency_totals <- tapply(frequencies$frequency, frequencies$rater, sum)
+    expect_equal(as.numeric(frequency_totals), c(8, 8, 8))
+    expect_equal(dimnames(frequency_totals)[[1]], c("r1", "r2", "r3"))
+    expect_match(
+        result$raterFrequencyTables$frequencyTable$notes$denominator$note,
+        "non-missing ratings"
+    )
+    for (row in seq_len(nrow(observed))) {
+        pair <- strsplit(observed$rater_pair[row], " vs ", fixed = TRUE)[[1]]
+        pair_data <- data[pair]
+        pair_data <- pair_data[stats::complete.cases(pair_data), , drop = FALSE]
+        expect_equal(observed$kappa[row], irr::kappa2(pair_data)$value)
+    }
+})
+
+test_that("BCa intervals use jackknife acceleration and disclose fallback", {
+    analysis <- pa_private(
+        pa_ratings(n = 30), vars = paste0("r", 1:3), bootstrapCIType = "bca"
+    )
+    helper <- analysis$private$.bootstrapInterval
+    draws <- stats::qgamma((1:200 - 0.5) / 200, shape = 2)
+    bca <- helper(draws, original = 1.7, jackknife_values = c(1.1, 1.3, 1.5, 1.9, 2.4))
+    fallback <- helper(draws, original = 1.7, jackknife_values = rep(1.7, 5))
+
+    expect_identical(bca$method, "BCa")
+    expect_false(bca$fallback)
+    expect_identical(fallback$method, "percentile")
+    expect_true(fallback$fallback)
+})
+
+test_that("trend sequence variable defines case order", {
+    lv <- c("A", "B")
+    base <- data.frame(
+        r1 = factor(rep(c("A", "B"), 20), lv),
+        r2 = factor(c(rep(c("B", "A"), 10), rep(c("A", "B"), 10)), lv),
+        r3 = factor(c(rep(c("A", "B"), 10), rep(c("A", "B"), 10)), lv),
+        sequence = seq_len(40)
+    )
+    set.seed(18)
+    shuffled <- base[sample.int(nrow(base)), ]
+    expected <- pa_run(
+        base, vars = c("r1", "r2", "r3"), agreementTrendAnalysis = TRUE
+    )$agreementTrendTable$asDF
+    ordered <- pa_run(
+        shuffled, vars = c("r1", "r2", "r3"), agreementTrendAnalysis = TRUE,
+        sequenceVariable = "sequence"
+    )$agreementTrendTable
+
+    expect_equal(ordered$asDF$agreement_percent, expected$agreement_percent)
+    expect_equal(ordered$asDF$kappa, expected$kappa)
+    expect_match(ordered$notes$order$note, "ordered by 'sequence'")
 })
 
 test_that("trend, bias and difficulty plots show the analysed data", {
@@ -142,6 +348,45 @@ test_that("META_ rows supply rater characteristics without leaking into categori
                                 categoryAnalysis = TRUE))
     expect_false(any(c("5", "10", "15", "20", "25") %in% r$categoryTable$asDF$category))
     expect_equal(r$diagnosticStyleTable$asDF$experience, c("5", "10", "15", "20", "25"))
+})
+
+test_that("metadata rows require a case ID variable", {
+    d <- pa_ratings(n = 20, raters = 3)
+    expect_error(
+        pa_run(d, vars = names(d), useMetadataRows = TRUE),
+        "case ID variable"
+    )
+})
+
+test_that("metadata-only values are removed from shared factor levels", {
+    ratings <- rep(c("Low", "Middle", "High"), length.out = 20)
+    raw <- data.frame(
+        r1 = c(ratings, "5", "Academic"),
+        r2 = c(ratings, "10", "Community"),
+        r3 = c(ratings, "15", "Academic"),
+        case_id = c(paste0("C", seq_len(20)), "META_experience", "META_institution")
+    )
+    shared_levels <- unique(unlist(raw[paste0("r", 1:3)], use.names = FALSE))
+    raw[paste0("r", 1:3)] <- lapply(
+        raw[paste0("r", 1:3)], factor, levels = shared_levels, ordered = TRUE
+    )
+    raw$case_id <- factor(raw$case_id)
+
+    checked <- pa_private(
+        raw,
+        vars = paste0("r", 1:3),
+        caseID = "case_id",
+        useMetadataRows = TRUE,
+        sft = TRUE
+    )
+
+    expect_equal(nrow(checked$private$.data_matrix), 20)
+    expect_true(all(vapply(
+        checked$private$.data_matrix,
+        function(x) identical(levels(x), c("Low", "Middle", "High")),
+        logical(1)
+    )))
+    expect_equal(checked$analysis$results$raterFrequencyTables$frequencyTable$rowCount, 9)
 })
 
 test_that("reject() fills its placeholder", {
@@ -200,6 +445,25 @@ test_that("sample size planning matches kappaSize", {
     expect_equal(s$value[s$parameter == "3 raters"], paste(expected, "cases"))
 })
 
+test_that("sample size planning does not silently alter boundary targets", {
+    d <- pa_ratings(n = 30, raters = 2, levels = c("Negative", "Positive"))
+    expect_error(
+        pa_run(d, vars = names(d), sampleSizePlanning = TRUE,
+               targetKappa = 0, targetPrecision = 0.1),
+        "targetKappa|strictly between 0 and 1"
+    )
+    expect_error(
+        pa_run(d, vars = names(d), sampleSizePlanning = TRUE,
+               targetKappa = 1, targetPrecision = 0.1),
+        "targetKappa|strictly between 0 and 1"
+    )
+    expect_error(
+        pa_run(d, vars = names(d), sampleSizePlanning = TRUE,
+               targetKappa = 0.95, targetPrecision = 0.1),
+        "confidence interval stays within 0 to 1"
+    )
+})
+
 test_that("one dissent among 10 raters is not labelled difficult", {
     base <- c(rep("Benign", 10), rep("EIN", 10))
     d <- as.data.frame(stats::setNames(lapply(1:10, function(i) {
@@ -241,10 +505,20 @@ test_that("arbitration flags tied cases in the consensus summary", {
 
 test_that("the exact option is labelled Conger's kappa and uses Conger's SE", {
     d <- pa_ratings(n = 80, raters = 4)
-    k <- pa_run(d, vars = paste0("r", 1:4), exct = TRUE, fleissCI = TRUE)$kappaTable$asDF
+    r <- pa_run(
+        d,
+        vars = paste0("r", 1:4),
+        exct = TRUE,
+        fleissCI = TRUE,
+        showClinicalSummary = TRUE
+    )
+    k <- r$kappaTable$asDF
     expect_match(k$method, "Conger")
     expect_equal(k$kappa, irr::kappam.fleiss(d, exact = TRUE)$value, tolerance = 1e-6)
     expect_equal(k$se, irrCAC::conger.kappa.raw(d)$est$coeff.se, tolerance = 1e-3)
+    expect_true(is.na(k$p))
+    expect_match(r$clinicalSummary$content, "not available")
+    expect_gt(nchar(r$reportTemplate$content), 0)
 })
 
 test_that("Gwet's AC2 is not described as accounting for rater heterogeneity", {

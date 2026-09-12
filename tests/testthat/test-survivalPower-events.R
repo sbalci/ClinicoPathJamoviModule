@@ -150,3 +150,35 @@ test_that("every preset produces a usable analysis, not a validation error", {
             info = paste(preset_name, "produced:", value))
     }
 })
+
+test_that("presets recover a usable design after unsupported settings were selected", {
+    skip_if_not_installed("jsonlite")
+    node <- Sys.which("node")
+    skip_if(!nzchar(node), "Node.js is unavailable")
+    script <- tempfile(fileext = ".js")
+    on.exit(unlink(script), add = TRUE)
+    writeLines(c(
+        paste0("const events = require(", jsonlite::toJSON(normalizePath(events_js), auto_unbox=TRUE), ");"),
+        "const results = [];",
+        "for (const preset of ['custom', 'oncology_phase3', 'cardio_prevention',",
+        "                      'biomarker_study', 'non_inferiority', 'pilot_study']) {",
+        "  const values = {analysis_type:'effect_size', survival_distribution:'weibull',",
+        "    accrual_pattern:'custom', interim_analyses:3, alpha_spending:'pocock'};",
+        "  const ui = new Proxy({}, {get: (_, key) => key === 'clinical_preset'",
+        "    ? {value: () => preset} : {setValue: value => values[key] = value}});",
+        "  events.onChange_clinicalPreset(ui);",
+        "  results.push(values);",
+        "}",
+        "process.stdout.write(JSON.stringify(results));"
+    ), script)
+    output <- system2(node, shQuote(script), stdout = TRUE, stderr = TRUE)
+    expect_null(attr(output, "status"))
+    configs <- jsonlite::fromJSON(paste(output, collapse = "\n"), simplifyVector = FALSE)
+    for (config in configs) {
+        expect_equal(config$analysis_type, "sample_size")
+        expect_equal(config$survival_distribution, "exponential")
+        expect_equal(config$accrual_pattern, "uniform")
+        expect_equal(config$interim_analyses, 0)
+        expect_equal(config$alpha_spending, "none")
+    }
+})

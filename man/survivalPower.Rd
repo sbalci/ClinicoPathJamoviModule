@@ -64,7 +64,8 @@ Size Type: a hazard ratio, a median survival ratio (treatment/control), or
 a survival probability difference read at the Additional Follow-up time.
 For RMST Difference the RMST options are used instead.}
 
-\item{alpha_level}{Significance level (two-sided)}
+\item{alpha_level}{Significance level (two-sided for superiority, one-sided
+for non-inferiority)}
 
 \item{power_level}{Desired statistical power}
 
@@ -115,8 +116,10 @@ rather than returning a number the formulas cannot justify.}
 ranges}
 
 \item{run_simulation_validation}{Validate analytical power calculations
-using Monte Carlo simulation. Available for log-rank and Cox designs under
-the exponential assumption. About 6 seconds at the default 2000 runs.}
+using Monte Carlo simulation. Available for fixed two-arm log-rank and Cox
+sample-size or power calculations under the exponential assumption.
+Multi-arm, cluster, interim-analysis and non-inferiority designs are not
+simulated. About 6 seconds at the default 2000 runs.}
 
 \item{simulation_runs}{Number of Monte Carlo runs. The default of 2000
 gives a Monte Carlo standard error below 0.01 for power near 0.8.}

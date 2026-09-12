@@ -14,6 +14,32 @@ items:
           - alpha_level
           - power_level
           - control_median_survival
+          - clinical_preset
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - allocation_ratio
+          - sample_size_input
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
 
     - name: instructions
       title: Instructions
@@ -51,6 +77,7 @@ items:
           - sensitivity_analysis
           - simulation_runs
           - simulation_seed
+          - run_simulation_validation
 
     - name: power_summary
       title: 'Power Analysis Summary'
@@ -89,6 +116,7 @@ items:
           - sensitivity_analysis
           - simulation_runs
           - simulation_seed
+          - run_simulation_validation
       columns:
           - name: analysis_type
             title: 'Analysis Type'
@@ -135,6 +163,21 @@ items:
           - simulation_runs
           - simulation_seed
           - run_simulation_validation
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - accrual_pattern
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
       columns:
           - name: metric
             title: 'Metric'
@@ -192,6 +235,7 @@ items:
           - sensitivity_analysis
           - simulation_runs
           - simulation_seed
+          - run_simulation_validation
       columns:
           - name: parameter
             title: 'Parameter'
@@ -240,6 +284,7 @@ items:
           - sensitivity_analysis
           - simulation_runs
           - simulation_seed
+          - run_simulation_validation
       columns:
           - name: parameter
             title: 'Parameter'
@@ -288,6 +333,7 @@ items:
           - sensitivity_analysis
           - simulation_runs
           - simulation_seed
+          - run_simulation_validation
       columns:
           - name: parameter
             title: 'Parameter'
@@ -336,6 +382,7 @@ items:
           - sensitivity_analysis
           - simulation_runs
           - simulation_seed
+          - run_simulation_validation
       columns:
           - name: parameter
             title: 'Parameter'
@@ -384,6 +431,7 @@ items:
           - sensitivity_analysis
           - simulation_runs
           - simulation_seed
+          - run_simulation_validation
       columns:
           - name: assumption
             title: 'Assumption'
@@ -413,6 +461,29 @@ items:
           - allocation_ratio
           - ni_margin
           - ni_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
       columns:
           - name: parameter
             title: 'Parameter'
@@ -442,6 +513,29 @@ items:
           - alpha_level
           - power_level
           - sample_size_input
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - allocation_ratio
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
       columns:
           - name: comparison
             title: 'Comparison'
@@ -470,6 +564,33 @@ items:
           - alpha_spending
           - alpha_level
           - power_level
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
       columns:
           - name: analysis_number
             title: 'Analysis'
@@ -500,6 +621,31 @@ items:
           - power_level
           - accrual_period
           - control_median_survival
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - allocation_ratio
+          - sample_size_input
+          - survival_distribution
+          - weibull_shape
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
       columns:
           - name: parameter
             title: 'Parameter'
@@ -528,6 +674,33 @@ items:
           - multiple_comparisons
           - interim_analyses
           - alpha_spending
+          - analysis_type
+          - test_type
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
       columns:
           - name: regulatory_aspect
             title: 'Regulatory Aspect'
@@ -564,6 +737,25 @@ items:
           - accrual_period
           - follow_up_period
           - dropout_rate
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - allocation_ratio
+          - accrual_pattern
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
 
     - name: sample_size_plot
       title: Sample Size by Effect Size
@@ -586,6 +778,26 @@ items:
           - accrual_period
           - follow_up_period
           - dropout_rate
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - allocation_ratio
+          - sample_size_input
+          - accrual_pattern
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
 
     - name: survival_curves_plot
       title: Expected Survival Curves
@@ -601,6 +813,33 @@ items:
           - control_median_survival
           - survival_distribution
           - weibull_shape
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
 
     - name: accrual_timeline_plot
       title: Accrual and Event Timeline
@@ -616,6 +855,33 @@ items:
           - follow_up_period
           - dropout_rate
           - control_median_survival
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - survival_distribution
+          - weibull_shape
+          - accrual_pattern
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
 
     - name: sensitivity_plot
       title: Sensitivity Analysis
@@ -633,6 +899,31 @@ items:
           - power_level
           - accrual_period
           - control_median_survival
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - allocation_ratio
+          - sample_size_input
+          - survival_distribution
+          - weibull_shape
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
 
     - name: clinical_interpretation
       title: Clinical Interpretation and Recommendations
@@ -650,6 +941,28 @@ items:
           - power_level
           - allocation_ratio
           - control_median_survival
+          - effect_size_type
+          - sample_size_input
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
 
     - name: natural_language_summary
       title: Plain Language Summary
@@ -663,6 +976,32 @@ items:
           - alpha_level
           - power_level
           - show_summary
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
 
     - name: educational_explanations
       title: Educational Guide
@@ -671,6 +1010,37 @@ items:
       clearWith:
           - test_type
           - show_explanations
+          - clinical_preset
+          - analysis_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
 
     - name: statistical_glossary
       title: Statistical Terms Glossary
@@ -678,6 +1048,38 @@ items:
       visible: (show_glossary)
       clearWith:
           - show_glossary
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
 
     - name: guided_workflow
       title: Guided Analysis Steps
@@ -685,6 +1087,38 @@ items:
       visible: (guided_mode)
       clearWith:
           - guided_mode
+          - clinical_preset
+          - analysis_type
+          - test_type
+          - study_design
+          - primary_endpoint
+          - effect_size_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - allocation_ratio
+          - sample_size_input
+          - control_median_survival
+          - survival_distribution
+          - weibull_shape
+          - accrual_period
+          - follow_up_period
+          - accrual_pattern
+          - dropout_rate
+          - ni_margin
+          - ni_type
+          - rmst_tau
+          - rmst_difference
+          - number_of_arms
+          - multiple_comparisons
+          - interim_analyses
+          - alpha_spending
+          - cluster_size
+          - icc
+          - sensitivity_analysis
+          - run_simulation_validation
+          - simulation_runs
+          - simulation_seed
 
 refs:
     - ClinicoPathJamoviModule

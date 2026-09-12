@@ -1,4 +1,3 @@
-context("pathagreement refinements")
 
 # Bind the internal classes from the package namespace. This file used to source
 # R/pathagreement.b.R and .h.R by an absolute /Users/... path (unrunnable on any
@@ -89,7 +88,7 @@ test_that("Missing data warning triggers", {
     
     content <- analysis$results$warnings$content
     expect_true(grepl("High missing data", content))
-    expect_true(grepl("excluded because of missing ratings", content))
+    expect_true(grepl("excluded from analyses that require jointly complete ratings", content))
 })
 
 test_that("Clustering requirement warning", {

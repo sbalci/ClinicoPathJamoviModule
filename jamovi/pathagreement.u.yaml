@@ -9,31 +9,39 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Rater Variables (Required)
+        label: Rater variables (required)
         children:
           - type: VariablesListBox
             name: vars
             isTarget: true
             itemDropBehaviour: emptyspace
       - type: TargetLayoutBox
-        label: Case ID Variable (Optional)
+        label: Case ID variable (optional)
         children:
           - type: VariablesListBox
             name: caseID
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Trend sequence variable (optional)
+        children:
+          - type: VariablesListBox
+            name: sequenceVariable
+            maxItemCount: 1
+            isTarget: true
+            enable: (agreementTrendAnalysis)
   - type: CollapseBox
-    label: 'Step 1: Core Agreement Analysis'
+    label: 'Step 1: Core agreement analysis'
     collapsed: false
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Statistical Method Selection
+            label: Statistical method selection
           - type: ComboBox
             name: multiraterMethod
-            label: Primary Analysis Method
+            label: Primary analysis method
             options:
               - title: Automatic (recommended for most users)
                 name: auto
@@ -47,10 +55,10 @@ children:
         margin: large
         children:
           - type: Label
-            label: Data Type & Weighting
+            label: Data type and weighting
           - type: ComboBox
             name: wght
-            label: Weighting Scheme
+            label: Weighting scheme
             options:
               - title: Unweighted (nominal/categorical data)
                 name: unweighted
@@ -62,7 +70,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: Statistical Options
+            label: Statistical options
           - type: CheckBox
             name: fleissCI
             label: Confidence intervals (recommended)
@@ -70,17 +78,17 @@ children:
             name: exct
             label: Conger's exact kappa (rater-specific marginals)
   - type: CollapseBox
-    label: 'Step 2: Clinical Output & Interpretation'
+    label: 'Step 2: Clinical output and interpretation'
     collapsed: false
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Clinical Reports
+            label: Clinical reports
           - type: CheckBox
             name: showClinicalSummary
-            label: Clinical Summary
+            label: Clinical summary
           - type: CheckBox
             name: sft
             label: Frequency tables for each rater
@@ -88,13 +96,13 @@ children:
         margin: large
         children:
           - type: Label
-            label: Educational Content
+            label: Educational content
           - type: CheckBox
             name: showAboutAnalysis
             label: About this analysis
           - type: CheckBox
             name: showAssumptions
-            label: Assumptions & Caveats
+            label: Assumptions and caveats
           - type: CheckBox
             name: showStatisticalGlossary
             label: Glossary of statistical terms
@@ -103,24 +111,24 @@ children:
             label: Weighted kappa guide
             enable: (wght != 'unweighted')
   - type: CollapseBox
-    label: 'Step 3: Visualization (Optional)'
+    label: 'Step 3: Visualization (optional)'
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Agreement Visualization
+            label: Agreement visualization
           - type: CheckBox
             name: heatmap
-            label: Agreement Heatmap
+            label: Agreement heatmap
           - type: CheckBox
             name: heatmapDetails
             label: Statistical details in heatmap
             enable: (heatmap)
           - type: ComboBox
             name: heatmapTheme
-            label: Color Theme
+            label: Color theme
             enable: (heatmap)
             options:
               - title: Viridis (colorblind-safe, recommended)
@@ -134,7 +142,7 @@ children:
               - title: Red-Yellow-Green (classic)
                 name: ryg
   - type: CollapseBox
-    label: 'Advanced: Consensus Analysis'
+    label: 'Advanced: Consensus analysis'
     collapsed: true
     children:
       - type: LayoutBox
@@ -145,7 +153,7 @@ children:
             label: Consensus scoring
           - type: ComboBox
             name: consensus_method
-            label: Consensus Threshold
+            label: Consensus threshold
             enable: (consensus)
             options:
               - title: Simple Majority (>50% agreement)
@@ -156,7 +164,7 @@ children:
                 name: unanimous
           - type: ComboBox
             name: tie_breaking
-            label: Handle Ties By
+            label: Handle ties by
             enable: (consensus)
             options:
               - title: Excluding tied cases from analysis
@@ -170,20 +178,20 @@ children:
             label: Case-by-case consensus results
             enable: (consensus)
   - type: CollapseBox
-    label: 'Advanced: Statistical Methods (Krippendorff, ICC, Gwet, etc.)'
+    label: 'Advanced: Statistical methods (Krippendorff, ICC, Gwet, etc.)'
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Alternative Agreement Coefficients
+            label: Alternative agreement coefficients
           - type: CheckBox
             name: kripp
-            label: Krippendorff's Alpha (handles missing data)
+            label: Krippendorff's alpha (allows partial ratings)
           - type: ComboBox
             name: krippMethod
-            label: Data Measurement Level
+            label: Data measurement level
             enable: (kripp)
             options:
               - title: Nominal (unordered categories)
@@ -199,7 +207,7 @@ children:
             label: Intraclass correlation coefficient (ICC)
           - type: CheckBox
             name: gwetAC
-            label: Gwet's AC1/AC2 Coefficients (prevalence-robust)
+            label: Gwet's AC1/AC2 coefficients (prevalence-robust)
           - type: CheckBox
             name: pabak
             label: PABAK (prevalence- and bias-adjusted kappa)
@@ -207,7 +215,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: Bootstrap Analysis
+            label: Bootstrap analysis
           - type: CheckBox
             name: bootstrap
             label: Bootstrap confidence intervals
@@ -221,8 +229,17 @@ children:
             label: Random seed
             enable: (bootstrap || agreementStabilityAnalysis)
             format: number
+          - type: ComboBox
+            name: bootstrapCIType
+            label: Interval method
+            enable: (bootstrap || agreementStabilityAnalysis)
+            options:
+              - title: Bias-corrected and accelerated (BCa)
+                name: bca
+              - title: Percentile
+                name: percentile
   - type: CollapseBox
-    label: 'Advanced: Diagnostic Style Clustering (Usubutun Method)'
+    label: 'Advanced: Diagnostic style clustering (Usubutun method)'
     collapsed: true
     children:
       - type: LayoutBox
@@ -244,10 +261,10 @@ children:
         margin: large
         children:
           - type: Label
-            label: Clustering Settings
+            label: Clustering settings
           - type: ComboBox
             name: clusteringMethod
-            label: Linkage Method
+            label: Linkage method
             enable: (performClustering)
             options:
               - title: Ward's method (minimize variance, recommended)
@@ -260,7 +277,7 @@ children:
                 name: single
           - type: ComboBox
             name: styleDistanceMetric
-            label: Distance Metric
+            label: Distance metric
             enable: (performClustering)
             options:
               - title: Percentage Agreement (recommended)
@@ -273,28 +290,28 @@ children:
         margin: large
         children:
           - type: Label
-            label: Number of Style Groups
+            label: Number of style groups
           - type: CheckBox
             name: autoSelectGroups
             label: Choose the number of groups automatically (silhouette)
             enable: (performClustering)
           - type: TextBox
             name: nStyleGroups
-            label: Number of Groups (if manual, 2-10)
+            label: Number of groups (if manual, 2-10)
             format: number
             enable: (performClustering && !autoSelectGroups)
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Discordant Case Analysis
+            label: Discordant case analysis
           - type: CheckBox
             name: identifyDiscordant
             label: High-disagreement cases
             enable: (performClustering)
           - type: TextBox
             name: discordantThreshold
-            label: Disagreement Threshold (0.2-0.8)
+            label: Disagreement threshold (0.2-0.8)
             format: number
             enable: (performClustering && identifyDiscordant)
           - type: CheckBox
@@ -312,7 +329,7 @@ children:
             enable: (performClustering)
           - type: ComboBox
             name: heatmapColorScheme
-            label: Heatmap Color Scheme
+            label: Heatmap color scheme
             enable: (performClustering && showClusteringHeatmap)
             options:
               - title: Diagnostic categories (blue-green-gold)
@@ -329,7 +346,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: Rater Characteristics (Optional - for Association Testing)
+            label: Rater characteristics (optional, for association testing)
           - type: CheckBox
             name: raterCharacteristics
             label: Association with rater characteristics
@@ -345,7 +362,7 @@ children:
         stretchFactor: 1
         children:
           - type: TargetLayoutBox
-            label: Reference/Expert Standard (optional)
+            label: Reference/expert standard (optional)
             children:
               - type: VariablesListBox
                 name: referenceStandard
@@ -383,14 +400,14 @@ children:
 
               META_specialty   | GYN     | GYN     | GEN
   - type: CollapseBox
-    label: 'Advanced: Detailed Analysis (Pairwise, Bias, Trends)'
+    label: 'Advanced: Detailed analysis (pairwise, bias, trends)'
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Rater-Level Analysis
+            label: Rater-level analysis
           - type: CheckBox
             name: pairwiseAnalysis
             label: Pairwise rater comparisons
@@ -399,15 +416,15 @@ children:
             label: Rater disagreement with consensus
           - type: CheckBox
             name: agreementTrendAnalysis
-            label: Agreement trend over cases (training effect)
+            label: Agreement trend over case sequence
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Case-Level Analysis
+            label: Case-level analysis
           - type: CheckBox
             name: categoryAnalysis
-            label: Category-Specific Agreement
+            label: Category-specific agreement
           - type: CheckBox
             name: outlierAnalysis
             label: Cases with poor agreement
@@ -418,7 +435,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: Clinical Context Analysis
+            label: Clinical context analysis
           - type: CheckBox
             name: pathologyContext
             label: Diagnostic accuracy metrics (requires reference standard)
@@ -426,7 +443,7 @@ children:
             name: agreementStabilityAnalysis
             label: Agreement stability (bootstrap)
   - type: CollapseBox
-    label: 'Planning: Study Design & Sample Size'
+    label: 'Planning: Study design and sample size'
     collapsed: true
     children:
       - type: LayoutBox
@@ -437,29 +454,23 @@ children:
             label: Sample size planning
           - type: TextBox
             name: targetKappa
-            label: Target Kappa Value (0.0-1.0)
+            label: Target kappa value (0.02-0.98)
             format: number
             enable: (sampleSizePlanning)
           - type: TextBox
             name: targetPrecision
-            label: Target Precision (CI Width, e.g., 0.1)
+            label: Target precision (95% CI half-width, e.g., 0.1)
             format: number
             enable: (sampleSizePlanning)
   - type: CollapseBox
-    label: 'Technical: System Options'
+    label: 'Technical: System options'
     collapsed: true
     children:
       - type: LayoutBox
         margin: large
         children:
           - type: Label
-            label: Performance & Debugging
+            label: Additional output
           - type: CheckBox
             name: showInlineComments
             label: Inline statistical comments
-          - type: CheckBox
-            name: enhancedErrorGuidance
-            label: Detailed error guidance
-          - type: CheckBox
-            name: showProgressIndicators
-            label: Progress messages for long operations

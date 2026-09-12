@@ -1,7 +1,7 @@
 ---
 name: survivalPower
 title: Survival Power Analysis
-menuGroup: Power
+menuGroup: PowerT
 menuSubgroup: Survival Power Analysis
 menuTitle: Survival Power Analysis
 menuSubtitle: Survival Power analysis
@@ -167,7 +167,7 @@ options:
       min: 0.001
       max: 0.10
       description:
-          R: Significance level (two-sided)
+          R: Significance level (two-sided for superiority, one-sided for non-inferiority)
 
     - name: power_level
       title: Power (1-Beta)
@@ -406,8 +406,10 @@ options:
       description:
           R: >
             Validate analytical power calculations using Monte Carlo simulation.
-            Available for log-rank and Cox designs under the exponential
-            assumption. About 6 seconds at the default 2000 runs.
+            Available for fixed two-arm log-rank and Cox sample-size or power
+            calculations under the exponential assumption. Multi-arm, cluster,
+            interim-analysis and non-inferiority designs are not simulated.
+            About 6 seconds at the default 2000 runs.
 
     - name: simulation_runs
       title: Simulation Runs

@@ -101,8 +101,7 @@ test_that("distance and automatic group choices reach every clustering output", 
                                  nStyleGroups = 2)
   private <- analysis$.__enclos_env__$private
   clusters <- private$.style_clustering_results
-  expected_distance <- stats::dist(t(vapply(data, as.integer, integer(nrow(data))))) /
-    nrow(data)
+  expected_distance <- stats::dist(t(vapply(data, as.integer, integer(nrow(data)))))
   expect_equal(as.matrix(clusters$distance_matrix), as.matrix(expected_distance))
   expect_equal(analysis$results$diagnosticStyleTable$asDF$style_group,
                paste("Style", clusters$cluster_assignments))
@@ -123,10 +122,30 @@ test_that("column names and factor labels survive agreement outputs", {
 
 test_that("empty and incomplete selections have a controlled response", {
   data <- pa_wiring_data()
-  empty <- pa_wiring_analysis(data[FALSE, ], vars = character())
+  # jamovi provides a zero-column frame when no variables are selected.
+  empty <- pa_wiring_analysis(data.frame(), vars = character())
   expect_match(empty$results$todo$content, "Inter-rater")
   class <- getFromNamespace("pathagreementClass", "ClinicoPath")
   options <- getFromNamespace("pathagreementOptions", "ClinicoPath")
   analysis <- class$new(data = data[FALSE, ], options = options$new(vars = names(data)))
   expect_error(analysis$.__enclos_env__$private$.run(), "at least 2 cases")
+})
+
+test_that("clustering heatmaps render the supplied categories", {
+  data <- pa_wiring_data()
+  analysis <- pa_wiring_analysis(data, vars = names(data), performClustering = TRUE)
+  private <- analysis$.__enclos_env__$private
+  expect_equal(private$.numericRatingMatrix(), vapply(data, as.integer, integer(nrow(data))))
+  expect_identical(names(private$.diagnosisColors()), levels(data[[1]]))
+  withr::local_options(lifecycle_verbosity = "quiet")
+  file <- tempfile(fileext = ".png")
+  grDevices::png(file, width = 1100, height = 900, type = "cairo")
+  withr::defer({grDevices::dev.off(); unlink(file)})
+  for (renderer in c(".diagnosticStyleDendrogram", ".diagnosticStyleHeatmap",
+                     ".diagnosticStyleCombined", ".clusteringHeatmap")) {
+    expect_no_warning(expect_true(private[[renderer]](
+      image = analysis$results[[substring(renderer, 2)]],
+      ggtheme = ggplot2::theme_grey(), theme = list()
+    )))
+  }
 })

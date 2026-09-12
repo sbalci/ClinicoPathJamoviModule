@@ -570,6 +570,18 @@ refs:
         doi: 10.1016/C2012-0-00477-2
         url: "https://doi.org/10.1016/C2012-0-00477-2"
 
+    Krippendorff2004:
+        type: article
+        author: "Krippendorff, K."
+        year: 2004
+        title: "Reliability in Content Analysis: Some Common Misconceptions and Recommendations"
+        publisher: Human Communication Research
+        volume: 30
+        issue: 3
+        pages: 411-433
+        doi: 10.1111/j.1468-2958.2004.tb00738.x
+        url: "https://doi.org/10.1111/j.1468-2958.2004.tb00738.x"
+
     LandisKoch1977:
         type: article
         author: "Landis, J. R., & Koch, G. G."
@@ -712,7 +724,7 @@ refs:
         title: Pathologists should probably forget about kappa. Percent agreement, diagnostic specificity and related metrics provide more clinically applicable measures of interobserver variability
         publisher: Annals of Diagnostic Pathology
         volume: 47
-        pages: 151561
+        pages: '151561'
         doi: 10.1016/j.anndiagpath.2020.151561
         pmid: 32623312
         url: "https://doi.org/10.1016/j.anndiagpath.2020.151561"

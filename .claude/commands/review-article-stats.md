@@ -699,3 +699,4 @@ The default output is always the structured Markdown report above.
 
 - `/create-function` -- Scaffold new functions to fill identified coverage gaps
 - `/review-function` -- Review existing functions mapped by the analysis
+- `python3 .claude/scripts/review_article_stats_local.py ARTICLE.pdf --label X` -- offline draft with a local Ollama model (article never leaves the machine; no citation checks, agents, or roadmap; writes `literature/X-citation-review-local.md`)

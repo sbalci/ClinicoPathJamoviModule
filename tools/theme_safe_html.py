@@ -36,8 +36,14 @@ import re
 import sys
 import glob
 
-# a CSS background declaration with a hex value, wherever it appears in R source
-BG = re.compile(r'\bbackground(-color)?\s*:\s*(#[0-9a-fA-F]{3,8})')
+# A CSS background declaration with a hex value or a white keyword, wherever it
+# appears in R source. Match both `background-color:` and the `background:`
+# shorthand: copy-ready output boxes previously bypassed the audit as
+# `background: white`.
+BG = re.compile(
+    r'\bbackground(-color)?\s*:\s*(#[0-9a-fA-F]{3,8}|white\b)',
+    re.IGNORECASE,
+)
 # a CSS foreground declaration (not `background-color`, not `border-color`)
 FG = re.compile(r'(?<![-\w])color\s*:\s*(#[0-9a-fA-F]{3,8})')
 
@@ -53,6 +59,8 @@ DARK_TEXT_L = 0.50
 
 
 def parse_hex(h):
+    if h.lower() == 'white':
+        return 255, 255, 255
     h = h.lstrip('#')
     if len(h) == 3:
         h = ''.join(c * 2 for c in h)

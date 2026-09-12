@@ -1,0 +1,1114 @@
+{
+  "duration_500": {
+    "numbers": {
+      "events": 380,
+      "duration": 45.5756201746
+    },
+    "headline": [
+      {
+        "analysis_type": "Calculate Study Duration",
+        "test_type": "Log-rank Test",
+        "study_design": "Two-arm Parallel",
+        "primary_endpoint": "Overall Survival",
+        "effect_size_type": "Hazard Ratio",
+        "calculated_value": "Required Study Duration: 45.6 months",
+        "confidence_level": "95%",
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "Analysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "power": [],
+    "effect": [],
+    "duration": [
+      {
+        "parameter": "Required Duration",
+        "value": "45.6 months",
+        "description": "Total study duration needed to achieve target power",
+        "_row": "\"total\""
+      },
+      {
+        "parameter": "Accrual Period",
+        "value": "24 months",
+        "description": "Patient recruitment period",
+        "_row": "\"accrual\""
+      },
+      {
+        "parameter": "Minimum Follow-up",
+        "value": "21.6 months",
+        "description": "Additional follow-up needed after recruitment",
+        "_row": "\"follow_up\""
+      },
+      {
+        "parameter": "Required Events",
+        "value": "380 events",
+        "description": "Events needed for target power",
+        "_row": "\"events\""
+      },
+      {
+        "parameter": "50% Events Time",
+        "value": "24 months",
+        "description": "Time when half of the required events have occurred",
+        "_row": "\"half\""
+      }
+    ],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "Two-sided alpha = 0.05 typically required",
+        "compliance_status": "Standard",
+        "recommendation": "Standard FDA/EMA requirement",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Minimum 80% power for primary endpoint",
+        "compliance_status": "Adequate",
+        "recommendation": "Meets the usual 80% expectation",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Clinically Realistic",
+        "recommendation": "Appropriate for oncology studies",
+        "_row": "\"effect\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [],
+    "timeline": [
+      {
+        "phase": "Accrual",
+        "start": 0,
+        "end": 24,
+        "y": 1
+      },
+      {
+        "phase": "Follow-up",
+        "start": 24,
+        "end": 36,
+        "y": 1
+      },
+      {
+        "phase": "Analysis",
+        "start": 36,
+        "end": 39,
+        "y": 1
+      }
+    ],
+    "natural_summary": "<div class='jmv-clinical-summary'><h3> Plain Language Summary<\/h3><p><strong>Study Design:<\/strong> Log-rank Test for Overall Survival<\/p><p><strong>Duration Analysis:<\/strong> Study timeline requirements for adequate power.<\/p><p><strong>Clinical Impact:<\/strong> Moderate assumed effect. Whether this is clinically worthwhile depends on the absolute survival gain and the disease setting.<\/p><p><strong>Study Timeline:<\/strong> 24 months recruitment + 12 months follow-up = 36 months total.<\/p><div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'><p><strong>Methods:<\/strong> Sample size calculations based on Schoenfeld (1983) log-rank test formula. Exponential survival distribution assumed with uniform accrual pattern.<\/p><\/div><\/div>",
+    "interpretation": "<p><strong>Power Analysis for Survival Study<\/strong><\/p><p><strong>Study Design:<\/strong><br>• Analysis Type: Calculate Study Duration<br>• Statistical Test: Log-rank Test<br>• Design: Two-arm Parallel<br>• Primary Endpoint: Overall Survival<\/p><p><strong>Statistical Parameters:<\/strong><br>• Hazard Ratio: 0.75<br>• Significance Level (alpha): 0.05 (5%)<br>• Statistical Power: 0.8 (80%)<br>• Allocation Ratio: 1:1<br>• Sample Size: 500 subjects<br><\/p><p><strong>Population Characteristics:<\/strong><br>• Control Median Survival: 12 months<br>• Expected Treatment Median: 16 months<br>• Accrual Period: 24 months<br>• Follow-up Period: 12 months<br>• Annual Dropout Rate: 5%<\/p><p><strong>Objective:<\/strong><br>Calculate the required study duration to achieve 80% power with 500 subjects.<\/p><p><strong>Clinical Interpretation:<\/strong><\/p><p><strong>Duration Interpretation:<\/strong><br>The required study duration is: Required Study Duration: 45.6 months<\/p><p>This includes both accrual and follow-up periods.<\/p>A Log-rank Test power analysis was conducted to determine the required study duration for 500 subjects with 80% power and     5% significance level to detect a hazard ratio of 0.75. Required Study Duration: 45.6 months"
+  },
+  "half_events": {
+    "numbers": {
+      "events": 380,
+      "duration": 24.01
+    },
+    "headline": [
+      {
+        "analysis_type": "Calculate Study Duration",
+        "test_type": "Log-rank Test",
+        "study_design": "Two-arm Parallel",
+        "primary_endpoint": "Overall Survival",
+        "effect_size_type": "Hazard Ratio",
+        "calculated_value": "Required Study Duration: 24 months",
+        "confidence_level": "95%",
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "Analysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "power": [],
+    "effect": [],
+    "duration": [
+      {
+        "parameter": "Required Duration",
+        "value": "24 months",
+        "description": "Total study duration needed to achieve target power",
+        "_row": "\"total\""
+      },
+      {
+        "parameter": "Accrual Period",
+        "value": "24 months",
+        "description": "Patient recruitment period",
+        "_row": "\"accrual\""
+      },
+      {
+        "parameter": "Minimum Follow-up",
+        "value": "0 months",
+        "description": "Additional follow-up needed after recruitment",
+        "_row": "\"follow_up\""
+      },
+      {
+        "parameter": "Required Events",
+        "value": "380 events",
+        "description": "Events needed for target power",
+        "_row": "\"events\""
+      },
+      {
+        "parameter": "50% Events Time",
+        "value": "24 months",
+        "description": "Time when half of the required events have occurred",
+        "_row": "\"half\""
+      }
+    ],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "Two-sided alpha = 0.05 typically required",
+        "compliance_status": "Standard",
+        "recommendation": "Standard FDA/EMA requirement",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Minimum 80% power for primary endpoint",
+        "compliance_status": "Adequate",
+        "recommendation": "Meets the usual 80% expectation",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Clinically Realistic",
+        "recommendation": "Appropriate for oncology studies",
+        "_row": "\"effect\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [],
+    "timeline": [
+      {
+        "phase": "Accrual",
+        "start": 0,
+        "end": 24,
+        "y": 1
+      },
+      {
+        "phase": "Follow-up",
+        "start": 24,
+        "end": 36,
+        "y": 1
+      },
+      {
+        "phase": "Analysis",
+        "start": 36,
+        "end": 39,
+        "y": 1
+      }
+    ],
+    "natural_summary": "",
+    "interpretation": "",
+    "independent_half_time": 15.3372909008
+  },
+  "effect_0.2": {
+    "numbers": {
+      "hr_detectable": 0.60345916595
+    },
+    "headline": [
+      {
+        "analysis_type": "Calculate Detectable Effect Size",
+        "test_type": "Log-rank Test",
+        "study_design": "Two-arm Parallel",
+        "primary_endpoint": "Overall Survival",
+        "effect_size_type": "Hazard Ratio",
+        "calculated_value": "Minimum Detectable HR: 0.603",
+        "confidence_level": "95%",
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "WARNING: Extreme Hazard Ratio\nExtreme hazard ratio detected (0.20) • Most trials detect HR between 0.5-2.0 • Verify this effect size is clinically plausible\n\nAnalysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "power": [],
+    "effect": [
+      {
+        "parameter": "Minimum Detectable HR",
+        "value": "0.603",
+        "description": "Smallest hazard ratio detectable with specified power",
+        "_row": "\"hr\""
+      },
+      {
+        "parameter": "Sample Size",
+        "value": "200 subjects",
+        "description": "Total number of subjects in the study",
+        "_row": "\"n\""
+      },
+      {
+        "parameter": "Power",
+        "value": "80%",
+        "description": "Statistical power for detecting minimum effect",
+        "_row": "\"power\""
+      },
+      {
+        "parameter": "Hazard Reduction",
+        "value": "39.7%",
+        "description": "Minimum relative reduction in the hazard detectable with the specified power",
+        "_row": "\"reduction\""
+      },
+      {
+        "parameter": "Expected Events",
+        "value": "93 events",
+        "description": "Number of events expected during study period",
+        "_row": "\"events\""
+      }
+    ],
+    "duration": [],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "Two-sided alpha = 0.05 typically required",
+        "compliance_status": "Standard",
+        "recommendation": "Standard FDA/EMA requirement",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Minimum 80% power for primary endpoint",
+        "compliance_status": "Adequate",
+        "recommendation": "Meets the usual 80% expectation",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Review Required",
+        "recommendation": "Very large effect sizes require clinical justification",
+        "_row": "\"effect\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [],
+    "timeline": [
+      {
+        "phase": "Accrual",
+        "start": 0,
+        "end": 24,
+        "y": 1
+      },
+      {
+        "phase": "Follow-up",
+        "start": 24,
+        "end": 36,
+        "y": 1
+      },
+      {
+        "phase": "Analysis",
+        "start": 36,
+        "end": 39,
+        "y": 1
+      }
+    ],
+    "natural_summary": "",
+    "interpretation": "",
+    "events_at_solved_hr": 123.0646033385
+  },
+  "effect_0.75": {
+    "numbers": {
+      "hr_detectable": 0.60345916595
+    },
+    "headline": [
+      {
+        "analysis_type": "Calculate Detectable Effect Size",
+        "test_type": "Log-rank Test",
+        "study_design": "Two-arm Parallel",
+        "primary_endpoint": "Overall Survival",
+        "effect_size_type": "Hazard Ratio",
+        "calculated_value": "Minimum Detectable HR: 0.603",
+        "confidence_level": "95%",
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "Analysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "power": [],
+    "effect": [
+      {
+        "parameter": "Minimum Detectable HR",
+        "value": "0.603",
+        "description": "Smallest hazard ratio detectable with specified power",
+        "_row": "\"hr\""
+      },
+      {
+        "parameter": "Sample Size",
+        "value": "200 subjects",
+        "description": "Total number of subjects in the study",
+        "_row": "\"n\""
+      },
+      {
+        "parameter": "Power",
+        "value": "80%",
+        "description": "Statistical power for detecting minimum effect",
+        "_row": "\"power\""
+      },
+      {
+        "parameter": "Hazard Reduction",
+        "value": "39.7%",
+        "description": "Minimum relative reduction in the hazard detectable with the specified power",
+        "_row": "\"reduction\""
+      },
+      {
+        "parameter": "Expected Events",
+        "value": "130 events",
+        "description": "Number of events expected during study period",
+        "_row": "\"events\""
+      }
+    ],
+    "duration": [],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "Two-sided alpha = 0.05 typically required",
+        "compliance_status": "Standard",
+        "recommendation": "Standard FDA/EMA requirement",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Minimum 80% power for primary endpoint",
+        "compliance_status": "Adequate",
+        "recommendation": "Meets the usual 80% expectation",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Clinically Realistic",
+        "recommendation": "Appropriate for oncology studies",
+        "_row": "\"effect\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [],
+    "timeline": [
+      {
+        "phase": "Accrual",
+        "start": 0,
+        "end": 24,
+        "y": 1
+      },
+      {
+        "phase": "Follow-up",
+        "start": 24,
+        "end": 36,
+        "y": 1
+      },
+      {
+        "phase": "Analysis",
+        "start": 36,
+        "end": 39,
+        "y": 1
+      }
+    ],
+    "natural_summary": "",
+    "interpretation": "",
+    "events_at_solved_hr": 123.0646033385
+  },
+  "low_events": {
+    "numbers": {
+      "power": 0.05002987929,
+      "events": 0.012606680835
+    },
+    "headline": [
+      {
+        "analysis_type": "Calculate Power",
+        "test_type": "Log-rank Test",
+        "study_design": "Two-arm Parallel",
+        "primary_endpoint": "Overall Survival",
+        "effect_size_type": "Hazard Ratio",
+        "calculated_value": "Statistical Power: 5.0% (0 expected events)",
+        "confidence_level": "95%",
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "WARNING: Short Study Duration\nStudy duration (1.0 mo) may be too short for median survival 240.0 mo • Consider extending follow-up to at least 360.0 mo\n\nAnalysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "power": [
+      {
+        "parameter": "Sample Size",
+        "value": "10 subjects",
+        "description": "Total number of subjects in the study",
+        "_row": "\"n\""
+      },
+      {
+        "parameter": "Calculated Power",
+        "value": "5%",
+        "description": "Statistical power for the given sample size",
+        "_row": "\"power\""
+      },
+      {
+        "parameter": "Expected Events",
+        "value": "0 events",
+        "description": "Events informing the treatment comparison",
+        "_row": "\"events\""
+      },
+      {
+        "parameter": "Effect Size",
+        "value": "HR = 0.75",
+        "description": "Hazard ratio representing treatment effect",
+        "_row": "\"hr\""
+      },
+      {
+        "parameter": "Significance Level",
+        "value": "    5% (two-sided)",
+        "description": "Type I error rate used, after any multiplicity adjustment",
+        "_row": "\"alpha\""
+      }
+    ],
+    "effect": [],
+    "duration": [],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "Two-sided alpha = 0.05 typically required",
+        "compliance_status": "Standard",
+        "recommendation": "Standard FDA/EMA requirement",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Minimum 80% power for primary endpoint",
+        "compliance_status": "Adequate",
+        "recommendation": "Meets the usual 80% expectation",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Clinically Realistic",
+        "recommendation": "Appropriate for oncology studies",
+        "_row": "\"effect\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [
+      {
+        "metric": "Statistical Power",
+        "analytical": 0.05002987929,
+        "simulated": 0,
+        "ci_lower": 0,
+        "ci_upper": 0,
+        "agreement": "Fair (< 10%)",
+        "_row": "\"power\""
+      },
+      {
+        "metric": "Expected Events",
+        "analytical": 0.012606680835,
+        "simulated": 0.016,
+        "agreement": "Poor (>= 15%)",
+        "_row": "\"events\""
+      }
+    ],
+    "timeline": [
+      {
+        "phase": "Accrual",
+        "start": 0,
+        "end": 1,
+        "y": 1
+      },
+      {
+        "phase": "Follow-up",
+        "start": 1,
+        "end": 1,
+        "y": 1
+      },
+      {
+        "phase": "Analysis",
+        "start": 1,
+        "end": 4,
+        "y": 1
+      }
+    ],
+    "natural_summary": "",
+    "interpretation": "",
+    "convergence": {
+      "converged": true,
+      "mc_se": 0,
+      "target_mc_se": 0.01,
+      "recommended_n_sims": 1000,
+      "message": "Simulation converged (MC SE = 0.0000, target = 0.0100)",
+      "recommendation": "Simulation precision is adequate"
+    },
+    "failed_or_zero_event_replicates": 984
+  },
+  "cluster": {
+    "numbers": {
+      "n": 30,
+      "events": 6
+    },
+    "headline": [
+      {
+        "analysis_type": "Calculate Sample Size",
+        "test_type": "Log-rank Test",
+        "study_design": "Cluster Randomized",
+        "primary_endpoint": "Overall Survival",
+        "effect_size_type": "Hazard Ratio",
+        "calculated_value": "Total Sample Size: 30 subjects , cluster design effect: 1.99",
+        "confidence_level": "95%",
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "WARNING: Extreme Hazard Ratio\nExtreme hazard ratio detected (0.10) • Most trials detect HR between 0.5-2.0 • Verify this effect size is clinically plausible\n\nAnalysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "power": [],
+    "effect": [],
+    "duration": [],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Sample Size Justification",
+        "requirement": "ICH E9: Provide statistical rationale with power calculations",
+        "compliance_status": "Calculation available",
+        "recommendation": "Document calculated Total Sample Size: 30 subjects , cluster design effect: 1.99 with all assumptions and their sources",
+        "_row": "\"sample_size\""
+      },
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "Two-sided alpha = 0.05 typically required",
+        "compliance_status": "Standard",
+        "recommendation": "Standard FDA/EMA requirement",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Minimum 80% power for primary endpoint",
+        "compliance_status": "Adequate",
+        "recommendation": "Meets the usual 80% expectation",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Review Required",
+        "recommendation": "Very large effect sizes require clinical justification",
+        "_row": "\"effect\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [],
+    "timeline": [
+      {
+        "phase": "Accrual",
+        "start": 0,
+        "end": 24,
+        "y": 1
+      },
+      {
+        "phase": "Follow-up",
+        "start": 24,
+        "end": 36,
+        "y": 1
+      },
+      {
+        "phase": "Analysis",
+        "start": 36,
+        "end": 39,
+        "y": 1
+      }
+    ],
+    "natural_summary": "",
+    "interpretation": ""
+  },
+  "ni_narrative": {
+    "numbers": {
+      "n": 901,
+      "events": 631
+    },
+    "headline": [
+      {
+        "analysis_type": "Calculate Sample Size",
+        "test_type": "Non-inferiority Trial",
+        "study_design": "Two-arm Parallel",
+        "primary_endpoint": "Overall Survival",
+        "effect_size_type": "Hazard Ratio",
+        "calculated_value": "Total Sample Size: 901 subjects ( 631 events needed; NI margin HR = 1.25 )",
+        "confidence_level": "97.5%",
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "One-sided Alpha for Non-inferiority\nNon-inferiority is tested one-sided at alpha = 0.025 • Regulatory submissions conventionally use one-sided 0.025 (enter 0.025 here)\n\nAnalysis Complete\nPower analysis completed: Non-inferiority Trial with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "power": [],
+    "effect": [],
+    "duration": [],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Sample Size Justification",
+        "requirement": "ICH E9: Provide statistical rationale with power calculations",
+        "compliance_status": "Calculation available",
+        "recommendation": "Document calculated Total Sample Size: 901 subjects ( 631 events needed; NI margin HR = 1.25 ) with all assumptions and their sources",
+        "_row": "\"sample_size\""
+      },
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "One-sided alpha = 0.025 conventional for non-inferiority",
+        "compliance_status": "Standard",
+        "recommendation": "Matches the usual non-inferiority convention",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Minimum 80% power for primary endpoint",
+        "compliance_status": "Adequate",
+        "recommendation": "Meets the usual 80% expectation",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Clinically Realistic",
+        "recommendation": "Appropriate for oncology studies",
+        "_row": "\"effect\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [],
+    "timeline": [
+      {
+        "phase": "Accrual",
+        "start": 0,
+        "end": 24,
+        "y": 1
+      },
+      {
+        "phase": "Follow-up",
+        "start": 24,
+        "end": 36,
+        "y": 1
+      },
+      {
+        "phase": "Analysis",
+        "start": 36,
+        "end": 39,
+        "y": 1
+      }
+    ],
+    "natural_summary": "<div class='jmv-clinical-summary'><h3> Plain Language Summary<\/h3><p><strong>Study Design:<\/strong> Non-inferiority Trial for Overall Survival<\/p><p><strong>Sample Size Calculation:<\/strong> To detect a hazard ratio of 1 (0% higher hazard) with 80% power at   2.5% significance level.<\/p><p><strong>Clinical Impact:<\/strong> No assumed difference between arms. Whether this is clinically worthwhile depends on the absolute survival gain and the disease setting.<\/p><p><strong>Study Timeline:<\/strong> 24 months recruitment + 12 months follow-up = 36 months total.<\/p><div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'><p><strong>Methods:<\/strong> Sample size calculations based on non-inferiority margin approach (Rothmann et al. 2003). Exponential survival distribution assumed with uniform accrual pattern.<\/p><\/div><\/div>",
+    "interpretation": "<p><strong>Power Analysis for Survival Study<\/strong><\/p><p><strong>Study Design:<\/strong><br>• Analysis Type: Calculate Sample Size<br>• Statistical Test: Non-inferiority Trial<br>• Design: Two-arm Parallel<br>• Primary Endpoint: Overall Survival<\/p><p><strong>Statistical Parameters:<\/strong><br>• Hazard Ratio: 1<br>• Significance Level (alpha): 0.025 (2.5%)<br>• Statistical Power: 0.8 (80%)<br>• Allocation Ratio: 1:1<br><\/p><p><strong>Population Characteristics:<\/strong><br>• Control Median Survival: 12 months<br>• Expected Treatment Median: 12 months<br>• Accrual Period: 24 months<br>• Follow-up Period: 12 months<br>• Annual Dropout Rate: 5%<\/p><p><strong>Objective:<\/strong><br>Determine the required sample size to detect a hazard ratio of 1 with 80% power at a   2.5% significance level.<\/p><p><strong>Clinical Interpretation:<\/strong><\/p><p><strong>Sample Size Interpretation:<\/strong><br>To detect a hazard ratio of 1 with 80% power and   2.5% significance level, you need approximately 901 total subjects.<\/p>A Non-inferiority Trial power analysis was conducted to determine the sample size required to rule out a hazard ratio of 1.25 or worse, assuming a true hazard ratio of 1.00 with 80% power at a   2.5% significance level (one-sided). The analysis indicates that 901 subjects are needed, with an accrual period of 24 months and additional follow-up of 12 months."
+  },
+  "direct_hr_015": {
+    "numbers": {
+      "n": 21,
+      "events": 9
+    },
+    "headline": [
+      {
+        "analysis_type": "Calculate Sample Size",
+        "test_type": "Log-rank Test",
+        "study_design": "Two-arm Parallel",
+        "primary_endpoint": "Overall Survival",
+        "effect_size_type": "Hazard Ratio",
+        "calculated_value": "Total Sample Size: 21 subjects ",
+        "confidence_level": "95%",
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "WARNING: Extreme Hazard Ratio\nExtreme hazard ratio detected (0.15) • Most trials detect HR between 0.5-2.0 • Verify this effect size is clinically plausible\n\nAnalysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "power": [],
+    "effect": [],
+    "duration": [],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Sample Size Justification",
+        "requirement": "ICH E9: Provide statistical rationale with power calculations",
+        "compliance_status": "Calculation available",
+        "recommendation": "Document calculated Total Sample Size: 21 subjects  with all assumptions and their sources",
+        "_row": "\"sample_size\""
+      },
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "Two-sided alpha = 0.05 typically required",
+        "compliance_status": "Standard",
+        "recommendation": "Standard FDA/EMA requirement",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Minimum 80% power for primary endpoint",
+        "compliance_status": "Adequate",
+        "recommendation": "Meets the usual 80% expectation",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Review Required",
+        "recommendation": "Very large effect sizes require clinical justification",
+        "_row": "\"effect\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [],
+    "timeline": [
+      {
+        "phase": "Accrual",
+        "start": 0,
+        "end": 24,
+        "y": 1
+      },
+      {
+        "phase": "Follow-up",
+        "start": 24,
+        "end": 36,
+        "y": 1
+      },
+      {
+        "phase": "Analysis",
+        "start": 36,
+        "end": 39,
+        "y": 1
+      }
+    ],
+    "natural_summary": "",
+    "interpretation": ""
+  },
+  "survival_difference_015": {
+    "numbers": [],
+    "headline": [
+      {
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "ERROR: Invalid Effect Size\nUnable to derive a valid hazard ratio from the selected effect size inputs • Check effect size type and related parameters",
+    "power": [],
+    "effect": [],
+    "duration": [],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Sample Size Justification",
+        "_row": "\"sample_size\""
+      },
+      {
+        "regulatory_aspect": "Significance Level",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "_row": "\"effect\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [],
+    "timeline": null,
+    "natural_summary": "",
+    "interpretation": "",
+    "equivalent_HR": 0.15
+  },
+  "cox_requested_power_0.5": {
+    "numbers": {
+      "power": 0.29628626905,
+      "events": 130.4787675835
+    },
+    "headline": [
+      {
+        "analysis_type": "Calculate Power",
+        "test_type": "Cox Regression",
+        "study_design": "Two-arm Parallel",
+        "primary_endpoint": "Overall Survival",
+        "effect_size_type": "Hazard Ratio",
+        "calculated_value": "Statistical Power: 29.6% (130 events expected)",
+        "confidence_level": "95%",
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "WARNING: Low Power\nPower below 70% (current: 50%) may result in underpowered study • Consider increasing to 80% or 90%\n\nAnalysis Complete\nPower analysis completed: Cox Regression with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "power": [
+      {
+        "parameter": "Sample Size",
+        "value": "200 subjects",
+        "description": "Total number of subjects in the study",
+        "_row": "\"n\""
+      },
+      {
+        "parameter": "Calculated Power",
+        "value": "29.6%",
+        "description": "Statistical power for the given sample size",
+        "_row": "\"power\""
+      },
+      {
+        "parameter": "Expected Events",
+        "value": "130 events",
+        "description": "Events informing the treatment comparison",
+        "_row": "\"events\""
+      },
+      {
+        "parameter": "Effect Size",
+        "value": "HR = 0.75",
+        "description": "Hazard ratio representing treatment effect",
+        "_row": "\"hr\""
+      },
+      {
+        "parameter": "Significance Level",
+        "value": "    5% (two-sided)",
+        "description": "Type I error rate used, after any multiplicity adjustment",
+        "_row": "\"alpha\""
+      }
+    ],
+    "effect": [],
+    "duration": [],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "Two-sided alpha = 0.05 typically required",
+        "compliance_status": "Standard",
+        "recommendation": "Standard FDA/EMA requirement",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Minimum 80% power for primary endpoint",
+        "compliance_status": "Insufficient",
+        "recommendation": "Increase power to >=80%, which is the usual expectation for a primary endpoint",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Clinically Realistic",
+        "recommendation": "Appropriate for oncology studies",
+        "_row": "\"effect\""
+      },
+      {
+        "regulatory_aspect": "Interim Analyses",
+        "requirement": "Alpha spending function for interim looks",
+        "compliance_status": "Planned",
+        "recommendation": "Document stopping rules and alpha spending method",
+        "_row": "\"interim\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [],
+    "timeline": [
+      {
+        "phase": "Accrual",
+        "start": 0,
+        "end": 24,
+        "y": 1
+      },
+      {
+        "phase": "Follow-up",
+        "start": 24,
+        "end": 36,
+        "y": 1
+      },
+      {
+        "phase": "Analysis",
+        "start": 36,
+        "end": 39,
+        "y": 1
+      }
+    ],
+    "natural_summary": "",
+    "interpretation": ""
+  },
+  "cox_requested_power_0.8": {
+    "numbers": {
+      "power": 0.29628626905,
+      "events": 130.4787675835
+    },
+    "headline": [
+      {
+        "analysis_type": "Calculate Power",
+        "test_type": "Cox Regression",
+        "study_design": "Two-arm Parallel",
+        "primary_endpoint": "Overall Survival",
+        "effect_size_type": "Hazard Ratio",
+        "calculated_value": "Statistical Power: 29.6% (130 events expected)",
+        "confidence_level": "95%",
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "Analysis Complete\nPower analysis completed: Cox Regression with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "power": [
+      {
+        "parameter": "Sample Size",
+        "value": "200 subjects",
+        "description": "Total number of subjects in the study",
+        "_row": "\"n\""
+      },
+      {
+        "parameter": "Calculated Power",
+        "value": "29.6%",
+        "description": "Statistical power for the given sample size",
+        "_row": "\"power\""
+      },
+      {
+        "parameter": "Expected Events",
+        "value": "130 events",
+        "description": "Events informing the treatment comparison",
+        "_row": "\"events\""
+      },
+      {
+        "parameter": "Effect Size",
+        "value": "HR = 0.75",
+        "description": "Hazard ratio representing treatment effect",
+        "_row": "\"hr\""
+      },
+      {
+        "parameter": "Significance Level",
+        "value": "    5% (two-sided)",
+        "description": "Type I error rate used, after any multiplicity adjustment",
+        "_row": "\"alpha\""
+      }
+    ],
+    "effect": [],
+    "duration": [],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "Two-sided alpha = 0.05 typically required",
+        "compliance_status": "Standard",
+        "recommendation": "Standard FDA/EMA requirement",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Minimum 80% power for primary endpoint",
+        "compliance_status": "Adequate",
+        "recommendation": "Meets the usual 80% expectation",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Clinically Realistic",
+        "recommendation": "Appropriate for oncology studies",
+        "_row": "\"effect\""
+      },
+      {
+        "regulatory_aspect": "Interim Analyses",
+        "requirement": "Alpha spending function for interim looks",
+        "compliance_status": "Planned",
+        "recommendation": "Document stopping rules and alpha spending method",
+        "_row": "\"interim\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [],
+    "timeline": [
+      {
+        "phase": "Accrual",
+        "start": 0,
+        "end": 24,
+        "y": 1
+      },
+      {
+        "phase": "Follow-up",
+        "start": 24,
+        "end": 36,
+        "y": 1
+      },
+      {
+        "phase": "Analysis",
+        "start": 36,
+        "end": 39,
+        "y": 1
+      }
+    ],
+    "natural_summary": "",
+    "interpretation": ""
+  },
+  "cox_requested_power_0.99": {
+    "numbers": {
+      "power": 0.29628626905,
+      "events": 130.4787675835
+    },
+    "headline": [
+      {
+        "analysis_type": "Calculate Power",
+        "test_type": "Cox Regression",
+        "study_design": "Two-arm Parallel",
+        "primary_endpoint": "Overall Survival",
+        "effect_size_type": "Hazard Ratio",
+        "calculated_value": "Statistical Power: 29.6% (130 events expected)",
+        "confidence_level": "95%",
+        "_row": "\"1\""
+      }
+    ],
+    "notices": "Analysis Complete\nPower analysis completed: Cox Regression with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "power": [
+      {
+        "parameter": "Sample Size",
+        "value": "200 subjects",
+        "description": "Total number of subjects in the study",
+        "_row": "\"n\""
+      },
+      {
+        "parameter": "Calculated Power",
+        "value": "29.6%",
+        "description": "Statistical power for the given sample size",
+        "_row": "\"power\""
+      },
+      {
+        "parameter": "Expected Events",
+        "value": "130 events",
+        "description": "Events informing the treatment comparison",
+        "_row": "\"events\""
+      },
+      {
+        "parameter": "Effect Size",
+        "value": "HR = 0.75",
+        "description": "Hazard ratio representing treatment effect",
+        "_row": "\"hr\""
+      },
+      {
+        "parameter": "Significance Level",
+        "value": "    5% (two-sided)",
+        "description": "Type I error rate used, after any multiplicity adjustment",
+        "_row": "\"alpha\""
+      }
+    ],
+    "effect": [],
+    "duration": [],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "Two-sided alpha = 0.05 typically required",
+        "compliance_status": "Standard",
+        "recommendation": "Standard FDA/EMA requirement",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Minimum 80% power for primary endpoint",
+        "compliance_status": "Adequate",
+        "recommendation": "Meets the usual 80% expectation",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Clinically Realistic",
+        "recommendation": "Appropriate for oncology studies",
+        "_row": "\"effect\""
+      },
+      {
+        "regulatory_aspect": "Interim Analyses",
+        "requirement": "Alpha spending function for interim looks",
+        "compliance_status": "Planned",
+        "recommendation": "Document stopping rules and alpha spending method",
+        "_row": "\"interim\""
+      }
+    ],
+    "multiarm": [],
+    "simulation": [],
+    "timeline": [
+      {
+        "phase": "Accrual",
+        "start": 0,
+        "end": 24,
+        "y": 1
+      },
+      {
+        "phase": "Follow-up",
+        "start": 24,
+        "end": 36,
+        "y": 1
+      },
+      {
+        "phase": "Analysis",
+        "start": 36,
+        "end": 39,
+        "y": 1
+      }
+    ],
+    "natural_summary": "",
+    "interpretation": ""
+  }
+}

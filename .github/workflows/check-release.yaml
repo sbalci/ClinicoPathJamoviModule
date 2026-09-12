@@ -1,18 +1,69 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
+  push:
+    branches: [master, main]
+    paths:
+      - DESCRIPTION
+      - jamovi/0000.yaml
   workflow_dispatch:
-  # push:
-  #   branches: [main, master]
-  # pull_request:
-  #   branches: [main, master]
 
 name: R-CMD-check
 
 jobs:
-  R-CMD-check:
-      # Skip this entire job if the commit message includes "WIP"
+  check-version:
+    name: Check version
     if: "!contains(github.event.head_commit.message, 'WIP')"
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.version.outputs.release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            DESCRIPTION
+            jamovi/0000.yaml
+          sparse-checkout-cone-mode: false
+
+      - name: Read and cross-check versions
+        id: version
+        run: |
+          set -euo pipefail
+          desc_raw=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION | head -n1 | tr -d '\r')
+          yml_raw=$(sed -n 's/^version:[[:space:]]*//p' jamovi/0000.yaml | head -n1 | tr -d "\r\"'")
+          printf 'DESCRIPTION: %s\n0000.yaml:   %s\n' "$desc_raw" "$yml_raw"
+
+          desc=${desc_raw#v}
+          yml=${yml_raw#v}
+
+          if [ "$desc" != "$yml" ]; then
+            echo "::error::Version mismatch - DESCRIPTION is '$desc_raw' but jamovi/0000.yaml is '$yml_raw'. Bump both together."
+            exit 1
+          fi
+
+          if printf '%s' "$desc" | grep -Eiq '(alpha|beta|test)'; then
+            echo "::notice::Version '$desc_raw' carries an alpha/beta/test marker - running for PRE-RELEASE."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          elif printf '%s' "$desc" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]$'; then
+            echo "Version '$desc' is a release version."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          elif printf '%s' "$desc" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]{2,}$'; then
+            echo "::notice::Version '$desc_raw' has a multi-digit last part - running for PRE-RELEASE."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            case "$desc" in
+              ''|*[!0-9.]*)
+                echo "::error::Unusable version string '$desc_raw'."
+                exit 1 ;;
+            esac
+            echo "::notice::Version '$desc_raw' has four or more parts - treated as a development build. Skipping R-CMD-check."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  R-CMD-check:
+    name: R-CMD-check
+    needs: check-version
+    if: needs.check-version.outputs.release == 'true'
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}

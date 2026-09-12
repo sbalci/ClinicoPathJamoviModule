@@ -58,7 +58,7 @@ children:
           - type: TextBox
             name: sample_size_input
             format: number
-            suffix: "(for power/effect calculations)"
+            suffix: "(for power/effect/duration calculations)"
             enable: (analysis_type != "sample_size")
 
   - type: CollapseBox

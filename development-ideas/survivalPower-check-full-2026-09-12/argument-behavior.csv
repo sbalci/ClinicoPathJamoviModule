@@ -1,0 +1,84 @@
+"option","default","changed","changed_outputs","context","contextual_outputs","context_numbers","primary_changed","error","notices","elapsed"
+"clinical_preset","custom","cardio_prevention","","NULL","","",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.014
+"analysis_type","sample_size","power","instructions;power_summary;sample_size_results;power_results;regulatory_table;power_curve_plot","NULL","","",TRUE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0130000000000001
+"test_type","log_rank","cox_regression","notices;instructions;power_summary;regulatory_table;power_curve_plot","NULL","","",TRUE,"","Analysis Complete
+Power analysis completed: Cox Regression with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0169999999999999
+"study_design","two_arm_parallel","multi_arm","notices;power_summary;multi_arm_table;regulatory_table;power_curve_plot;sample_size_plot","NULL","","",TRUE,"","WARNING: Multiplicity Approximation
+Holm/Dunnett adjustments are approximated conservatively using Bonferroni in current calculations
+
+Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0229999999999999
+"primary_endpoint","overall_survival","progression_free_survival","notices;power_summary","NULL","","",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with progression-free survival endpoint • Assumes exponential survival and uniform accrual",0.014
+"effect_size_type","hazard_ratio","median_ratio","instructions;power_summary;sample_size_results;regulatory_table;power_curve_plot;sample_size_plot;survival_curves_plot","NULL","","",TRUE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0130000000000001
+"effect_size","0.75","0.6","instructions;power_summary;sample_size_results;regulatory_table;power_curve_plot;sample_size_plot;survival_curves_plot","NULL","","",TRUE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0149999999999999
+"alpha_level","0.05","0.025","power_summary;sample_size_results;regulatory_table;power_curve_plot;sample_size_plot","NULL","","",TRUE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.018
+"power_level","0.8","0.9","power_summary;sample_size_results;regulatory_table;power_curve_plot;sample_size_plot","NULL","","",TRUE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0169999999999999
+"allocation_ratio","1","2","notices;power_summary;sample_size_results;regulatory_table;power_curve_plot;sample_size_plot","NULL","","",TRUE,"","Unequal Allocation Approximation
+With unequal allocation the Schoenfeld approximation used here (as in gsDesign) can overstate power by a few percentage points, about 2 points at 2:1 and HR 0.75 against simulation • Confirm with Simulation validation
+
+Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0130000000000001
+"sample_size_input","200","400","","list(analysis_type = ""power"")","power_summary;power_results;power_curve_plot","List of 2  $ old:List of 2   ..$ power : num 0.376   ..$ events: num 130  $ new:List of 2   ..$ power : num 0.642   ..$ events: num 261",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"control_median_survival","12","18","power_summary;assumptions_table;regulatory_table;power_curve_plot;sample_size_plot;survival_curves_plot","NULL","","",TRUE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"survival_distribution","exponential","weibull","notices;power_summary;sample_size_results;assumptions_table;regulatory_table;power_curve_plot;sample_size_plot;survival_curves_plot;accrual_timeline_plot","NULL","","",TRUE,"","ERROR: Distribution Not Supported
+Only exponential survival distribution is validated in this release • Select ""Exponential"" to proceed",0.00800000000000001
+"weibull_shape","1","1.5","","list(survival_distribution = ""weibull"")","","List of 2  $ old: list()  $ new: list()",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0139999999999998
+"accrual_period","24","36","power_summary;sample_size_results;regulatory_table;power_curve_plot;sample_size_plot;survival_curves_plot;accrual_timeline_plot","NULL","","",TRUE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"follow_up_period","12","24","power_summary;sample_size_results;regulatory_table;power_curve_plot;sample_size_plot;survival_curves_plot;accrual_timeline_plot","NULL","","",TRUE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"accrual_pattern","uniform","linear_increasing","notices;power_summary;sample_size_results;assumptions_table;regulatory_table;power_curve_plot;sample_size_plot;survival_curves_plot;accrual_timeline_plot","NULL","","",TRUE,"","ERROR: Accrual Pattern Not Supported
+Only uniform accrual is modelled in this release • Select ""Uniform Accrual"" to proceed",0.00900000000000034
+"dropout_rate","0.05","0.1","power_summary;assumptions_table;regulatory_table;power_curve_plot;sample_size_plot","NULL","","",TRUE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"ni_margin","1.25","1.5","","list(test_type = ""non_inferiority"", effect_size = 1, alpha_level = 0.025)","power_summary;non_inferiority_table;regulatory_table;power_curve_plot;sample_size_plot","List of 2  $ old:List of 2   ..$ n     : num 901   ..$ events: num 631  $ new:List of 2   ..$ n     : num 273   ..$ events: num 191",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"ni_type","relative_margin","absolute_margin","","list(test_type = ""non_inferiority"", effect_size = 1, alpha_level = 0.025)","notices;power_summary;sample_size_results;assumptions_table;non_inferiority_table;regulatory_table;power_curve_plot;sample_size_plot;survival_curves_plot;accrual_timeline_plot","List of 2  $ old:List of 2   ..$ n     : num 901   ..$ events: num 631  $ new: list()",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0139999999999998
+"rmst_tau","36","24","","list(effect_size_type = ""rmst_difference"")","instructions;power_summary;sample_size_results;regulatory_table;power_curve_plot;sample_size_plot;survival_curves_plot","List of 2  $ old:List of 2   ..$ n     : num 614   ..$ events: num 401  $ new:List of 2   ..$ n     : num 241   ..$ events: num 150",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"rmst_difference","3","4","","list(effect_size_type = ""rmst_difference"")","instructions;power_summary;sample_size_results;regulatory_table;power_curve_plot;sample_size_plot;survival_curves_plot","List of 2  $ old:List of 2   ..$ n     : num 614   ..$ events: num 401  $ new:List of 2   ..$ n     : num 353   ..$ events: num 225",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"number_of_arms","3","4","","list(study_design = ""multi_arm"")","power_summary;multi_arm_table;regulatory_table;power_curve_plot;sample_size_plot","List of 2  $ old:List of 2   ..$ n     : num 1059   ..$ events: num 460  $ new:List of 2   ..$ n     : num 1552   ..$ events: num 506",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"multiple_comparisons","dunnett","none","","list(study_design = ""multi_arm"")","notices;power_summary;multi_arm_table;regulatory_table;power_curve_plot;sample_size_plot","List of 2  $ old:List of 2   ..$ n     : num 1059   ..$ events: num 460  $ new:List of 2   ..$ n     : num 875   ..$ events: num 380",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"interim_analyses","0","2","notices;regulatory_table","list(alpha_spending = ""obrien_fleming"")","power_summary;interim_analysis_table;regulatory_table;power_curve_plot;sample_size_plot","List of 2  $ old:List of 2   ..$ n     : num 583   ..$ events: num 380  $ new:List of 2   ..$ n     : num 591   ..$ events: num 385",FALSE,"","WARNING: No Alpha Spending Function
+Interim analyses are planned but no spending function is selected • Boundaries and the sample-size inflation they require cannot be derived • Select O'Brien-Fleming or Pocock
+
+Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"alpha_spending","none","obrien_fleming","","list(interim_analyses = 2L)","notices;power_summary;interim_analysis_table;regulatory_table;power_curve_plot;sample_size_plot","List of 2  $ old:List of 2   ..$ n     : num 583   ..$ events: num 380  $ new:List of 2   ..$ n     : num 591   ..$ events: num 385",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"cluster_size","50","75","","list(study_design = ""cluster_randomized"")","power_summary;regulatory_table;power_curve_plot;sample_size_plot","List of 2  $ old:List of 2   ..$ n     : num 2012   ..$ events: num 380  $ new:List of 2   ..$ n     : num 2741   ..$ events: num 380",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"icc","0.05","0.1","","list(study_design = ""cluster_randomized"")","power_summary;regulatory_table;power_curve_plot;sample_size_plot","List of 2  $ old:List of 2   ..$ n     : num 2012   ..$ events: num 380  $ new:List of 2   ..$ n     : num 3440   ..$ events: num 380",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"sensitivity_analysis","FALSE","TRUE","sensitivity_analysis_table;sensitivity_plot","NULL","","",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0339999999999998
+"run_simulation_validation","FALSE","TRUE","simulation_validation_table","NULL","","",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",2.938
+"simulation_runs","2000","1000","","list(run_simulation_validation = TRUE)","simulation_validation_table","List of 2  $ old:List of 2   ..$ n     : num 583   ..$ events: num 380  $ new:List of 2   ..$ n     : num 583   ..$ events: num 380",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999999
+"simulation_seed","42","99","","list(run_simulation_validation = TRUE, simulation_runs = 1000L)","simulation_validation_table","List of 2  $ old:List of 2   ..$ n     : num 583   ..$ events: num 380  $ new:List of 2   ..$ n     : num 583   ..$ events: num 380",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0139999999999993
+"show_interpretation","FALSE","TRUE","clinical_interpretation","NULL","","",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0139999999999993
+"show_summary","FALSE","TRUE","natural_language_summary","NULL","","",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999981
+"show_explanations","FALSE","TRUE","educational_explanations","NULL","","",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0139999999999993
+"show_glossary","FALSE","TRUE","statistical_glossary","NULL","","",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0129999999999981
+"guided_mode","FALSE","TRUE","guided_workflow","NULL","","",FALSE,"","Analysis Complete
+Power analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",0.0130000000000017

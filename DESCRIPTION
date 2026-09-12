@@ -679,6 +679,7 @@ Collate:
     'parametricfrailty.h.R'
     'partialcorrelation.b.R'
     'partialcorrelation.h.R'
+    'pathagreement-bootstrap.R'
     'pathagreement.b.R'
     'pathagreement.h.R'
     'pathologyagreement.b.R'

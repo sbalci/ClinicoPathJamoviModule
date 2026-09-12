@@ -758,6 +758,10 @@ msgid ""
 "categories."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "[ ] Rater variables: {count}/2 minimum"
+msgstr ""
+
 #: R/jjpiestats.b.R
 msgid ""
 "[Enter the test statistic, effect estimate, confidence interval and p-value "
@@ -794,6 +798,10 @@ msgstr ""
 
 #: stagemigration/ui[8][22].label
 msgid "[Experimental] Win Ratio Analysis"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "[READY] {count} rater variables selected"
 msgstr ""
 
 #: R/nonparametric.b.R
@@ -950,6 +958,14 @@ msgstr ""
 "{cutoff} en yüksek Youden J değerine sahip (mevcuttan {margin} yüksek); "
 "örneklem doğruluğu aralıkları örtüşmüyor."
 
+#: R/pathagreement.b.R
+msgid ""
+"{data_note} 95% {method} bootstrap interval from {resamples} case resamples "
+"(seed {seed})."
+msgstr ""
+"{data_note} {resamples} olgu yeniden örneklemesinden %95 {method} bootstrap "
+"aralığı (tohum {seed})."
+
 #: R/survival.b.R
 msgid "{dist} model - AIC {aic}, BIC {bic}, log-likelihood {loglik}{cov}"
 msgstr "{dist} modeli - AIC {aic}, BIC {bic}, log-olabilirlik {loglik}{cov}"
@@ -997,6 +1013,32 @@ msgstr "{head} ve {last}"
 #: R/vartree.b.R
 msgid "{hidden} branch(es) are hidden by the minimum-size setting."
 msgstr "{hidden} dal en küçük boyut ayarı nedeniyle gizli."
+
+#: R/pathagreement.b.R
+msgid "{interpretation} (higher than standard kappa; prevalence bias may be present)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "{interpretation} (less affected by prevalence than kappa)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"{interpretation} (lower than standard kappa; review the category "
+"distribution)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "{interpretation} (ordinal weights give partial credit for near-miss ratings)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "{interpretation} (similar to standard kappa)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "{interpretation} (unweighted: identical to AC1 for nominal ratings)"
+msgstr ""
 
 #: R/multisurvival.b.R
 msgid "{ipa} vs Kaplan-Meier ({reference})"
@@ -1750,6 +1792,24 @@ msgstr ""
 msgid "*** / ** / *"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"\\u{2022} <em>Sample-size planning:</em> Helps design future studies for a "
+"target confidence-interval precision."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"\\u{2022} <em>Stability analysis:</em> Bootstrap resampling assesses how the "
+"agreement statistics vary across resampled cases."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"\\u{2022} <em>Trend analysis:</em> Tracks agreement over the case sequence "
+"to explore learning effects or fatigue."
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "\\u{2022} |Residual| > 2.0: Suggests meaningful deviation"
 msgstr "\\u{2022} |Artık| > 2.0: Anlamlı sapmaya işaret eder"
@@ -1757,6 +1817,54 @@ msgstr "\\u{2022} |Artık| > 2.0: Anlamlı sapmaya işaret eder"
 #: R/chisqposttest.b.R
 msgid "\\u{2022} |Residual| > 3.0: Strong evidence of deviation"
 msgstr "\\u{2022} |Artık| > 3.0: Sapmanın güçlü kanıtı"
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} 0.00-0.20: Slight agreement"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} 0.21-0.40: Fair agreement"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} 0.41-0.60: Moderate agreement"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} 0.61-0.80: Substantial agreement"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} 0.81-1.00: Almost perfect agreement"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} AC coefficients are less affected by prevalence imbalance"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} AC values can differ materially from kappa"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} AC1 is the nominal-data coefficient"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} AC2 applies disagreement weights for ordinal data"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Assesses consistency across clinicians"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Cases should be representative of the target population"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Category definitions should be clear and consistent"
+msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "\\u{2022} Cohort trace analysis performed"
@@ -1774,8 +1882,24 @@ msgstr ""
 msgid "\\u{2022} Consider budget impact if implementing recommendations"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "\\u{2022} Consider clinical context when interpreting statistical results"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Consider confidence intervals; wide intervals indicate imprecision"
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "\\u{2022} Consider sensitivity analysis for uncertain parameters"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Consider the consequences of disagreement in the specific context"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Consider whether disagreements reveal protocol ambiguities"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -1784,6 +1908,10 @@ msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "\\u{2022} Discounting applied for future benefits"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Document agreement thresholds in the research protocol"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -1798,9 +1926,29 @@ msgstr "\\u{2022} Bunun yerine 'ggVennDiagram Grafiğini Göster'i etkinleştiri
 msgid "\\u{2022} Equivalent per-comparison level:"
 msgstr "\\u{2022} Karşılaştırma başına eşdeğer düzey:"
 
+#: R/pathagreement.b.R
+msgid "\\u{2022} Evaluates diagnostic criteria and protocols"
+msgstr ""
+
 #: R/venn.b.R
 msgid "\\u{2022} ggVennDiagram supports 5+ variables with better visualization"
 msgstr "\\u{2022} ggVennDiagram daha iyi görselleştirme ile 5+ değişkeni destekler"
+
+#: R/pathagreement.b.R
+msgid ""
+"\\u{2022} High statistical agreement does not automatically establish "
+"clinical acceptability"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Identifies training needs and calibration opportunities"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"\\u{2022} Landis &amp; Koch bands are descriptive conventions, not clinical "
+"acceptability thresholds"
+msgstr ""
 
 #: R/decisiongraph.b.R
 msgid "\\u{2022} Lifetime costs and utilities calculated"
@@ -1814,6 +1962,10 @@ msgstr ""
 msgid "\\u{2022} Method:"
 msgstr "\\u{2022} Yöntem:"
 
+#: R/pathagreement.b.R
+msgid "\\u{2022} Missing-data patterns may affect results"
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "\\u{2022} Negative values: Under-represented (fewer than expected)"
 msgstr "\\u{2022} Negatif değerler: Yetersiz temsil edilen (beklenenden az)"
@@ -1826,9 +1978,23 @@ msgstr ""
 msgid "\\u{2022} Number of comparisons:"
 msgstr "\\u{2022} Karşılaştırma sayısı:"
 
+#: R/pathagreement.b.R
+msgid ""
+"\\u{2022} Plan follow-up calibration sessions if agreement is below the "
+"prespecified target"
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "\\u{2022} Positive values: Over-represented (more than expected)"
 msgstr "\\u{2022} Pozitif değerler: Fazla temsil edilen (beklenenden fazla)"
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Pre-specify agreement thresholds before data collection"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Raters should be independent (no collaboration during rating)"
+msgstr ""
 
 #: R/venn.b.R
 msgid "\\u{2022} Reduce to 4 or fewer variables for ggvenn visualization"
@@ -1838,8 +2004,40 @@ msgstr "\\u{2022} ggvenn görselleştirmesi için 4 veya daha az değişkene ind
 msgid "\\u{2022} Results compared against willingness-to-pay threshold"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "\\u{2022} Review cases with poor agreement for learning opportunities"
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid "\\u{2022} Review the detailed results tables below"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Some diagnostic categories may inherently have lower agreement"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Supports research reproducibility and multi-center studies"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"\\u{2022} The agreement required depends on the clinical consequence of a "
+"disagreement"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Training and protocol changes may alter agreement over time"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "\\u{2022} Use calibration sessions when the study protocol calls for them"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"\\u{2022} Use complementary agreement measures when their assumptions match "
+"the data"
 msgstr ""
 
 #: R/venn.b.R
@@ -4613,6 +4811,12 @@ msgid ""
 "group(s) (n = %d). %s</p></div>"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"<em>Choose the weighting scheme before analysis from the clinical cost of "
+"each degree of disagreement, and report it explicitly.</em>"
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid ""
 "<em>Note:</em> Zero-cell corrections can introduce bias, especially in large "
@@ -4620,6 +4824,46 @@ msgid ""
 msgstr ""
 "<em>Not:</em> Sıfır hücre düzeltmeleri, özellikle büyük çalışmalarda "
 "yanlılığa neden olabilir. Sonuçlar dikkatle yorumlanmalıdır."
+
+#: R/pathagreement.b.R
+msgid ""
+"<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #2e7d32;'>Inter-rater "
+"Reliability Analysis</h2>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<h2 style=\"color: #1976d2;\">Clustering analysis interpretation guide</h2>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h3 style='margin: 0 0 10px 0; color: #1976d2; font-size: 18px;'>Weighted "
+"kappa guide</h3>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h3 style='margin: 0 0 10px 0; color: #2e7d32; font-size: 16px;'>Setup "
+"status</h3>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h3 style='margin: 0 0 15px 0; color: #2e7d32; font-size: 18px;'>About "
+"inter-rater reliability analysis</h3>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h3 style='margin: 0 0 15px 0; color: #2e7d32; font-size: 18px;'>Statistical "
+"terms glossary</h3>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h3 style='margin: 0 0 15px 0; color: #f57c00; font-size: 18px;'>Assumptions "
+"and caveats</h3>"
+msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "<h3> Analysis Summary</h3>"
@@ -4643,6 +4887,10 @@ msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "<h3> Network Statistics</h3>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<h3>Clinical implications</h3>"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -4675,6 +4923,202 @@ msgstr ""
 "doğru şekilde tanımlanmıştır ({tpRate})</li><li>Hastalığı olmayan beklenen "
 "{healthy} kişi arasından {tn} kişi doğru şekilde tanımlanmıştır "
 "({tnRate})</li></ul>"
+
+#: R/pathagreement.b.R
+msgid "<h3>Silhouette scores</h3>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<h3>Understanding the tables</h3>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<h3>What is diagnostic style clustering?</h3>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<h3>Your results</h3>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #01579b; font-size: 15px;'>Educational "
+"insights</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Cohen's "
+"kappa (\\u{03BA})</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Copy-ready "
+"report template</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Fleiss' "
+"kappa</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Gwet's "
+"agreement coefficients (AC1/AC2)</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Intraclass "
+"correlation coefficient (ICC)</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: "
+"16px;'>Krippendorff's alpha (\\u{03B1})</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>PABAK "
+"(prevalence-adjusted bias-adjusted kappa)</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #2e7d32; font-size: "
+"15px;'>Understanding your results</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #2e7d32; font-size: 16px;'>Clinical "
+"summary</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #2e7d32; font-size: "
+"16px;'>Interpretation guidelines</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #6a1b9a; font-size: "
+"15px;'>Interpretation impact</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #ad1457; font-size: 15px;'>Important "
+"considerations</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #e65100; font-size: 15px;'>Clinical "
+"decision guide</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #e65100; font-size: 15px;'>Practical "
+"tips</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #f57c00; font-size: 15px;'>Clinical "
+"interpretation</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: #f57c00; font-size: 15px;'>Statistical "
+"interpretation guide</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; color: inherit; font-size: 15px;'>Key "
+"findings</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #2e7d32;'>Quick start "
+"guide</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #2e7d32;'>What you "
+"will get</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 10px 0; font-size: 15px; color: #f57c00;'>Important "
+"notes for clinical use</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 0 0 12px 0; color: #2e7d32; font-size: 16px;'>Weighting "
+"schemes explained</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'>Common "
+"pitfalls</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'>Data "
+"requirements</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: 15px;'>Important "
+"assumptions</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 15px 0 8px 0; color: #d84315; font-size: "
+"15px;'>Interpretation guidelines</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 15px 0 8px 0; color: inherit; font-size: 15px;'>Key "
+"outputs:</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 15px 0 8px 0; color: inherit; font-size: 15px;'>What does "
+"this analysis do?</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 15px 0 8px 0; color: inherit; font-size: 15px;'>What you "
+"need:</h4>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h4 style='margin: 15px 0 8px 0; color: inherit; font-size: 15px;'>When to "
+"use it?</h4>"
+msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "<h4> Biological Pathway Network Analysis</h4>"
@@ -4775,6 +5219,30 @@ msgstr "<h4>Seri Test Stratejisi (Negatifleri Test Etme)</h4>"
 msgid "<h4>Serial Testing Strategy (Testing Positives)</h4>"
 msgstr "<h4>Seri Test Stratejisi (Pozitifleri Test Etme)</h4>"
 
+#: R/pathagreement.b.R
+msgid ""
+"<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'>Unweighted "
+"kappa (standard)</h5>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h5 style='margin: 0 0 8px 0; font-size: 14px; color: inherit;'>Additional "
+"detail:</h5>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h5 style='margin: 0 0 8px 0; font-size: 14px; color: inherit;'>Clinical "
+"interpretation:</h5>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<h5 style='margin: 0 0 8px 0; font-size: 14px; color: inherit;'>Main "
+"result:</h5>"
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid "<h5>Combined Sensitivity</h5>"
 msgstr "<h5>Birleşik Duyarlılık</h5>"
@@ -4799,10 +5267,50 @@ msgstr "<h5>Pozitif Olabilirlik Oranı (LR+)</h5>"
 msgid "<h5>Positive Predictive Value (PPV)</h5>"
 msgstr "<h5>Pozitif Öngörü Değeri (PÖD)</h5>"
 
+#: R/pathagreement.b.R
+msgid "<li>\\u{03BA} &lt; 0.00: Poor agreement (worse than chance)</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>\\u{03BA} 0.00-0.20: Slight agreement</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>\\u{03BA} 0.21-0.40: Fair agreement</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>\\u{03BA} 0.41-0.60: Moderate agreement</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>\\u{03BA} 0.61-0.80: Substantial agreement</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>\\u{03BA} 0.81-1.00: Almost perfect agreement</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>&gt; 0.7:</strong> Strong separation between the observed "
+"groups</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li><strong>&lt; 0.5:</strong> Weak separation with overlapping groups</li>"
+msgstr ""
+
 #: R/jjcorrmat.b.R
 msgid ""
 "<li><strong>%s</strong> (n = %s): %d of %d pairs strong (|%s| ≥ 0.5), %d "
 "meeting the significance threshold. Strongest: %s = %s (%s vs %s).</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>0.5-0.7:</strong> Moderate separation between the observed "
+"groups</li>"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -4812,6 +5320,22 @@ msgid ""
 msgstr ""
 "<li><strong>1SE Kuralı</strong>: Minimum ÇD hatasının 1 SE içindeki en yalın "
 "modeli seçer.</li>"
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>2 or more rater variables</strong> - each representing ratings "
+"by different observers</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>95% confidence intervals</strong> - precision of the agreement "
+"estimate</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li><strong>Agreement heatmap</strong> with customizable color themes</li>"
+msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -4829,8 +5353,67 @@ msgid ""
 "network regions. Accounts for weight interpretation mode</li>"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Bias effects:</strong> Systematic differences between raters "
+"reduce apparent agreement</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Case difficulty:</strong> Easy and difficult cases may show "
+"different agreement patterns</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Category prevalence:</strong> Report rare categories and "
+"consider a prevalence-robust coefficient such as Gwet's AC1.</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Category prevalence:</strong> Report rare categories and "
+"consider how prevalence affects each coefficient</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Category prevalence:</strong> Report rare categories and examine "
+"prevalence-sensitive and prevalence-robust coefficients</li>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid "<li><strong>Centrality:</strong> Node importance in the network</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Characteristic associations:</strong> Tests whether style is "
+"associated with experience, institution, or other supplied "
+"characteristics</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Clinical context:</strong> Consider consequences of disagreement "
+"in interpretation</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Clinical context:</strong> Consider the clinical consequences of "
+"disagreement when interpreting results.</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Clinical interpretation</strong> - practical meaning of "
+"agreement levels</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li><strong>Clinical interpretation</strong> of agreement levels</li>"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -4850,10 +5433,20 @@ msgstr ""
 msgid "<li><strong>Communities:</strong> Group structure detection</li>"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Complete data:</strong> Missing ratings reduce the analyzed "
+"sample</li>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid ""
 "<li><strong>Connected Components:</strong> Isolated subnetworks may indicate "
 "distinct functional modules. Warnings issued for disconnected graphs</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li><strong>Consensus analysis</strong> for determining agreed ratings</li>"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -4888,6 +5481,12 @@ msgstr ""
 msgid "<li><strong>Density:</strong> Measure of network connectivity</li>"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Diagnostic patterns:</strong> Shows how each group uses "
+"diagnostic categories</li>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid ""
 "<li><strong>Directed Networks:</strong> When 'Directed network' is enabled, "
@@ -4899,6 +5498,12 @@ msgstr ""
 msgid ""
 "<li><strong>Disconnected Graphs:</strong> Closeness/betweenness may be "
 "unreliable. Inf/NA values are auto-filtered and warnings are issued</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Discordant cases:</strong> Shows cases where style groups "
+"disagree most</li>"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -4944,6 +5549,22 @@ msgstr ""
 "<li><strong>Elastic Net</strong>: L1 ve L2 cezalarını birleştirir; tahmin "
 "ediciler korelasyonlu olduğunda yararlıdır.</li>"
 
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Factor variables:</strong> Data must be properly coded as "
+"factors in your dataset</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Frequency tables and visualizations</strong> - detailed "
+"breakdown of agreement patterns</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li><strong>Frequency tables</strong> showing rater distributions</li>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid ""
 "<li><strong>Group Conflicts:</strong> If a node appears with multiple group "
@@ -4964,6 +5585,32 @@ msgstr ""
 msgid "<li><strong>Highest Degree:</strong>"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>ICC here:</strong> Available only for ordered-factor ratings and "
+"computed from their numeric level codes</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Independent ratings:</strong> Each rater evaluates cases without "
+"knowledge of other ratings</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Independent ratings</strong> - raters should evaluate cases "
+"independently</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Interpretation:</strong> Landis &amp; Koch (1977) bands for "
+"\\u{03BA}: 0.20 or less slight, 0.21-0.40 fair, 0.41-0.60 moderate, "
+"0.61-0.80 substantial, above 0.80 almost perfect. These are descriptive "
+"conventions, not clinical thresholds.</li>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid "<li><strong>Is Connected:</strong>"
 msgstr ""
@@ -4972,6 +5619,18 @@ msgstr ""
 msgid ""
 "<li><strong>Isolated Nodes:</strong> Entities with no connections appear "
 "only if referenced; unreachable nodes get zero centrality</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Kappa coefficient (\\u{03BA})</strong> - primary agreement "
+"measure corrected for chance</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Kappa statistics</strong> with confidence intervals and "
+"interpretation</li>"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -4995,6 +5654,10 @@ msgstr ""
 #: R/jjarcdiagram.b.R
 msgid "<li><strong>Layout:</strong> Choose horizontal or vertical arrangement</li>"
 msgstr ""
+
+"<li><strong>Eksik veri:</strong> Analizlerin çoğu seçilen değerlendiriciler "
+"boyunca eksiksiz satırları kullanır; Krippendorff alfası, en az iki gözlenmiş "
+"derecelendirmesi olan kısmen derecelendirilmiş olguları da kullanabilir</li>"
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -5079,6 +5742,20 @@ msgstr ""
 "<li><strong>Odds Oranı</strong>: exp(katsayı). OR > 1 pozitif sınıf "
 "olasılığını artırır.</li>"
 
+#: R/pathagreement.b.R
+msgid "<li><strong>Overall agreement percentage</strong> and summary statistics</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li><strong>P-values</strong> - statistical significance testing</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Planned sample size</strong> - base it on expected agreement, "
+"category prevalence, rater count, and target precision</li>"
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid "<li><strong>Positive Likelihood Ratio (LR+)</strong>: Se/(1-Sp)</li>"
 msgstr "<li><strong>Pozitif Olabilirlik Oranı (LR+)</strong>: Se/(1-Sp)</li>"
@@ -5086,6 +5763,49 @@ msgstr "<li><strong>Pozitif Olabilirlik Oranı (LR+)</strong>: Se/(1-Sp)</li>"
 #: R/sequentialtests.b.R
 msgid "<li><strong>Prevalence (P)</strong>: The pre-test probability of disease</li>"
 msgstr "<li><strong>Prevalans (P)</strong>: Hastalığın test öncesi olasılığı</li>"
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Prevalence effects:</strong> Very rare or very common conditions "
+"can inflate or deflate kappa</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Reporting:</strong> Include confidence intervals when "
+"available</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Representative sample:</strong> Cases should represent the "
+"typical population</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Same rating scale:</strong> All raters use identical categories "
+"in the same order</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Same rating scale</strong> - all raters must use identical "
+"categories</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Sample size:</strong> Plan from expected agreement, category "
+"prevalence, rater count, and target precision</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Sample size:</strong> Required sample size depends on expected "
+"agreement, category prevalence, rater count, and target precision; use the "
+"sample-size planning output.</li>"
+msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid ""
@@ -5121,6 +5841,12 @@ msgstr ""
 "<li><strong>Özgüllük (Sp)</strong>: Hastalıksız deneklerde testin negatif "
 "çıkma olasılığı</li>"
 
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Stable conditions:</strong> Rating criteria remain consistent "
+"throughout the study</li>"
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid ""
 "<li><strong>Standardization (default on):</strong> predictors are centered "
@@ -5141,10 +5867,22 @@ msgstr ""
 "yok). Önem sütunu ve Katsayı Grafiği, farklı birimlere sahip tahmin ediciler "
 "arasında karşılaştırılabilir olan standart sapma başına ölçekte kalır.</li>"
 
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Style-groups summary:</strong> Shows rater composition and "
+"agreement within and between groups</li>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid ""
 "<li><strong>Target Node:</strong> Select the variable representing "
 "connection destinations</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Training effects:</strong> Agreement may improve over time, "
+"affecting comparisons</li>"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -5152,6 +5890,22 @@ msgid ""
 "<li><strong>Weight Interpretation:</strong> Ensure 'Edge weight "
 "interpretation' matches your data. Most biological/clinical networks use "
 "'Strength' mode</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li>A larger weighted estimate does not by itself establish clinical "
+"acceptability</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li>Advanced users can try <strong>Krippendorff's alpha</strong> or "
+"<strong>consensus analysis</strong></li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>All disagreements are equally important</li>"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -5169,6 +5923,16 @@ msgid ""
 msgstr ""
 "<li>Bootstrap iyimserlik düzeltmesi, görünürdeki EAA'nın gerçek performansı "
 "ne kadar abarttığını tahmin eder.</li>"
+
+#: R/pathagreement.b.R
+msgid ""
+"<li>Choose an appropriate <strong>weighting scheme</strong> (unweighted for "
+"nominal, weighted for ordinal)</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Clinical consequences increase more rapidly with distance</li>"
+msgstr ""
 
 #: R/sequentialtests.b.R
 msgid "<li>Combined probability = {first} + {second} = {combined}</li>"
@@ -5222,6 +5986,18 @@ msgstr ""
 "<li>Payda = P \\u{00D7} Se + (1-P) \\u{00D7} (1-Sp) = {numerator} + "
 "{oneMinusP} \\u{00D7} {oneMinusSp} = {denominator}</li>"
 
+#: R/pathagreement.b.R
+msgid "<li>Distant rating errors have disproportionately larger consequences</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Each one-category error has similar clinical importance</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Each step of disagreement has equal clinical importance</li>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid "<li>Edge Weight: Strength of connections</li>"
 msgstr ""
@@ -5235,6 +6011,14 @@ msgstr ""
 "<li>Acil eğitim çifti (Fizyolojik test + Biyobelirteç)</li><li>Akut "
 "görüntüleme eğitim çifti (Klinik değerlendirme + Görüntüleme)</li>"
 
+#: R/pathagreement.b.R
+msgid "<li>Ensure all raters use the same rating scale/categories</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Establishing inter-institutional agreement</li>"
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid ""
 "<li>Events-per-variable (EPV) should be >=10. Below 5, results are "
@@ -5242,6 +6026,20 @@ msgid ""
 msgstr ""
 "<li>Değişken başına olay (EPV) >=10 olmalıdır. 5'in altında, "
 "düzenlileştirmeden bağımsız olarak sonuçlar güvenilmezdir.</li>"
+
+#: R/pathagreement.b.R
+msgid "<li>Example: Diagnostic categories, present/absent classifications</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li>Example: Disease severity, when a mild-to-severe disagreement matters "
+"more than an adjacent-category disagreement</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Example: Pain scales (1-10), tumor grades (I, II, III, IV)</li>"
+msgstr ""
 
 #: R/sequentialtests.b.R
 msgid ""
@@ -5288,6 +6086,10 @@ msgstr ""
 "<li>Herhangi bir morfolojik puanlama bileşeni için gözlemciler arası uyum "
 "değerlendirilmelidir.</li>"
 
+#: R/pathagreement.b.R
+msgid "<li>Large disagreements are disproportionately more serious</li>"
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid ""
 "<li>LASSO coefficients do not have standard errors or p-values. Use "
@@ -5296,8 +6098,16 @@ msgstr ""
 "<li>LASSO katsayılarının standart hataları veya p değerleri yoktur. Çıkarım "
 "için bootstrap doğrulamasını kullanın.</li>"
 
+#: R/pathagreement.b.R
+msgid "<li>Near-category disagreements receive partial agreement credit</li>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid "<li>Node Groups: Categories for color coding</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Nominal (categorical) data with no natural ordering</li>"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -5313,6 +6123,16 @@ msgstr "<li>Pay = (1-P) \\u{00D7} Sp = {oneMinusP} \\u{00D7} {sp} = {numerator}<
 #: R/sequentialtests.b.R
 msgid "<li>Numerator = P \\u{00D7} Se = {p} \\u{00D7} {se} = {numerator}</li>"
 msgstr "<li>Pay = P \\u{00D7} Se = {p} \\u{00D7} {se} = {numerator}</li>"
+
+#: R/pathagreement.b.R
+msgid ""
+"<li>Optionally enable <strong>frequency tables</strong> and <strong>heatmap "
+"visualization</strong></li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Ordinal data where categories are equally spaced</li>"
+msgstr ""
 
 #: R/sequentialtests.b.R
 msgid "<li>PPV = numerator/denominator = {numerator}/{denominator} = {ppv}</li>"
@@ -5372,6 +6192,30 @@ msgstr "<li>Test 1'de pozitif çıkma olasılığı: {value}</li>"
 msgid "<li>Probability of testing positive on Test 2: {value}</li>"
 msgstr "<li>Test 2'de pozitif çıkma olasılığı: {value}</li>"
 
+#: R/pathagreement.b.R
+msgid ""
+"<li>Quadratic weights give more credit to near-category disagreements than "
+"linear weights</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Quality assurance in clinical laboratories</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li>Rating scales have ordered, approximately equal steps (e.g., a 1-5 "
+"rating scale)</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Research studies requiring reliable measurements</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Risk strata are ordered from low to high risk</li>"
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid ""
 "<li>Rule-out teaching pair (Initial assessment \\u{2192} "
@@ -5381,6 +6225,10 @@ msgstr ""
 "<li>Dışlama eğitim çifti (İlk değerlendirme \\u{2192} "
 "Biyobelirteç)</li><li>Dışlama eğitim çifti (Klinik skor \\u{2192} "
 "Laboratuvar testi)</li>"
+
+#: R/pathagreement.b.R
+msgid "<li>Select <strong>2 or more rater variables</strong> from your dataset</li>"
+msgstr ""
 
 #: R/lassologistic.b.R
 msgid ""
@@ -5430,6 +6278,24 @@ msgstr ""
 "<li>Puanlama sistemi katsayıları tam sayılara yuvarlar, bu da kesinliği "
 "kaybeder ancak klinik kullanılabilirlik kazandırır.</li>"
 
+#: R/pathagreement.b.R
+msgid "<li>The weighting rule was specified before examining the results</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Training new staff and measuring competency</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li>Treatment-response categories are ordered from complete response to "
+"progression</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<li>Validating diagnostic consistency between pathologists</li>"
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid ""
 "<li>Variables NOT selected are not necessarily unimportant - they may be "
@@ -5468,6 +6334,253 @@ msgstr "<ol>"
 #: R/pathsampling.b.R
 msgid "<p style='{v1} {v2}'><b>Target detection probability:</b> {v3}%</p>"
 msgstr "<p style='{v1} {v2}'><b>Hedef saptama olasılığı:</b> %{v3}</p>"
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - [(i - j) / "
+"(k - 1)]\\u{00B2}</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - |i - j| / (k "
+"- 1)</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<p style='margin: 0 0 6px 0;'><strong>When to use:</strong></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Clinical "
+"use:</strong> A sensitivity analysis when prevalence affects standard "
+"kappa</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Clinical "
+"use:</strong> Comparing two pathologists, radiologists, or clinicians</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Clinical "
+"use:</strong> Multi-center studies, consensus panels, training assessment</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Data used "
+"here:</strong> Factor ratings; most analyses use complete rows, while "
+"Krippendorff's alpha also uses cases with at least two observed ratings</p>"
+msgstr ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Burada kullanılan "
+"veri:</strong> Faktör derecelendirmeleri; analizlerin çoğu eksiksiz satırları "
+"kullanırken Krippendorff alfası en az iki gözlenmiş derecelendirmesi olan "
+"olguları da kullanır</p>"
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Data used "
+"here:</strong> Numeric level codes from rating variables declared as ordered "
+"factors</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> -1 to "
+"+1 (0 = chance agreement, 1 = perfect agreement)</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> -1 to "
+"+1 (same interpretation as Cohen's kappa)</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> -1 to "
+"+1; the estimate may be higher or lower than standard kappa</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> -1 to "
+"+1; values can differ materially from kappa</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> "
+"Estimates can be negative; larger values indicate greater reliability</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> "
+"Values can be negative; 0 indicates chance-level agreement and 1 indicates "
+"perfect agreement</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Use:</strong> A "
+"complementary coefficient when category prevalence is strongly imbalanced</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it "
+"measures:</strong> Agreement among 3 or more raters, extending Cohen's "
+"kappa</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it "
+"measures:</strong> Agreement between exactly 2 raters, corrected for chance "
+"agreement</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it "
+"measures:</strong> Brennan-Prediger agreement using an equal-probability "
+"chance model</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it "
+"measures:</strong> Chance-corrected agreement that is less sensitive to "
+"prevalence than kappa</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it "
+"measures:</strong> ICC(2,1), two-way random-effects absolute agreement for a "
+"single rater</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it "
+"measures:</strong> Reliability using nominal, ordinal, interval, or ratio "
+"disagreement functions</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0;'><strong>Choose linear weighting "
+"when:</strong></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0;'><strong>Choose quadratic weighting "
+"when:</strong></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0;'><strong>Kappa interpretation (Landis & Koch, "
+"1977):</strong></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0 0 8px 0;'>Weighting changes how disagreements contribute "
+"to kappa:</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; color: inherit;'><em>All adjacent disagreements are "
+"penalized equally</em></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; color: inherit;'><em>All disagreements are treated "
+"equally, regardless of distance</em></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; color: inherit;'><em>Distant disagreements receive "
+"substantially less agreement credit than adjacent disagreements</em></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; color: inherit;'>Select at least 2 rater variables to "
+"proceed with analysis.</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; font-size: 13px; color: inherit;'>Click inside the "
+"boxes to select text, then copy (Ctrl+C/Cmd+C) for use in reports:</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; font-size: 14px; color: inherit;'><em>AC1 is nominal; "
+"AC2 applies disagreement weights for ordinal ratings</em></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; font-size: 14px; color: inherit;'><em>Formula: "
+"(observed - expected) / (1 - expected)</em></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; font-size: 14px; color: inherit;'><em>Nominal and "
+"continuous variables are not accepted by this analysis</em></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; font-size: 14px; color: inherit;'><em>Report the "
+"coefficient and its chance model rather than treating it as a "
+"prevalence-free truth</em></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; font-size: 14px; color: inherit;'><em>The selected "
+"disagreement function must match the measurement scale</em></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; font-size: 14px; color: inherit;'><em>This "
+"implementation analyzes complete cases rated by the selected raters</em></p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; font-size: 14px; color: inherit;'>Evaluate agreement "
+"between multiple raters/observers using statistical measures</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0; font-size: 14px; color: inherit;'>Quick reference for "
+"inter-rater reliability statistics and their interpretation</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p style='margin: 0;'>Minimum requirements met. Analysis will begin "
+"automatically.</p>"
+msgstr ""
 
 #: R/pathsampling.b.R
 msgid ""
@@ -5995,6 +7108,12 @@ msgid ""
 "classifications.</p>"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"<p><strong>High within-group agreement</strong> suggests a consistent "
+"diagnostic approach within a style group.</p>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid ""
 "<p><strong>Key Findings:</strong> The entity '%s' emerged as the most highly "
@@ -6030,6 +7149,12 @@ msgid ""
 "(%.2f %s).</p>"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"<p><strong>Low between-group agreement</strong> indicates systematic "
+"differences in diagnostic interpretation.</p>"
+msgstr ""
+
 #: R/jjarcdiagram.b.R
 msgid ""
 "<p><strong>Network Overview:</strong> This network contains %d entities with "
@@ -6041,6 +7166,13 @@ msgid ""
 "<p><strong>Network Summary:</strong> Arc diagram analysis of a %s network "
 "revealed %d entities connected by %d relationships, with a network density "
 "of %.3f indicating %s structure.</p>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<p><strong>No detected association with a characteristic</strong> means "
+"these data do not provide evidence of an association; it does not establish "
+"that the characteristic has no effect.</p>"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -6452,6 +7584,13 @@ msgstr "<p>Negatif bir test sonucunun gerçek bir negatif olma olasılığı:</p
 msgid "<p>The probability that a positive test result is a true positive:</p>"
 msgstr "<p>Pozitif bir test sonucunun gerçek bir pozitif olma olasılığı:</p>"
 
+#: R/pathagreement.b.R
+msgid ""
+"<p>This analysis groups raters by their diagnostic patterns. The resulting "
+"\"diagnostic styles\" describe approaches that differ systematically between "
+"groups.</p>"
+msgstr ""
+
 #: R/sequentialtests.b.R
 msgid "<p>This can be rewritten as:</p>"
 msgstr "<p>Bu şu şekilde yeniden yazılabilir:</p>"
@@ -6580,6 +7719,10 @@ msgstr ""
 msgid "<strong>Accuracy:</strong> Outlier detection and range validation"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "<strong>Advanced features explained:</strong>"
+msgstr ""
+
 #: R/jjwithinstats.b.R
 msgid "<strong>Analysis:</strong> %s with %d measurements per subject"
 msgstr ""
@@ -6605,6 +7748,16 @@ msgid ""
 "<strong>Bayesian:</strong> reports a Bayes factor quantifying evidence "
 "strength."
 msgstr "<strong>Bayesçi:</strong> kanıt gücünü niceleyen bir Bayes faktörü bildirir."
+
+#: R/pathagreement.b.R
+msgid "<strong>Best practices:</strong>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<strong>Bias detection:</strong> This identifies systematic tendencies in "
+"individual raters for review in training or calibration."
+msgstr ""
 
 #: R/jjwithinstats.b.R
 msgid ""
@@ -6636,6 +7789,14 @@ msgid ""
 "statistical options yourself."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "<strong>Clinical interpretation:</strong>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<strong>Clinical significance:</strong>"
+msgstr ""
+
 #: R/checkdata.b.R
 msgid "<strong>Clinical Trials:</strong> Regulatory compliance and data monitoring"
 msgstr ""
@@ -6644,6 +7805,10 @@ msgstr ""
 msgid ""
 "<strong>Clinical Validity:</strong> Context-specific validation (age, lab "
 "values, etc.)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<strong>Complete agreement (all raters identical):</strong> {pct}%"
 msgstr ""
 
 #: R/checkdata.b.R
@@ -6672,6 +7837,12 @@ msgid ""
 "approximately %.1f%%.<br><strong>RECOMMENDATION:</strong> Select a "
 "correction method to see guidance, or interpret all p-values cautiously "
 "acknowledging this inflated error rate."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<strong>Difficulty analysis:</strong> Cases with high disagreement may be "
+"ambiguous or may reveal a need to refine the rating protocol."
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -6730,6 +7901,16 @@ msgstr ""
 
 #: R/checkdata.b.R
 msgid "<strong>Grade D:</strong> Poor quality - major intervention required"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "<strong>Gwet's AC versus kappa:</strong>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<strong>Gwet's coefficients:</strong> These coefficients are less sensitive "
+"than standard kappa to unequal category prevalence."
 msgstr ""
 
 #: R/mageeequation.b.R
@@ -6823,6 +8004,10 @@ msgstr ""
 "<strong>Yorum:</strong> Bu özgüllük düzeyinde pozitif sonuçların kayda değer "
 "bir kısmının yanlış pozitif olması beklenir. "
 
+#: R/pathagreement.b.R
+msgid "<strong>Kappa interpretation (Landis & Koch):</strong>"
+msgstr ""
+
 #: R/jjhistostats.b.R
 msgid ""
 "<strong>Lab values:</strong> cholesterol levels, blood glucose, biomarker "
@@ -6889,6 +8074,10 @@ msgstr ""
 "gerektirir; burada havuzlanmış özgüllük 0'dır veya bir tahmin "
 "yakınsamamıştır. Hangisinin geçerli olduğunu görmek için yukarıdaki özette "
 "havuzlanmış özgüllüğü ve güven aralığını inceleyin."
+
+#: R/pathagreement.b.R
+msgid "<strong>Next steps:</strong>"
+msgstr ""
 
 #: R/jjhistostats.b.R
 msgid ""
@@ -6977,6 +8166,12 @@ msgid ""
 "methods: Z-score |z|>3, IQR 1.5{times}rule, Modified Z-score |z|>3.5)"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"<strong>PABAK analysis:</strong> This reports Brennan-Prediger agreement "
+"under an equal-probability chance model."
+msgstr ""
+
 #: R/jjscatterstats.b.R
 msgid ""
 "<strong>Parametric (Pearson):</strong> linear relationship, roughly normal "
@@ -7029,6 +8224,13 @@ msgstr ""
 
 #: R/mageeequation.b.R
 msgid "<strong>PR H-Score</strong> (0-300) or Percentage (0-100)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<strong>Precision note:</strong> Judge estimate stability from its "
+"confidence interval and use the planning output when designing a future "
+"study."
 msgstr ""
 
 #: R/checkdata.b.R
@@ -7117,6 +8319,10 @@ msgid ""
 "results."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "<strong>Statistical assumptions:</strong>"
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid "<strong>Studies corrected:</strong> %d of %d (%s)"
 msgstr "<strong>Düzeltilen çalışmalar:</strong> %d / %d (%s)"
@@ -7143,6 +8349,13 @@ msgid ""
 msgstr ""
 "<strong>Zaman Çizelgesi Verisi:</strong> İşlenmiş değişkenlerle eksiksiz "
 "hasta zaman çizelgesi veri seti"
+
+#: R/pathagreement.b.R
+msgid ""
+"<strong>Tip:</strong> Combine these sentences and adapt the language to "
+"match your publication style. Consider adding information about rater "
+"training, case characteristics, or clinical context as appropriate."
+msgstr ""
 
 #: R/jjhistostats.b.R
 msgid ""
@@ -7193,11 +8406,21 @@ msgid ""
 "errors"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "<strong>Why agreement matters:</strong>"
+msgstr ""
+
 #: R/jjhistostats.b.R
 msgid ""
 "<strong>Your caption was not used.</strong> With Bayes factor switched on, "
 "the caption area is written by the Bayes factor. Switch off Bayes factor to "
 "show your own caption."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<strong>Your dataset:</strong> {cases} cases rated by {raters} raters across "
+"{categories} categories."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -7239,6 +8462,63 @@ msgstr ""
 msgid ""
 "<strong>Your X-axis label was not used.</strong> With more than one variable "
 "selected, each panel is labelled with its own variable name."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<tr style='background-color: rgba(88, 88, 88, 0.06); color: inherit;'><th "
+"style='padding: 8px; border: 1px solid #ddd; text-align: left;'>Kappa/alpha "
+"value</th><th style='padding: 8px; border: 1px solid #ddd; text-align: "
+"left;'>Convention label</th><th style='padding: 8px; border: 1px solid #ddd; "
+"text-align: left;'>Interpretation note</th></tr>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<tr><td style='padding: 8px; border: 1px solid #ddd;'>&lt; 0.00</td><td "
+"style='padding: 8px; border: 1px solid #ddd;'>Poor (worse than "
+"chance)</td><td style='padding: 8px; border: 1px solid #ddd;'>Observed "
+"agreement is below the chance expectation</td></tr>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<tr><td style='padding: 8px; border: 1px solid #ddd;'>0.00 - 0.20</td><td "
+"style='padding: 8px; border: 1px solid #ddd;'>Slight agreement</td><td "
+"style='padding: 8px; border: 1px solid #ddd;'>Interpret with the confidence "
+"interval, prevalence, and consequences</td></tr>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<tr><td style='padding: 8px; border: 1px solid #ddd;'>0.21 - 0.40</td><td "
+"style='padding: 8px; border: 1px solid #ddd;'>Fair agreement</td><td "
+"style='padding: 8px; border: 1px solid #ddd;'>Interpret with the confidence "
+"interval, prevalence, and consequences</td></tr>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<tr><td style='padding: 8px; border: 1px solid #ddd;'>0.41 - 0.60</td><td "
+"style='padding: 8px; border: 1px solid #ddd;'>Moderate agreement</td><td "
+"style='padding: 8px; border: 1px solid #ddd;'>Interpret with the confidence "
+"interval, prevalence, and consequences</td></tr>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<tr><td style='padding: 8px; border: 1px solid #ddd;'>0.61 - 0.80</td><td "
+"style='padding: 8px; border: 1px solid #ddd;'>Substantial agreement</td><td "
+"style='padding: 8px; border: 1px solid #ddd;'>Interpret with the confidence "
+"interval, prevalence, and consequences</td></tr>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<tr><td style='padding: 8px; border: 1px solid #ddd;'>0.81 - 1.00</td><td "
+"style='padding: 8px; border: 1px solid #ddd;'>Almost perfect "
+"agreement</td><td style='padding: 8px; border: 1px solid #ddd;'>Interpret "
+"with the confidence interval, prevalence, and consequences</td></tr>"
 msgstr ""
 
 #: R/sequentialtests.b.R
@@ -8211,6 +9491,23 @@ msgstr ""
 msgid "95 percent confidence intervals"
 msgstr "%95 güven aralıkları"
 
+#: R/pathagreement.b.R
+msgid "95% {method} bootstrap interval {lower} to {upper}"
+msgstr "%95 {method} bootstrap aralığı: {lower} ile {upper}"
+
+#: R/pathagreement.b.R
+msgid ""
+"95% {method} conditional intervals use {resamples} case bootstrap resamples "
+"(seed {seed}). All ratings for a case are sampled together. The observed "
+"raters and style groups are held fixed; these intervals do not include "
+"uncertainty from selecting the groups or sampling new raters."
+msgstr ""
+"%95 {method} koşullu aralıkları, {resamples} olgu bootstrap yeniden "
+"örneklemesi kullanır (tohum {seed}). Bir olguya ait tüm derecelendirmeler "
+"birlikte örneklenir. Gözlenen değerlendiriciler ve stil grupları sabit "
+"tutulur; bu aralıklar grup seçiminden veya yeni değerlendiricilerin "
+"örneklenmesinden kaynaklanan belirsizliği içermez."
+
 #: psychopdaROC/results/bayesianROCTable.columns.title
 msgid "95% Bootstrap CI Lower"
 msgstr "%95 Bootstrap GA Alt"
@@ -8218,10 +9515,6 @@ msgstr "%95 Bootstrap GA Alt"
 #: psychopdaROC/results/bayesianROCTable.columns.title
 msgid "95% Bootstrap CI Upper"
 msgstr "%95 Bootstrap GA Üst"
-
-#: R/pathagreement.b.R
-msgid "95% bootstrap interval {lower} to {upper}"
-msgstr ""
 
 #: adaptivelasso/results/performanceMetrics.columns.title
 #: causalmediation/results/effectsTable.columns.superTitle
@@ -8713,12 +10006,6 @@ msgstr ""
 
 #: hullplot/ui[4][0]/confidence_ellipses.label
 msgid "95% data ellipses around groups"
-msgstr ""
-
-#: R/pathagreement.b.R
-msgid ""
-"95% percentile bootstrap interval from {resamples} case resamples (seed "
-"{seed})."
 msgstr ""
 
 #: bayesianclinical/results/predictive_intervals.columns.title
@@ -9332,6 +10619,12 @@ msgstr ""
 "Beklenen paya yakın bir yüzde, uyumlu verilerin nasıl göründüğüdür. "
 "Verilerin Benford Yasasından sapıp sapmadığı bu sayımla değil, özet "
 "tablosundaki MAD ve ki-kare sonuçlarıyla yanıtlanır."
+
+#: R/pathagreement.b.R
+msgid ""
+"A percentile interval is shown where the BCa acceleration could not be "
+"estimated."
+msgstr "BCa hızlandırması tahmin edilemediğinde yüzdelik aralık gösterilir."
 
 #: R/decisiongraph.b.R
 msgid ""
@@ -10078,6 +11371,10 @@ msgstr ""
 #: advancedraincloud/options/p_value_position/above.title
 msgid "Above Plot"
 msgstr ""
+
+#: R/pathsampling.b.R
+msgid "Above reference gap (index > 1.3)"
+msgstr "Referans boşluğun üzerinde (indeks > 1,3)"
 
 #: bbcplots/options/value_position/above.title
 msgid "Above/End"
@@ -11640,6 +12937,10 @@ msgstr ""
 
 #: mixedeffectscox/ui[9][0].label
 msgid "Additional Output"
+msgstr ""
+
+#: pathagreement/ui[9][0][0].label
+msgid "Additional output"
 msgstr ""
 
 #: summarydata/ui[2].label
@@ -13208,19 +14509,19 @@ msgid "Advanced weighted survival comparison tests"
 msgstr ""
 
 #: pathagreement/ui[4].label
-msgid "Advanced: Consensus Analysis"
+msgid "Advanced: Consensus analysis"
 msgstr ""
 
 #: pathagreement/ui[7].label
-msgid "Advanced: Detailed Analysis (Pairwise, Bias, Trends)"
+msgid "Advanced: Detailed analysis (pairwise, bias, trends)"
 msgstr ""
 
 #: pathagreement/ui[6].label
-msgid "Advanced: Diagnostic Style Clustering (Usubutun Method)"
+msgid "Advanced: Diagnostic style clustering (Usubutun method)"
 msgstr ""
 
 #: pathagreement/ui[5].label
-msgid "Advanced: Statistical Methods (Krippendorff, ICC, Gwet, etc.)"
+msgid "Advanced: Statistical methods (Krippendorff, ICC, Gwet, etc.)"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -13822,6 +15123,13 @@ msgstr ""
 msgid "Agreement analysis with limits of agreement"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"Agreement between {pair} was {interpretation} ({symbol} = {estimate}{ci}{p}) "
+"across {cases} cases. This is one of several rater pairs ({raters} raters in "
+"total); report the pairwise results rather than this pair alone."
+msgstr ""
+
 #: agreement/results/itemModalAgreementTable.title
 msgid "Agreement by Item Modal Category"
 msgstr "Madde Tepe Değeri (Mod) Kategorisine Göre Uyum"
@@ -13843,9 +15151,12 @@ msgstr ""
 
 #: cohenskappa/results/confusionHeatmap.title
 #: pathagreement/options/heatmap.title
-#: pathagreement/ui[3][0]/heatmap.label
 #: pathagreement/results/heatmapPlot.title
 msgid "Agreement Heatmap"
+msgstr ""
+
+#: pathagreement/ui[3][0]/heatmap.label
+msgid "Agreement heatmap"
 msgstr ""
 
 #: agreement/results/agreementHeatmapPlot.title
@@ -13969,8 +15280,8 @@ msgid "Agreement Trend Analysis"
 msgstr ""
 
 #: pathagreement/ui[7][0]/agreementTrendAnalysis.label
-msgid "Agreement trend over cases (training effect)"
-msgstr ""
+msgid "Agreement trend over case sequence"
+msgstr "Olgu sırası boyunca uyum eğilimi"
 
 #: pathagreement/results/trendPlot.title
 msgid "Agreement Trend Plot"
@@ -13984,12 +15295,15 @@ msgstr ""
 #: cohenskappa/options/agreement_plot.title
 #: cohenskappa/results/agreementPlot.title
 #: modalitycomparison/results/agreementPlot.title
-#: pathagreement/ui[3][0][0].label
 msgid "Agreement Visualization"
 msgstr ""
 
+#: pathagreement/ui[3][0][0].label
+msgid "Agreement visualization"
+msgstr ""
+
 #: R/pathagreement.b.R
-msgid "Agreement was assessed using %s."
+msgid "Agreement was assessed using {method}."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -14962,6 +16276,10 @@ msgstr ""
 msgid "Almost perfect"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Almost perfect agreement"
+msgstr ""
+
 #: decisionpanel/results/incrementalValue.columns.title
 msgid "Alone"
 msgstr ""
@@ -15072,7 +16390,7 @@ msgid "Alternating Row Colors"
 msgstr ""
 
 #: pathagreement/ui[5][0][0].label
-msgid "Alternative Agreement Coefficients"
+msgid "Alternative agreement coefficients"
 msgstr ""
 
 #: R/riverplot.b.R
@@ -15144,6 +16462,10 @@ msgstr "Her zaman geçmişte"
 msgid ""
 "Always interpret flow analysis results within the context of clinical "
 "knowledge, institutional protocols, and patient-specific factors."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Always report which weighting scheme was used."
 msgstr ""
 
 #: epidemiosurvival/options/cohort_design/ambidirectional.title
@@ -15675,6 +16997,12 @@ msgstr "Analiz kılavuzu"
 #: R/benford.b.R
 msgid "Analysis Guidelines"
 msgstr "Analiz Kılavuzu"
+
+#: R/pathagreement.b.R
+msgid ""
+"Analysis identified <strong>{count} diagnostic style groups</strong> using "
+"hierarchical clustering with {distance}."
+msgstr ""
 
 #: R/swimmerplot.b.R
 #: venn/results/analysisInfo.title
@@ -17808,7 +19136,6 @@ msgstr "Varsayımlar"
 #: irecist/results/assumptions.title
 #: multisurvival/results/assumptionsPanel.title
 #: pathagreement/options/showAssumptions.title
-#: pathagreement/ui[2][1]/showAssumptions.label
 #: pathagreement/results/assumptions.title
 msgid "Assumptions & Caveats"
 msgstr "Varsayımlar ve Uyarılar"
@@ -17843,6 +19170,7 @@ msgid "Assumptions & warnings"
 msgstr ""
 
 #: R/decisioncalculator.b.R
+#: pathagreement/ui[2][1]/showAssumptions.label
 msgid "Assumptions and caveats"
 msgstr "Varsayımlar ve uyarılar"
 
@@ -18023,6 +19351,16 @@ msgid ""
 msgstr ""
 "Kombinasyon analizi için en az dört eksiksiz olgu gereklidir; eksik değerler "
 "hariç tutulduktan sonra {total} olgudan yalnızca {used} olgu kaldı."
+
+#: R/pathagreement.b.R
+msgid ""
+"At least one BCa stability interval could not be estimated from the "
+"leave-one-case-out values, so a percentile interval was reported for that "
+"statistic."
+msgstr ""
+"En az bir BCa kararlılık aralığı, bir olguyu dışarıda bırakma değerlerinden "
+"tahmin edilemedi; bu nedenle ilgili istatistik için yüzdelik aralık "
+"raporlandı."
 
 #: R/chisqposttest.b.R
 msgid "At least one expected count is below 1"
@@ -18909,14 +20247,6 @@ msgstr ""
 msgid "Automatically adapt plot styling based on data characteristics and size."
 msgstr ""
 
-#: pathsampling/options/autoDetectHeterogeneity.description
-msgid ""
-"Automatically analyze and report if sample types have significantly "
-"different detection probabilities. Requires Sample Type variable. Uses a "
-"heuristic warning if CV > 30 percent; this is not a formal test of "
-"significance."
-msgstr ""
-
 #: enhancedcrosstable/options/test_auto.description.jamovi
 msgid ""
 "Automatically choose appropriate statistical tests (chi-square, Fisher, "
@@ -19158,6 +20488,10 @@ msgstr "Ortalama Kesinlik"
 
 #: vusanalysis/options/handle_ties/average.title
 msgid "Average Ranks"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Average silhouette width: {width}"
 msgstr ""
 
 #: segmentationmetrics/options/surface_distance.title
@@ -20911,6 +22245,10 @@ msgstr ""
 msgid "BBC-Style Visualization"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "BCa"
+msgstr "BCa"
+
 #: enhancedROC/options/bootstrapMethod/bca.title
 msgid "BCa (Bias-Corrected and Accelerated)"
 msgstr "BCa (Yanlılık Düzeltmeli ve Hızlandırılmış)"
@@ -21021,6 +22359,10 @@ msgstr ""
 #: jforester/options/table_position/below.title
 msgid "Below Plot"
 msgstr ""
+
+#: R/pathsampling.b.R
+msgid "Below reference gap (index < 0.7)"
+msgstr "Referans boşluğun altında (indeks < 0,7)"
 
 #: R/enhancedROC.b.R
 msgid "below the 0.75 level conventionally quoted for screening"
@@ -21730,6 +23072,11 @@ msgstr ""
 #: precisionrecall/options/ciMethod/bca.title
 msgid "Bias-corrected accelerated (BCa)"
 msgstr ""
+
+#: pathagreement/options/bootstrapCIType/bca.title
+#: pathagreement/ui[5][1]/bootstrapCIType/bca.title
+msgid "Bias-corrected and accelerated (BCa)"
+msgstr "Yanlılık düzeltilmiş ve hızlandırılmış (BCa)"
 
 #: R/multisurvival.b.R
 msgid "Bias-corrected estimate"
@@ -22969,9 +24316,6 @@ msgid "Bootstrap 95% CI Upper"
 msgstr ""
 
 #: pathagreement/ui[5][1][0].label
-msgid "Bootstrap Analysis"
-msgstr ""
-
 #: pathsampling/options/showBootstrap.title
 msgid "Bootstrap analysis"
 msgstr ""
@@ -23200,6 +24544,10 @@ msgstr "Bootstrap İç Doğrulama - {title}"
 #: survival/ui[3][2][0]/bootstrapValidation.label
 msgid "Bootstrap internal validation (C-index)"
 msgstr "Önyükleme (bootstrap) iç doğrulaması (C-indeksi)"
+
+#: pathagreement/options/bootstrapCIType.title
+msgid "Bootstrap Interval Method"
+msgstr "Bootstrap Aralığı Yöntemi"
 
 #: aivalidation/options/nBootstrap.title
 #: aivalidation/ui/bootstrapOptions/nBootstrap.label
@@ -26271,6 +27619,10 @@ msgstr ""
 "olay ve 3 sansürlü gözlem gerekir. {nEvents} olay ve {nCensored} sansürlü "
 "gözlem bulundu."
 
+#: R/pathagreement.b.R
+msgid "Cannot interpret an invalid coefficient value."
+msgstr ""
+
 #: qualitycontrol/results/capabilityAnalysis.columns.title
 msgid "Capability Index"
 msgstr ""
@@ -26350,6 +27702,10 @@ msgstr ""
 msgid "Case"
 msgstr "Olgu"
 
+#: R/pathagreement.b.R
+msgid "Case {row}"
+msgstr ""
+
 #: agreement/options/loaVariable.title
 msgid "Case agreement categorization"
 msgstr "Olgu uyum kategorizasyonu"
@@ -26377,6 +27733,10 @@ msgstr "Olgu kümeleme (puanlama deseni gruplarını belirleme)"
 #: agreement/results/caseDendrogram.title
 msgid "Case Clustering Dendrogram"
 msgstr "Olgu Kümeleme Dendrogramı"
+
+#: R/pathagreement.b.R
+msgid "Case clustering was skipped."
+msgstr ""
 
 #: missingdataexplorer/options/case_completeness.title
 msgid "Case Completeness Analysis"
@@ -26504,7 +27864,7 @@ msgid "Case ID Variable"
 msgstr ""
 
 #: pathagreement/ui[0][1].label
-msgid "Case ID Variable (Optional)"
+msgid "Case ID variable (optional)"
 msgstr ""
 
 #: modalitycomparison/options/case_id.title
@@ -26581,7 +27941,7 @@ msgid "Case-Level Agreement Details"
 msgstr "Olgu Düzeyinde Uyum Ayrıntıları"
 
 #: pathagreement/ui[7][1][0].label
-msgid "Case-Level Analysis"
+msgid "Case-level analysis"
 msgstr ""
 
 #: multifocalconcordance/results/caseLevelTable.title
@@ -26658,6 +28018,10 @@ msgstr ""
 msgid "Cases (N)"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Cases {start}-{end}"
+msgstr ""
+
 #: latentbiomarker/results/summaryTable.columns.title
 msgid "Cases / parameter"
 msgstr ""
@@ -26681,6 +28045,10 @@ msgstr "Tespit Edilen Olgular"
 
 #: pathagreement/results/discordantCasesTable.title
 msgid "Cases Distinguishing Diagnostic Styles"
+msgstr ""
+
+#: pathagreement/ui[6][3]/identifyDiscordantCases.label
+msgid "Cases distinguishing diagnostic styles"
 msgstr ""
 
 #: R/lassologistic.b.R
@@ -26713,6 +28081,12 @@ msgstr ""
 #: R/decisioncompare.b.R
 msgid "Cases sorted by gold standard result (n=%d)"
 msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Cases were ordered by '{variable}'; ties preserve their dataset order."
+msgstr ""
+"Olgular '{variable}' değişkenine göre sıralandı; eşitliklerde veri kümesi "
+"sırası korundu."
 
 #: R/decision.b.R
 msgid ""
@@ -27228,10 +28602,13 @@ msgstr ""
 #: agreement/results/specificAgreementHeading.title
 #: cohenskappa/results/categoryStats.title
 #: pathagreement/options/categoryAnalysis.title
-#: pathagreement/ui[7][1]/categoryAnalysis.label
 #: pathagreement/results/categoryTable.title
 msgid "Category-Specific Agreement"
 msgstr "Kategoriye Özgü Uyum"
+
+#: pathagreement/ui[7][1]/categoryAnalysis.label
+msgid "Category-specific agreement"
+msgstr ""
 
 #: R/pathagreement.b.R
 msgid "Category-specific agreement could not be calculated for these data."
@@ -29355,7 +30732,6 @@ msgstr ""
 #: pathagreement/results/pairwiseTable.columns.title
 #: pathagreement/results/krippTable.columns.title
 #: pathagreement/results/gwetACTable.columns.title
-#: pathagreement/results/referenceComparison.columns.title
 #: pathologyagreement/results/correlationtable.columns.title
 #: pcacomponenttest/results/results.columns.title
 #: pcacox/results/modelPerformance.columns.title
@@ -29473,7 +30849,6 @@ msgstr "GA Türü"
 #: pathagreement/results/pairwiseTable.columns.title
 #: pathagreement/results/krippTable.columns.title
 #: pathagreement/results/gwetACTable.columns.title
-#: pathagreement/results/referenceComparison.columns.title
 #: pathologyagreement/results/correlationtable.columns.title
 #: pcacomponenttest/results/results.columns.title
 #: pcacox/results/modelPerformance.columns.title
@@ -30412,8 +31787,11 @@ msgid "Clinical Context & Prevalence"
 msgstr "Klinik Bağlam ve Prevalans"
 
 #: featurequality/options/clinical_context.title
-#: pathagreement/ui[7][2][0].label
 msgid "Clinical Context Analysis"
+msgstr ""
+
+#: pathagreement/ui[7][2][0].label
+msgid "Clinical context analysis"
 msgstr ""
 
 #: treatmentmeta/results/clinical_interpretation.description
@@ -31578,7 +32956,7 @@ msgid "Clinical Reporting Options"
 msgstr "Klinik Raporlama Seçenekleri"
 
 #: pathagreement/ui[2][0][0].label
-msgid "Clinical Reports"
+msgid "Clinical reports"
 msgstr ""
 
 #: advancedbarplot/options/color_palette/clinical.title
@@ -31842,7 +33220,6 @@ msgstr "Klinik Özetler"
 #: jjridges/results/clinicalSummary.title
 #: jjsegmentedtotalbar/results/clinical_summary.title
 #: pathagreement/options/showClinicalSummary.title
-#: pathagreement/ui[2][0]/showClinicalSummary.label
 #: pathagreement/results/clinicalSummary.title
 #: studydiagram/results/clinicalSummary.title
 #: venn/results/clinicalSummary.title
@@ -31853,6 +33230,7 @@ msgstr "Klinik Özet"
 #: chisqposttest/options/showClinicalSummary.title
 #: decision/options/showNaturalLanguage.title
 #: decision/ui[4]/showNaturalLanguage.label
+#: pathagreement/ui[2][0]/showClinicalSummary.label
 #: venn/options/clinicalSummary.title
 msgid "Clinical summary"
 msgstr "Klinik özet"
@@ -32842,6 +34220,7 @@ msgstr ""
 msgid "Cluster Purity"
 msgstr ""
 
+#: R/pathagreement.b.R
 #: pathagreement/results/silhouettePlot.title
 msgid "Cluster Quality (Silhouette Plot)"
 msgstr ""
@@ -33103,8 +34482,11 @@ msgid "Clustering Results"
 msgstr ""
 
 #: ihccluster/ui[1].label
-#: pathagreement/ui[6][1][0].label
 msgid "Clustering Settings"
+msgstr ""
+
+#: pathagreement/ui[6][1][0].label
+msgid "Clustering settings"
 msgstr ""
 
 #: generalpseudo/options/clustering_var.title
@@ -33545,6 +34927,10 @@ msgstr ""
 "Cohen kappası örneklem büyüklüğü tam olarak 2 değerlendirici gerektirir. 3+ "
 "değerlendirici için Fleiss kappasını kullanın."
 
+#: R/pathagreement.b.R
+msgid "Cohen's Kappa: {first} vs {second}"
+msgstr ""
+
 #: effectsize/options/measures_cohens_u3.title
 msgid "Cohen's U₃"
 msgstr ""
@@ -33955,7 +35341,7 @@ msgid "Color Settings"
 msgstr ""
 
 #: pathagreement/ui[3][0]/heatmapTheme.label
-msgid "Color Theme"
+msgid "Color theme"
 msgstr ""
 
 #: lollipop/options/colorThreshold.title
@@ -34387,6 +35773,10 @@ msgstr ""
 
 #: pathagreement/results/diagnosticStyleCombined.title
 msgid "Combined Dendrogram + Heatmap (Usubutun Style)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Combined Dendrogram and Heatmap"
 msgstr ""
 
 #: enhancedfactorvariable/options/showCombinedAnalysis.title
@@ -36109,6 +37499,10 @@ msgstr ""
 msgid "Complete cases: {complete}/{total} ({pct}%)"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Complete consensus"
+msgstr ""
+
 #: R/tableone.b.R
 msgid "Complete data were available for all cases."
 msgstr "Tüm olguların verileri tamdı."
@@ -36963,15 +38357,6 @@ msgstr ""
 
 #: haralicktexture/options/texture_interpretation/comprehensive.title
 msgid "Comprehensive Guide"
-msgstr ""
-
-#: package/analyses/pathagreement.description
-#: pathagreement/options.description.main
-msgid ""
-"Comprehensive interrater reliability analysis including Cohen's kappa (2 "
-"raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus "
-"analysis. Provides agreement statistics, visualization, and clinical "
-"interpretation for categorical rating data."
 msgstr ""
 
 #: package/analyses/qualitycontrol.description
@@ -38027,6 +39412,14 @@ msgstr ""
 msgid "Conditional Average Treatment Effect"
 msgstr ""
 
+#: pathagreement/results/referenceComparison.columns.title
+msgid "Conditional CI Lower"
+msgstr "Koşullu GA Alt Sınırı"
+
+#: pathagreement/results/referenceComparison.columns.title
+msgid "Conditional CI Upper"
+msgstr "Koşullu GA Üst Sınırı"
+
 #: lollipop/options/conditionalColor.title
 #: lollipop/ui[3][0]/conditionalColor.label
 msgid "Conditional coloring"
@@ -38509,6 +39902,15 @@ msgid ""
 "(vcd::Kappa), which is the appropriate standard error for an interval; a "
 "blank interval means the rating table was degenerate."
 msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"Confidence intervals use the selected {method} case-bootstrap method; BCa "
+"uses leave-one-case-out estimates to adjust for bias and skewness."
+msgstr ""
+"Güven aralıkları seçilen {method} olgu-bootstrap yöntemini kullanır; BCa, "
+"yanlılık ve çarpıklık düzeltmesi için bir olguyu dışarıda bırakma "
+"tahminlerini kullanır."
 
 #: R/decisioncombine.b.R
 msgid ""
@@ -39306,6 +40708,10 @@ msgid "Conger's exact kappa (rater-specific marginals)"
 msgstr ""
 
 #: R/pathagreement.b.R
+msgid "Conger's Kappa"
+msgstr ""
+
+#: R/pathagreement.b.R
 msgid "Conger's Kappa (exact)"
 msgstr ""
 
@@ -39393,7 +40799,7 @@ msgid "Consensus Summary Statistics"
 msgstr ""
 
 #: pathagreement/ui[4][0]/consensus_method.label
-msgid "Consensus Threshold"
+msgid "Consensus threshold"
 msgstr ""
 
 #: agreement/options/consensusVar.title
@@ -39622,6 +41028,10 @@ msgstr ""
 "tahmin etmeden bir değişkeni kontrol etmeniz gerektiğinde veya temel risk "
 "gruplar arasında doğal olarak farklılaştığında tabakalandırmayı "
 "değerlendirin."
+
+#: R/pathagreement.b.R
+msgid "Consider targeted training. {tendency}"
+msgstr ""
 
 #: R/riverplot.b.R
 msgid "Consider These Complementary Approaches"
@@ -41021,7 +42431,6 @@ msgstr ""
 #: methodcomparison/results/correlationTable.columns.title
 #: missingdataexplorer/results/correlation_matrix.columns.title
 #: multiplexanalysis/results/correlationtable.columns.title
-#: pathagreement/options/styleDistanceMetric/correlation.title
 #: pathagreement/ui[6][1]/styleDistanceMetric/correlation.title
 #: patientreported/results/item_correlations.columns.title
 #: qualityoflife/results/domain_correlations.columns.title
@@ -41184,6 +42593,12 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid "Correlation could not be estimated with the available data."
 msgstr "Mevcut verilerle korelasyon tahmin edilemedi."
+
+#: R/pathagreement.b.R
+msgid ""
+"Correlation distance requires variation in every rater's ratings. Percentage "
+"disagreement distance was used because at least one rater is constant."
+msgstr ""
 
 #: R/linechart.b.R
 msgid "Correlation does not imply causation."
@@ -46469,7 +47884,7 @@ msgid "Data Matrix"
 msgstr ""
 
 #: pathagreement/ui[5][0]/krippMethod.label
-msgid "Data Measurement Level"
+msgid "Data measurement level"
 msgstr ""
 
 #: adaptivetrialdesign/results/dmbRecommendations.title
@@ -46910,12 +48325,12 @@ msgstr ""
 msgid "Data Type"
 msgstr ""
 
-#: pathagreement/ui[1][1][0].label
-msgid "Data Type & Weighting"
-msgstr ""
-
 #: R/dataquality.b.R
 msgid "Data Type Analysis:"
+msgstr ""
+
+#: pathagreement/ui[1][1][0].label
+msgid "Data type and weighting"
 msgstr ""
 
 #: agreement/options/krippMethod.title
@@ -49507,10 +50922,6 @@ msgstr ""
 msgid "Detailed Cutoff Analysis"
 msgstr "Ayrıntılı Kesme Noktası Analizi"
 
-#: pathagreement/ui[10][0]/enhancedErrorGuidance.label
-msgid "Detailed error guidance"
-msgstr ""
-
 #: R/decision.b.R
 msgid "Detailed examination of false positives and false negatives"
 msgstr "Yanlış pozitiflerin ve yanlış negatiflerin ayrıntılı incelemesi"
@@ -50013,6 +51424,7 @@ msgstr ""
 msgid "Diabetes/Prediabetes"
 msgstr ""
 
+#: R/pathagreement.b.R
 #: differentialdiagnosis/results/diagnosticProbabilities.columns.title
 #: enhancedROC/options/clinicalContext/diagnosis.title
 #: ihccluster/results/markerPerformance.columns.title
@@ -50484,6 +51896,7 @@ msgstr "Tanısal İstatistikler"
 msgid "Diagnostic Style Clustering Results"
 msgstr ""
 
+#: R/pathagreement.b.R
 #: pathagreement/results/diagnosticStyleDendrogram.title
 msgid "Diagnostic Style Dendrogram"
 msgstr ""
@@ -50925,6 +52338,10 @@ msgstr "Farklılaşma Testi"
 msgid "Difficult"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Difficult (significant disagreement)"
+msgstr ""
+
 #: pathagreement/results/caseDifficultyTable.columns.title
 msgid "Difficulty (1 - Modal Share)"
 msgstr ""
@@ -51189,6 +52606,10 @@ msgstr ""
 msgid "Direction of flow in the diagram."
 msgstr "Diyagramdaki akış yönü."
 
+#: R/stagemigration.b.R
+msgid "Direction of migration not determined"
+msgstr ""
+
 #: likelihoodratio/options/testDirection.description
 msgid "Direction of test values relative to disease presence"
 msgstr ""
@@ -51239,7 +52660,7 @@ msgid "Disagreement Score"
 msgstr ""
 
 #: pathagreement/ui[6][3]/discordantThreshold.label
-msgid "Disagreement Threshold (0.2-0.8)"
+msgid "Disagreement threshold (0.2-0.8)"
 msgstr ""
 
 #: agreement/results/maxwellRETable.columns.title
@@ -51298,7 +52719,11 @@ msgid "Discordant"
 msgstr ""
 
 #: pathagreement/ui[6][3][0].label
-msgid "Discordant Case Analysis"
+msgid "Discordant case analysis"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Discordant case analysis requires at least 2 style groups."
 msgstr ""
 
 #: pathagreement/options/discordantThreshold.title
@@ -53584,6 +55009,7 @@ msgstr ""
 "Doğrulama için orijinal kontenjans tablolarını ve eksik veri özetlerini "
 "görüntüler."
 
+#: R/pathagreement.b.R
 #: robustcorrelation/results/outlier_table.columns.title
 msgid "Distance"
 msgstr ""
@@ -53628,12 +55054,12 @@ msgstr ""
 #: classification/options/knnDistance.title
 #: ihccluster/options/distanceMethod.title
 #: ihccluster/ui[1][1][0].label
-#: pathagreement/ui[6][1]/styleDistanceMetric.label
 msgid "Distance Metric"
 msgstr ""
 
 #: agreement/options/clusterDistance.title
 #: agreement/options/caseClusterDistance.title
+#: pathagreement/ui[6][1]/styleDistanceMetric.label
 msgid "Distance metric"
 msgstr "Uzaklık metriği"
 
@@ -53691,6 +55117,10 @@ msgstr ""
 
 #: ihccluster/results/markerClusteringTree.columns.title
 msgid "Distance/Chi-squared"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Distinct diagnostic style"
 msgstr ""
 
 #: package/analyses/jjhistostats.menuSubgroup
@@ -55263,6 +56693,10 @@ msgstr ""
 msgid "Easy"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Easy (high consensus)"
+msgstr ""
+
 #: alluvial/options/engine/easyalluvial.title
 msgid "Easy Alluvial (automatic)"
 msgstr "Easy Alluvial (otomatik)"
@@ -55426,11 +56860,14 @@ msgstr ""
 #: jjpiestats/ui[4][0].label
 #: mixedcox/ui[7][2].label
 #: multisurvival/ui[11][0].label
-#: pathagreement/ui[2][1][0].label
 #: simonmakuch/ui[9][0][0].label
 #: surveysurvival/ui[5][0].label
 msgid "Educational Content"
 msgstr "Eğitici İçerik"
+
+#: pathagreement/ui[2][1][0].label
+msgid "Educational content"
+msgstr ""
 
 #: R/decisioncalculator.b.R
 msgid "Educational description of diagnostic-test performance"
@@ -56485,6 +57922,14 @@ msgstr ""
 msgid "Enable Deming regression specific options"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Enable diagnostic style analysis to view the combined visualization."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Enable diagnostic style analysis to view the style heatmap."
+msgstr ""
+
 #: decisiongraph/options/separateDiscountRates.description.ui
 msgid "Enable different discount rates for costs versus health outcomes (QALYs)."
 msgstr ""
@@ -56633,6 +58078,10 @@ msgstr ""
 
 #: R/stagemigration-part3.R
 msgid "Enable proportional hazards testing"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Enable rater clustering analysis to view the dendrogram."
 msgstr ""
 
 #: riverplot/options/enable_caching.title
@@ -57095,10 +58544,6 @@ msgstr ""
 #: alluvial/options/enhancedGradients.title
 msgid "Enhanced edge gradients"
 msgstr "Gelişmiş kenar geçişleri"
-
-#: pathagreement/options/enhancedErrorGuidance.title
-msgid "Enhanced Error Guidance"
-msgstr ""
 
 #: enhancedfactorvariable/ui.title
 msgid "Enhanced Factor Variable Analysis"
@@ -58146,6 +59591,7 @@ msgstr ""
 #: R/dataquality.b.R
 #: R/jjdotplotstats.b.R
 #: R/oddsratio.b.R
+#: R/pathagreement.b.R
 #: R/timeinterval.b.R
 #: crosstable/results/errorNotice.title
 msgid "Error"
@@ -58227,7 +59673,9 @@ msgid "Error calculating Gwet's AC: %s"
 msgstr "Gwet'in AC değeri hesaplanırken hata oluştu: %s"
 
 #: R/pathagreement.b.R
-msgid "Error calculating Gwet's coefficients:"
+msgid ""
+"Error calculating Gwet's coefficients: {error}. Ensure the ratings have "
+"adequate variability and complete cases."
 msgstr ""
 
 #: R/agreement.b.R
@@ -58265,7 +59713,9 @@ msgid "Error calculating Mean Spearman Rho: %s"
 msgstr "Ortalama Spearman Rho hesaplanırken hata oluştu: %s"
 
 #: R/pathagreement.b.R
-msgid "Error calculating PABAK:"
+msgid ""
+"Error calculating PABAK: {error}. Ensure at least two raters and complete "
+"ratings are available."
 msgstr ""
 
 #: R/agreement.b.R
@@ -58394,7 +59844,9 @@ msgid "Error if any training markers are missing from query data"
 msgstr ""
 
 #: R/pathagreement.b.R
-msgid "Error in bias analysis:"
+msgid ""
+"Error in bias analysis: {error}. Ensure multiple raters use more than one "
+"rating category."
 msgstr ""
 
 #: R/agreement.b.R
@@ -58406,7 +59858,9 @@ msgid "Error in cross-validation: {msg}"
 msgstr "Çapraz doğrulama hatası: {msg}"
 
 #: R/pathagreement.b.R
-msgid "Error in difficulty analysis:"
+msgid ""
+"Error in difficulty analysis: {error}. Ensure multiple raters and complete "
+"case ratings are available."
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -58438,11 +59892,15 @@ msgid "Error in rater clustering: %s"
 msgstr "Değerlendirici kümelemede hata: %s"
 
 #: R/pathagreement.b.R
-msgid "Error in sample size planning:"
+msgid ""
+"Error in sample size planning: {error}. Check that the target kappa and "
+"precision are within their allowed ranges."
 msgstr ""
 
 #: R/pathagreement.b.R
-msgid "Error in stability analysis:"
+msgid ""
+"Error in stability analysis: {error}. Ensure enough complete cases are "
+"available for bootstrap resampling."
 msgstr ""
 
 #: R/agreement.b.R
@@ -58458,7 +59916,9 @@ msgid "Error in the variance decomposition: %s"
 msgstr "Varyans ayrıştırmasında hata: %s"
 
 #: R/pathagreement.b.R
-msgid "Error in trend analysis:"
+msgid ""
+"Error in trend analysis: {error}. Ensure the rows are in the intended case "
+"order and contain enough complete ratings."
 msgstr ""
 
 #: jointmodeling/results/errors.title
@@ -59116,12 +60576,15 @@ msgstr ""
 #: clinicalheatmap/options/clusterDistanceCols/euclidean.title
 #: dendrogram/options/distanceMethod/euclidean.title
 #: jggheatmap/options/distance_method/euclidean.title
-#: pathagreement/options/styleDistanceMetric/euclidean.title
 msgid "Euclidean"
 msgstr ""
 
 #: ihccluster/options/markerClusteringMethod/euclidean.title
 msgid "Euclidean (continuous markers)"
+msgstr ""
+
+#: pathagreement/options/styleDistanceMetric/euclidean.title
+msgid "Euclidean (equally spaced ordinal ratings)"
 msgstr ""
 
 #: agreement/options/clusterDistance/euclidean.title
@@ -59131,6 +60594,10 @@ msgstr ""
 #: spatialbayesiansurvival/options/distance_method/euclidean.title
 msgid "Euclidean Distance"
 msgstr "Öklid Uzaklığı"
+
+#: R/pathagreement.b.R
+msgid "Euclidean distance"
+msgstr ""
 
 #: eurostatmap/options/dataset_id.title
 msgid "Eurostat Dataset ID"
@@ -60814,6 +62281,10 @@ msgstr ""
 msgid "Excellent completeness"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Excellent consistency with consensus"
+msgstr ""
+
 #: R/decision.b.R
 msgid "Excellent discriminatory power (Youden's index 0.80 or above)"
 msgstr "Mükemmel ayırt edici güç (Youden indeksi 0.80 veya üzeri)"
@@ -60835,6 +62306,10 @@ msgstr ""
 #: R/pathsampling.b.R
 msgid "Excellent fit"
 msgstr "Çok iyi uyum"
+
+#: R/pathagreement.b.R
+msgid "Excellent reliability"
+msgstr ""
 
 #: R/decision.b.R
 msgid "Excellent Tests"
@@ -63440,6 +64915,10 @@ msgstr "Orta"
 msgid "fair"
 msgstr "orta"
 
+#: R/pathagreement.b.R
+msgid "Fair agreement"
+msgstr ""
+
 #: R/decision.b.R
 msgid "Fair discriminatory power (Youden's index 0.40 to 0.59)"
 msgstr "Orta derecede ayırt edici güç (Youden indeksi 0.40 ila 0.59)"
@@ -64579,10 +66058,6 @@ msgstr ""
 msgid "First Detection"
 msgstr ""
 
-#: pathsampling/ui[1][1].label
-msgid "First Detection (Required)"
-msgstr ""
-
 #: decisioncombine/options/test1.description.ui
 msgid "First diagnostic test to evaluate. Must have at least 2 levels."
 msgstr "Değerlendirilecek ilk tanı testi. En az 2 düzeye sahip olmalıdır."
@@ -64646,6 +66121,10 @@ msgstr ""
 #: labcontrolcharts/results/violationSummary.columns.title
 msgid "First Violation (Run)"
 msgstr ""
+
+#: pathsampling/ui[1][1].label
+msgid "First-detection position for detection analyses"
+msgstr "Saptama analizleri için ilk saptama konumu"
 
 #: firthregression/results/comparisonTable.columns.title
 msgid "Firth Coefficient"
@@ -69380,6 +70859,7 @@ msgid "Good fit"
 msgstr "İyi uyum"
 
 #: R/ihcheterogeneity.b.R
+#: R/pathagreement.b.R
 msgid "Good reliability"
 msgstr "İyi güvenilirlik"
 
@@ -69736,6 +71216,7 @@ msgstr ""
 msgid "Greater than the test value"
 msgstr ""
 
+#: R/pathagreement.b.R
 #: basegraphics/options/regression_line_color/green.title
 #: jforestmodel/options/color_scheme/green.title
 msgid "Green"
@@ -69977,6 +71458,14 @@ msgstr ""
 #: waterfall/results/groupComparisonTable.columns.title
 msgid "Group"
 msgstr "Grup"
+
+#: R/pathagreement.b.R
+msgid "Group {group}"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Group {group1}: {rating1} vs group {group2}: {rating2}"
+msgstr ""
 
 #: winratio/options/group.title
 #: winratio/ui[0][0].label
@@ -71012,7 +72501,7 @@ msgid "Gwet's AC1/AC2 (Categorical/Ordinal)"
 msgstr "Gwet'in AC1/AC2 Katsayısı (Kategorik/Sıralı)"
 
 #: pathagreement/ui[5][0]/gwetAC.label
-msgid "Gwet's AC1/AC2 Coefficients (prevalence-robust)"
+msgid "Gwet's AC1/AC2 coefficients (prevalence-robust)"
 msgstr ""
 
 #: agreement/results/gwetTable.title
@@ -71183,7 +72672,7 @@ msgid "Handle Missing Values"
 msgstr ""
 
 #: pathagreement/ui[4][0]/tie_breaking.label
-msgid "Handle Ties By"
+msgid "Handle ties by"
 msgstr ""
 
 #: package/analyses/highdimcox.menuSubtitle
@@ -71861,9 +73350,12 @@ msgid "Heatmap Color Palette"
 msgstr ""
 
 #: pathagreement/options/heatmapColorScheme.title
-#: pathagreement/ui[6][4]/heatmapColorScheme.label
 #: robustcorrelation/options/heatmap_colors.title
 msgid "Heatmap Color Scheme"
+msgstr ""
+
+#: pathagreement/ui[6][4]/heatmapColorScheme.label
+msgid "Heatmap color scheme"
 msgstr ""
 
 #: pathagreement/options/heatmapTheme.title
@@ -72224,6 +73716,10 @@ msgstr ""
 msgid "Heteroscedastic by Group"
 msgstr ""
 
+#: pathsampling/results/multifocalTable.columns.title
+msgid "Heuristic groups"
+msgstr "Sezgisel gruplar"
+
 #: R/checkdata.b.R
 msgid ""
 "HEURISTIC: Insufficient data (n_miss={nmiss}, n_complete={ncomp}) for runs "
@@ -72384,12 +73880,20 @@ msgstr ""
 msgid "Hierarchical Clustering Dendrogram"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Hierarchical Clustering Dendrogram ({groups} groups)"
+msgstr ""
+
 #: pathagreement/results/clusteringHeatmap.title
 msgid "Hierarchical Clustering Heatmap (Cases × Raters)"
 msgstr ""
 
 #: ihccluster/options/linkageMethod.description
 msgid "Hierarchical clustering linkage method"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Hierarchical clustering of {count} pathologists"
 msgstr ""
 
 #: betabinomialdiagnostic/options/correlation_structure/hierarchical.title
@@ -72584,6 +74088,10 @@ msgstr ""
 msgid "High Cutoff (>=)"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "High disagreement"
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "High disease prevalence (>30%) is unusual for screening populations. "
@@ -72614,6 +74122,10 @@ msgstr ""
 msgid "High imbalance"
 msgstr "Yüksek dengesizlik"
 
+#: R/pathagreement.b.R
+msgid "High inter-style disagreement"
+msgstr ""
+
 #: R/tableone.b.R
 msgid ""
 "High missing data rate in original dataset: {missing} cases have at least "
@@ -72630,11 +74142,10 @@ msgstr ""
 msgid "High missing data rates (over 20%) require careful interpretation"
 msgstr "Yüksek eksik veri oranları (%20'nin üzeri) dikkatli yorumlama gerektirir"
 
-#: R/pathagreement.b.R
-msgid ""
-"High missing data: {pct}% of cases were excluded because of missing ratings. "
-"Results may be biased."
-msgstr ""
+"Yüksek eksik veri: Olguların %{pct}'si eksiksiz derecelendirme gerektiren "
+"analizlerden çıkarıldı. Krippendorff alfası seçildiğinde, en az iki "
+"gözlenmiş derecelendirmesi olan olguları kullanmaya devam eder. Eksiksiz "
+"olgu sonuçları yanlı olabilir."
 
 #: R/summarydata.b.R
 msgid "High missingness"
@@ -72863,6 +74374,10 @@ msgstr ""
 msgid "higher"
 msgstr "daha yüksek"
 
+#: R/pathagreement.b.R
+msgid "Higher"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "higher (narrower CI, more power)"
 msgstr "daha yüksek (daha dar GA, daha fazla güç)"
@@ -73090,6 +74605,10 @@ msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "highly connected"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Highly consistent diagnostic style"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -74280,8 +75799,9 @@ msgstr "ICC modeli"
 
 #: R/pathagreement.b.R
 msgid ""
-"ICC needs ordinal ratings (ordered factors), so it was not calculated. For "
-"nominal categories use Fleiss' kappa or Krippendorff's alpha."
+"ICC needs ordered factors with the same category levels in the same order, "
+"so it was not calculated. For nominal categories use Fleiss' kappa or "
+"Krippendorff's alpha."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -77645,6 +79165,7 @@ msgid "Info Loss vs Full Model (%)"
 msgstr "Tam Modele Göre Bilgi Kaybı (%)"
 
 #: R/oddsratio.b.R
+#: R/pathagreement.b.R
 #: multisurvival/results/infoMessages.title
 #: oddsratio/results/infoMessages.title
 #: outcomeorganizer/results/infoMessages.title
@@ -77774,7 +79295,7 @@ msgstr ""
 msgid "Initially Planned Sample Size"
 msgstr ""
 
-#: pathagreement/ui[10][0]/showInlineComments.label
+#: pathagreement/ui[9][0]/showInlineComments.label
 msgid "Inline statistical comments"
 msgstr ""
 
@@ -78566,14 +80087,22 @@ msgstr ""
 
 #: R/pathagreement.b.R
 msgid ""
-"Inter-rater agreement could not be reliably calculated for the %d raters "
-"evaluating %d cases. Data quality or sample size may be insufficient."
+"Inter-rater agreement among {raters} raters evaluating {cases} cases was "
+"{interpretation} ({symbol} = {estimate}{ci}{p})."
 msgstr ""
 
 #: R/pathagreement.b.R
 msgid ""
-"Inter-rater agreement was %s (\\u{03BA} = %.3f%s%s), indicating %s "
-"reliability for the %d raters evaluating %d cases."
+"Inter-rater agreement analysis of <strong>{raters} raters</strong> "
+"evaluating <strong>{cases} cases</strong> using <strong>{categories} "
+"categories</strong>."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"Inter-rater agreement could not be reliably calculated for the {raters} "
+"raters evaluating {cases} cases. Data quality or sample size may be "
+"insufficient."
 msgstr ""
 
 #: agreement/results/interIntraRaterInterTable.title
@@ -79563,6 +81092,15 @@ msgstr "Çeyrekler Arası Aralık (gözlenen süreler)"
 msgid "Interrater Reliability"
 msgstr "Değerlendiriciler Arası Güvenilirlik"
 
+#: package/analyses/pathagreement.description
+#: pathagreement/options.description.main
+msgid ""
+"Interrater reliability analysis including Cohen's kappa (2 raters),\n"
+"Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus analysis.\n"
+"Provides agreement statistics, visualization, and clinical\n"
+"interpretation for categorical rating data."
+msgstr ""
+
 #: interruptedtimeseries/results/plot.title
 msgid "Interrupted Time Series"
 msgstr ""
@@ -79717,6 +81255,10 @@ msgstr ""
 #: R/outcomeorganizer.b.R
 msgid "Interval endpoints run backwards"
 msgstr "Aralık uç noktaları geriye doğru çalışıyor"
+
+#: pathagreement/ui[5][1]/bootstrapCIType.label
+msgid "Interval method"
+msgstr "Aralık yöntemi"
 
 #: intervalsurvival/options/imputation_method/midpoint.title
 msgid "Interval Midpoint"
@@ -81855,6 +83397,7 @@ msgstr ""
 msgid "Kolmogorov-Smirnov Test"
 msgstr ""
 
+#: R/pathagreement.b.R
 #: agreement/results/krippTableHeading.title
 #: pathagreement/options/kripp.title
 msgid "Krippendorff's Alpha"
@@ -81864,16 +83407,20 @@ msgstr "Krippendorff Alfasu"
 msgid "Krippendorff's alpha"
 msgstr "Krippendorff alfasu"
 
+#: R/pathagreement.b.R
+msgid "Krippendorff's Alpha ({level})"
+msgstr ""
+
+#: pathagreement/ui[5][0]/kripp.label
+msgid "Krippendorff's alpha (allows partial ratings)"
+msgstr "Krippendorff alfası (kısmi derecelendirmelere izin verir)"
+
 #: agreement/ui[3].label
 msgid "Krippendorff's Alpha (Any Data Type)"
 msgstr "Krippendorff Alfasu (Her Tür Veri)"
 
 #: pathagreement/options/multiraterMethod/krippendorff.title
 msgid "Krippendorff's Alpha (any number)"
-msgstr ""
-
-#: pathagreement/ui[5][0]/kripp.label
-msgid "Krippendorff's Alpha (handles missing data)"
 msgstr ""
 
 #: pathagreement/ui[1][0]/multiraterMethod/krippendorff.title
@@ -81904,6 +83451,14 @@ msgstr ""
 #: pathagreement/results/krippTable.title
 msgid "Krippendorff's Alpha Results"
 msgstr "Krippendorff Alfasu Sonuçları"
+
+#: R/pathagreement.b.R
+msgid ""
+"Krippendorff's alpha used {cases} cases with at least two observed ratings, "
+"including {partial} partially rated cases."
+msgstr ""
+"Krippendorff alfası, {partial} kısmen derecelendirilmiş olgu dahil olmak "
+"üzere, en az iki gözlenmiş derecelendirmesi olan {cases} olguyu kullandı."
 
 #: advancedbarplot/options/stat_method/kruskal.title
 #: bbcplots/options/stat_method/kruskal.title
@@ -84442,6 +85997,14 @@ msgstr "Doğrusal Ağırlıklar (Eşit Adımlar)"
 msgid "Linear Weights (ordinal)"
 msgstr "Doğrusal Ağırlıklar (sıralı)"
 
+#: R/pathagreement.b.R
+msgid "Linear/equal weighting"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Linear/equal weighting ({status})"
+msgstr ""
+
 #: partialcorrelation/results/assumptionResults.columns.title
 msgid "Linearity"
 msgstr ""
@@ -84496,7 +86059,7 @@ msgid "Link function for modeling cure probability"
 msgstr ""
 
 #: pathagreement/ui[6][1]/clusteringMethod.label
-msgid "Linkage Method"
+msgid "Linkage method"
 msgstr ""
 
 #: ihccluster/options/linkageMethod.title
@@ -85675,6 +87238,10 @@ msgstr ""
 "örnekleri inceleyin ve veri kaynağını sistematik hatalar açısından kontrol "
 "edin. • Klinik analiz %70 başarının altında güvenilmez olabilir."
 
+#: R/pathagreement.b.R
+msgid "Low disagreement"
+msgstr ""
+
 #: differentialdiagnosis/results/sensitivityAnalysis.columns.title
 msgid "Low Estimate"
 msgstr ""
@@ -85868,6 +87435,7 @@ msgstr ""
 msgid "Low/Medium/High"
 msgstr "Düşük/Orta/Yüksek"
 
+#: R/pathagreement.b.R
 #: agreement/results/irrtable.columns.title
 #: causalmediation/results/effectsTable.columns.title
 #: causalmediation/results/proportionMediated.columns.title
@@ -87219,6 +88787,10 @@ msgstr ""
 
 #: R/pathagreement.b.R
 msgid "Marked"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Marked disagreement"
 msgstr ""
 
 #: ihcadvanced/results/pcaLoadings.columns.title
@@ -90756,6 +92328,12 @@ msgid ""
 "META_specialty   | GYN     | GYN     | GEN"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"Metadata rows require a case ID variable. Select the variable containing "
+"META_ identifiers and run the analysis again."
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 #: advancedimputation/results/imputationMethodSummary.columns.title
 #: agreement/results/irrtable.columns.title
@@ -91957,6 +93535,10 @@ msgid ""
 "reasonable."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Mild disagreement"
+msgstr ""
+
 #: qualityoflife/results/severity_classification.columns.title
 msgid "Mild Impairment N"
 msgstr ""
@@ -92247,6 +93829,10 @@ msgstr ""
 #: R/enhancedROC.b.R
 msgid "Minimal difference"
 msgstr "Minimal fark"
+
+#: R/pathagreement.b.R
+msgid "Minimal disagreement"
+msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Minimal effect"
@@ -92803,12 +94389,6 @@ msgstr ""
 msgid "Minimum Sample Size Warning"
 msgstr ""
 
-#: pathsampling/results/recommendTable.columns.title
-#: pathsampling/results/hyperRecommendTable.columns.title
-#: pathsampling/results/betaBinomialRecommendTable.columns.title
-msgid "Minimum Samples Required"
-msgstr ""
-
 #: treemedical/options/min_samples_split.title
 msgid "Minimum Samples to Split"
 msgstr ""
@@ -92925,6 +94505,10 @@ msgstr ""
 msgid ""
 "Minor allele frequency for SNP-based survival analysis. Common range: "
 "0.05-0.45."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Minor calibration may be needed. {tendency}"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -94700,6 +96284,10 @@ msgstr ""
 msgid "Model Interpretation and Clinical Insights"
 msgstr ""
 
+#: R/stagemigration.b.R
+msgid "Model log-likelihood"
+msgstr ""
+
 #: R/multisurvival.b.R
 #: R/oddsratio.b.R
 msgid "Model Metrics:"
@@ -95291,6 +96879,10 @@ msgstr ""
 msgid "Modeling Method"
 msgstr ""
 
+#: pathsampling/results/stratifiedDetectionTable.columns.title
+msgid "Modelled detected fraction of recorded cases"
+msgstr "Kayıtlı olgularda modellenen saptanmış olgu oranı"
+
 #: R/decisioncurve.b.R
 msgid "Models Analyzed"
 msgstr "Analiz Edilen Modeller"
@@ -95342,6 +96934,7 @@ msgstr ""
 "bağlı)"
 
 #: R/agreement.b.R
+#: R/pathagreement.b.R
 msgid "Moderate agreement"
 msgstr "Orta düzeyde uyum"
 
@@ -95387,6 +96980,10 @@ msgstr "Hastalık olasılığında orta derecede azalma"
 msgid "Moderate difference"
 msgstr "Orta derecede fark"
 
+#: R/pathagreement.b.R
+msgid "Moderate difficulty"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "Moderate dimensionality. Consider standard Cox regression (Multivariable "
@@ -95394,6 +96991,10 @@ msgid ""
 msgstr ""
 "Orta düzeyde boyutluluk. Alternatif olarak standart Cox regresyonunu "
 "(ClinicoPath içinde Çok Değişkenli Sağkalım) düşününüz."
+
+#: R/pathagreement.b.R
+msgid "Moderate disagreement"
+msgstr ""
 
 #: R/enhancedROC.b.R
 msgid "Moderate early retrieval performance"
@@ -95506,6 +97107,7 @@ msgid "Moderate relative variability"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
+#: R/pathagreement.b.R
 msgid "Moderate reliability"
 msgstr "Orta düzeyde güvenilirlik"
 
@@ -95550,6 +97152,10 @@ msgstr ""
 
 #: R/checkdata.b.R
 msgid "moderately balanced"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Moderately cohesive diagnostic style"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -96027,6 +97633,10 @@ msgstr "Çoğu çalışma 'Yüzde Değişimleri' formatını kullanır"
 msgid "Most-deviating digit combinations:"
 msgstr "En çok sapan basamak kombinasyonları:"
 
+#: R/pathagreement.b.R
+msgid "Mostly agreement with some dissent"
+msgstr ""
+
 #: methodcomparison/options/mountain_plot.title
 #: methodcomparison/results/mountainPlot.title
 msgid "Mountain Plot"
@@ -96075,6 +97685,14 @@ msgstr ""
 
 #: semimarkov/results/reliabilityAnalysis.columns.title
 msgid "MTBF"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Much higher"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Much lower"
 msgstr ""
 
 #: agreement/options/multiAnnotatorConcordance.title
@@ -96493,6 +98111,10 @@ msgstr ""
 msgid "Multi-Variable Visual Quality"
 msgstr "Çok Değişkenli Görsel Kalite"
 
+#: R/pathagreement.b.R
+msgid "Multi-way disagreement ({count} different ratings)"
+msgstr ""
+
 #: R/lassocox.b.R
 msgid "Multicollinearity"
 msgstr "Çoklu bağlantı"
@@ -96541,10 +98163,6 @@ msgstr ""
 #: multifocalconcordance/ui.title
 #: multifocalconcordance/results.title
 msgid "Multifocal / Primary-Metastasis Concordance"
-msgstr ""
-
-#: pathsampling/results/multifocalText.title
-msgid "Multifocal Detection Analysis"
 msgstr ""
 
 #: advancedimputation/options/multilevel_imputation.title
@@ -97902,6 +99520,10 @@ msgstr ""
 msgid "NB Upper CI"
 msgstr ""
 
+#: R/pathsampling.b.R
+msgid "Near reference gap (index 0.7-1.3)"
+msgstr "Referans boşluğa yakın (indeks 0,7–1,3)"
+
 #: R/lassocox.b.R
 msgid ""
 "Near-perfect collinearity detected. Remove redundant variables before "
@@ -98918,6 +100540,10 @@ msgstr ""
 msgid "New staging + covariates"
 msgstr ""
 
+#: R/stagemigration-part1.R
+msgid "New staging added to original staging"
+msgstr ""
+
 #: stagemigration/options/generateStagingSystem.title
 #: stagemigration/ui[0][1].label
 msgid "New Staging System"
@@ -99174,6 +100800,10 @@ msgstr ""
 "anlamlı olması için her iki referans grubunun da makul büyüklükte olmasına "
 "ihtiyaç duyar."
 
+"Seçilen tüm değerlendiriciler boyunca eksiksiz olgu yok. Krippendorff "
+"alfası, en az iki gözlenmiş derecelendirmesi olan olgulardan hesaplandı; "
+"eksiksiz satır gerektiren analizler atlandı."
+
 #: R/enhancedROC.b.R
 msgid ""
 "No case observations found for predictor '%s'. Check that your outcome "
@@ -99228,6 +100858,10 @@ msgstr "hastalık olasılığında değişiklik yok"
 msgid "No clear linear trend was detected (R² = {r2})."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "No clear systematic tendency"
+msgstr ""
+
 #: explainableai/options/clustering_method/none.title
 msgid "No Clustering"
 msgstr ""
@@ -99269,10 +100903,6 @@ msgstr ""
 msgid ""
 "No complete cases found. Please check for missing values in selected "
 "variables."
-msgstr ""
-
-#: R/pathagreement.b.R
-msgid "No complete cases found. Please check for missing values."
 msgstr ""
 
 #: R/decisioncombine.b.R
@@ -100404,6 +102034,14 @@ msgstr ""
 #: grafify/options/log_transform/none.title
 msgid "No Transformation"
 msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"No trend sequence variable was selected; the current dataset row order was "
+"used."
+msgstr ""
+"Trend sıra değişkeni seçilmedi; veri kümesinin mevcut satır sırası "
+"kullanıldı."
 
 #: R/outcomeorganizer.b.R
 msgid ""
@@ -101905,6 +103543,7 @@ msgstr "Mevcut değil"
 #: R/decision.b.R
 #: R/lassocox.b.R
 #: R/multisurvival.b.R
+#: R/pathagreement.b.R
 msgid "not available"
 msgstr "mevcut değil"
 
@@ -102113,6 +103752,10 @@ msgstr "yarışan riskler için bildirilmez"
 #: R/waterfall.b.R
 msgid "NOT RESPONSE-EVALUABLE"
 msgstr "YANIT AÇISINDAN DEĞERLENDİRİLEMEZ"
+
+#: R/pathagreement.b.R
+msgid "Not selected"
+msgstr ""
 
 #: R/alluvial.b.R
 msgid "Not shown: {variables}"
@@ -102475,12 +104118,6 @@ msgstr ""
 msgid "Note: Cross-validation provides more robust performance estimates"
 msgstr ""
 
-#: R/stagemigration-part1.R
-msgid ""
-"Note: df=0 indicates models have the same number of parameters. P-value "
-"interpretation may be limited."
-msgstr ""
-
 #: R/agreement.b.R
 msgid ""
 "Note: Exact Kappa (Conger, 1980) does not provide statistical test. Use "
@@ -102634,6 +104271,12 @@ msgid ""
 "slightly different p-value."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"Note: The ordered category scale was not consistent across raters, so "
+"unweighted kappa was used."
+msgstr ""
+
 #: R/jjbetweenstats.b.R
 msgid ""
 "Note: the plot subtitle fell back to the package default (%s), so 'Equal "
@@ -102651,6 +104294,12 @@ msgstr ""
 msgid ""
 "Note: The requested fill palette could not be generated, so default colors "
 "were used."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"Note: The required agreement depends on the consequences of disagreement; "
+"the Landis and Koch bands are descriptive conventions."
 msgstr ""
 
 #: waterfall/ui[3][1][0][4].label
@@ -102704,12 +104353,6 @@ msgstr ""
 #: R/waterfall.b.R
 msgid "Note: Values <-100% are mathematically impossible for tumor shrinkage."
 msgstr "Not: <-%100 değerleri tümör küçülmesi için matematiksel olarak imkansızdır."
-
-#: R/pathagreement.b.R
-msgid ""
-"Note: Weighted kappa requires ordinal variables. Analysis performed with "
-"unweighted kappa instead."
-msgstr ""
 
 #: categorize/results/notices.title
 #: clinicalprediction/results/regulatory_summary.columns.title
@@ -102993,6 +104636,10 @@ msgstr "Sıfır hipotezi kappası (H0)"
 
 #: brierscore/results/brierSummary.columns.title
 msgid "Null Model Brier"
+msgstr ""
+
+#: R/stagemigration.b.R
+msgid "Null model log-likelihood is greater than fitted model log-likelihood."
 msgstr ""
 
 #: vusanalysis/results/vusSummary.columns.title
@@ -103526,14 +105173,6 @@ msgstr ""
 msgid "Number of first digits to analyze (1-3)"
 msgstr "Analiz edilecek ilk basamak sayısı (1-3)"
 
-#: pathsampling/results/multifocalTable.columns.title
-msgid "Number of Foci"
-msgstr ""
-
-#: pathsampling/results/multifocalTable.title
-msgid "Number of Foci Distribution"
-msgstr ""
-
 #: decisionpanel/options/nFolds.title
 #: decisionpanel/ui[5][1]/nFolds.label
 #: modelperformance/options/cvFolds.title
@@ -103600,7 +105239,7 @@ msgid "Number of Groups (Hosmer-Lemeshow)"
 msgstr ""
 
 #: pathagreement/ui[6][2]/nStyleGroups.label
-msgid "Number of Groups (if manual, 2-10)"
+msgid "Number of groups (if manual, 2-10)"
 msgstr ""
 
 #: modelval/options/calibrationGroups.description
@@ -104111,8 +105750,11 @@ msgid "Number of Studies"
 msgstr ""
 
 #: pathagreement/options/nStyleGroups.title
-#: pathagreement/ui[6][2][0].label
 msgid "Number of Style Groups"
+msgstr ""
+
+#: pathagreement/ui[6][2][0].label
+msgid "Number of style groups"
 msgstr ""
 
 #: causespecifichazards/results/overview.columns.title
@@ -104304,6 +105946,12 @@ msgstr ""
 
 #: survivalendpoints/options/inputType/numeric.title
 msgid "Numeric (time values)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"Numeric clustering distances require ordered factors with the same category "
+"order. Percentage disagreement distance was used for these ratings."
 msgstr ""
 
 #: directbinomial/options/eventOfInterest.description
@@ -105065,6 +106713,12 @@ msgstr ""
 msgid "Offset with Minor Ticks"
 msgstr ""
 
+#: R/stagemigration.b.R
+msgid ""
+"Old and new Cox models have different initial log-likelihoods, suggesting "
+"different baseline data."
+msgstr ""
+
 #: stagemigration/results/crossValidationResults.columns.title
 msgid "Old C-Index"
 msgstr ""
@@ -105354,6 +107008,10 @@ msgstr ""
 msgid "One gender level was filled in automatically"
 msgstr "Bir cinsiyet düzeyi otomatik olarak dolduruldu"
 
+#: R/pathagreement.b.R
+msgid "one minus signed Spearman correlation distance"
+msgstr ""
+
 #: R/pathsampling.b.R
 msgid ""
 "one of the two variables takes the same value in every case, so there is no "
@@ -105414,6 +107072,10 @@ msgstr ""
 #: jextractggstats/options/analysis_type/one_sample_stats.title
 msgid "One Sample Test"
 msgstr ""
+
+#: R/pathsampling.b.R
+msgid "One sample-position group"
+msgstr "Bir örnek konumu grubu"
 
 #: ncvregcox/options/lambda_type/1se.title
 msgid "One Standard Error Rule"
@@ -107175,6 +108837,12 @@ msgstr ""
 msgid "ordinal epsilon-squared"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"Ordinal Krippendorff's alpha requires factors with the same category levels "
+"in the same order."
+msgstr ""
+
 #: package/analyses/ordinalmixedmodel.title
 #: package/analyses/ordinalmixedmodel.menuTitle
 #: ordinalmixedmodel/options.title
@@ -107426,6 +109094,10 @@ msgstr ""
 
 #: stagemigration/options/baselineModel/original_plus_covariates.title
 msgid "Original staging + covariates"
+msgstr ""
+
+#: R/stagemigration-part1.R
+msgid "Original staging added to new staging"
 msgstr ""
 
 #: stagemigration/ui[0][0].label
@@ -108796,6 +110468,10 @@ msgstr ""
 "Dar bir aralıkta baştaki basamak frekansları Benford Yasası tarafından "
 "değil, aralığın nerede başlayıp bittiği tarafından belirlenir"
 
+#: R/pathagreement.b.R
+msgid "Over-diagnoses '{category}'"
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "Over-represented"
 msgstr "Fazla temsil edilen"
@@ -109858,13 +111534,6 @@ msgid ""
 "(optimism-corrected)."
 msgstr ""
 
-#: R/stagemigration-part1.R
-msgid ""
-"P-values for C-index difference are corrected for model correlation using "
-"Spearman correlation of risk scores (heuristic approximation). Enable "
-"Bootstrap for exact testing."
-msgstr ""
-
 #: jjcoefstats/options/pValue.description
 msgid "P-values for each coefficient."
 msgstr ""
@@ -109941,10 +111610,6 @@ msgstr ""
 
 #: pathsampling/results/stratifiedDetectionTable.columns.title
 msgid "P(detect by n | eventually detected)"
-msgstr ""
-
-#: pathsampling/results/stratifiedDetectionTable.columns.title
-msgid "P(detect overall)"
 msgstr ""
 
 #: hierarchicalbayes/results/metaRegressionResults.columns.title
@@ -110092,6 +111757,10 @@ msgid "PABAK Analysis Results"
 msgstr ""
 
 #: R/pathagreement.b.R
+msgid "PABAK could not be calculated."
+msgstr ""
+
+#: R/pathagreement.b.R
 msgid "PABAK requires at least 2 raters."
 msgstr ""
 
@@ -110104,6 +111773,18 @@ msgid "PABAK requires exactly 2 raters. Please select only 2 rater variables."
 msgstr ""
 "PABAK tam olarak 2 değerlendirici gerektirir. Lütfen yalnızca 2 "
 "değerlendirici değişkeni seçin."
+
+#: R/pathagreement.b.R
+msgid "Package 'ggdendro' is required for this analysis; please install it."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Package 'grid' is required for this analysis; please install it."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Package 'gridExtra' is required for this analysis; please install it."
+msgstr ""
 
 #: R/clinicalscore.b.R
 msgid "Package 'MASS' is required for ordinal regression."
@@ -111613,6 +113294,10 @@ msgstr ""
 
 #: nonparametric/options/clinical_context/pathological.title
 msgid "Pathological Grading"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Pathologist"
 msgstr ""
 
 #: nogoldstandard/options/clinicalPreset/pathology_agreement.title
@@ -113159,6 +114844,10 @@ msgstr "Yüzde ondalık basamakları"
 msgid "Percentage Decimals"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "percentage disagreement distance"
+msgstr ""
+
 #: enhancedtwowayfrequency/options/percentageDisplay.title
 msgid "Percentage Display Format"
 msgstr ""
@@ -113314,9 +115003,15 @@ msgid "Percentages Shown for Very Small Subgroups"
 msgstr "Çok Küçük Alt Gruplar İçin Yüzdeler Gösteriliyor"
 
 #: imagingcorrelation/results/radiomicsTable.columns.title
+#: pathagreement/options/bootstrapCIType/percentile.title
+#: pathagreement/ui[5][1]/bootstrapCIType/percentile.title
 #: precisionrecall/options/ciMethod/percentile.title
 msgid "Percentile"
-msgstr ""
+msgstr "Yüzdelik"
+
+#: R/pathagreement.b.R
+msgid "percentile"
+msgstr "yüzdelik"
 
 #: flexrstpm2/results/bootstrapValidation.columns.title
 msgid "Percentile CI"
@@ -114063,10 +115758,6 @@ msgstr ""
 
 #: clinicalvalidation/ui[4].label
 msgid "Performance & Calibration"
-msgstr ""
-
-#: pathagreement/ui[10][0][0].label
-msgid "Performance & Debugging"
 msgstr ""
 
 #: deeplearningprediction/results/crossValidationResults/cvMetrics.description
@@ -115381,7 +117072,7 @@ msgid "Planned N"
 msgstr ""
 
 #: pathagreement/ui[8].label
-msgid "Planning: Study Design & Sample Size"
+msgid "Planning: Study design and sample size"
 msgstr ""
 
 #: alluvial/options/colorPalette/plasma.title
@@ -115414,7 +117105,7 @@ msgid "Plateau Detection Threshold"
 msgstr ""
 
 #: stagemigration/ui[8][15]/curePlateauThreshold.label
-msgid "Plateau threshold"
+msgid "Plateau threshold (not yet implemented)"
 msgstr ""
 
 #: hematologicindices/options/platelets.title
@@ -117293,8 +118984,13 @@ msgid "Poor - Extensive missing data"
 msgstr ""
 
 #: R/agreement.b.R
+#: R/pathagreement.b.R
 msgid "Poor agreement"
 msgstr "Zayıf uyum"
+
+#: R/pathagreement.b.R
+msgid "Poor agreement (worse than chance)"
+msgstr ""
 
 #: R/checkdata.b.R
 msgid "Poor completeness"
@@ -117328,8 +119024,17 @@ msgid "Poor Model Fit"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
+#: R/pathagreement.b.R
 msgid "Poor reliability"
 msgstr "Zayıf güvenilirlik"
+
+#: R/pathagreement.b.R
+msgid "Poor reliability (negative ICC)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Poorly separated group"
+msgstr ""
 
 #: R/riverplot.b.R
 msgid "Populated"
@@ -118531,6 +120236,7 @@ msgstr ""
 #: package/analyses/kappaSizeCI.menuGroup
 #: package/analyses/kappaSizeFixedN.menuGroup
 #: package/analyses/kappaSizePower.menuGroup
+#: package/analyses/survivalPower.menuGroup
 #: adaptivetrialdesign/results/operatingCharacteristics.columns.title
 #: advancedSurvivalPower/options/calc_type/power.title
 #: competingRisksPower/results/powerCurveTable.columns.title
@@ -118539,6 +120245,7 @@ msgstr ""
 #: kappaSizeFixedN/options.menuGroup
 #: kappaSizePower/options.menuGroup
 #: kappaSizePower/ui[3][1][0]/power.label
+#: survivalPower/options.menuGroup
 msgid "Power"
 msgstr "Güç"
 
@@ -118812,11 +120519,6 @@ msgstr ""
 
 #: clinicaltrialdesign/results/sensitivity_analysis.description
 msgid "Power/sample size sensitivity across parameter ranges"
-msgstr ""
-
-#: package/analyses/survivalPower.menuGroup
-#: survivalPower/options.menuGroup
-msgid "PowerT"
 msgstr ""
 
 #: jpps/results/correlation_comparison.columns.title
@@ -120771,7 +122473,7 @@ msgid "Previous Value"
 msgstr ""
 
 #: pathagreement/ui[1][0]/multiraterMethod.label
-msgid "Primary Analysis Method"
+msgid "Primary analysis method"
 msgstr ""
 
 #: qualitycontrol/options/analysis_type.title
@@ -121856,10 +123558,6 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid "Progress information"
-msgstr ""
-
-#: pathagreement/ui[10][0]/showProgressIndicators.label
-msgid "Progress messages for long operations"
 msgstr ""
 
 #: swimmerplot/options/milestone4Name.default
@@ -123486,6 +125184,14 @@ msgstr ""
 #: agreement/options/gwetWeights/quadratic.title
 msgid "Quadratic Weights (ordinal)"
 msgstr "Karesel Ağırlıklar (sıralı)"
+
+#: R/pathagreement.b.R
+msgid "Quadratic/squared weighting"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Quadratic/squared weighting ({status})"
+msgstr ""
 
 #: ihcbasic/results/silhouetteTable.columns.title
 #: ihccluster/results/spatialCompartmentSummary.columns.title
@@ -125196,6 +126902,7 @@ msgstr ""
 msgid "Rate Ratio"
 msgstr ""
 
+#: R/pathagreement.b.R
 #: agreement/results/pairwiseKappaTable.columns.title
 #: agreement/results/interIntraRaterIntraTable.columns.title
 #: agreement/results/raterClusterTable.columns.title
@@ -125208,9 +126915,13 @@ msgid "Rater"
 msgstr "Değerlendirici"
 
 #: R/pathagreement.b.R
+msgid "Rater (ordered by cluster)"
+msgstr ""
+
+#: R/pathagreement.b.R
 msgid ""
-"Rater {rater} has categories that were never used: {unused}. Unused "
-"categories change the spacing of weighted kappa."
+"Rater {rater} has categories that were never used: {unused}. Confirm that "
+"the declared category scale is correct before interpreting weighted analyses."
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -125234,6 +126945,10 @@ msgstr ""
 #: agreement/results/allPairsKappaTable.columns.title
 msgid "Rater A"
 msgstr "Değerlendirici A"
+
+#: R/pathagreement.b.R
+msgid "Rater Agreement Heatmap"
+msgstr ""
 
 #: pathagreement/results/outlierTable.columns.title
 msgid "Rater Assignments"
@@ -125289,7 +127004,7 @@ msgid "Rater Characteristic"
 msgstr ""
 
 #: pathagreement/ui[6][5][0].label
-msgid "Rater Characteristics (Optional - for Association Testing)"
+msgid "Rater characteristics (optional, for association testing)"
 msgstr ""
 
 #: pathagreement/ui[6][5][2].label
@@ -125320,6 +127035,10 @@ msgid "Rater Clustering Dendrogram"
 msgstr "Değerlendirici Kümeleme Dendrogramı"
 
 #: R/pathagreement.b.R
+msgid "Rater Clustering Heatmap"
+msgstr ""
+
+#: R/pathagreement.b.R
 msgid "Rater clustering needs at least 3 raters, so it was skipped."
 msgstr ""
 
@@ -125335,6 +127054,10 @@ msgstr ""
 #: pathagreement/results/raterBiasTable.title
 #: pathagreement/results/biasPlot.title
 msgid "Rater Disagreement with Consensus"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Rater distance"
 msgstr ""
 
 #: agreement/results/specificAgreementTable.columns.title
@@ -125377,7 +127100,7 @@ msgid "Rater Variables"
 msgstr ""
 
 #: pathagreement/ui[0][0].label
-msgid "Rater Variables (Required)"
+msgid "Rater variables (required)"
 msgstr ""
 
 #: agreement/results/maxwellRETable.title
@@ -125395,7 +127118,7 @@ msgstr ""
 "Uyuşmazlık)"
 
 #: pathagreement/ui[7][0][0].label
-msgid "Rater-Level Analysis"
+msgid "Rater-level analysis"
 msgstr ""
 
 #: agreement/options/vars.title
@@ -126371,6 +128094,7 @@ msgstr ""
 msgid "Recursive Partitioning Tree"
 msgstr ""
 
+#: R/pathagreement.b.R
 #: basegraphics/options/regression_line_color/red.title
 #: jforestmodel/options/color_scheme/red.title
 msgid "Red"
@@ -126521,6 +128245,12 @@ msgstr ""
 #: R/lassologistic.b.R
 msgid "Reference class"
 msgstr "Referans sınıf"
+
+#: R/pathagreement.b.R
+msgid ""
+"Reference comparison requires at least two retained cases with reference "
+"ratings."
+msgstr ""
 
 #: irecist/results/referenceInfo.title
 msgid "Reference Information"
@@ -126919,8 +128649,11 @@ msgid "Reference/Certified Value"
 msgstr ""
 
 #: pathagreement/options/referenceStandard.title
-#: pathagreement/ui[6][6][0].label
 msgid "Reference/Expert Standard (optional)"
+msgstr ""
+
+#: pathagreement/ui[6][6][0].label
+msgid "Reference/expert standard (optional)"
 msgstr ""
 
 #: methodvalidation/options/reference_value.title
@@ -128014,6 +129747,16 @@ msgstr ""
 #: jjbarstats/ui[5].label
 #: jjpiestats/ui[4].label
 msgid "Report & Explanations"
+msgstr ""
+
+#: pathsampling/options/autoDetectHeterogeneity.description
+msgid ""
+"Report a heuristic warning when the CV of sample-type geometric "
+"first-detection estimates exceeds 30 percent. Requires Sample Type, at least "
+"10 detected cases overall, and at least two groups with three detected cases "
+"each. This screen always uses inverse mean first-detection positions, "
+"independently of the selected prediction estimator; it is not a formal "
+"significance test."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -130495,6 +132238,10 @@ msgstr "RMST Yorumu"
 msgid "RMST Metrics"
 msgstr ""
 
+#: R/stagemigration-part1.R
+msgid "RMST not computed"
+msgstr ""
+
 #: stagemigration/results/rmstComparison.columns.title
 msgid "RMST Range"
 msgstr ""
@@ -132478,6 +134225,14 @@ msgstr ""
 "adlandırılmış test stratejilerinin örnekleme bağımlı betimsel sıralaması; bu "
 "klinik bir kılavuz veya doğrulanmış öneri değildir"
 
+#: pathsampling/results/multifocalTable.title
+msgid "Sample-position group counts"
+msgstr "Örnek konumu gruplarının sayıları"
+
+#: pathsampling/results/multifocalText.title
+msgid "Sample-position groups (heuristic)"
+msgstr "Örnek konumu grupları (sezgisel)"
+
 #: R/lassocox.b.R
 msgid ""
 "Sample-size adequacy cannot be determined from total n or a universal EPV "
@@ -132539,6 +134294,12 @@ msgstr ""
 #: pathsampling/results/hyperRecommendTable.title
 msgid "Samples for target detection probability (Hypergeometric)"
 msgstr ""
+
+#: pathsampling/results/recommendTable.columns.title
+#: pathsampling/results/hyperRecommendTable.columns.title
+#: pathsampling/results/betaBinomialRecommendTable.columns.title
+msgid "Samples to reach target"
+msgstr "Hedefe ulaşmak için örnek sayısı"
 
 #: extratrees/ui[3].label
 msgid "Sampling"
@@ -135074,6 +136835,7 @@ msgstr ""
 msgid "Select your Y-axis variable (measurements, lab values, or biomarkers)"
 msgstr ""
 
+#: R/pathagreement.b.R
 #: bayesianma/results/inclusionProbabilities.columns.title
 #: clinicalnomograms/results/variableSelection.columns.title
 #: clinicalprediction/results/feature_selection_results.columns.title
@@ -139067,10 +140829,6 @@ msgid ""
 "progress."
 msgstr ""
 
-#: pathagreement/options/showProgressIndicators.title
-msgid "Show Progress for Long Operations"
-msgstr ""
-
 #: decisionpanel/options/showProgress.title
 #: stagemigration/options/enableProgressIndicators.title
 msgid "Show Progress Indicators"
@@ -140749,6 +142507,10 @@ msgstr ""
 msgid "Silhouette Δ"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Similar"
+msgstr ""
+
 #: R/ihcheterogeneity.b.R
 msgid "Similar bias"
 msgstr "Benzer yanlılık"
@@ -141358,6 +143120,10 @@ msgstr ""
 
 #: R/pathagreement.b.R
 msgid "Slight"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Slight agreement"
 msgstr ""
 
 #: dynamicprediction/results/trajectoryParameters.columns.title
@@ -142195,6 +143961,13 @@ msgstr ""
 msgid "Some issues require attention before relying on these results."
 msgstr "Bu sonuçlara güvenmeden önce bazı sorunların ele alınması gerekir."
 
+#: R/pathagreement.b.R
+msgid ""
+"Some reference-comparison bootstrap intervals could not be estimated because "
+"too many resamples had undefined kappas. The corresponding interval cells "
+"are left empty."
+msgstr ""
+
 #: R/swimmerplot.b.R
 msgid ""
 "Some response categories have <3 patients. Consider grouping categories for "
@@ -142909,6 +144682,10 @@ msgstr ""
 msgid "Spearman Correlation"
 msgstr ""
 
+#: pathagreement/options/styleDistanceMetric/correlation.title
+msgid "Spearman correlation (ordinal ratings)"
+msgstr ""
+
 #: R/linechart.b.R
 msgid "Spearman Correlation (Rank-based)"
 msgstr ""
@@ -142930,8 +144707,8 @@ msgid "Spearman rho"
 msgstr ""
 
 #: R/pathagreement.b.R
-msgid "Spearman rho = {rho}, p = {pvalue}, across cases in data order"
-msgstr ""
+msgid "Spearman rho = {rho}, p = {pvalue}, across the ordered case sequence"
+msgstr "Sıralanmış olgu dizisi boyunca Spearman rho = {rho}, p = {pvalue}"
 
 #: R/pathsampling.b.R
 msgid "Spearman's rho not estimable (no variation in one of the two variables)"
@@ -143866,6 +145643,10 @@ msgstr ""
 msgid "Split Heatmap by Dendrogram"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Split opinion"
+msgstr ""
+
 #: conditionalinference/results/splitStatistics.columns.title
 msgid "Split Point"
 msgstr ""
@@ -144264,6 +146045,10 @@ msgstr ""
 
 #: stagemigration/results/stageMigrationEffect.title
 msgid "Stage Migration Effect Formula (SME) Results"
+msgstr ""
+
+#: R/stagemigration-part1.R
+msgid "Stage migration effect not computed"
 msgstr ""
 
 #: stagemigration/options/showSankeyDiagram.title
@@ -145400,6 +147185,10 @@ msgstr ""
 msgid "Statistical Commentary"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Statistical commentary and educational notes"
+msgstr ""
+
 #: stagemigration/results/statisticalComparison.title
 msgid "Statistical Comparison"
 msgstr ""
@@ -145618,7 +147407,7 @@ msgid "Statistical method for parameter estimation"
 msgstr ""
 
 #: pathagreement/ui[1][0][0].label
-msgid "Statistical Method Selection"
+msgid "Statistical method selection"
 msgstr ""
 
 #: grafify/options/stat_method.description
@@ -145717,7 +147506,6 @@ msgstr ""
 #: jjcorrmat/ui[1][1].label
 #: jjdotchart/ui[2].label
 #: jjdotplotstats/ui[1][1].label
-#: pathagreement/ui[1][2][0].label
 #: pathologyagreement/ui[2].label
 #: robustcorrelation/ui[2].label
 #: stereology/ui[3].label
@@ -145726,6 +147514,10 @@ msgstr ""
 #: trichotomousroc/ui/statisticalOptions.label
 msgid "Statistical Options"
 msgstr "İstatistiksel Seçenekler"
+
+#: pathagreement/ui[1][2][0].label
+msgid "Statistical options"
+msgstr ""
 
 #: basegraphics/ui[4].label
 msgid "Statistical Overlays (Exploratory Only)"
@@ -145870,6 +147662,10 @@ msgstr ""
 #: stagemigration/results/frailtyModelsVarianceComponents.columns.title
 #: treatmentoptim/results/treatmentComparison.columns.title
 msgid "Statistical Significance"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Statistical significance"
 msgstr ""
 
 #: spatialanalysis/options/significance_level.description.ui
@@ -146466,7 +148262,7 @@ msgid "Step 1 Name"
 msgstr ""
 
 #: pathagreement/ui[1].label
-msgid "Step 1: Core Agreement Analysis"
+msgid "Step 1: Core agreement analysis"
 msgstr ""
 
 #: ihcscoring/ui[0][0][0].label
@@ -146478,7 +148274,7 @@ msgid "Step 2 Name"
 msgstr ""
 
 #: pathagreement/ui[2].label
-msgid "Step 2: Clinical Output & Interpretation"
+msgid "Step 2: Clinical output and interpretation"
 msgstr ""
 
 #: ihcscoring/ui[0][0][2].label
@@ -146494,7 +148290,7 @@ msgid "Step 3: Configure Scoring Parameters"
 msgstr ""
 
 #: pathagreement/ui[3].label
-msgid "Step 3: Visualization (Optional)"
+msgid "Step 3: Visualization (optional)"
 msgstr ""
 
 #: studydiagram/options/step4_label.title
@@ -147330,6 +149126,7 @@ msgid "STRONG WARNING"
 msgstr "GÜÇLÜ UYARI"
 
 #: R/oddsratio.b.R
+#: R/pathagreement.b.R
 msgid "Strong warning"
 msgstr "Güçlü uyarı"
 
@@ -147743,7 +149540,11 @@ msgid "Sturges Rule"
 msgstr ""
 
 #: R/pathagreement.b.R
-msgid "Style"
+msgid "Style {group}"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Style {group}: {rating}"
 msgstr ""
 
 #: pathagreement/options/styleDistanceMetric.title
@@ -148136,6 +149937,10 @@ msgstr ""
 msgid "Substantial"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Substantial agreement"
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid "Substantial between-study heterogeneity"
 msgstr "Belirgin çalışmalar arası heterojenlik"
@@ -148179,6 +149984,10 @@ msgid ""
 msgstr ""
 "Belirgin iyimserlik saptandı; görünür C-indeksi modelin gerçek ayrım gücünü "
 "olduğundan yüksek göstermektedir."
+
+#: R/pathagreement.b.R
+msgid "Substantial recalibration may be needed. {tendency}"
+msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "Substantial sample increase recommended"
@@ -150912,12 +152721,6 @@ msgstr ""
 msgid "Target Analysis"
 msgstr ""
 
-#: pathsampling/results/recommendTable.columns.title
-#: pathsampling/results/hyperRecommendTable.columns.title
-#: pathsampling/results/betaBinomialRecommendTable.columns.title
-msgid "Target Confidence"
-msgstr ""
-
 #: R/pathsampling.b.R
 msgid "Target confidence must be between 0 and 1"
 msgstr "Hedef güven düzeyi 0 ile 1 arasında olmalıdır"
@@ -150939,6 +152742,9 @@ msgid "Target cumulative probability"
 msgstr ""
 
 #: pathsampling/options/targetConfidence.title
+#: pathsampling/results/recommendTable.columns.title
+#: pathsampling/results/hyperRecommendTable.columns.title
+#: pathsampling/results/betaBinomialRecommendTable.columns.title
 msgid "Target detection probability"
 msgstr "Hedef saptama olasılığı"
 
@@ -150974,12 +152780,16 @@ msgstr ""
 msgid "Target Estimand"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Target kappa must be strictly between 0 and 1 for sample-size planning."
+msgstr ""
+
 #: pathagreement/options/targetKappa.title
 msgid "Target Kappa Value"
 msgstr ""
 
 #: pathagreement/ui[8][0]/targetKappa.label
-msgid "Target Kappa Value (0.0-1.0)"
+msgid "Target kappa value (0.02-0.98)"
 msgstr ""
 
 #: recist/ui[1][0][0].label
@@ -151061,11 +152871,18 @@ msgid "Target Power"
 msgstr "Hedef Güç"
 
 #: pathagreement/ui[8][0]/targetPrecision.label
-msgid "Target Precision (CI Width, e.g., 0.1)"
+msgid "Target precision (95% CI half-width, e.g., 0.1)"
 msgstr ""
 
 #: pathagreement/options/targetPrecision.title
 msgid "Target precision (half-width of the 95 percent CI)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"Target precision must be positive and smaller than both the target kappa and "
+"1 minus the target kappa, so the requested confidence interval stays within "
+"0 to 1."
 msgstr ""
 
 #: sigmametrics/results/defectRateAnalysis.columns.title
@@ -151315,8 +153132,8 @@ msgstr ""
 msgid "Technical Terms Glossary"
 msgstr ""
 
-#: pathagreement/ui[10].label
-msgid "Technical: System Options"
+#: pathagreement/ui[9].label
+msgid "Technical: System options"
 msgstr ""
 
 #: measurementuncertainty/options/temperature_uncertainty.title
@@ -153566,6 +155383,14 @@ msgid ""
 "its own subtitle"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"The BCa interval for Krippendorff's alpha could not be estimated from the "
+"leave-one-case-out values, so a percentile interval was reported."
+msgstr ""
+"Krippendorff alfası için BCa aralığı, bir olguyu dışarıda bırakma "
+"değerlerinden tahmin edilemedi; bu nedenle yüzdelik aralık raporlandı."
+
 #: R/enhancedROC.b.R
 msgid ""
 "The best performing predictor was '%s' with an AUC of %.3f (%s "
@@ -153649,6 +155474,10 @@ msgstr ""
 "yaklaşımı geçersizleşir. N'yi artırın, daha az uç bir prevalans kullanın "
 "veya anlamlılık düzeyini yükseltin."
 
+#: R/stagemigration-part1.R
+msgid "The calculation returned no result."
+msgstr ""
+
 #: R/survival.b.R
 msgid ""
 "The calibration slope is 1 by construction here, because the model is "
@@ -153730,6 +155559,13 @@ msgstr ""
 msgid ""
 "The chart subtitle therefore reports Fisher's exact test instead of the "
 "chi-square."
+msgstr ""
+
+#: R/stagemigration-part1.R
+msgid ""
+"The chi-square and Fisher tests ask whether the two classifications of the "
+"same patients are associated, which is expected by design; they do not show "
+"that either system predicts survival better."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -154672,6 +156508,14 @@ msgstr ""
 "Güven aralıkları için epiR paketi gereklidir. Yükleyin veya güven "
 "aralıklarını devre dışı bırakın."
 
+#: R/pathagreement.b.R
+msgid ""
+"The estimate is the mean of individual rater kappas against the reference "
+"standard, conditional on the observed style groups. Enable bootstrap "
+"confidence intervals to resample whole cases, keeping all raters and the "
+"reference together."
+msgstr ""
+
 #: eurostatmap/options/dataset_id.description.jamovi
 msgid "The Eurostat dataset identifier to retrieve data from."
 msgstr ""
@@ -154865,6 +156709,12 @@ msgstr ""
 msgid ""
 "The following raters have different factor levels than the first rater: "
 "{raters}. This may affect agreement calculations."
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"The following raters use a different category order than the first rater: "
+"{raters}. Methods that require an ordinal scale will not use ordinal scoring."
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -156119,6 +157969,13 @@ msgid ""
 "for power."
 msgstr ""
 
+#: R/stagemigration-part1.R
+msgid ""
+"The p-value for the C-index difference uses the paired variance of the two "
+"C-indices (survival::concordance on both Cox models), which accounts for "
+"both systems ranking the same patients."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "The p-value is blank for: %s. The differences are still shown; only the test "
@@ -156915,6 +158772,10 @@ msgstr ""
 "Seçilen çapraz doğrulama kuralı geçerli bir boş model üretti. Yerine daha az "
 "cezalandırılmış bir model kullanılmadı."
 
+#: R/pathagreement.b.R
+msgid "the selected distance"
+msgstr ""
+
 #: R/jjdotplotstats.b.R
 msgid "the selected effect size"
 msgstr ""
@@ -157547,9 +159408,37 @@ msgstr ""
 msgid "The tree displays hierarchical relationships between categorical variables"
 msgstr "Ağaç, kategorik değişkenler arasındaki hiyerarşik ilişkileri gösterir"
 
+#: R/pathagreement.b.R
+msgid ""
+"The trend sequence variable '{variable}' has missing values. Those cases "
+"were placed after cases with observed sequence values, while preserving "
+"their dataset order."
+msgstr ""
+"Trend sıra değişkeni '{variable}' eksik değerler içeriyor. Bu olgular, veri "
+"kümesi sıraları korunarak, sıra değeri gözlenen olguların arkasına "
+"yerleştirildi."
+
 #: R/decisioncombine.b.R
 msgid "The two kinds of row"
 msgstr "İki tür satır"
+
+#: R/stagemigration-part1.R
+msgid ""
+"The two staging systems are not nested, so no likelihood-ratio test compares "
+"them directly. Each row fits one Cox model with both classifications and "
+"tests what one system adds to the other: a better new system adds prognostic "
+"information to the original (small p) while the original adds little to it "
+"(large p)."
+msgstr ""
+
+#: R/stagemigration.b.R
+msgid ""
+"The two staging systems use different stage labels (original only: "
+"{onlyOld}; new only: {onlyNew}), so whether a change is up or down cannot be "
+"read from the data. Upstaging and downstaging are not reported; every "
+"patient whose label changed counts as migrated. Recode both variables to one "
+"shared, ordered set of labels to obtain them."
+msgstr ""
 
 #: advancedSurvivalPower/options/alpha.description
 msgid ""
@@ -158515,6 +160404,14 @@ msgstr ""
 #: R/benford.b.R
 msgid "This analysis may not be meaningful because:"
 msgstr "Bu analiz şu nedenlerle anlamlı olmayabilir:"
+
+#: R/pathagreement.b.R
+msgid ""
+"This analysis measures how consistently different raters (observers, "
+"pathologists, clinicians) evaluate the same cases. It supports assessment of "
+"diagnostic consistency, training effectiveness, and research reliability in "
+"clinical settings."
+msgstr ""
 
 #: R/waterfallrecist.b.R
 msgid ""
@@ -159579,6 +161476,10 @@ msgstr ""
 #: multisurvival/options/numRiskGroups/three.title
 msgid "Three Groups"
 msgstr "Üç Grup"
+
+#: R/pathsampling.b.R
+msgid "Three or more sample-position groups"
+msgstr "Üç veya daha fazla örnek konumu grubu"
 
 #: package/analyses/trichotomousroc.menuSubtitle
 #: trichotomousroc/options.menuSubtitle
@@ -162966,13 +164867,13 @@ msgstr ""
 msgid "Total samples (input)"
 msgstr "Toplam örnek (girdi)"
 
-#: pathsampling/ui[1][0].label
-msgid "Total Samples (Required)"
-msgstr ""
-
 #: R/pathsampling.b.R
 msgid "Total samples analyzed"
 msgstr "Analiz edilen toplam örnek"
+
+#: pathsampling/ui[1][0].label
+msgid "Total samples for first-detection analyses"
+msgstr "İlk saptama analizleri için toplam örnek sayısı"
 
 #: samplingerror/results/errorSummary.title
 msgid "Total Sampling Error"
@@ -164389,6 +166290,14 @@ msgstr ""
 msgid "Trend p-value"
 msgstr ""
 
+#: pathagreement/options/sequenceVariable.title
+msgid "Trend Sequence Variable"
+msgstr "Trend Sıra Değişkeni"
+
+#: pathagreement/ui[0][2].label
+msgid "Trend sequence variable (optional)"
+msgstr "Trend sıra değişkeni (isteğe bağlı)"
+
 #: pheval/results/residualAnalysis.columns.title
 msgid "Trend Slope"
 msgstr ""
@@ -165128,6 +167037,10 @@ msgstr ""
 msgid "Two Sample (Group Comparison)"
 msgstr ""
 
+#: R/pathsampling.b.R
+msgid "Two sample-position groups"
+msgstr "İki örnek konumu grubu"
+
 #: R/diagnosticmeta.b.R
 msgid ""
 "Two separate UNIVARIATE meta-regression models were fitted (logit "
@@ -165324,6 +167237,14 @@ msgstr "İki yönlü (denekler ve değerlendiriciler rastgele)"
 
 #: grafify/options/stat_method/anova_2way.title
 msgid "Two-way ANOVA"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Two-way clustered diagnostic patterns (Usubutun style)"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Two-way clustered diagnostic style heatmap"
 msgstr ""
 
 #: R/agreement.b.R
@@ -165793,6 +167714,10 @@ msgstr ""
 msgid "Unable to assess linearity automatically."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Unable to calculate"
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "Unable to compute PH diagnostics (cox.zph): {error}"
 msgstr "PH tanı testleri hesaplanamadı (cox.zph): {error}"
@@ -166109,6 +168034,10 @@ msgstr "tanımsız (negatif olgu yok)"
 #: R/oddsratio.b.R
 msgid "undefined (no positive cases)"
 msgstr "tanımsız (pozitif olgu yok)"
+
+#: R/pathagreement.b.R
+msgid "Under-diagnoses '{category}'"
+msgstr ""
 
 #: R/chisqposttest.b.R
 msgid "Under-represented"
@@ -171332,6 +173261,10 @@ msgid "Very difficult"
 msgstr ""
 
 #: R/pathagreement.b.R
+msgid "Very difficult (high disagreement)"
+msgstr ""
+
+#: R/pathagreement.b.R
 msgid "Very few complete cases (n={n}). Results may be unreliable."
 msgstr ""
 
@@ -171409,6 +173342,10 @@ msgstr ""
 
 #: R/checkdata.b.R
 msgid "Very high cardinality - variable may be identifier rather than categorical"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Very high disagreement"
 msgstr ""
 
 #: R/decision.b.R
@@ -172409,6 +174346,7 @@ msgstr ""
 #: R/enhancedROC.b.R
 #: R/jjdotplotstats.b.R
 #: R/oddsratio.b.R
+#: R/pathagreement.b.R
 #: R/reportcat.b.R
 #: R/timeinterval.b.R
 msgid "Warning"
@@ -173089,6 +175027,10 @@ msgstr ""
 msgid "Weighted Kaplan-Meier"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Weighted kappa"
+msgstr ""
+
 #: cohenskappa/options/kappa_type/linear.title
 msgid "Weighted Kappa (Linear)"
 msgstr ""
@@ -173124,8 +175066,8 @@ msgstr "Ağırlıklı Kappa Yorumlama Kılavuzu"
 
 #: R/pathagreement.b.R
 msgid ""
-"Weighted kappa requested but variables are not ordinal. Analysis reverted to "
-"unweighted kappa."
+"Weighted kappa requires ordered factors with the same category levels in the "
+"same order. Analysis reverted to unweighted kappa."
 msgstr ""
 
 #: R/agreement.b.R
@@ -173232,7 +175174,7 @@ msgid "Weighting"
 msgstr "Ağırlıklandırma"
 
 #: pathagreement/ui[1][1]/wght.label
-msgid "Weighting Scheme"
+msgid "Weighting scheme"
 msgstr ""
 
 #: stagemigration/options/concordanceProbabilityWeighting.title
@@ -175541,6 +177483,10 @@ msgstr "yıl"
 msgid "Years from Baseline"
 msgstr "Başlangıçtan İtibaren Yıl"
 
+#: R/pathagreement.b.R
+msgid "Yellow"
+msgstr ""
+
 #: R/checkdata.b.R
 #: R/chisqposttest.b.R
 #: R/jjarcdiagram.b.R
@@ -175631,6 +177577,12 @@ msgstr ""
 "Henüz uygulanmamış olan %s%s seçtiniz, bu nedenle %s için hiçbir şey "
 "hesaplanmadı: %s. Analizin geri kalanı etkilenmez. Bu mesajı kaldırmak için "
 "bu kutuları temizleyin."
+
+#: R/pathagreement.b.R
+msgid ""
+"You selected <strong>{weighting}</strong>. The sections below explain when "
+"and why to use each weighting scheme."
+msgstr ""
 
 #: R/swimmerplot_html.R
 msgid "You selected Date/Time input type, but your data contains numeric values."
@@ -176212,67 +178164,55 @@ msgstr ""
 msgid "χ² Tests"
 msgstr ""
 
+#: pathagreement
+msgid "Below the conventional 0.667 minimum for tentative conclusions"
+msgstr "Geçici sonuçlar için geleneksel 0.667 alt sınırının altında"
 
-#: R/pathsampling.b.R
-msgid "Below reference gap (index < 0.7)"
-msgstr "Referans boşluğun altında (indeks < 0,7)"
+#: pathagreement
+msgid "Meets the conventional 0.80 reliability threshold"
+msgstr "Geleneksel 0.80 güvenilirlik eşiğini karşılıyor"
 
+#: pathagreement
+msgid "Tentative conclusions only (0.667 to below 0.80)"
+msgstr "Yalnızca geçici sonuçlar (0.667 ile 0.80'in altı)"
 
-#: R/pathsampling.b.R
-msgid "Near reference gap (index 0.7-1.3)"
-msgstr "Referans boşluğa yakın (indeks 0,7–1,3)"
-
-
-#: R/pathsampling.b.R
-msgid "Above reference gap (index > 1.3)"
-msgstr "Referans boşluğun üzerinde (indeks > 1,3)"
-
-
-#: R/pathsampling.b.R
-msgid "One sample-position group"
-msgstr "Bir örnek konumu grubu"
+#: pathagreement
+msgid "The 0.667 and 0.80 interpretation cutoffs are conventional reliability guidelines, not clinical acceptability thresholds. Choose the required reliability from the consequences of disagreement."
+msgstr "0.667 ve 0.80 yorum eşikleri geleneksel güvenilirlik kılavuzlarıdır; klinik kabul edilebilirlik eşikleri değildir. Gerekli güvenilirlik düzeyini görüş ayrılığının sonuçlarına göre belirleyin."
 
 
-#: R/pathsampling.b.R
-msgid "Two sample-position groups"
-msgstr "İki örnek konumu grubu"
+#: pathagreement
+msgid "Pairwise available-case analysis"
+msgstr "İkili kullanılabilir olgu analizi"
 
+#: pathagreement
+msgid "No case is complete across all selected raters. Requested analyses that support partially observed ratings used the available data; analyses requiring jointly complete rows were skipped."
+msgstr "Seçilen değerlendiricilerin tümünde eksiksiz olan hiçbir olgu yoktur. Kısmen gözlenen puanları destekleyen istenmiş analizler kullanılabilir veriyi kullandı; birlikte eksiksiz satırlar gerektiren analizler atlandı."
 
-#: R/pathsampling.b.R
-msgid "Three or more sample-position groups"
-msgstr "Üç veya daha fazla örnek konumu grubu"
+#: pathagreement
+msgid "The selected overall agreement method requires jointly complete rows, so it could not be calculated."
+msgstr "Seçilen genel uyum yöntemi birlikte eksiksiz satırlar gerektirdiğinden hesaplanamadı."
 
+#: pathagreement
+msgid "No jointly complete cases were found. Krippendorff's alpha or pairwise Cohen analysis requires at least two usable cases."
+msgstr "Birlikte eksiksiz olgu bulunamadı. Krippendorff alfa veya ikili Cohen analizi en az iki kullanılabilir olgu gerektirir."
 
-#: jamovi/pathsampling.r.yaml
-msgid "Sample-position groups (heuristic)"
-msgstr "Örnek konumu grupları (sezgisel)"
+#: pathagreement
+msgid "High missing data: {pct}% of cases were excluded from analyses that require jointly complete ratings. Pairwise Cohen analyses use cases observed for each pair, and Krippendorff's alpha uses cases with at least two observed ratings. Complete-case results may be biased."
+msgstr "Yüksek eksik veri: Olguların %{pct} kadarı birlikte eksiksiz puan gerektiren analizlerden dışlandı. İkili Cohen analizleri her çift için gözlenen olguları, Krippendorff alfa ise en az iki gözlenen puanı olan olguları kullanır. Eksiksiz olgu sonuçları yanlı olabilir."
 
+#: pathagreement
+msgid "Pairwise available-case analysis used every case rated by both members of a pair. Pair-specific sample sizes: {counts}."
+msgstr "İkili kullanılabilir olgu analizi, çiftin her iki üyesinin de puanladığı tüm olguları kullandı. Çifte özgü örneklem büyüklükleri: {counts}."
 
-#: jamovi/pathsampling.r.yaml
-msgid "Sample-position group counts"
-msgstr "Örnek konumu gruplarının sayıları"
+#: pathagreement
+msgid "Each rater's percentages use that rater's non-missing ratings as the denominator."
+msgstr "Her değerlendiricinin yüzdelerinde payda olarak o değerlendiricinin eksik olmayan puanları kullanılır."
 
+#: pathagreement
+msgid "This trend is descriptive. It cannot distinguish learning or fatigue from changes in case mix, difficulty, or other factors across the sequence."
+msgstr "Bu eğilim betimseldir. Öğrenme veya yorgunluğu, sıra boyunca olgu bileşimi, güçlük ya da diğer etkenlerdeki değişikliklerden ayıramaz."
 
-#: jamovi/pathsampling.r.yaml
-msgid "Heuristic groups"
-msgstr "Sezgisel gruplar"
-
-
-#: jamovi/pathsampling.r.yaml
-msgid "Samples to reach target"
-msgstr "Hedefe ulaşmak için örnek sayısı"
-
-
-#: jamovi/pathsampling.r.yaml
-msgid "Modelled detected fraction of recorded cases"
-msgstr "Kayıtlı olgularda modellenen saptanmış olgu oranı"
-
-
-#: jamovi/pathsampling.u.yaml
-msgid "Total samples for first-detection analyses"
-msgstr "İlk saptama analizleri için toplam örnek sayısı"
-
-
-#: jamovi/pathsampling.u.yaml
-msgid "First-detection position for detection analyses"
-msgstr "Saptama analizleri için ilk saptama konumu"
+#: pathagreement
+msgid "<li><strong>Missing data:</strong> Overall multi-rater analyses use jointly complete rows; pairwise Cohen analyses use cases observed for each pair, and Krippendorff's alpha uses cases with at least two observed ratings</li>"
+msgstr "<li><strong>Eksik veri:</strong> Genel çok değerlendiricili analizler birlikte eksiksiz satırları kullanır; ikili Cohen analizleri her çift için gözlenen olguları, Krippendorff alfa ise en az iki gözlenen puanı olan olguları kullanır</li>"

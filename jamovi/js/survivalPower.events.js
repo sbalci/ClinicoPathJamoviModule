@@ -43,6 +43,11 @@ const PRESET_CONFIGS = {
     // leaving a worked example's numbers in boxes now labelled "custom", where
     // they would read as figures the user chose.
     custom: {
+        analysis_type: 'sample_size',
+        survival_distribution: 'exponential',
+        accrual_pattern: 'uniform',
+        interim_analyses: 0,
+        alpha_spending: 'none',
         test_type: 'log_rank',
         study_design: 'two_arm_parallel',
         primary_endpoint: 'overall_survival',
@@ -62,6 +67,11 @@ const PRESET_CONFIGS = {
     // Phase III oncology trial: 25% risk reduction, 1:1 randomisation,
     // 2 years accrual and 1 year follow-up.
     oncology_phase3: {
+        analysis_type: 'sample_size',
+        survival_distribution: 'exponential',
+        accrual_pattern: 'uniform',
+        interim_analyses: 0,
+        alpha_spending: 'none',
         test_type: 'log_rank',
         study_design: 'two_arm_parallel',
         primary_endpoint: 'overall_survival',
@@ -79,6 +89,11 @@ const PRESET_CONFIGS = {
     // Cardiovascular prevention: 15% risk reduction in a low-risk cohort, so
     // 5-year median survival, 90% power, and better compliance (3% dropout).
     cardio_prevention: {
+        analysis_type: 'sample_size',
+        survival_distribution: 'exponential',
+        accrual_pattern: 'uniform',
+        interim_analyses: 0,
+        alpha_spending: 'none',
         test_type: 'log_rank',
         study_design: 'two_arm_parallel',
         primary_endpoint: 'overall_survival',
@@ -97,6 +112,11 @@ const PRESET_CONFIGS = {
     // progression-free survival, randomised 2:1 control:experimental. The
     // unequal allocation costs efficiency, which the analysis reports as a notice.
     biomarker_study: {
+        analysis_type: 'sample_size',
+        survival_distribution: 'exponential',
+        accrual_pattern: 'uniform',
+        interim_analyses: 0,
+        alpha_spending: 'none',
         test_type: 'cox_regression',
         study_design: 'two_arm_parallel',
         primary_endpoint: 'progression_free_survival',
@@ -117,6 +137,11 @@ const PRESET_CONFIGS = {
     // size can demonstrate non-inferiority, which .validate_inputs() refuses
     // rather than answering.
     non_inferiority: {
+        analysis_type: 'sample_size',
+        survival_distribution: 'exponential',
+        accrual_pattern: 'uniform',
+        interim_analyses: 0,
+        alpha_spending: 'none',
         test_type: 'non_inferiority',
         study_design: 'two_arm_parallel',
         primary_endpoint: 'overall_survival',
@@ -137,6 +162,11 @@ const PRESET_CONFIGS = {
     // type I and type II error for a sample size a single centre can recruit,
     // with the higher dropout a pilot population tends to show.
     pilot_study: {
+        analysis_type: 'sample_size',
+        survival_distribution: 'exponential',
+        accrual_pattern: 'uniform',
+        interim_analyses: 0,
+        alpha_spending: 'none',
         test_type: 'log_rank',
         study_design: 'two_arm_parallel',
         primary_endpoint: 'progression_free_survival',

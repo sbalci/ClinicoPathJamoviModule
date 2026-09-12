@@ -29,13 +29,22 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  check-version:
+    name: Check version
     if: "!contains(github.event.head_commit.message, 'WIP')"
     runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.version.outputs.release }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          sparse-checkout: |
+            DESCRIPTION
+            jamovi/0000.yaml
+          sparse-checkout-cone-mode: false
 
       - name: Read and cross-check versions
         id: version
@@ -98,11 +107,20 @@ jobs:
           echo "version=$desc" >> "$GITHUB_OUTPUT"
           echo "tag=v$desc" >> "$GITHUB_OUTPUT"
 
+  release:
+    name: Tag and publish release
+    needs: check-version
+    if: needs.check-version.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Skip if the tag already exists
         id: tag
-        if: steps.version.outputs.release == 'true'
         env:
-          TAG: ${{ steps.version.outputs.tag }}
+          TAG: ${{ needs.check-version.outputs.tag }}
         run: |
           set -euo pipefail
           if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
@@ -113,9 +131,9 @@ jobs:
           fi
 
       - name: Extract release notes from NEWS.md
-        if: steps.version.outputs.release == 'true' && steps.tag.outputs.exists == 'false'
+        if: steps.tag.outputs.exists == 'false'
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ needs.check-version.outputs.version }}
         run: |
           set -euo pipefail
           : > RELEASE_NOTES.md
@@ -138,11 +156,11 @@ jobs:
           cat RELEASE_NOTES.md
 
       - name: Create tag and release
-        if: steps.version.outputs.release == 'true' && steps.tag.outputs.exists == 'false'
+        if: steps.tag.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.version.outputs.tag }}
-          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+          TAG: ${{ needs.check-version.outputs.tag }}
+          PRERELEASE: ${{ needs.check-version.outputs.prerelease }}
         run: |
           set -euo pipefail
           git tag "$TAG"

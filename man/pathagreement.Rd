@@ -32,6 +32,7 @@ pathagreement(
   caseID = NULL,
   icc = FALSE,
   bootstrap = FALSE,
+  bootstrapCIType = "bca",
   bootstrapSamples = 1000,
   seed = 42,
   pairwiseAnalysis = FALSE,
@@ -45,6 +46,7 @@ pathagreement(
   targetPrecision = 0.1,
   raterBiasAnalysis = FALSE,
   agreementTrendAnalysis = FALSE,
+  sequenceVariable = NULL,
   caseDifficultyScoring = FALSE,
   agreementStabilityAnalysis = FALSE,
   performClustering = FALSE,
@@ -58,9 +60,7 @@ pathagreement(
   referenceStandard = NULL,
   useMetadataRows = FALSE,
   showInlineComments = FALSE,
-  showClusteringInterpretation = FALSE,
-  enhancedErrorGuidance = TRUE,
-  showProgressIndicators = FALSE
+  showClusteringInterpretation = FALSE
 )
 }
 \arguments{
@@ -77,8 +77,8 @@ for pairwise comparisons.}
 \item{heatmap}{Show agreement heatmap visualization with color-coded
 agreement levels.}
 
-\item{heatmapDetails}{Show detailed heatmap with kappa values and
-confidence intervals for all rater pairs.}
+\item{heatmapDetails}{Show kappa values as text on the agreement heatmap
+for all rater pairs.}
 
 \item{heatmapTheme}{Choose color scheme for the agreement heatmap
 visualization.}
@@ -97,8 +97,10 @@ analysis or use automatic selection.}
 \item{fleissCI}{Calculate 95 percent confidence intervals for Fleiss' kappa
 using asymptotic standard errors.}
 
-\item{kripp}{Calculate Krippendorff's alpha, a generalized measure of
-reliability for any number of observers and data types.}
+\item{kripp}{Calculate Krippendorff's alpha for factor ratings using the
+selected disagreement function. Cases with at least two observed ratings
+are used, including cases with missing ratings from one or more other
+raters.}
 
 \item{krippMethod}{Measurement level for Krippendorff's alpha calculation.
 Choose based on your data type.}
@@ -131,7 +133,10 @@ options, including when to use linear vs quadratic weighting schemes.}
 ICC, alpha, etc.) with clinical interpretations and usage guidelines.}
 
 \item{styleDistanceMetric}{Distance metric for measuring diagnostic
-similarity between raters for style clustering.}
+similarity between raters for style clustering. Correlation uses one minus
+signed Spearman correlation, so reversed rating patterns remain dissimilar.
+Numeric distances require ordered factors with identical category order;
+otherwise percentage disagreement is used.}
 
 \item{raterCharacteristics}{Include rater background characteristics
 (experience, training, institution) in style analysis.}
@@ -139,14 +144,23 @@ similarity between raters for style clustering.}
 \item{identifyDiscordantCases}{Identify cases that distinguish different
 diagnostic styles - useful for training and consensus development.}
 
-\item{caseID}{Optional variable containing case identifiers. If not
-specified, cases will be numbered automatically.}
+\item{caseID}{Optional variable containing case identifiers. Case outputs
+retain these identifiers after missing ratings and metadata rows are
+excluded. Without an identifier, original row positions are shown.}
 
-\item{icc}{Calculate ICC for continuous or ordinal data. Provides
-additional reliability measures beyond kappa.}
+\item{icc}{Calculate ICC(2,1) from the numeric codes of ordered-factor
+ratings. Nominal and continuous variables are not accepted by this
+analysis.}
 
 \item{bootstrap}{Calculate bootstrap confidence intervals for
-Krippendorff's alpha and other statistics.}
+Krippendorff's alpha and mean rater kappa against a reference standard
+within each style group. Reference-comparison intervals resample whole
+cases, holding the observed raters and style groups fixed.}
+
+\item{bootstrapCIType}{Method used for bootstrap confidence intervals. BCa
+adjusts for bootstrap bias and skewness using leave-one-case-out estimates.
+If BCa cannot be estimated, the analysis reports a percentile interval and
+explains the fallback.}
 
 \item{bootstrapSamples}{Number of bootstrap samples for confidence interval
 calculation.}
@@ -155,8 +169,9 @@ calculation.}
 confidence interval and agreement stability) so that results are
 reproducible.}
 
-\item{pairwiseAnalysis}{Detailed analysis of agreement between each pair of
-raters.}
+\item{pairwiseAnalysis}{Detailed agreement analysis for each rater pair.
+Each pair uses all cases rated by both raters, so pair-specific sample
+sizes can differ.}
 
 \item{categoryAnalysis}{Agreement analysis for each diagnostic category
 separately.}
@@ -179,7 +194,9 @@ address prevalence and bias issues in agreement studies.}
 agreement studies with specified precision requirements.}
 
 \item{targetKappa}{Target kappa value for sample size planning
-calculations.}
+calculations. Values must be strictly between 0 and 1 because the
+confidence interval must extend on both sides of the target. The target
+precision must also be smaller than both the target and 1 minus the target.}
 
 \item{targetPrecision}{Half-width of the 95 percent confidence interval for
 kappa that the study should achieve, for example 0.1 for kappa 0.8 +/- 0.1.}
@@ -188,8 +205,14 @@ kappa that the study should achieve, for example 0.1 for kappa 0.8 +/- 0.1.}
 rating differs from the most common rating of the other raters, with any
 systematic over- or under-use of a category.}
 
-\item{agreementTrendAnalysis}{Analyze how agreement changes over time or
-case sequence, useful for training effect assessment.}
+\item{agreementTrendAnalysis}{Describe how agreement changes over time or
+case sequence. The analysis cannot distinguish learning or fatigue from
+changes in case mix or difficulty. Select a sequence variable to define the
+order explicitly; otherwise the current dataset row order is used.}
+
+\item{sequenceVariable}{Optional variable defining case order for agreement
+trend analysis, such as assessment date, training sequence, or case number.
+Ties retain dataset order; missing sequence values are placed last.}
 
 \item{caseDifficultyScoring}{Difficulty of each case from the share of
 raters who chose the most common rating.}
@@ -229,12 +252,15 @@ majority diagnosis.}
 
 \item{referenceStandard}{Expert consensus or reference standard diagnosis.
 Used to compare style groups and identify which group aligns most closely
-with expert judgment.}
+with expert judgment. Cases with missing reference ratings are omitted from
+reference comparisons but retained in interrater agreement analyses when
+all rater ratings are present.}
 
 \item{useMetadataRows}{Enable extraction of rater characteristics from
-special metadata rows in the dataset. Metadata rows should have case_id
-starting with "META_" (e.g., META_experience, META_specialty). Values in
-rater columns will be extracted as characteristics for association testing.}
+special metadata rows in the dataset. A case ID variable must be selected,
+and metadata rows should have identifiers starting with "META_" (e.g.,
+META_experience, META_specialty). Values in rater columns will be extracted
+as characteristics for association testing.}
 
 \item{showInlineComments}{Show detailed statistical explanations and
 interpretations inline with results for educational purposes.}
@@ -242,12 +268,6 @@ interpretations inline with results for educational purposes.}
 \item{showClusteringInterpretation}{Display explanatory guide for
 interpreting clustering results, diagnostic style groups, and discordant
 cases. Useful for understanding clinical implications.}
-
-\item{enhancedErrorGuidance}{Provide detailed error messages and
-suggestions for resolving common issues in agreement analysis.}
-
-\item{showProgressIndicators}{Display progress indicators for
-computationally intensive operations like bootstrap calculations.}
 }
 \value{
 A results object containing:
@@ -311,8 +331,8 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$overviewTable)}
 }
 \description{
-Comprehensive interrater reliability analysis including Cohen's kappa (2
-raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus
-analysis. Provides agreement statistics, visualization, and clinical
+Interrater reliability analysis including Cohen's kappa (2 raters),
+Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus analysis.
+Provides agreement statistics, visualization, and clinical
 interpretation for categorical rating data.
 }

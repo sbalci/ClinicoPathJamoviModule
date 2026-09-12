@@ -34,6 +34,8 @@ items:
         - vars
         - caseID
         - useMetadataRows
+        - multiraterMethod
+        - exct
       columns:
         - name: cases
           title: 'Cases'
@@ -372,6 +374,11 @@ items:
         - caseID
         - useMetadataRows
         - identifyDiscordantCases
+        - performClustering
+        - clusteringMethod
+        - styleDistanceMetric
+        - nStyleGroups
+        - autoSelectGroups
       columns:
         - name: case_id
           title: 'Case ID'
@@ -398,6 +405,7 @@ items:
         - kripp
         - krippMethod
         - bootstrap
+        - bootstrapCIType
         - bootstrapSamples
         - seed
       columns:
@@ -468,26 +476,11 @@ items:
           type: text
         - name: value
           title: 'Value'
-          type: text
+          type: integer
         - name: percentage
           title: 'Percentage'
           type: number
           format: zto
-
-    # - name: interpretationTable
-    #   title: 'Agreement Interpretation Guidelines'
-    #   type: Table
-    #   visible: (showInterpretation)
-    #  columns:
-    #    - name: kappa_range
-    #      title: 'Kappa Range'
-    #      type: text
-    #    - name: agreement_level
-    #      title: 'Agreement Level'
-    #      type: text
-    #    - name: clinical_interpretation
-    #      title: 'Clinical Interpretation'
-    #      type: text
 
     - name: heatmapPlot
       title: 'Agreement Heatmap'
@@ -647,7 +640,7 @@ items:
     - name: crosstabTable
       title: 'Cross-tabulation Matrix'
       type: Table
-      visible: (sft)
+      visible: (sft && length(vars) == 2)
       clearWith:
         - vars
         - caseID
@@ -675,6 +668,9 @@ items:
         - showClinicalSummary
         - multiraterMethod
         - wght
+        - exct
+        - fleissCI
+        - krippMethod
     - name: reportTemplate
       title: Copy-Ready Report
       type: Html
@@ -687,6 +683,9 @@ items:
         - showClinicalSummary
         - multiraterMethod
         - wght
+        - exct
+        - fleissCI
+        - krippMethod
     - name: aboutAnalysis
       title: About This Analysis
       type: Html
@@ -850,6 +849,7 @@ items:
         - caseID
         - useMetadataRows
         - agreementTrendAnalysis
+        - sequenceVariable
       columns:
         - name: sequence_group
           title: 'Sequence Group'
@@ -906,6 +906,7 @@ items:
         - caseID
         - useMetadataRows
         - agreementStabilityAnalysis
+        - bootstrapCIType
         - bootstrapSamples
         - seed
       columns:
@@ -945,6 +946,7 @@ items:
         - caseID
         - useMetadataRows
         - agreementTrendAnalysis
+        - sequenceVariable
     - name: biasPlot
       title: 'Rater Disagreement with Consensus'
       type: Image
@@ -981,6 +983,13 @@ items:
         - caseID
         - useMetadataRows
         - showInlineComments
+        - gwetAC
+        - pabak
+        - raterBiasAnalysis
+        - caseDifficultyScoring
+        - agreementStabilityAnalysis
+        - agreementTrendAnalysis
+        - sampleSizePlanning
     # ========================================================================
     # Clustering Analysis Results (Usubutun et al. 2012)
     # ========================================================================
@@ -1116,6 +1125,7 @@ items:
         - identifyDiscordant
         - discordantThreshold
         - raterCharacteristics
+        - seed
       columns:
         - name: characteristic
           title: 'Rater Characteristic'
@@ -1156,6 +1166,10 @@ items:
         - identifyDiscordant
         - discordantThreshold
         - raterCharacteristics
+        - bootstrap
+        - bootstrapCIType
+        - bootstrapSamples
+        - seed
       columns:
         - name: style_group
           title: 'Style Group'
@@ -1169,11 +1183,11 @@ items:
           type: number
           format: zto
         - name: ci_lower
-          title: 'CI Lower'
+          title: 'Conditional CI Lower'
           type: number
           format: zto
         - name: ci_upper
-          title: 'CI Upper'
+          title: 'Conditional CI Upper'
           type: number
           format: zto
         - name: accuracy_level
@@ -1290,5 +1304,6 @@ refs:
     - scales
     - stringr
     - viridisLite
+    - Krippendorff2004
 
 ...

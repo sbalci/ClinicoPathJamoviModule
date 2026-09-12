@@ -100,3 +100,4 @@ tests/testthat/_problems/
 
 docs/audit/
 quality-reports/
+literature/*-local.md

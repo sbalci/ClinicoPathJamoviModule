@@ -32,6 +32,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             caseID = NULL,
             icc = FALSE,
             bootstrap = FALSE,
+            bootstrapCIType = "bca",
             bootstrapSamples = 1000,
             seed = 42,
             pairwiseAnalysis = FALSE,
@@ -45,6 +46,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             targetPrecision = 0.1,
             raterBiasAnalysis = FALSE,
             agreementTrendAnalysis = FALSE,
+            sequenceVariable = NULL,
             caseDifficultyScoring = FALSE,
             agreementStabilityAnalysis = FALSE,
             performClustering = FALSE,
@@ -58,9 +60,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             referenceStandard = NULL,
             useMetadataRows = FALSE,
             showInlineComments = FALSE,
-            showClusteringInterpretation = FALSE,
-            enhancedErrorGuidance = TRUE,
-            showProgressIndicators = FALSE, ...) {
+            showClusteringInterpretation = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -212,6 +212,13 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "bootstrap",
                 bootstrap,
                 default=FALSE)
+            private$..bootstrapCIType <- jmvcore::OptionList$new(
+                "bootstrapCIType",
+                bootstrapCIType,
+                options=list(
+                    "bca",
+                    "percentile"),
+                default="bca")
             private$..bootstrapSamples <- jmvcore::OptionNumber$new(
                 "bootstrapSamples",
                 bootstrapSamples,
@@ -254,8 +261,8 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..targetKappa <- jmvcore::OptionNumber$new(
                 "targetKappa",
                 targetKappa,
-                min=0,
-                max=1,
+                min=0.02,
+                max=0.98,
                 default=0.8)
             private$..targetPrecision <- jmvcore::OptionNumber$new(
                 "targetPrecision",
@@ -271,6 +278,14 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "agreementTrendAnalysis",
                 agreementTrendAnalysis,
                 default=FALSE)
+            private$..sequenceVariable <- jmvcore::OptionVariable$new(
+                "sequenceVariable",
+                sequenceVariable,
+                suggested=list(
+                    "continuous",
+                    "ordinal",
+                    "id"),
+                default=NULL)
             private$..caseDifficultyScoring <- jmvcore::OptionBool$new(
                 "caseDifficultyScoring",
                 caseDifficultyScoring,
@@ -345,14 +360,6 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "showClusteringInterpretation",
                 showClusteringInterpretation,
                 default=FALSE)
-            private$..enhancedErrorGuidance <- jmvcore::OptionBool$new(
-                "enhancedErrorGuidance",
-                enhancedErrorGuidance,
-                default=TRUE)
-            private$..showProgressIndicators <- jmvcore::OptionBool$new(
-                "showProgressIndicators",
-                showProgressIndicators,
-                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..sft)
@@ -380,6 +387,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..caseID)
             self$.addOption(private$..icc)
             self$.addOption(private$..bootstrap)
+            self$.addOption(private$..bootstrapCIType)
             self$.addOption(private$..bootstrapSamples)
             self$.addOption(private$..seed)
             self$.addOption(private$..pairwiseAnalysis)
@@ -393,6 +401,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..targetPrecision)
             self$.addOption(private$..raterBiasAnalysis)
             self$.addOption(private$..agreementTrendAnalysis)
+            self$.addOption(private$..sequenceVariable)
             self$.addOption(private$..caseDifficultyScoring)
             self$.addOption(private$..agreementStabilityAnalysis)
             self$.addOption(private$..performClustering)
@@ -407,8 +416,6 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..useMetadataRows)
             self$.addOption(private$..showInlineComments)
             self$.addOption(private$..showClusteringInterpretation)
-            self$.addOption(private$..enhancedErrorGuidance)
-            self$.addOption(private$..showProgressIndicators)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -437,6 +444,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         caseID = function() private$..caseID$value,
         icc = function() private$..icc$value,
         bootstrap = function() private$..bootstrap$value,
+        bootstrapCIType = function() private$..bootstrapCIType$value,
         bootstrapSamples = function() private$..bootstrapSamples$value,
         seed = function() private$..seed$value,
         pairwiseAnalysis = function() private$..pairwiseAnalysis$value,
@@ -450,6 +458,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         targetPrecision = function() private$..targetPrecision$value,
         raterBiasAnalysis = function() private$..raterBiasAnalysis$value,
         agreementTrendAnalysis = function() private$..agreementTrendAnalysis$value,
+        sequenceVariable = function() private$..sequenceVariable$value,
         caseDifficultyScoring = function() private$..caseDifficultyScoring$value,
         agreementStabilityAnalysis = function() private$..agreementStabilityAnalysis$value,
         performClustering = function() private$..performClustering$value,
@@ -463,9 +472,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         referenceStandard = function() private$..referenceStandard$value,
         useMetadataRows = function() private$..useMetadataRows$value,
         showInlineComments = function() private$..showInlineComments$value,
-        showClusteringInterpretation = function() private$..showClusteringInterpretation$value,
-        enhancedErrorGuidance = function() private$..enhancedErrorGuidance$value,
-        showProgressIndicators = function() private$..showProgressIndicators$value),
+        showClusteringInterpretation = function() private$..showClusteringInterpretation$value),
     private = list(
         ..vars = NA,
         ..sft = NA,
@@ -493,6 +500,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..caseID = NA,
         ..icc = NA,
         ..bootstrap = NA,
+        ..bootstrapCIType = NA,
         ..bootstrapSamples = NA,
         ..seed = NA,
         ..pairwiseAnalysis = NA,
@@ -506,6 +514,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..targetPrecision = NA,
         ..raterBiasAnalysis = NA,
         ..agreementTrendAnalysis = NA,
+        ..sequenceVariable = NA,
         ..caseDifficultyScoring = NA,
         ..agreementStabilityAnalysis = NA,
         ..performClustering = NA,
@@ -519,9 +528,7 @@ pathagreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..referenceStandard = NA,
         ..useMetadataRows = NA,
         ..showInlineComments = NA,
-        ..showClusteringInterpretation = NA,
-        ..enhancedErrorGuidance = NA,
-        ..showProgressIndicators = NA)
+        ..showClusteringInterpretation = NA)
 )
 
 pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -606,7 +613,8 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "reshape2",
                     "scales",
                     "stringr",
-                    "viridisLite"))
+                    "viridisLite",
+                    "Krippendorff2004"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -636,7 +644,9 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "vars",
                     "caseID",
-                    "useMetadataRows"),
+                    "useMetadataRows",
+                    "multiraterMethod",
+                    "exct"),
                 columns=list(
                     list(
                         `name`="cases", 
@@ -1033,7 +1043,12 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "vars",
                     "caseID",
                     "useMetadataRows",
-                    "identifyDiscordantCases"),
+                    "identifyDiscordantCases",
+                    "performClustering",
+                    "clusteringMethod",
+                    "styleDistanceMetric",
+                    "nStyleGroups",
+                    "autoSelectGroups"),
                 columns=list(
                     list(
                         `name`="case_id", 
@@ -1064,6 +1079,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "kripp",
                     "krippMethod",
                     "bootstrap",
+                    "bootstrapCIType",
                     "bootstrapSamples",
                     "seed"),
                 columns=list(
@@ -1146,7 +1162,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="value", 
                         `title`="Value", 
-                        `type`="text"),
+                        `type`="integer"),
                     list(
                         `name`="percentage", 
                         `title`="Percentage", 
@@ -1322,7 +1338,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="crosstabTable",
                 title="Cross-tabulation Matrix",
-                visible="(sft)",
+                visible="(sft && length(vars) == 2)",
                 clearWith=list(
                     "vars",
                     "caseID",
@@ -1348,7 +1364,10 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "useMetadataRows",
                     "showClinicalSummary",
                     "multiraterMethod",
-                    "wght")))
+                    "wght",
+                    "exct",
+                    "fleissCI",
+                    "krippMethod")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportTemplate",
@@ -1360,7 +1379,10 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "useMetadataRows",
                     "showClinicalSummary",
                     "multiraterMethod",
-                    "wght")))
+                    "wght",
+                    "exct",
+                    "fleissCI",
+                    "krippMethod")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutAnalysis",
@@ -1532,7 +1554,8 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "vars",
                     "caseID",
                     "useMetadataRows",
-                    "agreementTrendAnalysis"),
+                    "agreementTrendAnalysis",
+                    "sequenceVariable"),
                 columns=list(
                     list(
                         `name`="sequence_group", 
@@ -1599,6 +1622,7 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "caseID",
                     "useMetadataRows",
                     "agreementStabilityAnalysis",
+                    "bootstrapCIType",
                     "bootstrapSamples",
                     "seed"),
                 columns=list(
@@ -1642,7 +1666,8 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "vars",
                     "caseID",
                     "useMetadataRows",
-                    "agreementTrendAnalysis")))
+                    "agreementTrendAnalysis",
+                    "sequenceVariable")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="biasPlot",
@@ -1678,7 +1703,14 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "vars",
                     "caseID",
                     "useMetadataRows",
-                    "showInlineComments")))
+                    "showInlineComments",
+                    "gwetAC",
+                    "pabak",
+                    "raterBiasAnalysis",
+                    "caseDifficultyScoring",
+                    "agreementStabilityAnalysis",
+                    "agreementTrendAnalysis",
+                    "sampleSizePlanning")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="styleGroupSummary",
@@ -1827,7 +1859,8 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "referenceStandard",
                     "identifyDiscordant",
                     "discordantThreshold",
-                    "raterCharacteristics"),
+                    "raterCharacteristics",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="characteristic", 
@@ -1873,7 +1906,11 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "referenceStandard",
                     "identifyDiscordant",
                     "discordantThreshold",
-                    "raterCharacteristics"),
+                    "raterCharacteristics",
+                    "bootstrap",
+                    "bootstrapCIType",
+                    "bootstrapSamples",
+                    "seed"),
                 columns=list(
                     list(
                         `name`="style_group", 
@@ -1891,12 +1928,12 @@ pathagreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `format`="zto"),
                     list(
                         `name`="ci_lower", 
-                        `title`="CI Lower", 
+                        `title`="Conditional CI Lower", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="ci_upper", 
-                        `title`="CI Upper", 
+                        `title`="Conditional CI Upper", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -1996,7 +2033,7 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "pathagreement",
-                version = c(0,1,0),
+                version = c(0,2,0),
                 options = options,
                 results = pathagreementResults$new(options=options),
                 data = data,
@@ -2011,9 +2048,9 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' Pathology Interrater Reliability
 #'
-#' Comprehensive interrater reliability analysis including Cohen's kappa (2 
-#' raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus 
-#' analysis. Provides agreement statistics, visualization, and clinical 
+#' Interrater reliability analysis including Cohen's kappa (2 raters),
+#' Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus analysis.
+#' Provides agreement statistics, visualization, and clinical
 #' interpretation for categorical rating data.
 #' 
 #' @param data The data as a data frame. Each row represents a case/subject,
@@ -2025,8 +2062,8 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   for pairwise comparisons.
 #' @param heatmap Show agreement heatmap visualization with color-coded
 #'   agreement levels.
-#' @param heatmapDetails Show detailed heatmap with kappa values and
-#'   confidence intervals for all rater pairs.
+#' @param heatmapDetails Show kappa values as text on the agreement heatmap
+#'   for all rater pairs.
 #' @param heatmapTheme Choose color scheme for the agreement heatmap
 #'   visualization.
 #' @param wght Weighting scheme for kappa analysis. Use 'squared' or 'equal'
@@ -2039,8 +2076,10 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   analysis or use automatic selection.
 #' @param fleissCI Calculate 95 percent confidence intervals for Fleiss' kappa
 #'   using asymptotic standard errors.
-#' @param kripp Calculate Krippendorff's alpha, a generalized measure of
-#'   reliability for any number of observers and data types.
+#' @param kripp Calculate Krippendorff's alpha for factor ratings using the
+#'   selected disagreement function. Cases with at least two observed ratings
+#'   are used, including cases with missing ratings from one or more other
+#'   raters.
 #' @param krippMethod Measurement level for Krippendorff's alpha calculation.
 #'   Choose based on your data type.
 #' @param consensus Perform consensus scoring analysis to determine
@@ -2062,24 +2101,36 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showStatisticalGlossary Show glossary of statistical terms (kappa,
 #'   ICC, alpha, etc.) with clinical interpretations and usage guidelines.
 #' @param styleDistanceMetric Distance metric for measuring diagnostic
-#'   similarity between raters for style clustering.
+#'   similarity between raters for style clustering. Correlation uses one minus
+#'   signed Spearman correlation, so reversed rating patterns remain dissimilar.
+#'   Numeric distances require ordered factors with identical category order;
+#'   otherwise percentage disagreement is used.
 #' @param raterCharacteristics Include rater background characteristics
 #'   (experience, training, institution) in style analysis.
 #' @param identifyDiscordantCases Identify cases that distinguish different
 #'   diagnostic styles - useful for training and consensus development.
-#' @param caseID Optional variable containing case identifiers. If not
-#'   specified, cases will be numbered automatically.
-#' @param icc Calculate ICC for continuous or ordinal data. Provides
-#'   additional reliability measures beyond kappa.
+#' @param caseID Optional variable containing case identifiers. Case outputs
+#'   retain these identifiers after missing ratings and metadata rows are
+#'   excluded. Without an identifier, original row positions are shown.
+#' @param icc Calculate ICC(2,1) from the numeric codes of ordered-factor
+#'   ratings. Nominal and continuous variables are not accepted by this
+#'   analysis.
 #' @param bootstrap Calculate bootstrap confidence intervals for
-#'   Krippendorff's alpha and other statistics.
+#'   Krippendorff's alpha and mean rater kappa against a reference standard
+#'   within each style group. Reference-comparison intervals resample whole
+#'   cases, holding the observed raters and style groups fixed.
+#' @param bootstrapCIType Method used for bootstrap confidence intervals. BCa
+#'   adjusts for bootstrap bias and skewness using leave-one-case-out estimates.
+#'   If BCa cannot be estimated, the analysis reports a percentile interval and
+#'   explains the fallback.
 #' @param bootstrapSamples Number of bootstrap samples for confidence interval
 #'   calculation.
 #' @param seed Seed for the bootstrap resampling (Krippendorff's alpha
 #'   confidence interval and agreement stability) so that results are
 #'   reproducible.
-#' @param pairwiseAnalysis Detailed analysis of agreement between each pair of
-#'   raters.
+#' @param pairwiseAnalysis Detailed agreement analysis for each rater pair.
+#'   Each pair uses all cases rated by both raters, so pair-specific sample
+#'   sizes can differ.
 #' @param categoryAnalysis Agreement analysis for each diagnostic category
 #'   separately.
 #' @param outlierAnalysis Identify cases with unusually poor agreement across
@@ -2095,14 +2146,21 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param sampleSizePlanning Perform sample size planning calculations for
 #'   agreement studies with specified precision requirements.
 #' @param targetKappa Target kappa value for sample size planning
-#'   calculations.
+#'   calculations. Values must be strictly between 0 and 1 because the
+#'   confidence interval must extend on both sides of the target. The target
+#'   precision must also be smaller than both the target and 1 minus the target.
 #' @param targetPrecision Half-width of the 95 percent confidence interval for
 #'   kappa that the study should achieve, for example 0.1 for kappa 0.8 +/- 0.1.
 #' @param raterBiasAnalysis For each rater, the share of cases on which their
 #'   rating differs from the most common rating of the other raters, with any
 #'   systematic over- or under-use of a category.
-#' @param agreementTrendAnalysis Analyze how agreement changes over time or
-#'   case sequence, useful for training effect assessment.
+#' @param agreementTrendAnalysis Describe how agreement changes over time or
+#'   case sequence. The analysis cannot distinguish learning or fatigue from
+#'   changes in case mix or difficulty. Select a sequence variable to define the
+#'   order explicitly; otherwise the current dataset row order is used.
+#' @param sequenceVariable Optional variable defining case order for agreement
+#'   trend analysis, such as assessment date, training sequence, or case number.
+#'   Ties retain dataset order; missing sequence values are placed last.
 #' @param caseDifficultyScoring Difficulty of each case from the share of
 #'   raters who chose the most common rating.
 #' @param agreementStabilityAnalysis Bootstrap-based stability measures to
@@ -2131,20 +2189,19 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   majority diagnosis.
 #' @param referenceStandard Expert consensus or reference standard diagnosis.
 #'   Used to compare style groups and identify which group aligns most closely
-#'   with expert judgment.
+#'   with expert judgment. Cases with missing reference ratings are omitted from
+#'   reference comparisons but retained in interrater agreement analyses when
+#'   all rater ratings are present.
 #' @param useMetadataRows Enable extraction of rater characteristics from
-#'   special metadata rows in the dataset. Metadata rows should have case_id
-#'   starting with "META_" (e.g., META_experience, META_specialty). Values in
-#'   rater columns will be extracted as characteristics for association testing.
+#'   special metadata rows in the dataset. A case ID variable must be selected,
+#'   and metadata rows should have identifiers starting with "META_" (e.g.,
+#'   META_experience, META_specialty). Values in rater columns will be extracted
+#'   as characteristics for association testing.
 #' @param showInlineComments Show detailed statistical explanations and
 #'   interpretations inline with results for educational purposes.
 #' @param showClusteringInterpretation Display explanatory guide for
 #'   interpreting clustering results, diagnostic style groups, and discordant
 #'   cases. Useful for understanding clinical implications.
-#' @param enhancedErrorGuidance Provide detailed error messages and
-#'   suggestions for resolving common issues in agreement analysis.
-#' @param showProgressIndicators Display progress indicators for
-#'   computationally intensive operations like bootstrap calculations.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -2234,6 +2291,7 @@ pathagreement <- function(
     caseID = NULL,
     icc = FALSE,
     bootstrap = FALSE,
+    bootstrapCIType = "bca",
     bootstrapSamples = 1000,
     seed = 42,
     pairwiseAnalysis = FALSE,
@@ -2247,6 +2305,7 @@ pathagreement <- function(
     targetPrecision = 0.1,
     raterBiasAnalysis = FALSE,
     agreementTrendAnalysis = FALSE,
+    sequenceVariable = NULL,
     caseDifficultyScoring = FALSE,
     agreementStabilityAnalysis = FALSE,
     performClustering = FALSE,
@@ -2260,21 +2319,21 @@ pathagreement <- function(
     referenceStandard = NULL,
     useMetadataRows = FALSE,
     showInlineComments = FALSE,
-    showClusteringInterpretation = FALSE,
-    enhancedErrorGuidance = TRUE,
-    showProgressIndicators = FALSE) {
+    showClusteringInterpretation = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("pathagreement requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
     if ( ! missing(caseID)) caseID <- jmvcore::resolveQuo(jmvcore::enquo(caseID))
+    if ( ! missing(sequenceVariable)) sequenceVariable <- jmvcore::resolveQuo(jmvcore::enquo(sequenceVariable))
     if ( ! missing(referenceStandard)) referenceStandard <- jmvcore::resolveQuo(jmvcore::enquo(referenceStandard))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(vars), vars, NULL),
             `if`( ! missing(caseID), caseID, NULL),
+            `if`( ! missing(sequenceVariable), sequenceVariable, NULL),
             `if`( ! missing(referenceStandard), referenceStandard, NULL))
 
     for (v in vars) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
@@ -2307,6 +2366,7 @@ pathagreement <- function(
         caseID = caseID,
         icc = icc,
         bootstrap = bootstrap,
+        bootstrapCIType = bootstrapCIType,
         bootstrapSamples = bootstrapSamples,
         seed = seed,
         pairwiseAnalysis = pairwiseAnalysis,
@@ -2320,6 +2380,7 @@ pathagreement <- function(
         targetPrecision = targetPrecision,
         raterBiasAnalysis = raterBiasAnalysis,
         agreementTrendAnalysis = agreementTrendAnalysis,
+        sequenceVariable = sequenceVariable,
         caseDifficultyScoring = caseDifficultyScoring,
         agreementStabilityAnalysis = agreementStabilityAnalysis,
         performClustering = performClustering,
@@ -2333,9 +2394,7 @@ pathagreement <- function(
         referenceStandard = referenceStandard,
         useMetadataRows = useMetadataRows,
         showInlineComments = showInlineComments,
-        showClusteringInterpretation = showClusteringInterpretation,
-        enhancedErrorGuidance = enhancedErrorGuidance,
-        showProgressIndicators = showProgressIndicators)
+        showClusteringInterpretation = showClusteringInterpretation)
 
     analysis <- pathagreementClass$new(
         options = options,

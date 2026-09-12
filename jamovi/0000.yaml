@@ -4231,7 +4231,7 @@ analyses:
     name: survivalPower
     ns: ClinicoPath
     category: analyses
-    menuGroup: Power
+    menuGroup: PowerT
     menuSubgroup: Survival Power Analysis
     menuTitle: Survival Power Analysis
     menuSubtitle: Survival Power analysis
@@ -4877,10 +4877,10 @@ analyses:
     menuGroup: OncoPathT
     menuSubgroup: Agreement
     menuTitle: Pathology Interrater Reliability
-    description: >
-      Comprehensive interrater reliability analysis including Cohen's kappa (2
-      raters),  Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus
-      analysis. Provides agreement statistics, visualization, and clinical
+    description: |
+      Interrater reliability analysis including Cohen's kappa (2 raters),
+      Fleiss' kappa (3+ raters), Krippendorff's alpha, and consensus analysis.
+      Provides agreement statistics, visualization, and clinical
       interpretation for categorical rating data.
     menuSubtitle: Agreement on Categorical and Ordinal Data
   - title: Auto-Plot (esquisse)
