@@ -1,0 +1,192 @@
+[
+  {
+    "mode": "effect_size",
+    "table": [
+      {
+        "parameter": "Hazard Ratio",
+        "base_case": "0.75",
+        "scenario_1": "0.60",
+        "scenario_2": "0.90",
+        "impact_assessment": "Parameter change affects results",
+        "_row": "\"hr\""
+      },
+      {
+        "parameter": "Control Median Survival",
+        "base_case": "12.0 months",
+        "scenario_1": "14.4 months",
+        "scenario_2": "9.6 months",
+        "impact_assessment": "Parameter change affects results",
+        "_row": "\"median\""
+      },
+      {
+        "parameter": "Significance Level",
+        "base_case": "0.050",
+        "scenario_1": "0.025",
+        "scenario_2": "0.100",
+        "impact_assessment": "Parameter change affects results",
+        "_row": "\"alpha\""
+      },
+      {
+        "parameter": "Accrual Period",
+        "base_case": "24.0 months",
+        "scenario_1": "19.2 months",
+        "scenario_2": "28.8 months",
+        "impact_assessment": "Parameter change affects results",
+        "_row": "\"accrual\""
+      }
+    ],
+    "curve": [
+      {
+        "hazard_ratio": 0.45,
+        "sample_size": 89,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.5,
+        "sample_size": 113,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.55,
+        "sample_size": 147,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.6,
+        "sample_size": 197,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.65,
+        "sample_size": 271,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.7,
+        "sample_size": 386,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.75,
+        "sample_size": 583,
+        "is_base_case": true
+      },
+      {
+        "hazard_ratio": 0.8,
+        "sample_size": 952,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.85,
+        "sample_size": 1765,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.9,
+        "sample_size": 4139,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.95,
+        "sample_size": 17230,
+        "is_base_case": false
+      }
+    ],
+    "notices": "Analysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual"
+  },
+  {
+    "mode": "duration",
+    "table": [
+      {
+        "parameter": "Hazard Ratio",
+        "base_case": "0.75",
+        "scenario_1": "0.60",
+        "scenario_2": "0.90",
+        "impact_assessment": "Parameter change affects results",
+        "_row": "\"hr\""
+      },
+      {
+        "parameter": "Control Median Survival",
+        "base_case": "12.0 months",
+        "scenario_1": "14.4 months",
+        "scenario_2": "9.6 months",
+        "impact_assessment": "Parameter change affects results",
+        "_row": "\"median\""
+      },
+      {
+        "parameter": "Significance Level",
+        "base_case": "0.050",
+        "scenario_1": "0.025",
+        "scenario_2": "0.100",
+        "impact_assessment": "Parameter change affects results",
+        "_row": "\"alpha\""
+      },
+      {
+        "parameter": "Accrual Period",
+        "base_case": "24.0 months",
+        "scenario_1": "19.2 months",
+        "scenario_2": "28.8 months",
+        "impact_assessment": "Parameter change affects results",
+        "_row": "\"accrual\""
+      }
+    ],
+    "curve": [
+      {
+        "hazard_ratio": 0.45,
+        "sample_size": 89,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.5,
+        "sample_size": 113,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.55,
+        "sample_size": 147,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.6,
+        "sample_size": 197,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.65,
+        "sample_size": 271,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.7,
+        "sample_size": 386,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.75,
+        "sample_size": 583,
+        "is_base_case": true
+      },
+      {
+        "hazard_ratio": 0.8,
+        "sample_size": 952,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.85,
+        "sample_size": 1765,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.9,
+        "sample_size": 4139,
+        "is_base_case": false
+      },
+      {
+        "hazard_ratio": 0.95,
+        "sample_size": 17230,
+        "is_base_case": false
+      }
+    ],
+    "notices": "Analysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual"
+  }
+]

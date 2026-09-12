@@ -1,0 +1,22 @@
+{
+  "power_curve_plot": {
+    "valid_state": true,
+    "null_state": false
+  },
+  "sample_size_plot": {
+    "valid_state": true,
+    "null_state": false
+  },
+  "survival_curves_plot": {
+    "valid_state": true,
+    "null_state": false
+  },
+  "accrual_timeline_plot": {
+    "valid_state": true,
+    "null_state": false
+  },
+  "sensitivity_plot": {
+    "valid_state": true,
+    "null_state": false
+  }
+}

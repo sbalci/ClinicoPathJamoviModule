@@ -1,0 +1,13 @@
+{
+  "options_defined": 37,
+  "defined_but_not_read": [],
+  "reads_without_definition": [],
+  "namespace_packages": ["R6", "jmvcore", "ggplot2", "scales", "mvtnorm", "gsDesign", "withr", "survival"],
+  "packages_missing_imports": [],
+  "html_entities": [],
+  "setVisible_FALSE": [],
+  "warning_calls": [],
+  "addRow_sites": 106,
+  "translation_calls": [],
+  "renderers": [".plot_power_curves", ".plot_sample_size_curves", ".plot_expected_survival", ".plot_study_timeline", ".plot_sensitivity_analysis"]
+}
