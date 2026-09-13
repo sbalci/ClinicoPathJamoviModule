@@ -1,0 +1,78 @@
+[
+  {
+    "arms": 3,
+    "solved_hr": 0.7437979585668,
+    "reported_whole": 650.968999188804,
+    "integrated_whole": 634.268555595959,
+    "table": [
+      {
+        "parameter": "Minimum Detectable HR",
+        "value": "0.744",
+        "description": "Hazard ratio nearest 1 meeting the target power in the selected direction",
+        "_row": "\"hr\""
+      },
+      {
+        "parameter": "Sample Size",
+        "value": "1000 subjects",
+        "description": "Total number of subjects in the study",
+        "_row": "\"n\""
+      },
+      {
+        "parameter": "Power",
+        "value": "80%",
+        "description": "Power for detecting the solved effect",
+        "_row": "\"power\""
+      },
+      {
+        "parameter": "Hazard Reduction",
+        "value": "25.6%",
+        "description": "Minimum relative reduction in the hazard detectable with the specified power",
+        "_row": "\"reduction\""
+      },
+      {
+        "parameter": "Expected Events",
+        "value": "651 events",
+        "description": "Number of events expected during study period",
+        "_row": "\"events\""
+      }
+    ]
+  },
+  {
+    "arms": 10,
+    "solved_hr": 0.513606977599,
+    "reported_whole": 588.646533878445,
+    "integrated_whole": 498.707497007331,
+    "table": [
+      {
+        "parameter": "Minimum Detectable HR",
+        "value": "0.514",
+        "description": "Hazard ratio nearest 1 meeting the target power in the selected direction",
+        "_row": "\"hr\""
+      },
+      {
+        "parameter": "Sample Size",
+        "value": "1000 subjects",
+        "description": "Total number of subjects in the study",
+        "_row": "\"n\""
+      },
+      {
+        "parameter": "Power",
+        "value": "80%",
+        "description": "Power for detecting the solved effect",
+        "_row": "\"power\""
+      },
+      {
+        "parameter": "Hazard Reduction",
+        "value": "48.6%",
+        "description": "Minimum relative reduction in the hazard detectable with the specified power",
+        "_row": "\"reduction\""
+      },
+      {
+        "parameter": "Expected Events",
+        "value": "589 events",
+        "description": "Number of events expected during study period",
+        "_row": "\"events\""
+      }
+    ]
+  }
+]

@@ -3,5 +3,8 @@
   "warning_text": "NaNs produced",
   "notices": "WARNING: Short Study Duration\nStudy duration (1.0 mo) may be too short for median survival 240.0 mo • Consider extending follow-up to at least 360.0 mo\n\nAnalysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
   "reported_CI": [0, 0],
-  "exact_binomial_CI": [0, 0.0037]
+  "exact_binomial_CI": [0, 0.0037],
+  "missing_p_values": 0,
+  "p_equals_one": 985,
+  "zero_recorded_events": 984
 }

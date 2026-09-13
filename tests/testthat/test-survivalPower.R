@@ -238,30 +238,15 @@ test_that("Parameter validation: Exponential distribution requirement", {
 test_that("Parameter validation: Effect size bounds", {
   skip_if_not_available()
 
-  # Effect size must be > 0
-  expect_error({
-    result <- survivalPower(
-      analysis_type = "sample_size",
-      test_type = "log_rank",
-      control_median_survival = 12,
-      effect_size = 0,  # Invalid
-      alpha_level = 0.05,
-      power_level = 0.80
-    )
-  })
-
-  # Out of the declared 0.1-5.0 range: jmvcore rejects it before the analysis runs
-  expect_error(
-    survivalPower(
-      analysis_type = "sample_size",
-      test_type = "log_rank",
-      control_median_survival = 12,
-      effect_size = 10,
-      alpha_level = 0.05,
-      power_level = 0.80
-    ),
-    regexp = "between 0.1 and 5"
-  )
+  # The shared numeric control also accepts signed survival differences and
+  # median ratios up to 10; HR-specific bounds are checked by the analysis.
+  for (effect in c(0, 10)) {
+    result <- survivalPower(analysis_type = "sample_size", test_type = "log_rank",
+      control_median_survival = 12, effect_size = effect,
+      alpha_level = 0.05, power_level = 0.80)
+    expect_match(result$notices$content, "Invalid Hazard Ratio", fixed = TRUE)
+    expect_true(is.na(result$power_summary$asDF$calculated_value[1]))
+  }
 
   # In range but clinically implausible: flagged via notice, still computed
   {
@@ -548,4 +533,4 @@ cat("1. ✅ ALL parameter names updated to current API\n")
 cat("2. ✅ Test methods updated (log_rank, cox_regression, non_inferiority)\n")
 cat("3. ✅ Tests now actually test current implementation\n")
 cat("4. ✅ Known limitations explicitly tested (expect errors)\n")
-cat("5. ⚠️ REMINDER: Version downgraded to 0.3.0 (beta with core features)\n")
+cat("5. Validated scope remains documented in the analysis limitations.\n")

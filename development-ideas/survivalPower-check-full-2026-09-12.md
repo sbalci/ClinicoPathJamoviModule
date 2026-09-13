@@ -21,7 +21,7 @@ The evidence directory is [survivalPower-check-full-2026-09-12](survivalPower-ch
 
 ### F1 — High: calculated power is assessed using the requested power option
 
-At [R/survivalPower.b.R:2635](../R/survivalPower.b.R#L2635), the regulatory table reads `self$options$power_level`; its classification at line 2687 therefore ignores calculated power. The low-power notice at line 289 uses the same input. With `analysis_type='power'`, N=10, control median=240 months, accrual=1 month, and follow-up=0, calculated power is **5.003%**, yet the regulatory row says **Adequate** and that the usual 80% expectation is met. Only a short-duration warning appears. In the six-look Cox/Pocock case, calculated power stays **29.629%** while changing the otherwise irrelevant requested power from 0.5 to 0.8 changes the assessment from Insufficient to Adequate.
+At [R/survivalPower.b.R:2635](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2635), the regulatory table reads `self$options$power_level`; its classification at line 2682 therefore ignores calculated power. The low-power notice at line 289 uses the same input. With `analysis_type='power'`, N=10, control median=240 months, accrual=1 month, and follow-up=0, calculated power is **5.003%**, yet the regulatory row says **Adequate** and that the usual 80% expectation is met. Only a short-duration warning appears. In the six-look Cox/Pocock case, calculated power stays **29.629%** while changing the otherwise irrelevant requested power from 0.5 to 0.8 changes the assessment from Insufficient to Adequate.
 
 **Proposed repair:** use `primary_numbers$power` in power mode, identify target power explicitly in other modes, and assess low power after a successful calculation. Replace categorical claims of clinical realism based solely on HR 0.5–2.0 with a request to justify assumptions in the disease setting. This audit does not establish regulatory compliance.
 
@@ -29,9 +29,9 @@ Evidence: `reproductions.json`, cases `low_events` and `cox_requested_power_*`.
 
 ### F2 — High: duration displays disagree, and the half-event time cannot occur during accrual
 
-For `analysis_type='duration', sample_size_input=500`, the solver and duration table correctly return **45.5756 months**, comprising 24 months accrual and 21.5756 months additional follow-up. The natural-language summary instead reports **24 + 12 = 36 months**. The timeline ends follow-up at month 36 and adds an unexplained three-month analysis phase ending at month 39. The survival-curve horizon also follows the entered timeline. These displays use raw options at [line 2975](../R/survivalPower.b.R#L2975) and [line 4356](../R/survivalPower.b.R#L4356), rather than the solved duration.
+For `analysis_type='duration', sample_size_input=500`, the solver and duration table correctly return **45.5756 months**, comprising 24 months accrual and 21.5756 months additional follow-up. The natural-language summary instead reports **24 + 12 = 36 months**. The timeline ends follow-up at month 36 and adds an unexplained three-month analysis phase ending at month 39. The survival-curve horizon also follows the entered timeline. These displays use raw options at [line 2975](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2975) and [line 4356](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:4356), rather than the solved duration.
 
-The half-event calculation at [line 1735](../R/survivalPower.b.R#L1735) reuses a solver restricted to follow-up after enrollment finishes ([line 3679](../R/survivalPower.b.R#L3679)). For N=1000 and the default 24-month accrual, it reports **24 months** to reach 190 of the 380 required events. Independent integration of uniform recruitment, exponential events, and the same dropout hazard gives **15.3373 months**. The existing solver cannot represent this time during recruitment.
+The half-event calculation at [line 1735](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:1735) reuses a solver restricted to follow-up after enrollment finishes ([line 3679](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:3679)). For N=1000 and the default 24-month accrual, it reports **24 months** to reach 190 of the 380 required events. Independent integration of uniform recruitment, exponential events, and the same dropout hazard gives **15.3373 months**. The existing solver cannot represent this time during recruitment.
 
 **Proposed repair:** construct a resolved design containing solved duration/follow-up and use it for all displays. Solve event milestones over calendar time from zero, integrating only participants recruited by that time. Remove the arbitrary three-month analysis phase or label it as an explicit user-specified operational assumption. Keep the end-of-accrual constraint for completion of enrollment distinct from event-milestone timing.
 
@@ -39,7 +39,7 @@ Evidence: `reproductions.json`, cases `duration_500` and `half_events`; independ
 
 ### F3 — High: detectable-effect event counts and curves use the assumed HR instead of the solved HR
 
-For `analysis_type='effect_size', sample_size_input=200`, both an input HR of 0.2 and an input HR of 0.75 produce the same detectable HR, **0.603459**. Nevertheless, Expected Events changes from **93** to **130**. The expected event count at the solved HR is **123.0646** under the stated assumptions. At [line 1683](../R/survivalPower.b.R#L1683), `expected_events_fun(private$.get_effect_hr())` selects the input HR. Expected survival curves also use that input ([line 2950](../R/survivalPower.b.R#L2950)). Effect-mode summaries and clinical-realism assessments inherit the same ambiguity.
+For `analysis_type='effect_size', sample_size_input=200`, both an input HR of 0.2 and an input HR of 0.75 produce the same detectable HR, **0.603459**. Nevertheless, Expected Events changes from **93** to **130**. The expected event count at the solved HR is **123.0646** under the stated assumptions. At [line 1683](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:1683), `expected_events_fun(private$.get_effect_hr())` selects the input HR. Expected survival curves also use that input ([line 2950](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2950)). Effect-mode summaries and clinical-realism assessments inherit the same ambiguity.
 
 **Proposed repair:** use the solved detectable HR consistently for a reported solved design, and distinguish any separately plotted input scenario. Label whole-study versus comparison-effective event counts, especially for multi-arm and cluster designs. Use the NI-specific threshold description rather than the current generic “smallest hazard ratio” text when non-inferiority is selected.
 
@@ -47,7 +47,7 @@ Evidence: `reproductions.json`, `effect_0.2` and `effect_0.75`.
 
 ### F4 — High: cluster sizing returns an individual-level inflation without a feasible cluster allocation
 
-The cluster adjustment at [line 3541](../R/survivalPower.b.R#L3541) only multiplies the individual-level requirement by `1 + (m - 1) * ICC`. With cluster size=100, ICC=0.01, and HR=0.1, the result is **30 subjects**, fewer than one declared cluster. With ordinary default cluster parameters, the result is **2012 subjects** for clusters of 50, without reporting or rounding the number of clusters. An extreme-HR warning in the first case does not explain the infeasible randomization units.
+The cluster adjustment at [line 3541](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:3541) only multiplies the individual-level requirement by `1 + (m - 1) * ICC`. With cluster size=100, ICC=0.01, and HR=0.1, the result is **30 subjects**, fewer than one declared cluster. With ordinary default cluster parameters, the result is **2012 subjects** for clusters of 50, without reporting or rounding the number of clusters. An extreme-HR warning in the first case does not explain the infeasible randomization units.
 
 **Proposed repair:** explicitly label this as an approximate design-effect calculation unless a validated cluster survival method is implemented. Compute and report whole clusters per arm, respect allocation, and assess whether enough independent clusters support the approximation. Do not present the individual-level ceiling as a complete cluster-randomized design.
 
@@ -55,9 +55,9 @@ Evidence: `reproductions.json`, `cluster`; contextual `cluster_size` and `icc` c
 
 ### F5 — High: sparse-event simulation produces hidden warnings and falsely exact confidence intervals
 
-The low-event design in F1 has only **0.01261 expected events**. Of 1000 simulations, **984** have zero recorded events or failed tests, and **984 “NaNs produced” warnings** are emitted by the numerical test path. The user-visible notices do not report this. The simulation reports power=0, a **[0, 0]** 95% interval, MC SE=0, and “Simulation precision is adequate.” Its Wald interval ([lines 4093–4100](../R/survivalPower.b.R#L4093)) degenerates at zero or one observed rejection proportion. For comparison, an exact binomial interval for 0/1000 rejections is **[0, 0.003682]**.
+The low-event design in F1 has only **0.01261 expected events**. Of 1000 simulations, **984** have zero recorded events or failed tests, and **984 “NaNs produced” warnings** are emitted by the numerical test path. The user-visible notices do not report this. The simulation reports power=0, a **[0, 0]** 95% interval, MC SE=0, and “Simulation precision is adequate.” Its Wald interval ([lines 4093–4100](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:4093)) degenerates at zero or one observed rejection proportion. For comparison, an exact binomial interval for 0/1000 rejections is **[0, 0.003682]**.
 
-The failure handler at [line 4086](../R/survivalPower.b.R#L4086) records failed tests as nonsignificant, with zero events, without a separate failure counter. This can conflate test failures with truly event-free replicates and can distort the reported event average for other failure types.
+The failure handler at [line 4086](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:4086) records failed tests as nonsignificant, with zero events, without a separate failure counter. This can conflate test failures with truly event-free replicates and can distort the reported event average for other failure types.
 
 **Proposed repair:** capture and summarize numerical warnings, retain actual event counts independently of successful fitting, and distinguish zero-information replicates from calculation failures. Use a binomial interval with meaningful boundary behavior and qualify precision diagnostics at boundary estimates. Add expected-event adequacy guidance before presenting asymptotic power as reliable. Planning-specific event guidance is appropriate; fitted-model EPV rules do not directly apply because this analysis fits no covariates.
 
@@ -65,9 +65,9 @@ Evidence: `low-event-diagnostics.json` and `reproductions.json` (`low_events`).
 
 ### F6 — High: non-inferiority narratives describe the wrong objective; the glossary confuses hazard with risk
 
-With non-inferiority, true HR=1, margin HR=1.25, and one-sided alpha=0.025, the primary result is **901 subjects and 631 events**. The plain-language summary and the early interpretation paragraphs describe a study “to detect a hazard ratio of 1.” The final report sentence correctly describes ruling out HR 1.25 or worse. Both descriptions appear in the same output, so the correct final sentence does not resolve the contradiction. See [line 2361](../R/survivalPower.b.R#L2361), [line 2412](../R/survivalPower.b.R#L2412), and [line 4288](../R/survivalPower.b.R#L4288).
+With non-inferiority, true HR=1, margin HR=1.25, and one-sided alpha=0.025, the primary result is **901 subjects and 631 events**. The plain-language summary and the early interpretation paragraphs describe a study “to detect a hazard ratio of 1.” The final report sentence correctly describes ruling out HR 1.25 or worse. Both descriptions appear in the same output, so the correct final sentence does not resolve the contradiction. See [line 2361](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2361), [line 2412](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2412), and [line 4288](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:4288).
 
-Separately, the glossary at [line 4429](../R/survivalPower.b.R#L4429) calls HR 0.75 “25% lower risk,” while the educational Cox explanation correctly distinguishes hazards from relative risks. Under this module's own exponential assumptions, at the control median the control risk is 0.5 and treatment risk for HR 0.75 is approximately 0.4054: the risk reduction is about 18.9%, not 25%.
+Separately, the glossary at [line 4429](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:4429) calls HR 0.75 “25% lower risk,” while the educational Cox explanation correctly distinguishes hazards from relative risks. Under this module's own exponential assumptions, at the control median the control risk is 0.5 and treatment risk for HR 0.75 is approximately 0.4054: the risk reduction is about 18.9%, not 25%.
 
 **Proposed repair:** route every narrative through one method-aware objective formatter, including margin, assumed HR and sidedness for NI. Define HR as a ratio of instantaneous event rates. Express absolute or relative risks only at an explicitly stated time using the survival model.
 
@@ -75,7 +75,7 @@ Evidence: `reproductions.json`, `ni_narrative`, and the cited glossary source.
 
 ### F7 — Medium: Cox headlines and supporting plots use different calculation methods
 
-The Cox headline uses `gsSurv()` with its default Lachin–Foulkes method ([line 1048](../R/survivalPower.b.R#L1048)); the power, sample-size and sensitivity curves use local Schoenfeld helpers ([line 2868](../R/survivalPower.b.R#L2868)). At HR=0.5 and a 5:1 control:experimental ratio, the headline requires **193 subjects** while the sample-size curve at the same HR says **179**. At the headline N, the power curve says **83.154%**; Cox power mode says **80.035%**. This is more than integer-rounding noise. Neither method is inherently invalid merely because the methods differ; the problem is presenting them as one coherent design.
+The Cox headline uses `gsSurv()` with its default Lachin–Foulkes method ([line 1048](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:1048)); the power, sample-size and sensitivity curves use local Schoenfeld helpers ([line 2868](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2868)). At HR=0.5 and a 5:1 control:experimental ratio, the headline requires **193 subjects** while the sample-size curve at the same HR says **179**. At the headline N, the power curve says **83.154%**; Cox power mode says **80.035%**. This is more than integer-rounding noise. Neither method is inherently invalid merely because the methods differ; the problem is presenting them as one coherent design.
 
 **Proposed repair:** make the chosen variance method explicit and reuse it for the headline, inverse calculations, sensitivity table, and plots. In the 12 audited fixed-design combinations, current Cox power inversion agrees with upstream `gsSurvPower()` to within **0.00003 absolute power** near the target of 80%; retain that agreement while unifying displays.
 
@@ -83,7 +83,7 @@ Evidence: `cox-consistency.csv`. The upstream [survival-design documentation](ht
 
 ### F8 — Medium: effect-input limits reject otherwise valid equivalent assumptions
 
-The shared `effect_size` control has bounds 0.1–5 ([jamovi/survivalPower.a.yaml:141](../jamovi/survivalPower.a.yaml#L141)). In survival-probability-difference mode this excludes a common five-percentage-point difference (0.05), while allowing values greater than the feasible probability range. Both numerical conversions use HR brackets limited to **0.2–3**, even though direct HR accepts **0.1–5** ([line 3162](../R/survivalPower.b.R#L3162), [line 3193](../R/survivalPower.b.R#L3193)). Direct HR=0.15 produces N=21, but its equivalent survival difference at the control median, approximately 0.40125, produces Invalid Effect Size.
+The shared `effect_size` control has bounds 0.1–5 ([jamovi/survivalPower.a.yaml:154](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/survivalPower.a.yaml:154)). In survival-probability-difference mode this excludes a common five-percentage-point difference (0.05), while allowing values greater than the feasible probability range. Both numerical conversions use HR brackets limited to **0.2–3**, even though direct HR accepts **0.1–5** ([line 3162](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:3162), [line 3193](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:3193)). Direct HR=0.15 produces N=21, but its equivalent survival difference at the control median, approximately 0.40125, produces Invalid Effect Size.
 
 **Proposed repair:** use effect-type-specific controls/ranges, validate feasible probabilities or RMST differences, and use consistent HR bounds or an analytical exponential conversion. Explain the direction of benefit and permit supported signed differences where appropriate.
 
@@ -91,7 +91,7 @@ Evidence: `reproductions.json`, `direct_hr_015` and `survival_difference_015`.
 
 ### F9 — Medium: sensitivity analysis is only partially implemented in effect and duration modes
 
-The sensitivity toggle is available in all modes. However, [line 2158](../R/survivalPower.b.R#L2158) returns NA for modes other than sample size/power. Effect and duration modes consequently display four scenario rows with the generic statement “Parameter change affects results,” without solving the scenario effects or durations. The adjacent sensitivity plot continues to show required sample sizes.
+The sensitivity toggle is available in all modes. However, [line 2158](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2158) returns NA for modes other than sample size/power. Effect and duration modes consequently display four scenario rows with the generic statement “Parameter change affects results,” without solving the scenario effects or durations. The adjacent sensitivity plot continues to show required sample sizes.
 
 **Proposed repair:** gate the control and outputs to implemented modes, or solve and label the selected estimand for every scenario. The current table is a partial placeholder in these modes, despite the analysis as a whole being functional.
 
@@ -99,7 +99,7 @@ Evidence: `sensitivity-modes.json`.
 
 ### F10 — Medium: the public R preset argument promises behavior implemented only in JavaScript
 
-Changing only `clinical_preset='cardio_prevention'` in the backend produces exactly the default results. The backend helper intentionally defers to UI events ([line 4238](../R/survivalPower.b.R#L4238)), but [man/survivalPower.Rd:48](../man/survivalPower.Rd#L48) says selecting a preset automatically populates parameters without an R-interface qualification. The JavaScript preset implementation and its schema/behavior tests work.
+Changing only `clinical_preset='cardio_prevention'` in the backend produces exactly the default results. The backend helper intentionally defers to UI events ([line 4238](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:4238)), but [man/survivalPower.Rd:48](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/man/survivalPower.Rd:48) says selecting a preset automatically populates parameters without an R-interface qualification. The JavaScript preset implementation and its schema/behavior tests work.
 
 **Proposed repair:** either implement preset resolution before constructing read-only R options, with documented precedence for explicit arguments, or document the preset as a UI-only convenience and require explicit assumptions for R calls. Update `.a.yaml` descriptions and regenerate help; do not hand-edit generated files.
 
@@ -109,13 +109,76 @@ Evidence: `argument-behavior.csv`, first row, and `jamovi/js/survivalPower.event
 
 Each option was changed alone from the YAML defaults. Conditional comparisons were then run where necessary. YES means an observable calculation, panel, label, or validation-path change; it does not certify accuracy. “Blocked” means the option belongs to an explicitly unsupported configuration. Full output diffs and contextual numeric values are in [argument-behavior.csv](survivalPower-check-full-2026-09-12/argument-behavior.csv), with result contents in `differential-snapshots.rds`.
 
-<!--ARGUMENT_MATRIX-->
+| Argument | Default → changed | Observed behavior | Effective? |
+|---|---|---|---|
+| `clinical_preset` | `custom` → `cardio_prevention` | No R result changes; GUI events populate a complete preset | UI only; F10 |
+| `analysis_type` | `sample_size` → `power` | Power table replaces sample-size table; headline/plot change | YES |
+| `test_type` | `log_rank` → `cox_regression` | Cox gsDesign path and headline/curve change | YES; F7 |
+| `study_design` | `two_arm_parallel` → `multi_arm` | Multi-arm scaling, multiplicity notice and comparison table | YES |
+| `primary_endpoint` | `overall_survival` → `progression_free_survival` | Endpoint labels and completion text change; arithmetic unchanged | YES, labels |
+| `effect_size_type` | `hazard_ratio` → `median_ratio` | Median ratio is converted to HR; numeric design changes | YES |
+| `effect_size` | `0.75` → `0.6` | Required events/N, power and survival curves change | YES |
+| `alpha_level` | `0.05` → `0.025` | Required events/N and alpha assessment change | YES |
+| `power_level` | `0.8` → `0.9` | Required events/N and target-power display change | YES; F1 in power mode |
+| `allocation_ratio` | `1` → `2` | Design information, N and unequal-allocation notice change | YES |
+| `sample_size_input` | `200` → `400` | No default change; power context: power 0.376 to 0.642 | YES, conditional |
+| `control_median_survival` | `12` → `18` | Event probability, N, assumptions and curves change | YES |
+| `survival_distribution` | `exponential` → `weibull` | Fatal unsupported-distribution notice; no numeric design | YES, guard |
+| `weibull_shape` | `1` → `1.5` | No change, including Weibull context which is already blocked | NO; blocked feature |
+| `accrual_period` | `24` → `36` | Event probability, N and timeline change | YES |
+| `follow_up_period` | `12` → `24` | Event probability, N and timeline change | YES; F2 in duration mode |
+| `accrual_pattern` | `uniform` → `linear_increasing` | Fatal unsupported-accrual notice; no numeric design | YES, guard |
+| `dropout_rate` | `0.05` → `0.1` | Event probability, N and dropout assumptions change | YES |
+| `ni_margin` | `1.25` → `1.5` | NI context: N 901 to 273; required events 631 to 191 | YES, conditional |
+| `ni_type` | `relative_margin` → `absolute_margin` | NI context: absolute-margin choice is explicitly rejected | YES, guard |
+| `rmst_tau` | `36` → `24` | RMST-effect context: N 614 to 241 | YES, conditional |
+| `rmst_difference` | `3` → `4` | RMST-effect context: N 614 to 353 | YES, conditional |
+| `number_of_arms` | `3` → `4` | Multi-arm context: N 1059 to 1552; comparisons change | YES, conditional |
+| `multiple_comparisons` | `dunnett` → `none` | Multi-arm context: N 1059 to 875; adjustment notice changes | YES, conditional |
+| `interim_analyses` | `0` → `2` | Default: missing-spending warning; with OBF: N 583 to 591 | YES, conditional |
+| `alpha_spending` | `none` → `obrien_fleming` | With two interims: N 583 to 591 and boundaries populate | YES, conditional |
+| `cluster_size` | `50` → `75` | Cluster context: N 2012 to 2741 | YES, conditional; F4 |
+| `icc` | `0.05` → `0.1` | Cluster context: N 2012 to 3440 | YES, conditional; F4 |
+| `sensitivity_analysis` | `FALSE` → `TRUE` | Sensitivity table and plot populate | YES; F9 in other modes |
+| `run_simulation_validation` | `FALSE` → `TRUE` | Monte Carlo comparison table populates | YES |
+| `simulation_runs` | `2000` → `1000` | Enabled-simulation estimates/precision change | YES, conditional |
+| `simulation_seed` | `42` → `99` | Enabled-simulation sampled results change; primary result unchanged | YES, conditional |
+| `show_interpretation` | `FALSE` → `TRUE` | Clinical interpretation HTML populates | YES |
+| `show_summary` | `FALSE` → `TRUE` | Plain-language summary HTML populates | YES |
+| `show_explanations` | `FALSE` → `TRUE` | Educational explanation HTML populates | YES |
+| `show_glossary` | `FALSE` → `TRUE` | Statistical glossary HTML populates | YES |
+| `guided_mode` | `FALSE` → `TRUE` | Planning checklist HTML populates | YES |
 
 ## Output population matrix
 
 Every setter site was checked against the source, then population was confirmed in runtime result snapshots. `clearWith` includes all 32 calculation/selection/simulation options for all results; each optional HTML result also clears with its own display toggle. There are no undefined reference keys or permanently invisible outputs. The schema uses declarative visibility, not failure-driven hiding.
 
-<!--OUTPUT_MATRIX-->
+| Output | Type | Setter in .b.R | Visibility | Populated? |
+|---|---|---|---|---|
+| `notices` | Preformatted | [`setContent()`, line 77](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:77) | `default` | YES |
+| `instructions` | Html | [`setContent()`, line 563](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:563) | `TRUE` | YES |
+| `power_summary` | Table | [`setRow()`, line 651](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:651) | `TRUE` | YES |
+| `simulation_validation_table` | Table | [`setRow()`, line 1481](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:1481) | `(run_simulation_validation)` | YES |
+| `sample_size_results` | Table | [`setRow()`, line 1598](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:1598) | `(analysis_type=="sample_size")` | YES |
+| `power_results` | Table | [`setRow()`, line 1641](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:1641) | `(analysis_type=="power")` | YES |
+| `effect_size_results` | Table | [`setRow()`, line 1713](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:1713) | `(analysis_type=="effect_size")` | YES |
+| `study_duration_results` | Table | [`setRow()`, line 1774](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:1774) | `(analysis_type=="duration")` | YES |
+| `assumptions_table` | Table | [`setRow()`, line 2287](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2287) | `TRUE` | YES |
+| `non_inferiority_table` | Table | [`setRow()`, line 1857](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:1857) | `(test_type=="non_inferiority")` | YES |
+| `multi_arm_table` | Table | [`setRow()`, line 1958](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:1958) | `(study_design=="multi_arm")` | YES |
+| `interim_analysis_table` | Table | [`setRow()`, line 2002](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2002) | `(interim_analyses>0)` | YES |
+| `sensitivity_analysis_table` | Table | [`setRow()`, line 2125](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2125) | `(sensitivity_analysis)` | YES |
+| `regulatory_table` | Table | [`setRow()`, line 2722](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2722) | `TRUE` | YES |
+| `power_curve_plot` | Image | [`setState()`, line 2750](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2750) | `TRUE` | YES |
+| `sample_size_plot` | Image | [`setState()`, line 2777](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2777) | `(analysis_type=="sample_size")` | YES |
+| `survival_curves_plot` | Image | [`setState()`, line 2804](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2804) | `TRUE` | YES |
+| `accrual_timeline_plot` | Image | [`setState()`, line 2831](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2831) | `TRUE` | YES |
+| `sensitivity_plot` | Image | [`setState()`, line 2859](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2859) | `(sensitivity_analysis)` | YES |
+| `clinical_interpretation` | Html | [`setContent()`, line 2313](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:2313) | `(show_interpretation)` | YES |
+| `natural_language_summary` | Html | [`setContent()`, line 4376](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:4376) | `(show_summary)` | YES |
+| `educational_explanations` | Html | [`setContent()`, line 4420](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:4420) | `(show_explanations)` | YES |
+| `statistical_glossary` | Html | [`setContent()`, line 4458](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:4458) | `(show_glossary)` | YES |
+| `guided_workflow` | Html | [`setContent()`, line 4491](/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/R/survivalPower.b.R:4491) | `(guided_mode)` | YES |
 
 For Images, the associated renderers are `.plot_power_curves`, `.plot_sample_size_curves`, `.plot_expected_survival`, `.plot_study_timeline`, and `.plot_sensitivity_analysis`. Full crosswalk: [output-population.csv](survivalPower-check-full-2026-09-12/output-population.csv). Render evidence: `plot-rendering.json` and `rendered-plots.pdf`.
 

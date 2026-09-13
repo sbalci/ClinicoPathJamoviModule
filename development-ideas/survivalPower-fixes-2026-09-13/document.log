@@ -1,0 +1,104 @@
+ℹ Updating ClinicoPath documentation
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+Registered S3 method overwritten by 'lme4':
+  method           from
+  na.action.merMod car 
+Registered S3 methods overwritten by 'forecast':
+  method       from  
+  autoplot.acf useful
+  fortify.ts   useful
+Registered S3 method overwritten by 'riskRegression':
+  method        from 
+  nobs.multinom broom
+ℹ Loading ClinicoPath
+Registered S3 methods overwritten by 'consort':
+  method                from          
+  heightDetails.textbox ComplexHeatmap
+  widthDetails.textbox  ComplexHeatmap
+Registered S3 method overwritten by 'partitions':
+  method            from
+  print.equivalence lava
+Registered S3 method overwritten by 'DoE.base':
+  method           from       
+  factorize.factor conf.design
+Registered S3 methods overwritten by 'fmsb':
+  method    from
+  print.roc pROC
+  plot.roc  pROC
+Registered S3 methods overwritten by 'FSA':
+  method       from
+  confint.boot car 
+  hist.boot    car 
+Registered S3 methods overwritten by 'ggfortify':
+  method                 from    
+  autoplot.Arima         forecast
+  autoplot.acf           forecast
+  autoplot.ar            forecast
+  autoplot.bats          forecast
+  autoplot.decomposed.ts forecast
+  autoplot.ets           forecast
+  autoplot.forecast      forecast
+  autoplot.glmnet        parsnip 
+  autoplot.stl           forecast
+  autoplot.ts            forecast
+  fitted.ar              forecast
+  fortify.acf            useful  
+  fortify.kmeans         useful  
+  fortify.ts             forecast
+  residuals.ar           forecast
+Registered S3 methods overwritten by 'huge':
+  method    from
+  plot.roc  fmsb
+  plot.sim  lava
+  print.roc fmsb
+  print.sim lava
+Registered S3 methods overwritten by 'logspline':
+  method               from     
+  plot.logspline       polspline
+  plot.oldlogspline    polspline
+  print.logspline      polspline
+  print.oldlogspline   polspline
+  summary.logspline    polspline
+  summary.oldlogspline polspline
+Registered S3 methods overwritten by 'vegan':
+  method          from      
+  rev.hclust      dendextend
+  plot.rda        klaR      
+  predict.rda     klaR      
+  print.nullmodel parsnip   
+  print.rda       klaR      
+Registered S3 method overwritten by 'fit.models':
+  method       from 
+  vcov.default Hmisc
+Registered S3 method overwritten by 'spatstat.explore':
+  method   from
+  plot.roc huge
+Registered S3 method overwritten by 'spdep':
+  method   from
+  plot.mst ape 
+Registered S3 methods overwritten by 'tangram':
+  method               from 
+  [.impute             Hmisc
+  as.data.frame.impute Hmisc
+  print.impute         Hmisc
+Registered S3 method overwritten by 'mlt':
+  method         from
+  print.response httr
+Registered S3 methods overwritten by 'vcdExtra':
+  method      from
+  pairs.table vcd 
+  print.Kappa vcd 
+Serdar Balci MD Pathologist
+https://www.serdarbalci.com/
+
+Writing 'survivalPower.Rd'
+Warning messages:
+1: In check_dep_version(dep_pkg = "TMB") : package version mismatch: 
+glmmTMB was built with TMB package version 1.9.23
+Current TMB package version is 1.9.25
+Please re-install glmmTMB from source or restore original ‘TMB’ package (see '?reinstalling' for more information)
+2: In fun(libname, pkgname) :
+  couldn't connect to display "/var/run/com.apple.launchd.OCeLokAqh6/org.xquartz:0"

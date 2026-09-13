@@ -11435,9 +11435,10 @@ msgstr ""
 msgid "Absolute Loading"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: simpleSurvivalPower/options/ni_type/absolute_margin.title
 msgid "Absolute Margin"
-msgstr ""
+msgstr "Mutlak Sınır"
 
 #: survivalPower/options/ni_type/absolute_margin.title
 msgid "Absolute Margin (not available yet)"
@@ -37190,6 +37191,7 @@ msgstr ""
 msgid "Competing Risk Rate (Group 2)"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: R/outcomeorganizer.b.R
 #: package/analyses/finegray.menuSubgroup
 #: finegray/options.menuSubgroup
@@ -44051,6 +44053,7 @@ msgstr "Cox yeniden uyumlaması sonlu olmayan bir log-olabilirlik döndürdü."
 msgid "Cox refit returned non-finite coefficient estimates."
 msgstr "Cox yeniden uyumlaması sonlu olmayan katsayı tahminleri döndürdü."
 
+#: R/survivalPower.b.R
 #: R/clinicalscore.b.R
 #: advancedtrials/options/statistical_test/cox_regression.title
 #: clinicalprediction/options/model_type/cox_regression.title
@@ -44061,7 +44064,7 @@ msgstr "Cox yeniden uyumlaması sonlu olmayan katsayı tahminleri döndürdü."
 #: simpleSurvivalPower/options/test_type/cox_regression.title
 #: survivalPower/options/test_type/cox_regression.title
 msgid "Cox Regression"
-msgstr ""
+msgstr "Cox Regresyonu"
 
 #: R/survival.b.R
 msgid "Cox regression"
@@ -60026,9 +60029,10 @@ msgstr ""
 msgid "Error:"
 msgstr "Hata:"
 
+#: R/survivalPower.b.R
 #: R/chisqposttest.b.R
 msgid "ERROR:"
-msgstr ""
+msgstr "HATA:"
 
 #: R/sequentialtests.b.R
 msgid "ERROR: "
@@ -86753,6 +86757,7 @@ msgstr "Log-Rank (standart, rho=0)"
 msgid "Log-rank statistic"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: advancedtrials/options/statistical_test/log_rank.title
 #: pheval/options/test_logrank.title
 #: pheval/ui[2][0]/test_logrank.label
@@ -86760,7 +86765,7 @@ msgstr ""
 #: simpleSurvivalPower/options/test_type/log_rank.title
 #: survivalPower/options/test_type/log_rank.title
 msgid "Log-rank Test"
-msgstr ""
+msgstr "Log-rank Testi"
 
 #: mediansurvival/options/test_method/logrank.title
 msgid "Log-rank test"
@@ -102647,11 +102652,12 @@ msgstr ""
 msgid "Non-Inferiority Margin"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: comprehensiveSurvivalPower/options/non_inferiority_margin.title
 #: simpleSurvivalPower/options/ni_margin.title
 #: survivalPower/options/ni_margin.title
 msgid "Non-inferiority Margin"
-msgstr ""
+msgstr "Aşağı Olmama Sınırı"
 
 #: comprehensiveSurvivalPower/options/non_inferiority_margin.description
 msgid ""
@@ -102663,11 +102669,12 @@ msgstr ""
 msgid "Non-Inferiority Trial"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: comprehensiveSurvivalPower/options/statistical_method/non_inferiority.title
 #: simpleSurvivalPower/options/test_type/non_inferiority.title
 #: survivalPower/options/test_type/non_inferiority.title
 msgid "Non-inferiority Trial"
-msgstr ""
+msgstr "Aşağı Olmama Çalışması"
 
 #: simpleSurvivalPower/options/clinical_preset/non_inferiority.title
 #: survivalPower/options/clinical_preset/non_inferiority.title
@@ -129255,10 +129262,11 @@ msgstr ""
 "yüksek, TO &lt; 1 daha düşük bir model tehlikesini gösterir. Tek başına "
 "kümülatif risk oranı veya nedensel etki değildir."
 
+#: R/survivalPower.b.R
 #: simpleSurvivalPower/options/ni_type/relative_margin.title
 #: survivalPower/options/ni_type/relative_margin.title
 msgid "Relative Margin"
-msgstr ""
+msgstr "Göreli Sınır"
 
 #: netreclassification/options/relative_nri.title
 msgid "Relative NRI"
@@ -131126,9 +131134,10 @@ msgstr ""
 msgid "Retained (%)"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: simpleSurvivalPower/options/ni_type/retention_fraction.title
 msgid "Retention of Effect Fraction"
-msgstr ""
+msgstr "Korunan Etki Oranı"
 
 #: survivalPower/options/ni_type/retention_fraction.title
 msgid "Retention of Effect Fraction (not available yet)"
@@ -132164,11 +132173,12 @@ msgstr ""
 msgid "RMST and Non-inferiority Parameters"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: advancedtrials/options/statistical_test/rmst_test.title
 #: comprehensiveSurvivalPower/options/statistical_method/rmst.title
 #: simpleSurvivalPower/options/test_type/rmst_test.title
 msgid "RMST Comparison"
-msgstr ""
+msgstr "RMST Karşılaştırması"
 
 #: survivalPower/options/test_type/rmst_test.title
 msgid "RMST Comparison (not available yet)"
@@ -143787,9 +143797,10 @@ msgstr ""
 msgid "SNP Selection Summary"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: simpleSurvivalPower/options/test_type/snp_survival.title
 msgid "SNP-based Survival"
-msgstr ""
+msgstr "SNP Temelli Sağkalım"
 
 #: comprehensiveSurvivalPower/options/statistical_method/snp_survival_additive.title
 msgid "SNP-based Survival (Additive)"
@@ -149134,6 +149145,7 @@ msgstr "Güçlü uyarı"
 msgid "Strong Warning"
 msgstr "Güçlü Uyarı"
 
+#: R/survivalPower.b.R
 #: R/pathsampling.b.R
 msgid "STRONG WARNING:"
 msgstr "GÜÇLÜ UYARI:"
@@ -174374,9 +174386,10 @@ msgstr ""
 msgid "Warning:"
 msgstr "Uyarı:"
 
+#: R/survivalPower.b.R
 #: R/chisqposttest.b.R
 msgid "WARNING:"
-msgstr ""
+msgstr "UYARI:"
 
 #: R/sequentialtests.b.R
 msgid "WARNING: "
@@ -175083,11 +175096,12 @@ msgstr ""
 msgid "Weighted likelihood"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: comprehensiveSurvivalPower/options/statistical_method/weighted_logrank.title
 #: progressionsurvival/options/comparison_test/weighted_logrank.title
 #: simpleSurvivalPower/options/test_type/weighted_log_rank.title
 msgid "Weighted Log-rank"
-msgstr ""
+msgstr "Ağırlıklı Log-rank"
 
 #: survivalPower/options/test_type/weighted_log_rank.title
 msgid "Weighted Log-rank (not available yet)"
@@ -178216,3 +178230,164 @@ msgstr "Bu eğilim betimseldir. Öğrenme veya yorgunluğu, sıra boyunca olgu b
 #: pathagreement
 msgid "<li><strong>Missing data:</strong> Overall multi-rater analyses use jointly complete rows; pairwise Cohen analyses use cases observed for each pair, and Krippendorff's alpha uses cases with at least two observed ratings</li>"
 msgstr "<li><strong>Eksik veri:</strong> Genel çok değerlendiricili analizler birlikte eksiksiz satırları kullanır; ikili Cohen analizleri her çift için gözlenen olguları, Krippendorff alfa ise en az iki gözlenen puanı olan olguları kullanır</li>"
+
+
+#: R/survivalPower.b.R
+msgid "This is an individual-level survival calculation inflated by 1 + (cluster size - 1) times ICC, not a validated cluster survival design. Planned allocation: {control} control and {treatment} treatment clusters of {size} subjects. Confirm the design with a cluster-specific method."
+msgstr "Bu hesaplama, birey düzeyindeki sağkalım örneklemini 1 + (küme büyüklüğü - 1) çarpı ICC ile artırır; doğrulanmış bir küme sağkalım tasarımı değildir. Planlanan dağılım: her biri {size} kişilik {control} kontrol ve {treatment} tedavi kümesi. Tasarımı kümelere özgü bir yöntemle doğrulayın."
+
+#: R/survivalPower.b.R
+msgid "Per-comparison sequential power is reported. Total study power requires a validated joint arm-and-look calculation and is not estimated here."
+msgstr "Karşılaştırma başına ardışık güç raporlanır. Çalışmanın genel gücü, kolları ve ara analizleri birlikte ele alan doğrulanmış bir hesaplama gerektirir ve burada tahmin edilmez."
+
+#: R/survivalPower.b.R
+msgid "{alpha}% significance level (one-sided)"
+msgstr "%{alpha} anlamlılık düzeyi (tek yönlü)"
+
+#: R/survivalPower.b.R
+msgid "A {test} power analysis for {n} subjects gives a maximum true HR of {hr} meeting the non-inferiority power target, with {accrual} months of accrual and {followup} months of additional follow-up."
+msgstr "{n} kişi için {test} güç analizi, {accrual} aylık katılımcı alımı ve {followup} aylık ek takip ile aşağı olmama güç hedefini karşılayan en yüksek gerçek HR değerini {hr} olarak vermektedir."
+
+#: R/survivalPower.b.R
+msgid "A {test} power analysis for {n} subjects gives {power}% calculated power, with {accrual} months of accrual and {followup} months of additional follow-up."
+msgstr "{n} kişi için {test} güç analizi, {accrual} aylık katılımcı alımı ve {followup} aylık ek takip ile %{power} hesaplanan güç vermektedir."
+
+#: R/survivalPower.b.R
+msgid "At HR 1 there is no superiority effect; a matching superiority event requirement is not defined."
+msgstr "HR 1 olduğunda üstünlük etkisi yoktur; eşleşen üstünlük karşılaştırması için gerekli olay sayısı tanımlı değildir."
+
+#: R/survivalPower.b.R
+msgid "Sensitivity analysis is available for sample-size and power calculations. Select one of those modes to evaluate numerical scenarios."
+msgstr "Duyarlılık analizi örneklem büyüklüğü ve güç hesaplamalarında kullanılabilir. Sayısal senaryoları değerlendirmek için bu modlardan birini seçin."
+
+#: R/survivalPower.b.R
+msgid "A {test} power analysis indicates that {n} subjects are required, with {accrual} months of accrual and {followup} months of additional follow-up."
+msgstr "{test} güç analizi, {accrual} aylık katılımcı alımı ve {followup} aylık ek takip ile {n} kişi gerektiğini göstermektedir."
+
+#: R/survivalPower.b.R
+msgid "For non-inferiority conclusion"
+msgstr "Aşağı olmama sonucuna varmak için"
+
+#: R/survivalPower.b.R
+msgid "{n} subjects"
+msgstr "{n} kişi"
+
+#: R/survivalPower.b.R
+msgid "The design aims to detect a hazard ratio of {hr} with {n} subjects and {power}% power at a {alpha}% significance level (two-sided)."
+msgstr "Tasarım, {n} kişide %{power} güç ve %{alpha} anlamlılık düzeyinde (iki yönlü), {hr} hazard oranını saptamayı amaçlar."
+
+#: R/survivalPower.b.R
+msgid "True Hazard Ratio"
+msgstr "Gerçek Hazard Oranı"
+
+#: R/survivalPower.b.R
+msgid "Sample Size Requirement"
+msgstr "Gerekli Örneklem Büyüklüğü"
+
+#: R/survivalPower.b.R
+msgid "Few Expected Events"
+msgstr "Az Sayıda Beklenen Olay"
+
+#: R/survivalPower.b.R
+msgid "Statistical threshold"
+msgstr "İstatistiksel eşik"
+
+#: R/survivalPower.b.R
+msgid "Expected effect"
+msgstr "Beklenen etki"
+
+#: R/survivalPower.b.R
+msgid "Few Independent Clusters"
+msgstr "Az Sayıda Bağımsız Küme"
+
+#: R/survivalPower.b.R
+msgid "Control arm: {control} subjects, shared by {comparisons} comparisons; {experimental} per experimental arm. Power is per comparison at the adjusted alpha. For fixed designs, total study power is a joint normal approximation to the probability that at least one comparison rejects when every experimental arm has HR {hr}. Superiority uses both rejection tails; non-inferiority uses one tail. Shared-control correlation uses allocation proportions for Schoenfeld tests and expected-event variances for Cox. This family estimate is unavailable for sequential designs."
+msgstr "Kontrol kolu: {comparisons} karşılaştırmada paylaşılan {control} kişi; her deneysel kolda {experimental} kişi. Güç, düzeltilmiş alfa düzeyinde karşılaştırma başına verilir. Sabit tasarımlarda çalışmanın genel gücü, her deneysel kolda HR {hr} iken en az bir karşılaştırmanın sıfır hipotezini reddetme olasılığının ortak normal dağılım yaklaşımıdır. Üstünlük testinde iki ret kuyruğu, aşağı olmama testinde tek kuyruk kullanılır. Ortak kontrol korelasyonu, Schoenfeld testlerinde dağılım oranlarına, Cox yönteminde beklenen olay varyanslarına dayanır. Bu genel güç tahmini ardışık tasarımlar için kullanılamaz."
+
+#: R/survivalPower.b.R
+msgid "Fewer than 10 clusters per arm are planned; the simple design-effect approximation does not account for small-cluster degrees of freedom. Obtain a cluster-specific power calculation."
+msgstr "Her kolda 10 kümeden az planlanıyor; basit tasarım etkisi yaklaşımı az sayıdaki kümenin serbestlik derecesini dikkate almaz. Kümelere özgü bir güç hesabı yapın."
+
+#: R/survivalPower.b.R
+msgid "One-sided Alpha"
+msgstr "Tek Yönlü Alfa"
+
+#: R/survivalPower.b.R
+msgid "The margin requires disease-specific justification from historical evidence and clinical relevance."
+msgstr "Sınır, geçmiş kanıtlara ve klinik öneme dayanan, hastalığa özgü bir gerekçe gerektirir."
+
+#: R/survivalPower.b.R
+msgid "Low Calculated Power"
+msgstr "Düşük Hesaplanan Güç"
+
+#: R/survivalPower.b.R
+msgid "Calculated power is {power}%; consider a larger sample or longer follow-up to reach the planning target."
+msgstr "Hesaplanan güç %{power}; planlama hedefine ulaşmak için daha büyük bir örneklem veya daha uzun takip süresi düşünün."
+
+#: R/survivalPower.b.R
+msgid "Limited Expected Events"
+msgstr "Sınırlı Sayıda Beklenen Olay"
+
+#: R/survivalPower.b.R
+msgid "Total enrollment"
+msgstr "Toplam katılımcı alımı"
+
+#: R/survivalPower.b.R
+msgid "The comparison has {events} expected effective events; check the accuracy of the asymptotic approximation."
+msgstr "Karşılaştırmada {events} etkin olay bekleniyor; asimptotik yaklaşımın doğruluğunu kontrol edin."
+
+#: R/survivalPower.b.R
+msgid "The joint normal integration did not meet its accuracy requirement. Per-comparison results remain available."
+msgstr "Ortak normal dağılım integrali gerekli doğruluğa ulaşmadı. Karşılaştırma başına sonuçlar kullanılabilir durumdadır."
+
+#: R/survivalPower.b.R
+msgid "A {test} power analysis for {n} subjects requires {duration} months in total: {accrual} months of accrual and {followup} months of additional follow-up."
+msgstr "{n} kişi için {test} güç analizi, {accrual} aylık katılımcı alımı ve {followup} aylık ek takip olmak üzere toplam {duration} ay gerektirir."
+
+#: R/survivalPower.b.R
+msgid "Requires {percent}% of the events a superiority trial at HR {hr} would need"
+msgstr "HR {hr} için bir üstünlük çalışmasında gerekli olay sayısının %{percent} kadarı gerekir"
+
+#: R/survivalPower.b.R
+msgid "Cluster Design Approximation"
+msgstr "Küme Tasarımı Yaklaşımı"
+
+#: R/survivalPower.b.R
+msgid "Multi-arm Family Power Unavailable"
+msgstr "Çok Kollu Tasarım İçin Genel Güç Hesaplanamıyor"
+
+#: R/survivalPower.b.R
+msgid "{alpha}% significance level (two-sided)"
+msgstr "%{alpha} anlamlılık düzeyi (iki yönlü)"
+
+#: R/survivalPower.b.R
+msgid "A matching superiority comparison cannot be estimated for these assumptions."
+msgstr "Bu varsayımlar için eşleşen bir üstünlük karşılaştırması tahmin edilemez."
+
+#: R/survivalPower.b.R
+msgid "Sensitivity Analysis Not Applicable"
+msgstr "Duyarlılık Analizi Uygulanamaz"
+
+#: R/survivalPower.b.R
+msgid "The design targets {power}% power to exclude the NI margin at this assumed HR."
+msgstr "Tasarım, varsayılan bu HR için aşağı olmama sınırını dışlamak üzere %{power} gücü hedefler."
+
+#: R/survivalPower.b.R
+msgid "The design aims to rule out a hazard ratio of {margin} or worse, assuming a true hazard ratio of {hr}, with {n} subjects and {power}% power at a {alpha}% significance level (one-sided)."
+msgstr "Tasarım, gerçek hazard oranının {hr} olduğu varsayımıyla, {n} kişide %{power} güç ve %{alpha} anlamlılık düzeyinde (tek yönlü), {margin} veya daha kötü bir hazard oranını dışlamayı amaçlar."
+
+#: R/survivalPower.b.R
+msgid "Only {events} comparison-effective events are expected; asymptotic power can be unreliable with sparse events. Confirm the design using an appropriate simulation."
+msgstr "Karşılaştırma için yalnızca {events} etkin olay bekleniyor; olay sayısı az olduğunda asimptotik güç güvenilir olmayabilir. Tasarımı uygun bir simülasyonla doğrulayın."
+
+#: R/survivalPower.b.R
+msgid "Sequential Multi-arm Family Power Not Available"
+msgstr "Ardışık Çok Kollu Tasarım İçin Genel Güç Hesaplanamıyor"
+
+#: R/survivalPower.b.R
+msgid "A {test} power analysis for {n} subjects gives a detectable HR of {hr}, with {accrual} months of accrual and {followup} months of additional follow-up."
+msgstr "{n} kişi için {test} güç analizi, {accrual} aylık katılımcı alımı ve {followup} aylık ek takip ile saptanabilir HR değerini {hr} olarak vermektedir."
+
+#: R/survivalPower.b.R
+msgid "The assumed HR is below the NI margin; calculated power is {power}%."
+msgstr "Varsayılan HR, aşağı olmama sınırının altındadır; hesaplanan güç %{power}."

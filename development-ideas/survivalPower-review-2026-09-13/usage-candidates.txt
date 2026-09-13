@@ -1,0 +1,3 @@
+.populate_regulatory_considerations: local variable ‘hr’ assigned but may not be used
+.generate_natural_language_summary: local variable ‘analysis_type’ assigned but may not be used
+.generate_natural_language_summary: local variable ‘power’ assigned but may not be used

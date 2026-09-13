@@ -45,9 +45,11 @@ survivalPower(
 )
 }
 \arguments{
-\item{clinical_preset}{Pre-configured parameter sets for common clinical
-trial designs. Selecting a preset will automatically populate appropriate
-values.}
+\item{clinical_preset}{UI-only worked examples for common clinical trial
+designs. In jamovi, selecting a preset fills the controls. R calls use the
+explicit numeric arguments unchanged; setting clinical_preset alone does
+not apply a preset. The displayed values are illustrative, not literature
+estimates.}
 
 \item{analysis_type}{Type of power analysis to perform}
 
@@ -62,7 +64,10 @@ values.}
 \item{effect_size}{Expected effect size, interpreted according to Effect
 Size Type: a hazard ratio, a median survival ratio (treatment/control), or
 a survival probability difference read at the Additional Follow-up time.
-For RMST Difference the RMST options are used instead.}
+For RMST Difference the RMST options are used instead. Supported HRs are
+0.1 to 5 and median ratios are 0.2 to 10. Survival probability differences
+are signed proportions (0.05 means five percentage points) and must imply a
+valid probability and supported HR at the stated time.}
 
 \item{alpha_level}{Significance level (two-sided for superiority, one-sided
 for non-inferiority)}
@@ -108,7 +113,10 @@ rather than returning a number the formulas cannot justify.}
 
 \item{alpha_spending}{Alpha spending function for interim analyses}
 
-\item{cluster_size}{Average cluster size for cluster randomized trials}
+\item{cluster_size}{Equal number of subjects per cluster (whole number).
+Sample-size calculations round enrollment up to complete clusters in both
+arms. The design-effect inflation is approximate and does not model unequal
+cluster sizes or small-cluster degrees of freedom.}
 
 \item{icc}{ICC for cluster randomized trials}
 

@@ -96,14 +96,14 @@ test_that("total study power is a probability, not an invented multiplier", {
     for (p in c(0.5, 0.8)) {
         for (k in c(2, 4)) {
             for (rho in c(0, 0.5)) {
-                analytic <- h$.disjunctive_power(p, 0.025, k, rho)
                 z <- qnorm(1 - 0.025 / 2)
                 ncp <- z + qnorm(p)
+                analytic <- h$.disjunctive_power(ncp, z, k, rho)
                 sigma <- matrix(rho, k, k)
                 diag(sigma) <- 1
                 chol_s <- chol(sigma)
                 simulated <- mean(replicate(
-                    40000, any(ncp + as.vector(rnorm(k) %*% chol_s) > z)
+                    40000, any(abs(ncp + as.vector(rnorm(k) %*% chol_s)) > z)
                 ))
                 expect_equal(analytic, simulated, tolerance = 0.01,
                     info = sprintf("p=%.1f k=%d rho=%.1f", p, k, rho))
@@ -112,8 +112,8 @@ test_that("total study power is a probability, not an invented multiplier", {
     }
 
     # A correlated set must not beat the independent one.
-    expect_lt(h$.disjunctive_power(0.8, 0.025, 3, 0.5),
-              h$.disjunctive_power(0.8, 0.025, 3, 0.0))
+    expect_lt(h$.disjunctive_power(3, qnorm(0.975), 3, 0.5),
+              h$.disjunctive_power(3, qnorm(0.975), 3, 0.0))
 })
 
 
@@ -161,6 +161,9 @@ test_that("regulatory guidance matches the convention for the test being run", {
     ni_tbl <- ni$results$non_inferiority_table$asDF
     claim <- ni_tbl$clinical_interpretation[ni_tbl$parameter == "Sample Size Requirement"]
     expect_false(grepl("20-50%", claim, fixed = TRUE))
+    expect_match(claim, "At HR 1 there is no superiority effect", fixed = TRUE)
+    alternative <- sp(test_type = "non_inferiority", effect_size = 0.75)
+    claim <- alternative$results$non_inferiority_table$asDF$clinical_interpretation[2]
     expect_match(claim, "^Requires [0-9]+% of the events")
 })
 
@@ -244,8 +247,7 @@ test_that("Cox honours the same design adjustments as log-rank", {
 
     cox_cluster <- sp(test_type = "cox_regression", study_design = "cluster_randomized",
                       cluster_size = 50, icc = 0.05)
-    expect_equal(sp_n(cox_cluster), ceiling(sp_n(cox_plain) * (1 + 49 * 0.05)),
-                 tolerance = 2)
+    expect_equal(sp_n(cox_cluster), 100 * ceiling(sp_n(cox_plain) * (1 + 49 * 0.05) / 100))
 })
 
 
@@ -327,7 +329,9 @@ test_that("the Monte Carlo loop is interruptible and a restart is not swallowed"
         NULL
     }
     expect_false(is.null(q$.run_simulation_analysis()))
-    expect_equal(seen, 1000L %/% 50L)
+    # Analytical work also checkpoints; simulation must still yield at least
+    # once per 50 replicates.
+    expect_gte(seen, 1000L %/% 50L)
 })
 
 

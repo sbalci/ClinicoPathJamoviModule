@@ -33,7 +33,7 @@ completeWhenFilled: false
 options:
     # Clinical Presets
     - name: clinical_preset
-      title: Clinical Study Preset
+      title: Clinical study preset (jamovi UI only)
       type: List
       options:
         - title: "Custom Design"
@@ -51,12 +51,14 @@ options:
       default: custom
       description:
         R: >
-          Pre-configured parameter sets for common clinical trial designs.
-          Selecting a preset will automatically populate appropriate values.
+          UI-only worked examples for common clinical trial designs. In jamovi,
+          selecting a preset fills the controls. R calls use the explicit numeric
+          arguments unchanged; setting clinical_preset alone does not apply a
+          preset. The displayed values are illustrative, not literature estimates.
 
     # Analysis Type
     - name: analysis_type
-      title: Analysis Type
+      title: Analysis type
       type: List
       options:
           - name: "sample_size"
@@ -72,7 +74,7 @@ options:
           R: Type of power analysis to perform
 
     - name: test_type
-      title: Statistical Test
+      title: Statistical test
       type: List
       options:
           - name: "log_rank"
@@ -95,7 +97,7 @@ options:
 
     # Study Design Parameters
     - name: study_design
-      title: Study Design
+      title: Study design
       type: List
       options:
           - name: "two_arm_parallel"
@@ -113,7 +115,7 @@ options:
           R: Overall study design type
 
     - name: primary_endpoint
-      title: Primary Endpoint
+      title: Primary endpoint
       type: List
       options:
           - name: "overall_survival"
@@ -132,7 +134,7 @@ options:
 
     # Statistical Parameters
     - name: effect_size_type
-      title: Effect Size Type
+      title: Effect size type
       type: List
       options:
           - name: "hazard_ratio"
@@ -148,20 +150,25 @@ options:
           R: Type of effect size specification
 
     - name: effect_size
-      title: Effect Size
+      title: Effect size
       type: Number
       default: 0.75
-      min: 0.1
-      max: 5.0
+      min: -1.0
+      max: 10.0
       description:
           R: >
             Expected effect size, interpreted according to Effect Size Type: a
             hazard ratio, a median survival ratio (treatment/control), or a
             survival probability difference read at the Additional Follow-up
-            time. For RMST Difference the RMST options are used instead.
+            time. For RMST Difference the RMST options are used instead. Supported HRs are
+            0.1 to 5 and median ratios are 0.2 to 10. Survival probability
+            differences are signed proportions (0.05 means five percentage points)
+            and must imply a valid probability and supported HR at the stated time.
+            In non-inferiority effect-size mode, the HR is solved from the design;
+            the effect-size input and its type are not used.
 
     - name: alpha_level
-      title: Type I Error Rate (Alpha)
+      title: Type I error rate (alpha)
       type: Number
       default: 0.05
       min: 0.001
@@ -170,7 +177,7 @@ options:
           R: Significance level (two-sided for superiority, one-sided for non-inferiority)
 
     - name: power_level
-      title: Power (1-Beta)
+      title: Power (1-beta)
       type: Number
       default: 0.80
       min: 0.50
@@ -179,7 +186,7 @@ options:
           R: Desired statistical power
 
     - name: allocation_ratio
-      title: Allocation Ratio (Control:Experimental)
+      title: Allocation ratio (control:experimental)
       type: Number
       default: 1.0
       min: 0.1
@@ -188,7 +195,7 @@ options:
           R: Ratio of control to experimental group sizes
 
     - name: sample_size_input
-      title: Total Sample Size (for Power/Effect/Duration Calculations)
+      title: Total sample size (for power/effect/duration calculations)
       type: Integer
       default: 200
       min: 10
@@ -198,7 +205,7 @@ options:
 
     # Survival Distribution Parameters
     - name: control_median_survival
-      title: Control Group Median Survival (months)
+      title: Control group median survival (months)
       type: Number
       default: 12.0
       min: 1.0
@@ -207,7 +214,7 @@ options:
           R: Expected median survival in control group
 
     - name: survival_distribution
-      title: Survival Distribution
+      title: Survival distribution
       type: List
       options:
           - name: "exponential"
@@ -228,7 +235,7 @@ options:
             number the formulas cannot justify.
 
     - name: weibull_shape
-      title: Weibull Shape Parameter
+      title: Weibull shape parameter
       type: Number
       default: 1.0
       min: 0.1
@@ -238,7 +245,7 @@ options:
 
     # Study Timeline Parameters
     - name: accrual_period
-      title: Accrual Period (months)
+      title: Accrual period (months)
       type: Number
       default: 24.0
       min: 1.0
@@ -247,7 +254,7 @@ options:
           R: Patient recruitment period
 
     - name: follow_up_period
-      title: Additional Follow-up (months)
+      title: Additional follow-up (months)
       type: Number
       default: 12.0
       min: 0.0
@@ -256,7 +263,7 @@ options:
           R: Additional follow-up after recruitment ends
 
     - name: accrual_pattern
-      title: Accrual Pattern
+      title: Accrual pattern
       type: List
       options:
           - name: "uniform"
@@ -272,7 +279,7 @@ options:
           R: Pattern of patient accrual over time
 
     - name: dropout_rate
-      title: Annual Dropout Rate
+      title: Annual dropout rate
       type: Number
       default: 0.05
       min: 0.0
@@ -282,16 +289,16 @@ options:
 
     # Non-inferiority Specific
     - name: ni_margin
-      title: Non-inferiority Margin
+      title: Non-inferiority margin
       type: Number
       default: 1.25
       min: 1.0
       max: 2.0
       description:
-          R: Non-inferiority margin (hazard ratio scale)
+          R: Non-inferiority margin on the hazard-ratio scale. Justify the margin from disease-specific historical evidence and clinical relevance.
 
     - name: ni_type
-      title: Non-inferiority Type
+      title: Non-inferiority type
       type: List
       options:
           - name: "absolute_margin"
@@ -306,7 +313,7 @@ options:
 
     # RMST Parameters
     - name: rmst_tau
-      title: RMST Restriction Time (months)
+      title: RMST restriction time (months)
       type: Number
       default: 36.0
       min: 6.0
@@ -315,17 +322,17 @@ options:
           R: Restriction time for RMST analysis
 
     - name: rmst_difference
-      title: Expected RMST Difference (months)
+      title: Expected RMST difference (months)
       type: Number
       default: 3.0
-      min: 0.1
-      max: 60.0
+      min: -120.0
+      max: 120.0
       description:
           R: Expected difference in restricted mean survival time
 
     # Multi-arm Parameters
     - name: number_of_arms
-      title: Number of Treatment Arms
+      title: Number of treatment arms
       type: Integer
       default: 3
       min: 2
@@ -334,7 +341,7 @@ options:
           R: Total number of treatment arms (including control)
 
     - name: multiple_comparisons
-      title: Multiple Comparisons Adjustment
+      title: Multiple comparisons adjustment
       type: List
       options:
           - name: "none"
@@ -351,7 +358,7 @@ options:
 
     # Advanced Options
     - name: interim_analyses
-      title: Number of Interim Analyses
+      title: Number of interim analyses
       type: Integer
       default: 0
       min: 0
@@ -360,7 +367,7 @@ options:
           R: Number of planned interim analyses
 
     - name: alpha_spending
-      title: Alpha Spending Function
+      title: Alpha spending function
       type: List
       options:
           - name: "none"
@@ -374,16 +381,20 @@ options:
           R: Alpha spending function for interim analyses
 
     - name: cluster_size
-      title: Average Cluster Size
+      title: Subjects per cluster
       type: Number
       default: 50
       min: 5
       max: 1000
       description:
-          R: Average cluster size for cluster randomized trials
+          R: >
+            Equal number of subjects per cluster (whole number). Sample-size
+            calculations round enrollment up to complete clusters in both arms.
+            The design-effect inflation is approximate and does not model
+            unequal cluster sizes or small-cluster degrees of freedom.
 
     - name: icc
-      title: Intracluster Correlation Coefficient
+      title: Intracluster correlation coefficient
       type: Number
       default: 0.05
       min: 0.0
@@ -412,7 +423,7 @@ options:
             About 6 seconds at the default 2000 runs.
 
     - name: simulation_runs
-      title: Simulation Runs
+      title: Simulation runs
       type: Integer
       default: 2000
       min: 1000
@@ -423,7 +434,7 @@ options:
             standard error below 0.01 for power near 0.8.
 
     - name: simulation_seed
-      title: Simulation Seed
+      title: Simulation seed
       type: Integer
       default: 42
       description:

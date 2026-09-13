@@ -1,0 +1,118 @@
+[
+  {
+    "n": 10,
+    "power": 0.04800156151897,
+    "ni_table": [
+      {
+        "parameter": "Non-inferiority Margin",
+        "value": "1.250",
+        "margin_type": "Relative Margin",
+        "clinical_interpretation": "The margin requires disease-specific justification from historical evidence and clinical relevance.",
+        "_row": "\"margin\""
+      },
+      {
+        "parameter": "Sample Size Requirement",
+        "value": "10 subjects",
+        "margin_type": "Total enrollment",
+        "clinical_interpretation": "At HR 1 there is no superiority effect; a matching superiority event requirement is not defined.",
+        "_row": "\"n\""
+      },
+      {
+        "parameter": "One-sided Alpha",
+        "value": "0.0250",
+        "margin_type": "Statistical threshold",
+        "clinical_interpretation": "For non-inferiority conclusion",
+        "_row": "\"alpha\""
+      },
+      {
+        "parameter": "True Hazard Ratio",
+        "value": "1.000",
+        "margin_type": "Expected effect",
+        "clinical_interpretation": "The assumed HR is below the NI margin; calculated power is 4.8%.",
+        "_row": "\"hr\""
+      }
+    ],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "One-sided alpha = 0.025 conventional for non-inferiority",
+        "compliance_status": "Standard",
+        "recommendation": "Matches the usual non-inferiority convention",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Calculated power relative to an 80% planning benchmark",
+        "compliance_status": "Insufficient",
+        "recommendation": "Consider a design with at least 80% power; justify the chosen target in the protocol",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Clinical justification required",
+        "recommendation": "Justify the assumed effect using disease-specific evidence and absolute survival differences; an HR alone cannot establish clinical relevance",
+        "_row": "\"effect\""
+      }
+    ],
+    "notices": "STRONG WARNING: Few Expected Events\nOnly 7.01 comparison-effective events are expected; asymptotic power can be unreliable with sparse events. Confirm the design using an appropriate simulation.\n\nWARNING: Low Calculated Power\nCalculated power is 4.8%; consider a larger sample or longer follow-up to reach the planning target.\n\nOne-sided Alpha for Non-inferiority\nNon-inferiority is tested one-sided at alpha = 0.025 • Regulatory submissions conventionally use one-sided 0.025 (enter 0.025 here)\n\nAnalysis Complete\nPower analysis completed: Non-inferiority Trial with overall survival endpoint • Assumes exponential survival and uniform accrual"
+  },
+  {
+    "n": 200,
+    "power": 0.2614700030223,
+    "ni_table": [
+      {
+        "parameter": "Non-inferiority Margin",
+        "value": "1.250",
+        "margin_type": "Relative Margin",
+        "clinical_interpretation": "The margin requires disease-specific justification from historical evidence and clinical relevance.",
+        "_row": "\"margin\""
+      },
+      {
+        "parameter": "Sample Size Requirement",
+        "value": "200 subjects",
+        "margin_type": "Total enrollment",
+        "clinical_interpretation": "At HR 1 there is no superiority effect; a matching superiority event requirement is not defined.",
+        "_row": "\"n\""
+      },
+      {
+        "parameter": "One-sided Alpha",
+        "value": "0.0250",
+        "margin_type": "Statistical threshold",
+        "clinical_interpretation": "For non-inferiority conclusion",
+        "_row": "\"alpha\""
+      },
+      {
+        "parameter": "True Hazard Ratio",
+        "value": "1.000",
+        "margin_type": "Expected effect",
+        "clinical_interpretation": "The assumed HR is below the NI margin; calculated power is 26.1%.",
+        "_row": "\"hr\""
+      }
+    ],
+    "regulatory": [
+      {
+        "regulatory_aspect": "Significance Level",
+        "requirement": "One-sided alpha = 0.025 conventional for non-inferiority",
+        "compliance_status": "Standard",
+        "recommendation": "Matches the usual non-inferiority convention",
+        "_row": "\"alpha\""
+      },
+      {
+        "regulatory_aspect": "Statistical Power",
+        "requirement": "Calculated power relative to an 80% planning benchmark",
+        "compliance_status": "Insufficient",
+        "recommendation": "Consider a design with at least 80% power; justify the chosen target in the protocol",
+        "_row": "\"power\""
+      },
+      {
+        "regulatory_aspect": "Effect Size",
+        "requirement": "Clinically meaningful and realistic effect size",
+        "compliance_status": "Clinical justification required",
+        "recommendation": "Justify the assumed effect using disease-specific evidence and absolute survival differences; an HR alone cannot establish clinical relevance",
+        "_row": "\"effect\""
+      }
+    ],
+    "notices": "WARNING: Low Calculated Power\nCalculated power is 26.1%; consider a larger sample or longer follow-up to reach the planning target.\n\nOne-sided Alpha for Non-inferiority\nNon-inferiority is tested one-sided at alpha = 0.025 • Regulatory submissions conventionally use one-sided 0.025 (enter 0.025 here)\n\nAnalysis Complete\nPower analysis completed: Non-inferiority Trial with overall survival endpoint • Assumes exponential survival and uniform accrual"
+  }
+]

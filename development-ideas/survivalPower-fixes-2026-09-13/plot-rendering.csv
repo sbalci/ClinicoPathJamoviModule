@@ -1,0 +1,6 @@
+"output","valid_state","null_state"
+"power_curve_plot",TRUE,FALSE
+"sample_size_plot",TRUE,FALSE
+"survival_curves_plot",TRUE,FALSE
+"accrual_timeline_plot",TRUE,FALSE
+"sensitivity_plot",TRUE,FALSE

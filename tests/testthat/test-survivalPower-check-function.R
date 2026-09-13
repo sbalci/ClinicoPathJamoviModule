@@ -35,9 +35,15 @@ test_that("shared control power uses the correlation of the treatment contrasts"
                 allocation_ratio = 2, multiple_comparisons = "bonferroni")
   table <- a$results$multi_arm_table$asDF
   # Var(C) / Var(E-C) = (1/nC) / (1/nC + 1/nE) = 1 / (1 + ratio).
-  critical_minus_mean <- -qnorm(table$power[1] / 100)
+  p <- a$.__enclos_env__$private
+  comparison_n <- p$primary_numbers$n * 3 / 4
+  events <- p$.expected_events_from_sample(comparison_n, log(2)/12, 0.75,
+                                           2, 24, 12, 0.05)$total
+  mean_z <- abs(log(0.75)) * sqrt(events * 2 / 9)
+  z <- qnorm(1 - 0.025 / 2)
   expected <- 1 - as.numeric(mvtnorm::pmvnorm(
-    upper = rep(critical_minus_mean, 2), corr = matrix(c(1, 1/3, 1/3, 1), 2)
+    lower = rep(-z, 2), upper = rep(z, 2), mean = rep(mean_z, 2),
+    corr = matrix(c(1, 1/3, 1/3, 1), 2), algorithm = mvtnorm::Miwa(steps = 128)
   ))
   expect_equal(table$total_study_power, rep(round(expected * 100, 1), 2), tolerance = 0.1)
 })

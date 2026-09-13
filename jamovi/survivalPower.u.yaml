@@ -13,7 +13,7 @@ children:
         children:
           - type: ComboBox
             name: clinical_preset
-            label: "Clinical Study Preset (Quick Setup)"
+            label: "Clinical study preset (worked example)"
             events:
               change: ./survivalPower.events::onChange_clinicalPreset
           - type: ComboBox
@@ -36,21 +36,24 @@ children:
         children:
           - type: ComboBox
             name: effect_size_type
+            enable: (test_type != "non_inferiority" || analysis_type != "effect_size")
           - type: TextBox
             name: effect_size
             format: number
             suffix: "(interpreted per Effect Size Type)"
-            label: "Effect Size"
+            label: "Effect size"
+            enable: (effect_size_type != "rmst_difference" && (test_type != "non_inferiority" || analysis_type != "effect_size"))
           - type: TextBox
             name: alpha_level
             format: number
             suffix: "(typically 0.05)"
-            label: "Significance Level (Alpha)"
+            label: "Significance level (alpha)"
           - type: TextBox
             name: power_level
             format: number
             suffix: "(typically 0.80)"
-            label: "Statistical Power (1-Beta)"
+            label: "Target power (1-beta)"
+            enable: (analysis_type != "power")
           - type: TextBox
             name: allocation_ratio
             format: number
@@ -119,11 +122,11 @@ children:
           - type: TextBox
             name: rmst_tau
             format: number
-            enable: (test_type:rmst_test || effect_size_type:rmst_difference)
+            enable: ((test_type:rmst_test || effect_size_type:rmst_difference) && (test_type != "non_inferiority" || analysis_type != "effect_size"))
           - type: TextBox
             name: rmst_difference
             format: number
-            enable: (test_type:rmst_test || effect_size_type:rmst_difference)
+            enable: ((test_type:rmst_test || effect_size_type:rmst_difference) && (test_type != "non_inferiority" || analysis_type != "effect_size"))
 
   - type: CollapseBox
     label: Advanced Options
@@ -156,6 +159,7 @@ children:
           - type: CheckBox
             name: sensitivity_analysis
             label: "Sensitivity analysis"
+            enable: (analysis_type == "sample_size" || analysis_type == "power")
           - type: CheckBox
             name: run_simulation_validation
             label: "Simulation validation"

@@ -67,19 +67,16 @@ test_that("interim analyses reach gsDesign and inflate the sample size", {
     pat <- ".*Total Sample Size: ([0-9]+).*"
     expect_gt(sp_number(seqd, pat), sp_number(fixed, pat))
 
-    # gsDesign is the ground truth for both: an efficacy-only design (test.type = 1).
-    # gsSurv's default test.type = 4 adds a non-binding futility bound the options
-    # never expose; this test previously encoded that design (N 618) as the truth.
-    truth <- gsDesign::gsSurv(
-        k = 3, timing = c(1, 2, 3) / 3, sfu = gsDesign::sfLDOF,
-        test.type = 1, alpha = 0.025, sided = 1, beta = 0.20, lambdaC = log(2) / 12,
-        hr = 0.75, eta = -log(1 - 0.05) / 12, ratio = 1,
-        R = 24, T = 36, minfup = 12
-    )
-    expect_equal(
-        sp_number(seqd, pat),
-        ceiling(sum(truth$eNC[3, ]) + sum(truth$eNE[3, ]))
-    )
+    # The integer enrollment must meet the selected achieved-power calculation;
+    # gsSurv's sizing call alone can be a participant short of that target.
+    n <- sp_number(seqd, pat)
+    power_at <- function(n) {
+        a <- sp_run(test_type = "cox_regression", analysis_type = "power",
+            interim_analyses = 2, alpha_spending = "obrien_fleming", sample_size_input = n)
+        a$.__enclos_env__$private$primary_numbers$power
+    }
+    expect_gte(power_at(n), 0.8)
+    expect_lt(power_at(n - 1), 0.8)
 })
 
 
@@ -133,7 +130,7 @@ test_that("interim boundaries and spend come from the design, not hand arithmeti
 })
 
 
-test_that("Cox and log-rank agree on duration and detectable effect", {
+test_that("Cox duration and detectable effect invert the chosen method", {
     # Regression: the Cox branches duplicated solvers that already existed.
     # Duration used lambda * (1 - dropout/12) -- an annual proportion folded
     # into a monthly hazard -- ignored the HR and ignored staggered entry.
@@ -152,8 +149,13 @@ test_that("Cox and log-rank agree on duration and detectable effect", {
 
         expect_false(grepl("Unable to determine", sp_value(cox)),
             info = paste(type, "must produce an answer"))
-        expect_identical(sp_value(lr), sp_value(cox),
-            info = paste(type, "must not depend on log-rank vs Cox"))
+        solved <- cox$.__enclos_env__$private$primary_numbers
+        verify_args <- modifyList(args, list(analysis_type = "power", test_type = "cox_regression"))
+        if (type == "effect_size") verify_args$effect_size <- solved$hr_detectable else
+            verify_args$follow_up_period <- solved$duration - args$accrual_period
+        verified <- do.call(sp_run, verify_args)
+        expect_equal(verified$.__enclos_env__$private$primary_numbers$power, 0.8,
+                     tolerance = 1e-6, info = paste(type, "must invert its own Lachin-Foulkes method"))
     }
 })
 

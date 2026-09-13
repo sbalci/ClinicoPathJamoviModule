@@ -1,0 +1,9 @@
+{
+  "R": "R version 4.6.0 (2026-04-24)",
+  "packages": {
+    "jmvcore": "2.7.38",
+    "gsDesign": "3.11.0",
+    "survival": "3.8.11",
+    "testthat": "3.3.2"
+  }
+}

@@ -10267,6 +10267,7 @@ msgstr ""
 msgid "Absolute Loading"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: simpleSurvivalPower/options/ni_type/absolute_margin.title
 msgid "Absolute Margin"
 msgstr ""
@@ -35231,6 +35232,7 @@ msgstr ""
 msgid "Competing Risk Rate (Group 2)"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: R/outcomeorganizer.b.R
 #: package/analyses/finegray.menuSubgroup
 #: finegray/options.menuSubgroup
@@ -41863,6 +41865,7 @@ msgstr ""
 msgid "Cox refit returned non-finite coefficient estimates."
 msgstr ""
 
+#: R/survivalPower.b.R
 #: R/clinicalscore.b.R
 #: advancedtrials/options/statistical_test/cox_regression.title
 #: clinicalprediction/options/model_type/cox_regression.title
@@ -57270,6 +57273,7 @@ msgstr ""
 msgid "Error:"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: R/chisqposttest.b.R
 msgid "ERROR:"
 msgstr ""
@@ -82984,6 +82988,7 @@ msgstr ""
 msgid "Log-rank statistic"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: advancedtrials/options/statistical_test/log_rank.title
 #: pheval/options/test_logrank.title
 #: pheval/ui[2][0]/test_logrank.label
@@ -98281,6 +98286,7 @@ msgstr ""
 msgid "Non-Inferiority Margin"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: comprehensiveSurvivalPower/options/non_inferiority_margin.title
 #: simpleSurvivalPower/options/ni_margin.title
 #: survivalPower/options/ni_margin.title
@@ -98297,6 +98303,7 @@ msgstr ""
 msgid "Non-Inferiority Trial"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: comprehensiveSurvivalPower/options/statistical_method/non_inferiority.title
 #: simpleSurvivalPower/options/test_type/non_inferiority.title
 #: survivalPower/options/test_type/non_inferiority.title
@@ -123813,6 +123820,7 @@ msgid ""
 "It is not a cumulative-risk ratio or a causal effect by itself."
 msgstr ""
 
+#: R/survivalPower.b.R
 #: simpleSurvivalPower/options/ni_type/relative_margin.title
 #: survivalPower/options/ni_type/relative_margin.title
 msgid "Relative Margin"
@@ -125599,6 +125607,7 @@ msgstr ""
 msgid "Retained (%)"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: simpleSurvivalPower/options/ni_type/retention_fraction.title
 msgid "Retention of Effect Fraction"
 msgstr ""
@@ -126623,6 +126632,7 @@ msgstr ""
 msgid "RMST and Non-inferiority Parameters"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: advancedtrials/options/statistical_test/rmst_test.title
 #: comprehensiveSurvivalPower/options/statistical_method/rmst.title
 #: simpleSurvivalPower/options/test_type/rmst_test.title
@@ -137822,6 +137832,7 @@ msgstr ""
 msgid "SNP Selection Summary"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: simpleSurvivalPower/options/test_type/snp_survival.title
 msgid "SNP-based Survival"
 msgstr ""
@@ -143009,6 +143020,7 @@ msgstr ""
 msgid "Strong Warning"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: R/pathsampling.b.R
 msgid "STRONG WARNING:"
 msgstr "STRONG WARNING:"
@@ -166229,6 +166241,7 @@ msgstr ""
 msgid "Warning:"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: R/chisqposttest.b.R
 msgid "WARNING:"
 msgstr ""
@@ -166904,6 +166917,7 @@ msgstr ""
 msgid "Weighted likelihood"
 msgstr ""
 
+#: R/survivalPower.b.R
 #: comprehensiveSurvivalPower/options/statistical_method/weighted_logrank.title
 #: progressionsurvival/options/comparison_test/weighted_logrank.title
 #: simpleSurvivalPower/options/test_type/weighted_log_rank.title
@@ -169844,4 +169858,165 @@ msgstr ""
 
 #: pathagreement
 msgid "<li><strong>Missing data:</strong> Overall multi-rater analyses use jointly complete rows; pairwise Cohen analyses use cases observed for each pair, and Krippendorff's alpha uses cases with at least two observed ratings</li>"
+msgstr ""
+
+
+#: R/survivalPower.b.R
+msgid "This is an individual-level survival calculation inflated by 1 + (cluster size - 1) times ICC, not a validated cluster survival design. Planned allocation: {control} control and {treatment} treatment clusters of {size} subjects. Confirm the design with a cluster-specific method."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Per-comparison sequential power is reported. Total study power requires a validated joint arm-and-look calculation and is not estimated here."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "{alpha}% significance level (one-sided)"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "A {test} power analysis for {n} subjects gives a maximum true HR of {hr} meeting the non-inferiority power target, with {accrual} months of accrual and {followup} months of additional follow-up."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "A {test} power analysis for {n} subjects gives {power}% calculated power, with {accrual} months of accrual and {followup} months of additional follow-up."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "At HR 1 there is no superiority effect; a matching superiority event requirement is not defined."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Sensitivity analysis is available for sample-size and power calculations. Select one of those modes to evaluate numerical scenarios."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "A {test} power analysis indicates that {n} subjects are required, with {accrual} months of accrual and {followup} months of additional follow-up."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "For non-inferiority conclusion"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "{n} subjects"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "The design aims to detect a hazard ratio of {hr} with {n} subjects and {power}% power at a {alpha}% significance level (two-sided)."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "True Hazard Ratio"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Sample Size Requirement"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Few Expected Events"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Statistical threshold"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Expected effect"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Few Independent Clusters"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Control arm: {control} subjects, shared by {comparisons} comparisons; {experimental} per experimental arm. Power is per comparison at the adjusted alpha. For fixed designs, total study power is a joint normal approximation to the probability that at least one comparison rejects when every experimental arm has HR {hr}. Superiority uses both rejection tails; non-inferiority uses one tail. Shared-control correlation uses allocation proportions for Schoenfeld tests and expected-event variances for Cox. This family estimate is unavailable for sequential designs."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Fewer than 10 clusters per arm are planned; the simple design-effect approximation does not account for small-cluster degrees of freedom. Obtain a cluster-specific power calculation."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "One-sided Alpha"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "The margin requires disease-specific justification from historical evidence and clinical relevance."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Low Calculated Power"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Calculated power is {power}%; consider a larger sample or longer follow-up to reach the planning target."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Limited Expected Events"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Total enrollment"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "The comparison has {events} expected effective events; check the accuracy of the asymptotic approximation."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "The joint normal integration did not meet its accuracy requirement. Per-comparison results remain available."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "A {test} power analysis for {n} subjects requires {duration} months in total: {accrual} months of accrual and {followup} months of additional follow-up."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Requires {percent}% of the events a superiority trial at HR {hr} would need"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Cluster Design Approximation"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Multi-arm Family Power Unavailable"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "{alpha}% significance level (two-sided)"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "A matching superiority comparison cannot be estimated for these assumptions."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Sensitivity Analysis Not Applicable"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "The design targets {power}% power to exclude the NI margin at this assumed HR."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "The design aims to rule out a hazard ratio of {margin} or worse, assuming a true hazard ratio of {hr}, with {n} subjects and {power}% power at a {alpha}% significance level (one-sided)."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Only {events} comparison-effective events are expected; asymptotic power can be unreliable with sparse events. Confirm the design using an appropriate simulation."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Sequential Multi-arm Family Power Not Available"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "A {test} power analysis for {n} subjects gives a detectable HR of {hr}, with {accrual} months of accrual and {followup} months of additional follow-up."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "The assumed HR is below the NI margin; calculated power is {power}%."
 msgstr ""

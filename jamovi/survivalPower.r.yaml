@@ -612,7 +612,7 @@ items:
       title: 'Sensitivity Analysis'
       type: Table
       rows: 0
-      visible: (sensitivity_analysis)
+      visible: (sensitivity_analysis && (analysis_type=="sample_size" || analysis_type=="power"))
       clearWith:
           - clinical_preset
           - sensitivity_analysis
@@ -888,7 +888,7 @@ items:
       type: Image
       width: 600
       height: 450
-      visible: (sensitivity_analysis)
+      visible: (sensitivity_analysis && (analysis_type=="sample_size" || analysis_type=="power"))
       requiresData: false
       renderFun: .plot_sensitivity_analysis
       clearWith:
@@ -1122,7 +1122,9 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
+    - Schoenfeld1983
     - LachinAndFoulkes1986
+    - Rothmann2003
     - gsDesign
     - survival
     - ggplot2

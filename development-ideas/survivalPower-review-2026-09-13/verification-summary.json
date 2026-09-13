@@ -1,0 +1,29 @@
+{
+  "analysis": "survivalPower",
+  "review_date": "2026-09-13",
+  "review_findings": 5,
+  "implementation_changed_in_review": false,
+  "regression": {
+    "files": 10,
+    "blocks": 105,
+    "passed": 904,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0,
+    "skipped": 0
+  },
+  "rendering_contract": {
+    "passed": 6,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  "lintr": {
+    "real_bug_findings": 0,
+    "brace_style": 14,
+    "semicolon_style": 3
+  },
+  "source_files_unchanged": true,
+  "prepared_files_match": true,
+  "clinical_release_readiness": "NOT_READY"
+}

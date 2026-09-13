@@ -1,0 +1,240 @@
+{
+  "sample_size": {
+    "design": {
+      "hr": 0.75,
+      "n": 583,
+      "effective_n": 583,
+      "accrual": 24,
+      "follow_up": 12,
+      "duration": 36,
+      "events": 380.345607506001,
+      "comparison_events": 380.345607506001,
+      "power": 0.8,
+      "power_label": "Target power",
+      "alpha": 0.05
+    },
+    "primary": {
+      "n": 583,
+      "events": 380
+    },
+    "notices": "Analysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "summary": "<div class='jmv-clinical-summary'><h3> Plain Language Summary<\/h3><p><strong>Study Design:<\/strong> Log-rank Test for Overall Survival<\/p><p><strong>Result:<\/strong> Total Sample Size: 583 subjects <\/p><p><strong>Objective:<\/strong> The design aims to detect a hazard ratio of 0.75 with 583 subjects and 80% power at a 5% significance level (two-sided).<\/p><p><strong>Effect:<\/strong> 25% lower hazard; this does not directly specify the event risk over a fixed period.<\/p><p><strong>Clinical Impact:<\/strong> Moderate assumed effect. Whether this is clinically worthwhile depends on the absolute survival gain and the disease setting.<\/p><p><strong>Study Timeline:<\/strong> 24 months recruitment + 12 months follow-up = 36 months total.<\/p><div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'><p><strong>Methods:<\/strong> Sample size calculations based on Schoenfeld (1983) log-rank test formula. Exponential survival distribution assumed with uniform accrual pattern.<\/p><\/div><\/div>",
+    "interpretation": "<p><strong>Power Analysis for Survival Study<\/strong><\/p><p><strong>Study Design:<\/strong><br>• Analysis Type: Calculate Sample Size<br>• Statistical Test: Log-rank Test<br>• Design: Two-arm Parallel<br>• Primary Endpoint: Overall Survival<\/p><p><strong>Statistical Parameters:<\/strong><br>• Hazard Ratio: 0.75<br>• Significance Level (alpha): 0.05 (5%)<br>• Target power: 0.8 (80%)<br>• Allocation Ratio: 1:1<br><\/p><p><strong>Population Characteristics:<\/strong><br>• Control Median Survival: 12 months<br>• Expected Treatment Median: 16 months<br>• Accrual Period: 24 months<br>• Follow-up Period: 12 months<br>• Annual Dropout Rate: 5%<\/p><p><strong>Objective:<\/strong><br>The design aims to detect a hazard ratio of 0.75 with 583 subjects and 80% power at a 5% significance level (two-sided).<\/p><p><strong>Clinical Interpretation:<\/strong><\/p><p><strong>Sample Size Interpretation:<\/strong><br>The design aims to detect a hazard ratio of 0.75 with 80% power and     5% significance level, you need approximately 583 total subjects.<\/p><p>A hazard ratio of 0.75 represents a 25% lower hazard of the event in the treatment group compared to control.<\/p>A Log-rank Test power analysis was conducted to determine the sample size required to detect a hazard ratio of 0.75 with 80% power at a     5% significance level (two-sided). The analysis indicates that 583 subjects are needed, with an accrual period of 24 months and additional follow-up of 12 months.",
+    "simulation": {
+      "empirical_power": 0.813,
+      "ci_lower": 0.7874249204686,
+      "ci_upper": 0.8367167800754,
+      "zero_event_trials": 0,
+      "failed_tests": 0,
+      "valid_sims": 1000,
+      "numerical_warnings": 0,
+      "convergence": {
+        "converged": false,
+        "mc_se": 0.01233008515786,
+        "target_mc_se": 0.01,
+        "recommended_n_sims": 1521,
+        "message": "Simulation may need more runs (MC SE = 0.0123, target = 0.0100)",
+        "recommendation": "Consider increasing to 1521 simulations for better precision"
+      }
+    }
+  },
+  "power": {
+    "design": {
+      "hr": 0.75,
+      "n": 200,
+      "effective_n": 200,
+      "accrual": 24,
+      "follow_up": 12,
+      "duration": 36,
+      "events": 130.478767583534,
+      "comparison_events": 130.478767583534,
+      "power": 0.3758144987536,
+      "power_label": "Calculated power",
+      "alpha": 0.05
+    },
+    "primary": {
+      "power": 0.3758144987536,
+      "events": 130.478767583534
+    },
+    "notices": "WARNING: Low Calculated Power\nCalculated power is 37.6%; consider a larger sample or longer follow-up to reach the planning target.\n\nAnalysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "summary": "<div class='jmv-clinical-summary'><h3> Plain Language Summary<\/h3><p><strong>Study Design:<\/strong> Log-rank Test for Overall Survival<\/p><p><strong>Result:<\/strong> Statistical Power: 37.6% (130 expected events)<\/p><p><strong>Objective:<\/strong> The design aims to detect a hazard ratio of 0.75 with 200 subjects and 37.6% power at a 5% significance level (two-sided).<\/p><p><strong>Effect:<\/strong> 25% lower hazard; this does not directly specify the event risk over a fixed period.<\/p><p><strong>Clinical Impact:<\/strong> Moderate assumed effect. Whether this is clinically worthwhile depends on the absolute survival gain and the disease setting.<\/p><p><strong>Study Timeline:<\/strong> 24 months recruitment + 12 months follow-up = 36 months total.<\/p><div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'><p><strong>Methods:<\/strong> Sample size calculations based on Schoenfeld (1983) log-rank test formula. Exponential survival distribution assumed with uniform accrual pattern.<\/p><\/div><\/div>",
+    "interpretation": "<p><strong>Power Analysis for Survival Study<\/strong><\/p><p><strong>Study Design:<\/strong><br>• Analysis Type: Calculate Power<br>• Statistical Test: Log-rank Test<br>• Design: Two-arm Parallel<br>• Primary Endpoint: Overall Survival<\/p><p><strong>Statistical Parameters:<\/strong><br>• Hazard Ratio: 0.75<br>• Significance Level (alpha): 0.05 (5%)<br>• Calculated power: 0.376 (37.6%)<br>• Allocation Ratio: 1:1<br>• Sample Size: 200 subjects<br><\/p><p><strong>Population Characteristics:<\/strong><br>• Control Median Survival: 12 months<br>• Expected Treatment Median: 16 months<br>• Accrual Period: 24 months<br>• Follow-up Period: 12 months<br>• Annual Dropout Rate: 5%<\/p><p><strong>Objective:<\/strong><br>The design aims to detect a hazard ratio of 0.75 with 200 subjects and 37.6% power at a 5% significance level (two-sided).<\/p><p><strong>Clinical Interpretation:<\/strong><\/p><p><strong>Power Interpretation:<\/strong><br>With 200 subjects, you have 37.6% power to detect a hazard ratio of 0.75 at a     5% significance level (two-sided).<\/p><p><strong>Warning:<\/strong> Power below 70% indicates the study is underpowered. Consider increasing sample size or reconsidering the effect size.<\/p>A Log-rank Test power analysis was conducted for a study with 200 subjects to detect a hazard ratio of 0.75 at a     5% significance level (two-sided). The calculated power is 37.6%, with an accrual period of 24 months and follow-up of 12 months.",
+    "simulation": null
+  },
+  "duration": {
+    "design": {
+      "hr": 0.75,
+      "n": 500,
+      "effective_n": 500,
+      "accrual": 24,
+      "follow_up": 21.575620197706,
+      "duration": 45.575620197706,
+      "events": 380.000031195052,
+      "comparison_events": 380.000031195052,
+      "power": 0.8,
+      "power_label": "Target power",
+      "alpha": 0.05
+    },
+    "primary": {
+      "events": 380,
+      "duration": 45.575620197706
+    },
+    "notices": "Analysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "summary": "<div class='jmv-clinical-summary'><h3> Plain Language Summary<\/h3><p><strong>Study Design:<\/strong> Log-rank Test for Overall Survival<\/p><p><strong>Result:<\/strong> Required Study Duration: 45.6 months<\/p><p><strong>Objective:<\/strong> The design aims to detect a hazard ratio of 0.75 with 500 subjects and 80% power at a 5% significance level (two-sided).<\/p><p><strong>Effect:<\/strong> 25% lower hazard; this does not directly specify the event risk over a fixed period.<\/p><p><strong>Clinical Impact:<\/strong> Moderate assumed effect. Whether this is clinically worthwhile depends on the absolute survival gain and the disease setting.<\/p><p><strong>Study Timeline:<\/strong> 24 months recruitment + 21.6 months follow-up = 45.6 months total.<\/p><div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'><p><strong>Methods:<\/strong> Sample size calculations based on Schoenfeld (1983) log-rank test formula. Exponential survival distribution assumed with uniform accrual pattern.<\/p><\/div><\/div>",
+    "interpretation": "<p><strong>Power Analysis for Survival Study<\/strong><\/p><p><strong>Study Design:<\/strong><br>• Analysis Type: Calculate Study Duration<br>• Statistical Test: Log-rank Test<br>• Design: Two-arm Parallel<br>• Primary Endpoint: Overall Survival<\/p><p><strong>Statistical Parameters:<\/strong><br>• Hazard Ratio: 0.75<br>• Significance Level (alpha): 0.05 (5%)<br>• Target power: 0.8 (80%)<br>• Allocation Ratio: 1:1<br>• Sample Size: 500 subjects<br><\/p><p><strong>Population Characteristics:<\/strong><br>• Control Median Survival: 12 months<br>• Expected Treatment Median: 16 months<br>• Accrual Period: 24 months<br>• Follow-up Period: 21.6 months<br>• Annual Dropout Rate: 5%<\/p><p><strong>Objective:<\/strong><br>The design aims to detect a hazard ratio of 0.75 with 500 subjects and 80% power at a 5% significance level (two-sided).<\/p><p><strong>Clinical Interpretation:<\/strong><\/p><p><strong>Duration Interpretation:<\/strong><br>The required study duration is: Required Study Duration: 45.6 months<\/p><p>This includes both accrual and follow-up periods.<\/p>A Log-rank Test power analysis was conducted to determine the required study duration for 500 subjects with 80% power and     5% significance level (two-sided) to detect a hazard ratio of 0.75. Required Study Duration: 45.6 months. The objective is to detect a hazard ratio of 0.75.",
+    "simulation": null
+  },
+  "effect": {
+    "design": {
+      "hr": 0.6034591659464,
+      "n": 200,
+      "effective_n": 200,
+      "accrual": 24,
+      "follow_up": 12,
+      "duration": 36,
+      "events": 123.064603338537,
+      "comparison_events": 123.064603338537,
+      "power": 0.8,
+      "power_label": "Target power",
+      "alpha": 0.05
+    },
+    "primary": {
+      "hr_detectable": 0.6034591659464
+    },
+    "notices": "Analysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "summary": "<div class='jmv-clinical-summary'><h3> Plain Language Summary<\/h3><p><strong>Study Design:<\/strong> Log-rank Test for Overall Survival<\/p><p><strong>Result:<\/strong> Minimum Detectable HR: 0.603<\/p><p><strong>Objective:<\/strong> The design aims to detect a hazard ratio of 0.603 with 200 subjects and 80% power at a 5% significance level (two-sided).<\/p><p><strong>Effect:<\/strong> 39.7% lower hazard; this does not directly specify the event risk over a fixed period.<\/p><p><strong>Clinical Impact:<\/strong> Large assumed effect. Whether this is clinically worthwhile depends on the absolute survival gain and the disease setting.<\/p><p><strong>Study Timeline:<\/strong> 24 months recruitment + 12 months follow-up = 36 months total.<\/p><div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'><p><strong>Methods:<\/strong> Sample size calculations based on Schoenfeld (1983) log-rank test formula. Exponential survival distribution assumed with uniform accrual pattern.<\/p><\/div><\/div>",
+    "interpretation": "<p><strong>Power Analysis for Survival Study<\/strong><\/p><p><strong>Study Design:<\/strong><br>• Analysis Type: Calculate Detectable Effect Size<br>• Statistical Test: Log-rank Test<br>• Design: Two-arm Parallel<br>• Primary Endpoint: Overall Survival<\/p><p><strong>Statistical Parameters:<\/strong><br>• Hazard Ratio: 0.603<br>• Significance Level (alpha): 0.05 (5%)<br>• Target power: 0.8 (80%)<br>• Allocation Ratio: 1:1<br>• Sample Size: 200 subjects<br><\/p><p><strong>Population Characteristics:<\/strong><br>• Control Median Survival: 12 months<br>• Expected Treatment Median: 19.9 months<br>• Accrual Period: 24 months<br>• Follow-up Period: 12 months<br>• Annual Dropout Rate: 5%<\/p><p><strong>Objective:<\/strong><br>The design aims to detect a hazard ratio of 0.603 with 200 subjects and 80% power at a 5% significance level (two-sided).<\/p><p><strong>Clinical Interpretation:<\/strong><\/p><p><strong>Effect Size Interpretation:<\/strong><br>The minimum detectable hazard ratio with the given parameters is: Minimum Detectable HR: 0.603<\/p><p>This represents the smallest effect size your study can reliably detect.<\/p>A Log-rank Test power analysis was conducted to determine the minimum detectable effect size with 200 subjects, 80% power, and a     5% significance level (two-sided). Minimum Detectable HR: 0.603. The objective is to detect a hazard ratio of 0.603.",
+    "simulation": null
+  },
+  "ni": {
+    "design": {
+      "hr": 1,
+      "n": 901,
+      "effective_n": 901,
+      "accrual": 24,
+      "follow_up": 12,
+      "duration": 36,
+      "events": 631.664367300571,
+      "comparison_events": 631.664367300571,
+      "power": 0.8,
+      "power_label": "Target power",
+      "alpha": 0.025
+    },
+    "primary": {
+      "n": 901,
+      "events": 631
+    },
+    "notices": "One-sided Alpha for Non-inferiority\nNon-inferiority is tested one-sided at alpha = 0.025 • Regulatory submissions conventionally use one-sided 0.025 (enter 0.025 here)\n\nAnalysis Complete\nPower analysis completed: Non-inferiority Trial with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "summary": "<div class='jmv-clinical-summary'><h3> Plain Language Summary<\/h3><p><strong>Study Design:<\/strong> Non-inferiority Trial for Overall Survival<\/p><p><strong>Result:<\/strong> Total Sample Size: 901 subjects ( 631 events needed; NI margin HR = 1.25 )<\/p><p><strong>Objective:<\/strong> The design aims to rule out a hazard ratio of 1.25 or worse, assuming a true hazard ratio of 1, with 901 subjects and 80% power at a 2.5% significance level (one-sided).<\/p><p><strong>Effect:<\/strong> Equal assumed hazards; this does not directly specify the event risk over a fixed period.<\/p><p><strong>Clinical Impact:<\/strong> No assumed difference between arms. Whether this is clinically worthwhile depends on the absolute survival gain and the disease setting.<\/p><p><strong>Study Timeline:<\/strong> 24 months recruitment + 12 months follow-up = 36 months total.<\/p><div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'><p><strong>Methods:<\/strong> Sample size calculations based on Schoenfeld information approximation for a fixed HR margin; margin-selection background: Rothmann et al. (2003). Exponential survival distribution assumed with uniform accrual pattern.<\/p><\/div><\/div>",
+    "interpretation": "<p><strong>Power Analysis for Survival Study<\/strong><\/p><p><strong>Study Design:<\/strong><br>• Analysis Type: Calculate Sample Size<br>• Statistical Test: Non-inferiority Trial<br>• Design: Two-arm Parallel<br>• Primary Endpoint: Overall Survival<\/p><p><strong>Statistical Parameters:<\/strong><br>• Hazard Ratio: 1<br>• Significance Level (alpha): 0.025 (2.5%)<br>• Target power: 0.8 (80%)<br>• Allocation Ratio: 1:1<br><\/p><p><strong>Population Characteristics:<\/strong><br>• Control Median Survival: 12 months<br>• Expected Treatment Median: 12 months<br>• Accrual Period: 24 months<br>• Follow-up Period: 12 months<br>• Annual Dropout Rate: 5%<\/p><p><strong>Objective:<\/strong><br>The design aims to rule out a hazard ratio of 1.25 or worse, assuming a true hazard ratio of 1, with 901 subjects and 80% power at a 2.5% significance level (one-sided).<\/p><p><strong>Clinical Interpretation:<\/strong><\/p><p><strong>Sample Size Interpretation:<\/strong><br>The design aims to rule out a hazard ratio of 1.25 or worse, assuming a true hazard ratio of 1 with 80% power and   2.5% significance level, you need approximately 901 total subjects.<\/p>A Non-inferiority Trial power analysis was conducted to determine the sample size required to rule out a hazard ratio of 1.25 or worse, assuming a true hazard ratio of 1 with 80% power at a   2.5% significance level (one-sided). The analysis indicates that 901 subjects are needed, with an accrual period of 24 months and additional follow-up of 12 months.",
+    "simulation": null
+  },
+  "multi_arm": {
+    "design": {
+      "hr": 0.75,
+      "n": 1059,
+      "effective_n": 706,
+      "accrual": 24,
+      "follow_up": 12,
+      "duration": 36,
+      "events": 690.885074354812,
+      "comparison_events": 460.590049569875,
+      "power": 0.8,
+      "power_label": "Target power",
+      "alpha": 0.025
+    },
+    "primary": {
+      "n": 1059,
+      "events": 460
+    },
+    "notices": "Analysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "summary": "<div class='jmv-clinical-summary'><h3> Plain Language Summary<\/h3><p><strong>Study Design:<\/strong> Log-rank Test for Overall Survival<\/p><p><strong>Result:<\/strong> Total Sample Size: 1059 subjects , 3 arms sharing one control (x1.5), alpha adjusted for multiplicity: 0.025<\/p><p><strong>Objective:<\/strong> The design aims to detect a hazard ratio of 0.75 with 1059 subjects and 80% power at a 2.5% significance level (two-sided).<\/p><p><strong>Effect:<\/strong> 25% lower hazard; this does not directly specify the event risk over a fixed period.<\/p><p><strong>Clinical Impact:<\/strong> Moderate assumed effect. Whether this is clinically worthwhile depends on the absolute survival gain and the disease setting.<\/p><p><strong>Study Timeline:<\/strong> 24 months recruitment + 12 months follow-up = 36 months total.<\/p><div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'><p><strong>Methods:<\/strong> Sample size calculations based on Schoenfeld (1983) log-rank test formula. Exponential survival distribution assumed with uniform accrual pattern.<\/p><\/div><\/div>",
+    "interpretation": "<p><strong>Power Analysis for Survival Study<\/strong><\/p><p><strong>Study Design:<\/strong><br>• Analysis Type: Calculate Sample Size<br>• Statistical Test: Log-rank Test<br>• Design: Multi-arm Trial<br>• Primary Endpoint: Overall Survival<\/p><p><strong>Statistical Parameters:<\/strong><br>• Hazard Ratio: 0.75<br>• Significance Level (alpha): 0.025 (2.5%)<br>• Target power: 0.8 (80%)<br>• Allocation Ratio: 1:1<br><\/p><p><strong>Population Characteristics:<\/strong><br>• Control Median Survival: 12 months<br>• Expected Treatment Median: 16 months<br>• Accrual Period: 24 months<br>• Follow-up Period: 12 months<br>• Annual Dropout Rate: 5%<\/p><p><strong>Objective:<\/strong><br>The design aims to detect a hazard ratio of 0.75 with 1059 subjects and 80% power at a 2.5% significance level (two-sided).<\/p><p><strong>Clinical Interpretation:<\/strong><\/p><p><strong>Sample Size Interpretation:<\/strong><br>The design aims to detect a hazard ratio of 0.75 with 80% power and   2.5% significance level, you need approximately 1059 total subjects.<\/p><p>A hazard ratio of 0.75 represents a 25% lower hazard of the event in the treatment group compared to control.<\/p><p><strong>Feasibility Note:<\/strong> This large sample size may require multi-center collaboration or extended recruitment periods.<\/p>A Log-rank Test power analysis was conducted to determine the sample size required to detect a hazard ratio of 0.75 with 80% power at a   2.5% significance level (two-sided). The analysis indicates that 1059 subjects are needed, with an accrual period of 24 months and additional follow-up of 12 months.",
+    "simulation": null
+  },
+  "sequential": {
+    "design": {
+      "hr": 0.75,
+      "n": 589,
+      "effective_n": 589,
+      "accrual": 24,
+      "follow_up": 12,
+      "duration": 36,
+      "events": 384.259970533507,
+      "comparison_events": 384.259970533507,
+      "power": 0.8,
+      "power_label": "Target power",
+      "alpha": 0.05
+    },
+    "primary": {
+      "n": 589,
+      "events": 385
+    },
+    "notices": "Analysis Complete\nPower analysis completed: Cox Regression with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "summary": "<div class='jmv-clinical-summary'><h3> Plain Language Summary<\/h3><p><strong>Study Design:<\/strong> Cox Regression for Overall Survival<\/p><p><strong>Result:<\/strong> Total Sample Size: 589 subjects (385 events needed) [gsDesign group-sequential, 3 looks; Lachin-Foulkes]<\/p><p><strong>Objective:<\/strong> The design aims to detect a hazard ratio of 0.75 with 589 subjects and 80% power at a 5% significance level (two-sided).<\/p><p><strong>Effect:<\/strong> 25% lower hazard; this does not directly specify the event risk over a fixed period.<\/p><p><strong>Clinical Impact:<\/strong> Moderate assumed effect. Whether this is clinically worthwhile depends on the absolute survival gain and the disease setting.<\/p><p><strong>Study Timeline:<\/strong> 24 months recruitment + 12 months follow-up = 36 months total.<\/p><div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'><p><strong>Methods:<\/strong> Sample size calculations based on Lachin-Foulkes method (1986) via gsDesign for Cox proportional hazards. Exponential survival distribution assumed with uniform accrual pattern.<\/p><\/div><\/div>",
+    "interpretation": "<p><strong>Power Analysis for Survival Study<\/strong><\/p><p><strong>Study Design:<\/strong><br>• Analysis Type: Calculate Sample Size<br>• Statistical Test: Cox Regression<br>• Design: Two-arm Parallel<br>• Primary Endpoint: Overall Survival<\/p><p><strong>Statistical Parameters:<\/strong><br>• Hazard Ratio: 0.75<br>• Significance Level (alpha): 0.05 (5%)<br>• Target power: 0.8 (80%)<br>• Allocation Ratio: 1:1<br><\/p><p><strong>Population Characteristics:<\/strong><br>• Control Median Survival: 12 months<br>• Expected Treatment Median: 16 months<br>• Accrual Period: 24 months<br>• Follow-up Period: 12 months<br>• Annual Dropout Rate: 5%<\/p><p><strong>Objective:<\/strong><br>The design aims to detect a hazard ratio of 0.75 with 589 subjects and 80% power at a 5% significance level (two-sided).<\/p><p><strong>Clinical Interpretation:<\/strong><\/p><p><strong>Sample Size Interpretation:<\/strong><br>The design aims to detect a hazard ratio of 0.75 with 80% power and     5% significance level, you need approximately 589 total subjects.<\/p><p>A hazard ratio of 0.75 represents a 25% lower hazard of the event in the treatment group compared to control.<\/p>A Cox Regression power analysis was conducted to determine the sample size required to detect a hazard ratio of 0.75 with 80% power at a     5% significance level (two-sided). The analysis indicates that 589 subjects are needed, with an accrual period of 24 months and additional follow-up of 12 months.",
+    "simulation": null
+  },
+  "cluster": {
+    "design": {
+      "hr": 0.1,
+      "n": 200,
+      "effective_n": 100.502512562814,
+      "accrual": 24,
+      "follow_up": 12,
+      "duration": 36,
+      "events": 82.315150932742,
+      "comparison_events": 41.364397453639,
+      "power": 0.8,
+      "power_label": "Target power",
+      "alpha": 0.05
+    },
+    "primary": {
+      "n": 200,
+      "events": 6
+    },
+    "notices": "STRONG WARNING: Extreme Hazard Ratio\nExtreme hazard ratio detected (0.10) • Most trials detect HR between 0.5-2.0 • Verify this effect size is clinically plausible\n\nSTRONG WARNING: Few Independent Clusters\nFewer than 10 clusters per arm are planned; the simple design-effect approximation does not account for small-cluster degrees of freedom. Obtain a cluster-specific power calculation.\n\nWARNING: Limited Expected Events\nThe comparison has 41.4 expected effective events; check the accuracy of the asymptotic approximation.\n\nWARNING: Cluster Design Approximation\nThis is an individual-level survival calculation inflated by 1 + (cluster size - 1) times ICC, not a validated cluster survival design. Planned allocation: 1 control and 1 treatment clusters of 100 subjects. Confirm the design with a cluster-specific method.\n\nAnalysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "summary": "<div class='jmv-clinical-summary'><h3> Plain Language Summary<\/h3><p><strong>Study Design:<\/strong> Log-rank Test for Overall Survival<\/p><p><strong>Result:<\/strong> Total Sample Size: 200 subjects , cluster design effect: 1.99<\/p><p><strong>Objective:<\/strong> The design aims to detect a hazard ratio of 0.1 with 200 subjects and 80% power at a 5% significance level (two-sided).<\/p><p><strong>Effect:<\/strong> 90% lower hazard; this does not directly specify the event risk over a fixed period.<\/p><p><strong>Clinical Impact:<\/strong> Large assumed effect. Whether this is clinically worthwhile depends on the absolute survival gain and the disease setting.<\/p><p><strong>Study Timeline:<\/strong> 24 months recruitment + 12 months follow-up = 36 months total.<\/p><div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'><p><strong>Methods:<\/strong> Sample size calculations based on Schoenfeld (1983) log-rank test formula. Exponential survival distribution assumed with uniform accrual pattern.<\/p><\/div><\/div>",
+    "interpretation": "<p><strong>Power Analysis for Survival Study<\/strong><\/p><p><strong>Study Design:<\/strong><br>• Analysis Type: Calculate Sample Size<br>• Statistical Test: Log-rank Test<br>• Design: Cluster Randomized<br>• Primary Endpoint: Overall Survival<\/p><p><strong>Statistical Parameters:<\/strong><br>• Hazard Ratio: 0.1<br>• Significance Level (alpha): 0.05 (5%)<br>• Target power: 0.8 (80%)<br>• Allocation Ratio: 1:1<br><\/p><p><strong>Population Characteristics:<\/strong><br>• Control Median Survival: 12 months<br>• Expected Treatment Median: 120 months<br>• Accrual Period: 24 months<br>• Follow-up Period: 12 months<br>• Annual Dropout Rate: 5%<\/p><p><strong>Objective:<\/strong><br>The design aims to detect a hazard ratio of 0.1 with 200 subjects and 80% power at a 5% significance level (two-sided).<\/p><p><strong>Clinical Interpretation:<\/strong><\/p><p><strong>Sample Size Interpretation:<\/strong><br>The design aims to detect a hazard ratio of 0.1 with 80% power and     5% significance level, you need approximately 200 total subjects.<\/p><p>A hazard ratio of 0.1 represents a 90% lower hazard of the event in the treatment group compared to control.<\/p>A Log-rank Test power analysis was conducted to determine the sample size required to detect a hazard ratio of 0.1 with 80% power at a     5% significance level (two-sided). The analysis indicates that 200 subjects are needed, with an accrual period of 24 months and additional follow-up of 12 months.",
+    "simulation": null
+  },
+  "sparse": {
+    "design": {
+      "hr": 0.75,
+      "n": 10,
+      "effective_n": 10,
+      "accrual": 1,
+      "follow_up": 0,
+      "duration": 1,
+      "events": 0.01260668083489,
+      "comparison_events": 0.01260668083489,
+      "power": 0.0500298792904,
+      "power_label": "Calculated power",
+      "alpha": 0.05
+    },
+    "primary": {
+      "power": 0.0500298792904,
+      "events": 0.01260668083489
+    },
+    "notices": "STRONG WARNING: Few Expected Events\nOnly 0.01 comparison-effective events are expected; asymptotic power can be unreliable with sparse events. Confirm the design using an appropriate simulation.\n\nWARNING: Short Study Duration\nStudy duration (1.0 mo) may be too short for median survival 240.0 mo • Consider extending follow-up to at least 360.0 mo\n\nWARNING: Low Calculated Power\nCalculated power is 5.0%; consider a larger sample or longer follow-up to reach the planning target.\n\nWARNING: Event-free Simulations\n984 of 1000 simulated trials had no events and were counted as non-rejections; asymptotic analytical power may not apply to this sparse-event design.\n\nAnalysis Complete\nPower analysis completed: Log-rank Test with overall survival endpoint • Assumes exponential survival and uniform accrual",
+    "summary": "<div class='jmv-clinical-summary'><h3> Plain Language Summary<\/h3><p><strong>Study Design:<\/strong> Log-rank Test for Overall Survival<\/p><p><strong>Result:<\/strong> Statistical Power: 5.0% (0 expected events)<\/p><p><strong>Objective:<\/strong> The design aims to detect a hazard ratio of 0.75 with 10 subjects and 5% power at a 5% significance level (two-sided).<\/p><p><strong>Effect:<\/strong> 25% lower hazard; this does not directly specify the event risk over a fixed period.<\/p><p><strong>Clinical Impact:<\/strong> Moderate assumed effect. Whether this is clinically worthwhile depends on the absolute survival gain and the disease setting.<\/p><p><strong>Study Timeline:<\/strong> 1 months recruitment + 0 months follow-up = 1 months total.<\/p><div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'><p><strong>Methods:<\/strong> Sample size calculations based on Schoenfeld (1983) log-rank test formula. Exponential survival distribution assumed with uniform accrual pattern.<\/p><\/div><\/div>",
+    "interpretation": "<p><strong>Power Analysis for Survival Study<\/strong><\/p><p><strong>Study Design:<\/strong><br>• Analysis Type: Calculate Power<br>• Statistical Test: Log-rank Test<br>• Design: Two-arm Parallel<br>• Primary Endpoint: Overall Survival<\/p><p><strong>Statistical Parameters:<\/strong><br>• Hazard Ratio: 0.75<br>• Significance Level (alpha): 0.05 (5%)<br>• Calculated power: 0.05 (5%)<br>• Allocation Ratio: 1:1<br>• Sample Size: 10 subjects<br><\/p><p><strong>Population Characteristics:<\/strong><br>• Control Median Survival: 240 months<br>• Expected Treatment Median: 320 months<br>• Accrual Period: 1 months<br>• Follow-up Period: 0 months<br>• Annual Dropout Rate: 5%<\/p><p><strong>Objective:<\/strong><br>The design aims to detect a hazard ratio of 0.75 with 10 subjects and 5% power at a 5% significance level (two-sided).<\/p><p><strong>Clinical Interpretation:<\/strong><\/p><p><strong>Power Interpretation:<\/strong><br>With 10 subjects, you have 5% power to detect a hazard ratio of 0.75 at a     5% significance level (two-sided).<\/p><p><strong>Warning:<\/strong> Power below 70% indicates the study is underpowered. Consider increasing sample size or reconsidering the effect size.<\/p>A Log-rank Test power analysis was conducted for a study with 10 subjects to detect a hazard ratio of 0.75 at a     5% significance level (two-sided). The calculated power is 5.0%, with an accrual period of 1 months and follow-up of 0 months.",
+    "simulation": {
+      "empirical_power": 0,
+      "ci_lower": 0,
+      "ci_upper": 0.003682083896866,
+      "zero_event_trials": 984,
+      "failed_tests": 0,
+      "valid_sims": 1000,
+      "numerical_warnings": 0,
+      "convergence": {
+        "converged": false,
+        "mc_se": 0,
+        "target_mc_se": 0.01,
+        "recommended_n_sims": 2500,
+        "message": "Validation is limited by event-free trials or failed tests; inspect the exact binomial interval and simulation diagnostics.",
+        "recommendation": "Review event-free trials and test failures before using this simulation as validation."
+      }
+    }
+  }
+}

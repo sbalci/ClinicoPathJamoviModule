@@ -115,8 +115,8 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "effect_size",
                 effect_size,
                 default=0.75,
-                min=0.1,
-                max=5)
+                min=-1,
+                max=10)
             private$..alpha_level <- jmvcore::OptionNumber$new(
                 "alpha_level",
                 alpha_level,
@@ -213,8 +213,8 @@ survivalPowerOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "rmst_difference",
                 rmst_difference,
                 default=3,
-                min=0.1,
-                max=60)
+                min=-120,
+                max=120)
             private$..number_of_arms <- jmvcore::OptionInteger$new(
                 "number_of_arms",
                 number_of_arms,
@@ -448,7 +448,9 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Survival Power Analysis",
                 refs=list(
                     "ClinicoPathJamoviModule",
+                    "Schoenfeld1983",
                     "LachinAndFoulkes1986",
+                    "Rothmann2003",
                     "gsDesign",
                     "survival",
                     "ggplot2",
@@ -1105,7 +1107,7 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="sensitivity_analysis_table",
                 title="Sensitivity Analysis",
                 rows=0,
-                visible="(sensitivity_analysis)",
+                visible="(sensitivity_analysis && (analysis_type==\"sample_size\" || analysis_type==\"power\"))",
                 clearWith=list(
                     "clinical_preset",
                     "sensitivity_analysis",
@@ -1390,7 +1392,7 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Sensitivity Analysis",
                 width=600,
                 height=450,
-                visible="(sensitivity_analysis)",
+                visible="(sensitivity_analysis && (analysis_type==\"sample_size\" || analysis_type==\"power\"))",
                 requiresData=FALSE,
                 renderFun=".plot_sensitivity_analysis",
                 clearWith=list(
@@ -1654,9 +1656,11 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' consider the other power analysis functions: Classical, Competing Risks, 
 #' Advanced, or Comprehensive.
 #' 
-#' @param clinical_preset Pre-configured parameter sets for common clinical
-#'   trial designs. Selecting a preset will automatically populate appropriate
-#'   values.
+#' @param clinical_preset UI-only worked examples for common clinical trial
+#'   designs. In jamovi, selecting a preset fills the controls. R calls use the
+#'   explicit numeric arguments unchanged; setting clinical_preset alone does
+#'   not apply a preset. The displayed values are illustrative, not literature
+#'   estimates.
 #' @param analysis_type Type of power analysis to perform
 #' @param test_type Type of statistical test for power calculation
 #' @param study_design Overall study design type
@@ -1665,7 +1669,12 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param effect_size Expected effect size, interpreted according to Effect
 #'   Size Type: a hazard ratio, a median survival ratio (treatment/control), or
 #'   a survival probability difference read at the Additional Follow-up time.
-#'   For RMST Difference the RMST options are used instead.
+#'   For RMST Difference the RMST options are used instead. Supported HRs are
+#'   0.1 to 5 and median ratios are 0.2 to 10. Survival probability differences
+#'   are signed proportions (0.05 means five percentage points) and must imply a
+#'   valid probability and supported HR at the stated time. In non-inferiority
+#'   effect-size mode, the HR is solved from the design; the effect-size input
+#'   and its type are not used.
 #' @param alpha_level Significance level (two-sided for superiority, one-sided
 #'   for non-inferiority)
 #' @param power_level Desired statistical power
@@ -1683,7 +1692,9 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param follow_up_period Additional follow-up after recruitment ends
 #' @param accrual_pattern Pattern of patient accrual over time
 #' @param dropout_rate Annual rate of loss to follow-up
-#' @param ni_margin Non-inferiority margin (hazard ratio scale)
+#' @param ni_margin Non-inferiority margin on the hazard-ratio scale. Justify
+#'   the margin from disease-specific historical evidence and clinical
+#'   relevance.
 #' @param ni_type Type of non-inferiority margin
 #' @param rmst_tau Restriction time for RMST analysis
 #' @param rmst_difference Expected difference in restricted mean survival time
@@ -1691,7 +1702,10 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param multiple_comparisons Method for multiple comparisons adjustment
 #' @param interim_analyses Number of planned interim analyses
 #' @param alpha_spending Alpha spending function for interim analyses
-#' @param cluster_size Average cluster size for cluster randomized trials
+#' @param cluster_size Equal number of subjects per cluster (whole number).
+#'   Sample-size calculations round enrollment up to complete clusters in both
+#'   arms. The design-effect inflation is approximate and does not model unequal
+#'   cluster sizes or small-cluster degrees of freedom.
 #' @param icc ICC for cluster randomized trials
 #' @param sensitivity_analysis Perform sensitivity analysis across parameter
 #'   ranges

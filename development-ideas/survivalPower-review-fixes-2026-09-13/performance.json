@@ -1,0 +1,59 @@
+{
+  "benchmarks": [
+    {
+      "options": [],
+      "elapsed_seconds": 0.09,
+      "primary": {
+        "n": 583,
+        "events": 380
+      }
+    },
+    {
+      "options": {
+        "test_type": "cox_regression"
+      },
+      "elapsed_seconds": 0.307,
+      "primary": {
+        "n": 580,
+        "events": 379
+      }
+    },
+    {
+      "options": {
+        "test_type": "cox_regression",
+        "interim_analyses": 5,
+        "alpha_spending": "pocock"
+      },
+      "elapsed_seconds": 3.359,
+      "primary": {
+        "n": 711,
+        "events": 464
+      }
+    },
+    {
+      "options": {
+        "test_type": "cox_regression",
+        "interim_analyses": 5,
+        "alpha_spending": "pocock",
+        "sensitivity_analysis": true
+      },
+      "elapsed_seconds": 4.827,
+      "primary": {
+        "n": 711,
+        "events": 464
+      }
+    },
+    {
+      "options": {
+        "run_simulation_validation": true,
+        "simulation_runs": 2000
+      },
+      "elapsed_seconds": 3.643,
+      "primary": {
+        "n": 583,
+        "events": 380
+      }
+    }
+  ],
+  "multiarm_rng_preserved": true
+}

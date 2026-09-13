@@ -41,15 +41,24 @@ test_that("interim looks inflate log-rank and non-inferiority, not only Cox", {
 
 test_that("the Cox sequential design is efficacy-only", {
     skip_if_not_installed("gsDesign")
-    # Regression: gsSurv's default test.type = 4 added a hidden non-binding futility
-    # bound and sized the 3-look design at 618 instead of 588.
+    # No hidden futility boundary. Verify the smallest integer N attaining the
+    # target against upstream two-sided efficacy-boundary crossing probabilities.
     cox <- run_sp(test_type = "cox_regression", interim_analyses = 2, alpha_spending = "obrien_fleming")
-    truth <- gsDesign::gsSurv(
-        k = 3, test.type = 1, alpha = 0.025, sided = 1, beta = 0.2, timing = c(1, 2, 3) / 3,
-        sfu = gsDesign::sfLDOF, lambdaC = log(2) / 12, hr = 0.75, eta = -log(1 - 0.05) / 12,
-        ratio = 1, R = 24, T = 36, minfup = 12
-    )
-    expect_equal(nums(cox)$n, ceiling(sum(truth$eNC[3, ]) + sum(truth$eNE[3, ])))
+    reference_power <- function(n) {
+        fixed <- gsDesign::nSurv(lambdaC = log(2) / 12, hr = 0.75,
+            eta = -log1p(-0.05) / 12, ratio = 1, gamma = n / 24,
+            R = 24, T = 36, minfup = 12, beta = NULL, method = "LachinFoulkes")
+        events <- sum(fixed$eDC) + sum(fixed$eDE)
+        truth <- gsDesign::gsSurvPower(k = 3, test.type = 2, alpha = 0.025, sided = 1,
+            sfu = gsDesign::sfLDOF, lambdaC = log(2) / 12, hr = 0.75,
+            eta = -log1p(-0.05) / 12, ratio = 1, gamma = n / 24, R = 24, minfup = 12,
+            plannedCalendarTime = c(NA, NA, 36), targetEvents = events * (1:3) / 3,
+            method = "LachinFoulkes")
+        column <- length(truth$theta)
+        sum(truth$upper$prob[, column]) + sum(truth$lower$prob[, column])
+    }
+    expect_gte(reference_power(nums(cox)$n), 0.8)
+    expect_lt(reference_power(nums(cox)$n - 1), 0.8)
 })
 
 test_that("sequential power agrees with gsDesign's boundary-crossing probability", {
@@ -84,7 +93,14 @@ test_that("power, detectable HR and duration honour the design the sample size u
         d <- designs[[nm]]
         n <- nums(do.call(run_sp, d))$n
         power <- nums(do.call(run_sp, c(d, list(analysis_type = "power", sample_size_input = n))))$power
-        expect_equal(power, 0.80, tolerance = 0.015, info = paste(nm, "power at its own sample size"))
+        if (nm == "cluster") {
+            # Whole cluster allocation overshoots the continuous target.
+            expect_gte(power, 0.80)
+            expect_lt(power, 0.85)
+            expect_equal(n %% 100, 0)
+        } else {
+            expect_equal(power, 0.80, tolerance = 0.015, info = paste(nm, "power at its own sample size"))
+        }
     }
     # Regression values: 93.8 percent (3 arms) and 99.9 percent (cluster) at n sized for 80.
     hd <- nums(do.call(run_sp, c(designs$multi_arm, list(analysis_type = "effect_size", sample_size_input = 1059))))$hr_detectable

@@ -1,0 +1,18 @@
+{
+  "test_files": 10,
+  "test_blocks": 105,
+  "counts": {
+    "failed": 0,
+    "skipped": 0,
+    "error": 0,
+    "warning": 0,
+    "passed": 904
+  },
+  "rendering_contract_assertions": 6,
+  "populated_outputs": 24,
+  "rendered_plots": 5,
+  "resolved_references": 8,
+  "prepare": "passed",
+  "document": "passed",
+  "generated_files_match_staging": true
+}

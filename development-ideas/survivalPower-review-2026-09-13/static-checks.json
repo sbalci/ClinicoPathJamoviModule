@@ -1,0 +1,62 @@
+{
+  "scalar_vector_logic": [],
+  "namespace_packages": ["R6", "jmvcore", "gsDesign", "ggplot2", "scales", "mvtnorm", "withr", "survival", "stats"],
+  "imports_missing": [],
+  "options_missing": [],
+  "options_unread": [],
+  "raw_non_ascii": [],
+  "translated_messages": ["ERROR: ", "STRONG WARNING: ", "WARNING: ", "Low Calculated Power", "Calculated power is {power}%; consider a larger sample or longer follow-up to reach the planning target.", "Few Expected Events", "Only {events} comparison-effective events are expected; asymptotic power can be unreliable with sparse events. Confirm the design using an appropriate simulation.", "Limited Expected Events", "The comparison has {events} expected effective events; check the accuracy of the asymptotic approximation.", "Cluster Design Approximation", "This is an individual-level survival calculation inflated by 1 + (cluster size - 1) times ICC, not a validated cluster survival design. Planned allocation: {control} control and {treatment} treatment clusters of {size} subjects. Confirm the design with a cluster-specific method.", "Few Independent Clusters", "Fewer than 10 clusters per arm are planned; the simple design-effect approximation does not account for small-cluster degrees of freedom. Obtain a cluster-specific power calculation.", "Sensitivity Analysis Not Applicable", "Sensitivity analysis is available for sample-size and power calculations. Select one of those modes to evaluate numerical scenarios.", "The design aims to rule out a hazard ratio of {margin} or worse, assuming a true hazard ratio of {hr}, with {n} subjects and {power}% power at a {alpha}.", "The design aims to detect a hazard ratio of {hr} with {n} subjects and {power}% power at a {alpha}."],
+  "translation_whitespace": ["ERROR: ", "STRONG WARNING: ", "WARNING: "],
+  "messages_missing_from_tr": ["Low Calculated Power", "Calculated power is {power}%; consider a larger sample or longer follow-up to reach the planning target.", "Few Expected Events", "Only {events} comparison-effective events are expected; asymptotic power can be unreliable with sparse events. Confirm the design using an appropriate simulation.", "Limited Expected Events", "The comparison has {events} expected effective events; check the accuracy of the asymptotic approximation.", "Cluster Design Approximation", "This is an individual-level survival calculation inflated by 1 + (cluster size - 1) times ICC, not a validated cluster survival design. Planned allocation: {control} control and {treatment} treatment clusters of {size} subjects. Confirm the design with a cluster-specific method.", "Few Independent Clusters", "Fewer than 10 clusters per arm are planned; the simple design-effect approximation does not account for small-cluster degrees of freedom. Obtain a cluster-specific power calculation.", "Sensitivity Analysis Not Applicable", "Sensitivity analysis is available for sample-size and power calculations. Select one of those modes to evaluate numerical scenarios.", "The design aims to rule out a hazard ratio of {margin} or worse, assuming a true hazard ratio of {hr}, with {n} subjects and {power}% power at a {alpha}.", "The design aims to detect a hazard ratio of {hr} with {n} subjects and {power}% power at a {alpha}."],
+  "refs": [
+    {
+      "key": "ClinicoPathJamoviModule",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "Schoenfeld1983",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "LachinAndFoulkes1986",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "Rothmann2003",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "gsDesign",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "survival",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "ggplot2",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "scales",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    }
+  ],
+  "menu_group": "PowerT"
+}
