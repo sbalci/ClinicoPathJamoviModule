@@ -2379,15 +2379,23 @@ stagemigrationPart2 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         color = ifelse(matrix_long$Count > max(matrix_long$Count) * 0.5, "white", "black"),
                         size = 3.5, lineheight = 0.8
                     ) +
-                    # Color scale
-                    scale_fill_gradient2(
-                        low = "#f0f0f0",
-                        mid = "#3498db",
-                        high = "#2c3e50",
-                        midpoint = median(matrix_long$Count),
-                        name = "Number of\nPatients",
-                        breaks = pretty(range(matrix_long$Count), n = 5)
-                    ) +
+                    # Color scale (colorblind-safe viridis if accessibility features enabled)
+                    (if (isTRUE(image$parent$options$enableAccessibilityFeatures)) {
+                        ggplot2::scale_fill_viridis_c(
+                            option = "viridis",
+                            name = "Number of\nPatients",
+                            breaks = pretty(range(matrix_long$Count), n = 5)
+                        )
+                    } else {
+                        ggplot2::scale_fill_gradient2(
+                            low = "#f0f0f0",
+                            mid = "#3498db",
+                            high = "#2c3e50",
+                            midpoint = median(matrix_long$Count),
+                            name = "Number of\nPatients",
+                            breaks = pretty(range(matrix_long$Count), n = 5)
+                        )
+                    }) +
                     # Labels
                     ggplot2::labs(
                         title = "Stage Migration Heatmap",

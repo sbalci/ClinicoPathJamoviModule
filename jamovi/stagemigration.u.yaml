@@ -396,15 +396,16 @@ children:
                 enable: (performCompetingRisks)
               - type: CheckBox
                 name: generateCRSummary
-      - type: Label
-        label: Visualization
+      - type: CollapseBox
+        label: Extended CIF Visualization
+        collapsed: true
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
                 name: generateCIFPlots
-                label: Cumulative incidence plots (not yet implemented)
+                label: Cumulative incidence curves
                 enable: (performCompetingRisks)
               - type: TextBox
                 name: cifTimePoints
@@ -473,19 +474,20 @@ children:
                 label: '    Treatment effect (HR)'
                 format: number
                 enable: (clinicalUtilityNNT)
-              - type: CheckBox
-                name: clinicalUtilityComparison
-                label: '  Compare staging systems (not yet implemented)'
-                enable: (performClinicalUtilityAnalysis)
-      - type: Label
-        label: Cost-Effectiveness
+      - type: CollapseBox
+        label: Extended Utility & Cost-Effectiveness
+        collapsed: true
         children:
           - type: LayoutBox
             margin: large
             children:
               - type: CheckBox
+                name: clinicalUtilityComparison
+                label: Compare staging systems
+                enable: (performClinicalUtilityAnalysis)
+              - type: CheckBox
                 name: clinicalUtilityCostEffectiveness
-                label: Cost-effectiveness analysis (not yet implemented)
+                label: Cost-effectiveness analysis
                 enable: (performClinicalUtilityAnalysis)
               - type: TextBox
                 name: clinicalUtilityCostPerIntervention
@@ -625,10 +627,6 @@ children:
       - type: LayoutBox
         margin: large
         children:
-          - type: ComboBox
-            name: multiStateModel
-            label: Model type (not yet implemented)
-            enable: (performMultiStateAnalysis)
           - type: TextBox
             name: multiStateStates
             label: State names (comma-separated)
@@ -653,17 +651,30 @@ children:
             label: Transition matrix
             enable: (performMultiStateAnalysis)
           - type: CheckBox
-            name: multiStateGraphics
-            label: State diagrams (not yet implemented)
-            enable: (performMultiStateAnalysis)
-          - type: CheckBox
-            name: msStratifyByStaging
-            label: Stratify by staging system (not yet implemented)
-          - type: CheckBox
-            name: multiStateValidation
-            label: Multi-state model validation (not yet implemented)
-          - type: CheckBox
             name: generateMSMSummary
+      - type: CollapseBox
+        label: Extended Multi-State Options
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: multiStateModel
+                label: Model type
+                enable: (performMultiStateAnalysis)
+              - type: CheckBox
+                name: multiStateGraphics
+                label: State transition diagrams
+                enable: (performMultiStateAnalysis)
+              - type: CheckBox
+                name: msStratifyByStaging
+                label: Stratify by staging system
+                enable: (performMultiStateAnalysis)
+              - type: CheckBox
+                name: multiStateValidation
+                label: Multi-state model validation
+                enable: (performMultiStateAnalysis)
       - type: Label
         label: "[Experimental] Interval Censoring"
         children:
@@ -715,7 +726,7 @@ children:
             enable: (performIntervalCensoringAnalysis)
           - type: CheckBox
             name: intervalCensoringPlots
-            label: Survival plots (not yet implemented)
+            label: Survival curves
             enable: (performIntervalCensoringAnalysis)
           - type: CheckBox
             name: intervalCensoringDiagnostics
@@ -788,15 +799,24 @@ children:
             format: number
             enable: (frailtyBootstrap)
           - type: CheckBox
-            name: frailtyModelSelection
-            label: Model selection (not yet implemented)
-          - type: CheckBox
             name: frailtyPredictiveAccuracy
           - type: CheckBox
             name: frailtyDiagnostics
-          - type: CheckBox
-            name: frailtyAdvancedInference
-            label: Advanced statistical inference (not yet implemented)
+      - type: CollapseBox
+        label: Extended Frailty Options
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: frailtyModelSelection
+                label: Model selection
+                enable: (performFrailtyModelsAnalysis)
+              - type: CheckBox
+                name: frailtyAdvancedInference
+                label: Advanced statistical inference
+                enable: (performFrailtyModelsAnalysis)
       - type: Label
         label: "[Experimental] Cure Models"
         children:
@@ -836,10 +856,6 @@ children:
             name: cureAnalyzeNewStage
             label: Analyze new stage
             enable: (performCureModelAnalysis)
-          - type: ComboBox
-            name: cureFractionEstimation
-            label: Cure fraction method (not yet implemented)
-            enable: (performCureModelAnalysis)
           - type: TextBox
             name: cureConfidenceLevel
             label: Confidence level
@@ -859,11 +875,6 @@ children:
             label: Time horizon (months)
             format: number
             enable: (performCureModelAnalysis)
-          - type: TextBox
-            name: curePlateauThreshold
-            label: Plateau threshold (not yet implemented)
-            format: number
-            enable: (performCureModelAnalysis)
           - type: CheckBox
             name: cureModelComparison
             label: Model comparison
@@ -873,13 +884,29 @@ children:
             label: Stage-specific analysis
             enable: (performCureModelAnalysis)
           - type: CheckBox
-            name: cureGoodnessOfFit
-            label: Goodness-of-fit (not yet implemented)
-            enable: (performCureModelAnalysis)
-          - type: CheckBox
             name: generateCureSummary
             label: Summary
             enable: (performCureModelAnalysis)
+      - type: CollapseBox
+        label: Extended Cure Model Parameters
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: cureFractionEstimation
+                label: Cure fraction method
+                enable: (performCureModelAnalysis)
+              - type: TextBox
+                name: curePlateauThreshold
+                label: Plateau threshold
+                format: number
+                enable: (performCureModelAnalysis)
+              - type: CheckBox
+                name: cureGoodnessOfFit
+                label: Goodness-of-fit
+                enable: (performCureModelAnalysis)
       - type: Label
         label: "[Experimental] Informative Censoring"
         children:
@@ -890,22 +917,6 @@ children:
                 name: performInformativeCensoringAnalysis
                 label: Informative censoring
                 enable: (advancedMigrationAnalysis)
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
-        children:
-          - type: TargetLayoutBox
-            label: Censoring Mechanism Covariates (not yet implemented)
-            children:
-              - type: VariablesListBox
-                name: informativeCensoringCovariates
-                isTarget: true
-          - type: TargetLayoutBox
-            label: IPW Model Variables (not yet implemented)
-            children:
-              - type: VariablesListBox
-                name: informativeCensoringIPWVariables
-                isTarget: true
       - type: LayoutBox
         margin: large
         children:
@@ -942,13 +953,36 @@ children:
             format: number
             enable: (performInformativeCensoringAnalysis)
           - type: CheckBox
-            name: informativeCensoringPlots
-            label: Diagnostic plots (not yet implemented)
-            enable: (performInformativeCensoringAnalysis)
-          - type: CheckBox
             name: informativeCensoringCompareStages
             label: Compare stages
             enable: (performInformativeCensoringAnalysis)
+      - type: CollapseBox
+        label: Extended Censoring Variables & Plots
+        collapsed: true
+        children:
+          - type: VariableSupplier
+            persistentItems: false
+            stretchFactor: 1
+            children:
+              - type: TargetLayoutBox
+                label: Censoring Mechanism Covariates
+                children:
+                  - type: VariablesListBox
+                    name: informativeCensoringCovariates
+                    isTarget: true
+              - type: TargetLayoutBox
+                label: IPW Model Variables
+                children:
+                  - type: VariablesListBox
+                    name: informativeCensoringIPWVariables
+                    isTarget: true
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: informativeCensoringPlots
+                label: Diagnostic plots
+                enable: (performInformativeCensoringAnalysis)
       - type: Label
         label: Concordance Probability
         children:
@@ -959,16 +993,20 @@ children:
                 name: performConcordanceProbabilityAnalysis
                 label: Concordance probability
                 enable: (advancedMigrationAnalysis)
-      - type: VariableSupplier
-        persistentItems: false
-        stretchFactor: 1
+      - type: CollapseBox
+        label: Extended Adjustment Variables
+        collapsed: true
         children:
-          - type: TargetLayoutBox
-            label: Adjustment Variables (not yet implemented)
+          - type: VariableSupplier
+            persistentItems: false
+            stretchFactor: 1
             children:
-              - type: VariablesListBox
-                name: concordanceProbabilityAdjustVariables
-                isTarget: true
+              - type: TargetLayoutBox
+                label: Adjustment Variables
+                children:
+                  - type: VariablesListBox
+                    name: concordanceProbabilityAdjustVariables
+                    isTarget: true
       - type: LayoutBox
         margin: large
         children:
@@ -1125,10 +1163,6 @@ children:
       - type: LayoutBox
         margin: large
         children:
-          - type: ComboBox
-            name: forestModelType
-            label: Model type (not yet implemented)
-            enable: (performRandomForestAnalysis)
           - type: TextBox
             name: forestNTrees
             label: Number of trees
@@ -1150,7 +1184,7 @@ children:
             enable: (performRandomForestAnalysis)
           - type: ComboBox
             name: forestImportanceType
-            label: '  Importance type (not yet implemented)'
+            label: '  Importance type'
             enable: (calculateVariableImportance)
           - type: CheckBox
             name: forestDiscriminationMetrics
@@ -1174,15 +1208,6 @@ children:
             label: Survival predictions
             enable: (performRandomForestAnalysis)
           - type: CheckBox
-            name: forestBootstrap
-            label: Bootstrap (not yet implemented)
-            enable: (performRandomForestAnalysis)
-          - type: TextBox
-            name: forestBootstrapSamples
-            label: '  Samples (not yet implemented)'
-            format: number
-            enable: (forestBootstrap)
-          - type: CheckBox
             name: generateForestSummary
             label: Summary
             enable: (performRandomForestAnalysis)
@@ -1204,6 +1229,26 @@ children:
             name: rfMinimalDepth
             label: Minimal depth analysis
             enable: (performRandomForestAnalysis)
+      - type: CollapseBox
+        label: Extended Random Forest Options
+        collapsed: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: forestModelType
+                label: Model type
+                enable: (performRandomForestAnalysis)
+              - type: CheckBox
+                name: forestBootstrap
+                label: Bootstrap validation
+                enable: (performRandomForestAnalysis)
+              - type: TextBox
+                name: forestBootstrapSamples
+                label: '  Bootstrap samples'
+                format: number
+                enable: (forestBootstrap)
       - type: Label
         label: "[Experimental] SHAP Analysis (Explainable AI)"
         children:
@@ -1247,7 +1292,7 @@ children:
             enable: (performSHAPAnalysis)
           - type: CheckBox
             name: generateSHAPPlots
-            label: Plots (not yet implemented)
+            label: SHAP importance plots
             enable: (performSHAPAnalysis)
           - type: CheckBox
             name: shapInteractionAnalysis
@@ -1324,7 +1369,7 @@ children:
                 label: Optimize for large data (n>10,000)
               - type: CheckBox
                 name: enableAccessibilityFeatures
-                label: Accessibility features (not yet implemented)
+                label: Color-blind accessible palettes
               - type: ComboBox
                 name: multipleTestingCorrection
                 label: Multiple testing correction

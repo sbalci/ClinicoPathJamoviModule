@@ -223,7 +223,7 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             )))
                         }
 
-                        if (length(summary_data) > 0) {
+                        if (length(summary_data) > 0 && isTRUE(self$options$generateForestSummary)) {
                             private$.populateRandomForestSummary(summary_data)
                         }
 
@@ -1223,7 +1223,9 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 }
                             )))
 
-                            private$.populateCureModelComparison(comp_data)
+                            if (isTRUE(self$options$cureModelComparison)) {
+                                private$.populateCureModelComparison(comp_data)
+                            }
                         }
 
                         # Populate Stage-Specific Analysis
@@ -1310,7 +1312,7 @@ stagemigrationPart5 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             Recommendation = overall_recommendation
                         )))
 
-                        if (length(summary_data) > 0) {
+                        if (length(summary_data) > 0 && isTRUE(self$options$generateCureSummary)) {
                             private$.populateCureAnalysisSummary(summary_data)
                         }
 

@@ -38,7 +38,7 @@ make_stage_data <- function(n = 200, seed = 42, n_stages = 3, event_rate = 0.6) 
   time <- pmin(time, 120)
   cens <- rbinom(n, 1, 1 - event_rate) == 1
   status <- as.integer(!cens & time < 120)
-  time[cens] <- runif(sum(cens), 0.5, time[cens])
+  time[cens] <- runif(sum(cens), 0.5, pmax(0.6, time[cens]))
   time <- round(pmax(time, 0.5), 1)
 
   data.frame(
@@ -442,11 +442,19 @@ test_that("the removed clinical-preset option is gone from the schema", {
   h_src <- readLines(test_path("..", "..", "R", "stagemigration.h.R"), warn = FALSE)
   skip_if(any(grepl("clinicalPreset", h_src, fixed = TRUE)),
           "R/stagemigration.h.R is stale - run jmvtools::prepare()")
+  sm_fn <- if (exists("stagemigration", mode = "function")) {
+    get("stagemigration", mode = "function")
+  } else if (requireNamespace("ClinicoPath", quietly = TRUE)) {
+    ClinicoPath::stagemigration
+  } else {
+    NULL
+  }
+  skip_if(is.null(sm_fn), "stagemigration function not available in current environment")
   expect_error(
-    stagemigration(data = stagemigration_lung_cancer, oldStage = "old_stage",
-                   newStage = "new_stage", survivalTime = "survival_time",
-                   event = "event", eventLevel = "1",
-                   clinicalPreset = "routine_clinical"),
+    sm_fn(data = stagemigration_lung_cancer, oldStage = "old_stage",
+          newStage = "new_stage", survivalTime = "survival_time",
+          event = "event", eventLevel = "1",
+          clinicalPreset = "routine_clinical"),
     "unused argument")
 })
 

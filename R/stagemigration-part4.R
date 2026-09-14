@@ -423,12 +423,23 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 next
                             }
 
-                            # Adjust survival times (subtract landmark time)
-                            landmark_data[[paste0(time_var, "_adj")]] <- landmark_data[[time_var]] - landmark_time
+                            # Ensure internal aliases exist in landmark_data
+                            if (!("stage_old" %in% names(landmark_data)) && !is.null(old_stage) && old_stage %in% names(landmark_data)) {
+                                landmark_data[["stage_old"]] <- landmark_data[[old_stage]]
+                            }
+                            if (!("stage_new" %in% names(landmark_data)) && !is.null(new_stage) && new_stage %in% names(landmark_data)) {
+                                landmark_data[["stage_new"]] <- landmark_data[[new_stage]]
+                            }
+                            if (!("time_internal" %in% names(landmark_data)) && !is.null(time_var) && time_var %in% names(landmark_data)) {
+                                landmark_data[["time_internal"]] <- landmark_data[[time_var]]
+                            }
 
-                            # Fit Cox models for landmark cohort
-                            old_formula <- as.formula(paste("survival::Surv(", paste0(time_var, "_adj"), ",", event_var, ") ~", old_stage))
-                            new_formula <- as.formula(paste("survival::Surv(", paste0(time_var, "_adj"), ",", event_var, ") ~", new_stage))
+                            # Adjust survival times (subtract landmark time)
+                            landmark_data[["time_adj_internal"]] <- landmark_data[["time_internal"]] - landmark_time
+
+                            # Fit Cox models for landmark cohort using internal aliases
+                            old_formula <- stats::as.formula("survival::Surv(time_adj_internal, event_binary) ~ stage_old")
+                            new_formula <- stats::as.formula("survival::Surv(time_adj_internal, event_binary) ~ stage_new")
 
                             old_cox_landmark <- survival::coxph(old_formula, data = landmark_data)
                             new_cox_landmark <- survival::coxph(new_formula, data = landmark_data)
@@ -736,26 +747,31 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Test for time-varying effects using interaction with time
                         time_varying_results <- list()
 
-                        # Create time interaction terms
-                        data$log_time <- log(pmax(data[[time_var]], 0.1)) # Avoid log(0)
-                        data$sqrt_time <- sqrt(data[[time_var]])
+                        # Ensure internal aliases exist in data
+                        if (!("stage_old" %in% names(data)) && !is.null(old_stage) && old_stage %in% names(data)) {
+                            data[["stage_old"]] <- data[[old_stage]]
+                        }
+                        if (!("stage_new" %in% names(data)) && !is.null(new_stage) && new_stage %in% names(data)) {
+                            data[["stage_new"]] <- data[[new_stage]]
+                        }
+                        if (!("time_internal" %in% names(data)) && !is.null(time_var) && time_var %in% names(data)) {
+                            data[["time_internal"]] <- data[[time_var]]
+                        }
 
-                        # Test old staging system
-                        old_base_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
-                        old_time_formula <- as.formula(paste(
-                            "survival::Surv(", time_var, ",", event_var, ") ~",
-                            old_stage, "+ ", old_stage, ":log_time"
-                        ))
+                        # Create time interaction terms
+                        data$log_time <- log(pmax(data[["time_internal"]], 0.1)) # Avoid log(0)
+                        data$sqrt_time <- sqrt(data[["time_internal"]])
+
+                        # Test old staging system using internal aliases
+                        old_base_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_old")
+                        old_time_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_old + stage_old:log_time")
 
                         old_base_cox <- survival::coxph(old_base_formula, data = data)
                         old_time_cox <- survival::coxph(old_time_formula, data = data)
 
-                        # Test new staging system
-                        new_base_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
-                        new_time_formula <- as.formula(paste(
-                            "survival::Surv(", time_var, ",", event_var, ") ~",
-                            new_stage, "+ ", new_stage, ":log_time"
-                        ))
+                        # Test new staging system using internal aliases
+                        new_base_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_new")
+                        new_time_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_new + stage_new:log_time")
 
                         new_base_cox <- survival::coxph(new_base_formula, data = data)
                         new_time_cox <- survival::coxph(new_time_formula, data = data)
@@ -3829,8 +3845,9 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Create survival object
                         surv_obj <- Surv(shap_data$outcome_time, shap_data$outcome_event)
 
-                        # Build Cox model with all features
-                        cox_formula <- as.formula(paste("surv_obj ~", paste(shap_data$feature_names, collapse = " + ")))
+                        # Build Cox model with all features using safe variable escaping
+                        safe_features <- vapply(shap_data$feature_names, function(x) paste0("`", gsub("`", "", x), "`"), character(1))
+                        cox_formula <- stats::as.formula(paste("surv_obj ~", paste(safe_features, collapse = " + ")))
                         cox_model <- private$.safeExecute(
                             {
                                 coxph(cox_formula, data = shap_data$feature_data)
@@ -3883,10 +3900,11 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             n_vars <- max(2, floor(sqrt(n_features)))
                             selected_vars <- sample(shap_data$feature_names, min(n_vars, n_features))
 
-                            # Build submodel
-                            submodel_formula <- as.formula(paste(
+                            # Build submodel using safe variable escaping
+                            safe_selected <- vapply(selected_vars, function(x) paste0("`", gsub("`", "", x), "`"), character(1))
+                            submodel_formula <- stats::as.formula(paste(
                                 "Surv(outcome_time, outcome_event) ~",
-                                paste(selected_vars, collapse = " + ")
+                                paste(safe_selected, collapse = " + ")
                             ))
                             submodel <- private$.safeExecute(
                                 {
@@ -5339,7 +5357,7 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 system_name <- ifelse(stage_system == "old_stage", "Original", "New")
 
                                 # Fit Cox model
-                                cox_formula <- as.formula(paste("survival::Surv(time, current_event) ~", stage_system))
+                                cox_formula <- stats::as.formula(paste("survival::Surv(time, current_event) ~", stage_system))
                                 cox_fit <- tryCatch(
                                     {
                                         survival::coxph(cox_formula, data = competing_data)
@@ -5560,7 +5578,7 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         # Fit Cox model
-                        cox_formula <- as.formula(paste("survival::Surv(time,", event_var, ") ~", stage_var))
+                        cox_formula <- stats::as.formula(paste("survival::Surv(time,", event_var, ") ~", stage_var))
                         cox_fit <- survival::coxph(cox_formula, data = data)
 
                         # Extract concordance
@@ -5862,9 +5880,21 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         nodesize <- as.numeric(self$options$forestMinNodeSize)
                         mtry <- if (self$options$rfMtryAuto) NULL else as.numeric(self$options$forestMTry)
 
-                        # Fit Random Forest model
-                        formula_str <- paste("Surv(time, status) ~", paste(predictor_vars, collapse = " + "))
-                        rf_formula <- as.formula(formula_str)
+                        # Fit Random Forest model using safe escaped variables
+                        safe_predictors <- vapply(predictor_vars, function(x) paste0("`", gsub("`", "", x), "`"), character(1))
+                        formula_str <- paste("Surv(time, status) ~", paste(safe_predictors, collapse = " + "))
+                        rf_formula <- stats::as.formula(formula_str)
+
+                        # Determine importance parameter
+                        imp_arg <- if (isTRUE(self$options$calculateVariableImportance)) {
+                            if (!is.null(self$options$forestImportanceType) && self$options$forestImportanceType %in% c("permute", "random")) {
+                                self$options$forestImportanceType
+                            } else {
+                                TRUE
+                            }
+                        } else {
+                            FALSE
+                        }
 
                         rf_model <- randomForestSRC::rfsrc(
                             formula = rf_formula,
@@ -5872,7 +5902,7 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ntree = ntree,
                             nodesize = nodesize,
                             mtry = mtry,
-                            importance = self$options$calculateVariableImportance,
+                            importance = imp_arg,
                             bootstrap = if (self$options$rfBootstrapType == "by.root") "by.root" else "by.node",
                             samptype = if (self$options$rfSamplingType == "swr") "swr" else "swor",
                             na.action = "na.impute"

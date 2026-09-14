@@ -30,11 +30,28 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             time_points <- c(12, 24, 60) # Default time points
                         }
 
-                        # Build prediction models
-                        old_covariates <- c(old_stage, all_covariates)
-                        old_formula <- as.formula(paste(
-                            "survival::Surv(", survival_time, ", event_binary) ~",
-                            paste(old_covariates, collapse = " + ")
+                        # Ensure internal aliases exist in covariate_data
+                        if (!("stage_old" %in% names(covariate_data)) && !is.null(old_stage) && old_stage %in% names(covariate_data)) {
+                            covariate_data[["stage_old"]] <- covariate_data[[old_stage]]
+                        }
+                        if (!("stage_new" %in% names(covariate_data)) && !is.null(new_stage) && new_stage %in% names(covariate_data)) {
+                            covariate_data[["stage_new"]] <- covariate_data[[new_stage]]
+                        }
+                        if (!("time_internal" %in% names(covariate_data)) && !is.null(survival_time) && survival_time %in% names(covariate_data)) {
+                            covariate_data[["time_internal"]] <- covariate_data[[survival_time]]
+                        }
+
+                        # Build prediction models using safe aliases
+                        safe_covariates <- if (length(all_covariates) > 0) {
+                            vapply(all_covariates, function(x) paste0("`", gsub("`", "", x), "`"), character(1))
+                        } else {
+                            character(0)
+                        }
+
+                        old_terms <- c("stage_old", safe_covariates)
+                        old_formula <- stats::as.formula(paste(
+                            "survival::Surv(time_internal, event_binary) ~",
+                            paste(old_terms, collapse = " + ")
                         ))
                         old_model <- tryCatch(
                             {
@@ -43,10 +60,10 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             error = function(e) NULL
                         )
 
-                        new_covariates <- c(new_stage, all_covariates)
-                        new_formula <- as.formula(paste(
-                            "survival::Surv(", survival_time, ", event_binary) ~",
-                            paste(new_covariates, collapse = " + ")
+                        new_terms <- c("stage_new", safe_covariates)
+                        new_formula <- stats::as.formula(paste(
+                            "survival::Surv(time_internal, event_binary) ~",
+                            paste(new_terms, collapse = " + ")
                         ))
                         new_model <- tryCatch(
                             {
@@ -601,6 +618,12 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 all_variables <- c(old_stage, new_stage, all_covariates)
                 n_vars <- length(all_variables)
 
+                # Ensure time_internal alias exists
+                if (!("time_internal" %in% names(covariate_data)) && !is.null(survival_time) && survival_time %in% names(covariate_data)) {
+                    covariate_data[["time_internal"]] <- covariate_data[[survival_time]]
+                }
+                safe_all_variables <- vapply(all_variables, function(x) paste0("`", gsub("`", "", x), "`"), character(1))
+
                 # Storage for bootstrap results
                 bootstrap_selections <- matrix(0, nrow = n_bootstrap, ncol = n_vars)
                 colnames(bootstrap_selections) <- all_variables
@@ -633,9 +656,9 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             }
 
                             # Build full model for bootstrap sample
-                            full_formula <- as.formula(paste(
-                                "survival::Surv(", survival_time, ", event_binary) ~",
-                                paste(all_variables, collapse = " + ")
+                            full_formula <- stats::as.formula(paste(
+                                "survival::Surv(time_internal, event_binary) ~",
+                                paste(safe_all_variables, collapse = " + ")
                             ))
 
                             # Check for model convergence
@@ -751,9 +774,10 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (length(stable_vars) > 0) {
                     tryCatch(
                         {
-                            stable_formula <- as.formula(paste(
-                                "survival::Surv(", survival_time, ", event_binary) ~",
-                                paste(stable_vars, collapse = " + ")
+                            safe_stable_vars <- vapply(stable_vars, function(x) paste0("`", gsub("`", "", x), "`"), character(1))
+                            stable_formula <- stats::as.formula(paste(
+                                "survival::Surv(time_internal, event_binary) ~",
+                                paste(safe_stable_vars, collapse = " + ")
                             ))
                             final_stable_model <- survival::coxph(stable_formula, data = covariate_data)
 
@@ -776,9 +800,9 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 traditional_stepwise <- NULL
                 tryCatch(
                     {
-                        full_formula <- as.formula(paste(
-                            "survival::Surv(", survival_time, ", event_binary) ~",
-                            paste(all_variables, collapse = " + ")
+                        full_formula <- stats::as.formula(paste(
+                            "survival::Surv(time_internal, event_binary) ~",
+                            paste(safe_all_variables, collapse = " + ")
                         ))
                         full_model <- survival::coxph(full_formula, data = covariate_data)
                         traditional_stepwise <- step(full_model, direction = "both", trace = FALSE)
@@ -884,29 +908,33 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ))
                 }
 
+                # Ensure internal aliases exist in covariate_data
+                covariate_data[["stage_old"]] <- covariate_data[[old_stage]]
+                covariate_data[["stage_new"]] <- covariate_data[[new_stage]]
+                covariate_data[["time_internal"]] <- covariate_data[[survival_time]]
+
                 # Perform interaction tests
                 interaction_tests <- list()
 
                 for (covar in all_covariates) {
                     # Create covariate formula
+                    safe_covar_name <- paste0("`", gsub("`", "", covar), "`")
                     covariate_formula <- if (is.factor(covariate_data[[covar]])) {
-                        paste("as.factor(", covar, ")", sep = "")
+                        paste0("as.factor(", safe_covar_name, ")")
                     } else {
-                        covar
+                        safe_covar_name
                     }
 
                     # Test interaction with old staging
                     tryCatch(
                         {
-                            int_formula_old <- as.formula(paste(
-                                "survival::Surv(", survival_time, ", event_binary) ~",
-                                "as.factor(", old_stage, ") *", covariate_formula
+                            int_formula_old <- stats::as.formula(paste(
+                                "survival::Surv(time_internal, event_binary) ~ as.factor(stage_old) *", covariate_formula
                             ))
                             int_model_old <- survival::coxph(int_formula_old, data = covariate_data)
 
-                            base_formula_old <- as.formula(paste(
-                                "survival::Surv(", survival_time, ", event_binary) ~",
-                                "as.factor(", old_stage, ") +", covariate_formula
+                            base_formula_old <- stats::as.formula(paste(
+                                "survival::Surv(time_internal, event_binary) ~ as.factor(stage_old) +", covariate_formula
                             ))
                             base_model_old <- survival::coxph(base_formula_old, data = covariate_data)
 
@@ -930,15 +958,13 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Test interaction with new staging
                     tryCatch(
                         {
-                            int_formula_new <- as.formula(paste(
-                                "survival::Surv(", survival_time, ", event_binary) ~",
-                                "as.factor(", new_stage, ") *", covariate_formula
+                            int_formula_new <- stats::as.formula(paste(
+                                "survival::Surv(time_internal, event_binary) ~ as.factor(stage_new) *", covariate_formula
                             ))
                             int_model_new <- survival::coxph(int_formula_new, data = covariate_data)
 
-                            base_formula_new <- as.formula(paste(
-                                "survival::Surv(", survival_time, ", event_binary) ~",
-                                "as.factor(", new_stage, ") +", covariate_formula
+                            base_formula_new <- stats::as.formula(paste(
+                                "survival::Surv(time_internal, event_binary) ~ as.factor(stage_new) +", covariate_formula
                             ))
                             base_model_new <- survival::coxph(base_formula_new, data = covariate_data)
 
@@ -4211,6 +4237,14 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             stringsAsFactors = FALSE
                         )
 
+                        # Ensure internal aliases exist in data
+                        if (!("stage_old" %in% names(data)) && !is.null(old_col) && old_col %in% names(data)) {
+                            data[["stage_old"]] <- data[[old_col]]
+                        }
+                        if (!("stage_new" %in% names(data)) && !is.null(new_col) && new_col %in% names(data)) {
+                            data[["stage_new"]] <- data[[new_col]]
+                        }
+
                         # Perform cross-validation (k-fold or multi-institutional)
                         for (fold in 1:cv_folds) {
                             # Checkpoint before each fold to allow cancellation
@@ -4261,11 +4295,11 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 {
                                     # Old staging system
                                     train_surv <- survival::Surv(train_data[[time_col]], train_data$event_binary)
-                                    old_formula <- as.formula(paste("train_surv ~", old_col))
+                                    old_formula <- stats::as.formula("train_surv ~ stage_old")
                                     old_fit <- survival::coxph(old_formula, data = train_data)
 
                                     # New staging system
-                                    new_formula <- as.formula(paste("train_surv ~", new_col))
+                                    new_formula <- stats::as.formula("train_surv ~ stage_new")
                                     new_fit <- survival::coxph(new_formula, data = train_data)
 
                                     # Test on held-out data
@@ -4293,9 +4327,9 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                                     # Statistical comparison using likelihood ratio test
                                     # Fit nested models on test data for comparison
-                                    test_old_formula <- as.formula(paste("test_surv ~", old_col))
+                                    test_old_formula <- stats::as.formula("test_surv ~ stage_old")
                                     test_old_fit <- survival::coxph(test_old_formula, data = test_data)
-                                    test_new_formula <- as.formula(paste("test_surv ~", new_col))
+                                    test_new_formula <- stats::as.formula("test_surv ~ stage_new")
                                     test_new_fit <- survival::coxph(test_new_formula, data = test_data)
 
                                     # Likelihood ratio test
@@ -4889,18 +4923,26 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             stringsAsFactors = FALSE
                         )
 
+                        # Ensure internal aliases exist in covariate_data
+                        if (!("stage_old" %in% names(covariate_data)) && !is.null(old_stage) && old_stage %in% names(covariate_data)) {
+                            covariate_data[["stage_old"]] <- covariate_data[[old_stage]]
+                        }
+                        if (!("stage_new" %in% names(covariate_data)) && !is.null(new_stage) && new_stage %in% names(covariate_data)) {
+                            covariate_data[["stage_new"]] <- covariate_data[[new_stage]]
+                        }
+
                         # Test interactions with each covariate
                         for (covar in all_covariates) {
                             if (covar %in% names(covariate_data)) {
                                 # Test interaction with old staging system
+                                safe_covar <- paste0("`", gsub("`", "", covar), "`")
 
-                                # Build formulas with debugging
-                                old_int_formula_str <- paste("surv_obj ~", old_stage, "*", covar)
-                                old_main_formula_str <- paste("surv_obj ~", old_stage, "+", covar)
+                                # Build formulas with internal aliases
+                                old_int_formula_str <- paste("surv_obj ~ stage_old *", safe_covar)
+                                old_main_formula_str <- paste("surv_obj ~ stage_old +", safe_covar)
 
-
-                                old_interaction_formula <- as.formula(old_int_formula_str)
-                                old_main_formula <- as.formula(old_main_formula_str)
+                                old_interaction_formula <- stats::as.formula(old_int_formula_str)
+                                old_main_formula <- stats::as.formula(old_main_formula_str)
 
                                 old_interaction_fit <- tryCatch(
                                     {
@@ -4921,8 +4963,8 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 )
 
                                 # Test interaction with new staging system
-                                new_interaction_formula <- as.formula(paste("surv_obj ~", new_stage, "*", covar))
-                                new_main_formula <- as.formula(paste("surv_obj ~", new_stage, "+", covar))
+                                new_interaction_formula <- stats::as.formula(paste("surv_obj ~ stage_new *", safe_covar))
+                                new_main_formula <- stats::as.formula(paste("surv_obj ~ stage_new +", safe_covar))
 
                                 new_interaction_fit <- tryCatch(coxph(new_interaction_formula, data = covariate_data), error = function(e) NULL)
                                 new_main_fit <- tryCatch(coxph(new_main_formula, data = covariate_data), error = function(e) NULL)
@@ -5000,9 +5042,9 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     comparison_p <- tryCatch(
                                         {
                                             # Create unified model with both staging systems and their interactions
-                                            unified_formula <- as.formula(paste(
-                                                "surv_obj ~", old_stage, "+", new_stage, "+", covar, "+",
-                                                paste0(old_stage, ":", covar), "+", paste0(new_stage, ":", covar)
+                                            unified_formula <- stats::as.formula(paste(
+                                                "surv_obj ~ stage_old + stage_new +", safe_covar, "+",
+                                                paste0("stage_old:", safe_covar), "+", paste0("stage_new:", safe_covar)
                                             ))
                                             unified_fit <- coxph(unified_formula, data = covariate_data)
 
@@ -5020,7 +5062,7 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     )
 
                                     # Extract hazard ratios
-                                    old_main_hr <- tryCatch(exp(coef(old_main_fit)[grep(old_stage, names(coef(old_main_fit)))[1]]), error = function(e) NA)
+                                    old_main_hr <- tryCatch(exp(coef(old_main_fit)[grep("(stage_old|old_stage)", names(coef(old_main_fit)))[1]]), error = function(e) NA)
                                     old_interaction_hr <- tryCatch(
                                         {
                                             interaction_coef <- coef(old_interaction_fit)[grep(":", names(coef(old_interaction_fit)))]
@@ -5029,7 +5071,7 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                         error = function(e) NA
                                     )
 
-                                    new_main_hr <- tryCatch(exp(coef(new_main_fit)[grep(new_stage, names(coef(new_main_fit)))[1]]), error = function(e) NA)
+                                    new_main_hr <- tryCatch(exp(coef(new_main_fit)[grep("(stage_new|new_stage)", names(coef(new_main_fit)))[1]]), error = function(e) NA)
                                     new_interaction_hr <- tryCatch(
                                         {
                                             interaction_coef <- coef(new_interaction_fit)[grep(":", names(coef(new_interaction_fit)))]
@@ -5163,9 +5205,22 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Create survival object
                         surv_obj <- Surv(survival_times, events == self$options$eventLevel)
 
+                        # Ensure internal aliases exist in covariate_data
+                        if (!("stage_old" %in% names(covariate_data)) && !is.null(old_stage) && old_stage %in% names(covariate_data)) {
+                            covariate_data[["stage_old"]] <- covariate_data[[old_stage]]
+                        }
+                        if (!("stage_new" %in% names(covariate_data)) && !is.null(new_stage) && new_stage %in% names(covariate_data)) {
+                            covariate_data[["stage_new"]] <- covariate_data[[new_stage]]
+                        }
+                        safe_covariates <- if (length(all_covariates) > 0) {
+                            vapply(all_covariates, function(x) paste0("`", gsub("`", "", x), "`"), character(1))
+                        } else {
+                            character(0)
+                        }
+
                         # Build comprehensive models for diagnostics
-                        old_formula <- as.formula(paste("surv_obj ~", old_stage, "+", paste(all_covariates, collapse = " + ")))
-                        new_formula <- as.formula(paste("surv_obj ~", new_stage, "+", paste(all_covariates, collapse = " + ")))
+                        old_formula <- stats::as.formula(paste("surv_obj ~", paste(c("stage_old", safe_covariates), collapse = " + ")))
+                        new_formula <- stats::as.formula(paste("surv_obj ~", paste(c("stage_new", safe_covariates), collapse = " + ")))
 
                         old_model <- tryCatch(coxph(old_formula, data = covariate_data), error = function(e) NULL)
                         new_model <- tryCatch(coxph(new_formula, data = covariate_data), error = function(e) NULL)
@@ -5714,9 +5769,20 @@ stagemigrationPart3 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .assessSurvivalPatternEvidence = function(data, old_stage, new_stage, time_var, event_var) {
                 tryCatch(
                     {
-                        # Fit survival models for comparison
-                        old_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", old_stage))
-                        new_formula <- as.formula(paste("survival::Surv(", time_var, ",", event_var, ") ~", new_stage))
+                        # Ensure internal aliases exist in data
+                        if (!("stage_old" %in% names(data)) && !is.null(old_stage) && old_stage %in% names(data)) {
+                            data[["stage_old"]] <- data[[old_stage]]
+                        }
+                        if (!("stage_new" %in% names(data)) && !is.null(new_stage) && new_stage %in% names(data)) {
+                            data[["stage_new"]] <- data[[new_stage]]
+                        }
+                        if (!("time_internal" %in% names(data)) && !is.null(time_var) && time_var %in% names(data)) {
+                            data[["time_internal"]] <- data[[time_var]]
+                        }
+
+                        # Fit survival models for comparison using internal aliases
+                        old_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_old")
+                        new_formula <- stats::as.formula("survival::Surv(time_internal, event_binary) ~ stage_new")
 
                         old_cox <- survival::coxph(old_formula, data = data)
                         new_cox <- survival::coxph(new_formula, data = data)

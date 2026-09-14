@@ -276,6 +276,45 @@ stagemigration_validateData <- function(data, options,
         return(validation_result)
     }
 
+    # Check for sparse staging subgroups (<5 patients) and zero-event categories
+    if (!is.null(old_stage) && old_stage %in% names(data)) {
+        old_counts <- table(data[[old_stage]])
+        old_sparse <- names(old_counts)[old_counts > 0 & old_counts < 5]
+        if (length(old_sparse) > 0) {
+            validation_result$warnings <- c(validation_result$warnings,
+                sprintf("Original staging contains sparse category (<5 patients): %s. Parameter estimates for this stage may have high standard errors.",
+                        paste(old_sparse, collapse = ", ")))
+        }
+        if ("event_binary" %in% names(data)) {
+            old_events <- tapply(data$event_binary, data[[old_stage]], sum, na.rm = TRUE)
+            old_zero_ev <- names(old_events)[!is.na(old_events) & old_events == 0]
+            if (length(old_zero_ev) > 0) {
+                validation_result$warnings <- c(validation_result$warnings,
+                    sprintf("Original staging contains category with 0 events: %s. This may cause model convergence issues or infinite hazard ratios.",
+                            paste(old_zero_ev, collapse = ", ")))
+            }
+        }
+    }
+
+    if (!is.null(new_stage) && new_stage %in% names(data)) {
+        new_counts <- table(data[[new_stage]])
+        new_sparse <- names(new_counts)[new_counts > 0 & new_counts < 5]
+        if (length(new_sparse) > 0) {
+            validation_result$warnings <- c(validation_result$warnings,
+                sprintf("New staging contains sparse category (<5 patients): %s. Parameter estimates for this stage may have high standard errors.",
+                        paste(new_sparse, collapse = ", ")))
+        }
+        if ("event_binary" %in% names(data)) {
+            new_events <- tapply(data$event_binary, data[[new_stage]], sum, na.rm = TRUE)
+            new_zero_ev <- names(new_events)[!is.na(new_events) & new_events == 0]
+            if (length(new_zero_ev) > 0) {
+                validation_result$warnings <- c(validation_result$warnings,
+                    sprintf("New staging contains category with 0 events: %s. This may cause model convergence issues or infinite hazard ratios.",
+                            paste(new_zero_ev, collapse = ", ")))
+            }
+        }
+    }
+
     # =========================================================================
     # STEP 6: Validate covariates if multifactorial analysis enabled
     # =========================================================================

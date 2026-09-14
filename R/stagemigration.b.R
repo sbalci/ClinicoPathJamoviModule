@@ -3473,6 +3473,14 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             .("Proportional hazards assumption"),
                             paste0("The Schoenfeld global test suggests non-proportional hazards (", paste(detail, collapse = "; "),
                                    "). Hazard ratios, C-index, NRI and IDI from these Cox models assume proportional hazards; consider a stratified or time-varying Cox model, or RMST, which does not require the assumption."))
+
+                        ph_tbl_note <- .("Note: Proportional hazards assumption may be violated (Schoenfeld p \u{2264} 0.05). Hazard ratios and concordance measures reflect average effects over follow-up; evaluate Time-Dependent ROC or Landmark Analysis.")
+                        if (!is.null(self$results$concordanceComparison)) {
+                            tryCatch(self$results$concordanceComparison$setNote("ph_violation", ph_tbl_note), error = function(e) NULL)
+                        }
+                        if (!is.null(self$results$statisticalComparison)) {
+                            tryCatch(self$results$statisticalComparison$setNote("ph_violation", ph_tbl_note), error = function(e) NULL)
+                        }
                     }
                 }
 
