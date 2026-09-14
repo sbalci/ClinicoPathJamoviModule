@@ -1,0 +1,647 @@
+{
+  "clientPath": "/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets/analysisui-BevjJ36p.js",
+  "report": [
+    {
+      "control": "effect_size_type",
+      "values": {},
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "effect_size_type",
+      "values": {
+        "test_type": "non_inferiority",
+        "analysis_type": "effect_size"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "effect_size",
+      "values": {},
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'effect_size_type != \"rmst_difference\"'. It does not exist.",
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "effect_size",
+      "values": {
+        "effect_size_type": "rmst_difference"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'effect_size_type != \"rmst_difference\"'. It does not exist.",
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "effect_size",
+      "values": {
+        "test_type": "non_inferiority",
+        "analysis_type": "effect_size"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'effect_size_type != \"rmst_difference\"'. It does not exist.",
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "power_level",
+      "values": {},
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type != \"power\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "power_level",
+      "values": {
+        "analysis_type": "power"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type != \"power\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "sample_size_input",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type != \"sample_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "sample_size_input",
+      "values": {
+        "analysis_type": "power"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type != \"sample_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "sample_size_input",
+      "values": {
+        "analysis_type": "effect_size"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type != \"sample_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "sample_size_input",
+      "values": {
+        "analysis_type": "duration"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type != \"sample_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "weibull_shape",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'survival_distribution==\"weibull\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "weibull_shape",
+      "values": {
+        "survival_distribution": "weibull"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'survival_distribution==\"weibull\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "ni_margin",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type==\"non_inferiority\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "ni_margin",
+      "values": {
+        "test_type": "non_inferiority"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type==\"non_inferiority\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "ni_type",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type==\"non_inferiority\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "ni_type",
+      "values": {
+        "test_type": "non_inferiority"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type==\"non_inferiority\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "rmst_tau",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type"
+      ],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "rmst_tau",
+      "values": {
+        "effect_size_type": "rmst_difference"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type"
+      ],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "rmst_tau",
+      "values": {
+        "test_type": "rmst_test"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type"
+      ],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "rmst_tau",
+      "values": {
+        "test_type": "non_inferiority",
+        "analysis_type": "effect_size",
+        "effect_size_type": "rmst_difference"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type"
+      ],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "number_of_arms",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'study_design==\"multi_arm\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "number_of_arms",
+      "values": {
+        "study_design": "multi_arm"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'study_design==\"multi_arm\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "cluster_size",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'study_design==\"cluster_randomized\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "cluster_size",
+      "values": {
+        "study_design": "cluster_randomized"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'study_design==\"cluster_randomized\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "alpha_spending",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'interim_analyses>0'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "alpha_spending",
+      "values": {
+        "interim_analyses": 1
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'interim_analyses>0'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "alpha_spending",
+      "values": {
+        "interim_analyses": 5
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'interim_analyses>0'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "sensitivity_analysis",
+      "values": {},
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type == \"sample_size\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type == \"power\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "sensitivity_analysis",
+      "values": {
+        "analysis_type": "power"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type == \"sample_size\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type == \"power\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "sensitivity_analysis",
+      "values": {
+        "analysis_type": "effect_size"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type == \"sample_size\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type == \"power\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "sensitivity_analysis",
+      "values": {
+        "analysis_type": "duration"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type == \"sample_size\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type == \"power\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "simulation_runs",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "run_simulation_validation"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "simulation_runs",
+      "values": {
+        "run_simulation_validation": true
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "run_simulation_validation"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "rmst_difference",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type"
+      ],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "rmst_difference",
+      "values": {
+        "effect_size_type": "rmst_difference"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type"
+      ],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "rmst_difference",
+      "values": {
+        "test_type": "rmst_test"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type"
+      ],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "rmst_difference",
+      "values": {
+        "test_type": "non_inferiority",
+        "analysis_type": "effect_size",
+        "effect_size_type": "rmst_difference"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type"
+      ],
+      "warnings": [
+        "WARNING: Cannot bind to 'test_type != \"non_inferiority\"'. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type != \"effect_size\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "multiple_comparisons",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'study_design==\"multi_arm\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "multiple_comparisons",
+      "values": {
+        "study_design": "multi_arm"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'study_design==\"multi_arm\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "icc",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'study_design==\"cluster_randomized\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "icc",
+      "values": {
+        "study_design": "cluster_randomized"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'study_design==\"cluster_randomized\"'. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "run_simulation_validation",
+      "values": {},
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type=='sample_size''. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type=='power''. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "run_simulation_validation",
+      "values": {
+        "analysis_type": "power"
+      },
+      "expected": true,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type=='sample_size''. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type=='power''. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "run_simulation_validation",
+      "values": {
+        "analysis_type": "effect_size"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type=='sample_size''. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type=='power''. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "run_simulation_validation",
+      "values": {
+        "analysis_type": "duration"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [],
+      "warnings": [
+        "WARNING: Cannot bind to 'analysis_type=='sample_size''. It does not exist.",
+        "WARNING: Cannot bind to 'analysis_type=='power''. It does not exist."
+      ],
+      "pass": false
+    },
+    {
+      "control": "simulation_seed",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "run_simulation_validation"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "simulation_seed",
+      "values": {
+        "run_simulation_validation": true
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "run_simulation_validation"
+      ],
+      "warnings": [],
+      "pass": true
+    }
+  ]
+}

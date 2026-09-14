@@ -170,9 +170,9 @@ modules:
       - "survival_utils.R"
       # diagnostichelpers.R removed: all 17 functions are dead umbrella-wide.
       # survivalPower_distributions.R is intentionally NOT shipped to production jsurvival:
-      # the survivalPower analysis is dev-routed to menuGroup SurvivalT (JamoviTest) and is
+      # the survivalPower analysis is dev-routed to menuGroup PowerT (JamoviTest) and is
       # absent from jsurvival's 0000.yaml, so this helper (11 functions, 0 callers in jsurvival)
-      # is orphaned dead weight in the release build. It stays in main + JamoviTest r_files;
+      # is orphaned dead weight in the release build. It is auto-copied to JamoviTest;
       # re-add here when survivalPower is promoted to a production Survival menuGroup.
       - "multisurvival-interactions.R"
       - "multisurvival-metrics.R"

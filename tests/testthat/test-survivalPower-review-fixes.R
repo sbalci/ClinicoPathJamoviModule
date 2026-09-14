@@ -58,7 +58,11 @@ test_that("NI effect inversion ignores the unused starting HR but keeps feasibil
     expect_false(grepl("Effect Not Below", a$results$notices$content, fixed = TRUE))
     sp_review_private(a)$primary_numbers$hr_detectable
   }, 0)
-  expect_equal(solved, rep(1.011903860189, 4), tolerance = 1e-5)
+  reference <- uniroot(function(hr) {
+    events <- 500 * (sp_review_events(1) + sp_review_events(hr))
+    log(1.25 / hr) * sqrt(events / 4) - qnorm(0.975) - qnorm(0.8)
+  }, c(0.1, 1.25), tol = 1e-10)$root
+  expect_equal(solved, rep(reference, 4), tolerance = 1e-8)
   for (mode in c("sample_size", "power", "duration")) {
     a <- sp_review(test_type = "non_inferiority", analysis_type = mode, effect_size = 1.5)
     expect_match(a$results$notices$content, "Effect Not Below", fixed = TRUE)

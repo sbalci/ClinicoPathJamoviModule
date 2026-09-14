@@ -1,0 +1,16 @@
+[
+  {
+    "input_hr": 1,
+    "numbers": {
+      "hr_detectable": 1.011903860189
+    },
+    "notices": "One-sided Alpha for Non-inferiority\nNon-inferiority is tested one-sided at alpha = 0.025 • Regulatory submissions conventionally use one-sided 0.025 (enter 0.025 here)\n\nAnalysis Complete\nPower analysis completed: Non-inferiority Trial with overall survival endpoint • Assumes exponential survival and uniform accrual"
+  },
+  {
+    "input_hr": 1.5,
+    "numbers": {
+      "hr_detectable": 1.011903860189
+    },
+    "notices": "One-sided Alpha for Non-inferiority\nNon-inferiority is tested one-sided at alpha = 0.025 • Regulatory submissions conventionally use one-sided 0.025 (enter 0.025 here)\n\nAnalysis Complete\nPower analysis completed: Non-inferiority Trial with overall survival endpoint • Assumes exponential survival and uniform accrual"
+  }
+]

@@ -1,0 +1,52 @@
+"case","observed","reference","abs_error","tolerance","passed"
+"log_rank power ratio 0.2 HR 0.1",0.999999999999998,0.999999999999998,0,1e-07,TRUE
+"log_rank power ratio 0.2 HR 0.75",0.542945389065897,0.542945389065896,3.33066907387547e-16,1e-07,TRUE
+"log_rank power ratio 0.2 HR 1",0.0500000000000001,0.05,1.38777878078145e-16,1e-07,TRUE
+"log_rank power ratio 0.2 HR 1.5",0.912436421198846,0.912436421198846,3.33066907387547e-16,1e-07,TRUE
+"log_rank power ratio 0.2 HR 5",1,1,0,1e-07,TRUE
+"log_rank power ratio 1 HR 0.1",1,1,0,1e-07,TRUE
+"log_rank power ratio 1 HR 0.75",0.812163674419933,0.812163674419933,5.55111512312578e-16,1e-07,TRUE
+"log_rank power ratio 1 HR 1",0.0500000000000001,0.05,1.38777878078145e-16,1e-07,TRUE
+"log_rank power ratio 1 HR 1.5",0.991220480486857,0.991220480486857,1.11022302462516e-16,1e-07,TRUE
+"log_rank power ratio 1 HR 5",1,1,0,1e-07,TRUE
+"log_rank power ratio 5 HR 0.1",1,1,0,1e-07,TRUE
+"log_rank power ratio 5 HR 0.75",0.584482684154426,0.584482684154426,1.11022302462516e-16,1e-07,TRUE
+"log_rank power ratio 5 HR 1",0.0500000000000001,0.05,1.38777878078145e-16,1e-07,TRUE
+"log_rank power ratio 5 HR 1.5",0.881740705621814,0.881740705621814,1.11022302462516e-16,1e-07,TRUE
+"log_rank power ratio 5 HR 5",1,1,0,1e-07,TRUE
+"log_rank inverted HR reaches 80% power",0.799999543799289,0.8,4.56200710874377e-07,2e-05,TRUE
+"log_rank required events",380,380,0,1e-07,TRUE
+"log_rank sample size",583,583,0,1e-07,TRUE
+"log_rank duration months",24,24,0,1e-04,TRUE
+"cox_regression power ratio 0.2 HR 0.1",1,1,0,1e-07,TRUE
+"cox_regression power ratio 0.2 HR 0.75",0.546560637097877,0.546560637097876,5.55111512312578e-16,1e-07,TRUE
+"cox_regression power ratio 0.2 HR 1",0.0500000000000001,0.05,1.04083408558608e-16,1e-07,TRUE
+"cox_regression power ratio 0.2 HR 1.5",0.901272318044167,0.901272318044167,2.22044604925031e-16,1e-07,TRUE
+"cox_regression power ratio 0.2 HR 5",1,1,0,1e-07,TRUE
+"cox_regression power ratio 1 HR 0.1",1,1,0,1e-07,TRUE
+"cox_regression power ratio 1 HR 0.75",0.813106231667206,0.813106231667206,2.22044604925031e-16,1e-07,TRUE
+"cox_regression power ratio 1 HR 1",0.0500000000000001,0.05,1.04083408558608e-16,1e-07,TRUE
+"cox_regression power ratio 1 HR 1.5",0.991325586809011,0.991325586809011,1.11022302462516e-16,1e-07,TRUE
+"cox_regression power ratio 1 HR 5",1,1,0,1e-07,TRUE
+"cox_regression power ratio 5 HR 0.1",0.999999999998641,0.999999999998641,0,1e-07,TRUE
+"cox_regression power ratio 5 HR 0.75",0.581474039241757,0.581474039241757,0,1e-07,TRUE
+"cox_regression power ratio 5 HR 1",0.0500000000000001,0.05,1.04083408558608e-16,1e-07,TRUE
+"cox_regression power ratio 5 HR 1.5",0.895159610182352,0.895159610182352,0,1e-07,TRUE
+"cox_regression power ratio 5 HR 5",1,1,0,1e-07,TRUE
+"cox_regression inverted HR reaches 80% power",0.80000002791412,0.8,2.79141196823929e-08,2e-05,TRUE
+"cox_regression duration months",24,24,0,1e-04,TRUE
+"non_inferiority power ratio 0.2 HR 0.75",0.956520077076942,0.956520077076942,0,1e-07,TRUE
+"non_inferiority power ratio 0.2 HR 1",0.399603127027216,0.399603127027216,0,1e-07,TRUE
+"non_inferiority power ratio 0.2 HR 1.2",0.0507773826345525,0.0507773826345526,3.46944695195361e-17,1e-07,TRUE
+"non_inferiority power ratio 1 HR 0.75",0.99901032858376,0.99901032858376,0,1e-07,TRUE
+"non_inferiority power ratio 1 HR 1",0.628666816991025,0.628666816991025,1.11022302462516e-16,1e-07,TRUE
+"non_inferiority power ratio 1 HR 1.2",0.0626662829451916,0.0626662829451916,5.55111512312578e-17,1e-07,TRUE
+"non_inferiority power ratio 5 HR 0.75",0.971222094497631,0.971222094497631,0,1e-07,TRUE
+"non_inferiority power ratio 5 HR 1",0.399603127027216,0.399603127027216,0,1e-07,TRUE
+"non_inferiority power ratio 5 HR 1.2",0.0499026729443024,0.0499026729443024,2.77555756156289e-17,1e-07,TRUE
+"non_inferiority inverted HR reaches 80% power",0.800000000020077,0.8,2.00764960212041e-11,2e-05,TRUE
+"non_inferiority required events",631,631,0,1e-07,TRUE
+"non_inferiority sample size",901,901,0,1e-07,TRUE
+"non_inferiority duration months",31.7136800920668,31.7136781977131,1.89435368724844e-06,1e-04,TRUE
+"log_rank nonzero additional follow-up duration",34.7245634728296,34.7245741623735,1.06895439273558e-05,1e-04,TRUE
+"cox_regression nonzero additional follow-up duration",34.557519834578,34.5575198340577,5.20280707405618e-10,1e-04,TRUE

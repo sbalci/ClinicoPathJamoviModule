@@ -1,0 +1,62 @@
+{
+  "scalar_vector_logic": [],
+  "namespace_packages": ["R6", "jmvcore", "gsDesign", "ggplot2", "scales", "withr", "survival", "stats"],
+  "imports_missing": [],
+  "options_missing": [],
+  "options_unread": [],
+  "raw_non_ascii": [],
+  "translated_messages": ["ERROR:", "STRONG WARNING:", "WARNING:", "Low Calculated Power", "Calculated power is {power}%; consider a larger sample or longer follow-up to reach the planning target.", "Few Expected Events", "Only {events} comparison-effective events are expected; asymptotic power can be unreliable with sparse events. Confirm the design using an appropriate simulation.", "Limited Expected Events", "The comparison has {events} expected effective events; check the accuracy of the asymptotic approximation.", "Cluster Design Approximation", "This is an individual-level survival calculation inflated by 1 + (cluster size - 1) times ICC, not a validated cluster survival design. Planned allocation: {control} control and {treatment} treatment clusters of {size} subjects. Confirm the design with a cluster-specific method.", "Few Independent Clusters", "Fewer than 10 clusters per arm are planned; the simple design-effect approximation does not account for small-cluster degrees of freedom. Obtain a cluster-specific power calculation.", "Sensitivity Analysis Not Applicable", "Sensitivity analysis is available for sample-size and power calculations. Select one of those modes to evaluate numerical scenarios.", "Log-rank Test", "Cox Regression", "Competing Risks", "RMST Comparison", "Non-inferiority Trial", "SNP-based Survival", "Weighted Log-rank", "{n} subjects", "The assumed HR is below the NI margin; calculated power is {power}%.", "The design targets {power}% power to exclude the NI margin at this assumed HR.", "Non-inferiority Margin", "The margin requires disease-specific justification from historical evidence and clinical relevance.", "Sample Size Requirement", "Total enrollment", "One-sided Alpha", "Statistical threshold", "For non-inferiority conclusion", "True Hazard Ratio", "Expected effect", "A matching superiority comparison cannot be estimated for these assumptions.", "At HR 1 there is no superiority effect; a matching superiority event requirement is not defined.", "A matching superiority comparison cannot be estimated for these assumptions.", "Requires {percent}% of the events a superiority trial at HR {hr} would need", "Absolute Margin", "Relative Margin", "Retention of Effect Fraction", "Sequential Multi-arm Family Power Not Available", "Per-comparison sequential power is reported. Total study power requires a validated joint arm-and-look calculation and is not estimated here.", "Multi-arm Family Power Unavailable", "The joint normal integration did not meet its accuracy requirement. Per-comparison results remain available.", "Control arm: {control} subjects, shared by {comparisons} comparisons; {experimental} per experimental arm. Power is per comparison at the adjusted alpha. For fixed designs, total study power is a joint normal approximation to the probability that at least one comparison rejects when every experimental arm has HR {hr}. Superiority uses both rejection tails; non-inferiority uses one tail. Shared-control correlation uses allocation proportions for Schoenfeld tests and expected-event variances for Cox. This family estimate is unavailable for sequential designs.", "The design aims to rule out a hazard ratio of {margin} or worse, assuming a true hazard ratio of {hr}, with {n} subjects and {power}% power at a {alpha}% significance level (one-sided).", "The design aims to detect a hazard ratio of {hr} with {n} subjects and {power}% power at a {alpha}% significance level (two-sided).", "{alpha}% significance level (one-sided)", "{alpha}% significance level (two-sided)", "A {test} power analysis indicates that {n} subjects are required, with {accrual} months of accrual and {followup} months of additional follow-up.", "A {test} power analysis for {n} subjects gives {power}% calculated power, with {accrual} months of accrual and {followup} months of additional follow-up.", "A {test} power analysis for {n} subjects gives a maximum true HR of {hr} meeting the non-inferiority power target, with {accrual} months of accrual and {followup} months of additional follow-up.", "A {test} power analysis for {n} subjects gives a detectable HR of {hr}, with {accrual} months of accrual and {followup} months of additional follow-up.", "A {test} power analysis for {n} subjects requires {duration} months in total: {accrual} months of accrual and {followup} months of additional follow-up."],
+  "translation_whitespace": [],
+  "messages_missing_from_tr": [],
+  "refs": [
+    {
+      "key": "ClinicoPathJamoviModule",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "Schoenfeld1983",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "LachinAndFoulkes1986",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "Rothmann2003",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "gsDesign",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "survival",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "ggplot2",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    },
+    {
+      "key": "scales",
+      "defined": true,
+      "author_ok": true,
+      "year_ok": true
+    }
+  ],
+  "menu_group": "PowerT"
+}

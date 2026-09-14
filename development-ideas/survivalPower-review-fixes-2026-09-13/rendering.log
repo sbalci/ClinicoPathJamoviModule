@@ -1,0 +1,4 @@
+null device 
+          1 
+24 outputs populated; 8 references resolve; all 5 renderers pass valid/NULL states.
+Legacy power-plot state and solved duration/effect PNGs also render.

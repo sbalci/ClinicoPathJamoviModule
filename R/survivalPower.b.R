@@ -416,7 +416,8 @@ survivalPowerClass <- R6::R6Class(
 
             # A survival difference has to be read at some time point; it is read at
             # the Additional Follow-up value, so changing follow-up changes the effect.
-            if (isTRUE(self$options$effect_size_type == "survival_difference") && is.finite(hr)) {
+            if (!ni_inverse && isTRUE(self$options$effect_size_type == "survival_difference") &&
+                is.finite(hr)) {
                 private$.addNotice("INFO", "Survival Difference Landmark", sprintf(
                     "The survival difference is read at %s months after entry (the Additional Follow-up value), giving HR %.3f \u{2022} Set Additional Follow-up to the time point the difference refers to",
                     format(self$options$follow_up_period), hr
@@ -573,7 +574,7 @@ survivalPowerClass <- R6::R6Class(
                 # warning and the sign of the log effect was flipped, so the
                 # analysis returned a confident sample size for a trial that can
                 # never succeed.
-                ni_hr <- private$.get_effect_hr()
+                ni_hr <- hr
                 ni_margin <- self$options$ni_margin
                 if (!ni_inverse && is.finite(ni_hr) && !is.null(ni_margin) && ni_hr >= ni_margin) {
                     private$.addNotice("ERROR", "Effect Not Below Non-inferiority Margin", sprintf(
@@ -583,8 +584,7 @@ survivalPowerClass <- R6::R6Class(
                     valid <- FALSE
                 }
 
-                # alpha_level is entered and displayed as two-sided, but the
-                # non-inferiority test is one-sided by construction.
+                # Non-inferiority uses the entered alpha as a one-sided rate.
                 private$.addNotice("INFO", "One-sided Alpha for Non-inferiority", sprintf(
                     "Non-inferiority is tested one-sided at alpha = %.3f \u{2022} Regulatory submissions conventionally use one-sided 0.025 (enter 0.025 here)",
                     private$.one_sided_alpha()
@@ -1361,7 +1361,8 @@ survivalPowerClass <- R6::R6Class(
 
                 detectable_hr <- tryCatch(
                     {
-                        uniroot(objective, interval = c(lower_bound, upper_bound))$root
+                        uniroot(objective, interval = c(lower_bound, upper_bound),
+                            tol = 1e-8)$root
                     },
                     error = function(e) {
                         NA_real_
@@ -1835,8 +1836,6 @@ survivalPowerClass <- R6::R6Class(
         .populate_multi_arm_table = function() {
             table <- self$results$multi_arm_table
             num_arms <- self$options$number_of_arms
-            ratio <- self$options$allocation_ratio
-            if (is.null(ratio) || !is.finite(ratio) || ratio <= 0) ratio <- 1
 
             adjusted_alpha <- private$.adjust_alpha_for_multiplicity(self$options$alpha_level)
 
@@ -3147,7 +3146,8 @@ survivalPowerClass <- R6::R6Class(
                     target <- plotData$options$power_target
                     if (length(target) == 1 && is.finite(target)) {
                         plot <- plot + ggplot2::geom_hline(
-                            yintercept = target, linetype = "dashed", alpha = 0.6)
+                            yintercept = target, linetype = "dashed",
+                            color = "#D55E00", linewidth = 0.7)
                     }
                     print(plot)
                     return(TRUE)
@@ -3260,7 +3260,12 @@ survivalPowerClass <- R6::R6Class(
                             "Follow-up" = "#E69F00",
                             "Analysis" = "#e74c3c"
                         )) +
-                        ggtheme
+                        ggtheme +
+                        ggplot2::theme(
+                            axis.text.y = ggplot2::element_blank(),
+                            axis.ticks.y = ggplot2::element_blank(),
+                            axis.title.y = ggplot2::element_blank()
+                        )
 
                     print(plot)
                     return(TRUE)

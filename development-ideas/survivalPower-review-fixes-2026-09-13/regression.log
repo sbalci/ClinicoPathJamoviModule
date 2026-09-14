@@ -1,0 +1,195 @@
+ℹ Loading ClinicoPath
+Registered S3 method overwritten by 'lme4':
+  method           from
+  na.action.merMod car 
+Registered S3 methods overwritten by 'consort':
+  method                from          
+  heightDetails.textbox ComplexHeatmap
+  widthDetails.textbox  ComplexHeatmap
+Registered S3 method overwritten by 'partitions':
+  method            from
+  print.equivalence lava
+Registered S3 method overwritten by 'DoE.base':
+  method           from       
+  factorize.factor conf.design
+Registered S3 methods overwritten by 'fmsb':
+  method    from
+  print.roc pROC
+  plot.roc  pROC
+Registered S3 methods overwritten by 'forecast':
+  method       from  
+  autoplot.acf useful
+  fortify.ts   useful
+Registered S3 methods overwritten by 'FSA':
+  method       from
+  confint.boot car 
+  hist.boot    car 
+Registered S3 methods overwritten by 'ggfortify':
+  method                 from    
+  autoplot.Arima         forecast
+  autoplot.acf           forecast
+  autoplot.ar            forecast
+  autoplot.bats          forecast
+  autoplot.decomposed.ts forecast
+  autoplot.ets           forecast
+  autoplot.forecast      forecast
+  autoplot.glmnet        parsnip 
+  autoplot.stl           forecast
+  autoplot.ts            forecast
+  fitted.ar              forecast
+  fortify.acf            useful  
+  fortify.kmeans         useful  
+  fortify.ts             forecast
+  residuals.ar           forecast
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+Registered S3 methods overwritten by 'huge':
+  method    from
+  plot.roc  fmsb
+  plot.sim  lava
+  print.roc fmsb
+  print.sim lava
+Registered S3 methods overwritten by 'vegan':
+  method          from      
+  rev.hclust      dendextend
+  plot.rda        klaR      
+  predict.rda     klaR      
+  print.nullmodel parsnip   
+  print.rda       klaR      
+Registered S3 methods overwritten by 'polspline':
+  method               from     
+  plot.logspline       logspline
+  plot.oldlogspline    logspline
+  print.logspline      logspline
+  print.oldlogspline   logspline
+  summary.logspline    logspline
+  summary.oldlogspline logspline
+Registered S3 method overwritten by 'riskRegression':
+  method        from 
+  nobs.multinom broom
+Registered S3 method overwritten by 'fit.models':
+  method       from 
+  vcov.default Hmisc
+Registered S3 method overwritten by 'spatstat.explore':
+  method   from
+  plot.roc huge
+Registered S3 method overwritten by 'spdep':
+  method   from
+  plot.mst ape 
+Registered S3 methods overwritten by 'tangram':
+  method               from 
+  [.impute             Hmisc
+  as.data.frame.impute Hmisc
+  print.impute         Hmisc
+Registered S3 method overwritten by 'mlt':
+  method         from
+  print.response httr
+Registered S3 methods overwritten by 'vcdExtra':
+  method      from
+  pairs.table vcd 
+  print.Kappa vcd 
+Serdar Balci MD Pathologist
+https://www.serdarbalci.com/
+
+Warning messages:
+1: In check_dep_version(dep_pkg = "TMB") : package version mismatch: 
+glmmTMB was built with TMB package version 1.9.23
+Current TMB package version is 1.9.25
+Please re-install glmmTMB from source or restore original ‘TMB’ package (see '?reinstalling' for more information)
+2: In fun(libname, pkgname) :
+  couldn't connect to display "/var/run/com.apple.launchd.OCeLokAqh6/org.xquartz:0"
+
+FILE: tests/testthat/test-survivalPower-check-function.R 
+survivalPower-check-function: ...............................................Found more than one class "file" in cache; using the first, from namespace 'BiocGenerics'
+Also defined by 'PBSmodelling' 'RProtoBuf'
+.....................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+FILE: tests/testthat/test-survivalPower-design-factors.R 
+survivalPower-design-factors: ............................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+FILE: tests/testthat/test-survivalPower-distributions.R 
+survivalPower-distributions: ...............
+survivalPower distribution tests completed.
+
+Test Coverage (smoke tests only):
+- These 10 tests assert that a result object is returned; they do NOT check
+  any computed value. Non-exponential distributions are blocked by
+  .validate_inputs() in this release, so the Weibull and log-normal cases
+  below exercise the refusal path, not a sample-size calculation.
+- Numeric correctness of the distribution parameters is covered in
+  test-survivalPower-release-review.R (checked against stats::qweibull).
+- The exponential/gate behaviour is covered in test-survivalPower-simulation.R.
+
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+FILE: tests/testthat/test-survivalPower-events.R 
+survivalPower-events: .............................................................................................................................................................................................................................................................................................................................................................................................................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+FILE: tests/testthat/test-survivalPower-full-audit-fixes.R 
+survivalPower-full-audit-fixes: ......................................................................................................................................................................................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+FILE: tests/testthat/test-survivalPower-interim-and-ni.R 
+survivalPower-interim-and-ni: ............................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+FILE: tests/testthat/test-survivalPower-release-review.R 
+survivalPower-release-review: ...........................................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+FILE: tests/testthat/test-survivalPower-reporting.R 
+survivalPower-reporting: ...........................................................................................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+FILE: tests/testthat/test-survivalPower-review-fixes.R 
+survivalPower-review-fixes: ........................................................................................................................................................................................................................................................................................................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+😸
+
+FILE: tests/testthat/test-survivalPower-simulation.R 
+survivalPower-simulation: ...................
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+FILE: tests/testthat/test-survivalPower.R 
+survivalPower: ..................................
+survivalPower regression tests completed.
+
+Test Coverage:
+- Core functionality (5 tests): Log-rank sample size/power/effect/duration
+- Cox regression (2 tests): Sample size and power
+- Non-inferiority (2 tests): Sample size and power
+- Parameter validation (4 tests): Distribution, effect size, alpha, power
+- Allocation ratios (2 tests): 2:1 and 1:2 allocations
+- Dropout handling (1 test): Annual dropout rate
+- Known limitations (4 tests): Competing risks, RMST, SNP, Weighted log-rank
+- Edge cases (3 tests): High power, small/large effect sizes
+
+Total: 23 comprehensive tests
+
+Critical Fixes Applied:
+1. ✅ ALL parameter names updated to current API
+2. ✅ Test methods updated (log_rank, cox_regression, non_inferiority)
+3. ✅ Tests now actually test current implementation
+4. ✅ Known limitations explicitly tested (expect errors)
+5. Validated scope remains documented in the analysis limitations.
+
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+🐝 Your tests are the bee's knees 🐝
+ failed skipped   error warning  passed 
+      0       0       0       0    1201 

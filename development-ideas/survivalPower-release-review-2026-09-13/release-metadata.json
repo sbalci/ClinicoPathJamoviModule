@@ -1,0 +1,2329 @@
+{
+  "option_count": 37,
+  "output_count": 24,
+  "ui_count": 37,
+  "options_without_ui": [],
+  "backend_undeclared_options": [],
+  "options_without_direct_read": [],
+  "read_map": [
+    {
+      "option": "sensitivity_analysis",
+      "method": ".assumption_row_keys",
+      "line": 170
+    },
+    {
+      "option": "run_simulation_validation",
+      "method": ".assumption_row_keys",
+      "line": 171
+    },
+    {
+      "option": "analysis_type",
+      "method": ".regulatory_row_keys",
+      "line": 179
+    },
+    {
+      "option": "study_design",
+      "method": ".regulatory_row_keys",
+      "line": 181
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".regulatory_row_keys",
+      "line": 182
+    },
+    {
+      "option": "analysis_type",
+      "method": ".run",
+      "line": 213
+    },
+    {
+      "option": "test_type",
+      "method": ".run",
+      "line": 214
+    },
+    {
+      "option": "analysis_type",
+      "method": ".run",
+      "line": 234
+    },
+    {
+      "option": "show_interpretation",
+      "method": ".run",
+      "line": 251
+    },
+    {
+      "option": "test_type",
+      "method": ".run",
+      "line": 259
+    },
+    {
+      "option": "primary_endpoint",
+      "method": ".run",
+      "line": 260
+    },
+    {
+      "option": "analysis_type",
+      "method": ".resolved_design",
+      "line": 269
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".resolved_design",
+      "line": 271
+    },
+    {
+      "option": "accrual_period",
+      "method": ".resolved_design",
+      "line": 272
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".resolved_design",
+      "line": 273
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".resolved_design",
+      "line": 278
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".resolved_design",
+      "line": 279
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".resolved_design",
+      "line": 279
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".resolved_design",
+      "line": 281
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".resolved_design",
+      "line": 282
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".resolved_design",
+      "line": 282
+    },
+    {
+      "option": "power_level",
+      "method": ".resolved_design",
+      "line": 290
+    },
+    {
+      "option": "alpha_level",
+      "method": ".resolved_design",
+      "line": 292
+    },
+    {
+      "option": "study_design",
+      "method": ".arm_allocation",
+      "line": 296
+    },
+    {
+      "option": "number_of_arms",
+      "method": ".arm_allocation",
+      "line": 297
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".arm_allocation",
+      "line": 299
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".arm_allocation",
+      "line": 300
+    },
+    {
+      "option": "study_design",
+      "method": ".round_design_n",
+      "line": 304
+    },
+    {
+      "option": "cluster_size",
+      "method": ".round_design_n",
+      "line": 306
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".cluster_allocation",
+      "line": 310
+    },
+    {
+      "option": "cluster_size",
+      "method": ".cluster_allocation",
+      "line": 315
+    },
+    {
+      "option": "analysis_type",
+      "method": ".assess_resolved_design",
+      "line": 322
+    },
+    {
+      "option": "study_design",
+      "method": ".assess_resolved_design",
+      "line": 336
+    },
+    {
+      "option": "cluster_size",
+      "method": ".assess_resolved_design",
+      "line": 341
+    },
+    {
+      "option": "sensitivity_analysis",
+      "method": ".assess_resolved_design",
+      "line": 345
+    },
+    {
+      "option": "analysis_type",
+      "method": ".sensitivity_applicable",
+      "line": 351
+    },
+    {
+      "option": "accrual_period",
+      "method": ".calendar_event_time",
+      "line": 354
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".calendar_event_time",
+      "line": 355
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".calendar_event_time",
+      "line": 356
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".calendar_event_time",
+      "line": 357
+    },
+    {
+      "option": "study_design",
+      "method": ".validate_inputs",
+      "line": 377
+    },
+    {
+      "option": "cluster_size",
+      "method": ".validate_inputs",
+      "line": 378
+    },
+    {
+      "option": "cluster_size",
+      "method": ".validate_inputs",
+      "line": 378
+    },
+    {
+      "option": "analysis_type",
+      "method": ".validate_inputs",
+      "line": 382
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".validate_inputs",
+      "line": 383
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".validate_inputs",
+      "line": 387
+    },
+    {
+      "option": "test_type",
+      "method": ".validate_inputs",
+      "line": 393
+    },
+    {
+      "option": "analysis_type",
+      "method": ".validate_inputs",
+      "line": 394
+    },
+    {
+      "option": "analysis_type",
+      "method": ".validate_inputs",
+      "line": 409
+    },
+    {
+      "option": "effect_size_type",
+      "method": ".validate_inputs",
+      "line": 419
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".validate_inputs",
+      "line": 423
+    },
+    {
+      "option": "power_level",
+      "method": ".validate_inputs",
+      "line": 428
+    },
+    {
+      "option": "analysis_type",
+      "method": ".validate_inputs",
+      "line": 436
+    },
+    {
+      "option": "alpha_level",
+      "method": ".validate_inputs",
+      "line": 445
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".validate_inputs",
+      "line": 462
+    },
+    {
+      "option": "accrual_pattern",
+      "method": ".validate_inputs",
+      "line": 482
+    },
+    {
+      "option": "survival_distribution",
+      "method": ".validate_inputs",
+      "line": 492
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".validate_inputs",
+      "line": 502
+    },
+    {
+      "option": "test_type",
+      "method": ".validate_inputs",
+      "line": 513
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".validate_inputs",
+      "line": 522
+    },
+    {
+      "option": "test_type",
+      "method": ".validate_inputs",
+      "line": 535
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".validate_inputs",
+      "line": 536
+    },
+    {
+      "option": "alpha_spending",
+      "method": ".validate_inputs",
+      "line": 537
+    },
+    {
+      "option": "multiple_comparisons",
+      "method": ".validate_inputs",
+      "line": 545
+    },
+    {
+      "option": "multiple_comparisons",
+      "method": ".validate_inputs",
+      "line": 548
+    },
+    {
+      "option": "study_design",
+      "method": ".validate_inputs",
+      "line": 553
+    },
+    {
+      "option": "multiple_comparisons",
+      "method": ".validate_inputs",
+      "line": 554
+    },
+    {
+      "option": "test_type",
+      "method": ".validate_inputs",
+      "line": 562
+    },
+    {
+      "option": "ni_type",
+      "method": ".validate_inputs",
+      "line": 563
+    },
+    {
+      "option": "test_type",
+      "method": ".validate_inputs",
+      "line": 571
+    },
+    {
+      "option": "ni_margin",
+      "method": ".validate_inputs",
+      "line": 578
+    },
+    {
+      "option": "study_design",
+      "method": ".validate_inputs",
+      "line": 595
+    },
+    {
+      "option": "study_design",
+      "method": ".validate_inputs",
+      "line": 602
+    },
+    {
+      "option": "test_type",
+      "method": ".validate_inputs",
+      "line": 611
+    },
+    {
+      "option": "test_type",
+      "method": ".validate_inputs",
+      "line": 614
+    },
+    {
+      "option": "effect_size",
+      "method": ".validate_parameter_combinations",
+      "line": 625
+    },
+    {
+      "option": "alpha_level",
+      "method": ".validate_parameter_combinations",
+      "line": 631
+    },
+    {
+      "option": "accrual_period",
+      "method": ".validate_parameter_combinations",
+      "line": 632
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".validate_parameter_combinations",
+      "line": 634
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".validate_parameter_combinations",
+      "line": 668
+    },
+    {
+      "option": "analysis_type",
+      "method": ".generate_instructions_html",
+      "line": 711
+    },
+    {
+      "option": "test_type",
+      "method": ".generate_instructions_html",
+      "line": 712
+    },
+    {
+      "option": "analysis_type",
+      "method": ".populate_power_summary",
+      "line": 786
+    },
+    {
+      "option": "test_type",
+      "method": ".populate_power_summary",
+      "line": 787
+    },
+    {
+      "option": "study_design",
+      "method": ".populate_power_summary",
+      "line": 788
+    },
+    {
+      "option": "primary_endpoint",
+      "method": ".populate_power_summary",
+      "line": 789
+    },
+    {
+      "option": "effect_size_type",
+      "method": ".populate_power_summary",
+      "line": 790
+    },
+    {
+      "option": "alpha_level",
+      "method": ".populate_power_summary",
+      "line": 794
+    },
+    {
+      "option": "test_type",
+      "method": ".calculate_primary_result",
+      "line": 846
+    },
+    {
+      "option": "analysis_type",
+      "method": ".extract_log_rank_parameters",
+      "line": 893
+    },
+    {
+      "option": "alpha_level",
+      "method": ".extract_log_rank_parameters",
+      "line": 894
+    },
+    {
+      "option": "power_level",
+      "method": ".extract_log_rank_parameters",
+      "line": 895
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".extract_log_rank_parameters",
+      "line": 897
+    },
+    {
+      "option": "accrual_period",
+      "method": ".extract_log_rank_parameters",
+      "line": 898
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".extract_log_rank_parameters",
+      "line": 899
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".extract_log_rank_parameters",
+      "line": 900
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".extract_log_rank_parameters",
+      "line": 901
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".calculate_log_rank_sample_size",
+      "line": 939
+    },
+    {
+      "option": "number_of_arms",
+      "method": ".build_adjustment_string",
+      "line": 969
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".build_adjustment_string",
+      "line": 975
+    },
+    {
+      "option": "alpha_spending",
+      "method": ".build_adjustment_string",
+      "line": 976
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".calculate_log_rank_power",
+      "line": 998
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".solve_log_rank_detectable_hr",
+      "line": 1039
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".calculate_log_rank_duration",
+      "line": 1086
+    },
+    {
+      "option": "analysis_type",
+      "method": ".calculate_cox_regression",
+      "line": 1170
+    },
+    {
+      "option": "alpha_level",
+      "method": ".calculate_cox_regression",
+      "line": 1172
+    },
+    {
+      "option": "power_level",
+      "method": ".calculate_cox_regression",
+      "line": 1174
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".calculate_cox_regression",
+      "line": 1175
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".calculate_cox_regression",
+      "line": 1185
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".calculate_cox_regression",
+      "line": 1186
+    },
+    {
+      "option": "accrual_period",
+      "method": ".calculate_cox_regression",
+      "line": 1186
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".calculate_cox_regression",
+      "line": 1187
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".calculate_cox_regression",
+      "line": 1187
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".calculate_cox_regression",
+      "line": 1197
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".calculate_cox_regression",
+      "line": 1198
+    },
+    {
+      "option": "accrual_period",
+      "method": ".calculate_cox_regression",
+      "line": 1198
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".calculate_cox_regression",
+      "line": 1199
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".calculate_cox_regression",
+      "line": 1199
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".calculate_cox_regression",
+      "line": 1214
+    },
+    {
+      "option": "accrual_period",
+      "method": ".calculate_cox_regression",
+      "line": 1219
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".calculate_cox_regression",
+      "line": 1222
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".calculate_cox_regression",
+      "line": 1223
+    },
+    {
+      "option": "accrual_period",
+      "method": ".calculate_cox_regression",
+      "line": 1223
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".calculate_cox_regression",
+      "line": 1224
+    },
+    {
+      "option": "analysis_type",
+      "method": ".calculate_non_inferiority",
+      "line": 1228
+    },
+    {
+      "option": "power_level",
+      "method": ".calculate_non_inferiority",
+      "line": 1230
+    },
+    {
+      "option": "accrual_period",
+      "method": ".calculate_non_inferiority",
+      "line": 1232
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".calculate_non_inferiority",
+      "line": 1233
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".calculate_non_inferiority",
+      "line": 1234
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".calculate_non_inferiority",
+      "line": 1235
+    },
+    {
+      "option": "ni_margin",
+      "method": ".calculate_non_inferiority",
+      "line": 1236
+    },
+    {
+      "option": "ni_type",
+      "method": ".calculate_non_inferiority",
+      "line": 1237
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".calculate_non_inferiority",
+      "line": 1274
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".calculate_non_inferiority",
+      "line": 1304
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".calculate_non_inferiority",
+      "line": 1329
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".calculate_non_inferiority",
+      "line": 1383
+    },
+    {
+      "option": "analysis_type",
+      "method": ".perform_power_analysis",
+      "line": 1407
+    },
+    {
+      "option": "run_simulation_validation",
+      "method": ".populate_simulation_comparison",
+      "line": 1426
+    },
+    {
+      "option": "analysis_type",
+      "method": ".populate_simulation_comparison",
+      "line": 1469
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".populate_simulation_comparison",
+      "line": 1473
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".populate_simulation_comparison",
+      "line": 1478
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".populate_simulation_comparison",
+      "line": 1485
+    },
+    {
+      "option": "accrual_period",
+      "method": ".populate_simulation_comparison",
+      "line": 1486
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".populate_simulation_comparison",
+      "line": 1487
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".populate_simulation_comparison",
+      "line": 1488
+    },
+    {
+      "option": "survival_distribution",
+      "method": ".populate_simulation_comparison",
+      "line": 1534
+    },
+    {
+      "option": "weibull_shape",
+      "method": ".format_distribution",
+      "line": 1542
+    },
+    {
+      "option": "weibull_shape",
+      "method": ".format_distribution",
+      "line": 1543
+    },
+    {
+      "option": "power_level",
+      "method": ".populate_sample_size_results",
+      "line": 1558
+    },
+    {
+      "option": "alpha_level",
+      "method": ".populate_sample_size_results",
+      "line": 1562
+    },
+    {
+      "option": "test_type",
+      "method": ".populate_sample_size_results",
+      "line": 1563
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".populate_sample_size_results",
+      "line": 1570
+    },
+    {
+      "option": "accrual_period",
+      "method": ".populate_sample_size_results",
+      "line": 1574
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".populate_sample_size_results",
+      "line": 1578
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".populate_power_results",
+      "line": 1595
+    },
+    {
+      "option": "test_type",
+      "method": ".populate_power_results",
+      "line": 1599
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".populate_effect_size_results",
+      "line": 1634
+    },
+    {
+      "option": "power_level",
+      "method": ".populate_effect_size_results",
+      "line": 1635
+    },
+    {
+      "option": "test_type",
+      "method": ".populate_effect_size_results",
+      "line": 1641
+    },
+    {
+      "option": "accrual_period",
+      "method": ".populate_duration_results",
+      "line": 1691
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".populate_duration_results",
+      "line": 1699
+    },
+    {
+      "option": "test_type",
+      "method": ".populate_specialized_tables",
+      "line": 1736
+    },
+    {
+      "option": "study_design",
+      "method": ".populate_specialized_tables",
+      "line": 1742
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".populate_specialized_tables",
+      "line": 1746
+    },
+    {
+      "option": "sensitivity_analysis",
+      "method": ".populate_specialized_tables",
+      "line": 1750
+    },
+    {
+      "option": "ni_margin",
+      "method": ".populate_non_inferiority_table",
+      "line": 1758
+    },
+    {
+      "option": "ni_type",
+      "method": ".populate_non_inferiority_table",
+      "line": 1759
+    },
+    {
+      "option": "analysis_type",
+      "method": ".populate_non_inferiority_table",
+      "line": 1766
+    },
+    {
+      "option": "number_of_arms",
+      "method": ".populate_multi_arm_table",
+      "line": 1838
+    },
+    {
+      "option": "alpha_level",
+      "method": ".populate_multi_arm_table",
+      "line": 1840
+    },
+    {
+      "option": "analysis_type",
+      "method": ".populate_multi_arm_table",
+      "line": 1842
+    },
+    {
+      "option": "analysis_type",
+      "method": ".populate_multi_arm_table",
+      "line": 1846
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".populate_multi_arm_table",
+      "line": 1847
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".populate_multi_arm_table",
+      "line": 1872
+    },
+    {
+      "option": "alpha_spending",
+      "method": ".populate_multi_arm_table",
+      "line": 1873
+    },
+    {
+      "option": "alpha_spending",
+      "method": ".populate_interim_analysis_table",
+      "line": 1910
+    },
+    {
+      "option": "test_type",
+      "method": ".populate_interim_analysis_table",
+      "line": 1926
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".populate_interim_analysis_table",
+      "line": 1930
+    },
+    {
+      "option": "test_type",
+      "method": ".populate_interim_analysis_table",
+      "line": 1942
+    },
+    {
+      "option": "sensitivity_analysis",
+      "method": ".populate_sensitivity_analysis_table",
+      "line": 1993
+    },
+    {
+      "option": "effect_size",
+      "method": ".populate_sensitivity_analysis_table",
+      "line": 1998
+    },
+    {
+      "option": "alpha_level",
+      "method": ".populate_sensitivity_analysis_table",
+      "line": 1998
+    },
+    {
+      "option": "alpha_level",
+      "method": ".populate_sensitivity_analysis_table",
+      "line": 2009
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".populate_sensitivity_analysis_table",
+      "line": 2010
+    },
+    {
+      "option": "accrual_period",
+      "method": ".populate_sensitivity_analysis_table",
+      "line": 2011
+    },
+    {
+      "option": "alpha_level",
+      "method": ".sensitivity_value",
+      "line": 2110
+    },
+    {
+      "option": "accrual_period",
+      "method": ".sensitivity_value",
+      "line": 2110
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".sensitivity_value",
+      "line": 2111
+    },
+    {
+      "option": "analysis_type",
+      "method": ".sensitivity_value",
+      "line": 2114
+    },
+    {
+      "option": "power_level",
+      "method": ".sensitivity_value",
+      "line": 2115
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".sensitivity_value",
+      "line": 2119
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".populate_assumptions",
+      "line": 2157
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".populate_assumptions",
+      "line": 2169
+    },
+    {
+      "option": "accrual_pattern",
+      "method": ".populate_assumptions",
+      "line": 2175
+    },
+    {
+      "option": "sensitivity_analysis",
+      "method": ".populate_assumptions",
+      "line": 2182
+    },
+    {
+      "option": "simulation_runs",
+      "method": ".populate_assumptions",
+      "line": 2187
+    },
+    {
+      "option": "analysis_type",
+      "method": ".generate_study_summary",
+      "line": 2227
+    },
+    {
+      "option": "test_type",
+      "method": ".generate_study_summary",
+      "line": 2228
+    },
+    {
+      "option": "effect_size",
+      "method": ".generate_study_summary",
+      "line": 2231
+    },
+    {
+      "option": "accrual_period",
+      "method": ".generate_study_summary",
+      "line": 2235
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".generate_study_summary",
+      "line": 2237
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".generate_study_summary",
+      "line": 2238
+    },
+    {
+      "option": "study_design",
+      "method": ".generate_study_summary",
+      "line": 2246
+    },
+    {
+      "option": "primary_endpoint",
+      "method": ".generate_study_summary",
+      "line": 2247
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".generate_study_summary",
+      "line": 2252
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".generate_study_summary",
+      "line": 2253
+    },
+    {
+      "option": "test_type",
+      "method": ".generate_objective_text",
+      "line": 2272
+    },
+    {
+      "option": "ni_margin",
+      "method": ".generate_objective_text",
+      "line": 2277
+    },
+    {
+      "option": "analysis_type",
+      "method": ".generate_clinical_interpretation",
+      "line": 2283
+    },
+    {
+      "option": "effect_size",
+      "method": ".generate_sample_size_interpretation",
+      "line": 2305
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".generate_power_interpretation",
+      "line": 2374
+    },
+    {
+      "option": "test_type",
+      "method": ".generate_effect_size_interpretation",
+      "line": 2398
+    },
+    {
+      "option": "alpha_level",
+      "method": ".alpha_pct",
+      "line": 2429
+    },
+    {
+      "option": "test_type",
+      "method": ".format_alpha_phrase",
+      "line": 2433
+    },
+    {
+      "option": "test_type",
+      "method": ".format_objective_phrase",
+      "line": 2443
+    },
+    {
+      "option": "ni_margin",
+      "method": ".format_objective_phrase",
+      "line": 2445
+    },
+    {
+      "option": "analysis_type",
+      "method": ".generate_report_sentence",
+      "line": 2452
+    },
+    {
+      "option": "test_type",
+      "method": ".generate_report_sentence",
+      "line": 2457
+    },
+    {
+      "option": "test_type",
+      "method": ".generate_report_sentence",
+      "line": 2464
+    },
+    {
+      "option": "analysis_type",
+      "method": ".populate_regulatory_considerations",
+      "line": 2473
+    },
+    {
+      "option": "test_type",
+      "method": ".populate_regulatory_considerations",
+      "line": 2474
+    },
+    {
+      "option": "study_design",
+      "method": ".populate_regulatory_considerations",
+      "line": 2475
+    },
+    {
+      "option": "alpha_level",
+      "method": ".populate_regulatory_considerations",
+      "line": 2476
+    },
+    {
+      "option": "multiple_comparisons",
+      "method": ".populate_regulatory_considerations",
+      "line": 2545
+    },
+    {
+      "option": "multiple_comparisons",
+      "method": ".populate_regulatory_considerations",
+      "line": 2546
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".populate_regulatory_considerations",
+      "line": 2551
+    },
+    {
+      "option": "alpha_spending",
+      "method": ".populate_regulatory_considerations",
+      "line": 2555
+    },
+    {
+      "option": "alpha_level",
+      "method": ".create_visualizations",
+      "line": 2568
+    },
+    {
+      "option": "power_level",
+      "method": ".create_visualizations",
+      "line": 2568
+    },
+    {
+      "option": "power_level",
+      "method": ".create_visualizations",
+      "line": 2587
+    },
+    {
+      "option": "alpha_level",
+      "method": ".create_visualizations",
+      "line": 2588
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".create_visualizations",
+      "line": 2589
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".create_visualizations",
+      "line": 2589
+    },
+    {
+      "option": "analysis_type",
+      "method": ".create_visualizations",
+      "line": 2601
+    },
+    {
+      "option": "power_level",
+      "method": ".create_visualizations",
+      "line": 2615
+    },
+    {
+      "option": "alpha_level",
+      "method": ".create_visualizations",
+      "line": 2616
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".create_visualizations",
+      "line": 2643
+    },
+    {
+      "option": "accrual_period",
+      "method": ".create_visualizations",
+      "line": 2669
+    },
+    {
+      "option": "sensitivity_analysis",
+      "method": ".create_visualizations",
+      "line": 2682
+    },
+    {
+      "option": "power_level",
+      "method": ".create_visualizations",
+      "line": 2697
+    },
+    {
+      "option": "alpha_level",
+      "method": ".create_visualizations",
+      "line": 2698
+    },
+    {
+      "option": "analysis_type",
+      "method": ".generate_power_curve_data",
+      "line": 2719
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".generate_power_curve_data",
+      "line": 2723
+    },
+    {
+      "option": "alpha_level",
+      "method": ".generate_power_curve_data",
+      "line": 2731
+    },
+    {
+      "option": "alpha_level",
+      "method": ".generate_sample_size_curve_data",
+      "line": 2762
+    },
+    {
+      "option": "power_level",
+      "method": ".generate_sample_size_curve_data",
+      "line": 2765
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".generate_survival_curve_data",
+      "line": 2793
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".cox_power",
+      "line": 2830
+    },
+    {
+      "option": "alpha_spending",
+      "method": ".cox_power",
+      "line": 2831
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".cox_power",
+      "line": 2832
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".cox_power",
+      "line": 2841
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".cox_power",
+      "line": 2842
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".cox_power",
+      "line": 2846
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".cox_power",
+      "line": 2846
+    },
+    {
+      "option": "alpha_spending",
+      "method": ".cox_power",
+      "line": 2849
+    },
+    {
+      "option": "alpha_spending",
+      "method": ".cox_power",
+      "line": 2866
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".basic_power_calc",
+      "line": 2897
+    },
+    {
+      "option": "accrual_period",
+      "method": ".basic_power_calc",
+      "line": 2898
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".basic_power_calc",
+      "line": 2898
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".uncached_power_calc",
+      "line": 2903
+    },
+    {
+      "option": "accrual_period",
+      "method": ".uncached_power_calc",
+      "line": 2904
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".uncached_power_calc",
+      "line": 2904
+    },
+    {
+      "option": "test_type",
+      "method": ".uncached_power_calc",
+      "line": 2905
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".uncached_power_calc",
+      "line": 2914
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".uncached_power_calc",
+      "line": 2917
+    },
+    {
+      "option": "test_type",
+      "method": ".uncached_power_calc",
+      "line": 2920
+    },
+    {
+      "option": "ni_margin",
+      "method": ".uncached_power_calc",
+      "line": 2921
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".uncached_power_calc",
+      "line": 2926
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".uncached_power_calc",
+      "line": 2936
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".basic_sample_size_calc",
+      "line": 2943
+    },
+    {
+      "option": "accrual_period",
+      "method": ".basic_sample_size_calc",
+      "line": 2944
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".basic_sample_size_calc",
+      "line": 2944
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".uncached_sample_size_calc",
+      "line": 2949
+    },
+    {
+      "option": "accrual_period",
+      "method": ".uncached_sample_size_calc",
+      "line": 2950
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".uncached_sample_size_calc",
+      "line": 2950
+    },
+    {
+      "option": "test_type",
+      "method": ".uncached_sample_size_calc",
+      "line": 2951
+    },
+    {
+      "option": "test_type",
+      "method": ".uncached_sample_size_calc",
+      "line": 2970
+    },
+    {
+      "option": "ni_margin",
+      "method": ".uncached_sample_size_calc",
+      "line": 2971
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".uncached_sample_size_calc",
+      "line": 2975
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".uncached_sample_size_calc",
+      "line": 2990
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".uncached_sample_size_calc",
+      "line": 3001
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".uncached_sample_size_calc",
+      "line": 3004
+    },
+    {
+      "option": "effect_size_type",
+      "method": ".get_effect_hr",
+      "line": 3012
+    },
+    {
+      "option": "effect_size",
+      "method": ".get_effect_hr",
+      "line": 3013
+    },
+    {
+      "option": "rmst_difference",
+      "method": ".get_effect_hr",
+      "line": 3048
+    },
+    {
+      "option": "rmst_tau",
+      "method": ".get_effect_hr",
+      "line": 3049
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".get_effect_hr",
+      "line": 3050
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".get_effect_hr",
+      "line": 3101
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".get_effect_hr",
+      "line": 3102
+    },
+    {
+      "option": "survival_distribution",
+      "method": ".get_distribution_parameters",
+      "line": 3317
+    },
+    {
+      "option": "weibull_shape",
+      "method": ".get_distribution_parameters",
+      "line": 3318
+    },
+    {
+      "option": "study_design",
+      "method": ".adjust_alpha_for_multiplicity",
+      "line": 3399
+    },
+    {
+      "option": "multiple_comparisons",
+      "method": ".adjust_alpha_for_multiplicity",
+      "line": 3400
+    },
+    {
+      "option": "number_of_arms",
+      "method": ".adjust_alpha_for_multiplicity",
+      "line": 3401
+    },
+    {
+      "option": "study_design",
+      "method": ".adjust_sample_for_design",
+      "line": 3424
+    },
+    {
+      "option": "cluster_size",
+      "method": ".adjust_sample_for_design",
+      "line": 3425
+    },
+    {
+      "option": "icc",
+      "method": ".adjust_sample_for_design",
+      "line": 3426
+    },
+    {
+      "option": "study_design",
+      "method": ".multi_arm_factor",
+      "line": 3454
+    },
+    {
+      "option": "number_of_arms",
+      "method": ".multi_arm_factor",
+      "line": 3458
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".multi_arm_factor",
+      "line": 3463
+    },
+    {
+      "option": "test_type",
+      "method": ".hr_grid",
+      "line": 3654
+    },
+    {
+      "option": "ni_margin",
+      "method": ".hr_grid",
+      "line": 3655
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".fixed_normal_parameters",
+      "line": 3687
+    },
+    {
+      "option": "accrual_period",
+      "method": ".fixed_normal_parameters",
+      "line": 3688
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".fixed_normal_parameters",
+      "line": 3688
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".fixed_normal_parameters",
+      "line": 3690
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".fixed_normal_parameters",
+      "line": 3692
+    },
+    {
+      "option": "test_type",
+      "method": ".fixed_normal_parameters",
+      "line": 3693
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".fixed_normal_parameters",
+      "line": 3696
+    },
+    {
+      "option": "test_type",
+      "method": ".fixed_normal_parameters",
+      "line": 3704
+    },
+    {
+      "option": "ni_margin",
+      "method": ".fixed_normal_parameters",
+      "line": 3705
+    },
+    {
+      "option": "alpha_level",
+      "method": ".one_sided_alpha",
+      "line": 3746
+    },
+    {
+      "option": "test_type",
+      "method": ".one_sided_alpha",
+      "line": 3748
+    },
+    {
+      "option": "power_level",
+      "method": ".gs_info_design",
+      "line": 3761
+    },
+    {
+      "option": "alpha_level",
+      "method": ".gs_info_design",
+      "line": 3762
+    },
+    {
+      "option": "power_level",
+      "method": ".uncached_gs_info_design",
+      "line": 3766
+    },
+    {
+      "option": "alpha_level",
+      "method": ".uncached_gs_info_design",
+      "line": 3766
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".uncached_gs_info_design",
+      "line": 3770
+    },
+    {
+      "option": "alpha_spending",
+      "method": ".uncached_gs_info_design",
+      "line": 3771
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".uncached_gs_info_design",
+      "line": 3778
+    },
+    {
+      "option": "alpha_spending",
+      "method": ".uncached_gs_info_design",
+      "line": 3783
+    },
+    {
+      "option": "power_level",
+      "method": ".sequential_inflation",
+      "line": 3790
+    },
+    {
+      "option": "alpha_level",
+      "method": ".sequential_inflation",
+      "line": 3790
+    },
+    {
+      "option": "alpha_level",
+      "method": ".sequential_power",
+      "line": 3798
+    },
+    {
+      "option": "alpha_level",
+      "method": ".gs_design",
+      "line": 3819
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".gs_design",
+      "line": 3820
+    },
+    {
+      "option": "accrual_period",
+      "method": ".gs_design",
+      "line": 3821
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".gs_design",
+      "line": 3821
+    },
+    {
+      "option": "alpha_spending",
+      "method": ".gs_design",
+      "line": 3834
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".gs_design",
+      "line": 3835
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".gs_design",
+      "line": 3842
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".gs_design",
+      "line": 3859
+    },
+    {
+      "option": "analysis_type",
+      "method": ".simulation_applicable",
+      "line": 3883
+    },
+    {
+      "option": "test_type",
+      "method": ".simulation_applicable",
+      "line": 3884
+    },
+    {
+      "option": "survival_distribution",
+      "method": ".simulation_applicable",
+      "line": 3885
+    },
+    {
+      "option": "study_design",
+      "method": ".simulation_applicable",
+      "line": 3886
+    },
+    {
+      "option": "interim_analyses",
+      "method": ".simulation_applicable",
+      "line": 3887
+    },
+    {
+      "option": "run_simulation_validation",
+      "method": ".run_simulation_analysis",
+      "line": 3891
+    },
+    {
+      "option": "simulation_seed",
+      "method": ".run_simulation_analysis",
+      "line": 3913
+    },
+    {
+      "option": "simulation_runs",
+      "method": ".run_simulation_analysis",
+      "line": 3917
+    },
+    {
+      "option": "alpha_level",
+      "method": ".run_simulation_analysis",
+      "line": 3925
+    },
+    {
+      "option": "analysis_type",
+      "method": ".run_simulation_analysis",
+      "line": 3927
+    },
+    {
+      "option": "sample_size_input",
+      "method": ".run_simulation_analysis",
+      "line": 3931
+    },
+    {
+      "option": "control_median_survival",
+      "method": ".run_simulation_analysis",
+      "line": 3941
+    },
+    {
+      "option": "accrual_period",
+      "method": ".run_simulation_analysis",
+      "line": 3945
+    },
+    {
+      "option": "follow_up_period",
+      "method": ".run_simulation_analysis",
+      "line": 3946
+    },
+    {
+      "option": "dropout_rate",
+      "method": ".run_simulation_analysis",
+      "line": 3947
+    },
+    {
+      "option": "allocation_ratio",
+      "method": ".run_simulation_analysis",
+      "line": 3948
+    },
+    {
+      "option": "clinical_preset",
+      "method": ".apply_clinical_preset",
+      "line": 4180
+    },
+    {
+      "option": "show_summary",
+      "method": ".generate_clinical_friendly_outputs",
+      "line": 4201
+    },
+    {
+      "option": "show_explanations",
+      "method": ".generate_clinical_friendly_outputs",
+      "line": 4201
+    },
+    {
+      "option": "show_glossary",
+      "method": ".generate_clinical_friendly_outputs",
+      "line": 4202
+    },
+    {
+      "option": "guided_mode",
+      "method": ".generate_clinical_friendly_outputs",
+      "line": 4202
+    },
+    {
+      "option": "show_summary",
+      "method": ".generate_clinical_friendly_outputs",
+      "line": 4209
+    },
+    {
+      "option": "show_explanations",
+      "method": ".generate_clinical_friendly_outputs",
+      "line": 4214
+    },
+    {
+      "option": "show_glossary",
+      "method": ".generate_clinical_friendly_outputs",
+      "line": 4219
+    },
+    {
+      "option": "guided_mode",
+      "method": ".generate_clinical_friendly_outputs",
+      "line": 4224
+    },
+    {
+      "option": "test_type",
+      "method": ".generate_natural_language_summary",
+      "line": 4230
+    },
+    {
+      "option": "primary_endpoint",
+      "method": ".generate_natural_language_summary",
+      "line": 4242
+    },
+    {
+      "option": "effect_size_type",
+      "method": ".generate_natural_language_summary",
+      "line": 4272
+    },
+    {
+      "option": "accrual_period",
+      "method": ".generate_natural_language_summary",
+      "line": 4279
+    },
+    {
+      "option": "test_type",
+      "method": ".generate_educational_explanations",
+      "line": 4302
+    },
+    {
+      "option": "analysis_type",
+      "method": ".generate_guided_workflow",
+      "line": 4397
+    },
+    {
+      "option": "test_type",
+      "method": ".generate_guided_workflow",
+      "line": 4401
+    },
+    {
+      "option": "power_level",
+      "method": ".generate_guided_workflow",
+      "line": 4405
+    },
+    {
+      "option": "alpha_level",
+      "method": ".generate_guided_workflow",
+      "line": 4406
+    }
+  ],
+  "controls": {
+    "clinical_preset": {
+      "type": "ComboBox",
+      "group": "Analysis Configuration",
+      "enable": true
+    },
+    "analysis_type": {
+      "type": "ComboBox",
+      "group": "Analysis Configuration",
+      "enable": true
+    },
+    "test_type": {
+      "type": "ComboBox",
+      "group": "Analysis Configuration",
+      "enable": true
+    },
+    "study_design": {
+      "type": "ComboBox",
+      "group": "Analysis Configuration",
+      "enable": true
+    },
+    "primary_endpoint": {
+      "type": "ComboBox",
+      "group": "Analysis Configuration",
+      "enable": true
+    },
+    "effect_size_type": {
+      "type": "ComboBox",
+      "group": "Statistical Parameters",
+      "enable": "(!(test_type:non_inferiority && analysis_type:effect_size))"
+    },
+    "effect_size": {
+      "type": "TextBox",
+      "group": "Statistical Parameters",
+      "enable": "(!(effect_size_type:rmst_difference) && !(test_type:non_inferiority && analysis_type:effect_size))"
+    },
+    "alpha_level": {
+      "type": "TextBox",
+      "group": "Statistical Parameters",
+      "enable": true
+    },
+    "power_level": {
+      "type": "TextBox",
+      "group": "Statistical Parameters",
+      "enable": "(!(analysis_type:power))"
+    },
+    "allocation_ratio": {
+      "type": "TextBox",
+      "group": "Statistical Parameters",
+      "enable": true
+    },
+    "sample_size_input": {
+      "type": "TextBox",
+      "group": "Statistical Parameters",
+      "enable": "(!(analysis_type:sample_size))"
+    },
+    "control_median_survival": {
+      "type": "TextBox",
+      "group": "Survival Distribution Parameters",
+      "enable": true
+    },
+    "survival_distribution": {
+      "type": "ComboBox",
+      "group": "Survival Distribution Parameters",
+      "enable": true
+    },
+    "weibull_shape": {
+      "type": "TextBox",
+      "group": "Survival Distribution Parameters",
+      "enable": "(survival_distribution:weibull)"
+    },
+    "accrual_period": {
+      "type": "TextBox",
+      "group": "Study Timeline",
+      "enable": true
+    },
+    "follow_up_period": {
+      "type": "TextBox",
+      "group": "Study Timeline",
+      "enable": true
+    },
+    "accrual_pattern": {
+      "type": "ComboBox",
+      "group": "Study Timeline",
+      "enable": true
+    },
+    "dropout_rate": {
+      "type": "TextBox",
+      "group": "Study Timeline",
+      "enable": true
+    },
+    "ni_margin": {
+      "type": "TextBox",
+      "group": "Specialized Methods",
+      "enable": "(test_type:non_inferiority)"
+    },
+    "ni_type": {
+      "type": "ComboBox",
+      "group": "Specialized Methods",
+      "enable": "(test_type:non_inferiority)"
+    },
+    "rmst_tau": {
+      "type": "TextBox",
+      "group": "Specialized Methods",
+      "enable": "((test_type:rmst_test || effect_size_type:rmst_difference) && (!(test_type:non_inferiority && analysis_type:effect_size)))"
+    },
+    "rmst_difference": {
+      "type": "TextBox",
+      "group": "Specialized Methods",
+      "enable": "((test_type:rmst_test || effect_size_type:rmst_difference) && (!(test_type:non_inferiority && analysis_type:effect_size)))"
+    },
+    "number_of_arms": {
+      "type": "TextBox",
+      "group": "Advanced Options",
+      "enable": "(study_design:multi_arm)"
+    },
+    "multiple_comparisons": {
+      "type": "ComboBox",
+      "group": "Advanced Options",
+      "enable": "(study_design:multi_arm)"
+    },
+    "cluster_size": {
+      "type": "TextBox",
+      "group": "Advanced Options",
+      "enable": "(study_design:cluster_randomized)"
+    },
+    "icc": {
+      "type": "TextBox",
+      "group": "Advanced Options",
+      "enable": "(study_design:cluster_randomized)"
+    },
+    "interim_analyses": {
+      "type": "TextBox",
+      "group": "Advanced Options",
+      "enable": true
+    },
+    "alpha_spending": {
+      "type": "ComboBox",
+      "group": "Advanced Options",
+      "enable": "(!(interim_analyses:0))"
+    },
+    "sensitivity_analysis": {
+      "type": "CheckBox",
+      "group": "Advanced Options",
+      "enable": "(analysis_type:sample_size || analysis_type:power)"
+    },
+    "run_simulation_validation": {
+      "type": "CheckBox",
+      "group": "Advanced Options",
+      "enable": "(analysis_type:sample_size || analysis_type:power)"
+    },
+    "simulation_runs": {
+      "type": "TextBox",
+      "group": "Advanced Options",
+      "enable": "(run_simulation_validation)"
+    },
+    "simulation_seed": {
+      "type": "TextBox",
+      "group": "Advanced Options",
+      "enable": "(run_simulation_validation)"
+    },
+    "show_interpretation": {
+      "type": "CheckBox",
+      "group": "Clinical-Friendly Output Options",
+      "enable": true
+    },
+    "show_summary": {
+      "type": "CheckBox",
+      "group": "Clinical-Friendly Output Options",
+      "enable": true
+    },
+    "show_explanations": {
+      "type": "CheckBox",
+      "group": "Clinical-Friendly Output Options",
+      "enable": true
+    },
+    "show_glossary": {
+      "type": "CheckBox",
+      "group": "Clinical-Friendly Output Options",
+      "enable": true
+    },
+    "guided_mode": {
+      "type": "CheckBox",
+      "group": "Clinical-Friendly Output Options",
+      "enable": true
+    }
+  },
+  "results": [
+    {
+      "name": "notices",
+      "type": "Preformatted",
+      "visible": true,
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "instructions",
+      "type": "Html",
+      "visible": true,
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "power_summary",
+      "type": "Table",
+      "visible": true,
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "simulation_validation_table",
+      "type": "Table",
+      "visible": "(run_simulation_validation)",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "sample_size_results",
+      "type": "Table",
+      "visible": "(analysis_type==\"sample_size\")",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "power_results",
+      "type": "Table",
+      "visible": "(analysis_type==\"power\")",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "effect_size_results",
+      "type": "Table",
+      "visible": "(analysis_type==\"effect_size\")",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "study_duration_results",
+      "type": "Table",
+      "visible": "(analysis_type==\"duration\")",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "assumptions_table",
+      "type": "Table",
+      "visible": true,
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "non_inferiority_table",
+      "type": "Table",
+      "visible": "(test_type==\"non_inferiority\")",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "multi_arm_table",
+      "type": "Table",
+      "visible": "(study_design==\"multi_arm\")",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "interim_analysis_table",
+      "type": "Table",
+      "visible": "(interim_analyses>0)",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "sensitivity_analysis_table",
+      "type": "Table",
+      "visible": "(sensitivity_analysis && (analysis_type==\"sample_size\" || analysis_type==\"power\"))",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "regulatory_table",
+      "type": "Table",
+      "visible": true,
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "power_curve_plot",
+      "type": "Image",
+      "visible": true,
+      "renderFun": ".plot_power_curves",
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "sample_size_plot",
+      "type": "Image",
+      "visible": "(analysis_type==\"sample_size\")",
+      "renderFun": ".plot_sample_size_curves",
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "survival_curves_plot",
+      "type": "Image",
+      "visible": true,
+      "renderFun": ".plot_expected_survival",
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "accrual_timeline_plot",
+      "type": "Image",
+      "visible": true,
+      "renderFun": ".plot_study_timeline",
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "sensitivity_plot",
+      "type": "Image",
+      "visible": "(sensitivity_analysis && (analysis_type==\"sample_size\" || analysis_type==\"power\"))",
+      "renderFun": ".plot_sensitivity_analysis",
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "clinical_interpretation",
+      "type": "Html",
+      "visible": "(show_interpretation)",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "natural_language_summary",
+      "type": "Html",
+      "visible": "(show_summary)",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "educational_explanations",
+      "type": "Html",
+      "visible": "(show_explanations)",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "statistical_glossary",
+      "type": "Html",
+      "visible": "(show_glossary)",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    },
+    {
+      "name": "guided_workflow",
+      "type": "Html",
+      "visible": "(guided_mode)",
+      "renderFun": null,
+      "invalid_clearWith": [],
+      "render_defined": true
+    }
+  ],
+  "references": [
+    {
+      "key": "ClinicoPathJamoviModule",
+      "title": "ClinicoPath jamovi Module doi:10.5281/zenodo.3997188",
+      "author": "Serdar Balci",
+      "url": "https://www.serdarbalci.com/ClinicoPathJamoviModule/"
+    },
+    {
+      "key": "Schoenfeld1983",
+      "title": "Sample-size formula for the proportional-hazards regression model",
+      "author": "Schoenfeld, D. A.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/6354290/"
+    },
+    {
+      "key": "LachinAndFoulkes1986",
+      "title": "Evaluation of sample size and power for analyses of survival with allowance for nonuniform patient entry, losses to follow-up, noncompliance, and stratification",
+      "author": "Lachin, J. M., & Foulkes, M. A.",
+      "url": "https://doi.org/10.2307/2531201"
+    },
+    {
+      "key": "Rothmann2003",
+      "title": "Design and analysis of non-inferiority mortality trials in oncology",
+      "author": "Rothmann, M., Li, N., Chen, G., Chi, G. Y. H., Temple, R., & Tsou, H.-H.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/12520560/"
+    },
+    {
+      "key": "gsDesign",
+      "title": "gsDesign: R package",
+      "author": "Keaven Anderson",
+      "url": "https://CRAN.R-project.org/package=gsDesign"
+    },
+    {
+      "key": "survival",
+      "title": "survival: Survival Analysis",
+      "author": "Terry M Therneau",
+      "url": "https://CRAN.R-project.org/package=survival"
+    },
+    {
+      "key": "ggplot2",
+      "title": "ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics",
+      "author": "Wickham, H., Chang, W., Henry, L., Pedersen, T. L., Takahashi, K., Wilke, C., Woo, K., & RStudio",
+      "url": "https://CRAN.R-project.org/package=ggplot2"
+    },
+    {
+      "key": "scales",
+      "title": "scales: Scale Functions for Visualization",
+      "author": "Hadley Wickham",
+      "url": "https://CRAN.R-project.org/package=scales"
+    }
+  ],
+  "versions": {
+    "DESCRIPTION": "1.0.81.01",
+    "module": "1.0.81.01",
+    "CITATION": "1.0.81.01",
+    "analysis_source": "0.4.1",
+    "analysis_generated": "0.4.0"
+  },
+  "compilerMode": "tame",
+  "distribution": [
+    {
+      "module": "jjstatsplot",
+      "path": "/Users/serdarbalci/Documents/GitHub/jjstatsplot",
+      "exists": true,
+      "analysis_exists": false,
+      "scoped_tracked_files": []
+    },
+    {
+      "module": "meddecide",
+      "path": "/Users/serdarbalci/Documents/GitHub/meddecide",
+      "exists": true,
+      "analysis_exists": false,
+      "scoped_tracked_files": []
+    },
+    {
+      "module": "jsurvival",
+      "path": "/Users/serdarbalci/Documents/GitHub/jsurvival",
+      "exists": true,
+      "analysis_exists": false,
+      "scoped_tracked_files": [
+        "vignettes/survivalpower_documentation.md"
+      ]
+    },
+    {
+      "module": "ClinicoPathDescriptives",
+      "path": "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives",
+      "exists": true,
+      "analysis_exists": false,
+      "scoped_tracked_files": []
+    },
+    {
+      "module": "OncoPath",
+      "path": "/Users/serdarbalci/Documents/GitHub/OncoPath",
+      "exists": true,
+      "analysis_exists": false,
+      "scoped_tracked_files": []
+    },
+    {
+      "module": "JamoviTest",
+      "path": "/Users/serdarbalci/Documents/GitHub/JamoviTest",
+      "exists": true,
+      "analysis_exists": false,
+      "scoped_tracked_files": []
+    }
+  ],
+  "tracked_build_archives": [],
+  "wrapper_in_namespace": true,
+  "rd_name": true,
+  "data_options": []
+}

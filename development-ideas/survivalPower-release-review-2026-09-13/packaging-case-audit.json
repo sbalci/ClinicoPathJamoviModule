@@ -1,0 +1,99 @@
+[
+  {
+    "root": "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule",
+    "name": "survivalPower",
+    "version": "0.4.1",
+    "menu_group": "PowerT",
+    "files": {
+      "R/survivalPower.b.R": {
+        "exists": true,
+        "tracked_exact": true,
+        "sha256": "4533ea82b6266d48293c8e70e0da3ff13280b774cfdadab538e806f76f4beb0f"
+      },
+      "R/survivalPower.h.R": {
+        "exists": true,
+        "tracked_exact": true,
+        "sha256": "829fc886a3851c35171e82fcb702c4c173f8a4956ef9fc8b5860cd9ac5a121f6"
+      },
+      "R/survivalPower_distributions.R": {
+        "exists": true,
+        "tracked_exact": true,
+        "sha256": "0015230523b3656e68572654d00fe62e1a3b618ee06aa07c4747d954787823a9"
+      },
+      "jamovi/survivalPower.a.yaml": {
+        "exists": true,
+        "tracked_exact": true,
+        "sha256": "7686511f41e1659ddaeb01a9626a37392d8dab402602fcdd075a1bbf61a3848a"
+      },
+      "jamovi/survivalPower.u.yaml": {
+        "exists": true,
+        "tracked_exact": true,
+        "sha256": "55f022fe85b77107e4ff530db147d1597ea8f55cbc20e8c29720d8d6ddd7bb3f"
+      },
+      "jamovi/survivalPower.r.yaml": {
+        "exists": true,
+        "tracked_exact": true,
+        "sha256": "e2e307a44cf0654865db0efa12edac27c4ec42addf0dbe1161cd6dcc418a2f6b"
+      },
+      "man/survivalPower.Rd": {
+        "exists": true,
+        "tracked_exact": true,
+        "sha256": "4cb1c7bad9b4a189d621e3e190ac289fabd2098cbad3c9b42978bfd15ff3b577"
+      },
+      "jamovi/js/survivalPower.events.js": {
+        "exists": true,
+        "tracked_exact": true,
+        "sha256": "b4adfd76dc409c138369f1f3625f594c0c4f042e3e26c0a20dec9aed5b092142"
+      }
+    },
+    "wrapper": "survivalPowerClass",
+    "matching_class": true,
+    "collate": [
+      {
+        "name": "advancedSurvivalPower.b.R",
+        "tracked_exact": true
+      },
+      {
+        "name": "advancedSurvivalPower.h.R",
+        "tracked_exact": true
+      },
+      {
+        "name": "classicalSurvivalPower.b.R",
+        "tracked_exact": true
+      },
+      {
+        "name": "classicalSurvivalPower.h.R",
+        "tracked_exact": true
+      },
+      {
+        "name": "comprehensiveSurvivalPower.b.R",
+        "tracked_exact": true
+      },
+      {
+        "name": "comprehensiveSurvivalPower.h.R",
+        "tracked_exact": true
+      },
+      {
+        "name": "simpleSurvivalPower.b.R",
+        "tracked_exact": true
+      },
+      {
+        "name": "simpleSurvivalPower.h.R",
+        "tracked_exact": true
+      },
+      {
+        "name": "survivalPower.b.R",
+        "tracked_exact": true
+      },
+      {
+        "name": "survivalPower.h.R",
+        "tracked_exact": true
+      },
+      {
+        "name": "survivalPower_distributions.R",
+        "tracked_exact": true
+      }
+    ],
+    "case_collisions": []
+  }
+]

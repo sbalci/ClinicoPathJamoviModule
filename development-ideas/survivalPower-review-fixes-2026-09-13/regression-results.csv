@@ -1,0 +1,115 @@
+"file","context","test","nb","failed","skipped","error","warning","user","system","real","passed"
+"test-survivalPower-check-function.R","survivalPower-check-function","multi-arm non-inferiority uses the adjusted one-sided alpha throughout",12,0,FALSE,FALSE,0,0.647000000000002,0.155,0.833000000000006,12
+"test-survivalPower-check-function.R","survivalPower-check-function","shared control power uses the correlation of the treatment contrasts",1,0,FALSE,FALSE,0,0.135999999999999,0.0600000000000005,0.216999999999999,1
+"test-survivalPower-check-function.R","survivalPower-check-function","failed calculations do not produce completion messages or derived plots",12,0,FALSE,FALSE,0,0.109000000000002,0.0220000000000002,0.132999999999996,12
+"test-survivalPower-check-function.R","survivalPower-check-function","simulation validation refuses designs the simulator does not implement",12,0,FALSE,FALSE,0,0.348000000000003,0.126,0.515000000000001,12
+"test-survivalPower-check-function.R","survivalPower-check-function","sensitivity scenarios keep the selected design and multiplicity adjustment",8,0,FALSE,FALSE,0,2.578,0.397,3.058,8
+"test-survivalPower-check-function.R","survivalPower-check-function","saved results clear when a formerly valid design becomes unsupported",16,0,FALSE,FALSE,0,0.449000000000002,0.111,0.573,16
+"test-survivalPower-check-function.R","survivalPower-check-function","two-sided power equals alpha at the null and includes both rejection tails",7,0,FALSE,FALSE,0,0.150000000000002,0.0250000000000004,0.178000000000004,7
+"test-survivalPower-design-factors.R","survivalPower-design-factors","interim looks inflate log-rank and non-inferiority, not only Cox",2,0,FALSE,FALSE,0,0.370999999999999,0.0599999999999996,0.441000000000003,2
+"test-survivalPower-design-factors.R","survivalPower-design-factors","the Cox sequential design is efficacy-only",2,0,FALSE,FALSE,0,2.776,0.422,3.237,2
+"test-survivalPower-design-factors.R","survivalPower-design-factors","sequential power agrees with gsDesign's boundary-crossing probability",3,0,FALSE,FALSE,0,0.18,0.024,0.207000000000001,3
+"test-survivalPower-design-factors.R","survivalPower-design-factors","power, detectable HR and duration honour the design the sample size used",7,0,FALSE,FALSE,0,0.602000000000004,0.0730000000000004,0.683,7
+"test-survivalPower-design-factors.R","survivalPower-design-factors","detail tables report the headline's numbers",4,0,FALSE,FALSE,0,0.0929999999999964,0.0119999999999996,0.106999999999999,4
+"test-survivalPower-design-factors.R","survivalPower-design-factors","the non-inferiority interim table is populated at one-sided alpha",3,0,FALSE,FALSE,0,0.140999999999998,0.0229999999999997,0.167999999999999,3
+"test-survivalPower-design-factors.R","survivalPower-design-factors","unsupported design choices are refused or disclosed, not silently ignored",7,0,FALSE,FALSE,0,0.287999999999997,0.04,0.329999999999998,7
+"test-survivalPower-distributions.R","survivalPower-distributions","Weibull distribution: Sample size calculation works (shape = 1.5)",1,0,FALSE,FALSE,0,0.0320000000000036,0.00499999999999989,0.036999999999999,1
+"test-survivalPower-distributions.R","survivalPower-distributions","Weibull distribution: Shape = 1.0 equivalent to exponential",2,0,FALSE,FALSE,0,0.0769999999999982,0.00999999999999979,0.0879999999999939,2
+"test-survivalPower-distributions.R","survivalPower-distributions","Weibull distribution: Decreasing hazard (shape < 1)",1,0,FALSE,FALSE,0,0.0300000000000011,0.00499999999999989,0.0349999999999966,1
+"test-survivalPower-distributions.R","survivalPower-distributions","Weibull distribution: Increasing hazard (shape > 1)",1,0,FALSE,FALSE,0,0.0350000000000037,0.00700000000000056,0.0420000000000016,1
+"test-survivalPower-distributions.R","survivalPower-distributions","Weibull distribution: Power calculation works",1,0,FALSE,FALSE,0,0.0320000000000036,0.00499999999999989,0.036999999999999,1
+"test-survivalPower-distributions.R","survivalPower-distributions","Weibull distribution: Invalid shape parameter rejected",2,0,FALSE,FALSE,0,0.046999999999997,0.00699999999999967,0.0539999999999949,2
+"test-survivalPower-distributions.R","survivalPower-distributions","Log-normal distribution: Sample size calculation works",1,0,FALSE,FALSE,0,0.029999999999994,0.00499999999999989,0.036999999999999,1
+"test-survivalPower-distributions.R","survivalPower-distributions","Log-normal distribution: Power calculation works",1,0,FALSE,FALSE,0,0.0300000000000011,0.00499999999999989,0.0350000000000037,1
+"test-survivalPower-distributions.R","survivalPower-distributions","Log-normal distribution: Different sigma values",2,0,FALSE,FALSE,0,0.103000000000002,0.0169999999999995,0.120000000000005,2
+"test-survivalPower-distributions.R","survivalPower-distributions","Different distributions produce different sample sizes",3,0,FALSE,FALSE,0,0.100999999999999,0.0140000000000002,0.116,3
+"test-survivalPower-events.R","survivalPower-events","the events file is wired to the control that references it",4,0,FALSE,FALSE,0,0.00500000000000256,0.00199999999999978,0.00799999999999557,4
+"test-survivalPower-events.R","survivalPower-events","every preset key and value is legal under the .a.yaml schema",331,0,FALSE,FALSE,0,0.356999999999999,0.162,0.530999999999999,331
+"test-survivalPower-events.R","survivalPower-events","the custom preset restores the .a.yaml defaults",19,0,FALSE,FALSE,0,0.0479999999999947,0.0169999999999995,0.0660000000000025,19
+"test-survivalPower-events.R","survivalPower-events","every preset produces a usable analysis, not a validation error",12,0,FALSE,FALSE,0,0.329000000000001,0.048,0.380000000000003,12
+"test-survivalPower-events.R","survivalPower-events","presets recover a usable design after unsupported settings were selected",31,0,FALSE,FALSE,0,0.0459999999999994,0.0220000000000002,0.271000000000001,31
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","achieved power drives assessment, independently of requested power",15,0,FALSE,FALSE,0,0.134999999999998,0.0229999999999997,0.160000000000004,15
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","solved durations and calendar event milestones propagate to displays",7,0,FALSE,FALSE,0,0.097999999999999,0.0199999999999996,0.119999999999997,7
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","detectable effect summaries use the solved HR and its events",9,0,FALSE,FALSE,0,0.103000000000002,0.0170000000000003,0.120999999999995,9
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","cluster enrollment uses complete allocation blocks and discloses limitations",20,0,FALSE,FALSE,0,0.300000000000004,0.0430000000000001,0.345999999999997,20
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","event-free simulations have finite uncertainty and explicit diagnostics",9,0,FALSE,FALSE,0,0.201,0.0259999999999998,0.234999999999999,9
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","NI objectives are consistent across every narrative and analysis mode",34,0,FALSE,FALSE,0,0.207000000000001,0.0329999999999995,0.241999999999997,34
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","Cox headlines, plots, sensitivity and inverse calculations share a method",13,0,FALSE,FALSE,0,0.449000000000005,0.0630000000000006,0.518999999999998,13
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","equivalent effect specifications support signed differences and full HR bounds",17,0,FALSE,FALSE,0,1.035,0.144,1.198,17
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","unsupported sensitivity modes produce no placeholder scenarios or hidden plots",8,0,FALSE,FALSE,0,0.0839999999999961,0.0140000000000002,0.0990000000000038,8
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","preset help accurately describes R and GUI behavior",2,0,FALSE,FALSE,0,0.0949999999999989,0.0129999999999999,0.166000000000004,2
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","simulation failures retain events and warnings without claiming convergence",17,0,FALSE,FALSE,0,0.204000000000001,0.0360000000000005,0.241999999999997,17
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","Cox simulation comparison uses achieved power of the selected method",5,0,FALSE,FALSE,0,2.116,0.256,2.407,5
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","sequential Cox power preserves null alpha and gates missing upstream support",5,0,FALSE,FALSE,0,0.304000000000002,0.0459999999999994,0.357999999999997,5
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","sequential Cox enrollment attains target power in both effect directions",16,0,FALSE,FALSE,0,24.517,3.933,29.155,16
+"test-survivalPower-full-audit-fixes.R","survivalPower-full-audit-fixes","notices prioritize severity and deduplicate repeated diagnostics",5,0,FALSE,FALSE,0,0.0670000000000073,0.00699999999999967,0.0739999999999981,5
+"test-survivalPower-interim-and-ni.R","survivalPower-interim-and-ni","a non-inferiority effect at or beyond the margin yields no sample size",8,0,FALSE,FALSE,0,0.143000000000001,0.0210000000000008,0.166000000000011,8
+"test-survivalPower-interim-and-ni.R","survivalPower-interim-and-ni","interim analyses reach gsDesign and inflate the sample size",5,0,FALSE,FALSE,0,2.26700000000001,0.382999999999999,2.77800000000001,5
+"test-survivalPower-interim-and-ni.R","survivalPower-interim-and-ni","interim boundaries and spend come from the design, not hand arithmetic",8,0,FALSE,FALSE,0,1.92999999999999,0.309000000000001,2.26900000000001,8
+"test-survivalPower-interim-and-ni.R","survivalPower-interim-and-ni","Cox duration and detectable effect invert the chosen method",4,0,FALSE,FALSE,0,0.295999999999992,0.0329999999999995,0.331999999999994,4
+"test-survivalPower-interim-and-ni.R","survivalPower-interim-and-ni","Monte Carlo validation is seeded and run once per analysis",3,0,FALSE,FALSE,0,8.232,2.611,12.162,3
+"test-survivalPower-release-review.R","survivalPower-release-review","Weibull scale is the true inverse of the requested median",6,0,FALSE,FALSE,0,0.275000000000006,0.0589999999999993,0.506,6
+"test-survivalPower-release-review.R","survivalPower-release-review","Weibull medians match stats::qweibull",6,0,FALSE,FALSE,0,0.176000000000002,0.0410000000000004,0.222999999999999,6
+"test-survivalPower-release-review.R","survivalPower-release-review","Weibull treatment scale encodes proportional hazards",9,0,FALSE,FALSE,0,0.606999999999999,0.149000000000001,0.772999999999996,9
+"test-survivalPower-release-review.R","survivalPower-release-review","Simulator accepts the parameter names the getter actually returns",9,0,FALSE,FALSE,0,0.26100000000001,0.0670000000000002,0.426000000000002,9
+"test-survivalPower-release-review.R","survivalPower-release-review","Simulated Weibull data recovers the requested median",3,0,FALSE,FALSE,0,0.221000000000004,0.0519999999999996,0.317999999999998,3
+"test-survivalPower-release-review.R","survivalPower-release-review","Seeded simulation validation is reproducible",1,0,FALSE,FALSE,0,1.381,0.397,1.84100000000001,1
+"test-survivalPower-release-review.R","survivalPower-release-review","Simulated power agrees with the analytical power it validates",2,0,FALSE,FALSE,0,4.04299999999999,0.590999999999999,4.723,2
+"test-survivalPower-release-review.R","survivalPower-release-review","Schoenfeld event counts match gsDesign",4,0,FALSE,FALSE,0,0.0990000000000038,0.0259999999999998,0.12700000000001,4
+"test-survivalPower-release-review.R","survivalPower-release-review","Event probability matches numerical integration over accrual",3,0,FALSE,FALSE,0,0.201000000000008,0.0380000000000003,0.24199999999999,3
+"test-survivalPower-reporting.R","survivalPower-reporting","narrative output reports the hazard ratio the analysis actually used",7,0,FALSE,FALSE,0,0.213000000000008,0.036999999999999,0.257000000000005,7
+"test-survivalPower-reporting.R","survivalPower-reporting","a multi-arm trial is sized as a trial, not as one pairwise comparison",6,0,FALSE,FALSE,0,0.522999999999996,0.081999999999999,0.611999999999995,6
+"test-survivalPower-reporting.R","survivalPower-reporting","total study power is a probability, not an invented multiplier",9,0,FALSE,FALSE,0,1.01600000000001,0.162000000000001,1.20500000000001,9
+"test-survivalPower-reporting.R","survivalPower-reporting","the copy-ready sentence states the test that was actually run",6,0,FALSE,FALSE,0,0.266000000000005,0.0419999999999998,0.313000000000002,6
+"test-survivalPower-reporting.R","survivalPower-reporting","regulatory guidance matches the convention for the test being run",6,0,FALSE,FALSE,0,0.203000000000003,0.0329999999999995,0.242999999999995,6
+"test-survivalPower-reporting.R","survivalPower-reporting","plots are drawn for the design that was reported",11,0,FALSE,FALSE,0,0.704999999999998,0.0950000000000006,0.811999999999998,11
+"test-survivalPower-reporting.R","survivalPower-reporting","analysis-specific interpretation and detail tables are populated",4,0,FALSE,FALSE,0,0.152000000000001,0.0220000000000002,0.177000000000007,4
+"test-survivalPower-reporting.R","survivalPower-reporting","an unreachable event target explains itself",3,0,FALSE,FALSE,0,0.117000000000004,0.016,0.134999999999991,3
+"test-survivalPower-reporting.R","survivalPower-reporting","the glossary describes the allocation ratio the code implements",3,0,FALSE,FALSE,0,0.0899999999999892,0.00999999999999979,0.102999999999994,3
+"test-survivalPower-reporting.R","survivalPower-reporting","Cox honours the same design adjustments as log-rank",2,0,FALSE,FALSE,0,0.189999999999998,0.0289999999999999,0.222999999999999,2
+"test-survivalPower-reporting.R","survivalPower-reporting","non-uniform accrual is refused rather than silently treated as uniform",7,0,FALSE,FALSE,0,0.277999999999992,0.0299999999999994,0.312000000000012,7
+"test-survivalPower-reporting.R","survivalPower-reporting","simulation validation runs only for the test it actually simulates",3,0,FALSE,FALSE,0,1.69,0.259,2.017,3
+"test-survivalPower-reporting.R","survivalPower-reporting","the Monte Carlo loop is interruptible and a restart is not swallowed",7,0,FALSE,FALSE,0,3.345,0.495999999999999,3.95699999999999,7
+"test-survivalPower-reporting.R","survivalPower-reporting","count options reject fractional values at the option boundary",4,0,FALSE,FALSE,0,0.0829999999999984,0.0449999999999982,0.143000000000001,4
+"test-survivalPower-reporting.R","survivalPower-reporting","the narrative interpretation panel is off unless requested",2,0,FALSE,FALSE,0,0.206000000000003,0.204999999999998,0.483999999999995,2
+"test-survivalPower-reporting.R","survivalPower-reporting","the educational panel states clinically correct definitions",4,0,FALSE,FALSE,0,0.158000000000001,0.0380000000000003,0.210000000000008,4
+"test-survivalPower-reporting.R","survivalPower-reporting","the guided workflow does not claim progress it cannot observe",2,0,FALSE,FALSE,0,0.0520000000000067,0.0109999999999992,0.0660000000000025,2
+"test-survivalPower-reporting.R","survivalPower-reporting","the sensitivity plot draws its base-case highlight",2,0,FALSE,FALSE,0,0.0799999999999983,0.0360000000000014,0.129999999999995,2
+"test-survivalPower-reporting.R","survivalPower-reporting","sensitivity scenarios are compared like with like",3,0,FALSE,FALSE,0,0.171999999999997,0.0499999999999972,0.236000000000004,3
+"test-survivalPower-review-fixes.R","survivalPower-review-fixes","multi-arm whole-study and comparison events use their actual populations",56,0,FALSE,FALSE,0,1.18899999999999,0.477,1.785,56
+"test-survivalPower-review-fixes.R","survivalPower-review-fixes","NI interpretation describes power without promising a conclusion",9,0,FALSE,FALSE,0,0.153000000000006,0.0359999999999978,0.200999999999993,9
+"test-survivalPower-review-fixes.R","survivalPower-review-fixes","NI effect inversion ignores the unused starting HR but keeps feasibility guards",15,0,FALSE,FALSE,0,0.314000000000007,0.177,0.563000000000002,15
+"test-survivalPower-review-fixes.R","survivalPower-review-fixes","joint fixed power integrates the correct two-sided or NI region",28,0,FALSE,FALSE,0,0.598000000000013,0.263999999999999,0.941000000000003,28
+"test-survivalPower-review-fixes.R","survivalPower-review-fixes","sequential multi-arm family power is withheld with a visible explanation",9,0,FALSE,FALSE,0,0.691000000000003,0.370000000000001,1.17400000000001,9
+"test-survivalPower-review-fixes.R","survivalPower-review-fixes","analytical multi-arm calculations preserve present and absent RNG states",3,0,FALSE,FALSE,0,0.174999999999997,0.0370000000000026,0.217999999999989,3
+"test-survivalPower-review-fixes.R","survivalPower-review-fixes","numeric cache reuses identical requests and separates changed inputs",9,0,FALSE,FALSE,0,0.100999999999999,0.0350000000000001,0.138999999999982,9
+"test-survivalPower-review-fixes.R","survivalPower-review-fixes","affected messages have complete Turkish entries and matching placeholders",162,0,FALSE,FALSE,0,1.00200000000001,0.346,1.37899999999999,162
+"test-survivalPower-review-fixes.R","survivalPower-review-fixes","translated NI reports retain numeric results and complete localized sentences",5,0,FALSE,FALSE,0,0.391000000000005,0.0459999999999994,0.449999999999989,5
+"test-survivalPower-simulation.R","survivalPower-simulation","Simulation validation integrates correctly with sample size calculation",6,0,FALSE,FALSE,0,2.012,1.314,3.80600000000001,6
+"test-survivalPower-simulation.R","survivalPower-simulation","Non-exponential distributions are refused, not silently mis-computed",9,0,FALSE,FALSE,0,0.147999999999996,0.0560000000000009,0.295000000000016,9
+"test-survivalPower-simulation.R","survivalPower-simulation","Exponential remains selectable and unaffected by the distribution gate",2,0,FALSE,FALSE,0,0.0579999999999927,0.0159999999999982,0.082000000000022,2
+"test-survivalPower-simulation.R","survivalPower-simulation","Simulation validation works with power calculation",1,0,FALSE,FALSE,0,1.416,0.656000000000002,2.243,1
+"test-survivalPower-simulation.R","survivalPower-simulation","Simulation validation is skipped when not requested",1,0,FALSE,FALSE,0,0.0480000000000018,0.00700000000000145,0.0560000000000116,1
+"test-survivalPower.R","survivalPower","survivalPower function exists and basic functionality works",3,0,FALSE,FALSE,0,0.134999999999991,0.0139999999999993,0.152999999999992,3
+"test-survivalPower.R","survivalPower","Log-rank test: Sample size calculation works",1,0,FALSE,FALSE,0,0.0669999999999931,0.00600000000000023,0.0749999999999886,1
+"test-survivalPower.R","survivalPower","Log-rank test: Power calculation works",1,0,FALSE,FALSE,0,0.0379999999999967,0.00500000000000256,0.0439999999999827,1
+"test-survivalPower.R","survivalPower","Log-rank test: Effect size calculation works",1,0,FALSE,FALSE,0,0.039999999999992,0.00500000000000256,0.0459999999999923,1
+"test-survivalPower.R","survivalPower","Log-rank test: Duration calculation works",1,0,FALSE,FALSE,0,0.0330000000000013,0.00400000000000134,0.0390000000000157,1
+"test-survivalPower.R","survivalPower","Cox regression: Sample size calculation works",1,0,FALSE,FALSE,0,0.0579999999999927,0.00800000000000267,0.0669999999999789,1
+"test-survivalPower.R","survivalPower","Cox regression: Power calculation works",1,0,FALSE,FALSE,0,0.0369999999999919,0.00500000000000256,0.0430000000000064,1
+"test-survivalPower.R","survivalPower","Non-inferiority: Sample size calculation works",1,0,FALSE,FALSE,0,0.0460000000000065,0.00500000000000256,0.0529999999999973,1
+"test-survivalPower.R","survivalPower","Non-inferiority: Power calculation works",1,0,FALSE,FALSE,0,0.0420000000000016,0.00600000000000023,0.0489999999999782,1
+"test-survivalPower.R","survivalPower","Parameter validation: Exponential distribution requirement",2,0,FALSE,FALSE,0,0.0369999999999919,0.00700000000000145,0.0440000000000111,2
+"test-survivalPower.R","survivalPower","Parameter validation: Effect size bounds",5,0,FALSE,FALSE,0,0.123000000000005,0.0169999999999995,0.199000000000012,5
+"test-survivalPower.R","survivalPower","Parameter validation: Alpha level bounds",1,0,FALSE,FALSE,0,0.0220000000000056,0.00400000000000134,0.0269999999999868,1
+"test-survivalPower.R","survivalPower","Parameter validation: Power level bounds",1,0,FALSE,FALSE,0,0.0229999999999961,0.00400000000000134,0.0270000000000152,1
+"test-survivalPower.R","survivalPower","Allocation ratio: Unequal allocation (2:1) works",1,0,FALSE,FALSE,0,0.10799999999999,0.00999999999999801,0.119,1
+"test-survivalPower.R","survivalPower","Allocation ratio: Unequal allocation (1:2) works",1,0,FALSE,FALSE,0,0.0739999999999981,0.004999999999999,0.0809999999999889,1
+"test-survivalPower.R","survivalPower","Dropout handling: Annual dropout rate accounted for",1,0,FALSE,FALSE,0,0.0520000000000067,0.00600000000000023,0.0579999999999927,1
+"test-survivalPower.R","survivalPower","KNOWN LIMITATION: Competing risks test not implemented",2,0,FALSE,FALSE,0,0.0330000000000013,0.00600000000000023,0.0389999999999873,2
+"test-survivalPower.R","survivalPower","KNOWN LIMITATION: RMST test not implemented",2,0,FALSE,FALSE,0,0.0330000000000013,0.00600000000000023,0.0390000000000157,2
+"test-survivalPower.R","survivalPower","KNOWN LIMITATION: SNP survival test not implemented",2,0,FALSE,FALSE,0,0.0319999999999965,0.004999999999999,0.0380000000000109,2
+"test-survivalPower.R","survivalPower","KNOWN LIMITATION: Weighted log-rank test not implemented",2,0,FALSE,FALSE,0,0.0330000000000013,0.00600000000000023,0.0389999999999873,2
+"test-survivalPower.R","survivalPower","Edge case: Very high power (0.95) works",1,0,FALSE,FALSE,0,0.0430000000000064,0.0199999999999996,0.063999999999993,1
+"test-survivalPower.R","survivalPower","Edge case: Small effect size (HR=0.90) requires large sample",1,0,FALSE,FALSE,0,0.0430000000000064,0.004999999999999,0.0490000000000066,1
+"test-survivalPower.R","survivalPower","Edge case: Large effect size (HR=0.50) requires small sample",1,0,FALSE,FALSE,0,0.0460000000000065,0.00600000000000023,0.0509999999999877,1

@@ -67,7 +67,9 @@ a survival probability difference read at the Additional Follow-up time.
 For RMST Difference the RMST options are used instead. Supported HRs are
 0.1 to 5 and median ratios are 0.2 to 10. Survival probability differences
 are signed proportions (0.05 means five percentage points) and must imply a
-valid probability and supported HR at the stated time.}
+valid probability and supported HR at the stated time. In non-inferiority
+effect-size mode, the HR is solved from the design; the effect-size input
+and its type are not used.}
 
 \item{alpha_level}{Significance level (two-sided for superiority, one-sided
 for non-inferiority)}
@@ -97,7 +99,9 @@ rather than returning a number the formulas cannot justify.}
 
 \item{dropout_rate}{Annual rate of loss to follow-up}
 
-\item{ni_margin}{Non-inferiority margin (hazard ratio scale)}
+\item{ni_margin}{Non-inferiority margin on the hazard-ratio scale. Justify
+the margin from disease-specific historical evidence and clinical
+relevance.}
 
 \item{ni_type}{Type of non-inferiority margin}
 

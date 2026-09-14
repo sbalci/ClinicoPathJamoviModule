@@ -1,0 +1,7 @@
+{'option_count': 37, 'output_count': 24, 'ui_count': 37, 'options_without_ui': [], 'backend_undeclared_options': [], 'options_without_direct_read': [], 'versions': {'DESCRIPTION': '1.0.81.01', 'module': '1.0.81.01', 'CITATION': '1.0.81.01', 'analysis_source': '0.4.1', 'analysis_generated': '0.4.0'}, 'compilerMode': 'tame', 'tracked_build_archives': [], 'data_options': []}
+jjstatsplot True False []
+meddecide True False []
+jsurvival True False ['vignettes/survivalpower_documentation.md']
+ClinicoPathDescriptives True False []
+OncoPath True False []
+JamoviTest True False []

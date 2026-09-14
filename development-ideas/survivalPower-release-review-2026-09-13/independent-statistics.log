@@ -1,0 +1,104 @@
+                                                 case        observed
+                      log_rank power ratio 0.2 HR 0.1   1.00000000000
+                     log_rank power ratio 0.2 HR 0.75   0.54294538907
+                        log_rank power ratio 0.2 HR 1   0.05000000000
+                      log_rank power ratio 0.2 HR 1.5   0.91243642120
+                        log_rank power ratio 0.2 HR 5   1.00000000000
+                        log_rank power ratio 1 HR 0.1   1.00000000000
+                       log_rank power ratio 1 HR 0.75   0.81216367442
+                          log_rank power ratio 1 HR 1   0.05000000000
+                        log_rank power ratio 1 HR 1.5   0.99122048049
+                          log_rank power ratio 1 HR 5   1.00000000000
+                        log_rank power ratio 5 HR 0.1   1.00000000000
+                       log_rank power ratio 5 HR 0.75   0.58448268415
+                          log_rank power ratio 5 HR 1   0.05000000000
+                        log_rank power ratio 5 HR 1.5   0.88174070562
+                          log_rank power ratio 5 HR 5   1.00000000000
+               log_rank inverted HR reaches 80% power   0.79999954380
+                             log_rank required events 380.00000000000
+                                 log_rank sample size 583.00000000000
+                             log_rank duration months  24.00000000000
+                cox_regression power ratio 0.2 HR 0.1   1.00000000000
+               cox_regression power ratio 0.2 HR 0.75   0.54656063710
+                  cox_regression power ratio 0.2 HR 1   0.05000000000
+                cox_regression power ratio 0.2 HR 1.5   0.90127231804
+                  cox_regression power ratio 0.2 HR 5   1.00000000000
+                  cox_regression power ratio 1 HR 0.1   1.00000000000
+                 cox_regression power ratio 1 HR 0.75   0.81310623167
+                    cox_regression power ratio 1 HR 1   0.05000000000
+                  cox_regression power ratio 1 HR 1.5   0.99132558681
+                    cox_regression power ratio 1 HR 5   1.00000000000
+                  cox_regression power ratio 5 HR 0.1   1.00000000000
+                 cox_regression power ratio 5 HR 0.75   0.58147403924
+                    cox_regression power ratio 5 HR 1   0.05000000000
+                  cox_regression power ratio 5 HR 1.5   0.89515961018
+                    cox_regression power ratio 5 HR 5   1.00000000000
+         cox_regression inverted HR reaches 80% power   0.80000002791
+                       cox_regression duration months  24.00000000000
+              non_inferiority power ratio 0.2 HR 0.75   0.95652007708
+                 non_inferiority power ratio 0.2 HR 1   0.39960312703
+               non_inferiority power ratio 0.2 HR 1.2   0.05077738263
+                non_inferiority power ratio 1 HR 0.75   0.99901032858
+                   non_inferiority power ratio 1 HR 1   0.62866681699
+                 non_inferiority power ratio 1 HR 1.2   0.06266628295
+                non_inferiority power ratio 5 HR 0.75   0.97122209450
+                   non_inferiority power ratio 5 HR 1   0.39960312703
+                 non_inferiority power ratio 5 HR 1.2   0.04990267294
+        non_inferiority inverted HR reaches 80% power   0.80000000002
+                      non_inferiority required events 631.00000000000
+                          non_inferiority sample size 901.00000000000
+                      non_inferiority duration months  31.71368009207
+       log_rank nonzero additional follow-up duration  34.72456347283
+ cox_regression nonzero additional follow-up duration  34.55751983458
+       reference       abs_error tolerance passed
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   0.54294538907 3.330669074e-16     1e-07   TRUE
+   0.05000000000 1.387778781e-16     1e-07   TRUE
+   0.91243642120 3.330669074e-16     1e-07   TRUE
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   0.81216367442 5.551115123e-16     1e-07   TRUE
+   0.05000000000 1.387778781e-16     1e-07   TRUE
+   0.99122048049 1.110223025e-16     1e-07   TRUE
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   0.58448268415 1.110223025e-16     1e-07   TRUE
+   0.05000000000 1.387778781e-16     1e-07   TRUE
+   0.88174070562 1.110223025e-16     1e-07   TRUE
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   0.80000000000 4.562007109e-07     2e-05   TRUE
+ 380.00000000000 0.000000000e+00     1e-07   TRUE
+ 583.00000000000 0.000000000e+00     1e-07   TRUE
+  24.00000000000 0.000000000e+00     1e-04   TRUE
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   0.54656063710 5.551115123e-16     1e-07   TRUE
+   0.05000000000 1.040834086e-16     1e-07   TRUE
+   0.90127231804 2.220446049e-16     1e-07   TRUE
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   0.81310623167 2.220446049e-16     1e-07   TRUE
+   0.05000000000 1.040834086e-16     1e-07   TRUE
+   0.99132558681 1.110223025e-16     1e-07   TRUE
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   0.58147403924 0.000000000e+00     1e-07   TRUE
+   0.05000000000 1.040834086e-16     1e-07   TRUE
+   0.89515961018 0.000000000e+00     1e-07   TRUE
+   1.00000000000 0.000000000e+00     1e-07   TRUE
+   0.80000000000 2.791411968e-08     2e-05   TRUE
+  24.00000000000 0.000000000e+00     1e-04   TRUE
+   0.95652007708 0.000000000e+00     1e-07   TRUE
+   0.39960312703 0.000000000e+00     1e-07   TRUE
+   0.05077738263 3.469446952e-17     1e-07   TRUE
+   0.99901032858 0.000000000e+00     1e-07   TRUE
+   0.62866681699 1.110223025e-16     1e-07   TRUE
+   0.06266628295 5.551115123e-17     1e-07   TRUE
+   0.97122209450 0.000000000e+00     1e-07   TRUE
+   0.39960312703 0.000000000e+00     1e-07   TRUE
+   0.04990267294 2.775557562e-17     1e-07   TRUE
+   0.80000000000 2.007649602e-11     2e-05   TRUE
+ 631.00000000000 0.000000000e+00     1e-07   TRUE
+ 901.00000000000 0.000000000e+00     1e-07   TRUE
+  31.71367819771 1.894353687e-06     1e-04   TRUE
+  34.72457416237 1.068954393e-05     1e-04   TRUE
+  34.55751983406 5.202807074e-10     1e-04   TRUE

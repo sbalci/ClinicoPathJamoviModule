@@ -1,0 +1,10 @@
+                    scenario  version elapsed
+1                    default baseline   0.030
+2                  fixed_cox baseline   0.042
+3             sequential_cox baseline   3.021
+4 sequential_cox_sensitivity baseline   8.088
+5                    default  current   0.038
+6                  fixed_cox  current   0.045
+7             sequential_cox  current   2.830
+8 sequential_cox_sensitivity  current   4.299
+All paired sample sizes and event counts are identical.

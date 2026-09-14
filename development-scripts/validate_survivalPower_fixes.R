@@ -4,7 +4,8 @@ source("R/survivalPower.h.R")
 source("R/survivalPower_distributions.R")
 source("R/survivalPower.b.R")
 
-out <- "development-ideas/survivalPower-fixes-2026-09-13"
+args <- commandArgs(trailingOnly = TRUE)
+out <- if (length(args)) args[[1]] else "development-ideas/survivalPower-fixes-2026-09-13"
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 spec <- yaml::read_yaml("jamovi/survivalPower.r.yaml")
 make <- function(...) {
@@ -46,16 +47,26 @@ stopifnot(nrow(population) == 24, all(population$populated))
 write.csv(population, file.path(out, "output-population.csv"), row.names = FALSE)
 
 images <- Filter(function(x) x$type == "Image", spec$items)
-render <- function(a, item, state = a$results$get(item$name)$state) {
+dark_theme <- ggplot2::theme_minimal(base_size = 12) + ggplot2::theme(
+  plot.background = ggplot2::element_rect(fill = "#202124", colour = NA),
+  panel.background = ggplot2::element_rect(fill = "#202124", colour = NA),
+  text = ggplot2::element_text(colour = "white"),
+  axis.text = ggplot2::element_text(colour = "white"),
+  panel.grid.major = ggplot2::element_line(colour = "#555555"),
+  panel.grid.minor = ggplot2::element_line(colour = "#333333")
+)
+render <- function(a, item, state = a$results$get(item$name)$state,
+                   ggtheme = ggplot2::theme_minimal(base_size = 12)) {
   a$.__enclos_env__$private[[item$renderFun]](list(state = state),
-    ggtheme = ggplot2::theme_minimal(), theme = NULL)
+    ggtheme = ggtheme, theme = NULL)
 }
 grDevices::pdf(file.path(out, "rendered-plots.pdf"), width = 8, height = 6)
 rendered <- lapply(images, function(item) {
   valid <- render(analyses$sample_size, item)
+  dark <- render(analyses$sample_size, item, ggtheme = dark_theme)
   empty <- render(analyses$sample_size, item, state = NULL)
-  stopifnot(isTRUE(valid), identical(empty, FALSE))
-  data.frame(output = item$name, valid_state = valid, null_state = empty)
+  stopifnot(isTRUE(valid), isTRUE(dark), identical(empty, FALSE))
+  data.frame(output = item$name, valid_state = valid, dark_theme = dark, null_state = empty)
 })
 power_item <- Filter(function(x) x$name == "power_curve_plot", images)[[1]]
 old_state <- analyses$sample_size$results$power_curve_plot$state
@@ -68,6 +79,10 @@ write.csv(do.call(rbind, rendered), file.path(out, "plot-rendering.csv"), row.na
 for (item in images) {
   ragg::agg_png(file.path(out, paste0(item$name, ".png")), width = 800, height = 600)
   stopifnot(isTRUE(render(analyses$sample_size, item)))
+  grDevices::dev.off()
+  ragg::agg_png(file.path(out, paste0(item$name, "-dark.png")), width = 800, height = 600)
+  stopifnot(isTRUE(render(analyses$sample_size, item,
+                        ggtheme = dark_theme)))
   grDevices::dev.off()
 }
 for (pair in list(c("duration", "accrual_timeline_plot"), c("effect", "survival_curves_plot"))) {

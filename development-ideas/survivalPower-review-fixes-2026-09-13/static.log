@@ -1,0 +1,25 @@
+Static review complete; packages: R6, jmvcore, gsDesign, ggplot2, scales, withr, survival, stats 
+Registered S3 method overwritten by 'lme4':
+  method           from
+  na.action.merMod car 
+Registered S3 methods overwritten by 'forecast':
+  method       from  
+  autoplot.acf useful
+  fortify.ts   useful
+Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2
+Registered S3 method overwritten by 'riskRegression':
+  method        from 
+  nobs.multinom broom
+Warning messages:
+1: In check_dep_version(dep_pkg = "TMB") : package version mismatch: 
+glmmTMB was built with TMB package version 1.9.23
+Current TMB package version is 1.9.25
+Please re-install glmmTMB from source or restore original ‘TMB’ package (see '?reinstalling' for more information)
+2: In fun(libname, pkgname) :
+  couldn't connect to display "/var/run/com.apple.launchd.OCeLokAqh6/org.xquartz:0"
+
+    brace_linter semicolon_linter 
+              13                3 

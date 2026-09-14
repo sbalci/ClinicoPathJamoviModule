@@ -1,0 +1,21 @@
+{
+  "status": "Ready after specified minor actions",
+  "analysis_source": "0.4.1",
+  "generated_base": "0.4.0",
+  "regression_assertions": 1320,
+  "regression_files": 13,
+  "regression_blocks": 119,
+  "regression_failures": 0,
+  "rendering_contract_assertions": 6,
+  "independent_numeric_cases": 51,
+  "independent_numeric_failures": 0,
+  "scratch_ui_cases": 48,
+  "regression_ui_scenarios": 50,
+  "outputs_populated": 24,
+  "renderers": 5,
+  "references_complete": 8,
+  "remaining": [
+    "User regeneration: prepare then document",
+    "Build/distribute and smoke-test packaged analysis in jamovi"
+  ]
+}

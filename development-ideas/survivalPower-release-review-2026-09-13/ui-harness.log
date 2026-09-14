@@ -1,0 +1,8 @@
+== survivalPower
+"HARNESS: response to 1 ERR {}"
+"Uncaught (in promise) ReferenceError: require is not defined"
+== agreement
+"HARNESS: response to 1 ERR {}"
+"Uncaught (in promise) ReferenceError: require is not defined"
+== tableone
+"HARNESS: placeholder present = false ; title = Table One ; errors = undefined"

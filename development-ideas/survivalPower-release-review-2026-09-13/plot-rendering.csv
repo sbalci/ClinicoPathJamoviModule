@@ -1,0 +1,6 @@
+"output","valid_state","dark_theme","null_state"
+"power_curve_plot",TRUE,TRUE,FALSE
+"sample_size_plot",TRUE,TRUE,FALSE
+"survival_curves_plot",TRUE,TRUE,FALSE
+"accrual_timeline_plot",TRUE,TRUE,FALSE
+"sensitivity_plot",TRUE,TRUE,FALSE

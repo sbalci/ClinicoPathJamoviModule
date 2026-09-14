@@ -1,6 +1,7 @@
 # Run from the repository root: Rscript development-scripts/review_survivalPower_static.R
 source('R/survivalPower.h.R'); source('R/survivalPower_distributions.R'); source('R/survivalPower.b.R')
-out <- 'development-ideas/survivalPower-review-2026-09-13'
+args <- commandArgs(trailingOnly = TRUE)
+out <- if (length(args)) args[[1]] else 'development-ideas/survivalPower-review-2026-09-13'
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 src <- readLines('R/survivalPower.b.R')
 ast <- parse('R/survivalPower.b.R', keep.source=TRUE)
@@ -97,4 +98,4 @@ baseline <- read.csv('development-ideas/survivalPower-fixes-2026-09-13/source-fi
 baseline$current_md5 <- unname(tools::md5sum(baseline$path))
 baseline$unchanged <- baseline$md5 == baseline$current_md5
 write.csv(baseline, file.path(out, 'source-verification.csv'), row.names = FALSE)
-stopifnot(all(baseline$unchanged))
+if (!length(args)) stopifnot(all(baseline$unchanged))

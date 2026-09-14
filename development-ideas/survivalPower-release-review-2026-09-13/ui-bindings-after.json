@@ -1,0 +1,623 @@
+{
+  "clientPath": "/Applications/jamovi.app/Contents/Resources/jamovi/client/dist/assets/analysisui-BevjJ36p.js",
+  "report": [
+    {
+      "control": "effect_size_type",
+      "values": {},
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "test_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "effect_size_type",
+      "values": {
+        "test_type": "non_inferiority",
+        "analysis_type": "effect_size"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "effect_size",
+      "values": {},
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "effect_size_type",
+        "test_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "effect_size",
+      "values": {
+        "effect_size_type": "rmst_difference"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "effect_size_type",
+        "test_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "effect_size",
+      "values": {
+        "test_type": "non_inferiority",
+        "analysis_type": "effect_size"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "effect_size_type",
+        "test_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "power_level",
+      "values": {},
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "power_level",
+      "values": {
+        "analysis_type": "power"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "sample_size_input",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "sample_size_input",
+      "values": {
+        "analysis_type": "power"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "sample_size_input",
+      "values": {
+        "analysis_type": "effect_size"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "sample_size_input",
+      "values": {
+        "analysis_type": "duration"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "weibull_shape",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "survival_distribution"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "weibull_shape",
+      "values": {
+        "survival_distribution": "weibull"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "survival_distribution"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "ni_margin",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "test_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "ni_margin",
+      "values": {
+        "test_type": "non_inferiority"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "test_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "ni_type",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "test_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "ni_type",
+      "values": {
+        "test_type": "non_inferiority"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "test_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "rmst_tau",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "rmst_tau",
+      "values": {
+        "effect_size_type": "rmst_difference"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "test_type",
+        "effect_size_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "rmst_tau",
+      "values": {
+        "test_type": "rmst_test"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "test_type",
+        "effect_size_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "rmst_tau",
+      "values": {
+        "test_type": "non_inferiority",
+        "analysis_type": "effect_size",
+        "effect_size_type": "rmst_difference"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "number_of_arms",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "study_design"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "number_of_arms",
+      "values": {
+        "study_design": "multi_arm"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "study_design"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "cluster_size",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "study_design"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "cluster_size",
+      "values": {
+        "study_design": "cluster_randomized"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "study_design"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "alpha_spending",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "interim_analyses"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "alpha_spending",
+      "values": {
+        "interim_analyses": 1
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "interim_analyses"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "alpha_spending",
+      "values": {
+        "interim_analyses": 5
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "interim_analyses"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "sensitivity_analysis",
+      "values": {},
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "sensitivity_analysis",
+      "values": {
+        "analysis_type": "power"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "sensitivity_analysis",
+      "values": {
+        "analysis_type": "effect_size"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "sensitivity_analysis",
+      "values": {
+        "analysis_type": "duration"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "simulation_runs",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "run_simulation_validation"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "simulation_runs",
+      "values": {
+        "run_simulation_validation": true
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "run_simulation_validation"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "rmst_difference",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "rmst_difference",
+      "values": {
+        "effect_size_type": "rmst_difference"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "test_type",
+        "effect_size_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "rmst_difference",
+      "values": {
+        "test_type": "rmst_test"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "test_type",
+        "effect_size_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "rmst_difference",
+      "values": {
+        "test_type": "non_inferiority",
+        "analysis_type": "effect_size",
+        "effect_size_type": "rmst_difference"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "test_type",
+        "effect_size_type",
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "multiple_comparisons",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "study_design"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "multiple_comparisons",
+      "values": {
+        "study_design": "multi_arm"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "study_design"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "icc",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "study_design"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "icc",
+      "values": {
+        "study_design": "cluster_randomized"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "study_design"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "run_simulation_validation",
+      "values": {},
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "run_simulation_validation",
+      "values": {
+        "analysis_type": "power"
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "run_simulation_validation",
+      "values": {
+        "analysis_type": "effect_size"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "run_simulation_validation",
+      "values": {
+        "analysis_type": "duration"
+      },
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "analysis_type"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "simulation_seed",
+      "values": {},
+      "expected": false,
+      "actual": false,
+      "sources": [
+        "run_simulation_validation"
+      ],
+      "warnings": [],
+      "pass": true
+    },
+    {
+      "control": "simulation_seed",
+      "values": {
+        "run_simulation_validation": true
+      },
+      "expected": true,
+      "actual": true,
+      "sources": [
+        "run_simulation_validation"
+      ],
+      "warnings": [],
+      "pass": true
+    }
+  ]
+}

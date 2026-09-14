@@ -1,0 +1,35 @@
+{
+  "analysis": "survivalPower",
+  "date": "2026-09-13",
+  "review_findings_addressed": 5,
+  "regression": {
+    "files": 11,
+    "blocks": 114,
+    "passed": 1201,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0,
+    "skipped": 0
+  },
+  "new_regression_assertions": 296,
+  "rendering_contract_passed": 6,
+  "outputs_populated": 24,
+  "renderers_checked": 5,
+  "light_and_dark_rendering": true,
+  "null_and_legacy_states": true,
+  "references_resolved": 8,
+  "translated_backend_messages": 54,
+  "messages_missing_from_tr": 0,
+  "lintr_real_bug_findings": 0,
+  "lintr_style_findings": 16,
+  "prepare_succeeded": true,
+  "document_succeeded": true,
+  "prepared_files_match": true,
+  "multiarm_rng_preserved": true,
+  "sequential_multiarm_family_power": "withheld with explanation",
+  "paired_complex_sensitivity_seconds": {
+    "before": 8.088,
+    "after": 4.299,
+    "median_of": 3
+  }
+}

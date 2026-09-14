@@ -1,0 +1,180 @@
+--- before/R/survivalPower.b.R
++++ after/R/survivalPower.b.R
+@@ -416,7 +416,8 @@
+ 
+             # A survival difference has to be read at some time point; it is read at
+             # the Additional Follow-up value, so changing follow-up changes the effect.
+-            if (isTRUE(self$options$effect_size_type == "survival_difference") && is.finite(hr)) {
++            if (!ni_inverse && isTRUE(self$options$effect_size_type == "survival_difference") &&
++                is.finite(hr)) {
+                 private$.addNotice("INFO", "Survival Difference Landmark", sprintf(
+                     "The survival difference is read at %s months after entry (the Additional Follow-up value), giving HR %.3f \u{2022} Set Additional Follow-up to the time point the difference refers to",
+                     format(self$options$follow_up_period), hr
+@@ -573,7 +574,7 @@
+                 # warning and the sign of the log effect was flipped, so the
+                 # analysis returned a confident sample size for a trial that can
+                 # never succeed.
+-                ni_hr <- private$.get_effect_hr()
++                ni_hr <- hr
+                 ni_margin <- self$options$ni_margin
+                 if (!ni_inverse && is.finite(ni_hr) && !is.null(ni_margin) && ni_hr >= ni_margin) {
+                     private$.addNotice("ERROR", "Effect Not Below Non-inferiority Margin", sprintf(
+@@ -583,8 +584,7 @@
+                     valid <- FALSE
+                 }
+ 
+-                # alpha_level is entered and displayed as two-sided, but the
+-                # non-inferiority test is one-sided by construction.
++                # Non-inferiority uses the entered alpha as a one-sided rate.
+                 private$.addNotice("INFO", "One-sided Alpha for Non-inferiority", sprintf(
+                     "Non-inferiority is tested one-sided at alpha = %.3f \u{2022} Regulatory submissions conventionally use one-sided 0.025 (enter 0.025 here)",
+                     private$.one_sided_alpha()
+@@ -1361,7 +1361,8 @@
+ 
+                 detectable_hr <- tryCatch(
+                     {
+-                        uniroot(objective, interval = c(lower_bound, upper_bound))$root
++                        uniroot(objective, interval = c(lower_bound, upper_bound),
++                            tol = 1e-8)$root
+                     },
+                     error = function(e) {
+                         NA_real_
+@@ -3145,7 +3146,8 @@
+                     target <- plotData$options$power_target
+                     if (length(target) == 1 && is.finite(target)) {
+                         plot <- plot + ggplot2::geom_hline(
+-                            yintercept = target, linetype = "dashed", alpha = 0.6)
++                            yintercept = target, linetype = "dashed",
++                            color = "#D55E00", linewidth = 0.7)
+                     }
+                     print(plot)
+                     return(TRUE)
+--- before/jamovi/00refs.yaml
++++ after/jamovi/00refs.yaml
+@@ -917,6 +917,7 @@
+         issue: 2
+         pages: 499-503
+         doi: 10.2307/2531021
++        url: https://pubmed.ncbi.nlm.nih.gov/6354290/
+ 
+     SemiMarkov:
+         type: software
+--- before/jamovi/survivalPower.a.yaml
++++ after/jamovi/survivalPower.a.yaml
+@@ -5,7 +5,7 @@
+ menuSubgroup: Survival Power Analysis
+ menuTitle: Survival Power Analysis
+ menuSubtitle: Survival Power analysis
+-version: '0.4.0'
++version: '0.4.1'
+ jas: '1.2'
+ 
+ description:
+--- before/jamovi/survivalPower.u.yaml
++++ after/jamovi/survivalPower.u.yaml
+@@ -36,13 +36,13 @@
+         children:
+           - type: ComboBox
+             name: effect_size_type
+-            enable: (test_type != "non_inferiority" || analysis_type != "effect_size")
++            enable: (!(test_type:non_inferiority && analysis_type:effect_size))
+           - type: TextBox
+             name: effect_size
+             format: number
+             suffix: "(interpreted per Effect Size Type)"
+             label: "Effect size"
+-            enable: (effect_size_type != "rmst_difference" && (test_type != "non_inferiority" || analysis_type != "effect_size"))
++            enable: (!(effect_size_type:rmst_difference) && !(test_type:non_inferiority && analysis_type:effect_size))
+           - type: TextBox
+             name: alpha_level
+             format: number
+@@ -53,7 +53,7 @@
+             format: number
+             suffix: "(typically 0.80)"
+             label: "Target power (1-beta)"
+-            enable: (analysis_type != "power")
++            enable: (!(analysis_type:power))
+           - type: TextBox
+             name: allocation_ratio
+             format: number
+@@ -62,7 +62,7 @@
+             name: sample_size_input
+             format: number
+             suffix: "(for power/effect/duration calculations)"
+-            enable: (analysis_type != "sample_size")
++            enable: (!(analysis_type:sample_size))
+ 
+   - type: CollapseBox
+     label: Survival Distribution Parameters
+@@ -81,7 +81,7 @@
+             name: weibull_shape
+             format: number
+             suffix: "(1 = exponential)"
+-            enable: (survival_distribution=="weibull")
++            enable: (survival_distribution:weibull)
+ 
+   - type: CollapseBox
+     label: Study Timeline
+@@ -115,18 +115,18 @@
+           - type: TextBox
+             name: ni_margin
+             format: number
+-            enable: (test_type=="non_inferiority")
++            enable: (test_type:non_inferiority)
+           - type: ComboBox
+             name: ni_type
+-            enable: (test_type=="non_inferiority")
++            enable: (test_type:non_inferiority)
+           - type: TextBox
+             name: rmst_tau
+             format: number
+-            enable: ((test_type:rmst_test || effect_size_type:rmst_difference) && (test_type != "non_inferiority" || analysis_type != "effect_size"))
++            enable: ((test_type:rmst_test || effect_size_type:rmst_difference) && (!(test_type:non_inferiority && analysis_type:effect_size)))
+           - type: TextBox
+             name: rmst_difference
+             format: number
+-            enable: ((test_type:rmst_test || effect_size_type:rmst_difference) && (test_type != "non_inferiority" || analysis_type != "effect_size"))
++            enable: ((test_type:rmst_test || effect_size_type:rmst_difference) && (!(test_type:non_inferiority && analysis_type:effect_size)))
+ 
+   - type: CollapseBox
+     label: Advanced Options
+@@ -138,32 +138,32 @@
+           - type: TextBox
+             name: number_of_arms
+             format: number
+-            enable: (study_design=="multi_arm")
++            enable: (study_design:multi_arm)
+           - type: ComboBox
+             name: multiple_comparisons
+-            enable: (study_design=="multi_arm")
++            enable: (study_design:multi_arm)
+           - type: TextBox
+             name: cluster_size
+             format: number
+-            enable: (study_design=="cluster_randomized")
++            enable: (study_design:cluster_randomized)
+           - type: TextBox
+             name: icc
+             format: number
+-            enable: (study_design=="cluster_randomized")
++            enable: (study_design:cluster_randomized)
+           - type: TextBox
+             name: interim_analyses
+             format: number
+           - type: ComboBox
+             name: alpha_spending
+-            enable: (interim_analyses>0)
++            enable: (!(interim_analyses:0))
+           - type: CheckBox
+             name: sensitivity_analysis
+             label: "Sensitivity analysis"
+-            enable: (analysis_type == "sample_size" || analysis_type == "power")
++            enable: (analysis_type:sample_size || analysis_type:power)
+           - type: CheckBox
+             name: run_simulation_validation
+             label: "Simulation validation"
+-            enable: (analysis_type=='sample_size' || analysis_type=='power')
++            enable: (analysis_type:sample_size || analysis_type:power)
+           - type: TextBox
+             name: simulation_runs
+             format: number

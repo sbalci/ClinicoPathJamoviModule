@@ -917,6 +917,7 @@ refs:
         issue: 2
         pages: 499-503
         doi: 10.2307/2531021
+        url: https://pubmed.ncbi.nlm.nih.gov/6354290/
 
     SemiMarkov:
         type: software

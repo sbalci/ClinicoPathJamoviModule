@@ -36,13 +36,13 @@ children:
         children:
           - type: ComboBox
             name: effect_size_type
-            enable: (test_type != "non_inferiority" || analysis_type != "effect_size")
+            enable: (!(test_type:non_inferiority && analysis_type:effect_size))
           - type: TextBox
             name: effect_size
             format: number
             suffix: "(interpreted per Effect Size Type)"
             label: "Effect size"
-            enable: (effect_size_type != "rmst_difference" && (test_type != "non_inferiority" || analysis_type != "effect_size"))
+            enable: (!(effect_size_type:rmst_difference) && !(test_type:non_inferiority && analysis_type:effect_size))
           - type: TextBox
             name: alpha_level
             format: number
@@ -53,7 +53,7 @@ children:
             format: number
             suffix: "(typically 0.80)"
             label: "Target power (1-beta)"
-            enable: (analysis_type != "power")
+            enable: (!(analysis_type:power))
           - type: TextBox
             name: allocation_ratio
             format: number
@@ -62,7 +62,7 @@ children:
             name: sample_size_input
             format: number
             suffix: "(for power/effect/duration calculations)"
-            enable: (analysis_type != "sample_size")
+            enable: (!(analysis_type:sample_size))
 
   - type: CollapseBox
     label: Survival Distribution Parameters
@@ -81,7 +81,7 @@ children:
             name: weibull_shape
             format: number
             suffix: "(1 = exponential)"
-            enable: (survival_distribution=="weibull")
+            enable: (survival_distribution:weibull)
 
   - type: CollapseBox
     label: Study Timeline
@@ -115,18 +115,18 @@ children:
           - type: TextBox
             name: ni_margin
             format: number
-            enable: (test_type=="non_inferiority")
+            enable: (test_type:non_inferiority)
           - type: ComboBox
             name: ni_type
-            enable: (test_type=="non_inferiority")
+            enable: (test_type:non_inferiority)
           - type: TextBox
             name: rmst_tau
             format: number
-            enable: ((test_type:rmst_test || effect_size_type:rmst_difference) && (test_type != "non_inferiority" || analysis_type != "effect_size"))
+            enable: ((test_type:rmst_test || effect_size_type:rmst_difference) && (!(test_type:non_inferiority && analysis_type:effect_size)))
           - type: TextBox
             name: rmst_difference
             format: number
-            enable: ((test_type:rmst_test || effect_size_type:rmst_difference) && (test_type != "non_inferiority" || analysis_type != "effect_size"))
+            enable: ((test_type:rmst_test || effect_size_type:rmst_difference) && (!(test_type:non_inferiority && analysis_type:effect_size)))
 
   - type: CollapseBox
     label: Advanced Options
@@ -138,32 +138,32 @@ children:
           - type: TextBox
             name: number_of_arms
             format: number
-            enable: (study_design=="multi_arm")
+            enable: (study_design:multi_arm)
           - type: ComboBox
             name: multiple_comparisons
-            enable: (study_design=="multi_arm")
+            enable: (study_design:multi_arm)
           - type: TextBox
             name: cluster_size
             format: number
-            enable: (study_design=="cluster_randomized")
+            enable: (study_design:cluster_randomized)
           - type: TextBox
             name: icc
             format: number
-            enable: (study_design=="cluster_randomized")
+            enable: (study_design:cluster_randomized)
           - type: TextBox
             name: interim_analyses
             format: number
           - type: ComboBox
             name: alpha_spending
-            enable: (interim_analyses>0)
+            enable: (!(interim_analyses:0))
           - type: CheckBox
             name: sensitivity_analysis
             label: "Sensitivity analysis"
-            enable: (analysis_type == "sample_size" || analysis_type == "power")
+            enable: (analysis_type:sample_size || analysis_type:power)
           - type: CheckBox
             name: run_simulation_validation
             label: "Simulation validation"
-            enable: (analysis_type=='sample_size' || analysis_type=='power')
+            enable: (analysis_type:sample_size || analysis_type:power)
           - type: TextBox
             name: simulation_runs
             format: number
