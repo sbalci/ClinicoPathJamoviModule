@@ -804,6 +804,17 @@
         `pages`="343-346", 
         `doi`="10.1016/0197-2456(96)00075-X", 
         `url`="https://doi.org/10.1016/0197-2456(96)00075-X"), 
+    `Rothmann2003`=list(
+        `type`="article", 
+        `author`="Rothmann, M., Li, N., Chen, G., Chi, G. Y. H., Temple, R., & Tsou, H.-H.", 
+        `year`=2003, 
+        `title`="Design and analysis of non-inferiority mortality trials in oncology", 
+        `publisher`="Statistics in Medicine", 
+        `volume`=22, 
+        `issue`=2, 
+        `pages`="239-264", 
+        `doi`="10.1002/sim.1400", 
+        `url`="https://pubmed.ncbi.nlm.nih.gov/12520560/"), 
     `Schoenfeld1983`=list(
         `type`="article", 
         `author`="Schoenfeld, D. A.", 
@@ -813,7 +824,8 @@
         `volume`=39, 
         `issue`=2, 
         `pages`="499-503", 
-        `doi`="10.2307/2531021"), 
+        `doi`="10.2307/2531021", 
+        `url`="https://pubmed.ncbi.nlm.nih.gov/6354290/"), 
     `SemiMarkov`=list(
         `type`="software", 
         `author`="Agnieszka Listwon-Krol, Philippe Saint-Pierre", 
@@ -3310,7 +3322,7 @@
         `author`="Terry M Therneau", 
         `year`=2026, 
         `title`="survival: Survival Analysis", 
-        `publisher`="[R package version 3.8-9]. Retrieved from https://CRAN.R-project.org/package=survival", 
+        `publisher`="[R package]. Retrieved from https://CRAN.R-project.org/package=survival", 
         `url`="https://CRAN.R-project.org/package=survival"), 
     `survivalrviews`=list(
         `type`="article", 
