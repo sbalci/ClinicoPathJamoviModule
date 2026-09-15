@@ -1,0 +1,23 @@
+# Null-coalescing operator
+
+Null-coalescing operator
+
+## Usage
+
+``` r
+x %||% y
+```
+
+## Arguments
+
+- x:
+
+  Left-hand side value
+
+- y:
+
+  Right-hand side default value
+
+## Value
+
+`x` if it is not `NULL`, otherwise `y`.

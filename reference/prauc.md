@@ -1,0 +1,177 @@
+# Precision-Recall Analysis
+
+Precision-Recall (PR) analysis is superior to ROC analysis for highly
+imbalanced datasets, which are common in digital pathology and AI
+applications. While ROC curves can be misleading when the negative class
+vastly outnumbers the positive class, PR curves focus on the performance
+in the minority (positive) class. The area under the PR curve (PR-AUC or
+Average Precision) provides a single-number summary of model
+performance. PR analysis is essential for evaluating rare event
+detection (mitotic figures \<1 percent, rare tumor cells,
+micrometastases), cancer screening where positives are rare, quality
+control in digital pathology where defects are uncommon, and AI triage
+systems where abnormal cases are infrequent. This module provides
+comprehensive PR analysis with optimal threshold selection, comparison
+to baseline (random classifier), and F-score optimization for different
+precision-recall trade-offs.
+
+## Usage
+
+``` r
+prauc(
+  data,
+  outcome,
+  predictor,
+  positive_level = "",
+  prevalence = -1,
+  calculate_auc = TRUE,
+  calculate_fscore = TRUE,
+  beta_weights = "1, 2, 0.5",
+  confidence_intervals = TRUE,
+  ci_method = "bootstrap",
+  bootstrap_samples = 1000,
+  confidence_level = 0.95,
+  compare_to_roc = TRUE,
+  baseline_comparison = TRUE,
+  interpolation_method = "step",
+  plot_pr_curve = TRUE,
+  plot_comparison = FALSE,
+  plot_fscore = FALSE,
+  min_threshold = 0,
+  max_threshold = 1,
+  random_seed = 12345
+)
+```
+
+## Arguments
+
+- data:
+
+  The data as a data frame.
+
+- outcome:
+
+  Binary outcome variable (e.g., cancer/non-cancer, positive/negative).
+  Must have exactly two levels.
+
+- predictor:
+
+  Continuous predictor variable (e.g., AI score, biomarker level,
+  probability). Higher values should indicate higher likelihood of
+  positive outcome.
+
+- positive_level:
+
+  Level of outcome variable to treat as "positive" class. If not
+  specified, the second level of the factor is used. Critical for
+  correct PR analysis.
+
+- prevalence:
+
+  Observed prevalence of positive class in dataset. Automatically
+  calculated if not specified (-1). Used for baseline comparison and
+  interpretation.
+
+- calculate_auc:
+
+  Calculate area under precision-recall curve (also called Average
+  Precision). Uses trapezoidal integration. Essential summary metric for
+  imbalanced data.
+
+- calculate_fscore:
+
+  Find optimal threshold that maximizes F1-score (harmonic mean of
+  precision and recall). Also calculates F2-score (emphasizes recall)
+  and F0.5-score (emphasizes precision).
+
+- beta_weights:
+
+  Comma-separated list of beta values for F-score calculation. F1
+  (beta=1) balances precision and recall. F2 (beta=2) weights recall
+  higher. F0.5 (beta=0.5) weights precision higher. Example: "1, 2, 0.5,
+  3"
+
+- confidence_intervals:
+
+  Calculate confidence intervals for PR-AUC using bootstrap resampling.
+  Provides uncertainty quantification for imbalanced datasets.
+
+- ci_method:
+
+  Method for confidence interval calculation. Bootstrap percentile is
+  standard. BCa (bias-corrected and accelerated) adjusts for skewness.
+
+- bootstrap_samples:
+
+  Number of bootstrap resamples for confidence interval calculation.
+
+- confidence_level:
+
+  Confidence level for interval estimation.
+
+- compare_to_roc:
+
+  Calculate ROC-AUC for comparison. Demonstrates advantage of PR
+  analysis for imbalanced data where ROC-AUC may be misleadingly high.
+
+- baseline_comparison:
+
+  Compare PR-AUC to baseline (random classifier). Baseline PR-AUC equals
+  the prevalence. Shows improvement over chance performance.
+
+- interpolation_method:
+
+  Method for interpolating PR curve between points. Step function is
+  standard for PR curves. Linear interpolation can smooth the curve.
+
+- plot_pr_curve:
+
+  Plot precision-recall curve with optimal F-score threshold marked.
+  Shows trade-off between precision and recall across all thresholds.
+
+- plot_comparison:
+
+  Side-by-side comparison of ROC and PR curves to demonstrate
+  differences in imbalanced dataset evaluation.
+
+- plot_fscore:
+
+  Plot F-scores (F1, F2, F0.5) across all thresholds to visualize
+  optimal operating points for different precision-recall trade-offs.
+
+- min_threshold:
+
+  Minimum predictor threshold to evaluate. Use to focus on clinically
+  relevant range.
+
+- max_threshold:
+
+  Maximum predictor threshold to evaluate.
+
+- random_seed:
+
+  Random seed for bootstrap procedures to ensure reproducibility.
+
+## Value
+
+A results object containing:
+
+|  |  |  |  |  |  |
+|----|----|----|----|----|----|
+| `results$instructions` |  |  |  |  | a html |
+| `results$prSummary` |  |  |  |  | Precision-Recall area under curve with baseline comparison |
+| `results$optimalThresholds` |  |  |  |  | Optimal operating points for different F-score metrics |
+| `results$prCurveData` |  |  |  |  | Precision and recall values across all thresholds |
+| `results$performanceAtKey` |  |  |  |  | Precision and recall at clinically relevant thresholds |
+| `results$prCurvePlot` |  |  |  |  | Precision-recall curve with optimal F1 threshold marked |
+| `results$comparisonPlot` |  |  |  |  | Side-by-side comparison of ROC and PR curves |
+| `results$fscorePlot` |  |  |  |  | F-scores across thresholds for different beta values |
+| `results$interpretation` |  |  |  |  | a html |
+
+Tables can be converted to data frames with `asDF` or
+[`as.data.frame`](https://rdrr.io/r/base/as.data.frame.html). For
+example:
+
+`results$prSummary$asDF`
+
+`as.data.frame(results$prSummary)`

@@ -1,0 +1,128 @@
+# Date/DateTime Validator
+
+Comprehensive date and datetime field validation and quality assessment
+using multiple R packages (datefixR, anytime, lubridate). This module
+validates and diagnoses messy date/datetime formats commonly found in
+clinical databases: different separators, month representations, missing
+components, and ambiguous formats. Provides detailed validation reports
+and quality assessment. Perfect for clinical research data quality
+control and database audit workflows.
+
+## Usage
+
+``` r
+datevalidator(
+  data,
+  date_vars,
+  correction_method = "datefixr",
+  date_format = "auto",
+  day_impute = 1,
+  month_impute = 7,
+  handle_excel = FALSE,
+  timezone = "UTC",
+  show_correction_table = FALSE,
+  show_quality_assessment = FALSE,
+  show_format_analysis = FALSE,
+  show_correction_summary = FALSE,
+  show_interpretation = FALSE
+)
+```
+
+## Arguments
+
+- data:
+
+  The data as a data frame.
+
+- date_vars:
+
+  Variables containing date or datetime information in various formats
+  that need validation and quality assessment. Can handle character
+  strings, numeric values, factors with date/datetime representations.
+
+- correction_method:
+
+  Method for date/datetime validation. datefixR provides robust format
+  detection, anytime offers flexible parsing, lubridate allows format
+  specification, and consensus combines methods for maximum reliability.
+
+- date_format:
+
+  Expected date or datetime format for ambiguous cases. Auto-detect
+  tries to determine the most likely format based on the data patterns.
+  HMS formats include time components (hours, minutes, seconds).
+
+- day_impute:
+
+  Day of month to impute when day is missing (1-31). Default is 1st of
+  month. If value exceeds days in month, last day of month will be used.
+
+- month_impute:
+
+  Month to impute when month is missing (1-12). Default is 7 (July).
+  Commonly used middle-year value for clinical research.
+
+- handle_excel:
+
+  Whether to convert Excel numeric date values (days since 1900-01-01).
+  Useful for data exported from Excel spreadsheets.
+
+- timezone:
+
+  Timezone for output dates/datetimes. Use UTC for standardization, or
+  local timezone if time-of-day information is critical. Only applies to
+  anytime and consensus methods.
+
+- show_correction_table:
+
+  Display detailed table showing original values, validated values, and
+  validation status for each observation.
+
+- show_quality_assessment:
+
+  Provide quality assessment including success rates, common problems,
+  and recommendations for further validation.
+
+- show_format_analysis:
+
+  Analyze detected date/datetime formats and patterns in the original
+  data.
+
+- show_correction_summary:
+
+  Summary statistics of the validation process including before/after
+  comparison and data quality metrics.
+
+- show_interpretation:
+
+  Display guidance on date/datetime validation methods, best practices,
+  and recommendations for clinical research data. Includes information
+  about the DateTime Converter module.
+
+## Value
+
+A results object containing:
+
+|                              |     |     |     |     |                |
+|------------------------------|-----|-----|-----|-----|----------------|
+| `results$notices`            |     |     |     |     | a preformatted |
+| `results$todo`               |     |     |     |     | a html         |
+| `results$corrected_data`     |     |     |     |     | a table        |
+| `results$correction_table`   |     |     |     |     | a html         |
+| `results$quality_assessment` |     |     |     |     | a html         |
+| `results$format_analysis`    |     |     |     |     | a html         |
+| `results$correction_summary` |     |     |     |     | a html         |
+| `results$interpretation`     |     |     |     |     | a html         |
+
+Tables can be converted to data frames with `asDF` or
+[`as.data.frame`](https://rdrr.io/r/base/as.data.frame.html). For
+example:
+
+`results$corrected_data$asDF`
+
+`as.data.frame(results$corrected_data)`
+
+## Details
+
+For datetime conversion with component extraction (year, month, day,
+hour, minute, second), see the DateTime Converter module.

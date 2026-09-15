@@ -1,0 +1,125 @@
+# Interaction terms in Multivariable Survival Analysis
+
+## When to use this
+
+A randomized trial rarely stops at “does the treatment work?” The next
+question is *“who does it work for?”* - does the treatment effect differ
+across a biomarker, a stage, or a histologic subtype? This is **effect
+modification**, and the standard way to test it in a Cox model is a
+**Treatment × Biomarker interaction term**:
+`Surv(time, event) ~ Treatment * Biomarker`.
+
+`multisurvival` (Multivariable Survival Analysis) now supports building
+these interaction terms directly, without leaving jamovi.
+
+**Interaction is not the same as stratification.** `multisurvival`
+already supports
+[`strata()`](https://rdrr.io/pkg/survival/man/strata.html) for
+stratified Cox models: stratifying by a variable gives each stratum its
+own baseline hazard, but it *forces the covariate effects to be
+identical across strata* - it cannot tell you whether a treatment effect
+differs by subgroup. An interaction term does the opposite: it estimates
+a coefficient for the crossed term and directly tests whether the effect
+is modified. If your question is “does the biomarker predict who
+benefits from treatment?”, you need an interaction term, not (only)
+stratification.
+
+## Building an interaction term in the GUI
+
+1.  Assign variables to **Explanatory Variables** and/or **Continuous
+    Explanatory Variable** as usual - these become the main effects in
+    the Cox model.
+2.  Open the **Interaction Terms** section (collapsed by default). It
+    lists every variable already chosen as a main effect as an available
+    predictor.
+3.  Select two (or more) of those variables and use the transfer button
+    to cross them into a term, exactly like jamovi’s regression/ANOVA
+    Model Terms builders.
+
+Because only variables already selected as main effects can be crossed,
+the builder enforces the **marginality (hierarchy) principle** by
+construction - you cannot add `Treatment:Biomarker` without both
+`Treatment` and `Biomarker` already present as main effects.
+
+> **Convention:** for a two-way term `A × B`, **A (listed first) is the
+> focal effect** and **B (listed second) is the moderator**. The focal
+> effect is the variable whose hazard ratio you want to see change
+> across subgroups (e.g. Treatment); the moderator defines the subgroups
+> (e.g. Biomarker status). To get the effect in the other direction,
+> build `B × A` instead.
+
+## What you get
+
+**1. The standard outputs, extended.** Interaction terms appear as
+additional rows in the main hazard-ratio table and in the forest plot,
+alongside the main effects - no separate step needed.
+
+**2. Interaction (Effect-Modification) Test.** A dedicated table with
+one row per interaction term: hazard ratio, 95% CI, and the interaction
+p-value. A significant p indicates the focal effect genuinely differs
+across levels of the moderator (effect modification) - this is the
+formal test biomarker-by-treatment analyses report.
+
+**3. Within-Subgroup Hazard Ratios.** For each two-way interaction whose
+moderator is **categorical**, `multisurvival` releveles the data to each
+moderator level in turn and refits the *same full* Cox model (all
+covariates and interactions, unchanged), then reports the focal
+variable’s hazard ratio within that subgroup. This gives the
+fully-adjusted “HR for Treatment in Biomarker-positive patients” / “HR
+for Treatment in Biomarker-negative patients” rows clinicians actually
+want to read, computed from one coherent model rather than separate
+subgroup-only fits.
+
+## Limitations
+
+- **Within-subgroup HRs need a categorical moderator.** If the moderator
+  is continuous, the interaction coefficient in the effect-modification
+  test table is still reported, but per-subgroup HRs are not computed
+  (there is no discrete “subgroup” to relevel to) - a note explains this
+  in the output.
+- **Within-subgroup HRs are computed for two-way interactions only.**
+  Three-way and higher-order terms appear in the HR table and the
+  effect-modification test, but are skipped for the subgroup breakdown.
+- **Disabled in competing-risks (Fine-Gray) mode.** When Multiple Event
+  Levels analysis is set to “Competing risks”, within-subgroup refits
+  are disabled (weighted subdistribution refits are fragile); the output
+  notes this and directs you to the interaction coefficient instead.
+- **Non-converged subgroups are flagged.** If a subgroup refit fails to
+  converge (typically small-sample separation), its row is marked with
+  an asterisk and a footnote - treat that HR with extreme caution.
+
+## In R
+
+The GUI builds exactly the Cox interaction model you would write
+directly with the `survival` package:
+
+``` r
+
+library(survival)
+
+# A minimal simulated trial: does Treatment benefit differ by Biomarker status?
+set.seed(1)
+n <- 300
+dat <- data.frame(
+  Treatment = factor(sample(c("Control", "Drug"), n, replace = TRUE)),
+  Biomarker = factor(sample(c("Negative", "Positive"), n, replace = TRUE))
+)
+lp <- with(dat, -0.1 * (Treatment == "Drug") +
+                 -0.9 * (Treatment == "Drug" & Biomarker == "Positive"))
+dat$time  <- rexp(n, rate = exp(lp) * 0.1)
+dat$event <- rbinom(n, 1, 0.8)
+
+# Treatment (focal) x Biomarker (moderator): the interaction test
+fit <- coxph(Surv(time, event) ~ Treatment * Biomarker, data = dat)
+summary(fit)
+
+# Within-subgroup HR for Treatment, computed the same way multisurvival does:
+# relevel Biomarker to each level and re-read the Treatment coefficient.
+fit_neg <- coxph(Surv(time, event) ~ Treatment * relevel(Biomarker, ref = "Negative"), data = dat)
+fit_pos <- coxph(Surv(time, event) ~ Treatment * relevel(Biomarker, ref = "Positive"), data = dat)
+```
+
+`multisurvival`’s Interaction (Effect-Modification) Test table reports
+the same HR/CI/p as the `Treatment:BiomarkerPositive` row of
+`summary(fit)` above, and its Within-Subgroup Hazard Ratios table
+reports the `TreatmentDrug` coefficient from each releveled refit.

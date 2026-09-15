@@ -1,0 +1,201 @@
+# Interpreting the interaction output in Multivariable Survival Analysis
+
+This guide is a practical companion to *Interaction terms in
+Multivariable Survival Analysis*. That vignette shows **how to build**
+an interaction; this one shows **how to read the results** — what the
+two interaction tables mean, how the within-subgroup hazard ratios are
+computed, and why they differ slightly from running separate Cox models
+in each subgroup.
+
+Throughout we use a concrete breast-cancer example: a set of candidate
+markers (AR and others) tested for whether their effect on overall
+survival **depends on ER status**.
+
+## Prognostic vs. predictive
+
+Two different clinical claims hide behind the word “biomarker”:
+
+- A **prognostic** marker predicts outcome *overall* — higher AR is
+  associated with worse (or better) survival, regardless of anything
+  else.
+- A **predictive** marker’s effect *depends on another factor* — AR
+  matters in ER-positive tumours but not in ER-negative ones (or vice
+  versa).
+
+A single Cox model fitted per marker cannot separate these. The
+**interaction test** can: it asks whether the marker’s hazard ratio is
+the *same* in both ER groups, or *different*. A different effect across
+groups is **effect modification**, and it is the statistical signature
+of a predictive biomarker.
+
+## The model
+
+When you cross `ER` with a marker in the **Interaction Terms** builder,
+the module fits a single Cox model with the crossed term:
+
+``` r
+
+survival::coxph(survival::Surv(OS_days, OS_event) ~ ER * Marker, data = df)
+# ER * Marker expands to:  ER + Marker + ER:Marker
+```
+
+The `ER:Marker` coefficient **is** the interaction. Exponentiated, it is
+a *ratio of hazard ratios*: how much the marker’s HR in ER-positive
+patients differs from its HR in ER-negative patients. If it equals 1,
+the marker behaves identically in both groups (not predictive). If it
+departs from 1, the marker’s effect is modified by ER.
+
+## Table 1 — Interaction (Effect-Modification) Test
+
+This table has one row per crossed term and reports the formal test of
+*whether* the effect differs.
+
+| Interaction |   HR |      95% CI |     p |
+|-------------|-----:|------------:|------:|
+| `AR : ER`   | 0.42 | 0.22 – 0.80 | 0.008 |
+
+- **HR** is the *ratio* of AR’s hazard ratio between the ER groups.
+  `0.42` means AR is far more protective in one ER stratum than the
+  other.
+- **HR = 1** would mean AR does the same thing regardless of ER — no
+  modification, not predictive.
+- **p** is the *p-for-interaction*. Here `p = 0.008`, so AR’s effect on
+  survival genuinely differs by ER status.
+
+Read this table as the answer to the predictive-biomarker question:
+*does the marker’s effect depend on ER?* It tells you **that** the
+effect differs; the next table tells you **how**.
+
+## Table 2 — Within-Subgroup Hazard Ratios
+
+This table gives the marker’s actual effect size *inside* each ER
+subgroup — the clinically usable numbers.
+
+| Interaction | Subgroup          | Focal |   HR |      95% CI |       p |
+|-------------|-------------------|-------|-----:|------------:|--------:|
+| `AR * ER`   | ER0 (ER-negative) | AR    | 1.02 | 0.71 – 1.47 |    0.90 |
+| `AR * ER`   | ER1 (ER-positive) | AR    | 0.43 | 0.26 – 0.72 | \<0.001 |
+
+AR is **inert in ER-negative** tumours (HR 1.02, p = 0.90) but
+**strongly protective in ER-positive** tumours (HR 0.43, p \< 0.001). AR
+is therefore a **predictive marker within ER-positive disease** —
+exactly what the significant interaction in Table 1 promised. Reporting
+only a pooled AR HR would have averaged these two very different
+realities into a misleading middle.
+
+## How the within-subgroup HRs are computed
+
+The subgroup HRs are read straight out of the **one interaction model**
+— *not* from separate Cox models fitted in each ER group. The module
+uses **relevel-and-refit**:
+
+1.  Fit the full model `Surv ~ AR * ER` (plus any covariates you added)
+    on all patients.
+2.  Relevel `ER` so a chosen level (ER0, then ER1) is the reference.
+    This changes only the parameterisation, not the fit.
+3.  In the releveled model, the `AR` main-effect coefficient now *is*
+    AR’s effect **within that ER level**. Its HR = `exp(coef)`, with the
+    CI and p from the model’s own variance.
+
+Because releveling does not alter the fit, this is mathematically
+identical to reading `β(AR)` (within ER0) and `β(AR) + β(AR:ER)` (within
+ER1) off the single model — releveling is just the clean way to obtain
+each one *together with its correct standard error*. These are the
+model’s **implied conditional effects**.
+
+## Why they differ slightly from separate subgroup Cox models
+
+If you fit AR in each ER subgroup *independently*, the point estimates
+(HRs) will be *almost, but not exactly*, the same, and the confidence
+intervals and p-values will differ a little. This is expected, and it
+follows from what each method assumes:
+
+|  | Interaction model (what the module reports) | Separate Cox per ER group |
+|----|----|----|
+| Baseline hazard | **common** across ER (ER is a covariate) | each subgroup its **own** |
+| Other covariates | effects assumed **shared**, estimated once | **re-estimated** within each group |
+| Standard errors | **borrow strength** across the whole sample | use **only** that subgroup’s data |
+| Consequence | **narrower CIs, more power** | wider CIs, less power |
+
+- **HRs nearly identical:** with only `ER * Marker`, they differ only
+  because the interaction model uses a common baseline hazard across ER
+  while a subgroup-only fit uses an ER-specific baseline. Add other
+  covariates and the small gap also reflects the interaction model
+  assuming common covariate effects.
+- **CIs and p differ more:** the interaction model pools variance across
+  both ER groups, so its intervals are tighter — the small difference
+  you may notice against a manual subgroup check.
+
+Both are valid, but they answer subtly different questions. The
+interaction-model (conditional) subgroup effect is the **preferred, more
+efficient estimand for predictive-biomarker subgroup analysis**, and it
+is what the module reports (noted in the table caption). Separate
+subgroup fits are a fine sanity check: expect matching point estimates
+and slightly wider intervals.
+
+## Getting the subgroup table to fill — focal and moderator
+
+The builder reads a crossed term as **focal : moderator**. The
+**moderator** is the variable that defines the subgroups, and it must be
+**categorical**. The **focal** is the effect measured within those
+subgroups.
+
+The module **auto-detects** the moderator: for a term `A:B` it uses
+whichever of `A` / `B` is categorical as the moderator (preferring the
+second variable when both are categorical). So:
+
+- `AR : ER` (ER categorical) → subgroups by ER, AR effect shown within
+  each — the marker-by-ER question. Fills the table.
+- `Marker : ER` with a continuous marker → still fills: ER is the
+  moderator, and the marker’s per-unit HR is shown within each ER
+  subgroup.
+- If **both** variables in the term are continuous, there are no
+  discrete subgroups to form, so the Within-Subgroup table is
+  intentionally left empty (an on-screen note explains this). The
+  interaction-test table (Table 1) fills either way.
+
+To be sure a categorical variable is used as the moderator, simply
+include it in the crossed term; the module will assign the roles so the
+subgroups are formed by the categorical variable.
+
+## A reproducible check in R
+
+To confirm the interaction HR for one marker against the module
+(matching the module’s complete-case handling for that marker):
+
+``` r
+
+library(survival); library(broom)
+
+fit <- coxph(Surv(OS_days, OS_event) ~ ER * AR, data = na.omit(df[, c("OS_days","OS_event","ER","AR")]))
+
+# interaction HR / CI / p (matches Table 1)
+broom::tidy(fit, exponentiate = TRUE, conf.int = TRUE)[grepl(":", broom::tidy(fit)$term), ]
+
+# within-subgroup AR HR, ER-positive as reference (matches Table 2, ER1 row)
+df$ER <- relevel(factor(df$ER), ref = "ER1")
+coxph(Surv(OS_days, OS_event) ~ ER * AR, data = df)   # read the AR coefficient
+```
+
+## Cautions before concluding “predictive”
+
+- **Power.** Interaction tests need substantially more events than
+  main-effect tests. A non-significant interaction in a modest sample is
+  *weak evidence of no modification*, not proof of its absence.
+- **Multiplicity.** Scanning many markers inflates false positives.
+  Adjust the p-for-interaction (for example, with an FDR correction)
+  before calling any single marker predictive.
+- **Complete cases.** If you compare the module to a per-marker R
+  script, note that the module uses complete cases across *all* selected
+  variables, whereas a per-marker script drops rows missing *that*
+  marker only. Match the row set when comparing a single marker, or N —
+  and therefore the CI and p — can differ for that reason alone.
+
+## Summary
+
+Table 1 tells you **whether** a marker’s effect on survival depends on
+ER (the predictive-biomarker test). Table 2 tells you **how big** the
+effect is inside each ER group, estimated from the same interaction
+model as its implied conditional effects. Include a categorical variable
+in the crossed term and the module forms the subgroups by it
+automatically.
