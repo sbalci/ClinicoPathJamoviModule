@@ -238,9 +238,9 @@ test_that("LASSO results reload and active scores retain alignment on the protob
   failed$init()
   failed$postInit()
   failed$.load(vChanges = "time")
-  failed$run()
-  expect_equal(failed$results$modelSummary$rowCount, 0)
-  expect_match(failed$results$todo$content, "zero values")
+  # jmvcore::reject() reaches jamovi (no catch-all): fixed rows stay, values cleared.
+  expect_error(failed$run(), "zero values")
+  expect_true(all(is.na(as.data.frame(failed$results$modelSummary)$value)))
   expect_null(failed$results$path_plot$state)
   expect_true(all(is.na(failed$results$riskScore$.__enclos_env__$private$.values[[1]])))
   invalid_scores <- wire_scores(failed)
@@ -374,12 +374,16 @@ test_that("correlation details escape special predictor names exactly once", {
 test_that("one candidate is judged by its encoded design width", {
   d <- lassocox_audit_data()
   numeric_only <- lassocox_audit_analysis(d, explanatory = "x")
-  numeric_only$run()
-  expect_equal(numeric_only$results$modelSummary$rowCount, 0)
-  expect_match(numeric_only$results$todo$content,
+  # The reject() reaches the user verbatim: no "Error creating design matrix: ..."
+  # prefix and no doubled full stop from the old re-wrapping tryCatch.
+  err <- tryCatch(numeric_only$run(), error = function(e) e)
+  expect_s3_class(err, "error")
+  expect_match(conditionMessage(err),
     "At least two non-constant encoded predictor columns", fixed = TRUE)
+  expect_false(grepl("Error creating design matrix", conditionMessage(err), fixed = TRUE))
+  expect_false(grepl("..", conditionMessage(err), fixed = TRUE))
   expect_false(grepl("Only one non-constant explanatory variable remains",
-    numeric_only$results$todo$content, fixed = TRUE))
+    conditionMessage(err), fixed = TRUE))
 
   factor_only <- lassocox_audit_analysis(d, explanatory = "grade")
   factor_only$run()

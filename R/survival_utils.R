@@ -366,8 +366,12 @@
         return(fail(paste0(
             "Outcome variable '", outcome_name, "' is numeric but not coded 0/1. ",
             "Values found: ", paste(sort(observed), collapse = ", "),
-            ". Either recode as 0 = censored / 1 = event, or select which value ",
-            "represents the event using the Event Level option.")))
+            ". The analysis does not guess which value is the event, because a coding ",
+            "such as 1/2 means 2 = event in some datasets and 1 = event in others. ",
+            "Either recode it as 0 = censored / 1 = event, or choose the value that ",
+            "represents the event in Event Level (in jamovi, first set the column's ",
+            "measure type to Nominal in Data > Setup so its values are listed); every ",
+            "other value is then treated as censored.")))
     }
 
     fail(paste0(

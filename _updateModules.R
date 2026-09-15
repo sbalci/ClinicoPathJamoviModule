@@ -888,6 +888,9 @@ collect_used_refs <- function(jamovi_dir) {
     ln <- tryCatch(readLines(f, warn = FALSE), error = function(e) character(0))
     in_refs <- FALSE
     for (line in ln) {
+      # A commented-out `#   refs: key` is not a citation; counting it kept dead
+      # entries (jsurvival `ggstatsplot`, 2026-09-15 library audit) through the trim.
+      if (grepl("^\\s*#", line)) next
       inl <- regmatches(line, regexec("refs:\\s*\\[([^]]*)\\]", line))[[1]]
       if (length(inl) == 2) {
         used <- c(used, trimws(gsub("['\"]", "", strsplit(inl[2], ",")[[1]])))

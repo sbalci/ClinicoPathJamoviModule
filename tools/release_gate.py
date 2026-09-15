@@ -164,10 +164,126 @@ def check_entities():
     print('  non-structural HTML entities: %d' % len(hits))
 
 
+def _dicts(node):
+    if isinstance(node, dict):
+        yield node
+        for v in node.values():
+            yield from _dicts(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _dicts(v)
+
+
+def _safe_yaml(p):
+    try:
+        return yaml.safe_load(open(p, encoding='utf-8'))
+    except Exception:
+        return None
+
+
+def _shipped(name):
+    """Production menuGroups carry no D (development) or T (JamoviTest) suffix."""
+    a = _safe_yaml('jamovi/%s.a.yaml' % name) or {}
+    return not re.search(r'[DT]$', str(a.get('menuGroup', 'D')))
+
+
+_METHOD = re.compile(r'^\s*(\.[A-Za-z_][\w.]*)\s*=\s*function\s*\(', re.M)
+_DATA = re.compile(r'self\$data\b|self\$readDataset|private\$\.data\b')
+_CALL = re.compile(r'private\$(\.[A-Za-z_][\w.]*)\s*\(')
+
+
+def check_requires_data():
+    """jmvcore nulls private$.data once .run() returns and re-reads the dataset for a
+    redraw or export only when the Image declares requiresData: true (library review
+    guide section 15). Trace each renderFun through the private$ helpers it calls.
+    ponytail: method bodies are split at method headers with comments stripped - a
+    heuristic, but it reproduces the 2026-09-15 jsurvival report exactly."""
+    missing, surplus = [], []
+    for p in glob.glob('jamovi/*.r.yaml'):
+        name = os.path.basename(p)[:-7]
+        b = 'R/%s.b.R' % name
+        r = _safe_yaml(p)
+        if not os.path.exists(b) or not r:
+            continue
+        src = re.sub(r'#[^\n]*', '', open(b, encoding='utf-8', errors='replace').read())
+        heads = list(_METHOD.finditer(src))
+        body = {h.group(1): src[h.end(): heads[i + 1].start() if i + 1 < len(heads) else len(src)]
+                for i, h in enumerate(heads)}
+        for d in _dicts(r):
+            if d.get('type') != 'Image' or not d.get('renderFun'):
+                continue
+            seen, todo, touches = set(), [d['renderFun']], False
+            while todo and not touches:
+                f = todo.pop()
+                if f in seen or f not in body:
+                    continue
+                seen.add(f)
+                touches = bool(_DATA.search(body[f]))
+                todo.extend(_CALL.findall(body[f]))
+            if touches != (d.get('requiresData') is True):
+                (missing if touches else surplus).append((name, '%s:%s' % (name, d.get('name'))))
+    ship_missing = sorted(x for n, x in missing if _shipped(n))
+    ship_surplus = sorted(x for n, x in surplus if _shipped(n))
+    if ship_missing:
+        FAIL.append('%d shipped Image(s) reach self$data without requiresData: true - the plot '
+                    'errors on resize / .omv reopen / export: %s' % (len(ship_missing), ', '.join(ship_missing)))
+    if ship_surplus:
+        WARN.append('%d shipped Image(s) declare requiresData: true but draw only from image$state '
+                    '(dataset re-read for nothing): %s' % (len(ship_surplus), ', '.join(ship_surplus[:10])))
+    print('  requiresData: %d missing (%d shipped), %d surplus (%d shipped)'
+          % (len(missing), len(ship_missing), len(surplus), len(ship_surplus)))
+
+
+_SMALL_WORDS = {'a', 'an', 'and', 'as', 'at', 'by', 'for', 'from', 'in', 'of', 'on', 'or',
+                'per', 'the', 'to', 'via', 'vs', 'with'}
+
+
+def check_collapsebox_titlecase():
+    """Group headings are Title Case; individual controls are sentence case (section 12)."""
+    bad = []
+    for p in glob.glob('jamovi/*.u.yaml'):
+        name = os.path.basename(p)[:-7]
+        for d in _dicts(_safe_yaml(p)):
+            label = d.get('label')
+            if d.get('type') != 'CollapseBox' or not isinstance(label, str):
+                continue
+            # parenthesised package names - "(ggpubr)", "(visdat)" - keep their own case
+            words = re.findall(r"[A-Za-z][A-Za-z'-]*", re.sub(r'\([^)]*\)', '', label))
+            if any(w[0].islower() and (i == 0 or w.lower() not in _SMALL_WORDS)
+                   for i, w in enumerate(words)):
+                bad.append((name, '%s: %s' % (name, label)))
+    ship = sorted(x for n, x in bad if _shipped(n))
+    if ship:
+        WARN.append('%d shipped CollapseBox headings not in Title Case: %s' % (len(ship), '; '.join(ship[:10])))
+    print('  CollapseBox Title Case: %d off-convention (%d shipped)' % (len(bad), len(ship)))
+
+
+def check_i18n_padding():
+    """A separator inside .() - leading space , ; . or a trailing space - is load-bearing
+    and invisible to translators (section 9). The older checklist grep also matched every
+    `collapse = ", "` and buried the real sites."""
+    lead = re.compile(r'\.\(\s*"(?:[\s,;:]|\.(?!\.\.))')   # a leading "..." ellipsis is fine
+    trail = re.compile(r'\.\(\s*"[^"\n]*\s"\s*[,)]')
+    hits = []
+    for p in glob.glob('R/*.b.R'):
+        name = os.path.basename(p)[:-4]
+        for i, l in enumerate(open(p, encoding='utf-8', errors='replace'), 1):
+            if l.lstrip().startswith('#'):
+                continue
+            if lead.search(l) or trail.search(l):
+                hits.append((name, '%s:%d' % (os.path.basename(p), i)))
+    ship = [x for n, x in hits if _shipped(n)]
+    if ship:
+        WARN.append('%d separator/padding sites inside .() in shipped analyses: %s'
+                    % (len(ship), ', '.join(ship[:10])))
+    print('  .() separator/padding: %d sites (%d shipped)' % (len(hits), len(ship)))
+
+
 if __name__ == '__main__':
     print('RELEASE GATE\n')
     for fn in (check_versions, check_license, check_refs, check_clearwith, check_renderfun,
-               check_artifacts, check_tame, check_visible_bang, check_entities):
+               check_artifacts, check_tame, check_visible_bang, check_entities,
+               check_requires_data, check_collapsebox_titlecase, check_i18n_padding):
         try:
             fn()
         except Exception as e:

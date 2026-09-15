@@ -5,6 +5,70 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-15 — jamovi library audit round 3 (jsurvival): why written rules did not hold
+
+### Guides taught `requiresData: true` as boilerplate
+
+- **Failure mode:** `multisurvival` `plot_adj` / `survMetricsPlot` refit the Cox model from
+  `self$data` in the renderer without `requiresData: true` → "Data contains no (complete) rows"
+  on resize, `.omv` reopen and export (HIGH); 29 other images carried the flag for nothing.
+  Every guide example showed the flag, and the plots guide table gave its default as `true`
+  (jmvcore's is `FALSE`).
+- **Detection signal:** Library reviewer; confirmed in jmvcore 2.7.38 source (`run()` nulls
+  `private$.data`; `.createImage()` re-reads only for `requiresData`). Invisible to testthat
+  because the R wrapper passes `data =` (`.dataProvided` defaults `TRUE`).
+- **Prevention rule:** `tools/release_gate.py` `check_requires_data` traces each renderer through
+  its `private$` helpers (FAIL for shipped analyses). Guide §15. When a rule says "renderers run
+  without `.run()`", apply it to every renderer input, not only `image$state`.
+
+### Templates taught the catch-all `tryCatch` around `reject()`
+
+- **Failure mode:** `lassocox` `.run()` wrapped all validation in `tryCatch(error=)`, swallowing
+  33 `jmvcore::reject()` messages and deleting `.init()` rows (MEDIUM). The same shape was in the
+  `create-function` `.b.R` template and notices guide §8.
+- **Detection signal:** Library reviewer.
+- **Prevention rule:** Template and guide corrected; guide §16. Wrap only the third-party call;
+  an uncoded `reject()` cannot be told apart from a library error by class.
+
+### A noisy check and instance-level fixes let a known class recur
+
+- **Failure mode:** 14 new `.()` strings with a leading space/punctuation after August's sites
+  were fixed. The checklist grep `'\.\(" |\ "\)'` returned 200 hits on jsurvival (every
+  `collapse = ", "`), so nobody could read it. `CollapseBox` Title Case (§12) had no check at all.
+- **Detection signal:** Reviewer; the tightened regex finds all 14 (the report names 13 locations; the 14th is `survivalcont.b.R:1554`).
+- **Prevention rule:** A rule ships with a machine check validated against the reviewer's list
+  (`check_i18n_padding`, `check_collapsebox_titlecase`). A check with hundreds of hits is not a check.
+
+### Generator counted commented-out refs as citations
+
+- **Failure mode:** `_updateModules.R` `collect_used_refs()` matched `#   refs: ggstatsplot`, so the
+  per-submodule trim kept a dead `00refs.yaml` entry.
+- **Detection signal:** Reviewer flagged the key; `grep` found only a commented-out reference.
+- **Prevention rule:** Skip comment lines in the extractor (fixed). Audit refs in the generated
+  submodule, not only the umbrella.
+
+### Reviewer's fix would have reintroduced a crash
+
+- **Failure mode:** The report proposed `.()` around two `reject()`s in `.eventIndicator()`, a
+  file-level helper — issue #122 ("object 'self' not found").
+- **Detection signal:** File header comment + jmvcore source (`.()` = `eval.parent(self)`).
+- **Prevention rule:** Verify the suggested fix, not only the problem. Guide §9 and the i18n guide
+  now say so explicitly.
+
+### Fix pass: a failed `prepare()` exited 0, and my YAML check could not see why
+
+- **Failure mode:** Adding `url:` to the `dichotomizing` citation created a duplicate key — the
+  umbrella entry already had a DOI url on the line just past a truncated `grep -A8`. PyYAML's
+  `safe_load` accepted the file silently; jamovi's compiler rejected it, and
+  `jmvtools::prepare()` printed the parse error but **exited 0**, so no `.h.R` was regenerated.
+  The reviewer had seen an older submodule copy, not a missing url in the source.
+- **Detection signal:** The prepare log tail showed a YAML error at `00refs.yaml:1597`, and
+  `git diff --stat R/*.h.R` was empty although 29 `requiresData` lines had been removed.
+- **Prevention rule:** Never trust `prepare()`'s exit status: after every run, check the log for
+  errors **and** confirm the expected generated diff exists. Don't validate jamovi YAML with PyYAML
+  alone (duplicate keys pass). Read a YAML block to its end, not through a fixed `-A` window, and
+  compare the umbrella source with the submodule before "fixing" what a reviewer saw there.
+
 ## 2026-09-10 — stagemigration deep audit and repair
 
 ### Declared options "dead" by searching only the backend

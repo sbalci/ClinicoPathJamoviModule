@@ -8,13 +8,17 @@ lassocox_edge_data <- function(n = 80, seed = 123) {
     status = factor(ifelse(event <= censor, "event", "censored")), x)
 }
 
-lassocox_edge_run <- function(data, predictors = paste0("var", 1:5), ...) {
+lassocox_edge_analysis <- function(data, predictors = paste0("var", 1:5), ...) {
   skip_if_not_installed("glmnet")
   args <- modifyList(list(elapsedtime = "time", outcome = "status",
     outcomeLevel = "event", censorLevel = "censored", explanatory = predictors,
     cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE), list(...))
   opts <- do.call(getFromNamespace("lassocoxOptions", "ClinicoPath")$new, args)
-  a <- getFromNamespace("lassocoxClass", "ClinicoPath")$new(options = opts, data = data)
+  getFromNamespace("lassocoxClass", "ClinicoPath")$new(options = opts, data = data)
+}
+
+lassocox_edge_run <- function(data, ...) {
+  a <- lassocox_edge_analysis(data, ...)
   a$run()
   a$results
 }
@@ -25,11 +29,17 @@ lassocox_edge_valid <- function(result) {
   expect_true(all(is.finite(as.numeric(as.data.frame(result$performance)$value))))
 }
 
-lassocox_edge_error <- function(result, message) {
-  expect_equal(result$modelSummary$rowCount, 0)
-  expect_match(result$todo$content, message)
-  expect_true(result$todo$visible)
-  expect_null(result$cv_plot$state)
+# Validation failures reach jamovi as an analysis error -- .run() has no catch-all
+# (library audit 2026-09-15): the message arrives verbatim, the fixed rows built in
+# .init() stay in place with their values cleared, and no stale plot state survives.
+lassocox_edge_error <- function(data, message, ...) {
+  a <- lassocox_edge_analysis(data, ...)
+  err <- tryCatch(a$run(), error = function(e) e)
+  expect_s3_class(err, "error")
+  expect_match(conditionMessage(err), message)
+  expect_false(grepl("^Error (creating design matrix|in cross-validation)", conditionMessage(err)))
+  expect_true(all(is.na(as.data.frame(a$results$modelSummary)$value)))
+  expect_null(a$results$cv_plot$state)
 }
 
 test_that("lassocox reports missing predictor rows and retained sample size", {
@@ -46,7 +56,7 @@ test_that("lassocox reports missing predictor rows and retained sample size", {
 test_that("lassocox rejects all-censored data visibly", {
   d <- lassocox_edge_data()
   d$status[] <- "censored"
-  lassocox_edge_error(lassocox_edge_run(d), "exactly 2 observed")
+  lassocox_edge_error(d, "exactly 2 observed")
 })
 
 test_that("lassocox warns about few events and reduces stratified folds", {
@@ -96,13 +106,13 @@ test_that("lassocox handles a finite large-scale predictor without erasing it", 
 test_that("lassocox rejects negative follow-up times visibly", {
   d <- lassocox_edge_data()
   d$time[1] <- -1
-  lassocox_edge_error(lassocox_edge_run(d), "negative values")
+  lassocox_edge_error(d, "negative values")
 })
 
 test_that("lassocox rejects zero follow-up without automatic adjustment", {
   d <- lassocox_edge_data()
   d$time[1] <- 0
-  lassocox_edge_error(lassocox_edge_run(d), "not been automatically adjusted")
+  lassocox_edge_error(d, "not been automatically adjusted")
 })
 
 test_that("lassocox distinguishes usable missingness from too few complete rows", {
@@ -110,7 +120,7 @@ test_that("lassocox distinguishes usable missingness from too few complete rows"
   d$var1[1:40] <- NA_real_
   lassocox_edge_valid(lassocox_edge_run(d))
   d$var1[1:72] <- NA_real_
-  lassocox_edge_error(lassocox_edge_run(d), "Too few complete cases")
+  lassocox_edge_error(d, "Too few complete cases")
 })
 
 test_that("lassocox retains a valid fit with perfectly correlated predictors", {

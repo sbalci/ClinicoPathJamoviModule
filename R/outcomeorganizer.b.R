@@ -1029,12 +1029,12 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 "warning",
                                 .("Follow-up times are not all positive"),
                                 paste0(
-                                    if (n_neg > 0) sprintf(
-                                        .("%d patient(s) have a NEGATIVE follow-up time, which cannot be a duration - survival functions reject it. This usually means the start and end dates are the wrong way round. "),
-                                        n_neg) else "",
-                                    if (n_zero > 0) sprintf(
-                                        .("%d patient(s) have a follow-up time of zero, which contributes no person-time; check whether a missing date was read as the origin. "),
-                                        n_zero) else "",
+                                    if (n_neg > 0) paste0(sprintf(
+                                        .("%d patient(s) have a NEGATIVE follow-up time, which cannot be a duration - survival functions reject it. This usually means the start and end dates are the wrong way round."),
+                                        n_neg), " ") else "",
+                                    if (n_zero > 0) paste0(sprintf(
+                                        .("%d patient(s) have a follow-up time of zero, which contributes no person-time; check whether a missing date was read as the origin."),
+                                        n_zero), " ") else "",
                                     .("These rows are truncated and written back unchanged in sign - fix them in the data before running a survival model.")))
                         cut_s <- private$.timeScale(mydata[["admin_censor_date"]])
                         fu    <- fu_s$v
@@ -1125,9 +1125,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             # output that the cut-off had been applied to only part of
                             # the cohort.
                             n_exempt <- sum(!keep)
-                            exempt_note <- if (n_exempt > 0) sprintf(
-                                .(" %d patient(s) were left untouched because they have no follow-up time or no cut-off value; they keep their full follow-up and their original event status, so the cut-off applies to only part of the cohort. Supply the missing values, or exclude those rows, before comparing groups."),
-                                n_exempt) else ""
+                            exempt_note <- if (n_exempt > 0) paste0(" ", sprintf(
+                                .("%d patient(s) were left untouched because they have no follow-up time or no cut-off value; they keep their full follow-up and their original event status, so the cut-off applies to only part of the cohort. Supply the missing values, or exclude those rows, before comparing groups."),
+                                n_exempt)) else ""
 
                             wipes_all_events <- n_events_before > 0 && n_reset == n_events_before
                             truncates_everyone <- sum(keep) > 0 && n_trunc == sum(keep)
@@ -1139,9 +1139,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 diagnostics$admin_censoring <- paste0(
                                     .("Administrative cut-off had no effect: no patient's follow-up extends beyond it, so nothing was truncated and no event status was reset."),
                                     if (looks_like_serial)
-                                        sprintf(.(" The cut-off reads %s while follow-up reaches only %s - that is what a date looks like once it has been imported as a plain number, and it is almost certainly not in the same units as the follow-up time."),
+                                        paste0(" ", sprintf(.("The cut-off reads %s while follow-up reaches only %s - that is what a date looks like once it has been imported as a plain number, and it is almost certainly not in the same units as the follow-up time."),
                                                 base::format(stats::median(cut[keep], na.rm = TRUE)),
-                                                base::format(max(fu[keep], na.rm = TRUE)))
+                                                base::format(max(fu[keep], na.rm = TRUE))))
                                     else "")
                                 private$.addHtmlMessage(
                                     if (looks_like_serial) "strong_warning" else "info",
@@ -1961,9 +1961,9 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 htmltools::htmlEscape(private$.getOutcomeLabel(v, analysistype, self$options$multievent, codes_present)),
                                 cnt, pct)
                     }, character(1))
-                    state_breakdown <- jmvcore::format(.(" Full state breakdown (of {total} coded records): {states}."), 
+                    state_breakdown <- paste0(" ", jmvcore::format(.("Full state breakdown (of {total} coded records): {states}."), 
                         total = total_n,
-                        states = paste(state_lines, collapse = "; "))
+                        states = paste(state_lines, collapse = "; ")))
                 }
 
                 natural_summary <- paste0(

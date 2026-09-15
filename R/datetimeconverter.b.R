@@ -1419,8 +1419,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # into a manuscript, so it has to be arithmetically true on its own.
             n_values <- quality$total_observations - quality$original_missing
             missing_clause <- if (quality$original_missing > 0)
-                .fmt(.("; {missing} of the {total} rows were missing"),
-                     missing = quality$original_missing, total = quality$total_observations) else ""
+                paste0("; ", .fmt(.("{missing} of the {total} rows were missing"),
+                     missing = quality$original_missing, total = quality$total_observations)) else ""
             summary_html <- glue::glue("
                 <div style='background-color: rgba(33, 137, 255, 0.07); padding: 15px; border: 1px solid #b3d9ff; border-radius: 5px; color: inherit;'>
                     <h4 style='margin-top: 0;'> Analysis Summary</h4>

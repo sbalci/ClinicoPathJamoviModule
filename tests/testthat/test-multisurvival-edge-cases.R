@@ -123,15 +123,17 @@ test_that("multisurvival handles negative survival time", {
   test_data_neg <- multisurvival_test
   test_data_neg$elapsedtime[1:5] <- -10
   
-  result <- .run_multisurvival(
-    data = test_data_neg,
-    elapsedtime = "elapsedtime",
-    outcome = "outcome",
-    explanatory = "treatment"
+  # A validation failure: jmvcore::reject() reaches jamovi now that .executeAnalysis()
+  # has no catch-all, so the wrapper raises instead of writing the message into `todo`.
+  expect_error(
+    .run_multisurvival(
+      data = test_data_neg,
+      elapsedtime = "elapsedtime",
+      outcome = "outcome",
+      explanatory = "treatment"
+    ),
+    "Negative survival times"
   )
-
-  expect_true(result$todo$visible)
-  expect_match(as.character(result$todo$content), "Negative survival times")
 })
 
 test_that("multisurvival handles extremely long follow-up times", {
@@ -152,17 +154,16 @@ test_that("multisurvival handles constant explanatory variable", {
   test_data_const <- multisurvival_test
   test_data_const$constant_var <- "Same"
   
-  result <- suppressWarnings(.run_multisurvival(
-    data = test_data_const,
-    elapsedtime = "elapsedtime",
-    outcome = "outcome",
-    explanatory = "constant_var"
-  ))
-
-  expect_true(result$todo$visible)
-  expect_match(
-    as.character(result$todo$content),
-    "2 or more levels|appropriate types and variation"
+  # A validation failure: jmvcore::reject() reaches jamovi now that .executeAnalysis()
+  # has no catch-all, so the wrapper raises instead of writing the message into `todo`.
+  expect_error(
+    suppressWarnings(.run_multisurvival(
+      data = test_data_const,
+      elapsedtime = "elapsedtime",
+      outcome = "outcome",
+      explanatory = "constant_var"
+    )),
+    "has only one value in the analysed rows"
   )
 })
 
@@ -286,17 +287,19 @@ test_that("multisurvival handles high multicollinearity", {
 test_that("multisurvival handles landmark time beyond maximum follow-up", {
   data(multisurvival_landmark, package = "ClinicoPath")
   
-  result <- .run_multisurvival(
-    data = multisurvival_landmark,
-    elapsedtime = "elapsedtime",
-    outcome = "outcome",
-    uselandmark = TRUE,
-    landmark = 100,
-    explanatory = "treatment"
+  # A validation failure: jmvcore::reject() reaches jamovi now that .executeAnalysis()
+  # has no catch-all, so the wrapper raises instead of writing the message into `todo`.
+  expect_error(
+    .run_multisurvival(
+      data = multisurvival_landmark,
+      elapsedtime = "elapsedtime",
+      outcome = "outcome",
+      uselandmark = TRUE,
+      landmark = 100,
+      explanatory = "treatment"
+    ),
+    "only one value.*Landmark analysis is on|landmark"
   )
-
-  expect_true(result$errors$visible)
-  expect_match(as.character(result$errors$content), "No events observed|landmark")
 })
 
 test_that("multisurvival handles invalid date formats", {
@@ -331,19 +334,21 @@ test_that("multisurvival handles follow-up date before diagnosis date", {
   # Swap dates for some patients
   test_data_dates$fudate[1:5] <- "2017-01-01"  # Before diagnosis dates
   
-  result <- .run_multisurvival(
-    data = test_data_dates,
-    tint = TRUE,
-    dxdate = "dxdate",
-    fudate = "fudate",
-    timetypedata = "ymd",
-    outcome = "outcome",
-    outcomeLevel = "Dead",
-    explanatory = "treatment"
+  # A validation failure: jmvcore::reject() reaches jamovi now that .executeAnalysis()
+  # has no catch-all, so the wrapper raises instead of writing the message into `todo`.
+  expect_error(
+    .run_multisurvival(
+      data = test_data_dates,
+      tint = TRUE,
+      dxdate = "dxdate",
+      fudate = "fudate",
+      timetypedata = "ymd",
+      outcome = "outcome",
+      outcomeLevel = "Dead",
+      explanatory = "treatment"
+    ),
+    "Negative Survival Times"
   )
-
-  expect_true(result$todo$visible)
-  expect_match(as.character(result$todo$content), "Negative Survival Times")
 })
 
 test_that("multisurvival handles risk score with insufficient events", {

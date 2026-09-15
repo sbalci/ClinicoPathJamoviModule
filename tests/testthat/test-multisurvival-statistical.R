@@ -40,6 +40,21 @@ test_that("Event indicator throws error for unsupported factor levels", {
   )
 })
 
+test_that("Event indicator translates via the caller's self and never requires one", {
+  # jmvcore's .() would throw "object 'self' not found" in this file-level
+  # helper (issue #122); the local shadow translates when `self` is in the
+  # caller's frame and falls back to English otherwise.
+  outcome_bad <- factor(c("Dead", "Alive", "Dead"))
+  self <- list(options = list(translate = function(text, n = 1) paste0("TR:", text)))
+  expect_error(ClinicoPath:::.eventIndicator(outcome_bad),
+               "TR:Outcome Factor Has Unsupported Levels.*Alive, Dead")
+  expect_error(ClinicoPath:::.eventIndicator(Sys.Date()),
+               "TR:Outcome Variable Type Not Supported.*'Date'")
+  # A character outcome lists its values; levels() alone printed "events: ."
+  expect_error(ClinicoPath:::.eventIndicator(c("Dead", "Alive", NA)),
+               "cannot be interpreted as events: Alive, Dead\\.")
+})
+
 test_that("Event indicator accepts numeric character encodings", {
   # Imported text columns containing 0/1 are safely interpretable.
   outcome_char <- c("0", "1", "0")
@@ -83,7 +98,7 @@ test_that("Survival data validation detects low event rate", {
   expect_true(any(grepl("Low event rate", validation$warnings)))
 })
 
-test_that("Survival data validation detects low event count", {
+test_that("Survival data validation leaves the event count to the post-fit EPV notice", {
   # Create data with < 10 events
   test_data <- data.frame(
     mytime = rep(10, 50),
@@ -92,8 +107,8 @@ test_that("Survival data validation detects low event count", {
 
   validation <- ClinicoPath:::.validateSurvivalData(test_data, "mytime", "myoutcome")
 
-  expect_true(length(validation$warnings) > 0)
-  expect_true(any(grepl("Low number of events detected", validation$warnings)))
+  # Owned by the graded post-fit EPV notice in .cox_model_impl(), not the validator
+  expect_false(any(grepl("Low number of events", validation$warnings)))
 })
 
 test_that("Clinical summary generation handles empty results", {

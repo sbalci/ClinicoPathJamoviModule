@@ -909,8 +909,9 @@ Populating tables defined in `.r.yaml`:
     # Survival curve plot
     if (self$options$showSurvivalCurve) {
         survival_state <- list(
-            data = analysis_results$survival_data,
-            fit = analysis_results$survival_fit,
+            # Plot-ready columns only (time, surv, lower, upper, strata). Never the
+            # survfit/coxph object or the cleaned dataset: state is saved in the .omv.
+            curve = analysis_results$survival_curve_df,
             options = list(
                 show_ci = self$options$showConfidenceIntervals,
                 show_risk_table = self$options$showRiskTable,
@@ -925,8 +926,8 @@ Populating tables defined in `.r.yaml`:
     # Forest plot for Cox model
     if (self$options$showForestPlot && !is.null(analysis_results$cox_model)) {
         forest_state <- list(
-            model = analysis_results$cox_model,
-            data = analysis_results$cox_data,
+            # term, HR, lower, upper, p - extracted in .run(), not the coxph fit
+            coef_table = analysis_results$cox_coef_table,
             options = list(
                 log_scale = self$options$useLogScale,
                 show_reference = self$options$showReference,
@@ -1151,6 +1152,13 @@ private = list(
 ## 8. Error Handling and Validation
 
 ### Comprehensive Error Handling Framework
+
+> **Never route validation through this.** `jmvcore::reject()` is a plain `simpleError`,
+> so a `tryCatch(error = )` around code that calls it swallows the validation message,
+> bypasses jamovi's own error state, and — if the handler clears tables — collapses the
+> results pane. Use a wrapper like `.safeExecute()` only around a third-party call, and
+> turn its failure into `jmvcore::reject(.("..."), code = "...")`. Let every `reject()`
+> in `.run()` propagate. See `jamovi_library_review_guide.md` §16.
 
 ```R
 .safeExecute = function(operation, error_context = "analysis") {

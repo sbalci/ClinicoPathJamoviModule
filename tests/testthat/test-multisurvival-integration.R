@@ -70,6 +70,8 @@ test_that("multisurvival workflow: basic → multivariable → risk stratificati
 })
 
 test_that("multisurvival workflow: date-based analysis pipeline", {
+  # A character Dead/Alive outcome needs its event level; without it the analysis
+  # rejects (previously hidden by the .executeAnalysis() catch-all).
   # Step 1: Calculate survival time from dates
   date_calc <- .run_multisurvival(
     data = multisurvival_dates,
@@ -78,7 +80,8 @@ test_that("multisurvival workflow: date-based analysis pipeline", {
     fudate = "fudate",
     timetypedata = "ymd",
     timetypeoutput = "months",
-    outcome = "outcome"
+    outcome = "outcome",
+    outcomeLevel = "Dead"
   )
   expect_s3_class(date_calc, "multisurvivalResults")
 
@@ -91,6 +94,7 @@ test_that("multisurvival workflow: date-based analysis pipeline", {
     timetypedata = "ymd",
     timetypeoutput = "months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     explanatory = c("treatment", "stage"),
     contexpl = "age"
   )
@@ -105,6 +109,7 @@ test_that("multisurvival workflow: date-based analysis pipeline", {
     timetypedata = "ymd",
     timetypeoutput = "months",
     outcome = "outcome",
+    outcomeLevel = "Dead",
     explanatory = c("treatment", "stage"),
     contexpl = "age",
     hr = TRUE,

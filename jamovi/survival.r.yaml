@@ -548,7 +548,6 @@ items:
       height: 500
       renderFun: .plotAgeStratifiedKM
       visible: (age_stratified_km)
-      requiresData: true
       clearWith:
           - age_stratified_km
           - age_variable
@@ -581,7 +580,6 @@ items:
       height: 500
       renderFun: .plotAdjustedCurves
       visible: (adjusted_curves)
-      requiresData: true
       clearWith:
           - adjusted_curves
           - age_adjustment
@@ -665,7 +663,6 @@ items:
       height: 450
       renderFun: .plot8
       visible: (ph_cox)
-      requiresData: true
       clearWith:
           - ph_cox
           - endplot
@@ -1431,7 +1428,6 @@ items:
       height: 450
       renderFun: .plot9
       visible: (residual_diagnostics)
-      requiresData: true
       clearWith:
           - residual_diagnostics
           - explanatory
@@ -1593,7 +1589,6 @@ items:
       height: 500
       renderFun: .plotCalibration
       visible: (calibration_curves)
-      requiresData: true
       clearWith:
         - calibration_curves
         - calibration_timepoint
@@ -1683,7 +1678,6 @@ items:
       height: 450
       renderFun: .plotRCS
       visible: (rcs_analysis)
-      requiresData: true
       clearWith:
         - rcs_analysis
         - rcs_variable
@@ -1897,7 +1891,6 @@ items:
       width: 600
       height: 450
       renderFun: .plotParametricSurvival
-      requiresData: true
       visible: (use_parametric && parametric_survival_plots)
       clearWith:
         - use_parametric

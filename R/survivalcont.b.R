@@ -1114,11 +1114,11 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             sprintf(
                                 paste0(.("Landmark at %.2f %s: %d of %d patient(s) (%.1f%%) had follow-up shorter than the landmark and were excluded%s; %d remain at risk. Reported times are measured FROM the landmark."),
                                        if (excl_pct > 30)
-                                           .(" Excluding this share of the cohort can introduce selection bias; the landmark should be prespecified.")
+                                           paste0(" ", .("Excluding this share of the cohort can introduce selection bias; the landmark should be prespecified."))
                                        else ""),
                                 landmark, self$options$timetypeoutput,
                                 n_landmark_excluded, n_pre_landmark, excl_pct,
-                                if (n_na_time > 0) sprintf(.(" , plus %d with missing follow-up time"), n_na_time) else "",
+                                if (n_na_time > 0) paste0(", ", sprintf(.("plus %d with missing follow-up time"), n_na_time)) else "",
                                 nrow(cleanData)))
                     }
 
@@ -1551,7 +1551,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             paste0(
                                 .("The requested multiple cut-offs could not be estimated from these data"),
                                 if (!is.null(reason)) paste0(": ", reason) else "",
-                                .(". Check variability, group-size constraints, and event counts, or use the continuous Cox model.")
+                                ". ", .("Check variability, group-size constraints, and event counts, or use the continuous Cox model.")
                             )
                         )
                     }

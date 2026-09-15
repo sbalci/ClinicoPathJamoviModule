@@ -60,6 +60,7 @@
 | `plotRiskGroups` | `Bool` | `FALSE` | Plot risk group survival |
 | `ci_optimism` | `Bool` | `FALSE` | Optimism-corrected C-index (bootstrap) |
 | `ci_optimism_boot` | `Integer` | `150` | Bootstrap resamples (optimism) |
+| `seed` | `Integer` | `1234` | Bootstrap seed |
 | `addRiskScore` | `Output` | `NULL` | Add Risk Score to Data |
 | `addRiskGroup` | `Output` | `NULL` | Add Risk Group to Data |
 | `ac` | `Bool` | `FALSE` | Adjusted probability curve |
@@ -113,7 +114,6 @@
 | `cox_ph` | `Preformatted` | `Proportional Hazards Diagnostics` |  |
 | `plot8` | `Image` | `Proportional Hazards: Schoenfeld Residual Plots` |  |
 | `plotKM` | `Image` | `Kaplan-Meier` |  |
-| `risk_score_analysis` | `Preformatted` | `Risk Score Analysis` |  |
 | `risk_score_analysis2` | `Html` | `Risk Score Analysis` |  |
 | `riskScoreHeading` | `Preformatted` | `Risk Score Analysis` |  |
 | `riskScoreSummaryHeading` | `Preformatted` | `Risk Score Natural Language Summary` |  |
@@ -130,8 +130,6 @@
 | `adjustedSurvivalHeading` | `Preformatted` | `Adjusted Probability Analysis` |  |
 | `adjustedEstimandPanel` | `Html` | `What is being computed` |  |
 | `plot_adj` | `Image` | `Adjusted Probability Plot` |  |
-| `adjustedSurvivalSummaryHeading` | `Preformatted` | `Adjusted Probability Natural Language Summary` |  |
-| `adjustedSurvivalSummary` | `Html` | `` |  |
 | `nomogramHeading` | `Preformatted` | `Nomogram Analysis` |  |
 | `plot_nomogram` | `Image` | `Nomogram` |  |
 | `nomogram_display` | `Html` | `Nomogram Scoring Guide` |  |

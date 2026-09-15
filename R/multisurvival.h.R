@@ -601,8 +601,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         adjustedSurvivalHeading = function() private$.items[["adjustedSurvivalHeading"]],
         adjustedEstimandPanel = function() private$.items[["adjustedEstimandPanel"]],
         plot_adj = function() private$.items[["plot_adj"]],
-        adjustedSurvivalSummaryHeading = function() private$.items[["adjustedSurvivalSummaryHeading"]],
-        adjustedSurvivalSummary = function() private$.items[["adjustedSurvivalSummary"]],
         nomogramHeading = function() private$.items[["nomogramHeading"]],
         plot_nomogram = function() private$.items[["plot_nomogram"]],
         nomogram_display = function() private$.items[["nomogram_display"]],
@@ -1320,7 +1318,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 height=450,
                 renderFun=".plot8",
                 visible="(ph_cox)",
-                requiresData=TRUE,
                 clearWith=list(
                     "ph_cox",
                     "endplot",
@@ -1542,7 +1539,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 width=600,
                 height=450,
                 renderFun=".plotRiskGroups",
-                requiresData=TRUE,
                 visible="(calculateRiskScore && plotRiskGroups)",
                 clearWith=list(
                     "calculateRiskScore",
@@ -1596,6 +1592,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "ci_optimism",
                     "ci_optimism_boot",
+                    "seed",
                     "outcome",
                     "outcomeLevel",
                     "elapsedtime",
@@ -1636,16 +1633,36 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 varTitle="`Calculated Time in Multivariable Survival Function - from ${ dxdate } to { fudate }`",
                 varDescription="Calculated Time from given Dates in Multivariable Survival Analysis",
                 clearWith=list(
+                    "calculatedtime",
                     "tint",
                     "dxdate",
-                    "fudate")))
+                    "fudate",
+                    "timetypedata",
+                    "timetypeoutput",
+                    "uselandmark",
+                    "landmark",
+                    "outcome",
+                    "outcomeLevel",
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "explanatory",
+                    "contexpl",
+                    "adjexplanatory",
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="outcomeredefined",
                 title="Add Redefined Outcome to Data",
+                measureType="nominal",
                 varTitle="`Redefined Outcome in Multivariable Survival Function - from ${ outcome } for analysis { analysistype }`",
                 varDescription="Redefined Outcome from Outcome based on Analysis Type in Multivariable Survival Analysis",
                 clearWith=list(
+                    "outcomeredefined",
                     "outcome",
                     "analysistype",
                     "multievent",
@@ -1653,7 +1670,19 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dod",
                     "dooc",
                     "awd",
-                    "awod")))
+                    "awod",
+                    "elapsedtime",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "timetypedata",
+                    "uselandmark",
+                    "landmark",
+                    "explanatory",
+                    "contexpl",
+                    "adjexplanatory",
+                    "use_stratify",
+                    "stratvar")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="addRiskScore",
@@ -1671,6 +1700,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
+                    "timetypedata",
+                    "adjexplanatory",
                     "multievent",
                     "analysistype",
                     "dod",
@@ -1702,6 +1733,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "fudate",
                     "dxdate",
                     "tint",
+                    "timetypedata",
+                    "adjexplanatory",
                     "multievent",
                     "analysistype",
                     "dod",
@@ -1783,41 +1816,6 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dooc",
                     "awd",
                     "awod",
-                    "interactions",
-                    "uselandmark",
-                    "landmark",
-                    "timetypeoutput",
-                    "timetypedata")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="adjustedSurvivalSummaryHeading",
-                title="Adjusted Probability Natural Language Summary",
-                visible="(ac && showSummaries)"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="adjustedSurvivalSummary",
-                title="",
-                visible="(ac && showSummaries)",
-                clearWith=list(
-                    "ac",
-                    "adjexplanatory",
-                    "outcome",
-                    "ac_method",
-                    "explanatory",
-                    "contexpl",
-                    "outcomeLevel",
-                    "elapsedtime",
-                    "fudate",
-                    "dxdate",
-                    "tint",
-                    "multievent",
-                    "analysistype",
-                    "dod",
-                    "dooc",
-                    "awd",
-                    "awod",
-                    "use_stratify",
-                    "stratvar",
                     "interactions",
                     "uselandmark",
                     "landmark",
@@ -2465,12 +2463,14 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param landmark The time point (in the units defined by
 #'   \code{timetypeoutput}) at which to start landmark analyses. Only used if
 #'   \code{uselandmark} = true.
-#' @param outcome The outcome variable. Typically indicates event status
-#'   (e.g., death, recurrence). For survival analysis, this may be a factor or
-#'   numeric event indicator.
-#' @param outcomeLevel The level of \code{outcome} considered as the event.
-#'   For example, if \code{outcome} is a factor, specify which level indicates
-#'   the event occurrence.
+#' @param outcome The outcome (event status) variable. A numeric 0/1 column is
+#'   read as 0 = censored and 1 = event. For any other coding, such as numeric
+#'   1/2 or a factor (Alive/Dead), \code{outcomeLevel} must name the event
+#'   value; every other value is treated as censored.
+#' @param outcomeLevel The level or numeric value of \code{outcome} that
+#'   represents the event. Values are matched exactly, not by size, and every
+#'   other value is treated as censored. Required unless \code{outcome} is
+#'   numeric 0/1.
 #' @param dod The level of \code{outcome} corresponding to death due to
 #'   disease, if applicable.
 #' @param dooc The level of \code{outcome} corresponding to death due to other
@@ -2646,8 +2646,6 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$adjustedSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$adjustedEstimandPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$adjustedSurvivalSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$adjustedSurvivalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$nomogramHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr

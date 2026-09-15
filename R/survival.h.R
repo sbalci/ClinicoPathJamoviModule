@@ -1368,7 +1368,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".plotAgeStratifiedKM",
                 visible="(age_stratified_km)",
-                requiresData=TRUE,
                 clearWith=list(
                     "age_stratified_km",
                     "age_variable",
@@ -1400,7 +1399,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".plotAdjustedCurves",
                 visible="(adjusted_curves)",
-                requiresData=TRUE,
                 clearWith=list(
                     "adjusted_curves",
                     "age_adjustment",
@@ -1481,7 +1479,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plot8",
                 visible="(ph_cox)",
-                requiresData=TRUE,
                 clearWith=list(
                     "ph_cox",
                     "endplot",
@@ -2210,7 +2207,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plot9",
                 visible="(residual_diagnostics)",
-                requiresData=TRUE,
                 clearWith=list(
                     "residual_diagnostics",
                     "explanatory",
@@ -2380,7 +2376,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".plotCalibration",
                 visible="(calibration_curves)",
-                requiresData=TRUE,
                 clearWith=list(
                     "calibration_curves",
                     "calibration_timepoint",
@@ -2477,7 +2472,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".plotRCS",
                 visible="(rcs_analysis)",
-                requiresData=TRUE,
                 clearWith=list(
                     "rcs_analysis",
                     "rcs_variable",
@@ -2701,7 +2695,6 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plotParametricSurvival",
-                requiresData=TRUE,
                 visible="(use_parametric && parametric_survival_plots)",
                 clearWith=list(
                     "use_parametric",

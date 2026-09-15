@@ -326,7 +326,7 @@ For plots, graphs, and other visual outputs.
 - `width`: Plot width in pixels
 - `height`: Plot height in pixels  
 - `renderFun`: R function name that generates the plot
-- `requiresData`: Whether plot needs data to render
+- `requiresData`: `true` makes jamovi re-read the dataset before the renderer runs outside `.run()` (resize, `.omv` reopen, export). Set it **only** when the renderer, or a `private$` helper it calls, reads `self$data`; omit it (default `FALSE`) when it draws from `image$state`. See `jamovi_library_review_guide.md` §15
 
 #### `Output`
 Creates new variables in the original dataset.

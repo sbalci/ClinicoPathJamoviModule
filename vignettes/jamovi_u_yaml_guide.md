@@ -394,6 +394,11 @@ individually and visible on every panel collectively.
 Title-cased *individual* controls read as headings, which is why the convention
 reserves title case for group headings and variable-box labels.
 
+**Enforced by `python3 tools/release_gate.py`** (`CollapseBox` headings, shipped
+analyses). This rule was already written when `lassocox` was built, and it still
+shipped four sentence-case headings (`Model options`, `Output options`…) because
+nothing checked it — the 2026-09-15 library report caught them.
+
 **The one exception:** a leading verb is correct when the checkbox really performs
 an action on the dataset. `Add test pattern to data` is accurate and should stay.
 

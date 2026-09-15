@@ -12,40 +12,31 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 #: R/timeinterval.b.R
-msgid " , measured from the {adj} landmark"
+msgid "measured from the {adj} landmark"
 msgstr ""
 
 #: R/survivalcont.b.R
-msgid " , plus %d with missing follow-up time"
+msgid "plus %d with missing follow-up time"
 msgstr ""
 
 #: R/outcomeorganizer.b.R
-msgid ""
-" %d patient(s) were left untouched because they have no follow-up time or no "
-"cut-off value; they keep their full follow-up and their original event "
-"status, so the cut-off applies to only part of the cohort. Supply the "
-"missing values, or exclude those rows, before comparing groups."
+msgid "%d patient(s) were left untouched because they have no follow-up time or no cut-off value; they keep their full follow-up and their original event status, so the cut-off applies to only part of the cohort. Supply the missing values, or exclude those rows, before comparing groups."
 msgstr ""
 
 #: R/survival.b.R
-msgid ""
-" All times reported here are measured FROM the landmark, not from study "
-"entry, and all estimates are conditional on being event-free at the "
-"landmark. They are not comparable with unlandmarked survival times."
+msgid "All times reported here are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark. They are not comparable with unlandmarked survival times."
 msgstr ""
 
 #: R/survival.b.R
-msgid ""
-" Calibration slope < 0.8 suggests the model predictions are too extreme "
-"(overfitting)."
+msgid "Calibration slope < 0.8 suggests the model predictions are too extreme (overfitting)."
 msgstr ""
 
 #: R/survival.b.R
-msgid " Calibration slope near 1 indicates good calibration."
+msgid "Calibration slope near 1 indicates good calibration."
 msgstr ""
 
 #: R/survival.b.R
-msgid " Calibration slope slightly below 1 indicates mild overfitting."
+msgid "Calibration slope slightly below 1 indicates mild overfitting."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -57,13 +48,11 @@ msgid " different categories across "
 msgstr ""
 
 #: R/survivalcont.b.R
-msgid ""
-" Excluding this share of the cohort can introduce selection bias; the "
-"landmark should be prespecified."
+msgid "Excluding this share of the cohort can introduce selection bias; the landmark should be prespecified."
 msgstr ""
 
 #: R/outcomeorganizer.b.R
-msgid " Full state breakdown (of {total} coded records): {states}."
+msgid "Full state breakdown (of {total} coded records): {states}."
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -85,10 +74,7 @@ msgid " stages or time points."
 msgstr ""
 
 #: R/outcomeorganizer.b.R
-msgid ""
-" The cut-off reads %s while follow-up reaches only %s - that is what a date "
-"looks like once it has been imported as a plain number, and it is almost "
-"certainly not in the same units as the follow-up time."
+msgid "The cut-off reads %s while follow-up reaches only %s - that is what a date looks like once it has been imported as a plain number, and it is almost certainly not in the same units as the follow-up time."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -234,7 +220,7 @@ msgid ", correlation adjustment = %.2f"
 msgstr ""
 
 #: R/datetimeconverter.b.R
-msgid "; {missing} of the {total} rows were missing"
+msgid "{missing} of the {total} rows were missing"
 msgstr ""
 
 #: R/jjpiestats.b.R
@@ -242,9 +228,7 @@ msgid "; split panels use Pearson's chi-squared test"
 msgstr ""
 
 #: R/survivalcont.b.R
-msgid ""
-". Check variability, group-size constraints, and event counts, or use the "
-"continuous Cox model."
+msgid "Check variability, group-size constraints, and event counts, or use the continuous Cox model."
 msgstr ""
 
 #: R/agreement.b.R
@@ -2525,16 +2509,11 @@ msgid ""
 msgstr ""
 
 #: R/outcomeorganizer.b.R
-msgid ""
-"%d patient(s) have a follow-up time of zero, which contributes no "
-"person-time; check whether a missing date was read as the origin. "
+msgid "%d patient(s) have a follow-up time of zero, which contributes no person-time; check whether a missing date was read as the origin."
 msgstr ""
 
 #: R/outcomeorganizer.b.R
-msgid ""
-"%d patient(s) have a NEGATIVE follow-up time, which cannot be a duration - "
-"survival functions reject it. This usually means the start and end dates are "
-"the wrong way round. "
+msgid "%d patient(s) have a NEGATIVE follow-up time, which cannot be a duration - survival functions reject it. This usually means the start and end dates are the wrong way round."
 msgstr ""
 
 #: R/waterfall.b.R

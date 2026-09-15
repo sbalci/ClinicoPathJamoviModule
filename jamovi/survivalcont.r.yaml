@@ -658,7 +658,6 @@ items:
       height: 450
       renderFun: .plot4
       visible: (findcut)
-      requiresData: true
       clearWith:
           - sc
           - endplot
@@ -694,7 +693,6 @@ items:
       height: 450
       renderFun: .plot5
       visible: (findcut && sc)
-      requiresData: true
       clearWith:
           - sc
           - endplot
@@ -932,7 +930,6 @@ items:
       height: 450
       renderFun: .plot2
       visible: (findcut && ce)
-      requiresData: true
       clearWith:
           - ce
           - endplot
@@ -972,7 +969,6 @@ items:
       height: 450
       renderFun: .plot3
       visible: (findcut && ch)
-      requiresData: true
       clearWith:
           - ch
           - endplot
@@ -1012,7 +1008,6 @@ items:
       height: 450
       renderFun: .plot6
       visible: (findcut && kmunicate)
-      requiresData: true
       clearWith:
           - kmunicate
           - endplot
@@ -1087,7 +1082,6 @@ items:
       height: 450
       renderFun: .plot7
       visible: (findcut && loglog)
-      requiresData: true
       clearWith:
         - loglog
         - endplot
@@ -1140,7 +1134,6 @@ items:
       height: 600
       renderFun: .plot9
       visible: (residual_diagnostics)
-      requiresData: true
       clearWith:
         - residual_diagnostics
         - contexpl
@@ -1469,7 +1462,6 @@ items:
       height: 600
       renderFun: .plotMultipleCutoffs
       visible: (multiple_cutoffs)
-      requiresData: true
       clearWith:
           - multiple_cutoffs
           - num_cutoffs
@@ -1510,7 +1502,6 @@ items:
       height: 600
       renderFun: .plotMultipleSurvival
       visible: (multiple_cutoffs && sc)
-      requiresData: true
       clearWith:
           - multiple_cutoffs
           - num_cutoffs

@@ -1316,7 +1316,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 lm_unit_1 <- sub("s$", "", lm_unit)                                          # "months" -> "month"
                 lm_amount <- paste(lm_val, if (isTRUE(lm_val == 1)) lm_unit_1 else lm_unit)  # "6 months"
                 lm_adj    <- paste0(lm_val, "-", lm_unit_1)                                  # "6-month"
-                lm_hdr_suffix <- jmvcore::format(.(" , measured from the {adj} landmark"), adj = lm_adj)
+                lm_hdr_suffix <- paste0(", ", jmvcore::format(.("measured from the {adj} landmark"), adj = lm_adj))
                 lm_pt_label   <- jmvcore::format(.("Total post-landmark person-time (from {amount} onward)"), amount = lm_amount)
                 lm_mean_label <- .("Mean post-landmark time")
                 lm_fu_phrase  <- .("mean post-landmark follow-up")

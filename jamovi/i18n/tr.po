@@ -12,54 +12,32 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 #: R/timeinterval.b.R
-msgid " , measured from the {adj} landmark"
-msgstr " , {adj} sınır noktasından (landmark) itibaren ölçüldü"
+msgid "measured from the {adj} landmark"
+msgstr "{adj} sınır noktasından (landmark) itibaren ölçüldü"
 
 #: R/survivalcont.b.R
-msgid " , plus %d with missing follow-up time"
-msgstr " , artı eksik takip süresine sahip %d kişi"
+msgid "plus %d with missing follow-up time"
+msgstr "artı eksik takip süresine sahip %d kişi"
 
 #: R/outcomeorganizer.b.R
-msgid ""
-" %d patient(s) were left untouched because they have no follow-up time or no "
-"cut-off value; they keep their full follow-up and their original event "
-"status, so the cut-off applies to only part of the cohort. Supply the "
-"missing values, or exclude those rows, before comparing groups."
-msgstr ""
-" Takip süresi veya kesme noktası değeri olmadığı için %d hasta olduğu gibi "
-"bırakıldı; tam takip sürelerini ve orijinal olay durumlarını korurlar, "
-"dolayısıyla kesme noktası kohortun yalnızca bir kısmı için geçerlidir. "
-"Grupları karşılaştırmadan önce eksik değerleri sağlayın veya bu satırları "
-"hariç tutun."
+msgid "%d patient(s) were left untouched because they have no follow-up time or no cut-off value; they keep their full follow-up and their original event status, so the cut-off applies to only part of the cohort. Supply the missing values, or exclude those rows, before comparing groups."
+msgstr "Takip süresi veya kesme noktası değeri olmadığı için %d hasta olduğu gibi bırakıldı; tam takip sürelerini ve orijinal olay durumlarını korurlar, dolayısıyla kesme noktası kohortun yalnızca bir kısmı için geçerlidir. Grupları karşılaştırmadan önce eksik değerleri sağlayın veya bu satırları hariç tutun."
 
 #: R/survival.b.R
-msgid ""
-" All times reported here are measured FROM the landmark, not from study "
-"entry, and all estimates are conditional on being event-free at the "
-"landmark. They are not comparable with unlandmarked survival times."
-msgstr ""
-" Burada bildirilen tüm süreler çalışmaya girişten değil, kerterizden "
-"(landmark) İTİBAREN ölçülür ve tüm tahminler kerterizde olaysız olma "
-"koşuluna bağlıdır. Kerteriz uygulanmamış sağkalım süreleriyle "
-"karşılaştırılamazlar."
+msgid "All times reported here are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark. They are not comparable with unlandmarked survival times."
+msgstr "Burada bildirilen tüm süreler çalışmaya girişten değil, kerterizden (landmark) İTİBAREN ölçülür ve tüm tahminler kerterizde olaysız olma koşuluna bağlıdır. Kerteriz uygulanmamış sağkalım süreleriyle karşılaştırılamazlar."
 
 #: R/survival.b.R
-msgid ""
-" Calibration slope < 0.8 suggests the model predictions are too extreme "
-"(overfitting)."
-msgstr ""
-" Kalibrasyon eğiminin < 0.8 olması, model tahminlerinin çok uç olduğunu "
-"(aşırı uyum / overfitting) gösterir."
+msgid "Calibration slope < 0.8 suggests the model predictions are too extreme (overfitting)."
+msgstr "Kalibrasyon eğiminin < 0.8 olması, model tahminlerinin çok uç olduğunu (aşırı uyum / overfitting) gösterir."
 
 #: R/survival.b.R
-msgid " Calibration slope near 1 indicates good calibration."
-msgstr " Kalibrasyon eğiminin 1'e yakın olması iyi kalibrasyonu gösterir."
+msgid "Calibration slope near 1 indicates good calibration."
+msgstr "Kalibrasyon eğiminin 1'e yakın olması iyi kalibrasyonu gösterir."
 
 #: R/survival.b.R
-msgid " Calibration slope slightly below 1 indicates mild overfitting."
-msgstr ""
-" Kalibrasyon eğiminin 1'in biraz altında olması hafif düzeyde aşırı uyumu "
-"gösterir."
+msgid "Calibration slope slightly below 1 indicates mild overfitting."
+msgstr "Kalibrasyon eğiminin 1'in biraz altında olması hafif düzeyde aşırı uyumu gösterir."
 
 #: R/riverplot.b.R
 msgid " categories across "
@@ -70,16 +48,12 @@ msgid " different categories across "
 msgstr ""
 
 #: R/survivalcont.b.R
-msgid ""
-" Excluding this share of the cohort can introduce selection bias; the "
-"landmark should be prespecified."
-msgstr ""
-" Kohortun bu oranının hariç tutulması seçim yanlılığına (selection bias) yol "
-"açabilir; sınır noktası (landmark) önceden belirlenmelidir."
+msgid "Excluding this share of the cohort can introduce selection bias; the landmark should be prespecified."
+msgstr "Kohortun bu oranının hariç tutulması seçim yanlılığına (selection bias) yol açabilir; sınır noktası (landmark) önceden belirlenmelidir."
 
 #: R/outcomeorganizer.b.R
-msgid " Full state breakdown (of {total} coded records): {states}."
-msgstr " Tam durum dökümü ({total} kodlanmış kayıt içinde): {states}."
+msgid "Full state breakdown (of {total} coded records): {states}."
+msgstr "Tam durum dökümü ({total} kodlanmış kayıt içinde): {states}."
 
 #: R/jjarcdiagram.b.R
 msgid " nodes"
@@ -104,14 +78,8 @@ msgid " stages or time points."
 msgstr ""
 
 #: R/outcomeorganizer.b.R
-msgid ""
-" The cut-off reads %s while follow-up reaches only %s - that is what a date "
-"looks like once it has been imported as a plain number, and it is almost "
-"certainly not in the same units as the follow-up time."
-msgstr ""
-" Kesme noktası %s olarak okunurken takip süresi yalnızca %s düzeyine "
-"ulaşıyor - bu, bir tarihin düz bir sayı olarak içe aktarıldığında aldığı "
-"görünümdür ve neredeyse kesinlikle takip süresiyle aynı birimde değildir."
+msgid "The cut-off reads %s while follow-up reaches only %s - that is what a date looks like once it has been imported as a plain number, and it is almost certainly not in the same units as the follow-up time."
+msgstr "Kesme noktası %s olarak okunurken takip süresi yalnızca %s düzeyine ulaşıyor - bu, bir tarihin düz bir sayı olarak içe aktarıldığında aldığı görünümdür ve neredeyse kesinlikle takip süresiyle aynı birimde değildir."
 
 #: R/riverplot.b.R
 msgid " time points or stages for individual patients/subjects."
@@ -277,20 +245,16 @@ msgid ", correlation adjustment = %.2f"
 msgstr ", korelasyon düzeltmesi = %.2f"
 
 #: R/datetimeconverter.b.R
-msgid "; {missing} of the {total} rows were missing"
-msgstr "; {total} satırın {missing} tanesi kayıptı"
+msgid "{missing} of the {total} rows were missing"
+msgstr "{total} satırın {missing} tanesi kayıptı"
 
 #: R/jjpiestats.b.R
 msgid "; split panels use Pearson's chi-squared test"
 msgstr ""
 
 #: R/survivalcont.b.R
-msgid ""
-". Check variability, group-size constraints, and event counts, or use the "
-"continuous Cox model."
-msgstr ""
-". Değişkenliği, grup büyüklüğü kısıtlamalarını ve olay sayılarını kontrol "
-"edin veya sürekli Cox modelini kullanın."
+msgid "Check variability, group-size constraints, and event counts, or use the continuous Cox model."
+msgstr "Değişkenliği, grup büyüklüğü kısıtlamalarını ve olay sayılarını kontrol edin veya sürekli Cox modelini kullanın."
 
 #: R/agreement.b.R
 #: R/likelihoodratio.b.R
@@ -2911,23 +2875,12 @@ msgstr ""
 "olarak şişirmezler."
 
 #: R/outcomeorganizer.b.R
-msgid ""
-"%d patient(s) have a follow-up time of zero, which contributes no "
-"person-time; check whether a missing date was read as the origin. "
-msgstr ""
-"%d hasta sıfır takip süresine sahiptir ve bu durum kişi-zamanına katkıda "
-"bulunmaz; eksik bir tarihin başlangıç noktası olarak okunup okunmadığını "
-"kontrol edin. "
+msgid "%d patient(s) have a follow-up time of zero, which contributes no person-time; check whether a missing date was read as the origin."
+msgstr "%d hasta sıfır takip süresine sahiptir ve bu durum kişi-zamanına katkıda bulunmaz; eksik bir tarihin başlangıç noktası olarak okunup okunmadığını kontrol edin."
 
 #: R/outcomeorganizer.b.R
-msgid ""
-"%d patient(s) have a NEGATIVE follow-up time, which cannot be a duration - "
-"survival functions reject it. This usually means the start and end dates are "
-"the wrong way round. "
-msgstr ""
-"%d hasta NEGATİF takip süresine sahiptir ve bu bir süre olamaz - sağkalım "
-"fonksiyonları bunu reddeder. Bu durum genellikle başlangıç ve bitiş "
-"tarihlerinin ters sırada olduğu anlamına gelir. "
+msgid "%d patient(s) have a NEGATIVE follow-up time, which cannot be a duration - survival functions reject it. This usually means the start and end dates are the wrong way round."
+msgstr "%d hasta NEGATİF takip süresine sahiptir ve bu bir süre olamaz - sağkalım fonksiyonları bunu reddeder. Bu durum genellikle başlangıç ve bitiş tarihlerinin ters sırada olduğu anlamına gelir."
 
 #: R/waterfall.b.R
 msgid ""

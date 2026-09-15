@@ -35,14 +35,14 @@ children:
             name: explanatory
             isTarget: true
   - type: CollapseBox
-    label: Data suitability
+    label: Data Suitability
     collapsed: false
     stretchFactor: 1
     children:
       - type: CheckBox
         name: suitabilityCheck
   - type: CollapseBox
-    label: Model options
+    label: Model Options
     collapsed: true
     stretchFactor: 1
     children:
@@ -73,7 +73,7 @@ children:
       - type: CheckBox
         name: survival_plot
   - type: CollapseBox
-    label: Output options
+    label: Output Options
     collapsed: true
     stretchFactor: 1
     children:
@@ -89,7 +89,7 @@ children:
           - type: Output
             name: riskScore
   - type: CollapseBox
-    label: Explanatory output
+    label: Explanatory Output
     collapsed: true
     stretchFactor: 1
     children:

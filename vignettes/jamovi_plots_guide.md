@@ -82,7 +82,7 @@ Every plot in jamovi is defined as an `Image` type item in the `.r.yaml` file:
 | `width` | integer | Plot width in pixels | 400 |
 | `height` | integer | Plot height in pixels | 300 |
 | `visible` | boolean/condition | Visibility condition | true |
-| `requiresData` | boolean | Whether plot needs data | true |
+| `requiresData` | boolean | Re-read the dataset before this renderer runs outside `.run()` (resize, `.omv` reopen, export). Set **only** if the renderer reaches `self$data` — see [below](#mandatory-requiresdata-matches-what-the-renderer-reads) | false |
 
 ### Dynamic Titles with Variables
 
@@ -306,6 +306,47 @@ python3 tools/check_state_guards.py        # exits 1 if any unguarded read remai
 `tests/testthat/test-zzz-results-rendering-contract.R` asserts the same invariant
 across the whole module.
 
+### MANDATORY: `requiresData` matches what the renderer reads
+
+**[HIGH] — raised by the jamovi library reviewer, 2026-09-15 jsurvival.**
+
+jmvcore sets `private$.data <- NULL` when `.run()` returns, and re-reads the dataset
+for a redraw or export **only** for an image with `requiresData: true`. The three
+paths above (early return, resize, `.omv` reopen) plus *Export…* therefore see
+`self$data == NULL` in any renderer whose image lacks the flag.
+
+| Renderer (following every `private$` helper it calls) reads | `requiresData` |
+|---|---|
+| only `image$state` and options | omit (default `FALSE`) |
+| `self$data`, `.cleandata()`, `.getData()`, or refits a model from data | `true` |
+
+```yaml
+# WRONG - .plot_adj() calls private$.cox_model(), which falls back to self$data
+- name: plot_adj
+  type: Image
+  renderFun: .plot_adj
+
+# RIGHT (quick) - declare it. RIGHT (better) - compute in .run(), store the small frame.
+- name: plot_adj
+  type: Image
+  renderFun: .plot_adj
+  requiresData: true
+```
+
+Invisible to testthat (the R wrapper passes `data =`, so jmvcore never clears it) and
+invisible in the run that fitted the model (caches still warm). A surplus flag is a LOW
+finding: the full dataset is re-read before every redraw for nothing.
+`python3 tools/release_gate.py` traces renderers and reports both directions. Full
+rationale: `vignettes/jamovi_library_review_guide.md` §15.
+
+### State holds drawing data, not models or datasets
+
+`image$state` is saved into the `.omv`. Store the extracted numbers the plot draws —
+a coefficient table, a `time × estimate × group` frame, `summary(survfit)` columns —
+never a `coxph`/`glm`/`survfit`/`cv.glmnet` object or the cleaned dataset. Visual
+options still belong in state so the plot refreshes when they change. See
+`vignettes/jamovi_library_review_guide.md` §17.
+
 ### State Data Structure Best Practices
 
 #### Recommended State Structure
@@ -313,7 +354,7 @@ across the whole module.
 ```R
 plotState <- list(
   # Core data
-  data = cleanedDataFrame,
+  data = plotReadyFrame,   # only the rows/columns drawn - never the cleaned dataset or a model fit
   
   # Processed variables
   variables = list(
@@ -325,7 +366,7 @@ plotState <- list(
   # Analysis results
   results = list(
     summary = summaryStats,
-    tests = statisticalTests
+    tests = testTable        # extracted numbers, not htest/model objects
   ),
   
   # Plot configuration

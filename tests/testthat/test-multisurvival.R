@@ -72,7 +72,7 @@ test_that("multisurvival risk score calculation works", {
   )
   
   # Check risk score outputs
-  expect_true(!is.null(result$risk_score_analysis))
+  # risk_score_analysis was removed from the schema (test-multisurvival-audit-2026-09.R)
   expect_true(!is.null(result$riskScoreTable))
 })
 

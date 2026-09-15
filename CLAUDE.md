@@ -182,7 +182,8 @@ Comprehensive guides are available in `vignettes/`:
 
 **State Management for Plots:**
 ```r
-# Include visual options in state to trigger updates
+# Include visual options in state to trigger updates. `data` is the small
+# plot-ready frame - never a fitted model or the cleaned dataset (state is saved in the .omv)
 plotState <- list(
     data = plotData,
     plot_title = self$options$plot_title,
@@ -190,6 +191,10 @@ plotState <- list(
 )
 image$setState(plotState)
 ```
+
+**`requiresData` on an Image:** `true` only if the renderer, or a `private$` helper it calls, reads `self$data`. jmvcore nulls the data after `.run()`, so a missing flag errors on resize / `.omv` reopen / export (invisible to testthat, which passes `data =`), and a surplus flag re-reads the dataset for nothing. `python3 tools/release_gate.py` traces it.
+
+**Never wrap `jmvcore::reject()` in a catch-all `tryCatch`:** `reject()` is a plain `simpleError`, so the handler swallows validation and bypasses jamovi's error state. Wrap only the third-party call. Details: `vignettes/jamovi_library_review_guide.md` §15–18.
 
 **Data Frame Serialization Fix:**
 ```r

@@ -199,7 +199,7 @@ Create a complete jamovi function with:
 ### jamovi Library Review Gate
 
 These are the findings the jamovi library reviewer raised against this project's
-five submodules in the 2026-08 round. Full rationale and fixes:
+five submodules in the 2026-08 and 2026-09 rounds. Full rationale and fixes:
 `vignettes/jamovi_library_review_guide.md`.
 
 ```bash
@@ -210,6 +210,8 @@ grep -n "setVisible(FALSE)" R/<fn>.b.R # every hit must be OPTION-driven, never 
 grep -n "^\s*warning(" R/<fn>.b.R      # jamovi never shows R warnings to the user
 grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set belongs in .init()
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
+grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
+python3 tools/release_gate.py          # requiresData contract, CollapseBox Title Case, refs (FAIL = blocking)
 Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contract.R")'
 ```
 
@@ -229,11 +231,19 @@ Checklist:
       goes to a notice element.
 - [ ] Every `.()` wraps a complete sentence with `{}` placeholders — no `paste0()` splices,
       no leading/trailing space, no `\n` inside the string. `jmvcore::reject()` messages
-      are wrapped too.
+      are wrapped too — but never `.()` inside a file-level (non-R6) helper (#122).
+- [ ] Every `Image` whose renderer reaches `self$data` — directly or through any `private$`
+      helper (`.cleandata()`, `.getData()`, a model refit) — declares `requiresData: true`;
+      an `Image` that draws only from `image$state` does not.
+- [ ] `setState()` stores extracted drawing data — never a fitted model (`coxph`, `glm`,
+      `survfit`, `cv.glmnet`) or the cleaned dataset.
+- [ ] No `tryCatch(error = )` wraps code that calls `jmvcore::reject()`, and no error
+      handler deletes table rows. Wrap only the third-party call.
 - [ ] Every package reached via `::` or `importFrom()` is in `Imports:` — `grDevices`,
       `grid`, `stats`, `utils` included.
 - [ ] Checkbox labels name the thing, not the action; individual control labels are
-      sentence case; the `.u.yaml` panel title matches the `.a.yaml` title.
+      sentence case; `CollapseBox` headings are Title Case; the `.u.yaml` panel title
+      matches the `.a.yaml` title.
 - [ ] No option, result, or `ui.<name>` in `.events.js` refers to a schema entry that is
       commented out or removed.
 - [ ] **Do not add `type: Notice` to `.r.yaml`** — it is not in the compiler enum and
@@ -364,23 +374,13 @@ $ARGUMENTSClass <- R6::R6Class(
         },
         
         .run = function() {
-            # Main analysis logic
-            tryCatch({
-                # Data preparation
-                data <- private$.prepareData()
-                
-                # Validation
-                private$.validateData(data)
-                
-                # Analysis
-                results <- private$.performAnalysis(data)
-                
-                # Populate outputs
-                private$.populateResults(results)
-                
-            }, error = function(e) {
-                self$results$todo$setContent(private$.generateErrorMessage(e))
-            })
+            # Main analysis logic. Let jmvcore::reject() propagate: jamovi then
+            # shows the message and keeps the results in place. Wrap only
+            # third-party calls in tryCatch (jamovi_library_review_guide.md §16).
+            data <- private$.prepareData()
+            private$.validateData(data)   # jmvcore::reject(.("..."), code = "...")
+            results <- private$.performAnalysis(data)
+            private$.populateResults(results)
         },
         
         .prepareData = function() {

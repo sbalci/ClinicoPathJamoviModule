@@ -713,7 +713,6 @@ items:
       height: 450
       renderFun: .plot8
       visible: (ph_cox)
-      requiresData: true
       clearWith:
           - ph_cox
           - endplot
@@ -992,7 +991,6 @@ items:
       width: 600
       height: 450
       renderFun: .plotRiskGroups
-      requiresData: true
       visible: (calculateRiskScore && plotRiskGroups)
       clearWith:
           - calculateRiskScore
@@ -1043,6 +1041,7 @@ items:
       clearWith:
           - ci_optimism
           - ci_optimism_boot
+          - seed
           - outcome
           - outcomeLevel
           - elapsedtime
@@ -1088,18 +1087,44 @@ items:
       type: Output
       varTitle: '`Calculated Time in Multivariable Survival Function - from ${ dxdate } to { fudate }`'
       varDescription: Calculated Time from given Dates in Multivariable Survival Analysis
+      # Written once (isNotFilled): every option that changes the values or the
+      # rows (unit, date parsing, landmark, complete-case columns) must clear it.
       clearWith:
+          - calculatedtime
           - tint
           - dxdate
           - fudate
+          - timetypedata
+          - timetypeoutput
+          - uselandmark
+          - landmark
+          - outcome
+          - outcomeLevel
+          - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - explanatory
+          - contexpl
+          - adjexplanatory
+          - use_stratify
+          - stratvar
 
 
     - name: outcomeredefined
       title: Add Redefined Outcome to Data
       type: Output
+      # Competing-risk mode writes a Censored/Event/Competing factor; without a
+      # measureType jamovi treats the column as continuous and drops the labels.
+      measureType: nominal
       varTitle: '`Redefined Outcome in Multivariable Survival Function - from ${ outcome } for analysis { analysistype }`'
       varDescription: Redefined Outcome from Outcome based on Analysis Type in Multivariable Survival Analysis
+      # Written once (isNotFilled): options that change which rows survive the
+      # complete-case and landmark filters must clear it too.
       clearWith:
+          - outcomeredefined
           - outcome
           - analysistype
           - multievent
@@ -1108,6 +1133,18 @@ items:
           - dooc
           - awd
           - awod
+          - elapsedtime
+          - tint
+          - dxdate
+          - fudate
+          - timetypedata
+          - uselandmark
+          - landmark
+          - explanatory
+          - contexpl
+          - adjexplanatory
+          - use_stratify
+          - stratvar
 
 
 
@@ -1127,6 +1164,8 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
+          - adjexplanatory
           - multievent
           - analysistype
           - dod
@@ -1159,6 +1198,8 @@ items:
           - fudate
           - dxdate
           - tint
+          - timetypedata
+          - adjexplanatory
           - multievent
           - analysistype
           - dod
@@ -1255,42 +1296,6 @@ items:
           - dooc
           - awd
           - awod
-          - interactions
-          - uselandmark
-          - landmark
-          - timetypeoutput
-          - timetypedata
-
-    # Adjusted Survival Summary (right after adjusted survival analysis)
-    - name: adjustedSurvivalSummaryHeading
-      title: 'Adjusted Probability Natural Language Summary'
-      type: Preformatted
-      visible: (ac && showSummaries)
-
-    - name: adjustedSurvivalSummary
-      title: ''
-      type: Html
-      visible: (ac && showSummaries)
-      clearWith:
-          - ac
-          - adjexplanatory
-          - outcome
-          - ac_method
-          - explanatory
-          - contexpl
-          - outcomeLevel
-          - elapsedtime
-          - fudate
-          - dxdate
-          - tint
-          - multievent
-          - analysistype
-          - dod
-          - dooc
-          - awd
-          - awod
-          - use_stratify
-          - stratvar
           - interactions
           - uselandmark
           - landmark

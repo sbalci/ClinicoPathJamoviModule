@@ -554,6 +554,12 @@ only fires on the branch that reaches the helper, it is data-dependent and easy 
 miss in testing. Keep `.()` inside R6 methods, or pass the already-translated
 string in.
 
+This applies to reviewer suggestions too. The 2026-09-15 library report proposed
+wrapping the two `reject()` messages in `R/multisurvival.b.R` `.eventIndicator()` — a
+file-level helper — with `.()`. Done literally, that reintroduces issue #122. Give the
+helper a `self` argument passed from the calling method, or have the method raise the
+translated `reject()`.
+
 ### 5.2 Avoid String Concatenation
 
 **❌ Bad - Fragmented translation:**

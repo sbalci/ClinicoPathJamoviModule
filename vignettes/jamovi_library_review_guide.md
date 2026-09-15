@@ -2,7 +2,7 @@
 
 **What the jamovi library reviewer actually checks — and how to pass first time.**
 
-This guide is distilled from five real audit reports issued by the jamovi library
+This guide is distilled from the real audit reports issued by the jamovi library
 reviewer against this project's submodules:
 
 | Report | Module | Date |
@@ -12,6 +12,7 @@ reviewer against this project's submodules:
 | `jamovi-library-audit/2026-08-17 meddecide.md` | meddecide | 2026-08-17 |
 | `jamovi-library-audit/2026-08-18 OncoPath.md` | OncoPath | 2026-08-18 |
 | `jamovi-library-audit/2026-08-18 jjstatsplot.md` | jjstatsplot | 2026-08-18 |
+| `jamovi-library-audit/2026-09-15 jsurvival.md` | jsurvival (round 3) | 2026-09-15 |
 
 Every rule below is something the reviewer *actually raised*, on real files, with
 severity attached. Nothing here is speculative.
@@ -34,6 +35,10 @@ severity attached. Nothing here is speculative.
 12. [Rule: UI label conventions](#12-rule-ui-label-conventions)
 13. [The `type: Notice` trap](#13-the-type-notice-trap)
 14. [Encoding review findings as tests](#14-encoding-review-findings-as-tests)
+15. [Rule: `requiresData` is a contract with `self$data` at render time](#15-rule-requiresdata-is-a-contract-with-selfdata-at-render-time)
+16. [Rule: never wrap `jmvcore::reject()` in a catch-all `tryCatch`](#16-rule-never-wrap-jmvcorereject-in-a-catch-all-trycatch)
+17. [Rule: image state holds drawing data, not models or datasets](#17-rule-image-state-holds-drawing-data-not-models-or-datasets)
+18. [Why round 3 still found things: how rules decay](#18-why-round-3-still-found-things-how-rules-decay)
 
 ---
 
@@ -63,12 +68,19 @@ grep -n "^\s*warning(" R/*.b.R
 
 # 7. Spliced .() fragments                                              [LOW]
 grep -nE '\.\("[^"]*"\)\s*,\s*[a-zA-Z_]|paste0\(\s*\.\(' R/*.b.R
-grep -nE '\.\(" |\ "\)' R/*.b.R          # leading/trailing space inside .()
+grep -nE '\.\(\s*"[[:space:],;:.]' R/*.b.R            # leading space/punctuation inside .()
+grep -nE '\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/*.b.R   # trailing space inside .()
+# (the old pattern '\.\(" |\ "\)' matched every `collapse = ", "` - 200 hits on
+#  jsurvival, burying the 14 real sites the 2026-09-15 audit then found)
 
 # 8. Undeclared packages, including base-priority ones                   [LOW/MED]
 Rscript -e 'testthat::test_file("tests/testthat/test-zzz-dependency-declaration.R")'
 
-# 9. Everything still compiles
+# 9. requiresData contract, CollapseBox Title Case, .() padding, refs,
+#    clearWith, renderFun, entities, versions                            [HIGH..LOW]
+python3 tools/release_gate.py      # FAIL lines block; read every WARN for shipped analyses
+
+# 10. Everything still compiles
 Rscript -e 'Sys.unsetenv("ELECTRON_RUN_AS_NODE"); jmvtools::prepare(".")'
 ```
 
@@ -78,7 +90,11 @@ Plus the cheap metadata gates the reviewer checks first:
   every `.a.yaml`, and `CITATION.cff`.
 - `License: GPL (>= 2)` (OSI-approved).
 - Every key in `jamovi/00refs.yaml` is cited **and** every cited key resolves,
-  with exact casing. Every entry has `title`, `author`, `url`.
+  with exact casing. Every entry has `title`, `author`, `url`. Check this in the
+  **generated submodule**, not only the umbrella: the umbrella keeps every entry on
+  purpose, and `_updateModules.R` trims each submodule's copy to the keys it cites.
+  A missing `url` is only a WARN in `tools/release_gate.py` — treat it as blocking for
+  any key a shipped analysis cites.
 - Every `clearWith` entry resolves to a real option name.
 - Every `renderFun:` resolves to a real `function(image, ...)` method.
 - No committed build artifacts (`*.tar.gz`, `*.jmo`).
@@ -536,6 +552,15 @@ jmvcore::reject(
     code = "bad_date_format")
 ```
 
+**Not in file-level helpers.** `.()` is `self <- eval.parent(str2lang("self"))` —
+it only works where `self` is in scope. The 2026-09-15 report suggested wrapping the
+two `reject()` calls in `.eventIndicator()`, a top-level helper in
+`R/multisurvival.b.R`, with `.()`; doing that literally brings back GitHub issue #122
+("object 'self' not found", data-dependent). Either give the helper a `self`
+parameter passed from the method, or return a sentinel and call `reject()` from the
+R6 method. See `vignettes/jamovi_i18n_guide.md` → "`.()` needs `self` in the caller
+frame".
+
 ### Coverage should be even
 
 Two thoroughly translated analyses and two untranslated ones in the same menu
@@ -744,6 +769,207 @@ Every audit finding becomes a test **before** you fix it, at the level of the
 
 A test written at the class level is what turns "we fixed the four `venn`
 renderers" into "this can't come back anywhere in the module."
+
+---
+
+## 15. Rule: `requiresData` is a contract with `self$data` at render time
+
+**[HIGH] — 2026-09-15 jsurvival: `multisurvival` `plot_adj` and `survMetricsPlot`.**
+
+### Why
+
+Read from jmvcore 2.7.38's own source:
+
+- `Analysis$run()` sets `private$.data <- NULL` as soon as `.run()` returns, unless the
+  data frame was handed in by the caller.
+- `Analysis$.createImage()` (every redraw) and `Analysis$.createPlotObject()`
+  (*Export…*) re-read the dataset **only** when
+  `image$requiresData && is.null(private$.data)`.
+- `jmvcore::Image`'s default is `requiresData = FALSE`.
+
+So a render function that runs *outside* `.run()` — on resize, on reopening a saved
+`.omv`, on export — sees `self$data` as `NULL` unless its image declares
+`requiresData: true`. In `multisurvival`, both renderers called
+`private$.cox_model()`, whose cold-cache path goes `.cleandata()` → `.getData()` →
+`self$data` → `jmvcore::reject("Data contains no (complete) rows")`. No `tryCatch`, so
+the **whole analysis** flipped to an error state instead of drawing a plot. It works
+in the run that fits the model (caches still warm), which is why nobody saw it.
+
+It is also invisible to testthat: the R wrapper passes `data =` in, jmvcore never
+clears it, and every renderer finds its data.
+
+This is the reasoning of [section 3](#3-rule-render-functions-must-null-guard-imagestate)
+("the renderer runs without `.run()`") — section 3 applied it to `image$state` only.
+
+### The rule
+
+| The renderer, **following every `private$` helper it calls**, reads | `requiresData` |
+|---|---|
+| only `image$state` (and options) | omit it — the default is `FALSE` |
+| `self$data`, `.cleandata()`, `.getData()`, or a helper that refits a model from data | `true` |
+
+The opposite mistake is cheaper but still a finding (LOW, 29 images in jsurvival):
+`requiresData: true` on a renderer that never touches the data makes jamovi read the
+whole dataset from disk before every redraw and every export, for nothing.
+
+**Better than the flag:** compute in `.run()`, store the small drawing frame with
+`setState()` ([section 17](#17-rule-image-state-holds-drawing-data-not-models-or-datasets)),
+and make the renderer draw only. Refitting in the renderer is a legitimate trade-off
+only when the stored object would be huge (the `rms` nomogram) — and then it needs
+`requiresData: true`.
+
+### Enforce it
+
+`python3 tools/release_gate.py` traces each `renderFun` through the `private$`
+helpers it calls. A production analysis whose renderer reaches the data without
+`requiresData: true` is a **FAIL**; the reverse is a WARN count.
+
+---
+
+## 16. Rule: never wrap `jmvcore::reject()` in a catch-all `tryCatch`
+
+**[MEDIUM] — 2026-09-15 jsurvival: `lassocox` `.run()`.**
+
+### Why
+
+`jmvcore::reject()` is `stop(createError(...))` — a plain `simpleError`, the same
+class as any library error. So an `error =` handler around validation code catches
+every validation message:
+
+- jamovi's own failure presentation (pane greyed, message shown, results left in
+  place) never happens — the user gets a hand-built red box on a complete-looking pane;
+- a handler that clears outputs (`deleteRows()`, a `.clearAnalysisOutputs()` helper)
+  deletes the fixed rows `.init()` built, so tables collapse and restructure while the
+  user clicks through an invalid intermediate selection;
+- an inner `tryCatch` that re-wraps the message corrupts it:
+  *"Error creating design matrix: At least two … engine.. Check factor coding …"*;
+- it also swallows the `.checkpoint()` restart, which is error-class too.
+
+### The pattern
+
+```r
+# WRONG - every reject() below lands in the handler
+.run = function() {
+    tryCatch({
+        data <- private$.cleanData()          # 33 jmvcore::reject() calls inside
+        fit  <- private$.fitModel(data)
+        private$.populate(fit)
+    }, error = function(e) {
+        private$.clearAnalysisOutputs()       # tables collapse
+        self$results$todo$setContent(e$message)
+    })
+}
+
+# RIGHT - validation propagates; tryCatch wraps only the third-party call
+.run = function() {
+    data <- private$.cleanData()              # rejects reach jamovi verbatim
+    fit <- tryCatch(
+        glmnet::cv.glmnet(data$x, data$y, family = "cox"),
+        error = function(e) jmvcore::reject(
+            jmvcore::format(.("The LASSO Cox fit failed: {msg}"), msg = conditionMessage(e)),
+            code = "fit_failed"))
+    private$.populate(fit)
+}
+```
+
+If a broad safety net must stay, re-raise first:
+
+```r
+error = function(e) {
+    if (!is.null(e$code)) stop(e)             # coded reject() and the .checkpoint() restart
+    ...
+}
+```
+
+— but `reject()` **without** `code =` leaves `e$code` `NULL`, indistinguishable from a
+library error. That test only works if every `reject()` in the guarded region passes a
+`code`. Narrowing the `tryCatch` is the reliable fix.
+
+`withCallingHandlers(warning = …)` that collects warnings into a notice is fine and
+worth keeping — it does not intercept errors.
+
+### Where the anti-pattern came from
+
+The `.b.R` template in `.claude/commands/create-function.md` and
+`vignettes/jamovi_notices_guide.md` §8 both wrapped the whole `.run()` in `tryCatch`.
+Both are corrected. New analyses copy templates faithfully.
+
+---
+
+## 17. Rule: image state holds drawing data, not models or datasets
+
+**[LOW] — 2026-09-15 jsurvival: `multisurvival` `plot`/`plot3`/`plotKM`/`plot_adj`,
+`oddsratio` `plot_nomogram`.**
+
+### Why
+
+`image$state` is serialised into the saved `.omv`. A `survival::coxph` fit carries its
+model frame, `x` matrix, call and environment; a cleaned dataset is a second copy of
+the data. Neither bears any relation to the handful of numbers a plot draws. The
+reviewer cites jamovi's image-state guidance: don't store the model object, extract
+what the plot needs.
+
+### The rule
+
+```r
+# WRONG
+self$results$plot$setState(c(cleaneddata, list(cox_model = cox_model)))
+
+# RIGHT - the extracted frame the renderer draws
+self$results$plot3$setState(list(
+    coef = data.frame(term = ..., HR = ..., lower = ..., upper = ..., p = ...),
+    plot_title = self$options$plot_title))       # visual options still belong here
+```
+
+- Forest plot → the coefficient table. Adjusted curves / hazard plot → a small
+  `time × estimate × group` frame. KM plot → the `summary(survfit)` columns.
+- Reference implementations: `multisurvival` `riskGroupPlot` state, `lassocox`
+  `.savePlotData()` (vectors and small frames, never the `cv.glmnet` object).
+- If the plot truly needs raw rows, use `requiresData: true` + `self$data`
+  ([section 15](#15-rule-requiresdata-is-a-contract-with-selfdata-at-render-time)) —
+  don't stash the dataset in state.
+- Still convert to a base `data.frame` before `setState()` (protobuf).
+
+Detect: `grep -nE 'setState\(.*(model|fit|clean(ed)?[Dd]ata)' R/<fn>.b.R`
+
+---
+
+## 18. Why round 3 still found things: how rules decay
+
+Round 2 closed its findings and wrote every one down as a rule. Round 3 (2026-09-15
+jsurvival) still found nine. Four were classes we *already had rules for*. The lessons
+are about the rules, not the code:
+
+| Finding | Rule existed? | Why it recurred |
+|---|---|---|
+| `requiresData` missing / surplus (HIGH + LOW) | No | Every example in the plots and r.yaml guides showed `requiresData: true` as boilerplate, and the plots guide's property table claimed the default is `true` (jmvcore's is `FALSE`). Section 3's "renderers run without `.run()`" was applied to `image$state` and never to `self$data`. |
+| Catch-all `tryCatch` swallows `reject()` (MEDIUM) | No — the opposite was taught | The `create-function` template and notices guide §8 wrapped the whole `.run()` in `tryCatch`; `lassocox` followed that shape. |
+| Model object / dataset in image state (LOW) | No — the opposite was taught | The plots guide's "Recommended State Structure" had `data = cleanedDataFrame`; the b.R guide stored `fit =` and `model =`; CLAUDE.md's quick reference said nothing about size. |
+| Sentence-case `CollapseBox` headings (LOW) | Yes, §12 | Checked by eye only. `lassocox` was new code written after the rule; nothing machine-checked it. |
+| Leading space/punctuation in `.()` (LOW) | Yes, §9 + checklist grep | The checklist grep returned **200 hits** on jsurvival — almost all `collapse = ", "` — so the 14 real sites were invisible. And August fixed the named *sites*, not the *class*. |
+| Two untranslated `reject()`s (LOW) | Yes, §9 | Left bare on purpose: they sit in a file-level helper whose file header forbids `.()` (#122). The reviewer's suggested fix is unsafe as written — see §9. |
+| Dead `ggstatsplot` ref (LOW) | Yes, §1 | `_updateModules.R` `collect_used_refs()` counted a **commented-out** `#   refs: ggstatsplot` as a citation, so the per-submodule trim kept the entry. Fixed in the generator. |
+| Ref with no `url` (LOW) | Yes, §1 | `release_gate.py` reports it as one WARN listing 18 umbrella entries; WARN lines get skimmed. |
+| Long methods (LOW) | Known | Deferred by decision. |
+
+**What to do differently:**
+
+1. **A rule without a machine check is a wish.** Every new rule gets a line in
+   `tools/release_gate.py` or a `test-zzz-*` test the same day. Round 3 added the
+   `requiresData` trace, the `CollapseBox` Title Case check and the `.()` padding check.
+2. **Test the check against the reviewer's list before trusting it.** A check that
+   reports 200 hits is never read; a check that reports 0 may be blind. The new checks
+   reproduce this report exactly (2 missing / 29 surplus `requiresData`; 4 headings;
+   all 14 `.()` sites — the report names 13 locations; the 14th is `survivalcont.b.R:1554`).
+3. **Fix the teaching material, not just the code.** Templates and guide examples are
+   copied faithfully. When a finding traces back to an example, the example is the bug.
+4. **Fix the class, then scan the whole module.** "The sites flagged in August are all
+   fixed; these are a different set of 14" is the reviewer telling us we fixed instances.
+5. **Generalise the mechanism, not the symptom.** "jamovi re-renders without `.run()`"
+   constrains *every* renderer input — state, `self$data`, caches.
+6. **Verify the reviewer's fix too.** The reviewer is usually right about the problem and
+   occasionally wrong about the fix (`.()` in a file-level helper here; 2026-08's
+   "unused" packages that the umbrella does use).
 
 ---
 

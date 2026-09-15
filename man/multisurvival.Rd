@@ -100,13 +100,15 @@ specified time point.}
 \code{timetypeoutput}) at which to start landmark analyses. Only used if
 \code{uselandmark} = true.}
 
-\item{outcome}{The outcome variable. Typically indicates event status
-(e.g., death, recurrence). For survival analysis, this may be a factor or
-numeric event indicator.}
+\item{outcome}{The outcome (event status) variable. A numeric 0/1 column is
+read as 0 = censored and 1 = event. For any other coding, such as numeric
+1/2 or a factor (Alive/Dead), \code{outcomeLevel} must name the event
+value; every other value is treated as censored.}
 
-\item{outcomeLevel}{The level of \code{outcome} considered as the event.
-For example, if \code{outcome} is a factor, specify which level indicates
-the event occurrence.}
+\item{outcomeLevel}{The level or numeric value of \code{outcome} that
+represents the event. Values are matched exactly, not by size, and every
+other value is treated as censored. Required unless \code{outcome} is
+numeric 0/1.}
 
 \item{dod}{The level of \code{outcome} corresponding to death due to
 disease, if applicable.}
@@ -327,8 +329,6 @@ A results object containing:
 \code{results$adjustedSurvivalHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$adjustedEstimandPanel} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot_adj} \tab \tab \tab \tab \tab an image \cr
-\code{results$adjustedSurvivalSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$adjustedSurvivalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$nomogramHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plot_nomogram} \tab \tab \tab \tab \tab an image \cr
 \code{results$nomogram_display} \tab \tab \tab \tab \tab a html \cr

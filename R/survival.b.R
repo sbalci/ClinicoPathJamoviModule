@@ -1949,7 +1949,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                       sprintf(.("<br><b>Landmark analysis at %s %s.</b>"),
                                               format(landmark),
                                               self$options$timetypeoutput),
-                                      .(" All times reported here are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark. They are not comparable with unlandmarked survival times.")
+                                      " ", .("All times reported here are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark. They are not comparable with unlandmarked survival times.")
                   )
                 }
 
@@ -3050,14 +3050,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         )
                     )
 
-                    slope_interp <- ifelse(
+                    slope_interp <- paste0(" ", ifelse(
                         mean_slope < 0.8,
-                        .(" Calibration slope < 0.8 suggests the model predictions are too extreme (overfitting)."),
+                        .("Calibration slope < 0.8 suggests the model predictions are too extreme (overfitting)."),
                         ifelse(mean_slope < 0.9,
-                               .(" Calibration slope slightly below 1 indicates mild overfitting."),
-                               .(" Calibration slope near 1 indicates good calibration.")
+                               .("Calibration slope slightly below 1 indicates mild overfitting."),
+                               .("Calibration slope near 1 indicates good calibration.")
                         )
-                    )
+                    ))
 
                     table$setNote("interpretation", paste0(
                         interp, slope_interp, " ",

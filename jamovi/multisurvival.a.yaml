@@ -1,7 +1,7 @@
 ---
 name:  multisurvival
 title: Multivariable Survival Analysis
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
 version: '1.0.81'
@@ -255,9 +255,10 @@ options:
       permitted: [ factor, numeric ]
       default: null
       description:
-        R: >
-          The outcome variable. Typically indicates event status (e.g., death, recurrence).
-          For survival analysis, this may be a factor or numeric event indicator.
+          ui: >
+            Event status. A numeric column coded 0/1 is read as 0 = censored, 1 = event. Any other coding (for example 1/2, or text such as Alive/Dead) is never guessed: choose the event value in Event Level.
+          R: >
+            The outcome (event status) variable. A numeric 0/1 column is read as 0 = censored and 1 = event. For any other coding, such as numeric 1/2 or a factor (Alive/Dead), `outcomeLevel` must name the event value; every other value is treated as censored.
 
     - name: outcomeLevel
       title: Event Level
@@ -265,9 +266,10 @@ options:
       variable: (outcome)
       allowNone: true
       description:
-        R: >
-          The level of `outcome` considered as the event. For example, if `outcome` is a factor,
-          specify which level indicates the event occurrence.
+          ui: >
+            The outcome value that means the event happened (for example Dead, or 2 in a column coded 1/2). Every other value is treated as censored. Required unless the outcome is numeric 0/1; if a numeric column lists no values here, set its measure type to Nominal in Data > Setup.
+          R: >
+            The level or numeric value of `outcome` that represents the event. Values are matched exactly, not by size, and every other value is treated as censored. Required unless `outcome` is numeric 0/1.
 
     - name: dod
       title: Dead of Disease

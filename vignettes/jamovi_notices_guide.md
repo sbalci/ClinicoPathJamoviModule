@@ -1451,7 +1451,14 @@ Notices are managed automatically by jamovi:
 
 ### Graceful Error Handling
 
-#### Comprehensive Error Catching
+#### ANTI-PATTERN: wrapping the whole `.run()` in `tryCatch`
+
+> **Do not copy this example.** It is kept to show the failure. `jmvcore::reject()` is a
+> plain `simpleError`, so this handler catches every validation message the analysis
+> raises, replaces jamovi's own error state with a hand-built notice, and (via
+> `insert()`) hits the Notice serialization problem too. The jamovi library reviewer
+> raised exactly this against `lassocox` (2026-09-15). Use "Wrap only the third-party
+> call" below; rationale in `jamovi_library_review_guide.md` §16.
 
 ```r
 .run = function() {
@@ -1502,6 +1509,28 @@ Notices are managed automatically by jamovi:
     })
 }
 ```
+
+#### Wrap only the third-party call
+
+```r
+.run = function() {
+    data <- private$.cleanData()      # jmvcore::reject() here reaches jamovi verbatim
+
+    fit <- tryCatch(
+        survival::coxph(formula, data = data),
+        error = function(e) jmvcore::reject(
+            jmvcore::format(.("The Cox model could not be fitted: {msg}"),
+                            msg = conditionMessage(e)),
+            code = "fit_failed"))
+
+    private$.populateTables(fit)
+}
+```
+
+If a broad safety net must stay, re-raise coded conditions first —
+`if (!is.null(e$code)) stop(e)` — and give every `reject()` in the guarded region a
+`code =`; an uncoded `reject()` is indistinguishable from a library error. Never delete
+table rows in an error handler.
 
 #### Specific Error Conditions
 

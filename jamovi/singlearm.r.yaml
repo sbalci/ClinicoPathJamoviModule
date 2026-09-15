@@ -582,7 +582,6 @@ items:
           - AalenJohansen1978
           - AustinLeeFine2016
       visible: (sc && multievent && analysistype:compete)
-      requiresData: true
       clearWith:
           - sc
           - endplot
@@ -618,7 +617,6 @@ items:
       height: 450
       renderFun: .plot6
       visible: (kmunicate)
-      requiresData: true
       clearWith:
           - kmunicate
           - endplot
@@ -656,7 +654,6 @@ items:
       refs:
           - KaplanMeier1958
       visible: (ce)
-      requiresData: true
       clearWith:
           - ce
           - endplot
@@ -695,7 +692,6 @@ items:
       refs:
           - KaplanMeier1958
       visible: (ch)
-      requiresData: true
       clearWith:
           - ch
           - endplot
@@ -816,7 +812,6 @@ items:
       height: 450
       renderFun: .baselineHazardPlot
       visible: (baseline_hazard)
-      requiresData: true
       clearWith:
         - outcome
         - outcomeLevel
@@ -845,7 +840,6 @@ items:
       refs:
           - Cleveland1979
       visible: (hazard_smoothing)
-      requiresData: true
       clearWith:
         - outcome
         - outcomeLevel

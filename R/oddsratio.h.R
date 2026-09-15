@@ -226,7 +226,6 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Prediction Nomogram",
                 width=800,
                 height=600,
-                requiresData=TRUE,
                 renderFun=".plot_nomogram",
                 visible="(showNomogram && !usePenalized)",
                 clearWith=list(

@@ -160,9 +160,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             collected_warnings <- character(0)
             stability_warnings <- character(0)
 
-            # Main analysis pipeline with comprehensive error handling
-            withCallingHandlers(
-                tryCatch({
+            # Warnings are collected into the results panel. Errors are deliberately
+            # NOT caught: a catch-all here swallowed every jmvcore::reject() raised by
+            # .cleanData()/.fitModel() into a red box and deleted the fixed table rows
+            # built in .init(). jamovi shows the message and keeps the results in place
+            # (jamovi_library_review_guide.md section 16).
+            withCallingHandlers({
                     # Prepare and validate data
                     data <- private$.cleanData()
                     if (is.null(data)) return()
@@ -207,18 +210,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     }
 
-                }, error = function(e) {
-                    error_msg <- paste0(
-                        "<div class='alert alert-danger'>",
-                        "<h4>", .("Analysis Error"), "</h4>",
-                        "<p><strong>", .("Error:"), "</strong> ", htmltools::htmlEscape(e$message), "</p>",
-                        "<p>", .("Please check your data and variable selections."), "</p>",
-                        "</div>"
-                    )
-                    private$.clearAnalysisOutputs()
-                    self$results$todo$setContent(error_msg)
-
-                }),
+                },
                 warning = function(w) {
                     if (inherits(w, "lassocox_instability")) {
                         stability_warnings <<- c(stability_warnings, conditionMessage(w))
@@ -470,7 +462,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             contrasts_list <- list()
             encoding <- NULL
             removed_design_columns <- character()
-            tryCatch({
+            # Only model.matrix() is guarded: a tryCatch around this whole block re-wrapped
+            # the jmvcore::reject() messages below as "Error creating design matrix: ...".
                 for (var_name in factor_predictors) {
                     x <- predictors_cc[[var_name]]
                     lev <- if (is.factor(x)) levels(droplevels(x)) else sort(unique(x))
@@ -483,8 +476,12 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     contrasts_list[[var_name]] <- stats::contr.treatment(lev, base = 1)
                 }
 
-                design <- stats::model.matrix(~ ., data = predictors_cc,
-                    contrasts.arg = if (length(contrasts_list)) contrasts_list else NULL)
+                design <- tryCatch(
+                    stats::model.matrix(~ ., data = predictors_cc,
+                        contrasts.arg = if (length(contrasts_list)) contrasts_list else NULL),
+                    error = function(e) jmvcore::reject(.fmt(
+                        .('Error creating design matrix: {msg}. Check factor coding and missing values.'),
+                        msg = sub("[.]$", "", conditionMessage(e)))))
                 assignments <- attr(design, "assign")[-1]
                 X <- .stripBackticks(design[, -1, drop = FALSE])
                 origins <- names(predictors_cc)[assignments]
@@ -517,10 +514,6 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (ncol(X) < 2) {
                     jmvcore::reject(.("At least two non-constant encoded predictor columns are required by this LASSO engine."))
                 }
-            }, error = function(e) {
-                jmvcore::reject(.fmt(.('Error creating design matrix: {msg}. Check factor coding and missing values.'),
-                    msg = e$message))
-            })
 
             if (length(factor_predictors) > 0) {
                 warning(.fmt(
@@ -679,38 +672,39 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 jmvcore::reject(.("Could not create event/censor-stratified cross-validation folds. Reduce the requested folds or provide more outcome observations."))
             }
 
-            # Fit cross-validated Lasso-Cox model
-            tryCatch({
-                # Save and restore RNG state to avoid side effects on user's session
-                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) get(".Random.seed", envir = .GlobalEnv) else NULL
-                on.exit({
-                    if (!is.null(old_seed)) {
-                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
-                    } else if (exists(".Random.seed", envir = .GlobalEnv)) {
-                        rm(".Random.seed", envir = .GlobalEnv)
-                    }
-                })
-                set.seed(seed_value)
-                cv_args <- list(
-                    x = data$X,
-                    y = y,
-                    family = "cox", cox.ties = "breslow",
-                    alpha = 1,  # Lasso (L1) penalty
-                    standardize = isTRUE(self$options$standardize),
-                    parallel = FALSE  # Avoid parallel processing issues
-                )
-                cv_args$foldid <- foldid
-                private$.checkpoint()
-                cv_fit <- .quietly(do.call(glmnet::cv.glmnet, cv_args))
-                
-                # Check if cross-validation succeeded
-                if (is.null(cv_fit$lambda.min) || is.na(cv_fit$lambda.min)) {
-                    jmvcore::reject(.("Cross-validation failed. Check data quality and sample size."))
+            # Fit cross-validated Lasso-Cox model. Save and restore the RNG state to
+            # avoid side effects on the user's session.
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) get(".Random.seed", envir = .GlobalEnv) else NULL
+            on.exit({
+                if (!is.null(old_seed)) {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                } else if (exists(".Random.seed", envir = .GlobalEnv)) {
+                    rm(".Random.seed", envir = .GlobalEnv)
                 }
-                
-            }, error = function(e) {
-                jmvcore::reject(.fmt(.('Error in cross-validation: {msg}'), msg = e$message))
-            })
+            }, add = TRUE)
+            set.seed(seed_value)
+            cv_args <- list(
+                x = data$X,
+                y = y,
+                family = "cox", cox.ties = "breslow",
+                alpha = 1,  # Lasso (L1) penalty
+                standardize = isTRUE(self$options$standardize),
+                parallel = FALSE  # Avoid parallel processing issues
+            )
+            cv_args$foldid <- foldid
+            # Outside any tryCatch: .checkpoint() signals its restart as an error.
+            private$.checkpoint()
+            # Only the glmnet call is guarded, so the reject() below reaches the user
+            # verbatim rather than re-wrapped as "Error in cross-validation: ...".
+            cv_fit <- tryCatch(
+                .quietly(do.call(glmnet::cv.glmnet, cv_args)),
+                error = function(e) jmvcore::reject(.fmt(.('Error in cross-validation: {msg}'),
+                    msg = conditionMessage(e))))
+
+            # Check if cross-validation succeeded
+            if (is.null(cv_fit$lambda.min) || is.na(cv_fit$lambda.min)) {
+                jmvcore::reject(.("Cross-validation failed. Check data quality and sample size."))
+            }
             
             # Respect the selected rule exactly. In particular, an empty model at
             # lambda.1se is a valid cross-validation result and must not be replaced
