@@ -39,6 +39,7 @@ severity attached. Nothing here is speculative.
 16. [Rule: never wrap `jmvcore::reject()` in a catch-all `tryCatch`](#16-rule-never-wrap-jmvcorereject-in-a-catch-all-trycatch)
 17. [Rule: image state holds drawing data, not models or datasets](#17-rule-image-state-holds-drawing-data-not-models-or-datasets)
 18. [Why round 3 still found things: how rules decay](#18-why-round-3-still-found-things-how-rules-decay)
+19. [Rule: a bare symbol must be importable from the submodule's own namespace](#19-rule-a-bare-symbol-must-be-importable-from-the-submodules-own-namespace)
 
 ---
 
@@ -611,6 +612,10 @@ packages wholesale. Narrow the exclusion to `base` itself and the guard covers
 - `Imports` *declares* the dependency; `Remotes` says *where to find it*. List
   every real runtime dependency in `Imports` even when it also appears in
   `Remotes`.
+- **A package in `Imports:` is still not in scope.** `Imports:` controls
+  installation; only `importFrom()`/`import()` puts a name within reach of the
+  code. For bare symbols such as `%>%` the difference is the whole bug — see
+  §19.
 
 ---
 
@@ -970,6 +975,106 @@ are about the rules, not the code:
 6. **Verify the reviewer's fix too.** The reviewer is usually right about the problem and
    occasionally wrong about the fix (`.()` in a file-level helper here; 2026-08's
    "unused" packages that the umbrella does use).
+
+---
+
+## 19. Rule: a bare symbol must be importable from the submodule's own namespace
+
+### Why
+
+During development the umbrella package has everything attached, and
+`devtools::load_all()` puts the entire search path within reach. A shipped
+submodule has neither. Inside jamovi its code resolves a name from only four
+places:
+
+1. its own `R/` definitions,
+2. packages attached in every R session (`base`, `stats`, `utils`, `graphics`,
+   `grDevices`, `methods`, `datasets`),
+3. names its `NAMESPACE` imports through `import(pkg)` or `importFrom(pkg, name)`,
+4. explicit `pkg::fn()` calls.
+
+The 2026-09-16 OncoPath audit found `%>%` used 114 times with `magrittr` absent
+from `Imports:` and no `importFrom` anywhere. `waterfall` could not run at all —
+`.processData()` is on every code path — and `swimmerplot` lost its person-time,
+milestone and event-marker tables. Every local check passed, because
+`load_all()` and any interactive `library(dplyr)` hide the failure, and
+`R CMD check` reports only a NOTE:
+
+```
+no visible global function definition for '%>%'
+```
+
+A NOTE does not fail a build. The module installed cleanly and broke in users'
+hands.
+
+### Proof, not reasoning
+
+```r
+f <- function(d) d %>% nrow()
+environment(f) <- new.env(parent = baseenv())   # nothing but base in scope
+f(data.frame(a = 1:3))
+#> Error: could not find function "%>%"
+```
+
+Run the same experiment with `:=` inside `dplyr::mutate()` and it **succeeds**:
+tidy-eval quotes `:=` and never looks it up. So `:=` costs an `R CMD check`
+NOTE, not a failed analysis — which is why the guard allows it by name and flags
+`%>%`.
+
+### The rule
+
+> Every symbol called as a function, and every infix operator, must be defined in
+> the module's own `R/` or imported by name in its `NAMESPACE`. `Imports:` alone
+> is not enough: a package listed there with no `importFrom()` puts nothing in
+> scope.
+
+### Where the import belongs
+
+Each submodule owns a hand-maintained `R/zzz_imports.R` carrying roxygen tags for
+what `R CMD check` cannot see inside R6 method bodies. That is the natural home:
+
+```r
+#' @importFrom magrittr %>%
+NULL
+```
+
+...together with the package in `Imports:`. For a generated submodule, also check
+`_updateModules_config.yaml`:
+
+- a `prune_imports` entry strips the package from the generated `DESCRIPTION`;
+- `r_symbol_files` copies **named symbols** out of an umbrella helper file, so a
+  roxygen-only re-export block (`#' @importFrom magrittr %>%` above a bare
+  `NULL`) has no symbol to select and never travels to the submodule.
+
+Both were true of OncoPath at once.
+
+### Why the dependency guard missed it
+
+`_updateModules_test_dependency_guard.R` matched `pkg::` calls and
+`library()`/`require()` against `Imports`/`Depends`. A bare infix operator is
+neither shape, so it was invisible. The guard now also walks every call head and
+infix operator and requires each to resolve from the module's own definitions,
+the always-attached packages, or a `NAMESPACE` import — expanding `import(pkg)`
+through `getNamespaceExports()`. Failures name `symbol (file:line, N uses)`.
+
+Function formals count as definitions; without that, every parameter called as
+`fun(...)` is a false positive.
+
+### Checking a submodule yourself
+
+An umbrella-side check answers an umbrella-side question. For anything about a
+submodule, test against that module's own tree:
+
+```r
+# does every called symbol resolve from this module's namespace?
+usage <- .dependency_guard_symbol_use("<module>/R")
+resolution <- .dependency_guard_importable("<module>/NAMESPACE", usage$defined)
+setdiff(names(usage$used),
+        c(resolution$importable, .dependency_guard_language_symbols()))
+```
+
+The authoritative check is `R CMD check` on the **built** submodule, reading the
+NOTEs rather than only the errors.
 
 ---
 

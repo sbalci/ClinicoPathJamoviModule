@@ -81,6 +81,12 @@ test_that("lassocox runs with breast cancer dataset (standard scenario)", {
 test_that("lassocox runs with small cohort dataset (minimal viable)", {
   skip_lassocox_deps()
   data <- load_small_cohort()
+  # The bundled fixture contains rounded zero follow-up times, which lassocox
+  # correctly rejects ("strictly positive follow-up times"; asserted in
+  # test-lassocox-integration.R). This test used to pass only because a
+  # catch-all tryCatch turned that rejection into a todo message. Lift just the
+  # zero times in memory so the rest of the minimal cohort is exercised.
+  data$time_months[!is.na(data$time_months) & data$time_months <= 0] <- 0.5
 
   expect_no_error({
     result <- lassocox(
@@ -90,7 +96,8 @@ test_that("lassocox runs with small cohort dataset (minimal viable)", {
       outcomeLevel = "Yes",
       explanatory = c("age", "gender", "biomarker_a", "biomarker_b",
                        "biomarker_c", "treatment_group", "severity_score"),
-      censorLevel = "No"
+      censorLevel = "No",
+      nfolds = 5
     )
   })
 })

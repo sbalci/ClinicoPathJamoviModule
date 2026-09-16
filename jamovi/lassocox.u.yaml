@@ -57,6 +57,9 @@ children:
           - type: TextBox
             name: nfolds
             format: number
+          - type: TextBox
+            name: random_seed
+            format: number
       - type: CheckBox
         name: standardize
   - type: CollapseBox
@@ -105,15 +108,3 @@ children:
         name: showVariableImportance
       - type: CheckBox
         name: showModelComparison
-  - type: CollapseBox
-    label: Seed
-    collapsed: true
-    stretchFactor: 1
-    children:
-      - type: Label
-        label: Random seed
-        children:
-          - type: TextBox
-            name: random_seed
-            format: number
-            width: large

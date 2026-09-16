@@ -133,6 +133,13 @@ test_that("label, text and explanation stay consistent with the method used", {
   expect_false(grepl("background-color:\\s*#", html_ok))
 })
 
+test_that(".fmtTimeLabel returns text with one decimal under import(jmvcore)", {
+  # jmvcore::format masks base::format in the umbrella and OncoPath namespaces
+  # and returned numeric 25, so interval labels differed from jsurvival's.
+  expect_identical(.fmtTimeLabel(25.04), "25.0")
+  expect_identical(.fmtTimeLabel(134), "134")
+})
+
 test_that("degenerate inputs do not error", {
   skip_if_not_installed("survival")
   expect_false(.medianFollowUp(numeric(0), integer(0))$reverse)

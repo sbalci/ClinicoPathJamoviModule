@@ -157,6 +157,7 @@ truncation (UpSetR `nsets = 5` silently dropped venn's 6th/7th set) — no schem
   - Citation integrity: no used-but-undefined / case-mismatch / empty-author-year refs in `00refs.yaml` (run `/update-refs --all --validate`)
   - Dependency declarations complete, incl. `requireNamespace`-guarded/recommended packages the guard test can't see
   - No declared-but-unused Imports
+  - No used-but-unimported bare symbols: every infix operator (`%>%`, `%||%`, …) and unqualified call must resolve from the module's own `NAMESPACE` — `Imports:` alone puts nothing in scope (guide §19)
   - UI label conventions (action-verb→noun, sentence-case controls); named-HTML-symbol-entities → Unicode
   - No orphaned non-analysis source files shipped in the build
 - **Time:** ~10 minutes per function

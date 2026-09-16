@@ -219,6 +219,7 @@ testthat::test_that("selected helper distribution writes only configured symbols
     "needed <- function(x) x + 1L",
     "also_needed <- function(x) needed(x)",
     "`%or%` <- function(x, y) if (is.null(x)) y else x",
+    "typed_na <- function() list(NA_real_, NA_character_)",
     "must_not_ship <- function() stop('unused')"
   ), file.path(root, "R", "helpers.R"))
 
@@ -227,9 +228,14 @@ testthat::test_that("selected helper distribution writes only configured symbols
     list(list(
       source = "helpers.R",
       destination = "helpers.R",
-      symbols = c("needed", "also_needed", "%or%")
+      symbols = c("needed", "also_needed", "%or%", "typed_na")
     ))
   )
+
+  # deparse(control = "keepInteger") shipped NA_real_ as a logical NA.
+  shipped <- new.env()
+  sys.source(file.path(module, "R", "helpers.R"), envir = shipped)
+  testthat::expect_identical(shipped$typed_na(), list(NA_real_, NA_character_))
 
   distributed <- paste(
     readLines(file.path(module, "R", "helpers.R"), warn = FALSE),

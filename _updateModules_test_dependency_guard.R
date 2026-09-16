@@ -277,19 +277,22 @@
   "base"
 }
 
-testthat::test_that("runtime dependencies are declared at the correct strength", {
+.dependency_guard_root <- function() {
   candidates <- c(
     tryCatch(testthat::test_path("..", ".."), error = function(e) NA_character_),
     file.path(getwd(), "..", "..")
   )
-  root <- NA_character_
   for (candidate in candidates) {
     if (!is.na(candidate) && dir.exists(file.path(candidate, "R")) &&
         file.exists(file.path(candidate, "DESCRIPTION"))) {
-      root <- normalizePath(candidate)
-      break
+      return(normalizePath(candidate))
     }
   }
+  NA_character_
+}
+
+testthat::test_that("runtime dependencies are declared at the correct strength", {
+  root <- .dependency_guard_root()
   testthat::skip_if(
     is.na(root),
     "package source tree not available in the installed test context"
@@ -330,6 +333,204 @@ testthat::test_that("runtime dependencies are declared at the correct strength",
     info = paste0(
       "Guarded optional package use must be declared in Suggests or ",
       "Imports/Depends: ", paste(sort(optional_missing), collapse = ", ")
+    )
+  )
+})
+
+
+# ---------------------------------------------------------------------------
+# Bare-symbol resolution.
+#
+# Added after the 2026-09-16 OncoPath audit [CRITICAL]: `%>%` was used 114 times
+# in OncoPath with no `importFrom` anywhere, so `waterfall` could not run inside
+# jamovi at all and `swimmerplot`'s summary tables failed. The scan above only
+# recognises `pkg::` calls and library()/require(); a bare infix operator is
+# neither shape, so it was invisible to it. devtools::load_all(), and any
+# interactive session that has attached dplyr, hide the failure -- R CMD check
+# reports it only as a NOTE ("no visible global function definition"), so the
+# package still installs and the break surfaces in a user's session.
+#
+# Verified empirically before this was written: a function whose environment
+# cannot see `%>%` dies with `could not find function "%>%"`, while the same
+# setup with `:=` inside dplyr::mutate() returns normally -- tidy-eval quotes
+# `:=` and never looks it up. `:=` is therefore allowed below: it costs an
+# R CMD check NOTE, not a failed analysis.
+.dependency_guard_symbol_use <- function(r_dir) {
+  used <- list()
+  defined <- character(0)
+
+  walk <- function(expr, file, line) {
+    if (!is.call(expr)) return(invisible(NULL))
+    srcref <- attr(expr, "srcref")
+    if (inherits(srcref, "srcref")) line <- as.integer(srcref)[1]
+
+    head <- expr[[1]]
+
+    if ((identical(head, as.name("<-")) || identical(head, as.name("=")) ||
+         identical(head, as.name("<<-"))) && length(expr) >= 2) {
+      target <- expr[[2]]
+      if (is.symbol(target)) defined <<- c(defined, as.character(target))
+      if (is.character(target) && length(target) == 1) defined <<- c(defined, target)
+    }
+
+    # formals are locals; a parameter called as fun() is not a dependency
+    if (identical(head, as.name("function")) && length(expr) >= 2 &&
+        !is.null(names(expr[[2]]))) {
+      defined <<- c(defined, names(expr[[2]]))
+    }
+
+    # pkg::fn(), pkg:::fn(), obj$method() and obj@slot() need no import
+    if (identical(head, as.name("::")) || identical(head, as.name(":::")) ||
+        identical(head, as.name("$")) || identical(head, as.name("@"))) {
+      for (i in seq_along(expr)[-1]) {
+        if (is.call(expr[[i]])) walk(expr[[i]], file, line)
+      }
+      return(invisible(NULL))
+    }
+
+    if (is.symbol(head)) {
+      name <- as.character(head)
+      previous <- used[[name]]
+      if (is.null(previous)) {
+        used[[name]] <<- list(file = basename(file), line = NA_integer_, uses = 1L)
+      } else {
+        previous$uses <- previous$uses + 1L
+        used[[name]] <<- previous
+      }
+    }
+
+    for (i in seq_along(expr)) {
+      if (i == 1 && is.symbol(head)) next
+      walk(expr[[i]], file, line)
+    }
+    invisible(NULL)
+  }
+
+  for (file in list.files(r_dir, pattern = "\\.[Rr]$", full.names = TRUE)) {
+    parsed <- tryCatch(parse(file, keep.source = TRUE), error = function(e) NULL)
+    if (is.null(parsed)) next
+    for (expr in parsed) walk(expr, file, NA_integer_)
+
+    # Fill in the exact line each newly seen symbol first appears on. Walking
+    # srcrefs cannot do this: an infix operator nested inside a 2,000-line R6
+    # class would report the line the class starts on.
+    parse_data <- tryCatch(utils::getParseData(parsed), error = function(e) NULL)
+    if (is.null(parse_data) || !nrow(parse_data)) next
+    tokens <- parse_data[parse_data$token %in%
+      c("SPECIAL", "SYMBOL_FUNCTION_CALL", "SYMBOL", "LEFT_ASSIGN"), ]
+    for (name in names(used)) {
+      entry <- used[[name]]
+      if (!identical(entry$file, basename(file)) || !is.na(entry$line)) next
+      lines <- tokens$line1[tokens$text == name]
+      if (length(lines)) {
+        entry$line <- min(lines)
+        # plain <- : this runs in the function body, where `used` is local.
+        # `<<-` here would skip past it and look in the global environment.
+        used[[name]] <- entry
+      }
+    }
+  }
+
+  list(used = used, defined = unique(defined))
+}
+
+# Everything callable without a pkg:: prefix: the package's own definitions, the
+# packages attached in every R session, and every name the NAMESPACE imports --
+# expanding import(pkg) into that package's complete export list.
+.dependency_guard_importable <- function(namespace_path, defined) {
+  always_attached <- c("base", "stats", "utils", "graphics", "grDevices",
+                       "methods", "datasets")
+  exports_of <- function(pkg) {
+    tryCatch(getNamespaceExports(pkg), error = function(e) character(0))
+  }
+
+  importable <- unlist(lapply(always_attached, exports_of), use.names = FALSE)
+  unexpandable <- character(0)
+
+  directives <- tryCatch(
+    parse(namespace_path, keep.source = FALSE),
+    error = function(e) list()
+  )
+  for (directive in directives) {
+    if (!is.call(directive)) next
+    verb <- as.character(directive[[1]])
+    args <- as.list(directive[-1])
+    if (verb == "import") {
+      for (arg in args) {
+        pkg <- if (is.symbol(arg)) as.character(arg) else
+               if (is.character(arg)) arg else NULL
+        if (is.null(pkg) || identical(pkg, "except")) next
+        exported <- exports_of(pkg)
+        if (length(exported) == 0) unexpandable <- c(unexpandable, pkg)
+        importable <- c(importable, exported)
+      }
+    } else if (verb == "importFrom" && length(args) >= 2) {
+      for (arg in args[-1]) {
+        name <- if (is.symbol(arg)) as.character(arg) else
+                if (is.character(arg)) arg else NULL
+        if (!is.null(name)) importable <- c(importable, name)
+      }
+    }
+  }
+
+  list(importable = unique(c(importable, defined)),
+       unexpandable = unique(unexpandable))
+}
+
+# Language constructs parse as calls but never resolve through the namespace.
+# `:=` is here because tidy-eval quotes it -- see the note above.
+.dependency_guard_language_symbols <- function() {
+  c("if", "for", "while", "repeat", "function", "return", "break", "next",
+    "{", "(", "<-", "<<-", "=", "~", "?", "@", "$", "[", "[[", "::", ":::",
+    ":=",
+    # Supplied by the data mask inside dplyr/ggplot2 verbs, so -- like `:=` --
+    # they are never looked up in the package namespace.
+    "n", "desc", "across", "cur_group", "cur_group_id", "cur_column",
+    "after_stat", "after_scale", "stage", "vars")
+  # Deliberately NOT here: formula specials such as survival's strata(),
+  # cluster(), frailty(), tt(), pspline() and mgcv's s()/te()/ti(). Those ARE
+  # resolved through the namespace when the model function evaluates the
+  # formula, so a missing importFrom for them is a real break, not noise.
+}
+
+testthat::test_that("bare symbols used as functions resolve from the package namespace", {
+  root <- .dependency_guard_root()
+  testthat::skip_if(
+    is.na(root),
+    "package source tree not available in the installed test context"
+  )
+
+  usage <- .dependency_guard_symbol_use(file.path(root, "R"))
+  resolution <- .dependency_guard_importable(
+    file.path(root, "NAMESPACE"),
+    usage$defined
+  )
+
+  testthat::expect_equal(
+    resolution$unexpandable,
+    character(0),
+    info = paste0(
+      "import(pkg) could not be expanded because the package is not installed: ",
+      paste(resolution$unexpandable, collapse = ", ")
+    )
+  )
+
+  unresolved <- setdiff(
+    names(usage$used),
+    c(resolution$importable, .dependency_guard_language_symbols())
+  )
+  locations <- vapply(unresolved, function(symbol) {
+    entry <- usage$used[[symbol]]
+    paste0(symbol, " (", entry$file, ":", entry$line, ", ", entry$uses, " uses)")
+  }, character(1))
+
+  testthat::expect_equal(
+    sort(unresolved),
+    character(0),
+    info = paste0(
+      "Called but not resolvable from the installed namespace. Add an ",
+      "importFrom to R/zzz_imports.R and the package to Imports: ",
+      paste(sort(locations), collapse = ", ")
     )
   )
 })

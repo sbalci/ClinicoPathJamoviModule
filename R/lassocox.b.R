@@ -247,6 +247,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results[[name]]$setState(NULL)
             }
             if (!is.null(self$results$riskScore) && !is.null(self$data)) {
+                # Row numbers must travel with the values: jmvcore sends them only for a
+                # data.frame, and without them jamovi writes value i to row i, so an
+                # active row filter attaches every score to the wrong patient.
+                self$results$riskScore$setRowNums(rownames(self$data))
                 self$results$riskScore$setValues(rep(NA_real_, nrow(self$data)))
             }
         },
@@ -305,15 +309,16 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 # Resolve event level
+                # Never inferred: sort order does not say which level is the event
                 outcome_level_opt <- self$options$outcomeLevel
                 if (is.null(outcome_level_opt) || !nzchar(as.character(outcome_level_opt))) {
-                    event_level_used <- observed_levels[2]
-                } else {
-                    event_level_used <- as.character(outcome_level_opt)
-                    if (!(event_level_used %in% observed_levels)) {
-                        jmvcore::reject(.fmt(.("Selected event level ('{level}') is not present in observed outcome data."),
-                            level = event_level_used))
-                    }
+                    jmvcore::reject(.fmt(.("Choose the Event Level: the outcome value that means the event happened. Values found: {levels}. The analysis does not pick one from the level order, because the order does not say which value is the event."),
+                        levels = paste(observed_levels, collapse = ", ")))
+                }
+                event_level_used <- as.character(outcome_level_opt)
+                if (!(event_level_used %in% observed_levels)) {
+                    jmvcore::reject(.fmt(.("Selected event level ('{level}') is not present in observed outcome data."),
+                        level = event_level_used))
                 }
 
                 # Resolve censor level
@@ -360,20 +365,19 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 } else if (all(observed_levels %in% c(0, 1))) {
                     event_level_num <- 1
                 } else {
-                    event_level_num <- max(observed_levels)
+                    jmvcore::reject(.fmt(.("Numeric outcome is not coded 0/1. Values found: {values}. The analysis does not guess which value is the event, because a coding such as 1/2 means 2 = event in some datasets and 1 = event in others. Either recode it as 0 = censored / 1 = event, or choose the value that represents the event in Event Level (in jamovi, first set the column's measure type to Nominal in Data > Setup so its values are listed)."),
+                        values = paste(observed_levels, collapse = ", ")))
                 }
 
-                # Resolve censor level
+                # Resolve censor level: if empty, the other of the two observed values
                 censor_level_opt <- self$options$censorLevel
                 if (!is.null(censor_level_opt) && nzchar(as.character(censor_level_opt))) {
                     censor_level_num <- suppressWarnings(as.numeric(censor_level_opt))
                     if (is.na(censor_level_num) || !(censor_level_num %in% observed_levels)) {
                         jmvcore::reject(.("For numeric outcomes, Censored Level must be one of the observed outcome values."))
                     }
-                } else if (all(observed_levels %in% c(0, 1))) {
-                    censor_level_num <- 0
                 } else {
-                    censor_level_num <- min(observed_levels)
+                    censor_level_num <- setdiff(observed_levels, event_level_num)[1]
                 }
 
                 if (event_level_num == censor_level_num) {
@@ -989,6 +993,8 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 hr_val <- exp(coef_val)
                 importance <- results$var_importance[var_name]
 
+                # TODO (UX): a factor indicator shows its design-column name ("Tumour gradeGrade 3");
+                # label it from the encoding (variable, level, reference) as "Tumour grade: Grade 3 vs Grade 1".
                 table$addRow(rowKey = i, values = list(
                     variable = var_name,
                     coefficient = coef_val,
@@ -1018,12 +1024,25 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 .("This C-index is apparent (training) performance from the same patients used for preprocessing, penalty selection, and model fitting. Its uncertainty does not include the modeling process. Use bootstrap optimism correction or nested cross-validation that repeats all preprocessing and tuning, followed by external validation before clinical use."), init = FALSE)
         },
 
+        # Draws a plain-text panel in place of a figure that cannot be produced.
+        .drawNotice = function(paragraphs, col = "red") {
+            grid::grid.newpage()
+            grid::pushViewport(grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5))
+            grid::grid.text(
+                paste(vapply(paragraphs, function(line) paste(strwrap(line, width = 62),
+                    collapse = "\n"), character(1)), collapse = "\n\n"),
+                x = 0.05, y = 0.95, just = c("left", "top"),
+                gp = grid::gpar(fontsize = 11, fontface = "plain", lineheight = 1.3, col = col))
+            grid::popViewport()
+            TRUE
+        },
+
         # Enhanced plotting functions
         .cvPlot = function(image, ggtheme, theme, ...) {
-            if (!self$options$cv_plot) return()
+            if (!self$options$cv_plot) return(FALSE)
 
             state <- image$state
-            if (is.null(state)) return()
+            if (is.null(state)) return(FALSE)
 
             # Build data frame from plain numeric state
             cv_data <- data.frame(
@@ -1094,10 +1113,16 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .coefPlot = function(image, ggtheme, theme, ...) {
-            if (!self$options$coef_plot) return()
+            if (!self$options$coef_plot) return(FALSE)
 
             state <- image$state
-            if (is.null(state) || length(state$var_names) == 0) return()
+            if (is.null(state)) return(FALSE)
+            if (length(state$var_names) == 0) {
+                return(private$.drawNotice(c(
+                    .("The selected rule retained no predictor columns, so there are no coefficients to plot."),
+                    .("The empty model is a valid result. Choose another lambda rule only as a prespecified modeling decision and report that choice transparently.")),
+                    col = "orange"))
+            }
 
             # Build data frame from plain state
             coef_data <- data.frame(
@@ -1143,64 +1168,23 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .survivalPlot = function(image, ggtheme, theme, ...) {
-            if (!self$options$survival_plot) return()
+            if (!self$options$survival_plot) return(FALSE)
 
             state <- image$state
-            if (is.null(state)) return()
+            if (is.null(state)) return(FALSE)
 
-            # Check if risk scores are available and valid
             if (is.null(state$risk_scores) || length(state$risk_scores) == 0) {
-                text_warning <- .("No variable-based risk scores are available because the selected rule retained no predictors.\n\nThe empty model is a valid result. Choose another lambda rule only as a prespecified modeling decision and report that choice transparently.")
-                
-                # Create a new page with proper formatting
-                grid::grid.newpage()
-                # Create a viewport with margins for better readability
-                vp <- grid::viewport(
-                  width = 0.9,    # Wider viewport for left-aligned text
-                  height = 0.9,   # Keep reasonable margins
-                  x = 0.5,        # Center the viewport
-                  y = 0.5         # Center the viewport
-                )
-                grid::pushViewport(vp)
-                # Add the text with left alignment
-                grid::grid.text(
-                  paste(vapply(strsplit(text_warning, "\n", fixed = TRUE)[[1]],
-                    function(line) paste(strwrap(line, width = 62), collapse = "\n"),
-                    character(1)), collapse = "\n"),
-                  x = 0.05,           # Move text to the left (5% margin)
-                  y = 0.95,           # Start from top (5% margin)
-                  just = c("left", "top"),  # Left align and top justify
-                  gp = grid::gpar(
-                    fontsize = 11,        # Maintain readable size
-                    fontface = "plain",   # Regular font
-                    lineheight = 1.3,     # Slightly increased line spacing for readability
-                    col = "red"           # Red color for warning
-                  )
-                )
-                # Reset viewport
-                grid::popViewport()
-                return(TRUE)
+                return(private$.drawNotice(c(
+                    .("No variable-based risk scores are available because the selected rule retained no predictors."),
+                    .("The empty model is a valid result. Choose another lambda rule only as a prespecified modeling decision and report that choice transparently."))))
             }
-            
-            # Check if all risk scores are the same (no discrimination)
+
             if (length(unique(state$risk_scores)) <= 1) {
-                text_warning <- .("Risk scores are uniform, so no risk-group curve can be formed. This is expected for an empty model or when all fitted linear predictors are identical.")
-                
-                grid::grid.newpage()
-                vp <- grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5)
-                grid::pushViewport(vp)
-                grid::grid.text(
-                  paste(vapply(strsplit(text_warning, "\n", fixed = TRUE)[[1]],
-                    function(line) paste(strwrap(line, width = 62), collapse = "\n"),
-                    character(1)), collapse = "\n"),
-                  x = 0.05, y = 0.95,
-                  just = c("left", "top"),
-                  gp = grid::gpar(fontsize = 11, fontface = "plain", lineheight = 1.3, col = "orange")
-                )
-                grid::popViewport()
-                return(TRUE)
+                return(private$.drawNotice(
+                    .("Risk scores are uniform, so no risk-group curve can be formed. This is expected for an empty model or when all fitted linear predictors are identical."),
+                    col = "orange"))
             }
-            
+
             # Development-sample median split for descriptive visualization only
             tryCatch({
                 risk_groups <- private$.makeBinaryRiskGroups(state$risk_scores)
@@ -1208,25 +1192,6 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     jmvcore::reject(.("Unable to create two risk groups from risk scores."))
                 }
 
-                # Check if we have valid data
-                if (is.null(state$time) || is.null(state$status)) {
-                    text_warning <- .("Survival data not available.\n\nPlease check that:\n\u2022 Time and outcome variables are properly selected\n\u2022 Data contains valid survival information")
-                    
-                    grid::grid.newpage()
-                    vp <- grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5)
-                    grid::pushViewport(vp)
-                    grid::grid.text(
-                      paste(vapply(strsplit(text_warning, "\n", fixed = TRUE)[[1]],
-                    function(line) paste(strwrap(line, width = 62), collapse = "\n"),
-                    character(1)), collapse = "\n"),
-                      x = 0.05, y = 0.95,
-                      just = c("left", "top"),
-                      gp = grid::gpar(fontsize = 11, fontface = "plain", lineheight = 1.3, col = "red")
-                    )
-                    grid::popViewport()
-                    return(TRUE)
-                }
-                
                 # Create complete data frame for survminer
                 plot_data <- data.frame(
                     time = state$time,
@@ -1237,23 +1202,6 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Remove any rows with missing data
                 plot_data <- plot_data[complete.cases(plot_data), ]
                 
-                if (nrow(plot_data) == 0) {
-                    text_warning <- .("No complete survival data available.\n\nThis can occur when:\n\u2022 There are missing values in time or outcome variables\n\u2022 Risk score calculation failed\n\u2022 Data filtering removed all observations")
-                    
-                    grid::grid.newpage()
-                    vp <- grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5)
-                    grid::pushViewport(vp)
-                    grid::grid.text(
-                      paste(vapply(strsplit(text_warning, "\n", fixed = TRUE)[[1]],
-                    function(line) paste(strwrap(line, width = 62), collapse = "\n"),
-                    character(1)), collapse = "\n"),
-                      x = 0.05, y = 0.95,
-                      just = c("left", "top"),
-                      gp = grid::gpar(fontsize = 11, fontface = "plain", lineheight = 1.3, col = "red")
-                    )
-                    grid::popViewport()
-                    return(TRUE)
-                }
                 
                 # Fit survival curves using column names in formula
                 fit <- survival::survfit(survival::Surv(time, status) ~ risk_groups, data = plot_data)
@@ -1299,21 +1247,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
             }, error = function(e) {
-                # Handle any errors gracefully using grid graphics
-                text_warning <- .fmt(.("Error creating survival plot:\n{msg}\n\nPlease check your data and model parameters."), msg = e$message)
-                
-                grid::grid.newpage()
-                vp <- grid::viewport(width = 0.9, height = 0.9, x = 0.5, y = 0.5)
-                grid::pushViewport(vp)
-                grid::grid.text(
-                  paste(vapply(strsplit(text_warning, "\n", fixed = TRUE)[[1]],
-                    function(line) paste(strwrap(line, width = 62), collapse = "\n"),
-                    character(1)), collapse = "\n"),
-                  x = 0.05, y = 0.95,
-                  just = c("left", "top"),
-                  gp = grid::gpar(fontsize = 11, fontface = "plain", lineheight = 1.3, col = "red")
-                )
-                grid::popViewport()
+                # A renderer must not propagate an error: draw the reason instead.
+                private$.drawNotice(c(
+                    .fmt(.("The survival plot could not be drawn: {msg}"), msg = conditionMessage(e)),
+                    .("Check the selected variables and the model options.")))
             })
             
             TRUE
@@ -1369,7 +1306,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
                 self$results$coef_plot$setState(coef_plot_data)
             } else if (self$options$coef_plot) {
-                self$results$coef_plot$setState(NULL)
+                # Not NULL: NULL cannot be told apart from "the analysis has not run",
+                # and the renderer must explain the empty model rather than draw nothing.
+                self$results$coef_plot$setState(list(var_names = character(0)))
             }
 
             if (self$options$survival_plot) {
@@ -1397,9 +1336,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Add risk scores to dataset if requested
             if (!is.null(self$results$riskScore)) {
-                # Create full-length vector with NAs for missing cases
-                full_risk_scores <- rep(NA, nrow(self$data))
+                # Full-length vector, missing for excluded rows, addressed by row number
+                # (see .clearAnalysisOutputs): position alone is wrong under a filter.
+                full_risk_scores <- rep(NA_real_, nrow(self$data))
                 full_risk_scores[results$data$complete_cases] <- results$risk_scores
+                self$results$riskScore$setRowNums(rownames(self$data))
                 self$results$riskScore$setValues(full_risk_scores)
             }
         },
@@ -1649,9 +1590,10 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # Find top correlated pairs
                     top_pairs <- character(0)
                     if (max_cor > 0.5) {
-                        cor_vals <- sort(abs(cor_matrix[upper.tri(cor_matrix)]), decreasing = TRUE)
-                        idx <- which(abs(cor_matrix) >= cor_vals[min(3, length(cor_vals))] & upper.tri(cor_matrix), arr.ind = TRUE)
-                        for (k in seq_len(min(3, nrow(idx)))) {
+                        idx <- which(upper.tri(cor_matrix), arr.ind = TRUE)
+                        pair_abs <- abs(cor_matrix[idx])
+                        ranked <- order(pair_abs, decreasing = TRUE)
+                        for (k in utils::head(ranked[is.finite(pair_abs[ranked])], 3L)) {
                             top_pairs <- c(top_pairs,
                                 sprintf("%s & %s (r=%.2f)",
                                         col_names[idx[k, 1]],

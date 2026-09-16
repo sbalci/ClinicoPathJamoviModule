@@ -33,10 +33,16 @@ run_lassocox <- function(df, ...) {
 
 lassocox_source_file <- function(...) {
     relative <- file.path(...)
+    # Installed packages put inst/ files at top level, and pkgload's
+    # system.file() shim (devtools::load_all) errors on a path starting with
+    # "inst" instead of returning "" -- so strip it and never let it abort.
+    installed <- tryCatch(
+        system.file(sub("^inst/", "", relative), package = "ClinicoPath"),
+        error = function(e) "")
     candidates <- c(
         relative,
         file.path("..", "..", relative),
-        system.file(..., package = "ClinicoPath")
+        installed
     )
     hit <- candidates[nzchar(candidates) & file.exists(candidates)]
     if (length(hit) == 0L)

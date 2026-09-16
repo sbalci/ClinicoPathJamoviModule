@@ -99,9 +99,14 @@ test_that("umbrella updater keeps the production OncoPath helper boundary minima
     unlist(symbol_file$symbols, use.names = FALSE),
     c(".quietly", ".fmt", "%||%")
   )
+  # swimmerplot is the only production caller, and it needs .medianFollowUp alone.
+  survival_symbols <- oncopath$r_symbol_files[[2]]
+  expect_equal(survival_symbols$source, "survival_utils.R")
+  expect_setequal(unlist(survival_symbols$symbols, use.names = FALSE), ".medianFollowUp")
+  # zzz_imports.R is hand-maintained in OncoPath and must not be pruned.
   expect_setequal(
     unlist(oncopath$prune_r_files, use.names = FALSE),
-    c("recist_engine.R", "zzz_imports.R")
+    "recist_engine.R"
   )
   expect_setequal(
     unlist(oncopath$prune_imports, use.names = FALSE),

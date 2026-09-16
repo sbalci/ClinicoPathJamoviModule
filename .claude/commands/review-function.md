@@ -161,6 +161,8 @@ print(df[, c("line_number", "linter", "message")])
 
 **Verify after fixing:** re-run the scoped lint (target: 0 real findings), confirm the file still parses (`parse("R/$ARGUMENTS.b.R")`), then drive the analysis on bundled data via `devtools::load_all()`. For `seq_linter` fixes specifically, exercise the empty/one-column edge case (no variables selected, zero-row filtered data) the fix targets, and confirm identical output on non-empty input.
 
+**`devtools::load_all()` is not proof for a submodule.** It puts the whole search path within reach, so a missing `importFrom` still runs — which is exactly how `%>%` shipped unimported in OncoPath and made `waterfall` unrunnable in jamovi. For anything that ships to a submodule, check the symbol against that module's own `NAMESPACE`, or run `R CMD check` on the built module and read the NOTEs, not just the errors. See `vignettes/jamovi_library_review_guide.md` §19.
+
 ### jamovi Library Review Gate
 
 These are the findings the jamovi library reviewer raised against this project's

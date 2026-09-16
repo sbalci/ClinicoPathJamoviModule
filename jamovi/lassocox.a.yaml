@@ -1,11 +1,11 @@
 ---
 name: lassocox
 title: Lasso-Cox Regression
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: Penalized Cox Regression
 menuTitle: LASSO Cox
 menuSubtitle: Sparse Cox model development with cross-validated L1 penalization.
-version: '1.0.81'
+version: '1.0.82'
 jas: '1.2'
 
 description:
@@ -13,12 +13,18 @@ description:
         Fits a cross-validated LASSO-penalized Cox model for exploratory model
         development. Apparent performance requires internal and external validation
         before clinical use.
-    # R:
-    #     dontrun: true
-    #     usage: |
-    #         lassocox(data = data, elapsedtime = "Time", outcome = "Status",
-    #             outcomeLevel = "1", censorLevel = "0",
-    #             explanatory = vars(age, stage, grade))
+    R:
+        dontrun: true
+        usage: |
+            lassocox(
+                data = lassocox_breast_cancer,
+                elapsedtime = "survival_months",
+                outcome = "death",
+                outcomeLevel = "Dead",
+                censorLevel = "Alive",
+                explanatory = c("age", "tumor_size_cm", "grade", "stage",
+                                "lymph_nodes_positive", "ki67_percent", "er_status"),
+                lambda = "lambda.min")
 
 options:
     - name: data
@@ -45,27 +51,36 @@ options:
       permitted: [ factor, numeric ]
       default: NULL
       description:
+        ui: >
+          Event status with exactly two observed values. A numeric column coded 0/1 is read as 0 = censored, 1 = event. Any other coding (for example 1/2, or Alive/Dead) is never guessed: choose the event value in Event level.
         R: >
-          Binary event indicator variable (event vs censored). Can be factor or
-          numeric with exactly two observed values.
+          Binary event indicator (event vs censored) with exactly two observed values.
+          A numeric 0/1 column is read as 0 = censored and 1 = event; for any other
+          coding, such as numeric 1/2 or a factor, `outcomeLevel` must name the event value.
 
     - name: outcomeLevel
       title: Event level
       type: Level
       variable: (outcome)
       description:
+        ui: >
+          The outcome value that means the event happened (for example Dead, or 2 in a column coded 1/2). Required unless the outcome is numeric 0/1. Values are matched exactly; the event is never taken from level order or numeric size.
         R: >
-          Level of `outcome` considered as the event. For binary factor outcomes,
-          if left empty the second observed level is used; for numeric binary
-          outcomes, the larger observed value is used (or 1 for 0/1 coding).
+          The level or numeric value of `outcome` that represents the event, matched
+          exactly. Required unless `outcome` is numeric 0/1 (read as 1 = event). A factor
+          or any other numeric coding without it stops with a request to choose it,
+          because level order and numeric size do not say which value is the event.
 
     - name: censorLevel
       title: Censored level
       type: Level
       variable: (outcome)
       description:
+        ui: >
+          The outcome value for patients without the event. If left empty, the other of the two observed values is used.
         R: >
-          Level of `outcome` considered as censored (no event). Together with
+          Level of `outcome` considered as censored (no event). If `NULL`, the other
+          of the two observed values is used. Together with
           `outcomeLevel`, this must identify the exactly two observed nonmissing
           outcome values. Rows with an actually missing outcome are excluded;
           additional observed event types cause the analysis to stop and must be

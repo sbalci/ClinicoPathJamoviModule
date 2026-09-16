@@ -5,6 +5,53 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-16 — lassocox: an output column addressed by position instead of by row number
+
+### Saved risk scores landed on the wrong patients whenever a jamovi filter was active
+
+- **Failure mode:** `.savePlotData()` wrote the risk-score Output with `setValues(<vector>)` and no
+  `setRowNums()`. jmvcore fills row numbers only for a data.frame, so none were sent, and jamovi's
+  server (`analyses/analysis.py`) falls back to `row_nums = range(n_rows)` — value *i* goes to row
+  *i*. jamovi hands an analysis only the rows that pass its filters, keeping their original row
+  names, so every score shifted. With an `er_status` filter, 68 of 68 scores sat on the wrong row.
+- **Detection signal:** `/check-function-full lassocox`, reading the Output write. The release pass
+  an hour earlier had cleared the analysis, because testthat never filters rows: row names are
+  always 1..n there, which is the one case where position and row number agree.
+- **Prevention rule:** `setRowNums(rownames(self$data))` immediately before every Output
+  `setValues()`. Guarded by `tests/testthat/test-lassocox-output-rows.R`, which passes
+  `data[-(1:20), ]` and asserts the element's row numbers. Still unaudited elsewhere: cotest,
+  dendrogram, lassologistic, retracted, sequentialtests, survivalfeaturerank.
+
+### Four copies of a fallback panel, each with newlines inside a translatable string
+
+- **Failure mode:** `.survivalPlot()` repeated the same 18-line grid-text block four times, two of
+  them in branches that could not run, and each `.()` string carried `\n\n` and bullet characters
+  that a translator cannot see are load-bearing.
+- **Detection signal:** the i18n checklist item "no `\n` inside a `.()` string"; the release gate's
+  padding check does not look for newlines.
+- **Prevention rule:** one `private$.drawNotice(paragraphs)` helper joins the paragraphs, so each
+  `.()` wraps a single complete sentence. A test asserts no `.()` in the file contains `\n`.
+
+---
+
+## 2026-09-15 — lassocox release check: a policy fixed in the shared coder, not in a sibling copy
+
+### lassocox inferred the event from level order and numeric size
+
+- **Failure mode:** With no Event level, lassocox took `sort(levels)[2]` for a factor
+  ("Died"/"Survived" made *Survived* the event) and `max()` for numeric codings such as 1/2.
+  With no Censored level it took `min()`, so a 1/2 outcome with event 1 stopped with "Event level
+  and censored level must be different". The same day's multisurvival fix had already made
+  `.defineEventIndicator()` refuse to guess, but lassocox keeps its own two-level coder.
+- **Detection signal:** `/check-function lassocox --profile release`, while explaining why
+  `censorLevel = NULL` changed no output; the `.a.yaml` description documented the guess as intended.
+- **Prevention rule:** When an outcome-coding policy changes, grep every coder, not only the shared
+  helper (`observed_levels[2]`, `max(observed`, `levels(x)[2]`). Only numeric 0/1 has a default; the
+  censored level may default to the other observed value. Guarded by
+  `tests/testthat/test-lassocox-event-coding.R`.
+
+---
+
 ## 2026-09-15 — jamovi library audit round 3 (jsurvival): why written rules did not hold
 
 ### Guides taught `requiresData: true` as boilerplate

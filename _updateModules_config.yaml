@@ -45,15 +45,15 @@
 # ==============================================
 
 
-new_version: "1.0.81.04"
-new_date: "2026-09-15"
+new_version: "1.0.82"
+new_date: "2026-09-16"
 quick: false
 TEST: false
-jjstatsplot: false
+jjstatsplot: true
 jsurvival: true
-ClinicoPathDescriptives: false
-OncoPath: false
-meddecide: false
+ClinicoPathDescriptives: true
+OncoPath: true
+meddecide: true
 ClinicoPath: false
 
 
@@ -206,6 +206,13 @@ modules:
       - "stagemigration_problematic.rda"
       - "stagemigration_small_sample.rda"
       - "stagemigration_summary_stats.rda"
+      # lassocox_*.rda: used by the lassocox R example (lassocox.a.yaml), tests and vignettes.
+      - "lassocox_breast_cancer.rda"
+      - "lassocox_cardiovascular.rda"
+      - "lassocox_genomic.rda"
+      - "lassocox_lung_cancer.rda"
+      - "lassocox_multicollinear.rda"
+      - "lassocox_small_cohort.rda"
   ClinicoPathDescriptives:
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
     i18n_files:
@@ -313,7 +320,11 @@ modules:
     prune_imports:
       - "cluster"
       - "tidyr"
-      - "magrittr"
+      # magrittr is NOT pruned: waterfall.b.R and swimmerplot.b.R use %>% 114
+      # times. Pruning it stripped the pipe from the generated DESCRIPTION, and
+      # with no importFrom anywhere `waterfall` could not run in jamovi at all
+      # (2026-09-16 OncoPath audit, CRITICAL). A bare infix operator is not put
+      # in scope by Imports: alone -- R/zzz_imports.R carries the importFrom tag.
       # ihc_utilities.R intentionally NOT shipped to production OncoPath: its
       # consumers (ihcimmune/ihcbasic/ihcadvanced/ihcdiagnostic) are dev-routed to
       # menuGroup OncoPathD/T, and the one production analysis here

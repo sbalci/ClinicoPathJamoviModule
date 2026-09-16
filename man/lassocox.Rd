@@ -39,19 +39,23 @@ event or last observation. Zero or negative times must be resolved from the
 time origin and measurement resolution; they are not automatically
 adjusted.}
 
-\item{outcome}{Binary event indicator variable (event vs censored). Can be
-factor or numeric with exactly two observed values.}
+\item{outcome}{Binary event indicator (event vs censored) with exactly two
+observed values. A numeric 0/1 column is read as 0 = censored and 1 =
+event; for any other coding, such as numeric 1/2 or a factor,
+\code{outcomeLevel} must name the event value.}
 
-\item{outcomeLevel}{Level of \code{outcome} considered as the event. For
-binary factor outcomes, if left empty the second observed level is used;
-for numeric binary outcomes, the larger observed value is used (or 1 for
-0/1 coding).}
+\item{outcomeLevel}{The level or numeric value of \code{outcome} that
+represents the event, matched exactly. Required unless \code{outcome} is
+numeric 0/1 (read as 1 = event). A factor or any other numeric coding
+without it stops with a request to choose it, because level order and
+numeric size do not say which value is the event.}
 
 \item{censorLevel}{Level of \code{outcome} considered as censored (no
-event). Together with \code{outcomeLevel}, this must identify the exactly
-two observed nonmissing outcome values. Rows with an actually missing
-outcome are excluded; additional observed event types cause the analysis to
-stop and must be recoded explicitly for a cause-specific analysis.}
+event). If \code{NULL}, the other of the two observed values is used.
+Together with \code{outcomeLevel}, this must identify the exactly two
+observed nonmissing outcome values. Rows with an actually missing outcome
+are excluded; additional observed event types cause the analysis to stop
+and must be recoded explicitly for a cause-specific analysis.}
 
 \item{explanatory}{Variables to be considered for selection in the
 Lasso-Cox regression. Time and outcome cannot also be predictors. Infinite
@@ -169,4 +173,17 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Fits a cross-validated LASSO-penalized Cox model for exploratory model
 development. Apparent performance requires internal and external validation
 before clinical use.
+}
+\examples{
+\donttest{
+lassocox(
+    data = lassocox_breast_cancer,
+    elapsedtime = "survival_months",
+    outcome = "death",
+    outcomeLevel = "Dead",
+    censorLevel = "Alive",
+    explanatory = c("age", "tumor_size_cm", "grade", "stage",
+                    "lymph_nodes_positive", "ki67_percent", "er_status"),
+    lambda = "lambda.min")
+}
 }
