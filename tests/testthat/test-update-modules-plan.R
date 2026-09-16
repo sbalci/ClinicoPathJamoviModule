@@ -145,6 +145,7 @@ testthat::test_that("plan: ships routed analyses, referenced JS and helpers; pru
   write_tree(d, list(
     "R/survival.h.R" = "# gen", "R/gone.b.R" = "x", "R/gone.h.R" = "# gen", "R/stale_helper.R" = "x",
     "R/zzz_imports.R" = "# hand", "R/data.R" = "# hand", "R/jsurvival-package.R" = "# hand",
+    "R/jsurvival-data.R" = "# hand", "R/oldanalysis_data-data.R" = "\"stale\"",
     "jamovi/gone.a.yaml" = "x", "jamovi/js/survivalPower.events.js" = "//",
     "jamovi/i18n/tr.po" = "# own catalog", "data/old.rda" = "x", "data/example.csv" = "x", "data/example.omv" = "x"))
   reg <- fixture_registry(u, list(jsurvival = list(directory = d, menu_groups = "Survival")))
@@ -155,18 +156,33 @@ testthat::test_that("plan: ships routed analyses, referenced JS and helpers; pru
   testthat::expect_true(all(c("R/survival.b.R", "R/utils-h.R", "jamovi/js/survival.events.js",
                               "jamovi/00refs.yaml", "tests/testthat/test-zzz-dependency-declaration.R") %in% mp$files$dest))
   testthat::expect_setequal(mp$delete, c("R/gone.b.R", "R/gone.h.R", "R/stale_helper.R", "jamovi/gone.a.yaml",
-                                         "jamovi/js/survivalPower.events.js", "data/old.rda"))
+                                         "jamovi/js/survivalPower.events.js", "data/old.rda",
+                                         "R/oldanalysis_data-data.R"))
 })
 
 testthat::test_that("plan: a module whose last analysis left has every managed file deleted", {
   skip_if_plan_missing()
   u <- base_umbrella(analysis_files("aa", "SurvivalD"))
   d <- module_dir("jsurvival")
-  write_tree(d, list("R/aa.b.R" = "x", "R/aa.h.R" = "# gen", "jamovi/aa.a.yaml" = "x", "R/zzz_imports.R" = "# hand"))
+  write_tree(d, list("R/aa.b.R" = "x", "R/aa.h.R" = "# gen", "jamovi/aa.a.yaml" = "x", "R/zzz_imports.R" = "# hand",
+                     "jamovi/0000.yaml" = c("---", "name: jsurvival", "analyses:", "  - title: A", "    name: aa", "    ns: jsurvival", "")))
   reg <- fixture_registry(u, list(jsurvival = list(directory = d, menu_groups = "Survival")))
-  mp <- plan_env$compute_distribution_plan(reg)$modules$jsurvival
+  plan <- plan_env$compute_distribution_plan(reg)
+  # paste0(character(0), ".b.R") is ".b.R": an empty module once failed with "R/.b.R does not exist"
+  testthat::expect_equal(plan$errors, character(0))
+  mp <- plan$modules$jsurvival
   testthat::expect_length(mp$analyses, 0)
   testthat::expect_setequal(mp$delete, c("R/aa.b.R", "R/aa.h.R", "jamovi/aa.a.yaml"))
+
+  # Nothing to build: the module is pruned, and prepare/document/install are skipped.
+  utils_path <- testthat::test_path("..", "..", "_updateModules_utils.R")
+  testthat::skip_if_not(file.exists(utils_path))
+  sys.source(utils_path, envir = plan_env)
+  capture.output(res <- plan_env$run_module(mp, reg, list(build = TRUE, install = TRUE)))
+  testthat::expect_identical(res$status, "EMPTY")
+  testthat::expect_false(any(grepl("name: aa", readLines(file.path(d, "jamovi", "0000.yaml")))))
+  testthat::expect_false(file.exists(file.path(d, "R", "aa.b.R")))
+  testthat::expect_true(file.exists(file.path(d, "R", "zzz_imports.R")))
 })
 
 testthat::test_that("rendering: namespace rename, trimmed refs and generated dataset docs", {

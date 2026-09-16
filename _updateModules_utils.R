@@ -844,7 +844,13 @@ run_module <- function(mp, reg, opts) {
   tryCatch({
     cat("\n==", mp$name, "==\n")
     apply_distribution_plan(mp, reg, opts$other_dirs[[mp$name]])
-    if (isTRUE(opts$build)) {
+    if (!length(mp$analyses)) {
+      # e.g. JamoviTest when no menuGroup ends in T: stale files are pruned above,
+      # but a jamovi module with no analyses has nothing to prepare or install.
+      prune_orphan_analyses(mp$dir)
+      res$status <- "EMPTY"
+      cat("  EMPTY: no analyses routed here; files pruned, build and install skipped\n")
+    } else if (isTRUE(opts$build)) {
       step <- "build";   build_module(mp)
       step <- "verify";  problems <- verify_module(mp, opts$guard_template)
       if (length(problems)) stop(paste(problems, collapse = "\n"), call. = FALSE)
@@ -852,7 +858,7 @@ run_module <- function(mp, reg, opts) {
       if (isTRUE(opts$check)) { step <- "check"; run_child(mp$dir, 'devtools::check(error_on = "error")', "R CMD check") }
       if (isTRUE(opts$webpage)) { step <- "site"; build_module_site(mp$dir) }
     }
-    cat("  OK\n")
+    if (res$status == "OK") cat("  OK\n")
   }, error = function(e) {
     res$status <<- "FAILED"
     res$step <<- step

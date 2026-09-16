@@ -37,6 +37,7 @@
 
 # Rscript scripts/build_site.R 
 
+# Rscript _updateModules.R --dry-run
 # Rscript _updateModules.R
 
 

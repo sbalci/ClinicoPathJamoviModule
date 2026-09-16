@@ -20,7 +20,7 @@
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
 # Submodule R/ files the updater never writes or deletes (hand-maintained).
-.PLAN_KEEP_R <- "^(00jmv|zzz_imports|data)\\.R$|-package\\.R$|-data\\.R$|^data-.*\\.R$"
+.PLAN_KEEP_R <- "^(00jmv|zzz_imports|data)\\.R$|^[A-Za-z0-9.]+-(package|data)\\.R$|^data-.*\\.R$"
 
 # Umbrella R/ files that are package infrastructure, never shipped as helpers.
 .PLAN_INFRA_R <- "^(00jmv|zzz)\\.R$|-package\\.R$|^data[-_]"
@@ -372,7 +372,7 @@ plan_module <- function(m, routes, index, reg, ignore = character()) {
   }
 
   # helpers
-  helpers <- resolve_helpers(index, paste0(analyses, ".b.R"), ignore)
+  helpers <- resolve_helpers(index, paste0(analyses, ".b.R", recycle0 = TRUE), ignore)
   errors <- c(errors, if (length(helpers$errors)) paste0(m$name, ": ", helpers$errors))
   warnings <- c(warnings, helpers$warnings)
   for (i in seq_along(helpers$files))
@@ -387,7 +387,7 @@ plan_module <- function(m, routes, index, reg, ignore = character()) {
 
   # data + generated dataset docs
   hand_doc <- function(obj) {
-    candidates <- c(file.path(U, "R", c(helpers$files, paste0(analyses, ".b.R"))),
+    candidates <- c(file.path(U, "R", c(helpers$files, paste0(analyses, ".b.R", recycle0 = TRUE))),
                     file.path(dir, "R", list.files(file.path(dir, "R"), .PLAN_KEEP_R)))
     for (f in candidates[file.exists(candidates)]) {
       l <- readLines(f, warn = FALSE)

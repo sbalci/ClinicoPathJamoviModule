@@ -4993,7 +4993,8 @@ Results: test-update-modules-dependency-guard 34/0, test-oncopath-library-audit 
 - [x] S4 helper reorganisation: `survival_utils.R` split (utils-followup/-eventindicator/-formula, multisurvival-formula, survival-competingrisks); renames to `utils-*.R` / `<analysis>-*.R` / `data-*.R`; dead stagemigration-competing-risks/-discrimination, treeProgressBar, tutorial builder deleted; survivalPower_distributions -> tests helper; duplicate `%||%`/wrappers/header copies removed; no @include/Collate
 - [x] S5 1,206 lines of retired utils removed (r_files/r_symbol_files/companion/prune/backup/vignette-copy machinery); config is a registry; mirror tool uses the planner; docs/skills updated
 - [ ] USER: `jmvtools::prepare()` + `devtools::document()` in the umbrella (0000.yaml menu groups for the T->P move; man/ source headers already regenerated)
-- [ ] USER: review + commit umbrella and sibling changes; JamoviTest (TEST: true) now has 0 analyses -- a TEST run empties it
+- [ ] USER: review + commit umbrella and sibling changes
+- [x] Empty JamoviTest (0 T analyses) failed planning (`R/.b.R does not exist`); fixed: empty modules are pruned, reported EMPTY, not built
 - [ ] Dead exported helpers (API change, needs NEWS): `enhanced_wrapper_example.R`; 8 in `enhancedROC-errors.R`, 8 in `utils-ihc.R`, 2 in `decisiongraph-utils.R` (lint `naming_pending`)
 - [ ] `tools/release_gate.py` / `promotion_screen.py` still re-derive routing from suffixes (now D/P/T-aware); could read the planner instead
 - [ ] `DESCRIPTION.backup.<timestamp with spaces>` files in ClinicoPathDescriptives/JamoviTest never match the prune regex

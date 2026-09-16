@@ -39,6 +39,20 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
   on any failure. Tested by three injected failures: unresolved `str_detect`, a load-time
   `stop()`, and a broken `.u.yaml`.
 
+### An empty test module stopped the whole run
+
+- **Failure mode:** once all 59 T analyses moved to P, `TEST: true` failed planning with
+  `R/.b.R does not exist`. The helper seeds were `paste0(analyses, ".b.R")`, and `paste0()` turns a
+  zero-length vector into `".b.R"`. The zero-analysis unit test checked the deletions but never
+  `plan$errors`. Two smaller problems in the same case: an empty module would still have gone to
+  `prepare()`/install, and the allowlist pattern `-data\.R$` kept the stale legacy file
+  `pcaloadingtest_data-data.R`.
+- **Detection signal:** the user ran it; reproduced with `Rscript _updateModules.R --dry-run JamoviTest`.
+- **Prevention rule:** use `paste0(..., recycle0 = TRUE)` over any vector that can be empty. A test
+  for an edge case asserts `plan$errors` as well as the outcome. A module with no analyses is
+  pruned (files and `0000.yaml` entries), reported as `EMPTY`, and never built. Allowlist patterns
+  are anchored to the whole name (`^[A-Za-z0-9.]+-(package|data)\.R$`).
+
 ### "Test" meant both "under test" and "not ready"
 
 - **Failure mode:** 59 analyses had sat on `...T` menu groups for weeks, so JamoviTest mixed work
