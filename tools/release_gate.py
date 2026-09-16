@@ -8,8 +8,19 @@ any BLOCKING check fails.
 import os, re, sys, glob, subprocess
 import yaml
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# --root <dir> runs every check against another module tree, e.g. a generated submodule
+# (the library-audit skill verifies a fix in the sibling repo the reviewer audits).
+ROOT = (os.path.abspath(sys.argv[sys.argv.index('--root') + 1]) if '--root' in sys.argv
+        else os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.chdir(ROOT)
+# with --root every list is printed in full, so it can be compared name by name with a report
+FULL = '--root' in sys.argv
+
+
+def cap(xs, n=10):
+    return xs if FULL else xs[:n]
+
+
 FAIL, WARN = [], []
 
 
@@ -50,17 +61,18 @@ def check_refs():
     used = set()
     for p in glob.glob('jamovi/*.a.yaml') + glob.glob('jamovi/*.r.yaml'):
         txt = open(p, encoding='utf-8').read()
-        for m in re.finditer(r'^\s*refs:\s*$\n((?:\s*-\s*\w+\s*\n)+)', txt, re.M):
-            used |= set(re.findall(r'-\s*(\w+)', m.group(1)))
+        # comment lines may sit inside the list; they used to end the match and hide every later key
+        for m in re.finditer(r'^\s*refs:\s*$\n((?:\s*(?:-\s*\w+|#[^\n]*)\s*\n)+)', txt, re.M):
+            used |= set(re.findall(r'^\s*-\s*(\w+)', m.group(1), re.M))
         for m in re.finditer(r'^\s*refs:\s*\[([^\]]*)\]', txt, re.M):
             used |= set(x.strip() for x in m.group(1).split(',') if x.strip())
     dangling = sorted(used - defined)
     if dangling:
-        FAIL.append('refs: keys with no entry in 00refs.yaml: %s' % ', '.join(dangling[:12]))
+        FAIL.append('refs: keys with no entry in 00refs.yaml: %s' % ', '.join(cap(dangling, 12)))
     body = refs.get('refs', refs) if isinstance(refs, dict) else {}
     nourl = [k for k, v in body.items() if isinstance(v, dict) and not v.get('url')]
     if nourl:
-        WARN.append('%d citation entries still have no url: %s' % (len(nourl), ', '.join(sorted(nourl)[:10])))
+        WARN.append('%d citation entries still have no url: %s' % (len(nourl), ', '.join(cap(sorted(nourl)))))
     print('  citations: %d defined, %d cited, %d dangling' % (len(defined), len(used), len(dangling)))
 
 
@@ -97,7 +109,7 @@ def check_clearwith():
                 bad.append('%s :: %s' % (name, e))
     if bad:
         FAIL.append('%d clearWith entries do not resolve to an option: %s'
-                    % (len(bad), '; '.join(sorted(set(bad))[:10])))
+                    % (len(bad), '; '.join(cap(sorted(set(bad))))))
     print('  clearWith: %d dangling entries' % len(bad))
 
 
@@ -116,16 +128,17 @@ def check_renderfun():
                 bad.append('%s :: %s' % (name, fn))
     if bad:
         FAIL.append('%d renderFun values resolve to no method anywhere in R/: %s'
-                    % (len(bad), '; '.join(bad[:10])))
+                    % (len(bad), '; '.join(cap(bad))))
     print('  renderFun: %d unresolved' % len(bad))
 
 
 def check_artifacts():
-    arts = [p for p in glob.glob('*.tar.gz') + glob.glob('*.jmo')]
-    tracked = subprocess.run(['git', 'ls-files'], capture_output=True, text=True).stdout.split('\n')
-    arts += [t for t in tracked if t.endswith(('.tar.gz', '.jmo'))]
+    # tracked + untracked-but-not-ignored: a gitignored local .jmo/.tar.gz is not shipped
+    files = subprocess.run(['git', 'ls-files', '-co', '--exclude-standard'],
+                           capture_output=True, text=True).stdout.split('\n')
+    arts = [f for f in files if f.endswith(('.tar.gz', '.jmo'))]
     if arts:
-        FAIL.append('committed build artifacts: %s' % ', '.join(sorted(set(arts))[:6]))
+        FAIL.append('committed build artifacts: %s' % ', '.join(cap(sorted(set(arts)), 6)))
     print('  build artifacts committed: %d' % len(set(arts)))
 
 
@@ -134,7 +147,7 @@ def check_tame():
                if 'compilerMode: tame' not in open(p, encoding='utf-8').read()]
     if missing:
         WARN.append('%d .u.yaml files without compilerMode: tame (e.g. %s)'
-                    % (len(missing), ', '.join(missing[:5])))
+                    % (len(missing), ', '.join(cap(missing, 5))))
     print('  compilerMode: tame missing on %d of %d .u.yaml' % (len(missing), len(glob.glob('jamovi/*.u.yaml'))))
 
 
@@ -146,7 +159,7 @@ def check_visible_bang():
                 hits.append('%s:%d' % (os.path.basename(p), i))
     if hits:
         WARN.append('%d `visible: (!x)` expressions - jmvcore cannot route these, so the item is '
-                    'ALWAYS VISIBLE: %s' % (len(hits), ', '.join(hits[:8])))
+                    'ALWAYS VISIBLE: %s' % (len(hits), ', '.join(cap(hits, 8))))
     print('  visible: (!x) silent-always-visible: %d' % len(hits))
 
 
@@ -160,7 +173,7 @@ def check_entities():
             for e in set(re.findall(r'&[a-zA-Z][a-zA-Z0-9]{1,12};', l)) - structural:
                 hits.append('%s:%d %s' % (os.path.basename(p), i, e))
     if hits:
-        FAIL.append('%d non-structural HTML entities: %s' % (len(hits), ', '.join(hits[:8])))
+        FAIL.append('%d non-structural HTML entities: %s' % (len(hits), ', '.join(cap(hits, 8))))
     print('  non-structural HTML entities: %d' % len(hits))
 
 
@@ -229,7 +242,7 @@ def check_requires_data():
                     'errors on resize / .omv reopen / export: %s' % (len(ship_missing), ', '.join(ship_missing)))
     if ship_surplus:
         WARN.append('%d shipped Image(s) declare requiresData: true but draw only from image$state '
-                    '(dataset re-read for nothing): %s' % (len(ship_surplus), ', '.join(ship_surplus[:10])))
+                    '(dataset re-read for nothing): %s' % (len(ship_surplus), ', '.join(cap(ship_surplus))))
     print('  requiresData: %d missing (%d shipped), %d surplus (%d shipped)'
           % (len(missing), len(ship_missing), len(surplus), len(ship_surplus)))
 
@@ -254,7 +267,7 @@ def check_collapsebox_titlecase():
                 bad.append((name, '%s: %s' % (name, label)))
     ship = sorted(x for n, x in bad if _shipped(n))
     if ship:
-        WARN.append('%d shipped CollapseBox headings not in Title Case: %s' % (len(ship), '; '.join(ship[:10])))
+        WARN.append('%d shipped CollapseBox headings not in Title Case: %s' % (len(ship), '; '.join(cap(ship))))
     print('  CollapseBox Title Case: %d off-convention (%d shipped)' % (len(bad), len(ship)))
 
 
@@ -275,12 +288,12 @@ def check_i18n_padding():
     ship = [x for n, x in hits if _shipped(n)]
     if ship:
         WARN.append('%d separator/padding sites inside .() in shipped analyses: %s'
-                    % (len(ship), ', '.join(ship[:10])))
+                    % (len(ship), ', '.join(cap(ship))))
     print('  .() separator/padding: %d sites (%d shipped)' % (len(hits), len(ship)))
 
 
 if __name__ == '__main__':
-    print('RELEASE GATE\n')
+    print('RELEASE GATE  %s\n' % ROOT)
     for fn in (check_versions, check_license, check_refs, check_clearwith, check_renderfun,
                check_artifacts, check_tame, check_visible_bang, check_entities,
                check_requires_data, check_collapsebox_titlecase, check_i18n_padding):

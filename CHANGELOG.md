@@ -5,6 +5,87 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-16 — library-audit tooling: checks that looked fine and were not
+
+### A plain `Rscript` passed the OncoPath build that could not run `waterfall`
+
+- **Failure mode:** `~/.Rprofile` runs `library(magrittr)` in every directory without its own
+  `.Rprofile` — every sibling submodule repo. The umbrella's commented-out `.Rprofile` shadows it, so
+  behaviour depended on the working directory: an installed-namespace scan of pre-fix OncoPath
+  1.0.81 reported `UNRESOLVED %>%` from the umbrella and `PASS` from `/tmp`. Nothing checked the
+  *installed* submodule at all, so the 2026-09-16 CRITICAL reached the reviewer.
+- **Detection signal:** building the `library-audit` skill; positive control
+  `git -C OncoPath archive 49e259a` run with and without `--vanilla`.
+- **Prevention rule:** submodule checks run `Rscript --vanilla`. `tools/submodule_smoke.R` installs a
+  sibling into a temp library, resolves every function called in every R6 method from the installed
+  namespace, and refuses to run in a session with anything extra attached (exit 3). Its first run on the
+  live OncoPath working tree failed to install — uncommitted state only, the committed build installs:
+  a stale `Collate:` naming 12 missing `stagemigration*` files and 8 undeclared `NAMESPACE` imports.
+  Nothing in `_updateModules.R` cleans `Collate:`.
+
+### The release gate's citation check skipped any `refs:` list containing a comment
+
+- **Failure mode:** `check_refs()` matched `refs:` items with a regex that stopped at the first
+  non-item line, so a comment under `refs:` hid every key after it from the dangling-key FAIL.
+  `decisioncurve.r.yaml` hid all 6 of its keys that way.
+- **Detection signal:** fact-checking the library-audit skill's breadcrumb placement rules.
+- **Prevention rule:** comment lines are allowed inside the list and keys are read only from item
+  lines (umbrella: 413 → 417 cited, still 0 dangling; all five siblings 0 dangling). Breadcrumbs go
+  above `refs:`, never inside it.
+
+### `tools/annotate_audit.py` deleted every response in any report it touched
+
+- **Failure mode:** `strip_old()` removed all `<!-- response:start -->` blocks in a file before writing
+  the JSON's entries, so a hand-written response (the 2026-09-16 OncoPath CRITICAL) or a trailing
+  block (four "UMBRELLA NAMESPACE REVERIFIED") vanished on the next run. `--check` was parsed and
+  ignored, the date silently defaulted to 2026-08-20, CRITICAL was not a known severity, and the
+  docstring and STATUS.md claimed it regenerated STATUS.md, which it never did.
+- **Detection signal:** reading the script before reusing it for the new reports.
+- **Prevention rule:** the script replaces only the findings named in the JSON; `--selftest` asserts a
+  hand-written block survives, a no-op run is byte-identical and re-runs are idempotent; all 16 report
+  files verified byte-identical on a no-op run.
+
+### A "no-op" mirror into a sibling changed it
+
+- **Failure mode:** verifying `tools/mirror_to_submodule.R` by mirroring files believed identical, one
+  was `R/utils.R` — an `r_symbol_files` source, so the whole spec regenerated and carried a same-day
+  umbrella change (`survival_utils.R` narrowed to `.medianFollowUp`) plus an umbrella test copy into
+  the dirty OncoPath tree. No snapshot had been taken.
+- **Detection signal:** a before/after fingerprint of `git diff` + `git status`; restored by trying
+  HEAD/current combinations until the fingerprint matched.
+- **Prevention rule:** the mirror script takes `git stash create` itself, prints `SNAPSHOT <sha>` first
+  and `CHANGED since <sha>` last; restore unintended drift with
+  `git restore --source=<sha> --worktree -- <path>` (not `checkout`, which also stages). `--regen`
+  restores the `inst/i18n/*.json` catalogs that `jmvtools::prepare()` deletes.
+
+---
+
+## 2026-09-16 — survival_utils.R distribution: a code generator that changed the code it copied
+
+### NA_real_ reached OncoPath as a logical NA
+
+- **Failure mode:** `distribute_selected_r_symbols()` rebuilds selected helpers with
+  `deparse(control = "keepInteger")`. Without `keepNA`, `NA_real_` and `NA_character_` come out as a
+  plain `NA`, so OncoPath's `.medianFollowUp` returned logical CI bounds while the umbrella's were
+  double. swimmerplot happened to read them only through `is.na()`, so nothing visible changed.
+  Every generator error was also downgraded to `warning()`, which kept the old file and installed anyway.
+- **Detection signal:** comparing each shipped definition with the umbrella one via
+  `identical(deparse(x), deparse(y))` using the *default* control. It flagged a file regenerated
+  minutes earlier, so the difference could not be staleness.
+- **Prevention rule:** a generator that re-renders code must check that the parse tree round-trips
+  and stop if it does not. Both are now in place, along with an `NA_real_`/`NA_character_` fixture in
+  `test-update-modules-dependency-guard.R`, and R-file copy errors now stop the run.
+
+### Same helper, different output per module
+
+- **Failure mode:** `.fmtTimeLabel` called bare `format()`. Under `import(jmvcore)` (umbrella,
+  OncoPath) that is `jmvcore::format`, which returns the number and ignores `nsmall`, giving "25".
+  jsurvival imports only `.` from jmvcore and printed "25.0".
+- **Detection signal:** reviewing the shipped copies module by module against each NAMESPACE.
+- **Prevention rule:** shared helpers call `base::format` explicitly. Guarded in `test-median-followup.R`.
+
+---
+
 ## 2026-09-16 — lassocox: an output column addressed by position instead of by row number
 
 ### Saved risk scores landed on the wrong patients whenever a jamovi filter was active

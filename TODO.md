@@ -4966,3 +4966,20 @@ Results: corrections suite 39 tests / 118 expectations; test-stagemigration.R 18
 - [ ] Turkish msgstr for new/changed stagemigration strings; 288 addRow calls outside .init(); advanced tier (~15 min) not exercised end to end
 
 Results: test-stagemigration.R 27 tests / 45 expectations; statistical-corrections 45 / 164; rendering contract 4 / 6; release battery: RMST = survival rmean at module tau, nested LR = anova(), paired C-index CI/p = concordance(old, new), direction/edge cases as specified, no leaked warnings.
+
+## survival_utils.R distribution audit (2026-09-16)
+
+- [x] OncoPath needs only `.medianFollowUp` (swimmerplot.b.R is the sole production caller); r_symbol_files trimmed from 5 symbols, pinned in test-oncopath-library-audit.R
+- [x] Generator `deparse(control = "keepInteger")` shipped NA_real_ as logical NA; default control + parse-tree round-trip stop() in `distribute_selected_r_symbols()`
+- [x] `_updateModules.R` R-file copy errors now stop the run (were warnings; old generated file stayed and the module still installed)
+- [x] `.fmtTimeLabel` uses `base::format` (jmvcore::format returned numeric 25 in the umbrella vs "25.0" in jsurvival)
+- [x] Stale expectation `prune_r_files` contains zzz_imports.R removed (test had failed since e020d34d9)
+- [ ] USER: run `Rscript _updateModules.R` so OncoPath/jsurvival/JamoviTest pick up the regenerated/updated survival_utils.R
+- [ ] OncoPath cannot install: `DESCRIPTION` Collate lists 12 deleted stagemigration*.R files (stagemigration re-routed to OncoPathT); `NAMESPACE` still `export(stagemigration)`; 22 untracked `man/stagemigration*.Rd`. Delete the Collate block + stale Rd, re-document. The updater never touches Collate
+- [ ] jsurvival `tests/testthat/test-jsurvival-library-audit.R:3` still lists lassocox (now SurvivalT) -> 6 errors; config still ships lassocox_*.rda to jsurvival
+- [ ] `optimalcutpoint` (menuGroup ClinicoPathT) matches no production or JamoviTest pattern, so it ships nowhere
+- [ ] JamoviTest stale since 2026-09-10 (TEST: false): old `.defineEventIndicator` text, orphan lassocox/multisurvival/survivalPower .h.R
+- [ ] `check_shared_helper_distribution()` scans only .b.R callers (misses companion files, helpers passed as values) and its message tells r_symbol_files modules to use r_files
+- [ ] `distribute_selected_r_symbols()`: first-match on duplicate definitions (R keeps the last), config-order emission, no callee-closure check, `definition_name` errors on `pkg::f(a, b)` top-level calls
+
+Results: test-update-modules-dependency-guard 34/0, test-oncopath-library-audit 60/0 (1 skip), test-median-followup 81/0, multisurvival release-review 36/0 + verification 47/0. Temp-copy regeneration: OncoPath survival_utils.R = `.medianFollowUp` only, identical() to umbrella, fallback CI typeof double; `check_shared_helper_distribution` passes, and fails when a `.medianFollowUpText()` call is injected.

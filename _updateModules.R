@@ -1481,7 +1481,9 @@ if (!WIP) {
         prune_configured_module_imports(module_dir, module_cfg$prune_imports)
         add_configured_module_imports(module_dir, module_cfg$extra_imports)
       }, error = function(e) {
-        warning("⚠️ Error copying R files for ", module_name, ": ", e$message)
+        # Stop: a warning left the previous generated helpers in place and the
+        # run went on to install the module.
+        stop("Error copying R files for ", module_name, ": ", e$message, call. = FALSE)
       })
     } else if (!copy_r_files) {
       cat("  ⏭️ Skipping", module_name, "R files (copy_r_files: false)\n")

@@ -1,7 +1,7 @@
 ---
 name: lassocox
 title: Lasso-Cox Regression
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: Penalized Cox Regression
 menuTitle: LASSO Cox
 menuSubtitle: Sparse Cox model development with cross-validated L1 penalization.

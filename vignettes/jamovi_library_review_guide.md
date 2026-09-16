@@ -74,8 +74,10 @@ grep -nE '\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/*.b.R   # trailing space inside .(
 # (the old pattern '\.\(" |\ "\)' matched every `collapse = ", "` - 200 hits on
 #  jsurvival, burying the 14 real sites the 2026-09-15 audit then found)
 
-# 8. Undeclared packages, including base-priority ones                   [LOW/MED]
-Rscript -e 'testthat::test_file("tests/testthat/test-zzz-dependency-declaration.R")'
+# 8. Undeclared packages and unimportable bare symbols (`%>%`)          [LOW..CRITICAL]
+#    --vanilla: ~/.Rprofile attaches magrittr outside the umbrella and hides the break
+Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-zzz-dependency-declaration.R")'
+Rscript --vanilla tools/submodule_smoke.R ../<Module>   # installed namespace of a submodule (section 19)
 
 # 9. requiresData contract, CollapseBox Title Case, .() padding, refs,
 #    clearWith, renderFun, entities, versions                            [HIGH..LOW]
@@ -1074,7 +1076,24 @@ setdiff(names(usage$used),
 ```
 
 The authoritative check is `R CMD check` on the **built** submodule, reading the
-NOTEs rather than only the errors.
+NOTEs rather than only the errors. The quick equivalent installs the submodule
+into a temporary library and resolves every function called inside every R6
+method from the *installed* namespace:
+
+```sh
+Rscript --vanilla tools/submodule_smoke.R /Users/serdarbalci/Documents/GitHub/OncoPath
+#> UNRESOLVED %>% in 13 function(s): swimmerplotClass (3), waterfallClass (10)   (pre-fix 1.0.81)
+```
+
+It also reports packages `NAMESPACE` imports but `DESCRIPTION` does not declare,
+and install/load failures such as a stale `Collate:` field.
+
+**Always `--vanilla`.** `~/.Rprofile` attaches magrittr in every directory that has
+no `.Rprofile` of its own — every sibling repo. The umbrella's own (commented-out)
+`.Rprofile` shadows it, so the same plain `Rscript` command passes in a sibling and
+fails in the umbrella. Run the smoke check without `--vanilla` from `/tmp` and the
+pre-fix OncoPath reports `PASS`; the script now refuses a session with anything
+extra attached.
 
 ---
 

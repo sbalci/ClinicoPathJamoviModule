@@ -1612,9 +1612,12 @@ distribute_selected_r_symbols <- function(module_dir, main_repo_dir, specs) {
       stop("Symbols not found in ", source_name, ": ", paste(missing, collapse = ", "))
 
     selected <- lapply(symbols, function(symbol) expressions[[match(symbol, names_found)]])
+    # Default deparse control: "keepInteger" alone writes NA_real_ as a logical NA.
     rendered <- unlist(lapply(selected, function(expr) {
-      c(deparse(expr, width.cutoff = 100L, control = "keepInteger"), "")
+      c(deparse(expr, width.cutoff = 100L), "")
     }), use.names = FALSE)
+    if (!identical(as.list(parse(text = rendered, keep.source = FALSE)), selected))
+      stop("Rendering changed the code of ", destination_name, "; refusing to ship it")
     escaped <- escape_non_ascii_code(rendered)
     # Only accept the escaping if it is a no-op on the parse tree. A non-ASCII
     # character outside a string constant (a backticked identifier, say) must not

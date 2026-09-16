@@ -625,8 +625,10 @@
 #' @keywords internal
 .fmtTimeLabel <- function(x) {
     if (length(x) == 0 || is.na(x)) return("NA")
-    if (isTRUE(all.equal(x, round(x)))) format(round(x), trim = TRUE)
-    else format(round(x, 1), nsmall = 1, trim = TRUE)
+    # base:: explicitly: under import(jmvcore), bare format() is jmvcore::format,
+    # which returns the number unchanged and ignores nsmall.
+    if (isTRUE(all.equal(x, round(x)))) base::format(round(x), trim = TRUE)
+    else base::format(round(x, 1), nsmall = 1, trim = TRUE)
 }
 
 # ============================================================================

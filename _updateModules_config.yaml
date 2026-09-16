@@ -45,7 +45,7 @@
 # ==============================================
 
 
-new_version: "1.0.82"
+new_version: "1.0.82.01"
 new_date: "2026-09-16"
 quick: false
 TEST: false
@@ -292,18 +292,18 @@ modules:
           - "%||%"
       # swimmerplot reports median follow-up by reverse Kaplan-Meier. The
       # estimator is shared with jsurvival's singlearm/multisurvival, so it
-      # lives in survival_utils.R -- but the rest of that file is Fine-Gray and
-      # competing-risk machinery with no OncoPath caller. Extract just the
-      # follow-up symbols rather than shipping the whole file.
-      # .medianFollowUpText calls .fmtTimeLabel, so that comes too.
+      # lives in survival_utils.R -- but nothing else in that file has an
+      # OncoPath caller. swimmerplot.b.R calls only .medianFollowUp (and writes
+      # its own labels), and .medianFollowUp calls no other helper.
+      # Promoting an OncoPathD/T analysis that uses more of the file
+      # (patientsimilarity: .asSurvivalFormula; ihcsurvival, curemodels,
+      # condsurvival, timeupdatesurvival: .medianFollowUpLabel/Text/Explanation,
+      # which need .fmtTimeLabel) means adding those symbols here;
+      # check_shared_helper_distribution() stops the run if a .b.R call is missed.
       - source: "survival_utils.R"
         destination: "survival_utils.R"
         symbols:
-          - ".fmtTimeLabel"
           - ".medianFollowUp"
-          - ".medianFollowUpLabel"
-          - ".medianFollowUpText"
-          - ".medianFollowUpExplanation"
     # Explicit removal matters because changing r_files alone does not delete a
     # helper copied by an earlier updateModules run.
     prune_r_files:
