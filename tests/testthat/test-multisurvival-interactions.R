@@ -29,7 +29,7 @@ if (is.na(.root)) .root <- .find_root(getwd())
 if (is.na(.root)) stop("Could not locate repo root (marker file R/utils.R not found)")
 
 source(file.path(.root, "R", "utils.R"))
-source(file.path(.root, "R", "survival_utils.R"))
+for (f in c("utils-formula.R", "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R", "multisurvival-formula.R")) source(file.path(.root, "R", f))
 source(file.path(.root, "R", "multisurvival-interactions.R"))
 
 # Local-only verification shim (does NOT touch production code): the CRAN

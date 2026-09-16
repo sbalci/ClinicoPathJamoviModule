@@ -1,7 +1,7 @@
 ---
 name: gsdesign
 title: Group-Sequential Design & Sample Size
-menuGroup: OncoPathT
+menuGroup: OncoPathP
 menuSubgroup: 'Trial Design'
 menuSubtitle: 'Interim Analyses, Boundaries, Sample Size'
 version: '0.0.1'

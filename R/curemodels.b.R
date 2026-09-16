@@ -1644,7 +1644,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Kaplan-Meier estimate and not median(observed time), which is
                 # the median time to event-or-censoring. Status is either a
                 # factor (level 1 = censored) or numeric 0/1, matching the
-                # normalisation at .validateData(). See R/survival_utils.R.
+                # normalisation at .validateData(). See R/utils-followup.R.
                 status_col <- private$cure_data[[self$options$status]]
                 censored <- if (is.factor(status_col))
                     as.numeric(status_col) == 1 else status_col == 0

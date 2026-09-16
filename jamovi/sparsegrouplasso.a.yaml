@@ -1,7 +1,7 @@
 ---
 name: sparsegrouplasso
 title: Sparse Group LASSO
-menuGroup: SurvivalT
+menuGroup: SurvivalP
 menuSubgroup: Penalized Cox Regression
 menuTitle: Sparse Group LASSO Cox
 menuSubtitle: Group selection with the flexibility to drop individual features.

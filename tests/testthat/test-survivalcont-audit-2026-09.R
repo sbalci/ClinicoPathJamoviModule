@@ -29,7 +29,8 @@ library(testthat)
 
 .sc_env <- function() {
   e <- new.env(parent = globalenv())
-  suppressWarnings(suppressMessages(sys.source(.sc_src("survival_utils.R"), envir = e)))
+  for (f in c("utils-formula.R", "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R", "multisurvival-formula.R"))
+    suppressWarnings(suppressMessages(sys.source(.sc_src(f), envir = e)))
   suppressWarnings(suppressMessages(sys.source(.sc_src("survivalcont.b.R"), envir = e)))
   e
 }

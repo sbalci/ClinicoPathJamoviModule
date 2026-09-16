@@ -132,7 +132,7 @@ test_that("the competing-risks export DECLARES all three levels", {
     # Output$asProtoBuf() does `if (!is.factor(column)) column <- as.factor(column)`
     # and serialises levels(column), so only the levels that OCCURRED reached
     # jamovi. A cohort with no other-cause deaths therefore shipped a column
-    # declaring just Censored/Event, and survival_utils' hand-off test
+    # declaring just Censored/Event, and the shared event coder's hand-off test
     #     setequal(levels(outcome), c("Censored","Event","Competing"))
     # failed -- the downstream analysis lost the competing-risk flag entirely.
     df <- oo_df()
@@ -149,7 +149,7 @@ test_that("the competing-risks export DECLARES all three levels", {
     expect_setequal(levels(no_comp), c("Censored", "Event", "Competing"))  # ... still declared
 })
 
-test_that("the exported column round-trips through survival_utils as competing risks", {
+test_that("the exported column round-trips through the shared event coder as competing risks", {
     df <- oo_df()
     df2 <- droplevels(df[df$vital != "DeadOther", , drop = FALSE])
 

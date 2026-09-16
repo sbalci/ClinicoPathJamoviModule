@@ -5,6 +5,51 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-16 — `_updateModules`: three hand-kept ways to ship a helper, and a build that could not fail
+
+### A shared helper was claimed by one analysis's file name
+
+- **Failure mode:** helpers reached submodules three ways that disagreed. A file-name regex
+  `^<analysis>[-_].*\.R` treated any file starting with an analysis name as that analysis's
+  companion. Beside it sat a hand-kept `r_files` list and a symbol generator. `survival` claimed
+  `survival_utils.R`, which 15 analyses in three modules use, so re-routing `survival` would have
+  deleted it. Four data-doc files were copied as "companions" into modules without their datasets.
+  A pruned file came back on the next run because the copy step ran after the prune step.
+- **Detection signal:** a read-only review of the updater before restructuring it, plus a routing
+  and helper census of all 390 analyses.
+- **Prevention rule:** the file name decides nothing. `_updateModules_plan.R` resolves which
+  helper files an analysis needs from the symbols its code uses: calls, values, infix operators and
+  `exists("f")`/`get0("f")` strings, followed transitively. Anything the updater manages but no
+  longer plans is deleted, except an explicit hand-maintained allowlist. Names are for people:
+  `<analysis>-<topic>.R` for one analysis, `utils-<topic>.R` for shared helpers.
+  `test-zzz-analysis-file-naming.R` fails when a name disagrees with the actual callers.
+
+### Build errors printed "All jamovi modules built" and exited 0
+
+- **Failure mode:** each of the six copy-pasted build blocks wrapped `prepare()`, `document()`
+  and the Imports sync in `tryCatch(..., error = warning)`. "completed successfully!" was printed
+  before any build started. `jmvtools::prepare()` itself exits 0 on a YAML compile error. OncoPath
+  shipped a `Collate:` naming 12 deleted files; roxygen never removes a stale Collate, and
+  nothing else touched it.
+- **Detection signal:** injecting failures into sandbox clones (APFS `cp -Rc`) of the sibling repos.
+- **Prevention rule:** one pipeline for every module (plan -> apply -> build -> verify -> install).
+  A plan error writes nothing. Build steps run in `Rscript --vanilla` children whose logs are
+  scanned. A module that fails verification (Collate, `pkg::` declarations, `prune_imports`,
+  bare-symbol resolution) is never installed. The summary is printed last and the exit status is 1
+  on any failure. Tested by three injected failures: unresolved `str_detect`, a load-time
+  `stop()`, and a broken `.u.yaml`.
+
+### "Test" meant both "under test" and "not ready"
+
+- **Failure mode:** 59 analyses had sat on `...T` menu groups for weeks, so JamoviTest mixed work
+  under active test with work that was simply unfinished. Four more used T groups that no rule
+  matched, so they were silently dropped.
+- **Detection signal:** the routing census; the user asked for four categories.
+- **Prevention rule:** production `<Group>`, tests `<Group>T` (JamoviTest), pending `<Group>P`,
+  drafts `<Group>D`. Routing is exact, and any other group is a plan error. The 59 moved to P.
+
+---
+
 ## 2026-09-16 — library-audit tooling: checks that looked fine and were not
 
 ### A plain `Rscript` passed the OncoPath build that could not run `waterfall`

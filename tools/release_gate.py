@@ -195,9 +195,9 @@ def _safe_yaml(p):
 
 
 def _shipped(name):
-    """Production menuGroups carry no D (development) or T (JamoviTest) suffix."""
+    """Production menuGroups carry no D (draft), P (pending) or T (JamoviTest) suffix."""
     a = _safe_yaml('jamovi/%s.a.yaml' % name) or {}
-    return not re.search(r'[DT]$', str(a.get('menuGroup', 'D')))
+    return not re.search(r'[DPT]$', str(a.get('menuGroup', 'D')))
 
 
 _METHOD = re.compile(r'^\s*(\.[A-Za-z_][\w.]*)\s*=\s*function\s*\(', re.M)

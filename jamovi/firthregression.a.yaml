@@ -1,7 +1,7 @@
 ---
 name: firthregression
 title: "Firth's Penalized Likelihood Regression"
-menuGroup: SurvivalT
+menuGroup: SurvivalP
 menuSubgroup: Penalized Cox Regression
 menuTitle: Firth Regression
 menuSubtitle: Bias reduction for small samples, rare events, and separation.

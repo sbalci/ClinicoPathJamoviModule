@@ -89,31 +89,26 @@ test_that("umbrella updater keeps the production OncoPath helper boundary minima
   package <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]]
   skip_if(package == "OncoPath", "updater configuration belongs to the umbrella")
   config_path <- oncopath_file("_updateModules_config.yaml")
-  skip_if_not(file.exists(config_path), "updater configuration unavailable")
+  plan_path <- oncopath_file("_updateModules_plan.R")
+  skip_if_not(file.exists(config_path) && file.exists(plan_path), "updater unavailable")
 
-  oncopath <- yaml::read_yaml(config_path)$modules$OncoPath
-  symbol_file <- oncopath$r_symbol_files[[1]]
-  expect_equal(symbol_file$source, "utils.R")
-  expect_equal(symbol_file$destination, "utils.R")
-  expect_setequal(
-    unlist(symbol_file$symbols, use.names = FALSE),
-    c(".quietly", ".fmt", "%||%")
-  )
-  # swimmerplot is the only production caller, and it needs .medianFollowUp alone.
-  survival_symbols <- oncopath$r_symbol_files[[2]]
-  expect_equal(survival_symbols$source, "survival_utils.R")
-  expect_setequal(unlist(survival_symbols$symbols, use.names = FALSE), ".medianFollowUp")
-  # zzz_imports.R is hand-maintained in OncoPath and must not be pruned.
-  expect_setequal(
-    unlist(oncopath$prune_r_files, use.names = FALSE),
-    "recist_engine.R"
-  )
-  expect_setequal(
-    unlist(oncopath$prune_imports, use.names = FALSE),
-    c("cluster", "tidyr")
-  )
-  expect_false("utils.R" %in% unlist(oncopath$r_files, use.names = FALSE))
-  expect_false("recist_engine.R" %in% unlist(oncopath$r_files, use.names = FALSE))
+  # Helpers are computed from what OncoPath's analyses use, not listed by hand.
+  planner <- new.env(parent = globalenv())
+  sys.source(plan_path, envir = planner)
+  cfg <- yaml::read_yaml(config_path)
+  routes <- planner$route_analyses(oncopath_root, cfg$modules, unlist(cfg$umbrella_only_suffixes))
+  analyses <- routes$analysis[routes$module %in% "OncoPath"]
+  expect_setequal(analyses, c("diagnosticmeta", "ihcheterogeneity", "swimmerplot", "waterfall"))
+  helpers <- planner$resolve_helpers(planner$index_r_sources(oncopath_root),
+                                     paste0(analyses, ".b.R"), ignore = character())
+  expect_equal(helpers$errors, character(0))
+  # swimmerplot needs only the follow-up estimator; the RECIST and IHC engines,
+  # the survival formula and event-coding helpers must not leak into OncoPath.
+  expect_setequal(helpers$files, c("utils.R", "utils-followup.R", "swimmerplot-html.R"))
+
+  # zzz_imports.R is hand-maintained in OncoPath: never written or deleted.
+  expect_true(grepl(planner$.PLAN_KEEP_R, "zzz_imports.R"))
+  expect_setequal(unlist(cfg$modules$OncoPath$prune_imports, use.names = FALSE), c("cluster", "tidyr"))
 })
 
 test_that("swimmer controls and errors follow jamovi UI and i18n conventions", {

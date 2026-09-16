@@ -993,7 +993,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                     # three, and stats::oneway.test rejects every formula with
                     # "a two-sided formula is required". Loading this package is
                     # enough to trigger it, so Welch's ANOVA fails for every user
-                    # unless the call is shielded. See R/ggstatsplot_utils.R.
+                    # unless the call is shielded. See R/utils-ggstatsplot.R.
                     ow <- run(withBaseFormulaChar(
                         stats::oneway.test(fml, data = data, var.equal = FALSE)))
                     if (!inherits(ow, "condition")) {

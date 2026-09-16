@@ -1,7 +1,7 @@
-# .escapeVariableNames() -- R/formula_utils.R
+# .escapeVariableNames() -- R/utils-formula.R
 #
 # This helper was deleted by accident on 2026-09-06 (commit 0247c20f), which
-# extracted the formula helpers from R/utils.R into R/formula_utils.R. Its
+# extracted the formula helpers from R/utils.R into R/utils-formula.R. Its
 # immediate neighbour .stripBackticks() made the move; this one was dropped with
 # the other 318 removed lines. Nothing caught it: the callers are inside R6
 # methods, where lintr's object_usage linter is blind, and the package still
@@ -12,16 +12,16 @@
 # deliberately a bare existence + call check rather than a behavioural one.
 
 if (!exists(".escapeVariableNames"))
-  source(file.path("..", "..", "R", "formula_utils.R"))
+  source(file.path("..", "..", "R", "utils-formula.R"))
 
 test_that("the helper exists and every caller can reach it", {
   expect_true(is.function(.escapeVariableNames))
 
   # Guard the distribution invariant too: each umbrella file that CALLS the
-  # helper must be shipped alongside a file that DEFINES it. formula_utils.R is
-  # in the r_files of every module that ships one of these callers.
+  # helper must be shipped alongside a file that DEFINES it. the updater
+  # ships utils-formula.R wherever one of these callers ships (resolved from the calls).
   root <- file.path("..", "..")
-  callers <- c("R/survival_utils.R", "R/multisurvival.b.R",
+  callers <- c("R/multisurvival-formula.R", "R/multisurvival.b.R",
                "R/multisurvival-interactions.R")
   for (f in callers) {
     p <- file.path(root, f)

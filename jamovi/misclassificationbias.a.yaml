@@ -1,7 +1,7 @@
 ---
 name: misclassificationbias
 title: Misclassification Bias Sensitivity Analysis
-menuGroup: meddecideT
+menuGroup: meddecideP
 menuSubgroup: Decision Support
 menuTitle: Misclassification Bias
 menuSubtitle: Assess impact of classification errors on effect estimates

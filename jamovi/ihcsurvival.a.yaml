@@ -1,7 +1,7 @@
 ---
 name: ihcsurvival
 title: IHC Survival Analysis
-menuGroup: OncoPathT
+menuGroup: OncoPathP
 menuSubgroup: IHC Analysis
 menuTitle: Survival & Prognosis
 version: '1.0.0'

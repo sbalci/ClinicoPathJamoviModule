@@ -27,7 +27,7 @@ suppressWarnings(suppressMessages({
 .cox_run <- function(df, explanatory = character(0), contexpl = character(0)) {
   src <- .msrc("multisurvival.b.R")
   e <- new.env(parent = globalenv())
-  for (f in c("utils.R", "survival_utils.R", "multisurvival-interactions.R", "multisurvival.b.R"))
+  for (f in c("utils.R", "utils-formula.R", "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R", "multisurvival-formula.R", "multisurvival-interactions.R", "multisurvival.b.R"))
     suppressWarnings(suppressMessages(sys.source(.msrc(f), envir = e)))
   # CRAN jmvcore has no asFormula(); see test-multisurvival-interactions.R.
   if (!exists("asFormula", envir = asNamespace("jmvcore"), inherits = FALSE))

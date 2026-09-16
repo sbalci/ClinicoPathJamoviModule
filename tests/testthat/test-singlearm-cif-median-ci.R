@@ -53,7 +53,7 @@ test_that("the ordinary Kaplan-Meier summary still reports its confidence interv
     txt <- as.character(r$clinicalSummary$content)
 
     # A bare Alive/Dead factor does not declare WHAT the event is, so the
-    # summary must not call it survival (survival_utils.R gives this path the
+    # summary must not call it survival (utils-eventindicator.R gives this path the
     # estimand "Kaplan-Meier survival for the selected event", which
     # .estimandMeta() labels "Median event-free time"). The point of this test
     # is the interval, which must still be a real one.

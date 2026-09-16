@@ -21,7 +21,7 @@ library(testthat)
 
 .load_survival <- function() {
   e <- new.env(parent = globalenv())
-  for (f in c("utils.R", "survival_utils.R", "survival.b.R"))
+  for (f in c("utils.R", "utils-formula.R", "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R", "multisurvival-formula.R", "survival.b.R"))
     suppressWarnings(suppressMessages(sys.source(.ssrc(f), envir = e)))
   e
 }

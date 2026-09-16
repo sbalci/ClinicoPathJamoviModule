@@ -1252,7 +1252,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_events <- sum(data$status_num, na.rm = TRUE)
             # Reverse Kaplan-Meier, not median(observed times) -- the latter is
             # the median time to event-or-censoring. status_num is 1 for death,
-            # 0 for censored (see .prepareData). See R/survival_utils.R.
+            # 0 for censored (see .prepareData). See R/utils-followup.R.
             mfu <- .medianFollowUp(data$time_years, data$status_num == 0)
             median_fu <- round(mfu$value, 1)
             method_label <- private$.methodLabel()

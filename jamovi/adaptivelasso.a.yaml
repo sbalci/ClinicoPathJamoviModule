@@ -1,7 +1,7 @@
 ---
 name: adaptivelasso
 title: Adaptive LASSO for Cox Models
-menuGroup: SurvivalT
+menuGroup: SurvivalP
 menuSubgroup: Penalized Cox Regression
 menuTitle: Adaptive LASSO Cox
 menuSubtitle: Oracle properties for mathematically consistent variable selection.

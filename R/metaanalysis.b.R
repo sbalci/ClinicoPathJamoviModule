@@ -1800,5 +1800,3 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         )
     )
 }
-
-metaanalysis <- metaanalysisClass$new

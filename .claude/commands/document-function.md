@@ -58,7 +58,7 @@ This command generates **four** complementary documents (controlled by `--docs`)
 | **Comprehensive Vignette** | `vignettes/{module}-$ARGUMENTS-comprehensive.Rmd` | Executable R Markdown with all feature demonstrations | Users & Developers |
 
 **Module prefix mapping** (based on `menuGroup` in `.a.yaml`):
-- `SurvivalT` → `jsurvival`
+- `Survival` (also `SurvivalT`/`SurvivalP`/`SurvivalD`) → `jsurvival`
 - `Descriptives` / `ClinicoPath` → `clinicopath-descriptives`
 - `DecisionTools` / `meddecide` → `meddecide`
 - `JJStatsPlot` → `jjstatsplot`

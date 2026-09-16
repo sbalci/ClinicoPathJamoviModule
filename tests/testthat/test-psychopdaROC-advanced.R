@@ -25,7 +25,7 @@ library(jmvcore)
 
 # Source required files
 if (file.exists("../../R/utils.R")) source("../../R/utils.R")
-if (file.exists("../../R/psychopdaROC_utilities.R")) source("../../R/psychopdaROC_utilities.R")
+if (file.exists("../../R/psychopdaROC-nri-idi.R")) source("../../R/psychopdaROC-nri-idi.R")
 
 # ═══════════════════════════════════════════════════════════
 # Helper: Create test data for advanced features

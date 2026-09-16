@@ -1,7 +1,7 @@
 ---
 name: pathsampling
 title: Pathology Sampling Adequacy Analysis
-menuGroup: OncoPathT
+menuGroup: OncoPathP
 menuSubgroup: ClinicoPath Descriptives
 version: '2.1.0'
 jas: '1.2'

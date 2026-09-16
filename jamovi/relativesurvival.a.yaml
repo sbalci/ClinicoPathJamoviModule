@@ -1,7 +1,7 @@
 ---
 name: relativesurvival
 title: Relative Survival Analysis
-menuGroup: SurvivalT
+menuGroup: SurvivalP
 menuSubgroup: Advanced Survival
 menuSubtitle: 'Population-Based Survival Comparison'
 version: '0.0.3'

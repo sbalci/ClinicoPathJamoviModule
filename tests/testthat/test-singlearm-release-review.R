@@ -102,7 +102,7 @@ test_that("user-facing messages go through .() and still render in English", {
   # exactly three pass-throughs remain, and each is translated at its source
   # rather than at the call: user_msg (a .() switch in .safeExecute), the
   # role_errors vector (.() at assignment), and res$error from the shared
-  # .defineEventIndicator() in survival_utils.R -- the only genuinely
+  # .defineEventIndicator() in utils-eventindicator.R -- the only genuinely
   # untranslated one, tracked for a module-wide pass.
   expect_equal(length(unwrapped), 3L)
 

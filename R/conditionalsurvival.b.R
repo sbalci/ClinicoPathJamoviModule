@@ -100,7 +100,7 @@ conditionalsurvivalClass <- R6::R6Class(
             # (Schemper & Smith 1996), not median(time): the latter is the
             # median time to event-or-censoring and anchors the conditioning
             # point far too early in a high-event cohort. See .medianFollowUp()
-            # in R/survival_utils.R; it falls back to median(time) itself when
+            # in R/utils-followup.R; it falls back to median(time) itself when
             # the reversed curve is not estimable.
             condTime <- self$options$conditionTime
             if (is.null(condTime) || is.na(condTime) || condTime <= 0) {
@@ -224,7 +224,7 @@ conditionalsurvivalClass <- R6::R6Class(
             # (Schemper & Smith 1996), not median(time): the latter is the
             # median time to event-or-censoring and anchors the conditioning
             # point far too early in a high-event cohort. See .medianFollowUp()
-            # in R/survival_utils.R; it falls back to median(time) itself when
+            # in R/utils-followup.R; it falls back to median(time) itself when
             # the reversed curve is not estimable.
             condTime <- self$options$conditionTime
             if (is.null(condTime) || is.na(condTime) || condTime <= 0) {

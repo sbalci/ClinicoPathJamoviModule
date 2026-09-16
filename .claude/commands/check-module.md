@@ -55,11 +55,14 @@ elsewhere:
 | `menuGroup:` value | Ships to | Meaning |
 |---|---|---|
 | `<Group>` | production submodule | released analysis |
-| `<Group>T` | JamoviTest | under test/modification (see CLAUDE.md "JamoviTest Routing") |
-| `<Group>D` | umbrella only | development, not shipped |
-| `<Group>ExtraD` / `<Group>ExtraT` | umbrella only / JamoviTest | work-in-progress overflow |
+| `<Group>T` (also `<Group>DT`, `<Group>PT`) | JamoviTest | tests: under test/modification (see CLAUDE.md "JamoviTest Routing") |
+| `<Group>P` | umbrella only | pending: written, not release-ready |
+| `<Group>D` | umbrella only | drafts, not shipped |
+| `<Group>ExtraD` / `<Group>ExtraP` / `<Group>ExtraT` | umbrella only / umbrella only / JamoviTest | overflow menus, same suffix rule |
 | `Power #<module>` | production submodule named after `#` | a released analysis of THAT module (e.g. `Power #meddecide` IS a meddecide analysis); the `#module` is a YAML comment jamovi ignores, so it shows under the shared Power menu |
 | `PowerT #<module>` | JamoviTest | that module's analysis, under test |
+
+The authoritative routing is `route_analyses()` in `_updateModules_plan.R`; `Rscript _updateModules.R --dry-run` prints it.
 
 Module name → production `menuGroup`:
 

@@ -33,10 +33,10 @@ library(testthat)
         return(env)
       }
     }
-    src <- .sa_src("survival_utils.R")
-    if (is.null(src)) return(NULL)
+    srcs <- lapply(c("utils-formula.R", "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R", "multisurvival-formula.R"), .sa_src)
+    if (any(vapply(srcs, is.null, NA))) return(NULL)
     e <- new.env(parent = globalenv())
-    suppressWarnings(suppressMessages(sys.source(src, envir = e)))
+    for (src in srcs) suppressWarnings(suppressMessages(sys.source(src, envir = e)))
     env <<- e
     env
   }

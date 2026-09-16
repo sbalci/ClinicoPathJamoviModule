@@ -102,8 +102,6 @@
 ^.*\.Rd2pdf.*$
 ^chisq\.multcomp\.$
 ^modellingSurvival\.$
-^R/for-utils\.R$
-^R/utils-pipe\.R$
 ^R/diagnostic_metrics\.R$
 ^R/for_jjstatsplot\.R$
 # Backup files from --backup tool runs (e.g. foo.b.R.bak.<timestamp>)

@@ -760,7 +760,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get colors
             colors <- private$.getColors(network_data, fg)
 
-            # Create the plot using the vendored arcplot (see R/arcdiagram_vendored.R);
+            # Create the plot using the vendored arcplot (see R/jjarcdiagram-arcplot.R);
             # arcdiagram is GitHub-only and cannot be installed by jamovi, so it is bundled.
             private$.checkpoint(flush = FALSE)  # Before arcplot rendering
             arcplot(

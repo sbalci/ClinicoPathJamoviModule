@@ -990,7 +990,7 @@ ihcsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # the reverse Kaplan-Meier estimate rather than median(observed
                 # time), which is the median time to event-or-censoring. The
                 # event level is 1, matching n_events just above. See
-                # .medianFollowUp() in R/survival_utils.R.
+                # .medianFollowUp() in R/utils-followup.R.
                 mfu <- .medianFollowUp(
                     self$data[[self$options$survivalTime]],
                     self$data[[self$options$survivalEvent]] != 1)

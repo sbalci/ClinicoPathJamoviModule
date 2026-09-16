@@ -767,7 +767,7 @@ pseudosurvivalClass <- R6::R6Class(
 
                 # Reverse Kaplan-Meier, not median(observed times) -- the
                 # latter is the median time to event-or-censoring. See
-                # .medianFollowUp() in R/survival_utils.R.
+                # .medianFollowUp() in R/utils-followup.R.
                 mfu <- .medianFollowUp(analysis_data$time, analysis_data$status == 0)
                 max_time <- max(analysis_data$time, na.rm = TRUE)
 

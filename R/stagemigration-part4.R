@@ -2246,7 +2246,7 @@ stagemigrationPart4 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 # is compared across centres here, and the naive
                                 # estimator is biased by each centre's event
                                 # rate, so the comparison itself was distorted.
-                                # See .medianFollowUp() in R/survival_utils.R.
+                                # See .medianFollowUp() in R/utils-followup.R.
                                 median_follow_up <- .medianFollowUp(
                                     inst_data[[time_var]],
                                     inst_data[[event_var]] == 0)$value

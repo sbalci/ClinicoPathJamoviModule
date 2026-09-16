@@ -399,7 +399,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Create a new outcome variable based on the analysis type
             if (!multievent) {
-                # Delegated to the shared coder in survival_utils.R so the five
+                # Delegated to the shared coder in utils-eventindicator.R so the five
                 # analyses that build an event indicator agree on validation.
                 res <- .defineEventIndicator(
                     outcome      = mydata[[outcome_var]],
@@ -606,7 +606,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # DUPLICATE ASSIGNMENT. This is the only multi-event path that
                     # does not go through .defineEventIndicator(), so it did not get
-                    # that function's duplicate check (R/survival_utils.R). The four
+                    # that function's duplicate check (R/utils-eventindicator.R). The four
                     # writes below are sequential, so assigning one level to two state
                     # slots silently lets the LAST write win and the patient lands in
                     # the wrong state -- with the Summary then printing two
@@ -1429,7 +1429,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # causes) has no fourth level to assign, so competing-risks and
                 # cause-specific survival could not be run on it at all without
                 # inventing a category. The shared coder .defineEventIndicator()
-                # (R/survival_utils.R:126-208) already states the real contract --
+                # (R/utils-eventindicator.R) already states the real contract --
                 # at least one bucket filled, and every OBSERVED level assigned to
                 # exactly one bucket -- and its own comment records that an empty
                 # category "is perfectly normal and must not error". Defer to it:
@@ -1878,7 +1878,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # run on a cohort with no other-cause deaths shipped a column
                     # declaring just Censored/Event.
                     #
-                    # That silently broke the hand-off. survival_utils.R identifies
+                    # That silently broke the hand-off. utils-eventindicator.R identifies
                     # this interchange format with
                     #     setequal(levels(outcome), c("Censored","Event","Competing"))
                     # and its comment states the intent explicitly: the outcome

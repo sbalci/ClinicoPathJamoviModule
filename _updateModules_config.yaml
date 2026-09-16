@@ -1,7 +1,8 @@
 # Configuration file for _updateModules.R
 # This file defines module settings, file mappings, and deployment parameters
 
-# Usage: Rscript _updateModules.R [config_file]
+# Usage: Rscript _updateModules.R [--dry-run] [--no-install] [--config=path] [module ...]
+#        Always run --dry-run first after changing routing or this file.
 
 # run  /Applications/jamovi.app/Contents/MacOS/jamovi
 # install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
@@ -45,7 +46,7 @@
 # ==============================================
 
 
-new_version: "1.0.82.01"
+new_version: "1.0.82.02"
 new_date: "2026-09-16"
 quick: false
 TEST: false
@@ -56,66 +57,47 @@ OncoPath: true
 meddecide: true
 ClinicoPath: false
 
-
-
-
 # ========================================
 # DETAILED CONFIGURATION BELOW
 # ========================================
 
-# Global settings (for backward compatibility)
 global:
   base_repo_dir: "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"
 
-# Operation modes (for backward compatibility)  
 modes:
-  check: false
-  extended: true
-  webpage: false
-  commit_modules: false
-  WIP: false
+  extended: true        # false: distribute files only; do not prepare/document/verify/install
+  check: false          # devtools::check() each module after install
+  webpage: false        # pkgdown site for modules that have _pkgdown.yml
   sync_analysis_versions: false # If false (default), preserves per-analysis versions in jamovi/*.a.yaml.
                                 # If true, forces .a.yaml version fields to match the package version.
-  
-  # File copying control modes
-  copy_vignettes: false       # Enable/disable vignette file copying
-  copy_data_files: true       # Distribute example data to submodules: copy each module's data_files
-                              # (.rda) from main data/, auto-generate roxygen docs for them, copy the
-                              # .omv referenced in the submodule 0000.yaml datasets: from main
-                              # inst/extdata/, and add omv rules to .Rbuildignore.
-  generate_data_docs: true    # Auto-generate roxygen dataset docs (clears R CMD check "undocumented data")
-  distribute_omv: true        # Copy .omv referenced in each submodule's 0000.yaml datasets: section
-  copy_test_files: false      # Distribute the umbrella's per-analysis functional tests to submodules
-                              # (name-keyed + namespace-translated). Leave FALSE until the umbrella
-                              # test suite is green -- otherwise a submodule's R CMD check goes red.
-                              # The self-contained strict dependency-guard test + testthat.R runner are
-                              # shipped regardless to modules with no pre-existing functional tests.
-  copy_r_files: true         # Enable/disable R utility file copying
-  copy_i18n_files: true      # Copy each module's configured gettext catalogs from jamovi/i18n/
-  use_legacy_copying: false   # Use legacy hardcoded file lists instead of config-based copying
+  copy_vignettes: false # Copy vignette_folders into each module's vignettes/ (and prune the rest)
+  copy_test_files: false # Distribute the umbrella's per-analysis functional tests to submodules
+                         # (name-keyed + namespace-translated). Leave FALSE until the umbrella
+                         # test suite is green -- otherwise a submodule's R CMD check goes red.
+                         # The dependency-guard test + testthat.R runner always ship.
 
-  # Build-time integrity checks (added with the submodule critical review)
-  check_module_dependencies: true   # Enforce direct declarations for package usage in submodules
-  deps_fail_on_error: true          # Hard-stop on required/optional declaration violations
-  check_distribution_coverage: true # Report analyses routed to zero or >1 submodule
-  coverage_fail_on_gap: false       # Also hard-stop when an analysis routes to NO submodule (release hardening)
+# Routing -- four categories, by menuGroup suffix:
+#   production  <Group>    e.g. Survival   -> the module whose menu_groups lists it
+#   tests       <Group>T   e.g. SurvivalT  -> JamoviTest (menu_group_suffix below); also
+#                                             <Group>DT / <Group>PT from the dev/test slash commands
+#   pending     <Group>P   e.g. SurvivalP  -> umbrella only: written, not release-ready
+#   drafts      <Group>D   e.g. SurvivalD  -> umbrella only
+# `Power #meddecide` is matched literally; otherwise a `#comment` is ignored. Any other
+# group is a plan error, so a typo can never silently drop an analysis.
+umbrella_only_suffixes: ["D", "P"]
 
-  # NAMESPACE-DESCRIPTION synchronization
-  sync_namespace_description: true  # Enable NAMESPACE to DESCRIPTION package synchronization
-  namespace_sync_dry_run: false     # Perform dry run only (show what would be changed)
-
-# Module directories (hardcoded for simplicity)
+# What else ships is computed, not listed:
+#   - helper R files: every umbrella R/ file whose definitions the shipped analyses use
+#     (directly or through other helpers, including exists("f")/get0("f") lookups)
+#   - JS: the ./<file>:: handlers named in the shipped .u.yaml
+#   - 00refs.yaml trimmed to cited keys, dataset docs, the dependency-guard test
+# Files the updater manages but no longer plans are deleted (R/, jamovi/*.yaml, js,
+# data/*.rda). Hand-maintained R/zzz_imports.R, R/data.R, R/*-package.R, R/*-data.R,
+# R/data-*.R, jamovi/i18n catalogs, data/*.csv and data/*.omv are never touched.
 modules:
   jjstatsplot:
     directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
-    r_files:
-      - "utils.R"
-      - "arcdiagram_vendored.R"
-      # REQUIRED, not optional: jjbetweenstats, jjdotplotstats and statsplot2 all
-      # call withBaseFormulaChar() from this file. Without it the shipped module
-      # dies with "could not find function" on every ggbetweenstats figure.
-      - "ggstatsplot_utils.R"
-    # Example datasets shipped to jjstatsplot (copied from main data/, auto-documented).
+    menu_groups: ["JJStatsPlot"]
     data_files:
       - "histopathology.rda"
       - "categorical_quality_data.rda"
@@ -128,6 +110,7 @@ modules:
       - "hullplot_survey_data.rda"
   meddecide:
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
+    menu_groups: ["meddecide", "Power #meddecide"]
     prune_imports:
       # meddecide's only htmltools use was htmlEscape, which jmvcore also exports.
       # Importing both made `@import jmvcore` and `@importFrom htmltools htmlEscape`
@@ -138,17 +121,6 @@ modules:
       - "catalog.pot"
       - "en.po"
       - "tr.po"
-    r_files:
-      - "utils.R"
-      - "formula_utils.R"
-      - "error_handling.R"
-      # diagnostichelpers.R removed: all 17 functions are dead umbrella-wide.
-      # decisiongraph_utils.R intentionally NOT shipped: the decisiongraph and
-      # bayesdca analyses live under menuGroup meddecideExtraD (umbrella/dev only,
-      # not production meddecide), so this helper was orphaned dead weight here.
-      # It stays in main + JamoviTest; re-add if those analyses go to production.
-      - "psychopdaROC_utilities.R"
-      - "nomogrammer.R"
     data_files:
       - "histopathology.rda"
       - "bayesdca_test_data.rda"
@@ -164,22 +136,7 @@ modules:
       - "dca_test_data.rda"
   jsurvival:
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
-    r_files:
-      - "utils.R"
-      - "formula_utils.R"
-      - "survival_utils.R"
-      # diagnostichelpers.R removed: all 17 functions are dead umbrella-wide.
-      # survivalPower_distributions.R is intentionally NOT shipped to production jsurvival:
-      # the survivalPower analysis is dev-routed to menuGroup PowerT (JamoviTest) and is
-      # absent from jsurvival's 0000.yaml, so this helper (11 functions, 0 callers in jsurvival)
-      # is orphaned dead weight in the release build. It is auto-copied to JamoviTest;
-      # re-add here when survivalPower is promoted to a production Survival menuGroup.
-      - "multisurvival-interactions.R"
-      - "multisurvival-metrics.R"
-    # psychopdaROC_utilities.R is a meddecide helper (computeNRI/bootstrapNRI) with no
-    # caller in any shipped jsurvival analysis; an earlier manifest left it behind.
-    prune_r_files:
-      - "psychopdaROC_utilities.R"
+    menu_groups: ["Survival"]
     # Declared in jsurvival Imports but referenced by no shipped R file (2026-09-03
     # /check-module audit). maxstat is survminer's own Import, so surv_cutpoint()
     # still gets it transitively. Also dropped from R/zzz_imports.R + NAMESPACE.
@@ -193,19 +150,12 @@ modules:
       - "survivalsvm"
       - "SurvMetrics"
       - "xgboost"
+    # stagemigration_*.rda are NOT shipped here: stagemigration is menuGroup OncoPathT
+    # (JamoviTest), and no jsurvival analysis, test or vignette uses them.
     data_files:
       - "histopathology.rda"
       - "melanoma.rda"
       - "data_longitudinal.rda"
-      # stagemigration_*.rda kept: used by jsurvival survival-staging analyses.
-      - "stagemigration_breast_cancer.rda"
-      - "stagemigration_colorectal_cancer.rda"
-      - "stagemigration_combined.rda"
-      - "stagemigration_large_performance.rda"
-      - "stagemigration_lung_cancer.rda"
-      - "stagemigration_problematic.rda"
-      - "stagemigration_small_sample.rda"
-      - "stagemigration_summary_stats.rda"
       # lassocox_*.rda: used by the lassocox R example (lassocox.a.yaml), tests and vignettes.
       - "lassocox_breast_cancer.rda"
       - "lassocox_cardiovascular.rda"
@@ -215,15 +165,14 @@ modules:
       - "lassocox_small_cohort.rda"
   ClinicoPathDescriptives:
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
+    menu_groups: ["Exploration"]
     i18n_files:
       - "catalog.pot"
       - "en.po"
       - "tr.po"
-    r_files:
-      - "utils.R"
-    # Declared in this module's Imports but used by no shipped R file. The sync
-    # only ever ADDS imports, so drop them here; the prune step also removes them
-    # from R/zzz_imports.R + NAMESPACE.
+    # Declared in this module's Imports but used by no shipped R file. The Imports sync
+    # only ever ADDS, so drop them here. A pruned package that is still imported by a
+    # tag in R/zzz_imports.R fails verification -- remove the tag there.
     #   vcd         - 2026-09-06 /audit-module
     #   DescTools   - only reference is @importFrom DescTools BreslowDayTest in
     #                 zzz_imports.R; BreslowDayTest has no caller in this module
@@ -271,50 +220,16 @@ modules:
       - "ggflowchart_comprehensive_data.rda"
   OncoPath:
     directory: "/Users/serdarbalci/Documents/GitHub/OncoPath"
+    menu_groups: ["OncoPath"]
     i18n_files:
       - "catalog.pot"
       - "en.po"
       - "tr.po"
-    r_files:
-      # Static/guidance HTML builders extracted from swimmerplot.b.R.
-      # Must ship wherever swimmerplot ships.
-      - "swimmerplot_html.R"
-    # The production analyses call only these three shared utilities. Generate a
-    # minimal file directly from the umbrella definitions so unrelated helpers
-    # such as raw_to_prob(), bootstrapIDI(), and the startup hook cannot leak into
-    # OncoPath or drift in a separately maintained template.
-    r_symbol_files:
-      - source: "utils.R"
-        destination: "utils.R"
-        symbols:
-          - ".quietly"
-          - ".fmt"
-          - "%||%"
-      # swimmerplot reports median follow-up by reverse Kaplan-Meier. The
-      # estimator is shared with jsurvival's singlearm/multisurvival, so it
-      # lives in survival_utils.R -- but nothing else in that file has an
-      # OncoPath caller. swimmerplot.b.R calls only .medianFollowUp (and writes
-      # its own labels), and .medianFollowUp calls no other helper.
-      # Promoting an OncoPathD/T analysis that uses more of the file
-      # (patientsimilarity: .asSurvivalFormula; ihcsurvival, curemodels,
-      # condsurvival, timeupdatesurvival: .medianFollowUpLabel/Text/Explanation,
-      # which need .fmtTimeLabel) means adding those symbols here;
-      # check_shared_helper_distribution() stops the run if a .b.R call is missed.
-      - source: "survival_utils.R"
-        destination: "survival_utils.R"
-        symbols:
-          - ".medianFollowUp"
-    # Explicit removal matters because changing r_files alone does not delete a
-    # helper copied by an earlier updateModules run.
-    prune_r_files:
-      - "recist_engine.R"
-    # NOTE: zzz_imports.R is deliberately NOT pruned here. OncoPath owns a
-    # hand-maintained R/zzz_imports.R (there is no umbrella source file, so
-    # nothing overwrites it). It exists because OncoPath's pkg:: calls all sit
-    # inside R6 method bodies, which R CMD check's installed-namespace scanner
-    # cannot walk -- without the @importFrom tags, ggrepel/grDevices/grid/
-    # patchwork/psych/rlang/stringr/survival/utils are all reported as unused
-    # Imports even though every one of them is called at runtime.
+    # OncoPath owns a hand-maintained R/zzz_imports.R (never written or deleted by the
+    # updater). OncoPath's pkg:: calls all sit inside R6 method bodies, which R CMD
+    # check's installed-namespace scanner cannot walk -- without the @importFrom tags,
+    # ggrepel/grDevices/grid/patchwork/psych/rlang/stringr/survival/utils are reported
+    # as unused Imports even though every one of them is called at runtime.
     # These remain legitimate umbrella dependencies but have no production
     # OncoPath call site. document() removes their stale NAMESPACE directives.
     prune_imports:
@@ -325,14 +240,6 @@ modules:
       # with no importFrom anywhere `waterfall` could not run in jamovi at all
       # (2026-09-16 OncoPath audit, CRITICAL). A bare infix operator is not put
       # in scope by Imports: alone -- R/zzz_imports.R carries the importFrom tag.
-      # ihc_utilities.R intentionally NOT shipped to production OncoPath: its
-      # consumers (ihcimmune/ihcbasic/ihcadvanced/ihcdiagnostic) are dev-routed to
-      # menuGroup OncoPathD/T, and the one production analysis here
-      # (ihcheterogeneity) does not use it. It stays in main + JamoviTest; re-add
-      # if those IHC analyses are promoted to a production OncoPath menuGroup.
-      # Companion R files (<analysis>-*.R, <analysis>_*.R) are now automatically
-      # discovered and copied by copy_module_files() based on menuGroup routing.
-      # Stale companions are also automatically pruned if an analysis is re-routed.
     data_files:
       - "histopathology.rda"
       - "waterfall_percentage_basic.rda"
@@ -341,112 +248,23 @@ modules:
       - "swimmerplot_sample.rda"
   JamoviTest:
     directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
-    enabled: false  # Automatically enabled when TEST mode is active
-    test_patterns:
-      - "menuGroup: JJStatsPlotT$"
-      - "menuGroup: meddecideT$"
-      - "menuGroup: SurvivalT$"
-      - "menuGroup: ExplorationT$"
-      - "menuGroup: OncoPathT$"
-      - "menuGroup: PowerT"
+    toggle: "TEST"          # enabled by the top-level TEST switch
+    menu_group_suffix: "T"  # every <Group>T analysis (tests category)
     data_files:
       - "histopathology.rda"
-    r_files:
-      # Shared utility files that do not belong to a single analysis.
-      # Note: Analysis-specific companion files (<analysis>-*.R, <analysis>_*.R)
-      # are now automatically copied by copy_module_files() whenever the analysis
-      # is routed to this module via its menuGroup.
-      - "utils.R"
-      - "formula_utils.R"
-      - "survival_utils.R"
-      - "error_handling.R"
-      - "ihc_utilities.R"
-      - "nomogrammer.R"
-      - "ggstatsplot_utils.R"
-    vignette_files: []
-    test_files: []
-    required_directories:
-      - "R"
-      - "jamovi"
 
-# ========================================
-# DETAILED CONFIGURATION BELOW
-# ========================================
-
-# Required packages for validation
-required_packages:
-  - xfun
-  - fs
-  - jmvtools
-  - devtools
-  - desc
-  - purrr
-  - digest
-  - yaml
-  - future
-
-# Vignette folder-to-module mapping
+# Vignette folder-to-module mapping (used when modes$copy_vignettes is true)
 vignette_folders:
-  # Direct folder mapping (source folder -> target modules)
   folder_mapping:
     vignettes-ClinicoPathDescriptives: ["ClinicoPathDescriptives"]
     vignettes-jjstatsplot: ["jjstatsplot"]
     vignettes-meddecide: ["meddecide"]
     vignettes-jsurvival: ["jsurvival"]
-    # vignettes: ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]  # General vignettes to all modules
-
-  # Special files that don't follow domain pattern (from vignettes/ folder)
-  special_files:
-    "use-jjstatsplot-in-R.Rmd": ["jjstatsplot"]
-   # "module-development-jamovi.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-   # "users-of-clinicopath.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-   # "pkgnet-report.Rmd": ["ClinicoPathDescriptives"]
-   # "_workflows.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-   # "_wf_master.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-   # "_wf_child.Rmd": ["jjstatsplot", "meddecide", "jsurvival", "ClinicoPathDescriptives"]
-
-  # Files to exclude from copying (internal or temporary files)
+  # Glob ("*-legacy.Rmd") or regular expression
   exclude_patterns:
-    - "*-legacy.Rmd"      # Legacy vignettes
-    - "test-*.Rmd"        # Test vignettes
-    - "temp-*.Rmd"        # Temporary vignettes
-    - "draft-*.Rmd"       # Draft vignettes
-    - ".*\\.tmp\\."       # Temporary files
-
-  # File extensions to process
+    - "*-legacy.Rmd"
+    - "test-*.Rmd"
+    - "temp-*.Rmd"
+    - "draft-*.Rmd"
+    - ".*\\.tmp\\."
   extensions: [".qmd", ".Rmd", ".md"]
-
-  # Copy mode settings
-  copy_settings:
-    use_folder_based: true        # Enable folder-based copying
-    use_manual_lists: false       # Use manual vignette_files lists
-    include_general: false         # Copy general vignettes folder to all modules
-    overwrite_existing: true      # Overwrite existing vignette files
-    create_directories: true      # Create vignette directories if missing
-
-# File extensions to copy for jamovi modules
-jamovi_extensions:
-  - ".b.R"
-  - ".a.yaml"
-  - ".r.yaml"
-  - ".u.yaml"
-  - ".js"      # JavaScript event files
-  - ".html"    # HTML content files
-
-# Security settings
-security:
-  validate_paths: true
-  verify_checksums: true
-  max_file_size_mb: 100
-
-# Performance settings
-performance:
-  parallel_processing: false
-  max_workers: 4
-  incremental_updates: true
-
-# Backup settings
-backup:
-  enabled: true
-  retention_days: 10
-  backup_location: "backups"

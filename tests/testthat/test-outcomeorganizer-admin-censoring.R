@@ -153,7 +153,7 @@ test_that("administrative censoring refuses to run against a multistate coding",
 # That is a UI-slot check, not a data check, so an ordinary 3-state registry
 # outcome (Alive / Dead of disease / Dead of other causes) could not be analysed
 # for competing risks at all without inventing a fourth category — while the
-# shared coder in R/survival_utils.R requires only that ONE bucket be filled and
+# shared coder in R/utils-eventindicator.R requires only that ONE bucket be filled and
 # that every OBSERVED level be assigned, and its own comment records that an
 # empty category "is perfectly normal and must not error".
 

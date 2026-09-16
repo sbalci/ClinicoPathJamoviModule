@@ -11,7 +11,7 @@
 > **Menu:** OncoPathT > Stage Migration Analysis
 > **Version:** 0.0.31
 > **Backend:** `R/stagemigration.b.R` (29,248 lines, ~878 functions)
-> **Helper files:** `stagemigration_helpers.R`, `stagemigration-competing-risks.R`, `stagemigration-discrimination.R`, `stagemigration-utils.R`, `stagemigration-validation.R` (2,479 lines combined)
+> **Helper files:** `stagemigration-metrics.R`, `stagemigration-utils.R`, `stagemigration-validation.R`, `stagemigration-part1..5.R` (2,479 lines combined)
 > **Total codebase:** ~31,700 lines across 7 R files + 4 YAML files (9,023 lines)
 
 ---
@@ -1024,7 +1024,7 @@ Additional experimental toggles that are not top-level gates but further sub-gat
 
 | File | Lines | Purpose |
 |------|-------|---------|
-| `stagemigration_helpers.R` | 563 | Delegated calculations: `calculateAdvancedMetrics`, `compareBootstrapCIndex`, `calculateNRI`, `calculateIDI` |
+| `stagemigration-metrics.R` | 563 | Delegated calculations: `calculateAdvancedMetrics`, `compareBootstrapCIndex`, `calculateNRI`, `calculateIDI` |
 | `stagemigration-validation.R` | 521 | `stagemigration_validateData()` - data cleaning, event binary creation, covariate handling |
 | `stagemigration-utils.R` | 570 | Shared utility functions |
 | `stagemigration-discrimination.R` | 301 | Discrimination metric calculations |

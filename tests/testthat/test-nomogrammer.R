@@ -8,7 +8,7 @@ library(ggplot2)
 library(scales)
 
 # Load the nomogrammer function (assumes it's available in the package)
-# source("../../R/nomogrammer.R")  # If testing standalone
+# source("../../R/utils-nomogrammer.R")  # If testing standalone
 
 #' =============================================================================
 #' Test Suite 1: Mathematical Accuracy

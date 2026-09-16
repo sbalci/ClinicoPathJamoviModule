@@ -291,7 +291,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 # labelled as a duration. The actual follow-up figure needs the
                 # event indicator, and is reported by reverse Kaplan-Meier
                 # (Schemper & Smith 1996) whenever one has been supplied.
-                # See .medianFollowUp() in R/survival_utils.R.
+                # See .medianFollowUp() in R/utils-followup.R.
                 mfu <- NULL
                 if (!is.null(self$options$event_var) &&
                     self$options$event_var %in% names(data)) {

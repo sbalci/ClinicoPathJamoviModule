@@ -1414,7 +1414,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
 
             # Reverse KM: censored patients become the "events". The estimator
-            # is shared -- .medianFollowUp() in R/survival_utils.R -- which also
+            # is shared -- .medianFollowUp() in R/utils-followup.R -- which also
             # handles the not-estimable case (the reversed curve never reaching
             # 50%) and reports why. Only the status CLASSIFICATION above is
             # specific to this analysis, so only that stays here.
@@ -1661,7 +1661,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     } else {
                         character(0)
                     }
-                    # Detailed HTML guidance (body in R/swimmerplot_html.R)
+                    # Detailed HTML guidance (body in R/swimmerplot-html.R)
                     mismatch_guidance <- swimmerplot_mismatch_guidance_html(self, safe_examples)
                     self$results$instructions$setContent(mismatch_guidance)
                     # Also surface via the ERROR-notice channel for consistent,
@@ -1680,7 +1680,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     } else {
                         character(0)
                     }
-                    # (body in R/swimmerplot_html.R)
+                    # (body in R/swimmerplot-html.R)
                     date_guidance <- swimmerplot_date_guidance_html(self, safe_format, safe_examples_date)
                     self$results$instructions$setContent(date_guidance)
                     return()  # Stop here, don't process further
@@ -1862,7 +1862,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         
         .generateInstructions = function() {
             # Static welcome/instructions panel; body lives in
-            # R/swimmerplot_html.R (fully .()-wrapped).
+            # R/swimmerplot-html.R (fully .()-wrapped).
             swimmerplot_instructions_html(self)
         },
         
@@ -2890,7 +2890,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             return(glyphs)
         },
 
-        # Generate clinical glossary (static; body in R/swimmerplot_html.R)
+        # Generate clinical glossary (static; body in R/swimmerplot-html.R)
         .generateClinicalGlossary = function() {
             self$results$clinicalGlossary$setContent(swimmerplot_glossary_html(self))
         },
@@ -3003,7 +3003,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             self$results$copyReadyReport$setContent(copy_ready_html)
         },
 
-        # Generate about analysis information (static; body in R/swimmerplot_html.R)
+        # Generate about analysis information (static; body in R/swimmerplot-html.R)
         .generateAboutAnalysis = function() {
             self$results$aboutAnalysis$setContent(swimmerplot_about_html(self))
         }

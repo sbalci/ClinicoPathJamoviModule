@@ -29,7 +29,7 @@ library(testthat)
     e <- new.env(parent = globalenv())
     assign(".", jmvcore::., envir = e)
     assign("%>%", magrittr::`%>%`, envir = e)
-    for (f in c("utils.R", "survival_utils.R", "outcomeorganizer.h.R", "outcomeorganizer.b.R"))
+    for (f in c("utils.R", "utils-formula.R", "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R", "multisurvival-formula.R", "outcomeorganizer.h.R", "outcomeorganizer.b.R"))
       suppressWarnings(suppressMessages(sys.source(.oo_src(f), envir = e)))
     env <<- e
     e

@@ -189,7 +189,7 @@ condsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 n_events <- sum(data$status)
                 # Reverse Kaplan-Meier, not median(observed times) -- the latter
                 # is the median time to event-or-censoring. See .medianFollowUp()
-                # in R/survival_utils.R.
+                # in R/utils-followup.R.
                 mfu <- .medianFollowUp(data$time, data$status == 0)
                 event_rate <- (n_events / n_total) * 100
 
@@ -815,5 +815,3 @@ condsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         ) # End of public list
     )
 }
-
-condsurvival <- condsurvivalClass$new

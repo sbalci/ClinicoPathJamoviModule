@@ -2,7 +2,7 @@
 #
 # Each test pins a corrected estimator against a hand-computed or reference-package
 # value, and several demonstrate the ORIGINAL defect so a silent revert fails loudly.
-# See R/stagemigration.b.R, R/stagemigration-part1..5.R and R/stagemigration_helpers.R.
+# See R/stagemigration.b.R, R/stagemigration-part1..5.R and R/stagemigration-metrics.R.
 
 # The backend is one R6 class chain spread over R/stagemigration.b.R and
 # R/stagemigration-part1.R ... part5.R; source-level checks must read all six files.
@@ -652,7 +652,7 @@ testthat::test_that("the module's timeROC wrapper works without survival attache
 })
 
 stagemigration_helper_env <- function() {
-    h <- testthat::test_path("..", "..", "R", "stagemigration_helpers.R")
+    h <- testthat::test_path("..", "..", "R", "stagemigration-metrics.R")
     testthat::skip_if_not(file.exists(h), "source tree not available")
     env <- new.env(parent = globalenv())
     sys.source(h, envir = env)

@@ -1,153 +1,6 @@
-# Module Utilities for Enhanced _updateModules.R
-# This file contains helper functions for module management, validation, security, and performance
-
-# Load required packages with validation
-load_required_packages <- function(packages) {
-  missing_packages <- c()
-
-  for (pkg in packages) {
-    if (!requireNamespace(pkg, quietly = TRUE)) {
-      missing_packages <- c(missing_packages, pkg)
-    }
-  }
-
-  if (length(missing_packages) > 0) {
-    stop("Missing required packages: ", paste(missing_packages, collapse = ", "),
-         "\nPlease install with: install.packages(c('",
-         paste(missing_packages, collapse = "', '"), "'))")
-  }
-
-  # Load packages
-  for (pkg in packages) {
-    library(pkg, character.only = TRUE)
-  }
-
-  message("✅ All required packages loaded successfully")
-}
-
-# Security: Path validation
-validate_path <- function(path, base_dir, description = "path") {
-  if (is.null(path) || is.na(path) || nchar(path) == 0) {
-    stop("Invalid ", description, ": path is null or empty")
-  }
-
-  # Check for path traversal attempts
-  if (grepl("\\.\\.", path) || grepl("~", path)) {
-    warning("Potential path traversal detected in ", description, ": ", path)
-  }
-
-  # Normalize paths for comparison
-  real_path <- tryCatch({
-    normalizePath(path, mustWork = FALSE)
-  }, error = function(e) {
-    stop("Invalid ", description, ": ", path, " - ", e$message)
-  })
-
-  real_base <- tryCatch({
-    normalizePath(base_dir, mustWork = TRUE)
-  }, error = function(e) {
-    stop("Invalid base directory: ", base_dir, " - ", e$message)
-  })
-
-  # Check if path is within base directory
-  if (!startsWith(real_path, real_base) && !startsWith(real_path, dirname(real_base))) {
-    warning("Path ", description, " is outside base directory: ", path)
-  }
-
-  return(real_path)
-}
-
-# Security: File integrity verification
-verify_file_integrity <- function(source_file, dest_file) {
-  if (!file.exists(source_file)) {
-    warning("Source file does not exist: ", source_file)
-    return(FALSE)
-  }
-
-  if (!file.exists(dest_file)) {
-    return(TRUE)  # Destination doesn't exist, copy is needed
-  }
-
-  # Check file sizes first (quick check)
-  source_size <- file.size(source_file)
-  dest_size <- file.size(dest_file)
-
-  if (source_size != dest_size) {
-    return(FALSE)
-  }
-
-  # Verify checksums for critical files
-  if (requireNamespace("digest", quietly = TRUE)) {
-    tryCatch({
-      source_hash <- digest::digest(file = source_file, algo = "sha256")
-      dest_hash <- digest::digest(file = dest_file, algo = "sha256")
-      return(source_hash == dest_hash)
-    }, error = function(e) {
-      warning("Failed to verify checksums: ", e$message)
-      return(FALSE)
-    })
-  }
-
-  return(TRUE)
-}
-
-# Security: File size validation
-validate_file_size <- function(file_path, max_size_mb = 100) {
-  if (!file.exists(file_path)) {
-    return(TRUE)  # File doesn't exist, no size concern
-  }
-
-  file_size_mb <- file.size(file_path) / (1024 * 1024)
-
-  if (file_size_mb > max_size_mb) {
-    warning("File exceeds maximum size (", max_size_mb, "MB): ", file_path,
-            " (", round(file_size_mb, 2), "MB)")
-    return(FALSE)
-  }
-
-  return(TRUE)
-}
-
-# Module validation: Check module integrity
-validate_module_integrity <- function(module_dir, module_name, required_dirs = NULL) {
-  if (!dir.exists(module_dir)) {
-    stop("Module directory does not exist: ", module_dir)
-  }
-
-  # Check required files
-  required_files <- c("DESCRIPTION")
-  missing_files <- c()
-
-  for (file in required_files) {
-    file_path <- file.path(module_dir, file)
-    if (!file.exists(file_path)) {
-      missing_files <- c(missing_files, file)
-    }
-  }
-
-  if (length(missing_files) > 0) {
-    stop("Missing required files in ", module_name, ": ", paste(missing_files, collapse = ", "))
-  }
-
-  # Check required directories
-  if (!is.null(required_dirs)) {
-    missing_dirs <- c()
-
-    for (dir in required_dirs) {
-      dir_path <- file.path(module_dir, dir)
-      if (!dir.exists(dir_path)) {
-        missing_dirs <- c(missing_dirs, dir)
-      }
-    }
-
-    if (length(missing_dirs) > 0) {
-      warning("Missing directories in ", module_name, ": ", paste(missing_dirs, collapse = ", "))
-    }
-  }
-
-  message("✅ Module integrity validated: ", module_name)
-  return(TRUE)
-}
+# Writing side of _updateModules.R: DESCRIPTION/NAMESPACE maintenance, dependency checks,
+# and the apply -> build -> verify -> install pipeline. Deciding WHAT goes where is
+# _updateModules_plan.R's job; nothing here chooses files.
 
 # Prune DESCRIPTION.backup.<timestamp> files older than `days` days.
 # Uses the filename timestamp (not file mtime) so git checkouts / OS-level
@@ -319,637 +172,8 @@ sync_namespace_with_description <- function(module_dir, dry_run = FALSE) {
   })
 }
 
-# Enhanced function to sync all modules
-sync_all_modules_namespace <- function(modules_config, main_repo_dir, dry_run = FALSE) {
-  message("\n🔄 Starting NAMESPACE-DESCRIPTION synchronization...")
-  
-  success_count <- 0
-  error_count <- 0
-  
-  for (module_name in names(modules_config)) {
-    module_config <- modules_config[[module_name]]
-    
-    if (!module_config$enabled) {
-      message("⏭️ Skipping disabled module: ", module_name)
-      next
-    }
-    
-    module_dir <- module_config$directory %||% file.path(main_repo_dir, module_config$repo_dir)
-    
-    if (!dir.exists(module_dir)) {
-      warning("⚠️ Module directory not found: ", module_dir)
-      error_count <- error_count + 1
-      next
-    }
-    
-    message("\n📁 Processing module: ", module_name)
-    
-    if (sync_namespace_with_description(module_dir, dry_run)) {
-      success_count <- success_count + 1
-    } else {
-      error_count <- error_count + 1
-    }
-  }
-  
-  message("\n📊 NAMESPACE-DESCRIPTION sync completed:")
-  message("   ✅ Success: ", success_count, " modules")
-  message("   ❌ Errors: ", error_count, " modules")
-  
-  return(error_count == 0)
-}
-
-# Backup management: Create backup
-create_backup <- function(module_dir, backup_base_dir = "backups") {
-  if (!dir.exists(module_dir)) {
-    warning("Cannot backup non-existent directory: ", module_dir)
-    return(NULL)
-  }
-
-  # Create backup directory if it doesn't exist
-  if (!dir.exists(backup_base_dir)) {
-    dir.create(backup_base_dir, recursive = TRUE)
-  }
-
-  # Generate backup name with timestamp
-  timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
-  module_name <- basename(module_dir)
-  backup_dir <- file.path(backup_base_dir, paste0(module_name, "_backup_", timestamp))
-
-  tryCatch({
-    fs::dir_copy(module_dir, backup_dir)
-    message("✅ Backup created: ", backup_dir)
-    return(backup_dir)
-  }, error = function(e) {
-    warning("Failed to create backup for ", module_name, ": ", e$message)
-    return(NULL)
-  })
-}
-
-# Backup management: Rollback module
-rollback_module <- function(backup_dir, module_dir) {
-  if (!dir.exists(backup_dir)) {
-    stop("Backup directory does not exist: ", backup_dir)
-  }
-
-  if (!dir.exists(module_dir)) {
-    warning("Target module directory does not exist, creating: ", module_dir)
-  } else {
-    # Remove existing module directory
-    tryCatch({
-      fs::dir_delete(module_dir)
-    }, error = function(e) {
-      stop("Failed to remove existing module directory: ", e$message)
-    })
-  }
-
-  # Restore from backup
-  tryCatch({
-    fs::dir_copy(backup_dir, module_dir)
-    message("✅ Module restored from backup: ", module_dir)
-    return(TRUE)
-  }, error = function(e) {
-    stop("Failed to restore from backup: ", e$message)
-  })
-}
-
-# Backup management: Clean old backups
-clean_old_backups <- function(backup_base_dir = "backups", retention_days = 30) {
-  if (!dir.exists(backup_base_dir)) {
-    return(TRUE)
-  }
-
-  backup_dirs <- list.dirs(backup_base_dir, recursive = FALSE)
-  current_time <- Sys.time()
-  retention_seconds <- retention_days * 24 * 60 * 60
-
-  cleaned_count <- 0
-
-  for (backup_dir in backup_dirs) {
-    dir_info <- file.info(backup_dir)
-    if (!is.na(dir_info$mtime)) {
-      age_seconds <- as.numeric(difftime(current_time, dir_info$mtime, units = "secs"))
-
-      if (age_seconds > retention_seconds) {
-        tryCatch({
-          fs::dir_delete(backup_dir)
-          cleaned_count <- cleaned_count + 1
-        }, error = function(e) {
-          warning("Failed to clean backup: ", backup_dir, " - ", e$message)
-        })
-      }
-    }
-  }
-
-  if (cleaned_count > 0) {
-    message("🧹 Cleaned ", cleaned_count, " old backup(s)")
-  }
-
-  return(TRUE)
-}
-
-# Enhanced vignette copying with domain-based logic
-copy_vignettes_by_domain <- function(config, main_repo_dir, module_configs) {
-  vignette_config <- config$vignette_domains
-  copy_settings <- vignette_config$copy_settings
-
-  # Check if domain-based copying is enabled
-  if (!copy_settings$use_domain_based) {
-    message("ℹ️ Domain-based vignette copying is disabled")
-    return(TRUE)
-  }
-
-  message("📄 Starting domain-based vignette copying...")
-
-  # Get all vignette files
-  vignette_files <- c()
-  vignette_dir <- file.path(main_repo_dir, "vignettes")
-
-  if (!dir.exists(vignette_dir)) {
-    warning("Vignettes directory does not exist: ", vignette_dir)
-    return(FALSE)
-  }
-
-  for (ext in vignette_config$extensions) {
-    pattern <- paste0("\\", ext, "$")
-    files <- list.files(
-      path = vignette_dir,
-      pattern = pattern,
-      full.names = FALSE
-    )
-    vignette_files <- c(vignette_files, files)
-  }
-
-  if (length(vignette_files) == 0) {
-    message("ℹ️ No vignette files found")
-    return(TRUE)
-  }
-
-  message("📊 Found ", length(vignette_files), " vignette files")
-
-  # Track copying statistics
-  copy_stats <- list(
-    total_files = length(vignette_files),
-    copied_files = 0,
-    skipped_files = 0,
-    error_files = 0,
-    excluded_files = 0
-  )
-
-  # Process each vignette file
-  for (vignette_file in vignette_files) {
-
-    # Check exclusion patterns
-    if (is_file_excluded(vignette_file, vignette_config$exclude_patterns)) {
-      copy_stats$excluded_files <- copy_stats$excluded_files + 1
-      next
-    }
-
-    target_modules <- get_target_modules_for_vignette(vignette_file, vignette_config)
-
-    if (length(target_modules) == 0) {
-      message("⚠️ No target modules found for: ", vignette_file)
-      copy_stats$skipped_files <- copy_stats$skipped_files + 1
-      next
-    }
-
-    # Copy to target modules
-    file_copied <- FALSE
-    for (module_name in target_modules) {
-      if (module_name %in% names(module_configs)) {
-        module_dir <- module_configs[[module_name]]$directory
-
-        if (copy_vignette_to_module(
-          vignette_file, vignette_dir, module_dir, copy_settings
-        )) {
-          file_copied <- TRUE
-        } else {
-          copy_stats$error_files <- copy_stats$error_files + 1
-        }
-      }
-    }
-
-    if (file_copied) {
-      copy_stats$copied_files <- copy_stats$copied_files + 1
-    }
-  }
-
-  # Report statistics
-  message("📈 Vignette copying completed:")
-  message("   📄 Total files: ", copy_stats$total_files)
-  message("   ✅ Copied: ", copy_stats$copied_files)
-  message("   ⏭️ Skipped: ", copy_stats$skipped_files)
-  message("   🚫 Excluded: ", copy_stats$excluded_files)
-  message("   ❌ Errors: ", copy_stats$error_files)
-
-  return(copy_stats$error_files == 0)
-}
-
-# Helper function to check if file should be excluded
-is_file_excluded <- function(filename, exclude_patterns) {
-  for (pattern in exclude_patterns) {
-    # Convert shell pattern to regex
-    regex_pattern <- glob2rx(pattern)
-    if (grepl(regex_pattern, filename)) {
-      return(TRUE)
-    }
-  }
-  return(FALSE)
-}
-
-# Helper function to determine target modules for a vignette
-get_target_modules_for_vignette <- function(vignette_file, vignette_config) {
-  domain_mapping <- vignette_config$domain_mapping
-  special_files <- vignette_config$special_files
-
-  # Check special files first
-  if (vignette_file %in% names(special_files)) {
-    return(special_files[[vignette_file]])
-  }
-
-  # Extract domain prefix (everything before first number)
-  domain_match <- regexpr("^[a-zA-Z-]+(?=-[0-9])", vignette_file, perl = TRUE)
-
-  if (domain_match > 0) {
-    domain_prefix <- substr(vignette_file, 1, domain_match + attr(domain_match, "match.length") - 1)
-
-    if (domain_prefix %in% names(domain_mapping)) {
-      return(domain_mapping[[domain_prefix]])
-    }
-  }
-
-  # Check for module-specific patterns without numbers
-  for (domain in names(domain_mapping)) {
-    if (startsWith(vignette_file, paste0(domain, "-")) ||
-        startsWith(vignette_file, domain)) {
-      return(domain_mapping[[domain]])
-    }
-  }
-
-  return(character(0))
-}
-
-# Helper function to copy a single vignette to a module
-copy_vignette_to_module <- function(vignette_file, source_dir, module_dir, copy_settings) {
-  if (!dir.exists(module_dir)) {
-    warning("Module directory does not exist: ", module_dir)
-    return(FALSE)
-  }
-
-  # Create vignettes directory if needed
-  target_vignette_dir <- file.path(module_dir, "vignettes")
-  if (copy_settings$create_directories && !dir.exists(target_vignette_dir)) {
-    tryCatch({
-      fs::dir_create(target_vignette_dir)
-    }, error = function(e) {
-      warning("Failed to create vignettes directory: ", e$message)
-      return(FALSE)
-    })
-  }
-
-  # Copy the file
-  source_path <- file.path(source_dir, vignette_file)
-  target_path <- file.path(target_vignette_dir, vignette_file)
-
-  # Check if target exists and overwrite setting
-  if (file.exists(target_path) && !copy_settings$overwrite_existing) {
-    return(TRUE)  # Skip but don't treat as error
-  }
-
-  tryCatch({
-    fs::file_copy(
-      path = source_path,
-      new_path = target_path,
-      overwrite = copy_settings$overwrite_existing
-    )
-    return(TRUE)
-  }, error = function(e) {
-    warning("Error copying ", vignette_file, " to ", basename(module_dir), ": ", e$message)
-    return(FALSE)
-  })
-}
-
-# Enhanced vignette copying with both domain-based and manual options
-copy_vignettes_enhanced <- function(config, main_repo_dir, module_configs) {
-  vignette_config <- config$vignette_domains
-  copy_settings <- vignette_config$copy_settings
-
-  success <- TRUE
-
-  # Domain-based copying
-  if (copy_settings$use_domain_based) {
-    success <- copy_vignettes_by_domain(config, main_repo_dir, module_configs) && success
-  }
-
-  # Manual copying (if enabled)
-  if (copy_settings$use_manual_lists) {
-    success <- copy_vignettes_manual(config, main_repo_dir, module_configs) && success
-  }
-
-  return(success)
-}
-
-# Legacy manual vignette copying (kept for backward compatibility)
-copy_vignettes_manual <- function(config, main_repo_dir, module_configs) {
-  message("📄 Starting manual vignette copying...")
-
-  vignette_dir <- file.path(main_repo_dir, "vignettes")
-  success <- TRUE
-
-  for (module_name in names(module_configs)) {
-    module_config <- module_configs[[module_name]]
-
-    if (length(module_config$vignette_files) == 0) {
-      next
-    }
-
-    module_dir <- module_config$directory
-    target_vignette_dir <- file.path(module_dir, "vignettes")
-
-    # Create directory if needed
-    if (!dir.exists(target_vignette_dir)) {
-      fs::dir_create(target_vignette_dir)
-    }
-
-    # Copy each specified vignette file
-    for (vignette_file in module_config$vignette_files) {
-      source_path <- file.path(vignette_dir, vignette_file)
-      target_path <- file.path(target_vignette_dir, vignette_file)
-
-      if (file.exists(source_path)) {
-        tryCatch({
-          fs::file_copy(source_path, target_path, overwrite = TRUE)
-        }, error = function(e) {
-          warning("Error copying ", vignette_file, " to ", module_name, ": ", e$message)
-          success <- FALSE
-        })
-      } else {
-        warning("Vignette file not found: ", source_path)
-        success <- FALSE
-      }
-    }
-  }
-
-  return(success)
-}
-
-# Testing integration: Run module tests
-run_module_tests <- function(module_dir, test_level = "basic") {
-  if (!dir.exists(module_dir)) {
-    warning("Module directory does not exist: ", module_dir)
-    return(FALSE)
-  }
-
-  old_wd <- getwd()
-  on.exit(setwd(old_wd))
-
-  tryCatch({
-    setwd(module_dir)
-
-    # Basic tests: Check if package can be loaded
-    if (test_level %in% c("basic", "full")) {
-      message("🧪 Running basic tests for ", basename(module_dir))
-
-      # Try to document the package
-      devtools::document()
-
-      # Try to prepare jamovi module
-      if (dir.exists("jamovi")) {
-        jmvtools::prepare()
-      }
-    }
-
-    # Full tests: Run testthat tests if they exist
-    if (test_level == "full" && dir.exists("tests")) {
-      message("🧪 Running full test suite for ", basename(module_dir))
-      devtools::test()
-    }
-
-    message("✅ Tests passed for ", basename(module_dir))
-    return(TRUE)
-
-  }, error = function(e) {
-    warning("❌ Tests failed for ", basename(module_dir), ": ", e$message)
-    return(FALSE)
-  })
-}
-
-# Performance: Check if file is newer
-is_file_newer <- function(source, dest) {
-  if (!file.exists(dest)) {
-    return(TRUE)
-  }
-
-  if (!file.exists(source)) {
-    warning("Source file does not exist: ", source)
-    return(FALSE)
-  }
-
-  source_time <- file.mtime(source)
-  dest_time <- file.mtime(dest)
-
-  return(source_time > dest_time)
-}
-
-# Performance: Copy file only if newer
-copy_if_newer <- function(source, dest, overwrite = TRUE) {
-  if (!file.exists(source)) {
-    warning("Source file does not exist: ", source)
-    return(FALSE)
-  }
-
-  # Create destination directory if it doesn't exist
-  dest_dir <- dirname(dest)
-  if (!dir.exists(dest_dir)) {
-    dir.create(dest_dir, recursive = TRUE)
-  }
-
-  if (is_file_newer(source, dest)) {
-    tryCatch({
-      fs::file_copy(source, dest, overwrite = overwrite)
-      return(TRUE)
-    }, error = function(e) {
-      warning("Failed to copy file ", source, " to ", dest, ": ", e$message)
-      return(FALSE)
-    })
-  }
-
-  return(FALSE)  # File was not copied (not newer)
-}
-
-# Enhanced file copying with validation
-safe_copy_files <- function(source_files, dest_dir, check_integrity = TRUE, max_size_mb = 100) {
-  if (!dir.exists(dest_dir)) {
-    dir.create(dest_dir, recursive = TRUE)
-  }
-
-  copied_count <- 0
-  skipped_count <- 0
-  failed_count <- 0
-
-  for (source_file in source_files) {
-    if (!file.exists(source_file)) {
-      warning("Source file does not exist: ", source_file)
-      failed_count <- failed_count + 1
-      next
-    }
-
-    # Validate file size
-    if (!validate_file_size(source_file, max_size_mb)) {
-      warning("Skipping large file: ", source_file)
-      skipped_count <- skipped_count + 1
-      next
-    }
-
-    dest_file <- file.path(dest_dir, basename(source_file))
-
-    # Check if copy is needed
-    if (check_integrity && verify_file_integrity(source_file, dest_file)) {
-      skipped_count <- skipped_count + 1
-      next
-    }
-
-    # Copy file
-    if (copy_if_newer(source_file, dest_file)) {
-      copied_count <- copied_count + 1
-    } else {
-      skipped_count <- skipped_count + 1
-    }
-  }
-
-  message("📁 File copy summary: ", copied_count, " copied, ",
-          skipped_count, " skipped, ", failed_count, " failed")
-
-  return(list(
-    copied = copied_count,
-    skipped = skipped_count,
-    failed = failed_count
-  ))
-}
-
-# Load configuration from YAML
-load_config <- function(config_file = "updateModules_config.yaml") {
-  if (!file.exists(config_file)) {
-    stop("Configuration file not found: ", config_file)
-  }
-
-  if (!requireNamespace("yaml", quietly = TRUE)) {
-    stop("yaml package is required for configuration loading")
-  }
-
-  tryCatch({
-    config <- yaml::read_yaml(config_file)
-    message("✅ Configuration loaded from: ", config_file)
-    return(config)
-  }, error = function(e) {
-    stop("Failed to load configuration: ", e$message)
-  })
-}
-
-# Validate configuration
-validate_config <- function(config) {
-  # Check for either simplified format (top-level) or nested format
-  has_top_level_version <- "new_version" %in% names(config)
-  has_nested_global <- "global" %in% names(config) && "new_version" %in% names(config$global)
-  
-  if (!has_top_level_version && !has_nested_global) {
-    stop("Missing version configuration - need either top-level 'new_version' or 'global.new_version'")
-  }
-  
-  # Check for modules section (always required)
-  if (!"modules" %in% names(config)) {
-    stop("Missing required configuration section: modules")
-  }
-
-  # Validate version and date (simplified format takes precedence)
-  if (has_top_level_version) {
-    if (!"new_date" %in% names(config)) {
-      stop("Missing required setting: new_date")
-    }
-  } else if (has_nested_global) {
-    global <- config$global
-    required_global <- c("new_version", "new_date")
-    
-    for (setting in required_global) {
-      if (!setting %in% names(global)) {
-        stop("Missing required global setting: ", setting)
-      }
-    }
-  }
-
-  # Validate base directory exists (get from either format)
-  base_repo_dir <- if ("global" %in% names(config) && "base_repo_dir" %in% names(config$global)) {
-    config$global$base_repo_dir
-  } else {
-    "/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule"  # Default fallback
-  }
-  
-  if (!dir.exists(base_repo_dir)) {
-    stop("Base repository directory does not exist: ", base_repo_dir)
-  }
-
-  # Validate modules
-  if (length(config$modules) == 0) {
-    stop("No modules defined in configuration")
-  }
-
-  for (module_name in names(config$modules)) {
-    module <- config$modules[[module_name]]
-
-    if (!"directory" %in% names(module)) {
-      stop("Module ", module_name, " missing 'directory' setting")
-    }
-  }
-
-  message("✅ Configuration validated successfully")
-  return(config)
-}
-
-# Enhanced error handling wrapper
-with_error_handling <- function(expr, description = "operation", continue_on_error = FALSE) {
-  tryCatch({
-    result <- expr
-    return(list(success = TRUE, result = result, error = NULL))
-  }, error = function(e) {
-    error_msg <- paste("Failed", description, ":", e$message)
-
-    if (continue_on_error) {
-      warning("⚠️ ", error_msg)
-      return(list(success = FALSE, result = NULL, error = e$message))
-    } else {
-      stop("❌ ", error_msg)
-    }
-  })
-}
-
-# Parallel processing setup
-setup_parallel_processing <- function(enabled = FALSE, max_workers = 4) {
-  if (!enabled) {
-    return(FALSE)
-  }
-
-  if (!requireNamespace("future", quietly = TRUE)) {
-    warning("future package not available, parallel processing disabled")
-    return(FALSE)
-  }
-
-  library(future)
-
-  # Determine number of workers
-  available_cores <- future::availableCores()
-  workers <- min(max_workers, available_cores - 1, 8)  # Leave one core free, max 8
-
-  if (workers > 1) {
-    future::plan(future::multisession, workers = workers)
-    message("🚀 Parallel processing enabled with ", workers, " workers")
-    return(TRUE)
-  } else {
-    message("ℹ️ Parallel processing not beneficial, using sequential processing")
-    return(FALSE)
-  }
-}
-
 # =============================================================================
-# Dependency reconciliation (P0.2) and distribution coverage (P1.6) checks
+# Dependency declaration checks (used by verify_module)
 # -----------------------------------------------------------------------------
 # Rationale: the distributed submodule DESCRIPTIONs are hand-maintained and the
 # existing NAMESPACE->DESCRIPTION sync (sync_namespace_with_description) is driven
@@ -1295,111 +519,13 @@ check_module_dependencies <- function(module_dir, module_name = basename(module_
        used = usage$used)
 }
 
-# Aggregate check across modules. `module_specs` is a named list: name -> dir.
-# Prints a report and stops for any declaration or source-parse violation.
-check_all_modules_dependencies <- function(module_specs, fail_on_error = TRUE) {
-  cat("\n🔎 Reconciling submodule dependencies (pkg:: usage vs DESCRIPTION)...\n")
-  base <- get_base_packages()
-  any_errors <- FALSE
-
-  for (nm in names(module_specs)) {
-    dir <- module_specs[[nm]]
-    if (is.null(dir) || !dir.exists(dir)) {
-      cat("  ⏭️  ", nm, ": directory not found, skipping\n", sep = "")
-      next
-    }
-    res <- check_module_dependencies(dir, nm, base)
-    if (length(res$errors) == 0 && length(res$warnings) == 0 &&
-        length(res$parse_errors) == 0) {
-      cat("  ✅ ", nm, ": all used packages declared\n", sep = "")
-    }
-    if (length(res$parse_errors) > 0) {
-      any_errors <- TRUE
-      cat("  ❌ ", nm, ": could not parse R source: ",
-          paste(res$parse_errors, collapse = "; "), "\n", sep = "")
-    }
-    if (length(res$warnings) > 0) {
-      any_errors <- TRUE
-      cat("  ⚠️  ", nm, ": used behind requireNamespace() but NOT declared (add to Imports; ",
-          "jamovi installs Imports first-run, so runtime deps must NOT sit in Suggests): ",
-          paste(res$warnings, collapse = ", "), "\n", sep = "")
-    }
-    if (length(res$errors) > 0) {
-      any_errors <- TRUE
-      cat("  ❌ ", nm, ": unguarded package use is not in Imports/Depends: ",
-          paste(res$errors, collapse = ", "), "\n", sep = "")
-    }
-  }
-
-  if (any_errors && fail_on_error) {
-    stop("❌ Dependency reconciliation failed: one or more submodules use packages ",
-         "without a direct DESCRIPTION declaration. Add every runtime dependency ",
-         "(unguarded AND requireNamespace-guarded) to Imports/Depends -- jamovi ",
-         "installs Imports first-run and cannot install a missing package on demand, ",
-         "so Suggests is not a valid home for runtime deps.")
-  }
-  invisible(!any_errors)
-}
-
-# -----------------------------------------------------------------------------
-# Distribution coverage (P1.6): assert every production analysis is routed to
-# exactly one submodule; surface analyses that route nowhere or to >1 module,
-# and analyses parked in dev/test (…T) or undistributed (…D) buckets. This is a
-# REPORT by default (warn, not stop) because the …D staging convention legitimately
-# leaves many analyses umbrella-only; set fail_on_gap=TRUE to harden a release build.
-# -----------------------------------------------------------------------------
-check_distribution_coverage <- function(all_analyses, module_modules,
-                                        fail_on_gap = FALSE) {
-  cat("\n🗺️  Checking distribution coverage (analysis -> submodule routing)...\n")
-  all_analyses <- unique(all_analyses)
-
-  # Which module(s) claim each analysis
-  claim_count <- setNames(integer(length(all_analyses)), all_analyses)
-  duplicates <- list()
-  for (nm in names(module_modules)) {
-    claimed <- intersect(module_modules[[nm]], all_analyses)
-    for (a in claimed) claim_count[[a]] <- claim_count[[a]] + 1L
-  }
-  distributed <- names(claim_count)[claim_count >= 1L]
-  unrouted <- names(claim_count)[claim_count == 0L]
-  multi <- names(claim_count)[claim_count >= 2L]
-
-  cat("  📊 ", length(distributed), "/", length(all_analyses),
-      " production analyses routed to a submodule\n", sep = "")
-
-  if (length(multi) > 0) {
-    for (a in multi) {
-      owners <- names(module_modules)[vapply(module_modules,
-                                             function(v) a %in% v, logical(1))]
-      cat("  ❗ '", a, "' routed to MULTIPLE submodules: ",
-          paste(owners, collapse = ", "), "\n", sep = "")
-    }
-  }
-  if (length(unrouted) > 0) {
-    cat("  ℹ️  ", length(unrouted), " analyses route to NO submodule (umbrella-only). ",
-        "First few: ", paste(utils::head(unrouted, 8), collapse = ", "),
-        if (length(unrouted) > 8) ", ..." else "", "\n", sep = "")
-  }
-
-  if ((length(multi) > 0 || (fail_on_gap && length(unrouted) > 0))) {
-    if (length(multi) > 0)
-      stop("❌ Distribution coverage failed: analyses routed to more than one submodule (see above).")
-    if (fail_on_gap)
-      stop("❌ Distribution coverage failed: analyses routed to no submodule (fail_on_gap=TRUE).")
-  }
-  invisible(list(distributed = distributed, unrouted = unrouted, multi = multi))
-}
-
 # =============================================================================
-# Test distribution & infrastructure (P1.4 / P1.5)
+# Test infrastructure
 # -----------------------------------------------------------------------------
-# The umbrella has a rich test suite but none of it was shipped to submodules
-# (copy_test_files was off and every module's test_files list was empty), so the
-# dependency regressions above shipped with no CI net. These helpers (a) generate
-# a tests/testthat.R runner so any distributed tests actually run under
-# devtools::test()/R CMD check, (b) install a self-contained dependency-guard test
-# that is the runtime twin of check_module_dependencies(), and (c) provide a
-# name-keyed copier so the umbrella's `test-<analysis>*.R` files can be distributed.
+# The planner ships the self-contained dependency-guard test (the runtime twin of
+# check_module_dependencies()) and, with copy_test_files, the umbrella's
+# test-<analysis>*.R files. A tests/testthat.R runner makes them run under
+# devtools::test()/R CMD check.
 # =============================================================================
 
 # Write tests/testthat.R (the standard testthat runner) if the module lacks one.
@@ -1422,269 +548,6 @@ ensure_testthat_runner <- function(module_dir) {
     cat("  🧪 Generated tests/testthat.R runner for ", pkg_name, "\n", sep = "")
   }
   invisible(TRUE)
-}
-
-# Copy the self-contained dependency-guard test into a submodule (always refreshed).
-write_dependency_guard_test <- function(module_dir, template_path) {
-  if (!file.exists(template_path)) {
-    warning("Dependency-guard test template not found: ", template_path)
-    return(invisible(FALSE))
-  }
-  dest_dir <- file.path(module_dir, "tests", "testthat")
-  if (!dir.exists(dest_dir)) dir.create(dest_dir, recursive = TRUE)
-  fs::file_copy(template_path,
-                file.path(dest_dir, "test-zzz-dependency-declaration.R"),
-                overwrite = TRUE)
-  cat("  🛡️  Installed dependency-guard test in ", basename(module_dir), "\n", sep = "")
-  invisible(TRUE)
-}
-
-# Distribute the umbrella's per-analysis tests (test-<name>.R, test-<name>-*.R) for
-# a set of analysis names. Returns the vector of copied file basenames. Anchored so
-# 'survival' does not also match 'survivalcont'. When `module_name` is supplied the
-# copied tests are namespace-translated (ClinicoPath -> module_name) so they run
-# against the submodule package -- self-contained, so it does NOT depend on the
-# separately-gated replace_clinicopath_with_module()/webpage step.
-copy_module_tests <- function(module_names, source_test_dir, dest_test_dir,
-                              module_name = NULL) {
-  if (!dir.exists(source_test_dir) || length(module_names) == 0)
-    return(character(0))
-  if (!dir.exists(dest_test_dir)) dir.create(dest_test_dir, recursive = TRUE)
-
-  # testthat auto-loads helper-*.R from tests/testthat before running any test, so a
-  # helper is part of its analysis's suite, not an optional extra. Globbing only
-  # "^test-" shipped tests whose shared setup was left behind -- e.g.
-  # helper-decisioncompare.R defines call_decisioncompare(), without which every
-  # copied test-decisioncompare*.R fails with "could not find function".
-  all_tests <- list.files(source_test_dir, pattern = "^(test|helper)-.*\\.R$")
-  copied <- character(0)
-  for (nm in module_names) {
-    pat <- paste0("^(test|helper)-", nm, "(\\.R$|[.-])")
-    hits <- all_tests[grepl(pat, all_tests, ignore.case = FALSE)]
-    for (h in hits) {
-      dest <- file.path(dest_test_dir, h)
-      if (is.null(module_name)) {
-        fs::file_copy(file.path(source_test_dir, h), dest, overwrite = TRUE)
-      } else {
-        txt <- readLines(file.path(source_test_dir, h), warn = FALSE)
-        txt <- gsub("library(ClinicoPath)", paste0("library(", module_name, ")"), txt, fixed = TRUE)
-        txt <- gsub("ClinicoPath::", paste0(module_name, "::"), txt, fixed = TRUE)
-        txt <- gsub('package = "ClinicoPath"', paste0('package = "', module_name, '"'), txt, fixed = TRUE)
-        txt <- gsub("package = 'ClinicoPath'", paste0("package = '", module_name, "'"), txt, fixed = TRUE)
-        writeLines(txt, dest)
-      }
-      copied <- c(copied, h)
-    }
-  }
-  unique(copied)
-}
-
-
-# ---------------------------------------------------------------------------
-# Shared-helper distribution check
-#
-# A submodule's .b.R files are copied from the umbrella, but the SHARED helper
-# files they call are copied only if they are listed in that module's `r_files`.
-# Miss one and nothing fails here: the umbrella keeps working (the helper is in
-# its namespace), the copy succeeds, and the breakage appears only in the
-# SHIPPED module, at runtime, as "could not find function <helper>" on every
-# analysis that touches it.
-#
-# Real instance: R/ggstatsplot_utils.R defines withBaseFormulaChar(), called by
-# jjbetweenstats, jjdotplotstats and statsplot2 - all three ship to jjstatsplot,
-# whose r_files listed only utils.R and arcdiagram_vendored.R.
-#
-# Candidates are restricted to functions DEFINED in the umbrella's own non-.b.R
-# R files, so package functions and base R can never be flagged.
-check_shared_helper_distribution <- function(module_specs, main_repo_dir = ".",
-                                             fail_on_error = TRUE) {
-  cat("\U0001F517 Checking shared helper distribution...\n")
-
-  # Anchored at column 0 on purpose. Allowing leading whitespace picks up every
-  # nested closure - `fn = function()` inside a list(), `warning = function(w)` as
-  # a tryCatch handler - and then flags calls to `fn()` or `warning()` as missing
-  # package helpers. Top-level definitions are the only ones that land in a
-  # namespace, which is exactly what this check is about.
-  defs_of <- function(path) {
-    txt <- tryCatch(readLines(path, warn = FALSE), error = function(e) character(0))
-    m <- regmatches(txt, regexpr("^([A-Za-z.][A-Za-z0-9._]*)\\s*(<-|=)\\s*function", txt))
-    sub("\\s*(<-|=)\\s*function.*$", "", trimws(m))
-  }
-
-  umbrella_r <- list.files(file.path(main_repo_dir, "R"), pattern = "\\.[Rr]$")
-  umbrella_r <- umbrella_r[!grepl("\\.(b|h)\\.R$", umbrella_r)]
-  helper_file <- list()          # function name -> defining file
-  for (f in umbrella_r)
-    for (d in defs_of(file.path(main_repo_dir, "R", f)))
-      if (nzchar(d)) helper_file[[d]] <- f
-
-  problems <- list()
-  for (nm in names(module_specs)) {
-    spec <- module_specs[[nm]]
-    mod_dir <- spec$directory
-    if (is.null(mod_dir) || !dir.exists(file.path(mod_dir, "R"))) next
-
-    shipped_r <- list.files(file.path(mod_dir, "R"), pattern = "\\.[Rr]$")
-    # Everything the shipped module can actually resolve.
-    available <- unlist(lapply(shipped_r, function(f) defs_of(file.path(mod_dir, "R", f))))
-
-    for (b in shipped_r[grepl("\\.b\\.R$", shipped_r)]) {
-      txt <- paste(readLines(file.path(mod_dir, "R", b), warn = FALSE), collapse = "\n")
-      for (h in names(helper_file)) {
-        if (h %in% available) next
-        # bare call `helper(` but not `pkg::helper(` and not `$helper(`
-        if (grepl(paste0("(^|[^A-Za-z0-9._$:])", h, "\\s*\\("), txt))
-          problems[[length(problems) + 1]] <- list(
-            module = nm, caller = b, fn = h, file = helper_file[[h]])
-      }
-    }
-  }
-
-  if (length(problems) == 0) {
-    cat("  ✅ Every shared helper called by a shipped .b.R is distributed\n")
-    return(invisible(TRUE))
-  }
-  for (p in problems)
-    cat("  ❌ ", p$module, ": ", p$caller, " calls ", p$fn, "() but ",
-        p$file, " is not in its r_files\n", sep = "")
-  if (fail_on_error)
-    stop("❌ Shared helper distribution failed: add the listed file(s) to the ",
-         "module's r_files in _updateModules_config.yaml")
-  invisible(FALSE)
-}
-
-# ---------------------------------------------------------------------------
-# Minimal shared-helper distribution and stale-file pruning
-#
-# Production submodules should receive the umbrella helpers their copied .b.R
-# files actually call, not an entire grab bag of unrelated exported utilities.
-# The selected expressions are parsed from the umbrella source on every update,
-# so there is no second hand-maintained copy that can drift.
-# deparse() renders a source-level \u{XXXX} escape back as the LITERAL character,
-# so an umbrella helper that was carefully ASCII-escaped lands in the submodule with
-# raw UTF-8 in its string constants -- R CMD check: "Portable packages must use only
-# ASCII characters in their R code". Re-escape after deparsing. \u{} is BMP-only, so
-# astral code points need \U{}. (Real instance: the em dash in .medianFollowUpExplanation
-# tripped OncoPath's non-ASCII WARNING, 2026-09-08.)
-escape_non_ascii_code <- function(lines) {
-  vapply(lines, function(line) {
-    cps <- utf8ToInt(line)
-    if (is.na(cps[1L]) || !any(cps > 127L)) return(line)
-    chars <- strsplit(line, "", fixed = TRUE)[[1]]
-    chars[cps > 127L] <- ifelse(cps[cps > 127L] <= 0xFFFFL,
-                                sprintf("\\u{%04X}", cps[cps > 127L]),
-                                sprintf("\\U{%08X}", cps[cps > 127L]))
-    paste0(chars, collapse = "")
-  }, character(1), USE.NAMES = FALSE)
-}
-
-distribute_selected_r_symbols <- function(module_dir, main_repo_dir, specs) {
-  if (length(specs) == 0L) return(invisible(character(0)))
-
-  r_dir <- file.path(module_dir, "R")
-  dir.create(r_dir, recursive = TRUE, showWarnings = FALSE)
-  written <- character(0)
-
-  for (spec in specs) {
-    source_name <- spec$source %||% ""
-    destination_name <- spec$destination %||% source_name
-    symbols <- unlist(spec$symbols, use.names = FALSE)
-
-    if (!nzchar(source_name) || !nzchar(destination_name) || length(symbols) == 0L)
-      stop("Each r_symbol_files entry needs source, destination, and symbols")
-    if (dirname(source_name) != "." || dirname(destination_name) != ".")
-      stop("r_symbol_files source and destination must be plain file names")
-
-    source_path <- file.path(main_repo_dir, "R", source_name)
-    if (!file.exists(source_path))
-      stop("Selected-symbol source does not exist: ", source_path)
-
-    expressions <- parse(source_path, keep.source = FALSE)
-    definition_name <- function(expr) {
-      if (!is.call(expr) || length(expr) < 3L ||
-          !as.character(expr[[1]]) %in% c("<-", "=")) return(NA_character_)
-      lhs <- expr[[2]]
-      if (is.symbol(lhs)) as.character(lhs) else NA_character_
-    }
-    names_found <- vapply(expressions, definition_name, character(1))
-    missing <- setdiff(symbols, names_found)
-    if (length(missing) > 0L)
-      stop("Symbols not found in ", source_name, ": ", paste(missing, collapse = ", "))
-
-    selected <- lapply(symbols, function(symbol) expressions[[match(symbol, names_found)]])
-    # Default deparse control: "keepInteger" alone writes NA_real_ as a logical NA.
-    rendered <- unlist(lapply(selected, function(expr) {
-      c(deparse(expr, width.cutoff = 100L), "")
-    }), use.names = FALSE)
-    if (!identical(as.list(parse(text = rendered, keep.source = FALSE)), selected))
-      stop("Rendering changed the code of ", destination_name, "; refusing to ship it")
-    escaped <- escape_non_ascii_code(rendered)
-    # Only accept the escaping if it is a no-op on the parse tree. A non-ASCII
-    # character outside a string constant (a backticked identifier, say) must not
-    # be turned into a \u escape.
-    if (!identical(rendered, escaped)) {
-      ok <- tryCatch(identical(parse(text = rendered, keep.source = FALSE),
-                               parse(text = escaped,  keep.source = FALSE)),
-                     error = function(e) FALSE)
-      if (ok) rendered <- escaped
-      else warning("Non-ASCII escaping changed the parse tree for ", destination_name,
-                   "; shipping unescaped (R CMD check will flag it)")
-    }
-    destination_path <- file.path(r_dir, destination_name)
-    writeLines(c(
-      "# Generated by _updateModules.R from explicitly selected umbrella helpers.",
-      "# Edit the source named in _updateModules_config.yaml, not this file.",
-      "",
-      rendered
-    ), destination_path)
-    written <- c(written, destination_path)
-    cat("  \U0001F9E9 Wrote selected helpers to ", destination_name, ": ",
-        paste(symbols, collapse = ", "), "\n", sep = "")
-  }
-
-  invisible(written)
-}
-
-distribute_module_i18n <- function(module_dir, main_repo_dir, files) {
-  files <- unlist(files, use.names = FALSE)
-  if (length(files) == 0L) return(invisible(character(0)))
-  if (any(!nzchar(files)) || any(dirname(files) != "."))
-    stop("i18n_files entries must be non-empty plain file names")
-
-  source_dir <- file.path(main_repo_dir, "jamovi", "i18n")
-  missing <- files[!file.exists(file.path(source_dir, files))]
-  if (length(missing) > 0L)
-    stop("Configured translation catalogs do not exist: ", paste(missing, collapse = ", "))
-
-  destination_dir <- file.path(module_dir, "jamovi", "i18n")
-  dir.create(destination_dir, recursive = TRUE, showWarnings = FALSE)
-  destinations <- file.path(destination_dir, files)
-  for (i in seq_along(files)) {
-    fs::file_copy(
-      file.path(source_dir, files[[i]]),
-      destinations[[i]],
-      overwrite = TRUE
-    )
-  }
-  cat("  🌐 Copied translation catalogs: ",
-      paste(files, collapse = ", "), "\n", sep = "")
-  invisible(destinations)
-}
-
-prune_configured_module_r_files <- function(module_dir, files) {
-  files <- unlist(files, use.names = FALSE)
-  if (length(files) == 0L) return(invisible(character(0)))
-  if (any(dirname(files) != "."))
-    stop("prune_r_files entries must be plain file names")
-
-  paths <- file.path(module_dir, "R", files)
-  present <- paths[file.exists(paths)]
-  if (length(present) > 0L && !all(file.remove(present)))
-    stop("Could not remove one or more configured stale R files")
-  if (length(present) > 0L)
-    cat("  \U0001F9F9 Removed stale R files: ",
-        paste(basename(present), collapse = ", "), "\n", sep = "")
-  invisible(present)
 }
 
 prune_configured_module_imports <- function(module_dir, packages) {
@@ -1736,15 +599,12 @@ add_configured_module_imports <- function(module_dir, packages) {
   invisible(missing)
 }
 
-message("✅ Module utilities loaded successfully")
-
 # ---------------------------------------------------------------------------
 # Prune orphaned analyses from a submodule's jamovi/0000.yaml
 # ---------------------------------------------------------------------------
 # jmvtools::prepare() MERGES into 0000.yaml rather than rebuilding it, so an
 # analysis stays listed forever once written -- including after it is re-routed
-# out of the submodule (menuGroup gets a T/D suffix and its files stop being
-# copied). The jamovi compiler then emits exports for classes that no longer
+# out of the submodule (menuGroup gets a T/P/D suffix and its files are pruned). The jamovi compiler then emits exports for classes that no longer
 # exist and the install dies with:
 #     undefined exports: clinicalscoreClass, clinicalscoreOptions, ...
 # That is exactly what happened to meddecide with 7 T-routed analyses.
@@ -1797,70 +657,328 @@ prune_orphan_analyses <- function(module_dir) {
   invisible(length(dropped))
 }
 
-# ---------------------------------------------------------------------------
-# When an analysis changes its menuGroup in jamovi/<name>.a.yaml (e.g. from
-# OncoPathT to OncoPath, or from meddecide to meddecideT), it enters a new
-# module manifest and leaves the old module manifest.
+# =============================================================================
+# Pipeline: apply -> build -> verify -> install (driven by _updateModules.R)
 #
-# prune_stale_module_analyses() detects any analysis files in module_dir that
-# originated from the umbrella repository but are NO LONGER in the submodule's
-# active_module_names. It cleanly removes:
-#   1. jamovi/<name>.a.yaml, .r.yaml, .u.yaml
-#   2. R/<name>.b.R, .h.R
-#   3. Companion R files matching R/<name>[-_]*.R
-#   4. JS/HTML assets matching jamovi/js/<name>*.(js|html)
-# This prevents stale analyses and their companion files from lingering in
-# submodules after menuGroup re-routing.
-prune_stale_module_analyses <- function(module_dir, active_module_names, main_repo_dir) {
-  if (!dir.exists(module_dir)) return(invisible(character(0)))
+# Every step stop()s on failure. run_module() turns the first failure into a
+# FAILED result for that module only, so nothing after the failing step runs
+# (in particular: no install of a module that did not verify).
+# =============================================================================
 
-  jamovi_dir <- file.path(module_dir, "jamovi")
-  r_dir      <- file.path(module_dir, "R")
-  js_dir     <- file.path(module_dir, "jamovi", "js")
+# Writes lines only when they differ, so an unchanged file keeps its bytes.
+.write_if_changed <- function(lines, target) {
+  if (file.exists(target) && identical(readLines(target, warn = FALSE), lines)) return(invisible(FALSE))
+  dir.create(dirname(target), recursive = TRUE, showWarnings = FALSE)
+  writeLines(lines, target)
+  invisible(TRUE)
+}
 
-  if (!dir.exists(jamovi_dir)) return(invisible(character(0)))
+# DESCRIPTION Version/Date, CITATION.cff and jamovi/0000.yaml version/date.
+set_module_version <- function(module_dir, version, date) {
+  d <- desc::desc(file = file.path(module_dir, "DESCRIPTION"))
+  d$set(Version = version, Date = date)
+  d$write(file = file.path(module_dir, "DESCRIPTION"))
+  cff <- file.path(module_dir, "CITATION.cff")
+  if (file.exists(cff)) {
+    l <- readLines(cff, warn = FALSE)
+    l <- sub("^version:.*$", paste0('version: "', version, '"'), l)
+    .write_if_changed(sub("^date-released:.*$", paste0("date-released: '", date, "'"), l), cff)
+  }
+  zero <- file.path(module_dir, "jamovi", "0000.yaml")
+  if (file.exists(zero)) {
+    l <- readLines(zero, warn = FALSE)
+    l <- sub("^version:.*$", paste0("version: ", version), l)
+    .write_if_changed(sub("^date:.*$", paste0("date: '", date, "'"), l), zero)
+  }
+  invisible(TRUE)
+}
 
-  # Existing .a.yaml files in this submodule
-  existing_yaml <- list.files(jamovi_dir, pattern = "\\.a\\.yaml$", full.names = FALSE)
-  existing_analyses <- gsub("\\.a\\.yaml$", "", existing_yaml)
-
-  # All known umbrella analyses
-  umbrella_yaml <- list.files(file.path(main_repo_dir, "jamovi"), pattern = "\\.a\\.yaml$", full.names = FALSE)
-  umbrella_analyses <- gsub("\\.a\\.yaml$", "", umbrella_yaml)
-
-  # Stale analyses: umbrella analyses currently on disk in this submodule
-  # that are NO LONGER in active_module_names
-  stale_analyses <- setdiff(intersect(existing_analyses, umbrella_analyses), active_module_names)
-
-  if (length(stale_analyses) == 0L) return(invisible(character(0)))
-
-  cat("  \U0001F9F9 Pruning stale analyses re-routed out of this module: ",
-      paste(stale_analyses, collapse = ", "), "\n", sep = "")
-
-  for (sa in stale_analyses) {
-    # 1. YAML files in jamovi/
-    y_files <- file.path(jamovi_dir, paste0(sa, c(".a.yaml", ".r.yaml", ".u.yaml")))
-    y_present <- y_files[file.exists(y_files)]
-    if (length(y_present) > 0L) file.remove(y_present)
-
-    # 2. Main R backend files in R/
-    main_r <- file.path(r_dir, paste0(sa, c(".b.R", ".h.R")))
-    main_r_present <- main_r[file.exists(main_r)]
-    if (length(main_r_present) > 0L) file.remove(main_r_present)
-
-    # 3. Companion / split / helper R files in R/
-    comp_pattern <- paste0("^", sa, "[-_].*\\.[rR]$")
-    comp_files <- list.files(r_dir, pattern = comp_pattern, full.names = TRUE)
-    if (length(comp_files) > 0L) file.remove(comp_files)
-
-    # 4. JS/HTML assets in jamovi/js/
-    if (dir.exists(js_dir)) {
-      js_pattern <- paste0("^", sa, ".*\\.(js|html)$")
-      js_files <- list.files(js_dir, pattern = js_pattern, full.names = TRUE)
-      if (length(js_files) > 0L) file.remove(js_files)
+apply_distribution_plan <- function(mp, reg, other_module_dirs = character()) {
+  dir <- mp$dir
+  for (p in mp$delete) {
+    f <- file.path(dir, p)
+    if (file.exists(f) && !file.remove(f)) stop("could not delete ", f)
+  }
+  for (i in seq_len(nrow(mp$files))) {
+    row <- mp$files[i, ]
+    target <- file.path(dir, row$dest)
+    lines <- render_entry(row, mp, reg)
+    if (!is.null(lines)) {
+      .write_if_changed(lines, target)
+    } else if (!file.exists(target) || tools::md5sum(row$src) != tools::md5sum(target)) {
+      dir.create(dirname(target), recursive = TRUE, showWarnings = FALSE)
+      if (!file.copy(row$src, target, overwrite = TRUE)) stop("could not copy ", row$src, " to ", target)
     }
   }
+  set_module_version(dir, mp$description$version, mp$description$date)
+  # roxygen re-creates Collate (complete) only while an @include ships, and never
+  # removes a stale one: OncoPath once listed 12 deleted stagemigration files.
+  if (length(mp$description$collate)) desc::desc_del("Collate", file = file.path(dir, "DESCRIPTION"))
+  prune_configured_module_imports(dir, mp$description$prune_imports)
+  add_configured_module_imports(dir, mp$description$extra_imports)
+  document_module_omv(dir, mp$name, other_module_dirs)
+  .ensure_rbuildignore_omv(dir)
+  ensure_testthat_runner(dir)
+  cat(sprintf("  applied: %d file(s) planned, %d deleted\n", nrow(mp$files), length(mp$delete)))
+  invisible(TRUE)
+}
 
-  invisible(stale_analyses)
+# One step in a clean child R process. jmvtools::prepare() exits 0 on a YAML
+# compile error, so the log is scanned as well as the exit status.
+run_child <- function(dir, code, step) {
+  out <- suppressWarnings(system2(
+    file.path(R.home("bin"), "Rscript"),
+    c("--vanilla", "-e", shQuote(sprintf('Sys.unsetenv("ELECTRON_RUN_AS_NODE"); setwd(%s); %s', deparse(dir), code))),
+    stdout = TRUE, stderr = TRUE))
+  status <- attr(out, "status") %||% 0L
+  if (status != 0L || any(grepl("Unable to compile|^Error|^\\s*\\^+\\s*$", out)))
+    stop(step, " failed (exit ", status, "):\n", paste(utils::tail(out, 25), collapse = "\n"), call. = FALSE)
+  invisible(out)
+}
+
+build_module <- function(mp) {
+  dir <- mp$dir
+  prune_orphan_analyses(dir)
+  run_child(dir, "jmvtools::prepare()", "prepare")
+  run_child(dir, "devtools::document()", "document")
+  before <- tools::md5sum(file.path(dir, "DESCRIPTION"))
+  if (!isTRUE(sync_namespace_with_description(dir))) stop("NAMESPACE -> DESCRIPTION sync failed", call. = FALSE)
+  if (tools::md5sum(file.path(dir, "DESCRIPTION")) != before) {
+    run_child(dir, "jmvtools::prepare()", "prepare (after Imports sync)")
+    run_child(dir, "devtools::document()", "document (after Imports sync)")
+  }
+  postprocess_module_examples(dir, mp$pkg)
+  invisible(TRUE)
+}
+
+# Problems that must stop the install; returns character(0) when clean.
+verify_module <- function(mp, guard_template) {
+  dir <- mp$dir
+  problems <- character()
+
+  d <- file.path(dir, "DESCRIPTION")
+  if (desc::desc_has_fields("Collate", file = d)) {
+    collate <- desc::desc_get_collate(file = d)
+    on_disk <- list.files(file.path(dir, "R"), "\\.[Rr]$")
+    if (!setequal(collate, on_disk))
+      problems <- c(problems, paste0("Collate does not match R/ (case-exact). Missing from R/: ",
+                                     paste(setdiff(collate, on_disk), collapse = ", "), "; not in Collate: ",
+                                     paste(setdiff(on_disk, collate), collapse = ", ")))
+  }
+
+  deps <- check_module_dependencies(dir, mp$name)
+  if (length(deps$parse_errors)) problems <- c(problems, paste("parse errors:", paste(deps$parse_errors, collapse = "; ")))
+  if (length(deps$errors)) problems <- c(problems, paste("used via pkg:: but not in Imports:", paste(deps$errors, collapse = ", ")))
+  if (length(deps$warnings)) problems <- c(problems, paste("guarded use not in Suggests/Imports:", paste(deps$warnings, collapse = ", ")))
+
+  imported <- unique(vapply(parseNamespaceFile(basename(dir), dirname(dir))$imports, function(x) x[[1]], ""))
+  imports <- get_description_dependencies(d)$required
+  left <- intersect(mp$description$prune_imports, c(imported, imports))
+  if (length(left))
+    problems <- c(problems, paste0("prune_imports still imported: ", paste(left, collapse = ", "),
+                                   " -- remove its @import/@importFrom tag (usually R/zzz_imports.R)"))
+
+  guard <- new.env()
+  for (e in parse(guard_template, keep.source = FALSE))
+    if (is.call(e) && identical(e[[1]], as.name("<-")) && startsWith(as.character(e[[2]]), ".dependency_guard_"))
+      eval(e, guard)
+  usage <- guard$.dependency_guard_symbol_use(file.path(dir, "R"))
+  resolution <- guard$.dependency_guard_importable(file.path(dir, "NAMESPACE"), usage$defined)
+  if (length(resolution$unexpandable))
+    problems <- c(problems, paste("import(pkg) of a package that is not installed:", paste(resolution$unexpandable, collapse = ", ")))
+  unresolved <- setdiff(names(usage$used), c(resolution$importable, guard$.dependency_guard_language_symbols()))
+  if (length(unresolved))
+    problems <- c(problems, paste0("called but not resolvable from the namespace: ",
+                                   paste(vapply(unresolved, function(s) paste0(s, " (", usage$used[[s]]$file, ")"), ""), collapse = ", ")))
+  problems
+}
+
+postprocess_module_examples <- function(module_dir, module_name) {
+  targets <- c(list.files(file.path(module_dir, "R"), "\\.h\\.R$", full.names = TRUE),
+               list.files(file.path(module_dir, "man"), "\\.Rd$", full.names = TRUE))
+  for (f in targets) {
+    txt <- readLines(f, warn = FALSE)
+    txt <- gsub('package = "ClinicoPath"', paste0('package = "', module_name, '"'), txt, fixed = TRUE)
+    txt <- gsub("package = 'ClinicoPath'", paste0("package = '", module_name, "'"), txt, fixed = TRUE)
+    # parent example datasets are not shipped, so these examples must not run under --run-donttest
+    .write_if_changed(gsub("\\donttest{", "\\dontrun{", txt, fixed = TRUE), f)
+  }
+  invisible(TRUE)
+}
+
+# jmvtools::install() returns normally when the jamovi build fails, so trust the
+# .jmo on disk, not the return value.
+install_module_verified <- function(module_dir, pkg) {
+  jmo_of <- function() list.files(module_dir, sprintf("^%s_.*\\.jmo$", pkg), full.names = TRUE)
+  before <- suppressWarnings(max(file.mtime(jmo_of()), na.rm = TRUE))
+  for (vdir in list.dirs(file.path(module_dir, "build"), recursive = FALSE))
+    unlink(list.files(vdir, "^00LOCK", full.names = TRUE), recursive = TRUE, force = TRUE)
+  old <- setwd(module_dir)
+  on.exit(setwd(old), add = TRUE)
+  jmvtools::install()
+  after <- jmo_of()
+  if (!length(after)) stop("no .jmo produced for ", pkg, call. = FALSE)
+  newest <- after[which.max(file.mtime(after))]
+  if (is.finite(before) && file.mtime(newest) <= before) stop(".jmo not regenerated for ", pkg, call. = FALSE)
+  cat("  built", basename(newest), "\n")
+  invisible(newest)
+}
+
+# pkgdown renders every root .md and fails on dev notes with invalid YAML; hide them.
+build_module_site <- function(module_dir) {
+  if (!file.exists(file.path(module_dir, "_pkgdown.yml"))) return(invisible(FALSE))
+  old <- setwd(module_dir)
+  on.exit(setwd(old), add = TRUE)
+  dev <- intersect(c("AGENTS.md", "CLAUDE.md", "GEMINI.md", "TODO.md"), list.files())
+  stash <- tempfile("pkgdown-dev-")
+  dir.create(stash)
+  file.rename(dev, file.path(stash, dev))
+  on.exit(file.rename(file.path(stash, dev), dev), add = TRUE)
+  pkgdown::build_site(lazy = TRUE)
+  invisible(TRUE)
+}
+
+run_module <- function(mp, reg, opts) {
+  res <- list(module = mp$name, status = "OK", step = "", message = "")
+  step <- "apply"
+  tryCatch({
+    cat("\n==", mp$name, "==\n")
+    apply_distribution_plan(mp, reg, opts$other_dirs[[mp$name]])
+    if (isTRUE(opts$build)) {
+      step <- "build";   build_module(mp)
+      step <- "verify";  problems <- verify_module(mp, opts$guard_template)
+      if (length(problems)) stop(paste(problems, collapse = "\n"), call. = FALSE)
+      if (isTRUE(opts$install)) { step <- "install"; install_module_verified(mp$dir, mp$pkg) }
+      if (isTRUE(opts$check)) { step <- "check"; run_child(mp$dir, 'devtools::check(error_on = "error")', "R CMD check") }
+      if (isTRUE(opts$webpage)) { step <- "site"; build_module_site(mp$dir) }
+    }
+    cat("  OK\n")
+  }, error = function(e) {
+    res$status <<- "FAILED"
+    res$step <<- step
+    res$message <<- conditionMessage(e)
+    cat("  FAILED at", step, ":", conditionMessage(e), "\n")
+  })
+  res
+}
+
+# Analyses added / updated / removed, from a diff_module() table.
+.analysis_changes <- function(df) {
+  a_of <- function(p) sub("\\.(b\\.R|a\\.yaml|r\\.yaml|u\\.yaml)$", "",
+                          basename(p[grepl("^(R/[^/]+\\.b\\.R|jamovi/[^/]+\\.(a|r|u)\\.yaml)$", p)]))
+  added <- a_of(df$path[df$action == "add" & grepl("\\.b\\.R$", df$path)])
+  removed <- a_of(df$path[df$action == "delete" & grepl("\\.b\\.R$|\\.a\\.yaml$", df$path)])
+  updated <- setdiff(a_of(df$path[df$action %in% c("add", "update")]), added)
+  other <- df$action != "same" & grepl("^R/", df$path) & !grepl("\\.(b|h)\\.R$", df$path) & !grepl("^R/data_", df$path)
+  helpers <- paste0(c(add = "+", update = "~", delete = "-")[df$action[other]], basename(df$path[other]))
+  list(added = sort(unique(added)), updated = sort(unique(updated)),
+       removed = sort(unique(removed)), helpers = sort(unique(helpers)))
+}
+
+print_run_summary <- function(plan, diffs, results = NULL, dry_run = FALSE) {
+  cat("\n================ _updateModules summary ================\n")
+  if (dry_run) cat("(dry run: nothing was written)\n")
+  cat(sprintf("%-24s %-8s %-8s %8s %6s %8s %8s\n", "module", "status", "step", "analyses", "added", "updated", "removed"))
+  for (m in names(plan$modules)) {
+    ch <- .analysis_changes(diffs[[m]])
+    r <- if (!is.null(results)) results[[m]] else list(status = if (dry_run) "planned" else "-", step = "")
+    cat(sprintf("%-24s %-8s %-8s %8d %6d %8d %8d\n", m, r$status, r$step,
+                length(plan$modules[[m]]$analyses), length(ch$added), length(ch$updated), length(ch$removed)))
+  }
+  for (m in names(plan$modules)) {
+    ch <- .analysis_changes(diffs[[m]])
+    if (!length(c(ch$added, ch$updated, ch$removed, ch$helpers))) next
+    cat("\n", m, ":\n", sep = "")
+    if (length(ch$added))   cat("  added:  ", paste(ch$added, collapse = ", "), "\n")
+    if (length(ch$updated)) cat("  updated:", paste(ch$updated, collapse = ", "), "\n")
+    if (length(ch$removed)) cat("  removed:", paste(ch$removed, collapse = ", "), "\n")
+    if (length(ch$helpers)) cat("  other R files (+added ~updated -removed):", paste(ch$helpers, collapse = ", "), "\n")
+  }
+  # Categories by menuGroup suffix (see route_analyses): tests go to JamoviTest,
+  # pending and drafts stay in the umbrella.
+  r <- plan$routes
+  bare <- trimws(sub("#.*$", "", r$menu_group))
+  category <- ifelse(endsWith(bare, "T"), "tests",
+              ifelse(is.na(r$module) & endsWith(bare, "P"), "pending",
+              ifelse(is.na(r$module), "drafts", "production")))
+  cat(sprintf("\nAnalyses by category: production %d, tests %d, pending %d, drafts %d\n",
+              sum(category == "production"), sum(category == "tests"), sum(category == "pending"), sum(category == "drafts")))
+  for (k in c("tests", "pending")) {
+    sel <- r[category == k, ]
+    cat(sprintf("  %s (%d): %s\n", k, nrow(sel),
+                if (nrow(sel)) paste(sprintf("%s [%s]", sel$analysis, sel$menu_group), collapse = ", ") else "none"))
+  }
+  failed <- Filter(function(x) x$status == "FAILED", results %||% list())
+  for (f in failed) cat(sprintf("\nFAILED %s at %s:\n%s\n", f$module, f$step, f$message))
+  cat("========================================================\n")
+  invisible(length(failed))
+}
+
+# Moved from _updateModules.R: .omv documentation and build-ignore rules for data assets.
+# Ensure a submodule's .Rbuildignore excludes the non-R payload that lives in data/:
+# .omv (jamovi assets) and .csv (raw example data). R CMD check treats a data/*.csv as a
+# user-level dataset and demands documentation for it -- the main repo has ignored them
+# since forever (see its .Rbuildignore), the submodules were missing the csv rule and so
+# reported "Undocumented data sets" for every csv without an .rda twin.
+.ensure_rbuildignore_omv <- function(module_dir) {
+  rbi <- file.path(module_dir, ".Rbuildignore")
+  # Built source tarballs are release artifacts, never package payload: a stale
+  # one committed at the OncoPath root was swept into source builds.
+  want <- c("^data/.*\\.omv$", "^inst/extdata/.*\\.omv$", "^data/.*\\.csv$",
+            "^.*\\.tar\\.gz$")
+  cur <- if (file.exists(rbi)) readLines(rbi, warn = FALSE) else character(0)
+  add <- setdiff(want, cur)
+  if (length(add) > 0) {
+    writeLines(c(cur, add), rbi)
+    cat("    📦 .Rbuildignore: added", length(add), "asset rule(s)\n")
+  }
+}
+
+# omv documentation: ensure every .omv in a submodule's data/ is listed in its 0000.yaml
+# `datasets:` (jamovi's dataset browser). prepare() preserves that section, so entries persist.
+.omv_title_map <- c(
+  agepyramid = "Age Pyramid", benford = "Benford Analysis", checkdata = "Data Quality Check",
+  dataquality = "Data Quality", reportcat = "Categorical Variables Report",
+  summarydata = "Continuous Variables Summary", treatmentResponse = "Treatment Response",
+  tableone = "Table One", swimmerplot = "Swimmer Plot", waterfall = "Treatment Response Waterfall")
+
+.omv_stem <- function(omv) sub("_(test|sample|example|basic|raw|longitudinal|percentage|data)([_.].*)?$", "",
+                              sub("\\.omv$", "", omv))
+
+.omv_entry <- function(omv) {
+  stem <- .omv_stem(omv)
+  title <- if (!is.na(.omv_title_map[stem])) unname(.omv_title_map[stem]) else tools::toTitleCase(gsub("[_-]", " ", stem))
+  c(paste0("  - name: ", title), paste0("    path: ", omv),
+    paste0("    description: Example dataset for the ", title, " analysis."),
+    "    tags:", paste0("      - ", title))
+}
+
+# Add datasets entries for present-but-undocumented omv, SKIPPING omv owned by another module
+# (documented in that module's 0000.yaml). Only appends to an EXISTING datasets: section.
+document_module_omv <- function(module_dir, module_name, other_module_dirs = character(0)) {
+  zero <- file.path(module_dir, "jamovi", "0000.yaml")
+  data_dir <- file.path(module_dir, "data")
+  if (!file.exists(zero) || !dir.exists(data_dir)) return(invisible())
+  zl <- readLines(zero, warn = FALSE)
+  omv_here <- basename(list.files(data_dir, pattern = "\\.omv$"))
+  if (length(omv_here) == 0) return(invisible())
+  path_of <- function(lines) basename(trimws(gsub(".*path:\\s*", "", grep("path:.*\\.omv", lines, value = TRUE))))
+  documented <- path_of(zl)
+  owned_elsewhere <- character(0)
+  for (od in other_module_dirs) {
+    oz <- file.path(od, "jamovi", "0000.yaml")
+    if (file.exists(oz)) owned_elsewhere <- c(owned_elsewhere, path_of(readLines(oz, warn = FALSE)))
+  }
+  to_add <- setdiff(omv_here, unique(c(documented, owned_elsewhere)))
+  if (length(to_add) == 0) return(invisible())
+  ds_line <- grep("^datasets:", zl)
+  if (length(ds_line) == 0) return(invisible())  # no datasets section -> don't fabricate
+  ds_line <- ds_line[1]
+  end <- length(zl) + 1L
+  if (ds_line < length(zl)) for (i in (ds_line + 1):length(zl)) if (grepl("^[A-Za-z]", zl[i])) { end <- i; break }
+  entries <- unlist(lapply(to_add, .omv_entry))
+  writeLines(append(zl, entries, after = end - 1L), zero)
+  cat(sprintf("    📄 documented %d omv in %s 0000.yaml datasets: %s\n",
+              length(to_add), module_name, paste(to_add, collapse = ", ")))
 }
 

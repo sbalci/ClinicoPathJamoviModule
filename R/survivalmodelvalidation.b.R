@@ -264,7 +264,7 @@ survivalmodelvalidationClass <- R6::R6Class(
                 
                 # Median FOLLOW-UP by reverse Kaplan-Meier, not median(observed
                 # times) -- the latter is the median time to event-or-censoring.
-                # See .medianFollowUp() in R/survival_utils.R.
+                # See .medianFollowUp() in R/utils-followup.R.
                 mfu <- .medianFollowUp(data[[time_var]], data[[status_var]] == 0)
                 private$data_info <- list(
                     n_total = n_total,

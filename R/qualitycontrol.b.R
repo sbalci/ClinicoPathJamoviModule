@@ -1318,5 +1318,3 @@ qualitycontrolClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         )
     )
 }
-
-qualitycontrol <- qualitycontrolClass$new

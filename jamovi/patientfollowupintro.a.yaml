@@ -1,7 +1,7 @@
 ---
 name: patientfollowupintro
 title: Patient Follow-Up & Response Guide
-menuGroup: OncoPathT
+menuGroup: OncoPathP
 menuSubgroup: 'Patient Follow-Up Plots'
 menuTitle: Which Analysis Should I Use?
 menuSubtitle: Waterfall, RECIST, swimmer plot - and what your data must look like

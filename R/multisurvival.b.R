@@ -1385,7 +1385,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         myoutcome_labelled <- labelled_data$myoutcome_labelled
 
 
-        # Delegated to the shared coder in survival_utils.R. Note the two
+        # Delegated to the shared coder in utils-eventindicator.R. Note the two
         # behaviour changes here: the numeric check used sum(unique(x)) == 1,
         # which accepted nonsense pairs such as {-1, 2}; and the competing-risk
         # branch pre-filled the vector with "Censored", so patients with unknown
@@ -1916,7 +1916,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # competing event, which is a terminal outcome and not a censoring:
           # it has to be censored in the reverse-KM fit, not counted as its
           # event, or the reported follow-up is understated. The estimator
-          # itself is shared -- .medianFollowUp() in R/survival_utils.R.
+          # itself is shared -- .medianFollowUp() in R/utils-followup.R.
           cens <- if (is.factor(mydata$myoutcome) && "Censored" %in% levels(mydata$myoutcome))
             as.integer(!is.na(mydata$myoutcome) & mydata$myoutcome == "Censored")
           else

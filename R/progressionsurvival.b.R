@@ -256,7 +256,7 @@ progressionsurvivalClass <- R6::R6Class(
             # CENSORED patients only, which discards everyone who progressed and
             # conditions on having survived long enough to still be at risk, so
             # it OVERSTATES follow-up. Reverse Kaplan-Meier uses every patient.
-            # See .medianFollowUp() in R/survival_utils.R.
+            # See .medianFollowUp() in R/utils-followup.R.
             mfu <- .medianFollowUp(data$time, data$pfs_event == 0)
             median_followup <- mfu$value
 

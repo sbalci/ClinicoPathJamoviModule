@@ -1,7 +1,7 @@
 ---
 name: grouplasso
 title: Group LASSO for Survival Analysis
-menuGroup: SurvivalT
+menuGroup: SurvivalP
 menuSubgroup: Penalized Cox Regression
 menuTitle: Group LASSO Cox
 menuSubtitle: Selects or removes pre-defined biological/categorical groups together.

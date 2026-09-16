@@ -1,4 +1,4 @@
-# Regression tests for the shared event-indicator helpers in R/survival_utils.R
+# Regression tests for the shared event-indicator helpers in R/utils-eventindicator.R
 # and for the outcomeorganizer hand-off.
 
 get_util <- function(nm) {
@@ -11,7 +11,7 @@ get_util <- function(nm) {
 test_that("cause-specific censoring is disclosed even with only two observed levels", {
     define   <- get_util(".defineEventIndicator")
     describe <- get_util(".describeEventIndicator")
-    skip_if(is.null(define) || is.null(describe), "survival_utils not available")
+    skip_if(is.null(define) || is.null(describe), "utils-eventindicator helpers not available")
 
     # Only DOD and DOOC occur. analysistype = "cause" codes DOOC to 0, i.e. a
     # death is entered as a censoring -- which biases KM / median / x-year
@@ -32,7 +32,7 @@ test_that("cause-specific censoring is disclosed even with only two observed lev
 test_that("three-level cause-specific censoring is still disclosed", {
     define   <- get_util(".defineEventIndicator")
     describe <- get_util(".describeEventIndicator")
-    skip_if(is.null(define) || is.null(describe), "survival_utils not available")
+    skip_if(is.null(define) || is.null(describe), "utils-eventindicator helpers not available")
 
     oc <- factor(rep(c("Dead", "Alive", "Lost"), each = 20))
     res <- define(outcome = oc, outcomeLevel = "Dead", outcome_name = "outcome")
@@ -43,7 +43,7 @@ test_that("three-level cause-specific censoring is still disclosed", {
 test_that("an ordinary two-level outcome is not mislabeled as overall survival", {
     define   <- get_util(".defineEventIndicator")
     describe <- get_util(".describeEventIndicator")
-    skip_if(is.null(define) || is.null(describe), "survival_utils not available")
+    skip_if(is.null(define) || is.null(describe), "utils-eventindicator helpers not available")
 
     oc <- factor(rep(c("Dead", "Alive"), each = 20))
     res <- define(outcome = oc, outcomeLevel = "Dead", outcome_name = "outcome")
@@ -56,7 +56,7 @@ test_that("an ordinary two-level outcome is not mislabeled as overall survival",
 test_that("the censoring assumption is disclosed for explicit overall survival", {
     define   <- get_util(".defineEventIndicator")
     describe <- get_util(".describeEventIndicator")
-    skip_if(is.null(define) || is.null(describe), "survival_utils not available")
+    skip_if(is.null(define) || is.null(describe), "utils-eventindicator helpers not available")
 
     oc <- factor(c("DOD", "DOOC", "AWD", "AWOD"))
     res <- define(outcome = oc, multievent = TRUE, analysistype = "overall",
@@ -68,7 +68,7 @@ test_that("the censoring assumption is disclosed for explicit overall survival",
 
 test_that("an invalid logical event level is rejected", {
     define <- get_util(".defineEventIndicator")
-    skip_if(is.null(define), "survival_utils not available")
+    skip_if(is.null(define), "utils-eventindicator helpers not available")
 
     res <- define(c(TRUE, FALSE, TRUE), outcomeLevel = "Dead",
                   outcome_name = "logical_status")
@@ -77,7 +77,7 @@ test_that("an invalid logical event level is rejected", {
 
 test_that("a factor with extra declared levels is not hijacked as a hand-off", {
     define <- get_util(".defineEventIndicator")
-    skip_if(is.null(define), "survival_utils not available")
+    skip_if(is.null(define), "utils-eventindicator helpers not available")
 
     oc <- factor(c("Censored", "Event", "Competing"),
                  levels = c("Censored", "Event", "Competing", "Unknown"))
@@ -89,7 +89,7 @@ test_that("a factor with extra declared levels is not hijacked as a hand-off", {
 
 test_that("the outcomeorganizer hand-off keeps its competing-risk labels", {
     define <- get_util(".defineEventIndicator")
-    skip_if(is.null(define), "survival_utils not available")
+    skip_if(is.null(define), "utils-eventindicator helpers not available")
 
     # A Censored/Event/Competing column arrives with multievent = FALSE (the user
     # never fills dod/dooc -- that is the point of the recoded column). The status

@@ -499,7 +499,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       },
 
       # Reverse-Kaplan-Meier median follow-up. The estimator itself is shared --
-      # .medianFollowUp() in R/survival_utils.R -- because three analyses had
+      # .medianFollowUp() in R/utils-followup.R -- because three analyses had
       # each hand-copied it and fifteen more reported median(time) instead.
       # This wrapper only maps THIS analysis's status coding onto the shared
       # interface: 0 is censored, everything else is a terminal outcome.
@@ -726,7 +726,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Median FOLLOW-UP, by reverse Kaplan-Meier -- not median(time_vals),
         # which is the median time to event-or-censoring. See .medianFollowUp()
-        # in R/survival_utils.R.
+        # in R/utils-followup.R.
         mfu <- private$.followUp(time_vals, mydata[[myoutcome]])
 
         # Data quality warnings.
@@ -780,7 +780,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # Multievent is "configured enough to run" once the outcome variable
           # and at least ONE category mapping are present. Everything past that
           # -- unmapped levels, a level assigned twice, an unknown analysis
-          # type -- is decided by .defineEventIndicator() in survival_utils.R,
+          # type -- is decided by .defineEventIndicator() in utils-eventindicator.R,
           # which returns a specific error the user can act on.
           #
           # This used to demand all four mappings and then check each against
@@ -1228,7 +1228,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         myoutcome_labelled <- labelled_data$myoutcome_labelled
 
 
-        # Delegated to the shared coder in survival_utils.R so that all five
+        # Delegated to the shared coder in utils-eventindicator.R so that all five
         # analyses that build an event indicator agree on validation and on what
         # happens to unselected levels and to NA.
         res <- .defineEventIndicator(
@@ -2942,7 +2942,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # Calculate additional statistics
         mean_follow_up <- round(total_time / nrow(mydata), 2)
         # Reverse Kaplan-Meier, not median(observed times) -- see
-        # .medianFollowUp() in R/survival_utils.R.
+        # .medianFollowUp() in R/utils-followup.R.
         mfu <- private$.followUp(mydata[[mytime]], mydata[[myoutcome]])
         median_follow_up <- round(mfu$value, 2)
         median_follow_up_label <- .medianFollowUpLabel(mfu)

@@ -6,7 +6,7 @@
 #' @importFrom stats hclust cutree
 
 # IHC utility functions (calculateHScore, calculateIHCDistance, ...) are
-# provided by ihc_utilities.R via the package Collate/namespace and are
+# provided by utils-ihc.R via the package namespace and are
 # callable directly; no source() is needed (sourcing at load would define
 # them in .GlobalEnv and mask the package copies).
 

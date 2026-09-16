@@ -22,7 +22,7 @@
 #       Needs jmvcore + R6 loaded, plus whatever the backend itself uses
 #       (magrittr/dplyr/rlang for this one), `. <- jmvcore::.` for translation,
 #       R/utils.R for .fmt(), and any shared helper the backend sources
-#       (R/survival_utils.R here). It reads the .h.R FROM DISK, so a stale .h.R
+#       (R/utils-eventindicator.R here). It reads the .h.R FROM DISK, so a stale .h.R
 #       silently exercises the old option table -- regenerate or hand-patch it
 #       before trusting a green run.
 #

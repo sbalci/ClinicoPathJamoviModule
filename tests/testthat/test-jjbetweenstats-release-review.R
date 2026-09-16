@@ -66,7 +66,7 @@ jb_anova_broken <- function() {
 }
 
 # Reference values must be computed with base behaviour restored, or they hit the
-# very bug the module now shields against. Same mechanism as R/ggstatsplot_utils.R.
+# very bug the module now shields against. Same mechanism as R/utils-ggstatsplot.R.
 jb_base_formula <- function(expr) {
     tbl <- get(".__S3MethodsTable__.", envir = asNamespace("base"))
     if (exists("as.character.formula", envir = tbl, inherits = FALSE)) {
@@ -322,7 +322,7 @@ test_that("the shield removes the fallback instead of merely disclosing it", {
     # This test used to assert the OPPOSITE: that when statsExpressions' ANOVA
     # path died, a notice fired saying the Equal variances / Effect size type /
     # Decimal places choices had been ignored. The cause was formula.tools
-    # breaking stats::oneway.test, and R/ggstatsplot_utils.R now shields every
+    # breaking stats::oneway.test, and R/utils-ggstatsplot.R now shields every
     # call, so there is no fallback left to disclose - the options are simply
     # honoured. Assert the better contract.
     fired <- function(...) grepl("fell back to the package default",

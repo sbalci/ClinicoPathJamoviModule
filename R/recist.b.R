@@ -256,7 +256,7 @@ recistClass <- R6::R6Class(
             data$exclusionReason <- NA_character_
 
             # Delegate the RECIST target-lesion limits to the shared engine
-            # (R/recist_engine.R) rather than reimplementing them here. The previous
+            # (R/utils-recist.R) rather than reimplementing them here. The previous
             # local version selected the FIRST ROW per patient rather than every
             # lesion at the baseline visit, so it followed a single lesion -- and
             # whichever one happened to sort first, not the largest. That understated

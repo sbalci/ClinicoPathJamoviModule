@@ -1,7 +1,7 @@
 ---
 name:  aalenhazard
 title: Aalen's Additive Hazard Models
-menuGroup: SurvivalT
+menuGroup: SurvivalP
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Non-proportional hazards with additive effects'
 version: '0.0.1'

@@ -76,3 +76,84 @@ test_that("no two tracked paths differ only by case", {
     dup <- tracked[duplicated(tolower(tracked))]
     expect_equal(dup, character(0))
 })
+
+
+# ---------------------------------------------------------------------------
+# R/ file naming. The module updater ships a helper file wherever a shipped analysis
+# uses what it defines (_updateModules_plan.R), so names do not route anything; they
+# tell a reader who owns the code, and these tests keep the names honest:
+#   <analysis>.b.R, <analysis>.h.R        the analysis
+#   <analysis>-<topic>.R                  used by exactly that one analysis
+#   utils.R, utils-<topic>.R              used by two or more analyses
+#   00jmv.R, zzz.R, ClinicoPath-package.R, data-<topic>.R / data_<x>.R   infrastructure
+# Checked against R/ on disk (not git), so a rename is covered before it is committed.
+
+naming_plan <- file.path(ROOT, "_updateModules_plan.R")
+naming_env <- new.env(parent = globalenv())
+if (file.exists(naming_plan)) sys.source(naming_plan, envir = naming_env)
+r_on_disk <- list.files(file.path(ROOT, "R"), "\\.[Rr]$")
+analysis_stems <- sub("\\.a\\.yaml$", "", list.files(file.path(ROOT, "jamovi"), "\\.a\\.yaml$"))
+
+# Files that break the rules for a reason still to be resolved. The test fails when an
+# entry no longer exists, so this list can only shrink.
+naming_pending <- c(
+  "enhanced_wrapper_example.R"   # dead, but exports enhanced_ttest(): removal is an API change
+)
+
+file_kind <- function(f) {
+  if (grepl("\\.(b|h)\\.R$", f)) return("analysis")
+  if (f %in% c("00jmv.R", "zzz.R", "ClinicoPath-package.R") || grepl("^data[-_]", f)) return("infra")
+  if (grepl("^utils(-[a-z0-9]+)*\\.R$", f)) return("shared")
+  if (grepl("^[A-Za-z0-9]+(-[a-z0-9]+)+\\.R$", f) && sub("-.*$", "", f) %in% analysis_stems) return("single")
+  NA_character_
+}
+
+test_that("every R/ file follows the naming scheme", {
+  expect_equal(intersect(analysis_stems, c("utils", "data", "zzz")), character(0))
+  expect_equal(setdiff(naming_pending, r_on_disk), character(0), info = "stale naming_pending entry")
+  kinds <- vapply(r_on_disk, file_kind, "")
+  expect_equal(setdiff(names(kinds)[is.na(kinds)], naming_pending), character(0))
+})
+
+test_that("helper file names agree with the analyses that actually use them", {
+  skip_if_not(exists("resolve_helpers", envir = naming_env), "updater planner not available")
+  index <- naming_env$index_r_sources(ROOT)
+  owners <- list()
+  for (a in analysis_stems) {
+    seed <- paste0(a, ".b.R")
+    if (is.null(index[[seed]])) next
+    for (f in naming_env$resolve_helpers(index, seed, ignore = character())$files)
+      owners[[f]] <- c(owners[[f]], a)
+  }
+  bad <- character(0)
+  for (f in setdiff(r_on_disk, naming_pending)) {
+    k <- file_kind(f)
+    o <- sort(unique(owners[[f]]))
+    if (identical(k, "single") && !identical(o, sub("-.*$", "", f)))
+      bad <- c(bad, sprintf("%s: named for one analysis, used by: %s", f, if (length(o)) paste(o, collapse = ", ") else "none"))
+    if (identical(k, "shared") && length(o) < 2L)
+      bad <- c(bad, sprintf("%s: shared name, used by: %s", f, if (length(o)) paste(o, collapse = ", ") else "none"))
+  }
+  expect_equal(bad, character(0))
+})
+
+test_that("no top-level name is defined in two R/ files", {
+  skip_if_not(exists(".plan_top_defs", envir = naming_env), "updater planner not available")
+  defs <- lapply(file.path(ROOT, "R", r_on_disk), function(p)
+    tryCatch(naming_env$.plan_top_defs(parse(p, keep.source = FALSE)), error = function(e) character()))
+  owner <- split(rep(r_on_disk, lengths(defs)), unlist(defs))
+  dup <- owner[lengths(owner) > 1L]
+  expect_equal(vapply(dup, paste, "", collapse = " + "), setNames(character(0), character(0)))
+})
+
+test_that("no Collate, no @include, and no R/ file is build-ignored", {
+  expect_false(desc::desc_has_fields("Collate", file = file.path(ROOT, "DESCRIPTION")))
+  includes <- unlist(lapply(file.path(ROOT, "R", r_on_disk), function(p)
+    grep("^#'\\s*@include", readLines(p, warn = FALSE), value = TRUE)))
+  expect_equal(includes, character(0))
+  rules <- readLines(file.path(ROOT, ".Rbuildignore"), warn = FALSE)
+  rules <- rules[nzchar(rules) & !startsWith(rules, "#")]
+  ignored <- r_on_disk[vapply(paste0("R/", r_on_disk), function(p)
+    any(vapply(rules, function(r) isTRUE(tryCatch(grepl(r, p, perl = TRUE, ignore.case = TRUE), error = function(e) FALSE)), NA)), NA)]
+  expect_equal(ignored, character(0))
+})

@@ -195,11 +195,6 @@
 #' @importFrom mgcv gam s
 #' @importFrom rms val.prob calibrate rcs
 #' @importFrom Hmisc rcorr.cens
-#' @include stagemigration-utils.R
-#' @include stagemigration-validation.R
-#' @include stagemigration-discrimination.R
-#' @include stagemigration-competing-risks.R
-#' @include stagemigration_helpers.R
 
 # ============================================================================
 # TODO (security): C1 RCE remediation - DEDICATED SESSION REQUIRED (Step 2)
@@ -1482,15 +1477,15 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 ))
             },
             .calculateAdvancedMetrics = function(data) {
-                # Delegated to stagemigration_helpers.R
+                # Delegated to stagemigration-metrics.R
                 return(stagemigration_calculateAdvancedMetrics(data, self$options, function() private$.checkpoint()))
             },
             .compareBootstrapCIndex = function(data, old_stage, new_stage, time_var, event_var, n_boot = 200) {
-                # Delegated to stagemigration_helpers.R
+                # Delegated to stagemigration-metrics.R
                 return(stagemigration_compareBootstrapCIndex(data, old_stage, new_stage, time_var, event_var, n_boot, function() private$.checkpoint(), options = self$options))
             },
             .calculateNRI = function(data, time_points = NULL) {
-                # Delegated to stagemigration_helpers.R
+                # Delegated to stagemigration-metrics.R
                 return(stagemigration_calculateNRI(data, self$options, time_points, function() private$.checkpoint()))
             },
             .extractSurvivalProbabilities = function(fit, data, time_point, stage_var) {
@@ -1540,7 +1535,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 return(probs)
             },
             .calculateIDI = function(data) {
-                # Delegated to stagemigration_helpers.R
+                # Delegated to stagemigration-metrics.R
                 return(stagemigration_calculateIDI(data, self$options, function() private$.checkpoint()))
             },
             .calculateLinearTrendTest = function(data, old_stage, new_stage, time_var, event_var) {

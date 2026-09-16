@@ -1092,4 +1092,3 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
 .correction_results <- NULL
 
 # Null-coalescing operator helper
-`%||%` <- function(x, y) if (is.null(x)) y else x

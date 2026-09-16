@@ -344,11 +344,26 @@ When updating documentation links in README.Rmd, ensure they point to these subm
 
 ### Module Update Command
 
-- Use this to check and update modules: `Rscript _updateModules.R`
+- `Rscript _updateModules.R --dry-run` first (prints the plan, the per-module diff and the summary; writes
+  nothing), then `Rscript _updateModules.R [--no-install] [module ...]`. Exit status 1 when any module failed.
+- Pipeline: `_updateModules_plan.R` decides what ships (pure); `_updateModules_utils.R` applies, builds
+  (prepare/document in `Rscript --vanilla` children, logs scanned), verifies (Collate, `pkg::` declarations,
+  `prune_imports`, bare-symbol resolution) and installs. A failing module stops before install.
+- **menuGroup categories** (suffix on the production group): `Survival` production -> jsurvival;
+  `SurvivalT` tests -> JamoviTest; `SurvivalP` pending (written, not release-ready) -> umbrella only;
+  `SurvivalD` drafts -> umbrella only. Any other group is a plan error.
+- **Helper files are not listed anywhere.** A helper ships wherever a shipped analysis uses what it defines
+  (resolved from the code, including `exists("f")`/`get0("f")`). Name R/ files for their owner:
+  `<analysis>-<topic>.R` (one analysis), `utils.R` / `utils-<topic>.R` (two or more), `data-<topic>.R`
+  (dataset docs, never shipped). `tests/testthat/test-zzz-analysis-file-naming.R` fails when a name
+  disagrees with the actual callers or a top-level name is defined twice. No `@include`/`Collate`.
+- Files the updater manages but no longer plans are deleted (R/, jamovi yaml/js, data/*.rda). Never
+  touched: `R/zzz_imports.R`, `R/data.R`, `R/*-package.R`, `R/*-data.R`, `R/data-*.R`, `jamovi/i18n`,
+  `data/*.csv|omv`.
 
 ### JamoviTest Routing for Dev/Test Slash Commands
 
-When running any of these slash commands on a target `FUNC_NAME`, append a `T` suffix to the `menuGroup:` line in `jamovi/FUNC_NAME.a.yaml` (idempotent — skip if already T-suffixed). This routes the function to the parallel **JamoviTest** module so it can be exercised in isolation while under modification, instead of staying live in the production menu.
+When running any of these slash commands on a target `FUNC_NAME`, append a `T` suffix to the `menuGroup:` line in `jamovi/FUNC_NAME.a.yaml` (idempotent — skip if already T-suffixed; `SurvivalP` becomes `SurvivalPT`, `SurvivalD` becomes `SurvivalDT` — every `...T` routes to JamoviTest). This routes the function to the parallel **JamoviTest** module so it can be exercised in isolation while under modification, instead of staying live in the production menu.
 
 Commands that trigger this: `/check-function`, `/check-function-full`, `/review-function`, `/fix-function`, `/generate-test-data`, `/update-refs`, `/document-function`, `/jamovify-function ... --apply` (only `--apply`, not dry-run), `/security-audit-function`. Touch only `menuGroup` — leave `menuSubgroup` alone. The user moves it back manually after testing.
 
@@ -411,7 +426,7 @@ critically evaluate functions. is it mathematically and statistically accurate? 
   cannot be serialized by jamovi's protobuf system.
 - jmvtools::check() only locates jamovi program bin file location. it does not check anything regarding module structure or code.
 - jmvtools DESCRIPTION dependencies: a package may now be listed in BOTH `Imports` and `Remotes`. The current jmvtools suppresses the CRAN-mirror download of an import when that package also appears in `Remotes`, installing it only from the remote (previously it tried CRAN first then the remote — redundant, or a failure when the package isn't on CRAN). Intended design: `Imports` *declares* the dependency, `Remotes` says *where to find* it. There's no functional install difference today if a dependency is only in `Remotes`, but list every real run-time dependency in `Imports` anyway (the reviewer "claudia" encourages it); add a `Remotes:` entry only for packages not on CRAN. See `vignettes/jamovi_module_patterns_guide.md` → "DESCRIPTION: Dependencies".
-- A submodule resolves names ONLY from its own namespace: its `R/` definitions, the always-attached base packages (`base`/`stats`/`utils`/`graphics`/`grDevices`/`methods`/`datasets`), and whatever its `NAMESPACE` imports. A **bare symbol** — `%>%` above all, and any other infix operator — needs `#' @importFrom magrittr %>%` in that module's `R/zzz_imports.R` **and** the package in `Imports:`. `Imports:` alone puts nothing in scope. `devtools::load_all()` and any interactive `library(dplyr)` hide the failure, and `R CMD check` reports only a NOTE ("no visible global function definition"), so it reaches the user as `could not find function "%>%"`. Found by the 2026-09-16 OncoPath audit: `waterfall` could not run at all. Two generator traps caused it — a `prune_imports` entry in `_updateModules_config.yaml` strips the package from the generated `DESCRIPTION`, and `r_symbol_files` copies *named symbols*, so a roxygen-only re-export block never travels. Guarded by the bare-symbol test in `_updateModules_test_dependency_guard.R` and by `Rscript --vanilla tools/submodule_smoke.R <sibling repo>` (installed namespace). Always `--vanilla`: `~/.Rprofile` attaches magrittr in every sibling repo (the umbrella's own `.Rprofile` shadows it), so a plain `Rscript` passes there. See `vignettes/jamovi_library_review_guide.md` §19; audit work: the `library-audit` skill.
+- A submodule resolves names ONLY from its own namespace: its `R/` definitions, the always-attached base packages (`base`/`stats`/`utils`/`graphics`/`grDevices`/`methods`/`datasets`), and whatever its `NAMESPACE` imports. A **bare symbol** — `%>%` above all, and any other infix operator — needs `#' @importFrom magrittr %>%` in that module's `R/zzz_imports.R` **and** the package in `Imports:`. `Imports:` alone puts nothing in scope. `devtools::load_all()` and any interactive `library(dplyr)` hide the failure, and `R CMD check` reports only a NOTE ("no visible global function definition"), so it reaches the user as `could not find function "%>%"`. Found by the 2026-09-16 OncoPath audit: `waterfall` could not run at all. Two generator traps caused it — a `prune_imports` entry in `_updateModules_config.yaml` strips the package from the generated `DESCRIPTION`, and the since-retired `r_symbol_files` copied *named symbols*, so a roxygen-only re-export block never travelled (helpers now ship as whole files). Guarded by the bare-symbol test in `_updateModules_test_dependency_guard.R` and by `Rscript --vanilla tools/submodule_smoke.R <sibling repo>` (installed namespace). Always `--vanilla`: `~/.Rprofile` attaches magrittr in every sibling repo (the umbrella's own `.Rprofile` shadows it), so a plain `Rscript` passes there. See `vignettes/jamovi_library_review_guide.md` §19; audit work: the `library-audit` skill.
 
 
 

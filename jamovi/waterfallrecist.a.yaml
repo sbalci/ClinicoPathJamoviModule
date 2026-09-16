@@ -1,7 +1,7 @@
 ---
 name: waterfallrecist
 title: 'Treatment Response: Lesion-Level RECIST v1.1 Algorithm'
-menuGroup: OncoPathT
+menuGroup: OncoPathP
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'One row per lesion per visit'
 version: '0.0.1'

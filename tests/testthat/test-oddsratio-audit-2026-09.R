@@ -53,7 +53,8 @@ test_that("S1: Firth forest-plot formula goes through the asFormula-guarded help
   expect_identical(rec$formula, "`out come` ~ `x y` + z")
   # and the guarded helper accepts exactly what the method now hands it
   u <- new.env(parent = globalenv())
-  suppressWarnings(suppressMessages(sys.source(.osrc("survival_utils.R"), envir = u)))
+  for (f in c("utils-formula.R", "utils-eventindicator.R", "utils-followup.R", "survival-competingrisks.R", "multisurvival-formula.R"))
+    suppressWarnings(suppressMessages(sys.source(.osrc(f), envir = u)))
   expect_s3_class(u$.asSurvivalFormula(rec$formula), "formula")
 })
 

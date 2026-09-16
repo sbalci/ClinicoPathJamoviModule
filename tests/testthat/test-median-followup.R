@@ -1,4 +1,4 @@
-# Reverse Kaplan-Meier median follow-up (R/survival_utils.R).
+# Reverse Kaplan-Meier median follow-up (R/utils-followup.R).
 #
 # The helper these tests cover replaced fifteen call sites that reported
 # median(observed time) under a "median follow-up" label. The first test is the
@@ -10,7 +10,7 @@
 # object, so bind it the same way whether we are under load_all or an installed
 # build. Sourcing directly keeps the test independent of collation order.
 if (!exists(".medianFollowUp"))
-  source(file.path("..", "..", "R", "survival_utils.R"))
+  source(file.path("..", "..", "R", "utils-followup.R"))
 
 simulate_cohort <- function(n, event_scale, max_followup, seed) {
   set.seed(seed)

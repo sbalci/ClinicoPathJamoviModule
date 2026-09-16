@@ -1,7 +1,7 @@
 ---
 name:  highdimcox
 title: High-Dimensional Cox Regression
-menuGroup: SurvivalT
+menuGroup: SurvivalP
 menuSubgroup: Penalized Cox Regression
 menuTitle: Elastic Net Cox
 menuSubtitle: Handles moderate/heavy collinearity among multiple predictors.

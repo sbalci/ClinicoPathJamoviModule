@@ -316,7 +316,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #
         # The S3 methods table is an ordinary unlocked environment, so swap the
         # method for the duration of the call and put it back on exit.
-        # Single implementation lives in R/ggstatsplot_utils.R.
+        # Single implementation lives in R/utils-ggstatsplot.R.
         .withBaseFormulaChar = function(expr) {
             withBaseFormulaChar(expr)
         },

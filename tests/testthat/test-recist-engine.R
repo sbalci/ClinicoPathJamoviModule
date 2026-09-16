@@ -1,4 +1,4 @@
-# Tests for the shared RECIST v1.1 engine (R/recist_engine.R).
+# Tests for the shared RECIST v1.1 engine (R/utils-recist.R).
 #
 # These call the engine directly, with no analysis object anywhere: that is the
 # point of the extraction. If a second analysis is ever wired up to these

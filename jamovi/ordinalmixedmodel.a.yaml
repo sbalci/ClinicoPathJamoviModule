@@ -1,7 +1,7 @@
 ---
 name: ordinalmixedmodel
 title: Ordinal Mixed Models (Cumulative Link)
-menuGroup: ClinicoPathT
+menuGroup: ClinicoPathP
 version: '1.0.0'
 jas: '1.2'
 description:

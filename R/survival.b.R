@@ -198,7 +198,7 @@
 #' @noRd
 NULL
 
-# Note: `.escapeVariableNames` lives in R/formula_utils.R as the canonical
+# Note: `.escapeVariableNames` lives in R/utils-formula.R as the canonical
 # definition. It was in R/utils.R until 2026-09-06, when commit 0247c20f split
 # the formula helpers out; it was dropped in that move and restored on
 # 2026-09-07. See tests/testthat/test-escape-variable-names.R.
@@ -726,7 +726,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             myoutcome_labelled <- labelled_data$myoutcome_labelled
 
 
-                # Delegated to the shared coder in survival_utils.R so that all
+                # Delegated to the shared coder in utils-eventindicator.R so that all
                 # five analyses that build an event indicator agree on validation
                 # and on what happens to unselected levels and to NA.
                 res <- .defineEventIndicator(

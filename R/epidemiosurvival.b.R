@@ -245,7 +245,7 @@ epidemiosurvivalClass <- R6::R6Class(
             incidence_rate <- (total_events / total_person_years) * 100000
             # Reverse Kaplan-Meier, not median(observed times) -- the latter is
             # the median time to event-or-censoring. See .medianFollowUp() in
-            # R/survival_utils.R.
+            # R/utils-followup.R.
             mfu <- .medianFollowUp(data$time, data$event == 0)
             median_followup <- mfu$value
 

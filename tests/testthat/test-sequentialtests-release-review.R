@@ -354,7 +354,7 @@ test_that("documentation and references match the repaired analysis", {
 
 
 test_that("the bundled demonstration datasets are documented as illustrative", {
-    doc <- paste(readLines("../../R/sequentialtests_data.R", warn = FALSE), collapse = "\n")
+    doc <- paste(readLines("../../R/data-sequentialtests.R", warn = FALSE), collapse = "\n")
     expect_match(doc, "not clinically accurate")
     # every shipped dataset is covered by the block
     rda <- sub("\\.rda$", "", basename(Sys.glob("../../data/sequentialtests_*.rda")))

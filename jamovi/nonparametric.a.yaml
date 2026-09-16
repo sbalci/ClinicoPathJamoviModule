@@ -1,7 +1,7 @@
 ---
 name: nonparametric
 title: "Non-Parametric Statistical Methods"
-menuGroup: ExplorationT
+menuGroup: ExplorationP
 menuSubgroup: Advanced Statistical Tests
 menuSubtitle: "Comprehensive non-parametric analysis with effect sizes and robust methods"
 version: '0.0.31'

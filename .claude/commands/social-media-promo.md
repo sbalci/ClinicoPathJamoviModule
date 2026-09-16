@@ -312,9 +312,10 @@ Provide all three variants clearly labeled:
 1. Use `Glob` to find all .a.yaml files: `jamovi/*.a.yaml`
 2. Filter out system files (0000.yaml, js.yaml)
 3. For each function, use `Grep` to check the `menuGroup:` field
-4. **Filter to mature functions only**: Exclude functions where menuGroup ends with "T" or "D"
+4. **Filter to mature functions only**: Exclude functions where menuGroup ends with "T", "P" or "D"
    - "T" suffix = Testing functions (e.g., `menuGroup: meddecideT`)
-   - "D" suffix = Development functions (e.g., `menuGroup: SurvivalD`)
+   - "P" suffix = Pending, not release-ready (e.g., `menuGroup: OncoPathP`)
+   - "D" suffix = Draft functions (e.g., `menuGroup: SurvivalD`)
 5. From the filtered list of mature functions, randomly select one
 6. Announce: "🎲 Randomly selected mature function: **[function_name]** (menuGroup: [group])"
 7. Use that function for the main execution steps below
@@ -322,7 +323,7 @@ Provide all three variants clearly labeled:
 **Mature Function Examples:**
 
 - ✅ VALID: `menuGroup: meddecide`, `menuGroup: Survival`, `menuGroup: Descriptives`
-- ❌ INVALID: `menuGroup: meddecideT`, `menuGroup: SurvivalD`, `menuGroup: ClinicoPathT`
+- ❌ INVALID: `menuGroup: meddecideT`, `menuGroup: SurvivalD`, `menuGroup: OncoPathP`
 
 **Otherwise:** Use the specified function name from `$1`
 

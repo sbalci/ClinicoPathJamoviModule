@@ -1,10 +1,8 @@
 # ============================================================================
 # FORMULA / MODEL-MATRIX HELPERS
 # ============================================================================
-# Moved from R/utils.R (2026-09-06 ClinicoPathDescriptives audit). Callers are the
-# penalised/regularised regression analyses (jsurvival, meddecide, JamoviTest), so
-# this file is listed in those modules' `r_files` only - it is not shipped to the
-# descriptives module, where it was dead weight.
+# Variable-name quoting for formula strings, and the allow-listed survival
+# formula parser. Used by the survival, penalised-regression and ROC analyses.
 
 #' Backtick-quote variable names for use in a formula string
 #'
@@ -86,4 +84,38 @@
         return(x)
     }
     clean(as.character(x))
+}
+
+
+#' Build a survival formula safely via jmvcore::asFormula
+#'
+#' Wraps `jmvcore::asFormula` with the function allow-list extended to cover
+#' common survival modelling helpers (`Surv`, `strata`, `cluster`, `frailty`,
+#' `tt`, `pspline`, `ns`, `bs`, `I`, `const`, `finegray`). Use this instead of
+#' base `stats::as.formula()` in survival / Cox / Fine-Gray paths so the formula
+#' goes through jmvcore's allow-listed parser.
+#'
+#' The returned formula's environment is set to the CALLER's frame. `asFormula`
+#' otherwise leaves it pointing at its own evaluation frame, which does not hold
+#' the caller's `mydata`. Model fitting still works, because `coxph(fml, data=)`
+#' is handed the data directly — but any method that later re-evaluates the
+#' model call does not get it. `cox.zph()` is the visible casualty: ticking
+#' "Proportional hazards assumption" aborted the entire analysis with
+#' "object 'mydata' not found", taking every other result down with it.
+#'
+#' @param x A character formula string (e.g. `"survival::Surv(t, d) ~ x"`).
+#' @param env Environment to attach to the returned formula. Defaults to the
+#'   calling frame, which is what downstream re-evaluation needs.
+#' @return A parsed formula object.
+#' @keywords internal
+.asSurvivalFormula <- function(x, env = parent.frame()) {
+    fml <- jmvcore::asFormula(
+        x,
+        additional_allowed_functions = c(
+            "Surv", "strata", "cluster", "frailty", "tt",
+            "pspline", "ns", "bs", "I", "const", "finegray"
+        )
+    )
+    if (inherits(fml, "formula")) environment(fml) <- env
+    fml
 }

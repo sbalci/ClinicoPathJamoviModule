@@ -118,7 +118,7 @@ def main():
         s = score_one(n, with_git)
         if s:
             rows.append(s)
-    dev = [r for r in rows if re.match(r'^[A-Za-z]+(Extra)?[DT]+$', r['group'])]
+    dev = [r for r in rows if re.match(r'^[A-Za-z]+(Extra)?[DPT]+$', r['group'])]
     dev.sort(key=lambda r: -r['score'])
     json.dump(dev, open(os.path.join(ROOT, 'tools', 'promotion_scores.json'), 'w'), indent=1)
     print('%-28s %-16s %6s %5s %5s %5s %4s %4s %5s' %

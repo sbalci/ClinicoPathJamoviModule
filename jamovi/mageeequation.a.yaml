@@ -1,7 +1,7 @@
 ---
 name: mageeequation
 title: Magee Equation - Oncotype DX Estimator
-menuGroup: meddecideT
+menuGroup: meddecideP
 menuSubgroup: Prediction Models
 menuTitle: Magee Equation (Oncotype DX)
 menuSubtitle: Estimate Oncotype DX Recurrence Score from pathology variables

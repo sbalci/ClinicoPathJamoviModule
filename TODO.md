@@ -4983,3 +4983,20 @@ Results: test-stagemigration.R 27 tests / 45 expectations; statistical-correctio
 - [ ] `distribute_selected_r_symbols()`: first-match on duplicate definitions (R keeps the last), config-order emission, no callee-closure check, `definition_name` errors on `pkg::f(a, b)` top-level calls
 
 Results: test-update-modules-dependency-guard 34/0, test-oncopath-library-audit 60/0 (1 skip), test-median-followup 81/0, multisurvival release-review 36/0 + verification 47/0. Temp-copy regeneration: OncoPath survival_utils.R = `.medianFollowUp` only, identical() to umbrella, fallback CI typeof double; `check_shared_helper_distribution` passes, and fails when a `.medianFollowUpText()` call is injected.
+
+## _updateModules redesign: plan -> apply -> verify, owner-named helpers (2026-09-16)
+
+- [x] S0 OncoPath stale Collate removed; `tools/submodule_smoke.R ../OncoPath` PASS (was install failure)
+- [x] S1 `_updateModules_plan.R` (registry, exact routing, symbol-resolved helpers, managed-set pruning, diff) + `test-update-modules-plan.R`
+- [x] S2 `_updateModules.R` rewritten as a ~80-line driver (`--dry-run`, `--no-install`, `--config=`, module args); apply/build/verify/install in utils; end-of-run summary (modules, analyses added/updated/removed, test/pending lists)
+- [x] Four menuGroup categories: production / tests `T` (JamoviTest) / pending `P` / drafts `D`; 59 T analyses moved to P
+- [x] S4 helper reorganisation: `survival_utils.R` split (utils-followup/-eventindicator/-formula, multisurvival-formula, survival-competingrisks); renames to `utils-*.R` / `<analysis>-*.R` / `data-*.R`; dead stagemigration-competing-risks/-discrimination, treeProgressBar, tutorial builder deleted; survivalPower_distributions -> tests helper; duplicate `%||%`/wrappers/header copies removed; no @include/Collate
+- [x] S5 1,206 lines of retired utils removed (r_files/r_symbol_files/companion/prune/backup/vignette-copy machinery); config is a registry; mirror tool uses the planner; docs/skills updated
+- [ ] USER: `jmvtools::prepare()` + `devtools::document()` in the umbrella (0000.yaml menu groups for the T->P move; man/ source headers already regenerated)
+- [ ] USER: review + commit umbrella and sibling changes; JamoviTest (TEST: true) now has 0 analyses -- a TEST run empties it
+- [ ] Dead exported helpers (API change, needs NEWS): `enhanced_wrapper_example.R`; 8 in `enhancedROC-errors.R`, 8 in `utils-ihc.R`, 2 in `decisiongraph-utils.R` (lint `naming_pending`)
+- [ ] `tools/release_gate.py` / `promotion_screen.py` still re-derive routing from suffixes (now D/P/T-aware); could read the planner instead
+- [ ] `DESCRIPTION.backup.<timestamp with spaces>` files in ClinicoPathDescriptives/JamoviTest never match the prune regex
+- [ ] Pre-existing failures (identical on HEAD): test-nomogrammer.R 7+1 err; test-outcomeorganizer-audit-2026-09.R "few-events warning ... missing values"
+
+Results: plan tests 32/32; updater dependency-guard 19/19; naming lint 11/11; 21 touched suites 1,420 expectations (only the 2 pre-existing failures). Routing identical to legacy for all 6 modules; helper sets identical to the old r_files for jj/md/js/CPD. Split files' parse trees identical to the originals; umbrella NAMESPACE unchanged after document(). Sandbox (APFS clones): idempotent second run; injected failures stop at verify/build with exit 1.

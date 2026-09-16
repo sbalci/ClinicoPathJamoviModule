@@ -13,17 +13,6 @@
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore .
 #' @import jmvcore
-# Provide a safe fallback for the translation helper used as .("text")
-# In environments where jmvcore's translator isn't available, treat it as identity
-if (!exists(".") || !is.function(get(".", inherits = TRUE))) {
-    `.` <- function(x) x
-}
-
-# Provide a safe fallback for the null-coalescing operator used as a %||% b
-if (!exists("%||%", inherits = TRUE)) {
-    `%||%` <- function(a, b) if (!is.null(a)) a else b
-}
-
 decisiongraphClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(
         "decisiongraphClass",

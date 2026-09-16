@@ -175,7 +175,7 @@ analyses:
   - title: Adverse Events Butterfly Plot
     name: aeplot
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Adverse Events Butterfly Plot
     description: >
@@ -210,7 +210,7 @@ analyses:
   - title: Clinical Heatmap
     name: clinicalheatmap
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Visualization
     menuTitle: Clinical Heatmap
     menuSubtitle: Tidy Heatmaps for Clinical Data
@@ -754,7 +754,7 @@ analyses:
   - title: Biomarker Response Association
     name: biomarkerresponse
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: ClinicoPath Biomarker Analysis
     menuTitle: Biomarker Response Association
     description: >-
@@ -776,7 +776,7 @@ analyses:
   - title: Clinical Classification
     name: classification
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: ClinicoPath Predictions
     menuTitle: Clinical Classification
     description: >-
@@ -1303,7 +1303,7 @@ analyses:
   - title: Overall, Cause Specific, and Competing Survival
     name: competingsurvival
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Drafts
     menuTitle: Overall, Cause Specific, and Competing Survival
     menuSubtitle: Survival for Different Outcomes
@@ -1322,7 +1322,7 @@ analyses:
   - title: Lasso-Cox Regression
     name: lassocox
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: Survival
     menuSubgroup: Penalized Cox Regression
     menuTitle: LASSO Cox
     menuSubtitle: Sparse Cox model development with cross-validated L1 penalization.
@@ -1335,7 +1335,7 @@ analyses:
   - title: Enhanced ROC Analysis
     name: timeroc
     ns: ClinicoPath
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: ClinicoPath Survival
     menuTitle: Enhanced ROC Analysis
     menuSubtitle: Time-Dependent & Binary ROC
@@ -1351,7 +1351,7 @@ analyses:
   - title: Advanced TNM Stage Migration Analysis
     name: stagemigration
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Stage Migration Analysis
     menuTitle: Advanced TNM Stage Migration Analysis
     menuSubtitle: State-of-the-Art Staging System Validation
@@ -1645,7 +1645,7 @@ analyses:
   - title: Dendrogram
     name: dendrogram
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuTitle: Dendrogram
     menuSubgroup: Hierarchical Clustering
     ribbon: analyses
@@ -1693,7 +1693,7 @@ analyses:
   - title: Syndromic Plot (PCA Loadings)
     name: jjsyndromicplot
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotP
     menuSubgroup: Multivariate Analysis
     menuTitle: Syndromic Plot (PCA Loadings)
     menuSubtitle: PCA Loading Visualization
@@ -1711,7 +1711,7 @@ analyses:
   - title: PCA Loading Heatmap & Barmap
     name: pcaloadingheatmap
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotP
     menuSubgroup: Multivariate Analysis
     menuTitle: PCA Loading Heatmap & Barmap
     menuSubtitle: Heatmap and Barmap Visualizations
@@ -2007,7 +2007,7 @@ analyses:
   - title: Base Graphics Visualization
     name: basegraphics
     ns: ClinicoPath
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotP
     menuTitle: Base Graphics Visualization
     menuSubgroup: All-In-One
     menuSubtitle: Fast & Customizable Base R Plots
@@ -2278,7 +2278,7 @@ analyses:
     name: patientsimilarity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Patient Similarity Clustering
     menuSubtitle: t-SNE, UMAP, PCA - Discover Patient Subgroups
@@ -2394,7 +2394,7 @@ analyses:
     name: relativesurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Advanced Survival
     menuTitle: Relative Survival Analysis
     menuSubtitle: Population-Based Survival Comparison
@@ -2491,7 +2491,7 @@ analyses:
     name: pathologyagreement
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuTitle: Pathology Agreement Analysis
     menuSubgroup: Agreement
     menuSubtitle: Agreement on Continuous Data
@@ -2499,7 +2499,7 @@ analyses:
     name: pathsampling
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuTitle: Pathology Sampling Adequacy Analysis
     description: >
       Describe sampling detection among cases in which a lesion was eventually
@@ -2543,7 +2543,7 @@ analyses:
     name: advancedanova
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathDT
+    menuGroup: ClinicoPathP
     menuSubgroup: Inferential
     menuTitle: Advanced ANOVA Suite
     menuSubtitle: Comprehensive ANOVA with enhanced post hoc testing
@@ -2584,7 +2584,7 @@ analyses:
     name: optimalcutpoint
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathT
+    menuGroup: ClinicoPathP
     menuSubgroup: Inferential
     menuTitle: Optimal Cutpoint Determination
     menuSubtitle: Find optimal thresholds for continuous biomarkers
@@ -2797,7 +2797,7 @@ analyses:
     name: clinicalcalculators
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuTitle: Clinical Risk Calculators & Nomograms
   - title: Enhanced Survival Model Validation
     name: survivalmodelvalidation
@@ -2979,7 +2979,7 @@ analyses:
     name: highdimcox
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Penalized Cox Regression
     menuTitle: Elastic Net Cox
     menuSubtitle: Handles moderate/heavy collinearity among multiple predictors.
@@ -2994,7 +2994,7 @@ analyses:
     name: aalenhazard
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: ClinicoPath Survival
     menuTitle: Aalen's Additive Hazard Models
     menuSubtitle: Non-proportional hazards with additive effects
@@ -3503,7 +3503,7 @@ analyses:
     name: adaptivelasso
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Penalized Cox Regression
     menuTitle: Adaptive LASSO Cox
     menuSubtitle: Oracle properties for mathematically consistent variable selection.
@@ -3525,7 +3525,7 @@ analyses:
     name: firthregression
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Penalized Cox Regression
     menuTitle: Firth Regression
     menuSubtitle: Bias reduction for small samples, rare events, and separation.
@@ -3549,7 +3549,7 @@ analyses:
     name: grouplasso
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Penalized Cox Regression
     menuTitle: Group LASSO Cox
     menuSubtitle: Selects or removes pre-defined biological/categorical groups together.
@@ -3636,7 +3636,7 @@ analyses:
     name: sparsegrouplasso
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Penalized Cox Regression
     menuTitle: Sparse Group LASSO Cox
     description: Sparse Group LASSO regularization for survival analysis
@@ -3699,7 +3699,7 @@ analyses:
     name: pcacox
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Dimension Reduction Cox
     menuTitle: PCA Cox
     menuSubtitle: Shrinks extreme collinearity into uncorrelated principal components.
@@ -3713,7 +3713,7 @@ analyses:
     name: plscox
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Dimension Reduction Cox
     menuTitle: PLS Cox
     menuSubtitle: Creates survival-directed composite scores for massive (p > n) datasets.
@@ -3779,7 +3779,7 @@ analyses:
     name: ihccluster
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: IHC Analysis
     menuTitle: IHC Clustering Analysis
     menuSubtitle: Cluster cases by IHC expression patterns
@@ -3830,7 +3830,7 @@ analyses:
     name: conditionalsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: ClinicoPath Survival
     menuTitle: Conditional Survival Estimation
     menuSubtitle: Conditional Survival, Landmark Analysis, Advanced Methods
@@ -3965,7 +3965,7 @@ analyses:
     name: ordinalmixedmodel
     ns: ClinicoPath
     category: analyses
-    menuGroup: ClinicoPathT
+    menuGroup: ClinicoPathP
     menuTitle: Ordinal Mixed Models (Cumulative Link)
     description: >
       Cumulative link mixed models (CLMM) for ordinal response data with random
@@ -4154,7 +4154,7 @@ analyses:
     name: tumorgrowth
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Survival Analysis
     menuTitle: Tumor Growth Models
   - title: Progression-Free Survival Analysis
@@ -4231,7 +4231,7 @@ analyses:
     name: survivalPower
     ns: ClinicoPath
     category: analyses
-    menuGroup: PowerT
+    menuGroup: PowerP
     menuSubgroup: Survival Power Analysis
     menuTitle: Survival Power Analysis
     menuSubtitle: Survival Power analysis
@@ -4244,7 +4244,7 @@ analyses:
     name: ncvregcox
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Penalized Cox Regression
     menuTitle: SCAD/MCP Cox
     menuSubtitle: Unbiased hazard ratio estimates without LASSO "shrinkage bias".
@@ -4441,7 +4441,7 @@ analyses:
     name: nonparametric
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT
+    menuGroup: ExplorationP
     menuSubgroup: Advanced Statistical Tests
     menuTitle: Non-Parametric Statistical Methods
     menuSubtitle: Comprehensive non-parametric analysis with effect sizes and robust methods
@@ -4500,7 +4500,7 @@ analyses:
     name: adaptivetrialdesign
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideExtraT
+    menuGroup: meddecideExtraP
     menuSubgroup: Advanced Bayesian Methods
     menuTitle: Adaptive Trial Design Methods
     menuSubtitle: Bayesian interim analysis and adaptive sample size re-estimation
@@ -4574,7 +4574,7 @@ analyses:
     name: pcacomponenttest
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT
+    menuGroup: ExplorationP
     menuSubgroup: Multivariate Analysis
     menuTitle: PCA Component Significance Test
     menuSubtitle: Permutation-based component selection
@@ -4590,7 +4590,7 @@ analyses:
     name: pcaloadingtest
     ns: ClinicoPath
     category: analyses
-    menuGroup: ExplorationT
+    menuGroup: ExplorationP
     menuSubgroup: Multivariate Analysis
     menuTitle: PCA Loading Significance Test
     menuSubtitle: Permutation-based loading thresholds
@@ -4757,7 +4757,7 @@ analyses:
     name: jjoncoplot
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Molecular Pathology Plots
     menuTitle: Genomic Landscape Visualization
     menuSubtitle: Oncoplot, Mutation Landscape, Clinical Annotations
@@ -4768,7 +4768,7 @@ analyses:
     name: studydiagram
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Study Design
     menuTitle: Study Diagram
     description: >-
@@ -4821,7 +4821,7 @@ analyses:
     name: ihcsurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: IHC Analysis
     menuTitle: Survival & Prognosis
     description: >
@@ -4874,7 +4874,7 @@ analyses:
     name: pathagreement
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Agreement
     menuTitle: Pathology Interrater Reliability
     description: |
@@ -4901,7 +4901,7 @@ analyses:
     name: consortdiagram
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Study Design
     menuTitle: CONSORT Diagram
     menuSubtitle: Clinical Trial Flow
@@ -4918,7 +4918,7 @@ analyses:
     name: jjpubr
     ns: ClinicoPath
     category: analyses
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotP
     menuSubgroup: All-In-One
     menuTitle: ggpubr Plots
     menuSubtitle: Publication-ready visualizations
@@ -5240,7 +5240,7 @@ analyses:
     name: timedependentdca
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideP
     menuSubgroup: Decision Curve Analysis
     menuTitle: Time-Dependent DCA
     menuSubtitle: Net benefit for survival and longitudinal data
@@ -5324,7 +5324,7 @@ analyses:
     name: jjcoefstats
     ns: ClinicoPath
     category: analyses
-    menuGroup: JJStatsPlotT
+    menuGroup: JJStatsPlotP
     menuSubgroup: Regression Plots
     menuTitle: Coefficient Forest Plot (ggcoefstats)
     description: >
@@ -5361,7 +5361,7 @@ analyses:
     name: irecist
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Response Evaluation
     menuTitle: iRECIST Analysis
     menuSubtitle: Immune-related Response Criteria
@@ -5374,7 +5374,7 @@ analyses:
     name: recist
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Response Evaluation
     menuTitle: RECIST 1.1 Multi-Lesion Aggregation
     menuSubtitle: Automated Best Overall Response
@@ -5387,7 +5387,7 @@ analyses:
     name: survivalendpoints
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Data Preparation
     menuTitle: Survival Endpoint Derivation
     menuSubtitle: Derive PFS, OS, TTP, DOR from Timeline Data
@@ -5407,7 +5407,7 @@ analyses:
     name: waterfallrecist
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: 'Treatment Response: Lesion-Level RECIST v1.1 Algorithm'
     menuSubtitle: One row per lesion per visit
@@ -5434,7 +5434,7 @@ analyses:
     name: datevalidator
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Data Preparation
     menuTitle: Date/DateTime Validator
     menuSubtitle: Validate and diagnose messy date/datetime formats
@@ -5454,7 +5454,7 @@ analyses:
     name: groomecompare
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: ClinicoPath Survival
     menuTitle: Groome Staging System Comparison
     menuSubtitle: Compare Staging Systems Using Groome Criteria
@@ -5468,7 +5468,7 @@ analyses:
     name: rpasurvival
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: ClinicoPath Survival
     menuTitle: Recursive Partitioning Analysis for Survival
     menuSubtitle: RPA/CART for Survival Data - Develop Risk Stratification
@@ -5482,7 +5482,7 @@ analyses:
     name: lassointro
     ns: ClinicoPath
     category: analyses
-    menuGroup: SurvivalT
+    menuGroup: SurvivalP
     menuSubgroup: Penalized Cox Regression
     menuTitle: Method Guide
     menuSubtitle: Which penalized survival method should I use?
@@ -5510,7 +5510,7 @@ analyses:
     name: leaveonecenterout
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideP
     menuSubgroup: Prediction Models
     menuTitle: Leave-One-Center-Out CV
     menuSubtitle: Internal-external validation for multi-institutional models
@@ -5523,7 +5523,7 @@ analyses:
     name: misclassificationbias
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideP
     menuSubgroup: Decision Support
     menuTitle: Misclassification Bias
     menuSubtitle: Assess impact of classification errors on effect estimates
@@ -5536,7 +5536,7 @@ analyses:
     name: clinicalscore
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideP
     menuSubgroup: Prediction Models
     menuTitle: Clinical Score Builder
     menuSubtitle: Build, validate, and compare integer-point scoring systems
@@ -5550,7 +5550,7 @@ analyses:
     name: mageeequation
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecideP
     menuSubgroup: Prediction Models
     menuTitle: Magee Equation (Oncotype DX)
     menuSubtitle: Estimate Oncotype DX Recurrence Score from pathology variables
@@ -5562,7 +5562,7 @@ analyses:
   - title: Latent Biomarker Construct + Cox Regression
     name: latentbiomarker
     ns: ClinicoPath
-    menuGroup: meddecideT
+    menuGroup: meddecideP
     menuSubgroup: Biomarkers
     menuTitle: Latent Biomarker Construct + Cox Regression
     menuSubtitle: Reflective CFA on biomarker indicators + survival
@@ -5792,7 +5792,7 @@ analyses:
     name: gsdesign
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Trial Design
     menuTitle: Group-Sequential Design & Sample Size
     menuSubtitle: Interim Analyses, Boundaries, Sample Size
@@ -5859,7 +5859,7 @@ analyses:
     name: patientfollowupintro
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPathP
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Which Analysis Should I Use?
     menuSubtitle: Waterfall, RECIST, swimmer plot - and what your data must look like

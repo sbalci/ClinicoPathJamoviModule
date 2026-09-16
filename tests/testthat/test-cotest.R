@@ -759,20 +759,3 @@ test_that("the Fagan nomogram is titled with the rule it actually plots", {
     expect_equal(unname(odds / (1 + odds)), unname(either), tolerance = 1e-9)
 })
 
-test_that("every Collate entry matches a tracked filename exactly (case included)", {
-    # cotest sources R/nomogrammer.R for the Fagan plot. git tracked it as `nomogrammer.r`
-    # while DESCRIPTION's Collate said `nomogrammer.R`; macOS is case-insensitive so this was
-    # invisible locally, but on a case-sensitive filesystem R CMD build fails outright with
-    # "files in 'Collate' field missing from 'R'".
-    skip_if_not(nzchar(Sys.which("git")))
-    root <- normalizePath("../..")
-    tracked <- system2("git", c("-C", shQuote(root), "ls-files", "R/"), stdout = TRUE)
-    tracked <- sub("^R/", "", tracked[startsWith(tracked, "R/")])
-    desc <- paste(readLines(file.path(root, "DESCRIPTION")), collapse = "\n")
-    tail_txt <- substring(desc, regexpr("Collate:", desc))   # match and extract on the SAME string
-    collate <- gsub("'", "", regmatches(tail_txt, gregexpr("'[^']+'", tail_txt))[[1]])
-    skip_if(length(collate) == 0)
-    expect_true("nomogrammer.R" %in% tracked)
-    expect_true("nomogrammer.R" %in% collate)
-    expect_equal(setdiff(collate, tracked), character(0))
-})

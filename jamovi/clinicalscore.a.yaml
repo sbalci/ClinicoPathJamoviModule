@@ -1,7 +1,7 @@
 ---
 name: clinicalscore
 title: Clinical Scoring System Generator
-menuGroup: meddecideT
+menuGroup: meddecideP
 menuSubgroup: Prediction Models
 menuTitle: Clinical Score Builder
 menuSubtitle: Build, validate, and compare integer-point scoring systems

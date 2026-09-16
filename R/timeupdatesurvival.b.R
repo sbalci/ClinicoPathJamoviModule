@@ -180,7 +180,7 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             n_events <- sum(data$status)
             # Reverse Kaplan-Meier, not median(observed times) -- the latter is
             # the median time to event-or-censoring. See .medianFollowUp() in
-            # R/survival_utils.R.
+            # R/utils-followup.R.
             mfu <- .medianFollowUp(data$time, data$status == 0)
             n_covariates <- length(covariate_vars)
             
@@ -958,5 +958,3 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
         }
     )
 )
-
-timeupdatesurvival <- timeupdatesurvivalClass$new

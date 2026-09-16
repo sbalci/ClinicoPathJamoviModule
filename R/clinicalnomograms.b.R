@@ -279,7 +279,7 @@ clinicalnomogramsClass <- R6::R6Class(
                     # median(observed times): the latter is the median time to
                     # event-or-censoring and understates the observation window
                     # in a high-event cohort. See .medianFollowUp() in
-                    # R/survival_utils.R. status_var is normalised to 0/1 above.
+                    # R/utils-followup.R. status_var is normalised to 0/1 above.
                     mfu <- .medianFollowUp(data[[time_var]], data[[status_var]] == 0)
                     private$data_info <- list(
                         n_total = nrow(data),

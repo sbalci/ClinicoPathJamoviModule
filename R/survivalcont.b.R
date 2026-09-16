@@ -461,7 +461,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # high-event cohort that sits far below the true observation
                 # window, so this warning fired on cohorts whose follow-up was
                 # perfectly adequate. See .medianFollowUp() in
-                # R/survival_utils.R.
+                # R/utils-followup.R.
                 mfu <- .medianFollowUp(data[[time_var]], data[[outcome_var]] == 0)
                 median_time <- mfu$value
                 short_followup <- switch(self$options$timetypeoutput,
@@ -896,7 +896,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             myoutcome_labelled <- labelled_data$myoutcome_labelled
 
 
-                # Delegated to the shared coder in survival_utils.R. This block
+                # Delegated to the shared coder in utils-eventindicator.R. This block
                 # previously had no null-check on outcomeLevel (it crashed with a
                 # raw "replacement has 0 rows" error) and returned NULL silently
                 # on a bad numeric outcome, leaving the user with a blank

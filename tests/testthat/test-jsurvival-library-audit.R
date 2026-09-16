@@ -1,7 +1,13 @@
-jsurvival_audit_analyses <- c(
-  "singlearm", "survival", "survivalcont", "multisurvival",
-  "oddsratio", "datetimeconverter", "timeinterval", "outcomeorganizer", "lassocox"
-)
+# Every analysis on the production Survival menu (the ones the updater ships to
+# jsurvival), read from the .a.yaml files so a routing change cannot leave this stale.
+jsurvival_audit_analyses <- local({
+  files <- list.files(testthat::test_path("..", "..", "jamovi"), "\\.a\\.yaml$", full.names = TRUE)
+  group <- vapply(files, function(f) {
+    g <- grep("^menuGroup:", readLines(f, warn = FALSE), value = TRUE)
+    if (length(g)) trimws(sub("^menuGroup:", "", g[1])) else ""
+  }, "")
+  sort(sub("\\.a\\.yaml$", "", basename(files[group == "Survival"])))
+})
 
 jsurvival_audit_root <- normalizePath(
   testthat::test_path("..", ".."),

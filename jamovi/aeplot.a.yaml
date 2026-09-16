@@ -1,7 +1,7 @@
 ---
 name: aeplot
 title: Adverse Events Butterfly Plot
-menuGroup: OncoPathT
+menuGroup: OncoPathP
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Butterfly / Tornado Plot of Adverse Events'
 version: '0.0.51'

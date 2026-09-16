@@ -399,6 +399,11 @@ confirm a hit is really at top level before acting on it.)
 - Never hand-write the public wrapper in `.b.R`: the generated `.h.R` defines it
   too, collates after, and wins, leaving your version dead while still emitting a
   duplicate `@export`.
+- Name helper FILES for their owner (R packages cannot use subfolders in `R/`):
+  `<analysis>-<topic>.R` when one analysis uses it, `utils.R` / `utils-<topic>.R`
+  when two or more do, `data-<topic>.R` for dataset documentation. The module
+  updater ships a helper wherever a shipped analysis uses its definitions, so the
+  name routes nothing — `test-zzz-analysis-file-naming.R` keeps it honest.
 
 ## Data Handling Patterns
 
