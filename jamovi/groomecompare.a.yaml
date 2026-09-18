@@ -1,7 +1,7 @@
 ---
 name: groomecompare
 title: Groome Staging System Comparison
-menuGroup: SurvivalP
+menuGroup: SurvivalD
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Compare Staging Systems Using Groome Criteria'
 version: '0.0.34'

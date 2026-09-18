@@ -1,7 +1,7 @@
 ---
 name:  pcaloadingheatmap
 title: PCA Loading Heatmap & Barmap
-menuGroup: JJStatsPlotP
+menuGroup: JJStatsPlotD
 menuSubgroup: Multivariate Analysis
 version: '1.0.4'
 jas: '1.2'

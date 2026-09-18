@@ -1,7 +1,7 @@
 ---
 name: latentbiomarker
 title: "Latent Biomarker Construct + Cox Regression"
-menuGroup: meddecideP
+menuGroup: meddecideD
 menuSubgroup: Biomarkers
 menuSubtitle: "Reflective CFA on biomarker indicators + survival"
 version: '1.0.4'

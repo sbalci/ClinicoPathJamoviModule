@@ -20,8 +20,9 @@ description:
         Categories are named CR, PR, SD and PD and the thresholds are adapted from RECIST
         v1.1, but this is NOT a RECIST v1.1 implementation: because it never sees individual
         lesions it cannot sum target lesions, detect a new lesion, or judge non-target
-        progression, and it cannot apply the 4-week confirmation rule itself (you may supply
-        your own confirmation column). If your data list each lesion separately, use the
+        progression, and it cannot apply the 4-week confirmation rule (a confirmation column
+        only adds markers to the plot; to count confirmed responses, supply confirmed
+        categories through the category override). If your data list each lesion separately, use the
         lesion-level RECIST v1.1 analysis. It will be available in upcoming releases.
     # Kept commented, as in the great majority of this module's .a.yaml files:
     # `dontrun: false` emits a BARE \examples{} block, so R CMD check runs it.
@@ -84,7 +85,7 @@ options:
 
 
     - name: timeVar
-      title: Time variable (required for spider plot)
+      title: Time variable (required for raw input and spider plot)
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
@@ -191,10 +192,14 @@ options:
           R: >
             Optional categorical variable indicating response confirmation status
             (e.g., Confirmed vs Unconfirmed CR/PR). A distinct marker is drawn at
-            each bar tip according to the level of this variable.
+            each bar tip according to the level of this variable. The markers are
+            display only: ORR and DCR are not changed. To count only confirmed
+            responses, give the categories through Response category override.
+            One value per patient (the first non-missing value is used).
           jamovi: >
             Optional variable indicating confirmation status (e.g., Confirmed vs
-            Unconfirmed). A distinct marker is drawn at each bar tip per level.
+            Unconfirmed). A distinct marker is drawn at each bar tip per level;
+            ORR and DCR are not changed (use the category override for that).
 
     - name: ongoingVar
       title: On-Treatment / Ongoing (optional)
@@ -206,10 +211,11 @@ options:
           R: >
             Optional variable flagging patients still on treatment / with an
             ongoing response. Truthy values (TRUE, non-zero, or text matching
-            yes/y/true/on/ongoing/1) draw an upward arrow at the bar tip.
+            yes/y/true/on/ongoing/1) draw an arrow pointing away from the bar tip.
+            One value per patient (the first non-missing value is used).
           jamovi: >
             Optional flag for patients still on treatment / ongoing response.
-            'Yes'/TRUE/1 draws an upward arrow at the bar tip.
+            'Yes'/TRUE/1 draws an arrow pointing away from the bar tip.
 
     - name: responseCategoryVar
       title: Response category override (optional)
@@ -222,7 +228,9 @@ options:
             Optional per-patient RECIST category (CR/PR/SD/PD). When supplied it
             overrides the category computed from the percentage value, so a patient
             with target-lesion shrinkage can still be classified PD (e.g., a new
-            lesion). Affects both bar coloring and response metrics (ORR/DCR).
+            lesion). Affects bar coloring, response metrics (ORR/DCR), time to
+            response and duration of response. One value per patient: the first
+            non-missing value is used and conflicting values are reported.
           jamovi: >
             Optional per-patient RECIST category (CR/PR/SD/PD). When supplied it
             overrides the category computed from the % value — e.g., a shrinking
@@ -267,8 +275,9 @@ options:
       default: true
       description:
           R: >
-            Show +20 percent and -30 percent RECIST v1.1 thresholds as dashed lines.
-            Helps identify Progressive Disease (PD) and Partial Response (PR) cutoffs.
+            Show +20 percent and -30 percent RECIST v1.1 thresholds as dashed lines
+            on the waterfall and spider plots. Helps identify Progressive Disease (PD)
+            and Partial Response (PR) cutoffs.
           jamovi: >
             Show RECIST v1.1 threshold lines on plots:
             • -30 percent line: Partial Response (PR) cutoff - tumor shrinkage threshold
@@ -291,9 +300,11 @@ options:
       default: false
       description:
           R: >
-            Show median response as a horizontal line.
+            Show the median response as a horizontal line on the waterfall plot and
+            as a median trajectory on the spider plot.
           jamovi: >
-            Show median response as a horizontal line.
+            Show the median response (waterfall: horizontal line; spider: median
+            trajectory).
 
     - name: showCI
       title: Confidence interval
@@ -339,9 +350,9 @@ options:
       options:
         - title: jamovi
           name: jamovi
-        - title: RECIST (Red/Blue/Green)
+        - title: RECIST (teal/purple/magenta/orange)
           name: recist
-        - title: Simple (Red/Green)
+        - title: Simple (teal response, orange progression)
           name: simple
         - title: Colorful (Group Colors)
           name: colorful
@@ -420,7 +431,7 @@ options:
       title: Spider plot color scheme
       type: List
       options:
-        - title: Classic (Blue/Red)
+        - title: Classic (teal/orange)
           name: classic
         - title: jamovi Theme
           name: jamovi
@@ -477,13 +488,13 @@ options:
       default: false
       description:
           R: >
-            Display clinical significance interpretations for ORR and DCR
+            Display clinical significance context for ORR and DCR: the range of rates
+            compatible with the data (exact confidence interval) and a sample-size note.
           jamovi: >
             Add clinical significance context to results:
-            • ORR thresholds: <15 percent (low), 15-30 percent (moderate), >30 percent (promising)
-            • DCR interpretations with clinical relevance
-            • Sample size adequacy assessment
-            Helps interpret results in clinical context
+            • The range of response rates compatible with the data (exact confidence interval)
+            • A reminder to compare with the rate expected in your tumour type and setting
+            • Sample size assessment
 
     - name: showConfidenceIntervals
       title: Confidence intervals for clinical metrics

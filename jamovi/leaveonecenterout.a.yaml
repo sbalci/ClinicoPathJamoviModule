@@ -1,7 +1,7 @@
 ---
 name: leaveonecenterout
 title: Leave-One-Center-Out Cross-Validation
-menuGroup: meddecideP
+menuGroup: meddecideD
 menuSubgroup: Prediction Models
 menuTitle: Leave-One-Center-Out CV
 menuSubtitle: Internal-external validation for multi-institutional models

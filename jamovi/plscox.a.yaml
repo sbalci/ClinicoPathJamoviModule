@@ -1,7 +1,7 @@
 ---
 name: plscox
 title: Partial Least Squares Cox Models
-menuGroup: SurvivalP
+menuGroup: SurvivalD
 menuSubgroup: Dimension Reduction Cox
 menuTitle: PLS Cox
 menuSubtitle: Creates survival-directed composite scores for massive (p > n) datasets.

@@ -57,8 +57,9 @@ test_that("an all-missing cohort says why nothing was produced", {
   )
   # The 4-row table skeleton from .init() stays, but no values are filled.
   expect_true(all(is.na(result$summaryTable$asDF$n)))
-  # Validation aborts before the analysis runs and explains itself in todo2.
-  expect_match(wf_text(result, "todo2"), "No patients with valid response data")
+  # The run stops and explains itself once, in the always-visible notices panel
+  # (it was also copied into todo2, so the message appeared twice).
+  expect_match(wf_text(result, "notices"), "No patients with valid response data")
 })
 
 test_that("waterfall handles missing patientID values", {

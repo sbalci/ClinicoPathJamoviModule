@@ -30,7 +30,7 @@ children:
                 events:
                   change: './waterfall.events::onChange_inputType'
       - type: TargetLayoutBox
-        label: Time Variable
+        label: Time Variable (raw input, visits, spider plot)
         children:
           - type: VariablesListBox
             name: timeVar
@@ -116,13 +116,13 @@ children:
                     isTarget: true
               - type: CheckBox
                 name: showThresholds
-                enable: (showWaterfallPlot)
+                enable: (showWaterfallPlot || showSpiderPlot)
               - type: CheckBox
                 name: labelOutliers
                 enable: (showWaterfallPlot)
               - type: CheckBox
                 name: showMedian
-                enable: (showWaterfallPlot)
+                enable: (showWaterfallPlot || showSpiderPlot)
               - type: CheckBox
                 name: showCI
                 enable: (showWaterfallPlot)

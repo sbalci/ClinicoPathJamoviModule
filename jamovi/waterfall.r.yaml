@@ -125,13 +125,14 @@ items:
           title: "Median time to best response"
           type: text
         - name: median_duration
-          title: "Median time in response"
+          title: "Median DoR (Kaplan-Meier)"
           type: text
       clearWith:
          - patientID
          - responseVar
          - timeVar
          - inputType
+         - responseCategoryVar
 
 
     - name: clinicalMetrics
@@ -304,6 +305,7 @@ items:
         - name: p_value
           title: "p-value"
           type: number
+          format: zto,pvalue
         - name: interpretation
           title: "Clinical Interpretation"
           type: text
@@ -376,6 +378,7 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - responseCategoryVar
       columns:
          - name: metric
            title: "Metric"

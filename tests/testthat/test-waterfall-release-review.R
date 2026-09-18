@@ -102,7 +102,9 @@ test_that("a cohort above 100 rows gets the hand-computed best response", {
   # There used to be a separate large-data path above 100 rows / 50 patients whose
   # copy of the logic drifted from the standard one. One path now serves every
   # size; this pins its result on a large cohort against a hand computation:
-  # best response = the smallest change over the post-baseline visits.
+  # best response = the smallest change over the post-baseline visits up to the
+  # first progression (RECIST v1.1: a first scan >= 1.2 x the baseline is PD, and
+  # a later shrinkage does not count).
   set.seed(1)
   big <- do.call(rbind, lapply(1:60, function(i) data.frame(
     id = sprintf("P%03d", i), tm = c(0, 1, 2),
@@ -111,7 +113,12 @@ test_that("a cohort above 100 rows gets the hand-computed best response", {
                   timeVar = "tm", inputType = "raw")
   w <- p$.processData(big, "id", "raw", "size", "tm", NULL)$waterfall
   w <- w[order(w$id), ]
-  expected <- vapply(split(big, big$id), function(x) min(x$size[x$tm > 0]) - 100, numeric(1))
+  expected <- vapply(split(big, big$id), function(x) {
+    s1 <- x$size[x$tm == 1]; s2 <- x$size[x$tm == 2]
+    if (s1 >= 120) s1 - 100 else min(s1, s2) - 100
+  }, numeric(1))
+  expect_true(any(vapply(split(big, big$id), function(x) x$size[x$tm == 1] >= 120 &&
+                           x$size[x$tm == 2] < x$size[x$tm == 1], logical(1))))   # the rule is exercised
   expect_equal(nrow(w), 60)
   expect_equal(unname(w$response), unname(expected[w$id]))
 })
@@ -219,7 +226,7 @@ test_that("copy-ready sentence still renders when no patient achieves CR", {
 
   txt <- as.character(a$results$copyReadyReport$content)
   expect_match(txt, "objective response rate")
-  expect_match(txt, "0 patients achieving complete response")
+  expect_match(txt, "complete response n = 0")
 })
 
 test_that("unrecognised response-category overrides are rejected, not fatal", {
@@ -413,7 +420,8 @@ test_that("notices are delivered even when the run aborts early", {
   # .run(); the on.exit(renderNotices) must still deliver what accumulated.
   d <- data.frame(pid = paste0("P", 1:12), resp = NA_real_)
   res <- ClinicoPath::waterfall(data = d, patientID = "pid", responseVar = "resp")
-  expect_match(rr_txt(res), "REGULATORY USE PROHIBITED")
+  # (method disclaimers are not shown when nothing was computed; the error is)
+  expect_match(rr_txt(res), "DATA PROCESSING ERROR")
   expect_match(rr_txt(res), "missing response values")
 })
 
@@ -434,7 +442,8 @@ test_that("safety notices describe nadir-referenced progression, not baseline", 
   res <- ClinicoPath::waterfall(data = d, patientID = "pid", responseVar = "resp",
                                 timeVar = "time", inputType = "percentage")
   txt <- rr_txt(res)
-  expect_match(txt, "referenced to the nadir")
+  # (The disclaimer that said "referenced to the nadir" was merged into one factual
+  # notice; the time-to-event notice still states the nadir rule.)
   expect_match(txt, "increase over the NADIR")
   expect_false(grepl("measured from BASELINE, not from the NADIR", txt, fixed = TRUE))
 })

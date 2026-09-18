@@ -5,6 +5,34 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-18 — reviewing my own `waterfall` fix: three majors the fix introduced or missed
+
+- **Failure mode:** the first fix passed 431/431 tests, yet an independent review found (1) exact-boundary progression
+  missed ~40% of the time with raw input: `(60 - 50) / 50 * 100` via percent space gives 19.99999999999999, below the
+  inclusive `>= 20`; (2) best response still counted scans after a documented progression; (3) a denominator of mine
+  that included Unknown patients. A scripted block move also deleted an adjacent line (`n_supplied`).
+- **Detection signal:** a six-reviewer workflow with adversarial verification of each issue, then a differential against
+  an independently written base-R RECIST reference on random data (pre-fix 435/600, fixed 600/600).
+- **Prevention rule:** compare every inclusive clinical threshold with a tolerance when the value is derived; own tests
+  written by the implementer share the implementer's blind spots - check a fix against an independent reference on
+  random data, and run that check on the unfixed code first. After a scripted block move, grep for every line that sat
+  at the block's edges.
+
+## 2026-09-18 — `waterfall`: a PD that could never happen, and an equivalence test that proved nothing
+
+- **Failure mode:** with a time variable, best response was `slice_min(response)` over every row, including the
+  time-0 baseline row at 0%. No patient's best response could exceed 0%, so a tumour that only grew was scored SD,
+  PD never occurred, and the panel printed "DCR 100% - Excellent disease control". A separate >100-row processing
+  path had its own copy of that logic plus group handling that duplicated a patient whose group changed between rows.
+- **Detection signal:** the OncoPath release check (C1, C3): independent recomputation of best response by hand.
+  Existing tests passed because (1) the baseline test covered the patient who should NOT be scored (baseline only ->
+  Unknown), never the one who SHOULD be PD; (2) "large-data path agrees with the standard path" compared two copies
+  that shared the bug, on data without a group variable.
+- **Prevention rule:** an equivalence test between two implementations proves they agree, not that either is right;
+  pin one to a hand computation, or delete the duplicate (done: one path, 18,000 rows in 0.22 s). For every category
+  a classifier can emit, keep a test where that category is the expected answer. `df$col` on a tibble warns when
+  `col` is absent ("Unknown or uninitialised column"); test `"col" %in% names(df)`.
+
 ## 2026-09-18 — OncoPath `/check-module`: two checks that could not fail
 
 ### A plot-warning harness that was blind to the warning
