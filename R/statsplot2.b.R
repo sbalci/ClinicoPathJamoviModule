@@ -1517,6 +1517,22 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     }, error = function(e) plot)
                 }
 
+                # Statistics drawn by resampling or posterior sampling name the seed they came from.
+                if (inherits(plot, "ggplot") || inherits(plot, "patchwork")) {
+                    design <- switch(analysis_info$plot_type,
+                        independent_factor_continuous = "between", independent_continuous_factor = "between",
+                        repeated_factor_continuous = "within", independent_continuous_continuous = "correlation",
+                        independent_factor_factor = "contingency", "none")
+                    type <- switch(analysis_info$distribution,
+                        np = "nonparametric", r = "robust", bf = "bayes", "parametric")
+                    factor_var <- if (identical(analysis_info$plot_type, "independent_continuous_factor"))
+                        prepared_data$dep else prepared_data$group
+                    k <- if (isTRUE(factor_var %in% names(prepared_data$data)))
+                        nlevels(droplevels(factor(prepared_data$data[[factor_var]]))) else 2L
+                    if (statsSeedMatters(type, design, k))
+                        plot <- addSeedCaption(plot, self, self$options$seed)
+                }
+
                 # Return the plot
                 if (!is.null(plot)) {
                     # ggalluvial warns "Some strata appear at multiple axes" whenever the

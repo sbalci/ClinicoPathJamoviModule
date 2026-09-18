@@ -621,10 +621,11 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   equals the phi coefficient for a 2x2. Each interval is computed per
 #'   comparison and is not adjusted for multiple testing. Note: This is
 #'   computationally intensive and may take longer for large tables.
-#' @param seed Random seed for the bootstrap confidence intervals, so that the
-#'   interval reported for a given table is reproducible. Change it to see how
-#'   much the interval depends on the resampling. Used only when bootstrap
-#'   confidence intervals are requested.
+#' @param seed Random seed for the bootstrap confidence intervals and for
+#'   Fisher's exact test when it has to be evaluated by Monte Carlo simulation,
+#'   so that the interval and p-value reported for a given table are
+#'   reproducible. The tables name the seed whenever one of these was used.
+#'   Change it to see how much a result depends on the resampling.
 #' @param testSelection Which test to use. Automatic applies Fisher's exact
 #'   test to any pairwise comparison whose expected counts fall below 5. Always
 #'   Fisher's exact applies it to the overall table as well as to every pairwise

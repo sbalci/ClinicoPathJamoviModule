@@ -26,6 +26,7 @@ jjridges(
   test_type = "parametric",
   p_adjust_method = "none",
   effsize_type = "d",
+  seed = 20250101,
   alpha = 0.8,
   color_palette = "clinical_colorblind",
   custom_colors = "#3498db,#e74c3c,#2ecc71,#f39c12",
@@ -118,6 +119,10 @@ comparisons.}
 skewed data (like lymph node counts),  consider using nonparametric effect
 sizes: Cliff's Delta shows probability that one group  has higher values,
 Hodges-Lehmann shift shows typical difference in units.}
+
+\item{seed}{Random seed for the bootstrap confidence interval of Cliff's
+delta. The statistical tests table names the seed whenever it was used. The
+default reproduces the previous fixed behaviour.}
 
 \item{alpha}{Transparency level for ridge fills.}
 

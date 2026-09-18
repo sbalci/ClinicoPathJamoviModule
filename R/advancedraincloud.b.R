@@ -779,7 +779,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                         {
                             # Create sophisticated fallback that mimics raincloud appearance
                             # Set consistent jittering with seed for reproducible results
-                            set.seed(self$options$jitter_seed)
+                            withr::local_seed(self$options$jitter_seed)
                             dodge_width <- 0.8
                             jitter_width <- 0.15
 

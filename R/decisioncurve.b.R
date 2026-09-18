@@ -1020,24 +1020,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # each run: across eight identical reruns at the default 1000 replications the
             # comparison p-value moved between 0.030 and 0.060 and the 95% CI crossed zero
             # in two of them. A clinician who reruns an analysis must get the same numbers.
-            # The caller's RNG state is restored on exit so an R-API user's stream is not
-            # disturbed by running this analysis.
+            # withr::local_seed() restores the caller's RNG state when .run() exits, so neither an
+            # R-API user's stream nor the next analysis in the shared jamovi process is disturbed.
             seed_val <- self$options$seed
             if (is.null(seed_val) || is.na(seed_val)) seed_val <- 42
-            .had_seed <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
-            .saved_seed <- if (.had_seed) {
-                get(".Random.seed", envir = globalenv(), inherits = FALSE)
-            } else {
-                NULL
-            }
-            on.exit({
-                if (.had_seed) {
-                    assign(".Random.seed", .saved_seed, envir = globalenv())
-                } else if (exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
-                    base::remove(list = ".Random.seed", envir = globalenv())
-                }
-            }, add = TRUE)
-            set.seed(seed_val)
+            withr::local_seed(seed_val)
 
             # Check if required packages are available
             required_packages <- c("ggplot2", "dplyr", "tidyr")
@@ -2469,6 +2456,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 plot_data <- private$.optimizePlotDataForManyModels(plot_data, n_models)
             }
 
+            caption <- if (!is.null(private$.plotThinning))
+                .fmt(.('Curve drawn from {to} of {from} computed points for rendering speed; tables and statistics use all of them.'),
+                     to = private$.plotThinning$to, from = private$.plotThinning$from)
+
             # Create base plot with optimized aesthetics
             p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = threshold, y = net_benefit, color = model)) +
                 # linewidth, not size: `size` for lines was deprecated in ggplot2 3.4.0 and emits a
@@ -2479,10 +2470,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     x = .("Threshold Probability"),
                     y = .("Net Benefit"),
                     color = .("Strategy"),
-                    caption = if (!is.null(private$.plotThinning))
-                        .fmt(.('Curve drawn from {to} of {from} computed points for rendering speed; tables and statistics use all of them.'),
-                             to = private$.plotThinning$to, from = private$.plotThinning$from)
-                    else NULL
+                    caption = caption
                 ) +
                 ggplot2::scale_x_continuous(labels = function(x) paste0(round(x * 100), "%")) +
                 ggtheme
@@ -2508,7 +2496,11 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     ggplot2::labs(fill = if (band == "simultaneous")
                         .fmt(.('{level}% simultaneous band'), level = sprintf("%.0f", self$options$ciLevel * 100))
                     else
-                        .fmt(.('{level}% pointwise CI'), level = sprintf("%.0f", self$options$ciLevel * 100)))
+                        .fmt(.('{level}% pointwise CI'), level = sprintf("%.0f", self$options$ciLevel * 100)),
+                        # the bands are bootstrap intervals: name the seed that drew them
+                        caption = paste(c(caption, jmvcore::format(.("Random seed: {seed}"),
+                            seed = if (is.null(self$options$seed) || is.na(self$options$seed)) 42 else self$options$seed)),
+                            collapse = " "))
                 }
             }
 

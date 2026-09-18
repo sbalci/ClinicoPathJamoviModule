@@ -326,17 +326,14 @@ enhancedROCClass <- R6::R6Class(
             # intervals, bootstrap ROC comparisons, internal-validation resamples and
             # cross-validation folds all draw from this stream; none of them was seeded, so
             # re-running the same analysis produced a different confidence interval each time.
-            # The caller's RNG state is restored on exit so we do not disturb their session.
+            # withr::local_seed() restores the caller's RNG state when .run() exits: every analysis in a
+            # jamovi session shares one R process.
             # jmvcore raises an error (rather than returning NULL) for an option the compiled
             # .h.R does not yet carry, so read it defensively: this keeps working both before
             # and after jmvtools::prepare() picks up the new `seed` option.
             seed_val <- tryCatch(self$options$seed, error = function(e) NULL)
             if (is.null(seed_val) || !is.finite(seed_val)) seed_val <- 0
-            if (exists(".Random.seed", envir = globalenv())) {
-                .saved_seed <- get(".Random.seed", envir = globalenv())
-                on.exit(assign(".Random.seed", .saved_seed, envir = globalenv()), add = TRUE)
-            }
-            set.seed(seed_val)
+            withr::local_seed(seed_val)
 
             # Check if we have required data
             if (is.null(private$.outcome) || is.null(private$.predictors) || length(private$.predictors) == 0) {
@@ -1476,6 +1473,7 @@ enhancedROCClass <- R6::R6Class(
             aucTable <- self$results$results$aucSummary
             aucTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
             private$.noteDirection(aucTable, private$.rocObjects)
+            aucTable$setNote("seed", if (isTRUE(self$options$useBootstrap)) jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
             aucTable$setNote(
                 "context_reference",
                 .("The last column restates each AUC as what it actually is: the probability that a randomly chosen case scores higher than a randomly chosen non-case. Where the selected clinical context has a conventionally quoted reference level (0.75 for screening, 0.80 for diagnosis) it also says which side of that level this AUC falls; those levels are reporting conventions, not thresholds for patient care, and the AUC Interpretation column is the same number placed in the same kind of conventional band. Both are in-sample estimates from these data; the AUC Lower CI and AUC Upper CI columns show how precisely this sample pins the AUC down.")
@@ -1858,6 +1856,8 @@ enhancedROCClass <- R6::R6Class(
 
             compTable <- self$results$results$rocComparisons
             compTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            # bootstrap and Venkatraman (permutation) tests resample; DeLong does not
+            compTable$setNote("seed", if (self$options$comparisonMethod != "delong") jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
             compTable$setNote(
                 "no_equivalence",
                 .("\"Not significantly different\" means no difference was detected in this sample; it does not establish that the two predictors perform equally, because the test may lack power to detect a difference of the size that would matter here.")
@@ -2001,6 +2001,7 @@ enhancedROCClass <- R6::R6Class(
 
             statSummaryTable <- self$results$results$statisticalSummary
             statSummaryTable$deleteRows()   # jamovi re-runs .run() on the same object; addRow() would stack duplicates
+            statSummaryTable$setNote("seed", if (self$options$comparisonMethod != "delong") jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
             statSummaryTable$setNote(
                 "no_equivalence",
                 .("\"No significant difference (p >= 0.05)\" means no difference between the two AUCs was detected in this sample; it does not establish that the two predictors perform equally, because the test may lack the power to detect a difference of the size that would matter here. The p-value is the probability of seeing a gap at least this large if the two AUCs were identical, not the probability that they are identical. The Effect Magnitude column reports only how far apart the two observed AUCs are, so a wide observed gap and a large p-value can appear on the same row when the sample is small.")
@@ -3216,6 +3217,9 @@ enhancedROCClass <- R6::R6Class(
                 report_html <- paste0(report_html, comparative_text, "</div>")
             }
 
+            # the sentences above quote the AUC interval, which is a bootstrap one here
+            if (isTRUE(self$options$useBootstrap))
+                report_html <- paste0(report_html, "<p><em>", jmvcore::htmlEscape(jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed)), "</em></p>")
             report_html <- paste0(report_html, "</div>")
 
             html$setContent(report_html)
@@ -3448,6 +3452,12 @@ enhancedROCClass <- R6::R6Class(
 
         # Plotting functions
         .plotROCCurve = function(image, ggtheme, theme, ...) {
+            # The confidence bands come from pROC::ci.coords(), which is a stratified
+            # bootstrap with no analytic alternative, and it runs in this renderer - after
+            # .run()'s withr::local_seed() has already been restored. Unseeded, the bands
+            # moved on every resize, .omv reopen and export, and the user's seed option
+            # could not reach them at all.
+            withr::local_seed(if (is.finite(self$options$seed)) self$options$seed else 0)
             private$.restoreFromState(image)
             # Check if ROC curve plotting is enabled
             if (!self$options$rocCurve) {
@@ -3523,6 +3533,7 @@ enhancedROCClass <- R6::R6Class(
 
                     # Add confidence bands if requested
                     if (self$options$showConfidenceBands) {
+                        p <- p + ggplot2::labs(caption = jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
                         for (predictor in names(private$.rocResults)) {
                             roc_obj <- private$.rocResults[[predictor]]$roc
 
@@ -4661,6 +4672,8 @@ enhancedROCClass <- R6::R6Class(
             }
 
             aucTable <- self$results$results$multiClassAUC
+            # the one-vs-rest AUC limits are bootstrap intervals when useBootstrap is on
+            aucTable$setNote("seed", if (isTRUE(self$options$useBootstrap)) jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
             # This table still builds its rows in .run(): the row count is not knowable in
             # advance, so deleteRows() is required or every run would stack duplicates.
             aucTable$deleteRows()
@@ -5189,7 +5202,8 @@ enhancedROCClass <- R6::R6Class(
 
             val_method <- self$options$validationMethod
 
-            summary_text <- paste0("<h3>Internal Validation (", private$.safeHtmlOutput(val_method), ")</h3>")
+            summary_text <- paste0("<h3>Internal Validation (", private$.safeHtmlOutput(val_method), ")</h3>",
+                                   "<p>", jmvcore::htmlEscape(jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed)), "</p>")
 
             for (predictor in names(private$.rocResults)) {
                 result <- tryCatch(

@@ -13,7 +13,6 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
         # BayesFactor's MCMC and robust/effect-size CIs use bootstrapping, so
         # without this the SAME analysis reported different numbers on every
         # re-render - a credible interval that moves when nothing changed.
-        .STOCHASTIC_SEED = 20250101L,
 
 
         # Option overrides for clinical presets (jamovi options are read-only at runtime;
@@ -1013,7 +1012,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             .plot = function(image, ggtheme, theme, ...) {
                 # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
                 # re-render of an unchanged analysis reports the same numbers.
-                withr::local_seed(private$.STOCHASTIC_SEED)
+                withr::local_seed(self$options$seed)
 
                 # Main plot generation function
                 # Defensive: repopulate clinical-preset overrides in case this render
@@ -1092,6 +1091,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     )
                 }
 
+                if ((isTRUE(options_data$resultssubtitle) && statsSeedMatters(options_data$typestatistics, "one_sample")) ||
+                    captionSeedMatters(options_data$typestatistics, "one_sample", 2L, options_data$bf.message))
+                    plot <- addSeedCaption(plot, self, self$options$seed)
+
                 # Print plot
                 print(plot)
                 TRUE
@@ -1102,7 +1105,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             .plot2 = function(image, ggtheme, theme, ...) {
                 # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
                 # re-render of an unchanged analysis reports the same numbers.
-                withr::local_seed(private$.STOCHASTIC_SEED)
+                withr::local_seed(self$options$seed)
 
                 # Grouped plot generation function
                 # Defensive: repopulate clinical-preset overrides in case this render
@@ -1187,6 +1190,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         )
                     )
                 }
+
+                if ((isTRUE(options_data$resultssubtitle) && statsSeedMatters(options_data$typestatistics, "one_sample")) ||
+                    captionSeedMatters(options_data$typestatistics, "one_sample", 2L, options_data$bf.message))
+                    plot2 <- addSeedCaption(plot2, self, self$options$seed)
 
                 # Print plot
                 print(plot2)

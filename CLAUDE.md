@@ -359,7 +359,8 @@ When updating documentation links in README.Rmd, ensure they point to these subm
   disagrees with the actual callers or a top-level name is defined twice. No `@include`/`Collate`.
 - Files the updater manages but no longer plans are deleted (R/, jamovi yaml/js, data/*.rda). Never
   touched: `R/zzz_imports.R`, `R/data.R`, `R/*-package.R`, `R/*-data.R`, `R/data-*.R`, `jamovi/i18n`,
-  `data/*.csv|omv`.
+  `data/*.csv|omv`. `.omv` example analyses are made and saved in the submodule and never copied from
+  the umbrella; the plan only warns when a 0000.yaml `datasets:` entry has no file in `data/`.
 
 ### JamoviTest Routing for Dev/Test Slash Commands
 

@@ -185,7 +185,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             else
                                 assign(".Random.seed", old_seed, envir = globalenv())
                         }, add = TRUE)
-                        set.seed(20240101L)
+                        set.seed(self$options$seed)
                         ci <- suppressWarnings(classInt::classIntervals(
                             x,
                             n = nbins,
@@ -405,7 +405,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "# 3000 observations and would give different breaks every run.\n",
                     "# Requires: install.packages('classInt')\n",
                     if (n_obs > private$.jenksExactMaxN) paste0(
-                        "set.seed(20240101)  # ", n_obs,
+                        "set.seed(", self$options$seed, ")  # ", n_obs,
                         " observations: classInt subsamples, so pin the seed\n",
                         "ci <- classInt::classIntervals(x[!is.na(x)], n = ", nbins,
                         ", style = 'fisher')\n")
@@ -902,6 +902,10 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # addRow() appends without a duplicate-key check, so a second
             # $run() on the same analysis object would double every row.
             breakTable$deleteRows()
+            # above .jenksExactMaxN the natural breaks come from a random subsample
+            breakTable$setNote("seed", if (method == "jenks" && requireNamespace("classInt", quietly = TRUE) &&
+                                           length(x_clean) > private$.jenksExactMaxN)
+                jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
             for (i in seq_along(breaks)) {
                 breakTable$addRow(rowKey = i, values = list(
                     index = i,

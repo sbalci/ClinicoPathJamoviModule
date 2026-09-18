@@ -26,6 +26,7 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             test_type = "parametric",
             p_adjust_method = "none",
             effsize_type = "d",
+            seed = 20250101,
             alpha = 0.8,
             color_palette = "clinical_colorblind",
             custom_colors = "#3498db,#e74c3c,#2ecc71,#f39c12",
@@ -191,6 +192,10 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cliff_delta",
                     "hodges_lehmann"),
                 default="d")
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=20250101)
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
                 alpha,
@@ -352,6 +357,7 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..test_type)
             self$.addOption(private$..p_adjust_method)
             self$.addOption(private$..effsize_type)
+            self$.addOption(private$..seed)
             self$.addOption(private$..alpha)
             self$.addOption(private$..color_palette)
             self$.addOption(private$..custom_colors)
@@ -400,6 +406,7 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         test_type = function() private$..test_type$value,
         p_adjust_method = function() private$..p_adjust_method$value,
         effsize_type = function() private$..effsize_type$value,
+        seed = function() private$..seed$value,
         alpha = function() private$..alpha$value,
         color_palette = function() private$..color_palette$value,
         custom_colors = function() private$..custom_colors$value,
@@ -447,6 +454,7 @@ jjridgesOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..test_type = NA,
         ..p_adjust_method = NA,
         ..effsize_type = NA,
+        ..seed = NA,
         ..alpha = NA,
         ..color_palette = NA,
         ..custom_colors = NA,
@@ -518,6 +526,7 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "test_type",
                     "show_stats",
                     "effsize_type",
+                    "seed",
                     "clinicalPreset")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -557,6 +566,7 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "show_stats",
                     "test_type",
                     "effsize_type",
+                    "seed",
                     "clinicalPreset")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -726,6 +736,7 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "test_type",
                     "p_adjust_method",
                     "effsize_type",
+                    "seed",
                     "fill_var",
                     "facet_var",
                     "clinicalPreset")))
@@ -814,6 +825,9 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   skewed data (like lymph node counts),  consider using nonparametric effect
 #'   sizes: Cliff's Delta shows probability that one group  has higher values,
 #'   Hodges-Lehmann shift shows typical difference in units.
+#' @param seed Random seed for the bootstrap confidence interval of Cliff's
+#'   delta. The statistical tests table names the seed whenever it was used. The
+#'   default reproduces the previous fixed behaviour.
 #' @param alpha Transparency level for ridge fills.
 #' @param color_palette Color palette for ridges. 'Clinical' is optimized for
 #'   accessibility and medical publications. Viridis family are also
@@ -895,6 +909,7 @@ jjridges <- function(
     test_type = "parametric",
     p_adjust_method = "none",
     effsize_type = "d",
+    seed = 20250101,
     alpha = 0.8,
     color_palette = "clinical_colorblind",
     custom_colors = "#3498db,#e74c3c,#2ecc71,#f39c12",
@@ -962,6 +977,7 @@ jjridges <- function(
         test_type = test_type,
         p_adjust_method = p_adjust_method,
         effsize_type = effsize_type,
+        seed = seed,
         alpha = alpha,
         color_palette = color_palette,
         custom_colors = custom_colors,

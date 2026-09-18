@@ -88,6 +88,18 @@ refs:
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=BiocManager"
         url: "https://CRAN.R-project.org/package=BiocManager"
 
+    BlandAltman1986:
+        type: article
+        author: "Bland, J. M., & Altman, D. G."
+        year: 1986
+        title: Statistical methods for assessing agreement between two methods of clinical measurement
+        publisher: Lancet
+        volume: 1
+        issue: 8476
+        pages: 307-310
+        pmid: 2868172
+        url: "https://pubmed.ncbi.nlm.nih.gov/2868172/"
+
     BlueSky:
         type: software
         author: BlueSkyStatistics
@@ -336,6 +348,68 @@ refs:
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=DiagrammeRsvg"
         url: "https://CRAN.R-project.org/package=DiagrammeRsvg"
 
+    Dudgeon2021:
+        type: article
+        author: "Dudgeon, S. N., Wen, S., Hanna, M. G., et al."
+        year: 2021
+        title: "A Pathologist-Annotated Dataset for Validating Artificial Intelligence: A Project Description and Pilot Study"
+        publisher: Journal of Pathology Informatics
+        volume: 12
+        pages: 45
+        doi: 10.4103/jpi.jpi_83_20
+        pmid: 34881099
+        url: "https://doi.org/10.4103/jpi.jpi_83_20"
+
+    Elfer2022:
+        type: article
+        author: "Elfer, K., Dudgeon, S., Garcia, V., et al."
+        year: 2022
+        title: Pilot study to evaluate tools to collect pathologist annotations for validating machine learning algorithms
+        publisher: "Journal of Medical Imaging (Bellingham)"
+        volume: 9
+        issue: 4
+        pages: "047501"
+        doi: 10.1117/1.JMI.9.4.047501
+        pmid: 35911208
+        url: "https://doi.org/10.1117/1.JMI.9.4.047501"
+
+    Elfer2024:
+        type: article
+        author: "Elfer, K., Gardecki, E., Garcia, V., et al."
+        year: 2024
+        title: "Reproducible Reporting of the Collection and Evaluation of Annotations for Artificial Intelligence Models (CLEARR-AI)"
+        publisher: Modern Pathology
+        volume: 37
+        issue: 4
+        pages: 100439
+        doi: 10.1016/j.modpat.2024.100439
+        pmid: 38286221
+        url: "https://doi.org/10.1016/j.modpat.2024.100439"
+
+    FDA_CDRH_RST_Catalog_2025:
+        type: website
+        author: U.S. Food and Drug Administration, Center for Devices and Radiological Health.
+        year: 2025
+        title: "Catalog of Regulatory Science Tools to Help Assess New Medical Devices (Digital Pathology program area)"
+        publisher: U.S. Food and Drug Administration
+        url: "https://cdrh-rst.fda.gov/"
+
+    FDA_RST24MD06_SegValWSI_2025:
+        type: software
+        author: "Arab, A., Kahaki, S., & Chen, W."
+        year: 2025
+        title: "SegVal-WSI: Whole Slide Image Segmentation Algorithm Performance Assessment Tool (Regulatory Science Tool RST24MD06.02)"
+        publisher: U.S. Food and Drug Administration, Center for Devices and Radiological Health
+        url: "https://cdrh-rst.fda.gov/segval-wsi-whole-slide-image-segmentation-algorithm-performance-assessment-tool"
+
+    FDA_RST24MD19_DxGoals_2025:
+        type: software
+        author: "Nguyen, N. T., & Pennello, G. A."
+        year: 2025
+        title: "DxGoals: A Software Tool for Determining, Visualizing, and Analyzing Performance Goals for a Diagnostic Test (Regulatory Science Tool RST24MD19.01)"
+        publisher: U.S. Food and Drug Administration, Center for Devices and Radiological Health
+        url: "https://cdrh-rst.fda.gov/dxgoals-software-tool-determining-visualizing-and-analyzing-performance-goals-diagnostic-test"
+
     FFTrees:
         type: software
         author: Nathaniel Phillips, Hansjoerg Neth, Jan Woike and Wolfgang Gaissmaer
@@ -409,6 +483,19 @@ refs:
         issue: 2
         pages: 121-129
         doi: 10.1002/sim.4780010204
+
+    Garcia2022:
+        type: article
+        author: "Garcia, V., Elfer, K., Peeters, D. J. E., et al."
+        year: 2022
+        title: Development of Training Materials for Pathologists to Provide Machine Learning Validation Data of Tumor-Infiltrating Lymphocytes in Breast Cancer
+        publisher: Cancers
+        volume: 14
+        issue: 10
+        pages: 2467
+        doi: 10.3390/cancers14102467
+        pmid: 35626070
+        url: "https://doi.org/10.3390/cancers14102467"
 
     GGally:
         type: software
@@ -685,6 +772,19 @@ refs:
         publisher: "[R package version 0.10.0]. Retrieved from https://CRAN.R-project.org/package=MendelianRandomization"
         url: "https://CRAN.R-project.org/package=MendelianRandomization"
 
+    NguyenPennello2024:
+        type: article
+        author: "Nguyen, N. T., & Pennello, G. A."
+        year: 2024
+        title: "DxGoals: A Software Tool for Determining and Analyzing Clinically Meaningful Classification Accuracy Goals for Diagnostic Tests"
+        publisher: The Journal of Applied Laboratory Medicine
+        volume: 9
+        issue: 5
+        pages: 952-962
+        doi: 10.1093/jalm/jfae054
+        pmid: 39225456
+        url: "https://doi.org/10.1093/jalm/jfae054"
+
     NPHMC:
         type: software
         author: Chao Cai , Songfeng Wang , Wenbin Lu , Jiajia Zhang
@@ -692,6 +792,18 @@ refs:
         title: "NPHMC: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=NPHMC"
         url: "https://CRAN.R-project.org/package=NPHMC"
+
+    Pennello2021:
+        type: article
+        author: Pennello, G. A.
+        year: 2021
+        title: Classification accuracy goals for diagnostic tests based on risk stratification
+        publisher: "Biostatistics & Epidemiology"
+        volume: 5
+        issue: 2
+        pages: 149-168
+        doi: 10.1080/24709360.2021.1878406
+        url: "https://doi.org/10.1080/24709360.2021.1878406"
 
     PMCMR:
         type: software
@@ -860,6 +972,19 @@ refs:
         title: "Rtsne: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=Rtsne"
         url: "https://CRAN.R-project.org/package=Rtsne"
+
+    Salgado2015:
+        type: article
+        author: "Salgado, R., Denkert, C., Demaria, S., et al."
+        year: 2015
+        title: "The evaluation of tumor-infiltrating lymphocytes (TILs) in breast cancer: recommendations by an International TILs Working Group 2014"
+        publisher: Annals of Oncology
+        volume: 26
+        issue: 2
+        pages: 259-271
+        doi: 10.1093/annonc/mdu450
+        pmid: 25214542
+        url: "https://doi.org/10.1093/annonc/mdu450"
 
     STARD2015:
         type: article

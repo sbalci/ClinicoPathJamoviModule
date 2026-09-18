@@ -159,7 +159,24 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
           self$results$warnings$setVisible(TRUE)
         },
 
+        # library-audit 2026-09-16 meddecide [LOW] DONE (same class): detailed_stats has a fixed row set, so .init()
+        # scaffolds the rows and .run() fills them with setRow()
+        .detailedStatsLabels = function() {
+            c(categories    = .("Total Categories"),
+              segments      = .("Total Segments"),
+              total         = .("Total Summed Value"),
+              min_pct       = .("Min Percentage"),
+              max_pct       = .("Max Percentage"),
+              mean_pct      = .("Mean Percentage"),
+              most_variable = .("Most Variable Segment"))
+        },
+
         .init = function() {
+            labels <- private$.detailedStatsLabels()
+            for (key in names(labels))
+                self$results$detailed_stats$addRow(rowKey = key,
+                    values = list(measure = unname(labels[[key]])))
+
             # Initialize comprehensive instructions with clinical context
 
             html_content <- paste(
@@ -228,7 +245,11 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Clear existing tables to prevent accumulation
             self$results$composition_table$deleteRows()
-            self$results$detailed_stats$deleteRows()
+            # detailed_stats keeps the rows .init() scaffolded (deleting them would drop the
+            # table until the statistics return); blank the values so an early return does
+            # not leave a previous run's numbers on screen.
+            for (key in names(private$.detailedStatsLabels()))
+                self$results$detailed_stats$setRow(rowKey = key, values = list(value = NA_character_))
 
             if (self$options$show_statistical_tests) {
                  self$results$statistical_tests$deleteRows()
@@ -937,20 +958,19 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 dplyr::arrange(desc(cv)) %>%
                 dplyr::slice(1)
 
-            # Create statistics rows
-            stats_rows <- list(
-                list(measure = "Total Categories", value = as.character(n_categories)),
-                list(measure = "Total Segments", value = as.character(n_segments)),
-                list(measure = "Total Summed Value", value = as.character(total_obs)),
-                list(measure = "Min Percentage", value = paste0(min_pct, "%")),
-                list(measure = "Max Percentage", value = paste0(max_pct, "%")),
-                list(measure = "Mean Percentage", value = paste0(mean_pct, "%")),
-                list(measure = "Most Variable Segment", value = as.character(segment_variation$segment[1]))
+            # Fill the rows .init() scaffolded (keys and labels: .detailedStatsLabels())
+            stats_values <- list(
+                categories    = as.character(n_categories),
+                segments      = as.character(n_segments),
+                total         = as.character(total_obs),
+                min_pct       = paste0(min_pct, "%"),
+                max_pct       = paste0(max_pct, "%"),
+                mean_pct      = paste0(mean_pct, "%"),
+                most_variable = as.character(segment_variation$segment[1])
             )
 
-            # Add rows to table
-            for (i in seq_along(stats_rows)) {
-                self$results$detailed_stats$addRow(rowKey = i, values = stats_rows[[i]])
+            for (key in names(stats_values)) {
+                self$results$detailed_stats$setRow(rowKey = key, values = list(value = stats_values[[key]]))
             }
 
             # Make the table visible if we have data

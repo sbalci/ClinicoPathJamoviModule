@@ -90,14 +90,19 @@ test_that("tables do not accumulate rows across re-runs", {
     for (i in 1:2) tbl$addRow(rowKey = i, values = list(a = i))
     expect_equal(tbl$rowCount, 4L, label = "addRow duplicates on a repeated key")
 
-    # The CI tables are rebuilt with addRow() on each run, so they must clear first.
-    # multipleCutoffTable is different: its three fixed rows are created once in .init()
-    # and .run() updates them with setRow(), which cannot accumulate duplicate rows.
+    # library-audit 2026-09-16 meddecide [LOW]: the CI tables are no longer rebuilt on each run.
+    # Their statistic set is fixed, so .init() scaffolds the rows and .run() fills them with
+    # setRow() - which cannot accumulate. Clearing them here would delete that scaffold, so the
+    # expectation is now the opposite of the one this test carried before.
     src <- readLines(testthat::test_path("..", "..", "R", "decisioncalculator.b.R"))
     for (nm in c("epirTable_ratio", "epirTable_number")) {
-        expect_true(any(grepl(paste0(nm, "\\$deleteRows\\(\\)"), src)),
-                    info = paste(nm, "must be cleared before addRow"))
+        expect_false(any(grepl(paste0(nm, "\\$deleteRows\\(\\)"), src)),
+                     info = paste(nm, "is scaffolded in .init() and must not be cleared"))
+        expect_true(any(grepl(paste0("self\\$results\\$", nm, "\\$addRow\\(rowKey = key"), src)),
+                    info = paste(nm, "rows are seeded in .init()"))
     }
+    expect_true(any(grepl("table\\$setRow\\(rowKey = stats\\[i\\]", src)),
+                info = "the epiR values are written by statistic key")
     expect_equal(sum(grepl("multipleCutoffTable\\$addRow\\(", src)), 3L)
     expect_equal(sum(grepl("multipleCutoffTable\\$setRow\\(", src)), 3L)
 })
@@ -213,8 +218,11 @@ test_that("confidence intervals and external prevalence coexist without false PP
 test_that("fractional frequencies retain point estimates but omit binomial intervals", {
     r <- decisioncalculator(TP = 90.5, TN = 80.5, FP = 30.5, FN = 20.5, ci = TRUE)
     expect_equal(r$ratioTable$asDF$Sens[1], 90.5 / (90.5 + 20.5), tolerance = 1e-12)
-    expect_equal(nrow(r$epirTable_ratio$asDF), 0L)
-    expect_equal(nrow(r$epirTable_number$asDF), 0L)
+    # library-audit 2026-09-16 meddecide [LOW]: the rows are the fixed statistic set, scaffolded in
+    # .init(), so they are present and blank rather than absent; the notice below says why.
+    expect_true(nrow(r$epirTable_ratio$asDF) > 0)
+    expect_true(all(is.na(r$epirTable_ratio$asDF$est)))
+    expect_true(all(is.na(r$epirTable_number$asDF$est)))
     expect_match(notices_of(r), "Fractional frequencies are used for point estimates only")
 
     cut <- decisioncalculator(

@@ -43,6 +43,9 @@ children:
               - type: ComboBox
                 name: typestatistics
               - type: TextBox
+                name: seed
+                format: number
+              - type: TextBox
                 name: conflevel
                 format: number
               - type: CheckBox

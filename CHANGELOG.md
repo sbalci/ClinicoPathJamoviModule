@@ -5,6 +5,123 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-18 — OncoPath `/check-module`: two checks that could not fail
+
+### A plot-warning harness that was blind to the warning
+
+- **Failure mode:** to verify the `waterfall` spider-plot fix (`geom_line(size = 1)` →
+  `linewidth`), the harness rendered with `print(r$spiderplot)` and captured warnings. The
+  pre-fix build printed "no warnings" too: jmvcore's `print()` path swallows renderer
+  conditions, so the check passed on the broken code. The first report had also stated the
+  warning "lands in Analysis Notes", which was never observed.
+- **Detection signal:** running the same harness on a build of the *pre-fix* file
+  (`R CMD INSTALL` into a scratch library). Identical output before and after meant the check
+  measured nothing.
+- **Prevention rule:** before trusting a harness, run it on the unfixed code and see it fail.
+  To observe a renderer, call it directly:
+  `img$analysis$.__enclos_env__$private$.<renderFun>(img, ggtheme = ggplot2::theme_grey(), theme = list())`
+  inside `withCallingHandlers()`, with `options(lifecycle_verbosity = "warning")` so
+  once-per-session deprecations always fire.
+
+### A `size` → `linewidth` sweep that only knew ggplot2's geom names
+
+- **Failure mode:** the first sweep listed ggplot2 line geoms by name, fixed 5 sites, and
+  missed `ggswim::geom_swim_arrow(size = 1.5)`. That layer draws on every swimmerplot with a
+  censor variable and kept emitting the deprecation warning.
+- **Detection signal:** the release-profile review (`S46`/`S47`); reproduced with the
+  direct-renderer harness above.
+- **Prevention rule:** decide per layer from the geom itself. Build the layer, then read
+  `layer$geom$default_aes`: flag `size =` only where `linewidth` is an aesthetic and `size` is not.
+  This covers extension packages (ggswim, ggrepel …) that no name list keeps up with.
+
+### A release-review regression test that reported as a skip
+
+- **Failure mode:** `test-ihcheterogeneity-release-review.R` "Levene's test … actually reports a
+  result" filtered `tt$test` (the column is `test_type`) for "Levene" (the row became
+  "Brown-Forsythe"), and put every expectation behind `if (nrow(lev) > 0)`. It could never fail;
+  testthat counted it as an empty-test SKIP.
+- **Detection signal:** a SKIP in a run where the skip's stated reason (psych missing) was false.
+- **Prevention rule:** assert the row exists (`expect_equal(nrow(lev), 1)`) rather than guarding
+  the assertions with `if`; treat every unexplained skip as a dead test.
+
+## 2026-09-18 — OncoPath `devtools::document()` stopped on shared `utils.R`
+
+- **Failure mode:** `✖ utils.R:82: @details has mismatched braces or quotes.` The `.fmt()` docs
+  say "contains a `` `{` ``". The umbrella and the other four submodules run roxygen in markdown
+  mode and render it as `\verb{\{}`. OncoPath's hand-maintained DESCRIPTION had no
+  `Roxygen: list(markdown = TRUE)`, so the raw `{` reached the Rd, and every other backtick in
+  OncoPath's docs rendered as literal text.
+- **Detection signal:** `devtools::document()` in OncoPath only; the umbrella documented cleanly.
+- **Prevention rule:** `apply_distribution_plan()` sets the `Roxygen` field on every submodule
+  (asserted in `test-update-modules-plan.R`). Don't put a lone brace in roxygen prose, even in
+  backticks; the `.fmt()` text now says "an opening brace".
+
+## 2026-09-17 — library audit round 4 (OncoPath): our own remediation caused five of eight findings
+
+### `waterfall` could not run at all in the shipped module
+
+- **Failure mode:** round 2's cleanup put `magrittr` in OncoPath's `prune_imports`
+  (`55a4e7186`); 114 `%>%` uses in `waterfall`/`swimmerplot` lost their import.
+- **Detection signal:** the library reviewer (`2026-09-16 OncoPath` [CRITICAL]). Every local check
+  passed: `~/.Rprofile` attaches magrittr, `load_all()` sees everything, `R CMD check` only NOTEs it.
+- **Prevention rule:** names must resolve from the submodule's installed namespace; enforced by the
+  bare-symbol guard and `Rscript --vanilla tools/submodule_smoke.R <sibling>`; guide §19.
+
+### Every OncoPath install carried 7.3 MB of another module's translations
+
+- **Failure mode:** round 2 answered "no catalogs" by copying the umbrella catalog through
+  `i18n_files` (`99779adfe`); 31,237 of 32,761 msgids were unused (same in CPD and meddecide).
+- **Detection signal:** the library reviewer (`2026-09-16 OncoPath` [MEDIUM]); no check existed.
+- **Prevention rule:** `build_module()` runs `jmvtools::i18nUpdate()` before `prepare()`
+  (keeps every used translation, drops the rest); `release_gate.py` `check_i18n_catalog_scope`
+  (WARN until CPD/meddecide/jsurvival are regenerated); guide §9.
+
+### Turkish output printed "Inf", doubled words, cut sentences short, or stopped with a format error
+
+- **Failure mode:** the August i18n pass (`0551a2d57`) spliced band words into sentences
+  (`ile ile`), compared `.("not estimable")` with English (always TRUE once translated: `Inf`
+  printed, `NaN` crashed), kept `[[APPROX]]` after a space (jmvcore cuts ` [..]` when a string has
+  no catalog entry), and wrote braced `\u{2265}` inside `.()` (never extracted, so never
+  translated: 110 shipped sites). Separately `tr.po` rendered `100%%` as `%%%100` and `50%%` as
+  `%%%50`, which `sprintf()` rejects — `diagnosticmeta` and jsurvival `singlearm`, Turkish only.
+- **Detection signal:** the library reviewer (`2026-09-16 OncoPath` [LOW] padding/fragments and
+  [INFO] TODOs); the rest by running the builders with the Turkish catalog and a `«…»`
+  pseudo-catalog. English output and every existing test were clean.
+- **Prevention rule:** whole `.()` sentences per band; branch on untranslated keys; no ` [` and no
+  `\u{}` inside `.()`; translations keep every conversion. Enforced by `release_gate.py`
+  `check_i18n_bracket` (FAIL), `check_i18n_braced_escape`, `check_i18n_po_formats`,
+  `check_i18n_padding`, and the pseudo-translation test in `test-oncopath-library-audit.R`;
+  guide §7, §9; `jamovi_i18n_guide.md` §5.6, §11.7. Guide §7 and five command checklists had
+  taught the braced escape — corrected.
+
+### Notice titles fell below 3:1 contrast in the dark theme
+
+- **Failure mode:** severity-coloured titles on a translucent tint, under a round-2 comment
+  claiming they were "saturated enough to read on both" themes: `#dc2626` 2.93:1 and `#2563eb`
+  2.74:1 on a dark pane. The pattern was copied from `waterfall`, the documented reference
+  implementation (19 renderers in the umbrella).
+- **Detection signal:** the library reviewer (`2026-09-16 OncoPath` [INFO], suggesting native
+  `type: Notice`, which still does not compile); contrast measured before replying.
+- **Prevention rule:** notice titles `color: inherit`; `check_notice_title_colour` (WARN); guide §4.
+  A comment asserting a measurable property must have been measured.
+
+### A reviewer-suggested flag removal would have silently dropped a plot's annotation tracks
+
+- **Failure mode:** the report listed `waterfallplot` among six state-only renderers; its helper
+  `.annotationTrack()` reads `self$data`. `image$.render()` in tests nulls the data before the
+  renderer runs, so it cannot show the difference.
+- **Detection signal:** the helper trace in `release_gate.py`, confirmed on the engine path
+  (`.createImage()` with a counting dataset source).
+- **Prevention rule:** trace helpers before removing `requiresData`; test flagged images through
+  `.createImage()`; guide §15, `jamovi_plots_guide.md`.
+
+### `NEWS.md` one release behind in all five modules
+
+- **Failure mode:** `_updateModules.R` rewrites `Version:` on every regeneration and never writes
+  `NEWS.md`.
+- **Detection signal:** the library reviewer (`2026-09-16 OncoPath` [LOW], meddecide [INFO]).
+- **Prevention rule:** `release_gate.py` `check_news` (WARN); guide §1.
+
 ## 2026-09-16 — `_updateModules`: three hand-kept ways to ship a helper, and a build that could not fail
 
 ### A shared helper was claimed by one analysis's file name

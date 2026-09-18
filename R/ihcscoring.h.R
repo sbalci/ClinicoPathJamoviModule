@@ -957,7 +957,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `format`="zto"),
                                 list(
                                     `name`="clinical_significance", 
-                                    `title`="Clinical Significance", 
+                                    `title`="What was counted", 
                                     `type`="text"),
                                 list(
                                     `name`="reference_range", 
@@ -989,7 +989,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `format`="pc"),
                                 list(
                                     `name`="clinical_context", 
-                                    `title`="Clinical Context", 
+                                    `title`="Scale and source", 
                                     `type`="text"))))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
@@ -1370,7 +1370,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `type`="text"),
                                 list(
                                     `name`="clinical_significance", 
-                                    `title`="Clinical Significance", 
+                                    `title`="What was counted", 
                                     `type`="text"))))
                         self$add(jmvcore::Table$new(
                             options=options,

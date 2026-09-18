@@ -12,6 +12,7 @@ jjbetweenstats(
   centralityplotting = FALSE,
   centralitytype = "parametric",
   typestatistics = "parametric",
+  seed = 20250101,
   pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
   padjustmethod = "holm",
@@ -51,6 +52,12 @@ jjbetweenstats(
 \item{centralitytype}{.}
 
 \item{typestatistics}{.}
+
+\item{seed}{Random seed for the statistics computed by resampling or
+posterior sampling (robust tests, Bayesian estimates, and some
+nonparametric effect-size intervals). The plot caption names the seed
+whenever it affected the numbers shown. The default reproduces the previous
+fixed behaviour.}
 
 \item{pairwisecomparisons}{.}
 

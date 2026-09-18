@@ -911,7 +911,6 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=450,
                 renderFun=".plot1",
-                requiresData=TRUE,
                 visible="(plot)",
                 clearWith=list(
                     "plot",
@@ -939,7 +938,6 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=600,
                 renderFun=".plotRadar",
-                requiresData=TRUE,
                 visible="(radarplot)",
                 clearWith=list(
                     "radarplot",
@@ -967,7 +965,6 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=800,
                 height=400,
                 renderFun=".plotHeatmap",
-                requiresData=TRUE,
                 visible="(heatmap)",
                 clearWith=list(
                     "heatmap",

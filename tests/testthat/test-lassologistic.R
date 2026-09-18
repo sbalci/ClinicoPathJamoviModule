@@ -745,9 +745,21 @@ test_that("an empty scoring system explains itself", {
             scoringSystem = TRUE, scoringMethod = "compare", scoreLookupTable = TRUE)
 
   note <- function(tbl) tbl$.__enclos_env__$private$.notes[["no_vars"]]$note
-  for (tb in list(res$scoringTable, res$scoringPerformance,
-                  res$lookupTable, res$methodComparison)) {
+  for (tb in list(res$scoringTable, res$lookupTable)) {
     expect_equal(tb$rowCount, 0)
+    expect_match(note(tb), "selected zero predictors")
+  }
+  # library-audit 2026-09-16 meddecide [LOW]: Scoring System Performance and Scoring
+  # Method Comparison have a fixed row set that .init() now lays down, so they keep their
+  # labelled rows instead of having none. What must still hold is that nothing is filled
+  # in when no score exists - every value cell stays blank - and the note says why.
+  sp <- res$scoringPerformance$asDF
+  expect_equal(nrow(sp), 11)
+  expect_true(all(is.na(sp$value)))
+  mc <- res$methodComparison$asDF
+  expect_equal(nrow(mc), 4)
+  expect_true(all(is.na(mc$auc)) && all(is.na(mc$accuracy)) && all(is.na(mc$info_loss)))
+  for (tb in list(res$scoringPerformance, res$methodComparison)) {
     expect_match(note(tb), "selected zero predictors")
   }
   expect_match(gsub("<[^>]+>", " ", res$notices$content), "Scoring System Not Generated")

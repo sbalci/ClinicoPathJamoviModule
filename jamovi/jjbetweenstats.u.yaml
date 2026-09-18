@@ -41,6 +41,9 @@ children:
             children:
               - type: ComboBox
                 name: typestatistics
+              - type: TextBox
+                name: seed
+                format: number
       - type: Label
         label: Statistical Options
         fitToGrid: true

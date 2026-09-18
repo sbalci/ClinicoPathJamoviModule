@@ -10,6 +10,7 @@ jjpiestats(
   group = NULL,
   grvar = NULL,
   typestatistics = "parametric",
+  seed = 20250101,
   originaltheme = FALSE,
   counts = NULL,
   ratio = "",
@@ -49,6 +50,11 @@ group level (e.g., separate charts by treatment center or study site).}
 analysis. 'parametric' uses Pearson's Chi-square test, 'nonparametric' uses
 contingency table tests, 'robust' uses robust association measures, 'bayes'
 provides Bayesian analysis with Bayes factors.}
+
+\item{seed}{Random seed for the statistics computed by posterior sampling
+(the Bayesian contingency test, and the Bayes factor caption of a
+frequentist test). The plot caption names the seed whenever it affected the
+numbers shown. The default reproduces the previous fixed behaviour.}
 
 \item{originaltheme}{Whether to apply the original ggstatsplot theme layer
 to the plot. If TRUE, uses ggstatsplot's default styling. If FALSE, uses

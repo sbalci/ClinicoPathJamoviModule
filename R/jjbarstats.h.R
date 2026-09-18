@@ -11,6 +11,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             grvar = NULL,
             counts = NULL,
             typestatistics = "parametric",
+            seed = 20250101,
             originaltheme = FALSE,
             palette = "Dark2",
             resultssubtitle = FALSE,
@@ -78,6 +79,10 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "parametric",
                     "bayes"),
                 default="parametric")
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=20250101)
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -181,6 +186,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..grvar)
             self$.addOption(private$..counts)
             self$.addOption(private$..typestatistics)
+            self$.addOption(private$..seed)
             self$.addOption(private$..originaltheme)
             self$.addOption(private$..palette)
             self$.addOption(private$..resultssubtitle)
@@ -206,6 +212,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         grvar = function() private$..grvar$value,
         counts = function() private$..counts$value,
         typestatistics = function() private$..typestatistics$value,
+        seed = function() private$..seed$value,
         originaltheme = function() private$..originaltheme$value,
         palette = function() private$..palette$value,
         resultssubtitle = function() private$..resultssubtitle$value,
@@ -230,6 +237,7 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..grvar = NA,
         ..counts = NA,
         ..typestatistics = NA,
+        ..seed = NA,
         ..originaltheme = NA,
         ..palette = NA,
         ..resultssubtitle = NA,
@@ -285,6 +293,7 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "counts",
                     "paired",
                     "typestatistics",
+                    "seed",
                     "originaltheme",
                     "palette",
                     "resultssubtitle",
@@ -312,7 +321,8 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "paired",
                     "ratio",
                     "clinicalpreset",
-                    "typestatistics")))
+                    "typestatistics",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -419,6 +429,10 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param typestatistics Frequentist (Pearson's chi-squared; Fisher's exact
 #'   test on a sparse 2x2 table; McNemar's test when paired) or Bayesian
 #'   contingency analysis.
+#' @param seed Random seed for the statistics computed by posterior sampling
+#'   (the Bayesian contingency test, and the Bayes factor caption of a
+#'   frequentist test). The plot caption names the seed whenever it affected the
+#'   numbers shown. The default reproduces the previous fixed behaviour.
 #' @param originaltheme Use the ggstatsplot theme instead of the jamovi theme.
 #' @param palette Palette for the bar segments: an RColorBrewer palette, or
 #'   gdoc, the ggstatsplot default.
@@ -481,6 +495,7 @@ jjbarstats <- function(
     grvar = NULL,
     counts = NULL,
     typestatistics = "parametric",
+    seed = 20250101,
     originaltheme = FALSE,
     palette = "Dark2",
     resultssubtitle = FALSE,
@@ -525,6 +540,7 @@ jjbarstats <- function(
         grvar = grvar,
         counts = counts,
         typestatistics = typestatistics,
+        seed = seed,
         originaltheme = originaltheme,
         palette = palette,
         resultssubtitle = resultssubtitle,

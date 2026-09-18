@@ -302,7 +302,7 @@ items:
                 type: number
                 format: zto
               - name: clinical_significance
-                title: 'Clinical Significance'
+                title: 'What was counted'
                 type: text
               - name: reference_range
                 title: 'Reference Range'
@@ -329,7 +329,7 @@ items:
                 type: number
                 format: pc
               - name: clinical_context
-                title: 'Clinical Context'
+                title: 'Scale and source'
                 type: text
 
     - name: digitalvalidation
@@ -631,7 +631,7 @@ items:
                 title: '95% CI'
                 type: text
               - name: clinical_significance
-                title: 'Clinical Significance'
+                title: 'What was counted'
                 type: text
 
           - name: cpsstatistics

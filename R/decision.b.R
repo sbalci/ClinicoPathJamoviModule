@@ -43,7 +43,50 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # its report file is gone and 5 of its 6 items were already false or
             # obsolete. See git history for the retired text.
 
+            # The epiR tables always report the same statistics in the same order, so their rows
+            # are known before any data is seen. .init() seeds them; .run() only fills values.
+            .epirStatLabels = function() {
+                c(se = .("Sensitivity"),
+                  sp = .("Specificity"),
+                  `pv.pos` = .("Positive predictive value"),
+                  `pv.neg` = .("Negative predictive value"),
+                  `lr.pos` = .("Positive likelihood ratio"),
+                  `lr.neg` = .("Negative likelihood ratio"),
+                  `diag.or` = .("Diagnostic odds ratio"),
+                  youden = .("Youden's index"),
+                  nndx = .("Number needed to diagnose"))
+            },
+            .epirRatioStats = function() c("se", "sp", "pv.pos", "pv.neg"),
+            .epirNumberStats = function() c("lr.pos", "lr.neg", "diag.or", "youden", "nndx"),
+
+            # library-audit 2026-09-16 meddecide [LOW] DONE (same class): rawContingency has a fixed row set, so .init()
+            # scaffolds the rows and .run() fills them with setRow()
+            # One row for the positive test level, one for the (single or pooled) negative test level and
+            # a Total row. The labels are level names: the positive level and an explicit negative level
+            # come from the options, so .init() can show them; a negative level inferred from the data is
+            # known only in .run(), which passes it in.
+            .rawContingencyLabels = function(test_negative_label = self$options$testNegative) {
+                level_label <- function(x)
+                    if (length(x) > 0 && !is.na(x[1]) && nzchar(x[1])) as.character(x[1]) else ""
+                c(test_pos = level_label(self$options$testPositive),
+                  test_neg = level_label(test_negative_label),
+                  total = .("Total"))
+            },
+
             .init = function() {
+                labels <- private$.epirStatLabels()
+                for (key in private$.epirRatioStats())
+                    self$results$epirTable_ratio$addRow(rowKey = key,
+                        values = list(statsnames = unname(labels[[key]])))
+                for (key in private$.epirNumberStats())
+                    self$results$epirTable_number$addRow(rowKey = key,
+                        values = list(statsnames = unname(labels[[key]])))
+
+                raw_labels <- private$.rawContingencyLabels()
+                for (key in names(raw_labels))
+                    self$results$rawContingency$addRow(rowKey = key,
+                        values = list(test_level = unname(raw_labels[[key]])))
+
                 cTable <- self$results$cTable
                 cTable$addRow(rowKey = "Test Positive", values = list(newtest = .("Test Positive")))
                 cTable$addRow(rowKey = "Test Negative", values = list(newtest = .("Test Negative")))
@@ -1213,8 +1256,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Populate raw contingency jamovi table (using user's selected levels, not lexicographic order)
                 raw_contingency <- self$results$rawContingency
-                # Clear existing rows - jamovi tables use deleteRows(), not clear()
-                try(raw_contingency$deleteRows(), silent = TRUE)
+                # Rows are scaffolded in .init() (see .rawContingencyLabels); they are relabelled and
+                # blanked below, never deleted, so the table keeps its shape while this runs.
 
                 # Get actual levels from the ORIGINAL variables (before recoding)
                 test_levels <- if (is.factor(mydata[[testVariable]])) {
@@ -1277,14 +1320,21 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # One positive row, one pooled negative row. Iterating a synthetic label
                 # would skip the negative row entirely (it is not a real level name).
                 ordered_test_groups <- list(
-                    list(label = self$options$testPositive, members = self$options$testPositive),
-                    list(label = test_negative_label,       members = test_negative_members))
+                    list(key = "test_pos", members = self$options$testPositive),
+                    list(key = "test_neg", members = test_negative_members))
+
+                # Label every scaffolded row (the negative level may only be known now) and blank its
+                # counts, so a group absent from the data shows an empty row, not a stale count.
+                raw_labels <- private$.rawContingencyLabels(test_negative_label)
+                for (key in names(raw_labels))
+                    raw_contingency$setRow(rowKey = key, values = list(
+                        test_level = unname(raw_labels[[key]]),
+                        gold_pos = NA_real_, gold_neg = NA_real_, row_total = NA_real_))
 
                 if (!is.null(test_levels) && length(test_levels) > 0 &&
                     !is.null(gold_levels) && length(gold_levels) > 0) {
 
                     for (grp in ordered_test_groups) {
-                        lvl <- grp$label
                         present <- intersect(grp$members, test_levels)
                         if (length(present) == 0) next
 
@@ -1315,10 +1365,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                         row_total <- sum(row_values, na.rm = TRUE)
 
-                        raw_contingency$addRow(
-                            rowKey = paste0("row_", lvl),
+                        raw_contingency$setRow(
+                            rowKey = grp$key,
                             values = list(
-                                test_level = lvl,
                                 gold_pos = val_pos,
                                 gold_neg = val_neg,
                                 row_total = row_total
@@ -1349,10 +1398,9 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         NA_real_
                     }
 
-                    raw_contingency$addRow(
-                        rowKey = "row_total",
+                    raw_contingency$setRow(
+                        rowKey = "total",
                         values = list(
-                            test_level = .("Total"),
                             gold_pos = total_pos,
                             gold_neg = total_neg,
                             row_total = sum(results_matrix)
@@ -1867,13 +1915,22 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     # without this the CI tables list every statistic twice on re-run.
                     # Cleared before the tryCatch so a failed epiR call leaves the
                     # tables empty rather than showing the previous run's numbers.
-                    self$results$epirTable_ratio$deleteRows()
-                    self$results$epirTable_number$deleteRows()
+                    # The rows are the fixed statistic set scaffolded in .init(); clearing them here
+                    # would delete the scaffold and make the table appear only once epiR returns.
+                    # Blank the values instead, so a failed epiR leaves empty cells, not a missing table.
+                    for (key in private$.epirRatioStats())
+                        self$results$epirTable_ratio$setRow(rowKey = key,
+                            values = list(est = NA_real_, lower = NA_real_, upper = NA_real_))
+                    for (key in private$.epirNumberStats())
+                        self$results$epirTable_number$setRow(rowKey = key,
+                            values = list(est = NA_real_, lower = NA_real_, upper = NA_real_))
 
                     # epiR confidence intervals with error handling
                     epir_success <- FALSE
                     epirresult_ratio <- NULL
                     epirresult_number <- NULL
+                    epirresult_ratio_stats <- character(0)
+                    epirresult_number_stats <- character(0)
 
                     tryCatch({
                         epirresult <- epiR::epi.tests(dat = conf_table)
@@ -1894,17 +1951,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                             if (!is.null(epir_detail) && nrow(epir_detail) > 0) {
                                 epir_detail <- as.data.frame(epir_detail, stringsAsFactors = FALSE)
 
-                                stat_map <- c(
-                                    se = .("Sensitivity"),
-                                    sp = .("Specificity"),
-                                    `pv.pos` = .("Positive predictive value"),
-                                    `pv.neg` = .("Negative predictive value"),
-                                    `lr.pos` = .("Positive likelihood ratio"),
-                                    `lr.neg` = .("Negative likelihood ratio"),
-                                    `diag.or` = .("Diagnostic odds ratio"),
-                                    youden = .("Youden's index"),
-                                    nndx = .("Number needed to diagnose")
-                                )
+                                stat_map <- private$.epirStatLabels()
 
                                 selected_stats <- names(stat_map)
                                 epir_detail <- epir_detail[epir_detail$statistic %in% selected_stats, , drop = FALSE]
@@ -1914,8 +1961,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                     epir_detail <- epir_detail[order(order_index), , drop = FALSE]
                                     epir_detail$statsnames <- unname(stat_map[match(epir_detail$statistic, selected_stats)])
 
-                                    ratio_stats <- c("se", "sp", "pv.pos", "pv.neg")
-                                    number_stats <- c("diag.or", "nndx", "youden", "lr.pos", "lr.neg")
+                                    ratio_stats <- private$.epirRatioStats()
+                                    number_stats <- private$.epirNumberStats()
 
                                     epir_ratio <- epir_detail[epir_detail$statistic %in% ratio_stats, , drop = FALSE]
                                     epir_number <- epir_detail[epir_detail$statistic %in% number_stats, , drop = FALSE]
@@ -1935,9 +1982,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                                 epir_detail_cc[m[keep], c("est", "lower", "upper")]
                                     }
 
-                                    # Footnotes below are attached per statistic, so the row order
-                                    # has to travel with the data.
-                                    epirresult_number_stats <- epir_number$statistic
+                                    # Values are written by rowKey, so each row's statistic has to
+                                    # travel with the data.
+                                    # as.character: epiR returns `statistic` as a factor, and a factor
+                                    # element does not match a string rowKey.
+                                    epirresult_ratio_stats <- as.character(epir_ratio$statistic)
+                                    epirresult_number_stats <- as.character(epir_number$statistic)
 
                                     epir_ratio <- epir_ratio[, c("statsnames", "est", "lower", "upper"), drop = FALSE]
                                     epir_number <- epir_number[, c("statsnames", "est", "lower", "upper"), drop = FALSE]
@@ -1973,30 +2023,33 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                         if (!is.null(epirresult_ratio) && nrow(epirresult_ratio) > 0) {
                             data_frame <- epirresult_ratio
-                            for (i in seq_along(data_frame[, 1, drop = TRUE])) {
-                                epirTable_ratio$addRow(rowKey = i,
-                                                       values = c(data_frame[i, ]))
+                            # rows were scaffolded in .init(): fill by key, never add
+                            for (i in seq_len(nrow(data_frame))) {
+                                key <- epirresult_ratio_stats[i]
+                                if (key %in% private$.epirRatioStats())
+                                    epirTable_ratio$setRow(rowKey = key,
+                                        values = list(est = data_frame$est[i],
+                                                      lower = data_frame$lower[i],
+                                                      upper = data_frame$upper[i]))
                             }
 
                             # epirTable_ratio footnotes ----
                             if (self$options$fnote) {
-                                add_ratio_note <- function(row_no, col, text) {
-                                    if (nrow(data_frame) >= row_no) {
-                                        epirTable_ratio$addFootnote(rowNo = row_no, col = col, text)
-                                    }
+                                add_ratio_note <- function(key, col, text) {
+                                    epirTable_ratio$addFootnote(rowKey = key, col = col, note = text)
                                 }
 
-                                add_ratio_note(1, "statsnames", .("Proportion of diseased patients correctly identified (TP rate). Higher is better for ruling OUT disease when negative."))
-                                add_ratio_note(2, "statsnames", .("Proportion of healthy patients correctly identified (TN rate). Higher is better for ruling IN disease when positive."))
-                                add_ratio_note(3, "statsnames", .("Probability of disease given a positive test. Depends on prevalence, sensitivity and specificity."))
-                                add_ratio_note(4, "statsnames", .("Probability of being healthy given a negative test. Depends on prevalence, sensitivity and specificity."))
-                                add_ratio_note(1, "est", .("Confidence intervals for sensitivity, specificity, and predictive values are Clopper-Pearson exact intervals, computed as in epiR::epi.tests() with its default settings (method = \"exact\")."))
+                                add_ratio_note("se", "statsnames", .("Proportion of diseased patients correctly identified (TP rate). Higher is better for ruling OUT disease when negative."))
+                                add_ratio_note("sp", "statsnames", .("Proportion of healthy patients correctly identified (TN rate). Higher is better for ruling IN disease when positive."))
+                                add_ratio_note("pv.pos", "statsnames", .("Probability of disease given a positive test. Depends on prevalence, sensitivity and specificity."))
+                                add_ratio_note("pv.neg", "statsnames", .("Probability of being healthy given a negative test. Depends on prevalence, sensitivity and specificity."))
+                                add_ratio_note("se", "est", .("Confidence intervals for sensitivity, specificity, and predictive values are Clopper-Pearson exact intervals, computed as in epiR::epi.tests() with its default settings (method = \"exact\")."))
                                 if (isTRUE(self$options$pp)) {
                                     # The main table reports PPV/NPV at the user's prior; these
                                     # rows are exact binomial quantities from the observed table
                                     # and cannot be moved to a different prevalence.
-                                    add_ratio_note(3, "est", .("This predictive value is computed at the observed sample prevalence, so it differs from the prior-adjusted value in the main table above."))
-                                    add_ratio_note(4, "est", .("This predictive value is computed at the observed sample prevalence, so it differs from the prior-adjusted value in the main table above."))
+                                    add_ratio_note("pv.pos", "est", .("This predictive value is computed at the observed sample prevalence, so it differs from the prior-adjusted value in the main table above."))
+                                    add_ratio_note("pv.neg", "est", .("This predictive value is computed at the observed sample prevalence, so it differs from the prior-adjusted value in the main table above."))
                                 }
                             }
                         }
@@ -2006,9 +2059,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                         if (!is.null(epirresult_number) && nrow(epirresult_number) > 0) {
                             data_frame <- epirresult_number
-                            for (i in seq_along(data_frame[, 1, drop = TRUE])) {
-                                epirTable_number$addRow(rowKey = i,
-                                                        values = c(data_frame[i, ]))
+                            for (i in seq_len(nrow(data_frame))) {
+                                key <- epirresult_number_stats[i]
+                                if (key %in% private$.epirNumberStats())
+                                    epirTable_number$setRow(rowKey = key,
+                                        values = list(est = data_frame$est[i],
+                                                      lower = data_frame$lower[i],
+                                                      upper = data_frame$upper[i]))
                             }
 
                             if (self$options$fnote) {
@@ -2022,15 +2079,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                     `youden` = .("Youden's index is the difference between the true positive rate and the false positive rate. Youden's index ranges from -1 to +1 with values closer to 1 if both sensitivity and specificity are high (i.e. close to 1).")
                                 )
 
-                                stat_keys <- if (exists("epirresult_number_stats", inherits = FALSE))
-                                    epirresult_number_stats else character(0)
-
-                                for (i in seq_len(nrow(data_frame))) {
-                                    key <- if (i <= length(stat_keys)) stat_keys[i] else NA_character_
-                                    if (!is.na(key) && key %in% names(number_notes))
-                                        epirTable_number$addFootnote(rowNo = i, col = "statsnames",
-                                                                     number_notes[[key]])
-                                }
+                                for (key in names(number_notes))
+                                    if (key %in% private$.epirNumberStats())
+                                        epirTable_number$addFootnote(rowKey = key, col = "statsnames",
+                                                                     note = number_notes[[key]])
                             }
                         }
                     }

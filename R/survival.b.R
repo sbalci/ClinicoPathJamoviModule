@@ -333,6 +333,19 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 paste(lhs, "~", esc_group)
             },
 
+            # library-audit 2026-09-16 meddecide [LOW] DONE (same class): calibrationTable and
+            # parametricModelComparison have a fixed row set, so .init() scaffolds the rows and
+            # .run() fills them with setRow()
+            .calibrationMetricLabels = function(t = "...") {
+                c(slope = .("Calibration slope"),
+                  meancal = jmvcore::format(.("Mean calibration (observed - predicted at t = {t})"), t = t),
+                  mae = .("Mean absolute difference across risk groups"),
+                  cindex = .("C-index (Discrimination)"))
+            },
+            .parametricComparisonDists = function() {
+                c("exp", "weibull", "lnorm", "llogis", "gamma", "gengamma", "gompertz")
+            },
+
             .init = function() {
                 # Result visibility is declared in survival.r.yaml. The only
                 # imperative visibility here is the dynamic onboarding panel.
@@ -349,6 +362,24 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     private$.todo()
                 } else {
                     self$results$todo$setVisible(FALSE)
+                }
+
+                # Calibration metrics: all four rows up front; the time point is
+                # only known here when the user set one (0 = median observed time).
+                if (isTRUE(self$options$calibration_curves)) {
+                    cal_t <- self$options$calibration_timepoint
+                    cal_labels <- private$.calibrationMetricLabels(
+                        t = if (!is.null(cal_t) && cal_t > 0) round(cal_t, 1) else "...")
+                    for (key in names(cal_labels))
+                        self$results$calibrationTable$addRow(rowKey = key,
+                            values = list(metric = unname(cal_labels[[key]])))
+                }
+                # Distribution comparison: one row per candidate distribution; a
+                # distribution that fails to fit stays as a blank row.
+                if (isTRUE(self$options$use_parametric) && isTRUE(self$options$compare_distributions)) {
+                    for (dd in private$.parametricComparisonDists())
+                        self$results$parametricModelComparison$addRow(rowKey = dd,
+                            values = list(distribution = private$.distLabel(dd)))
                 }
             }
             ,
@@ -2925,7 +2956,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # User-configurable seed for reproducibility (defaults to 42).
                     seed_val <- self$options$seed
                     if (is.null(seed_val)) seed_val <- 42
-                    set.seed(seed_val)
+                    withr::local_seed(seed_val)
+                    table$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = seed_val))
                     # Pre-initialise to NA so failed bootstrap draws stay NA
                     # without needing `<<-` from the error handler below.
                     optimism_values <- rep(NA_real_, n_boot)
@@ -4855,6 +4887,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
             ,
             .calculateCalibration = function(results) {
                 tryCatch({
+                    # The metric rows are scaffolded in .init(). Blank their values
+                    # so an early return or a failed step cannot leave a previous
+                    # run's numbers next to this run's note.
+                    for (key in names(private$.calibrationMetricLabels()))
+                        self$results$calibrationTable$setRow(rowKey = key, values = list(
+                            value = NA, ci_lower = NA, ci_upper = NA,
+                            ideal = NA, interpretation = NA))
+
                     mytime <- results$name1time
                     myoutcome <- results$name2outcome
                     myfactor <- results$name3explanatory
@@ -5011,7 +5051,6 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     #     the calibration time minus mean predicted survival.
                     #     Kaplan-Meier handles censoring, which the OLS did not.
                     cal_table <- self$results$calibrationTable
-                    cal_table$deleteRows()
 
                     # --- calibration slope --------------------------------------
                     slope_fit <- tryCatch(
@@ -5022,8 +5061,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         cal_slope <- unname(stats::coef(slope_fit)[1])
                         slope_ci  <- tryCatch(stats::confint(slope_fit),
                                               error = function(e) matrix(NA_real_, 1, 2))
-                        cal_table$addRow(rowKey = "slope", values = list(
-                            metric = .("Calibration slope"),
+                        cal_table$setRow(rowKey = "slope", values = list(
                             value = cal_slope,
                             ci_lower = slope_ci[1, 1],
                             ci_upper = slope_ci[1, 2],
@@ -5045,8 +5083,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (!is.null(km_overall) && length(km_overall$surv) == 1) {
                         obs_overall  <- km_overall$surv
                         pred_overall <- mean(pred_surv, na.rm = TRUE)
-                        cal_table$addRow(rowKey = "meancal", values = list(
-                            metric = jmvcore::format(.("Mean calibration (observed - predicted at t = {t})"), t = round(cal_time, 1)),
+                        cal_table$setRow(rowKey = "meancal", values = list(
+                            metric = unname(private$.calibrationMetricLabels(t = round(cal_time, 1))[["meancal"]]),
                             value = obs_overall - pred_overall,
                             ci_lower = km_overall$lower - pred_overall,
                             ci_upper = km_overall$upper - pred_overall,
@@ -5058,8 +5096,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     # --- group-level agreement, reported without a grade ---------
                     if (length(group_pred) >= 3) {
                         mae <- mean(abs(group_obs - group_pred))
-                        cal_table$addRow(rowKey = "mae", values = list(
-                            metric = .("Mean absolute difference across risk groups"),
+                        cal_table$setRow(rowKey = "mae", values = list(
                             value = mae,
                             ci_lower = NA,
                             ci_upper = NA,
@@ -5079,8 +5116,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 sqrt(survival::concordance(cox_model)$var)
                             }, error = function(e) NA)
 
-                            cal_table$addRow(rowKey = "cindex", values = list(
-                                metric = .("C-index (Discrimination)"),
+                            cal_table$setRow(rowKey = "cindex", values = list(
                                 value = c_index,
                                 ci_lower = if (!is.na(c_se)) max(0, c_index - 1.96 * c_se) else NA,
                                 ci_upper = if (!is.na(c_se)) min(1, c_index + 1.96 * c_se) else NA,
@@ -5538,13 +5574,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 # ---- Distribution comparison (AIC / BIC / logLik) ----
                 if (isTRUE(self$options$compare_distributions)) {
                     cmp <- self$results$parametricModelComparison
-                    cmp$deleteRows()
-                    for (dd in c("exp","weibull","lnorm","llogis","gamma","gengamma","gompertz")) {
+                    for (dd in private$.parametricComparisonDists()) {
                         f <- tryCatch(flexsurv::flexsurvreg(form, data = df, dist = dd),
                                       error = function(e) NULL)
-                        if (is.null(f)) next
-                        cmp$addRow(rowKey = dd, values = list(
-                            distribution = private$.distLabel(dd),
+                        # Every row is written, so a fit that fails now cannot keep
+                        # the numbers of an earlier run; it stays a blank row.
+                        cmp$setRow(rowKey = dd, values = if (is.null(f))
+                            list(aic = NA, bic = NA, loglik = NA, df = NA)
+                        else list(
                             aic = AIC(f), bic = BIC(f),
                             loglik = as.numeric(stats::logLik(f)), df = f$npars
                         ))

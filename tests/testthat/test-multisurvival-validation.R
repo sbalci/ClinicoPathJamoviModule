@@ -38,7 +38,10 @@ source(file.path(.root, "R", "multisurvival-metrics.R"))
 # using the internal column names multisurvival passes to the helper.
 # ---------------------------------------------------------------------------
 .lung_fixture <- function() {
-  d <- na.omit(lung[, c("time", "status", "age", "sex", "ph.ecog")])
+  # survival::, not a bare `lung`: run in one process after another test file whose package
+  # also exports a `lung`, the bare name resolved to that one and every test here errored
+  # with "undefined columns selected" (green in isolation, red in a batch).
+  d <- na.omit(survival::lung[, c("time", "status", "age", "sex", "ph.ecog")])
   d$mytime <- d$time
   status <- as.integer(d$status == 2)          # 2 = death in the lung dataset
   d$status_ind <- status
@@ -111,7 +114,10 @@ test_that(".multisurvivalOptimismCIndex returns NULL when events are too few", {
 test_that(".multisurvivalOptimismCIndex uses within-stratum concordance for strata() models", {
   # Regression guard for the stratified-concordance fix: C_test must use the
   # model's own (within-stratum) concordance, not a global Surv ~ lp form.
-  d <- na.omit(lung[, c("time", "status", "age", "sex", "ph.ecog")])
+  # survival::, not a bare `lung`: run in one process after another test file whose package
+  # also exports a `lung`, the bare name resolved to that one and every test here errored
+  # with "undefined columns selected" (green in isolation, red in a batch).
+  d <- na.omit(survival::lung[, c("time", "status", "age", "sex", "ph.ecog")])
   d$mytime <- d$time
   d$status_ind <- as.integer(d$status == 2)
   fit_s <- survival::coxph(

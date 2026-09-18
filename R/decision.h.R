@@ -216,8 +216,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "DiagnosticTests",
                     "epiR",
-                    "forcats",
-                    "htmlTable"))
+                    "forcats"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -531,7 +530,6 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=600,
                 height=450,
                 renderFun=".plot1",
-                requiresData=TRUE,
                 visible="(fagan)",
                 clearWith=list(
                     "pp",

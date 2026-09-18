@@ -13,6 +13,7 @@ items:
         - test_type
         - show_stats
         - effsize_type
+        - seed
         - clinicalPreset
 
     - name: warnings
@@ -52,6 +53,7 @@ items:
         - show_stats
         - test_type
         - effsize_type
+        - seed
         - clinicalPreset
 
     - name: aboutPanel
@@ -204,6 +206,7 @@ items:
         - test_type
         - p_adjust_method
         - effsize_type
+        - seed
         - fill_var
         - facet_var
         - clinicalPreset

@@ -440,7 +440,6 @@ items:
       width:  600
       height: 450
       renderFun: .plot1
-      requiresData: true
       visible: (fagan)
       clearWith:
           - pp
@@ -622,5 +621,4 @@ refs:
     - DiagnosticTests
     - epiR
     - forcats
-    - htmlTable
 ...

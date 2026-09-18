@@ -714,6 +714,9 @@ apply_distribution_plan <- function(mp, reg, other_module_dirs = character()) {
   # roxygen re-creates Collate (complete) only while an @include ships, and never
   # removes a stale one: OncoPath once listed 12 deleted stagemigration files.
   if (length(mp$description$collate)) desc::desc_del("Collate", file = file.path(dir, "DESCRIPTION"))
+  # Shipped roxygen is written in the umbrella's markdown mode. Without the field a backticked
+  # `{` reaches the Rd raw and document() stops: OncoPath lacked it (2026-09-18).
+  desc::desc_set(Roxygen = "list(markdown = TRUE)", file = file.path(dir, "DESCRIPTION"))
   prune_configured_module_imports(dir, mp$description$prune_imports)
   add_configured_module_imports(dir, mp$description$extra_imports)
   document_module_omv(dir, mp$name, other_module_dirs)
@@ -739,6 +742,10 @@ run_child <- function(dir, code, step) {
 build_module <- function(mp) {
   dir <- mp$dir
   prune_orphan_analyses(dir)
+  # library-audit 2026-09-16 OncoPath [MEDIUM] DONE: i18n_files copies the whole umbrella catalog;
+  #   i18nUpdate() keeps only this module's strings (and their translations) before install builds json
+  if (file.exists(file.path(dir, "jamovi", "i18n", "catalog.pot")))
+    run_child(dir, "jmvtools::i18nUpdate()", "i18n update")
   run_child(dir, "jmvtools::prepare()", "prepare")
   run_child(dir, "devtools::document()", "document")
   before <- tools::md5sum(file.path(dir, "DESCRIPTION"))

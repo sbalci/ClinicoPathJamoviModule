@@ -670,6 +670,23 @@ if (std) {
 .('Analysis date')  # Let locale handle format
 ```
 
+**A translation must keep every `sprintf()` conversion of its msgid.** Turkish writes the
+percent sign before the number, and a translator turned `"(sensitivity ≈ 100%%)."` into
+`"(duyarlılık ≈ %%%100)."`. After `%%` that leaves `%100)`, and `sprintf()` stops with
+*unrecognised format specification* — in Turkish only (2026-09-16: `diagnosticmeta`, jsurvival
+`singlearm`). The correct form is `%%100`. A template formatted twice keeps `%%%%` in both
+msgid and msgstr. `python3 tools/release_gate.py` `check_i18n_po_formats` compares the
+conversions of every `.po` entry with its msgid.
+
+**Never compare a translated string with English.** `cls <- .("not estimable")` followed by
+`if (cls != "not estimable")` is always TRUE once translated — in Turkish that printed
+"LR+ = Inf" and stopped the summary on NaN. Branch on an untranslated key or on the number;
+call `.()` only where the text is displayed.
+
+**Write symbols as `\uXXXX`, never `\u{XXXX}`, inside `.()`.** The extractor decodes only the
+four-digit form; a braced escape reaches the catalog literally and never matches at run time
+(`check_i18n_braced_escape`).
+
 ---
 
 ## 6. Working with .po and .pot Files
@@ -1548,6 +1565,16 @@ if (n == 1) {
 **Cause:** the compiler and jmvcore treat a trailing ` [context]` as the translator context (msgctxt) and strip it from the displayed text.
 
 **Solution:** never end a `.()` string with `]`; put confidence intervals in parentheses. Gate: `grep -nE '\.\("[^"]*\]"\)' R/*.b.R` must return nothing.
+
+**Not only at the end.** jmvcore's run-time regex `"(.*) \\[(.*)\\]"` is not anchored: when a string has no catalog entry, any ` [` followed later by `]` cuts the text at the space. `"(specificity [[APPROX]] 100% or model unstable)."` displayed as `"(specificity"` in every language without a catalog (2026-09-16 OncoPath). The compiler's extraction regex *is* end-anchored, so the catalog looks fine and only the screen is wrong. Write `≈` as `\u2248` and a CI as `95% CI %s to %s`. `python3 tools/release_gate.py` `check_i18n_bracket` FAILs on any shipped `.()` string containing ` [..]`; to test every literal at once, `identical(jmvcore::Options$new()$translate(s), s)` (that Options object has no catalog).
+
+### 11.7b A Module Ships Another Module's Catalog
+
+**Symptom:** `jamovi/i18n/*.po` and `inst/i18n/*.json` are megabytes, full of msgids for analyses the module does not have (2026-09-16 OncoPath: 31,690 msgids, 7.3 MB json, 1,499 used).
+
+**Cause:** `_updateModules.R` copies the umbrella catalog into each module listed under `i18n_files`.
+
+**Solution:** `jmvtools::i18nUpdate()` in the module re-extracts its own strings, keeps the translation of every string still used and deletes the rest; `build_module()` now runs it before `prepare()`. `inst/i18n/*.json` is written only by `jmvtools::install()` (or `--build`), never by `prepare()`. `check_i18n_catalog_scope` reports catalog msgids no module source uses.
 
 ### 11.8 Fill Scripts Skip Long Entries
 

@@ -395,7 +395,6 @@ items:
         width: 600
         height: 400
         renderFun: .plotCriterion
-        requiresData: true
         clearWith:
           - dependentVars
           - classVar
@@ -415,7 +414,6 @@ items:
         width: 600
         height: 400
         renderFun: .plotPrevalence
-        requiresData: true
         clearWith:
           - dependentVars
           - classVar
@@ -434,7 +432,6 @@ items:
         width: 600
         height: 400
         renderFun: .plotDot
-        requiresData: true
         clearWith:
           - dependentVars
           - classVar

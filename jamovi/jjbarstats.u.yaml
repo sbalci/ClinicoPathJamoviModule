@@ -71,6 +71,9 @@ children:
               - type: ComboBox
                 name: typestatistics
                 label: Test type
+              - type: TextBox
+                name: seed
+                format: number
               - type: CheckBox
                 name: proportiontest
                 label: Proportion tests

@@ -86,6 +86,10 @@ test_that("re-running the same analysis object does not duplicate table rows", {
     outcome = "dx", outcomeLevel = "NEC", explanatory = c("p53", "Rb1", "ki67", "age"),
     nfolds = 10, random_seed = 123456, showVariableImportance = TRUE, showModelComparison = TRUE)
   an <- ClinicoPath:::lassologisticClass$new(options = opts, data = d)
+  # library-audit 2026-09-16 meddecide [LOW]: the fixed-row tables (performance among them)
+  # now get their rows in .init() and .run() fills them by key, so the object is initialised
+  # first, as jamovi always does, before .run() is called twice on it.
+  an$init()
   pr <- an$.__enclos_env__$private
   pr$.run()
   n1 <- vapply(c("modelSummary", "coefficients", "performance", "variableImportance", "modelComparison"),

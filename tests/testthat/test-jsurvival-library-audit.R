@@ -347,3 +347,67 @@ test_that("audited backends contain no direct code-execution calls", {
     )
   }
 })
+
+# A result that changes with the random seed names that seed next to it (Random seed option).
+test_that("seed-dependent jsurvival results show the seed that drew them", {
+  skip_if_not(exists("survivalClass") && exists("multisurvivalClass") && exists("lassocoxClass"))
+  skip_if_not_installed("glmnet")
+  quiet <- function(expr) suppressWarnings(suppressMessages(expr))
+  shown <- "Random seed: 777"
+  notes <- function(table) unname(vapply(table$notes, function(n) n$note, ""))
+  run <- function(name, data, ...) {
+    a <- get(paste0(name, "Class"))$new(options = get(paste0(name, "Options"))$new(...), data = data)
+    quiet(a$init())
+    quiet(a$run())
+    a
+  }
+  set.seed(9)
+  n <- 160
+  d <- data.frame(x1 = stats::rnorm(n), x2 = stats::rnorm(n), x3 = stats::rnorm(n), x4 = stats::rnorm(n),
+                  age = stats::rnorm(n, 60, 10), trt = factor(sample(c("A", "B"), n, TRUE)))
+  d$time <- stats::rexp(n, exp(0.6 * d$x1 + 0.4 * (d$trt == "B")) / 24)
+  d$status <- stats::rbinom(n, 1, 0.75)
+  d$event <- factor(ifelse(d$status == 1, "Yes", "No"))
+
+  sv <- run("survival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1", explanatory = "trt",
+            bootstrapValidation = TRUE, bootstrapValN = 50, seed = 777)
+  expect_true(shown %in% notes(sv$results$bootstrapValidationTable))
+
+  ms <- run("multisurvival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1",
+            explanatory = "trt", contexpl = "age", ci_optimism = TRUE, ci_optimism_boot = 50, seed = 777)
+  expect_true(shown %in% notes(ms$results$cindexValidation))
+
+  lc <- run("lassocox", d, elapsedtime = "time", outcome = "event", outcomeLevel = "Yes", censorLevel = "No",
+            explanatory = c("x1", "x2", "x3", "x4", "age"), random_seed = 777,
+            cv_plot = FALSE, coef_plot = FALSE, survival_plot = FALSE)
+  expect_true(shown %in% notes(lc$results$modelSummary))
+})
+
+# library-audit 2026-09-16 meddecide [LOW] DONE (same class): tables whose row set is fixed by the code or by
+#   an option have their rows before .run(); a statistic that cannot be computed stays as a blank row
+#   rather than vanishing, so "not estimable" is distinguishable from "never tried"
+test_that("fixed-row jsurvival tables are scaffolded before .run()", {
+  skip_if_not(exists("survivalClass") && exists("singlearmClass") && exists("multisurvivalClass"))
+  after_init <- function(name, data, ...) {
+    a <- get(paste0(name, "Class"))$new(options = get(paste0(name, "Options"))$new(...), data = data)
+    suppressWarnings(suppressMessages(a$init()))
+    function(table) unlist(a$results[[table]]$rowKeys)
+  }
+  set.seed(10)
+  n <- 80
+  d <- data.frame(time = round(stats::rexp(n, 0.025) + 1, 2), status = stats::rbinom(n, 1, 0.7),
+                  trt = factor(sample(c("A", "B"), n, TRUE)), age = stats::rnorm(n, 60, 10))
+  sv <- after_init("survival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1", explanatory = "trt",
+                   calibration_curves = TRUE, use_parametric = TRUE, compare_distributions = TRUE)
+  expect_identical(sv("calibrationTable"), c("slope", "meancal", "mae", "cindex"))
+  expect_identical(sv("parametricModelComparison"),
+                   c("exp", "weibull", "lnorm", "llogis", "gamma", "gengamma", "gompertz"))
+  sa <- after_init("singlearm", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1",
+                   advancedDiagnostics = TRUE)
+  expect_identical(sa("dataQualityTable"),
+                   c("n_total", "n_events", "event_rate", "followup_range", "median_followup", "memory",
+                     "time_complete", "outcome_complete"))
+  ms <- after_init("multisurvival", d, elapsedtime = "time", outcome = "status", outcomeLevel = "1",
+                   explanatory = "trt", contexpl = "age", ci_optimism = TRUE)
+  expect_identical(ms("cindexValidation"), c("apparent", "optimism", "corrected"))
+})

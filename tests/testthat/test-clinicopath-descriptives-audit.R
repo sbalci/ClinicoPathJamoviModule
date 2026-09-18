@@ -457,3 +457,57 @@ test_that("audited checkbox labels use noun phrases", {
     )
   }
 })
+
+# A result that changes with the random seed names that seed next to it, and the same seed reproduces it
+# (Random seed option).
+test_that("seed-dependent Descriptives results show the seed and reproduce with it", {
+  skip_if_not(exists("chisqposttestClass") && exists("categorizeClass") && exists("outlierdetectionClass"))
+  quiet <- function(expr) suppressWarnings(suppressMessages(expr))
+  shown <- "Random seed: 777"
+  notes <- function(table) unname(vapply(table$notes, function(n) n$note, ""))
+  run <- function(name, data, ...) {
+    a <- get(paste0(name, "Class"))$new(options = get(paste0(name, "Options"))$new(...), data = data)
+    quiet(a$init())
+    quiet(a$run())
+    a
+  }
+
+  # chisqposttest: a table too large for the exact algorithm is tested by Monte Carlo simulation
+  set.seed(1)
+  counts <- as.data.frame(as.table(matrix(stats::rmultinom(1, 1500, outer(rep(0.2, 5), rep(1 / 6, 6))), 5)))
+  big <- counts[rep(seq_len(nrow(counts)), counts$Freq), 1:2]
+  names(big) <- c("a", "b")
+  mc <- function() run("chisqposttest", big, rows = "a", cols = "b", testSelection = "fisher", seed = 777)
+  first <- mc()
+  expect_true(shown %in% notes(first$results$chisqTable))
+  expect_identical(first$results$chisqTable$asDF$p, mc()$results$chisqTable$asDF$p)
+  # the bootstrap interval for the effect size
+  a <- factor(rep(c("x", "y"), each = 60))
+  small <- data.frame(a, b = factor(ifelse(a == "x", sample(c("p", "q", "r"), 120, TRUE, c(.6, .3, .1)),
+                                           sample(c("p", "q", "r"), 120, TRUE, c(.1, .3, .6)))))
+  phi <- run("chisqposttest", small, rows = "a", cols = "b", phiCI = TRUE, seed = 777)
+  expect_true(shown %in% notes(phi$results$posthocTable))
+
+  # outlierdetection: MCD draws random subsets
+  od <- run("outlierdetection", data.frame(x1 = stats::rnorm(200), x2 = stats::rnorm(200)), vars = c("x1", "x2"),
+            method_category = "multivariate", multivariate_methods = "mcd", show_outlier_table = TRUE, seed = 777)
+  expect_match(od$results$outlier_table$content, shown, fixed = TRUE)
+
+  # categorize: natural breaks above 20000 observations come from a random subsample
+  skip_if_not_installed("classInt")
+  cz <- run("categorize", data.frame(v = stats::rnorm(20500)), var = "v", method = "jenks", nbins = 4,
+            seed = 777, showcode = TRUE)
+  expect_true(shown %in% notes(cz$results$breakpointsTable))
+  expect_match(cz$results$rcode$content, "set.seed(777)", fixed = TRUE)
+})
+
+# library-audit 2026-09-16 meddecide [LOW] DONE (same class): the venn summary has one row per selected
+#   variable - an option, not the data - so .init() lays those rows down and .run() fills them
+test_that("the venn summary table is scaffolded before .run()", {
+  skip_if_not(exists("vennClass"))
+  d <- data.frame(A = factor(c("Pos", "Neg", "Pos")), B = factor(c("Neg", "Neg", "Pos")),
+                  C = factor(c("Pos", "Pos", "Neg")))
+  a <- vennClass$new(options = vennOptions$new(var1 = "A", var2 = "B", var4 = "C"), data = d)
+  suppressWarnings(suppressMessages(a$init()))
+  expect_identical(unlist(a$results$summary$rowKeys), c("var1", "var2", "var4"))
+})

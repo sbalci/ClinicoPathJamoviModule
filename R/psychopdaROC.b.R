@@ -269,7 +269,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # contradicting this analysis's own fixedSensSpecTable.
       .samplePrevalenceList = list(),
       .aucList = list(), # Store AUC values for clinical interpretation
-      .forestPlotData = NULL, # Store forest plot data for meta-analysis
       .runSummaryHead = NULL, # Fixed part of the Analysis Status box, built in .run(); see .renderRunSummary
       .assumedPositiveClass = NULL, # Set when no positive class was chosen and one was guessed
       .modeInstructionsHtml = "", # Instructions written by .applyClinicalModeSettings(); the
@@ -1498,6 +1497,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         private$.notePositiveClassGuess(resultsTable)
         private$.noteMetricTolerance(resultsTable)
         private$.noteCutpointOptimism(resultsTable)
+        # the bootstrap-metric methods choose the cutpoint over random resamples
+        resultsTable$setNote("seed", if (self$options$method %in% c("maximize_boot_metric", "minimize_boot_metric"))
+          jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
         # This is the table that actually shows PPV/NPV, and it is visible by
         # default -- so the prevalence caveat belongs here, not only inside the
         # optional Fixed Sensitivity/Specificity panel.
@@ -1993,6 +1995,11 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                   </html>"
         )
 
+        metaLabels <- private$.metaAnalysisRowLabels()
+        for (key in names(metaLabels))
+          self$results$metaAnalysisTable$addRow(rowKey = key,
+            values = list(model_type = unname(metaLabels[[key]])))
+
         # Enable meta-analysis options only when sufficient variables are available
         private$.updateMetaAnalysisVisibility()
       },
@@ -2229,9 +2236,33 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         for (nm in names(self$results)) {
           item <- tryCatch(self$results[[nm]], error = function(e) NULL)
           if (!is.null(item) && inherits(item, "Table")) {
+            # metaAnalysisTable's rows are scaffolded in .init(); deleting them would drop the
+            # scaffold (and make setRow() fail), so only its values are blanked.
+            if (identical(nm, "metaAnalysisTable")) {
+              private$.blankMetaAnalysisRows()
+              next
+            }
             tryCatch(item$deleteRows(), error = function(e) NULL)
           }
         }
+      },
+
+      # library-audit 2026-09-16 meddecide [LOW] DONE (same class): metaAnalysisTable has a fixed row set, so .init()
+      # scaffolds the rows and .run() fills them with setRow()
+      # The pooled models reported are chosen by the Meta-Analysis Method option alone, so the
+      # rows are known before any data is seen.
+      .metaAnalysisRowLabels = function() {
+        labels <- c(fixed = .("Fixed Effects"), random = .("Random Effects"))
+        method <- self$options$metaAnalysisMethod
+        labels[c(method %in% c("fixed", "both"), method %in% c("random", "both"))]
+      },
+
+      .blankMetaAnalysisRows = function() {
+        for (key in names(private$.metaAnalysisRowLabels()))
+          self$results$metaAnalysisTable$setRow(rowKey = key, values = list(
+            pooled_auc = NA_real_, ci_lower = NA_real_, ci_upper = NA_real_,
+            heterogeneity_i2 = NA_real_, tau_squared = NA_real_,
+            cochran_q = NA_real_, q_p_value = NA_real_))
       },
 
       # ============================================================================
@@ -2287,7 +2318,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         private$.prevalenceList <- list()
         private$.samplePrevalenceList <- list()
         private$.aucList <- list()
-        private$.forestPlotData <- NULL
         private$.clearTables()
 
         # -----------------------------------------------------------------------
@@ -2961,6 +2991,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           }
         }
 
+        private$.attachRocOverlayState()
+
         # -----------------------------------------------------------------------
         # 10. PERFORM DELONG'S TEST FOR AUC COMPARISON
         # -----------------------------------------------------------------------
@@ -3381,6 +3413,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         if (self$options$partialAUC) {
           # Checkpoint before expensive partial AUC calculations
           private$.checkpoint()
+          self$results$partialAUCTable$setNote("seed", if (self$options$bootstrapCI) jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
 
           # Table visibility is controlled by YAML: visible: (partialAUC)
 
@@ -3448,10 +3481,14 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           }
         }
 
+        # The smoothed curves exist only now; refresh the ROC image states so they carry them.
+        if (self$options$rocSmoothingMethod != "none") private$.attachRocOverlayState()
+
         # Calculate bootstrap confidence intervals if requested
         if (self$options$bootstrapCI) {
           # Checkpoint before expensive bootstrap calculations
           private$.checkpoint()
+          self$results$bootstrapCITable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
 
           # Table visibility is controlled by YAML: visible: (bootstrapCI)
 
@@ -3608,6 +3645,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           if (length(self$options$dependentVars) < 2) {
             jmvcore::reject("Please specify at least two dependent variables to calculate IDI/NRI.")
           }
+          # both are bootstrap estimates
+          if (self$options$calculateIDI) self$results$idiTable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
+          if (self$options$calculateNRI) self$results$nriTable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
 
           # IDI/NRI does not support subgroup analysis
           if (!is.null(self$options$subGroup) && self$options$subGroup != "") {
@@ -3863,8 +3903,50 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
       # @param ggtheme The ggplot theme to use
       # @param theme Additional theme elements
       # @param ... Additional parameters
+      # library-audit 2026-09-16 meddecide [MEDIUM] DONE: every ROC overlay draws from image$state, never
+      #   private$.rocDataList - export and .omv reopen call .plotROC() without .run()
+      # Wraps each ROC image's curve with the small inputs its overlays need: per-marker class counts
+      # (confidence bands, quantile CIs), predictor quantiles at the requested probabilities, and the
+      # smoothed curve. Counts and quantiles, not the predictor values, so the .omv holds no raw data.
+      .attachRocOverlayState = function() {
+        probs <- suppressWarnings(as.numeric(unlist(strsplit(self$options$quantiles, ","))))
+        probs <- probs[!is.na(probs) & probs >= 0 & probs <= 1]
+        plots <- self$results$plotROC
+        for (key in plots$itemKeys) {
+          image <- plots$get(key = key)
+          st <- image$state
+          curve <- if (is.data.frame(st)) st else st$curve
+          if (is.null(curve) || nrow(curve) == 0) next
+          counts <- NULL
+          quantiles <- NULL
+          smooth <- NULL
+          for (v in unique(as.character(curve$var))) {
+            raw <- attr(private$.rocDataList[[v]], "rawData")
+            if (!is.null(raw)) {
+              counts <- rbind(counts, data.frame(
+                var = v, n_pos = sum(raw$class == "Positive", na.rm = TRUE),
+                n_neg = sum(raw$class == "Negative", na.rm = TRUE), stringsAsFactors = FALSE))
+              if (length(probs) > 0) {
+                quantiles <- rbind(quantiles, data.frame(
+                  var = v, prob = probs,
+                  value = unname(quantile(raw$value, probs = probs, na.rm = TRUE)),
+                  stringsAsFactors = FALSE))
+              }
+            }
+            sm <- private$.rocDataList[[paste0(v, "_smooth")]]
+            if (!is.null(sm)) smooth <- rbind(smooth, as.data.frame(sm))
+          }
+          image$setState(list(curve = as.data.frame(curve), counts = counts,
+                              quantiles = quantiles, smooth = smooth))
+        }
+      },
+
       .plotROC = function(image, ggtheme, theme, ...) {
-        plotData <- data.frame(image$state)
+        state <- image$state
+        # list(curve, counts, quantiles, smooth) - see .attachRocOverlayState(). A bare data frame is
+        # the curve-only state of older saved analyses: it draws without overlays.
+        overlay <- if (is.data.frame(state)) list() else state
+        plotData <- data.frame(if (is.data.frame(state) || is.null(state$curve)) state else state$curve)
 
         if (nrow(plotData) == 0) {
           return(FALSE)
@@ -3977,22 +4059,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           }
         }
 
-        # Check if we have smoothed curves
-        has_smoothed <- any(grepl("_smooth", names(private$.rocDataList)))
+        # Smoothed curves for the markers on this panel, from the image state
+        smoothed_data <- if (is.null(overlay$smooth)) data.frame() else as.data.frame(overlay$smooth)
 
-        if (has_smoothed && self$options$rocSmoothingMethod != "none") {
-          # Prepare data for smoothed curves
-          smoothed_data <- data.frame()
-
-          for (var_name in names(private$.rocDataList)) {
-            if (grepl("_smooth", var_name)) {
-              smooth_data <- private$.rocDataList[[var_name]]
-              if (!is.null(smooth_data)) {
-                smoothed_data <- rbind(smoothed_data, smooth_data)
-              }
-            }
-          }
-
+        if (nrow(smoothed_data) > 0 && self$options$rocSmoothingMethod != "none") {
           if (nrow(smoothed_data) > 0) {
             # Add smoothed curves
             if (self$options$combinePlots && length(unique(smoothed_data$var)) > 1) {
@@ -4168,12 +4238,12 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # ticking "Confidence bands" changed nothing at all for most users.
           # One ribbon per marker, filled to match that marker's curve colour.
           bands_data <- do.call(rbind, lapply(unique(plotData$var), function(var_name) {
-            raw <- attr(private$.rocDataList[[var_name]], "rawData")
-            if (is.null(raw)) return(NULL)
+            if (is.null(overlay$counts)) return(NULL)
+            cnt <- overlay$counts[overlay$counts$var == var_name, , drop = FALSE]
             vd <- plotData[plotData$var == var_name, , drop = FALSE]
-            if (nrow(vd) == 0) return(NULL)
-            n_pos <- sum(raw$class == "Positive", na.rm = TRUE)
-            n_neg <- sum(raw$class == "Negative", na.rm = TRUE)
+            if (nrow(cnt) == 0 || nrow(vd) == 0) return(NULL)
+            n_pos <- cnt$n_pos[1]
+            n_neg <- cnt$n_neg[1]
             if (n_pos < 1 || n_neg < 1) return(NULL)
             # Normal approximation to the binomial, pointwise in sensitivity.
             sens_se <- sqrt(vd$sensitivity * (1 - vd$sensitivity) / n_pos)
@@ -4219,17 +4289,16 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             for (var_name in unique(plotData$var)) {
               var_data <- plotData[plotData$var == var_name, ]
 
-              # Extract the predictor values
-              if (!is.null(attr(private$.rocDataList[[var_name]], "rawData"))) {
-                raw_data <- attr(private$.rocDataList[[var_name]], "rawData")
-                predictor_values <- raw_data$value
-
-                # Calculate class-specific counts
-                n_pos <- sum(raw_data$class == "Positive")
-                n_neg <- sum(raw_data$class == "Negative")
-
-                # Calculate predictor quantiles
-                pred_quantiles <- quantile(predictor_values, probs = quantiles_vec, na.rm = TRUE)
+              # Predictor quantiles and class counts for this marker, from the image state
+              qs <- if (is.null(overlay$quantiles)) NULL else
+                overlay$quantiles[overlay$quantiles$var == var_name, , drop = FALSE]
+              cnt <- if (is.null(overlay$counts)) NULL else
+                overlay$counts[overlay$counts$var == var_name, , drop = FALSE]
+              if (!is.null(qs) && nrow(qs) > 0 && !is.null(cnt) && nrow(cnt) > 0) {
+                n_pos <- cnt$n_pos[1]
+                n_neg <- cnt$n_neg[1]
+                pred_quantiles <- qs$value
+                quantiles_vec <- qs$prob
 
                 # Create a data frame for quantile points
                 quantile_points <- data.frame()
@@ -5461,6 +5530,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           note = "NOTE: This analysis uses bootstrap resampling with optional prior weighting, not full Bayesian MCMC. The 'credible intervals' shown are bootstrap percentile confidence intervals. For true Bayesian inference, consider using specialized software like Stan or JAGS.",
           init = FALSE
         )
+        self$results$bayesianROCTable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed), init = FALSE)
 
         y <- as.numeric(data[[private$.escapeVar(self$options$classVar)]] == positiveClass)
 
@@ -5957,10 +6027,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         ci_lower_re <- pooled_auc_re - 1.96 * se_pooled_re
         ci_upper_re <- pooled_auc_re + 1.96 * se_pooled_re
 
-        # Add results to table based on selected method
-        if (self$options$metaAnalysisMethod %in% c("fixed", "both")) {
-          self$results$metaAnalysisTable$addRow(rowKey = "fixed", values = list(
-            model_type = "Fixed Effects",
+        # Fill the rows .init() scaffolded for the selected method
+        metaKeys <- names(private$.metaAnalysisRowLabels())
+        if ("fixed" %in% metaKeys) {
+          self$results$metaAnalysisTable$setRow(rowKey = "fixed", values = list(
             pooled_auc = pooled_auc_fe,
             ci_lower = ci_lower_fe,
             ci_upper = ci_upper_fe,
@@ -5971,9 +6041,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           ))
         }
 
-        if (self$options$metaAnalysisMethod %in% c("random", "both")) {
-          self$results$metaAnalysisTable$addRow(rowKey = "random", values = list(
-            model_type = "Random Effects",
+        if ("random" %in% metaKeys) {
+          self$results$metaAnalysisTable$setRow(rowKey = "random", values = list(
             pooled_auc = pooled_auc_re,
             ci_lower = ci_lower_re,
             ci_upper = ci_upper_re,
@@ -6403,54 +6472,29 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               plot_data <- rbind(plot_data, combined_row)
             }
 
-            # Create forest plot
-            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = auc, y = study)) +
-              ggplot2::geom_point(size = 3) +
-              ggplot2::geom_errorbarh(ggplot2::aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
-              ggplot2::geom_vline(xintercept = 0.5, linetype = "dashed", color = "red", alpha = 0.7) +
-              ggplot2::labs(
-                title = "Meta-Analysis Forest Plot",
-                subtitle = "AUC Values with 95% Confidence Intervals",
-                x = "Area Under the Curve (AUC)",
-                y = "Test Variable"
-              ) +
-              ggplot2::theme_minimal() +
-              ggplot2::theme(
-                plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
-                plot.subtitle = ggplot2::element_text(hjust = 0.5),
-                panel.grid.minor = ggplot2::element_blank()
-              ) +
-              ggplot2::scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.1))
-
-            # Add text annotations for AUC values
-            p <- p + ggplot2::geom_text(ggplot2::aes(label = sprintf("%.3f", auc)),
-              vjust = -0.5, size = 3
-            )
-
-            # Store plot data for the render function to use
-            private$.forestPlotData <- list(
-              plot_data = plot_data,
-              combined_result = combined_result
-            )
-
-            # Add image to the array
+            # library-audit 2026-09-16 meddecide [HIGH] DONE: the state is the renderer's only input;
+            #   export and .omv reopen redraw without .run(), so a private$ copy was NULL there
             image <- self$results$metaAnalysisForestPlot$addItem(key = "forestPlot")
             image$setState(list(data = plot_data))
           },
           error = function(e) {
-            # If plot generation fails, just hide the plot
-            self$results$metaAnalysisForestPlot$setVisible(FALSE)
+            # Say why the plot is missing; hiding it left the user with a silent gap.
+            self$results$metaAnalysisWarning$setContent(paste0(
+              "<p>", jmvcore::htmlEscape(jmvcore::format(
+                .("The meta-analysis forest plot could not be built: {msg}"),
+                msg = conditionMessage(e))), "</p>"))
+            self$results$metaAnalysisWarning$setVisible(TRUE)
           }
         )
       },
 
       # Forest plot render function (called by jamovi)
       .plotMetaAnalysisForest = function(image, ggtheme, theme, ...) {
-        if (is.null(private$.forestPlotData)) {
+        plot_data <- image$state$data
+        if (is.null(plot_data)) {
           return(FALSE)
         }
-
-        plot_data <- private$.forestPlotData$plot_data
+        plot_data <- as.data.frame(plot_data)
 
         # Create forest plot
         p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = auc, y = study)) +

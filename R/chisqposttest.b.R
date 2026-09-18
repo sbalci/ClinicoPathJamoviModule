@@ -14,6 +14,7 @@
 #' @import jmvcore
 #' @importFrom stats chisq.test p.adjust fisher.test qnorm xtabs quantile
 #' @importFrom htmltools HTML div h3 h4 h5 p strong em br
+#' @importFrom withr with_seed
 #'
 #' @return An \code{R6} class generator object for the \code{chisqposttestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -267,8 +268,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(p = fisher_test$p.value, method = "fisher"))
 
             private$.checkpoint()
-            fisher_test <- try(
-                stats::fisher.test(contTable, simulate.p.value = TRUE, B = 2000),
+            # Monte Carlo: seeded, or the same table gave a different p-value on every run
+            fisher_test <- try(withr::with_seed(self$options$seed,
+                stats::fisher.test(contTable, simulate.p.value = TRUE, B = 2000)),
                 silent = TRUE)
             if (!inherits(fisher_test, "try-error"))
                 return(list(p = fisher_test$p.value, method = "fisher_mc"))
@@ -287,8 +289,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(p = fisher_test$p.value, method = "fisher"))
 
             private$.checkpoint()
-            fisher_test <- try(
-                stats::fisher.test(subtable, simulate.p.value = TRUE, B = 2000),
+            fisher_test <- try(withr::with_seed(self$options$seed,
+                stats::fisher.test(subtable, simulate.p.value = TRUE, B = 2000)),
                 silent = TRUE)
             if (!inherits(fisher_test, "try-error"))
                 return(list(p = fisher_test$p.value, method = "fisher_mc"))
@@ -1674,8 +1676,11 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 p = chiSqTest$p.value
             )
 
+            self$results$chisqTable$setNote("seed", NULL)
             if (identical(self$options$testSelection, "fisher")) {
                 fisher_omnibus <- private$.fisherOmnibusPvalue(contTable)
+                if (identical(fisher_omnibus$method, "fisher_mc"))
+                    self$results$chisqTable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
                 if (!is.null(fisher_omnibus))
                     omnibus_values <- list(
                         stat = if (identical(fisher_omnibus$method, "fisher_mc"))
@@ -2001,6 +2006,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         .("The bootstrap interval is computed at 95% for each comparison separately and is NOT adjusted for the number of comparisons, unlike the adjusted p-value column. An interval that excludes 0 does not imply significance after correction."))
                 else
                     self$results$posthocTable$setNote("phici", NULL)
+                # the bootstrap interval and any Monte Carlo p-value both depend on the seed
+                self$results$posthocTable$setNote("seed", if (self$options$phiCI || fisher_mc_used) jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
 
                 # A two-level variable is deliberately not split into pairs: its one
                 # pair is the whole table, i.e. the omnibus test reported above.
@@ -2038,6 +2045,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateExportTable = function(chiSqTest, contTable, pairwise_results = NULL) {
             # Same append-not-replace problem as posthocTable - see the note there.
             self$results$exportTable$deleteRows()
+            # these rows carry the same p-values and interval as the tables above
+            mc_used <- length(pairwise_results) > 0 &&
+                any(vapply(pairwise_results, function(x) identical(x$test_used, "fisher_mc"), logical(1)))
+            self$results$exportTable$setNote("seed", if (self$options$phiCI || mc_used) jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
 
             export_data <- list()
             row_index <- 1

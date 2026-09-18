@@ -93,7 +93,35 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$notices$setContent(html)
         },
 
+        # library-audit 2026-09-16 meddecide [LOW] DONE (same class): modelMetrics has a fixed row set, so .init()
+        # scaffolds the rows and .run() fills them with setRow()
+        # The rows are chosen by the modelType option, which .init() can already see.
+        .modelMetricLabels = function() {
+            c(r_squared        = .("R-squared"),
+              adj_r_squared    = .("Adjusted R-squared"),
+              pseudo_r_squared = .("Pseudo R-squared"),
+              concordance      = .("Concordance"),
+              aic              = .("AIC"),
+              bic              = .("BIC"))
+        },
+        .modelMetricKeys = function() {
+            switch(self$options$modelType,
+                   lm    = c("r_squared", "adj_r_squared", "aic"),
+                   glm   = c("aic", "pseudo_r_squared"),
+                   cox   = c("concordance", "aic"),
+                   mixed = c("aic", "bic"),
+                   character(0))
+        },
+
         .init = function() {
+            # modelMetrics is filled only when a model is fitted (the .run() branch that is not "precomputed")
+            if (self$options$inputMode != "precomputed") {
+                labels <- private$.modelMetricLabels()
+                for (key in private$.modelMetricKeys())
+                    self$results$modelMetrics$addRow(rowKey = key,
+                        values = list(metric = unname(labels[[key]])))
+            }
+
             # Show initial instructions
             instructions <- glue::glue("
             <h3>Coefficient Forest Plot (ggcoefstats)</h3>
@@ -791,49 +819,52 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .populateModelMetrics = function(model) {
             table <- self$results$modelMetrics
+            keys <- private$.modelMetricKeys()
 
-            # Extract model metrics based on type
-            tryCatch({
-                if (inherits(model, "lm")) {
-                    # R-squared for linear models
-                    r_sq <- summary(model)$r.squared
-                    adj_r_sq <- summary(model)$adj.r.squared
-                    aic <- AIC(model)
+            # Blank the scaffolded rows first, so a failed extraction leaves empty cells
+            # rather than a previous run's numbers.
+            for (key in keys)
+                table$setRow(rowKey = key, values = list(value = NA))
+            table$setNote("unavailable", NULL)
 
-                    table$addRow(rowKey = 1, values = list(metric = "R-squared", value = round(r_sq, 3)))
-                    table$addRow(rowKey = 2, values = list(metric = "Adjusted R-squared", value = round(adj_r_sq, 3)))
-                    table$addRow(rowKey = 3, values = list(metric = "AIC", value = round(aic, 1)))
+            # Dispatch on the modelType option - the same choice .init() scaffolded the rows
+            # from. Dispatching on inherits(model, "lm") sent every glm down the lm branch
+            # (a glm inherits "lm"), where summary()$r.squared is NULL and the whole table
+            # fell back to "Metrics unavailable".
+            metrics <- tryCatch({
+                switch(self$options$modelType,
+                    lm = {
+                        model_summary <- summary(model)
+                        list(r_squared = round(model_summary$r.squared, 3),
+                             adj_r_squared = round(model_summary$adj.r.squared, 3),
+                             aic = round(AIC(model), 1))
+                    },
+                    glm = {
+                        # McFadden pseudo R-squared from the deviances
+                        list(aic = round(AIC(model), 1),
+                             pseudo_r_squared = round(1 - (deviance(model) / model$null.deviance), 3))
+                    },
+                    cox = {
+                        # summary()$concordance is c(C, se(C)); model$concordance[1] is the
+                        # count of concordant PAIRS, not the C-index.
+                        list(concordance = round(unname(summary(model)$concordance[1]), 3),
+                             aic = round(AIC(model), 1))
+                    },
+                    mixed = {
+                        list(aic = round(AIC(model), 1),
+                             bic = round(BIC(model), 1))
+                    },
+                    list())
+            }, error = function(e) NULL)
 
-                } else if (inherits(model, "glm")) {
-                    # AIC and deviance for GLM
-                    aic <- AIC(model)
-                    deviance <- deviance(model)
-                    null_dev <- model$null.deviance
-                    pseudo_r2 <- 1 - (deviance / null_dev)
+            if (is.null(metrics)) {
+                # If metrics can't be extracted, say so in a table note
+                table$setNote("unavailable", .("Metrics unavailable"))
+                return()
+            }
 
-                    table$addRow(rowKey = 1, values = list(metric = "AIC", value = round(aic, 1)))
-                    table$addRow(rowKey = 2, values = list(metric = "Pseudo R-squared", value = round(pseudo_r2, 3)))
-
-                } else if (inherits(model, "coxph")) {
-                    # Concordance for Cox models
-                    concordance <- model$concordance[1]
-                    aic <- AIC(model)
-
-                    table$addRow(rowKey = 1, values = list(metric = "Concordance", value = round(concordance, 3)))
-                    table$addRow(rowKey = 2, values = list(metric = "AIC", value = round(aic, 1)))
-
-                } else if (inherits(model, c("lmerMod", "glmerMod"))) {
-                    # AIC and BIC for mixed models
-                    aic <- AIC(model)
-                    bic <- BIC(model)
-
-                    table$addRow(rowKey = 1, values = list(metric = "AIC", value = round(aic, 1)))
-                    table$addRow(rowKey = 2, values = list(metric = "BIC", value = round(bic, 1)))
-                }
-            }, error = function(e) {
-                # If metrics can't be extracted, add a note
-                table$addRow(rowKey = 1, values = list(metric = "Note", value = "Metrics unavailable"))
-            })
+            for (key in intersect(names(metrics), keys))
+                table$setRow(rowKey = key, values = list(value = metrics[[key]]))
         },
 
         .generateModelSummary = function() {

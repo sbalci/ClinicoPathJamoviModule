@@ -11,6 +11,7 @@ categorize(
   nbins = 4,
   breaks = "",
   sdmult = 1,
+  seed = 20240101,
   labels = "auto",
   customlabels = "",
   newvarname = "",
@@ -49,6 +50,11 @@ out-of-range exclusion is on.}
 
 \item{sdmult}{Multiplier for standard deviation when using meansd method
 (default = 1).}
+
+\item{seed}{Random seed for natural breaks (Jenks) above 20000
+observations, where the break points are computed on a random subsample.
+The break points table names the seed whenever it was used. The default
+reproduces the previous fixed behaviour.}
 
 \item{labels}{How to label the resulting categories.}
 

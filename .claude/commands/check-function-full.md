@@ -385,7 +385,7 @@ Checklist:
 - [ ] No `style=` attribute sets a hex `background-color` without a `color:`. Pale
       panel fills are translucent `rgba()` + `color: inherit`; saturated chips keep
       their fill but declare an explicit foreground.
-- [ ] Only the five structural HTML entities appear. Everything else is a `\u{}` escape.
+- [ ] Only the five structural HTML entities appear. Everything else is a `\uXXXX` escape — never braced `\u{}` inside `.()`, which the catalog extractor cannot read.
 - [ ] `setVisible(FALSE)` never signals failure; nothing is written to a hidden element;
       no `.init()`-hides / `.run()`-restores pair (use the declarative `visible:`).
 - [ ] Table rows that depend only on options or data shape are created in `.init()` and

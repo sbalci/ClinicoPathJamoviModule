@@ -117,6 +117,18 @@ options:
           jamovi: >
             How many standard deviations from mean to use for category boundaries.
 
+    - name: seed
+      title: Random seed
+      type: Integer
+      default: 20240101
+      description:
+          R: >
+            Random seed for natural breaks (Jenks) above 20000 observations, where the break
+            points are computed on a random subsample. The break points table names the seed
+            whenever it was used. The default reproduces the previous fixed behaviour.
+          jamovi: >
+            Seed for the random subsample natural breaks uses above 20000 observations.
+
     - name: labels
       title: Category labels
       type: List

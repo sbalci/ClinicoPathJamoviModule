@@ -942,7 +942,22 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                     effectiveOptions = effectiveOptions
                 ))
             },
+            # library-audit 2026-09-16 meddecide [LOW] DONE (same class): plotInfo has a fixed row set, so .init()
+            # scaffolds the rows and .run() fills them with setRow()
+            .plotInfoLabels = function() {
+                c(samples      = .("Total Samples"),
+                  genes        = .("Total Genes"),
+                  plot_type    = .("Plot Type"),
+                  color_scheme = .("Color Scheme"),
+                  width        = .("Width"),
+                  height       = .("Height"))
+            },
             .init = function() {
+                labels <- private$.plotInfoLabels()
+                for (key in names(labels))
+                    self$results$plotInfo$addRow(rowKey = key,
+                        values = list(parameter = unname(labels[[key]])))
+
                 # Set up clinical context and instructions
                 instructions_html <- "
             <div style='background-color: rgba(138, 155, 172, 0.06); border-radius: 8px; padding: 15px; margin: 10px 0; color: inherit;'>
@@ -1134,21 +1149,17 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
 
-                # Update plot info
-                plot_info <- data.frame(
-                    parameter = c("Total Samples", "Total Genes", "Plot Type", "Color Scheme", "Width", "Height"),
-                    value = c(
-                        nrow(prepared_data$data),
-                        length(prepared_data$selected_genes),
-                        effectiveOptions$plotType,
-                        effectiveOptions$colorScheme,
-                        plotWidth,
-                        plotHeight
-                    )
+                # Update plot info: fill the rows .init() scaffolded (keys and labels: .plotInfoLabels())
+                plot_info <- c(
+                    samples      = nrow(prepared_data$data),
+                    genes        = length(prepared_data$selected_genes),
+                    plot_type    = effectiveOptions$plotType,
+                    color_scheme = effectiveOptions$colorScheme,
+                    width        = plotWidth,
+                    height       = plotHeight
                 )
-                # Set plot info data safely
-                for (i in seq_len(nrow(plot_info))) {
-                    self$results$plotInfo$addRow(rowKey = i, values = plot_info[i, ])
+                for (key in names(plot_info)) {
+                    self$results$plotInfo$setRow(rowKey = key, values = list(value = unname(plot_info[[key]])))
                 }
 
                 # INFO: Hierarchical sorting explanation

@@ -308,7 +308,6 @@ items:
       renderFun: .cvPlot
       width: 600
       height: 400
-      requiresData: true
       visible: (cv_plot)
       refs: glmnet
       clearWith:
@@ -328,7 +327,6 @@ items:
       renderFun: .coefPlot
       width: 600
       height: 400
-      requiresData: true
       visible: (coef_plot)
       refs: glmnet
       clearWith:
@@ -348,7 +346,6 @@ items:
       renderFun: .rocPlot
       width: 600
       height: 500
-      requiresData: true
       visible: (roc_plot)
       refs: pROC
       clearWith:

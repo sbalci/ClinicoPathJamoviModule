@@ -32,7 +32,7 @@
 # Rscript -e 'checktor::n_issues(res)'        # total count
 # Rscript -e 'checktor::tidy(res)'            # data.frame: category, check, passed, n_issues
 # Rscript -e 'checktor::issues(res)'          # data.frame: category, check, file, line, location, message  <- every finding
-# Rscript -e 'checktor::prescribe(res)' — treatment recommendations for what it found
+# Rscript -e 'checktor::prescribe(res)' - treatment recommendations for what it found
 
 
 # Rscript scripts/build_site.R 
@@ -47,15 +47,15 @@
 # ==============================================
 
 
-new_version: "1.0.82.02"
-new_date: "2026-09-16"
+new_version: "1.0.82.04"
+new_date: "2026-09-18"
 quick: false
 TEST: true
-jjstatsplot: true
-jsurvival: true
-ClinicoPathDescriptives: true
+jjstatsplot: false
+jsurvival: false
+ClinicoPathDescriptives: false
 OncoPath: true
-meddecide: true
+meddecide: false
 ClinicoPath: false
 
 # ========================================
@@ -92,9 +92,13 @@ umbrella_only_suffixes: ["D", "P"]
 #     (directly or through other helpers, including exists("f")/get0("f") lookups)
 #   - JS: the ./<file>:: handlers named in the shipped .u.yaml
 #   - 00refs.yaml trimmed to cited keys, dataset docs, the dependency-guard test
+#   - i18n_files: copied from the umbrella, then trimmed to the module's own strings by
+#     jmvtools::i18nUpdate() in build_module() (a dry-run therefore always lists them as update)
 # Files the updater manages but no longer plans are deleted (R/, jamovi/*.yaml, js,
 # data/*.rda). Hand-maintained R/zzz_imports.R, R/data.R, R/*-package.R, R/*-data.R,
 # R/data-*.R, jamovi/i18n catalogs, data/*.csv and data/*.omv are never touched.
+# .omv example analyses are made in the submodule and never copied from the umbrella
+# (an .omv in data_files is skipped with a warning).
 modules:
   jjstatsplot:
     directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"

@@ -11,6 +11,7 @@ categorizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             nbins = 4,
             breaks = "",
             sdmult = 1,
+            seed = 20240101,
             labels = "auto",
             customlabels = "",
             newvarname = "",
@@ -63,6 +64,10 @@ categorizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=0.5,
                 max=3,
                 default=1)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=20240101)
             private$..labels <- jmvcore::OptionList$new(
                 "labels",
                 labels,
@@ -117,6 +122,7 @@ categorizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..nbins)
             self$.addOption(private$..breaks)
             self$.addOption(private$..sdmult)
+            self$.addOption(private$..seed)
             self$.addOption(private$..labels)
             self$.addOption(private$..customlabels)
             self$.addOption(private$..newvarname)
@@ -135,6 +141,7 @@ categorizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         nbins = function() private$..nbins$value,
         breaks = function() private$..breaks$value,
         sdmult = function() private$..sdmult$value,
+        seed = function() private$..seed$value,
         labels = function() private$..labels$value,
         customlabels = function() private$..customlabels$value,
         newvarname = function() private$..newvarname$value,
@@ -152,6 +159,7 @@ categorizeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..nbins = NA,
         ..breaks = NA,
         ..sdmult = NA,
+        ..seed = NA,
         ..labels = NA,
         ..customlabels = NA,
         ..newvarname = NA,
@@ -204,6 +212,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "var",
                     "method",
                     "nbins",
+                    "seed",
                     "breaks",
                     "excludeoutofrange",
                     "labels",
@@ -232,6 +241,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "var",
                     "method",
                     "nbins",
+                    "seed",
                     "breaks",
                     "excludeoutofrange",
                     "sdmult",
@@ -272,6 +282,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "var",
                     "method",
                     "nbins",
+                    "seed",
                     "breaks",
                     "excludeoutofrange",
                     "sdmult",
@@ -298,6 +309,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "var",
                     "method",
                     "nbins",
+                    "seed",
                     "breaks",
                     "excludeoutofrange",
                     "sdmult",
@@ -311,6 +323,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "var",
                     "method",
                     "nbins",
+                    "seed",
                     "breaks",
                     "excludeoutofrange",
                     "sdmult",
@@ -332,6 +345,7 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "var",
                     "method",
                     "nbins",
+                    "seed",
                     "breaks",
                     "excludeoutofrange",
                     "sdmult",
@@ -403,6 +417,10 @@ categorizeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   out-of-range exclusion is on.
 #' @param sdmult Multiplier for standard deviation when using meansd method
 #'   (default = 1).
+#' @param seed Random seed for natural breaks (Jenks) above 20000
+#'   observations, where the break points are computed on a random subsample.
+#'   The break points table names the seed whenever it was used. The default
+#'   reproduces the previous fixed behaviour.
 #' @param labels How to label the resulting categories.
 #' @param customlabels Comma-separated custom labels (e.g., "Low, Medium,
 #'   High"). Must match the number of categories.
@@ -457,6 +475,7 @@ categorize <- function(
     nbins = 4,
     breaks = "",
     sdmult = 1,
+    seed = 20240101,
     labels = "auto",
     customlabels = "",
     newvarname = "",
@@ -484,6 +503,7 @@ categorize <- function(
         nbins = nbins,
         breaks = breaks,
         sdmult = sdmult,
+        seed = seed,
         labels = labels,
         customlabels = customlabels,
         newvarname = newvarname,

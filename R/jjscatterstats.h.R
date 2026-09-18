@@ -18,6 +18,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             marginalType = "none",
             smoothMethod = "lm",
             typestatistics = "parametric",
+            seed = 20250101,
             mytitle = "",
             xtitle = "",
             ytitle = "",
@@ -147,6 +148,10 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "robust",
                     "bayes"),
                 default="parametric")
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=20250101)
             private$..mytitle <- jmvcore::OptionString$new(
                 "mytitle",
                 mytitle,
@@ -285,6 +290,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..marginalType)
             self$.addOption(private$..smoothMethod)
             self$.addOption(private$..typestatistics)
+            self$.addOption(private$..seed)
             self$.addOption(private$..mytitle)
             self$.addOption(private$..xtitle)
             self$.addOption(private$..ytitle)
@@ -323,6 +329,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         marginalType = function() private$..marginalType$value,
         smoothMethod = function() private$..smoothMethod$value,
         typestatistics = function() private$..typestatistics$value,
+        seed = function() private$..seed$value,
         mytitle = function() private$..mytitle$value,
         xtitle = function() private$..xtitle$value,
         ytitle = function() private$..ytitle$value,
@@ -360,6 +367,7 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..marginalType = NA,
         ..smoothMethod = NA,
         ..typestatistics = NA,
+        ..seed = NA,
         ..mytitle = NA,
         ..xtitle = NA,
         ..ytitle = NA,
@@ -430,6 +438,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "smoothMethod",
                     "originaltheme",
                     "typestatistics",
+                    "seed",
                     "conflevel",
                     "bfmessage",
                     "k",
@@ -594,6 +603,11 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   (verified: on the same 80 points statsExpressions returns 0.5894, matching
 #'   WRS2::wincor exactly, while WRS2::pbcor returns 0.6152). Bayesian analysis
 #'   quantifies evidence strength for clinical decision-making.
+#' @param seed Random seed for the statistics computed by resampling or
+#'   posterior sampling (robust tests, Bayesian estimates, and some
+#'   nonparametric effect-size intervals). The plot caption names the seed
+#'   whenever it affected the numbers shown. The default reproduces the previous
+#'   fixed behaviour.
 #' @param mytitle .
 #' @param xtitle .
 #' @param ytitle .
@@ -656,6 +670,7 @@ jjscatterstats <- function(
     marginalType = "none",
     smoothMethod = "lm",
     typestatistics = "parametric",
+    seed = 20250101,
     mytitle = "",
     xtitle = "",
     ytitle = "",
@@ -720,6 +735,7 @@ jjscatterstats <- function(
         marginalType = marginalType,
         smoothMethod = smoothMethod,
         typestatistics = typestatistics,
+        seed = seed,
         mytitle = mytitle,
         xtitle = xtitle,
         ytitle = ytitle,

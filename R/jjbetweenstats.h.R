@@ -12,6 +12,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             centralityplotting = FALSE,
             centralitytype = "parametric",
             typestatistics = "parametric",
+            seed = 20250101,
             pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
             padjustmethod = "holm",
@@ -88,6 +89,10 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "robust",
                     "bayes"),
                 default="parametric")
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=20250101)
             private$..pairwisecomparisons <- jmvcore::OptionBool$new(
                 "pairwisecomparisons",
                 pairwisecomparisons,
@@ -231,6 +236,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..centralityplotting)
             self$.addOption(private$..centralitytype)
             self$.addOption(private$..typestatistics)
+            self$.addOption(private$..seed)
             self$.addOption(private$..pairwisecomparisons)
             self$.addOption(private$..pairwisedisplay)
             self$.addOption(private$..padjustmethod)
@@ -262,6 +268,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         centralityplotting = function() private$..centralityplotting$value,
         centralitytype = function() private$..centralitytype$value,
         typestatistics = function() private$..typestatistics$value,
+        seed = function() private$..seed$value,
         pairwisecomparisons = function() private$..pairwisecomparisons$value,
         pairwisedisplay = function() private$..pairwisedisplay$value,
         padjustmethod = function() private$..padjustmethod$value,
@@ -292,6 +299,7 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..centralityplotting = NA,
         ..centralitytype = NA,
         ..typestatistics = NA,
+        ..seed = NA,
         ..pairwisecomparisons = NA,
         ..pairwisedisplay = NA,
         ..padjustmethod = NA,
@@ -353,6 +361,7 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "group",
                     "grvar",
                     "typestatistics",
+                    "seed",
                     "pairwisecomparisons",
                     "pairwisedisplay",
                     "padjustmethod",
@@ -444,6 +453,7 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "dep",
                     "group",
                     "typestatistics",
+                    "seed",
                     "varequal",
                     "colorblindSafe",
                     "mytitle",
@@ -466,6 +476,7 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "dep",
                     "group",
                     "typestatistics",
+                    "seed",
                     "varequal",
                     "colorblindSafe",
                     "grvar",
@@ -512,6 +523,11 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param centralityplotting .
 #' @param centralitytype .
 #' @param typestatistics .
+#' @param seed Random seed for the statistics computed by resampling or
+#'   posterior sampling (robust tests, Bayesian estimates, and some
+#'   nonparametric effect-size intervals). The plot caption names the seed
+#'   whenever it affected the numbers shown. The default reproduces the previous
+#'   fixed behaviour.
 #' @param pairwisecomparisons .
 #' @param pairwisedisplay .
 #' @param padjustmethod .
@@ -576,6 +592,7 @@ jjbetweenstats <- function(
     centralityplotting = FALSE,
     centralitytype = "parametric",
     typestatistics = "parametric",
+    seed = 20250101,
     pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
     padjustmethod = "holm",
@@ -623,6 +640,7 @@ jjbetweenstats <- function(
         centralityplotting = centralityplotting,
         centralitytype = centralitytype,
         typestatistics = typestatistics,
+        seed = seed,
         pairwisecomparisons = pairwisecomparisons,
         pairwisedisplay = pairwisedisplay,
         padjustmethod = padjustmethod,

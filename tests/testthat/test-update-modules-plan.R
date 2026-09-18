@@ -210,7 +210,23 @@ testthat::test_that("rendering: namespace rename, trimmed refs and generated dat
   testthat::expect_identical(utils::tail(doc, 2), c("\"histo\"", ""))
 })
 
-testthat::test_that("apply: writes and prunes the plan, drops a stale Collate, and a second plan is a no-op", {
+testthat::test_that("plan: .omv example files are never copied; the submodule owns them", {
+  skip_if_plan_missing()
+  u <- base_umbrella(c(analysis_files("aa", "Survival"),
+                       list("data-raw/non-rda/listed.omv" = "umbrella", "data/extra.omv" = "umbrella")))
+  d <- module_dir("jsurvival")
+  write_tree(d, list("jamovi/0000.yaml" = c("datasets:", "  - name: Listed", "    path: listed.omv",
+                                            "  - name: Gone", "    path: gone.omv"),
+                     "data/listed.omv" = "example analysis saved in the submodule"))
+  reg <- fixture_registry(u, list(jsurvival = list(directory = d, menu_groups = "Survival", data_files = "extra.omv")))
+  mp <- plan_env$compute_distribution_plan(reg)$modules$jsurvival
+  testthat::expect_false(any(grepl("\\.omv$", c(mp$files$dest, mp$delete))))
+  testthat::expect_true(any(grepl("data_files.*extra\\.omv", mp$warnings)))
+  testthat::expect_true(any(grepl("missing from data/: gone\\.omv", mp$warnings)))
+  testthat::expect_false(any(grepl("listed\\.omv", mp$warnings)))
+})
+
+testthat::test_that("apply: writes and prunes the plan, drops a stale Collate, enables roxygen markdown, and a second plan is a no-op", {
   skip_if_plan_missing()
   utils_path <- testthat::test_path("..", "..", "_updateModules_utils.R")
   testthat::skip_if_not(file.exists(utils_path))
@@ -229,6 +245,7 @@ testthat::test_that("apply: writes and prunes the plan, drops a stale Collate, a
   testthat::expect_true(file.exists(file.path(d, "R/zzz_imports.R")))
   testthat::expect_identical(unname(desc::desc_get_version(file.path(d, "DESCRIPTION"))), package_version("9.9.9"))
   testthat::expect_false(desc::desc_has_fields("Collate", file = file.path(d, "DESCRIPTION")))
+  testthat::expect_identical(unname(desc::desc_get("Roxygen", file = file.path(d, "DESCRIPTION"))), "list(markdown = TRUE)")
   again <- plan_env$compute_distribution_plan(reg)$modules$jsurvival
   df <- plan_env$diff_module(again, reg)
   testthat::expect_true(all(df$action == "same"))

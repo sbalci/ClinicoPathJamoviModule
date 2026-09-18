@@ -380,6 +380,8 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .fillTable = function(tab) {
             t <- self$results$summary
             if (is.null(tab)) return()
+            # the Lower/Upper columns are a bootstrap interval whatever the selected test
+            t$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
             t$setNote("agg", sprintf(
                 "Each row is one plotted point. 'Summary' is the %s of that group's observations, which is the statistic the selected test uses, and Lower/Upper are the same %g%% interval drawn as that point's error bar on the chart. 'SD' is the standard deviation of the raw observations. 'vs Reference' is Summary minus the Reference Value (%s).",
                 private$.summaryLabelLower(), 100 * self$options$conflevel,
@@ -478,6 +480,9 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(private$.plotFailure(sprintf(
                     "The chart could not be drawn: %s. Check that each group has at least one usable observation.",
                     conditionMessage(p))))
+            # the error bars are bootstrap intervals whatever the selected test, so the
+            # seed is named on every chart
+            p <- addSeedCaption(p, self, self$options$seed)
             print(p)
             TRUE
         },
@@ -510,6 +515,9 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(private$.plotFailure(sprintf(
                     "The split chart could not be drawn: %s. Check that every level of the Split By variable has at least two groups with data.",
                     conditionMessage(p))))
+            # the error bars are bootstrap intervals whatever the selected test, so the
+            # seed is named on every chart
+            p <- addSeedCaption(p, self, self$options$seed)
             print(p)
             TRUE
         }

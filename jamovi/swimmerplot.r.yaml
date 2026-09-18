@@ -40,7 +40,6 @@ items:
       width: 900
       height: 600
       renderFun: .plot
-      requiresData: true
       clearWith:
           - maxMilestones
           - patientID

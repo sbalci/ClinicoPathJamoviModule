@@ -133,7 +133,13 @@ test_that("an absent true level is reported, not thrown", {
   msg <- as.character(res$validationErrors$content)
   expect_match(msg, "Maybe")
   expect_match(msg, "Available levels")
-  expect_equal(nrow(res$summary$asDF), 0L)
+  # library-audit 2026-09-16 meddecide [LOW]: the summary rows are now laid down
+  # by .init() (one per selected variable) and only filled by .run(), so a failed
+  # validation leaves both rows in place with every count blank instead of an empty
+  # table. The intent is unchanged: no counts appear underneath the error.
+  sm <- res$summary$asDF
+  expect_equal(sm$variable, c("a", "b"))
+  expect_true(all(is.na(sm[, c("trueCount", "falseCount", "totalCount", "truePercentage")])))
 })
 
 test_that("excluded incomplete cases are disclosed", {
@@ -169,6 +175,10 @@ test_that("re-running does not duplicate the summary rows", {
     data = d)
 
   a$init()
+  # library-audit 2026-09-16 meddecide [LOW]: the rows are laid down by .init(),
+  # keyed by variable slot, before any data is counted.
+  expect_equal(unlist(a$results$summary$rowKeys), c("var1", "var2", "var3"))
+  expect_true(all(is.na(a$results$summary$asDF$trueCount)))
   a$run()
   expect_equal(a$results$summary$rowCount, 3L)
   a$run()

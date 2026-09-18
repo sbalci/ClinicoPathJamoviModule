@@ -82,9 +82,9 @@ swimmerplot_glossary_html <- function(self) {
         "<h4 style='color: #0056b3; margin: 10px 0 5px 0;'>", .("Response Categories"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px;'>",
         "<li><strong>", .("CR (Complete Response):"), "</strong> ", .("Complete disappearance of all target lesions"), "</li>",
-        "<li><strong>", .("PR (Partial Response):"), "</strong> ", .("\u{2265}30% decrease in sum of target lesion diameters"), "</li>",
+        "<li><strong>", .("PR (Partial Response):"), "</strong> ", .("\u226530% decrease in sum of target lesion diameters"), "</li>",
         "<li><strong>", .("SD (Stable Disease):"), "</strong> ", .("Neither sufficient shrinkage for PR nor sufficient increase for PD"), "</li>",
-        "<li><strong>", .("PD (Progressive Disease):"), "</strong> ", .("\u{2265}20% increase in sum of target lesion diameters"), "</li>",
+        "<li><strong>", .("PD (Progressive Disease):"), "</strong> ", .("\u226520% increase in sum of target lesion diameters"), "</li>",
         "</ul>",
         "</div>",
 

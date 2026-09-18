@@ -10,6 +10,7 @@ clearWith:
     - counts
     - paired
     - typestatistics
+    - seed
     - originaltheme
     - palette
     - resultssubtitle
@@ -41,6 +42,7 @@ items:
         - ratio
         - clinicalpreset
         - typestatistics
+        - seed
 
     - name: about
       title: About This Analysis

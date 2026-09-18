@@ -1026,6 +1026,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     table <- self$results$table
     # Clear existing rows - jamovi tables use deleteRows(), not clear()
     table$deleteRows()
+    # Bayesian estimates are posterior draws: name the seed they came from
+    table$setNote("seed", if (identical(options_data$typestatistics, "bayes"))
+        jmvcore::format(.("Random seed: {seed}"), seed = private$.bayesSeed()))
     private$.pair_n <- integer(0)
     private$.n_valid_pairs <- 0L
 
@@ -1250,6 +1253,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # list that .displayWarnings() had already consumed, so it never
             # reached the user.
 
+            if (identical(options_data$typestatistics, "bayes"))
+                plot <- addSeedCaption(plot, self, private$.bayesSeed())
+
             # Print Plot ----
 
             print(plot)
@@ -1334,6 +1340,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # The correlation table AND the clinical interpretation are both
             # produced once in .run(); only the figure is drawn here.
+
+            if (identical(options_data$typestatistics, "bayes"))
+                plot2 <- addSeedCaption(plot2, self, private$.bayesSeed())
 
             # Print Plot ----
 

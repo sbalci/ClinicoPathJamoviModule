@@ -4,8 +4,6 @@
 #' @import jmvcore
 #' @importFrom irr kappa2 kappam.fleiss agree
 #' @importFrom dplyr group_by count
-#' @importFrom htmlTable htmlTable
-#' @importFrom glue glue
 #'
 #' @description This function calculates interrater reliability for ordinal or categorical data.
 #'
@@ -53,6 +51,73 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     tbl$getColumn("ci_lower")$setTitle(paste0(conf_pct, "% CI Lower"))
                     tbl$getColumn("ci_upper")$setTitle(paste0(conf_pct, "% CI Upper"))
                 }
+
+                # Fixed-row tables: every row is laid down here; .run() only fills the values.
+                fixed <- private$.fixedRowTables()
+                for (nm in names(fixed)) {
+                    spec <- fixed[[nm]]
+                    if (!isTRUE(spec$show)) next
+                    for (key in names(spec$rows)) {
+                        values <- list()
+                        values[[spec$column]] <- unname(spec$rows[[key]])
+                        self$results[[nm]]$addRow(rowKey = key, values = values)
+                    }
+                }
+            },
+            # library-audit 2026-09-16 meddecide [LOW] DONE (same class): varianceDecompositionTable,
+            # hierarchicalICCTable, mixedEffectsVarianceTable, concordanceF1Table and
+            # agreementSampleSizeTable have a fixed row set, so .init() scaffolds the rows and .run()
+            # fills them with setRow()
+            # Each entry: `show` = the options that make the table visible (the same options that
+            # guard its fill code in .run()), `column` = the label column, `rows` = rowKey -> label.
+            # Rows a run cannot compute stay blank. Reads options only: .init() has no data.
+            .fixedRowTables = function() {
+                o <- self$options
+                ss_metric <- private$.ssMetricLabel()
+                ss_rows <- c(metric = .("Agreement Metric"),
+                             n_required = .("Required Sample Size (subjects)"),
+                             n_raters = .("Number of Raters"),
+                             n_cat = .("Number of Categories"),
+                             kappa_null = sprintf(.("%s under H0"), ss_metric),
+                             kappa_alt = sprintf(.("%s under H1"), ss_metric),
+                             alpha = .("Significance Level (alpha)"),
+                             power = .("Target Power (1 - beta)"),
+                             total_reads = .("Total Reads Required"))
+                # The ICC sample size does not depend on the number of categories
+                if (identical(o$ssMetric, "icc")) ss_rows <- ss_rows[names(ss_rows) != "n_cat"]
+
+                list(
+                    varianceDecompositionTable = list(
+                        show = isTRUE(o$hierarchicalKappa) && isTRUE(o$varianceDecomposition),
+                        column = "component",
+                        rows = c(case = .("Case (Subject)"), rater = .("Rater"),
+                                 cluster = .("Cluster (Institution)"), residual = .("Residual"),
+                                 total = .("Total"))),
+                    hierarchicalICCTable = list(
+                        show = isTRUE(o$hierarchicalKappa) && isTRUE(o$iccHierarchical),
+                        column = "icc_type",
+                        rows = c(icc1 = .("ICC(1) - Single Rating"),
+                                 icc2 = .("ICC(2) - Mean of k Ratings"),
+                                 g_coeff = .("G-coefficient"))),
+                    mixedEffectsVarianceTable = list(
+                        show = isTRUE(o$mixedEffectsComparison),
+                        column = "component",
+                        rows = c(case = .("Case (Subject)"), rater = .("Rater"),
+                                 residual = .("Residual"))),
+                    concordanceF1Table = list(
+                        show = isTRUE(o$multiAnnotatorConcordance),
+                        column = "metric",
+                        rows = c(conc_acc = .("Concordance Accuracy"),
+                                 strict_acc = .("Strict Accuracy (vs Consensus)"),
+                                 annotator_agree = .("Mean Annotator Agreement"),
+                                 n_info = .("N Annotators (reference)"))),
+                    agreementSampleSizeTable = list(
+                        show = isTRUE(o$agreementSampleSize),
+                        column = "parameter",
+                        rows = ss_rows))
+            },
+            .ssMetricLabel = function() {
+                switch(self$options$ssMetric, kappa = "Cohen's Kappa", fleiss = "Fleiss' Kappa", "ICC")
             },
             # jmvcore has no "column exists" check: the contingency and rating-combination
             # tables add their data-driven columns in .run(), so every re-run appended the
@@ -1682,7 +1747,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         if (is.null(n_boot) || !is.finite(n_boot) || n_boot < 100) n_boot <- 1000
                         seed_val <- self$options$seed
                         if (is.null(seed_val)) seed_val <- 42
-                        set.seed(seed_val)
+                        withr::local_seed(seed_val)
                         boot_a <- vapply(seq_len(n_boot), function(b) {
                             idx <- sample.int(n_subjects, replace = TRUE)
                             private$.robinsonA(ratings_matrix[idx, , drop = FALSE])
@@ -2961,7 +3026,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         # change on every re-run.
                         tdi_seed <- self$options$seed
                         if (is.null(tdi_seed)) tdi_seed <- 42
-                        set.seed(tdi_seed)
+                        withr::local_seed(tdi_seed)
+                        tdiTable$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = tdi_seed))
 
                         for (i in 1:(n_raters - 1)) {
                             for (j in (i + 1):n_raters) {
@@ -4300,8 +4366,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Add cluster labels if available
                 if (!is.null(cluster_labels)) {
-                    # Color branches by cluster
-                    rect.hclust(hc, k = length(unique(cluster_labels)), border = 2:6)
+                    # rect.hclust() accepts 2 to n-1 clusters; an analysis saved before k was capped
+                    # can hold one cluster per leaf, which used to stop the plot with an error.
+                    n_clusters <- length(unique(cluster_labels))
+                    if (n_clusters >= 2 && n_clusters < length(hc$order)) {
+                        rect.hclust(hc, k = n_clusters, border = 2:6)
+                    }
                 }
 
                 return(TRUE)
@@ -4370,6 +4440,22 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             self$results$raterClusterTable$setNote("error", .("Clustering requires at least 3 raters"))
                             return()
                         }
+
+                        # With as many clusters as raters every rater is alone: nothing is grouped, and the
+                        # dendrogram's rect.hclust() stops with "k must be between 2 and n-1".
+                        if (k > n_raters - 1) {
+                            self$results$raterClusterTable$setNote("k_capped", jmvcore::format(
+                                .("{requested} clusters were requested for {n} raters; {used} were used, the most that still places some raters together."),
+                                requested = k, n = n_raters, used = n_raters - 1))
+                            k <- n_raters - 1
+                        } else {
+                            self$results$raterClusterTable$setNote("k_capped", NULL)
+                        }
+
+                        # kmeans() starts from random centres: unseeded, a rerun could regroup the raters.
+                        withr::local_seed(self$options$seed)
+                        self$results$raterClusterTable$setNote("seed", if (identical(method, "kmeans"))
+                            jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
 
                         # Compute distance matrix
                         if (is_categorical || distance_metric == "agreement") {
@@ -4538,8 +4624,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Add cluster labels if available
                 if (!is.null(cluster_labels)) {
-                    # Color branches by cluster
-                    rect.hclust(hc, k = length(unique(cluster_labels)), border = 2:6)
+                    # rect.hclust() accepts 2 to n-1 clusters; an analysis saved before k was capped
+                    # can hold one cluster per leaf, which used to stop the plot with an error.
+                    n_clusters <- length(unique(cluster_labels))
+                    if (n_clusters >= 2 && n_clusters < length(hc$order)) {
+                        rect.hclust(hc, k = n_clusters, border = 2:6)
+                    }
                 }
 
                 return(TRUE)
@@ -4604,6 +4694,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
 
+                # Which cases are drawn was a random draw: name the seed that made it.
+                if (isTRUE(plotState$subsampled))
+                    graphics::mtext(jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed),
+                                    side = 1, line = 3, adj = 1, cex = 0.7)
+
                 return(TRUE)
             },
             .performCaseClustering = function(ratings) {
@@ -4628,6 +4723,22 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             self$results$caseClusterTable$setNote("error", .("Clustering requires at least 3 cases and 2 raters"))
                             return()
                         }
+
+                        # Same limit as for raters: k must leave at least two cases in one cluster.
+                        if (k > n_cases - 1) {
+                            self$results$caseClusterTable$setNote("k_capped", jmvcore::format(
+                                .("{requested} clusters were requested for {n} cases; {used} were used, the most that still places some cases together."),
+                                requested = k, n = n_cases, used = n_cases - 1))
+                            k <- n_cases - 1
+                        } else {
+                            self$results$caseClusterTable$setNote("k_capped", NULL)
+                        }
+
+                        # kmeans() starts from random centres, and over 200 cases the heatmap shows a random
+                        # subsample: unseeded, a rerun could regroup the cases or show different ones.
+                        withr::local_seed(self$options$seed)
+                        self$results$caseClusterTable$setNote("seed", if (identical(method, "kmeans"))
+                            jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
 
                         # Compute distance matrix between cases
                         if (is_categorical || distance_metric == "agreement") {
@@ -4770,7 +4881,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 heatmap$setState(list(
                                     similarity_matrix = similarity_matrix[sample_idx, sample_idx],
                                     cluster_assignments = cluster_assign[sample_idx],
-                                    case_ids = case_ids[sample_idx]
+                                    case_ids = case_ids[sample_idx],
+                                    # which cases these are was drawn at random: the renderer names the seed
+                                    subsampled = TRUE
                                 ))
                                 heatmap$setNote("info", sprintf(.("Showing %d of %d cases (stratified sample)"), length(sample_idx), n_cases))
                             } else {
@@ -8543,9 +8656,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$varianceDecomposition) {
                     var_table <- self$results$varianceDecompositionTable
 
-                    interpret_component <- function(name, proportion) {
+                    interpret_component <- function(key, proportion) {
                         pct <- round(proportion * 100, 1)
-                        if (name == "Case (Subject)") {
+                        if (key == "case") {
                             if (pct > 50) {
                                 return("Scores driven by true case differences (desirable)")
                             }
@@ -8553,7 +8666,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 return("Moderate case-level variation")
                             }
                             return("Low case-level variation; other sources dominate")
-                        } else if (name == "Rater") {
+                        } else if (key == "rater") {
                             if (pct > 30) {
                                 return("Substantial rater bias; calibration needed")
                             }
@@ -8561,7 +8674,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 return("Moderate rater effects")
                             }
                             return("Minimal rater bias")
-                        } else if (name == "Cluster (Institution)") {
+                        } else if (key == "cluster") {
                             if (pct > 30) {
                                 return("Large institutional differences; protocol harmonization needed")
                             }
@@ -8580,28 +8693,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     }
 
+                    # Keys match the rows .init() scaffolded (private$.fixedRowTables())
                     components <- list(
-                        list(name = "Case (Subject)", var = sigma2_case),
-                        list(name = "Rater", var = sigma2_rater),
-                        list(name = "Cluster (Institution)", var = sigma2_cluster),
-                        list(name = "Residual", var = sigma2_resid)
+                        case = sigma2_case,
+                        rater = sigma2_rater,
+                        cluster = sigma2_cluster,
+                        residual = sigma2_resid
                     )
 
-                    for (i in seq_along(components)) {
-                        comp <- components[[i]]
-                        prop <- comp$var / sigma2_total
-                        var_table$addRow(rowKey = i, values = list(
-                            component = comp$name,
-                            variance = comp$var,
-                            sd = sqrt(comp$var),
+                    for (key in names(components)) {
+                        comp_var <- components[[key]]
+                        prop <- comp_var / sigma2_total
+                        var_table$setRow(rowKey = key, values = list(
+                            variance = comp_var,
+                            sd = sqrt(comp_var),
                             proportion = prop,
-                            interpretation = interpret_component(comp$name, prop)
+                            interpretation = interpret_component(key, prop)
                         ))
                     }
 
                     # Total row
-                    var_table$addRow(rowKey = length(components) + 1, values = list(
-                        component = "Total",
+                    var_table$setRow(rowKey = "total", values = list(
                         variance = sigma2_total,
                         sd = sqrt(sigma2_total),
                         proportion = 1.0,
@@ -8642,29 +8754,19 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         return("Negative (problematic)")
                     }
 
+                    # Keys match the rows .init() scaffolded (private$.fixedRowTables())
                     icc_rows <- list(
-                        list(
-                            type = "ICC(1) - Single Rating",
-                            val = icc1_val
-                        ),
-                        list(
-                            type = "ICC(2) - Mean of k Ratings",
-                            val = icc2_val
-                        ),
-                        list(
-                            type = "G-coefficient",
-                            val = g_coeff
-                        )
+                        icc1 = icc1_val,
+                        icc2 = icc2_val,
+                        g_coeff = g_coeff
                     )
 
-                    for (i in seq_along(icc_rows)) {
-                        row <- icc_rows[[i]]
-                        icc_table$addRow(rowKey = i, values = list(
-                            icc_type = row$type,
-                            icc_value = row$val,
+                    for (key in names(icc_rows)) {
+                        icc_table$setRow(rowKey = key, values = list(
+                            icc_value = icc_rows[[key]],
                             ci_lower = NA,
                             ci_upper = NA,
-                            interpretation = interpret_icc(row$val)
+                            interpretation = interpret_icc(icc_rows[[key]])
                         ))
                     }
 
@@ -9059,9 +9161,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 sigma2_total <- sigma2_case + sigma2_rater + sigma2_resid
 
                 if (sigma2_total > 1e-12) {
-                    interpret_var <- function(name, prop) {
+                    interpret_var <- function(key, prop) {
                         pct <- round(prop * 100, 1)
-                        if (name == "Case (Subject)") {
+                        if (key == "case") {
                             if (pct > 50) {
                                 return("Scores driven by true case differences (desirable)")
                             }
@@ -9069,7 +9171,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 return("Moderate case-level variation")
                             }
                             return("Low case-level variation")
-                        } else if (name == "Rater") {
+                        } else if (key == "rater") {
                             if (pct > 30) {
                                 return("Substantial rater bias; calibration needed")
                             }
@@ -9088,23 +9190,29 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
                     }
 
+                    # Keys match the rows .init() scaffolded (private$.fixedRowTables())
                     components <- list(
-                        list(name = "Case (Subject)", var = sigma2_case),
-                        list(name = "Rater", var = sigma2_rater),
-                        list(name = "Residual", var = sigma2_resid)
+                        case = sigma2_case,
+                        rater = sigma2_rater,
+                        residual = sigma2_resid
                     )
 
-                    for (i in seq_along(components)) {
-                        comp <- components[[i]]
-                        prop <- comp$var / sigma2_total
-                        var_table$addRow(rowKey = i, values = list(
-                            component = comp$name,
-                            variance = comp$var,
-                            sd = sqrt(comp$var),
+                    for (key in names(components)) {
+                        comp_var <- components[[key]]
+                        prop <- comp_var / sigma2_total
+                        var_table$setRow(rowKey = key, values = list(
+                            variance = comp_var,
+                            sd = sqrt(comp_var),
                             proportion = prop,
-                            interpretation = interpret_var(comp$name, prop)
+                            interpretation = interpret_var(key, prop)
                         ))
                     }
+                } else {
+                    # The scaffolded rows stay blank; say why.
+                    var_table$setNote(
+                        "error",
+                        .("Total variance is effectively zero; all scores appear identical.")
+                    )
                 }
 
                 ref_level <- levels(long_df$condition)[1]
@@ -9398,7 +9506,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         seed_val <- self$options$seed
                         if (is.null(seed_val)) seed_val <- 42
-                        set.seed(seed_val)
+                        withr::local_seed(seed_val)
                         boot_results <- lapply(seq_len(n_boot), function(b) {
                             idx <- sample(n_cases, replace = TRUE)
                             compute_metrics(ratings[idx, , drop = FALSE])
@@ -9595,13 +9703,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         strict_accuracy <- mean(strict_match, na.rm = TRUE)
 
                         table <- self$results$concordanceF1Table
-                        table$addRow(rowKey = "conc_acc", values = list(
-                            metric = "Concordance Accuracy", value = concordance_accuracy,
+                        table$setRow(rowKey = "conc_acc", values = list(
+                            value = concordance_accuracy,
                             comparison = paste0("vs Strict: ", round(strict_accuracy, 4)),
                             interpretation = paste0(round((concordance_accuracy - strict_accuracy) * 100, 1), "% improvement over strict consensus")
                         ))
-                        table$addRow(rowKey = "strict_acc", values = list(
-                            metric = "Strict Accuracy (vs Consensus)", value = strict_accuracy,
+                        table$setRow(rowKey = "strict_acc", values = list(
+                            value = strict_accuracy,
                             comparison = "Majority consensus",
                             interpretation = if (strict_accuracy >= 0.9) "Excellent" else if (strict_accuracy >= 0.8) "Good" else if (strict_accuracy >= 0.7) "Moderate" else "Needs improvement"
                         ))
@@ -9621,14 +9729,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             }
                         }
                         if (length(pairwise_agreements) > 0) {
-                            table$addRow(rowKey = "annotator_agree", values = list(
-                                metric = "Mean Annotator Agreement", value = mean(pairwise_agreements),
+                            table$setRow(rowKey = "annotator_agree", values = list(
+                                value = mean(pairwise_agreements),
                                 comparison = paste0("Range: [", round(min(pairwise_agreements), 3), ", ", round(max(pairwise_agreements), 3), "]"),
                                 interpretation = "Baseline inter-annotator agreement among references"
                             ))
                         }
-                        table$addRow(rowKey = "n_info", values = list(
-                            metric = "N Annotators (reference)", value = length(ref_cols),
+                        table$setRow(rowKey = "n_info", values = list(
+                            value = length(ref_cols),
                             comparison = paste0("Prediction: rater ", pred_col),
                             interpretation = paste0(n_valid, " cases evaluated")
                         ))
@@ -9740,7 +9848,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         n_boot <- self$options$pairedBootN
                         seed_val <- self$options$seed
                         if (is.null(seed_val)) seed_val <- 42
-                        set.seed(seed_val)
+                        withr::local_seed(seed_val)
                         alpha <- 1 - self$options$confLevel
                         boot_pct_diff <- numeric(n_boot)
                         boot_kappa_diff <- numeric(n_boot)
@@ -9881,7 +9989,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             )
 
                             n_required <- max(ceiling(n_est), 2 * n_raters)
-                            metric_label <- if (metric == "kappa") "Cohen's Kappa" else "Fleiss' Kappa"
+                            metric_label <- private$.ssMetricLabel()
                         } else {
                             # ICC: Walter, Eliasziw & Donner (1998)
                             rho0 <- k0
@@ -9898,20 +10006,22 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             denominator <- k * (k - 1) * (rho1 - rho0)^2
                             n_required <- ceiling(1 + numerator / denominator)
                             n_required <- max(n_required, k + 1)
-                            metric_label <- "ICC"
+                            metric_label <- private$.ssMetricLabel()
                         }
 
-                        table$addRow(rowKey = "metric", values = list(parameter = "Agreement Metric", value = metric_label))
-                        table$addRow(rowKey = "n_required", values = list(parameter = "Required Sample Size (subjects)", value = as.character(n_required)))
-                        table$addRow(rowKey = "n_raters", values = list(parameter = "Number of Raters", value = as.character(n_raters)))
+                        # Keys and labels were scaffolded in .init() (private$.fixedRowTables());
+                        # the n_cat row exists only when the metric is not ICC.
+                        table$setRow(rowKey = "metric", values = list(value = metric_label))
+                        table$setRow(rowKey = "n_required", values = list(value = as.character(n_required)))
+                        table$setRow(rowKey = "n_raters", values = list(value = as.character(n_raters)))
                         if (metric != "icc") {
-                            table$addRow(rowKey = "n_cat", values = list(parameter = "Number of Categories", value = as.character(n_cat)))
+                            table$setRow(rowKey = "n_cat", values = list(value = as.character(n_cat)))
                         }
-                        table$addRow(rowKey = "kappa_null", values = list(parameter = paste0(metric_label, " under H0"), value = base::format(k0, digits = 3)))
-                        table$addRow(rowKey = "kappa_alt", values = list(parameter = paste0(metric_label, " under H1"), value = base::format(k1, digits = 3)))
-                        table$addRow(rowKey = "alpha", values = list(parameter = "Significance Level (alpha)", value = base::format(alpha, digits = 3)))
-                        table$addRow(rowKey = "power", values = list(parameter = "Target Power (1 - beta)", value = base::format(power, digits = 3)))
-                        table$addRow(rowKey = "total_reads", values = list(parameter = "Total Reads Required", value = as.character(n_required * n_raters)))
+                        table$setRow(rowKey = "kappa_null", values = list(value = base::format(k0, digits = 3)))
+                        table$setRow(rowKey = "kappa_alt", values = list(value = base::format(k1, digits = 3)))
+                        table$setRow(rowKey = "alpha", values = list(value = base::format(alpha, digits = 3)))
+                        table$setRow(rowKey = "power", values = list(value = base::format(power, digits = 3)))
+                        table$setRow(rowKey = "total_reads", values = list(value = as.character(n_required * n_raters)))
 
                         table$setNote("info", sprintf(.("Formula: %s. Assumes %sTwo-sided test."), if (metric == "icc") {
                                 "Walter, Eliasziw & Donner (1998)"
@@ -10257,18 +10367,30 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Every rows:0 table below is rebuilt with addRow(), and jmvcore never checks
                 # for duplicate row keys, so an option toggle absent from a table's clearWith
                 # (any of ~150 guide/plot switches) re-ran .run() and doubled its rows. One
-                # reset here covers all 28; the fixed-row tables use setRow() and are left alone.
+                # reset here covers all 23; the fixed-row tables use setRow() and are left alone.
                 for (nm in c("contingencyTable", "ratingCombinationsTable", "pairwiseKappaTable",
                              "allPairsKappaTable", "itemModalAgreementTable", "clusterSpecificTable",
-                             "varianceDecompositionTable", "hierarchicalICCTable", "mixedEffectsTable",
-                             "mixedEffectsVarianceTable", "confusionMatrixTable", "perClassMetricsTable",
-                             "bootstrapCITable", "concordanceF1Table", "concordanceF1PerClassTable",
+                             "mixedEffectsTable", "confusionMatrixTable", "perClassMetricsTable",
+                             "bootstrapCITable", "concordanceF1PerClassTable",
                              "linCCCTable", "tdiTable", "interIntraRaterIntraTable", "specificAgreementTable",
                              "levelInfoTable", "consensusTable", "loaTable", "loaDetailTable",
                              "subgroupAgreementTable", "raterClusterTable", "caseClusterTable",
-                             "pairedAgreementTable", "agreementSampleSizeTable")) {
+                             "pairedAgreementTable")) {
                     tbl <- tryCatch(self$results[[nm]], error = function(e) NULL)
                     if (!is.null(tbl)) tbl$deleteRows()
+                }
+
+                # The scaffolded tables keep their .init() rows, but jamovi restores the previous
+                # run's cell values into matching rows. Blank the values so a row this run cannot
+                # compute (early return, failed fit) shows empty rather than the old number.
+                fixed <- private$.fixedRowTables()
+                for (nm in names(fixed)) {
+                    tbl <- self$results[[nm]]
+                    cols <- setdiff(vapply(tbl$columns, function(cl) cl$name, character(1)),
+                                    fixed[[nm]]$column)
+                    blank <- as.list(rep(NA, length(cols)))
+                    names(blank) <- cols
+                    for (key in tbl$rowKeys) tbl$setRow(rowKey = key, values = blank)
                 }
 
                 # Validate input ----
@@ -10872,7 +10994,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 # consistent with other bootstraps in this module
                                 seed_val <- self$options$seed
                                 if (is.null(seed_val)) seed_val <- 42
-                                set.seed(seed_val)
+                                withr::local_seed(seed_val)
                                 n_boot <- self$options$nBoot
                                 alpha_boots <- rep(NA_real_, n_boot)
 
@@ -10917,6 +11039,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                             # Populate results table
                             krippTable <- self$results$krippTable
+                            krippTable$setNote("seed", if (self$options$bootstrap) jmvcore::format(.("Random seed: {seed}"), seed = seed_val))
                             krippTable$setRow(rowNo = 1, values = values_list)
                         },
                         error = function(e) {

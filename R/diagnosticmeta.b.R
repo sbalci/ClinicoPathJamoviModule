@@ -64,6 +64,8 @@ diagnosticmetaClass <- R6::R6Class(
         # Human-readable estimation-method name for table notes. Notes
         # previously showed internal keys ("reml", "DL"), which read as debug
         # output to a clinician.
+        # library-audit 2026-09-16 OncoPath [LOW] DEFERRED: the method name is spliced into sentences via %s;
+        #   revisit when these sentences are next rewritten or translated (guide section 9)
         .methodTitle = function(method) {
             switch(
                 tolower(method %||% "reml"),
@@ -97,6 +99,8 @@ diagnosticmetaClass <- R6::R6Class(
         # between runs, so the same banner accumulated once per run cycle.
         # Notices now render into a dedicated always-visible `notices` Html
         # item, rebuilt from scratch each run.
+        # library-audit 2026-09-16 OncoPath [INFO] REJECTED: no native notice element - type: Notice fails the
+        #   .r.yaml schema, type: Notification builds no results object (guide section 13)
         .addNotice = function(type, title, content) {
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                 type = type,
@@ -115,13 +119,13 @@ diagnosticmetaClass <- R6::R6Class(
                 return()
             }
 
-            # Translucent rgba tints composite over either jamovi theme;
-            # title colors are saturated enough to read on both.
+            # library-audit 2026-09-16 OncoPath [INFO] DONE: titles inherit the pane colour - fixed hues fell to
+            #   2.7-2.9:1 on the dark theme; the translucent tint and the border carry the severity
             typeStyles <- list(
-                ERROR = list(color = "#dc2626", bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
-                STRONG_WARNING = list(color = "#ea580c", bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
-                WARNING = list(color = "#ca8a04", bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
-                INFO = list(color = "#2563eb", bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd")
+                ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
+                STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
+                WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
+                INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd")
             )
 
             html <- "<div style='margin: 10px 0;'>"
@@ -132,7 +136,7 @@ diagnosticmetaClass <- R6::R6Class(
                     "<div style='background-color: ", style$bgcolor, "; ",
                     "border-left: 4px solid ", style$border, "; ",
                     "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                    "<strong style='color: ", style$color, ";'>",
+                    "<strong style='color: inherit;'>",
                     htmltools::htmlEscape(notice$title), "</strong><br>",
                     "<span style='color: inherit;'>",
                     htmltools::htmlEscape(notice$content), "</span>",
@@ -239,18 +243,22 @@ diagnosticmetaClass <- R6::R6Class(
                     rowKey = biv_key,
                     values = list(parameter = biv_parameters[[biv_key]]))
 
+            # library-audit 2026-09-16 meddecide [LOW] DONE (same class): publicationbias has a fixed row set, so .init()
+            # scaffolds the rows and .run() fills them with setRow()
+            # One row, Deeks' test, whenever publication bias is requested. .run()
+            # fills it, or leaves it blank beside the note that says why.
+            if (isTRUE(self$options$publication_bias))
+                self$results$publicationbias$addRow(
+                    rowKey = "deeks_test",
+                    values = list(test = .("Deeks' Funnel Plot Asymmetry Test")))
+
         },
         
         .run = function() {
 
-            # TODO (jamovify): i18n - this function emits substantial English
-            # text (HTML banners in .populateWelcome/.populateAbout, table
-            # notes, sprintf-formatted summaries in .generateSummary /
-            # .generateBasicSummary, all interpretation/explanation panels).
-            # Translation coverage remains incomplete: the fatal minimum-study
-            # rejection is wrapped, but notices, HTML panels, table notes, and
-            # generated interpretations are not yet extractable. Run `/prepare-translation
-            # diagnosticmeta` before declaring localization complete.
+            # library-audit 2026-09-16 OncoPath [INFO] DEFERRED: six HTML panels are untranslated English literals
+            #   (.populateInstructions/Interpretation/AboutPanel, forest/SROC/funnel plot explanations);
+            #   revisit when diagnosticmeta's translation pass runs (/prepare-translation diagnosticmeta)
 
             # Reset the notices accumulator and clear any banner content left
             # from the previous run cycle; every .addNotice() below re-renders.
@@ -750,7 +758,7 @@ diagnosticmetaClass <- R6::R6Class(
 
             # SERIALIZATION FIX: Use table note instead of inserting Notice
             self$results$bivariateresults$setNote("heterogeneity_info",
-                .("I\u{00b2} is not reported here: a univariate I\u{00b2} ignores the within-study correlation between sensitivity and specificity and does not describe the bivariate model (Zwinderman & Bossuyt 2008). The Heterogeneity Assessment table reports Q, tau-squared and a univariate I\u{00b2} computed SEPARATELY for sensitivity and for specificity - read those as descriptive summaries of each margin, not as the heterogeneity of the bivariate model. For a model-consistent statement of how much studies differ, use the prediction interval above and the prediction region on the SROC plot.")
+                .("I\u00b2 is not reported here: a univariate I\u00b2 ignores the within-study correlation between sensitivity and specificity and does not describe the bivariate model (Zwinderman & Bossuyt 2008). The Heterogeneity Assessment table reports Q, tau-squared and a univariate I\u00b2 computed SEPARATELY for sensitivity and for specificity - read those as descriptive summaries of each margin, not as the heterogeneity of the bivariate model. For a model-consistent statement of how much studies differ, use the prediction interval above and the prediction region on the SROC plot.")
             )
 
             # The p-values on the sensitivity/specificity rows are the Wald tests
@@ -1576,8 +1584,11 @@ diagnosticmetaClass <- R6::R6Class(
         
         .performPublicationBiasAssessment = function(meta_data, analysis_data) {
 
-            # Clear first, before any early return (see .performMetaRegression).
-            self$results$publicationbias$deleteRows()
+            # Blank first, before any early return. The Deeks row is scaffolded in
+            # .init(), so deleteRows() would remove it; a run that cannot assess
+            # bias leaves empty cells, not the previous run's result.
+            self$results$publicationbias$setRow(rowKey = "deeks_test", values = list(
+                statistic = NA_real_, p_value = NA_real_, interpretation = NA_character_))
 
             if (!requireNamespace("metafor", quietly = TRUE)) {
                 self$results$publicationbias$setNote("package_error",
@@ -1657,8 +1668,7 @@ diagnosticmetaClass <- R6::R6Class(
                 bias_table <- self$results$publicationbias
 
                 if (nrow(fit_data) < 3) {
-                    bias_table$addRow(rowKey = "deeks_test", values = list(
-                        test = .("Deeks' Funnel Plot Asymmetry Test"),
+                    bias_table$setRow(rowKey = "deeks_test", values = list(
                         statistic = NA_real_, p_value = NA_real_,
                         interpretation = .("Not estimable: at least 3 studies with finite odds ratios are required")
                     ))
@@ -1670,8 +1680,7 @@ diagnosticmetaClass <- R6::R6Class(
                     deeks_p <- cf[2, 4]
                     deeks_df <- stats::df.residual(deeks_fit)
 
-                    bias_table$addRow(rowKey = "deeks_test", values = list(
-                        test = .("Deeks' Funnel Plot Asymmetry Test"),
+                    bias_table$setRow(rowKey = "deeks_test", values = list(
                         statistic = deeks_t,
                         p_value = deeks_p,
                         interpretation = ifelse(deeks_p < 0.05,
@@ -2719,17 +2728,13 @@ diagnosticmetaClass <- R6::R6Class(
 
             inv_lr_neg <- if (is.finite(lr_neg) && lr_neg > 0) 1 / lr_neg else NA_real_
 
-            # TODO (i18n): the two .() strings below containing " [[APPROX]]" are
-            #   truncated by jmvcore's translator when no catalog entry matches -
-            #   its regex "(.*) \\[(.*)\\]" treats ' [...]' as a msgctxt marker and
-            #   drops everything from the space-bracket on (found by
-            #   /check-function jjpiestats, 2026-09-06). Move the [[APPROX]] token
-            #   outside the .() call or drop the space before it.
+            # library-audit 2026-09-16 OncoPath [INFO] DONE: no " [" inside .() - jmvcore's translator reads
+            #   " [..]" as a context marker and cut these sentences short in any language without a catalog
             plr_text <- if (is.finite(lr_pos)) {
                 paste0("<p>", sprintf(.("<strong>Positive Likelihood Ratio:</strong> %.2f - A positive test is %.1fx more likely in disease than healthy"),
                         lr_pos, lr_pos), "</p>")
             } else {
-                private$.renderSymbols(paste0("<p>", .("<strong>Positive Likelihood Ratio:</strong> Not estimable with the current data (specificity [[APPROX]] 100% or model unstable)."), "</p>"))
+                paste0("<p>", .("<strong>Positive Likelihood Ratio:</strong> Not estimable with the current data (specificity \u2248 100% or model unstable)."), "</p>")
             }
 
             nlr_text <- if (is.finite(lr_neg)) {
@@ -2737,10 +2742,10 @@ diagnosticmetaClass <- R6::R6Class(
                     paste0("<p>", sprintf(.("<strong>Negative Likelihood Ratio:</strong> %.2f - A negative test is %.1fx more likely in healthy than disease"),
                             lr_neg, inv_lr_neg), "</p>")
                 } else {
-                    private$.renderSymbols(paste0("<p>", sprintf(
-                        .("<strong>Negative Likelihood Ratio:</strong> %.2f - Interpretation unstable (sensitivity [[APPROX]] 100%%)."),
+                    paste0("<p>", sprintf(
+                        .("<strong>Negative Likelihood Ratio:</strong> %.2f - Interpretation unstable (sensitivity \u2248 100%%)."),
                         lr_neg
-                    ), "</p>"))
+                    ), "</p>")
                 }
             } else {
                 private$.renderSymbols(paste0("<p>", .("<strong>Negative Likelihood Ratio:</strong> Not estimable with the current data. LR- is (1 - sensitivity) / specificity, so it needs a pooled specificity above zero and finite pooled estimates; here the pooled specificity is 0 or an estimate did not converge. Read the pooled specificity and its confidence interval in the summary above to see which."), "</p>"))
@@ -2924,11 +2929,6 @@ diagnosticmetaClass <- R6::R6Class(
             # interval does not support.
             band_key <- function(x) if (x >= 90) "excellent" else if (x >= 80) "good"
                                 else if (x >= 70) "moderate" else "limited"
-            band_label <- function(x) if (x >= 90) .("excellent") else if (x >= 80) .("good")
-                                else if (x >= 70) .("moderate") else .("limited")
-
-            sens_class <- band_label(sens)
-            spec_class <- band_label(spec)
 
             # TRUE when the interval spans more than one performance band, i.e.
             # the data cannot distinguish "excellent" from something worse.
@@ -2944,153 +2944,132 @@ diagnosticmetaClass <- R6::R6Class(
                 sprintf(" (%.1f%%-%.1f%%)", min(ci), max(ci))
             }
 
-            # Classify positive LR
-            plr_class <- if (is.finite(lr_pos)) {
-                if (lr_pos > 10) .("strong")
-                else if (lr_pos >= 5) .("moderate")
-                else if (lr_pos >= 2) .("weak")
-                else .("minimal")
-            } else {
-                .("not estimable")
-            }
+            # library-audit 2026-09-16 OncoPath [LOW] DONE: every band is its own whole .() sentence and the
+            #   branches test these keys, never a translated word (in Turkish LR+ = Inf printed; NaN crashed)
+            plr_key <- if (!is.finite(lr_pos)) "not_estimable" else if (lr_pos > 10) "strong"
+                       else if (lr_pos >= 5) "moderate" else if (lr_pos >= 2) "weak" else "minimal"
+            nlr_key <- if (!is.finite(lr_neg)) "not_estimable" else if (lr_neg < 0.1) "strong"
+                       else if (lr_neg <= 0.2) "moderate" else if (lr_neg <= 0.5) "weak" else "minimal"
 
-            # Classify negative LR
-            nlr_class <- if (is.finite(lr_neg)) {
-                if (lr_neg < 0.1) .("strong")
-                else if (lr_neg <= 0.2) .("moderate")
-                else if (lr_neg <= 0.5) .("weak")
-                else .("minimal")
-            } else {
-                .("not estimable")
-            }
-
-            # Build dynamic interpretation with actual values
-            interpretation <- sprintf(
-                .("<strong>Your pooled sensitivity of %.1f%%%s</strong> is classified as <em>%s</em> for screening purposes. "),
-                sens, ci_txt(sens_ci), sens_class
-            )
+            # Sentences are collected and joined at the end; no .() string carries the separator.
+            parts <- sprintf(switch(band_key(sens),
+                excellent = .("<strong>Your pooled sensitivity of %.1f%%%s</strong> is classified as <em>excellent</em> for screening purposes."),
+                good      = .("<strong>Your pooled sensitivity of %.1f%%%s</strong> is classified as <em>good</em> for screening purposes."),
+                moderate  = .("<strong>Your pooled sensitivity of %.1f%%%s</strong> is classified as <em>moderate</em> for screening purposes."),
+                limited   = .("<strong>Your pooled sensitivity of %.1f%%%s</strong> is classified as <em>limited</em> for screening purposes.")),
+                sens, ci_txt(sens_ci))
             if (sens_uncertain) {
-                interpretation <- paste0(interpretation,
-                    .("<strong>Note:</strong> the confidence interval spans more than one performance category, so this classification is not firmly established by the pooled data. "))
+                parts <- c(parts, .("<strong>Note:</strong> the confidence interval spans more than one performance category, so this classification is not firmly established by the pooled data."))
             }
 
             # Add sensitivity-specific guidance
             if (sens >= 90) {
-                interpretation <- paste0(interpretation,
+                parts <- c(parts,
                     if (sens_uncertain) {
-                        sprintf(.("On the pooled estimate this test would detect about %.0f of 100 patients with disease, but the interval%s admits materially worse performance. "),
+                        sprintf(.("On the pooled estimate this test would detect about %.0f of 100 patients with disease, but the interval%s admits materially worse performance."),
                                 sens, ci_txt(sens_ci))
                     } else {
-                        sprintf(.("With %.1f%% sensitivity, this test will detect %.0f out of 100 patients with disease, missing only %.0f. "),
+                        sprintf(.("With %.1f%% sensitivity, this test will detect %.0f out of 100 patients with disease, missing only %.0f."),
                                 sens, sens, 100 - sens)
                     },
-                    if (is.finite(lr_neg) && lr_neg < 0.1) {
-                        sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which lowers the post-test odds substantially (the SnNout pattern). "),
-                                lr_neg)
-                    } else if (is.finite(lr_neg)) {
-                        sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which provides %s evidence against disease after a negative result. "),
-                                lr_neg, nlr_class)
-                    } else {
-                        .("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone, and LR- is not estimable here. ")
-                    }
+                    switch(nlr_key,
+                        strong = sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which lowers the post-test odds substantially (the SnNout pattern)."), lr_neg),
+                        moderate = sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which provides moderate evidence against disease after a negative result."), lr_neg),
+                        weak = sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which provides weak evidence against disease after a negative result."), lr_neg),
+                        minimal = sprintf(.("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone; here LR- = %.2f, which provides minimal evidence against disease after a negative result."), lr_neg),
+                        not_estimable = .("Rule-out power is governed by the negative likelihood ratio rather than by sensitivity alone, and LR- is not estimable here.")
+                    )
                 )
             } else if (sens >= 80) {
-                interpretation <- paste0(interpretation,
-                    sprintf(.("With %.1f%% sensitivity, approximately %.0f out of 100 diseased patients will be correctly identified. "),
+                parts <- c(parts,
+                    sprintf(.("With %.1f%% sensitivity, approximately %.0f out of 100 diseased patients will be correctly identified."),
                             sens, sens),
-                    .("<strong>Interpretation:</strong> a negative result reduces, but does not remove, the possibility of disease at this sensitivity. ")
+                    .("<strong>Interpretation:</strong> a negative result reduces, but does not remove, the possibility of disease at this sensitivity.")
                 )
             } else {
-                interpretation <- paste0(interpretation,
-                    sprintf(.("With %.1f%% sensitivity, up to %.0f out of 100 diseased patients may be missed. "),
+                parts <- c(parts,
+                    sprintf(.("With %.1f%% sensitivity, up to %.0f out of 100 diseased patients may be missed."),
                             sens, 100 - sens),
-                    .("<strong>Interpretation:</strong> at this sensitivity a substantial proportion of diseased patients are expected to test negative. ")
+                    .("<strong>Interpretation:</strong> at this sensitivity a substantial proportion of diseased patients are expected to test negative.")
                 )
             }
 
             # Add specificity interpretation
-            interpretation <- paste0(interpretation,
-                sprintf(.("<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified as <em>%s</em> for confirmatory testing. "),
-                        spec, ci_txt(spec_ci), spec_class)
-            )
+            parts <- c(parts, sprintf(switch(band_key(spec),
+                excellent = .("<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified as <em>excellent</em> for confirmatory testing."),
+                good      = .("<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified as <em>good</em> for confirmatory testing."),
+                moderate  = .("<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified as <em>moderate</em> for confirmatory testing."),
+                limited   = .("<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified as <em>limited</em> for confirmatory testing.")),
+                spec, ci_txt(spec_ci)))
             if (spec_uncertain) {
-                interpretation <- paste0(interpretation,
-                    .("<strong>Note:</strong> the confidence interval spans more than one performance category, so this classification is not firmly established by the pooled data. "))
+                parts <- c(parts, .("<strong>Note:</strong> the confidence interval spans more than one performance category, so this classification is not firmly established by the pooled data."))
             }
 
             if (spec >= 90) {
-                interpretation <- paste0(interpretation,
-                    sprintf(.("With %.1f%% specificity, only %.0f out of 100 healthy individuals will test positive (false alarms). "),
+                parts <- c(parts,
+                    sprintf(.("With %.1f%% specificity, only %.0f out of 100 healthy individuals will test positive (false alarms)."),
                             spec, 100 - spec),
-                    if (is.finite(lr_pos) && lr_pos > 10) {
-                        sprintf(.("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone; here LR+ = %.2f, which raises the post-test odds substantially (the SpPin pattern). "),
-                                lr_pos)
-                    } else if (is.finite(lr_pos)) {
-                        sprintf(.("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone; here LR+ = %.2f, which provides %s evidence for disease after a positive result. "),
-                                lr_pos, plr_class)
-                    } else {
-                        .("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone, and LR+ is not estimable here. ")
-                    }
+                    switch(plr_key,
+                        strong = sprintf(.("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone; here LR+ = %.2f, which raises the post-test odds substantially (the SpPin pattern)."), lr_pos),
+                        moderate = sprintf(.("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone; here LR+ = %.2f, which provides moderate evidence for disease after a positive result."), lr_pos),
+                        weak = sprintf(.("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone; here LR+ = %.2f, which provides weak evidence for disease after a positive result."), lr_pos),
+                        minimal = sprintf(.("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone; here LR+ = %.2f, which provides minimal evidence for disease after a positive result."), lr_pos),
+                        not_estimable = .("Rule-in power is governed by the positive likelihood ratio rather than by specificity alone, and LR+ is not estimable here.")
+                    )
                 )
             } else if (spec >= 80) {
-                interpretation <- paste0(interpretation,
-                    sprintf(.("With %.1f%% specificity, approximately %.0f out of 100 healthy individuals will be correctly classified. "),
+                parts <- c(parts,
+                    sprintf(.("With %.1f%% specificity, approximately %.0f out of 100 healthy individuals will be correctly classified."),
                             spec, spec),
-                    .("<strong>Interpretation:</strong> at this specificity an appreciable share of positive results are expected to be false positives. ")
+                    .("<strong>Interpretation:</strong> at this specificity an appreciable share of positive results are expected to be false positives.")
                 )
             } else {
-                interpretation <- paste0(interpretation,
-                    sprintf(.("With %.1f%% specificity, up to %.0f out of 100 healthy individuals may test positive. "),
+                parts <- c(parts,
+                    sprintf(.("With %.1f%% specificity, up to %.0f out of 100 healthy individuals may test positive."),
                             spec, 100 - spec),
-                    .("<strong>Interpretation:</strong> at this specificity a large share of positive results are expected to be false positives. ")
+                    .("<strong>Interpretation:</strong> at this specificity a large share of positive results are expected to be false positives.")
                 )
             }
 
             # Add likelihood ratio interpretation if available
-            if (plr_class != "not estimable") {
-                interpretation <- paste0(interpretation,
-                    sprintf(.("<br><br><strong>Your positive LR of %.2f</strong> provides <em>%s</em> evidence FOR disease when test is positive. "),
-                            lr_pos, plr_class)
+            if (plr_key != "not_estimable") {
+                parts <- c(parts,
+                    sprintf(switch(plr_key,
+                        strong   = .("<br><br><strong>Your positive LR of %.2f</strong> provides <em>strong</em> evidence FOR disease when test is positive."),
+                        moderate = .("<br><br><strong>Your positive LR of %.2f</strong> provides <em>moderate</em> evidence FOR disease when test is positive."),
+                        weak     = .("<br><br><strong>Your positive LR of %.2f</strong> provides <em>weak</em> evidence FOR disease when test is positive."),
+                        minimal  = .("<br><br><strong>Your positive LR of %.2f</strong> provides <em>minimal</em> evidence FOR disease when test is positive.")),
+                        lr_pos),
+                    if (lr_pos > 10) {
+                        sprintf(.("A positive result increases disease probability substantially (multiplies pre-test odds by %.1fx)."),
+                                lr_pos)
+                    } else if (lr_pos >= 5) {
+                        .("A positive result moderately increases disease probability.")
+                    } else {
+                        sprintf(.("A positive result multiplies the pre-test odds by %.2fx; the post-test probability also depends on the pre-test probability."),
+                                lr_pos)
+                    }
                 )
-
-                if (lr_pos > 10) {
-                    interpretation <- paste0(interpretation,
-                        sprintf(.("A positive result increases disease probability substantially (multiplies pre-test odds by %.1fx). "),
-                                lr_pos)
-                    )
-                } else if (lr_pos >= 5) {
-                    interpretation <- paste0(interpretation,
-                        .("A positive result moderately increases disease probability. ")
-                    )
-                } else {
-                    interpretation <- paste0(interpretation,
-                        sprintf(.("A positive result multiplies the pre-test odds by %.2fx; the post-test probability also depends on the pre-test probability. "),
-                                lr_pos)
-                    )
-                }
             }
 
-            if (nlr_class != "not estimable") {
-                interpretation <- paste0(interpretation,
-                    sprintf(.("<strong>Your negative LR of %.2f</strong> provides <em>%s</em> evidence AGAINST disease when test is negative. "),
-                            lr_neg, nlr_class)
-                )
-
-                if (lr_neg < 0.1) {
-                    interpretation <- paste0(interpretation,
-                        sprintf(.("A negative result substantially decreases disease probability (divides pre-test odds by %.1fx). "),
+            if (nlr_key != "not_estimable") {
+                parts <- c(parts,
+                    sprintf(switch(nlr_key,
+                        strong   = .("<strong>Your negative LR of %.2f</strong> provides <em>strong</em> evidence AGAINST disease when test is negative."),
+                        moderate = .("<strong>Your negative LR of %.2f</strong> provides <em>moderate</em> evidence AGAINST disease when test is negative."),
+                        weak     = .("<strong>Your negative LR of %.2f</strong> provides <em>weak</em> evidence AGAINST disease when test is negative."),
+                        minimal  = .("<strong>Your negative LR of %.2f</strong> provides <em>minimal</em> evidence AGAINST disease when test is negative.")),
+                        lr_neg),
+                    if (lr_neg < 0.1) {
+                        sprintf(.("A negative result substantially decreases disease probability (divides pre-test odds by %.1fx)."),
                                 1/lr_neg)
-                    )
-                } else if (lr_neg <= 0.2) {
-                    interpretation <- paste0(interpretation,
-                        .("A negative result moderately decreases disease probability. ")
-                    )
-                } else {
-                    interpretation <- paste0(interpretation,
-                        sprintf(.("A negative result multiplies the pre-test odds by %.2fx; the post-test probability also depends on the pre-test probability. "),
+                    } else if (lr_neg <= 0.2) {
+                        .("A negative result moderately decreases disease probability.")
+                    } else {
+                        sprintf(.("A negative result multiplies the pre-test odds by %.2fx; the post-test probability also depends on the pre-test probability."),
                                 lr_neg)
-                    )
-                }
+                    }
+                )
             }
 
             # Overall summary of the pooled estimates. This describes what was
@@ -3099,24 +3078,24 @@ diagnosticmetaClass <- R6::R6Class(
             # measured - a single pooled pair does not describe any one setting
             # when the prediction interval is wide.
             if (sens >= 90 && spec >= 90) {
-                interpretation <- paste0(interpretation,
+                parts <- c(parts,
                     sprintf(.("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) both fall in the <em>excellent</em> band."),
                             sens, spec)
                 )
             } else if (sens >= 80 && spec >= 80) {
-                interpretation <- paste0(interpretation,
+                parts <- c(parts,
                     sprintf(.("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) both fall in the <em>good</em> band or above."),
                             sens, spec)
                 )
             } else if (sens >= 90 || spec >= 90) {
-                interpretation <- paste0(interpretation,
+                parts <- c(parts,
                     sprintf(.("<br><br><strong>Overall Summary:</strong> performance is <em>asymmetric</em> - pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) fall in different performance bands."),
                             sens, spec)
                 )
             } else {
-                interpretation <- paste0(interpretation,
-                    sprintf(.("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%, <em>%s</em>) and pooled specificity (%.1f%%, <em>%s</em>) do not both reach the <em>good</em> band."),
-                            sens, sens_class, spec, spec_class)
+                parts <- c(parts,
+                    sprintf(.("<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and pooled specificity (%.1f%%) do not both reach the <em>good</em> band."),
+                            sens, spec)
                 )
             }
 
@@ -3125,16 +3104,16 @@ diagnosticmetaClass <- R6::R6Class(
                 !is.null(pi) && length(pi) == 2 && all(is.finite(pi)) && (max(pi) - min(pi)) > 30
             }
             if (pi_wide(private$.pooled_sens_pi) || pi_wide(private$.pooled_spec_pi)) {
-                interpretation <- paste0(interpretation,
-                    " ", .("Between-study heterogeneity is substantial - the prediction interval spans a wide range of accuracy - so this pooled pair does not describe any single population or laboratory. Read the prediction region and the subgroup or meta-regression results rather than the pooled point.")
+                parts <- c(parts,
+                    .("Between-study heterogeneity is substantial - the prediction interval spans a wide range of accuracy - so this pooled pair does not describe any single population or laboratory. Read the prediction region and the subgroup or meta-regression results rather than the pooled point.")
                 )
             } else {
-                interpretation <- paste0(interpretation,
-                    " ", .("These are pooled estimates from the included studies only; how far they carry to another setting depends on the prediction region and on how comparable the positivity thresholds, patient spectrum and reference standards are.")
+                parts <- c(parts,
+                    .("These are pooled estimates from the included studies only; how far they carry to another setting depends on the prediction region and on how comparable the positivity thresholds, patient spectrum and reference standards are.")
                 )
             }
 
-            return(interpretation)
+            return(paste(parts, collapse = " "))
         },
 
         # Populate About This Analysis panel
@@ -3438,7 +3417,7 @@ diagnosticmetaClass <- R6::R6Class(
 
                     <ul>
                         <li><strong>X-axis:</strong> Log Diagnostic Odds Ratio (effect size)</li>
-                        <li><strong>Y-axis:</strong> 1/\u{221A}(effective sample size), reversed so the most precise studies sit at the top (Deeks' funnel plot)</li>
+                        <li><strong>Y-axis:</strong> 1/\u221A(effective sample size), reversed so the most precise studies sit at the top (Deeks' funnel plot)</li>
                         <li><strong>Each Point:</strong> One study in your meta-analysis</li>
                         <li><strong>Expected Pattern:</strong> Inverted funnel shape if no bias present</li>
                     </ul>

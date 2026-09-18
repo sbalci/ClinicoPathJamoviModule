@@ -448,7 +448,6 @@ items:
       width: 600
       height: 450
       renderFun: .plot1
-      requiresData: true
       visible: (plot)
       clearWith:
           - plot
@@ -477,7 +476,6 @@ items:
       width: 600
       height: 600
       renderFun: .plotRadar
-      requiresData: true
       visible: (radarplot)
       clearWith:
           - radarplot
@@ -506,7 +504,6 @@ items:
       width: 800
       height: 400
       renderFun: .plotHeatmap
-      requiresData: true
       visible: (heatmap)
       clearWith:
           - heatmap

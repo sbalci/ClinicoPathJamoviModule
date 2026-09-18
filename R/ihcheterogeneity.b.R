@@ -24,6 +24,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         .repro_stats = NULL,
         .noticeList = list(),
 
+        # library-audit 2026-09-16 OncoPath [INFO] REJECTED: no native notice element - type: Notice fails the
+        #   .r.yaml schema, type: Notification builds no results object (guide section 13)
         .addNotice = function(type, title, content) {
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                 type = type, title = title, content = content)
@@ -36,11 +38,13 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 self$results$notices$setContent("")
                 return()
             }
+            # library-audit 2026-09-16 OncoPath [INFO] DONE: titles inherit the pane colour - fixed hues fell to
+            #   2.7-2.9:1 on the dark theme; the translucent tint and the border carry the severity
             typeStyles <- list(
-                ERROR = list(color = "#dc2626", bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
-                STRONG_WARNING = list(color = "#ea580c", bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
-                WARNING = list(color = "#ca8a04", bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
-                INFO = list(color = "#2563eb", bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd")
+                ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5"),
+                STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74"),
+                WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047"),
+                INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd")
             )
             html <- "<div style='margin: 10px 0;'>"
             for (notice in private$.noticeList) {
@@ -49,7 +53,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 html <- paste0(html,
                     "<div style='background-color: ", style$bgcolor, "; border-left: 4px solid ", style$border,
                     "; padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                    "<strong style='color: ", style$color, ";'>", htmltools::htmlEscape(notice$title), "</strong><br>",
+                    "<strong style='color: inherit;'>", htmltools::htmlEscape(notice$title), "</strong><br>",
                     "<span style='color: inherit;'>", htmltools::htmlEscape(notice$content), "</span></div>")
             }
             self$results$notices$setContent(paste0(html, "</div>"))
@@ -1440,6 +1444,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         },
 
         .formatClinicalAssessment = function(metrics, cv_threshold, correlation_threshold) {
+            # library-audit 2026-09-16 OncoPath [LOW] DEFERRED: the comparison target is spliced into sentences via %s;
+            #   revisit when these sentences are next rewritten or translated (guide section 9)
             comparison_target <- if (metrics$has_reference) .("whole section") else .("other regions")
 
             correlation_item <- if (!is.na(metrics$overall_corr)) {
@@ -1528,7 +1534,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 paste0(bias_veto,
                        "<p><strong> ", .("NOT ADEQUATE FOR SUBSTITUTION:"), "</strong> ",
                        sprintf(
-                           .("Agreement thresholds (correlation \u{2265} %s, CV \u{2264} %s%%) may be met, but a clinically material systematic difference is present."),
+                           .("Agreement thresholds (correlation \u2265 %s, CV \u2264 %s%%) may be met, but a clinically material systematic difference is present."),
                            correlation_threshold, cv_threshold),
                        " <span style='color: red;'>",
                        sprintf(.("Calibrate the regional measurement before using it in place of the %s."), comparison_target),
@@ -1537,9 +1543,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 paste0("<p><strong> ", .("AGREEMENT THRESHOLDS MET:"), "</strong> ",
                        sprintf(
                            if (!is.na(metrics$bias_p) && is.finite(private$.relativeBias(metrics)))
-                               .("Regional measurements agree with the %s in this dataset (correlation \u{2265} %s, CV \u{2264} %s%%), and no material systematic bias was detected.")
+                               .("Regional measurements agree with the %s in this dataset (correlation \u2265 %s, CV \u2264 %s%%), and no material systematic bias was detected.")
                            else
-                               .("Regional measurements agree with the %s in this dataset (correlation \u{2265} %s, CV \u{2264} %s%%). Systematic bias could not be assessed in this run."),
+                               .("Regional measurements agree with the %s in this dataset (correlation \u2265 %s, CV \u2264 %s%%). Systematic bias could not be assessed in this run."),
                            comparison_target, correlation_threshold, cv_threshold),
                        " <span style='color: green;'>",
                        .("These are summary statistics from this dataset alone; they are not an external validation and they do not describe agreement at the score thresholds used to classify cases."),
@@ -1547,7 +1553,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             } else if (metrics$overall_corr >= (correlation_threshold - 0.2) && metrics$mean_cv <= (cv_threshold * 1.5)) {
                 paste0("<p><strong> ", .("MODERATE SAMPLING:"), "</strong> ",
                        sprintf(
-                           .("Regional measurements show moderate agreement with %s (thresholds: correlation \u{2265} %s, CV \u{2264} %s%%)."),
+                           .("Regional measurements show moderate agreement with %s (thresholds: correlation \u2265 %s, CV \u2264 %s%%)."),
                            comparison_target, correlation_threshold, cv_threshold),
                        " <span style='color: orange;'>",
                        .("Consider additional samples or sampling optimization."),
@@ -1555,7 +1561,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             } else {
                 paste0("<p><strong> ", .("INADEQUATE SAMPLING:"), "</strong> ",
                        sprintf(
-                           .("Sampling does not meet quality thresholds (correlation \u{2265} %s, CV \u{2264} %s%%)."),
+                           .("Sampling does not meet quality thresholds (correlation \u2265 %s, CV \u2264 %s%%)."),
                            correlation_threshold, cv_threshold),
                        " <span style='color: red;'>",
                        .("Review sampling strategy and consider increased sampling."),
@@ -1584,7 +1590,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<li><strong>", .("Sample Size:"), "</strong> ",
                 if (!is.na(metrics$mean_cv)) {
                     if (metrics$mean_cv <= cv_threshold/2) {
-                        sprintf(.("Current sampling appears adequate (CV = %s%% \u{2264} %s%%)"), round(metrics$mean_cv, 1), cv_threshold/2)
+                        sprintf(.("Current sampling appears adequate (CV = %s%% \u2264 %s%%)"), round(metrics$mean_cv, 1), cv_threshold/2)
                     } else if (metrics$mean_cv <= cv_threshold) {
                         sprintf(.("Consider 2-3 additional samples to reduce variability (current CV = %s%%, threshold = %s%%)"), round(metrics$mean_cv, 1), cv_threshold)
                     } else {
@@ -1617,57 +1623,63 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         },
         .generateReportSentences = function(metrics, cv_threshold, correlation_threshold) {
             # Generate copy-ready sentences for clinical reports
-            comparison_target <- if (metrics$has_reference) "reference measurements" else "other regional measurements"
-            correlation_phrase <- if (metrics$has_reference) .("with whole-section measurements") else .("between regional measurements")
-
+            # library-audit 2026-09-16 OncoPath [LOW] DONE: whole .() sentences joined by paste(); the grade
+            #   and the comparison are baked into each sentence, never a phrase spliced in with %s
             correlation_sentence <- if (!is.na(metrics$overall_corr)) {
                 # Graded against the user's correlation_threshold, not fixed
                 # cut-offs: with a threshold of 0.95 an r of 0.80 was still
                 # called "excellent" here while the verdict below called the
                 # same run inadequate.
-                sprintf(
-                    if (metrics$overall_corr >= correlation_threshold)
-                        .("Regional measurements showed excellent correlation %s (r = %s). ")
-                    else if (metrics$overall_corr >= correlation_threshold - 0.10)
-                        .("Regional measurements showed good correlation %s (r = %s). ")
-                    else if (metrics$overall_corr >= correlation_threshold - 0.20)
-                        .("Regional measurements showed moderate correlation %s (r = %s). ")
-                    else
-                        .("Regional measurements showed poor correlation %s (r = %s). "),
-                    correlation_phrase, round(metrics$overall_corr, 3)
-                )
+                grade <- if (metrics$overall_corr >= correlation_threshold) "excellent"
+                         else if (metrics$overall_corr >= correlation_threshold - 0.10) "good"
+                         else if (metrics$overall_corr >= correlation_threshold - 0.20) "moderate"
+                         else "poor"
+                template <- if (metrics$has_reference) {
+                    switch(grade,
+                        excellent = .("Regional measurements showed excellent correlation with whole-section measurements (r = %s)."),
+                        good      = .("Regional measurements showed good correlation with whole-section measurements (r = %s)."),
+                        moderate  = .("Regional measurements showed moderate correlation with whole-section measurements (r = %s)."),
+                        poor      = .("Regional measurements showed poor correlation with whole-section measurements (r = %s)."))
+                } else {
+                    switch(grade,
+                        excellent = .("Regional measurements showed excellent correlation with one another (r = %s)."),
+                        good      = .("Regional measurements showed good correlation with one another (r = %s)."),
+                        moderate  = .("Regional measurements showed moderate correlation with one another (r = %s)."),
+                        poor      = .("Regional measurements showed poor correlation with one another (r = %s)."))
+                }
+                sprintf(template, round(metrics$overall_corr, 3))
             } else {
-                .("Correlation metrics were not estimable with the available data. ")
+                .("Correlation metrics were not estimable with the available data.")
             }
 
             variability_sentence <- if (!is.na(metrics$mean_cv)) {
                 # Graded against the user's cv_threshold - see above.
                 sprintf(
                     if (metrics$mean_cv <= cv_threshold / 2)
-                        .("Sampling variability was low (mean CV = %s%%). ")
+                        .("Sampling variability was low (mean CV = %s%%).")
                     else if (metrics$mean_cv <= cv_threshold)
-                        .("Sampling variability was moderate (mean CV = %s%%). ")
+                        .("Sampling variability was moderate (mean CV = %s%%).")
                     else
-                        .("Sampling variability was high (mean CV = %s%%). "),
+                        .("Sampling variability was high (mean CV = %s%%)."),
                     round(metrics$mean_cv, 1)
                 )
             } else {
-                .("Sampling variability could not be estimated. ")
+                .("Sampling variability could not be estimated.")
             }
 
             bias_sentence <- if (metrics$has_reference) {
                 if (!is.na(metrics$bias_p)) {
                     if (metrics$bias_p < 0.05) {
-                        sprintf(.("Systematic bias was detected between regional and reference measurements (p = %s). "),
+                        sprintf(.("Systematic bias was detected between regional and reference measurements (p = %s)."),
                                 ifelse(metrics$bias_p < 0.001, "<0.001", round(metrics$bias_p, 3)))
                     } else {
-                        .("No systematic bias was detected between regional and reference measurements (p \u{2265} 0.05); this does not establish that the two agree, as the test may lack power to detect a difference of relevant size. ")
+                        .("No systematic bias was detected between regional and reference measurements (p \u2265 0.05); this does not establish that the two agree, as the test may lack power to detect a difference of relevant size.")
                     }
                 } else {
-                    .("Bias testing could not be performed due to limited paired observations. ")
+                    .("Bias testing could not be performed due to limited paired observations.")
                 }
             } else {
-                .("Bias analysis was not applicable because no reference measurement was supplied. ")
+                .("Bias analysis was not applicable because no reference measurement was supplied.")
             }
 
             quality_status <- if (!is.na(metrics$overall_corr) && metrics$overall_corr >= correlation_threshold &&
@@ -1684,10 +1696,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             quality_sentence <- switch(
                 quality_status,
-                "met the predefined quality criteria" = .("The biopsy sampling approach met the predefined quality criteria (correlation and CV thresholds set in the analysis options). "),
-                "partially met the predefined quality criteria" = .("The sampling approach met the correlation and CV criteria only after relaxing them to correlation \u{2265} (threshold - 0.20) and CV \u{2264} (1.5 \u{00D7} threshold). "),
-                "did not meet the predefined quality criteria" = .("The sampling approach did not meet the predefined quality criteria. "),
-                "unable to be evaluated due to insufficient data" = .("Data were insufficient to evaluate overall sampling quality against predefined criteria. "),
+                "met the predefined quality criteria" = .("The biopsy sampling approach met the predefined quality criteria (correlation and CV thresholds set in the analysis options)."),
+                "partially met the predefined quality criteria" = .("The sampling approach met the correlation and CV criteria only after relaxing them to correlation \u2265 (threshold - 0.20) and CV \u2264 (1.5 \u00D7 threshold)."),
+                "did not meet the predefined quality criteria" = .("The sampling approach did not meet the predefined quality criteria."),
+                "unable to be evaluated due to insufficient data" = .("Data were insufficient to evaluate overall sampling quality against predefined criteria."),
                 ""
             )
 
@@ -1717,23 +1729,23 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 # straight into a Methods section. Likewise it claimed an ICC was
                 # computed even when .calculateICC had fallen back to a mean
                 # correlation.
-                sprintf(.("IHC heterogeneity analysis was performed on %d cases with %d regional measurements each. "),
-                        as.integer(metrics$n_cases), as.integer(metrics$n_biopsies)),
-                if (identical(private$.repro_stats$icc_method, "icc"))
-                    .("Agreement was assessed using the intraclass correlation coefficient (ICC(2,1), absolute agreement) and Spearman rank correlation. ")
-                else
-                    .("Agreement was assessed using Spearman rank correlation; an intraclass correlation coefficient could not be estimated from these data. "),
-                .("Systematic difference from the reference measurement was tested with a paired t-test. "),
-                .("Sampling variability was quantified using the coefficient of variation (CV). "),
-                sprintf(.("Quality thresholds were set at correlation \u{2265}%s and CV \u{2264}%s%%."), correlation_threshold, cv_threshold),
+                paste(c(
+                    sprintf(.("IHC heterogeneity analysis was performed on %d cases with %d regional measurements each."),
+                            as.integer(metrics$n_cases), as.integer(metrics$n_biopsies)),
+                    if (identical(private$.repro_stats$icc_method, "icc"))
+                        .("Agreement was assessed using the intraclass correlation coefficient (ICC(2,1), absolute agreement) and Spearman rank correlation.")
+                    else
+                        .("Agreement was assessed using Spearman rank correlation; an intraclass correlation coefficient could not be estimated from these data."),
+                    .("Systematic difference from the reference measurement was tested with a paired t-test."),
+                    .("Sampling variability was quantified using the coefficient of variation (CV)."),
+                    sprintf(.("Quality thresholds were set at correlation \u2265%s and CV \u2264%s%%."), correlation_threshold, cv_threshold)
+                ), collapse = " "),
                 "</p>",
 
                 "<h4>", .("Results Section:"), "</h4>",
                 "<p style='font-family: monospace; background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 10px; border-left: 4px solid #28a745;'>",
-                correlation_sentence,
-                variability_sentence,
-                bias_sentence,
-                quality_sentence,
+                paste(Filter(nzchar, c(correlation_sentence, variability_sentence, bias_sentence, quality_sentence)),
+                      collapse = " "),
                 "</p>",
 
                 "<h4>", .("Clinical Interpretation:"), "</h4>",
@@ -1885,7 +1897,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<h4> Scope of These Estimates</h4>",
                 "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 12px; border-radius: 5px; color: inherit;'>",
                 "<ul>",
-                "<li><strong>Quality Thresholds:</strong> The default criteria applied by this analysis are correlation \u{2265}0.80 and CV \u{2264}20%; both are set in the analysis options</li>",
+                "<li><strong>Quality Thresholds:</strong> The default criteria applied by this analysis are correlation \u22650.80 and CV \u226420%; both are set in the analysis options</li>",
                 "<li><strong>Biomarker-Specific Adjustment:</strong> Thresholds may require adjustment for specific biomarkers</li>",
                 "<li><strong>Protocol Validation:</strong> Results should inform but not replace empirical validation studies</li>",
                 "<li><strong>Continuous Monitoring:</strong> These estimates describe the cases analyzed here and say nothing about performance over time</li>",
@@ -1939,7 +1951,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<div style='margin: 15px 0; padding: 15px; background-color: rgba(33, 255, 92, 0.07); border-left: 4px solid #48bb78; border-radius: 4px; color: inherit;'>",
                 "<h4 style='color: inherit; margin-top: 0;'> Variability Measures</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
-                "<li><strong>CV (Coefficient of Variation):</strong> Standardized measure of variability = (SD/Mean) \u{00d7} 100%. ",
+                "<li><strong>CV (Coefficient of Variation):</strong> Standardized measure of variability = (SD/Mean) \u00d7 100%. ",
                 "Common literature bands: CV < 10% = low variability (excellent), 10-20% = moderate, 20-30% = high, >30% = very high. ",
                 "This analysis grades variability against the CV threshold you set under Clinical Thresholds (low: at or below half the threshold; moderate: within it; high: above it). ",
                 "Clinical meaning: How much measurements vary relative to their average.</li>",
@@ -1952,7 +1964,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<h4 style='color: inherit; margin-top: 0;'> IHC-Specific Terms</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>Spatial Heterogeneity:</strong> Variation in biomarker expression across different tissue regions.</li>",
-                "<li><strong>H-score:</strong> Immunohistochemical scoring method: (1\u{00d7}%weak) + (2\u{00d7}%moderate) + (3\u{00d7}%strong). Range: 0-300.</li>",
+                "<li><strong>H-score:</strong> Immunohistochemical scoring method: (1\u00d7%weak) + (2\u00d7%moderate) + (3\u00d7%strong). Range: 0-300.</li>",
                 "<li><strong>Proliferation Index:</strong> Percentage of cells showing positive staining (e.g., Ki67). Range: 0-100%.</li>",
                 "<li><strong>Regional Sampling:</strong> Measuring biomarker expression from specific tissue areas.</li>",
                 "</ul>",
@@ -1992,6 +2004,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # icc_method. Same guard as the Methods paragraph: never print the word
             # "ICC" next to a number that is not one.
             is_icc <- identical(private$.repro_stats$icc_method, "icc")
+            # library-audit 2026-09-16 OncoPath [LOW] DEFERRED: metric_label, target and icc_target are spliced into sentences via %s;
+            #   revisit when these sentences are next rewritten or translated (guide section 9)
             metric_label <- if (is_icc) "ICC" else .("mean correlation")
             mean_cv <- metrics$mean_cv
             avg_correlation <- if (!is.null(metrics$correlations) && any(!is.na(metrics$correlations))) {
@@ -2188,7 +2202,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 if (n_biopsies >= 2) {
                     note_text <- if (!is.na(mean_r) && !is.na(ci_lower)) {
                         sprintf(
-                            .("Note: 'psych' package not available. Using correlation-based approximation (r = %s, 95%% CI [%s, %s]) instead of ICC(2,1). Install 'psych' for exact ICC calculations."),
+                            .("Note: 'psych' package not available. Using correlation-based approximation (r = %s, 95%% CI %s to %s) instead of ICC(2,1). Install 'psych' for exact ICC calculations."),
                             round(mean_r, 3), round(ci_lower, 3), round(ci_upper, 3)
                         )
                     } else {
@@ -2392,7 +2406,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Check for values outside typical biomarker ranges
             max_value <- max(c(whole_section, as.matrix(biopsy_data)), na.rm = TRUE)
             if (!is.na(max_value) && max_value > 300) {
-                warnings <- c(warnings, sprintf(.("Very high biomarker values detected (max: %s). Verify if these are appropriate for your biomarker scale (e.g., percentages should be \u{2264}100%%, H-scores \u{2264}300)."), round(max_value, 1)))
+                warnings <- c(warnings, sprintf(.("Very high biomarker values detected (max: %s). Verify if these are appropriate for your biomarker scale (e.g., percentages should be \u2264100%%, H-scores \u2264300)."), round(max_value, 1)))
             }
 
             return(warnings)

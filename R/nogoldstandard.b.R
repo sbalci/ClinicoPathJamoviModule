@@ -637,7 +637,17 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     ci_upper <- ci$upper
                 }
 
+                # the fit statistics come from the same seeded multi-start search
+                seed_note <- if (isTRUE(self$options$bootstrap) || identical(self$options$method, "latent_class"))
+                    jmvcore::format(.("Random seed: {seed}"), seed = private$.seedValue())
+                for (nm in c("model_fit", "conditional_dependence")) {
+                    t <- private$.resultsItem(nm)
+                    if (!is.null(t)) t$setNote("seed", seed_note)
+                }
+
                 table <- self$results$prevalence
+                # bootstrap resamples and the latent-class random starts both draw from the seed
+                table$setNote("seed", if (isTRUE(self$options$bootstrap) || identical(self$options$method, "latent_class")) jmvcore::format(.("Random seed: {seed}"), seed = private$.seedValue()))
                 if (latent_method) {
                     table$setNote(
                         "meaning",
@@ -683,6 +693,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # whatever level, so an 80% Wald interval was indistinguishable from a 95%
                 # bootstrap percentile interval. State both.
                 conf_pct <- 100 * (1 - self$options$alpha)
+                # the bootstrap note below already names the seed
+                table$setNote("seed", if (!isTRUE(self$options$bootstrap) && identical(self$options$method, "latent_class")) jmvcore::format(.("Random seed: {seed}"), seed = private$.seedValue()))
                 table$setNote(
                     "ci_provenance",
                     if (isTRUE(self$options$bootstrap))

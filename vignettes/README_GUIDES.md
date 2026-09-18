@@ -41,12 +41,12 @@ This directory contains comprehensive guides for jamovi module development in th
 ### 🚦 `jamovi_library_review_guide.md` - **What the jamovi library reviewer checks**
 
 **Created:** 2026-08-20
-**Source:** Five real audit reports in `jamovi-library-audit/` (ClinicoPathDescriptives,
-jsurvival, meddecide, OncoPath, jjstatsplot — 2026-07-13 and 2026-08-17/18 rounds)
+**Source:** The real audit reports in `jamovi-library-audit/` (ClinicoPathDescriptives,
+jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18, 2026-09-15 and 2026-09-16)
 
 **Use this guide for:**
 - The pre-submission checklist (runnable commands, one per finding class)
-- The ten findings that recur across **every** module
+- The thirteen findings that recur across modules, and why each round's still came back (§18)
 - Knowing which fixes the reviewer treats as MEDIUM/HIGH vs. polish
 
 **Contents:**

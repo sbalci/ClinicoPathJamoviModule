@@ -58,7 +58,74 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 html <- paste0(html, "</div>")
                 self$results$notices$setContent(html)
             },
+            # library-audit 2026-09-16 meddecide [LOW] DONE (same class): performance, scoringPerformance,
+            # validationTable and methodComparison have a fixed row set, so .init() scaffolds the rows and
+            # .run() fills them with setRow()
+            # One place for those rows: `label` is the column that names the row, `rows` maps each stable
+            # row key to its label, `fill` lists the value columns .run() writes (and blanks on a re-run),
+            # and `static` holds per-row text that never depends on the data.
+            .fixedRowTables = function() {
+                list(
+                    performance = list(
+                        label = "metric", fill = c("value", "interpretation"),
+                        rows = c(
+                            auc = .("AUC (apparent)"),
+                            threshold = .("Optimal threshold"),
+                            accuracy = .("Accuracy"),
+                            sensitivity = .("Sensitivity (Recall)"),
+                            specificity = .("Specificity"),
+                            precision = .("Precision (PPV)"),
+                            f1 = .("F1 Score"),
+                            brier = .("Brier Score"))),
+                    scoringPerformance = list(
+                        label = "metric", fill = "value",
+                        rows = c(
+                            method = .("Scoring method"),
+                            auc = .("Score AUC (apparent)"),
+                            cutoff = .("Optimal score cutoff (chosen on this data)"),
+                            accuracy = .("Accuracy"),
+                            sensitivity = .("Sensitivity"),
+                            specificity = .("Specificity"),
+                            precision = .("Precision"),
+                            f1 = .("F1 Score"),
+                            mean_pos = .("Mean score (positive class)"),
+                            mean_neg = .("Mean score (reference class)"),
+                            range = .("Score range"))),
+                    validationTable = list(
+                        label = "metric", fill = c("apparent", "optimism", "corrected"),
+                        rows = c(
+                            auc = .("AUC"),
+                            brier = .("Brier Score"),
+                            slope = .("Calibration slope"))),
+                    methodComparison = list(
+                        label = "method", fill = c("auc", "accuracy", "info_loss"),
+                        rows = c(
+                            beta10 = "Beta10",
+                            schneeweiss = "Schneeweiss",
+                            maxscaled = .("Max-scaled"),
+                            full = .("Full LASSO model (continuous)")),
+                        static = list(reference = c(
+                            beta10 = "Zhang et al. 2017",
+                            schneeweiss = "Mehta et al. 2016",
+                            maxscaled = .("beta / max|beta| x maximum points"),
+                            full = .("Reference (no rounding)"))))
+                )
+            },
             .init = function() {
+                # Laid down before any guard below, because .run() fills these rows by key
+                # whether or not the inputs are complete.
+                fixed <- private$.fixedRowTables()
+                for (nm in names(fixed)) {
+                    spec <- fixed[[nm]]
+                    for (key in names(spec$rows)) {
+                        values <- list(unname(spec$rows[[key]]))
+                        names(values) <- spec$label
+                        for (col in names(spec$static))
+                            values[[col]] <- unname(spec$static[[col]][[key]])
+                        self$results[[nm]]$addRow(rowKey = key, values = values)
+                    }
+                }
+
                 if (!requireNamespace("glmnet", quietly = TRUE)) {
                     self$results$todo$setContent(paste0(
                         "<div class='alert alert-danger'><h4>Missing Dependency</h4>",
@@ -107,12 +174,20 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Every table is rebuilt with addRow() below and jmvcore never checks for
                 # duplicate row keys, so an option toggle that is not in a table's
                 # clearWith (showSummary, cv_plot, ...) re-ran .run() and doubled its rows.
-                # One reset here covers all ten tables.
-                for (nm in c("modelSummary", "coefficients", "performance", "scoringTable",
-                             "scoringPerformance", "methodComparison", "lookupTable",
-                             "validationTable", "variableImportance", "modelComparison")) {
+                # One reset here covers the six tables whose rows depend on the data.
+                for (nm in c("modelSummary", "coefficients", "scoringTable",
+                             "lookupTable", "variableImportance", "modelComparison")) {
                     tbl <- tryCatch(self$results[[nm]], error = function(e) NULL)
                     if (!is.null(tbl)) tbl$deleteRows()
+                }
+                # The four fixed-row tables keep their .init() rows; only their values are
+                # blanked, so a run that stops early cannot leave the previous run's numbers.
+                fixed <- private$.fixedRowTables()
+                for (nm in names(fixed)) {
+                    blank <- rep(list(NA), length(fixed[[nm]]$fill))
+                    names(blank) <- fixed[[nm]]$fill
+                    for (key in names(fixed[[nm]]$rows))
+                        self$results[[nm]]$setRow(rowKey = key, values = blank)
                 }
 
                 if (is.null(self$options$outcome) ||
@@ -135,7 +210,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
 
-                set.seed(self$options$random_seed)
+                withr::local_seed(self$options$random_seed)
 
                 # ── 1. Clean data ──────────────────────────────────────────────
                 data <- tryCatch(private$.cleanData(), error = function(e) {
@@ -880,7 +955,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     list(.("Alpha"), sprintf("%.2f", fit$alpha)),
                     list(.("Lambda (optimal)"), sprintf("%.4f", fit$lambda)),
                     list(.("Lambda selection"), lambda_label),
-                    list(.("CV folds"), as.character(fit$nfolds))
+                    list(.("CV folds"), as.character(fit$nfolds)),
+                    # the folds are drawn at random, so the seed decides lambda and the selection
+                    list(.("Random seed"), as.character(self$options$random_seed))
                 )
 
                 # Break the exclusions down by cause, but only when there are any
@@ -1084,9 +1161,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 f1 <- if (!is.na(precision) && precision + recall > 0)
                     2 * precision * recall / (precision + recall) else NA_real_
 
+                # Keyed by the rows .init() laid down (see .fixedRowTables()).
                 rows <- list(
-                    list(
-                        .("AUC (apparent)"),
+                    auc = list(
                         # DeLong's interval for AUC == 1 is always exactly 1.000 to
                         # 1.000. Printing that reads as an extraordinarily precise
                         # estimate when it is really the interval collapsing.
@@ -1098,14 +1175,14 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         else if (auc_val >= 0.9) .("Excellent") else if (auc_val >= 0.8) .("Good")
                         else if (auc_val >= 0.7) .("Acceptable") else .("Poor")
                     ),
-                    list(.("Optimal threshold"), sprintf("%.3f", optimal_threshold), .("Youden index")),
-                    list(.("Accuracy"), sprintf("%.3f", accuracy), ""),
-                    list(.("Sensitivity (Recall)"), sprintf("%.3f", sensitivity), ""),
-                    list(.("Specificity"), sprintf("%.3f", specificity), ""),
-                    list(.("Precision (PPV)"), sprintf("%.3f", precision), ""),
-                    list(.("F1 Score"), sprintf("%.3f", f1), ""),
-                    list(
-                        .("Brier Score"), sprintf("%.4f", brier),
+                    threshold = list(sprintf("%.3f", optimal_threshold), .("Youden index")),
+                    accuracy = list(sprintf("%.3f", accuracy), ""),
+                    sensitivity = list(sprintf("%.3f", sensitivity), ""),
+                    specificity = list(sprintf("%.3f", specificity), ""),
+                    precision = list(sprintf("%.3f", precision), ""),
+                    f1 = list(sprintf("%.3f", f1), ""),
+                    brier = list(
+                        sprintf("%.4f", brier),
                         {
                             # The Brier score is an OVERALL accuracy score, not a
                             # calibration measure, and its scale is driven by outcome
@@ -1128,9 +1205,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     )
                 )
 
-                for (i in seq_along(rows)) {
-                    table$addRow(rowKey = i, values = list(
-                        metric = rows[[i]][[1]], value = rows[[i]][[2]], interpretation = rows[[i]][[3]]
+                for (key in names(rows)) {
+                    table$setRow(rowKey = key, values = list(
+                        value = rows[[key]][[1]], interpretation = rows[[key]][[2]]
                     ))
                 }
 
@@ -1696,33 +1773,31 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 total_scores <- private$.computeTotalScores(data, vars, pts_primary, cuts)
                 perf <- private$.evaluateScore(data$y, total_scores)
 
-                perf_rows <- list(
+                # Keyed by the rows .init() laid down (see .fixedRowTables()).
+                perf_values <- list(
                     # A fallback is required: without one an unmapped option value
-                    # returns NULL, the row collapses to length 1 and the fill loop
-                    # dies with "subscript out of bounds", taking the analysis down.
-                    list(.("Scoring method"), switch(method,
+                    # returns NULL and the Scoring method row is left blank.
+                    method = switch(method,
                         "beta10" = "Beta10",
                         "schneeweiss" = "Schneeweiss",
                         "maxscaled" = .("Max-scaled"),
                         "compare" = .("Schneeweiss (primary)"),
                         as.character(method)
-                    )),
-                    list(.("Score AUC (apparent)"), sprintf("%.3f", perf$auc)),
-                    list(.("Optimal score cutoff (chosen on this data)"), as.character(perf$cutoff)),
-                    list(.("Accuracy"), sprintf("%.3f", perf$accuracy)),
-                    list(.("Sensitivity"), sprintf("%.3f", perf$sensitivity)),
-                    list(.("Specificity"), sprintf("%.3f", perf$specificity)),
-                    list(.("Precision"), sprintf("%.3f", perf$precision)),
-                    list(.("F1 Score"), sprintf("%.3f", perf$f1)),
-                    list(.("Mean score (positive class)"), sprintf("%.2f", perf$mean_pos)),
-                    list(.("Mean score (reference class)"), sprintf("%.2f", perf$mean_neg)),
-                    list(.("Score range"), sprintf("%d to %d", perf$range[1], perf$range[2]))
+                    ),
+                    auc = sprintf("%.3f", perf$auc),
+                    cutoff = as.character(perf$cutoff),
+                    accuracy = sprintf("%.3f", perf$accuracy),
+                    sensitivity = sprintf("%.3f", perf$sensitivity),
+                    specificity = sprintf("%.3f", perf$specificity),
+                    precision = sprintf("%.3f", perf$precision),
+                    f1 = sprintf("%.3f", perf$f1),
+                    mean_pos = sprintf("%.2f", perf$mean_pos),
+                    mean_neg = sprintf("%.2f", perf$mean_neg),
+                    range = sprintf("%d to %d", perf$range[1], perf$range[2])
                 )
 
-                for (i in seq_along(perf_rows)) {
-                    perf_table$addRow(rowKey = i, values = list(
-                        metric = perf_rows[[i]][[1]], value = perf_rows[[i]][[2]]
-                    ))
+                for (key in names(perf_values)) {
+                    perf_table$setRow(rowKey = key, values = list(value = perf_values[[key]]))
                 }
 
                 perf_table$setNote(
@@ -1745,15 +1820,16 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Full model AUC for reference (single-source apparent AUC)
                     full_auc <- fit$apparent_auc
 
+                    # Keyed by the rows .init() laid down with their method names and
+                    # references (see .fixedRowTables()); only the numbers are filled here.
                     methods_list <- list(
-                        list("Beta10", pts_beta10, "Zhang et al. 2017"),
-                        list("Schneeweiss", pts_schneeweiss, "Mehta et al. 2016"),
-                        list(.("Max-scaled"), pts_maxscaled, .("beta / max|beta| x maximum points"))
+                        beta10 = pts_beta10,
+                        schneeweiss = pts_schneeweiss,
+                        maxscaled = pts_maxscaled
                     )
 
-                    for (j in seq_along(methods_list)) {
-                        m <- methods_list[[j]]
-                        scores_j <- private$.computeTotalScores(data, vars, m[[2]], cuts)
+                    for (key in names(methods_list)) {
+                        scores_j <- private$.computeTotalScores(data, vars, methods_list[[key]], cuts)
                         perf_j <- private$.evaluateScore(data$y, scores_j)
 
                         info_loss <- if (!is.na(full_auc) && !is.na(perf_j$auc) && full_auc > 0) {
@@ -1762,22 +1838,18 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             NA
                         }
 
-                        comp_table$addRow(rowKey = j, values = list(
-                            method = m[[1]],
+                        comp_table$setRow(rowKey = key, values = list(
                             auc = perf_j$auc,
                             accuracy = perf_j$accuracy,
-                            info_loss = info_loss,
-                            reference = m[[3]]
+                            info_loss = info_loss
                         ))
                     }
 
-                    # Add full model as reference row
-                    comp_table$addRow(rowKey = 4, values = list(
-                        method = .("Full LASSO model (continuous)"),
+                    # Full model as reference row
+                    comp_table$setRow(rowKey = "full", values = list(
                         auc = full_auc,
                         accuracy = NA,
-                        info_loss = 0,
-                        reference = .("Reference (no rounding)")
+                        info_loss = 0
                     ))
                 }
 
@@ -1836,6 +1908,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .bootstrapValidation = function(data, fit) {
                 table <- self$results$validationTable
                 B <- self$options$bootstrapN
+                table$setNote("seed", jmvcore::format(.("Random seed: {seed}"), seed = self$options$random_seed))
 
                 alpha_val <- fit$alpha
 
@@ -1941,18 +2014,18 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     table$setNote("boot_few", .("Fewer than 20 bootstrap replicates succeeded. The optimism correction is unreliable at this number - increase the sample size or reduce the number of candidate predictors."))
                 }
 
+                # Keyed by the rows .init() laid down (see .fixedRowTables()).
                 rows <- list(
-                    list(.("AUC"), apparent_auc, mean_optimism_auc, corrected_auc),
-                    list(.("Brier Score"), apparent_brier, mean_optimism_brier, corrected_brier),
-                    list(.("Calibration slope"), apparent_slope, mean_optimism_slope, corrected_slope)
+                    auc = list(apparent_auc, mean_optimism_auc, corrected_auc),
+                    brier = list(apparent_brier, mean_optimism_brier, corrected_brier),
+                    slope = list(apparent_slope, mean_optimism_slope, corrected_slope)
                 )
 
-                for (i in seq_along(rows)) {
-                    table$addRow(rowKey = i, values = list(
-                        metric = rows[[i]][[1]],
-                        apparent = rows[[i]][[2]],
-                        optimism = rows[[i]][[3]],
-                        corrected = rows[[i]][[4]]
+                for (key in names(rows)) {
+                    table$setRow(rowKey = key, values = list(
+                        apparent = rows[[key]][[1]],
+                        optimism = rows[[key]][[2]],
+                        corrected = rows[[key]][[3]]
                     ))
                 }
 

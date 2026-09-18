@@ -514,5 +514,11 @@ test_that("validation fails when selected true level not present", {
     msg <- as.character(res$validationErrors$content)
     expect_match(msg, "Maybe")
     expect_match(msg, "Available levels")
-    expect_equal(nrow(res$summary$asDF), 0L)
+    # library-audit 2026-09-16 meddecide [LOW]: the summary rows are now laid down
+    # by .init() (one per selected variable) and only filled by .run(), so a failed
+    # validation leaves both rows in place with every count blank instead of an empty
+    # table. The intent is unchanged: no counts appear underneath the error.
+    sm <- res$summary$asDF
+    expect_equal(sm$variable, c("a", "b"))
+    expect_true(all(is.na(sm[, c("trueCount", "falseCount", "totalCount", "truePercentage")])))
 })

@@ -1571,6 +1571,38 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
         },
 
+        # library-audit 2026-09-16 meddecide [LOW] DONE (same class): advancedMetrics has a fixed row set, so .init()
+        # scaffolds the rows and .run() fills them with setRow()
+        # Four follow-up rows whenever person-time analysis is on, plus ORR and DCR
+        # when a response variable is analysed (left blank when the data cannot
+        # support them). summaryData is not converted: its per-category response
+        # rows depend on the levels present in the data.
+        .medianFollowUpLabel = function(method) {
+            switch(
+                method %||% "observed",
+                reverse_km = .("Median Follow-up Time (reverse Kaplan-Meier)"),
+                unrecognised = .("Median Follow-up Time (observed durations; censoring not recognised)"),
+                .("Median Follow-up Time (observed durations; no censoring information)")
+            )
+        },
+
+        # The follow-up estimator is known only in .run(); .init() labels that row
+        # with the one the options imply (reverse KM needs a censoring variable).
+        .advancedMetricLabels = function() {
+            if (!isTRUE(self$options$personTimeAnalysis)) return(character(0))
+            labels <- c(
+                median_followup = private$.medianFollowUpLabel(
+                    if (is.null(self$options$censorVar)) "observed" else "reverse_km"),
+                iqr = .("Interquartile Range (observed durations)"),
+                person_time = .("Total Study Person-Time"),
+                followup_density = .("Follow-up Density"))
+            if (isTRUE(self$options$responseAnalysis) && !is.null(self$options$responseVar))
+                labels <- c(labels,
+                    orr = .("Objective Response Rate (ORR)"),
+                    dcr = .("Disease Control Rate (DCR)"))
+            labels
+        },
+
         # Apply clinical preset configurations with context
 
         .init = function() {
@@ -1605,6 +1637,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 for (i in seq_along(summary_metrics))
                     self$results$summary$addRow(
                         rowKey = i, values = list(metric = summary_metrics[i]))
+
+            advanced_labels <- private$.advancedMetricLabels()
+            for (key in names(advanced_labels))
+                self$results$advancedMetrics$addRow(rowKey = key,
+                    values = list(metric_name = advanced_labels[[key]]))
         },
 
         .run = function() {
@@ -1624,6 +1661,16 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             self$results$validationReport$setContent('')
             self$results$validationReport$setVisible(FALSE)
             self$results$instructions$setContent('')
+
+            # advancedMetrics rows are scaffolded in .init(), and jamovi can restore
+            # a previous run's values into them. Blank them here, so an early
+            # return or error below leaves empty cells, not the last numbers.
+            advanced_labels <- private$.advancedMetricLabels()
+            for (key in names(advanced_labels))
+                self$results$advancedMetrics$setRow(rowKey = key, values = list(
+                    metric_name = advanced_labels[[key]], metric_value = NA_real_,
+                    confidence_interval = NA_character_, metric_unit = NA_character_,
+                    clinical_interpretation = NA_character_))
 
             # Static educational panels: populate whenever requested, BEFORE any
             # early return - previously an incomplete selection or a validation
@@ -2035,9 +2082,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         
         # Advanced metrics table population
         .updateAdvancedMetrics = function(patient_data, stats) {
-            # Clear FIRST so a run without the option does not keep stale rows
-            self$results$advancedMetrics$deleteRows()
-
+            # The rows exist only when the option is on (.init()) and were blanked
+            # at the start of .run(), so there is nothing to clear here.
             if (!self$options$personTimeAnalysis) return()
 
             patient_summary <- stats$patient_summary
@@ -2050,12 +2096,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Calculate advanced clinical metrics
             metrics <- list(
                 list(
-                    name = switch(
-                        stats$median_followup_method %||% "observed",
-                        reverse_km = .("Median Follow-up Time (reverse Kaplan-Meier)"),
-                        unrecognised = .("Median Follow-up Time (observed durations; censoring not recognised)"),
-                        .("Median Follow-up Time (observed durations; no censoring information)")
-                    ),
+                    key = "median_followup",
                     value = round(stats$median_followup_km, 2),
                     ci = if (!is.na(stats$median_followup_ci_lower %||% NA_real_) &&
                              !is.na(stats$median_followup_ci_upper %||% NA_real_))
@@ -2068,21 +2109,21 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         .("Plain median of the observed durations, because the reverse Kaplan-Meier estimate was not available. Read it as the median time to event-or-censoring, not as the length of follow-up.")
                 ),
                 list(
-                    name = .("Interquartile Range (observed durations)"),
+                    key = "iqr",
                     value = round(stats$q3_duration - stats$q1_duration, 2),
                     ci = NA_character_,
                     unit = self$options$timeUnit,
                     interpretation = .("Middle 50% of follow-up duration range")
                 ),
                 list(
-                    name = .("Total Study Person-Time"),
+                    key = "person_time",
                     value = round(stats$total_person_time, 2),
                     ci = NA_character_,
                     unit = sprintf(.("%s (cumulative)"), self$options$timeUnit),
                     interpretation = .("Total observation time across all patients")
                 ),
                 list(
-                    name = .("Follow-up Density"),
+                    key = "followup_density",
                     value = if (isTRUE(stats$total_person_time > 0)) round(n_patients_summary / stats$total_person_time * 100, 3) else NA_real_,
                     ci = NA_character_,
                     unit = sprintf(.("per 100 %s"), self$options$timeUnit),
@@ -2145,14 +2186,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                     metrics <- append(metrics, list(
                         list(
-                            name = .("Objective Response Rate (ORR)"),
+                            key = "orr",
                             value = if (!is.na(orr)) round(orr, 1) else NA_real_,
                             ci = orr_ci,
                             unit = .("percent"),
                             interpretation = .("Proportion with complete or partial response")
                         ),
                         list(
-                            name = .("Disease Control Rate (DCR)"),
+                            key = "dcr",
                             value = if (!is.na(dcr)) round(dcr, 1) else NA_real_,
                             ci = dcr_ci,
                             unit = .("percent"),
@@ -2162,11 +2203,16 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 }
             }
 
-            # Populate the table
-            for (i in seq_along(metrics)) {
-                metric <- metrics[[i]]
-                self$results$advancedMetrics$addRow(rowKey = i, values = list(
-                    metric_name = metric$name,
+            # Fill the rows .init() scaffolded. Labels come from
+            # .advancedMetricLabels() alone; only the follow-up label is replaced,
+            # by the estimator this run actually used. The key check keeps a
+            # metric whose row was not scaffolded from aborting the analysis in setRow().
+            labels <- private$.advancedMetricLabels()
+            labels[["median_followup"]] <- private$.medianFollowUpLabel(stats$median_followup_method)
+            for (metric in metrics) {
+                if (!metric$key %in% names(labels)) next
+                self$results$advancedMetrics$setRow(rowKey = metric$key, values = list(
+                    metric_name = labels[[metric$key]],
                     metric_value = metric$value,
                     confidence_interval = metric$ci,
                     metric_unit = metric$unit,
@@ -2493,7 +2539,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             yend = patient_id,
                             color = response
                         ),
-                        size = opts$laneWidth
+                        linewidth = opts$laneWidth
                     )
                 })
             } else {
@@ -2519,7 +2565,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             yend = patient_id
                         ),
                         color = "steelblue",
-                        size = opts$laneWidth
+                        linewidth = opts$laneWidth
                     )
                 })
             }
@@ -2594,7 +2640,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         y = patient_id
                     ),
                     colour = "darkgreen",
-                    size = 1.5,
+                    linewidth = 1.5,
                     alpha = 0.7
                 )
             }
@@ -2807,16 +2853,16 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # Geometric symbols also render correctly in PDF/Word exports and
         # regulatory documents, which the emoji did not.
         .getEnhancedClinicalGlyphs = function(event_labels) {
-            CIRCLE   <- "\u{25cf}"   # black circle
-            SQUARE   <- "\u{25a0}"   # black square
-            UP       <- "\u{25b2}"   # black up-pointing triangle
-            DOWN     <- "\u{25bc}"   # black down-pointing triangle
-            DIAMOND  <- "\u{25c6}"   # black diamond
-            STAR     <- "\u{2605}"   # black star
-            CROSS    <- "\u{271a}"   # heavy greek cross
-            XMARK    <- "\u{2716}"   # heavy multiplication x
-            HALF     <- "\u{25d1}"   # circle with right half black
-            RING     <- "\u{25ce}"   # bullseye
+            CIRCLE   <- "\u25cf"   # black circle
+            SQUARE   <- "\u25a0"   # black square
+            UP       <- "\u25b2"   # black up-pointing triangle
+            DOWN     <- "\u25bc"   # black down-pointing triangle
+            DIAMOND  <- "\u25c6"   # black diamond
+            STAR     <- "\u2605"   # black star
+            CROSS    <- "\u271a"   # heavy greek cross
+            XMARK    <- "\u2716"   # heavy multiplication x
+            HALF     <- "\u25d1"   # circle with right half black
+            RING     <- "\u25ce"   # bullseye
 
             # Define clinical icon mappings
             clinical_mapping <- list(
@@ -2907,6 +2953,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             fu_method <- stats$median_followup_method %||% "observed"
             fu_value  <- if (identical(fu_method, "reverse_km"))
                 stats$median_followup_km else stats$median_duration
+            # library-audit 2026-09-16 OncoPath [LOW] DEFERRED: the follow-up label is spliced into sentences via %s;
+            #   revisit when these sentences are next rewritten or translated (guide section 9)
             fu_label  <- switch(
                 fu_method,
                 reverse_km   = .("median follow-up (reverse Kaplan-Meier)"),
@@ -2989,7 +3037,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "<span style='margin-right: 8px;'></span>",
                 .("Copy-Ready Manuscript Text"),
                 "</h3>",
-                "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 10px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>",
+                "<div style='background-color: rgba(255, 255, 255, 0.06); color: inherit; padding: 15px; border-radius: 6px; margin: 10px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>",
                 "<p style='margin: 0; line-height: 1.6; color: inherit; font-size: 0.95em; text-align: justify;'>", full_text, "</p>",
                 "</div>",
                 "<div style='margin-top: 15px; padding: 10px; background-color: rgba(33, 163, 188, 0.21); border-radius: 4px; border: 1px dashed #0c5460; color: inherit;'>",

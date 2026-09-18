@@ -1214,7 +1214,6 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     width=600,
                     height=400,
                     renderFun=".plotCriterion",
-                    requiresData=TRUE,
                     clearWith=list(
                         "dependentVars",
                         "classVar",
@@ -1234,7 +1233,6 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     width=600,
                     height=400,
                     renderFun=".plotPrevalence",
-                    requiresData=TRUE,
                     clearWith=list(
                         "dependentVars",
                         "classVar",
@@ -1253,7 +1251,6 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     width=600,
                     height=400,
                     renderFun=".plotDot",
-                    requiresData=TRUE,
                     clearWith=list(
                         "dependentVars",
                         "classVar",

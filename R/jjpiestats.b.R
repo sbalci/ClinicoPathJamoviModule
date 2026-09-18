@@ -1414,6 +1414,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
         .plot1 = function(image, ggtheme, theme, ...) {
 
+            # The Bayesian contingency test samples its posterior, and a frequentist run with
+            # the Bayes factor message draws one too: seed them and name the seed.
+            withr::local_seed(self$options$seed)
+
             # Validation ----
             # CRITICAL FIX: Check for zero-length character vectors
             if ( is.null(self$options$dep) ||
@@ -1499,6 +1503,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Apply cached theme for better performance
             plot1 <- plot1 + private$.getPlotTheme()
 
+            if (statsSeedMatters(self$options$typestatistics, "contingency") ||
+                captionSeedMatters(self$options$typestatistics, "contingency", 2L, self$options$bfmessage))
+                plot1 <- addSeedCaption(plot1, self, self$options$seed)
+
             # Print Plot1 ----
 
             print(plot1)
@@ -1511,6 +1519,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         , .plot2 = function(image, ggtheme, theme, ...) {
+
+            # The Bayesian contingency test samples its posterior, and a frequentist run with
+            # the Bayes factor message draws one too: seed them and name the seed.
+            withr::local_seed(self$options$seed)
 
             # Validation ----
             # CRITICAL FIX: Check for zero-length character vectors
@@ -1625,6 +1637,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
 
+            if (statsSeedMatters(self$options$typestatistics, "contingency") ||
+                captionSeedMatters(self$options$typestatistics, "contingency", 2L, self$options$bfmessage))
+                plot2 <- addSeedCaption(plot2, self, self$options$seed)
+
             # Print Plot2 ----
             print(plot2)
             TRUE
@@ -1637,6 +1653,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
         , .plot4 = function(image, ggtheme, theme, ...) {
+
+            # The Bayesian contingency test samples its posterior, and a frequentist run with
+            # the Bayes factor message draws one too: seed them and name the seed.
+            withr::local_seed(self$options$seed)
 
             # Validation ----
             # CRITICAL FIX: Check for zero-length character vectors
@@ -1740,6 +1760,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
+
+            if (statsSeedMatters(self$options$typestatistics, "contingency") ||
+                captionSeedMatters(self$options$typestatistics, "contingency", 2L, self$options$bfmessage))
+                plot4 <- addSeedCaption(plot4, self, self$options$seed)
 
             # Print Plot4 ----
             print(plot4)

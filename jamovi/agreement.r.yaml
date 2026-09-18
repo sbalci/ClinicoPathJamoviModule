@@ -154,7 +154,6 @@ items:
       height: 400
       renderFun: .blandAltman
       visible: (blandAltmanPlot)
-      requiresData: true
       clearWith:
           - vars
           - baConfidenceLevel
@@ -170,7 +169,6 @@ items:
       height: 500
       renderFun: .agreementHeatmap
       visible: (agreementHeatmap)
-      requiresData: true
       clearWith:
           - vars
           - heatmapColorScheme
@@ -1858,7 +1856,6 @@ items:
       height: 450
       renderFun: .raterProfilePlot
       visible: (raterProfiles)
-      requiresData: true
       clearWith:
           - vars
           - raterProfileType
@@ -1916,7 +1913,6 @@ items:
       height: 450
       renderFun: .subgroupForestPlot
       visible: (agreementBySubgroup && subgroupForestPlot)
-      requiresData: true
       clearWith:
           - vars
           - subgroupVariable
@@ -1963,6 +1959,7 @@ items:
           - clusterDistance
           - clusterLinkage
           - nClusters
+          - seed
 
     - name: raterDendrogram
       title: 'Rater Clustering Dendrogram'
@@ -1971,7 +1968,6 @@ items:
       height: 500
       renderFun: .raterDendrogram
       visible: (raterClustering && clusterMethod:hierarchical && showDendrogram)
-      requiresData: true
       clearWith:
           - vars
           - clusterDistance
@@ -1984,13 +1980,13 @@ items:
       height: 550
       renderFun: .raterClusterHeatmap
       visible: (raterClustering && showClusterHeatmap)
-      requiresData: true
       clearWith:
           - vars
           - clusterMethod
           - clusterDistance
           - clusterLinkage
           - nClusters
+          - seed
 
     - name: raterClusterExplanation
       title: "About Rater Clustering"
@@ -2020,6 +2016,7 @@ items:
           - caseClusterDistance
           - caseClusterLinkage
           - nCaseClusters
+          - seed
 
     - name: caseDendrogram
       title: 'Case Clustering Dendrogram'
@@ -2028,7 +2025,6 @@ items:
       height: 500
       renderFun: .caseDendrogram
       visible: (caseClustering && caseClusterMethod:hierarchical && showCaseDendrogram)
-      requiresData: true
       clearWith:
           - vars
           - caseClusterDistance
@@ -2041,13 +2037,13 @@ items:
       height: 600
       renderFun: .caseClusterHeatmap
       visible: (caseClustering && showCaseClusterHeatmap)
-      requiresData: true
       clearWith:
           - vars
           - caseClusterMethod
           - caseClusterDistance
           - caseClusterLinkage
           - nCaseClusters
+          - seed
 
     - name: caseClusterExplanation
       title: "About Case Clustering"

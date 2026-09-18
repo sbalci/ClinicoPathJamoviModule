@@ -118,6 +118,9 @@ children:
             name: effsize_type
             label: Effect size type
             enable: (show_stats)
+          - type: TextBox
+            name: seed
+            format: number
   - type: CollapseBox
     label: Visual Appearance
     collapsed: true

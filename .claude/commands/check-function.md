@@ -333,7 +333,7 @@ grep -n "^\s*warning(" R/<fn>.b.R      # jamovi never shows R warnings to the us
 grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set belongs in .init()
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
-python3 tools/release_gate.py          # requiresData contract, CollapseBox Title Case, refs (FAIL = blocking)
+python3 tools/release_gate.py          # requiresData, CollapseBox Title Case, refs, .() " [..]"/\u{}/padding, translation %-specifiers, notice title colours (FAIL = blocking)
 Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contract.R")'
 ```
 
@@ -344,7 +344,7 @@ Checklist:
 - [ ] No `style=` attribute sets a hex `background-color` without a `color:`. Pale
       panel fills are translucent `rgba()` + `color: inherit`; saturated chips keep
       their fill but declare an explicit foreground.
-- [ ] Only the five structural HTML entities appear. Everything else is a `\u{}` escape.
+- [ ] Only the five structural HTML entities appear. Everything else is a `\uXXXX` escape — never braced `\u{}` inside `.()`, which the catalog extractor cannot read.
 - [ ] `setVisible(FALSE)` never signals failure; nothing is written to a hidden element;
       no `.init()`-hides / `.run()`-restores pair (use the declarative `visible:`).
 - [ ] Table rows that depend only on options or data shape are created in `.init()` and

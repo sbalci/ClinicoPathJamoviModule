@@ -110,6 +110,17 @@ options:
             'bayes' provides Bayesian analysis with Bayes factors.
 
 
+    - name: seed
+      title: Random seed
+      type: Integer
+      default: 20250101
+      description:
+          R: >
+            Random seed for the statistics computed by posterior sampling (the Bayesian
+            contingency test, and the Bayes factor caption of a frequentist test). The plot
+            caption names the seed whenever it affected the numbers shown. The default
+            reproduces the previous fixed behaviour.
+
     - name: originaltheme
       title: Add GGStatsPlot layer
       type: Bool

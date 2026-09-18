@@ -47,6 +47,9 @@ children:
                 name: typestatistics
                 events:
                   change: ./jjhistostats.events::onChange_typestatistics
+              - type: TextBox
+                name: seed
+                format: number
               - type: CheckBox
                 name: resultssubtitle
               - type: CheckBox

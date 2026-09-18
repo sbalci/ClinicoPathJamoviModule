@@ -11,6 +11,7 @@ jjbarstats(
   grvar = NULL,
   counts = NULL,
   typestatistics = "parametric",
+  seed = 20250101,
   originaltheme = FALSE,
   palette = "Dark2",
   resultssubtitle = FALSE,
@@ -48,6 +49,11 @@ represents a single observation.}
 \item{typestatistics}{Frequentist (Pearson's chi-squared; Fisher's exact
 test on a sparse 2x2 table; McNemar's test when paired) or Bayesian
 contingency analysis.}
+
+\item{seed}{Random seed for the statistics computed by posterior sampling
+(the Bayesian contingency test, and the Bayes factor caption of a
+frequentist test). The plot caption names the seed whenever it affected the
+numbers shown. The default reproduces the previous fixed behaviour.}
 
 \item{originaltheme}{Use the ggstatsplot theme instead of the jamovi theme.}
 

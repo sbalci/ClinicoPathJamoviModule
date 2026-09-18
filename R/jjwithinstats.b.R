@@ -159,7 +159,6 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Fixed seed for the sampling-based paths (Bayesian MCMC, robust
         # bootstrap), so the same analysis reports the same numbers on every
         # render rather than drifting between refreshes.
-        .STOCHASTIC_SEED = 20250101L,
 
         .prepared_data = NULL,
         .prepared_options = NULL,
@@ -398,7 +397,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # came from whichever caller ran first - the unseeded probe - and
             # the "same analysis reports the same numbers" guarantee was lost.
             if (opts$typestatistics %in% c("bayes", "robust"))
-                withr::local_seed(private$.STOCHASTIC_SEED)
+                withr::local_seed(self$options$seed)
 
             res <- tryCatch(
                 rlang::inject(fn(
@@ -873,7 +872,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 point = self$options$point,
                 titles = list(self$options$mytitle, self$options$xtitle, self$options$ytitle),
                 display = list(self$options$resultssubtitle, self$options$originaltheme),
-                advanced = list(self$options$bfmessage, self$options$conflevel, self$options$k)
+                advanced = list(self$options$bfmessage, self$options$conflevel, self$options$k, self$options$seed)
             ), algo = "md5")
             
             # Only reprocess if options have changed or forced refresh
@@ -1250,7 +1249,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # ggstatsplot sample, so the same analysis rendered twice reported
             # different numbers. Seed them; withr restores the caller's stream.
             if (opts$typestatistics %in% c("bayes", "robust"))
-                withr::local_seed(private$.STOCHASTIC_SEED)
+                withr::local_seed(self$options$seed)
 
             n_meas <- length(unique(long_data$measurement))
             sub_expr <- private$.subtitleExpr(long_data, opts, n_meas)
@@ -1320,6 +1319,10 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     plot <- plot + ggstatsplot::theme_ggstatsplot()
                 }
+
+                if ((isTRUE(opts$resultssubtitle) && statsSeedMatters(opts$typestatistics, "within", n_meas)) ||
+                    captionSeedMatters(opts$typestatistics, "within", n_meas, opts$bfmessage))
+                    plot <- addSeedCaption(plot, self, self$options$seed)
 
                 # Print Plot ----
                 print(plot)

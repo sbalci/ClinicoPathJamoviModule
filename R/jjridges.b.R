@@ -24,7 +24,6 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # BayesFactor's MCMC and robust/effect-size CIs use bootstrapping, so
         # without this the SAME analysis reported different numbers on every
         # re-render - a credible interval that moves when nothing changed.
-        .STOCHASTIC_SEED = 20250101L,
 
         # Clinical constants
         .MIN_SAMPLE_SIZE = 10,
@@ -1991,7 +1990,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         boot_result <- tryCatch({
                             # Seeded: an unseeded bootstrap moved the Cliff's
                             # delta confidence interval between identical runs.
-                            withr::local_seed(private$.STOCHASTIC_SEED)
+                            withr::local_seed(self$options$seed)
                             boot::boot(c(data1, data2), boot_fn, R = 1000,
                                        strata = factor(rep(1:2, c(n1, n2))))
                         }, error = function(e) NULL)
@@ -2146,6 +2145,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # See .generateStatistics: addRow() accepts duplicate rowKeys, so the table has
             # to be emptied before it is refilled or it accumulates across re-runs.
             tests_table$deleteRows()
+            # Cliff's delta has a bootstrap confidence interval
+            tests_table$setNote("seed", if (identical(private$.option("effsize_type"), "cliff_delta"))
+                jmvcore::format(.("Random seed: {seed}"), seed = self$options$seed))
 
             # Reset the assumption-switch accumulator for this run
             private$.assumptionSwitches <- character(0)

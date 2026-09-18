@@ -158,6 +158,8 @@ items:
       width: 800
       height: 500
       renderFun: .waterfallplot
+      # library-audit 2026-09-16 OncoPath [LOW] REJECTED: .annotationTrack() reads self$data at render;
+      #   without the flag the tracks vanish on resize/.omv reopen/export (guide section 15)
       requiresData: true
       visible: (showWaterfallPlot)
       clearWith:
@@ -321,7 +323,6 @@ items:
       width: 800
       height: 500
       renderFun: .spiderplot
-      requiresData: true
       visible: (showSpiderPlot)
       # Note: Spider plot requires both showSpiderPlot=true AND a time variable for meaningful trajectories
       clearWith:

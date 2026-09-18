@@ -224,14 +224,19 @@ test_that("Levene's test for compartment differences actually reports a result",
             compareCompartments = TRUE, compartmentTests = TRUE)
 
     tt <- res$compartmentTests$asDF
-    lev <- tt[grepl("Levene", tt$test, ignore.case = TRUE), ]
-    if (nrow(lev) > 0) {
-        # oneway.test()$parameter is c(num df, denom df); passing the length-2
-        # vector made addRow() throw inside a tryCatch, so this row ALWAYS said
-        # "Could not compute".
-        expect_false(is.na(lev$df[1]))
-        expect_false(grepl("Could not compute", lev$interpretation[1]))
-    }
+    # The row is the Brown-Forsythe (median-centred Levene) test, in column
+    # test_type. This block used to filter tt$test (no such column) for
+    # "Levene", matched nothing, and skipped every expectation behind an
+    # if (nrow(lev) > 0) - testthat reported it as an empty-test SKIP.
+    lev <- tt[grepl("Brown-Forsythe|Levene", tt$test_type, ignore.case = TRUE), ]
+    expect_equal(nrow(lev), 1)
+    # oneway.test()$parameter is c(num df, denom df); passing the length-2
+    # vector made addRow() throw inside a tryCatch, so this row ALWAYS said
+    # "Could not compute".
+    expect_equal(lev$df[1], 2)   # 3 compartments - 1
+    expect_true(is.finite(lev$statistic[1]))
+    expect_true(lev$p_value[1] >= 0 && lev$p_value[1] <= 1)
+    expect_false(grepl("Could not compute", lev$interpretation[1]))
 })
 
 # ── Check-pass regressions (2026-08-23) ──────────────────────────

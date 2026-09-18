@@ -64,7 +64,49 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                 self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
             },
+            # The epiR tables report a fixed statistic set - fixed per option, which .init() can
+            # already see - so their rows are scaffolded here and .run() only fills values.
+            .epirStatLabels = function() {
+                c("ap"      = .("Apparent prevalence"),
+                  "tp"      = .("True prevalence"),
+                  "se"      = .("Test sensitivity"),
+                  "sp"      = .("Test specificity"),
+                  "diag.ac" = .("Diagnostic accuracy"),
+                  "diag.or" = .("Diagnostic odds ratio"),
+                  "nndx"    = .("Number needed to diagnose"),
+                  "youden"  = .("Youden's index"),
+                  "pv.pos"  = .("Positive predictive value"),
+                  "pv.neg"  = .("Negative predictive value"),
+                  "lr.pos"  = .("Likelihood ratio of a positive test"),
+                  "lr.neg"  = .("Likelihood ratio of a negative test"),
+                  "p.rout"  = .("Proportion of subjects with outcome ruled out"),
+                  "p.rin"   = .("Proportion of subjects with outcome ruled in"),
+                  "p.tpdn"  = .("False-positive rate among outcome-negative subjects"),
+                  "p.tndp"  = .("False-negative rate among outcome-positive subjects"),
+                  "p.dntp"  = .("False-discovery proportion among test-positive subjects"),
+                  "p.dptn"  = .("False-omission proportion among test-negative subjects"),
+                  "bal.acc"  = .("Balanced accuracy (CI not computed)"),
+                  "f1.score" = .("F1 score at selected prevalence (CI not computed)"))
+            },
+            .epirRatioStats = function() {
+                base <- if (isTRUE(self$options$pp)) c("se", "sp", "diag.ac")
+                        else c("ap", "tp", "se", "sp", "diag.ac", "pv.pos", "pv.neg",
+                               "p.rout", "p.rin", "p.tpdn", "p.tndp", "p.dntp", "p.dptn")
+                c(base, "bal.acc", "f1.score")
+            },
+            .epirNumberStats = function() c("lr.pos", "lr.neg", "diag.or", "youden", "nndx"),
+
             .init = function() {
+                if (isTRUE(self$options$ci)) {
+                    labels <- private$.epirStatLabels()
+                    for (key in private$.epirRatioStats())
+                        self$results$epirTable_ratio$addRow(rowKey = key,
+                            values = list(statsnames = unname(labels[[key]])))
+                    for (key in private$.epirNumberStats())
+                        self$results$epirTable_number$addRow(rowKey = key,
+                            values = list(statsnames = unname(labels[[key]])))
+                }
+
                 # Welcome message
                 welcome_html <- paste0(
                     "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
@@ -619,9 +661,14 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                 if (ci) {
                     epirTable_ratio <- self$results$epirTable_ratio
-                    epirTable_ratio$deleteRows()
                     epirTable_number <- self$results$epirTable_number
-                    epirTable_number$deleteRows()
+                    # The rows are the fixed statistic set scaffolded in .init(); deleting them here
+                    # would make the table appear only once epiR returns. Blank the values instead.
+                    blank <- list(est = NA_real_, lower = NA_real_, upper = NA_real_)
+                    for (key in private$.epirRatioStats())
+                        epirTable_ratio$setRow(rowKey = key, values = blank)
+                    for (key in private$.epirNumberStats())
+                        epirTable_number$setRow(rowKey = key, values = blank)
 
                     if (!fractional_counts) {
                         if (!requireNamespace("epiR", quietly = TRUE)) {
@@ -638,26 +685,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             as.data.frame() |>
                             tibble::rownames_to_column(var = "statsabv")
 
-                        stat_labels <- c(
-                            "ap"      = .("Apparent prevalence"),
-                            "tp"      = .("True prevalence"),
-                            "se"      = .("Test sensitivity"),
-                            "sp"      = .("Test specificity"),
-                            "diag.ac" = .("Diagnostic accuracy"),
-                            "diag.or" = .("Diagnostic odds ratio"),
-                            "nndx"    = .("Number needed to diagnose"),
-                            "youden"  = .("Youden's index"),
-                            "pv.pos"  = .("Positive predictive value"),
-                            "pv.neg"  = .("Negative predictive value"),
-                            "lr.pos"  = .("Likelihood ratio of a positive test"),
-                            "lr.neg"  = .("Likelihood ratio of a negative test"),
-                            "p.rout"  = .("Proportion of subjects with outcome ruled out"),
-                            "p.rin"   = .("Proportion of subjects with outcome ruled in"),
-                            "p.tpdn"  = .("False-positive rate among outcome-negative subjects"),
-                            "p.tndp"  = .("False-negative rate among outcome-positive subjects"),
-                            "p.dntp"  = .("False-discovery proportion among test-positive subjects"),
-                            "p.dptn"  = .("False-omission proportion among test-negative subjects")
-                        )
+                        stat_labels <- private$.epirStatLabels()
                         epirresult2$statsnames <- unname(stat_labels[epirresult2$statistic])
 
                         ratiorows <- if (pp) {
@@ -685,26 +713,23 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                             lower = NA_real_,
                             upper = NA_real_,
                             statsabv = c("bal.acc", "f1.score"),
-                            statsnames = c(
-                                .("Balanced accuracy (CI not computed)"),
-                                .("F1 score at selected prevalence (CI not computed)")
-                            ),
+                            statsnames = unname(stat_labels[c("bal.acc", "f1.score")]),
                             stringsAsFactors = FALSE
                         )
                         epirresult_ratio <- rbind(epirresult_ratio, extra_rows)
 
-                        for (i in seq_len(nrow(epirresult_ratio))) {
-                            epirTable_ratio$addRow(
-                                rowKey = i,
-                                values = c(epirresult_ratio[i, ])
-                            )
+                        # as.character: epiR returns `statistic` as a factor, which does not match
+                        # a string rowKey.
+                        fill <- function(table, df, keys) {
+                            stats <- as.character(df$statistic)
+                            for (i in seq_len(nrow(df)))
+                                if (stats[i] %in% keys)
+                                    table$setRow(rowKey = stats[i],
+                                        values = list(est = df$est[i], lower = df$lower[i],
+                                                      upper = df$upper[i]))
                         }
-                        for (i in seq_len(nrow(epirresult_number))) {
-                            epirTable_number$addRow(
-                                rowKey = i,
-                                values = c(epirresult_number[i, ])
-                            )
-                        }
+                        fill(epirTable_ratio, epirresult_ratio, private$.epirRatioStats())
+                        fill(epirTable_number, epirresult_number, private$.epirNumberStats())
                     }
                 }
 

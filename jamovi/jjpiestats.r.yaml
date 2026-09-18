@@ -11,6 +11,7 @@ clearWith:
     - ratio
     - paired
     - typestatistics
+    - seed
     - label
     - digits
     - conflevel
@@ -38,6 +39,7 @@ items:
         - grvar
         - counts
         - typestatistics
+        - seed
         - paired
 
     - name: about

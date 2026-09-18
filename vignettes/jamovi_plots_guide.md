@@ -336,6 +336,25 @@ paths above (early return, resize, `.omv` reopen) plus *Export…* therefore see
 Invisible to testthat (the R wrapper passes `data =`, so jmvcore never clears it) and
 invisible in the run that fitted the model (caches still warm). A surplus flag is a LOW
 finding: the full dataset is re-read before every redraw for nothing.
+
+**Check helpers before removing a flag.** `waterfall` `.waterfallplot()` reads only state, but the
+`private$.annotationTrack()` it calls reads `self$data`; without the flag the plot still renders
+and the annotation tracks silently disappear (2026-09-16 OncoPath, where the reviewer listed it
+for removal).
+
+**Testing a flagged image:** `image$.render()` does not reproduce jamovi. It goes through
+`.createPlotObject()`, which nulls the data again before the renderer runs. The engine uses
+`.createImage()` (redraw) and `.savePart()` (export), which keep it:
+
+```r
+fresh <- myClass$new(options = ran$options, data = NULL)
+fresh$.setReadDatasetHeaderSource(function(vars) d[0, intersect(unlist(vars), names(d))])
+fresh$.setReadDatasetSource(function(vars) { reads <<- reads + 1; d[intersect(unlist(vars), names(d))] })
+fresh$init()
+fresh$.__enclos_env__$private$.data <- NULL      # init() leaves a 0-row frame that suppresses the re-read
+img <- fresh$results$myplot; img$setState(ran$results$myplot$state)
+fresh$.createImage(img$.__enclos_env__$private$.renderFun, img)   # reads == 1 only with the flag
+```
 `python3 tools/release_gate.py` traces renderers and reports both directions. Full
 rationale: `vignettes/jamovi_library_review_guide.md` §15.
 

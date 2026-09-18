@@ -18,6 +18,7 @@ jjscatterstats(
   marginalType = "none",
   smoothMethod = "lm",
   typestatistics = "parametric",
+  seed = 20250101,
   mytitle = "",
   xtitle = "",
   ytitle = "",
@@ -93,6 +94,12 @@ not as a percentage-bend correlation, which is a different estimator
 (verified: on the same 80 points statsExpressions returns 0.5894, matching
 WRS2::wincor exactly, while WRS2::pbcor returns 0.6152). Bayesian analysis
 quantifies evidence strength for clinical decision-making.}
+
+\item{seed}{Random seed for the statistics computed by resampling or
+posterior sampling (robust tests, Bayesian estimates, and some
+nonparametric effect-size intervals). The plot caption names the seed
+whenever it affected the numbers shown. The default reproduces the previous
+fixed behaviour.}
 
 \item{mytitle}{.}
 

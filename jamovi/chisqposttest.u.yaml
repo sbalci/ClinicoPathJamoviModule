@@ -67,7 +67,6 @@ children:
           - type: TextBox
             name: seed
             format: number
-            enable: (phiCI)
           - type: ComboBox
             name: testSelection
           - type: CheckBox

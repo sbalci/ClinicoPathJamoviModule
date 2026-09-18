@@ -1398,4 +1398,7 @@ importFrom(viridis,
   viridis
 )
 importFrom(vtree,vtree)
-importFrom(withr,local_seed)
+importFrom(withr,
+  local_seed,
+  with_seed
+)

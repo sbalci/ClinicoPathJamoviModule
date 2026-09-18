@@ -31,7 +31,7 @@ literally \code{{n}} that is then interpolated by name.
 This wrapper is a pass-through. When no supplied value contains a brace -- the
 overwhelming majority of calls -- it delegates untouched and the output is
 byte-identical to calling \code{jmvcore::format()} directly. Only when a value actually
-contains a \verb{\{} are that value's braces neutralised, so a pathological input
+contains an opening brace are that value's braces neutralised, so a pathological input
 degrades to slightly different text instead of hanging.
 
 Verified trigger conditions (R, jmvcore 2.7.x): a value containing its OWN

@@ -730,7 +730,6 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=800,
                 height=500,
                 renderFun=".spiderplot",
-                requiresData=TRUE,
                 visible="(showSpiderPlot)",
                 clearWith=list(
                     "patientID",

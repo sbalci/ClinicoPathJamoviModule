@@ -542,7 +542,6 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 width=900,
                 height=600,
                 renderFun=".plot",
-                requiresData=TRUE,
                 clearWith=list(
                     "maxMilestones",
                     "patientID",

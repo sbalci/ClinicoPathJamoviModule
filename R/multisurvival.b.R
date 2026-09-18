@@ -845,6 +845,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         self$results$todo$setVisible(!validation$valid)
         if (!validation$valid) return()
 
+        if (isTRUE(self$options$ci_optimism)) {
+          cindex_labels <- private$.cindexValidationLabels()
+          for (key in names(cindex_labels))
+            self$results$cindexValidation$addRow(rowKey = key,
+              values = list(metric = unname(cindex_labels[[key]])))
+        }
+
         # Static explanatory content; display is gated by the declarative
         # `visible: (... && showExplanations)` expressions.
         if (self$options$showExplanations) {
@@ -1867,6 +1874,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .run = function() {
         private$.resetComputeCaches()
         private$.initializeMessageOutputs()
+        # Before any early return: the scaffolded C-index rows can hold values
+        # jamovi copied back from the previous run.
+        private$.blankCIndexValidationRows()
         # Modular execution using helper functions
         if (!private$.validateAndPrepare()) {
           return()
@@ -3566,6 +3576,30 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         return(html_content)
       }
 
+      # library-audit 2026-09-16 meddecide [LOW] DONE (same class): cindexValidation has a fixed
+      # row set, so .init() scaffolds the rows and .run() fills them with setRow()
+      ,
+      .cindexValidationLabels = function() {
+        c(apparent = .("Apparent C-index"),
+          optimism = .("Optimism (bootstrap)"),
+          corrected = .("Optimism-corrected C-index"))
+      }
+
+      # Blank the value cells of the scaffolded rows. Called at the top of .run(),
+      # before validation: on reload jamovi copies the previous run's cells into
+      # every row with the same key unless a changed option is in this table's
+      # clearWith, so a run that stops early (multievent without dod/dooc, a
+      # jmvcore::reject() in .executeAnalysis()) would otherwise leave the old
+      # C-index values under the new error. Only rows .init() laid down are
+      # touched; setRow() on a missing rowKey errors.
+      ,
+      .blankCIndexValidationRows = function() {
+        tbl <- self$results$cindexValidation
+        present <- unlist(tbl$rowKeys, use.names = FALSE)
+        for (key in intersect(names(private$.cindexValidationLabels()), present))
+          tbl$setRow(rowKey = key, values = list(value = NA, detail = NA))
+      }
+
       # Bootstrap optimism-corrected Harrell's C-index (discrimination). Delegates
       # the numeric work to the pure .multisurvivalOptimismCIndex() helper in
       # R/multisurvival-metrics.R. Skipped for competing-risks (Fine-Gray)
@@ -3576,9 +3610,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (!isTRUE(self$options$ci_optimism)) return()
 
         tbl <- self$results$cindexValidation
-        # Rows are added by literal rowKey below; clear first so a re-run cannot
-        # append a second apparent/optimism/corrected set.
-        tbl$deleteRows()
+        # The apparent/optimism/corrected rows are scaffolded in .init() and
+        # blanked at the top of .run() (.blankCIndexValidationRows()), so a
+        # competing-risks, failed or early-returning run shows no old numbers.
 
         is_cr <- private$.isCompetingRisk()
         if (is_cr) {
@@ -3605,18 +3639,17 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           return()
         }
 
-        tbl$addRow(rowKey = "apparent", values = list(
-          metric = .("Apparent C-index"),
+        tbl$setNote("seed", jmvcore::format(.("Random seed: {seed}"),
+          seed = if (is.null(self$options$seed) || is.na(self$options$seed)) 1234L else self$options$seed))
+        tbl$setRow(rowKey = "apparent", values = list(
           value = res$apparent,
           detail = .("In-sample (optimistic)")
         ))
-        tbl$addRow(rowKey = "optimism", values = list(
-          metric = .("Optimism (bootstrap)"),
+        tbl$setRow(rowKey = "optimism", values = list(
           value = res$optimism,
           detail = .fmt(.("Mean over {b} resamples"), b = res$n_boot)
         ))
-        tbl$addRow(rowKey = "corrected", values = list(
-          metric = .("Optimism-corrected C-index"),
+        tbl$setRow(rowKey = "corrected", values = list(
           value = res$corrected,
           detail = .("Bias-corrected estimate")
         ))

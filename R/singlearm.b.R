@@ -120,6 +120,26 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           # rather than on the options: the KM-vs-CIF switch and the
           # piecewise-hazard suppression in .run(), both driven by
           # private$.eventRecode, which does not exist yet at .init() time.
+
+          if (isTRUE(self$options$advancedDiagnostics)) {
+            dq_labels <- private$.dataQualityLabels()
+            for (key in names(dq_labels))
+              self$results$dataQualityTable$addRow(rowKey = key,
+                values = list(metric = unname(dq_labels[[key]])))
+          }
+      },
+
+      # library-audit 2026-09-16 meddecide [LOW] DONE (same class): dataQualityTable has a fixed
+      # row set, so .init() scaffolds the rows and .run() fills them with setRow()
+      .dataQualityLabels = function() {
+        c(n_total = .("Sample Size"),
+          n_events = .("Number of Events"),
+          event_rate = .("Observed Event Proportion"),
+          followup_range = .("Follow-up Range (min-max)"),
+          median_followup = .("Median Follow-up (reverse KM)"),
+          memory = .("Dataset Memory Usage"),
+          time_complete = .("Time Variable Completeness (before exclusions)"),
+          outcome_complete = .("Outcome Variable Completeness (before exclusions)"))
       },
 
       # Message Accumulation Methods (to avoid serialization errors from dynamic Notices) ----
@@ -161,8 +181,16 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # for early-return paths reached after an option combination becomes
         # invalid.
         for (nm in c("medianTable", "survTable", "personTimeTable",
-                     "baselineHazardTable", "dataQualityTable")) {
+                     "baselineHazardTable")) {
           try(self$results[[nm]]$deleteRows(), silent = TRUE)
+        }
+        # dataQualityTable keeps the metric rows scaffolded in .init(); only
+        # their contents are reset (the median row's label varies per run).
+        if (isTRUE(self$options$advancedDiagnostics)) {
+          dq_labels <- private$.dataQualityLabels()
+          for (key in names(dq_labels))
+            try(self$results$dataQualityTable$setRow(rowKey = key, values = list(
+              metric = unname(dq_labels[[key]]), value = NA, assessment = NA)), silent = TRUE)
         }
 
         for (spec in list(
@@ -4019,23 +4047,20 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           "grading",
           .("Automated adequacy grades are not assigned. Interpret event counts, completeness, follow-up, confidence intervals, and time-specific risk sets in the context of the endpoint and intended use."))
 
-        # Add rows to table
-        quality_table$addRow(rowKey = 1, values = list(
-          metric = .("Sample Size"),
+        # Fill the rows scaffolded in .init()
+        quality_table$setRow(rowKey = "n_total", values = list(
           value = paste(dq$n_total, .("subjects")),
           assessment = not_graded
         ))
 
-        quality_table$addRow(rowKey = 2, values = list(
-          metric = .("Number of Events"),
+        quality_table$setRow(rowKey = "n_events", values = list(
           value = paste(dq$n_events, .("events")),
           assessment = not_graded
         ))
 
         # Event rate: reported, not graded. "20% or more = Good" said that a
         # cohort in which more patients had died was better data.
-        quality_table$addRow(rowKey = 3, values = list(
-          metric = .("Observed Event Proportion"),
+        quality_table$setRow(rowKey = "event_rate", values = list(
           value = paste0(dq$event_rate, "%"),
           assessment = not_graded
         ))
@@ -4046,15 +4071,14 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # driven by the single most extreme observation in the data set. The
         # grade now lives on the median follow-up row below, where a robust
         # summary of the observation window belongs.
-        quality_table$addRow(rowKey = 4, values = list(
-          metric = .("Follow-up Range (min-max)"),
+        quality_table$setRow(rowKey = "followup_range", values = list(
           value = paste0(dq$min_time, "-", dq$max_time, " ", self$options$timetypeoutput),
           assessment = not_graded
         ))
 
-        quality_table$addRow(rowKey = 5, values = list(
+        quality_table$setRow(rowKey = "median_followup", values = list(
           metric = if (isTRUE(dq$median_followup_reverse_km))
-            .("Median Follow-up (reverse KM)") else
+            unname(private$.dataQualityLabels()[["median_followup"]]) else
             .("Median Observed Time (reverse KM not estimable)"),
           value = paste(dq$median_followup, self$options$timetypeoutput),
           assessment = not_graded
@@ -4067,8 +4091,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # of jmvcore -- so format.object_size never ran, the cell received a raw
         # object_size, and the old grader read its BYTE count as megabytes and
         # labelled a 2 KB data set "Large".
-        quality_table$addRow(rowKey = 6, values = list(
-          metric = .("Dataset Memory Usage"),
+        quality_table$setRow(rowKey = "memory", values = list(
           value = base::format(utils::object.size(results$cleanData), units = "auto"),
           assessment = not_graded
         ))
@@ -4100,14 +4123,12 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
           fmt <- function(pct) if (is.na(pct)) .("n/a") else paste0(round(pct, 1), "%")
 
-          quality_table$addRow(rowKey = 7, values = list(
-            metric = .("Time Variable Completeness (before exclusions)"),
+          quality_table$setRow(rowKey = "time_complete", values = list(
             value = fmt(time_complete),
             assessment = not_graded
           ))
 
-          quality_table$addRow(rowKey = 8, values = list(
-            metric = .("Outcome Variable Completeness (before exclusions)"),
+          quality_table$setRow(rowKey = "outcome_complete", values = list(
             value = fmt(outcome_complete),
             assessment = not_graded
           ))

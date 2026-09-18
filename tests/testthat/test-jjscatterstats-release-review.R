@@ -680,11 +680,17 @@ test_that("bfmessage is described and gated as what it actually does", {
                                             ggtheme = ggplot2::theme_bw(), theme = NULL),
             silent = TRUE)
         grDevices::dev.off(); on.exit()
-        !is.null(ggplot2::last_plot()$labels$caption)
+        caption <- ggplot2::last_plot()$labels$caption
+        if (is.null(caption)) NA_character_ else paste(deparse(caption), collapse = " ")
     }
-    expect_false(cap(typestatistics = "parametric", bfmessage = FALSE))
-    expect_true( cap(typestatistics = "parametric", bfmessage = TRUE))
-    expect_false(cap(typestatistics = "bayes",      bfmessage = TRUE))   # inert, hence gated
+    expect_true(is.na(cap(typestatistics = "parametric", bfmessage = FALSE)))
+    expect_match(cap(typestatistics = "parametric", bfmessage = TRUE), "BF", fixed = TRUE)
+    # library-audit 2026-09-16 meddecide [LOW] (seed visibility): a Bayesian correlation now carries a
+    #   caption naming its random seed, because its posterior estimate is sampled. "Inert" therefore means
+    #   no Bayes-factor message in that caption - not no caption at all, which this test used to check.
+    bayes <- cap(typestatistics = "bayes", bfmessage = TRUE)
+    expect_false(grepl("BF", bayes, fixed = TRUE))   # inert, hence gated
+    expect_match(bayes, "Random seed", fixed = TRUE)
 })
 
 

@@ -80,3 +80,83 @@ withBaseFormulaChar <- function(expr) {
 
     force(expr)
 }
+
+#' Does a ggstatsplot / statsExpressions result change with the random seed?
+#'
+#' Measured on statsExpressions 2.1.1 by computing each test under two seeds:
+#' parametric results never change; robust ones do (bootstrap intervals), except for
+#' correlations and contingency tables; Bayesian ones do for one- and two-sample tests,
+#' correlations and contingency tables (posterior draws); nonparametric ones only for
+#' three or more independent groups (the bootstrap interval of epsilon-squared).
+#'
+#' @param type `typestatistics`: "parametric", "nonparametric", "robust" or "bayes".
+#' @param design "between", "within", "one_sample", "correlation" or "contingency".
+#' @param k Number of groups or measurements compared.
+#' @return TRUE when the reported numbers depend on the seed.
+#' @noRd
+#' @keywords internal
+statsSeedMatters <- function(type, design, k = 2L) {
+    switch(design,
+        between     = type == "robust" || (type == "bayes" && k == 2) || (type == "nonparametric" && k >= 3),
+        within      = type == "robust" || (type == "bayes" && k == 2),
+        one_sample  = type %in% c("robust", "bayes"),
+        correlation = type == "bayes",
+        contingency = type == "bayes",
+        FALSE)
+}
+
+#' Does the Bayes-factor CAPTION under a plot depend on the random seed?
+#'
+#' ggstatsplot writes a `bf.message` caption only for a PARAMETRIC test, and that caption
+#' carries a posterior median and a credible interval, both sampled. Measured on
+#' ggstatsplot 0.13.x with two seeds: the caption differs for a one-sample test, a
+#' correlation, a contingency table, a paired comparison with any number of measurements,
+#' and an independent comparison of exactly two groups; an independent comparison of three
+#' or more groups draws no caption at all.
+#'
+#' @param type `typestatistics`.
+#' @param design "between", "within", "one_sample", "correlation" or "contingency".
+#' @param k Number of groups or measurements compared.
+#' @param bfmessage Whether the Bayes-factor message is switched on.
+#' @return TRUE when the caption is drawn AND its numbers depend on the seed.
+#' @noRd
+#' @keywords internal
+captionSeedMatters <- function(type, design, k = 2L, bfmessage = FALSE) {
+    if (!isTRUE(bfmessage) || !identical(type, "parametric")) return(FALSE)
+    switch(design,
+        between     = k == 2,
+        within      = TRUE,
+        one_sample  = TRUE,
+        correlation = TRUE,
+        contingency = TRUE,
+        FALSE)
+}
+
+#' Name the random seed under a plot whose statistics depend on it
+#'
+#' Appended to an existing text caption; a combined (patchwork) plot gets it as the
+#' overall caption.
+#'
+#' @param plot A ggplot or patchwork object.
+#' @param self The analysis, for the translation of the caption.
+#' @param seed The seed the statistics were computed with.
+#' @return The plot with the caption added.
+#' @noRd
+#' @keywords internal
+addSeedCaption <- function(plot, self, seed) {
+    text <- jmvcore::format(.("Random seed: {seed}"), seed = seed)
+    if (inherits(plot, "patchwork"))
+        return(plot + patchwork::plot_annotation(caption = text))
+    old <- plot$labels$caption
+    caption <- if (is.character(old) && any(nzchar(old))) {
+        paste(c(old, text), collapse = "\n")
+    } else if (is.language(old) || is.expression(old)) {
+        # The Bayes-factor caption is plotmath, not text: stack the seed under it with atop()
+        # rather than replacing it, or the figure loses the Bayes factor it was drawing.
+        expr <- if (is.expression(old)) old[[1]] else old
+        as.expression(bquote(atop(.(expr), .(text))))
+    } else {
+        text
+    }
+    plot + ggplot2::labs(caption = caption)
+}

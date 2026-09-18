@@ -1285,6 +1285,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
             ,
             .plot = function(image, ggtheme, theme, ...) {
+                # The Bayesian contingency test samples its posterior, and a frequentist
+                # run with the Bayes factor message draws one too: seed them and name it.
+                withr::local_seed(self$options$seed)
+
                 # Validation ----
                 if (is.null(self$options$dep) || is.null(self$options$group))
                     return()
@@ -1318,6 +1322,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     )
                 }
 
+                if (statsSeedMatters(private$.option("typestatistics"), "contingency") ||
+                    captionSeedMatters(private$.option("typestatistics"), "contingency", 2L, self$options$bfmessage))
+                    plot <- addSeedCaption(plot, self, self$options$seed)
+
                 # Print Plot ----
                 print(plot)
                 TRUE
@@ -1327,6 +1335,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             ,
 
             .plot2 = function(image, ggtheme, theme, ...) {
+                # The Bayesian contingency test samples its posterior, and a frequentist
+                # run with the Bayes factor message draws one too: seed them and name it.
+                withr::local_seed(self$options$seed)
+
                 # Validation ----
                 if (is.null(self$options$dep) || is.null(self$options$group) || is.null(self$options$grvar))
                     return()
@@ -1359,6 +1371,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         grouped = TRUE
                     )
                 }
+
+                if (statsSeedMatters(private$.option("typestatistics"), "contingency") ||
+                    captionSeedMatters(private$.option("typestatistics"), "contingency", 2L, self$options$bfmessage))
+                    plot2 <- addSeedCaption(plot2, self, self$options$seed)
 
                 # Print Plot ----
                 print(plot2)

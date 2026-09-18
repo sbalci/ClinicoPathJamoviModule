@@ -101,10 +101,12 @@ cost of speed.}
 the rows that are not sampled cannot be detected, so the reported count is
 a lower bound; larger values recover more of them at the cost of speed.}
 
-\item{seed}{Random seed used for the reproducible random subsample that is
-drawn when the dataset exceeds the subsampling threshold. Change this value
-to draw a different sample; the default of 123 reproduces the previous
-fixed behaviour.}
+\item{seed}{Random seed for the random subsample drawn when the dataset
+exceeds the subsampling threshold, and for the randomised detection methods
+(MCD draws random subsets; ICS simulates its cutoff). The outlier table
+names the seed whenever it affected the result. Change it to draw a
+different sample; the default of 123 reproduces the previous fixed
+behaviour.}
 }
 \value{
 A results object containing:

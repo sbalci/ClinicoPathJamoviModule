@@ -7,12 +7,14 @@ reviewer against this project's submodules:
 
 | Report | Module | Date |
 |---|---|---|
+| `jamovi-library-audit/2026-07-13 <Module>.md` (×5) | all five modules (round 1) | 2026-07-13 |
 | `jamovi-library-audit/2026-08-17 ClinicoPathDescriptives.md` | ClinicoPathDescriptives | 2026-08-17 |
 | `jamovi-library-audit/2026-08-17 jsurvival.md` | jsurvival | 2026-08-17 |
 | `jamovi-library-audit/2026-08-17 meddecide.md` | meddecide | 2026-08-17 |
 | `jamovi-library-audit/2026-08-18 OncoPath.md` | OncoPath | 2026-08-18 |
 | `jamovi-library-audit/2026-08-18 jjstatsplot.md` | jjstatsplot | 2026-08-18 |
 | `jamovi-library-audit/2026-09-15 jsurvival.md` | jsurvival (round 3) | 2026-09-15 |
+| `jamovi-library-audit/2026-09-16 <Module>.md` (×4) | OncoPath, ClinicoPathDescriptives, jjstatsplot, meddecide (round 4) | 2026-09-16 |
 
 Every rule below is something the reviewer *actually raised*, on real files, with
 severity attached. Nothing here is speculative.
@@ -80,8 +82,11 @@ Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-zzz-dependency-de
 Rscript --vanilla tools/submodule_smoke.R ../<Module>   # installed namespace of a submodule (section 19)
 
 # 9. requiresData contract, CollapseBox Title Case, .() padding, refs,
-#    clearWith, renderFun, entities, versions                            [HIGH..LOW]
+#    clearWith, renderFun, entities, versions, NEWS.md heading,
+#    catalog scope, " [..]" and \u{} inside .(), translated sprintf
+#    specifiers, notice title colours                                    [CRITICAL..LOW]
 python3 tools/release_gate.py      # FAIL lines block; read every WARN for shipped analyses
+python3 tools/release_gate.py --root ../<Module>   # the same checks on the tree the reviewer reads
 
 # 10. Everything still compiles
 Rscript -e 'Sys.unsetenv("ELECTRON_RUN_AS_NODE"); jmvtools::prepare(".")'
@@ -102,6 +107,11 @@ Plus the cheap metadata gates the reviewer checks first:
 - Every `renderFun:` resolves to a real `function(image, ...)` method.
 - No committed build artifacts (`*.tar.gz`, `*.jmo`).
 - `compilerMode: tame` on every `.u.yaml`.
+- `NEWS.md` has a heading for the exact `DESCRIPTION` version. `_updateModules.R` rewrites
+  `Version:` on every regeneration and never writes `NEWS.md`, so after each regeneration the
+  submodule's changelog is one release behind until a person writes it (2026-09-16 OncoPath).
+- `jamovi/i18n` holds only this module's strings: the updater copies the umbrella catalog and
+  `jmvtools::i18nUpdate()` trims it at build ([section 9](#9-rule-translatable-strings-are-whole-sentences)).
 
 ---
 
@@ -119,9 +129,12 @@ problems, not one-off bugs** — when one function does it, the whole module doe
 | 5 | Named HTML entities that will render literally | 3 of 5 | MEDIUM |
 | 6 | `setVisible(FALSE)` used to signal a failure | 3 of 5 | MEDIUM–HIGH |
 | 7 | Packages used but not declared in `Imports:` | 2 of 5 | LOW–MEDIUM |
-| 8 | Opaque light-theme HTML colours | 1 of 5 (module-wide) | MEDIUM |
+| 8 | HTML that ignores the dark theme (opaque pastels; fixed title hues on a tint) | 2 of 5 | MEDIUM–INFO |
 | 9 | Bare `warning()` the user never sees | 1 of 5 | MEDIUM |
 | 10 | Dead code referencing commented-out schema | 2 of 5 | MEDIUM |
+| 11 | `requiresData: true` on renderers that draw from state only | 5 of 5 (rounds 3–4) | LOW |
+| 12 | Translation catalogs inherited from the umbrella | 3 of 5 (round 4) | MEDIUM–LOW |
+| 13 | `NEWS.md` behind the `DESCRIPTION` version | 2 of 5 (round 4) | LOW–INFO |
 
 **The lesson:** when a review names one instance, grep for the class and fix all
 of it. The reviewer explicitly rewards this — "several of them by fixing the
@@ -280,6 +293,27 @@ Rules of thumb:
 - **Explicit dark text** (`color: #721c24`, `#856404`, `#155724`) inside a panel
   you made translucent: change to `color: inherit`. The semantic colour is
   already carried by the border accent.
+- **Saturated text on a tint is not safe either.** Round 4 (2026-09-16 OncoPath [INFO])
+  found notice titles coloured by severity (`#dc2626`, `#ea580c`, `#ca8a04`, `#2563eb`)
+  above a translucent tint, with a comment claiming they were "saturated enough to read on
+  both" themes. Measured (WCAG, against a dark pane `#2b2b2b`): ERROR 2.93:1 and INFO
+  2.74:1 — below the 3:1 floor even for large bold text; WARNING was 2.94:1 on white. A
+  hue that passes on one background fails on the other. Titles take `color: inherit`; the
+  border and the tint carry the severity. Measure a colour claim before writing it in a comment.
+
+```r
+# WRONG - a fixed title hue on a translucent tint
+"<strong style='color: ", style$color, ";'>", title, "</strong>"
+# RIGHT - the title follows the pane; severity lives in the border and tint
+"<strong style='color: inherit;'>", title, "</strong>"
+```
+
+### Enforce it
+
+`python3 tools/theme_safe_html.py` (opaque pastels; must report 0) and
+`python3 tools/release_gate.py` `check_notice_title_colour` (fixed title hues in a
+`.renderNotices()`; WARN — 9 shipped renderers in jjstatsplot, meddecide and jsurvival
+at round 4). `theme_safe_html.py` cannot see coloured text on a translucent tint.
 
 ### What you cannot do
 
@@ -427,29 +461,39 @@ to PDF and the raw entity text comes through.
 
 ### The fix
 
-Use the real character — but written as a `\u{}` escape, because `R CMD check`
-flags literal non-ASCII bytes in R source.
+Use the real character — but written as a `\uXXXX` escape (exactly four hex digits,
+**no braces**), because `R CMD check` flags literal non-ASCII bytes in R source.
+
+**Why no braces:** R reads `\u{2265}` and `\u2265` identically, but the jamovi catalog
+extractor (`jmvtools::i18nUpdate()`) reads the *source text* and decodes only `\uXXXX`.
+Inside `.()` a braced escape reaches the catalog as the literal msgid `\u{2265}…`, which never
+matches the runtime string — the sentence stays English in every language even when `tr.po`
+"translates" it (round 4: 110 shipped sites across four modules). This table used to show the
+braced form. `R` reads at most four hex digits after `\u`, so `\u22655` is `≥5` — no ambiguity.
 
 | Entity | Char | Escape |
 |---|---|---|
-| `&minus;` | − | `\u{2212}` |
-| `&mdash;` | — | `\u{2014}` |
-| `&ndash;` | – | `\u{2013}` |
-| `&rarr;` | → | `\u{2192}` |
-| `&times;` | × | `\u{00D7}` |
-| `&plusmn;` | ± | `\u{00B1}` |
-| `&alpha;` | α | `\u{03B1}` |
-| `&beta;` | β | `\u{03B2}` |
-| `&kappa;` | κ | `\u{03BA}` |
-| `&ge;` | ≥ | `\u{2265}` |
-| `&eacute;` | é | `\u{00E9}` |
-| `&nbsp;` | (nbsp) | `\u{00A0}` |
+| `&minus;` | − | `\u2212` |
+| `&mdash;` | — | `\u2014` |
+| `&ndash;` | – | `\u2013` |
+| `&rarr;` | → | `\u2192` |
+| `&times;` | × | `\u00D7` |
+| `&plusmn;` | ± | `\u00B1` |
+| `&alpha;` | α | `\u03B1` |
+| `&beta;` | β | `\u03B2` |
+| `&kappa;` | κ | `\u03BA` |
+| `&ge;` | ≥ | `\u2265` |
+| `&eacute;` | é | `\u00E9` |
+| `&nbsp;` | (nbsp) | `\u00A0` |
+
+Placeholder tokens such as `[[APPROX]]` replaced by a helper after translation are not an
+alternative inside `.()`: a space before `[` truncates the string ([section 9](#9-rule-translatable-strings-are-whole-sentences)).
 
 For `&nbsp;` used purely as a table-cell spacer, the simplest fix is to drop it:
 `<td></td>` renders the same in HTML and exports cleanly.
 
 **Caveat for very large HTML literals.** In a string literal longer than ~10,000
-characters, `\u{}` escapes can hit a parse trap in a non-UTF-8 locale. In those
+characters, `\u` escapes can hit a parse trap in a non-UTF-8 locale. In those
 specific cases use HTML *numeric* entities (`&#x2192;`) instead — numeric
 entities are part of the HTML spec and are not affected by the named-entity
 change. See `reference_nonascii_conversion_pitfalls`.
@@ -569,6 +613,62 @@ frame".
 Two thoroughly translated analyses and two untranslated ones in the same menu
 "reads as broken rather than as partial." If you internationalise, do the whole
 module.
+
+### Round 4: wrapping a string in `.()` is not the end (2026-09-16 OncoPath)
+
+The August coverage work took `diagnosticmeta` from 1 to 214 `.()` calls. It also created
+four defects that only show outside English:
+
+1. **Band words spliced into a sentence.** `.("strong")` substituted into
+   `.("… provides %s evidence …")`. In Turkish a spliced phrase doubled a postposition
+   ("…ölçümleri **ile ile** …"). Bake each band into its own whole sentence and pick with
+   `switch()`; don't splice nouns either — Turkish marks case on the noun itself.
+2. **A translated word compared with English.** `plr_class <- .("not estimable")` then
+   `if (plr_class != "not estimable")` — always TRUE once translated, so Turkish printed
+   "LR+ = Inf … tahmin edilemiyor kanıt" and LR− = NaN stopped the summary with
+   *missing value where TRUE/FALSE needed*. Branch on untranslated keys or on the numbers;
+   `.()` only at the point of display.
+3. **`" ["` inside `.()`.** jmvcore's `Translator` splits `"(.*) \\[(.*)\\]"` as a context
+   marker. With no catalog entry — any language without a catalog, or the umbrella during
+   development — everything from the space-bracket on disappears: the LR notes ended at
+   "(specificity". Write `≈` as `\u2248`, a CI as "95% CI %s to %s". A trailing
+   ` [ctx]` also becomes msgctxt at extraction (see `jamovi_i18n_guide.md`).
+4. **A translation that breaks `sprintf()`.** Turkish puts `%` before the number; the
+   translator turned `100%%` into `%%%100` and `50%%` into `%%%50`, leaving `%100` / `%50'`,
+   which `sprintf()` rejects with *unrecognised format specification* — in Turkish only
+   (`diagnosticmeta`, and jsurvival `singlearm`). A translation must keep every conversion
+   of its msgid. Templates formatted twice keep `%%%%` in both.
+
+Plus two catalog rules from the same round:
+
+- **Ship only the module's own strings.** Copying the umbrella's catalog put 31,690 msgids
+  (7.3 MB of runtime json) into a module that uses 1,499. `_updateModules.R` `build_module()`
+  now runs `jmvtools::i18nUpdate()`, which keeps a translation for every string still used
+  and deletes the rest.
+- **Braced escapes never translate** — see [section 7](#7-rule-no-named-html-entities-except-the-structural-five).
+
+**Test it without a translator.** A pseudo-catalog that wraps every `.()` literal as
+`«…»` makes all four visible in English: nesting `«…«…»…»` is a splice, a space next to a
+mark is padding, and leaked `Inf`/`NaN` is a translated-word comparison
+(`tests/testthat/test-oncopath-library-audit.R` → "report sentences translate as whole
+sentences"). `jmvcore::Options$new()$translate(s)` has no catalog, so
+`identical(translate(s), s)` catches the `" ["` truncation for every literal.
+
+### Enforce it
+
+`python3 tools/release_gate.py` (add `--root ../<Module>` for a submodule):
+
+| Check | Level | Shipped count at round 4 |
+|---|---|---|
+| `check_i18n_padding` — separator inside `.()` | WARN | OncoPath 0; CPD 2, JJ 3, MD 6 |
+| `check_i18n_bracket` — `" [..]"` inside `.()` | **FAIL** | 0 everywhere |
+| `check_i18n_braced_escape` — `\u{…}` inside `.()` | WARN | OP 21, CPD 32, MD 51, JS 6 |
+| `check_i18n_po_formats` — translation drops a conversion | WARN | umbrella 0; CPD 2, MD 2, JS 1 until regenerated |
+| `check_i18n_catalog_scope` — catalog msgids unused by the module | WARN | OP 0; CPD 30,405, MD 28,736, JS 17 until regenerated |
+
+Splices and translated-word comparisons have no static detector (a lowercase `.()` word is
+usually a legitimate label: 46 hits in OncoPath, 19 of them fine); the pseudo-translation test
+is the check.
 
 ---
 
@@ -747,6 +847,25 @@ Sys.unsetenv("ELECTRON_RUN_AS_NODE")   # VS Code sets this and breaks prepare()
 jmvtools::prepare(".")
 ```
 
+**Re-verified 2026-09-17** (jmvtools 28.3, jmvcore 2.7.38) on a clone of OncoPath: `type: Notice`
+still fails the schema; `type: Notification` compiles and `<fn>Results$new()` then fails with
+*attempt to apply non-function*.
+
+### Say so in the code
+
+Round 2 rejected this suggestion for ClinicoPathDescriptives and meddecide, and round 4
+(2026-09-16 OncoPath [INFO]) raised it again: the rejection lived only in our responses, which the
+reviewer never reads. Every hand-rolled notice helper now carries a comment the reviewer will see:
+
+```r
+# library-audit 2026-09-16 OncoPath [INFO] REJECTED: no native notice element - type: Notice fails the
+#   .r.yaml schema, type: Notification builds no results object (guide section 13)
+.addNotice = function(type, title, content) {
+```
+
+Put that line above `.addNotice()` in any analysis you touch. The theme concern that motivates
+the suggestion *is* fixable in HTML — [section 4](#4-rule-html-output-must-be-theme-safe).
+
 ---
 
 ## 14. Encoding review findings as tests
@@ -789,9 +908,13 @@ Read from jmvcore 2.7.38's own source:
 
 - `Analysis$run()` sets `private$.data <- NULL` as soon as `.run()` returns, unless the
   data frame was handed in by the caller.
-- `Analysis$.createImage()` (every redraw) and `Analysis$.createPlotObject()`
-  (*Export…*) re-read the dataset **only** when
-  `image$requiresData && is.null(private$.data)`.
+- `Analysis$.createImage()` (every redraw) and `Analysis$.savePart()` (*Export…*) re-read
+  the dataset **only** when `image$requiresData && is.null(private$.data)`, keep it while the
+  renderer runs, and null it afterwards.
+- `Analysis$.createPlotObject()` — behind the R-side `image$.render()` — also re-reads it, but
+  restores `NULL` in an `on.exit()` *before* the wrapped renderer runs. **A test that renders a
+  `requiresData: true` image through `$.render()` never sees the data the flag provides**; use
+  `analysis$.createImage(image$.__enclos_env__$private$.renderFun, image)` to reproduce the engine.
 - `jmvcore::Image`'s default is `requiresData = FALSE`.
 
 So a render function that runs *outside* `.run()` — on resize, on reopening a saved
@@ -830,6 +953,17 @@ only when the stored object would be huge (the `rms` nomogram) — and then it n
 `python3 tools/release_gate.py` traces each `renderFun` through the `private$`
 helpers it calls. A production analysis whose renderer reaches the data without
 `requiresData: true` is a **FAIL**; the reverse is a WARN count.
+
+**Round 4 (2026-09-16):** the surplus WARN came back in OncoPath (5), ClinicoPathDescriptives (5),
+jjstatsplot (7) and meddecide (18) — a WARN only jsurvival had been swept against. OncoPath is 0;
+the rest are answered in their own reports. The reviewer named six OncoPath images and was wrong
+about one: `waterfall` `.waterfallplot()` → `.annotationTrack()` reads `self$data`. Removing the
+flag there raises no error; the annotation tracks silently vanish on resize, reopen and export.
+Trace helpers, then prove it on the engine path — a fresh analysis with a counting
+`.setReadDatasetSource()`, `private$.data <- NULL` after `init()` (init leaves a 0-row header frame
+that suppresses the re-read), state restored, `.createImage()`: 1 read per render with the flag,
+0 without, and the output compared. `tests/testthat/test-oncopath-library-audit.R` carries an R port
+of the trace for a module's own tests.
 
 ---
 
@@ -977,6 +1111,34 @@ are about the rules, not the code:
 6. **Verify the reviewer's fix too.** The reviewer is usually right about the problem and
    occasionally wrong about the fix (`.()` in a file-level helper here; 2026-08's
    "unused" packages that the umbrella does use).
+
+### Round 4 (2026-09-16 OncoPath)
+
+Eight findings; five were caused by our own earlier remediation.
+
+| Finding | Rule existed? | Why it came back |
+|---|---|---|
+| `%>%` not importable — `waterfall` could not run (CRITICAL) | No | Round 2's cleanup added `magrittr` to OncoPath's `prune_imports` (commit `55a4e7186`). Every local check passed because `~/.Rprofile` attaches magrittr and `load_all()` sees everything. Now §19, the bare-symbol guard and `tools/submodule_smoke.R` (installed namespace, `--vanilla`). |
+| Catalogs 93% another module's strings (MEDIUM) | No | Round 2 answered "no catalogs" by copying the umbrella catalog (`i18n_files`, commit `99779adfe`); nothing trimmed it, and the meddecide audit test asserted the copy. Now `i18nUpdate()` in `build_module()` + `check_i18n_catalog_scope`. |
+| `requiresData: true` on state-only renderers (LOW) | Yes, §15 | A WARN, swept in jsurvival only. The reviewer's list included one site that must keep the flag. |
+| `.()` padding and spliced band words (LOW) | Yes, §9 | Padding: WARN, skimmed. Fragments: no detector; the August coverage work wrote them, plus a translated-word comparison and a `" ["` string that only fail outside English. |
+| `NEWS.md` one release behind (LOW) | No | The updater bumps `Version:` on every regeneration; `NEWS.md` belongs to a person and nothing checked it. Now `check_news`. |
+| Long functions (LOW) | Known | Deferred by decision. |
+| Two TODOs (INFO) | — | Both hid real defects: `[[APPROX]]` after a space truncated two sentences; the other named ~1,800 untranslated words. |
+| Native `Notice` instead of HTML (INFO) | Yes, §13 (rejected) | NO-CHANNEL: the rejection lived in a report the reviewer never sees. The theme point was right — our round-2 comment "titles saturated enough to read on both" was never measured (2.7–2.9:1). |
+
+**What to do differently (round 4):**
+
+1. **Check the tree that ships, in the environment that ships.** `--vanilla`, `release_gate.py
+   --root <sibling>`, `submodule_smoke.R`. The CRITICAL passed every umbrella check.
+2. **Our fixes are the main source of new findings.** A `prune_imports` entry, a catalog copy, an
+   i18n pass and a theme comment each created a finding. Treat remediation commits as code under
+   review: a class test, a breadcrumb, and a check on the shipped tree.
+3. **Translation work needs a non-English test.** English output cannot show splices, padding,
+   translated-word comparisons, `" ["` truncation or broken `%` in a translation; a pseudo-catalog
+   (§9) and the Turkish catalog can.
+4. **A comment that asserts a measurable property must have been measured.** Contrast, sizes,
+   counts.
 
 ---
 

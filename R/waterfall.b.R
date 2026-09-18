@@ -3,6 +3,7 @@
 #' @description R6 class for performing treatment response analysis using waterfall plots.
 #' @name waterfallClass
 #' @importFrom R6 R6Class
+#' @importFrom withr local_seed
 #' @return An \code{R6} class generator object for the \code{waterfallClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "waterfallClass",
@@ -10,9 +11,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
 
         # RECIST v1.1 Constants ----
-        RECIST_CR_THRESHOLD = -100,  # Complete Response threshold (\u{2264}-100%)
-        RECIST_PR_THRESHOLD = -30,   # Partial Response threshold (\u{2264}-30%)
-        RECIST_PD_THRESHOLD = 20,    # Progressive Disease threshold (\u{2265}+20%, inclusive)
+        RECIST_CR_THRESHOLD = -100,  # Complete Response threshold (\u2264-100%)
+        RECIST_PR_THRESHOLD = -30,   # Partial Response threshold (\u2264-30%)
+        RECIST_PD_THRESHOLD = 20,    # Progressive Disease threshold (\u2265+20%, inclusive)
         RECIST_SD_MIN = -30,         # Stable Disease minimum (-30%)
         RECIST_SD_MAX = 20,          # Stable Disease maximum (20%)
 
@@ -46,6 +47,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .noticeList = list(),
 
         # Add a notice to the collection
+        # library-audit 2026-09-16 OncoPath [INFO] REJECTED: no native notice element - type: Notice fails the
+        #   .r.yaml schema, type: Notification builds no results object (guide section 13)
         .addNotice = function(type, title, content) {
           private$.noticeList[[length(private$.noticeList) + 1]] <- list(
             type = type,
@@ -62,14 +65,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return()
           }
 
-          # Map notice types to colors and icons. Backgrounds are translucent
-          # rgba tints (house theme-safe pattern) so they composite over either
-          # jamovi theme; title colors are saturated enough to read on both.
+          # library-audit 2026-09-16 OncoPath [INFO] DONE: titles inherit the pane colour - fixed hues fell to
+          #   2.7-2.9:1 on the dark theme; the translucent tint and the border carry the severity
           typeStyles <- list(
-            ERROR = list(color = "#dc2626", bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", icon = ""),
-            STRONG_WARNING = list(color = "#ea580c", bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", icon = ""),
-            WARNING = list(color = "#ca8a04", bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", icon = ""),
-            INFO = list(color = "#2563eb", bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", icon = "")
+            ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", icon = ""),
+            STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", icon = ""),
+            WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", icon = ""),
+            INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", icon = "")
           )
 
           html <- "<div style='margin: 10px 0;'>"
@@ -81,7 +83,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               "<div style='background-color: ", style$bgcolor, "; ",
               "border-left: 4px solid ", style$border, "; ",
               "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-              "<strong style='color: ", style$color, ";'>",
+              "<strong style='color: inherit;'>",
               style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
               "<span style='color: inherit;'>", private$.safeHtmlOutput(notice$content), "</span>",
               "</div>"
@@ -106,10 +108,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
           burden <- 100 + values
           nadir_burden <- cummin(burden)
-          # Guard the degenerate case of a nadir at complete disappearance.
+          # After a complete response the nadir is zero, so a relative increase is
+          # undefined; any burden above zero is then the lesion reappearing, which
+          # RECIST v1.1 counts as progression. (Returning NA here censored every
+          # relapsing CR and pushed the KM median to "not reached".)
           rel_increase <- ifelse(nadir_burden > 0,
                                  (burden - nadir_burden) / nadir_burden * 100,
-                                 NA_real_)
+                                 ifelse(burden > 0, Inf, NA_real_))
 
           times[!is.na(rel_increase) &
                   rel_increase >= private$RECIST_PD_THRESHOLD &
@@ -117,112 +122,107 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Calculate time-to-event metrics
-        .calculateTimeToEventMetrics = function(df, patientID, timeVar, responseVar) {
+        #
+        # One record per patient from their measured assessments:
+        #   - time to first response: first post-baseline assessment at PR or better
+        #   - duration of response: from first response to progression over the
+        #     NADIR (RECIST v1.1: ">=20% increase taking as reference the smallest
+        #     sum on study"; reappearance after CR is progression), or censored at
+        #     the last MEASURED assessment - a scheduled visit without a measurement
+        #     is not follow-up in response.
+        # Responders are the patients whose FINAL category (after demotions and the
+        # category override) is CR/PR, so TTR/DoR describe the same patients as the
+        # ORR numerator. `final_categories` is data.frame(<patientID>, category).
+        .calculateTimeToEventMetrics = function(df, patientID, timeVar, responseVar,
+                                                final_categories = NULL) {
           if (is.null(timeVar) || !timeVar %in% names(df)) {
             return(NULL)
           }
 
           tryCatch({
-            # Convert to numeric
-            df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
-            df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
+            times_all <- jmvcore::toNumeric(df[[timeVar]])
+            values_all <- jmvcore::toNumeric(df[[responseVar]])
+            pr_thr <- private$RECIST_PR_THRESHOLD
 
-            metrics <- df %>%
-              dplyr::group_by(!!rlang::sym(patientID)) %>%
-              dplyr::arrange(!!rlang::sym(timeVar)) %>%
-              dplyr::summarise(
-                # Time to first response (PR or better: <=-30%)
-                time_to_first_response = ifelse(
-                  any(.data[[responseVar]] <= private$RECIST_PR_THRESHOLD, na.rm = TRUE),
-                  min(.data[[timeVar]][.data[[responseVar]] <= private$RECIST_PR_THRESHOLD], na.rm = TRUE),
-                  NA_real_
-                ),
-                # Duration of response (time from first response to progression/end)
-                #
-                # Progression is referenced to the NADIR -- the smallest percent
-                # change recorded so far -- not to baseline. RECIST v1.1 defines PD
-                # as ">=20% increase taking as reference the smallest sum on study".
-                # Testing `response > +20` against BASELINE instead means a patient
-                # who shrinks and then regrows is never recorded as progressing
-                # while their tumour is still smaller than at enrolment: a patient
-                # going 100 -> 60 -> 78 mm is +30% over their nadir (RECIST
-                # progression) yet sits at -22% from baseline, so they were counted
-                # as censored and their duration of response ran to last follow-up.
-                # That inflates every duration-of-response summary and the KM curve.
-                duration_of_response = ifelse(
-                  any(.data[[responseVar]] <= private$RECIST_PR_THRESHOLD, na.rm = TRUE),
-                  {
-                    first_response_time <- min(.data[[timeVar]][.data[[responseVar]] <= private$RECIST_PR_THRESHOLD], na.rm = TRUE)
-                    progression_times <- private$.progressionTimes(
-                      .data[[timeVar]], .data[[responseVar]], first_response_time)
-                    if (length(progression_times) > 0) {
-                      min(progression_times) - first_response_time  # Event observed
-                    } else {
-                      max(.data[[timeVar]]) - first_response_time  # Censored at last follow-up
-                    }
-                  },
-                  NA_real_
-                ),
-                # ADDED: Censoring indicator (1 = event/progression observed, 0 = censored)
-                duration_censored = ifelse(
-                  any(.data[[responseVar]] <= private$RECIST_PR_THRESHOLD, na.rm = TRUE),
-                  {
-                    first_response_time <- min(.data[[timeVar]][.data[[responseVar]] <= private$RECIST_PR_THRESHOLD], na.rm = TRUE)
-                    progression_times <- private$.progressionTimes(
-                      .data[[timeVar]], .data[[responseVar]], first_response_time)
-                    ifelse(length(progression_times) > 0, 1, 0)  # 1=event, 0=censored
-                  },
-                  NA_real_
-                ),
-                # Best response achieved. A patient whose every assessment is NA
-                # (a baseline row plus missing measurements passes validation)
-                # made min() return Inf and which.min() return integer(0);
-                # summarise() then failed with "must return size 1" and the
-                # whole TTR/DoR table vanished for the entire cohort.
-                best_response = {
-                  v <- .data[[responseVar]]
-                  if (all(is.na(v))) NA_real_ else min(v, na.rm = TRUE)
-                },
-                # Time to best response
-                time_to_best_response = {
-                  valid_idx <- which(!is.na(.data[[responseVar]]))
-                  if (length(valid_idx) == 0) NA_real_
-                  else .data[[timeVar]][valid_idx[which.min(.data[[responseVar]][valid_idx])]]
-                },
-                .groups = "drop"
-              ) %>%
-              dplyr::filter(!is.na(time_to_first_response) | !is.na(duration_of_response))
-
-            # Kaplan-Meier median duration of response (censoring-aware). The naive median
-            # of duration_of_response ignores responders still in response at last
-            # follow-up (duration_censored == 0) and so understates DoR.
-            km_median_dor <- NA_real_
-            n_dor_events <- NA_integer_
-            dor_ok <- !is.na(metrics$duration_of_response) & !is.na(metrics$duration_censored)
-            if (sum(dor_ok) >= 2 && requireNamespace("survival", quietly = TRUE)) {
-              km_dor <- tryCatch({
-                fit <- survival::survfit(
-                  survival::Surv(metrics$duration_of_response[dor_ok],
-                                 metrics$duration_censored[dor_ok]) ~ 1)
-                unname(summary(fit)$table["median"])
-              }, error = function(e) NA_real_)
-              km_median_dor <- km_dor
-              n_dor_events <- sum(metrics$duration_censored[dor_ok] == 1)
+            one_patient <- function(t, v) {
+              ok <- !is.na(t) & !is.na(v)
+              t <- t[ok]; v <- v[ok]
+              o <- order(t); t <- t[o]; v <- v[o]
+              post <- t > 0
+              best <- if (any(post)) min(v[post]) else NA_real_
+              ttb <- if (any(post)) t[post][which.min(v[post])] else NA_real_
+              last <- if (length(t)) max(t) else NA_real_
+              resp <- post & v <= pr_thr
+              if (!any(resp)) {
+                return(c(ttr = NA_real_, dor = NA_real_, event = NA_real_,
+                         best = best, ttb = ttb, last = last))
+              }
+              first <- min(t[resp])
+              prog <- private$.progressionTimes(t, v, first)
+              if (length(prog) > 0)
+                c(ttr = first, dor = min(prog) - first, event = 1, best = best, ttb = ttb, last = last)
+              else
+                c(ttr = first, dor = last - first, event = 0, best = best, ttb = ttb, last = last)
             }
 
-            # Summary statistics
+            ids <- df[[patientID]]
+            keep_id <- !is.na(ids)
+            per <- lapply(split(seq_along(ids)[keep_id], as.character(ids[keep_id])),
+                          function(i) one_patient(times_all[i], values_all[i]))
+            all_patients <- data.frame(
+              pid = names(per),
+              time_to_first_response = vapply(per, `[[`, numeric(1), "ttr"),
+              duration_of_response = vapply(per, `[[`, numeric(1), "dor"),
+              duration_censored = vapply(per, `[[`, numeric(1), "event"),
+              best_response = vapply(per, `[[`, numeric(1), "best"),
+              time_to_best_response = vapply(per, `[[`, numeric(1), "ttb"),
+              last_assessment = vapply(per, `[[`, numeric(1), "last"),
+              stringsAsFactors = FALSE, row.names = NULL
+            )
+            names(all_patients)[1] <- patientID
+
+            # Responders: final category CR/PR and a measured response time.
+            final_responder <- if (!is.null(final_categories)) {
+              resp_ids <- as.character(final_categories[[1]][
+                final_categories$category %in% c("CR", "PR")])
+              all_patients[[patientID]] %in% resp_ids
+            } else {
+              rep(TRUE, nrow(all_patients))
+            }
+            metrics <- all_patients[final_responder &
+                                      !is.na(all_patients$time_to_first_response), , drop = FALSE]
+            n_without_time <- if (!is.null(final_categories))
+              sum(final_categories$category %in% c("CR", "PR")) - nrow(metrics) else 0L
+
+            # Kaplan-Meier median duration of response (censoring-aware), with its
+            # 95% CI. The crude median ignores responders still in response.
+            km_median_dor <- NA_real_; km_lcl <- NA_real_; km_ucl <- NA_real_
+            n_dor_events <- if (nrow(metrics) > 0) sum(metrics$duration_censored == 1) else 0L
+            if (nrow(metrics) >= 2 && requireNamespace("survival", quietly = TRUE)) {
+              km <- tryCatch({
+                fit <- survival::survfit(
+                  survival::Surv(metrics$duration_of_response, metrics$duration_censored) ~ 1)
+                summary(fit)$table[c("median", "0.95LCL", "0.95UCL")]
+              }, error = function(e) c(NA_real_, NA_real_, NA_real_))
+              km_median_dor <- unname(km[1]); km_lcl <- unname(km[2]); km_ucl <- unname(km[3])
+            }
+
             summary_stats <- list(
-              median_time_to_response = median(metrics$time_to_first_response, na.rm = TRUE),
-              median_duration_of_response = median(metrics$duration_of_response, na.rm = TRUE),
+              median_time_to_response = if (nrow(metrics)) stats::median(metrics$time_to_first_response) else NA_real_,
+              median_duration_of_response = if (nrow(metrics)) stats::median(metrics$duration_of_response) else NA_real_,
               km_median_duration_of_response = km_median_dor,
+              km_median_lcl = km_lcl,
+              km_median_ucl = km_ucl,
               n_duration_events = n_dor_events,
-              median_time_to_best_response = median(metrics$time_to_best_response, na.rm = TRUE),
-              n_responders = sum(!is.na(metrics$time_to_first_response)),
-              n_with_duration_data = sum(!is.na(metrics$duration_of_response))
+              median_time_to_best_response = if (nrow(metrics)) stats::median(metrics$time_to_best_response, na.rm = TRUE) else NA_real_,
+              n_responders = nrow(metrics),
+              n_with_duration_data = sum(!is.na(metrics$duration_of_response)),
+              n_responders_without_time = max(0L, as.integer(n_without_time))
             )
 
             list(
               by_patient = metrics,
+              all_patients = all_patients,
               summary = summary_stats
             )
           }, error = function(e) {
@@ -237,11 +237,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             NULL
           })
-        },
-
-        # Check if dataset is large and needs optimization
-        .shouldOptimizeForLargeDataset = function(df) {
-          nrow(df) > 100 || length(unique(df[[1]])) > 50  # Assuming first column might be patient ID
         },
 
         # --- Issue #1 enhancements: baseline line + annotation markers ---
@@ -265,18 +260,23 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           src_pid_name <- self$options$patientID
           if (is.null(src_pid_name) || !(src_pid_name %in% names(source_df)))
             return(wdf)
-          idx <- match(wdf[[pidCol]], source_df[[src_pid_name]])
+          # First non-missing value per patient (in time order), not the first row.
+          timeVar <- self$options$timeVar
+          patient_value <- function(var) {
+            f <- private$.resolvePatientField(source_df, src_pid_name, var, timeVar)
+            f$value[match(as.character(wdf[[pidCol]]), as.character(f$ids))]
+          }
           if (!is.null(confVar) && confVar %in% names(source_df))
-            wdf$confirm_status <- as.character(source_df[[confVar]])[idx]
+            wdf$confirm_status <- as.character(patient_value(confVar))
           if (!is.null(ongVar) && ongVar %in% names(source_df))
-            wdf$ongoing_flag <- private$.coerceOngoing(source_df[[ongVar]][idx])
+            wdf$ongoing_flag <- private$.coerceOngoing(patient_value(ongVar))
           wdf
         },
 
         # Override computed RECIST category with a user-supplied category variable.
         # Matches by patient-ID VALUE; only rows with a supplied value are changed.
         # Expected values: CR / PR / SD / PD (case-insensitive).
-        .applyCategoryOverride = function(wdf, source_df, pidCol, categoryVar) {
+        .applyCategoryOverride = function(wdf, source_df, pidCol, categoryVar, timeVar = NULL) {
           if (is.null(categoryVar) || is.null(source_df) ||
               !(categoryVar %in% names(source_df)) || !(pidCol %in% names(wdf)) ||
               !("recist_category" %in% names(wdf)))
@@ -284,8 +284,21 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           src_pid_name <- self$options$patientID
           if (is.null(src_pid_name) || !(src_pid_name %in% names(source_df)))
             return(wdf)
-          idx <- match(wdf[[pidCol]], source_df[[src_pid_name]])
-          user_cat <- toupper(trimws(as.character(source_df[[categoryVar]])[idx]))
+          # Patient-level value: the first non-missing one in time order. match()
+          # on the patient ID read only the patient's FIRST row, so an override
+          # recorded on a follow-up row (e.g. a new lesion at week 12) was ignored.
+          field <- private$.resolvePatientField(source_df, src_pid_name, categoryVar, timeVar)
+          if (length(field$conflicts) > 0) {
+            private$.addNotice(
+              type = "WARNING",
+              title = .("CONFLICTING CATEGORY OVERRIDES"),
+              content = sprintf(
+                .("%d patient(s) have more than one response category override across their rows: %s. The first recorded value is used. Enter one category per patient."),
+                length(field$conflicts), paste(utils::head(field$conflicts, 10), collapse = ", "))
+            )
+          }
+          idx <- match(as.character(wdf[[pidCol]]), as.character(field$ids))
+          user_cat <- toupper(trimws(as.character(field$value)[idx]))
 
           # recist_category is a factor with levels CR/PR/SD/PD/Unknown. Assigning
           # a label outside that set silently produced NA (with an "invalid factor
@@ -340,14 +353,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             vars <- vars[vars %in% names(src)]
             if (length(vars) == 0) return(NULL)
 
-            # One row per patient, taken from the source data by ID.
-            idx <- match(as.character(df[[pid]]), as.character(src[[pid]]))
-
+            # One value per patient: the first non-missing one in time order (a
+            # value on a follow-up row was lost when only the first row was read).
             long <- do.call(rbind, lapply(vars, function(v) {
+                f <- private$.resolvePatientField(src, pid, v, plotData$options$timeVar)
                 data.frame(
                     bar   = seq_len(nrow(df)),
                     track = v,
-                    value = as.character(src[[v]])[idx],
+                    value = as.character(f$value)[match(as.character(df[[pid]]),
+                                                        as.character(f$ids))],
                     stringsAsFactors = FALSE
                 )
             }))
@@ -449,264 +463,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           plot
         },
 
-        # Memory-efficient processing for large datasets
-        .processLargeDataset = function(df, patientID, inputType, responseVar, timeVar = NULL, groupVar = NULL) {
-          tryCatch({
-            # Work with references to avoid copying data
-            df_copy <- df  # Minimal copy
-
-            # Convert to numeric efficiently
-            df_copy[[responseVar]] <- jmvcore::toNumeric(df_copy[[responseVar]])
-            if (!is.null(timeVar)) {
-              df_copy[[timeVar]] <- jmvcore::toNumeric(df_copy[[timeVar]])
-            }
-
-            if (inputType == "raw") {
-              # For raw data, process in chunks if very large
-              if (nrow(df_copy) > 1000) {
-                result <- private$.processRawDataInChunks(df_copy, patientID, responseVar, timeVar, groupVar)
-              } else {
-                result <- private$.processRawDataStandard(df_copy, patientID, responseVar, timeVar, groupVar)
-              }
-            } else {
-              # For percentage data, direct processing
-              result <- private$.processPercentageDataEfficient(df_copy, patientID, responseVar, timeVar, groupVar)
-            }
-
-            return(result)
-          }, error = function(e) {
-            # Fall back to standard processing; tell the user rather than
-            # leaving an R warning nobody sees.
-            private$.addNotice("WARNING", .("Large-dataset optimisation unavailable"), sprintf(
-              .("The optimised processing path failed (%s); the standard path was used instead, so results are unaffected."),
-              e$message))
-            return(private$.processDataStandard(df, patientID, inputType, responseVar, timeVar, groupVar))
-          })
-        },
-
-        # Process raw data in chunks for very large datasets
-        .processRawDataInChunks = function(df, patientID, responseVar, timeVar, groupVar) {
-          # Get unique patients and process in batches
-          unique_patients <- unique(df[[patientID]])
-          chunk_size <- 100  # Process 100 patients at a time
-
-          waterfall_results <- list()
-          spider_results <- list()
-
-          for (i in seq(1, length(unique_patients), by = chunk_size)) {
-            end_idx <- min(i + chunk_size - 1, length(unique_patients))
-            chunk_patients <- unique_patients[i:end_idx]
-
-            # Filter data for this chunk
-            chunk_df <- df[df[[patientID]] %in% chunk_patients, , drop = FALSE]
-
-            # Process this chunk
-            chunk_result <- private$.processRawDataStandard(chunk_df, patientID, responseVar, timeVar, groupVar)
-
-            # Accumulate results
-            if (i == 1) {
-              waterfall_results <- chunk_result$waterfall
-              spider_results <- chunk_result$spider
-            } else {
-              waterfall_results <- rbind(waterfall_results, chunk_result$waterfall)
-              if (!is.null(chunk_result$spider)) {
-                spider_results <- rbind(spider_results, chunk_result$spider)
-              }
-            }
-          }
-
-          return(list(waterfall = waterfall_results, spider = spider_results))
-        },
-
-        # Standard raw data processing (extracted for reuse)
-        .processRawDataStandard = function(df, patientID, responseVar, timeVar, groupVar) {
-          # Calculate percentage change from baseline
-          baseline_df <- df %>%
-            dplyr::filter(!!rlang::sym(timeVar) == 0) %>%
-            dplyr::select(!!rlang::sym(patientID), baseline = !!rlang::sym(responseVar))
-
-          processed_df <- df %>%
-            dplyr::left_join(baseline_df, by = patientID) %>%
-            dplyr::group_by(!!rlang::sym(patientID)) %>%
-            dplyr::arrange(!!rlang::sym(timeVar)) %>%
-            dplyr::mutate(
-              baseline = jmvcore::toNumeric(baseline),
-              response = ifelse(!is.na(baseline) & baseline != 0,
-                              ((!!rlang::sym(responseVar) - baseline) / baseline) * 100,
-                              NA_real_)
-            ) %>%
-            dplyr::ungroup()
-
-          # Create waterfall data (best response per patient).
-          # Drop all-NA patients first so an empty group does not become
-          # min(numeric(0)) = Inf (which .categorizeRECIST mis-labels as PD).
-          waterfall_data <- processed_df %>%
-            dplyr::filter(!is.na(response)) %>%
-            dplyr::group_by(!!rlang::sym(patientID)) %>%
-            dplyr::summarise(
-              response = min(response, na.rm = TRUE),
-              .groups = "drop"
-            )
-
-          # Add group information if available
-          if (!is.null(groupVar) && groupVar %in% names(df)) {
-            group_info <- df %>%
-              dplyr::select(!!rlang::sym(patientID), !!rlang::sym(groupVar)) %>%
-              dplyr::distinct()
-            waterfall_data <- waterfall_data %>%
-              dplyr::left_join(group_info, by = patientID)
-            names(waterfall_data)[names(waterfall_data) == groupVar] <- "patient_group"
-          }
-
-          # Add RECIST categories
-          waterfall_data$recist_category <- private$.categorizeRECIST(waterfall_data$response)
-
-          # Spider data needs patient_group too, or "Spider Plot Color By:
-          # Patient Groups" silently downgrades to responder coloring on the
-          # large-dataset path while working on the standard path.
-          if (!is.null(groupVar) && groupVar %in% names(processed_df))
-            processed_df$patient_group <- factor(processed_df[[groupVar]])
-
-          return(list(waterfall = waterfall_data, spider = processed_df))
-        },
-
-        # Efficient processing for percentage data
-        .processPercentageDataEfficient = function(df, patientID, responseVar, timeVar, groupVar) {
-          # Direct processing without copying
-          processed_df <- df
-          processed_df$response <- processed_df[[responseVar]]
-
-          # Create waterfall data efficiently
-          if (!is.null(timeVar) && timeVar %in% names(df)) {
-            # For time-series percentage data, get best response per patient.
-            # Drop all-NA patients first so an empty group does not become
-            # min(numeric(0)) = Inf (which .categorizeRECIST mis-labels as PD).
-            waterfall_data <- processed_df %>%
-              dplyr::filter(!is.na(response)) %>%
-              dplyr::group_by(!!rlang::sym(patientID)) %>%
-              dplyr::summarise(
-                response = min(response, na.rm = TRUE),
-                .groups = "drop"
-              )
-            spider_data <- processed_df
-          } else {
-            # Percentage data with no time variable. This must still collapse to
-            # one row per patient: without the reduction, a patient contributing
-            # several assessment rows was counted once per ROW, so ORR/DCR were
-            # computed over measurements rather than patients. Because this path
-            # is only reached above the 100-row / 50-patient threshold, the same
-            # dataset produced different rates on either side of that boundary
-            # (verified: 30 patients x 3 rows -> ORR 100%; 60 patients x 3 rows
-            # -> ORR 33.3%). The NA filter also matches the sibling branches, so
-            # unevaluable rows no longer inflate the denominator.
-            waterfall_data <- processed_df %>%
-              dplyr::filter(!is.na(response)) %>%
-              dplyr::group_by(!!rlang::sym(patientID)) %>%
-              dplyr::summarise(
-                response = min(response, na.rm = TRUE),
-                .groups = "drop"
-              )
-            spider_data <- NULL
-          }
-
-          # Add group information efficiently if available
-          if (!is.null(groupVar) && groupVar %in% names(df)) {
-            waterfall_data$patient_group <- df[[groupVar]][match(waterfall_data[[patientID]], df[[patientID]])]
-            if (!is.null(spider_data) && groupVar %in% names(spider_data))
-              spider_data$patient_group <- factor(spider_data[[groupVar]])
-          }
-
-          # Add RECIST categories
-          waterfall_data$recist_category <- private$.categorizeRECIST(waterfall_data$response)
-
-          return(list(waterfall = waterfall_data, spider = spider_data))
-        },
-
-        # Fallback to standard processing
-        .processDataStandard = function(df, patientID, inputType, responseVar, timeVar, groupVar) {
-          # This is the original processing logic as fallback
-          if (inputType == "raw") {
-            if (!is.null(timeVar)) {
-              df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
-              df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
-
-              baseline_df <- df %>%
-                dplyr::filter(!!rlang::sym(timeVar) == 0) %>%
-                dplyr::select(!!rlang::sym(patientID), baseline = !!rlang::sym(responseVar))
-
-              processed_df <- df %>%
-                dplyr::left_join(baseline_df, by = patientID) %>%
-                dplyr::group_by(!!rlang::sym(patientID)) %>%
-                dplyr::arrange(!!rlang::sym(timeVar)) %>%
-                dplyr::mutate(
-                  baseline = jmvcore::toNumeric(baseline),
-                  response = ifelse(!is.na(baseline) & baseline != 0,
-                                  ((!!rlang::sym(responseVar) - baseline) / baseline) * 100,
-                                  NA_real_)
-                ) %>%
-                dplyr::ungroup()
-            } else {
-              df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
-              processed_df <- df %>%
-                dplyr::group_by(!!rlang::sym(patientID)) %>%
-                dplyr::arrange(!!rlang::sym(patientID)) %>%
-                dplyr::mutate(
-                  baseline = dplyr::first(!!rlang::sym(responseVar)),
-                  response = ((!!rlang::sym(responseVar) - baseline) / baseline) * 100
-                ) %>%
-                dplyr::ungroup()
-            }
-          } else {
-            processed_df <- df
-            processed_df$response <- jmvcore::toNumeric(processed_df[[responseVar]])
-          }
-
-          # Create waterfall and spider data
-          if (!is.null(timeVar) && timeVar %in% names(processed_df)) {
-            # Drop all-NA patients first so an empty group does not become
-            # min(numeric(0)) = Inf (which .categorizeRECIST mis-labels as PD).
-            waterfall_data <- processed_df %>%
-              dplyr::filter(!is.na(response)) %>%
-              dplyr::group_by(!!rlang::sym(patientID)) %>%
-              dplyr::summarise(response = min(response, na.rm = TRUE), .groups = "drop")
-            spider_data <- processed_df
-          } else {
-            # Collapse to one row per patient here too, so rates are computed over
-            # patients rather than assessment rows regardless of which processing
-            # path a dataset happens to take.
-            waterfall_data <- processed_df %>%
-              dplyr::filter(!is.na(response)) %>%
-              dplyr::group_by(!!rlang::sym(patientID)) %>%
-              dplyr::summarise(response = min(response, na.rm = TRUE), .groups = "drop")
-            spider_data <- NULL
-          }
-
-          # Add group information
-          if (!is.null(groupVar) && groupVar %in% names(df)) {
-            if (!"patient_group" %in% names(waterfall_data)) {
-              group_info <- df %>%
-                dplyr::select(!!rlang::sym(patientID), !!rlang::sym(groupVar)) %>%
-                dplyr::distinct()
-              waterfall_data <- waterfall_data %>%
-                dplyr::left_join(group_info, by = patientID)
-              names(waterfall_data)[names(waterfall_data) == groupVar] <- "patient_group"
-            }
-            if (!is.null(spider_data) && groupVar %in% names(spider_data))
-              spider_data$patient_group <- factor(spider_data[[groupVar]])
-          }
-
-          # Add RECIST categories
-          waterfall_data$recist_category <- private$.categorizeRECIST(waterfall_data$response)
-
-          return(list(waterfall = waterfall_data, spider = spider_data))
-        },
-
-        # Categorize responses into RECIST-style categories (CR/PR/SD/PD).
-        # Shared by the large-dataset processing paths; mirrors the case_when
-        # in .processData so both paths yield identical factors. Missing this
-        # method previously caused "attempt to apply non-function" for any
-        # dataset large enough to enter the optimized path (>100 rows or
-        # >50 unique patients), e.g. the bundled histopathology example.
             # Enforce the two physical limits on tumour measurements, at the single
             # point where every processing path converges.
             #
@@ -805,7 +561,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #     response-evaluable and certainly not stable disease; counting them as
         #     SD inflates the disease control rate.
         .accountForUnevaluablePatients = function(waterfall_data, source_df,
-                                                  patientID, timeVar) {
+                                                  patientID, timeVar,
+                                                  responseVar = NULL,
+                                                  inputType = "percentage") {
           if (is.null(waterfall_data) || !is.data.frame(waterfall_data) ||
               is.null(patientID) || is.null(source_df) ||
               !patientID %in% names(source_df)) {
@@ -821,37 +579,49 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             unique(waterfall_data[[patientID]]) else character(0)
           dropped <- setdiff(all_ids, kept_ids)
 
-          # A cohort where nothing is evaluable previously produced an empty
-          # analysis with no explanation at all.
-          if (length(kept_ids) == 0) {
+          no_evaluable_notice <- function() {
             private$.addNotice(
               type = "ERROR",
               title = .("NO EVALUABLE PATIENTS"),
               content = sprintf(
-                .("None of the %d patients supplied could be evaluated for response. Every response value was missing, non-numeric, or lacked a usable baseline, so no rates, plots or categories can be produced. Check that the response variable holds numeric values and, for raw measurements, that each patient has a time = 0 baseline."),
+                .("None of the %d patients supplied could be evaluated for response. Every response value was missing, non-numeric, lacked a usable baseline, or had no post-baseline assessment, so no rates or categories can be produced. Check that the response variable holds numeric values and, for raw measurements, that each patient has a time = 0 baseline and at least one later measurement."),
                 length(all_ids))
             )
+          }
+
+          if (length(kept_ids) == 0) {
+            no_evaluable_notice()
             return(waterfall_data)
           }
 
           if (length(dropped) > 0) {
+            # The reason depends on the input type: raw measurements need a usable
+            # time = 0 baseline, while a percentage patient is dropped only when
+            # every response value is missing.
+            template <- if (identical(inputType, "raw"))
+              .("%d of %d patients were excluded from the response analysis because a usable baseline could not be established (baseline missing, zero, or non-numeric). Excluded: %s. All rates below are computed over the %d remaining patients, so they are NOT intention-to-treat.")
+            else
+              .("%d of %d patients were excluded from the response analysis because they have no non-missing response value. Excluded: %s. All rates below are computed over the %d remaining patients, so they are NOT intention-to-treat.")
             private$.addNotice(
               type = "WARNING",
               title = .("PATIENTS EXCLUDED"),
-              content = sprintf(
-                .("%d of %d patients were excluded from the response analysis because a usable baseline could not be established (baseline missing, zero, or non-numeric). Excluded: %s. All rates below are computed over the %d remaining patients, so they are NOT intention-to-treat."),
+              content = sprintf(template,
                 length(dropped), length(all_ids),
                 paste(utils::head(as.character(dropped), 10), collapse = ", "),
                 length(kept_ids))
             )
           }
 
-          # Patients with a baseline but no post-baseline assessment.
+          # Patients with no post-baseline ASSESSMENT: a later row counts only when
+          # its measurement is present. Counting rows by time alone let a scheduled
+          # visit with a missing measurement pass, and the patient became SD at 0%.
           if (!is.null(timeVar) && timeVar %in% names(source_df)) {
             tv <- jmvcore::toNumeric(source_df[[timeVar]])
+            measured <- if (!is.null(responseVar) && responseVar %in% names(source_df))
+              !is.na(jmvcore::toNumeric(source_df[[responseVar]])) else rep(TRUE, length(tv))
             post <- stats::aggregate(
-              list(n_post = tv), by = list(pid = source_df[[patientID]]),
-              FUN = function(x) sum(!is.na(x) & x > 0))
+              list(n_post = !is.na(tv) & tv > 0 & measured),
+              by = list(pid = source_df[[patientID]]), FUN = sum)
             no_post <- post$pid[post$n_post == 0]
             idx <- which(waterfall_data[[patientID]] %in% no_post)
             if (length(idx) > 0) {
@@ -862,7 +632,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 type = "WARNING",
                 title = .("NOT RESPONSE-EVALUABLE"),
                 content = sprintf(
-                  .("%d patient(s) have a baseline measurement but no post-baseline assessment and are therefore not response-evaluable: %s. They are reported as \"Unknown\" rather than as stable disease, so they do not inflate the disease control rate."),
+                  .("%d patient(s) have a baseline but no post-baseline measurement (no later row, or the later measurements are missing) and are therefore not response-evaluable: %s. They are reported as \"Unknown\" rather than as stable disease, so they do not inflate the disease control rate."),
                   length(idx),
                   paste(utils::head(as.character(waterfall_data[[patientID]][idx]), 10),
                         collapse = ", "))
@@ -870,9 +640,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
           }
 
+          # Checked after the demotions: a cohort can have rows for every patient
+          # and still leave nobody evaluable.
+          if (all(is.na(waterfall_data$response))) {
+            no_evaluable_notice()
+          }
+
           # (Small-cohort messaging lives in .processAndAnalyzeData, which runs
-          # after the demotions above and counts evaluable patients - a second
-          # notice here duplicated it with a different denominator.)
+          # after the demotions above and counts evaluable patients.)
 
           waterfall_data
         },
@@ -1097,7 +872,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               "<br><br>", .("Recommended actions:"),
               "<br>1. ", .("Verify data entry for calculation errors"),
               "<br>2. ", .("Check if baseline measurements are correct"),
-              "<br>3. ", .("Confirm percentage calculation method: ((current - baseline) / baseline) \u{00d7} 100"),
+              "<br>3. ", .("Confirm percentage calculation method: ((current - baseline) / baseline) \u00d7 100"),
               "<br>4. ", .("Values will be automatically capped at -100% for analysis"),
               "<br><br>", .("Note: Values <-100% are mathematically impossible for tumor shrinkage.")
             ))
@@ -1240,10 +1015,36 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
       ,
+      # One value per patient for a patient-level field (group, category override,
+      # confirmation, ongoing flag). The FIRST non-missing value in time order is used,
+      # so a value recorded on a follow-up row is not lost behind an empty baseline
+      # row; patients whose non-missing values disagree are returned in $conflicts.
+      .resolvePatientField = function(df, patientID, var, timeVar = NULL) {
+        ids <- df[[patientID]]
+        v <- df[[var]]
+        keep <- !is.na(ids) & !is.na(v) & trimws(as.character(v)) != ""
+        o <- if (!is.null(timeVar) && timeVar %in% names(df))
+          order(jmvcore::toNumeric(df[[timeVar]]), na.last = TRUE) else seq_along(ids)
+        o <- o[keep[o]]
+        first <- !duplicated(ids[o])
+        n_distinct <- tapply(as.character(v[keep]), as.character(ids[keep]),
+                             function(x) length(unique(x)))
+        list(
+          ids = ids[o][first],
+          value = v[o][first],
+          conflicts = names(n_distinct)[n_distinct > 1]
+        )
+      },
+
       # process validated data ----
+      #
+      # One processing path for every cohort size. There used to be a separate
+      # "large dataset" path above 100 rows with its own copy of the best-response
+      # and group logic; the copies drifted (patients duplicated when their group
+      # changed between rows, a numeric group crashing the plot), and the vectorised
+      # dplyr code below handles tens of thousands of rows in well under a second.
       .processData = function(df, patientID, inputType, responseVar, timeVar = NULL, groupVar = NULL) {
-        
-        # Validate input parameters first
+
         if (is.null(patientID) || is.null(responseVar)) {
           return(list(
             error = TRUE,
@@ -1251,54 +1052,39 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           ))
         }
 
-        # Optimize processing for large datasets
-        use_efficient_processing <- private$.shouldOptimizeForLargeDataset(df)
-        if (use_efficient_processing) {
-          return(private$.processLargeDataset(df, patientID, inputType, responseVar, timeVar, groupVar))
-        }
+        has_time <- !is.null(timeVar) && timeVar %in% names(df)
+        df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
+        if (has_time) df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
 
-        # For raw measurements, calculate percentage change from baseline
         if (inputType == "raw") {
-          # For raw data, we need time variable to identify baseline
-          if (!is.null(timeVar)) {
-            # Ensure numeric conversion for calculations
-            df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
-            df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
-            
-            # First, identify baseline values for each patient
+          if (has_time) {
+            # Percent change from each patient's time = 0 measurement.
             baseline_df <- df %>%
               dplyr::filter(!!rlang::sym(timeVar) == 0) %>%
               dplyr::select(!!rlang::sym(patientID), baseline = !!rlang::sym(responseVar))
-            
-            # Join baseline values and calculate response
+
             processed_df <- df %>%
               dplyr::left_join(baseline_df, by = patientID) %>%
               dplyr::group_by(!!rlang::sym(patientID)) %>%
               dplyr::arrange(!!rlang::sym(timeVar)) %>%
               dplyr::mutate(
-                # Ensure baseline is numeric
                 baseline = jmvcore::toNumeric(baseline),
-                # Calculate percentage change from baseline
                 response = ifelse(!is.na(baseline) & baseline != 0,
-                                ((!!rlang::sym(responseVar) - baseline) / baseline) * 100,
-                                NA_real_)
+                                  ((!!rlang::sym(responseVar) - baseline) / baseline) * 100,
+                                  NA_real_)
               ) %>%
               dplyr::ungroup()
           } else {
-            # Without time variable, assume first measurement is baseline
-            df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
-            
+            # Validation requires a time variable for raw input; kept for direct calls.
             processed_df <- df %>%
               dplyr::group_by(!!rlang::sym(patientID)) %>%
-              dplyr::arrange(!!rlang::sym(patientID)) %>%
               dplyr::mutate(
                 baseline = dplyr::first(!!rlang::sym(responseVar)),
                 response = ((!!rlang::sym(responseVar) - baseline) / baseline) * 100
               ) %>%
               dplyr::ungroup()
           }
-          
-          # Validate processed data
+
           if (nrow(processed_df) == 0) {
             return(list(
               error = TRUE,
@@ -1306,81 +1092,103 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
           }
         } else {
-          # Data is already in percentage format
-          df[[responseVar]] <- jmvcore::toNumeric(df[[responseVar]])
-          processed_df <- df %>%
-            dplyr::mutate(
-              response = !!rlang::sym(responseVar)
-            )
+          processed_df <- df
+          processed_df$response <- df[[responseVar]]
         }
-        
-        # Calculate SIMPLIFIED response categories (threshold-based, NOT full RECIST v1.1)
-        # Best response = most negative percent change (minimum value for tumor shrinkage)
-        # Optimized for large datasets
-        n_patients <- length(unique(processed_df[[patientID]]))
-        
-        df_waterfall <- processed_df %>%
-          dplyr::filter(!is.na(response)) %>%
+
+        # Best response = the most negative change over POST-BASELINE assessments.
+        # With a time variable the time = 0 row is the baseline itself (0% by
+        # definition for raw input, and the format the welcome text suggests for
+        # percentage input). Letting it compete in the minimum capped every
+        # patient's best response at 0%, so a tumour that only grew was reported as
+        # SD, PD could not occur and the disease control rate was inflated.
+        post <- !is.na(processed_df$response)
+        if (has_time) {
+          post <- post & !is.na(processed_df[[timeVar]]) & processed_df[[timeVar]] > 0
+        }
+        df_waterfall <- processed_df[post, , drop = FALSE] %>%
           dplyr::group_by(!!rlang::sym(patientID)) %>%
           dplyr::slice_min(response, with_ties = FALSE, n = 1) %>%
           dplyr::ungroup()
-        
-        # Validate waterfall data
+
+        # A patient with a usable value but no post-baseline one (a baseline row
+        # only, or follow-up rows whose measurement is missing) is not
+        # response-evaluable: keep them as "Unknown" instead of dropping them.
+        # Patients with no usable value at all are reported as excluded later.
+        with_value <- unique(processed_df[[patientID]][!is.na(processed_df$response)])
+        no_post <- setdiff(with_value, df_waterfall[[patientID]])
+        if (length(no_post) > 0) {
+          unevaluable <- data.frame(no_post, response = NA_real_, stringsAsFactors = FALSE)
+          names(unevaluable)[1] <- patientID
+          df_waterfall <- dplyr::bind_rows(df_waterfall, unevaluable)
+        }
+
         if (nrow(df_waterfall) == 0) {
           return(list(
             error = TRUE,
             message = .("No patients with valid response data found.")
           ))
         }
-        
-        df_waterfall <- df_waterfall %>%
-          dplyr::mutate(
-            # Create simplified response categories (threshold-based, NOT RECIST v1.1 compliant)
-            # NOTE: Variable name "recist_category" retained for backward compatibility
-            # but represents SIMPLIFIED categories (no confirmation, no new lesions, no non-target)
-            #
-            # Delegates to .categorizeRECIST so this path cannot drift from the
-            # other callers. The previous inline copy also declared its levels as
-            # c(..., .("Unknown")) while case_when emitted the untranslated
-            # "Unknown", so under any non-English locale every unevaluable
-            # patient silently became NA instead of "Unknown".
-            recist_category = private$.categorizeRECIST(response)
-          )
-        
-        # Add group variable if specified
-        if (!is.null(groupVar) && groupVar %in% names(processed_df)) {
-          # Get group information for each patient (use first occurrence if multiple)
-          group_info <- processed_df %>%
-            dplyr::group_by(!!rlang::sym(patientID)) %>%
-            dplyr::slice(1) %>%
-            dplyr::ungroup() %>%
-            dplyr::select(!!rlang::sym(patientID), patient_group = !!rlang::sym(groupVar))
-          
-          # Join group information to waterfall data
-          df_waterfall <- df_waterfall %>%
-            dplyr::left_join(group_info, by = patientID) %>%
-            dplyr::mutate(
-              patient_group = factor(patient_group)
+
+        df_waterfall$recist_category <- private$.categorizeRECIST(df_waterfall$response)
+
+        # Several rows per patient are reduced to one value; say so when the data
+        # give no time order to explain it (or repeat a visit time).
+        valued <- processed_df[!is.na(processed_df$response), , drop = FALSE]
+        if (!has_time) {
+          n_rows <- table(valued[[patientID]])
+          multi <- names(n_rows)[n_rows > 1]
+          if (length(multi) > 0) {
+            private$.addNotice(
+              type = "INFO",
+              title = .("SEVERAL ROWS PER PATIENT"),
+              content = sprintf(
+                .("%d patient(s) have more than one row and no time variable is selected, so the smallest (best) value was used as each patient's best response: %s. Select a time variable if these rows are visits."),
+                length(multi), paste(utils::head(multi, 10), collapse = ", "))
             )
+          }
+        } else {
+          dup_visit <- duplicated(valued[, c(patientID, timeVar)])
+          if (any(dup_visit)) {
+            dup_ids <- unique(as.character(valued[[patientID]][dup_visit]))
+            private$.addNotice(
+              type = "WARNING",
+              title = .("REPEATED VISIT TIMES"),
+              content = sprintf(
+                .("%d patient(s) have more than one assessment at the same time point: %s. All of them are used, and the best is taken as the best response. Check for duplicated rows."),
+                length(dup_ids), paste(utils::head(dup_ids, 10), collapse = ", "))
+            )
+          }
         }
 
-        # Prepare spider plot data
+        # One group per patient: the first non-missing value in time order. Joining
+        # on distinct (patient, group) pairs made a patient whose group changed
+        # between rows appear once per group.
         df_spider <- processed_df
-        
-        # Add group information to spider data if specified
-        if (!is.null(groupVar) && groupVar %in% names(df_spider)) {
-          df_spider <- df_spider %>%
-            dplyr::mutate(
-              patient_group = factor(!!rlang::sym(groupVar))
+        if (!is.null(groupVar) && groupVar %in% names(processed_df)) {
+          g <- private$.resolvePatientField(processed_df, patientID, groupVar,
+                                            if (has_time) timeVar)
+          group_levels <- levels(factor(g$value))
+          df_waterfall$patient_group <- factor(
+            as.character(g$value)[match(df_waterfall[[patientID]], g$ids)],
+            levels = group_levels)
+          df_spider$patient_group <- factor(
+            as.character(g$value)[match(df_spider[[patientID]], g$ids)],
+            levels = group_levels)
+          if (length(g$conflicts) > 0) {
+            private$.addNotice(
+              type = "WARNING",
+              title = .("GROUP CHANGES WITHIN PATIENT"),
+              content = sprintf(
+                .("%d patient(s) have more than one value of the group variable across their rows: %s. Each patient is counted once, in the group of their first recorded value. Check the group column."),
+                length(g$conflicts), paste(utils::head(g$conflicts, 10), collapse = ", "))
             )
+          }
         }
-        
 
-        # Add informative attributes about the processing
         attr(df_waterfall, "input_type") <- inputType
         attr(df_spider, "input_type") <- inputType
-
-        if (!is.null(timeVar)) {
+        if (has_time) {
           attr(df_spider, "time_variable") <- timeVar
         }
 
@@ -1436,127 +1244,89 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       ,
       # Calculate person-time metrics for enhanced analysis
-      .calculatePersonTimeMetrics = function(df, patientID, timeVar, responseVar) {
-        # Requires time variable to calculate person-time
+      #
+      # Per patient: follow-up = last measured assessment; time in response = the
+      # duration of response from .calculateTimeToEventMetrics (first response to
+      # nadir-referenced progression, else to the last measured assessment), so it
+      # stops at progression. Each patient's category is their FINAL category from
+      # the waterfall (after demotions and the override), so this table cannot
+      # disagree with the Response Categories table; patients who are not
+      # evaluable are left out and counted in `n_excluded`.
+      .calculatePersonTimeMetrics = function(df, patientID, timeVar, responseVar,
+                                             final_categories = NULL, tte = NULL) {
         if (is.null(timeVar) || !timeVar %in% names(df))
           return(NULL)
-
-        if (!patientID %in% names(df))
+        if (!patientID %in% names(df) || nrow(df) == 0)
+          return(NULL)
+        if (is.null(final_categories) || is.null(tte) || is.null(tte$all_patients))
           return(NULL)
 
-        if (nrow(df) == 0)
+        ap <- tte$all_patients
+        cats <- data.frame(pid = as.character(final_categories[[1]]),
+                           category = as.character(final_categories$category),
+                           stringsAsFactors = FALSE)
+        evaluable <- cats$pid[cats$category %in% c("CR", "PR", "SD", "PD")]
+        n_excluded <- length(setdiff(cats$pid, evaluable))
+
+        pt_by_patient <- ap[as.character(ap[[patientID]]) %in% evaluable, , drop = FALSE]
+        if (nrow(pt_by_patient) == 0)
           return(NULL)
-
-        df <- df %>%
-          dplyr::filter(!is.na(.data[[patientID]]))
-
-        if (nrow(df) == 0)
-          return(NULL)
-
-        # Convert time variable to numeric if needed
-        df[[timeVar]] <- jmvcore::toNumeric(df[[timeVar]])
-
-        response_col <- NULL
-        if ("percentage_change" %in% names(df)) {
-          response_col <- "percentage_change"
-        } else if ("response" %in% names(df)) {
-          response_col <- "response"
-        } else {
-          return(NULL)
-        }
-
-        df[[response_col]] <- jmvcore::toNumeric(df[[response_col]])
-
-        safe_extreme <- function(x, fun) {
-          x <- x[!is.na(x)]
-          if (length(x) == 0)
-            return(NA_real_)
-          fun(x)
-        }
-
-        # Delegates to .categorizeRECIST rather than repeating the thresholds, so
-        # the person-time table cannot disagree with the summary table. NA maps to
-        # "Unknown", which is absent from the factor levels applied below and so
-        # becomes NA exactly as the previous local helper did.
-        classify_response <- function(value) {
-          as.character(private$.categorizeRECIST(value))
-        }
-
-        pt_by_patient <- df %>%
-          dplyr::group_by(!!rlang::sym(patientID)) %>%
-          dplyr::summarise(
-            follow_up_time = safe_extreme(.data[[timeVar]], max),
-            best_response = safe_extreme(.data[[response_col]], min),
-            time_to_best = {
-              valid_idx <- which(!is.na(.data[[response_col]]))
-              if (length(valid_idx) == 0) {
-                NA_real_
-              } else {
-                best_idx <- valid_idx[which.min(.data[[response_col]][valid_idx])]
-                .data[[timeVar]][best_idx]
-              }
-            },
-            time_in_response = {
-              responders <- which(!is.na(.data[[response_col]]) & .data[[response_col]] <= private$RECIST_PR_THRESHOLD)
-              if (length(responders) == 0) {
-                0
-              } else {
-                start_time <- min(.data[[timeVar]][responders], na.rm = TRUE)
-                end_time <- max(.data[[timeVar]][responders], na.rm = TRUE)
-                if (is.finite(start_time) && is.finite(end_time)) max(end_time - start_time, 0) else 0
-              }
-            },
-            .groups = "drop"
-          )
-
-        if (!"best_response" %in% names(pt_by_patient))
-          return(NULL)
-
-        pt_by_patient <- pt_by_patient %>%
-          dplyr::mutate(
-            response_cat = vapply(best_response, classify_response, character(1), USE.NAMES = FALSE),
-            response_cat = factor(response_cat, levels = c("CR", "PR", "SD", "PD"))
-          )
+        pt_by_patient$response_cat <- factor(
+          cats$category[match(as.character(pt_by_patient[[patientID]]), cats$pid)],
+          levels = c("CR", "PR", "SD", "PD"))
+        pt_by_patient$follow_up_time <- pt_by_patient$last_assessment
+        pt_by_patient$time_to_best <- pt_by_patient$time_to_best_response
+        # Only final responders have a duration of response; everyone else has
+        # spent no time in response.
+        is_resp <- pt_by_patient$response_cat %in% c("CR", "PR") &
+          !is.na(pt_by_patient$duration_of_response)
+        pt_by_patient$time_in_response <- ifelse(is_resp, pt_by_patient$duration_of_response, 0)
+        pt_by_patient$dor_event <- ifelse(is_resp, pt_by_patient$duration_censored, NA_real_)
 
         total_patients <- nrow(pt_by_patient)
-        if (total_patients == 0)
-          return(NULL)
-
         total_person_time <- sum(pt_by_patient$follow_up_time, na.rm = TRUE)
         total_response_time <- sum(pt_by_patient$time_in_response, na.rm = TRUE)
 
-        pt_by_category <- pt_by_patient %>%
-          dplyr::group_by(response_cat, .drop = FALSE) %>%
-          dplyr::summarise(
-            patients = dplyr::n(),
-            person_time = sum(follow_up_time, na.rm = TRUE),
-            median_time_to_response = safe_extreme(time_to_best, stats::median),
-            median_duration = safe_extreme(time_in_response, stats::median),
-            .groups = "drop"
-          ) %>%
-          dplyr::mutate(
-            pct_patients = if (total_patients > 0) (patients / total_patients) * 100 else 0,
-            pct_time = if (!is.na(total_person_time) && total_person_time > 0) (person_time / total_person_time) * 100 else 0
-          )
-
-        response_rate <- if (!is.na(total_person_time) && total_person_time > 0) {
-          (total_response_time / total_person_time) * 100
-        } else {
-          NA_real_
+        km_median <- function(time, event) {
+          ok <- !is.na(time) & !is.na(event)
+          if (sum(ok) < 1 || !requireNamespace("survival", quietly = TRUE)) return(NA_real_)
+          tryCatch(unname(summary(survival::survfit(
+            survival::Surv(time[ok], event[ok]) ~ 1))$table["median"]),
+            error = function(e) NA_real_)
         }
+        safe_median <- function(x) if (all(is.na(x))) NA_real_ else stats::median(x, na.rm = TRUE)
 
-        summary_metrics <- list(
-          total_patients = total_patients,
-          total_person_time = total_person_time,
-          total_response_time = total_response_time,
-          response_rate_per_100 = response_rate
-        )
+        pt_by_category <- do.call(rbind, lapply(levels(pt_by_patient$response_cat), function(k) {
+          sub <- pt_by_patient[pt_by_patient$response_cat == k, , drop = FALSE]
+          responder <- k %in% c("CR", "PR")
+          data.frame(
+            response_cat = k,
+            patients = nrow(sub),
+            person_time = sum(sub$follow_up_time, na.rm = TRUE),
+            median_time_to_response = if (responder && nrow(sub)) safe_median(sub$time_to_best) else NA_real_,
+            median_duration = if (responder && nrow(sub)) km_median(sub$time_in_response, sub$dor_event) else NA_real_,
+            n_dor_events = if (responder) sum(sub$dor_event == 1, na.rm = TRUE) else NA_integer_,
+            stringsAsFactors = FALSE
+          )
+        }))
+        pt_by_category$response_cat <- factor(pt_by_category$response_cat, levels = c("CR", "PR", "SD", "PD"))
+        pt_by_category$pct_patients <- pt_by_category$patients / total_patients * 100
+        pt_by_category$pct_time <- if (total_person_time > 0)
+          pt_by_category$person_time / total_person_time * 100 else 0
 
-        return(list(
+        response_rate <- if (total_person_time > 0) total_response_time / total_person_time * 100 else NA_real_
+
+        list(
           by_patient = pt_by_patient,
           by_category = pt_by_category,
-          summary = summary_metrics
-        ))
+          summary = list(
+            total_patients = total_patients,
+            total_person_time = total_person_time,
+            total_response_time = total_response_time,
+            response_rate_per_100 = response_rate,
+            n_excluded = n_excluded
+          )
+        )
       }
 
       ,
@@ -1704,8 +1474,27 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         safe_timeVar <- self$options$timeVar
         safe_groupVar <- self$options$groupVar
 
+        # Rows without a patient ID cannot belong to a patient. Grouped by an NA
+        # key they became one phantom "NA" patient counted in ORR/DCR (and named
+        # "NA" by the duplicate-baseline check), so drop and report them first.
+        analysis_data <- self$data
+        if (!is.null(safe_patientID) && safe_patientID %in% names(analysis_data)) {
+          ids <- analysis_data[[safe_patientID]]
+          no_id <- is.na(ids) | trimws(as.character(ids)) == ""
+          if (any(no_id)) {
+            analysis_data <- analysis_data[!no_id, , drop = FALSE]
+            private$.addNotice(
+              type = "WARNING",
+              title = .("ROWS WITHOUT PATIENT ID"),
+              content = sprintf(
+                .("%d row(s) with no patient ID were excluded from the analysis; they cannot be assigned to a patient. Fill in the patient ID if they belong to a patient."),
+                sum(no_id))
+            )
+          }
+        }
+
         validated_data <- private$.validateData(
-          self$data,
+          analysis_data,
           safe_patientID,
           self$options$inputType,
           safe_responseVar,
@@ -1790,16 +1579,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Account for every patient that entered the analysis but does not appear
         # in the waterfall, and demote patients with no post-baseline assessment
-        # to "Unknown". Runs here because all three processing paths
-        # (.processData, .processDataStandard, .processLargeDataset) converge on
-        # this one return value.
+        # to "Unknown".
         if (!is.null(processed_data) && !is.null(processed_data$waterfall)) {
           processed_data$waterfall <- private$.enforceMeasurementLimits(
             processed_data$waterfall, validated_data, safe_patientID,
             safe_responseVar, self$options$inputType)
 
           processed_data$waterfall <- private$.accountForUnevaluablePatients(
-            processed_data$waterfall, validated_data, safe_patientID, safe_timeVar)
+            processed_data$waterfall, validated_data, safe_patientID, safe_timeVar,
+            safe_responseVar, self$options$inputType)
         }
 
         # Optional: override the computed RECIST category with a user-supplied one
@@ -1807,8 +1595,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # metrics and plots so ORR/DCR and bar coloring all reflect it.
         if (!is.null(processed_data) && !is.null(processed_data$waterfall)) {
           processed_data$waterfall <- private$.applyCategoryOverride(
-            processed_data$waterfall, self$data, safe_patientID,
-            self$options$responseCategoryVar)
+            processed_data$waterfall, analysis_data, safe_patientID,
+            self$options$responseCategoryVar, safe_timeVar)
         }
 
         # ============================================================================
@@ -1874,7 +1662,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         private$.addNotice(
           type = "WARNING",
           title = .("CONFIRMATION NOT REQUIRED"),
-          content = .("RECIST v1.1 requires CR/PR confirmation at \u{2265}4 weeks. This analysis uses FIRST instance of response thresholds without confirmation. ORR and DCR may be INFLATED compared to confirmed RECIST responses. For clinical trials, unconfirmed responses should be clearly disclosed as exploratory endpoints.")
+          content = .("RECIST v1.1 requires CR/PR confirmation at \u22654 weeks. This analysis uses FIRST instance of response thresholds without confirmation. ORR and DCR may be INFLATED compared to confirmed RECIST responses. For clinical trials, unconfirmed responses should be clearly disclosed as exploratory endpoints.")
         )
 
         # Warning #4: Time-to-Event Methodology Limitations (MEDIUM)
@@ -1885,7 +1673,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           private$.addNotice(
             type = "WARNING",
             title = .("TIME-TO-EVENT LIMITATIONS"),
-            content = .("Duration of response is reported both as a crude median (which ignores censoring and so understates DoR) and as a censoring-aware Kaplan-Meier median. Progression is detected as a >=20% increase over the NADIR (the smallest burden recorded so far), following RECIST v1.1. Two limitations remain. (1) The additional RECIST v1.1 requirement of a >=5 mm absolute increase cannot be applied to percent-change data, and new-lesion or non-target progression is invisible here, so progression may still be under-detected. (2) No log-rank test or Cox regression for covariates is provided. For formal progression-free survival (PFS) or duration of response analysis, use dedicated survival analysis functions. Current calculations are exploratory only.")
+            content = .("The headline duration of response is the censoring-aware Kaplan-Meier median; the crude median in the Time-to-Response table ignores censoring and understates DoR. Progression is detected as a >=20% increase over the NADIR (the smallest burden recorded so far), or any reappearance after a complete response, following RECIST v1.1. Two limitations remain. (1) The additional RECIST v1.1 requirement of a >=5 mm absolute increase cannot be applied to percent-change data, and new-lesion or non-target progression is invisible here, so progression may still be under-detected. (2) No log-rank test or Cox regression for covariates is provided. For formal progression-free survival (PFS) or duration of response analysis, use dedicated survival analysis functions. Current calculations are exploratory only.")
           )
         }
 
@@ -1918,7 +1706,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .("Only n=%d evaluable patients. ORR and DCR confidence intervals will be EXTREMELY WIDE and unreliable, and a single patient changes the rate by %.0f percentage points. Phase II oncology trials typically require minimum n=20-40 for meaningful ORR estimation. With n<10, results are purely descriptive and should NOT be used for treatment decision-making or regulatory submissions. Consider this a pilot/feasibility analysis only."),
                 n_patients, 100 / n_patients)
             )
-          } else if (n_patients < 20) {
+          } else if (n_patients > 0 && n_patients < 20) {
+            # (n = 0 is reported once, as NO EVALUABLE PATIENTS.)
             private$.addNotice(
               type = "WARNING",
               title = .("SMALL SAMPLE"),
@@ -1959,6 +1748,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Check for processing errors
         if (!is.null(processed_data$error) && processed_data$error) {
+          # Always in the notices panel: in guided mode todo2 is not used, so the
+          # failure was silent while the guide still said "Results will appear below".
+          private$.addNotice("ERROR", .("DATA PROCESSING ERROR"), processed_data$message)
           error_message <- paste0(
             "<br><br>", .("Data Processing Error:"),
             "<br>", processed_data$message,
@@ -1997,9 +1789,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
 
         
-        # Calculate person-time metrics if applicable
-        person_time_metrics <- NULL
-        personTimeVisible <- !is.null(self$options$timeVar) && self$options$inputType == "raw"
         
         ## Populate tables ----
         # 1. Response Summary Table
@@ -2074,10 +1863,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
 
-        # Add interpretations to clinical metrics
-        orr_interpretation <- private$.interpretORR(metrics$ORR)
-        dcr_interpretation <- private$.interpretDCR(metrics$DCR)
-
         # Row counter held in an environment so the nested add_metric_row()
         # helper can advance it without `<<-` into the enclosing method scope.
         idx_env <- new.env(parent = emptyenv())
@@ -2096,18 +1881,29 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           value = as.character(metrics$n)
         ))
 
+        # Rates with their exact (Clopper-Pearson) 95% CI. The value cells used to
+        # carry a verdict ("Excellent disease control", "Promising activity")
+        # graded on the point estimate alone; the interval is what a reader needs
+        # to judge a rate, and the benchmark depends on the tumour and setting.
+        rate_with_ci <- function(k, n, rate) {
+          ci <- tryCatch(stats::binom.test(k, n)$conf.int * 100, error = function(e) c(NA, NA))
+          if (any(is.na(ci))) sprintf("%.1f%%", rate)
+          else sprintf(.("%.1f%% (95%% CI %.1f-%.1f%%)"), rate, ci[1], ci[2])
+        }
+        n_resp <- sum(metrics$summary$n[metrics$summary$category %in% c("CR", "PR")])
+        n_ctrl <- sum(metrics$summary$n[metrics$summary$category %in% c("CR", "PR", "SD")])
 
         if (!is.na(metrics$ORR)) {
           add_metric_row(list(
             metric = .("Objective Response Rate (CR+PR)"),
-            value = sprintf("%.1f%% (%s)", metrics$ORR, orr_interpretation)
+            value = rate_with_ci(n_resp, metrics$n, metrics$ORR)
           ))
         }
 
         if (!is.na(metrics$DCR)) {
           add_metric_row(list(
             metric = .("Disease Control Rate (CR+PR+SD)"),
-            value = sprintf("%.1f%% (%s)", metrics$DCR, dcr_interpretation)
+            value = rate_with_ci(n_ctrl, metrics$n, metrics$DCR)
           ))
         }
 
@@ -2120,25 +1916,99 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Power belongs in a DESIGN calculation before the trial; see the
         # Group-Sequential Design & Sample Size analysis.
 
+        # Each patient's FINAL category (after demotions and the override): the
+        # time-to-event and person-time figures describe exactly these patients.
+        final_categories <- data.frame(
+          pid = as.character(processed_data$waterfall[[safe_patientID]]),
+          category = as.character(processed_data$waterfall$recist_category),
+          stringsAsFactors = FALSE)
 
-        # Control visibility of personTimeTable based on conditions
+        # Time to response and duration of response ----
+        tte_metrics <- NULL
+        if (!is.null(self$options$timeVar) && !is.null(processed_data$spider) &&
+            safe_timeVar %in% names(processed_data$spider)) {
+          tte_metrics <- private$.calculateTimeToEventMetrics(
+            processed_data$spider, safe_patientID, safe_timeVar, "response", final_categories)
+        }
+
+        if (!is.null(tte_metrics)) {
+          s <- tte_metrics$summary
+          fmt_num <- function(x) if (is.na(x)) "NR" else sprintf("%.1f", x)
+          km_text <- if (!is.na(s$km_median_duration_of_response)) {
+            sprintf(.("%s time units (95%% CI %s-%s; %d of %d responders progressed)"),
+                    fmt_num(s$km_median_duration_of_response), fmt_num(s$km_median_lcl),
+                    fmt_num(s$km_median_ucl), s$n_duration_events, s$n_responders)
+          } else if (s$n_responders >= 2) {
+            sprintf(.("not reached (%d of %d responders progressed)"),
+                    s$n_duration_events, s$n_responders)
+          } else NULL
+
+          if (s$n_responders > 0 && !is.na(s$median_time_to_response)) {
+            add_metric_row(list(
+              metric = .("Median Time to First Response"),
+              value = sprintf(.("%.1f time units (n=%d responders)"),
+                              s$median_time_to_response, s$n_responders)
+            ))
+          }
+          # The headline duration of response is the Kaplan-Meier median: the crude
+          # median ignores responders still in response and understates DoR.
+          if (!is.null(km_text)) {
+            add_metric_row(list(
+              metric = .("Median Duration of Response (Kaplan-Meier)"),
+              value = km_text
+            ))
+          }
+
+          # Dedicated TTR / DoR table
+          if (isTRUE(self$options$showResponseDuration) &&
+              !is.null(self$results$responseDurationTable)) {
+            rdt <- self$results$responseDurationTable
+            if (s$n_responders == 0) {
+              rdt$setNote("none", .("No patient reached a response (PR or better, <= -30%) after baseline, so time to response and duration of response are not estimable."))
+            } else {
+              rdt$addRow(rowKey = "ttr", values = list(
+                metric = .("Median time to first response (TTR)"),
+                value = s$median_time_to_response,
+                detail = sprintf(.("RECIST PR or better; n=%d responders"), s$n_responders)))
+              rdt$addRow(rowKey = "dor_naive", values = list(
+                metric = .("Median duration of response (naive)"),
+                value = s$median_duration_of_response,
+                detail = sprintf(.("Ignores censoring; n=%d with duration data"),
+                                 s$n_with_duration_data)))
+              rdt$addRow(rowKey = "dor_km", values = list(
+                metric = .("Median duration of response (Kaplan-Meier)"),
+                value = s$km_median_duration_of_response,
+                detail = if (s$n_responders < 2)
+                  .("Not estimable with fewer than 2 responders")
+                else if (is.na(s$km_median_duration_of_response))
+                  sprintf(.("Median not reached (only %d of %d responders progressed)"),
+                          s$n_duration_events, s$n_responders)
+                else
+                  sprintf(.("Censoring-aware; %d progression events; 95%% CI %s-%s"),
+                          s$n_duration_events, fmt_num(s$km_median_lcl), fmt_num(s$km_median_ucl))))
+              rdt$setNote("dor",
+                .("DoR is measured from first response to progression over the nadir (reappearance after a complete response counts as progression); responders still in response are censored at their last measured assessment. The Kaplan-Meier median accounts for this censoring and is the preferred summary."))
+            }
+            if (s$n_responders_without_time > 0) {
+              rdt$setNote("override",
+                sprintf(.("%d responder(s) by category override have no measured response time and are not included here."),
+                        s$n_responders_without_time))
+            }
+          }
+        }
+
+        # Person-time ----
         personTimeVisible <- !is.null(self$options$timeVar) && self$options$inputType == "raw"
-        
         if (!is.null(self$results$personTimeTable)) {
           self$results$personTimeTable$setVisible(personTimeVisible)
         }
-        
-        # Calculate and add person-time metrics if time variable is available and input is raw
         person_time_metrics <- NULL
         if (personTimeVisible) {
           private$.checkpoint()  # Checkpoint before person-time calculations
           person_time_metrics <- tryCatch({
             private$.calculatePersonTimeMetrics(
-              processed_data$spider,
-              safe_patientID,
-              safe_timeVar,
-              safe_responseVar
-            )
+              processed_data$spider, safe_patientID, safe_timeVar, safe_responseVar,
+              final_categories, tte_metrics)
           }, error = function(e) {
             private$.addNotice(
               type = "WARNING",
@@ -2151,141 +2021,38 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           })
         }
 
-
-
-        # Add time-to-event metrics if available
-        tte_metrics <- NULL
-
-        if (!is.null(self$options$timeVar) && !is.null(processed_data$spider) &&
-            safe_timeVar %in% names(processed_data$spider)) {
-          tte_metrics <- private$.calculateTimeToEventMetrics(
-            processed_data$spider,
-            safe_patientID,
-            safe_timeVar,
-            "response"
-          )
-
-          if (!is.null(tte_metrics)) {
-            # Add median time to response
-            if (!is.na(tte_metrics$summary$median_time_to_response)) {
-              add_metric_row(list(
-                metric = .("Median Time to First Response"),
-                value = sprintf(.("%.1f time units (n=%d responders)"),
-                               tte_metrics$summary$median_time_to_response,
-                               tte_metrics$summary$n_responders)
-              ))
-            }
-
-            # Add median duration of response
-            if (!is.na(tte_metrics$summary$median_duration_of_response)) {
-              add_metric_row(list(
-                metric = .("Median Duration of Response"),
-                value = sprintf(.("%.1f time units (n=%d with duration data)"),
-                               tte_metrics$summary$median_duration_of_response,
-                               tte_metrics$summary$n_with_duration_data)
-              ))
-            }
-
-            # Dedicated TTR / DoR table with censoring-aware (Kaplan-Meier) DoR
-            if (isTRUE(self$options$showResponseDuration) &&
-                !is.null(self$results$responseDurationTable)) {
-              rdt <- self$results$responseDurationTable
-              s <- tte_metrics$summary
-              if (!is.na(s$median_time_to_response))
-                rdt$addRow(rowKey = "ttr", values = list(
-                  metric = .("Median time to first response (TTR)"),
-                  value = s$median_time_to_response,
-                  detail = sprintf(.("RECIST PR or better; n=%d responders"), s$n_responders)))
-              if (!is.na(s$median_duration_of_response))
-                rdt$addRow(rowKey = "dor_naive", values = list(
-                  metric = .("Median duration of response (naive)"),
-                  value = s$median_duration_of_response,
-                  detail = sprintf(.("Ignores censoring; n=%d with duration data"),
-                                   s$n_with_duration_data)))
-              if (!is.null(s$km_median_duration_of_response) &&
-                  !is.na(s$km_median_duration_of_response)) {
-                rdt$addRow(rowKey = "dor_km", values = list(
-                  metric = .("Median duration of response (Kaplan-Meier)"),
-                  value = s$km_median_duration_of_response,
-                  detail = sprintf(.("Censoring-aware; %d progression events"), s$n_duration_events)))
-              } else if (!is.null(s$n_duration_events) && !is.na(s$n_duration_events)) {
-                # A silently missing KM row read as "not computed"; say why.
-                rdt$addRow(rowKey = "dor_km", values = list(
-                  metric = .("Median duration of response (Kaplan-Meier)"),
-                  value = NA_real_,
-                  detail = sprintf(.("Median not reached (only %d of %d responders progressed)"),
-                                   s$n_duration_events, s$n_responders)))
-              }
-              rdt$setNote("dor",
-                .("DoR is measured from first RECIST response to progression over the nadir; responders still in response at last follow-up are censored. The Kaplan-Meier median accounts for this censoring and is the preferred summary."))
-            }
-          }
-        }
-        
-
-        # Add person-time metrics to the results if available
         if (!is.null(person_time_metrics) && personTimeVisible) {
-          # The person-time TTR/DoR figures are computed differently from the
-          # tte_metrics rows above (time to BEST response; first-to-last
-          # response-visit span). Adding both put TWO rows named "Median
-          # Duration of Response" with different numbers in one table, plus
-          # unit-agnostic interpretations ("rapid" at <=2 of whatever the time
-          # unit is). They are added only as an honestly-labelled FALLBACK when
-          # the tte_metrics rows are unavailable; the per-category detail lives
-          # in the Person-Time table either way.
-          if (is.null(tte_metrics)) {
-            median_tbr <- stats::median(person_time_metrics$by_patient$time_to_best, na.rm = TRUE)
-            median_span <- median(person_time_metrics$by_patient$time_in_response[
-              person_time_metrics$by_patient$time_in_response > 0
-            ], na.rm = TRUE)
-
-            if (!is.na(median_tbr))
-              add_metric_row(list(
-                metric = .("Median Time to Best Response"),
-                value = sprintf("%.1f", median_tbr)
-              ))
-            if (!is.na(median_span))
-              add_metric_row(list(
-                metric = .("Median Time in Response (first to last response visit)"),
-                value = sprintf("%.1f", median_span)
-              ))
-          }
-
           response_rate_value <- person_time_metrics$summary$response_rate_per_100
-          response_rate_text <- if (!is.na(response_rate_value)) {
-            sprintf("%.2f", response_rate_value)
-          } else {
-            .("Not estimable")
-          }
-
           add_metric_row(list(
-            metric = .("Response Time per 100 Person-Time Units"),
-            value = response_rate_text
+            metric = .("Time in response per 100 person-time units (DoR-based, exploratory)"),
+            value = if (!is.na(response_rate_value)) sprintf("%.2f", response_rate_value) else .("Not estimable")
           ))
 
-          # Add person-time table if it exists
           if (!is.null(self$results$personTimeTable)) {
             private$.checkpoint()  # Checkpoint before person-time table population
-            for (i in seq_len(nrow(person_time_metrics$by_category))) {
-              cat_i <- as.character(person_time_metrics$by_category$response_cat[i])
-              # "Median Time to Response" is meaningless for SD/PD rows (it
-              # would be time to the least-bad assessment); leave those blank.
+            pt <- self$results$personTimeTable
+            by_cat <- person_time_metrics$by_category
+            blank_na <- function(x) if (is.na(x)) "" else sprintf("%.1f", x)
+            for (i in seq_len(nrow(by_cat))) {
+              cat_i <- as.character(by_cat$response_cat[i])
+              # "Median time to best response" and the DoR are meaningless for
+              # SD/PD rows; leave those blank.
               is_responder_cat <- cat_i %in% c("CR", "PR")
-              self$results$personTimeTable$addRow(rowKey = i, values = list(
+              pt$addRow(rowKey = i, values = list(
                 category = cat_i,
-                patients = person_time_metrics$by_category$patients[i],
-                patient_pct = sprintf("%.1f%%", person_time_metrics$by_category$pct_patients[i]),
-                person_time = sprintf("%.1f", person_time_metrics$by_category$person_time[i]),
-                time_pct = sprintf("%.1f%%", person_time_metrics$by_category$pct_time[i]),
-                median_time = if (is_responder_cat)
-                  sprintf("%.1f", person_time_metrics$by_category$median_time_to_response[i]) else "",
-                median_duration = if (is_responder_cat)
-                  sprintf("%.1f", person_time_metrics$by_category$median_duration[i]) else ""
+                patients = by_cat$patients[i],
+                patient_pct = sprintf("%.1f%%", by_cat$pct_patients[i]),
+                person_time = sprintf("%.1f", by_cat$person_time[i]),
+                time_pct = sprintf("%.1f%%", by_cat$pct_time[i]),
+                median_time = if (is_responder_cat) blank_na(by_cat$median_time_to_response[i]) else "",
+                median_duration = if (is_responder_cat) {
+                  if (by_cat$patients[i] == 0) ""
+                  else if (is.na(by_cat$median_duration[i])) .("not reached")
+                  else sprintf("%.1f", by_cat$median_duration[i])
+                } else ""
               ))
             }
-
-            # Add total row
-            self$results$personTimeTable$addRow(rowKey = nrow(person_time_metrics$by_category) + 1, values = list(
+            pt$addRow(rowKey = nrow(by_cat) + 1, values = list(
               category = .("Total"),
               patients = person_time_metrics$summary$total_patients,
               patient_pct = "100.0%",
@@ -2294,9 +2061,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               median_time = "",
               median_duration = ""
             ))
+            pt$setNote("dor",
+              .("Categories are the final response categories (same as the Response Categories table). Person-time is follow-up to the last measured assessment. The DoR column is the Kaplan-Meier median duration of response within the category."))
+            if (person_time_metrics$summary$n_excluded > 0) {
+              pt$setNote("excluded",
+                sprintf(.("%d patient(s) not evaluable for response are not included."),
+                        person_time_metrics$summary$n_excluded))
+            }
           }
         }
-
 
         # Generate clinical summary ----
         private$.generateClinicalSummary(processed_data, metrics, person_time_metrics)
@@ -2592,7 +2365,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<div style='padding: 15px; background-color: rgba(216, 33, 50, 0.18); border-left: 4px solid #dc3545; margin: 20px 0; color: inherit;'>",
           "<h3 style='color: inherit; margin-top: 0;'>", .("Key Assumptions & Limitations:"), "</h3>",
           "<ul style='margin: 5px 0;'>",
-          "<li>", sprintf(.("RECIST v1.1 thresholds: CR \u{2264}-100%%, PR \u{2264}-30%%, PD \u{2265}+20%%")), "</li>",
+          "<li>", sprintf(.("RECIST v1.1 thresholds: CR \u2264-100%%, PR \u2264-30%%, PD \u2265+20%%")), "</li>",
           "<li>", .("For raw measurements, baseline assumed at time = 0"), "</li>",
           "<li>", .("Waterfall plot shows best (most negative) response per patient"), "</li>",
           "<li>", .("Missing values are excluded from analysis"), "</li>",
@@ -2877,9 +2650,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           tryCatch({
             # REPRODUCIBILITY: user-configurable seed for reproducible bootstrap
             # results (defaults to 123 when unset).
+            # library-audit 2026-09-16 meddecide [LOW] DONE (same class): local_seed() restores the
+            #   session's RNG stream when this renderer returns; set.seed() left it fixed for the next analysis
             seed_val <- plotData$options$seed
             if (is.null(seed_val)) seed_val <- 123
-            set.seed(seed_val)
+            withr::local_seed(seed_val)
 
             # Resample the NON-MISSING responses only: drawing from the full
             # vector including NAs made each replicate's effective n random
@@ -2912,6 +2687,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 vjust = -0.5,
                 size = 3
               )
+            # the interval is a bootstrap: name the seed that drew it
+            p <- p + ggplot2::labs(caption = jmvcore::format(.("Random seed: {seed}"), seed = seed_val))
           }, error = function(e) {
             # No CI annotation; say so on the plot (notices are already rendered
             # by the time a renderer runs, and jamovi hides warning()).
@@ -3084,7 +2861,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 group = .data[[options$patientID]],
                 color = patient_group
               ),
-              size = 1,
+              linewidth = 1,
               alpha = 0.7
             ) +
             # Add points at each measurement, colored by group
@@ -3134,7 +2911,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 y = response,
                 group = .data[[options$patientID]]
               ),
-              size = 1,
+              linewidth = 1,
               color = "gray50"
             ) +
             # Add points at each measurement
@@ -3247,7 +3024,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               ),
               color = "black",
               linetype = "dotted",
-              size = 1
+              linewidth = 1
             )
         }
 
@@ -3374,7 +3151,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           
           "<h5>", .("Key Assumptions & Limitations:"), "</h5>",
           "<ul>",
-          sprintf("<li>%s CR \u{2264}%d%%, PR \u{2264}%d%%, PD \u{2265}+%d%%</li>", .("RECIST v1.1 thresholds:"), private$RECIST_CR_THRESHOLD, private$RECIST_PR_THRESHOLD, private$RECIST_PD_THRESHOLD),
+          sprintf("<li>%s CR \u2264%d%%, PR \u2264%d%%, PD \u2265+%d%%</li>", .("RECIST v1.1 thresholds:"), private$RECIST_CR_THRESHOLD, private$RECIST_PR_THRESHOLD, private$RECIST_PD_THRESHOLD),
           "<li>", .("For raw measurements, baseline assumed at time = 0"), "</li>",
           "<li>", .("Waterfall plot shows best (most negative) response per patient"), "</li>",
           "<li>", .("Missing values are excluded from analysis"), "</li>",
@@ -3405,7 +3182,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Calculate exact binomial confidence intervals with edge case handling
         orr_ci <- tryCatch({
           if (n_total == 0) {
-            c(0, 1)  # No data case
+            c(NA_real_, NA_real_)  # no evaluable patient: no interval (0-100% read as a real CI)
           } else if (n_responders == 0) {
             # Use exact method for 0 events
             binom.test(0, n_total, conf.level = 0.95)$conf.int
@@ -3421,7 +3198,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         dcr_ci <- tryCatch({
           if (n_total == 0) {
-            c(0, 1)  # No data case
+            c(NA_real_, NA_real_)  # no evaluable patient: no interval (0-100% read as a real CI)
           } else if (n_dcr == 0) {
             # Use exact method for 0 events
             binom.test(0, n_total, conf.level = 0.95)$conf.int
@@ -3534,7 +3311,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<div style='background-color: rgba(138, 155, 172, 0.08); padding: 10px; border-radius: 3px; margin: 10px 0; color: inherit;'>",
           "<h5>", .("Methods Description:"), "</h5>",
           "<p style='font-family: monospace; background-color: rgba(138, 155, 172, 0.06); padding: 8px; border-radius: 3px; color: inherit;'>",
-          .("Tumor response was categorized using SIMPLIFIED threshold-based criteria adapted from RECIST v1.1 (NOT full RECIST-compliant). Categories based on percent change thresholds: CR \u{2264}-100%, PR \u{2264}-30%, SD >-30% to <+20%, PD \u{2265}+20%. This analysis does NOT include target lesion summation, new lesion detection, non-target assessment, or confirmation requirements mandated by RECIST v1.1. Response rates calculated with exact binomial confidence intervals."),
+          .("Tumor response was categorized using SIMPLIFIED threshold-based criteria adapted from RECIST v1.1 (NOT full RECIST-compliant). Categories based on percent change thresholds: CR \u2264-100%, PR \u2264-30%, SD >-30% to <+20%, PD \u2265+20%. This analysis does NOT include target lesion summation, new lesion detection, non-target assessment, or confirmation requirements mandated by RECIST v1.1. Response rates calculated with exact binomial confidence intervals."),
           "</p>",
           "</div>",
 
@@ -3712,7 +3489,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<div>",
           "<h5 style='color: inherit; margin-bottom: 10px;'>", .("Response Metrics"), "</h5>",
           "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
-          "<li><strong>ORR (Objective Response Rate - Unconfirmed):</strong> ", .("Percentage of patients achieving threshold-based CR (\u{2264}-100%) or PR (\u{2264}-30%) without RECIST v1.1 confirmation requirement. May overestimate true confirmed ORR."), "</li>",
+          "<li><strong>ORR (Objective Response Rate - Unconfirmed):</strong> ", .("Percentage of patients achieving threshold-based CR (\u2264-100%) or PR (\u2264-30%) without RECIST v1.1 confirmation requirement. May overestimate true confirmed ORR."), "</li>",
           "<li><strong>DCR (Disease Control Rate - Unconfirmed):</strong> ", .("Percentage achieving threshold-based response or stable disease (CR + PR + SD) without confirmation. Exploratory endpoint only."), "</li>",
           "<li><strong>Best Response (Simplified):</strong> ", .("Most favorable (most negative) percent change from baseline. NOT equivalent to RECIST v1.1 'Best Overall Response' which requires confirmation."), "</li>",
           "<li><strong>Person-Time:</strong> ", .("Total time patients are followed, accounting for different follow-up durations"), "</li>",
@@ -3722,10 +3499,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<div>",
           "<h5 style='color: inherit; margin-bottom: 10px;'>", .("Response Categories (Simplified Threshold-Based)"), "</h5>",
           "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
-          "<li><strong>CR (Complete Response - Threshold):</strong> ", .("\u{2264}-100% change from baseline (simplified criterion, NOT full RECIST CR which requires disappearance of ALL lesions including non-target)"), "</li>",
-          "<li><strong>PR (Partial Response - Threshold):</strong> ", .("\u{2264}-30% change from baseline (simplified criterion, NOT full RECIST PR which requires target lesion sum calculation and no new lesions)"), "</li>",
+          "<li><strong>CR (Complete Response - Threshold):</strong> ", .("\u2264-100% change from baseline (simplified criterion, NOT full RECIST CR which requires disappearance of ALL lesions including non-target)"), "</li>",
+          "<li><strong>PR (Partial Response - Threshold):</strong> ", .("\u2264-30% change from baseline (simplified criterion, NOT full RECIST PR which requires target lesion sum calculation and no new lesions)"), "</li>",
           "<li><strong>SD (Stable Disease - Threshold):</strong> ", .("Between -30% and +20% change (simplified criterion)"), "</li>",
-          "<li><strong>PD (Progressive Disease - Threshold):</strong> ", .("\u{2265}+20% change from baseline (simplified criterion, NOT full RECIST PD which includes new lesion detection and non-target progression)"), "</li>",
+          "<li><strong>PD (Progressive Disease - Threshold):</strong> ", .("\u2265+20% change from baseline (simplified criterion, NOT full RECIST PD which includes new lesion detection and non-target progression)"), "</li>",
           "</ul>",
           "</div>",
 

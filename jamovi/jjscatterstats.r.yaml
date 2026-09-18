@@ -19,6 +19,7 @@ clearWith:
     - smoothMethod
     - originaltheme
     - typestatistics
+    - seed
     - conflevel
     - bfmessage
     - k

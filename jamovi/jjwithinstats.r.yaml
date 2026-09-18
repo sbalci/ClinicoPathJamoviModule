@@ -10,6 +10,7 @@ clearWith:
     - dep4
     - clinicalpreset
     - typestatistics
+    - seed
     - pairwisecomparisons
     - pairwisedisplay
     - padjustmethod
@@ -51,6 +52,7 @@ items:
         - dep3
         - dep4
         - typestatistics
+        - seed
         - clinicalpreset
 
     - name: interpretation
@@ -62,6 +64,7 @@ items:
         - dep3
         - dep4
         - typestatistics
+        - seed
 
     - name: explanations
       title: Explanations
@@ -83,6 +86,7 @@ items:
         - dep3
         - dep4
         - typestatistics
+        - seed
         - pairwisecomparisons
         - pairwisedisplay
         - padjustmethod
@@ -114,6 +118,7 @@ items:
         - dep3
         - dep4
         - typestatistics
+        - seed
         - pairwisecomparisons
         - centralityplotting
         - pointpath
@@ -132,6 +137,7 @@ items:
         - dep3
         - dep4
         - typestatistics
+        - seed
         - ggpubrPlotType
         - ggpubrPalette
         - ggpubrAddStats

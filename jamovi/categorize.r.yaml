@@ -20,6 +20,7 @@ items:
           - var
           - method
           - nbins
+          - seed
           - breaks
           - excludeoutofrange
           - labels
@@ -48,6 +49,7 @@ items:
           - var
           - method
           - nbins
+          - seed
           - breaks
           - excludeoutofrange
           - sdmult
@@ -83,6 +85,7 @@ items:
           - var
           - method
           - nbins
+          - seed
           - breaks
           - excludeoutofrange
           - sdmult
@@ -107,6 +110,7 @@ items:
           - var
           - method
           - nbins
+          - seed
           - breaks
           - excludeoutofrange
           - sdmult
@@ -120,6 +124,7 @@ items:
           - var
           - method
           - nbins
+          - seed
           - breaks
           - excludeoutofrange
           - sdmult
@@ -141,6 +146,7 @@ items:
           - var
           - method
           - nbins
+          - seed
           - breaks
           - excludeoutofrange
           - sdmult

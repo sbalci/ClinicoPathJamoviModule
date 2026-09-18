@@ -12,7 +12,6 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # BayesFactor's MCMC and robust/effect-size CIs use bootstrapping, so
         # without this the SAME analysis reported different numbers on every
         # re-render - a credible interval that moves when nothing changed.
-        .STOCHASTIC_SEED = 20250101L,
 
 
         # Option overrides for clinical presets (jamovi options are read-only at runtime;
@@ -559,7 +558,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot = function(image, ggtheme, theme, ...) {
             # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
             # re-render of an unchanged analysis reports the same numbers.
-            withr::local_seed(private$.STOCHASTIC_SEED)
+            withr::local_seed(self$options$seed)
 
 
             if (is.null(self$options$dep) || is.null(self$options$group))
@@ -635,6 +634,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot <- plot + ggstatsplot::theme_ggstatsplot()
             }
 
+            if ((isTRUE(private$.option("resultssubtitle")) && statsSeedMatters(private$.option("typestatistics"), "correlation")) ||
+                captionSeedMatters(private$.option("typestatistics"), "correlation", 2L, self$options$bfmessage))
+                plot <- addSeedCaption(plot, self, self$options$seed)
+
             print(plot)
             TRUE
         },
@@ -644,7 +647,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot2 = function(image, ggtheme, theme, ...) {
             # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
             # re-render of an unchanged analysis reports the same numbers.
-            withr::local_seed(private$.STOCHASTIC_SEED)
+            withr::local_seed(self$options$seed)
 
 
             if (is.null(self$options$dep) || is.null(self$options$group) || is.null(self$options$grvar))
@@ -759,6 +762,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot <- plot & ggstatsplot::theme_ggstatsplot()
             }
 
+            if ((isTRUE(private$.option("resultssubtitle")) && statsSeedMatters(private$.option("typestatistics"), "correlation")) ||
+                captionSeedMatters(private$.option("typestatistics"), "correlation", 2L, self$options$bfmessage))
+                plot <- addSeedCaption(plot, self, self$options$seed)
+
             print(plot)
             TRUE
         },
@@ -768,7 +775,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot3 = function(image, ggtheme, theme, ...) {
             # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
             # re-render of an unchanged analysis reports the same numbers.
-            withr::local_seed(private$.STOCHASTIC_SEED)
+            withr::local_seed(self$options$seed)
 
 
             if (is.null(self$options$dep) || is.null(self$options$group))
@@ -896,6 +903,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # CONSTRUCTION for all four types. Verified on 80 points (seed 42):
             # parametric r = 0.6682502, nonparametric rho = 0.6274965, robust
             # (Winsorized Pearson) 0.5893926, bayes r = 0.6503592 / BF10 = 8.08e+08.
+            .corr_done <- FALSE
             tryCatch({
                 test_type <- private$.option("typestatistics")
 
@@ -949,6 +957,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
 
                     n_used <- if (!is.null(res$n.obs)) as.integer(res$n.obs) else n_complete
+                    .corr_done <- TRUE
                     p <- p + ggplot2::labs(subtitle = paste0(
                         as.character(res$method)[1], ": ", est, ", ", tail_txt,
                         ", n = ", n_used))
@@ -975,6 +984,11 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 p <- p + ggstatsplot::theme_ggstatsplot()
             }
+
+            # only when the correlation was actually computed - a failed or skipped one
+            # leaves the "not computed" subtitle, which no seed produced
+            if (isTRUE(.corr_done) && statsSeedMatters(private$.option("typestatistics"), "correlation"))
+                p <- addSeedCaption(p, self, self$options$seed)
 
             # Add marginal plots if requested
             if (self$options$marginalType != "none") {

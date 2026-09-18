@@ -9,6 +9,7 @@ jjhistostats(
   dep,
   grvar = NULL,
   typestatistics = "parametric",
+  seed = 20250101,
   centralityline = FALSE,
   changebinwidth = FALSE,
   binwidth = 1.1,
@@ -63,6 +64,12 @@ is a one-sample t-test, 'nonparametric' a Wilcoxon signed-rank test,
 one-sample t-test. This option does NOT perform a normality test - no
 Shapiro-Wilk, Anderson-Darling or similar statistic is computed or
 displayed anywhere in this analysis.}
+
+\item{seed}{Random seed for the statistics computed by resampling or
+posterior sampling (robust tests, Bayesian estimates, and some
+nonparametric effect-size intervals). The plot caption names the seed
+whenever it affected the numbers shown. The default reproduces the previous
+fixed behaviour.}
 
 \item{centralityline}{Whether to display a vertical line indicating the
 measure of central tendency (mean for parametric, median for

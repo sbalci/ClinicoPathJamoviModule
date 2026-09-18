@@ -14,7 +14,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # BayesFactor's MCMC and robust/effect-size CIs use bootstrapping, so
         # without this the SAME analysis reported different numbers on every
         # re-render - a credible interval that moves when nothing changed.
-        .STOCHASTIC_SEED = 20250101L,
 
         # Set by .subtitleExpr when the statsExpressions takeover was attempted
         # and failed; rendered as a notice from .run().
@@ -876,7 +875,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 titles = list(self$options$mytitle, self$options$xtitle, self$options$ytitle),
                 display = list(self$options$resultssubtitle, self$options$originaltheme),
                 dimensions = list(self$options$plotwidth, self$options$plotheight),
-                colorblindSafe = self$options$colorblindSafe
+                colorblindSafe = self$options$colorblindSafe,
+                seed = self$options$seed
             ), algo = "md5")
             
             # Only reprocess if options have changed or forced refresh
@@ -1285,7 +1285,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 .plot = function(image, ggtheme, theme, ...) {
     # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
     # re-render of an unchanged analysis reports the same numbers.
-    withr::local_seed(private$.STOCHASTIC_SEED)
+    withr::local_seed(self$options$seed)
 
             # Use shared validation helper ----
             if (!private$.validateInputs())
@@ -1451,6 +1451,11 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Print Plot ----
+            # robust and some Bayesian and nonparametric results are resampled: name the seed
+            .k <- nlevels(droplevels(factor(mydata[[group]])))
+            if ((isTRUE(opts$resultssubtitle) && statsSeedMatters(opts$typestatistics, "between", .k)) ||
+                captionSeedMatters(opts$typestatistics, "between", .k, opts$bfmessage))
+                plot <- addSeedCaption(plot, self, self$options$seed)
 
                 print(plot)
                 TRUE
@@ -1458,7 +1463,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot2 = function(image, ggtheme, theme, ...) {
             # Seed the sampling-based paths (Bayesian MCMC, bootstrap CIs) so a
             # re-render of an unchanged analysis reports the same numbers.
-            withr::local_seed(private$.STOCHASTIC_SEED)
+            withr::local_seed(self$options$seed)
 
             # Use shared validation helper with additional grouping check ----
             if (!private$.validateInputs() || is.null(self$options$grvar))
@@ -1611,6 +1616,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Print Plot ----
+            .k <- nlevels(droplevels(factor(mydata[[self$options$group]])))
+            if ((isTRUE(opts$resultssubtitle) && statsSeedMatters(opts$typestatistics, "between", .k)) ||
+                captionSeedMatters(opts$typestatistics, "between", .k, opts$bfmessage))
+                plot2 <- addSeedCaption(plot2, self, self$options$seed)
             print(plot2)
             TRUE
         },

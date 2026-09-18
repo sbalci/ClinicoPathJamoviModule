@@ -827,6 +827,9 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 results$data$censor_level_used)
             for (i in seq_along(values)) self$results$modelSummary$setRow(rowKey = i,
                 values = list(value = as.character(values[[i]])))
+            # the cross-validation folds, and so lambda and the selection, come from this seed
+            self$results$modelSummary$setNote("seed",
+                jmvcore::format(.("Random seed: {seed}"), seed = results$seed_used), init = FALSE)
         },
 
         .populateReproducibility = function(results) {

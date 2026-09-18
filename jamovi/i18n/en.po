@@ -11,48 +11,12 @@ msgstr ""
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: R/timeinterval.b.R
-msgid "measured from the {adj} landmark"
-msgstr ""
-
-#: R/survivalcont.b.R
-msgid "plus %d with missing follow-up time"
-msgstr ""
-
-#: R/outcomeorganizer.b.R
-msgid "%d patient(s) were left untouched because they have no follow-up time or no cut-off value; they keep their full follow-up and their original event status, so the cut-off applies to only part of the cohort. Supply the missing values, or exclude those rows, before comparing groups."
-msgstr ""
-
-#: R/survival.b.R
-msgid "All times reported here are measured FROM the landmark, not from study entry, and all estimates are conditional on being event-free at the landmark. They are not comparable with unlandmarked survival times."
-msgstr ""
-
-#: R/survival.b.R
-msgid "Calibration slope < 0.8 suggests the model predictions are too extreme (overfitting)."
-msgstr ""
-
-#: R/survival.b.R
-msgid "Calibration slope near 1 indicates good calibration."
-msgstr ""
-
-#: R/survival.b.R
-msgid "Calibration slope slightly below 1 indicates mild overfitting."
-msgstr ""
-
 #: R/riverplot.b.R
 msgid " categories across "
 msgstr ""
 
 #: R/riverplot.b.R
 msgid " different categories across "
-msgstr ""
-
-#: R/survivalcont.b.R
-msgid "Excluding this share of the cohort can introduce selection bias; the landmark should be prespecified."
-msgstr ""
-
-#: R/outcomeorganizer.b.R
-msgid "Full state breakdown (of {total} coded records): {states}."
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -71,10 +35,6 @@ msgstr ""
 
 #: R/riverplot.b.R
 msgid " stages or time points."
-msgstr ""
-
-#: R/outcomeorganizer.b.R
-msgid "The cut-off reads %s while follow-up reaches only %s - that is what a date looks like once it has been imported as a plain number, and it is almost certainly not in the same units as the follow-up time."
 msgstr ""
 
 #: R/riverplot.b.R
@@ -219,16 +179,8 @@ msgstr ""
 msgid ", correlation adjustment = %.2f"
 msgstr ""
 
-#: R/datetimeconverter.b.R
-msgid "{missing} of the {total} rows were missing"
-msgstr ""
-
 #: R/jjpiestats.b.R
 msgid "; split panels use Pearson's chi-squared test"
-msgstr ""
-
-#: R/survivalcont.b.R
-msgid "Check variability, group-size constraints, and event counts, or use the continuous Cox model."
 msgstr ""
 
 #: R/agreement.b.R
@@ -591,7 +543,7 @@ msgstr ""
 msgid "(not set)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "(numeric days/months/years)"
 msgstr ""
 
@@ -647,19 +599,19 @@ msgid ""
 "or Bayes factor from the relevant chart.]"
 msgstr ""
 
-#: stagemigration/ui[8][13].label
+#: stagemigration/ui[8][15].label
 msgid "[Experimental] Cure Models"
 msgstr ""
 
-#: stagemigration/ui[8][10].label
+#: stagemigration/ui[8][11].label
 msgid "[Experimental] Frailty Models"
 msgstr ""
 
-#: stagemigration/ui[8][16].label
+#: stagemigration/ui[8][19].label
 msgid "[Experimental] Informative Censoring"
 msgstr ""
 
-#: stagemigration/ui[8][7].label
+#: stagemigration/ui[8][8].label
 msgid "[Experimental] Interval Censoring"
 msgstr ""
 
@@ -671,11 +623,11 @@ msgstr ""
 msgid "[Experimental] Random Survival Forests"
 msgstr ""
 
-#: stagemigration/ui[9][3].label
+#: stagemigration/ui[9][4].label
 msgid "[Experimental] SHAP Analysis (Explainable AI)"
 msgstr ""
 
-#: stagemigration/ui[8][22].label
+#: stagemigration/ui[8][25].label
 msgid "[Experimental] Win Ratio Analysis"
 msgstr ""
 
@@ -697,6 +649,14 @@ msgstr ""
 #: R/chisqposttest.b.R
 #: R/decisioncurve.b.R
 msgid "{a} vs {b}"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "{alpha}% significance level (one-sided)"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "{alpha}% significance level (two-sided)"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -831,7 +791,7 @@ msgid ""
 "strategy is evaluated on the same {kept} retained rows."
 msgstr ""
 
-#: R/survival_utils.R
+#: R/survival-competingrisks.R
 msgid ""
 "{feature} is not available for competing-risks analysis. It assumes a single "
 "event type, and the competing-risk outcome is coded 0/1/2. Use the "
@@ -989,6 +949,10 @@ msgid ""
 "are clean - reporting it as zero outliers would be misleading. Lower the "
 "confidence level, or select Robust Z-score or the Interquartile range "
 "method, and run the analysis again."
+msgstr ""
+
+#: R/datetimeconverter.b.R
+msgid "{missing} of the {total} rows were missing"
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -1165,6 +1129,10 @@ msgid ""
 "it comes first."
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid "{n} subjects"
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "{n} time value(s) are negative (smallest {min}). Time values must be zero or "
@@ -1330,6 +1298,18 @@ msgstr ""
 
 #: R/singlearm.b.R
 msgid "{probability}: Natural Language Summary"
+msgstr ""
+
+#: R/agreement.b.R
+msgid ""
+"{requested} clusters were requested for {n} cases; {used} were used, the "
+"most that still places some cases together."
+msgstr ""
+
+#: R/agreement.b.R
+msgid ""
+"{requested} clusters were requested for {n} raters; {used} were used, the "
+"most that still places some raters together."
 msgstr ""
 
 #: R/swimmerplot.b.R
@@ -1809,11 +1789,11 @@ msgid ""
 "which includes new lesion detection and non-target progression)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "\\u{2265}20% increase in sum of target lesion diameters"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "\\u{2265}30% decrease in sum of target lesion diameters"
 msgstr ""
 
@@ -2509,11 +2489,16 @@ msgid ""
 msgstr ""
 
 #: R/outcomeorganizer.b.R
-msgid "%d patient(s) have a follow-up time of zero, which contributes no person-time; check whether a missing date was read as the origin."
+msgid ""
+"%d patient(s) have a follow-up time of zero, which contributes no "
+"person-time; check whether a missing date was read as the origin."
 msgstr ""
 
 #: R/outcomeorganizer.b.R
-msgid "%d patient(s) have a NEGATIVE follow-up time, which cannot be a duration - survival functions reject it. This usually means the start and end dates are the wrong way round."
+msgid ""
+"%d patient(s) have a NEGATIVE follow-up time, which cannot be a duration - "
+"survival functions reject it. This usually means the start and end dates are "
+"the wrong way round."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -2541,6 +2526,14 @@ msgid ""
 "%d patient(s) have more than one row. For each, the EARLIEST record carrying "
 "the priority outcome (%s) was kept as the event and their later rows were "
 "censored, so the event is not moved earlier in time."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"%d patient(s) were left untouched because they have no follow-up time or no "
+"cut-off value; they keep their full follow-up and their original event "
+"status, so the cut-off applies to only part of the cohort. Supply the "
+"missing values, or exclude those rows, before comparing groups."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -2920,6 +2913,14 @@ msgstr ""
 msgid "%s regression"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "%s under H0"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "%s under H1"
+msgstr ""
+
 #: R/singlearm.b.R
 msgid "%s was %%.1f %%s"
 msgstr ""
@@ -3076,15 +3077,11 @@ msgid "• Correlations → Scatter plot"
 msgstr ""
 
 #: ihcscoring/ui[2][1][0][1].label
-msgid "• ER/PR: H-score >=100 (FDA approved)"
-msgstr ""
-
-#: ihcscoring/ui[2][1][0][2].label
-msgid "• HER2: H-score >=150 (research standard)"
+msgid "• H-score scale: 0-300 (intensity x percentage)"
 msgstr ""
 
 #: ihcscoring/ui[2][1][0][3].label
-msgid "• Ki-67: H-score >=100 (proliferation index)"
+msgid "• Intensity scale: 0-3 (or 0-4 extended)"
 msgstr ""
 
 #: R/jjcorrmat.b.R
@@ -3105,6 +3102,10 @@ msgid ""
 "samples • Frequency: Bar chart of mutation rates per gene (identifies most "
 "frequently altered genes)   • Co-occurrence: Heatmap showing which genes "
 "tend to be mutated together or exclusively"
+msgstr ""
+
+#: ihcscoring/ui[2][1][0][2].label
+msgid "• Percentage scale: 0-100 (percent positive nuclei)"
 msgstr ""
 
 #: decisionpanel/ui[7][0][2].label
@@ -3736,13 +3737,6 @@ msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
-"<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%, "
-"<em>%s</em>) and pooled specificity (%.1f%%, <em>%s</em>) do not both reach "
-"the <em>good</em> band."
-msgstr ""
-
-#: R/diagnosticmeta.b.R
-msgid ""
 "<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and "
 "pooled specificity (%.1f%%) both fall in the <em>excellent</em> band."
 msgstr ""
@@ -3755,14 +3749,56 @@ msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
-"<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified "
-"as <em>%s</em> for confirmatory testing. "
+"<br><br><strong>Overall Summary:</strong> pooled sensitivity (%.1f%%) and "
+"pooled specificity (%.1f%%) do not both reach the <em>good</em> band."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
-"<br><br><strong>Your positive LR of %.2f</strong> provides <em>%s</em> "
-"evidence FOR disease when test is positive. "
+"<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified "
+"as <em>excellent</em> for confirmatory testing."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified "
+"as <em>good</em> for confirmatory testing."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified "
+"as <em>limited</em> for confirmatory testing."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Your pooled specificity of %.1f%%%s</strong> is classified "
+"as <em>moderate</em> for confirmatory testing."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Your positive LR of %.2f</strong> provides <em>minimal</em> "
+"evidence FOR disease when test is positive."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Your positive LR of %.2f</strong> provides <em>moderate</em> "
+"evidence FOR disease when test is positive."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Your positive LR of %.2f</strong> provides <em>strong</em> "
+"evidence FOR disease when test is positive."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<br><br><strong>Your positive LR of %.2f</strong> provides <em>weak</em> "
+"evidence FOR disease when test is positive."
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -4875,6 +4911,13 @@ msgstr ""
 
 #: R/jjarcdiagram.b.R
 msgid "<li><strong>Layout:</strong> Choose horizontal or vertical arrangement</li>"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"<li><strong>Missing data:</strong> Overall multi-rater analyses use jointly "
+"complete rows; pairwise Cohen analyses use cases observed for each pair, and "
+"Krippendorff's alpha uses cases with at least two observed ratings</li>"
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -7039,25 +7082,25 @@ msgstr ""
 #: R/diagnosticmeta.b.R
 msgid ""
 "<strong>Interpretation:</strong> a negative result reduces, but does not "
-"remove, the possibility of disease at this sensitivity. "
+"remove, the possibility of disease at this sensitivity."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "<strong>Interpretation:</strong> at this sensitivity a substantial "
-"proportion of diseased patients are expected to test negative. "
+"proportion of diseased patients are expected to test negative."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "<strong>Interpretation:</strong> at this specificity a large share of "
-"positive results are expected to be false positives. "
+"positive results are expected to be false positives."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "<strong>Interpretation:</strong> at this specificity an appreciable share of "
-"positive results are expected to be false positives. "
+"positive results are expected to be false positives."
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -7109,7 +7152,7 @@ msgstr ""
 #: R/diagnosticmeta.b.R
 msgid ""
 "<strong>Negative Likelihood Ratio:</strong> %.2f - Interpretation unstable "
-"(sensitivity [[APPROX]] 100%%)."
+"(sensitivity ≈ 100%%)."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -7156,7 +7199,7 @@ msgstr ""
 msgid ""
 "<strong>Note:</strong> the confidence interval spans more than one "
 "performance category, so this classification is not firmly established by "
-"the pooled data. "
+"the pooled data."
 msgstr ""
 
 #: R/mageeequation.b.R
@@ -7254,7 +7297,7 @@ msgstr ""
 #: R/diagnosticmeta.b.R
 msgid ""
 "<strong>Positive Likelihood Ratio:</strong> Not estimable with the current "
-"data (specificity [[APPROX]] 100% or model unstable)."
+"data (specificity ≈ 100% or model unstable)."
 msgstr ""
 
 #: R/mageeequation.b.R
@@ -7451,14 +7494,50 @@ msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
-"<strong>Your negative LR of %.2f</strong> provides <em>%s</em> evidence "
-"AGAINST disease when test is negative. "
+"<strong>Your negative LR of %.2f</strong> provides <em>minimal</em> evidence "
+"AGAINST disease when test is negative."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Your negative LR of %.2f</strong> provides <em>moderate</em> "
+"evidence AGAINST disease when test is negative."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Your negative LR of %.2f</strong> provides <em>strong</em> evidence "
+"AGAINST disease when test is negative."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Your negative LR of %.2f</strong> provides <em>weak</em> evidence "
+"AGAINST disease when test is negative."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "<strong>Your pooled sensitivity of %.1f%%%s</strong> is classified as "
-"<em>%s</em> for screening purposes. "
+"<em>excellent</em> for screening purposes."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Your pooled sensitivity of %.1f%%%s</strong> is classified as "
+"<em>good</em> for screening purposes."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Your pooled sensitivity of %.1f%%%s</strong> is classified as "
+"<em>limited</em> for screening purposes."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"<strong>Your pooled sensitivity of %.1f%%%s</strong> is classified as "
+"<em>moderate</em> for screening purposes."
 msgstr ""
 
 #: R/jjhistostats.b.R
@@ -8605,7 +8684,7 @@ msgstr ""
 msgid "95% CI (Adjusted)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "95% CI (Confidence Interval):"
 msgstr ""
 
@@ -9058,6 +9137,39 @@ msgstr ""
 msgid "A {strength} {direction} trend was detected (R² = {r2})."
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid ""
+"A {test} power analysis for {n} subjects gives {power}% calculated power, "
+"with {accrual} months of accrual and {followup} months of additional "
+"follow-up."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid ""
+"A {test} power analysis for {n} subjects gives a detectable HR of {hr}, with "
+"{accrual} months of accrual and {followup} months of additional follow-up."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid ""
+"A {test} power analysis for {n} subjects gives a maximum true HR of {hr} "
+"meeting the non-inferiority power target, with {accrual} months of accrual "
+"and {followup} months of additional follow-up."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid ""
+"A {test} power analysis for {n} subjects requires {duration} months in "
+"total: {accrual} months of accrual and {followup} months of additional "
+"follow-up."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid ""
+"A {test} power analysis indicates that {n} subjects are required, with "
+"{accrual} months of accrual and {followup} months of additional follow-up."
+msgstr ""
+
 #: R/raincloud.b.R
 msgid ""
 "A %s comparing %s did not find a statistically significant difference in %s "
@@ -9376,6 +9488,10 @@ msgstr ""
 msgid "a lower hazard"
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid "A matching superiority comparison cannot be estimated for these assumptions."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid ""
 "A measure of health outcome that combines mortality and morbidity into a "
@@ -9409,7 +9525,7 @@ msgid ""
 msgstr ""
 
 #: R/diagnosticmeta.b.R
-msgid "A negative result moderately decreases disease probability. "
+msgid "A negative result moderately decreases disease probability."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -9419,13 +9535,13 @@ msgstr ""
 #: R/diagnosticmeta.b.R
 msgid ""
 "A negative result multiplies the pre-test odds by %.2fx; the post-test "
-"probability also depends on the pre-test probability. "
+"probability also depends on the pre-test probability."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "A negative result substantially decreases disease probability (divides "
-"pre-test odds by %.1fx). "
+"pre-test odds by %.1fx)."
 msgstr ""
 
 #: R/jjarcdiagram.b.R
@@ -9548,11 +9664,11 @@ msgstr ""
 #: R/diagnosticmeta.b.R
 msgid ""
 "A positive result increases disease probability substantially (multiplies "
-"pre-test odds by %.1fx). "
+"pre-test odds by %.1fx)."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
-msgid "A positive result moderately increases disease probability. "
+msgid "A positive result moderately increases disease probability."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -9562,7 +9678,7 @@ msgstr ""
 #: R/diagnosticmeta.b.R
 msgid ""
 "A positive result multiplies the pre-test odds by %.2fx; the post-test "
-"probability also depends on the pre-test probability. "
+"probability also depends on the pre-test probability."
 msgstr ""
 
 #: contTablesPaired/results/freqs.description
@@ -10102,7 +10218,7 @@ msgstr ""
 msgid "About Stuart-Maxwell Test"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "About Swimmer Plot Analysis"
 msgstr ""
 
@@ -10415,10 +10531,6 @@ msgstr ""
 msgid "Accessibility Features"
 msgstr ""
 
-#: stagemigration/ui[11][1][0]/enableAccessibilityFeatures.label
-msgid "Accessibility features (not yet implemented)"
-msgstr ""
-
 #: multistatesurvival/options/competing_risks.title
 msgid "Account for Competing Risks"
 msgstr ""
@@ -10475,8 +10587,11 @@ msgid "Accrual Duration (Tr)"
 msgstr ""
 
 #: simpleSurvivalPower/options/accrual_pattern.title
-#: survivalPower/options/accrual_pattern.title
 msgid "Accrual Pattern"
+msgstr ""
+
+#: survivalPower/options/accrual_pattern.title
+msgid "Accrual pattern"
 msgstr ""
 
 #: competingRisksPower/options/accrualTime.title
@@ -10486,8 +10601,11 @@ msgstr ""
 
 #: advancedtrials/results/sample_size_calculations.columns.title
 #: simpleSurvivalPower/options/accrual_period.title
-#: survivalPower/options/accrual_period.title
 msgid "Accrual Period (months)"
+msgstr ""
+
+#: survivalPower/options/accrual_period.title
+msgid "Accrual period (months)"
 msgstr ""
 
 #: advancedtrials/options/accrual_rate.title
@@ -10715,7 +10833,7 @@ msgstr ""
 msgid "Actual \\\\ Predicted"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Actual calendar dates with multiple format support"
 msgstr ""
 
@@ -11652,8 +11770,11 @@ msgid "Additional Export Format"
 msgstr ""
 
 #: simpleSurvivalPower/options/follow_up_period.title
-#: survivalPower/options/follow_up_period.title
 msgid "Additional Follow-up (months)"
+msgstr ""
+
+#: survivalPower/options/follow_up_period.title
+msgid "Additional follow-up (months)"
 msgstr ""
 
 #: comprehensiveSurvivalPower/options/follow_up_period.description
@@ -12186,10 +12307,6 @@ msgstr ""
 msgid "Adjusted Probability Curves"
 msgstr ""
 
-#: multisurvival/results/adjustedSurvivalSummaryHeading.title
-msgid "Adjusted Probability Natural Language Summary"
-msgstr ""
-
 #: multisurvival/results/plot_adj.title
 msgid "Adjusted Probability Plot"
 msgstr ""
@@ -12207,6 +12324,7 @@ msgid "Adjusted Probability Tables"
 msgstr ""
 
 #: R/clinicalscore.b.R
+#: R/jjcoefstats.b.R
 msgid "Adjusted R-squared"
 msgstr ""
 
@@ -12289,7 +12407,7 @@ msgid "Adjustment Method"
 msgstr ""
 
 #: jjwithinstats/options/padjustmethod.title
-#: stagemigration/ui[8][18]/informativeCensoringAdjustmentMethod.label
+#: stagemigration/ui[8][20]/informativeCensoringAdjustmentMethod.label
 msgid "Adjustment method"
 msgstr ""
 
@@ -12321,17 +12439,14 @@ msgstr ""
 
 #: continuousrelationship/options/covariates.title
 #: continuousrelationship/ui[0][2].label
-#: stagemigration/ui[8][8][2].label
+#: stagemigration/ui[8][9][2].label
+#: stagemigration/ui[8][23][0][0].label
 msgid "Adjustment Variables"
 msgstr ""
 
 #: stagemigration/options/intervalCensoringAdjustVariables.title
 #: stagemigration/options/concordanceProbabilityAdjustVariables.title
 msgid "Adjustment variables"
-msgstr ""
-
-#: stagemigration/ui[8][20][0].label
-msgid "Adjustment Variables (not yet implemented)"
 msgstr ""
 
 #: ihcsurvival/ui[3][0][0][0].label
@@ -13064,8 +13179,8 @@ msgstr ""
 msgid "Advanced Statistical Inference"
 msgstr ""
 
-#: stagemigration/ui[8][12]/frailtyAdvancedInference.label
-msgid "Advanced statistical inference (not yet implemented)"
+#: stagemigration/ui[8][14][0]/frailtyAdvancedInference.label
+msgid "Advanced statistical inference"
 msgstr ""
 
 #: package/analyses/nonparametricregression.menuSubgroup
@@ -13884,6 +13999,7 @@ msgstr ""
 msgid "Agreement Level:"
 msgstr ""
 
+#: R/agreement.b.R
 #: pathologyagreement/results/agreementtable.columns.title
 msgid "Agreement Metric"
 msgstr ""
@@ -13979,13 +14095,13 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Agreement was assessed using Spearman rank correlation; an intraclass "
-"correlation coefficient could not be estimated from these data. "
+"correlation coefficient could not be estimated from these data."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Agreement was assessed using the intraclass correlation coefficient "
-"(ICC(2,1), absolute agreement) and Spearman rank correlation. "
+"(ICC(2,1), absolute agreement) and Spearman rank correlation."
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -14046,6 +14162,7 @@ msgstr ""
 msgid "AI-Assisted Analysis"
 msgstr ""
 
+#: R/jjcoefstats.b.R
 #: aalenhazard/results/modelComparison.columns.title
 #: condsurvival/results/modelFitStatistics.columns.title
 #: continuousmarkov/results/modelComparison.columns.title
@@ -14607,6 +14724,7 @@ msgid "All time"
 msgstr ""
 
 #: R/multisurvival.b.R
+#: R/survival.b.R
 msgid ""
 "All times reported here are measured FROM the landmark, not from study "
 "entry, and all estimates are conditional on being event-free at the "
@@ -14739,8 +14857,11 @@ msgid "Allocation Ratio"
 msgstr ""
 
 #: simpleSurvivalPower/options/allocation_ratio.title
-#: survivalPower/options/allocation_ratio.title
 msgid "Allocation Ratio (Control:Experimental)"
+msgstr ""
+
+#: survivalPower/options/allocation_ratio.title
+msgid "Allocation ratio (control:experimental)"
 msgstr ""
 
 #: advancedSurvivalPower/options/allocation_ratio.title
@@ -14959,8 +15080,11 @@ msgstr ""
 #: comprehensiveSurvivalPower/options/spending_function.title
 #: progressionsurvival/options/alpha_spending.title
 #: simpleSurvivalPower/options/alpha_spending.title
-#: survivalPower/options/alpha_spending.title
 msgid "Alpha Spending Function"
+msgstr ""
+
+#: survivalPower/options/alpha_spending.title
+msgid "Alpha spending function"
 msgstr ""
 
 #: adaptivetrialdesign/results/stoppingBoundaries.columns.title
@@ -15482,7 +15606,6 @@ msgid ""
 msgstr ""
 
 #: R/benford.b.R
-#: R/lassocox.b.R
 #: R/linechart.b.R
 #: R/riverplot.b.R
 #: R/survivalcont.b.R
@@ -16170,7 +16293,6 @@ msgstr ""
 #: singlearm/ui[2][1].label
 #: stagemigration/results/concordanceProbabilityRobustness.columns.title
 #: stagemigration/results/winRatioSensitivityResults.columns.title
-#: survivalPower/options/analysis_type.title
 #: survivalPower/results/power_summary.columns.title
 #: timeroc/options/analysisType.title
 #: treatmentswitching/results/sensitivityTable.columns.title
@@ -16184,8 +16306,9 @@ msgstr ""
 #: jjpiestats/ui[0]/clinicalpreset.label
 #: psychopdaROC/ui[5][0]/fixedAnalysisType.label
 #: stagemigration/ui[1][1][0]/analysisType.label
-#: stagemigration/ui[9][5]/shapAnalysisType.label
+#: stagemigration/ui[9][6]/shapAnalysisType.label
 #: survival/ui[2][0][0]/analysistype.label
+#: survivalPower/options/analysis_type.title
 #: survivalcont/ui[3][0][0]/analysistype.label
 msgid "Analysis type"
 msgstr ""
@@ -16225,12 +16348,6 @@ msgstr ""
 
 #: R/survivalcont.b.R
 msgid "Analysis warning"
-msgstr ""
-
-#: R/multisurvival.b.R
-msgid ""
-"Analysis will proceed, but consider these recommendations for optimal "
-"results."
 msgstr ""
 
 #: multisurvival/ui[2].label
@@ -16326,7 +16443,7 @@ msgstr ""
 msgid "Analyze Neighborhood Consistency"
 msgstr ""
 
-#: stagemigration/ui[8][15]/cureAnalyzeNewStage.label
+#: stagemigration/ui[8][17]/cureAnalyzeNewStage.label
 msgid "Analyze new stage"
 msgstr ""
 
@@ -16338,7 +16455,7 @@ msgstr ""
 msgid "Analyze new staging system (RF)"
 msgstr ""
 
-#: stagemigration/ui[8][15]/cureAnalyzeOldStage.label
+#: stagemigration/ui[8][17]/cureAnalyzeOldStage.label
 msgid "Analyze old stage"
 msgstr ""
 
@@ -16596,8 +16713,11 @@ msgstr ""
 #: comprehensiveSurvivalPower/options/dropout_rate.title
 #: gsdesign/options/dropoutRate.title
 #: simpleSurvivalPower/options/dropout_rate.title
-#: survivalPower/options/dropout_rate.title
 msgid "Annual Dropout Rate"
+msgstr ""
+
+#: survivalPower/options/dropout_rate.title
+msgid "Annual dropout rate"
 msgstr ""
 
 #: comprehensiveSurvivalPower/options/dropout_rate.description
@@ -17729,6 +17849,12 @@ msgid ""
 "fragile: a small shift in prevalence moves it a long way."
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid ""
+"At HR 1 there is no superiority effect; a matching superiority event "
+"requirement is not defined."
+msgstr ""
+
 #: R/agreement.b.R
 msgid "At least 10 cases required for bootstrap CIs."
 msgstr ""
@@ -18471,7 +18597,7 @@ msgstr ""
 msgid "Automated Image Analysis Results"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Automated insights for research"
 msgstr ""
 
@@ -18811,7 +18937,6 @@ msgstr ""
 
 #: simpleSurvivalPower/options/cluster_size.title
 #: stagemigration/results/frailtyModelsOverview.columns.title
-#: survivalPower/options/cluster_size.title
 msgid "Average Cluster Size"
 msgstr ""
 
@@ -19121,7 +19246,7 @@ msgstr ""
 msgid "Background Samples"
 msgstr ""
 
-#: stagemigration/ui[9][5]/shapBackgroundSamples.label
+#: stagemigration/ui[9][6]/shapBackgroundSamples.label
 msgid "Background samples"
 msgstr ""
 
@@ -19756,7 +19881,7 @@ msgstr ""
 msgid "Baseline Model"
 msgstr ""
 
-#: stagemigration/ui[9][5]/baselineModel.label
+#: stagemigration/ui[9][6]/baselineModel.label
 msgid "Baseline model"
 msgstr ""
 
@@ -20733,6 +20858,10 @@ msgstr ""
 msgid "below the 0.80 level conventionally quoted for diagnosis"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Below the conventional 0.667 minimum for tentative conclusions"
+msgstr ""
+
 #: bbcplots/options/value_position/below.title
 msgid "Below/Start"
 msgstr ""
@@ -21122,10 +21251,6 @@ msgid "Between Groups Comparison"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "between regional measurements"
-msgstr ""
-
-#: R/ihcheterogeneity.b.R
 msgid "between regions"
 msgstr ""
 
@@ -21308,7 +21433,7 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Bias analysis was not applicable because no reference measurement was "
-"supplied. "
+"supplied."
 msgstr ""
 
 #: clinicalprediction/options/bias_analysis.title
@@ -21370,7 +21495,7 @@ msgid "Bias reduction for small samples, rare events, and separation."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Bias testing could not be performed due to limited paired observations. "
+msgid "Bias testing could not be performed due to limited paired observations."
 msgstr ""
 
 #: methodcomparison/results/biasAnalysis.columns.title
@@ -21427,6 +21552,7 @@ msgstr ""
 msgid "Bibliometrics"
 msgstr ""
 
+#: R/jjcoefstats.b.R
 #: condsurvival/results/modelFitStatistics.columns.title
 #: continuousmarkov/results/modelComparison.columns.title
 #: continuousrelationship/results/modelFit.columns.title
@@ -22589,8 +22715,8 @@ msgstr ""
 #: recurrentsurvival/options/reReg_se/bootstrap.title
 #: rocreg/options/ci_method/bootstrap.title
 #: stagemigration/options/winRatioConfidenceMethod/bootstrap.title
-#: stagemigration/ui[8][18]/informativeCensoringBootstrap.label
-#: stagemigration/ui[8][21]/concordanceProbabilityBootstrap.label
+#: stagemigration/ui[8][20]/informativeCensoringBootstrap.label
+#: stagemigration/ui[8][24]/concordanceProbabilityBootstrap.label
 #: superpc/options/validation_method/bootstrap.title
 #: survivalvalidation/options/validation_method/bootstrap.title
 #: tinytable/options/table_theme/bootstrap.title
@@ -22606,10 +22732,6 @@ msgstr ""
 #: prauc/options/ci_method/bca.title
 #: vusanalysis/options/ci_method/bca.title
 msgid "Bootstrap (BCa)"
-msgstr ""
-
-#: stagemigration/ui[9][2]/forestBootstrap.label
-msgid "Bootstrap (not yet implemented)"
 msgstr ""
 
 #: predmodel/options/validationMethod/bootstrap.title
@@ -22653,7 +22775,7 @@ msgid "Bootstrap AUC Traces"
 msgstr ""
 
 #: nogoldstandard/options/bootstrap.title
-#: stagemigration/ui[8][15]/cureBootstrapCI.label
+#: stagemigration/ui[8][17]/cureBootstrapCI.label
 msgid "Bootstrap CI"
 msgstr ""
 
@@ -22774,7 +22896,7 @@ msgstr ""
 #: psychopdaROC/options/bootstrapCI.title
 #: psychopdaROC/ui[8][1]/bootstrapCI.label
 #: stagemigration/ui[7][3][0]/clinicalUtilityBootstrap.label
-#: stagemigration/ui[8][9]/intervalCensoringBootstrap.label
+#: stagemigration/ui[8][10]/intervalCensoringBootstrap.label
 msgid "Bootstrap confidence intervals"
 msgstr ""
 
@@ -23156,9 +23278,10 @@ msgstr ""
 #: enhancedROC/options/bootstrapSamples.title
 #: precisionrecall/ui[2][2]/ciSamples.label
 #: stagemigration/ui[7][3][0]/clinicalUtilityBootstrapSamples.label
-#: stagemigration/ui[8][9]/intervalCensoringBootstrapSamples.label
-#: stagemigration/ui[8][12]/frailtyBootstrapSamples.label
-#: stagemigration/ui[8][24]/winRatioBootstrapSamples.label
+#: stagemigration/ui[8][10]/intervalCensoringBootstrapSamples.label
+#: stagemigration/ui[8][13]/frailtyBootstrapSamples.label
+#: stagemigration/ui[8][27]/winRatioBootstrapSamples.label
+#: stagemigration/ui[9][3][0]/forestBootstrapSamples.label
 msgid "Bootstrap samples"
 msgstr ""
 
@@ -23283,7 +23406,8 @@ msgstr ""
 
 #: stagemigration/ui[3][2][0]/performBootstrap.label
 #: stagemigration/ui[8][3]/cutpointBootstrap.label
-#: stagemigration/ui[8][12]/frailtyBootstrap.label
+#: stagemigration/ui[8][13]/frailtyBootstrap.label
+#: stagemigration/ui[9][3][0]/forestBootstrap.label
 msgid "Bootstrap validation"
 msgstr ""
 
@@ -25254,6 +25378,12 @@ msgstr ""
 msgid "Calculated Outcome to Data"
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid ""
+"Calculated power is {power}%; consider a larger sample or longer follow-up "
+"to reach the planning target."
+msgstr ""
+
 #: survivalcont/options/calculatedtime.title
 msgid "Calculated survival time"
 msgstr ""
@@ -25292,7 +25422,7 @@ msgstr ""
 msgid "Calculated Time to Data"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Calculated using reverse Kaplan-Meier method when censoring data is provided "
 "(gold standard). Otherwise uses simple median."
@@ -25682,6 +25812,20 @@ msgstr ""
 msgid "Calibration slope"
 msgstr ""
 
+#: R/survival.b.R
+msgid ""
+"Calibration slope < 0.8 suggests the model predictions are too extreme "
+"(overfitting)."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Calibration slope near 1 indicates good calibration."
+msgstr ""
+
+#: R/survival.b.R
+msgid "Calibration slope slightly below 1 indicates mild overfitting."
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid ""
 "Calibration slope: 1.0 = ideal. A corrected slope below 1 means predicted "
@@ -25948,6 +26092,10 @@ msgstr ""
 #: ihcdiagnostic/results/differentialResults.columns.title
 #: tumorbudding/results/perCaseTable.columns.title
 msgid "Case"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Case (Subject)"
 msgstr ""
 
 #: R/pathagreement.b.R
@@ -27384,8 +27532,8 @@ msgstr ""
 msgid "Censoring mechanism covariates"
 msgstr ""
 
-#: stagemigration/ui[8][17][0].label
-msgid "Censoring Mechanism Covariates (not yet implemented)"
+#: stagemigration/ui[8][21][0][0].label
+msgid "Censoring Mechanism Covariates"
 msgstr ""
 
 #: outcomeorganizer/ui[4].label
@@ -27415,7 +27563,7 @@ msgstr ""
 msgid "Censoring variable not recognised"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Censoring Variable:"
 msgstr ""
 
@@ -27672,11 +27820,11 @@ msgstr ""
 msgid "Change"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Change 'Time Input Type' from 'Date/Time' to 'Raw Values'"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Change 'Time Input Type' from 'Raw Values' to 'Date/Time'"
 msgstr ""
 
@@ -28014,8 +28162,18 @@ msgstr ""
 msgid "Check the frequency table and the distribution plot"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "Check the selected variables and the model options."
+msgstr ""
+
 #: clinicaldataintegration/results/consistencyChecks.columns.title
 msgid "Check Type"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid ""
+"Check variability, group-size constraints, and event counts, or use the "
+"continuous Cox model."
 msgstr ""
 
 #: R/stagemigration-part3.R
@@ -28625,6 +28783,13 @@ msgstr ""
 msgid "Choose the diagnostic test you want to evaluate"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Choose the Event Level: the outcome value that means the event happened. "
+"Values found: {levels}. The analysis does not pick one from the level order, "
+"because the order does not say which value is the event."
+msgstr ""
+
 #: R/jjridges.b.R
 msgid "Choose the export resolution in jamovi's Save Image As dialog"
 msgstr ""
@@ -28799,11 +28964,11 @@ msgid ""
 "measurements and want automatic percentage calculation."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Choose your preferred 'Time Display' mode"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Choose your preferred 'Time Display' mode (Relative or Absolute)"
 msgstr ""
 
@@ -28957,7 +29122,7 @@ msgid "CI Method"
 msgstr ""
 
 #: exacttests/ui[1][1]/ciMethod.label
-#: stagemigration/ui[8][24]/winRatioConfidenceMethod.label
+#: stagemigration/ui[8][27]/winRatioConfidenceMethod.label
 msgid "CI method"
 msgstr ""
 
@@ -29899,7 +30064,6 @@ msgstr ""
 #: enhancedfactorvariable/options/clinical_interpretation.title
 #: enhancedfrequency/options/clinical_interpretation.title
 #: haralicktexture/options/texture_interpretation/clinical.title
-#: ihcscoring/results/biomarkerspecific/clinicalcutpoints.columns.title
 #: ordinalroc/options/clinical_context.title
 #: pathologyagreement/ui[1][0][0].label
 #: pathsampling/ui[2][0][0].label
@@ -30225,7 +30389,7 @@ msgstr ""
 msgid "Clinical Follow-up"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 #: swimmerplot/results/clinicalGlossary.title
 msgid "Clinical Glossary"
 msgstr ""
@@ -30724,7 +30888,7 @@ msgid "Clinical interpretation will be unreliable"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 #: R/waterfall.b.R
 msgid "Clinical Interpretation:"
 msgstr ""
@@ -30760,7 +30924,7 @@ msgid "Clinical Meaning"
 msgstr ""
 
 #: R/enhancedROC.b.R
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Clinical Metrics"
 msgstr ""
 
@@ -31093,7 +31257,7 @@ msgstr ""
 msgid "Clinical Research"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Clinical Research Applications:"
 msgstr ""
 
@@ -31239,8 +31403,6 @@ msgstr ""
 #: enhancedtwowayfrequency/results/associationMeasuresTable.columns.title
 #: enhancedtwowayfrequency/results/comprehensiveAnalysisSummary.columns.title
 #: ihcimmune/results/tilMethodResults.columns.title
-#: ihcscoring/results/biomarkerspecific/biomarkerresults.columns.title
-#: ihcscoring/results/cpsanalysis/cpsresults.columns.title
 #: imagingcorrelation/results/correlationTable.columns.title
 #: labcontrolcharts/results/westgardInterpretation.columns.title
 #: labinterpret/results/trendAnalysisTable.columns.title
@@ -31311,13 +31473,19 @@ msgid "Clinical Standards"
 msgstr ""
 
 #: simpleSurvivalPower/options/clinical_preset.title
-#: survivalPower/options/clinical_preset.title
 msgid "Clinical Study Preset"
 msgstr ""
 
+#: survivalPower/options/clinical_preset.title
+msgid "Clinical study preset (jamovi UI only)"
+msgstr ""
+
 #: simpleSurvivalPower/ui[0][0]/clinical_preset.label
-#: survivalPower/ui[0][0]/clinical_preset.label
 msgid "Clinical Study Preset (Quick Setup)"
+msgstr ""
+
+#: survivalPower/ui[0][0]/clinical_preset.label
+msgid "Clinical study preset (worked example)"
 msgstr ""
 
 #: dataquality/ui[2][0][0].label
@@ -31413,7 +31581,7 @@ msgstr ""
 msgid "Clinical terms glossary"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Clinical Themes:"
 msgstr ""
 
@@ -31435,7 +31603,7 @@ msgstr ""
 msgid "Clinical Thresholds"
 msgstr ""
 
-#: stagemigration/ui[9][5]/shapClinicalThresholds.label
+#: stagemigration/ui[9][6]/shapClinicalThresholds.label
 msgid "Clinical thresholds"
 msgstr ""
 
@@ -31457,7 +31625,7 @@ msgstr ""
 msgid "Clinical Trial Context"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Clinical trial data visualization and regulatory submissions"
 msgstr ""
 
@@ -32090,15 +32258,12 @@ msgid "ClinicoPathD"
 msgstr ""
 
 #: package/analyses/advancedanova.menuGroup
-#: advancedanova/options.menuGroup
-msgid "ClinicoPathDT"
-msgstr ""
-
 #: package/analyses/optimalcutpoint.menuGroup
 #: package/analyses/ordinalmixedmodel.menuGroup
+#: advancedanova/options.menuGroup
 #: optimalcutpoint/options.menuGroup
 #: ordinalmixedmodel/options.menuGroup
-msgid "ClinicoPathT"
+msgid "ClinicoPathP"
 msgstr ""
 
 #: multistatesurvival/options/model_type/clock_forward.title
@@ -32191,6 +32356,10 @@ msgstr ""
 msgid "Cluster"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Cluster (Institution)"
+msgstr ""
+
 #: patientsimilarity/ui[4].label
 msgid "Cluster Analysis"
 msgstr ""
@@ -32246,8 +32415,12 @@ msgstr ""
 msgid "Cluster Comparison"
 msgstr ""
 
-#: stagemigration/ui[8][12]/frailtyClusterComparison.label
+#: stagemigration/ui[8][13]/frailtyClusterComparison.label
 msgid "Cluster comparison"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Cluster Design Approximation"
 msgstr ""
 
 #: frailtysurvival/options/cluster_diagnostics.title
@@ -32443,7 +32616,7 @@ msgstr ""
 #: recurrentsurvival/options/cluster_variable.title
 #: recurrentsurvival/ui[5][0].label
 #: simonmakuch/options/clusterVariable.title
-#: stagemigration/ui[8][11][0].label
+#: stagemigration/ui[8][12][0].label
 msgid "Cluster Variable"
 msgstr ""
 
@@ -33363,6 +33536,7 @@ msgstr ""
 msgid "Color Saturation (0-1)"
 msgstr ""
 
+#: R/jjoncoplot.b.R
 #: aeplot/options/colorScheme.title
 #: alluvialSurvival/options/colorScheme.title
 #: basegraphics/options/color_scheme.title
@@ -33476,6 +33650,10 @@ msgstr ""
 #: raincloud/options/color_var.title
 #: raincloud/ui[0][3].label
 msgid "Color Variable (Optional)"
+msgstr ""
+
+#: stagemigration/ui[11][1][0]/enableAccessibilityFeatures.label
+msgid "Color-blind accessible palettes"
 msgstr ""
 
 #: diagnosticmeta/options/color_palette/colorblind_safe.title
@@ -34198,10 +34376,6 @@ msgid ""
 "analysis."
 msgstr ""
 
-#: ihcscoring/ui[2][1][0][0].label
-msgid "Common Clinical Cutpoints:"
-msgstr ""
-
 #: mantelhaenszel/results/mh_summary.columns.title
 msgid "Common Effect"
 msgstr ""
@@ -34637,9 +34811,9 @@ msgstr ""
 msgid "Compare spatial patterns between conditions (e.g., treated vs control)"
 msgstr ""
 
-#: stagemigration/ui[8][9]/intervalCensoringCompareStages.label
-#: stagemigration/ui[8][18]/informativeCensoringCompareStages.label
-#: stagemigration/ui[8][21]/concordanceProbabilityCompareStages.label
+#: stagemigration/ui[8][10]/intervalCensoringCompareStages.label
+#: stagemigration/ui[8][20]/informativeCensoringCompareStages.label
+#: stagemigration/ui[8][24]/concordanceProbabilityCompareStages.label
 msgid "Compare stages"
 msgstr ""
 
@@ -34648,8 +34822,8 @@ msgstr ""
 msgid "Compare Staging Systems"
 msgstr ""
 
-#: stagemigration/ui[7][1][0]/clinicalUtilityComparison.label
-msgid "Compare staging systems (not yet implemented)"
+#: stagemigration/ui[7][2][0]/clinicalUtilityComparison.label
+msgid "Compare staging systems"
 msgstr ""
 
 #: package/analyses/groomecompare.menuSubtitle
@@ -35211,8 +35385,8 @@ msgstr ""
 msgid "Competing Risk Rate (Group 2)"
 msgstr ""
 
-#: R/survivalPower.b.R
 #: R/outcomeorganizer.b.R
+#: R/survivalPower.b.R
 #: package/analyses/finegray.menuSubgroup
 #: finegray/options.menuSubgroup
 #: idi/options/competing_risks.title
@@ -35521,7 +35695,7 @@ msgstr ""
 msgid "Complete data with no constant predictors."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Complete disappearance of all target lesions"
 msgstr ""
 
@@ -35530,11 +35704,11 @@ msgstr ""
 msgid "Complete effect size toolkit with BlueSky integration"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Complete ggswim Integration:"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Complete ggswim package integration with swim lanes, event markers, status "
 "arrows, and professional clinical themes for maximum flexibility and "
@@ -37121,6 +37295,7 @@ msgstr ""
 msgid "Conclusion:"
 msgstr ""
 
+#: R/jjcoefstats.b.R
 #: ihccluster/results/spatialConcordance.columns.title
 #: ihcsurvival/results/regionalComparison.columns.title
 #: imagingcorrelation/results/stagingCorrelationTable.columns.title
@@ -37138,6 +37313,10 @@ msgstr ""
 
 #: stagemigration/results/concordanceProbabilityComparison.columns.title
 msgid "Concordance 2"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "Concordance Accuracy"
 msgstr ""
 
 #: mageeequation/options/showConcordance.title
@@ -37238,12 +37417,12 @@ msgstr ""
 msgid "Concordance Plot"
 msgstr ""
 
-#: stagemigration/ui[8][19].label
+#: stagemigration/ui[8][22].label
 #: timedependent/options/cutpoint_method/concordance.title
 msgid "Concordance Probability"
 msgstr ""
 
-#: stagemigration/ui[8][19][0]/performConcordanceProbabilityAnalysis.label
+#: stagemigration/ui[8][22][0]/performConcordanceProbabilityAnalysis.label
 msgid "Concordance probability"
 msgstr ""
 
@@ -38089,10 +38268,10 @@ msgstr ""
 #: polychoriccorr/options/ciWidth.title
 #: polychoriccorr/ui[1][1]/ciWidth.label
 #: stagemigration/ui[6][3][0]/cifConfidenceLevel.label
-#: stagemigration/ui[8][9]/intervalCensoringConfidenceLevel.label
-#: stagemigration/ui[8][15]/cureConfidenceLevel.label
-#: stagemigration/ui[8][21]/concordanceProbabilityConfidenceLevel.label
-#: stagemigration/ui[8][24]/winRatioConfidenceLevel.label
+#: stagemigration/ui[8][10]/intervalCensoringConfidenceLevel.label
+#: stagemigration/ui[8][17]/cureConfidenceLevel.label
+#: stagemigration/ui[8][24]/concordanceProbabilityConfidenceLevel.label
+#: stagemigration/ui[8][27]/winRatioConfidenceLevel.label
 #: weightedlogrank/options/confidence_level.title
 msgid "Confidence level"
 msgstr ""
@@ -38351,7 +38530,7 @@ msgstr ""
 msgid "configured for categorical flow visualization"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Configuring the date settings properly ensures accurate timeline "
 "calculations and gives you full control over how dates are displayed in your "
@@ -39605,6 +39784,18 @@ msgstr ""
 msgid "Control Arm Sharing"
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid ""
+"Control arm: {control} subjects, shared by {comparisons} comparisons; "
+"{experimental} per experimental arm. Power is per comparison at the adjusted "
+"alpha. For fixed designs, total study power is a joint normal approximation "
+"to the probability that at least one comparison rejects when every "
+"experimental arm has HR {hr}. Superiority uses both rejection tails; "
+"non-inferiority uses one tail. Shared-control correlation uses allocation "
+"proportions for Schoenfeld tests and expected-event variances for Cox. This "
+"family estimate is unavailable for sequential designs."
+msgstr ""
+
 #: qualitycontrol/results/controlChart.title
 msgid "Control Chart"
 msgstr ""
@@ -39665,8 +39856,11 @@ msgid "Control Group Mean"
 msgstr ""
 
 #: simpleSurvivalPower/options/control_median_survival.title
-#: survivalPower/options/control_median_survival.title
 msgid "Control Group Median Survival (months)"
+msgstr ""
+
+#: survivalPower/options/control_median_survival.title
+msgid "Control group median survival (months)"
 msgstr ""
 
 #: treatmentmeta/options/n_control.title
@@ -40545,7 +40739,7 @@ msgid "Correlation method for comparison"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Correlation metrics were not estimable with the available data. "
+msgid "Correlation metrics were not estimable with the available data."
 msgstr ""
 
 #: R/pathsampling.b.R
@@ -40890,7 +41084,6 @@ msgstr ""
 
 #: bayesiandiagnostic/results/decisionAnalysis.columns.title
 #: decisionpanel/results/optimalPanelsBySize.columns.title
-#: stagemigration/ui[7][2].label
 #: stagemigration/results/clinicalUtilityNNTTable.columns.title
 #: stagemigration/results/clinicalUtilitySummary.columns.title
 msgid "Cost-Effectiveness"
@@ -40926,6 +41119,10 @@ msgstr ""
 msgid "Cost-Effectiveness Analysis"
 msgstr ""
 
+#: stagemigration/ui[7][2][0]/clinicalUtilityCostEffectiveness.label
+msgid "Cost-effectiveness analysis"
+msgstr ""
+
 #: package/analyses/costeffectiveness.description
 #: costeffectiveness/options.description.main
 msgid ""
@@ -40945,10 +41142,6 @@ msgid ""
 "uncertainty in cost-effectiveness conclusions. Particularly valuable for "
 "demonstrating value proposition of advanced diagnostics to hospital "
 "administrators, payers, and policy makers."
-msgstr ""
-
-#: stagemigration/ui[7][2][0]/clinicalUtilityCostEffectiveness.label
-msgid "Cost-effectiveness analysis (not yet implemented)"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -41844,8 +42037,8 @@ msgstr ""
 msgid "Cox refit returned non-finite coefficient estimates."
 msgstr ""
 
-#: R/survivalPower.b.R
 #: R/clinicalscore.b.R
+#: R/survivalPower.b.R
 #: advancedtrials/options/statistical_test/cox_regression.title
 #: clinicalprediction/options/model_type/cox_regression.title
 #: coefplot/options/model_type/cox.title
@@ -42027,7 +42220,7 @@ msgstr ""
 msgid "CR (%)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "CR (Complete Response):"
 msgstr ""
 
@@ -42106,7 +42299,7 @@ msgstr ""
 msgid "Create complete automated analysis report."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Create comprehensive swimmer plots for visualizing patient timelines, "
 "treatments, and clinical events using the advanced ggswim package."
@@ -43449,6 +43642,10 @@ msgstr ""
 msgid "Cumulative Incidence by Risk Group"
 msgstr ""
 
+#: stagemigration/ui[6][3][0]/generateCIFPlots.label
+msgid "Cumulative incidence curves"
+msgstr ""
+
 #: R/singlearm.b.R
 msgid ""
 "Cumulative incidence did not reach 50%. Median time to event not estimable. "
@@ -43511,10 +43708,6 @@ msgstr ""
 
 #: epidemiosurvival/options/cumulative_incidence_plots.title
 msgid "Cumulative Incidence Plots"
-msgstr ""
-
-#: stagemigration/ui[6][3][0]/generateCIFPlots.label
-msgid "Cumulative incidence plots (not yet implemented)"
 msgstr ""
 
 #: directbinomial/results/cumulativeIncidenceTable.title
@@ -43707,8 +43900,8 @@ msgstr ""
 msgid "Cure Fraction Method"
 msgstr ""
 
-#: stagemigration/ui[8][15]/cureFractionEstimation.label
-msgid "Cure fraction method (not yet implemented)"
+#: stagemigration/ui[8][18][0]/cureFractionEstimation.label
+msgid "Cure fraction method"
 msgstr ""
 
 #: curemodels/results/cureFractionPlot.title
@@ -43751,7 +43944,7 @@ msgstr ""
 msgid "Cure Model Bootstrap Validation"
 msgstr ""
 
-#: stagemigration/ui[8][14][0].label
+#: stagemigration/ui[8][16][0].label
 msgid "Cure Model Covariates"
 msgstr ""
 
@@ -43788,7 +43981,7 @@ msgstr ""
 msgid "Cure Model Type"
 msgstr ""
 
-#: stagemigration/ui[8][13][0]/performCureModelAnalysis.label
+#: stagemigration/ui[8][15][0]/performCureModelAnalysis.label
 msgid "Cure models"
 msgstr ""
 
@@ -44253,7 +44446,7 @@ msgstr ""
 msgid "Custom Function"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Custom glyphs for clinical events"
 msgstr ""
 
@@ -45485,7 +45678,7 @@ msgstr ""
 msgid "Data Formats"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Data Formats Supported:"
 msgstr ""
 
@@ -45901,16 +46094,13 @@ msgstr ""
 #: R/lassologistic.b.R
 #: grouplasso/ui[1].label
 #: highdimcox/ui[2].label
+#: lassocox/ui[1].label
 #: lassologistic/ui[1].label
 #: ncvregcox/ui[1].label
 #: pcacox/ui[1].label
 #: plscox/ui[1].label
 #: sparsegrouplasso/ui[1].label
 msgid "Data Suitability"
-msgstr ""
-
-#: lassocox/ui[1].label
-msgid "Data suitability"
 msgstr ""
 
 #: R/clinicalscore.b.R
@@ -46020,7 +46210,7 @@ msgstr ""
 msgid "Data Type for Krippendorff's Alpha"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Data Type Guide"
 msgstr ""
 
@@ -46032,7 +46222,7 @@ msgstr ""
 msgid "Data type mismatch"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Data Type Mismatch"
 msgstr ""
 
@@ -46083,10 +46273,6 @@ msgid "Data Validation Warning"
 msgstr ""
 
 #: R/multisurvival.b.R
-msgid "Data Validation Warnings"
-msgstr ""
-
-#: R/multisurvival.b.R
 msgid "Data validation warnings"
 msgstr ""
 
@@ -46114,7 +46300,7 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Data were insufficient to evaluate overall sampling quality against "
-"predefined criteria. "
+"predefined criteria."
 msgstr ""
 
 #: autoeda/options/eda_engine/dataexplorer.title
@@ -46246,7 +46432,7 @@ msgstr ""
 msgid "Date Format Configuration"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Date Format Detected"
 msgstr ""
 
@@ -46340,7 +46526,7 @@ msgid ""
 "re-run."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Date/Time:"
 msgstr ""
 
@@ -46485,11 +46671,11 @@ msgstr ""
 msgid "Days from Baseline"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Days, weeks, months from treatment start"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Days, weeks, months, years"
 msgstr ""
 
@@ -46519,7 +46705,7 @@ msgstr ""
 msgid "DCR (%)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "DCR (Disease Control Rate):"
 msgstr ""
 
@@ -46663,7 +46849,7 @@ msgstr ""
 msgid "Death/Last Follow-up"
 msgstr ""
 
-#: stagemigration/ui[8][23][0].label
+#: stagemigration/ui[8][26][0].label
 msgid "Death/Primary Endpoint"
 msgstr ""
 
@@ -48143,7 +48329,7 @@ msgstr "Descriptive denominator"
 msgid "Descriptive estimates from a single cohort with no comparison group."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Descriptive measure of patient concentration per unit of observation time "
 "(not an event incidence rate)"
@@ -49365,12 +49551,9 @@ msgid "Diagnostic Plots"
 msgstr ""
 
 #: sequentialtests/options/show_plots.title
-#: stagemigration/ui[8][21]/concordanceProbabilityDiagnostics.label
+#: stagemigration/ui[8][21][1]/informativeCensoringPlots.label
+#: stagemigration/ui[8][24]/concordanceProbabilityDiagnostics.label
 msgid "Diagnostic plots"
-msgstr ""
-
-#: stagemigration/ui[8][18]/informativeCensoringPlots.label
-msgid "Diagnostic plots (not yet implemented)"
 msgstr ""
 
 #: smoothhazard/results/diagnostic_plots.description
@@ -52589,8 +52772,8 @@ msgstr ""
 #: measurementuncertainty/results/budgetTable.columns.title
 #: semimarkov/results/modelSummary.columns.title
 #: semimarkov/results/sojournDistribution.columns.title
-#: stagemigration/ui[8][9]/intervalCensoringDistribution.label
-#: stagemigration/ui[8][15]/cureDistribution.label
+#: stagemigration/ui[8][10]/intervalCensoringDistribution.label
+#: stagemigration/ui[8][17]/cureDistribution.label
 #: stagemigration/results/cureModelParameters.columns.title
 #: survival/ui[9][0][0]/parametric_distribution.label
 #: survival/results/parametricModelComparison.columns.title
@@ -53418,7 +53601,7 @@ msgstr ""
 msgid "Draw Quantile Lines"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Drawn with print-safe geometric symbols that render correctly in PDF/Word "
 "exports and regulatory documents."
@@ -53895,6 +54078,12 @@ msgstr ""
 msgid "Each proportion must be strictly between 0 and 1."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"Each rater's percentages use that rater's non-missing ratings as the "
+"denominator."
+msgstr ""
+
 #: R/jjridges.b.R
 msgid "Each ridge:"
 msgstr ""
@@ -53932,6 +54121,12 @@ msgid ""
 "not pointwise instantaneous hazards or Cox-model coefficients."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid ""
+"Each row is a separate likelihood-ratio test for that covariate given all "
+"the others; the p-values are not adjusted for multiple comparisons."
+msgstr ""
+
 #: R/diagnosticmeta.b.R
 msgid ""
 "Each row is a separate univariate random-effects model on the logit of that "
@@ -53952,7 +54147,7 @@ msgid ""
 "do not need to coincide with the plotting grid."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Each row represents one patient episode or treatment course"
 msgstr ""
 
@@ -54430,8 +54625,6 @@ msgstr ""
 #: semimarkov/results/covariateEffects.columns.title
 #: simpleSurvivalPower/options/effect_size.title
 #: stagemigration/results/effectSizes.columns.title
-#: survivalPower/options/effect_size.title
-#: survivalPower/ui[1][0]/effect_size.label
 #: treatmentmeta/options/effect_size.title
 #: treatmentmeta/results/pooled_effects.columns.title
 #: treatmentmeta/results/individual_studies.columns.title
@@ -54443,6 +54636,8 @@ msgstr ""
 
 #: R/nonparametric.b.R
 #: advancedraincloud/options/show_effect_size.title
+#: survivalPower/options/effect_size.title
+#: survivalPower/ui[1][0]/effect_size.label
 msgid "Effect size"
 msgstr ""
 
@@ -54663,12 +54858,12 @@ msgstr ""
 #: jjridges/options/effsize_type.title
 #: simpleSurvivalPower/options/effect_size_type.title
 #: simpleSurvivalPower/results/power_summary.columns.title
-#: survivalPower/options/effect_size_type.title
 #: survivalPower/results/power_summary.columns.title
 msgid "Effect Size Type"
 msgstr ""
 
 #: jjridges/ui[3][0]/effsize_type.label
+#: survivalPower/options/effect_size_type.title
 msgid "Effect size type"
 msgstr ""
 
@@ -55603,7 +55798,7 @@ msgstr ""
 msgid "End time parsing: {message}"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "End Time:"
 msgstr ""
 
@@ -55611,7 +55806,7 @@ msgstr ""
 msgid "End times are greater than or equal to start times"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "End times should be greater than or equal to start times"
 msgstr ""
 
@@ -55642,7 +55837,7 @@ msgstr ""
 msgid "Endpoint (priority order)"
 msgstr ""
 
-#: stagemigration/ui[8][24]/winRatioEndpoints.label
+#: stagemigration/ui[8][27]/winRatioEndpoints.label
 msgid "Endpoint configuration"
 msgstr ""
 
@@ -55799,7 +55994,7 @@ msgstr ""
 msgid "Enhanced Data Validation Report"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Enhanced Data Validation:"
 msgstr ""
 
@@ -55842,7 +56037,7 @@ msgstr ""
 msgid "Enhanced Factor Variable Analysis with BlueSky Integration"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Enhanced Features:"
 msgstr ""
 
@@ -56487,7 +56682,7 @@ msgstr ""
 msgid "Epidemiological Interpretation"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Epidemiological metrics and follow-up analysis"
 msgstr ""
 
@@ -56836,7 +57031,7 @@ msgid "ER/PR (Breast Cancer)"
 msgstr ""
 
 #: ihcscoring/ui[0][0]/guided_biomarker/er_pr.title
-msgid "ER/PR (Breast Cancer) - H-score >=100 recommended"
+msgid "ER/PR (Breast Cancer) - presets H-score cutpoint 100"
 msgstr ""
 
 #: R/categorize.b.R
@@ -57028,14 +57223,6 @@ msgstr ""
 
 #: R/waterfall.b.R
 msgid "Error creating spider plot: %s"
-msgstr ""
-
-#: R/lassocox.b.R
-msgid ""
-"Error creating survival plot:\n"
-"{msg}\n"
-"\n"
-"Please check your data and model parameters."
 msgstr ""
 
 #: R/tableone.b.R
@@ -57246,14 +57433,13 @@ msgid "Error Variance Ratio (λ)"
 msgstr ""
 
 #: R/chisqposttest.b.R
-#: R/lassocox.b.R
 #: R/linechart.b.R
 #: R/riverplot.b.R
 msgid "Error:"
 msgstr ""
 
-#: R/survivalPower.b.R
 #: R/chisqposttest.b.R
+#: R/survivalPower.b.R
 msgid "ERROR:"
 msgstr ""
 
@@ -58261,7 +58447,7 @@ msgstr ""
 msgid "Event markers were skipped. %s"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Event Markers:"
 msgstr ""
 
@@ -58413,6 +58599,20 @@ msgstr ""
 #: timeupdatedsurvival/options/statusVar.title
 #: timeupdatedsurvival/ui[0][1].label
 msgid "Event Status Variable"
+msgstr ""
+
+#: lassocox/options/outcome.description.ui
+msgid ""
+"Event status with exactly two observed values. A numeric column coded 0/1 is "
+"read as 0 = censored, 1 = event. Any other coding (for example 1/2, or "
+"Alive/Dead) is never guessed: choose the event value in Event level."
+msgstr ""
+
+#: multisurvival/options/outcome.description.ui
+msgid ""
+"Event status. A numeric column coded 0/1 is read as 0 = censored, 1 = event. "
+"Any other coding (for example 1/2, or text such as Alive/Dead) is never "
+"guessed: choose the event value in Event Level."
 msgstr ""
 
 #: jointfrailty/options/time.title
@@ -59295,7 +59495,7 @@ msgstr ""
 msgid "Examples only—not clinical guides or validated cut-off recommendations"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 #: R/timeinterval.b.R
 msgid "Examples:"
 msgstr ""
@@ -59343,7 +59543,6 @@ msgid "Excellent"
 msgstr ""
 
 #: R/decision.b.R
-#: R/diagnosticmeta.b.R
 #: R/psychopdaROC.b.R
 msgid "excellent"
 msgstr ""
@@ -59659,6 +59858,12 @@ msgid ""
 "exclusion (NA), or select fewer variables."
 msgstr ""
 
+#: R/survivalcont.b.R
+msgid ""
+"Excluding this share of the cohort can introduce selection bias; the "
+"landmark should be prespecified."
+msgstr ""
+
 #: pathagreement/ui[4][0]/tie_breaking/exclude.title
 msgid "Excluding tied cases from analysis"
 msgstr ""
@@ -59873,6 +60078,10 @@ msgstr ""
 msgid "Expected Duration (months)"
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid "Expected effect"
+msgstr ""
+
 #: advancedtrials/results/trial_design_summary.columns.title
 msgid "Expected Effect (HR)"
 msgstr ""
@@ -60044,8 +60253,11 @@ msgid "Expected Rate"
 msgstr ""
 
 #: simpleSurvivalPower/options/rmst_difference.title
-#: survivalPower/options/rmst_difference.title
 msgid "Expected RMST Difference (months)"
+msgstr ""
+
+#: survivalPower/options/rmst_difference.title
+msgid "Expected RMST difference (months)"
 msgstr ""
 
 #: adaptivetrialdesign/results/operatingCharacteristics.columns.title
@@ -60247,7 +60459,7 @@ msgstr ""
 msgid "Explanation Stability Analysis"
 msgstr ""
 
-#: stagemigration/ui[9][5]/shapExplanationType.label
+#: stagemigration/ui[9][6]/shapExplanationType.label
 msgid "Explanation type"
 msgstr ""
 
@@ -60326,13 +60538,10 @@ msgstr ""
 
 #: clinicalscore/ui[5].label
 #: firthregression/ui[7].label
+#: lassocox/ui[5].label
 #: lassologistic/ui[7].label
 #: nogoldstandard/ui[3].label
 msgid "Explanatory Output"
-msgstr ""
-
-#: lassocox/ui[5].label
-msgid "Explanatory output"
 msgstr ""
 
 #: emfrailty/options/showSummaries.title
@@ -60565,7 +60774,7 @@ msgstr ""
 #: nonparametric/options.menuGroup
 #: pcacomponenttest/options.menuGroup
 #: pcaloadingtest/options.menuGroup
-msgid "ExplorationT"
+msgid "ExplorationP"
 msgstr ""
 
 #: R/decisioncurve.b.R
@@ -61198,12 +61407,44 @@ msgstr ""
 msgid "expression units"
 msgstr ""
 
+#: stagemigration/ui[8][23].label
+msgid "Extended Adjustment Variables"
+msgstr ""
+
 #: sparsegrouplasso/options/selection_criterion/ebic.title
 msgid "Extended BIC"
 msgstr ""
 
+#: stagemigration/ui[8][21].label
+msgid "Extended Censoring Variables & Plots"
+msgstr ""
+
+#: stagemigration/ui[6][3].label
+msgid "Extended CIF Visualization"
+msgstr ""
+
 #: timedependent/options/model_type/extended_cox.title
 msgid "Extended Cox (Time-Varying Coefficients)"
+msgstr ""
+
+#: stagemigration/ui[8][18].label
+msgid "Extended Cure Model Parameters"
+msgstr ""
+
+#: stagemigration/ui[8][14].label
+msgid "Extended Frailty Options"
+msgstr ""
+
+#: stagemigration/ui[8][7].label
+msgid "Extended Multi-State Options"
+msgstr ""
+
+#: stagemigration/ui[9][3].label
+msgid "Extended Random Forest Options"
+msgstr ""
+
+#: stagemigration/ui[7][2].label
+msgid "Extended Utility & Cost-Effectiveness"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -62487,12 +62728,27 @@ msgid ""
 "events."
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid "Few Expected Events"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Few Independent Clusters"
+msgstr ""
+
 #: R/agepyramid.b.R
 msgid "Few observations behind each band"
 msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Few Outcome Events"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid ""
+"Fewer than 10 clusters per arm are planned; the simple design-effect "
+"approximation does not account for small-cluster degrees of freedom. Obtain "
+"a cluster-specific power calculation."
 msgstr ""
 
 #: R/nonparametric.b.R
@@ -63248,7 +63504,7 @@ msgstr ""
 msgid "Fisher's exact test, OR = %.2f"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Fisher's Exact Test:"
 msgstr ""
 
@@ -63418,6 +63674,7 @@ msgstr ""
 msgid "Fixed cutoff"
 msgstr ""
 
+#: R/psychopdaROC.b.R
 #: bayesiandiagnostic/options/heterogeneity_model/fixed.title
 #: mendelianrandomization/options/ivw_model/fixed.title
 #: mixedeffectscox/options/fixed_effects.title
@@ -64111,7 +64368,7 @@ msgid ""
 "measure, not an event rate). Times are in {unit}."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Follow-up Density:"
 msgstr ""
 
@@ -64542,6 +64799,10 @@ msgstr ""
 msgid ""
 "For manual binning, enter comma-separated break points (e.g., \"0, 25, 50, "
 "75, 100\"). Use a period as the decimal separator (2.5, not 2,5)."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "For non-inferiority conclusion"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -64986,7 +65247,7 @@ msgid ""
 "events."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Found date format:"
 msgstr ""
 
@@ -65092,7 +65353,7 @@ msgstr ""
 msgid "Frailty Distribution"
 msgstr ""
 
-#: stagemigration/ui[8][12]/frailtyDistribution.label
+#: stagemigration/ui[8][13]/frailtyDistribution.label
 msgid "Frailty distribution"
 msgstr ""
 
@@ -65141,7 +65402,7 @@ msgstr ""
 msgid "Frailty Model Type"
 msgstr ""
 
-#: stagemigration/ui[8][10][0]/performFrailtyModelsAnalysis.label
+#: stagemigration/ui[8][11][0]/performFrailtyModelsAnalysis.label
 msgid "Frailty models"
 msgstr ""
 
@@ -65523,6 +65784,10 @@ msgid ""
 "Bayesian analysis, and publication-quality outputs."
 msgstr ""
 
+#: R/outcomeorganizer.b.R
+msgid "Full state breakdown (of {total} coded records): {states}."
+msgstr ""
+
 #: enhancedtables/options/table_width/full.title
 msgid "Full Width"
 msgstr ""
@@ -65747,6 +66012,10 @@ msgstr ""
 
 #: advancedtrials/results/multiplicity_adjustment.columns.title
 msgid "FWER"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "G-coefficient"
 msgstr ""
 
 #: package/analyses/gcomputation.title
@@ -66328,7 +66597,7 @@ msgstr ""
 msgid "Generalized Mixed (glmer)"
 msgstr ""
 
-#: stagemigration/ui[8][24]/winRatioGeneralizedPairwise.label
+#: stagemigration/ui[8][27]/winRatioGeneralizedPairwise.label
 msgid "Generalized pairwise"
 msgstr ""
 
@@ -67460,7 +67729,7 @@ msgstr ""
 msgid "Glossary of terms"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Go to the 'Time & Date Settings' section (click to expand)"
 msgstr ""
 
@@ -67574,7 +67843,6 @@ msgid "Good"
 msgstr ""
 
 #: R/decision.b.R
-#: R/diagnosticmeta.b.R
 #: R/psychopdaROC.b.R
 msgid "good"
 msgstr ""
@@ -67671,8 +67939,8 @@ msgstr ""
 msgid "Goodness-of-Fit"
 msgstr ""
 
-#: stagemigration/ui[8][15]/cureGoodnessOfFit.label
-msgid "Goodness-of-fit (not yet implemented)"
+#: stagemigration/ui[8][18][0]/cureGoodnessOfFit.label
+msgid "Goodness-of-fit"
 msgstr ""
 
 #: nonparametricregression/results/goodnessOfFit.title
@@ -70135,6 +70403,7 @@ msgstr ""
 msgid "Heidelberger-Welch"
 msgstr ""
 
+#: R/jjoncoplot.b.R
 #: jggheatmap/results/clustertab.columns.title
 msgid "Height"
 msgstr ""
@@ -70256,7 +70525,7 @@ msgid "HER2 (Breast Cancer)"
 msgstr ""
 
 #: ihcscoring/ui[0][0]/guided_biomarker/her2.title
-msgid "HER2 (Breast Cancer) - H-score >=150 recommended"
+msgid "HER2 (Breast Cancer) - presets H-score cutpoint 150"
 msgstr ""
 
 #: modalitycomparison/options/score_categories/her2_5cat.title
@@ -70388,7 +70657,7 @@ msgid "Heterogeneity Test"
 msgstr ""
 
 #: pathsampling/options/showHeterogeneityTest.title
-#: stagemigration/ui[8][12]/frailtyHeterogeneityTest.label
+#: stagemigration/ui[8][13]/frailtyHeterogeneityTest.label
 msgid "Heterogeneity test"
 msgstr "Heterogeneity test"
 
@@ -70834,6 +71103,14 @@ msgstr ""
 
 #: R/reportcat.b.R
 msgid "High missing data rates (over 20%) require careful interpretation"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"High missing data: {pct}% of cases were excluded from analyses that require "
+"jointly complete ratings. Pairwise Cohen analyses use cases observed for "
+"each pair, and Krippendorff's alpha uses cases with at least two observed "
+"ratings. Complete-case results may be biased."
 msgstr ""
 
 #: R/summarydata.b.R
@@ -71624,7 +71901,7 @@ msgstr ""
 msgid "Horizontal Bars"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Horizontal bars representing individual patient treatment courses"
 msgstr ""
 
@@ -71653,7 +71930,7 @@ msgstr ""
 msgid "Horizontal Only"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Horizontal patient timelines with response coloring"
 msgstr ""
 
@@ -71829,6 +72106,14 @@ msgstr ""
 
 #: R/vartree.b.R
 msgid "How the Percentages Are Calculated"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"How this numeric outcome was read: the value {event} is the event and every "
+"other value ({censored}) is treated as censored. Values are matched exactly, "
+"not by size, so for a column coded 1/2 the Event Level decides which value "
+"is the event."
 msgstr ""
 
 #: ihccluster/options/spatialComparisonMode.description
@@ -72515,6 +72800,10 @@ msgid "ICC(1,k) - One-way random, average raters"
 msgstr ""
 
 #: R/agreement.b.R
+msgid "ICC(1) - Single Rating"
+msgstr ""
+
+#: R/agreement.b.R
 msgid ""
 "ICC(1): reliability of a single rating; ICC(2): reliability of the mean of "
 "%s raters; G-coefficient: generalizability across raters and clusters (%s "
@@ -72543,6 +72832,10 @@ msgstr ""
 
 #: agreement/options/iccType/icc2k.title
 msgid "ICC(2,k) - Two-way random, average raters"
+msgstr ""
+
+#: R/agreement.b.R
+msgid "ICC(2) - Mean of k Ratings"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -72677,7 +72970,7 @@ msgstr ""
 msgid "Ideal"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Ideal for oncology trials, treatment response visualization, progression "
 "tracking, and regulatory submissions."
@@ -73179,7 +73472,7 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "IHC heterogeneity analysis was performed on %d cases with %d regional "
-"measurements each. "
+"measurements each."
 msgstr ""
 
 #: package/analyses/ihcimmune.title
@@ -73823,7 +74116,7 @@ msgid "Importance Type"
 msgstr ""
 
 #: stagemigration/ui[9][2]/forestImportanceType.label
-msgid "Importance type (not yet implemented)"
+msgid "Importance type"
 msgstr ""
 
 #: R/jjdotplotstats.b.R
@@ -73842,7 +74135,7 @@ msgstr ""
 msgid "Important considerations and limitations"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Important Considerations for Regulatory Documentation"
 msgstr ""
 
@@ -73941,7 +74234,7 @@ msgid ""
 "validated against those standards."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Important Note"
 msgstr ""
 
@@ -74140,7 +74433,7 @@ msgstr ""
 msgid "In Training Set"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "in your time variables"
 msgstr ""
 
@@ -75196,7 +75489,7 @@ msgstr ""
 msgid "Indicate censored observations (lost to follow-up)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Indicate ongoing treatment at data cutoff"
 msgstr ""
 
@@ -75725,7 +76018,7 @@ msgstr ""
 msgid "Informative (Historical)"
 msgstr ""
 
-#: stagemigration/ui[8][16][0]/performInformativeCensoringAnalysis.label
+#: stagemigration/ui[8][19][0]/performInformativeCensoringAnalysis.label
 msgid "Informative censoring"
 msgstr ""
 
@@ -76623,7 +76916,7 @@ msgstr ""
 msgid "Interaction (Effect-Modification) Test."
 msgstr ""
 
-#: stagemigration/ui[9][5]/shapInteractionAnalysis.label
+#: stagemigration/ui[9][6]/shapInteractionAnalysis.label
 msgid "Interaction analysis"
 msgstr ""
 
@@ -77595,7 +77888,7 @@ msgstr ""
 
 #: outcomeorganizer/options/intervalCensoring.title
 #: outcomeorganizer/ui[4][0]/intervalCensoring.label
-#: stagemigration/ui[8][7][0]/performIntervalCensoringAnalysis.label
+#: stagemigration/ui[8][8][0]/performIntervalCensoringAnalysis.label
 msgid "Interval censoring"
 msgstr ""
 
@@ -77813,8 +78106,11 @@ msgstr ""
 
 #: mixedcox/results/iccTable.title
 #: simpleSurvivalPower/options/icc.title
-#: survivalPower/options/icc.title
 msgid "Intracluster Correlation Coefficient"
+msgstr ""
+
+#: survivalPower/options/icc.title
+msgid "Intracluster correlation coefficient"
 msgstr ""
 
 #: clinmon/options/icp.title
@@ -78177,8 +78473,8 @@ msgstr ""
 msgid "IPW model variables"
 msgstr ""
 
-#: stagemigration/ui[8][17][1].label
-msgid "IPW Model Variables (not yet implemented)"
+#: stagemigration/ui[8][21][0][1].label
+msgid "IPW Model Variables"
 msgstr ""
 
 #: biomarkerresponse/results/groupComparison.columns.title
@@ -78754,7 +79050,7 @@ msgstr ""
 #: jjpubr/options.menuGroup
 #: jjsyndromicplot/options.menuGroup
 #: pcaloadingheatmap/options.menuGroup
-msgid "JJStatsPlotT"
+msgid "JJStatsPlotP"
 msgstr ""
 
 #: R/jointmodeling.b.R
@@ -79411,7 +79707,7 @@ msgid "Key Assumption"
 msgstr ""
 
 #: R/riverplot.b.R
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 #: comprehensiveSurvivalPower/results/assumptions.title
 #: comprehensiveSurvivalPower/results/methodComparison.columns.title
 #: treatmentswitching/results/methodComparisonTable.columns.title
@@ -79434,11 +79730,11 @@ msgstr ""
 msgid "Key assumptions:"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Key clinical events (surgery, assessment, progression)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Key clinical events with dates"
 msgstr ""
 
@@ -79546,7 +79842,7 @@ msgid "Ki-67 (Proliferation)"
 msgstr ""
 
 #: ihcscoring/ui[0][0]/guided_biomarker/ki67.title
-msgid "Ki-67 (Proliferation) - H-score >=100 recommended"
+msgid "Ki-67 (Proliferation) - presets H-score cutpoint 100"
 msgstr ""
 
 #: mageeequation/options/ki67.title
@@ -80356,6 +80652,12 @@ msgstr ""
 msgid "Landmark Analysis for Time-varying Predictors"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid ""
+"Landmark analysis is on: rows with follow-up shorter than the landmark time "
+"were excluded before this check."
+msgstr ""
+
 #: condsurvival/results/landmarkPlot.title
 #: progressionsurvival/results/landmark_plot.title
 msgid "Landmark Analysis Plot"
@@ -80517,7 +80819,7 @@ msgstr ""
 msgid "Landmark Times"
 msgstr ""
 
-#: stagemigration/ui[8][18]/informativeCensoringLandmarkTimes.label
+#: stagemigration/ui[8][20]/informativeCensoringLandmarkTimes.label
 msgid "Landmark times (comma-separated)"
 msgstr ""
 
@@ -81120,7 +81422,7 @@ msgstr ""
 
 #: intervalsurvival/options/left_time.title
 #: intervalsurvival/ui[0][0].label
-#: stagemigration/ui[8][8][0].label
+#: stagemigration/ui[8][9][0].label
 msgid "Left Interval Time"
 msgstr ""
 
@@ -81812,7 +82114,6 @@ msgid "Limitations"
 msgstr ""
 
 #: R/decision.b.R
-#: R/diagnosticmeta.b.R
 msgid "limited"
 msgstr ""
 
@@ -81871,6 +82172,10 @@ msgstr ""
 
 #: R/benford.b.R
 msgid "Limited evidence"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Limited Expected Events"
 msgstr ""
 
 #: treatmenteffects/options/iv_method/limited_information.title
@@ -83396,6 +83701,10 @@ msgstr ""
 
 #: R/decisioncurve.b.R
 msgid "Low bootstrap replications ({n})."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Low Calculated Power"
 msgstr ""
 
 #: clinicalcalculators/options/clinical_threshold_low.title
@@ -85283,7 +85592,7 @@ msgstr ""
 msgid "Matching Strategy"
 msgstr ""
 
-#: stagemigration/ui[8][24]/winRatioMatchingStrategy.label
+#: stagemigration/ui[8][27]/winRatioMatchingStrategy.label
 msgid "Matching strategy"
 msgstr ""
 
@@ -85475,6 +85784,10 @@ msgstr ""
 
 #: mixedeffectscox/results/hierarchicalStructure.columns.title
 msgid "Max Obs"
+msgstr ""
+
+#: R/jjsegmentedtotalbar.b.R
+msgid "Max Percentage"
 msgstr ""
 
 #: entropyanalysis/results/caseLevelTable.columns.title
@@ -86389,6 +86702,10 @@ msgstr ""
 msgid "Mean and standard deviation of CV metrics"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Mean Annotator Agreement"
+msgstr ""
+
 #: explainableai/results/attentionanalysis/attentionstatstable.columns.title
 msgid "Mean Attention"
 msgstr ""
@@ -86706,6 +87023,10 @@ msgstr ""
 msgid "Mean Pearson Correlation requires numeric (continuous) data."
 msgstr ""
 
+#: R/jjsegmentedtotalbar.b.R
+msgid "Mean Percentage"
+msgstr ""
+
 #: clinicalprediction/results/stability_analysis.columns.title
 msgid "Mean Performance"
 msgstr ""
@@ -86987,7 +87308,7 @@ msgstr ""
 msgid "Measure"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Measure of association between group membership and outcome. OR > 1 "
 "indicates higher odds of response in the comparison group; OR < 1 indicates "
@@ -87001,6 +87322,10 @@ msgstr ""
 
 #: R/summarydata.b.R
 msgid "Measure of variability around the mean."
+msgstr ""
+
+#: R/timeinterval.b.R
+msgid "measured from the {adj} landmark"
 msgstr ""
 
 #: R/lollipop.b.R
@@ -87271,7 +87596,7 @@ msgstr ""
 
 #: package/analyses/adaptivetrialdesign.menuGroup
 #: adaptivetrialdesign/options.menuGroup
-msgid "meddecideExtraT"
+msgid "meddecideExtraP"
 msgstr ""
 
 #: package/analyses/timedependentdca.menuGroup
@@ -87286,7 +87611,7 @@ msgstr ""
 #: mageeequation/options.menuGroup
 #: misclassificationbias/options.menuGroup
 #: timedependentdca/options.menuGroup
-msgid "meddecideT"
+msgid "meddecideP"
 msgstr ""
 
 #: R/advancedraincloud.b.R
@@ -87526,7 +87851,7 @@ msgstr ""
 msgid "Median Follow-up Time (reverse Kaplan-Meier)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Median Follow-up:"
 msgstr ""
 
@@ -88111,6 +88436,10 @@ msgstr ""
 #: R/pathsampling.b.R
 msgid "Meets target at {v1} samples ({v2}%)"
 msgstr "Meets target at {v1} samples ({v2}%)"
+
+#: R/pathagreement.b.R
+msgid "Meets the conventional 0.80 reliability threshold"
+msgstr ""
 
 #: progressionsurvival/results/clinical_significance_table.columns.title
 msgid "Meets Threshold"
@@ -89214,7 +89543,7 @@ msgid "Methodology."
 msgstr ""
 
 #: R/jjpiestats.b.R
-#: stagemigration/ui[8][21]/concordanceProbabilityMethods.label
+#: stagemigration/ui[8][24]/concordanceProbabilityMethods.label
 msgid "Methods"
 msgstr ""
 
@@ -89413,6 +89742,10 @@ msgstr ""
 
 #: enhancedROC/results/results/precisionRecallTable.description
 msgid "Metrics for imbalanced data analysis"
+msgstr ""
+
+#: R/jjcoefstats.b.R
+msgid "Metrics unavailable"
 msgstr ""
 
 #: jsjplot/options/colors/metro.title
@@ -89661,7 +89994,7 @@ msgstr ""
 msgid "Milestone Event Summary"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Milestone Events (optional):"
 msgstr ""
 
@@ -89673,7 +90006,7 @@ msgstr ""
 msgid "Milestone skipped: calendar dates on a numeric timeline"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Milestone Support:"
 msgstr ""
 
@@ -89697,7 +90030,7 @@ msgstr ""
 msgid "Milestone Times/Dates"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Milestone-based clinical pathway analysis"
 msgstr ""
 
@@ -89705,7 +90038,7 @@ msgstr ""
 msgid "Milestones"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Milestones:"
 msgstr ""
 
@@ -89768,6 +90101,10 @@ msgstr ""
 
 #: mixedeffectscox/results/hierarchicalStructure.columns.title
 msgid "Min Obs"
+msgstr ""
+
+#: R/jjsegmentedtotalbar.b.R
+msgid "Min Percentage"
 msgstr ""
 
 #: agreement/results/meanPearsonTable.columns.title
@@ -89837,10 +90174,6 @@ msgstr ""
 #: tinytable/options/style_borders/minimal.title
 #: vartree/options/style/minimal.title
 msgid "Minimal"
-msgstr ""
-
-#: R/diagnosticmeta.b.R
-msgid "minimal"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -90794,7 +91127,7 @@ msgstr ""
 msgid "Missing Data Information"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Missing data is handled appropriately (excluded from calculations)"
 msgstr ""
 
@@ -91835,7 +92168,7 @@ msgstr ""
 msgid "Model Comparison"
 msgstr ""
 
-#: stagemigration/ui[8][15]/cureModelComparison.label
+#: stagemigration/ui[8][17]/cureModelComparison.label
 msgid "Model comparison"
 msgstr ""
 
@@ -92313,6 +92646,7 @@ msgstr ""
 #: flexcomprisk/ui[1].label
 #: geemodel/ui[2].label
 #: hierarchicalpathology/ui[1][0][0].label
+#: lassocox/ui[2].label
 #: lassologistic/ui[2].label
 #: leaveonecenterout/ui[1].label
 #: mixedcox/ui[2].label
@@ -92324,10 +92658,6 @@ msgstr ""
 #: timeupdatedsurvival/ui[1][0].label
 #: timevarycox/ui[1].label
 msgid "Model Options"
-msgstr ""
-
-#: lassocox/ui[2].label
-msgid "Model options"
 msgstr ""
 
 #: clinicalprediction/results/overview.title
@@ -92499,8 +92829,8 @@ msgstr ""
 msgid "Model Selection"
 msgstr ""
 
-#: stagemigration/ui[8][12]/frailtyModelSelection.label
-msgid "Model selection (not yet implemented)"
+#: stagemigration/ui[8][14][0]/frailtyModelSelection.label
+msgid "Model selection"
 msgstr ""
 
 #: bayesiannetworkma/results/modelComparison.title
@@ -92739,14 +93069,11 @@ msgid "Model Type"
 msgstr ""
 
 #: R/clinicalscore.b.R
-#: stagemigration/ui[8][9]/intervalCensoringModel.label
-#: stagemigration/ui[8][15]/cureModelType.label
+#: stagemigration/ui[8][7][0]/multiStateModel.label
+#: stagemigration/ui[8][10]/intervalCensoringModel.label
+#: stagemigration/ui[8][17]/cureModelType.label
+#: stagemigration/ui[9][3][0]/forestModelType.label
 msgid "Model type"
-msgstr ""
-
-#: stagemigration/ui[8][6]/multiStateModel.label
-#: stagemigration/ui[9][2]/forestModelType.label
-msgid "Model type (not yet implemented)"
 msgstr ""
 
 #: modelbuilder/ui[3].label
@@ -92862,7 +93189,6 @@ msgid "Models to Compare"
 msgstr ""
 
 #: R/decision.b.R
-#: R/diagnosticmeta.b.R
 #: R/enhancedROC.b.R
 #: R/linechart.b.R
 msgid "moderate"
@@ -93574,6 +93900,10 @@ msgstr ""
 msgid "Most studies use 'Percentage Changes' format"
 msgstr ""
 
+#: R/jjsegmentedtotalbar.b.R
+msgid "Most Variable Segment"
+msgstr ""
+
 #: R/benford.b.R
 msgid "Most-deviating digit combinations:"
 msgstr ""
@@ -93650,6 +93980,10 @@ msgstr ""
 
 #: agreement/results/concordanceF1Table.title
 msgid "Multi-Annotator Concordance Metrics"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Multi-arm Family Power Unavailable"
 msgstr ""
 
 #: simpleSurvivalPower/options/study_design/multi_arm.title
@@ -93991,8 +94325,8 @@ msgstr ""
 msgid "Multi-State Model Validation"
 msgstr ""
 
-#: stagemigration/ui[8][6]/multiStateValidation.label
-msgid "Multi-state model validation (not yet implemented)"
+#: stagemigration/ui[8][7][0]/multiStateValidation.label
+msgid "Multi-state model validation"
 msgstr ""
 
 #: package/analyses/flexmultistate.menuSubgroup
@@ -94159,8 +94493,11 @@ msgstr ""
 
 #: clinicaltrialdesign/options/multiple_comparisons.title
 #: simpleSurvivalPower/options/multiple_comparisons.title
-#: survivalPower/options/multiple_comparisons.title
 msgid "Multiple Comparisons Adjustment"
+msgstr ""
+
+#: survivalPower/options/multiple_comparisons.title
+msgid "Multiple comparisons adjustment"
 msgstr ""
 
 #: patientreported/options/multiple_comparisons.title
@@ -94409,7 +94746,7 @@ msgstr ""
 msgid "Multiple Time Points (comma-separated)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Multiple Time Units:"
 msgstr ""
 
@@ -94716,6 +95053,10 @@ msgid ""
 "N and Percent count all cases, including the missing (NA) row. Valid "
 "Percent, present only for variables that have missing values, counts only "
 "the cases with a recorded value."
+msgstr ""
+
+#: R/agreement.b.R
+msgid "N Annotators (reference)"
 msgstr ""
 
 #: dynamicprediction/results/landmarkAnalysis.columns.title
@@ -95741,7 +96082,7 @@ msgid ""
 "substitute for the usual range, duplicate, and missingness checks."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Neither sufficient shrinkage for PR nor sufficient increase for PD"
 msgstr ""
 
@@ -96631,6 +96972,13 @@ msgid ""
 "groups to be reasonably sized before a ranking means anything."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"No case is complete across all selected raters. Requested analyses that "
+"support partially observed ratings used the available data; analyses "
+"requiring jointly complete rows were skipped."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "No case observations found for predictor '%s'. Check that your outcome "
@@ -96770,16 +97118,6 @@ msgstr ""
 msgid ""
 "No complete records remain after applying the selected variables and "
 "landmark restriction."
-msgstr ""
-
-#: R/lassocox.b.R
-msgid ""
-"No complete survival data available.\n"
-"\n"
-"This can occur when:\n"
-"• There are missing values in time or outcome variables\n"
-"• Risk score calculation failed\n"
-"• Data filtering removed all observations"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -97188,6 +97526,12 @@ msgstr ""
 
 #: R/lassocox.b.R
 msgid "No issues"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"No jointly complete cases were found. Krippendorff's alpha or pairwise Cohen "
+"analysis requires at least two usable cases."
 msgstr ""
 
 #: variablebiplot/options/labelPoints/none.title
@@ -97664,7 +98008,7 @@ msgstr ""
 msgid ""
 "No systematic bias was detected between regional and reference measurements "
 "(p \\u{2265} 0.05); this does not establish that the two agree, as the test "
-"may lack power to detect a difference of relevant size. "
+"may lack power to detect a difference of relevant size."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -97906,10 +98250,7 @@ msgstr ""
 #: R/lassocox.b.R
 msgid ""
 "No variable-based risk scores are available because the selected rule "
-"retained no predictors.\n"
-"\n"
-"The empty model is a valid result. Choose another lambda rule only as a "
-"prespecified modeling decision and report that choice transparently."
+"retained no predictors."
 msgstr ""
 
 #: R/outlierdetection.b.R
@@ -98268,8 +98609,11 @@ msgstr ""
 #: R/survivalPower.b.R
 #: comprehensiveSurvivalPower/options/non_inferiority_margin.title
 #: simpleSurvivalPower/options/ni_margin.title
-#: survivalPower/options/ni_margin.title
 msgid "Non-inferiority Margin"
+msgstr ""
+
+#: survivalPower/options/ni_margin.title
+msgid "Non-inferiority margin"
 msgstr ""
 
 #: comprehensiveSurvivalPower/options/non_inferiority_margin.description
@@ -98295,8 +98639,11 @@ msgid "Non-inferiority Trial (1.25 margin)"
 msgstr ""
 
 #: simpleSurvivalPower/options/ni_type.title
-#: survivalPower/options/ni_type.title
 msgid "Non-inferiority Type"
+msgstr ""
+
+#: survivalPower/options/ni_type.title
+msgid "Non-inferiority type"
 msgstr ""
 
 #: clinicaltrialdesign/ui[4][0].label
@@ -99220,7 +99567,6 @@ msgstr ""
 msgid "Not estimable"
 msgstr ""
 
-#: R/diagnosticmeta.b.R
 #: R/enhancedROC.b.R
 #: R/nogoldstandard.b.R
 #: R/pathsampling.b.R
@@ -99581,7 +99927,7 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Note: 'psych' package not available. Using correlation-based approximation "
-"(r = %s, 95%% CI [%s, %s]) instead of ICC(2,1). Install 'psych' for exact "
+"(r = %s, 95%% CI %s to %s) instead of ICC(2,1). Install 'psych' for exact "
 "ICC calculations."
 msgstr ""
 
@@ -99666,6 +100012,13 @@ msgid ""
 "Note: on the Split By figure each panel is computed by ggstatsplot, which "
 "always uses the Welch variant and its own default effect size. 'Equal "
 "variances' and 'Effect size type' apply to the main figure only."
+msgstr ""
+
+#: R/stagemigration.b.R
+msgid ""
+"Note: Proportional hazards assumption may be violated (Schoenfeld p "
+"\\u{2264} 0.05). Hazard ratios and concordance measures reflect average "
+"effects over follow-up; evaluate Time-Dependent ROC or Landmark Analysis."
 msgstr ""
 
 #: R/linechart.b.R
@@ -100369,6 +100722,7 @@ msgstr ""
 msgid "Number of categories"
 msgstr ""
 
+#: R/agreement.b.R
 #: R/checkdata.b.R
 #: agreement/options/ssNCategories.title
 #: ordinalroc/results/overallSummary.columns.title
@@ -100732,8 +101086,11 @@ msgstr ""
 #: clinicaltrialdesign/options/interim_analyses.title
 #: comprehensiveSurvivalPower/options/number_of_looks.title
 #: simpleSurvivalPower/options/interim_analyses.title
-#: survivalPower/options/interim_analyses.title
 msgid "Number of Interim Analyses"
+msgstr ""
+
+#: survivalPower/options/interim_analyses.title
+msgid "Number of interim analyses"
 msgstr ""
 
 #: splinehazard/options/num_knots.description
@@ -101036,6 +101393,7 @@ msgstr ""
 msgid "Number of random splits for reproducibility testing"
 msgstr ""
 
+#: R/agreement.b.R
 #: agreement/options/ssNRaters.title
 #: kappaSizeCI/ui[0][1][0].label
 #: kappaSizeFixedN/ui[0][1][0].label
@@ -101277,8 +101635,11 @@ msgstr ""
 
 #: advancedtrials/options/number_of_arms.title
 #: simpleSurvivalPower/options/number_of_arms.title
-#: survivalPower/options/number_of_arms.title
 msgid "Number of Treatment Arms"
+msgstr ""
+
+#: survivalPower/options/number_of_arms.title
+msgid "Number of treatment arms"
 msgstr ""
 
 #: extratrees/options/num_trees.title
@@ -101415,6 +101776,16 @@ msgstr ""
 msgid "Numeric Format Selected For A Text Column"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"Numeric outcome is not coded 0/1. Values found: {values}. The analysis does "
+"not guess which value is the event, because a coding such as 1/2 means 2 = "
+"event in some datasets and 1 = event in others. Either recode it as 0 = "
+"censored / 1 = event, or choose the value that represents the event in Event "
+"Level (in jamovi, first set the column's measure type to Nominal in Data > "
+"Setup so its values are listed)."
+msgstr ""
+
 #: R/lassologistic.b.R
 msgid "Numeric outcome must have at least 2 observed values."
 msgstr ""
@@ -101427,11 +101798,19 @@ msgid ""
 "is 0; do not omit other event types."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid ""
+"Numeric outcomes: a column coded 0/1 is read as 0 = censored and 1 = event. "
+"Any other coding, such as 1/2, is never guessed: choose the event value in "
+"Event Level (set the column to Nominal in Data > Setup if its values are not "
+"listed). Every other value is treated as censored."
+msgstr ""
+
 #: enhancedROC/options/predictors.description
 msgid "Numeric predictor variables for ROC analysis"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "numeric values"
 msgstr ""
 
@@ -102053,7 +102432,7 @@ msgstr ""
 msgid "Odds Ratio (OR) - for binary"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Odds Ratio (OR):"
 msgstr ""
 
@@ -102219,7 +102598,7 @@ msgstr ""
 #: R/diagnosticmeta.b.R
 msgid ""
 "On the pooled estimate this test would detect about %.0f of 100 patients "
-"with disease, but the interval%s admits materially worse performance. "
+"with disease, but the interval%s admits materially worse performance."
 msgstr ""
 
 #: waterfall/options/ongoingVar.title
@@ -102370,7 +102749,7 @@ msgstr ""
 #: survivalendpoints/options.menuGroup
 #: tumorgrowth/options.menuGroup
 #: waterfallrecist/options.menuGroup
-msgid "OncoPathT"
+msgid "OncoPathP"
 msgstr ""
 
 #: package/analyses/jjoncoplot.menuSubtitle
@@ -102528,6 +102907,10 @@ msgstr ""
 msgid "One-sided (lower bound only)"
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid "One-sided Alpha"
+msgstr ""
+
 #: treecompare/options/rf_mtry_method/third.title
 msgid "One-third"
 msgstr ""
@@ -102593,7 +102976,7 @@ msgstr ""
 msgid "One-way sensitivity analysis results"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Ongoing treatment indicators"
 msgstr ""
 
@@ -102629,6 +103012,13 @@ msgstr ""
 
 #: R/survival.b.R
 msgid "Only {count} events observed"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid ""
+"Only {events} comparison-effective events are expected; asymptotic power can "
+"be unreliable with sparse events. Confirm the design using an appropriate "
+"simulation."
 msgstr ""
 
 #: R/vartree.b.R
@@ -104359,7 +104749,7 @@ msgstr ""
 msgid "ORR (%)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "ORR (Objective Response Rate):"
 msgstr ""
 
@@ -104589,6 +104979,12 @@ msgstr ""
 #: gcomputation/ui[1]/outcomeEvent.label
 #: misclassificationbias/options/outcomeLevel.title
 msgid "Outcome Event Level"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Outcome Factor Has Unsupported Levels: the outcome variable has non-numeric "
+"levels that cannot be interpreted as events: {levels}."
 msgstr ""
 
 #: idi/results/distributionSummary.columns.title
@@ -105012,6 +105408,12 @@ msgstr ""
 msgid "Outcome variable summary: {counts}"
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid ""
+"Outcome Variable Type Not Supported: the outcome variable has type '{type}', "
+"which cannot be used for survival analysis."
+msgstr ""
+
 #: clinicaldashboard/options/outcomeVars.title
 msgid "Outcome variables"
 msgstr ""
@@ -105388,7 +105790,7 @@ msgstr ""
 msgid "Output formatting style"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 #: jsummarytools/results/interpretation.title
 msgid "Output Interpretation"
 msgstr ""
@@ -105441,6 +105843,7 @@ msgstr ""
 #: joinpoint/ui[2].label
 #: jrecode/ui[4].label
 #: jwaffle/ui[3].label
+#: lassocox/ui[4].label
 #: lassologistic/ui[6].label
 #: leaveonecenterout/ui[2].label
 #: lymphnoderatio/ui[2].label
@@ -105477,10 +105880,6 @@ msgstr ""
 #: tumorbudding/ui[3].label
 #: winratio/ui[4].label
 msgid "Output Options"
-msgstr ""
-
-#: lassocox/ui[4].label
-msgid "Output options"
 msgstr ""
 
 #: chisqposttest/ui[3].label
@@ -106620,7 +107019,7 @@ msgstr ""
 msgid "P-value vs Overall"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "P-value:"
 msgstr ""
 
@@ -107107,6 +107506,16 @@ msgstr ""
 
 #: vusanalysis/options/pairwise_tests.title
 msgid "Pairwise AUC Tests"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid "Pairwise available-case analysis"
+msgstr ""
+
+#: R/pathagreement.b.R
+msgid ""
+"Pairwise available-case analysis used every case rated by both members of a "
+"pair. Pair-specific sample sizes: {counts}."
 msgstr ""
 
 #: trichotomousroc/options/pairwise_comparisons.title
@@ -108641,7 +109050,7 @@ msgid ""
 "plot. Please select all three variables in the Core Data Variables section."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 #: R/waterfall.b.R
 msgid "Patient ID:"
 msgstr ""
@@ -108700,7 +109109,7 @@ msgstr ""
 msgid "Patient Number-Based"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Patient outcome tracking in longitudinal studies"
 msgstr ""
 
@@ -108720,7 +109129,7 @@ msgstr ""
 msgid "Patient Profile Examples"
 msgstr ""
 
-#: stagemigration/ui[9][5]/shapPatientProfiles.label
+#: stagemigration/ui[9][6]/shapPatientProfiles.label
 msgid "Patient profiles"
 msgstr ""
 
@@ -108851,6 +109260,10 @@ msgstr ""
 
 #: R/outcomeorganizer.b.R
 msgid "patients in the disease state"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid "Patients in the model:"
 msgstr ""
 
 #: stagemigration/results/advancedMigrationHeatmapStats.columns.title
@@ -109173,7 +109586,7 @@ msgstr ""
 msgid "PD (%)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "PD (Progressive Disease):"
 msgstr ""
 
@@ -109218,7 +109631,7 @@ msgid "PD-L1 (Immunotherapy)"
 msgstr ""
 
 #: ihcscoring/ui[0][0]/guided_biomarker/pdl1.title
-msgid "PD-L1 (Immunotherapy) - TPS >=1% recommended"
+msgid "PD-L1 (Immunotherapy) - presets percentage cutpoint 1"
 msgstr ""
 
 #: haralicktexture/options/biomarker_context/pdl1.title
@@ -109621,6 +110034,12 @@ msgstr ""
 #: multiclassdiagnostics/results/perClassMetrics.title
 #: multiclassroc/results/classMetricsTable.title
 msgid "Per-Class Performance Metrics"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid ""
+"Per-comparison sequential power is reported. Total study power requires a "
+"validated joint arm-and-look calculation and is not estimated here."
 msgstr ""
 
 #: synopticcompleteness/options/showPerItem.title
@@ -111436,7 +111855,7 @@ msgstr ""
 msgid "Person-Time Analysis:"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Person-time Analysis:"
 msgstr ""
 
@@ -111556,7 +111975,7 @@ msgid ""
 "interval's events / person-time at risk."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Person-Time:"
 msgstr ""
 
@@ -112002,8 +112421,8 @@ msgstr ""
 msgid "Plateau Detection Threshold"
 msgstr ""
 
-#: stagemigration/ui[8][15]/curePlateauThreshold.label
-msgid "Plateau threshold (not yet implemented)"
+#: stagemigration/ui[8][18][0]/curePlateauThreshold.label
+msgid "Plateau threshold"
 msgstr ""
 
 #: hematologicindices/options/platelets.title
@@ -112107,7 +112526,6 @@ msgstr ""
 msgid "Please check your data and try again."
 msgstr ""
 
-#: R/lassocox.b.R
 #: R/multisurvival.b.R
 msgid "Please check your data and variable selections."
 msgstr ""
@@ -113182,6 +113600,7 @@ msgstr ""
 msgid "Plot Transition Probabilities"
 msgstr ""
 
+#: R/jjoncoplot.b.R
 #: advancedanova/options/plot_type.title
 #: basegraphics/options/plot_type.title
 #: conditionalsurvival/options/plotType.title
@@ -113347,10 +113766,6 @@ msgstr ""
 msgid "Plots"
 msgstr ""
 
-#: stagemigration/ui[9][5]/generateSHAPPlots.label
-msgid "Plots (not yet implemented)"
-msgstr ""
-
 #: stagemigration/ui[10][0].label
 msgid "Plots & Diagrams"
 msgstr ""
@@ -113416,6 +113831,10 @@ msgstr ""
 
 #: basegraphics/options/point_type/3.title
 msgid "Plus"
+msgstr ""
+
+#: R/survivalcont.b.R
+msgid "plus %d with missing follow-up time"
 msgstr ""
 
 #: retracted/results/summary.columns.title
@@ -115050,7 +115469,6 @@ msgstr ""
 #: package/analyses/kappaSizeCI.menuGroup
 #: package/analyses/kappaSizeFixedN.menuGroup
 #: package/analyses/kappaSizePower.menuGroup
-#: package/analyses/survivalPower.menuGroup
 #: adaptivetrialdesign/results/operatingCharacteristics.columns.title
 #: advancedSurvivalPower/options/calc_type/power.title
 #: competingRisksPower/results/powerCurveTable.columns.title
@@ -115059,7 +115477,6 @@ msgstr ""
 #: kappaSizeFixedN/options.menuGroup
 #: kappaSizePower/options.menuGroup
 #: kappaSizePower/ui[3][1][0]/power.label
-#: survivalPower/options.menuGroup
 msgid "Power"
 msgstr ""
 
@@ -115083,8 +115500,11 @@ msgid "Power (1-&beta;)"
 msgstr ""
 
 #: simpleSurvivalPower/options/power_level.title
-#: survivalPower/options/power_level.title
 msgid "Power (1-Beta)"
+msgstr ""
+
+#: survivalPower/options/power_level.title
+msgid "Power (1-beta)"
 msgstr ""
 
 #: advancedSurvivalPower/options/power.title
@@ -115329,6 +115749,11 @@ msgstr ""
 msgid "Power/sample size sensitivity across parameter ranges"
 msgstr ""
 
+#: package/analyses/survivalPower.menuGroup
+#: survivalPower/options.menuGroup
+msgid "PowerP"
+msgstr ""
+
 #: jpps/results/correlation_comparison.columns.title
 msgid "PPS Advantage"
 msgstr ""
@@ -115468,7 +115893,7 @@ msgstr ""
 msgid "PR (%)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "PR (Partial Response):"
 msgstr ""
 
@@ -116360,7 +116785,7 @@ msgid "Prediction Time Points"
 msgstr ""
 
 #: flexiblerelativesurvival/ui[1][2]/predictTimePoints.label
-#: stagemigration/ui[8][9]/intervalCensoringPredictionTime.label
+#: stagemigration/ui[8][10]/intervalCensoringPredictionTime.label
 msgid "Prediction time points"
 msgstr ""
 
@@ -117214,9 +117639,12 @@ msgstr ""
 #: advancedtrials/results/trial_design_summary.columns.title
 #: simpleSurvivalPower/options/primary_endpoint.title
 #: simpleSurvivalPower/results/power_summary.columns.title
-#: survivalPower/options/primary_endpoint.title
 #: survivalPower/results/power_summary.columns.title
 msgid "Primary Endpoint"
+msgstr ""
+
+#: survivalPower/options/primary_endpoint.title
+msgid "Primary endpoint"
 msgstr ""
 
 #: winratio/options/status1.title
@@ -117952,7 +118380,7 @@ msgstr ""
 msgid "Probability of Multiple Positive Samples"
 msgstr "Probability of Multiple Positive Samples"
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Probability of observing results as extreme or more extreme than observed, "
 "assuming no true difference exists. Convention: p < 0.05 indicates "
@@ -118117,7 +118545,7 @@ msgstr ""
 msgid "Professional clinical tables using pivottabler library"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Professional clinical visualization"
 msgstr ""
 
@@ -118130,7 +118558,7 @@ msgstr ""
 msgid "Professional News Graphics with BBC Design"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Professional styling for publications"
 msgstr ""
 
@@ -118590,11 +119018,11 @@ msgid ""
 "pilot data or literature."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Proportion of patients with CR or PR"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Proportion of patients with CR, PR, or SD"
 msgstr ""
 
@@ -118964,11 +119392,11 @@ msgstr ""
 msgid "Protocol times (3/6/9/12/18/24/36 months)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Protocol times, median values, custom timepoints"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Provide an explicit censoring/status variable for accurate ongoing treatment "
 "arrows and reverse Kaplan-Meier median follow-up calculation."
@@ -119151,6 +119579,10 @@ msgstr ""
 
 #: generalpseudo/results/functionalSummary.columns.title
 msgid "Pseudo Mean"
+msgstr ""
+
+#: R/jjcoefstats.b.R
+msgid "Pseudo R-squared"
 msgstr ""
 
 #: R/stagemigration-part1.R
@@ -120414,6 +120846,7 @@ msgid "R-hat"
 msgstr ""
 
 #: R/clinicalscore.b.R
+#: R/jjcoefstats.b.R
 msgid "R-squared"
 msgstr ""
 
@@ -120561,6 +120994,7 @@ msgstr ""
 msgid "Random Effect"
 msgstr ""
 
+#: R/psychopdaROC.b.R
 #: bayesiandiagnostic/options/heterogeneity_model/random.title
 #: jointmodeling/options/random_effects.title
 #: mixedeffectscox/options/random_effects.title
@@ -120860,14 +121294,22 @@ msgid "Random Seed"
 msgstr ""
 
 #: R/lassocox.b.R
+#: R/lassologistic.b.R
 #: agreement/options/seed.title
+#: categorize/options/seed.title
 #: chisqposttest/options/seed.title
 #: decisioncurve/ui[7][0]/seed.label
 #: enhancedROC/options/seed.title
+#: jjbarstats/options/seed.title
+#: jjbetweenstats/options/seed.title
 #: jjdotchart/options/seed.title
 #: jjdotplotstats/options/seed.title
+#: jjhistostats/options/seed.title
+#: jjpiestats/options/seed.title
+#: jjridges/options/seed.title
+#: jjscatterstats/options/seed.title
+#: jjwithinstats/options/seed.title
 #: lassocox/options/random_seed.title
-#: lassocox/ui[6][0].label
 #: nogoldstandard/ui[2][0]/seed.label
 #: outlierdetection/options/seed.title
 #: pathagreement/options/seed.title
@@ -120905,10 +121347,11 @@ msgstr ""
 
 #: chisqposttest/options/seed.description
 msgid ""
-"Random seed for the bootstrap confidence intervals, so that the interval "
-"reported for a given table is reproducible. Change it to see how much the "
-"interval depends on the resampling. Used only when bootstrap confidence "
-"intervals are requested."
+"Random seed for the bootstrap confidence intervals and for Fisher's exact "
+"test when it has to be evaluated by Monte Carlo simulation, so that the "
+"interval and p-value reported for a given table are reproducible. The tables "
+"name the seed whenever one of these was used. Change it to see how much a "
+"result depends on the resampling."
 msgstr ""
 
 #: stagemigration/options/seed.description
@@ -120940,6 +121383,27 @@ msgstr ""
 #: treeensemble/options/seed_value.title
 #: treemedical/options/seed_value.title
 msgid "Random Seed Value"
+msgstr ""
+
+#: R/agreement.b.R
+#: R/categorize.b.R
+#: R/chisqposttest.b.R
+#: R/decisioncurve.b.R
+#: R/enhancedROC.b.R
+#: R/jjcorrmat.b.R
+#: R/jjdotchart.b.R
+#: R/jjdotplotstats.b.R
+#: R/jjridges.b.R
+#: R/lassocox.b.R
+#: R/lassologistic.b.R
+#: R/multisurvival.b.R
+#: R/nogoldstandard.b.R
+#: R/outlierdetection.b.R
+#: R/psychopdaROC.b.R
+#: R/survival.b.R
+#: R/utils-ggstatsplot.R
+#: R/waterfall.b.R
+msgid "Random seed: {seed}"
 msgstr ""
 
 #: agreement/results/maxwellRETable.columns.title
@@ -121132,7 +121596,7 @@ msgid ""
 "95% of such intervals contain the true population parameter"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Range of values compatible with the observed data; over repeated studies, "
 "95% of such intervals contain the true population parameter. For response "
@@ -121515,6 +121979,7 @@ msgstr ""
 msgid "Rate Ratio"
 msgstr ""
 
+#: R/agreement.b.R
 #: R/pathagreement.b.R
 #: agreement/results/pairwiseKappaTable.columns.title
 #: agreement/results/interIntraRaterIntraTable.columns.title
@@ -121908,7 +122373,7 @@ msgstr ""
 msgid "Raw Measurements:"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Raw Numeric:"
 msgstr ""
 
@@ -121986,7 +122451,7 @@ msgstr ""
 msgid "re-estimated per subgroup"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Re-run the analysis"
 msgstr ""
 
@@ -122919,7 +123384,7 @@ msgstr ""
 msgid "Reference lines on absolute dates:"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Reference Lines:"
 msgstr ""
 
@@ -123367,19 +123832,43 @@ msgid ""
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Regional measurements showed excellent correlation %s (r = %s). "
+msgid "Regional measurements showed excellent correlation with one another (r = %s)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Regional measurements showed good correlation %s (r = %s). "
+msgid ""
+"Regional measurements showed excellent correlation with whole-section "
+"measurements (r = %s)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Regional measurements showed moderate correlation %s (r = %s). "
+msgid "Regional measurements showed good correlation with one another (r = %s)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Regional measurements showed poor correlation %s (r = %s). "
+msgid ""
+"Regional measurements showed good correlation with whole-section "
+"measurements (r = %s)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Regional measurements showed moderate correlation with one another (r = %s)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Regional measurements showed moderate correlation with whole-section "
+"measurements (r = %s)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Regional measurements showed poor correlation with one another (r = %s)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Regional measurements showed poor correlation with whole-section "
+"measurements (r = %s)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -123895,7 +124384,7 @@ msgstr ""
 msgid "Relative utility plot"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Relative vs Absolute:"
 msgstr ""
 
@@ -124232,7 +124721,7 @@ msgstr ""
 
 #: stagemigration/ui[3][2][0]/bootstrapReps.label
 #: stagemigration/ui[8][3]/cutpointBootstrapReps.label
-#: stagemigration/ui[8][15]/cureBootstrapReps.label
+#: stagemigration/ui[8][17]/cureBootstrapReps.label
 msgid "Repetitions"
 msgstr ""
 
@@ -124510,7 +124999,7 @@ msgstr ""
 msgid "Require Response Confirmation"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 #: labinterpret/results/criticalValuesTable.columns.title
 msgid "Required Action"
 msgstr ""
@@ -124519,7 +125008,7 @@ msgstr ""
 msgid "Required Cases"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Required Data"
 msgstr ""
 
@@ -124618,6 +125107,10 @@ msgstr ""
 msgid "Required Sample Size"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Required Sample Size (subjects)"
+msgstr ""
+
 #: R/kappaSizePower.b.R
 msgid ""
 "Required sample size: <b>{n}</b> {subjects}, each rated by all {raters} "
@@ -124642,7 +125135,7 @@ msgstr ""
 
 #: R/agepyramid.b.R
 #: R/mageeequation.b.R
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 #: R/waterfall.b.R
 msgid "Required Variables:"
 msgstr ""
@@ -124684,6 +125177,10 @@ msgstr ""
 
 #: clinicaltrialdesign/results/regulatory_considerations.columns.title
 msgid "Requirement/Guideline"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Requires {percent}% of the events a superiority trial at HR {hr} would need"
 msgstr ""
 
 #: R/benford.b.R
@@ -124747,6 +125244,7 @@ msgstr ""
 msgid "Reserved Model Name"
 msgstr ""
 
+#: R/agreement.b.R
 #: R/chisqposttest.b.R
 #: conditionalgee/results/gapTimePredictions.columns.title
 #: coxrobust/results/outlierAnalysis.columns.title
@@ -125023,7 +125521,7 @@ msgid "Response Assessment"
 msgstr ""
 
 #: R/advancedraincloud.b.R
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Response Categories"
 msgstr ""
 
@@ -125035,7 +125533,7 @@ msgstr ""
 msgid "Response Categories (threshold-based, not full RECIST v1.1)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Response categories follow standard clinical criteria (RECIST, etc.)"
 msgstr ""
 
@@ -125045,7 +125543,7 @@ msgid ""
 "control rates were not calculated."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Response Categories:"
 msgstr ""
 
@@ -125279,7 +125777,7 @@ msgstr ""
 msgid "Response Variable"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Response Variable (optional):"
 msgstr ""
 
@@ -125917,7 +126415,7 @@ msgstr ""
 
 #: intervalsurvival/options/right_time.title
 #: intervalsurvival/ui[0][1].label
-#: stagemigration/ui[8][8][1].label
+#: stagemigration/ui[8][9][1].label
 msgid "Right Interval Time"
 msgstr ""
 
@@ -126721,8 +127219,11 @@ msgid "RMST Restriction Time"
 msgstr ""
 
 #: simpleSurvivalPower/options/rmst_tau.title
-#: survivalPower/options/rmst_tau.title
 msgid "RMST Restriction Time (months)"
+msgstr ""
+
+#: survivalPower/options/rmst_tau.title
+msgid "RMST restriction time (months)"
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -126897,7 +127398,7 @@ msgstr ""
 msgid "Robust Error Handling"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Robust error handling and type conversion"
 msgstr ""
 
@@ -127092,7 +127593,7 @@ msgstr ""
 msgid "Robustness Analysis"
 msgstr ""
 
-#: stagemigration/ui[8][21]/concordanceProbabilityRobustnessAnalysis.label
+#: stagemigration/ui[8][24]/concordanceProbabilityRobustnessAnalysis.label
 msgid "Robustness analysis"
 msgstr ""
 
@@ -127909,41 +128410,69 @@ msgstr ""
 #: R/diagnosticmeta.b.R
 msgid ""
 "Rule-in power is governed by the positive likelihood ratio rather than by "
-"specificity alone, and LR+ is not estimable here. "
+"specificity alone, and LR+ is not estimable here."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "Rule-in power is governed by the positive likelihood ratio rather than by "
-"specificity alone; here LR+ = %.2f, which provides %s evidence for disease "
-"after a positive result. "
+"specificity alone; here LR+ = %.2f, which provides minimal evidence for "
+"disease after a positive result."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Rule-in power is governed by the positive likelihood ratio rather than by "
+"specificity alone; here LR+ = %.2f, which provides moderate evidence for "
+"disease after a positive result."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Rule-in power is governed by the positive likelihood ratio rather than by "
+"specificity alone; here LR+ = %.2f, which provides weak evidence for disease "
+"after a positive result."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "Rule-in power is governed by the positive likelihood ratio rather than by "
 "specificity alone; here LR+ = %.2f, which raises the post-test odds "
-"substantially (the SpPin pattern). "
+"substantially (the SpPin pattern)."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "Rule-out power is governed by the negative likelihood ratio rather than by "
-"sensitivity alone, and LR- is not estimable here. "
+"sensitivity alone, and LR- is not estimable here."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "Rule-out power is governed by the negative likelihood ratio rather than by "
 "sensitivity alone; here LR- = %.2f, which lowers the post-test odds "
-"substantially (the SnNout pattern). "
+"substantially (the SnNout pattern)."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "Rule-out power is governed by the negative likelihood ratio rather than by "
-"sensitivity alone; here LR- = %.2f, which provides %s evidence against "
-"disease after a negative result. "
+"sensitivity alone; here LR- = %.2f, which provides minimal evidence against "
+"disease after a negative result."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Rule-out power is governed by the negative likelihood ratio rather than by "
+"sensitivity alone; here LR- = %.2f, which provides moderate evidence against "
+"disease after a negative result."
+msgstr ""
+
+#: R/diagnosticmeta.b.R
+msgid ""
+"Rule-out power is governed by the negative likelihood ratio rather than by "
+"sensitivity alone; here LR- = %.2f, which provides weak evidence against "
+"disease after a negative result."
 msgstr ""
 
 #: psychopdaROC/options/run.title
@@ -127994,7 +128523,7 @@ msgstr ""
 msgid "Safety Category"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Safety event monitoring and adverse event reporting"
 msgstr ""
 
@@ -128156,7 +128685,7 @@ msgstr ""
 
 #: R/clinicalscore.b.R
 #: R/lassologistic.b.R
-#: stagemigration/ui[9][5]/shapSampleSize.label
+#: stagemigration/ui[9][6]/shapSampleSize.label
 msgid "Sample size"
 msgstr ""
 
@@ -128446,6 +128975,10 @@ msgstr ""
 msgid "Sample Size Required"
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid "Sample Size Requirement"
+msgstr ""
+
 #: clinicaltrialdesign/results/sample_size_plot.title
 msgid "Sample Size Requirements"
 msgstr ""
@@ -128619,13 +129152,9 @@ msgstr ""
 #: pathsampling/results/populationDetectionTable.columns.title
 #: pathsampling/results/stratifiedDetectionTable.columns.title
 #: pathsampling/results/multifocalProbTable.columns.title
-#: stagemigration/ui[8][18]/informativeCensoringBootstrapSamples.label
-#: stagemigration/ui[8][21]/concordanceProbabilityBootstrapSamples.label
+#: stagemigration/ui[8][20]/informativeCensoringBootstrapSamples.label
+#: stagemigration/ui[8][24]/concordanceProbabilityBootstrapSamples.label
 msgid "Samples"
-msgstr ""
-
-#: stagemigration/ui[9][2]/forestBootstrapSamples.label
-msgid "Samples (not yet implemented)"
 msgstr ""
 
 #: pathsampling/results/empiricalCumulativeTable.columns.title
@@ -128732,23 +129261,23 @@ msgid "Sampling Variability Analysis"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Sampling variability could not be estimated. "
+msgid "Sampling variability could not be estimated."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Sampling variability was high (mean CV = %s%%). "
+msgid "Sampling variability was high (mean CV = %s%%)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Sampling variability was low (mean CV = %s%%). "
+msgid "Sampling variability was low (mean CV = %s%%)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Sampling variability was moderate (mean CV = %s%%). "
+msgid "Sampling variability was moderate (mean CV = %s%%)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Sampling variability was quantified using the coefficient of variation (CV). "
+msgid "Sampling variability was quantified using the coefficient of variation (CV)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -128942,6 +129471,10 @@ msgstr ""
 
 #: tidydensity/options/weibull_scale.title
 msgid "Scale (λ)"
+msgstr ""
+
+#: ihcscoring/results/biomarkerspecific/clinicalcutpoints.columns.title
+msgid "Scale and source"
 msgstr ""
 
 #: clinicalheatmap/options/scaleMethod/both.title
@@ -129774,7 +130307,7 @@ msgstr ""
 msgid "SD (%)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "SD (Stable Disease):"
 msgstr ""
 
@@ -130161,7 +130694,7 @@ msgstr ""
 msgid "Secondary Diagnostic Test"
 msgstr ""
 
-#: stagemigration/ui[8][23][1].label
+#: stagemigration/ui[8][26][1].label
 msgid "Secondary Endpoint"
 msgstr ""
 
@@ -130169,7 +130702,7 @@ msgstr ""
 msgid "Secondary Endpoint Direction"
 msgstr ""
 
-#: stagemigration/ui[8][24]/wrSecondaryDirection.label
+#: stagemigration/ui[8][27]/wrSecondaryDirection.label
 msgid "Secondary endpoint direction"
 msgstr ""
 
@@ -130224,14 +130757,14 @@ msgstr ""
 msgid "See the plot subtitle for the test statistic, p-value, and effect size."
 msgstr ""
 
-#: lassocox/ui[6].label
-msgid "Seed"
-msgstr ""
-
 #: statsplot2/options/seed.description.ui
 msgid ""
 "Seed for the random subsample and for any resampling in robust or Bayesian "
 "statistics; the same seed reproduces the same result."
+msgstr ""
+
+#: categorize/options/seed.description.jamovi
+msgid "Seed for the random subsample natural breaks uses above 20000 observations."
 msgstr ""
 
 #: pathsampling/options/seedValue.title
@@ -130344,7 +130877,7 @@ msgstr ""
 msgid "Seismic"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Select 'Date Format':"
 msgstr ""
 
@@ -130658,7 +131191,7 @@ msgstr ""
 msgid "Select Test Variables:"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Select the appropriate 'Time Unit' (Days, Weeks, Months, or Years)"
 msgstr ""
 
@@ -131547,7 +132080,7 @@ msgstr ""
 msgid "Sensitivity Analysis"
 msgstr ""
 
-#: stagemigration/ui[8][24]/winRatioSensitivityAnalysis.label
+#: stagemigration/ui[8][27]/winRatioSensitivityAnalysis.label
 #: survivalPower/options/sensitivity_analysis.title
 #: survivalPower/ui[5][0]/sensitivity_analysis.label
 msgid "Sensitivity analysis"
@@ -131566,12 +132099,22 @@ msgstr ""
 msgid "Sensitivity Analysis (VanderWeele & Ding)"
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid ""
+"Sensitivity analysis is available for sample-size and power calculations. "
+"Select one of those modes to evaluate numerical scenarios."
+msgstr ""
+
 #: treatmenteffects/options/sensitivity_method.title
 msgid "Sensitivity Analysis Method"
 msgstr ""
 
 #: advancedimputation/options/sensitivity_methods.title
 msgid "Sensitivity Analysis Methods"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Sensitivity Analysis Not Applicable"
 msgstr ""
 
 #: causalmediation/results/sensitivityPlot.title
@@ -131705,7 +132248,7 @@ msgstr ""
 msgid "Sensitivity Range"
 msgstr ""
 
-#: stagemigration/ui[8][18]/informativeCensoringSensitivityRange.label
+#: stagemigration/ui[8][20]/informativeCensoringSensitivityRange.label
 msgid "Sensitivity range"
 msgstr ""
 
@@ -131905,6 +132448,10 @@ msgstr ""
 
 #: comprehensiveSurvivalPower/results/sequentialDesign.title
 msgid "Sequential Design Analysis"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Sequential Multi-arm Family Power Not Available"
 msgstr ""
 
 #: decisionpanel/options/strategies/sequential.title
@@ -132343,7 +132890,7 @@ msgstr ""
 msgid "SHAP Analysis"
 msgstr ""
 
-#: stagemigration/ui[9][3][0]/performSHAPAnalysis.label
+#: stagemigration/ui[9][4][0]/performSHAPAnalysis.label
 msgid "SHAP analysis"
 msgstr ""
 
@@ -132384,6 +132931,10 @@ msgstr ""
 
 #: stagemigration/results/shapGlobalImportance.title
 msgid "SHAP Global Feature Importance"
+msgstr ""
+
+#: stagemigration/ui[9][6]/generateSHAPPlots.label
+msgid "SHAP importance plots"
 msgstr ""
 
 #: stagemigration/results/shapIndividualExplanations.title
@@ -132466,7 +133017,7 @@ msgstr ""
 msgid "SHAP Values Summary"
 msgstr ""
 
-#: stagemigration/ui[9][4][0].label
+#: stagemigration/ui[9][5][0].label
 msgid "SHAP Variables"
 msgstr ""
 
@@ -135402,7 +135953,7 @@ msgstr ""
 msgid "Show Spatial Random Effects"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Show specific events along patient timelines"
 msgstr ""
 
@@ -136352,20 +136903,24 @@ msgstr ""
 #: partialcorrelation/ui[1][1]/sigLevel.label
 #: polychoriccorr/options/sigLevel.title
 #: polychoriccorr/ui[1][1]/sigLevel.label
-#: stagemigration/ui[8][18]/informativeCensoringAlpha.label
-#: stagemigration/ui[8][21]/concordanceProbabilityAlpha.label
+#: stagemigration/ui[8][20]/informativeCensoringAlpha.label
+#: stagemigration/ui[8][24]/concordanceProbabilityAlpha.label
 msgid "Significance level"
 msgstr ""
 
 #: nonparametric/options/alpha_level.title
 #: psychopdaROC/options/significanceLevel.title
 #: simpleSurvivalPower/ui[1][0]/alpha_level.label
-#: survivalPower/ui[1][0]/alpha_level.label
 msgid "Significance Level (Alpha)"
 msgstr ""
 
+#: R/agreement.b.R
 #: fragilityindex/options/alpha.title
 msgid "Significance Level (alpha)"
+msgstr ""
+
+#: survivalPower/ui[1][0]/alpha_level.label
+msgid "Significance level (alpha)"
 msgstr ""
 
 #: R/kappaSizeFixedN.b.R
@@ -136805,8 +137360,11 @@ msgstr ""
 
 #: advancedtrials/options/simulation_runs.title
 #: simpleSurvivalPower/options/simulation_runs.title
-#: survivalPower/options/simulation_runs.title
 msgid "Simulation Runs"
+msgstr ""
+
+#: survivalPower/options/simulation_runs.title
+msgid "Simulation runs"
 msgstr ""
 
 #: flexmultistate/options/n_simulation.title
@@ -136814,7 +137372,7 @@ msgid "Simulation Sample Size"
 msgstr ""
 
 #: survivalPower/options/simulation_seed.title
-msgid "Simulation Seed"
+msgid "Simulation seed"
 msgstr ""
 
 #: survivalPower/options/run_simulation_validation.title
@@ -138837,7 +139395,7 @@ msgstr ""
 msgid "Specific Covariates to Display"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Specific events occurring during treatment"
 msgstr ""
 
@@ -139998,7 +140556,7 @@ msgstr ""
 msgid "Stage-Covariate Interaction Tests"
 msgstr ""
 
-#: stagemigration/ui[8][15]/cureStageSpecificAnalysis.label
+#: stagemigration/ui[8][17]/cureStageSpecificAnalysis.label
 msgid "Stage-specific analysis"
 msgstr ""
 
@@ -140647,7 +141205,7 @@ msgstr ""
 msgid "Start time parsing: {message}"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Start Time:"
 msgstr ""
 
@@ -140742,10 +141300,6 @@ msgstr ""
 msgid "State Definitions"
 msgstr ""
 
-#: stagemigration/ui[8][6]/multiStateGraphics.label
-msgid "State diagrams (not yet implemented)"
-msgstr ""
-
 #: dynamiccoeff/ui[2][0]/state_dimension.label
 msgid "State Dimension"
 msgstr ""
@@ -140821,6 +141375,10 @@ msgstr ""
 #: flexmultistate/results/transitionDiagram.title
 #: markovmultistate/results/stateTransitionDiagram.title
 msgid "State Transition Diagram"
+msgstr ""
+
+#: stagemigration/ui[8][7][0]/multiStateGraphics.label
+msgid "State transition diagrams"
 msgstr ""
 
 #: stagemigration/results/transitionProbabilities.title
@@ -141454,7 +142012,6 @@ msgid "Statistical power"
 msgstr ""
 
 #: simpleSurvivalPower/ui[1][0]/power_level.label
-#: survivalPower/ui[1][0]/power_level.label
 msgid "Statistical Power (1-Beta)"
 msgstr ""
 
@@ -141644,7 +142201,7 @@ msgstr ""
 msgid "Statistical Terminology"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 #: R/waterfall.b.R
 msgid "Statistical Terms"
 msgstr ""
@@ -141678,13 +142235,13 @@ msgstr ""
 #: qualityoflife/options/statistical_test.title
 #: simpleSurvivalPower/options/test_type.title
 #: simpleSurvivalPower/results/power_summary.columns.title
-#: survivalPower/options/test_type.title
 #: survivalPower/results/power_summary.columns.title
 msgid "Statistical Test"
 msgstr ""
 
 #: jjpubr/ui[3]/statMethod.label
 #: jjridges/ui[3][0]/test_type.label
+#: survivalPower/options/test_type.title
 msgid "Statistical test"
 msgstr ""
 
@@ -141697,7 +142254,7 @@ msgstr ""
 msgid "Statistical Test Details"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Statistical test for comparing categorical outcomes (like response rates) "
 "between groups. Used to determine if response rates differ significantly "
@@ -141842,6 +142399,10 @@ msgstr ""
 
 #: R/jjwithinstats.b.R
 msgid "Statistical tests:"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "Statistical threshold"
 msgstr ""
 
 #: spatialanalysis/ui[5][1].label
@@ -142007,7 +142568,7 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Status Arrows:"
 msgstr ""
 
@@ -142821,8 +143382,8 @@ msgstr ""
 msgid "Stratify by Staging System"
 msgstr ""
 
-#: stagemigration/ui[8][6]/msStratifyByStaging.label
-msgid "Stratify by staging system (not yet implemented)"
+#: stagemigration/ui[8][7][0]/msStratifyByStaging.label
+msgid "Stratify by staging system"
 msgstr ""
 
 #: predmodel/options/showRiskGroups.description
@@ -142913,6 +143474,10 @@ msgid ""
 "individual tracking."
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Strict Accuracy (vs Consensus)"
+msgstr ""
+
 #: agreement/results/concordanceF1PerClassTable.columns.title
 msgid "Strict F1"
 msgstr ""
@@ -142937,7 +143502,6 @@ msgstr ""
 msgid "STROBE Compliance"
 msgstr ""
 
-#: R/diagnosticmeta.b.R
 #: R/linechart.b.R
 msgid "strong"
 msgstr ""
@@ -142999,8 +143563,8 @@ msgstr ""
 msgid "Strong Warning"
 msgstr ""
 
-#: R/survivalPower.b.R
 #: R/pathsampling.b.R
+#: R/survivalPower.b.R
 msgid "STRONG WARNING:"
 msgstr "STRONG WARNING:"
 
@@ -143154,9 +143718,12 @@ msgstr ""
 #: simpleSurvivalPower/results/power_summary.columns.title
 #: statsplot2/options/direction.title
 #: studydiagram/options.menuSubgroup
-#: survivalPower/options/study_design.title
 #: survivalPower/results/power_summary.columns.title
 msgid "Study Design"
+msgstr ""
+
+#: survivalPower/options/study_design.title
+msgid "Study design"
 msgstr ""
 
 #: comprehensiveSurvivalPower/options/study_design.title
@@ -143731,6 +144298,10 @@ msgstr ""
 msgid "Subjects"
 msgstr ""
 
+#: survivalPower/options/cluster_size.title
+msgid "Subjects per cluster"
+msgstr ""
+
 #: recurrentsurvival/options/event_plot_subjects.title
 msgid "Subjects to Display (Event Plot)"
 msgstr ""
@@ -144026,7 +144597,7 @@ msgstr ""
 #: lymphnoderatio/results/summary.title
 #: multifocalconcordance/results/summary.title
 #: residualcancerburden/results/summary.title
-#: stagemigration/ui[8][15]/generateCureSummary.label
+#: stagemigration/ui[8][17]/generateCureSummary.label
 #: stagemigration/ui[9][2]/generateForestSummary.label
 #: survivalfeaturerank/results/summaryText.title
 #: synopticcompleteness/results/summary.title
@@ -144599,6 +145170,13 @@ msgid ""
 "(exponential assumption). Other choices are not yet implemented."
 msgstr ""
 
+#: R/multisurvival.b.R
+msgid ""
+"Supported types: numeric 0 (censored) and 1 (event); logical FALSE "
+"(censored) and TRUE (event); or a factor with numeric levels ('0'/'1') or "
+"competing-risk levels ('Censored'/'Event'/'Competing')."
+msgstr ""
+
 #: R/checkdata.b.R
 msgid "Suppressed (|mean| < {min}); use MAD or IQR for spread"
 msgstr ""
@@ -144965,6 +145543,7 @@ msgstr ""
 msgid "Survival Curves"
 msgstr ""
 
+#: stagemigration/ui[8][10]/intervalCensoringPlots.label
 #: survival/ui[4][0][0]/sc.label
 msgid "Survival curves"
 msgstr ""
@@ -145080,15 +145659,6 @@ msgstr ""
 msgid "Survival data export skipped (competing risks)"
 msgstr ""
 
-#: R/lassocox.b.R
-msgid ""
-"Survival data not available.\n"
-"\n"
-"Please check that:\n"
-"• Time and outcome variables are properly selected\n"
-"• Data contains valid survival information"
-msgstr ""
-
 #: advancedtrials/options/ni_margin_type/survival_difference.title
 msgid "Survival Difference ( percent)"
 msgstr ""
@@ -145102,8 +145672,11 @@ msgstr ""
 #: curemodels/options/survival_dist.title
 #: simpleSurvivalPower/options/survival_distribution.title
 #: stagemigration/options/cureDistribution.title
-#: survivalPower/options/survival_distribution.title
 msgid "Survival Distribution"
+msgstr ""
+
+#: survivalPower/options/survival_distribution.title
+msgid "Survival distribution"
 msgstr ""
 
 #: simpleSurvivalPower/ui[2].label
@@ -145325,10 +145898,6 @@ msgstr ""
 #: stagemigration/options/intervalCensoringPlots.title
 #: survival/ui[4].label
 msgid "Survival Plots"
-msgstr ""
-
-#: stagemigration/ui[8][9]/intervalCensoringPlots.label
-msgid "Survival plots (not yet implemented)"
 msgstr ""
 
 #: multisurvival/results/survivalPlotsHeading3.title
@@ -145849,7 +146418,7 @@ msgstr ""
 #: rpasurvival/options.menuGroup
 #: sparsegrouplasso/options.menuGroup
 #: timeroc/options.menuGroup
-msgid "SurvivalT"
+msgid "SurvivalP"
 msgstr ""
 
 #: multisurvival/options/sty/t3.title
@@ -145898,7 +146467,7 @@ msgstr ""
 msgid "Swap x and y axes for horizontal violin plots"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Swim Lanes:"
 msgstr ""
 
@@ -145920,11 +146489,11 @@ msgstr ""
 msgid "Swimmer Plot (Treatment Duration & Response)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Swimmer Plot Analysis"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Swimmer plots are timeline visualizations that display individual patient "
 "treatment courses, clinical events, and outcomes in a single comprehensive "
@@ -146155,7 +146724,7 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Systematic bias was detected between regional and reference measurements (p "
-"= %s). "
+"= %s)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -146165,7 +146734,7 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Systematic difference from the reference measurement was tested with a "
-"paired t-test. "
+"paired t-test."
 msgstr ""
 
 #: package/analyses/decisioncombine.description
@@ -146623,6 +147192,14 @@ msgstr ""
 msgid "Target Power"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Target Power (1 - beta)"
+msgstr ""
+
+#: survivalPower/ui[1][0]/power_level.label
+msgid "Target power (1-beta)"
+msgstr ""
+
 #: pathagreement/ui[8][0]/targetPrecision.label
 msgid "Target precision (95% CI half-width, e.g., 0.1)"
 msgstr ""
@@ -146985,6 +147562,10 @@ msgstr ""
 msgid "Temporal validation"
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid "Tentative conclusions only (0.667 to below 0.80)"
+msgstr ""
+
 #: agreement/results/mixedEffectsTable.columns.title
 #: competingsurvival/results/fineGrayTable.columns.title
 #: coxphw/results/coefficients.columns.title
@@ -147113,7 +147694,7 @@ msgstr ""
 msgid "Terrain Colors"
 msgstr ""
 
-#: stagemigration/ui[8][23][2].label
+#: stagemigration/ui[8][26][2].label
 msgid "Tertiary Endpoint"
 msgstr ""
 
@@ -147884,7 +148465,7 @@ msgstr ""
 msgid "Test Method"
 msgstr ""
 
-#: stagemigration/ui[8][18]/informativeCensoringTestMethod.label
+#: stagemigration/ui[8][20]/informativeCensoringTestMethod.label
 msgid "Test method"
 msgstr ""
 
@@ -148502,10 +149083,6 @@ msgstr ""
 msgid "Text"
 msgstr ""
 
-#: R/decisiongraph.b.R
-msgid "text"
-msgstr ""
-
 #: venn/options/labelGeometry/text.title
 msgid "Text (no background)"
 msgstr ""
@@ -148729,6 +149306,13 @@ msgid ""
 "<b>{lowestevents} events</b>."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"The 0.667 and 0.80 interpretation cutoffs are conventional reliability "
+"guidelines, not clinical acceptability thresholds. Choose the required "
+"reliability from the consequences of disagreement."
+msgstr ""
+
 #: R/lassocox.b.R
 msgid ""
 "The 1-SE rule selects the most regularized value within one standard error "
@@ -148859,7 +149443,7 @@ msgstr ""
 msgid "The analysis was stopped to avoid reversing intervention recommendations."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "The analysis will be re-run with your settings."
 msgstr ""
 
@@ -148914,6 +149498,10 @@ msgstr ""
 msgid ""
 "The association between %s was %s (\\u{3C7}\\u{B2}(%d) = %.2f, p %s, n = "
 "%s). The effect size was %s (Cram\\u{E9}r's V = %.3f)."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "The assumed HR is below the NI margin; calculated power is {power}%."
 msgstr ""
 
 #: R/stagemigration.b.R
@@ -148999,7 +149587,7 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The biopsy sampling approach met the predefined quality criteria "
-"(correlation and CV thresholds set in the analysis options). "
+"(correlation and CV thresholds set in the analysis options)."
 msgstr ""
 
 #: ggprism/options/prism_palette/the_blues.title
@@ -149198,6 +149786,12 @@ msgstr ""
 msgid ""
 "the combined specificity above is too high and the combined sensitivity too "
 "low"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid ""
+"The comparison has {events} expected effective events; check the accuracy of "
+"the asymptotic approximation."
 msgstr ""
 
 #: R/jjdotplotstats.b.R
@@ -149465,6 +150059,13 @@ msgid ""
 "because the split was chosen from these same data. Report the continuous Cox "
 "model as the primary analysis and validate the cut-off in independent data. "
 "When publishing, cite survminer and maxstat."
+msgstr ""
+
+#: R/outcomeorganizer.b.R
+msgid ""
+"The cut-off reads %s while follow-up reaches only %s - that is what a date "
+"looks like once it has been imported as a plain number, and it is almost "
+"certainly not in the same units as the follow-up time."
 msgstr ""
 
 #: R/psychopdaROC.b.R
@@ -149746,12 +150347,31 @@ msgid ""
 "additional digits near 0.05 when needed to preserve the test decision."
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid ""
+"The design aims to detect a hazard ratio of {hr} with {n} subjects and "
+"{power}% power at a {alpha}% significance level (two-sided)."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid ""
+"The design aims to rule out a hazard ratio of {margin} or worse, assuming a "
+"true hazard ratio of {hr}, with {n} subjects and {power}% power at a "
+"{alpha}% significance level (one-sided)."
+msgstr ""
+
 #: R/kappaSizePower.b.R
 msgid ""
 "The design needs {n} subjects; few agreement studies can enrol this many. A "
 "rare finding (prevalence far from 0.5), a small difference between kappa0 "
 "and kappa1, and a high power target all inflate the sample size - revisit "
 "whichever of these is not a firm requirement."
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid ""
+"The design targets {power}% power to exclude the NI margin at this assumed "
+"HR."
 msgstr ""
 
 #: R/benford.b.R
@@ -149847,6 +150467,12 @@ msgid ""
 "plot shows the statistics package default instead."
 msgstr ""
 
+#: R/lassocox.b.R
+msgid ""
+"The empty model is a valid result. Choose another lambda rule only as a "
+"prespecified modeling decision and report that choice transparently."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid ""
 "The endpoint of a decision path where final outcomes (costs, utilities) are "
@@ -149912,6 +150538,13 @@ msgstr ""
 
 #: R/jjdotplotstats.b.R
 msgid "the explanatory measure of effect size (xi)"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"The explanatory variable '{var}' has only one value in the analysed rows, so "
+"no effect can be estimated for it. Remove it, or check the data filter and "
+"missing values."
 msgstr ""
 
 #: R/survival.b.R
@@ -150297,6 +150930,12 @@ msgid ""
 "offsets and is not a reliability coefficient."
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid ""
+"The joint normal integration did not meet its accuracy requirement. "
+"Per-comparison results remain available."
+msgstr ""
+
 #: R/singlearm.b.R
 msgid "The Kaplan-Meier survival plot"
 msgstr ""
@@ -150531,6 +151170,12 @@ msgstr ""
 msgid "the Mann-Whitney U test"
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid ""
+"The margin requires disease-specific justification from historical evidence "
+"and clinical relevance."
+msgstr ""
+
 #: R/decisiongraph.b.R
 msgid ""
 "The maximum amount society is willing to pay for an additional unit of "
@@ -150620,6 +151265,10 @@ msgid ""
 "dataset, so no new column has appeared. Everything else in this analysis is "
 "computed separately and is unaffected, and the same assignment is shown in "
 "the Membership Table if you switch it on. Technical detail: %s"
+msgstr ""
+
+#: R/psychopdaROC.b.R
+msgid "The meta-analysis forest plot could not be built: {msg}"
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -150943,6 +151592,27 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "The outcome should indicate whether the event of interest occurred"
+msgstr ""
+
+#: lassocox/options/censorLevel.description.ui
+msgid ""
+"The outcome value for patients without the event. If left empty, the other "
+"of the two observed values is used."
+msgstr ""
+
+#: multisurvival/options/outcomeLevel.description.ui
+msgid ""
+"The outcome value that means the event happened (for example Dead, or 2 in a "
+"column coded 1/2). Every other value is treated as censored. Required unless "
+"the outcome is numeric 0/1; if a numeric column lists no values here, set "
+"its measure type to Nominal in Data > Setup."
+msgstr ""
+
+#: lassocox/options/outcomeLevel.description.ui
+msgid ""
+"The outcome value that means the event happened (for example Dead, or 2 in a "
+"column coded 1/2). Required unless the outcome is numeric 0/1. Values are "
+"matched exactly; the event is never taken from level order or numeric size."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -151569,14 +152239,14 @@ msgid "the sample median"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "The sampling approach did not meet the predefined quality criteria. "
+msgid "The sampling approach did not meet the predefined quality criteria."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The sampling approach met the correlation and CV criteria only after "
 "relaxing them to correlation \\u{2265} (threshold - 0.20) and CV \\u{2264} "
-"(1.5 \\u{00D7} threshold). "
+"(1.5 \\u{00D7} threshold)."
 msgstr ""
 
 #: R/jscattermore.b.R
@@ -151650,6 +152320,12 @@ msgstr ""
 msgid "The selected outcome could not be mapped after variable-name normalization."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"The selected overall agreement method requires jointly complete rows, so it "
+"could not be calculated."
+msgstr ""
+
 #: R/enhancedROC.b.R
 msgid ""
 "The selected positive class '%s' does not occur in outcome variable '%s'. "
@@ -151674,6 +152350,12 @@ msgid ""
 "The selected prevalence is {prevalence}. Predictive values may be unstable "
 "or poorly transportable; verify them in the intended population and report "
 "the prevalence used."
+msgstr ""
+
+#: R/lassocox.b.R
+msgid ""
+"The selected rule retained no predictor columns, so there are no "
+"coefficients to plot."
 msgstr ""
 
 #: R/lassocox.b.R
@@ -151948,6 +152630,10 @@ msgid ""
 "using install.packages(\"summarytools\")"
 msgstr ""
 
+#: R/lassocox.b.R
+msgid "The survival plot could not be drawn: {msg}"
+msgstr ""
+
 #: R/survivalcont.b.R
 msgid ""
 "The survival tree produced no usable split for '{var}'. Quantile cut-points "
@@ -151955,7 +152641,7 @@ msgid ""
 "complexity and minimum group-size criteria."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "The swimmer plot displays individual patient timelines with optional color "
 "coding for response categories. Milestone markers show key events, and "
@@ -153223,6 +153909,14 @@ msgid ""
 "significance level and power."
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid ""
+"This is an individual-level survival calculation inflated by 1 + (cluster "
+"size - 1) times ICC, not a validated cluster survival design. Planned "
+"allocation: {control} control and {treatment} treatment clusters of {size} "
+"subjects. Confirm the design with a cluster-specific method."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid ""
 "This is equivalent to reading \\u{03B2}(focal) and \\u{03B2}(focal) + "
@@ -153676,6 +154370,12 @@ msgstr ""
 msgid "This tool will help you perform a multivariable survival analysis."
 msgstr ""
 
+#: R/pathagreement.b.R
+msgid ""
+"This trend is descriptive. It cannot distinguish learning or fatigue from "
+"changes in case mix, difficulty, or other factors across the sequence."
+msgstr ""
+
 #: R/multisurvival.b.R
 msgid "This typically indicates:"
 msgstr ""
@@ -153726,6 +154426,10 @@ msgstr ""
 
 #: multisurvival/options/numRiskGroups/three.title
 msgid "Three Groups"
+msgstr ""
+
+#: ihcscoring/ui[2][1][0][0].label
+msgid "Three independent scales - set each cutpoint yourself:"
 msgstr ""
 
 #: R/pathsampling.b.R
@@ -154091,7 +154795,7 @@ msgstr ""
 
 #: R/lassocox.b.R
 #: agreement/options/tieBreaker.title
-#: stagemigration/ui[8][24]/winRatioHandleTies.label
+#: stagemigration/ui[8][27]/winRatioHandleTies.label
 msgid "Tie handling"
 msgstr ""
 
@@ -154439,7 +155143,7 @@ msgid "Time Horizon"
 msgstr ""
 
 #: stagemigration/ui[8][0][0]/plotTimeRange.label
-#: stagemigration/ui[8][15]/cureTimeHorizon.label
+#: stagemigration/ui[8][17]/cureTimeHorizon.label
 msgid "Time horizon (months)"
 msgstr ""
 
@@ -154738,7 +155442,7 @@ msgstr ""
 msgid "time points"
 msgstr ""
 
-#: stagemigration/ui[8][21]/concordanceProbabilityTimePoints.label
+#: stagemigration/ui[8][24]/concordanceProbabilityTimePoints.label
 msgid "Time points (comma-separated)"
 msgstr ""
 
@@ -155444,11 +156148,11 @@ msgstr ""
 msgid "Time Variable:"
 msgstr ""
 
-#: stagemigration/ui[8][23][3].label
+#: stagemigration/ui[8][26][3].label
 msgid "Time Variables"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Time variables are either numeric (days/months) or valid date formats"
 msgstr ""
 
@@ -155943,11 +156647,11 @@ msgstr ""
 msgid "Timeline data"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Timeline display options"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Timeline Elements"
 msgstr ""
 
@@ -156246,6 +156950,21 @@ msgstr ""
 
 #: R/multisurvival.b.R
 msgid "To fix:"
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"To fix: check that the correct outcome variable is selected, verify its type "
+"under Data > Setup, and convert a text variable to a numeric or factor "
+"outcome, for example with Transform > Compute."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"To fix: select the level that represents the event with the Event Level "
+"option, or recode the outcome as numeric (0 = censored, 1 = event) or "
+"logical (FALSE/TRUE). For competing risks, use a factor with the levels "
+"'Censored', 'Event' and 'Competing'."
 msgstr ""
 
 #: R/waterfall.b.R
@@ -156547,6 +157266,7 @@ msgid "Tornado Diagram (Sensitivity Analysis)"
 msgstr ""
 
 #: R/agepyramid.b.R
+#: R/agreement.b.R
 #: R/chisqposttest.b.R
 #: R/decision.b.R
 #: R/decisioncalculator.b.R
@@ -156636,6 +157356,10 @@ msgstr "Total cases supplied"
 msgid "Total Cassettes Examined"
 msgstr "Total Cassettes Examined"
 
+#: R/jjsegmentedtotalbar.b.R
+msgid "Total Categories"
+msgstr ""
+
 #: ihcthreshold/options/totalCells.title
 #: ihcthreshold/ui[2][0].label
 msgid "Total Cell Count (Optional)"
@@ -156675,6 +157399,10 @@ msgstr ""
 msgid "Total Eligible"
 msgstr ""
 
+#: R/survivalPower.b.R
+msgid "Total enrollment"
+msgstr ""
+
 #: qualitycontrol/options/sigma_calculation/total_error.title
 msgid "Total Error Method"
 msgstr ""
@@ -156707,6 +157435,10 @@ msgstr "Total foci across slides (optional)"
 
 #: R/multisurvival.b.R
 msgid "Total follow-up time: <b>{time} person-{unit}</b>"
+msgstr ""
+
+#: R/jjoncoplot.b.R
+msgid "Total Genes"
 msgstr ""
 
 #: stereology/options/totalPoints.title
@@ -156848,7 +157580,7 @@ msgstr ""
 msgid "Total observation time across all patients"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Total observation time across all patients in the study"
 msgstr ""
 
@@ -156891,10 +157623,6 @@ msgstr ""
 #: alluvialSurvival/results/summaryTable.columns.title
 #: survivalendpoints/results/eventRates.columns.title
 msgid "Total Patients"
-msgstr ""
-
-#: R/multisurvival.b.R
-msgid "Total patients:"
 msgstr ""
 
 #: enhancedcrosstable/options/margin/table.title
@@ -156962,6 +157690,10 @@ msgstr ""
 msgid "Total QGI"
 msgstr ""
 
+#: R/agreement.b.R
+msgid "Total Reads Required"
+msgstr ""
+
 #: stereology/options/referenceArea.description
 msgid ""
 "Total reference area examined (in square micrometers). Typically calculated "
@@ -156991,8 +157723,11 @@ msgid "Total sample size"
 msgstr ""
 
 #: simpleSurvivalPower/options/sample_size_input.title
-#: survivalPower/options/sample_size_input.title
 msgid "Total Sample Size (for Power/Effect/Duration Calculations)"
+msgstr ""
+
+#: survivalPower/options/sample_size_input.title
+msgid "Total sample size (for power/effect/duration calculations)"
 msgstr ""
 
 #: competingRisksPower/options/totalSampleSize.description
@@ -157014,6 +157749,7 @@ msgstr ""
 msgid "Total Sample Size:"
 msgstr ""
 
+#: R/jjoncoplot.b.R
 #: jjoncoplot/results/mutationSummary.columns.title
 #: pathsampling/options/totalSamples.title
 msgid "Total Samples"
@@ -157045,6 +157781,10 @@ msgstr ""
 msgid "Total Screened"
 msgstr ""
 
+#: R/jjsegmentedtotalbar.b.R
+msgid "Total Segments"
+msgstr ""
+
 #: classicalSurvivalPower/options/study_duration.title
 msgid "Total Study Duration (Ts)"
 msgstr ""
@@ -157059,6 +157799,10 @@ msgstr ""
 
 #: sequentialtests/results/population_flow_table.columns.title
 msgid "Total Subjects"
+msgstr ""
+
+#: R/jjsegmentedtotalbar.b.R
+msgid "Total Summed Value"
 msgstr ""
 
 #: nonparametric/ui[3][0]/globalTestCount.label
@@ -157193,7 +157937,7 @@ msgstr ""
 msgid "TP: {tp}, FP: {fp}, FN: {fn}, TN: {tn}"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Track key clinical events (surgery, progression, etc.)"
 msgstr ""
 
@@ -158028,11 +158772,11 @@ msgid ""
 "available levels (must be exactly 2 groups)."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Treatment or observation end date/time"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Treatment or observation start date/time"
 msgstr ""
 
@@ -158106,11 +158850,11 @@ msgstr ""
 msgid "Treatment Response Assessment"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Treatment response assessment and duration analysis"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Treatment response categories"
 msgstr ""
 
@@ -158252,11 +158996,11 @@ msgstr ""
 msgid "Treatment/Exposure Variable"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Treatment/observation end time"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Treatment/observation start time"
 msgstr ""
 
@@ -158689,6 +159433,10 @@ msgstr ""
 
 #: misclassificationbias/results/correctedTable.columns.title
 msgid "True Exposed"
+msgstr ""
+
+#: R/survivalPower.b.R
+msgid "True Hazard Ratio"
 msgstr ""
 
 #: venn/options/var1true.title
@@ -159404,8 +160152,11 @@ msgid "Type I Error (%)"
 msgstr ""
 
 #: simpleSurvivalPower/options/alpha_level.title
-#: survivalPower/options/alpha_level.title
 msgid "Type I Error Rate (Alpha)"
+msgstr ""
+
+#: survivalPower/options/alpha_level.title
+msgid "Type I error rate (alpha)"
 msgstr ""
 
 #: adaptivetrialdesign/options/type1_error_rate.title
@@ -160651,7 +161402,7 @@ msgid ""
 "Liver_1, Lung_2, Target_Lesion_1"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 #: R/waterfall.b.R
 msgid "Unique identifier for each patient"
 msgstr ""
@@ -161624,7 +162375,7 @@ msgstr ""
 msgid "Use Data > Transform to create categorical groups from continuous variables."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Use Date/Time for:"
 msgstr ""
 
@@ -161915,7 +162666,7 @@ msgstr ""
 msgid "Use Rasterization (reduce file size)"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Use Raw Values for:"
 msgstr ""
 
@@ -161986,7 +162737,7 @@ msgstr ""
 msgid "Use Sparse Matrix Methods"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid ""
 "Use standard abbreviations (CR, PR, SD, PD) for consistency, though "
 "case-insensitive matching is supported."
@@ -164872,7 +165623,7 @@ msgid "Variance Components"
 msgstr ""
 
 #: diagnosticmeta/options/method/vc.title
-#: stagemigration/ui[8][12]/frailtyVarianceComponents.label
+#: stagemigration/ui[8][13]/frailtyVarianceComponents.label
 msgid "Variance components"
 msgstr ""
 
@@ -165802,7 +166553,6 @@ msgstr ""
 #: pathagreement/ui[6][4][0].label
 #: pathologycomposition/ui[1][3].label
 #: psychopdaROC/ui[7].label
-#: stagemigration/ui[6][3].label
 #: survivalendpoints/ui[4][0][4].label
 #: waterfall/ui[2][1][0].label
 msgid "Visualization"
@@ -165860,7 +166610,7 @@ msgstr ""
 msgid "Visualization Options"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "Visualization Options:"
 msgstr ""
 
@@ -166220,8 +166970,8 @@ msgstr ""
 msgid "Warning:"
 msgstr ""
 
-#: R/survivalPower.b.R
 #: R/chisqposttest.b.R
+#: R/survivalPower.b.R
 msgid "WARNING:"
 msgstr ""
 
@@ -166448,7 +167198,6 @@ msgstr ""
 msgid "We compared {outcome} distributions across {groups} using {method}."
 msgstr ""
 
-#: R/diagnosticmeta.b.R
 #: R/linechart.b.R
 msgid "weak"
 msgstr ""
@@ -166582,8 +167331,11 @@ msgid "Weibull Distribution"
 msgstr ""
 
 #: simpleSurvivalPower/options/weibull_shape.title
-#: survivalPower/options/weibull_shape.title
 msgid "Weibull Shape Parameter"
+msgstr ""
+
+#: survivalPower/options/weibull_shape.title
+msgid "Weibull shape parameter"
 msgstr ""
 
 #: flexmultistate/options/hazard_distribution/weibull_spline.title
@@ -166982,7 +167734,7 @@ msgstr ""
 msgid "Weighted:"
 msgstr ""
 
-#: stagemigration/ui[8][21]/concordanceProbabilityWeighting.label
+#: stagemigration/ui[8][24]/concordanceProbabilityWeighting.label
 #: survival/results/weightedLogRankTable.columns.title
 msgid "Weighting"
 msgstr ""
@@ -167183,7 +167935,7 @@ msgid ""
 "to 90%?"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "What is a Swimmer Plot?"
 msgstr ""
 
@@ -167296,6 +168048,11 @@ msgstr ""
 
 #: metaanalysis/options/effect_measure.title
 msgid "What type of effect are you combining?"
+msgstr ""
+
+#: ihcscoring/results/biomarkerspecific/biomarkerresults.columns.title
+#: ihcscoring/results/cpsanalysis/cpsresults.columns.title
+msgid "What was counted"
 msgstr ""
 
 #: R/jjscatterstats.b.R
@@ -167505,7 +168262,7 @@ msgstr ""
 msgid "When to use Stuart-Maxwell test"
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "When to Use Swimmer Plots"
 msgstr ""
 
@@ -167830,6 +168587,7 @@ msgstr ""
 msgid "Wider ridges = more variability; Narrow ridges = consistent values"
 msgstr ""
 
+#: R/jjoncoplot.b.R
 #: decisioncurve/results/benefitRangeTable.columns.title
 msgid "Width"
 msgstr ""
@@ -168059,7 +168817,7 @@ msgstr ""
 msgid "Win Ratio Analysis"
 msgstr ""
 
-#: stagemigration/ui[8][22][0]/performWinRatioAnalysis.label
+#: stagemigration/ui[8][25][0]/performWinRatioAnalysis.label
 msgid "Win ratio analysis"
 msgstr ""
 
@@ -168141,37 +168899,37 @@ msgstr ""
 #: R/diagnosticmeta.b.R
 msgid ""
 "With %.1f%% sensitivity, approximately %.0f out of 100 diseased patients "
-"will be correctly identified. "
+"will be correctly identified."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "With %.1f%% sensitivity, this test will detect %.0f out of 100 patients with "
-"disease, missing only %.0f. "
+"disease, missing only %.0f."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "With %.1f%% sensitivity, up to %.0f out of 100 diseased patients may be "
-"missed. "
+"missed."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "With %.1f%% specificity, approximately %.0f out of 100 healthy individuals "
-"will be correctly classified. "
+"will be correctly classified."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "With %.1f%% specificity, only %.0f out of 100 healthy individuals will test "
-"positive (false alarms). "
+"positive (false alarms)."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
 msgid ""
 "With %.1f%% specificity, up to %.0f out of 100 healthy individuals may test "
-"positive. "
+"positive."
 msgstr ""
 
 #: R/singlearm.b.R
@@ -168305,10 +169063,6 @@ msgstr ""
 msgid "with weighted flow values"
 msgstr ""
 
-#: R/ihcheterogeneity.b.R
-msgid "with whole-section measurements"
-msgstr ""
-
 #: agepyramid/options/pct_base/within_gender.title
 msgid "Within each gender (each column sums to 100%)"
 msgstr ""
@@ -168354,6 +169108,14 @@ msgstr ""
 msgid ""
 "Within-subgroup hazard ratios are disabled in competing-risks (Fine-Gray) "
 "mode; interpret the interaction coefficient above instead."
+msgstr ""
+
+#: R/multisurvival.b.R
+msgid ""
+"Within-subgroup hazard ratios are exploratory: their p-values are not "
+"adjusted for multiple comparisons, and a significant result in one subgroup "
+"but not in another is not evidence that the effect differs. Use the "
+"interaction test above to judge effect modification."
 msgstr ""
 
 #: R/multisurvival.b.R
@@ -169234,7 +169996,7 @@ msgid ""
 "and why to use each weighting scheme."
 msgstr ""
 
-#: R/swimmerplot_html.R
+#: R/swimmerplot-html.R
 msgid "You selected Date/Time input type, but your data contains numeric values."
 msgstr ""
 
@@ -169784,218 +170546,4 @@ msgstr ""
 
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
-msgstr ""
-
-#: pathagreement
-msgid "Below the conventional 0.667 minimum for tentative conclusions"
-msgstr ""
-
-#: pathagreement
-msgid "Meets the conventional 0.80 reliability threshold"
-msgstr ""
-
-#: pathagreement
-msgid "Tentative conclusions only (0.667 to below 0.80)"
-msgstr ""
-
-#: pathagreement
-msgid "The 0.667 and 0.80 interpretation cutoffs are conventional reliability guidelines, not clinical acceptability thresholds. Choose the required reliability from the consequences of disagreement."
-msgstr ""
-
-
-#: pathagreement
-msgid "Pairwise available-case analysis"
-msgstr ""
-
-#: pathagreement
-msgid "No case is complete across all selected raters. Requested analyses that support partially observed ratings used the available data; analyses requiring jointly complete rows were skipped."
-msgstr ""
-
-#: pathagreement
-msgid "The selected overall agreement method requires jointly complete rows, so it could not be calculated."
-msgstr ""
-
-#: pathagreement
-msgid "No jointly complete cases were found. Krippendorff's alpha or pairwise Cohen analysis requires at least two usable cases."
-msgstr ""
-
-#: pathagreement
-msgid "High missing data: {pct}% of cases were excluded from analyses that require jointly complete ratings. Pairwise Cohen analyses use cases observed for each pair, and Krippendorff's alpha uses cases with at least two observed ratings. Complete-case results may be biased."
-msgstr ""
-
-#: pathagreement
-msgid "Pairwise available-case analysis used every case rated by both members of a pair. Pair-specific sample sizes: {counts}."
-msgstr ""
-
-#: pathagreement
-msgid "Each rater's percentages use that rater's non-missing ratings as the denominator."
-msgstr ""
-
-#: pathagreement
-msgid "This trend is descriptive. It cannot distinguish learning or fatigue from changes in case mix, difficulty, or other factors across the sequence."
-msgstr ""
-
-#: pathagreement
-msgid "<li><strong>Missing data:</strong> Overall multi-rater analyses use jointly complete rows; pairwise Cohen analyses use cases observed for each pair, and Krippendorff's alpha uses cases with at least two observed ratings</li>"
-msgstr ""
-
-
-#: R/survivalPower.b.R
-msgid "This is an individual-level survival calculation inflated by 1 + (cluster size - 1) times ICC, not a validated cluster survival design. Planned allocation: {control} control and {treatment} treatment clusters of {size} subjects. Confirm the design with a cluster-specific method."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Per-comparison sequential power is reported. Total study power requires a validated joint arm-and-look calculation and is not estimated here."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "{alpha}% significance level (one-sided)"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "A {test} power analysis for {n} subjects gives a maximum true HR of {hr} meeting the non-inferiority power target, with {accrual} months of accrual and {followup} months of additional follow-up."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "A {test} power analysis for {n} subjects gives {power}% calculated power, with {accrual} months of accrual and {followup} months of additional follow-up."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "At HR 1 there is no superiority effect; a matching superiority event requirement is not defined."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Sensitivity analysis is available for sample-size and power calculations. Select one of those modes to evaluate numerical scenarios."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "A {test} power analysis indicates that {n} subjects are required, with {accrual} months of accrual and {followup} months of additional follow-up."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "For non-inferiority conclusion"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "{n} subjects"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "The design aims to detect a hazard ratio of {hr} with {n} subjects and {power}% power at a {alpha}% significance level (two-sided)."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "True Hazard Ratio"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Sample Size Requirement"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Few Expected Events"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Statistical threshold"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Expected effect"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Few Independent Clusters"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Control arm: {control} subjects, shared by {comparisons} comparisons; {experimental} per experimental arm. Power is per comparison at the adjusted alpha. For fixed designs, total study power is a joint normal approximation to the probability that at least one comparison rejects when every experimental arm has HR {hr}. Superiority uses both rejection tails; non-inferiority uses one tail. Shared-control correlation uses allocation proportions for Schoenfeld tests and expected-event variances for Cox. This family estimate is unavailable for sequential designs."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Fewer than 10 clusters per arm are planned; the simple design-effect approximation does not account for small-cluster degrees of freedom. Obtain a cluster-specific power calculation."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "One-sided Alpha"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "The margin requires disease-specific justification from historical evidence and clinical relevance."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Low Calculated Power"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Calculated power is {power}%; consider a larger sample or longer follow-up to reach the planning target."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Limited Expected Events"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Total enrollment"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "The comparison has {events} expected effective events; check the accuracy of the asymptotic approximation."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "The joint normal integration did not meet its accuracy requirement. Per-comparison results remain available."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "A {test} power analysis for {n} subjects requires {duration} months in total: {accrual} months of accrual and {followup} months of additional follow-up."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Requires {percent}% of the events a superiority trial at HR {hr} would need"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Cluster Design Approximation"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Multi-arm Family Power Unavailable"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "{alpha}% significance level (two-sided)"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "A matching superiority comparison cannot be estimated for these assumptions."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Sensitivity Analysis Not Applicable"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "The design targets {power}% power to exclude the NI margin at this assumed HR."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "The design aims to rule out a hazard ratio of {margin} or worse, assuming a true hazard ratio of {hr}, with {n} subjects and {power}% power at a {alpha}% significance level (one-sided)."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Only {events} comparison-effective events are expected; asymptotic power can be unreliable with sparse events. Confirm the design using an appropriate simulation."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "Sequential Multi-arm Family Power Not Available"
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "A {test} power analysis for {n} subjects gives a detectable HR of {hr}, with {accrual} months of accrual and {followup} months of additional follow-up."
-msgstr ""
-
-#: R/survivalPower.b.R
-msgid "The assumed HR is below the NI margin; calculated power is {power}%."
 msgstr ""

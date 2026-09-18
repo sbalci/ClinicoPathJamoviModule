@@ -98,24 +98,22 @@ test_that("a complete cohort raises no exclusion notices and is unchanged", {
   expect_equal(sort(round(w$response, 4)), c(-45, -10, -2))
 })
 
-test_that("optimised large-data path agrees with the standard path", {
-  # .processData dispatches to .processLargeDataset above 100 rows / 50 patients.
-  # A divergence there would silently change results for larger cohorts only.
+test_that("a cohort above 100 rows gets the hand-computed best response", {
+  # There used to be a separate large-data path above 100 rows / 50 patients whose
+  # copy of the logic drifted from the standard one. One path now serves every
+  # size; this pins its result on a large cohort against a hand computation:
+  # best response = the smallest change over the post-baseline visits.
   set.seed(1)
   big <- do.call(rbind, lapply(1:60, function(i) data.frame(
     id = sprintf("P%03d", i), tm = c(0, 1, 2),
     size = c(100, round(runif(1, 20, 160)), round(runif(1, 20, 160))))))
   p <- wf_private(big, patientID = "id", responseVar = "size",
                   timeVar = "tm", inputType = "raw")
-  expect_true(p$.shouldOptimizeForLargeDataset(big))
-
-  std <- p$.processDataStandard(big, "id", "raw", "size", "tm", NULL)$waterfall
-  lrg <- p$.processLargeDataset(big, "id", "raw", "size", "tm", NULL)$waterfall
-  std <- std[order(std$id), ]; lrg <- lrg[order(lrg$id), ]
-
-  expect_equal(nrow(std), nrow(lrg))
-  expect_equal(std$response, lrg$response)
-  expect_equal(as.character(std$recist_category), as.character(lrg$recist_category))
+  w <- p$.processData(big, "id", "raw", "size", "tm", NULL)$waterfall
+  w <- w[order(w$id), ]
+  expected <- vapply(split(big, big$id), function(x) min(x$size[x$tm > 0]) - 100, numeric(1))
+  expect_equal(nrow(w), 60)
+  expect_equal(unname(w$response), unname(expected[w$id]))
 })
 
 test_that("ORR and DCR match hand-computed rates over evaluable patients", {
@@ -177,10 +175,10 @@ test_that("response rates do not change at the 100-row optimisation boundary", {
     d <- mkdat(np)
     p <- wf_private(d, patientID = "id", responseVar = "pct", inputType = "percentage")
     m <- p$.calculateMetrics(p$.processData(d, "id", "percentage", "pct", NULL, NULL)$waterfall)
-    list(np = np, n = m$n, ORR = m$ORR, big = p$.shouldOptimizeForLargeDataset(d))
+    list(np = np, n = m$n, ORR = m$ORR)
   })
 
-  expect_false(res[[1]]$big); expect_true(res[[2]]$big)  # opposite sides of the boundary
+  # 90 and 180 rows: either side of the former 100-row large-data switch
   expect_equal(res[[1]]$n, 30)                            # patients, not rows
   expect_equal(res[[2]]$n, 60)
   expect_equal(res[[1]]$ORR, 100)

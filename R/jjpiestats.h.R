@@ -10,6 +10,7 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             group = NULL,
             grvar = NULL,
             typestatistics = "parametric",
+            seed = 20250101,
             originaltheme = FALSE,
             counts = NULL,
             ratio = "",
@@ -71,6 +72,10 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "robust",
                     "bayes"),
                 default="parametric")
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=20250101)
             private$..originaltheme <- jmvcore::OptionBool$new(
                 "originaltheme",
                 originaltheme,
@@ -169,6 +174,7 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..group)
             self$.addOption(private$..grvar)
             self$.addOption(private$..typestatistics)
+            self$.addOption(private$..seed)
             self$.addOption(private$..originaltheme)
             self$.addOption(private$..counts)
             self$.addOption(private$..ratio)
@@ -193,6 +199,7 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         group = function() private$..group$value,
         grvar = function() private$..grvar$value,
         typestatistics = function() private$..typestatistics$value,
+        seed = function() private$..seed$value,
         originaltheme = function() private$..originaltheme$value,
         counts = function() private$..counts$value,
         ratio = function() private$..ratio$value,
@@ -216,6 +223,7 @@ jjpiestatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..group = NA,
         ..grvar = NA,
         ..typestatistics = NA,
+        ..seed = NA,
         ..originaltheme = NA,
         ..counts = NA,
         ..ratio = NA,
@@ -274,6 +282,7 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ratio",
                     "paired",
                     "typestatistics",
+                    "seed",
                     "label",
                     "digits",
                     "conflevel",
@@ -299,6 +308,7 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "grvar",
                     "counts",
                     "typestatistics",
+                    "seed",
                     "paired")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -409,6 +419,10 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   analysis. 'parametric' uses Pearson's Chi-square test, 'nonparametric' uses
 #'   contingency table tests, 'robust' uses robust association measures, 'bayes'
 #'   provides Bayesian analysis with Bayes factors.
+#' @param seed Random seed for the statistics computed by posterior sampling
+#'   (the Bayesian contingency test, and the Bayes factor caption of a
+#'   frequentist test). The plot caption names the seed whenever it affected the
+#'   numbers shown. The default reproduces the previous fixed behaviour.
 #' @param originaltheme Whether to apply the original ggstatsplot theme layer
 #'   to the plot. If TRUE, uses ggstatsplot's default styling. If FALSE, uses
 #'   jamovi's default ggplot2 theme for consistency with other analyses.
@@ -474,6 +488,7 @@ jjpiestats <- function(
     group = NULL,
     grvar = NULL,
     typestatistics = "parametric",
+    seed = 20250101,
     originaltheme = FALSE,
     counts = NULL,
     ratio = "",
@@ -517,6 +532,7 @@ jjpiestats <- function(
         group = group,
         grvar = grvar,
         typestatistics = typestatistics,
+        seed = seed,
         originaltheme = originaltheme,
         counts = counts,
         ratio = ratio,

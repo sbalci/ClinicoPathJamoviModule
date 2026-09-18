@@ -54,6 +54,15 @@ children:
                 name: sdmult
                 format: number
                 enable: (method:meansd)
+          - type: LayoutBox
+            cell:
+              column: 0
+              row: 4
+            children:
+              - type: TextBox
+                name: seed
+                format: number
+                enable: (method:jenks)
   - type: CollapseBox
     label: Labels
     stretchFactor: 1

@@ -541,10 +541,14 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             model_note <- if (identical(opts$typestatistics, "parametric") && n_groups > 2)
                 paste0("<p>", .("The effect size is estimated from the same Welch model as the test, so it will not match the value a classical equal-variance ANOVA reports for these data. That is expected, not an error."), "</p>") else ""
 
-            seed_note <- if (opts$typestatistics %in% c("nonparametric", "robust"))
+            seed_note <- if (statsSeedMatters(opts$typestatistics, "between", n_groups) &&
+                             !identical(opts$typestatistics, "bayes"))
                 paste0("<p>", jmvcore::format(
                     .("The confidence interval on the effect size is obtained by resampling. It is computed with a fixed random seed ({seed}) so this figure reproduces exactly; change the seed under Plot Configuration to check that a borderline interval is not an artefact of one resample."),
-                    seed = private$.seed()), "</p>") else ""
+                    seed = private$.seed()), "</p>")
+            else if (identical(opts$typestatistics, "bayes") && n_groups == 2)
+                paste0("<p>", jmvcore::format(.("Random seed: {seed}"), seed = private$.seed()), "</p>")
+            else ""
 
             methods <- jmvcore::format(
                 .("A comparison of {outcome} across {groups} groups of {factor} was performed using {test}, with {effect} reported as the effect size and a {level} per cent {interval} interval. {pairwise}"),
@@ -1179,6 +1183,12 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(private$.plotFailure(jmvcore::format(
                     .("The plot could not be drawn: {reason}. Check the dependent variable for constant values, extreme outliers or too few observations per group, or try a different statistical test."),
                     reason = conditionMessage(plot))))
+            # the subtitle's effect-size interval / Bayes factor is resampled for some tests
+            .k <- nlevels(droplevels(as.factor(mydata[[options_data$group]])))
+            if (statsSeedMatters(options_data$typestatistics, "between", .k) ||
+                captionSeedMatters(options_data$typestatistics, "between", .k, options_data$bfmessage))
+                plot <- addSeedCaption(plot, self, self$options$seed)
+
             if (is.null(plot)) return()
 
             # Print Plot ----
@@ -1257,6 +1267,12 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (is.null(plot2)) return()
             }
 
+
+            # the subtitle's effect-size interval / Bayes factor is resampled for some tests
+            .k <- nlevels(droplevels(as.factor(mydata[[options_data$group]])))
+            if (statsSeedMatters(options_data$typestatistics, "between", .k) ||
+                captionSeedMatters(options_data$typestatistics, "between", .k, options_data$bfmessage))
+                plot2 <- addSeedCaption(plot2, self, self$options$seed)
 
             # Print Plot ----
 

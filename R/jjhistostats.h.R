@@ -9,6 +9,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             dep = NULL,
             grvar = NULL,
             typestatistics = "parametric",
+            seed = 20250101,
             centralityline = FALSE,
             changebinwidth = FALSE,
             binwidth = 1.1,
@@ -77,6 +78,10 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "robust",
                     "bayes"),
                 default="parametric")
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=20250101)
             private$..centralityline <- jmvcore::OptionBool$new(
                 "centralityline",
                 centralityline,
@@ -264,6 +269,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..dep)
             self$.addOption(private$..grvar)
             self$.addOption(private$..typestatistics)
+            self$.addOption(private$..seed)
             self$.addOption(private$..centralityline)
             self$.addOption(private$..changebinwidth)
             self$.addOption(private$..binwidth)
@@ -305,6 +311,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         dep = function() private$..dep$value,
         grvar = function() private$..grvar$value,
         typestatistics = function() private$..typestatistics$value,
+        seed = function() private$..seed$value,
         centralityline = function() private$..centralityline$value,
         changebinwidth = function() private$..changebinwidth$value,
         binwidth = function() private$..binwidth$value,
@@ -345,6 +352,7 @@ jjhistostatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..dep = NA,
         ..grvar = NA,
         ..typestatistics = NA,
+        ..seed = NA,
         ..centralityline = NA,
         ..changebinwidth = NA,
         ..binwidth = NA,
@@ -413,6 +421,7 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "dep",
                     "grvar",
                     "typestatistics",
+                    "seed",
                     "changebinwidth",
                     "binwidth",
                     "centralityline",
@@ -571,6 +580,11 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   one-sample t-test. This option does NOT perform a normality test - no
 #'   Shapiro-Wilk, Anderson-Darling or similar statistic is computed or
 #'   displayed anywhere in this analysis.
+#' @param seed Random seed for the statistics computed by resampling or
+#'   posterior sampling (robust tests, Bayesian estimates, and some
+#'   nonparametric effect-size intervals). The plot caption names the seed
+#'   whenever it affected the numbers shown. The default reproduces the previous
+#'   fixed behaviour.
 #' @param centralityline Whether to display a vertical line indicating the
 #'   measure of central tendency (mean for parametric, median for
 #'   nonparametric).
@@ -674,6 +688,7 @@ jjhistostats <- function(
     dep,
     grvar = NULL,
     typestatistics = "parametric",
+    seed = 20250101,
     centralityline = FALSE,
     changebinwidth = FALSE,
     binwidth = 1.1,
@@ -728,6 +743,7 @@ jjhistostats <- function(
         dep = dep,
         grvar = grvar,
         typestatistics = typestatistics,
+        seed = seed,
         centralityline = centralityline,
         changebinwidth = changebinwidth,
         binwidth = binwidth,

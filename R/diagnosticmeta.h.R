@@ -597,7 +597,6 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=800,
                 height=600,
                 visible="(forest_plot)",
-                requiresData=TRUE,
                 renderFun=".forestplot",
                 clearWith=list(
                     "study",
@@ -617,7 +616,6 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=600,
                 height=600,
                 visible="(sroc_plot)",
-                requiresData=TRUE,
                 renderFun=".srocplot",
                 clearWith=list(
                     "study",
@@ -637,7 +635,6 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=600,
                 height=500,
                 visible="(funnel_plot && publication_bias)",
-                requiresData=TRUE,
                 renderFun=".funnelplot",
                 clearWith=list(
                     "study",

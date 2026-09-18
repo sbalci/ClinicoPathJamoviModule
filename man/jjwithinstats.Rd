@@ -16,6 +16,7 @@ jjwithinstats(
   centralitytype = "parametric",
   clinicalpreset = "custom",
   typestatistics = "parametric",
+  seed = 20250101,
   pairwisecomparisons = FALSE,
   pairwisedisplay = "significant",
   padjustmethod = "holm",
@@ -71,6 +72,12 @@ powerful when appropriate.  Nonparametric: No distribution assumptions,
 robust for skewed biomarker data. Robust: Uses trimmed means, reduces
 outlier influence. Bayesian: Provides evidence strength rather than
 p-values.}
+
+\item{seed}{Random seed for the statistics computed by resampling or
+posterior sampling (robust tests, Bayesian estimates, and some
+nonparametric effect-size intervals). The plot caption names the seed
+whenever it affected the numbers shown. The default reproduces the previous
+fixed behaviour.}
 
 \item{pairwisecomparisons}{Enable to see which specific time points differ
 significantly (e.g., baseline vs month 3, month 3 vs month 6).  Useful for

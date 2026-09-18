@@ -281,7 +281,6 @@ items:
       width: 800
       height: 600
       visible: (forest_plot)
-      requiresData: true
       renderFun: .forestplot
       clearWith:
           - study
@@ -301,7 +300,6 @@ items:
       width: 600
       height: 600
       visible: (sroc_plot)
-      requiresData: true
       renderFun: .srocplot
       clearWith:
           - study
@@ -321,7 +319,6 @@ items:
       width: 600
       height: 500
       visible: (funnel_plot && publication_bias)
-      requiresData: true
       renderFun: .funnelplot
       clearWith:
           - study

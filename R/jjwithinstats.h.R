@@ -16,6 +16,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             centralitytype = "parametric",
             clinicalpreset = "custom",
             typestatistics = "parametric",
+            seed = 20250101,
             pairwisecomparisons = FALSE,
             pairwisedisplay = "significant",
             padjustmethod = "holm",
@@ -116,6 +117,10 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "robust",
                     "bayes"),
                 default="parametric")
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=20250101)
             private$..pairwisecomparisons <- jmvcore::OptionBool$new(
                 "pairwisecomparisons",
                 pairwisecomparisons,
@@ -261,6 +266,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..centralitytype)
             self$.addOption(private$..clinicalpreset)
             self$.addOption(private$..typestatistics)
+            self$.addOption(private$..seed)
             self$.addOption(private$..pairwisecomparisons)
             self$.addOption(private$..pairwisedisplay)
             self$.addOption(private$..padjustmethod)
@@ -297,6 +303,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         centralitytype = function() private$..centralitytype$value,
         clinicalpreset = function() private$..clinicalpreset$value,
         typestatistics = function() private$..typestatistics$value,
+        seed = function() private$..seed$value,
         pairwisecomparisons = function() private$..pairwisecomparisons$value,
         pairwisedisplay = function() private$..pairwisedisplay$value,
         padjustmethod = function() private$..padjustmethod$value,
@@ -332,6 +339,7 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..centralitytype = NA,
         ..clinicalpreset = NA,
         ..typestatistics = NA,
+        ..seed = NA,
         ..pairwisecomparisons = NA,
         ..pairwisedisplay = NA,
         ..padjustmethod = NA,
@@ -390,6 +398,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dep4",
                     "clinicalpreset",
                     "typestatistics",
+                    "seed",
                     "pairwisecomparisons",
                     "pairwisedisplay",
                     "padjustmethod",
@@ -427,6 +436,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dep3",
                     "dep4",
                     "typestatistics",
+                    "seed",
                     "clinicalpreset")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -437,7 +447,8 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dep2",
                     "dep3",
                     "dep4",
-                    "typestatistics")))
+                    "typestatistics",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanations",
@@ -459,6 +470,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dep3",
                     "dep4",
                     "typestatistics",
+                    "seed",
                     "pairwisecomparisons",
                     "pairwisedisplay",
                     "padjustmethod",
@@ -490,6 +502,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dep3",
                     "dep4",
                     "typestatistics",
+                    "seed",
                     "pairwisecomparisons",
                     "centralityplotting",
                     "pointpath")))
@@ -508,6 +521,7 @@ jjwithinstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dep3",
                     "dep4",
                     "typestatistics",
+                    "seed",
                     "ggpubrPlotType",
                     "ggpubrPalette",
                     "ggpubrAddStats",
@@ -562,6 +576,11 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   robust for skewed biomarker data. Robust: Uses trimmed means, reduces
 #'   outlier influence. Bayesian: Provides evidence strength rather than
 #'   p-values.
+#' @param seed Random seed for the statistics computed by resampling or
+#'   posterior sampling (robust tests, Bayesian estimates, and some
+#'   nonparametric effect-size intervals). The plot caption names the seed
+#'   whenever it affected the numbers shown. The default reproduces the previous
+#'   fixed behaviour.
 #' @param pairwisecomparisons Enable to see which specific time points differ
 #'   significantly (e.g., baseline vs month 3, month 3 vs month 6).  Useful for
 #'   identifying when changes occur during treatment or disease progression.
@@ -619,6 +638,7 @@ jjwithinstats <- function(
     centralitytype = "parametric",
     clinicalpreset = "custom",
     typestatistics = "parametric",
+    seed = 20250101,
     pairwisecomparisons = FALSE,
     pairwisedisplay = "significant",
     padjustmethod = "holm",
@@ -671,6 +691,7 @@ jjwithinstats <- function(
         centralitytype = centralitytype,
         clinicalpreset = clinicalpreset,
         typestatistics = typestatistics,
+        seed = seed,
         pairwisecomparisons = pairwisecomparisons,
         pairwisedisplay = pairwisedisplay,
         padjustmethod = padjustmethod,

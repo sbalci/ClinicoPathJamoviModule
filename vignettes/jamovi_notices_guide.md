@@ -2963,6 +2963,13 @@ value no longer matches the hex pattern it looks for).
 - **Borders and accents**: leave saturated hexes alone; they read in both themes.
 - **Explicit dark text** (`#721c24`, `#856404`, `#155724`) inside a panel you made
   translucent: change to `color: inherit`. The semantics are carried by the border.
+- **Notice titles inherit too.** A severity-coloured title on a translucent tint fails one theme
+  or the other: `#dc2626` 2.93:1 and `#2563eb` 2.74:1 on a dark pane, `#ca8a04` 2.94:1 on white
+  (2026-09-16 OncoPath). Write `"<strong style='color: inherit;'>"`; keep the hue for the border.
+  `tools/release_gate.py` `check_notice_title_colour` flags renderers that still colour titles.
+- **Say why there is no native notice.** Above a hand-rolled `.addNotice()`, leave the REJECTED
+  comment from `jamovi_library_review_guide.md` §13 — the reviewer suggests `type: Notice` every
+  round because nothing in the code says it does not compile.
 
 ### 13.3 Only five named HTML entities are safe
 
@@ -2982,23 +2989,24 @@ literally, so a methodology note starts reading `Cohen's &kappa;`. They also
 already fail non-HTML export: copy the panel into Word or export to PDF and the
 raw entity text comes through.
 
-Use the real character, written as a `\u{}` escape because `R CMD check` flags
-literal non-ASCII bytes in R source:
+Use the real character, written as a `\uXXXX` escape (four hex digits, **no braces**) because
+`R CMD check` flags literal non-ASCII bytes in R source. Inside `.()` a braced `\u2265` is never
+translated: the catalog extractor decodes only `\uXXXX` (2026-09-16 OncoPath).
 
 | Entity | Char | Escape | | Entity | Char | Escape |
 |---|---|---|---|---|---|---|
-| `&minus;` | − | `\u{2212}` | | `&alpha;` | α | `\u{03B1}` |
-| `&mdash;` | — | `\u{2014}` | | `&beta;` | β | `\u{03B2}` |
-| `&ndash;` | – | `\u{2013}` | | `&kappa;` | κ | `\u{03BA}` |
-| `&rarr;` | → | `\u{2192}` | | `&ge;` | ≥ | `\u{2265}` |
-| `&times;` | × | `\u{00D7}` | | `&eacute;` | é | `\u{00E9}` |
-| `&plusmn;` | ± | `\u{00B1}` | | `&nbsp;` | (nbsp) | `\u{00A0}` |
+| `&minus;` | − | `\u2212` | | `&alpha;` | α | `\u03B1` |
+| `&mdash;` | — | `\u2014` | | `&beta;` | β | `\u03B2` |
+| `&ndash;` | – | `\u2013` | | `&kappa;` | κ | `\u03BA` |
+| `&rarr;` | → | `\u2192` | | `&ge;` | ≥ | `\u2265` |
+| `&times;` | × | `\u00D7` | | `&eacute;` | é | `\u00E9` |
+| `&plusmn;` | ± | `\u00B1` | | `&nbsp;` | (nbsp) | `\u00A0` |
 
 For `&nbsp;` used purely as a table-cell spacer, drop it — `<td></td>` renders
 the same in HTML and exports cleanly.
 
 **Caveat for very large HTML literals.** In a string literal longer than ~10,000
-characters, `\u{}` escapes can hit a parse trap in a non-UTF-8 locale. There, use
+characters, `\u` escapes can hit a parse trap in a non-UTF-8 locale. There, use
 HTML *numeric* entities (`&#x2192;`) — numeric entities are part of the HTML spec
 and are unaffected by the named-entity change.
 

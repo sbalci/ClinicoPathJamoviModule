@@ -397,6 +397,10 @@ plan_module <- function(m, routes, index, reg, ignore = character()) {
     FALSE
   }
   for (f in unlist(m$data_files)) {
+    if (grepl("\\.omv$", f, ignore.case = TRUE)) {
+      warnings <- c(warnings, paste0(m$name, ": data_files lists ", f, "; .omv files are kept in the submodule, not copied"))
+      next
+    }
     s <- file.path(U, "data", f)
     if (!file.exists(s)) { errors <- c(errors, paste0(m$name, ": data file not found: data/", f)); next }
     add(file.path("data", f), s, "copy", "data_files")
@@ -406,15 +410,14 @@ plan_module <- function(m, routes, index, reg, ignore = character()) {
         if (!hand_doc(obj)) add(file.path("R", paste0("data_", obj, ".R")), s, "datadoc", obj)
     }
   }
+  # .omv example analyses are made and saved in the submodule, so they are never copied from
+  # the umbrella (a copy would overwrite them); only check that each listed one is there.
   zero <- file.path(dir, "jamovi", "0000.yaml")
   if (file.exists(zero)) {
     zl <- readLines(zero, warn = FALSE)
-    for (o in unique(trimws(basename(gsub(".*path:\\s*", "", grep("path:.*\\.omv", zl, value = TRUE)))))) {
-      cand <- file.path(U, c("data-raw/non-rda", "inst/extdata", "data"), o)
-      hit <- cand[file.exists(cand)]
-      if (length(hit)) add(file.path("data", o), hit[1], "copy", "0000.yaml datasets")
-      else warnings <- c(warnings, paste0(m$name, ": omv listed in 0000.yaml datasets not found in the umbrella: ", o))
-    }
+    for (o in unique(trimws(basename(gsub(".*path:\\s*", "", grep("path:.*\\.omv", zl, value = TRUE))))))
+      if (!file.exists(file.path(dir, "data", o)))
+        warnings <- c(warnings, paste0(m$name, ": omv listed in 0000.yaml datasets is missing from data/: ", o))
   }
 
   # refs, guard test, optional tests and vignettes

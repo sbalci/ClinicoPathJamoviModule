@@ -1632,7 +1632,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=400,
                 renderFun=".blandAltman",
                 visible="(blandAltmanPlot)",
-                requiresData=TRUE,
                 clearWith=list(
                     "vars",
                     "baConfidenceLevel",
@@ -1645,7 +1644,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".agreementHeatmap",
                 visible="(agreementHeatmap)",
-                requiresData=TRUE,
                 clearWith=list(
                     "vars",
                     "heatmapColorScheme",
@@ -3577,7 +3575,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".raterProfilePlot",
                 visible="(raterProfiles)",
-                requiresData=TRUE,
                 clearWith=list(
                     "vars",
                     "raterProfileType",
@@ -3641,7 +3638,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=450,
                 renderFun=".subgroupForestPlot",
                 visible="(agreementBySubgroup && subgroupForestPlot)",
-                requiresData=TRUE,
                 clearWith=list(
                     "vars",
                     "subgroupVariable",
@@ -3689,7 +3685,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "clusterMethod",
                     "clusterDistance",
                     "clusterLinkage",
-                    "nClusters")))
+                    "nClusters",
+                    "seed")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="raterDendrogram",
@@ -3698,7 +3695,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".raterDendrogram",
                 visible="(raterClustering && clusterMethod:hierarchical && showDendrogram)",
-                requiresData=TRUE,
                 clearWith=list(
                     "vars",
                     "clusterDistance",
@@ -3711,13 +3707,13 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=550,
                 renderFun=".raterClusterHeatmap",
                 visible="(raterClustering && showClusterHeatmap)",
-                requiresData=TRUE,
                 clearWith=list(
                     "vars",
                     "clusterMethod",
                     "clusterDistance",
                     "clusterLinkage",
-                    "nClusters")))
+                    "nClusters",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="raterClusterExplanation",
@@ -3749,7 +3745,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "caseClusterMethod",
                     "caseClusterDistance",
                     "caseClusterLinkage",
-                    "nCaseClusters")))
+                    "nCaseClusters",
+                    "seed")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="caseDendrogram",
@@ -3758,7 +3755,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=500,
                 renderFun=".caseDendrogram",
                 visible="(caseClustering && caseClusterMethod:hierarchical && showCaseDendrogram)",
-                requiresData=TRUE,
                 clearWith=list(
                     "vars",
                     "caseClusterDistance",
@@ -3771,13 +3767,13 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 height=600,
                 renderFun=".caseClusterHeatmap",
                 visible="(caseClustering && showCaseClusterHeatmap)",
-                requiresData=TRUE,
                 clearWith=list(
                     "vars",
                     "caseClusterMethod",
                     "caseClusterDistance",
                     "caseClusterLinkage",
-                    "nCaseClusters")))
+                    "nCaseClusters",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="caseClusterExplanation",

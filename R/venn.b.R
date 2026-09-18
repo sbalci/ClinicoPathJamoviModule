@@ -149,6 +149,25 @@ vennClass <- if (requireNamespace('jmvcore'))
                 self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
             },
 
+            # library-audit 2026-09-16 meddecide [LOW] DONE (same class): summary has a fixed row set, so .init()
+            # scaffolds the rows and .run() fills them with setRow()
+            # One summary row per selected variable slot, named by the SLOT ("var1" ..
+            # "var7") and valued by the variable name. The slot is the rowKey: the same
+            # variable picked twice would give two identical name keys (.run() rejects
+            # that, but only after .init() has laid the rows), and a row number would
+            # relabel rows when a slot is skipped. Empty until var1 and var2 are both
+            # chosen - the same gate .run() applies before it counts anything.
+            .summaryRowVars = function() {
+                if (is.null(self$options$var1) || is.null(self$options$var2))
+                    return(character(0))
+                vars <- character(0)
+                for (slot in paste0("var", 1:7)) {
+                    v <- self$options[[slot]]
+                    if (!is.null(v)) vars[[slot]] <- as.character(v)
+                }
+                vars
+            },
+
             .init = function() {
                 # Count number of selected variables for dynamic sizing
                 num_vars <- 0
@@ -212,6 +231,11 @@ vennClass <- if (requireNamespace('jmvcore'))
                             title = membership_titles[i],
                             type = if (i == 1L) "integer" else "text")
                 }
+
+                summary_vars <- private$.summaryRowVars()
+                for (slot in names(summary_vars))
+                    self$results$summary$addRow(rowKey = slot,
+                        values = list(variable = summary_vars[[slot]]))
             },
 
             .run = function() {
@@ -234,17 +258,18 @@ vennClass <- if (requireNamespace('jmvcore'))
                     self$results[[nm]]$setVisible(FALSE)
                 }
 
-                # summary is a rows: 0 table filled with addRow(), and jmvcore's addRow()
-                # appends without checking for a duplicate rowKey. The top-level clearWith
-                # covers the variables and the plot options but not the panel toggles
-                # (showGlossary, clinicalSummary, showSetCalculations, ...), so ticking one
-                # of those re-entered .run() against the retained rows and printed every
-                # variable twice - three runs gave 9 rows for 3 variables and
-                # as.data.frame() died with "duplicate 'row.names'". Clearing here rather
-                # than next to the fill loop also covers the early returns below, so a
-                # validation failure cannot leave the previous run's counts on screen
-                # underneath the error panel.
-                self$results$summary$deleteRows()
+                # summary's rows are laid by .init() and only filled here with setRow(),
+                # so re-entering .run() (a panel toggle such as showGlossary is not in the
+                # top-level clearWith) can no longer append a second copy of every row -
+                # the old addRow() fill gave 9 rows for 3 variables after three runs. The
+                # counts are blanked here rather than next to the fill loop so the early
+                # returns below cannot leave the previous run's counts on screen
+                # underneath the error panel. Do not deleteRows(): that removes the
+                # .init() scaffold and setRow() then fails with "rowKey not found".
+                for (slot in names(private$.summaryRowVars()))
+                    self$results$summary$setRow(rowKey = slot, values = list(
+                        trueCount = NA_integer_, falseCount = NA_integer_,
+                        totalCount = NA_integer_, truePercentage = NA_real_))
 
                 # Validate required variables and their true levels
                 if (!private$.validateVariables()) {
@@ -656,7 +681,10 @@ vennClass <- if (requireNamespace('jmvcore'))
                         stringsAsFactors = FALSE
                     )
 
-                    # Process each variable that was selected using helper function
+                    # Process each variable that was selected using helper function.
+                    # Each slot fills its own .init() row (rowKey "var1".."var7"). A slot
+                    # whose stats come back NULL keeps the blanked counts set at the top
+                    # of .run(), so summaryData and the table rows are not assumed 1:1.
                     variables <- list(var1, var2, var3, var4, var5, var6, var7)
                     true_levels <- list(var1true, var2true, var3true, var4true,
                                         var5true, var6true, var7true)
@@ -670,6 +698,14 @@ vennClass <- if (requireNamespace('jmvcore'))
                                     mydata, safe_name, var, true_levels[[vi]])
                                 if (!is.null(varStats)) {
                                     summaryData <- rbind(summaryData, varStats)
+                                    self$results$summary$setRow(
+                                        rowKey = paste0("var", vi), values = list(
+                                            variable = varStats$Variable[1],
+                                            trueCount = varStats$TrueCount[1],
+                                            falseCount = varStats$FalseCount[1],
+                                            totalCount = varStats$TotalCount[1],
+                                            truePercentage = varStats$TruePercentage[1]
+                                        ))
                                 }
                             }
                         }
@@ -677,15 +713,6 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                     # Set the summary results
                     if (!is.null(self$results$summary)) {
-                        for (i in seq_len(nrow(summaryData))) {
-                            self$results$summary$addRow(rowKey = i, values = list(
-                                variable = summaryData$Variable[i],
-                                trueCount = summaryData$TrueCount[i],
-                                falseCount = summaryData$FalseCount[i],
-                                totalCount = summaryData$TotalCount[i],
-                                truePercentage = summaryData$TruePercentage[i]
-                            ))
-                        }
                         # "True" is whatever level the user nominated per variable, and
                         # nothing else in the output records which level that was. The
                         # word "positive" appears throughout the prose panels, so the
@@ -1009,7 +1036,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                             paste0("Variable '", display_name, "' Was Left Out"),
                             paste0("Variable '", display_name, "' holds ",
                                 class(column_data)[1],
-                                " values, which cannot be turned into the yes/no set membership this analysis needs, so it contributes no row to the summary table and no set to the diagrams. ",
+                                " values, which cannot be turned into the yes/no set membership this analysis needs, so its row in the summary table is left blank and it contributes no set to the diagrams. ",
                                 "Pick a nominal or ordinal variable (or a 0/1 numeric one) and set its 'true' level in the options, or recode '",
                                 display_name,
                                 "' into two categories first, then run the analysis again.")

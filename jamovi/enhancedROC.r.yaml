@@ -651,6 +651,7 @@ items:
                 - showCutoffPoints
                 - showConfidenceBands
                 - confidenceLevel
+                - seed
                 - plotTheme
                 - plotWidth
                 - plotHeight

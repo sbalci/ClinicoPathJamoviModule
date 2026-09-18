@@ -611,7 +611,44 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             },
 
             # Initialize table structures
+            # The epiR tables report the same statistic list for every test, so their rows are
+            # known before any data is seen: .init() lays them down and .run() only fills values.
+            .epirStatLabels = function() {
+                c(ap = jmvcore::.("Apparent prevalence"),
+                  tp = jmvcore::.("True prevalence"),
+                  se = jmvcore::.("Test sensitivity"),
+                  sp = jmvcore::.("Test specificity"),
+                  diag.ac = jmvcore::.("Diagnostic accuracy"),
+                  diag.or = jmvcore::.("Diagnostic odds ratio"),
+                  nndx = jmvcore::.("Number needed to diagnose"),
+                  youden = jmvcore::.("Youden's index"),
+                  pv.pos = jmvcore::.("Positive predictive value"),
+                  pv.neg = jmvcore::.("Negative predictive value"),
+                  lr.pos = jmvcore::.("Likelihood ratio of a positive test"),
+                  lr.neg = jmvcore::.("Likelihood ratio of a negative test"),
+                  p.rout = jmvcore::.("Proportion of subjects with the outcome ruled out"),
+                  p.rin = jmvcore::.("Proportion of subjects with the outcome ruled in"),
+                  p.tpdn = jmvcore::.("Proportion of false positives"),
+                  p.tndp = jmvcore::.("Proportion of false negative"),
+                  p.dntp = jmvcore::.("False Discovery Rate"),
+                  p.dptn = jmvcore::.("False Omission Rate"))
+            },
+            .epirRatioStats = function() {
+                c("ap", "tp", "se", "sp", "diag.ac", "pv.pos", "pv.neg",
+                  "p.tpdn", "p.tndp", "p.dntp", "p.dptn")
+            },
+
             .initializeTables = function() {
+                # epiR confidence-interval tables: fixed statistic set, one table per test
+                labels <- private$.epirStatLabels()
+                for (i in 1:3) {
+                    table_name <- paste0("epirTable", i)
+                    if (table_name %in% names(self$results))
+                        for (key in private$.epirRatioStats())
+                            self$results[[table_name]]$addRow(rowKey = key,
+                                values = list(statsnames = unname(labels[[key]])))
+                }
+
                 # Add rows to contingency tables
                 for (i in 1:3) {
                     table_name <- paste0("cTable", i)
@@ -1339,31 +1376,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     }
 
                     # Clear any rows left from a previous run before repopulating
-                    epirTable$deleteRows()
+                    # rows are scaffolded in .init(); blank the values rather than delete them, so a
+                    # failed epiR call leaves empty cells instead of a table that vanishes
+                    for (key in private$.epirRatioStats())
+                        epirTable$setRow(rowKey = key,
+                            values = list(est = NA_real_, lower = NA_real_, upper = NA_real_))
 
                     # Map epiR statistic codes to display labels. Keying on the `statistic`
                     # code (not row position) keeps labels correct even if epiR changes the
                     # order or length of its summary output.
-                    stat_label_map <- c(
-                        ap = jmvcore::.("Apparent prevalence"),
-                        tp = jmvcore::.("True prevalence"),
-                        se = jmvcore::.("Test sensitivity"),
-                        sp = jmvcore::.("Test specificity"),
-                        diag.ac = jmvcore::.("Diagnostic accuracy"),
-                        diag.or = jmvcore::.("Diagnostic odds ratio"),
-                        nndx = jmvcore::.("Number needed to diagnose"),
-                        youden = jmvcore::.("Youden's index"),
-                        pv.pos = jmvcore::.("Positive predictive value"),
-                        pv.neg = jmvcore::.("Negative predictive value"),
-                        lr.pos = jmvcore::.("Likelihood ratio of a positive test"),
-                        lr.neg = jmvcore::.("Likelihood ratio of a negative test"),
-                        p.rout = jmvcore::.("Proportion of subjects with the outcome ruled out"),
-                        p.rin = jmvcore::.("Proportion of subjects with the outcome ruled in"),
-                        p.tpdn = jmvcore::.("Proportion of false positives"),
-                        p.tndp = jmvcore::.("Proportion of false negative"),
-                        p.dntp = jmvcore::.("False Discovery Rate"),
-                        p.dptn = jmvcore::.("False Omission Rate")
-                    )
 
                     tryCatch(
                         {
@@ -1379,15 +1400,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                             # Label rows explicitly by statistic code; fall back to the raw
                             # code for any unmapped statistic rather than silently mislabeling.
+                            # as.character: epiR returns `statistic` as a factor, which does not
+                            # match a string rowKey.
                             codes <- as.character(epirresult_ratio$statistic)
-                            labels <- unname(stat_label_map[codes])
-                            labels[is.na(labels)] <- codes[is.na(labels)]
 
                             for (i in seq_len(nrow(epirresult_ratio))) {
-                                epirTable$addRow(
-                                    rowKey = i,
+                                if (!codes[i] %in% private$.epirRatioStats()) next
+                                epirTable$setRow(
+                                    rowKey = codes[i],
                                     values = list(
-                                        statsnames = labels[i],
                                         est = epirresult_ratio$est[i],
                                         lower = epirresult_ratio$lower[i],
                                         upper = epirresult_ratio$upper[i]

@@ -18,13 +18,13 @@ children:
             name: guided_biomarker
             options:
               - name: er_pr
-                title: "ER/PR (Breast Cancer) - H-score >=100 recommended"
+                title: "ER/PR (Breast Cancer) - presets H-score cutpoint 100"
               - name: her2
-                title: "HER2 (Breast Cancer) - H-score >=150 recommended"
+                title: "HER2 (Breast Cancer) - presets H-score cutpoint 150"
               - name: ki67
-                title: "Ki-67 (Proliferation) - H-score >=100 recommended"
+                title: "Ki-67 (Proliferation) - presets H-score cutpoint 100"
               - name: pdl1
-                title: "PD-L1 (Immunotherapy) - TPS >=1% recommended"
+                title: "PD-L1 (Immunotherapy) - presets percentage cutpoint 1"
               - name: manual
                 title: "Manual Configuration"
           - type: Label
@@ -90,13 +90,13 @@ children:
             margin: large
             children:
               - type: Label
-                label: " Common Clinical Cutpoints:"
+                label: "Three independent scales - set each cutpoint yourself:"
               - type: Label
-                label: "• ER/PR: H-score >=100 (FDA approved)"
+                label: "• H-score scale: 0-300 (intensity x percentage)"
               - type: Label
-                label: "• HER2: H-score >=150 (research standard)"
+                label: "• Percentage scale: 0-100 (percent positive nuclei)"
               - type: Label
-                label: "• Ki-67: H-score >=100 (proliferation index)"
+                label: "• Intensity scale: 0-3 (or 0-4 extended)"
               - type: TextBox
                 name: binary_cutpoint
                 label: "H-score Cutoff for Positive/Negative"

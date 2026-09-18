@@ -919,52 +919,104 @@ ihcscoringClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Biomarker-specific results
                 bio_table <- self$results$biomarkerspecific$biomarkerresults
 
-                if (biomarker == "er" || biomarker == "pr") {
-                    # Estrogen/Progesterone Receptor specific analysis
-                    positive_rate <- sum(hscore >= 1, na.rm = TRUE) / length(hscore) * 100
+                # Every row below names the scale it was computed on, because the three
+                # scales are not interchangeable and mixing them was a real defect here.
+                bio_table$setNote(
+                    "scales",
+                    paste(
+                        "Each row states the scale it was computed on.",
+                        "H-score scale is 0-300 (intensity x percentage);",
+                        "percentage scale is 0-100 (percent positive nuclei);",
+                        "intensity scale is 0-3.",
+                        "These are not interchangeable: an H-score of 1 is 1% of nuclei at intensity 1,",
+                        "or 0.33% at intensity 3.",
+                        "A cutoff taken from one scale does not transfer to another."
+                    )
+                )
 
+                if (biomarker == "er" || biomarker == "pr") {
+                    # Two DIFFERENT scales, evaluated separately and never against each
+                    # other's thresholds. `proportion` is the percentage of positive nuclei
+                    # (0-100). `hscore` is intensity x proportion (0-300). They are not
+                    # interchangeable: an H-score of 1 is 1% of nuclei at intensity 1, or
+                    # 0.33% at intensity 3. The 1 and 10 cutoffs below are percentage-scale
+                    # figures and were previously applied to `hscore` while being labelled
+                    # as percentages, which mixed the two scales.
+                    n_prop <- length(proportion)
+
+                    pct_ge_1 <- sum(proportion >= 1, na.rm = TRUE) / n_prop * 100
                     bio_table$addRow(rowKey = 1, values = list(
-                        parameter = "Positive Rate (>=1% cells)",
-                        value = positive_rate,
-                        clinical_significance = "Hormone receptor positive",
-                        reference_range = ">=1% for clinical positivity"
+                        parameter = "Percentage scale: >=1% positive nuclei",
+                        value = pct_ge_1,
+                        clinical_significance = "Cases at or above 1% on the percentage scale",
+                        reference_range = "Percentage scale 0-100; 1% per ASCO/CAP 2020 definition"
                     ))
 
-                    weak_positive <- sum(hscore >= 1 & hscore < 10, na.rm = TRUE) / length(hscore) * 100
+                    pct_1_to_10 <- sum(proportion >= 1 & proportion < 10, na.rm = TRUE) / n_prop * 100
                     bio_table$addRow(rowKey = 2, values = list(
-                        parameter = "Weak Positive Rate (1-10%)",
-                        value = weak_positive,
-                        clinical_significance = "May benefit from endocrine therapy",
-                        reference_range = "1-10% weak positive"
+                        parameter = "Percentage scale: 1-10% positive nuclei",
+                        value = pct_1_to_10,
+                        clinical_significance = "Cases in the 1-10% band on the percentage scale",
+                        reference_range = "Percentage scale 0-100; band per ASCO/CAP 2020 definition"
+                    ))
+
+                    pct_lt_1 <- sum(proportion < 1, na.rm = TRUE) / n_prop * 100
+                    bio_table$addRow(rowKey = 3, values = list(
+                        parameter = "Percentage scale: <1% positive nuclei",
+                        value = pct_lt_1,
+                        clinical_significance = "Cases below 1% on the percentage scale",
+                        reference_range = "Percentage scale 0-100; 1% per ASCO/CAP 2020 definition"
+                    ))
+
+                    # Reported on its own scale, against the cutpoint the user set.
+                    hs_cut <- self$options$binary_cutpoint
+                    hs_ge_cut <- sum(hscore >= hs_cut, na.rm = TRUE) / length(hscore) * 100
+                    bio_table$addRow(rowKey = 4, values = list(
+                        parameter = sprintf("H-score scale: >=%g", hs_cut),
+                        value = hs_ge_cut,
+                        clinical_significance = "Cases at or above the H-score cutpoint you set",
+                        reference_range = sprintf("H-score scale 0-300; cutpoint %g", hs_cut)
                     ))
                 } else if (biomarker == "her2") {
-                    # HER2 specific analysis
-                    score_0_1 <- sum(hscore < 1, na.rm = TRUE) / length(hscore) * 100
-                    score_2 <- sum(hscore >= 1 & hscore < 100, na.rm = TRUE) / length(hscore) * 100
-                    score_3 <- sum(hscore >= 100, na.rm = TRUE) / length(hscore) * 100
+                    # HER2 IHC is reported as 0, 1+, 2+ or 3+ -- that is the INTENSITY
+                    # score, carried by the intensity variable, not a band of the H-score.
+                    # The previous implementation banded `hscore` (0-300) at 1 and 100 and
+                    # attached percentage reference ranges to the bands, mixing three
+                    # scales at once; `score_3` was also computed and never displayed.
+                    n_int <- length(intensity)
+                    her2_0_1 <- sum(intensity <= 1, na.rm = TRUE) / n_int * 100
+                    her2_2 <- sum(intensity == 2, na.rm = TRUE) / n_int * 100
+                    her2_3 <- sum(intensity >= 3, na.rm = TRUE) / n_int * 100
 
                     bio_table$addRow(rowKey = 1, values = list(
-                        parameter = "HER2 0/1+ Rate",
-                        value = score_0_1,
-                        clinical_significance = "HER2 negative",
-                        reference_range = "<30% membrane staining"
+                        parameter = "Intensity scale: 0 or 1+",
+                        value = her2_0_1,
+                        clinical_significance = "Cases scored 0 or 1+ on the intensity scale",
+                        reference_range = "Intensity scale 0-3"
                     ))
 
                     bio_table$addRow(rowKey = 2, values = list(
-                        parameter = "HER2 2+ Rate",
-                        value = score_2,
-                        clinical_significance = "Equivocal - requires FISH",
-                        reference_range = "30-100% moderate staining"
+                        parameter = "Intensity scale: 2+",
+                        value = her2_2,
+                        clinical_significance = "Cases scored 2+ on the intensity scale",
+                        reference_range = "Intensity scale 0-3"
+                    ))
+
+                    bio_table$addRow(rowKey = 3, values = list(
+                        parameter = "Intensity scale: 3+",
+                        value = her2_3,
+                        clinical_significance = "Cases scored 3+ on the intensity scale",
+                        reference_range = "Intensity scale 0-3"
                     ))
                 } else if (biomarker == "ki67") {
                     # Ki-67 proliferation index
                     high_proliferation <- sum(proportion >= 20, na.rm = TRUE) / length(proportion) * 100
 
                     bio_table$addRow(rowKey = 1, values = list(
-                        parameter = "High Proliferation Rate (>=20%)",
+                        parameter = "Percentage scale: >=20% positive nuclei",
                         value = high_proliferation,
-                        clinical_significance = "High proliferative activity",
-                        reference_range = ">=20% for high proliferation"
+                        clinical_significance = "Cases at or above 20% on the percentage scale",
+                        reference_range = "Percentage scale 0-100"
                     ))
                 }
 
@@ -972,14 +1024,15 @@ ihcscoringClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 cutpoints_table <- self$results$biomarkerspecific$clinicalcutpoints
 
                 if (biomarker == "er" || biomarker == "pr") {
-                    # Standard 1% cutpoint
-                    sens_1pct <- sum(hscore >= 1, na.rm = TRUE) / length(hscore)
+                    # 1% is a PERCENTAGE-scale cutoff and is applied to `proportion`.
+                    # It was previously applied to `hscore` (a 0-300 scale).
+                    rate_ge_1pct <- sum(proportion >= 1, na.rm = TRUE) / length(proportion)
                     cutpoints_table$addRow(rowKey = 1, values = list(
-                        cutpoint_type = "Standard Clinical (1%)",
+                        cutpoint_type = "Percentage scale (>=1% nuclei)",
                         threshold = 1.0,
-                        sensitivity = sens_1pct,
-                        specificity = 1 - sens_1pct,
-                        clinical_context = "FDA approved threshold for hormone receptor positivity"
+                        sensitivity = rate_ge_1pct,
+                        specificity = 1 - rate_ge_1pct,
+                        clinical_context = "1% is the ASCO/CAP 2020 definition (Allison et al., J Clin Oncol 38:1346-1366). Not an FDA-approved cutoff."
                     ))
                 } else if (biomarker == "pdl1") {
                     # PD-L1 tumor proportion score thresholds
@@ -991,7 +1044,7 @@ ihcscoringClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         threshold = 1.0,
                         sensitivity = tps_1,
                         specificity = 1 - tps_1,
-                        clinical_context = "Threshold for immunotherapy eligibility"
+                        clinical_context = "Percentage scale (tumor proportion score)"
                     ))
 
                     cutpoints_table$addRow(rowKey = 2, values = list(
@@ -999,7 +1052,7 @@ ihcscoringClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         threshold = 50.0,
                         sensitivity = tps_50,
                         specificity = 1 - tps_50,
-                        clinical_context = "High expression threshold for first-line therapy"
+                        clinical_context = "Percentage scale (tumor proportion score)"
                     ))
                 }
             },
@@ -2184,13 +2237,13 @@ def segment_nuclei(image_path):
                             cutpoint = 100,
                             allred_cutpoint = 3,
                             description = "ER/PR (Estrogen/Progesterone Receptors)",
-                            clinical_context = "FDA-approved cutoff: H-score >=100 for positive classification"
+                            clinical_context = "Preset H-score cutpoint 100 (H-score scale 0-300). Not an FDA-approved cutoff. The percentage scale is evaluated separately."
                         ),
                         "her2" = list(
                             cutpoint = 150,
                             allred_cutpoint = 4,
                             description = "HER2 (Human Epidermal Growth Factor Receptor 2)",
-                            clinical_context = "Research standard: H-score >=150, requires validation with FISH if 2+"
+                            clinical_context = "Preset H-score cutpoint 150 (H-score scale 0-300). The intensity scale (0/1+/2+/3+) is reported separately."
                         ),
                         "ki67" = list(
                             cutpoint = 100,
@@ -2370,11 +2423,13 @@ def segment_nuclei(image_path):
                 if (biomarker_type == "her2" && cutpoint < 150) {
                     warnings <- c(warnings, "HER2 typically uses higher cutoffs (>=150) - verify your threshold")
                 }
-                if (biomarker_type == "er" && cutpoint != 100) {
-                    warnings <- c(warnings, "ER scoring typically uses FDA-approved cutoff of 100 - consider standard threshold")
-                }
-                if (biomarker_type == "pr" && cutpoint != 100) {
-                    warnings <- c(warnings, "PR scoring typically uses FDA-approved cutoff of 100 - consider standard threshold")
+                if ((biomarker_type == "er" || biomarker_type == "pr") && cutpoint != 100) {
+                    warnings <- c(warnings, paste(
+                        "H-score cutpoint is", cutpoint,
+                        "rather than the commonly quoted 100. Note that 100 is a convention on the H-score scale (0-300),",
+                        "not an FDA-approved cutoff, and it is not the same thing as the 1% percentage-scale figure;",
+                        "the two scales are reported separately."
+                    ))
                 }
 
                 # Data quality warnings

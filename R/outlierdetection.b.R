@@ -670,10 +670,18 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             plain_summary <- private$.generate_plain_summary(outlier_results, analysis_data, original_n)
 
             # Generate outputs with original dataset size
+            # The flags depend on the seed when rows were subsampled, when MCD drew its random
+            # subsets, or when ICS simulated its cutoff: name the seed on every panel that
+            # reports them, not only on the main table.
+            seeded <- (!is.null(original_n) && original_n != nrow(analysis_data)) ||
+                any(outlier_results$method %in% c("mcd", "ics"))
+            seed_html <- if (seeded) paste0("<p><em>", jmvcore::htmlEscape(jmvcore::format(
+                .("Random seed: {seed}"), seed = if (is.null(self$options$seed)) 123 else self$options$seed)), "</em></p>")
+
             if (self$options$show_outlier_table) {
                 table_html <- private$.generate_outlier_table(outlier_results, analysis_data, original_n)
                 # Combine plain summary with technical table
-                combined_html <- paste0(plain_summary, table_html)
+                combined_html <- paste0(plain_summary, table_html, seed_html)
                 self$results$outlier_table$setContent(combined_html)
             }
 
@@ -699,12 +707,12 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                         icon = ""
                     )
                 }
-                self$results$method_comparison$setContent(comparison_html)
+                self$results$method_comparison$setContent(paste0(comparison_html, seed_html))
             }
 
             if (self$options$show_exclusion_summary) {
                 exclusion_html <- private$.generate_exclusion_summary(outlier_results, analysis_data, original_n)
-                self$results$exclusion_summary$setContent(exclusion_html)
+                self$results$exclusion_summary$setContent(paste0(exclusion_html, seed_html))
             }
             
             if (self$options$show_interpretation) {

@@ -1526,6 +1526,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "showCutoffPoints",
                                 "showConfidenceBands",
                                 "confidenceLevel",
+                                "seed",
                                 "plotTheme",
                                 "plotWidth",
                                 "plotHeight"),
