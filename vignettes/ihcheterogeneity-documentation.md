@@ -50,14 +50,14 @@
 | Output ID | Type | Title | Description |
 | :--- | :--- | :--- | :--- |
 | `welcome` | `Html` | `` | Welcome screen shown when no variables selected |
-| `notices` | `Html` | `` | Error, warning and information notices |
+| `notices` | `Html` | `` | All warnings in one panel, ordered by severity: strong warnings (small sample, material systematic difference), warnings (data-quality checks, duplicate variables, ICC not estimable, constant reference), information (rows left out, variability plot not drawn). Fatal problems stop the analysis with `jmvcore::reject()`. |
 | `interpretation` | `Html` | `Clinical Interpretation and Analysis Summary` |  |
 | `report_sentences` | `Html` | `Copy-Ready Report Sentences` | Pre-formatted sentences ready for clinical reports and publications |
 | `assumptions` | `Html` | `Methodology & Assumptions` | Analysis assumptions, data requirements, and methodological considerations |
 | `summary` | `Html` | `Summary (Plain-Language)` | Natural-language summary of heterogeneity analysis results |
 | `glossary` | `Html` | `Statistical Glossary` | Definitions of key statistical terms used in the analysis |
 | `reproducibilitytable` | `Table` | `Reproducibility Assessment` | Correlation and reliability metrics |
-| `samplingbiastable` | `Table` | `Sampling Bias Analysis` | Systematic bias assessment between methods |
+| `samplingbiastable` | `Table` | `Sampling Bias Analysis` | Per region (and the mean of all regions): n, mean difference with 95% CI, Bland-Altman 95% limits of agreement each with its 95% CI (Bland & Altman 1999), p-value, Hedges' g and the margin-based clinical impact |
 | `variancetable` | `Table` | `Variance Component Analysis` | Sources of measurement variability |
 | `samplesizetable` | `Table` | `Sample Size for ICC Precision` | Cases needed to estimate the ICC with a chosen 95 percent CI width (Bonett 2002) |
 | `spatialanalysistable` | `Table` | `Spatial Heterogeneity Analysis` | Variability across spatial regions |
@@ -129,4 +129,5 @@ sequenceDiagram
 - **Data Filtering**: Ensure observations with missing values are handled gracefully according to analysis options.
 - **Formula Conflicts**: Use isolated environment calls or base formula methods when interacting with `ggstatsplot` or formula parsers.
 - **Safe Deparsing**: Use `deparse(val)` in syntax generation (`asSource()`) to escape column names with spaces or special symbols.
+- **clearWith follows real dependencies**: each result clears only on the thresholds it reads (tables built in `.run()` are rebuilt anyway; images must list every option their renderer reads, e.g. `cv_threshold` for the variability and spatial plots). A new option read by an output must be added to that output's `clearWith`.
 

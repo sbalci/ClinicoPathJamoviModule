@@ -84,3 +84,21 @@ test_that("firthregression with all outputs", {
   expect_true(nchar(a$results$summaryText$content %||% "") > 0)
   expect_true(nchar(a$results$explanationText$content %||% "") > 0)
 })
+
+test_that("Cox mode reports coxphf's own hazard-ratio CI and variance-based SE", {
+  # coxphf returns ci.lower / ci.upper on the HR scale; they used to be exponentiated again
+  # (HR 1.06 printed with a "95% CI" of 2.78-3.02) and the SE was derived from that interval.
+  data("firth_standard", package = "ClinicoPath", envir = environment())
+  res <- ClinicoPath::firthregression(
+    data = firth_standard, analysisType = "cox", time = "follow_up_time",
+    outcome = "status", outcomeLevel = "Dead", predictors = c("age", "tumor_size", "marker"))
+  tab <- res$coefficients$asDF
+  d <- firth_standard
+  d$event <- as.integer(d$status == "Dead")
+  ref <- coxphf::coxphf(survival::Surv(follow_up_time, event) ~ age + tumor_size + marker, data = d)
+  expect_equal(tab$effect_size, unname(exp(ref$coefficients)), tolerance = 1e-6)
+  expect_equal(tab$lower_ci, unname(ref$ci.lower), tolerance = 1e-6)
+  expect_equal(tab$upper_ci, unname(ref$ci.upper), tolerance = 1e-6)
+  expect_equal(tab$se, unname(sqrt(diag(ref$var))), tolerance = 1e-6)
+  expect_true(all(tab$lower_ci <= tab$effect_size & tab$effect_size <= tab$upper_ci))
+})

@@ -168,6 +168,9 @@ firthregressionClass <- R6::R6Class(
             }
 
             # Separation detection (logistic only)
+            # TODO (UX): in Cox mode the Separation Diagnostics table is shown but stays empty;
+            #   and with ciMethod = "wald" the coefficient-table note still says p-values come from
+            #   penalized likelihood ratio tests (lines ~731/776). 2026-09-19.
             if (isTRUE(self$options$separationCheck)) {
                 private$.runSeparationCheck(data_info)
             }
@@ -741,9 +744,10 @@ firthregressionClass <- R6::R6Class(
                 lower_ci <- firth_fit$ci.lower
                 upper_ci <- firth_fit$ci.upper
 
-                # SE approximation from CI width
-                z_crit <- qnorm(1 - (1 - self$options$ciLevel) / 2)
-                se_vals <- (upper_ci - lower_ci) / (2 * z_crit)
+                # coxphf returns ci.lower / ci.upper already on the hazard-ratio scale (they were
+                # exponentiated a second time: HR 1.06 beside a "95% CI" of 2.78-3.02); the SE
+                # comes from the penalized variance, not from that interval's width.
+                se_vals <- sqrt(diag(firth_fit$var))
 
                 # Standard model for bias comparison
                 std_coefs <- NULL
@@ -762,8 +766,8 @@ firthregressionClass <- R6::R6Class(
                         coefficient = coefs[i],
                         se = se_vals[i],
                         effect_size = exp(coefs[i]),
-                        lower_ci = exp(lower_ci[i]),
-                        upper_ci = exp(upper_ci[i]),
+                        lower_ci = lower_ci[i],
+                        upper_ci = upper_ci[i],
                         p_value = p_vals[i],
                         bias_reduction = bias_red
                     ))
@@ -983,8 +987,8 @@ firthregressionClass <- R6::R6Class(
                 plot_df <- data.frame(
                     variable = var_names,
                     effect = exp(coefs),
-                    lower = exp(firth_fit$ci.lower),
-                    upper = exp(firth_fit$ci.upper),
+                    lower = firth_fit$ci.lower,
+                    upper = firth_fit$ci.upper,
                     stringsAsFactors = FALSE
                 )
             }
@@ -1107,7 +1111,7 @@ firthregressionClass <- R6::R6Class(
             } else {
                 sig_details <- sapply(which(p_vals < 0.05), function(i) {
                     sprintf("%s (%s = %.2f, p = %.3f)", private$.escapeHtml(var_names[i]),
-                        toupper(substring(effect_label, 1, 2)),
+                        if (model_type == "cox") "HR" else "OR",
                         exp(coefs[i]), p_vals[i])
                 })
                 paste0("Significant predictors: ", paste(sig_details, collapse = "; "), ".")

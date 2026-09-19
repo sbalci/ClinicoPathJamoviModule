@@ -181,20 +181,27 @@ test_that("ihcheterogeneity handles all NA in one biopsy", {
   expect_s3_class(result, "ihcheterogeneityResults")
 })
 
-test_that("ihcheterogeneity handles variable names with special characters", {
-  # Variable names with spaces
-  test_data_special <- ihcheterogeneity_test
-  names(test_data_special)[names(test_data_special) == "wholesection"] <-
-    "whole section"
+test_that("variable names with spaces, punctuation and non-ASCII letters are analysed", {
+  # Checks the computed values, not only that a result object comes back.
+  set.seed(7); n <- 30; w <- runif(n, 10, 80)
+  d <- data.frame(w, w + rnorm(n, 0, 3), w * 1.2 + rnorm(n, 0, 1),
+                  factor(rep(c("Merkez", "\u0130nvaziv"), each = 15)))
+  names(d) <- c("whole section (%)", "Ki-67 core #1", "Ki67 \u00e7ekirdek 2", "B\u00f6lge")
 
   result <- ihcheterogeneity(
-    data = test_data_special,
-    wholesection = "whole section",
-    biopsy1 = "biopsy1",
-    biopsy2 = "biopsy2"
+    data = d,
+    wholesection = "whole section (%)",
+    biopsy1 = "Ki-67 core #1",
+    biopsy2 = "Ki67 \u00e7ekirdek 2",
+    spatial_id = "B\u00f6lge"
   )
 
-  expect_s3_class(result, "ihcheterogeneityResults")
+  repro <- result$reproducibilitytable$asDF
+  ref <- psych::ICC(as.matrix(d[, 1:3]), lmer = FALSE)$results
+  expect_equal(repro$value[grepl("^ICC\\(2,1\\)", repro$metric)],
+               ref$ICC[ref$type == "ICC2"], tolerance = 1e-8)
+  expect_true("Ki67 \u00e7ekirdek 2 vs reference" %in% result$samplingbiastable$asDF$comparison)
+  expect_setequal(result$spatialanalysistable$asDF$region, c("Merkez", "\u0130nvaziv"))
 })
 
 test_that("ihcheterogeneity handles extreme CV thresholds", {

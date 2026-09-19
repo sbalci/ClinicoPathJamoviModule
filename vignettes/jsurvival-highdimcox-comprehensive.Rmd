@@ -144,13 +144,15 @@ cat("Predictors:", ncol(data_genomic) - 2, "\n")
 # All gene predictors (no clinical for clean LASSO demonstration)
 gene_vars <- paste0("GENE_", sprintf("%03d", 1:p_genes))
 
+# Variable arguments are read as column names: a bare `gene_vars` would be
+# looked up as a column, so `!!` passes the names the vector holds.
 highdimcox(
   data = data_genomic,
   elapsedtime = "survival_months",
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = gene_vars,
+  predictors = !!gene_vars,
   regularization_method = "lasso",
   cv_method = "cv_1se",
   cv_folds = 10,
@@ -175,7 +177,7 @@ highdimcox(
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = gene_vars,
+  predictors = !!gene_vars,
   regularization_method = "ridge",
   cv_method = "cv_min",
   cv_folds = 10,
@@ -206,7 +208,7 @@ highdimcox(
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = pred_vars,
+  predictors = !!pred_vars,
   regularization_method = "elastic_net",
   alpha_value = 0.5,
   cv_method = "cv_1se",
@@ -231,7 +233,7 @@ highdimcox(
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = gene_vars,
+  predictors = !!gene_vars,
   regularization_method = "elastic_net",
   alpha_value = 0.8,
   cv_folds = 10,
@@ -255,7 +257,7 @@ highdimcox(
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = gene_vars,
+  predictors = !!gene_vars,
   regularization_method = "adaptive_lasso",
   cv_method = "cv_1se",
   cv_folds = 10,
@@ -281,7 +283,7 @@ highdimcox(
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = gene_vars,
+  predictors = !!gene_vars,
   regularization_method = "elastic_net",
   alpha_value = 0.5,
   cv_folds = 10,
@@ -306,7 +308,7 @@ highdimcox(
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = gene_vars,
+  predictors = !!gene_vars,
   regularization_method = "lasso",
   cv_folds = 10,
   stability_selection = TRUE,
@@ -331,7 +333,7 @@ highdimcox(
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = gene_vars,
+  predictors = !!gene_vars,
   regularization_method = "lasso",
   cv_method = "cv_min",
   cv_folds = 10,
@@ -348,7 +350,7 @@ highdimcox(
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = gene_vars,
+  predictors = !!gene_vars,
   regularization_method = "lasso",
   cv_method = "cv_1se",
   cv_folds = 10,
@@ -377,7 +379,7 @@ highdimcox(
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = gene_vars,
+  predictors = !!gene_vars,
   suitabilityCheck = TRUE,
   show_coefficients_table = TRUE
 )
@@ -391,7 +393,7 @@ highdimcox(
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = gene_vars,
+  predictors = !!gene_vars,
   suitabilityCheck = FALSE,
   show_coefficients_table = TRUE
 )
@@ -448,7 +450,7 @@ highdimcox(
   outcome = "status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = prot_vars,
+  predictors = !!prot_vars,
   regularization_method = "elastic_net",
   alpha_value = 0.5,
   cv_method = "cv_1se",
@@ -479,7 +481,7 @@ highdimcox(
   outcome = "vital_status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = mixed_vars,
+  predictors = !!mixed_vars,
   regularization_method = "elastic_net",
   alpha_value = 0.5,
   cv_folds = 10,
@@ -524,7 +526,7 @@ highdimcox(
   outcome = "status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = prot_vars,
+  predictors = !!prot_vars,
   regularization_method = "elastic_net",
   alpha_value = 0.7,
   cv_method = "cv_min",
@@ -569,6 +571,8 @@ highdimcox(
 
 ### Below minimum observations
 
+With fewer than 30 observations the analysis stops with a validation message.
+
 ```{r edge-below-min}
 tiny_data <- data_proteomic[1:20, ]
 
@@ -584,6 +588,8 @@ highdimcox(
 ```
 
 ### All censored (no events)
+
+When no row matches the event level, the analysis stops with a validation message.
 
 ```{r edge-no-events}
 no_events <- data_genomic

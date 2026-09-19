@@ -57,6 +57,7 @@ options:
       type: Variable
       suggested: [continuous]
       permitted: [numeric]
+      default: NULL
       description:
           R: >
             Time to event variable (numeric). Required only for Cox regression.

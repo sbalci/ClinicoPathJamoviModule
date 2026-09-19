@@ -61,7 +61,8 @@ This analysis is particularly valuable for genomic survival studies where genes 
 ### Default settings with continuous predictors
 
 ```{r basic-continuous}
-lung <- read.csv(paste0(data_path, "sparsegrouplasso_lung.csv"))
+data("sparsegrouplasso_lung", package = "ClinicoPath")
+lung <- sparsegrouplasso_lung
 str(lung[, c("time", "status", "age", "smoking_py", "tumor_size", "pdl1")])
 
 sparsegrouplasso(
@@ -148,7 +149,7 @@ sparsegrouplasso(
 )
 ```
 
-Compare the two: lower alpha tends to select/exclude entire groups, higher alpha allows individual variable selection within retained groups.
+Compare the two: lower alpha tends to select/exclude entire groups, higher alpha allows individual variable selection within retained groups. Here every continuous predictor forms its own group, so both fits keep all 8 variables; the difference shows only when groups contain several variables (factors or custom groups).
 
 ---
 
@@ -190,7 +191,7 @@ sparsegrouplasso(
 )
 ```
 
-BIC typically selects fewer variables than CV deviance or AIC due to its stronger penalty for model complexity.
+BIC typically selects fewer variables than CV deviance or AIC due to its stronger penalty for model complexity. In this example AIC keeps 4 of the 8 variables and BIC keeps none, so the BIC output shows a "No Variables Selected" warning.
 
 ---
 
@@ -318,8 +319,8 @@ Repeated CV averages error curves across multiple random fold assignments for mo
 ## 10. High-Dimensional Gene Panel
 
 ```{r genepanel}
-genepanel <- read.csv(paste0(data_path, "sparsegrouplasso_genepanel.csv"))
-gene_vars <- names(genepanel)[!names(genepanel) %in% c("time", "status")]
+data("sparsegrouplasso_genepanel", package = "ClinicoPath")
+genepanel <- sparsegrouplasso_genepanel
 
 sparsegrouplasso(
   data = genepanel,
@@ -327,7 +328,7 @@ sparsegrouplasso(
   event_var = "status",
   outcomeLevel = "Progressed",
   censorLevel = "Stable",
-  pred_vars = gene_vars,
+  pred_vars = setdiff(names(genepanel), c("time", "status")),
   pathway_info = NULL,
   group_definition = "correlation_based",
   correlation_threshold = 0.5,
@@ -337,14 +338,15 @@ sparsegrouplasso(
 )
 ```
 
-With 40 predictors and 100 observations, this is a p > n/3 scenario where regularization is essential.
+With 40 predictors and 100 observations, this is a p > n/3 scenario where regularization is essential. With these settings, correlation-based grouping at r = 0.5 merges only a few genes (37 groups) and cross-validation keeps no variable, so the output shows a "No Variables Selected" warning.
 
 ---
 
 ## 11. Small Sample Edge Case
 
 ```{r small-sample}
-small <- read.csv(paste0(data_path, "sparsegrouplasso_small.csv"))
+data("sparsegrouplasso_small", package = "ClinicoPath")
+small <- sparsegrouplasso_small
 
 sparsegrouplasso(
   data = small,
@@ -359,7 +361,7 @@ sparsegrouplasso(
 )
 ```
 
-The suitability report should flag the small sample size and low EPV.
+The suitability report flags the low EPV (19 events for 4 predictors), and a "Low Event Count" warning is shown.
 
 ---
 

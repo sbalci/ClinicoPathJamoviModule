@@ -3915,6 +3915,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         for (key in plots$itemKeys) {
           image <- plots$get(key = key)
           st <- image$state
+          if (is.null(st)) next
           curve <- if (is.data.frame(st)) st else st$curve
           if (is.null(curve) || nrow(curve) == 0) next
           counts <- NULL

@@ -49,6 +49,7 @@ When you cross `ER` with a marker in the **Interaction Terms** builder, the modu
 single Cox model with the crossed term:
 
 ```{r}
+# df: your data - OS_days, OS_event (0/1), ER (factor) and the marker columns
 survival::coxph(survival::Surv(OS_days, OS_event) ~ ER * Marker, data = df)
 # ER * Marker expands to:  ER + Marker + ER:Marker
 ```
@@ -164,6 +165,7 @@ To confirm the interaction HR for one marker against the module (matching the mo
 complete-case handling for that marker):
 
 ```{r}
+# df: your data - OS_days, OS_event (0/1), ER (factor with levels ER0/ER1) and AR
 library(survival); library(broom)
 
 fit <- coxph(Surv(OS_days, OS_event) ~ ER * AR, data = na.omit(df[, c("OS_days","OS_event","ER","AR")]))

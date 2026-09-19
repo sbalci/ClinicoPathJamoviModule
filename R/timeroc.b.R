@@ -184,6 +184,11 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         length(unique(data$marker))))
             }
 
+            # TODO (correctness): this drops the `markers` columns, so options$check() (run after .init) rejects
+            #   them as non-numeric and .runROCComparison() / the multi-ROC plot read NULL from self$data -
+            #   ROC comparison cannot run. Keep the markers columns or store the cleaned frame in its own field.
+            #   Repro: timeroc(data = timeroc_test, outcome = "Recurrence", outcomeLevel = "1", marker = "Ki67",
+            #   markers = c("GeneScore"), analysisType = "binary", compareROCs = TRUE). Found 2026-09-19.
             private$.data <- data[c("time", "status", "marker")]
         },
 

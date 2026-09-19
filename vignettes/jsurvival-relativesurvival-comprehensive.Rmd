@@ -47,12 +47,12 @@ national cancer registries worldwide.
 The `relativesurvival` module provides:
 
 - **Four estimation methods**: Pohar-Perme (recommended), Ederer I, Ederer II, Hakulinen
-- **15 population rate tables**: 4 from the `relsurv` package (US, Minnesota, France, Slovenia) and 10 WHO-based tables (Turkey, Germany, UK, Italy, Japan, Spain, Brazil, South Korea, China, India), plus a custom option
+- **Population rate tables**: US and Minnesota (from the `survival` package), Slovenia (from the `relsurv` package) and 10 WHO-based tables (Turkey, Germany, UK, Italy, Japan, Spain, Brazil, South Korea, China, India). The French and custom choices are listed but not yet usable: French stops with a message because no installed package provides `survexp.fr`, and custom falls back to the US table
 - **Net survival** and **excess mortality** estimation
 - **Crude probability of death** decomposition (disease vs. other causes)
 - **ICSS age standardization** for international comparisons
 - **Period analysis** to track survival trends over diagnosis years
-- **Regression models**: additive excess hazard, multiplicative, and flexible parametric (via `rstpm2`)
+- **Regression models**: additive excess hazard, multiplicative, and flexible parametric (via `rstpm2`; under repair in this version)
 - **Four publication-ready plots**: observed, expected, relative survival, and excess mortality
 
 ---
@@ -189,7 +189,7 @@ table should match the country and calendar period of the patient cohort.
 
 ### 3a. US Population (default)
 
-The `survexp.us` table from the `survival` package, repackaged by `relsurv`.
+The `survexp.us` table from the `survival` package.
 
 ```{r ratetable-us}
 relativesurvival(
@@ -219,9 +219,13 @@ relativesurvival(
 )
 ```
 
-### 3c. French Population
+### 3c. German Population (WHO)
 
-```{r ratetable-fr}
+The French table (`ratetable = "fr"`, `survexp.fr`) is still listed as a choice, but no
+installed package provides it, so the analysis stops and asks for another table. The
+example below uses the WHO-based German table instead.
+
+```{r ratetable-germany}
 relativesurvival(
   data = relativesurvival_test,
   time = "followup_years",
@@ -229,7 +233,7 @@ relativesurvival(
   age = "age_at_diagnosis",
   sex = "sex",
   year = "diagnosis_year",
-  ratetable = "fr"
+  ratetable = "germany"
 )
 ```
 
@@ -494,9 +498,11 @@ relativesurvival(
 
 The flexible parametric model (`rstpm2::stpm2`) uses restricted cubic splines
 to model the baseline excess hazard. The `spline_df` option controls the
-degrees of freedom (complexity) of the spline.
+degrees of freedom (complexity) of the spline. The flexible (stpm2) excess-hazard model is
+under repair in this version, so its output is not shown.
 
-```{r regression-flexible}
+```{r regression-flexible, eval=FALSE}
+# Not run: the flexible (stpm2) model is under repair in this version.
 relativesurvival(
   data = relativesurvival_test,
   time = "followup_years",
@@ -741,8 +747,9 @@ relativesurvival(
 | 20 | `plot_relative` | Bool | `true` | - | 1. Basic Analysis |
 | 21 | `plot_excess` | Bool | `true` | - | 4b. Excess Mortality |
 | 22 | `confidence_level` | Number | `0.95` | 0.50-0.99 | 10b. Custom Confidence |
+| 23 | `timepoints` | String | `"1,3,5,10"` | comma-separated years | 10a. Custom Timepoints |
 
-All 22 `.a.yaml` options are covered in the examples above.
+All 23 `.a.yaml` options are covered in the examples above.
 
 ---
 

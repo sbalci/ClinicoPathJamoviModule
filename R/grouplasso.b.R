@@ -301,6 +301,9 @@ grouplassoClass <- R6::R6Class(
         },
 
         .createDesignMatrix = function(pred_data, pred_vars) {
+            # TODO (correctness): `~ . - 1` codes EVERY level of each factor (the reference
+            #   level too), so a factor's dummies sum to 1 - not identifiable in a Cox model
+            #   without the penalty, and group sizes are inflated by one. 2026-09-19.
             # Convert factors to dummy variables and create design matrix
             x_matrix <- .stripBackticks(model.matrix(~ . - 1, data = pred_data))
 

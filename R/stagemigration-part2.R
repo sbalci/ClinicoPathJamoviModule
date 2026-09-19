@@ -1127,7 +1127,9 @@ stagemigrationPart2 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
                 )
             },
-            .calculateTimeDependentAUC = function(data, risk_scores, time_col, time_point) {
+            # iid = FALSE skips timeROC's O(n^2) influence-function decomposition, which only
+            # feeds the SE; the bootstrap reads the AUC alone (with iid it took >40 min at n = 2100).
+            .calculateTimeDependentAUC = function(data, risk_scores, time_col, time_point, iid = TRUE) {
                 # Calculate time-dependent AUC using timeROC or fallback method
                 tryCatch(
                     {
@@ -1149,7 +1151,7 @@ stagemigrationPart2 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                         marker = risk_scores,
                                         cause = 1,
                                         times = time_point,
-                                        iid = TRUE
+                                        iid = iid
                                     )
                                 },
                                 silent = TRUE
@@ -1251,8 +1253,8 @@ stagemigrationPart2 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 for (j in seq_along(time_points)) {
                                     # Was names(boot_data)[3] -- the survival time picked by column
                                     # position. Every other call site passes the option.
-                                    auc_old <- private$.calculateTimeDependentAUC(boot_data, boot_old_risk, self$options$survivalTime, time_points[j])
-                                    auc_new <- private$.calculateTimeDependentAUC(boot_data, boot_new_risk, self$options$survivalTime, time_points[j])
+                                    auc_old <- private$.calculateTimeDependentAUC(boot_data, boot_old_risk, self$options$survivalTime, time_points[j], iid = FALSE)
+                                    auc_new <- private$.calculateTimeDependentAUC(boot_data, boot_new_risk, self$options$survivalTime, time_points[j], iid = FALSE)
 
                                     if (!is.na(auc_old$auc) && !is.na(auc_new$auc)) {
                                         boot_auc_old[j] <- auc_old$auc

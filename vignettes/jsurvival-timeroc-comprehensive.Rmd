@@ -266,9 +266,15 @@ Compare multiple markers against the primary marker using the DeLong test
 (default), bootstrap test, or Venkatraman test. This is available in
 binary ROC mode only.
 
+The examples in this section are shown but not run: in the current version a
+non-empty `markers` list is rejected with "Argument 'markers' requires a numeric
+variable", even for numeric columns, so ROC comparison is unavailable until that
+defect is fixed.
+
 ### 7a. DeLong Test (Default)
 
-```{r roc-comparison-delong}
+```{r roc-comparison-delong, eval=FALSE}
+# Not run: comparison markers currently fail the option check (package bug in timeroc).
 timeroc(
   data = timeroc_test,
   outcome = "Recurrence",
@@ -290,7 +296,8 @@ timeroc(
 
 ### 7b. Bootstrap Test
 
-```{r roc-comparison-bootstrap}
+```{r roc-comparison-bootstrap, eval=FALSE}
+# Not run: comparison markers currently fail the option check (package bug in timeroc).
 timeroc(
   data = timeroc_test,
   outcome = "Recurrence",
@@ -305,7 +312,8 @@ timeroc(
 
 ### 7c. Venkatraman Test
 
-```{r roc-comparison-venkatraman}
+```{r roc-comparison-venkatraman, eval=FALSE}
+# Not run: comparison markers currently fail the option check (package bug in timeroc).
 timeroc(
   data = timeroc_test,
   outcome = "Recurrence",

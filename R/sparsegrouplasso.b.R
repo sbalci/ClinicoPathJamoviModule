@@ -1447,7 +1447,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 group_vars <- which(groups == g)
                 group_coefs <- optimal_coefs[group_vars]
                 n_selected_in_group <- sum(abs(group_coefs) > 1e-8)
-                sparsity_within <- (length(group_vars) - n_selected_in_group) / length(group_vars) * 100
+                sparsity_within <- (length(group_vars) - n_selected_in_group) / length(group_vars)  # format: pc column
 
                 # Compute the actual group penalty (same formula as .fitSparseGroupLASSO)
                 group_size <- length(group_vars)
@@ -1645,7 +1645,9 @@ sparsegrouplassoClass <- R6::R6Class(
                 row_values <- list(
                     variable = var_names[i],
                     group = results$group_names[groups[i]],
-                    selection_probability = max_prob * 100,
+                    # TODO (correctness): the maximum over the whole lambda path reaches 1 for every
+                    #   variable, so all are called stable; use a fixed lambda or the average. 2026-09-19.
+                    selection_probability = max_prob,  # format: pc column
                     stable_selection = ifelse(stable_vars[i], "Yes", "No"),
                     first_selected = first_sel,
                     last_selected = last_sel
@@ -1671,7 +1673,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 selected <- abs(coefs_l) > 1e-8
                 n_sel <- sum(selected)
                 n_groups_sel <- if (any(selected)) length(unique(groups[selected])) else 0L
-                sparsity <- (n_vars - n_sel) / n_vars * 100
+                sparsity <- (n_vars - n_sel) / n_vars  # format: pc column (was x100: showed 3333%)
 
                 table$addRow(rowKey = j, values = list(
                     lambda_index = as.integer(idx),

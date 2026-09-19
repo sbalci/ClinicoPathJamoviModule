@@ -976,3 +976,52 @@ test_that("a blank expected width is explained, and p columns share one title (R
     expect_match(note_text(res$samplesizetable), "blank because fewer than 2 cases have every measurement", fixed = TRUE)
     expect_equal(res$samplingbiastable$getColumn("p_value")$title, "p-value")
 })
+
+# ── check-function-full 2026-09-19: notices, LoA CIs, verdict wording, example ──
+
+test_that("each limit of agreement carries the Bland & Altman (1999) 95% CI", {
+    d <- clean()
+    res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")
+    row <- res$samplingbiastable$asDF[1, ]
+    dif <- d$b1 - d$whole; n <- length(dif); s <- sd(dif)
+    loa <- mean(dif) + c(-1, 1) * 1.96 * s
+    half <- qt(0.975, n - 1) * s * sqrt(1 / n + 1.96^2 / (2 * (n - 1)))  # independent of the module
+    expect_equal(c(row$loa_lower_lcl, row$loa_lower_ucl), loa[1] + c(-1, 1) * half, tolerance = 1e-10)
+    expect_equal(c(row$loa_upper_lcl, row$loa_upper_ucl), loa[2] + c(-1, 1) * half, tolerance = 1e-10)
+    expect_match(note_text(res$samplingbiastable), "Bland & Altman (1999)", fixed = TRUE)
+})
+
+test_that("data-quality checks are notices, not a box inside the interpretation", {
+    d <- clean(); d$b1[1] <- -5
+    res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")
+    expect_match(txt(res$notices$content), "Data quality Negative values detected", fixed = TRUE)
+    expect_false(grepl("Data Quality Warnings|Negative values", txt(res$interpretation$content)))
+})
+
+test_that("a material difference is also a strong warning, listed before warnings and info", {
+    d <- rbind(opposite_bias(), data.frame(whole = NA, b1 = 1, b2 = 2))   # one row dropped -> INFO notice first
+    notes <- txt(ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")$notices$content)
+    expect_match(notes, "Material systematic difference Region(s) 'b1', 'b2' are offset from the reference", fixed = TRUE)
+    expect_lt(regexpr("Material systematic difference", notes, fixed = TRUE),
+              regexpr("Cases not analysed", notes, fixed = TRUE))
+})
+
+test_that("a hidden variability plot is explained", {
+    d <- data.frame(whole = rep(0, 12), b1 = rep(0, 12), b2 = rep(0, 12))
+    res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")
+    expect_false(res$variabilityplot$visible)
+    expect_match(txt(res$notices$content), "Variability plot not drawn", fixed = TRUE)
+})
+
+test_that("the moderate verdict and its relaxed band are labelled a heuristic", {
+    glossary <- txt(ihc(clean(), wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", showGlossary = TRUE)$glossary$content)
+    expect_match(glossary, "Moderate sampling: The thresholds are met only after relaxing them", fixed = TRUE)
+    expect_match(glossary, "heuristic of this analysis, not a published criterion", fixed = TRUE)
+})
+
+test_that("the help-page example runs", {
+    y <- yaml::read_yaml(test_path("..", "..", "jamovi", "ihcheterogeneity.a.yaml"))
+    code <- gsub("package = 'ClinicoPath'", "package = 'ClinicoPath', envir = environment()", y$description$R$usage, fixed = TRUE)
+    res <- eval(parse(text = code))
+    expect_gt(nrow(res$samplingbiastable$asDF), 0)
+})

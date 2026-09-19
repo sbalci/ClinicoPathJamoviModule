@@ -50,9 +50,9 @@ This analysis is particularly valuable for genomic survival studies with natural
 
 | Dataset | N | Predictors | Events | Primary Use |
 |---------|---|-----------|--------|-------------|
-| `grouplasso_biomarker` | 200 | 15 (mixed numeric + factor) | ~100 | Breast cancer biomarker panel with 5 clinical groups |
-| `grouplasso_genomic` | 120 | 30 (all continuous) | ~60 | Gene expression data with 6 pathway groups |
-| `grouplasso_small` | 60 | 8 (mixed) | ~30 | Small clinical cohort for edge-case testing |
+| `grouplasso_biomarker` | 200 | 15 (mixed numeric + factor) | 91 | Breast cancer biomarker panel with 5 clinical groups |
+| `grouplasso_genomic` | 120 | 30 (all continuous) | 59 | Gene expression data with 6 pathway groups |
+| `grouplasso_small` | 60 | 8 (mixed) | 31 | Small clinical cohort for edge-case testing |
 
 ---
 
@@ -63,7 +63,8 @@ This analysis is particularly valuable for genomic survival studies with natural
 This example uses automatic grouping, where each original variable (and its dummy codes for factors) forms a separate group.
 
 ```{r basic-biomarker}
-biomarker <- read.csv(paste0(data_path, "grouplasso_biomarker.csv"))
+data("grouplasso_biomarker", package = "ClinicoPath")
+biomarker <- grouplasso_biomarker
 str(biomarker)
 table(biomarker$status)
 
@@ -188,7 +189,8 @@ Look for: The group structure plot showing the variable-to-group assignment, and
 The genomic dataset has 30 gene expression variables organized into 6 biological pathways.
 
 ```{r genomic-pathways}
-genomic <- read.csv(paste0(data_path, "grouplasso_genomic.csv"))
+data("grouplasso_genomic", package = "ClinicoPath")
+genomic <- grouplasso_genomic
 str(genomic)
 
 grouplasso(
@@ -407,7 +409,8 @@ Look for: With `standardize=FALSE`, variables on different scales may have diffe
 ### Small clinical cohort with reduced CV folds
 
 ```{r small-sample}
-small_data <- read.csv(paste0(data_path, "grouplasso_small.csv"))
+data("grouplasso_small", package = "ClinicoPath")
+small_data <- grouplasso_small
 str(small_data)
 table(small_data$status)
 
@@ -426,7 +429,7 @@ grouplasso(
 )
 ```
 
-Look for: The suitability report should flag the small sample size. The model may select fewer groups with wider confidence intervals.
+Look for: The suitability report flags the small sample size and the low EPV. With only 31 events, cross-validation keeps no group at lambda.min, so all coefficients are zero and the output shows a "No Variables Selected" warning.
 
 ---
 
@@ -447,7 +450,7 @@ grouplasso(
 )
 ```
 
-Look for: Each factor variable (grade, lvi, her2, chemo, radiation, hormonal) forms its own group with all its dummy variables included together.
+Look for: Each factor variable (grade, lvi, her2, chemo, radiation, hormonal) forms its own group with all its dummy variables included together. With these six factors alone, no group is selected at lambda.min, so the output shows a "No Variables Selected" warning.
 
 ---
 

@@ -69,7 +69,7 @@ This vignette uses the bundled `conditionalsurvival_test` dataset:
 | `histopathology` | varies | Built-in ClinicoPath dataset | General clinicopathological variables |
 
 ```{r load-data}
-data("conditionalsurvival_test")
+data("conditionalsurvival_test", package = "ClinicoPath")
 str(conditionalsurvival_test)
 summary(conditionalsurvival_test[, c("OverallTime", "Event", "Treatment", "Stage")])
 ```
@@ -82,13 +82,15 @@ summary(conditionalsurvival_test[, c("OverallTime", "Event", "Treatment", "Stage
 
 The simplest use case: estimate conditional survival for the entire cohort with
 default settings. When `conditionTime = 0`, the function automatically uses the
-median follow-up time.
+median follow-up time. `conditionVar` is a required argument of the R function, so
+unstratified examples pass `conditionVar = NULL`.
 
 ```{r basic-unstratified}
 conditionalsurvival(
   data         = conditionalsurvival_test,
   timeVar      = OverallTime,
   outcomeVar   = Event,
+  conditionVar = NULL,
   conditionTime = 0,
   method       = "km",
   showTable    = TRUE,
@@ -107,6 +109,7 @@ conditionalsurvival(
   data         = conditionalsurvival_test,
   timeVar      = OverallTime,
   outcomeVar   = Event,
+  conditionVar = NULL,
   conditionTime = 12,
   method       = "km",
   showTable    = TRUE,
@@ -280,6 +283,7 @@ conditionalsurvival(
   data         = conditionalsurvival_test,
   timeVar      = OverallTime,
   outcomeVar   = Event,
+  conditionVar = NULL,
   conditionTime = 12,
   timePoints   = "24,36,48,60",
   method       = "km",
@@ -300,6 +304,7 @@ conditionalsurvival(
   data         = conditionalsurvival_test,
   timeVar      = OverallTime,
   outcomeVar   = Event,
+  conditionVar = NULL,
   conditionTime = 24,
   timePoints   = "12,18,24,36,48,60",
   method       = "km",
@@ -366,6 +371,7 @@ conditionalsurvival(
   data         = conditionalsurvival_test,
   timeVar      = OverallTime,
   outcomeVar   = Event,
+  conditionVar = NULL,
   conditionTime = 12,
   confInt      = 0.90,
   method       = "km",
@@ -382,6 +388,7 @@ conditionalsurvival(
   data         = conditionalsurvival_test,
   timeVar      = OverallTime,
   outcomeVar   = Event,
+  conditionVar = NULL,
   conditionTime = 12,
   confInt      = 0.99,
   method       = "km",
@@ -422,6 +429,7 @@ conditionalsurvival(
   data         = conditionalsurvival_test,
   timeVar      = OverallTime,
   outcomeVar   = Event,
+  conditionVar = NULL,
   conditionTime = 0,
   method       = "km",
   showTable    = TRUE,
@@ -440,6 +448,7 @@ conditionalsurvival(
   data         = conditionalsurvival_test,
   timeVar      = OverallTime,
   outcomeVar   = Event,
+  conditionVar = NULL,
   conditionTime = 60,
   method       = "km",
   showTable    = TRUE,
@@ -454,15 +463,20 @@ When the conditioning time is at or beyond the maximum observed follow-up,
 the function rejects the analysis with an informative error.
 
 ```{r edge-condtime-beyond-max}
-conditionalsurvival(
-  data         = conditionalsurvival_test,
-  timeVar      = OverallTime,
-  outcomeVar   = Event,
-  conditionTime = 200,
-  method       = "km",
-  showTable    = TRUE,
-  showPlot     = FALSE,
-  showExplanations = FALSE
+# Catch the rejection so its message is shown as output
+tryCatch(
+  conditionalsurvival(
+    data         = conditionalsurvival_test,
+    timeVar      = OverallTime,
+    outcomeVar   = Event,
+    conditionVar = NULL,
+    conditionTime = 200,
+    method       = "km",
+    showTable    = TRUE,
+    showPlot     = FALSE,
+    showExplanations = FALSE
+  ),
+  error = function(e) cat("Error:", conditionMessage(e), "\n")
 )
 ```
 
@@ -479,15 +493,20 @@ few_events_data <- data.frame(
   group = rep(c("A", "B"), 10)
 )
 
-conditionalsurvival(
-  data         = few_events_data,
-  timeVar      = time,
-  outcomeVar   = event,
-  conditionTime = 10,
-  method       = "km",
-  showTable    = TRUE,
-  showPlot     = FALSE,
-  showExplanations = FALSE
+# Catch the rejection so its message is shown as output
+tryCatch(
+  conditionalsurvival(
+    data         = few_events_data,
+    timeVar      = time,
+    outcomeVar   = event,
+    conditionVar = NULL,
+    conditionTime = 10,
+    method       = "km",
+    showTable    = TRUE,
+    showPlot     = FALSE,
+    showExplanations = FALSE
+  ),
+  error = function(e) cat("Error:", conditionMessage(e), "\n")
 )
 ```
 
@@ -501,15 +520,20 @@ bad_data$BadOutcome <- factor(
   sample(c("Alive", "Dead", "Unknown"), nrow(bad_data), replace = TRUE)
 )
 
-conditionalsurvival(
-  data         = bad_data,
-  timeVar      = OverallTime,
-  outcomeVar   = BadOutcome,
-  conditionTime = 12,
-  method       = "km",
-  showTable    = TRUE,
-  showPlot     = FALSE,
-  showExplanations = FALSE
+# Catch the rejection so its message is shown as output
+tryCatch(
+  conditionalsurvival(
+    data         = bad_data,
+    timeVar      = OverallTime,
+    outcomeVar   = BadOutcome,
+    conditionVar = NULL,
+    conditionTime = 12,
+    method       = "km",
+    showTable    = TRUE,
+    showPlot     = FALSE,
+    showExplanations = FALSE
+  ),
+  error = function(e) cat("Error:", conditionMessage(e), "\n")
 )
 ```
 
@@ -521,16 +545,20 @@ A grouping variable with only one level cannot be used for stratified analysis.
 single_data <- conditionalsurvival_test
 single_data$SingleGroup <- "Everyone"
 
-conditionalsurvival(
-  data         = single_data,
-  timeVar      = OverallTime,
-  outcomeVar   = Event,
-  conditionVar = SingleGroup,
-  conditionTime = 12,
-  method       = "km",
-  showTable    = TRUE,
-  showPlot     = FALSE,
-  showExplanations = FALSE
+# Catch the rejection so its message is shown as output
+tryCatch(
+  conditionalsurvival(
+    data         = single_data,
+    timeVar      = OverallTime,
+    outcomeVar   = Event,
+    conditionVar = SingleGroup,
+    conditionTime = 12,
+    method       = "km",
+    showTable    = TRUE,
+    showPlot     = FALSE,
+    showExplanations = FALSE
+  ),
+  error = function(e) cat("Error:", conditionMessage(e), "\n")
 )
 ```
 
@@ -565,6 +593,7 @@ conditionalsurvival(
   data         = conditionalsurvival_test,
   timeVar      = OverallTime,
   outcomeVar   = Event,
+  conditionVar = NULL,
   conditionTime = 12,
   plotType     = "probability",
   method       = "km",
@@ -609,6 +638,7 @@ conditionalsurvival(
   data         = conditionalsurvival_test,
   timeVar      = OverallTime,
   outcomeVar   = Event,
+  conditionVar = NULL,
   conditionTime = 6,
   timePoints   = "12,24,36,60",
   method       = "km",
@@ -623,6 +653,7 @@ conditionalsurvival(
   data         = conditionalsurvival_test,
   timeVar      = OverallTime,
   outcomeVar   = Event,
+  conditionVar = NULL,
   conditionTime = 24,
   timePoints   = "36,48,60,72",
   method       = "km",

@@ -257,9 +257,11 @@ conditionalsurvivalClass <- R6::R6Class(
             
             # Use condSURV package functions based on method
             if (method == "km") {
-                # Kaplan-Meier weights approach
-                weights <- condSURV::KMW(time = time, delta = status, x = condTime)
-                condSurv <- private$.calculateCondSurvFromWeights(time, status, weights, timePoints, condTime)
+                # Kaplan-Meier conditional survival S(t) / S(s). The former
+                # condSURV::KMW(time, delta, x) call matched no signature of condSURV 2.x
+                # (KMW(time, status)), so every "km" run ended in an empty table, and its
+                # weighted-fraction helper was a placeholder, not a conditional KM.
+                condSurv <- private$.runManualCondSurv(time, status, condTime, timePoints)
                 
             } else if (method == "landmark") {
                 # Landmark approach - subset data to those who survived to condTime
@@ -331,6 +333,9 @@ conditionalsurvivalClass <- R6::R6Class(
                     se_t <- private$.getSurvSEAtTime(fit, t)
                     se_cond <- private$.getSurvSEAtTime(fit, condTime)
                     
+                    # TODO (correctness): S(t) and S(s) are nested, not independent; the Greenwood
+                    #   variance of S(t)/S(s) sums only over events in (s, t]. Adding both relative
+                    #   variances overstates the SE (conservative CIs). 2026-09-19.
                     # Delta method approximation for SE of ratio
                     # Guard: when survAtT == 0, the ratio se_t/survAtT is Inf,
                     # and 0 * Inf = NaN in R
@@ -357,59 +362,6 @@ conditionalsurvivalClass <- R6::R6Class(
             return(results)
         },
         
-        .calculateCondSurvFromWeights = function(time, status, weights, timePoints, condTime) {
-            # Simplified conditional survival calculation from KM weights
-            # This is a placeholder - full condSURV implementation would be more complex
-            
-            results <- data.frame(
-                time = timePoints,
-                condtime = condTime,
-                condprob = numeric(length(timePoints)),
-                se = numeric(length(timePoints)),
-                lower = numeric(length(timePoints)),
-                upper = numeric(length(timePoints))
-            )
-            
-            # Use weighted Kaplan-Meier for conditional survival estimation
-            for (i in seq_along(timePoints)) {
-                t <- timePoints[i]
-                
-                if (t <= condTime) {
-                    results$condprob[i] <- 1.0
-                    results$se[i] <- 0.0
-                    results$lower[i] <- 1.0
-                    results$upper[i] <- 1.0
-                } else {
-                    # Weighted analysis for subjects surviving past condTime
-                    idx <- time >= condTime
-                    if (sum(idx) > 0) {
-                        time_adj <- time[idx]
-                        status_adj <- status[idx] 
-                        weights_adj <- weights[idx]
-                        
-                        # Simple weighted survival estimate
-                        at_risk <- sum(weights_adj[time_adj >= t])
-                        total_at_cond <- sum(weights_adj)
-                        
-                        if (total_at_cond > 0) {
-                            condSurv <- at_risk / total_at_cond
-                            se <- sqrt(condSurv * (1 - condSurv) / total_at_cond)
-                            
-                            ci_level <- self$options$confInt
-                            z <- qnorm(1 - (1 - ci_level)/2)
-                            
-                            results$condprob[i] <- condSurv
-                            results$se[i] <- se
-                            results$lower[i] <- max(0, condSurv - z * se)
-                            results$upper[i] <- min(1, condSurv + z * se)
-                        }
-                    }
-                }
-            }
-            
-            return(results)
-        },
-
         .calculateIPWCondSurv = function(time, status, condTime, timePoints) {
             # TODO: IPW Conditional Survival - Implement proper inverse probability
             # weighting using IPCW estimator. Requires computing censoring weights

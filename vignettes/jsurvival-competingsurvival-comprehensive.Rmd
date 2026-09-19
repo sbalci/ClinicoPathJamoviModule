@@ -427,36 +427,45 @@ analysis. This protects against unstable CIF and Fine-Gray estimates.
 # Create a small subset with few events
 set.seed(42)
 small_data <- competing_survival_data[sample(1:300, 15), ]
+table(small_data$Outcome)
 
-# This may error if disease or competing events < 5
-competingsurvival(
-  data = small_data,
-  overalltime = "Overall_Time",
-  outcome = "Outcome",
-  explanatory = "Treatment",
-  analysistype = "compete",
-  dod = "Dead_of_Disease",
-  dooc = "Dead_of_Other",
-  awd = "Alive_w_Disease",
-  awod = "Alive_wo_Disease"
+# Fewer than 5 competing deaths: the analysis stops with the guard message
+tryCatch(
+  competingsurvival(
+    data = small_data,
+    overalltime = "Overall_Time",
+    outcome = "Outcome",
+    explanatory = "Treatment",
+    analysistype = "compete",
+    dod = "Dead_of_Disease",
+    dooc = "Dead_of_Other",
+    awd = "Alive_w_Disease",
+    awod = "Alive_wo_Disease"
+  ),
+  error = function(e) conditionMessage(e)
 )
 ```
 
 ### Competing Risks Requires Both Death Types
 
 If only `dod` is defined without `dooc`, competing risks analysis will produce
-an informative error.
+an informative error. Level arguments have no default in R, so an unset level
+is passed explicitly as `NULL` (the same as leaving the box empty in jamovi).
 
 ```{r missing-dooc}
-competingsurvival(
-  data = competing_survival_data,
-  overalltime = "Overall_Time",
-  outcome = "Outcome",
-  explanatory = "Treatment",
-  analysistype = "compete",
-  dod = "Dead_of_Disease",
-  awd = "Alive_w_Disease",
-  awod = "Alive_wo_Disease"
+tryCatch(
+  competingsurvival(
+    data = competing_survival_data,
+    overalltime = "Overall_Time",
+    outcome = "Outcome",
+    explanatory = "Treatment",
+    analysistype = "compete",
+    dod = "Dead_of_Disease",
+    dooc = NULL,
+    awd = "Alive_w_Disease",
+    awod = "Alive_wo_Disease"
+  ),
+  error = function(e) conditionMessage(e)
 )
 ```
 
@@ -525,10 +534,10 @@ patients and clinicians care about.
 | `overalltime` | Variable (numeric) | (required) | Follow-up time in months |
 | `outcome` | Variable (factor) | (required) | Multi-level outcome factor |
 | `explanatory` | Variable (factor) | NULL | Grouping variable for comparison |
-| `dod` | Level | NULL | Level of `outcome` indicating death from disease |
-| `dooc` | Level | NULL | Level of `outcome` indicating death from other causes |
-| `awd` | Level | NULL | Level of `outcome` indicating alive with disease |
-| `awod` | Level | NULL | Level of `outcome` indicating alive without disease |
+| `dod` | Level | (required in R; `NULL` if unused) | Level of `outcome` indicating death from disease |
+| `dooc` | Level | (required in R; `NULL` if unused) | Level of `outcome` indicating death from other causes |
+| `awd` | Level | (required in R; `NULL` if unused) | Level of `outcome` indicating alive with disease |
+| `awod` | Level | (required in R; `NULL` if unused) | Level of `outcome` indicating alive without disease |
 | `analysistype` | List | "overall" | Analysis type: "overall", "cause", or "compete" |
 | `graystest` | Bool | FALSE | Perform Gray's test comparing CIF curves between groups |
 | `subdistribution` | Bool | FALSE | Fit Fine-Gray subdistribution hazard model |

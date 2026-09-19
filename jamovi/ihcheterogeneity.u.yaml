@@ -65,6 +65,9 @@ children:
       - type: ComboBox
         name: sampling_strategy
         label: Sampling strategy
+  - type: CollapseBox
+    label: Spatial Compartments
+    children:
       - type: CheckBox
         name: compareCompartments
         label: Spatial compartment comparison
@@ -98,17 +101,17 @@ children:
         label: Variability plots
       - type: CheckBox
         name: variance_components
-        label: Variance components analysis
+        label: Variance component analysis
       - type: CheckBox
         name: sample_size_planning
         label: Sample size for ICC precision
-      - type: CheckBox
-        name: generate_recommendations
-        label: Clinical recommendations
   - type: CollapseBox
     label: Output Options
     collapsed: true
     children:
+      - type: CheckBox
+        name: generate_recommendations
+        label: Clinical recommendations
       - type: CheckBox
         name: showSummary
         label: Plain-language summary

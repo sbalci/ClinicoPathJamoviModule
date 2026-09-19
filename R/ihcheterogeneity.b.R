@@ -61,7 +61,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd")
             )
             html <- "<div style='margin: 10px 0;'>"
-            for (notice in private$.noticeList) {
+            severity <- match(vapply(private$.noticeList, function(n) n$type, ""), names(typeStyles), nomatch = 4L)
+            for (notice in private$.noticeList[order(severity)]) {
                 style <- typeStyles[[notice$type]]
                 if (is.null(style)) style <- typeStyles$INFO
                 html <- paste0(html,
@@ -73,10 +74,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             self$results$notices$setContent(paste0(html, "</div>"))
         },
 
-        # Accumulators for data-quality warnings and sampling-strategy notes so
-        # they are merged into the final interpretation instead of being
-        # clobbered (Html $state is always NULL and cannot be read back).
-        .warnings_html = NULL,
+        # Sampling-strategy note, merged into the final interpretation (Html
+        # $state is always NULL and cannot be read back).
         .strategy_notes = NULL,
 
         # One paired comparison: region (x) minus reference (y).
@@ -110,10 +109,16 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 g <- md / sdd * (1 - 3 / (4 * n - 5))
             }
             loa <- if (is.na(sdd)) c(NA_real_, NA_real_) else md + c(-1, 1) * 1.96 * sdd
+            # 95% CI of each limit, approximate SE of Bland & Altman (1999):
+            # SD * sqrt(1/n + 1.96^2 / (2 (n - 1))). Rows: lower limit, upper limit.
+            loa_ci <- if (is.na(sdd)) matrix(NA_real_, 2, 2) else {
+                half <- stats::qt(0.975, n - 1) * sdd * sqrt(1 / n + 1.96^2 / (2 * (n - 1)))
+                rbind(loa[1] + c(-1, 1) * half, loa[2] + c(-1, 1) * half)
+            }
             ref_mean <- mean(y)
             rel <- if (abs(ref_mean) < 1e-6) NA_real_ else md / abs(ref_mean) * 100
             rel_ci <- if (is.na(rel)) c(NA_real_, NA_real_) else ci / abs(ref_mean) * 100
-            list(n = n, mean_diff = md, sd = sdd, ci = ci, loa = loa, p = p, g = g,
+            list(n = n, mean_diff = md, sd = sdd, ci = ci, loa = loa, loa_ci = loa_ci, p = p, g = g,
                  constant = constant, rel = rel, rel_ci = rel_ci, ref_mean = ref_mean)
         },
 
@@ -600,19 +605,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             private$.cv_floor <- private$.CLINICAL_CONSTANTS$CV_FLOOR_FRACTION *
                 as.numeric(stats::quantile(all_values, private$.CLINICAL_CONSTANTS$CV_FLOOR_QUANTILE, names = FALSE))
 
-            warnings <- private$.detectMisuse(whole_section, biopsy_data)
-            if (length(warnings) > 0) {
-                private$.warnings_html <- paste0(
-                    "<div style='background-color: rgba(255, 202, 33, 0.23); border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-                    "<h4 style='color: inherit; margin-top: 0;'> ", .("Data Quality Warnings"), "</h4>",
-                    "<ul style='color: inherit; margin: 5px 0; padding-left: 20px;'>",
-                    paste0("<li>", warnings, "</li>", collapse = ""),
-                    "</ul>",
-                    "</div>"
-                )
-            } else {
-                private$.warnings_html <- NULL
-            }
+            # Data-quality checks go to the notices panel with every other warning
+            # (they used to sit in a separate box at the top of the interpretation).
+            for (w in private$.detectMisuse(whole_section, biopsy_data))
+                private$.addNotice("WARNING", .("Data quality"), w)
 
             study_design <- if (has_reference) "reference_based" else "inter_regional"
 
@@ -625,7 +621,12 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             # No case has a CV (e.g. every value is 0): the variability plot would
             # stay visible and empty.
-            if (!any(!is.na(private$.repro_stats$case_cv))) self$results$variabilityplot$setVisible(FALSE)
+            if (!any(!is.na(private$.repro_stats$case_cv))) {
+                self$results$variabilityplot$setVisible(FALSE)
+                if (self$options$show_variability_plots || self$options$analysis_type %in% c("variability", "comprehensive"))
+                    private$.addNotice("INFO", .("Variability plot not drawn"),
+                        .("No case has a computable coefficient of variation (every case mean is zero or near zero), so the variability plot is not shown."))
+            }
 
             # The spatial plot covers the compartments the tables cover; with
             # fewer than two of them there is nothing to draw.
@@ -1037,6 +1038,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     mean_diff = r$mean_diff,
                     ci_lower = r$ci[1], ci_upper = r$ci[2],
                     loa_lower = r$loa[1], loa_upper = r$loa[2],
+                    loa_lower_lcl = r$loa_ci[1, 1], loa_lower_ucl = r$loa_ci[1, 2],
+                    loa_upper_lcl = r$loa_ci[2, 1], loa_upper_ucl = r$loa_ci[2, 2],
                     p_value = r$p,
                     effect_size = r$g,
                     clinical_impact = private$.impactText(r, judged = !reference_constant)))
@@ -1052,6 +1055,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     margin))
             }
             if (m > 0) {
+                bias_table$setNote("loa_ci", .("The CIs of the limits of agreement use the approximate standard error of Bland & Altman (1999), SD x sqrt(1/n + 1.96^2 / (2(n - 1))); they are wide in small samples."))
                 bias_table$setNote("loa", if (has_reference)
                     .("Mean difference = region minus reference. Limits of agreement (Bland & Altman 1986): 95% of individual differences are expected between these bounds if the differences are roughly normal.")
                   else
@@ -1798,6 +1802,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     "<p><strong>", .("MODERATE SAMPLING:"), "</strong> ",
                     sprintf(.("The thresholds are met only after relaxing them to correlation \u2265 %s and CV \u2264 %s%%."),
                             signif(correlation_threshold - 0.2, 6), signif(cv_threshold * 1.5, 6)),
+                    " ", .("This relaxed band (correlation threshold minus 0.2, CV threshold times 1.5) is a heuristic of this analysis, not a published criterion."),
                     " ", .("Consider averaging more than one region per case or revising the sampling protocol."),
                     "</p>"),
                 inadequate = paste0(
@@ -2079,6 +2084,19 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             metrics <- private$.calculateInterpretationMetrics(whole_section, biopsy_data, private$.repro_stats, study_design)
 
             assessment <- private$.formatClinicalAssessment(metrics, cv_threshold, correlation_threshold)
+            # The substitution verdict is the analysis's main clinical finding; readers
+            # who look only at the notices must see it too.
+            if (identical(private$.verdict(metrics, cv_threshold, correlation_threshold), "bias")) {
+                info <- private$.materialInfo(metrics$bias_rows)
+                margin <- self$options$bias_margin
+                private$.addNotice("STRONG_WARNING", .("Material systematic difference"),
+                    if (!metrics$has_reference)
+                        sprintf(.("Region(s) %s differ systematically from the other regions by more than the %s%% margin, so the regions cannot be used interchangeably without calibration; see the Clinical Assessment."), info$regions, margin)
+                    else if (nzchar(info$regions))
+                        sprintf(.("Region(s) %s are offset from the reference by more than the %s%% margin and should not replace it without calibration; see the Clinical Assessment."), info$regions, margin)
+                    else
+                        sprintf(.("The mean of all regions is offset from the reference by more than the %s%% margin, although no single region is materially offset on its own; see the Clinical Assessment."), margin))
+            }
             recommendations <- if (self$options$generate_recommendations) {
                 private$.generateRecommendations(metrics, cv_threshold)
             } else ""
@@ -2108,9 +2126,6 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 assessment,
                 recommendations
             )
-            if (!is.null(private$.warnings_html)) {
-                interpretation <- paste0(private$.warnings_html, interpretation)
-            }
             if (!is.null(private$.strategy_notes)) {
                 interpretation <- paste0(interpretation,
                     "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 10px; border-left: 4px solid #6c757d; margin: 10px 0; color: inherit;'>",
@@ -2173,6 +2188,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<li>Koo TK, Li MY. J Chiropr Med 2016;15(2):155-163.</li>",
                 "<li>McGraw KO, Wong SP. Psychol Methods 1996;1(1):30-46.</li>",
                 "<li>Bland JM, Altman DG. Lancet 1986;1(8476):307-310.</li>",
+                "<li>Bland JM, Altman DG. Stat Methods Med Res 1999;8(2):135-160.</li>",
                 if (metrics$has_reference) "<li>Bonett DG, Wright TA. Psychometrika 2000;65(1):23-28.</li>",
                 "<li>Schuirmann DJ. J Pharmacokinet Biopharm 1987;15(6):657-680.</li>",
                 if (isTRUE(private$.ss_done)) "<li>Bonett DG. Stat Med 2002;21(9):1331-1335.</li>"
@@ -2205,6 +2221,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     entry(.("CV (coefficient of variation):"), .("SD divided by the mean, times 100, for one case's measurements. This analysis grades it against the CV threshold you set: low at or below half the threshold, moderate within it, high above it. It is unstable when the mean is near zero, so such cases are left out.")),
                     entry(.("Limits of agreement:"), .("Mean difference plus or minus 1.96 SD of the differences: the range expected to hold 95% of individual region-minus-reference differences.")),
                     entry(.("Variance components:"), .("The total variance split into between-case, between-method and residual (within-case) parts.")))),
+                block(.("Verdicts"), "#6b7280", c(
+                    entry(.("Agreement thresholds met:"), .("The correlation and CV thresholds you set are met and every systematic difference was shown to lie within your margin (90% CI inside it). If the thresholds are met but a difference was not ruled out, the verdict is 'met, not confirmed'.")),
+                    entry(.("Moderate sampling:"), .("The thresholds are met only after relaxing them to the correlation threshold minus 0.2 and 1.5 times the CV threshold. This band is a heuristic of this analysis, not a published criterion.")),
+                    entry(.("Not adequate for substitution:"), .("A systematic difference was shown to exceed your margin (Bonferroni-adjusted CI entirely beyond it); correlation and CV cannot rescue it.")))),
                 block(.("IHC terms"), "#805ad5", c(
                     entry(.("Spatial heterogeneity:"), .("Variation in biomarker expression across regions of the same tumour.")),
                     entry(.("H-score:"), .("(1 \u00d7 % weak) + (2 \u00d7 % moderate) + (3 \u00d7 % strong) staining; range 0 to 300.")),
@@ -2385,7 +2405,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             constant_regions <- names(biopsy_data)[vapply(biopsy_data, is_constant, logical(1))]
             if (length(constant_regions) > 0) {
                 warnings <- c(warnings, sprintf(.("Regional measurements with the same value in every case: %s. Check for data entry errors."),
-                                                htmltools::htmlEscape(paste(constant_regions, collapse = ", "))))
+                                                paste(constant_regions, collapse = ", ")))
             }
 
             missing_percent <- sum(is.na(biopsy_data)) / (nrow(biopsy_data) * ncol(biopsy_data)) * 100

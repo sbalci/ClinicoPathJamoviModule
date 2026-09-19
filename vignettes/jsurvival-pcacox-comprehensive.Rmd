@@ -50,7 +50,7 @@ This analysis is particularly valuable for genomic survival studies (gene expres
 
 | Dataset | N | Predictors | Events | Primary Use |
 |---------|---|-----------|--------|-------------|
-| `pcacox_clinical` | 60 | 10 (mixed clinical) | 30 | Standard clinical scenarios |
+| `pcacox_clinical` | 60 | 10 (continuous clinical) | 30 | Standard clinical scenarios |
 | `pcacox_genomic` | 150 | 30 (6 correlated gene blocks) | 72 | High-dimensional genomics |
 
 ---
@@ -60,7 +60,8 @@ This analysis is particularly valuable for genomic survival studies (gene expres
 ### Basic analysis
 
 ```{r standard-pca}
-clinical <- read.csv(paste0(data_path, "pcacox_clinical.csv"))
+data("pcacox_clinical", package = "ClinicoPath")
+clinical <- pcacox_clinical
 str(clinical[, 1:6])
 
 pcacox(
@@ -145,6 +146,7 @@ pcacox(
   predictors = c("age", "bmi", "albumin", "crp", "ldh",
                  "hemoglobin", "wbc", "platelets", "tumor_size", "ki67"),
   clinical_vars = NULL,
+  pca_method = "standard",
   component_selection = "cv",
   cv_folds = 5,
   suitabilityCheck = FALSE
@@ -153,7 +155,7 @@ pcacox(
 
 ### Variance threshold
 
-Select the minimum number of components explaining at least the specified proportion of variance.
+Select the minimum number of components explaining at least the specified proportion of variance. The result is capped at `n_components` (default 5), so it is raised to 10 here.
 
 ```{r variance-selection}
 pcacox(
@@ -165,6 +167,8 @@ pcacox(
   predictors = c("age", "bmi", "albumin", "crp", "ldh",
                  "hemoglobin", "wbc", "platelets", "tumor_size", "ki67"),
   clinical_vars = NULL,
+  pca_method = "standard",
+  n_components = 10,
   component_selection = "variance",
   variance_threshold = 0.8,
   suitabilityCheck = FALSE
@@ -222,15 +226,15 @@ pcacox(
 )
 ```
 
-Look for: sequential model comparison (1-5 PCs with AIC/BIC/C-index), feature cluster analysis by dominant component, risk group KM curves.
+Look for: sequential model comparison (1-3 PCs with AIC/BIC/C-index), feature cluster analysis by dominant component, risk group KM curves.
 
 ---
 
 ## 6. High-Dimensional Genomic Data
 
 ```{r genomic}
-genomic <- read.csv(paste0(data_path, "pcacox_genomic.csv"))
-gene_vars <- names(genomic)[!names(genomic) %in% c("time", "status")]
+data("pcacox_genomic", package = "ClinicoPath")
+genomic <- pcacox_genomic
 
 pcacox(
   data = genomic,
@@ -238,7 +242,7 @@ pcacox(
   status = "status",
   outcomeLevel = "Dead",
   censorLevel = "Alive",
-  predictors = gene_vars,
+  predictors = setdiff(names(genomic), c("time", "status")),
   clinical_vars = NULL,
   pca_method = "standard",
   n_components = 5,

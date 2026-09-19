@@ -61,7 +61,7 @@ The module supports two modes: **Firth logistic regression** (binary outcomes vi
 ### Basic logistic analysis
 
 ```{r logistic-basic}
-standard <- read.csv(paste0(data_path, "firth_standard.csv"))
+standard <- firth_standard
 str(standard[, c("mortality", "age", "grade", "tumor_size", "lvi", "marker")])
 
 firthregression(
@@ -134,7 +134,7 @@ firthregression(
 )
 ```
 
-Compare the CI widths: profile CIs are typically asymmetric (reflecting the actual likelihood shape), while Wald CIs are symmetric.
+Compare the intervals: profile CIs are typically asymmetric around the estimate on the log-odds scale (reflecting the actual likelihood shape), while Wald CIs are symmetric on that scale. The Wald example also uses a 99% level, so its intervals are wider for that reason as well.
 
 ---
 
@@ -142,10 +142,10 @@ Compare the CI widths: profile CIs are typically asymmetric (reflecting the actu
 
 ### Data with complete separation
 
-The `firth_separation` dataset includes a variable (`margin_positive`) that perfectly predicts the outcome - all positive-margin patients had recurrence. Standard logistic regression would produce infinite coefficients.
+The `firth_separation` dataset includes a variable (`margin_positive`) that almost perfectly predicts the outcome - every patient with recurrence had a positive margin (11 of the 12 positive-margin patients recurred), a quasi-complete separation. Standard logistic regression would produce infinite coefficients.
 
 ```{r separation}
-separation <- read.csv(paste0(data_path, "firth_separation.csv"))
+separation <- firth_separation
 table(separation$outcome, separation$margin_positive)
 
 firthregression(
@@ -241,7 +241,7 @@ Look for: natural-language results summary suitable for reports, and methodologi
 ## 8. Small Cox Cohort
 
 ```{r small-cox}
-smallcox <- read.csv(paste0(data_path, "firth_smallcox.csv"))
+smallcox <- firth_smallcox
 table(smallcox$status)
 
 firthregression(
@@ -262,6 +262,6 @@ firthregression(
 ## References
 
 - Firth D (1993). "Bias reduction of maximum likelihood estimates." *Biometrika*, 80(1), 27-38.
-- Heinze G, Schemper M (2001). "A solution to the problem of separation in logistic regression." *Statistics in Medicine*, 20(2), 169-177.
+- Heinze G, Schemper M (2002). "A solution to the problem of separation in logistic regression." *Statistics in Medicine*, 21(16), 2409-2419.
 - Heinze G, Ploner M (2023). *logistf: Firth's Bias-Reduced Logistic Regression*. R package.
 - Heinze G, Ploner M, Beyea J (2023). *coxphf: Cox Regression with Firth's Penalized Likelihood*. R package.

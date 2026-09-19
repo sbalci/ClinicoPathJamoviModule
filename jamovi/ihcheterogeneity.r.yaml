@@ -116,7 +116,6 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
-        - bias_margin
         - analysis_type
       columns:
         - name: metric
@@ -150,8 +149,6 @@ items:
         - biopsy4
         - biopsies
         - spatial_id
-        - cv_threshold
-        - correlation_threshold
         - bias_margin
         - analysis_type
       columns:
@@ -185,6 +182,26 @@ items:
           superTitle: '95% Limits of Agreement'
           type: number
           format: zto
+        - name: loa_lower_lcl
+          title: 'Lower'
+          superTitle: '95% CI of Lower Limit'
+          type: number
+          format: zto
+        - name: loa_lower_ucl
+          title: 'Upper'
+          superTitle: '95% CI of Lower Limit'
+          type: number
+          format: zto
+        - name: loa_upper_lcl
+          title: 'Lower'
+          superTitle: '95% CI of Upper Limit'
+          type: number
+          format: zto
+        - name: loa_upper_ucl
+          title: 'Upper'
+          superTitle: '95% CI of Upper Limit'
+          type: number
+          format: zto
         - name: p_value
           title: 'p-value'
           type: number
@@ -210,9 +227,6 @@ items:
         - biopsy4
         - biopsies
         - spatial_id
-        - cv_threshold
-        - correlation_threshold
-        - bias_margin
         - analysis_type
       columns:
         - name: component
@@ -243,9 +257,6 @@ items:
         - biopsy4
         - biopsies
         - spatial_id
-        - cv_threshold
-        - correlation_threshold
-        - bias_margin
         - analysis_type
       columns:
         - name: scenario
@@ -282,8 +293,6 @@ items:
         - biopsies
         - spatial_id
         - cv_threshold
-        - correlation_threshold
-        - bias_margin
         - analysis_type
       columns:
         - name: region
@@ -318,8 +327,6 @@ items:
         - biopsies
         - spatial_id
         - cv_threshold
-        - correlation_threshold
-        - bias_margin
         - analysis_type
       columns:
         - name: metric
@@ -357,9 +364,6 @@ items:
         - biopsy4
         - biopsies
         - spatial_id
-        - cv_threshold
-        - correlation_threshold
-        - bias_margin
         - analysis_type
       columns:
         - name: test_type
@@ -398,9 +402,6 @@ items:
         - biopsy4
         - biopsies
         - spatial_id
-        - cv_threshold
-        - correlation_threshold
-        - bias_margin
         - analysis_type
       renderFun: .biopsyplot
 
@@ -420,8 +421,6 @@ items:
         - biopsies
         - spatial_id
         - cv_threshold
-        - correlation_threshold
-        - bias_margin
         - analysis_type
       renderFun: .variabilityplot
 
@@ -441,8 +440,6 @@ items:
         - biopsies
         - spatial_id
         - cv_threshold
-        - correlation_threshold
-        - bias_margin
         - analysis_type
       renderFun: .spatialplot
 
@@ -455,4 +452,5 @@ refs:
     - BonettWright2000
     - Schuirmann1987
     - Bonett2002
+    - BlandAltman1999
 ...

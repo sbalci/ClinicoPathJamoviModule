@@ -251,12 +251,14 @@ modules:
       - "waterfall_raw_longitudinal.rda"
       - "diagnostic_studies.rda"
       - "swimmerplot_sample.rda"
+      - "ihcheterogeneity_test.rda"   # the ihcheterogeneity help example
   JamoviTest:
     directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
     toggle: "TEST"          # enabled by the top-level TEST switch
     menu_group_suffix: "T"  # every <Group>T analysis (tests category)
     data_files:
       - "histopathology.rda"
+      - "ihcheterogeneity_test.rda"   # the ihcheterogeneity help example
 
 # Vignette folder-to-module mapping (used when modes$copy_vignettes is true)
 vignette_folders:

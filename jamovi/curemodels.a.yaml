@@ -56,11 +56,13 @@ options:
       type: Variables
       suggested: [ continuous, ordinal, nominal ]
       permitted: [ numeric, factor ]
+      default: NULL
       description:
           ui: >
             Variables to include in the cure model
           R: >
-            Predictor variables for the model
+            Predictor variables for the model (optional: without them the
+            model estimates the cure fraction of the whole cohort)
 
     - name: model_type
       title: 'Cure Model Type'

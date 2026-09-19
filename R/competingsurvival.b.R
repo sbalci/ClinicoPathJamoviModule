@@ -277,7 +277,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 
             }, error = function(e) {
                 # TODO (security): the three tryCatch blocks at L213, L252, L436 all interpolate `e$message` into a jmvcore::reject() format string. jamovi's reject UI typically renders as plain analysis-error text (no HTML), so the risk is lower than for setContent paths - but third-party error messages from finalfit / cmprsk / survival can echo factor labels or column names from user data. If the reject surface ever gains HTML rendering, these need wrapping with htmltools::htmlEscape(). Defense-in-depth.
-                jmvcore::reject("Overall survival analysis failed: {}", e$message)
+                jmvcore::reject("{}", msg = paste("Overall survival analysis failed:", e$message))
             })
         },
         
@@ -321,7 +321,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 private$.formatSurvivalResults(result, "Cause-Specific Survival")
                 
             }, error = function(e) {
-                jmvcore::reject("Cause-specific survival analysis failed: {}", e$message)
+                jmvcore::reject("{}", msg = paste("Cause-specific survival analysis failed:", e$message))
             })
         },
  
@@ -352,10 +352,11 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
             n_disease_events <- sum(mydata$status_crr == 1, na.rm = TRUE)
             n_competing_events <- sum(mydata$status_crr == 2, na.rm = TRUE)
             if (n_disease_events < 5) {
-                jmvcore::reject("Too few disease events ({}). Competing risks analysis requires at least 5 events of each type for reliable estimates.", n_disease_events)
+                # A positional value lands in reject()'s `code` argument and the {} stayed literal.
+                jmvcore::reject("{}", msg = sprintf("Too few disease events (%d). Competing risks analysis requires at least 5 events of each type for reliable estimates.", n_disease_events))
             }
             if (self$options$analysistype == "compete" && n_competing_events < 5) {
-                jmvcore::reject("Too few competing events ({}). Competing risks analysis requires at least 5 events of each type.", n_competing_events)
+                jmvcore::reject("{}", msg = sprintf("Too few competing events (%d). Competing risks analysis requires at least 5 events of each type.", n_competing_events))
             }
 
             # Create survival object for competing risks
@@ -503,7 +504,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 self$results$kmvscifPlot$setState(plot_state)
                 
             }, error = function(e) {
-                jmvcore::reject("Competing risks analysis failed: {}", e$message)
+                jmvcore::reject("{}", msg = paste("Competing risks analysis failed:", e$message))
             })
         },
         

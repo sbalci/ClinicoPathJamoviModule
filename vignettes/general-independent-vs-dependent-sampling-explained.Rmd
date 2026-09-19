@@ -162,6 +162,12 @@ The model applicability guide explains available methods; it does not automatica
 which model is clinically valid.
 
 ```{r analysis_example, eval = FALSE}
+# Illustrative data: blocks examined per case and the position of the first positive block
+set.seed(1)
+cases <- data.frame(samples_examined = sample(4:10, 80, replace = TRUE))
+first <- rgeom(80, prob = 0.35) + 1
+cases$first_positive_position <- ifelse(first <= cases$samples_examined, first, NA)
+
 ClinicoPath::pathsampling(
   data = cases,
   totalSamples = "samples_examined",

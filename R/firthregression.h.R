@@ -41,7 +41,8 @@ firthregressionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                default=NULL)
             private$..outcome <- jmvcore::OptionVariable$new(
                 "outcome",
                 outcome,
@@ -511,7 +512,7 @@ firthregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 firthregression <- function(
     data,
     analysisType = "logistic",
-    time,
+    time = NULL,
     outcome,
     outcomeLevel,
     predictors,

@@ -172,8 +172,16 @@ Optional variance components, sample-size planning for ICC precision
 (Bonett 2002) and comparisons between spatial compartments.
 }
 \examples{
-# data <- read.csv("ihc_heterogeneity.csv")
-# ihcheterogeneity(data = data, wholesection = "ki67_wholesection",
-#                  biopsy1 = "ki67_region1", biopsy2 = "ki67_region2")
+\donttest{
+data('ihcheterogeneity_test', package = 'ClinicoPath')
 
+# Three regional Ki67 scores against the whole-section score
+ihcheterogeneity(
+    data = ihcheterogeneity_test,
+    wholesection = 'wholesection',
+    biopsy1 = 'biopsy1',
+    biopsy2 = 'biopsy2',
+    biopsy3 = 'biopsy3',
+    bias_margin = 5)
+}
 }

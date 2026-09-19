@@ -273,7 +273,8 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "BlandAltman1986",
                     "BonettWright2000",
                     "Schuirmann1987",
-                    "Bonett2002"))
+                    "Bonett2002",
+                    "BlandAltman1999"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -381,7 +382,6 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
-                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -419,8 +419,6 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "biopsy4",
                     "biopsies",
                     "spatial_id",
-                    "cv_threshold",
-                    "correlation_threshold",
                     "bias_margin",
                     "analysis_type"),
                 columns=list(
@@ -462,6 +460,30 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `type`="number", 
                         `format`="zto"),
                     list(
+                        `name`="loa_lower_lcl", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI of Lower Limit", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="loa_lower_ucl", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI of Lower Limit", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="loa_upper_lcl", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI of Upper Limit", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="loa_upper_ucl", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI of Upper Limit", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
                         `name`="p_value", 
                         `title`="p-value", 
                         `type`="number", 
@@ -488,9 +510,6 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "biopsy4",
                     "biopsies",
                     "spatial_id",
-                    "cv_threshold",
-                    "correlation_threshold",
-                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -524,9 +543,6 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "biopsy4",
                     "biopsies",
                     "spatial_id",
-                    "cv_threshold",
-                    "correlation_threshold",
-                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -567,8 +583,6 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "biopsies",
                     "spatial_id",
                     "cv_threshold",
-                    "correlation_threshold",
-                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -607,8 +621,6 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "biopsies",
                     "spatial_id",
                     "cv_threshold",
-                    "correlation_threshold",
-                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -651,9 +663,6 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "biopsy4",
                     "biopsies",
                     "spatial_id",
-                    "cv_threshold",
-                    "correlation_threshold",
-                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -697,9 +706,6 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "biopsy4",
                     "biopsies",
                     "spatial_id",
-                    "cv_threshold",
-                    "correlation_threshold",
-                    "bias_margin",
                     "analysis_type"),
                 renderFun=".biopsyplot"))
             self$add(jmvcore::Image$new(
@@ -718,8 +724,6 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "biopsies",
                     "spatial_id",
                     "cv_threshold",
-                    "correlation_threshold",
-                    "bias_margin",
                     "analysis_type"),
                 renderFun=".variabilityplot"))
             self$add(jmvcore::Image$new(
@@ -738,8 +742,6 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "biopsies",
                     "spatial_id",
                     "cv_threshold",
-                    "correlation_threshold",
-                    "bias_margin",
                     "analysis_type"),
                 renderFun=".spatialplot"))}))
 
@@ -782,10 +784,18 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' 
 #'
 #' @examples
-#' # data <- read.csv("ihc_heterogeneity.csv")
-#' # ihcheterogeneity(data = data, wholesection = "ki67_wholesection",
-#' #                  biopsy1 = "ki67_region1", biopsy2 = "ki67_region2")
+#' \donttest{
+#' data('ihcheterogeneity_test', package = 'ClinicoPath')
 #'
+#' # Three regional Ki67 scores against the whole-section score
+#' ihcheterogeneity(
+#'     data = ihcheterogeneity_test,
+#'     wholesection = 'wholesection',
+#'     biopsy1 = 'biopsy1',
+#'     biopsy2 = 'biopsy2',
+#'     biopsy3 = 'biopsy3',
+#'     bias_margin = 5)
+#'}
 #' @param data the data as a data frame
 #' @param wholesection Optional reference measurement for comparison with
 #'   regional measurements. Can be whole section average, hotspot area, or

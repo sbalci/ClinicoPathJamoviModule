@@ -7,7 +7,7 @@
 firthregression(
   data,
   analysisType = "logistic",
-  time,
+  time = NULL,
   outcome,
   outcomeLevel,
   predictors,

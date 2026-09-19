@@ -508,6 +508,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data_superpc,
                     data_superpc,
                     threshold = optimal_threshold,
+                    # TODO (correctness): superpc supports at most 3 components (the CV call above caps
+                    #   it); with the default 5 this errors and silently falls back to standard PCA.
+                    #   Cap it and tell the user. Also: no seed option, so CV/bootstrap results change
+                    #   between runs; .performCVSelection ignores n_components (searches to 10). 2026-09-19.
                     n.components = n_components
                 )
 
@@ -536,12 +540,14 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Run Sparse PCA
                     # Note: sparsepca expects centered data usually, X_matrix is already scaled/centered if requested
                     sparse_param <- self$options$sparse_parameter %||% 0.1
-                    spca_res <- sparsepca::spca(private$X_matrix, k = n_components, alpha = sparse_param, beta = sparse_param)
+                    spca_res <- sparsepca::spca(private$X_matrix, k = n_components, alpha = sparse_param, beta = sparse_param, verbose = FALSE)
                     
                     private$pca_result <- spca_res
                     
                     # Store scores
-                    private$pc_scores <- spca_res$transform
+                    # n x k scores; $transform is the p x k matrix, which data.frame() then
+                    # recycled across subjects before the Cox fit.
+                    private$pc_scores <- spca_res$scores
                     colnames(private$pc_scores) <- paste0("PC", seq_len(ncol(private$pc_scores)))
                     
                     # Store loadings
@@ -1448,7 +1454,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Predict on original data using bootstrap model
                         lp_orig <- predict(boot_model, newdata = private$cox_data, type = "lp")
                         c_orig <- survival::concordance(
-                            survival::Surv(private$cox_data$time, private$cox_data$status) ~ lp_orig
+                            survival::Surv(private$cox_data$time, private$cox_data$status) ~ lp_orig,
+                            reverse = TRUE  # higher Cox linear predictor = higher risk; without it c_orig was 1 - C
                         )$concordance
 
                         # Optimism = boot performance - original data performance

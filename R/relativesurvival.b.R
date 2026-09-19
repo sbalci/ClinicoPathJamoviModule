@@ -339,9 +339,12 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             rate_table <- switch(ratetable_choice,
-                "us"          = relsurv::survexp.us,
-                "mn"          = relsurv::survexp.mn,
-                "fr"          = relsurv::survexp.fr,
+                # survexp.us / survexp.mn ship with survival; relsurv does not export them.
+                "us"          = survival::survexp.us,
+                "mn"          = survival::survexp.mn,
+                # No installed package provides survexp.fr; substituting another country's
+                # mortality would bias the net survival.
+                "fr"          = jmvcore::reject(.("The French population table (survexp.fr) is not available in this installation. Choose another population rate table.")),
                 "slovenia"    = relsurv::slopop,
                 "turkey"      = {
                     rt <- NULL
@@ -367,13 +370,16 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             if (is.null(rate_table)) {
-                rate_table <- relsurv::survexp.us
+                rate_table <- survival::survexp.us
                 self$results$survivalTable$setNote(
                     "ratetable_fallback",
                     "Selected population rate table was not available. Using US population table as default."
                 )
             }
 
+            # survival's survexp.us / survexp.mn name their dimensions only in dimnames();
+            # relsurv's Hakulinen path looks them up in attr(, "dimid").
+            if (is.null(attr(rate_table, "dimid"))) attr(rate_table, "dimid") <- names(dimnames(rate_table))
             return(rate_table)
         },
 
@@ -433,7 +439,10 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         year = diagdate
                     ),
                     ratetable = rate_table,
-                    data = data
+                    data = data,
+                    # Without times (and with no response) survexp() errors, which the
+                    # handler turned into an always-empty Expected Survival column.
+                    times = sort(unique(data$time_days))
                 )
             }, error = function(e) NULL)
         },
@@ -955,6 +964,9 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "The {rstpm2} package is required for flexible parametric models. Install: install.packages('rstpm2')"
                         )
                     }
+                    # TODO (correctness): regression_model = "flexible" always fails - rstpm2::stpm2() evaluates
+                    #   quote(gsm) in the caller's namespace, and ClinicoPath has no importFrom(rstpm2, gsm) (same in
+                    #   flexrstpm2.b.R:523, flexparametric.b.R:608; submodules too). Found 2026-09-19 (vignette audit).
                     # Compute per-individual background hazard for relative survival
                     bhaz <- private$.computeExpectedHazard(data, rate_table)
                     if (!is.null(bhaz) && length(bhaz) == nrow(data)) {
@@ -1362,6 +1374,10 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # ── Expected Hazard from Rate Table ────────────────────────────
         .computeExpectedHazard = function(data, rate_table) {
+            # TODO (correctness): both survexp(~ 1, times = 1, method = "individual.h"/"individual.s") calls are
+            #   rejected by survival (a response is required unless method = 'ederer'), so the model is always fitted
+            #   without bhazard. The rate at day 1 is also the wrong quantity: an excess-hazard stpm2 needs the
+            #   population hazard at each subject's exit (attained age and calendar year). Found 2026-09-19.
             # Compute per-individual background hazard from population rate table
             # Used for flexible parametric relative survival models (stpm2 bhazard)
             tryCatch({

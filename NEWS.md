@@ -1,6 +1,70 @@
 # ClinicoPath News
 
 
+## Unreleased — articles, dataset documentation and Turkish catalog (module 1.0.81.01)
+
+- **Articles.** 53 generated `*-comprehensive.Rmd` stubs were deleted: each loaded a package that does not
+  exist (`ClinicoPathJamoviModule`) and a dataset that does not exist (`<analysis>_test_data`), with the only
+  call commented out. The generator that wrote them on 2026-08-29 had also overwritten the 967-line
+  `jsurvival-survival-comprehensive` article, which is restored. Eleven articles that knit with
+  `error = TRUE` printed errors instead of results in most chunks (adaptivelasso 43 of 44, plscox 30 of 34,
+  relativesurvival 24 of 29): CSVs read from a relative `data/` path, required `Level` arguments never
+  passed, and column-name vectors passed where the wrapper expects names (`!!x` injects them). All now run
+  chunk by chunk against the current code; the few examples still not run say why.
+- **Package fixes found through the articles.** `relativesurvival`: the default US and Minnesota rate tables
+  were read from `relsurv`, which does not export them (every default run failed); they come from
+  `survival`, the Hakulinen method works with them, the Expected Survival column is no longer always empty,
+  and `ratetable = "fr"` stops with a clear message (no installed package provides it). `firthregression`:
+  in Cox mode the hazard-ratio CI was exponentiated twice (HR 1.06 with a "95% CI" of 2.78-3.02) and the SE
+  derived from it; the optional time variable is no longer a required R argument. `conditionalsurvival`: the
+  default `km` method always returned an empty table (a `condSURV::KMW()` call matching no signature); it
+  now computes the Kaplan-Meier ratio S(t)/S(s). `pcacox`: sparse PCA fitted the Cox model on the loadings
+  instead of the scores, and the bootstrap optimism-corrected C-index used 1 - C. `sparsegrouplasso`:
+  percentage columns showed 3333%. `competingsurvival`: error messages printed a literal `{}` instead of the
+  count. `psychopdaROC`: explicit NULL guard on a saved plot state.
+- **Datasets.** 681 datasets had no help page (R CMD check: undocumented data sets). Each now has one,
+  generated from the data itself by `tools/document_datasets.R` into `R/data-datasets.R`: variables with
+  type, range or levels and missing counts, the analysis that uses it and the `data-raw/` script that writes
+  it. Three datasets (`retraction_example_data`, `riverplot_example_data`, `riverplot_wide_example_data`)
+  were missing from the installed package: a documentation-only `data/<name>.R` beside `data/<name>.rda`
+  takes precedence in `data()` and in the LazyData build and defines nothing. Their docs moved to
+  `R/data-example-scripts.R`. 29 object names are defined by more than one `.rda` file; the help page names
+  the file the lazy-loaded object comes from.
+- **Turkish.** 433 new translations for the rewritten `ihcheterogeneity` (now fully translated) and
+  `waterfall` sentences; every template was checked with R's `sprintf()` and both analyses were run in
+  Turkish with every output switched on.
+
+## Unreleased — ihcheterogeneity release review (module 1.0.81.01)
+
+- `ihcheterogeneity`: `/check-function --profile release` passes after the 2026-09-18
+  `/fix-function` rounds. **Breaking:** option `power_analysis` -> `sample_size_planning`, table
+  `poweranalysistable` -> `samplesizetable`, and the compartment-tests column `df` -> `df1` + `df2`.
+  The old table tested H0: correlation = 0 at Cohen's r of 0.1 to 0.5, a question no agreement
+  study asks; it is replaced by Bonett (2002) sample sizes for a chosen width of the ICC's 95% CI.
+  A saved `.omv` that used the old option name will not map it.
+- `ihcheterogeneity` new option `bias_margin` (default 5% of the comparison mean). A systematic
+  difference is now ruled out when its 90% CI lies inside the margin (two one-sided tests), shown
+  to be material when a Bonferroni-adjusted CI lies entirely beyond it, and inconclusive
+  otherwise, which gives the new verdict "AGREEMENT THRESHOLDS MET, NOT CONFIRMED". The earlier
+  rule (point estimate above 5% and p < 0.05 against zero) called a true 3% offset material in up to
+  a third of studies, and two regions offset in opposite directions could cancel out in the verdict.
+- `ihcheterogeneity` statistics: the ICC(2,1) and ICC(3,1) with their McGraw & Wong CIs, the
+  variance components, the paired-difference CIs, limits of agreement and Hedges' g, and the
+  Brown-Forsythe and Kruskal-Wallis compartment tests agree with `psych::ICC`, `irr::icc`,
+  `lme4::lmer`, `stats::t.test`, `effectsize::hedges_g` and `car::leveneTest`. Spearman CIs use the
+  Bonett & Wright (2000) variance (95.1% simulated coverage at n = 30, rho = 0.85).
+- `ihcheterogeneity` panel: the compartment options have their own "Spatial Compartments" box,
+  and "Clinical recommendations" moved to Output Options with the other text outputs.
+- `ihcheterogeneity` (`/check-function-full` follow-up): each Bland-Altman limit of agreement now
+  has its 95% CI (Bland & Altman 1999), four new columns of the Sampling Bias table. All warnings
+  share the notices panel, ordered by severity: the six data-quality checks moved there from a
+  separate box inside the interpretation, a material systematic difference is also a strong warning,
+  and a variability plot hidden because no case has a computable CV says so. The "moderate" verdict
+  band (correlation threshold - 0.2, CV threshold x 1.5) is labelled a heuristic in the assessment
+  and the glossary, which now explains the verdicts. Tables and plots clear only on the options they
+  read. The help page has a runnable example; `ihcheterogeneity_test.rda` ships to OncoPath and
+  JamoviTest for it.
+
 ## Unreleased — pathsampling release review (analysis 1.0.0 -> 2.0.0)
 
 - `pathsampling`: `/check-function`, `/check-function-full`, `/fix-function`, `/review-function`
