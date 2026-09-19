@@ -21,6 +21,7 @@
 | `sampling_strategy` | UI Control `sampling_strategy` | `self$options$sampling_strategy` | Output item / Table |
 | `cv_threshold` | UI Control `cv_threshold` | `self$options$cv_threshold` | Output item / Table |
 | `correlation_threshold` | UI Control `correlation_threshold` | `self$options$correlation_threshold` | Output item / Table |
+| `bias_margin` | UI Control `bias_margin` | `self$options$bias_margin` | Sampling Bias Analysis table / verdict |
 | `show_variability_plots` | UI Control `show_variability_plots` | `self$options$show_variability_plots` | Output item / Table |
 | `variance_components` | UI Control `variance_components` | `self$options$variance_components` | Output item / Table |
 | `sample_size_planning` | UI Control `sample_size_planning` | `self$options$sample_size_planning` | Output item / Table |

@@ -5,6 +5,34 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-19 — function check of my own `ihcheterogeneity` fix: a new option left an old constant behind
+
+### The margin I added did not reach the column that grades the same difference
+
+- **Failure mode:** round 3 added `bias_margin` and made the verdict, table note and report sentences use it, but the
+  per-row "Clinical Impact" column kept fixed 5% / 15% bands on the point estimate beside a 95% CI. At a margin of 10
+  the column read "Moderate (5-15%)" for rows the rule had ruled out; at 2 it read "Minimal (<5%)" for an inconclusive
+  row. The same round left the limits-of-agreement sentence saying "differ from the reference" in the inter-regional
+  design (copy-ready text included), and the column title "Region - Reference" with no reference.
+- **Detection signal:** `/function-checker` plus a runtime-contract checker that ran every option at NON-default
+  values and read each row's text against the rule's own flags; adversarial verifiers rejected 3 of the checkers'
+  patches (e.g. a 95% CI printed beside a zone the 90% CI decides) and supplied the corrected versions.
+- **Prevention rule:** when an option replaces a constant, grep the file for the constant's literals ("5%", "15%",
+  "reference") and route every consumer through the option in the same change; add one test at a non-default value
+  that reads each consumer. Text that names the comparison ("reference", "other regions") must branch on the design
+  the row actually used, like the label beside it does.
+
+### A plot fix that only worked in the tests
+
+- **Failure mode:** `theme(axis.text.x = element_text(angle = 45))` and `scale_fill_manual(...)` sat BEFORE `+ ggtheme`.
+  jamovi's ggtheme is a list: a complete theme (resets earlier `theme()` and drops `vjust`) plus discrete fill/colour
+  palette scales (replace the manual scale). In jamovi the labels overlapped horizontally and the colour-blind-safe
+  fill, legend title and unused band vanished; tests passed because they rendered with `ggplot2::theme_grey()`.
+- **Detection signal:** a verifier that rendered with `jmvcore:::getGlobalTheme("default", "jmv")$ggtheme` and read
+  the resolved `axis.text.x` angle and the fill scale name.
+- **Prevention rule:** theme tweaks and manual scales go AFTER `ggtheme` (rotated labels need `vjust = 1`); renderer
+  tests use the jamovi global theme, not `theme_grey()`. 19 more sites in 11 other analyses have the old order.
+
 ## 2026-09-19 — `stagemigration` verdict; a tool reported "not installed" that was only off PATH
 
 ### A worse staging system was recommended for adoption

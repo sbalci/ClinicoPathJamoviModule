@@ -23,7 +23,7 @@
 | :--- | :--- | :--- | :--- |
 | `data` | `Data` | `NULL` |  |
 | `wholesection` | `Variable` | `NULL` | Overall / Whole Slide / HotSpot (Optional) |
-| `biopsy1` | `Variable` | `NULL` | Regional Measurement 1 (Required) |
+| `biopsy1` | `Variable` | `NULL` | Regional Measurement 1 (any of slots 1-4 or the Additional list starts the analysis) |
 | `biopsy2` | `Variable` | `NULL` | Regional Measurement 2 (Optional) |
 | `biopsy3` | `Variable` | `NULL` | Regional Measurement 3 (Optional) |
 | `biopsy4` | `Variable` | `NULL` | Regional Measurement 4 (Optional) |
@@ -35,6 +35,7 @@
 | `sampling_strategy` | `List` | `unknown` | Sampling Strategy |
 | `cv_threshold` | `Number` | `20` | CV Threshold for Acceptable Variability |
 | `correlation_threshold` | `Number` | `0.8` | Minimum Acceptable Correlation |
+| `bias_margin` | `Number` | `5` | Systematic difference margin (% of the comparison mean) |
 | `show_variability_plots` | `Bool` | `FALSE` | Variability plots |
 | `variance_components` | `Bool` | `FALSE` | Variance component analysis |
 | `sample_size_planning` | `Bool` | `FALSE` | Sample size for ICC precision (Bonett 2002) |
@@ -49,6 +50,7 @@
 | Output ID | Type | Title | Description |
 | :--- | :--- | :--- | :--- |
 | `welcome` | `Html` | `` | Welcome screen shown when no variables selected |
+| `notices` | `Html` | `` | Error, warning and information notices |
 | `interpretation` | `Html` | `Clinical Interpretation and Analysis Summary` |  |
 | `report_sentences` | `Html` | `Copy-Ready Report Sentences` | Pre-formatted sentences ready for clinical reports and publications |
 | `assumptions` | `Html` | `Methodology & Assumptions` | Analysis assumptions, data requirements, and methodological considerations |
@@ -57,7 +59,7 @@
 | `reproducibilitytable` | `Table` | `Reproducibility Assessment` | Correlation and reliability metrics |
 | `samplingbiastable` | `Table` | `Sampling Bias Analysis` | Systematic bias assessment between methods |
 | `variancetable` | `Table` | `Variance Component Analysis` | Sources of measurement variability |
-| `poweranalysistable` | `Table` | `Power Analysis Results` | Sample size recommendations and power calculations |
+| `samplesizetable` | `Table` | `Sample Size for ICC Precision` | Cases needed to estimate the ICC with a chosen 95 percent CI width (Bonett 2002) |
 | `spatialanalysistable` | `Table` | `Spatial Heterogeneity Analysis` | Variability across spatial regions |
 | `compartmentComparison` | `Table` | `Compartment Heterogeneity Comparison` | Statistical comparison of heterogeneity metrics between compartments |
 | `compartmentTests` | `Table` | `Statistical Tests for Compartment Differences` | Formal statistical tests comparing heterogeneity across compartments |
