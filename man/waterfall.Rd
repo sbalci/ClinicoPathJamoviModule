@@ -81,17 +81,23 @@ mark the baseline.}
 
 \item{confirmationVar}{Optional categorical variable indicating response
 confirmation status (e.g., Confirmed vs Unconfirmed CR/PR). A distinct
-marker is drawn at each bar tip according to the level of this variable.}
+marker is drawn at each bar tip according to the level of this variable.
+The markers are display only: ORR and DCR are not changed. To count only
+confirmed responses, give the categories through Response category
+override. One value per patient (the first non-missing value is used).}
 
 \item{ongoingVar}{Optional variable flagging patients still on treatment /
 with an ongoing response. Truthy values (TRUE, non-zero, or text matching
-yes/y/true/on/ongoing/1) draw an upward arrow at the bar tip.}
+yes/y/true/on/ongoing/1) draw an arrow pointing away from the bar tip. One
+value per patient (the first non-missing value is used).}
 
 \item{responseCategoryVar}{Optional per-patient RECIST category
 (CR/PR/SD/PD). When supplied it overrides the category computed from the
 percentage value, so a patient with target-lesion shrinkage can still be
-classified PD (e.g., a new lesion). Affects both bar coloring and response
-metrics (ORR/DCR).}
+classified PD (e.g., a new lesion). Affects bar coloring, response metrics
+(ORR/DCR), time to response and duration of response. One value per
+patient: the first non-missing value is used and conflicting values are
+reported.}
 
 \item{showCategoryLabels}{Print the response category (CR, PR, SD, PD)
 above each waterfall bar, so the category can be read directly instead of
@@ -108,12 +114,13 @@ therapy, treatment arm or any covariate you want read off against each
 patient's response.}
 
 \item{showThresholds}{Show +20 percent and -30 percent RECIST v1.1
-thresholds as dashed lines. Helps identify Progressive Disease (PD) and
-Partial Response (PR) cutoffs.}
+thresholds as dashed lines on the waterfall and spider plots. Helps
+identify Progressive Disease (PD) and Partial Response (PR) cutoffs.}
 
 \item{labelOutliers}{Label responses exceeding the specified threshold.}
 
-\item{showMedian}{Show median response as a horizontal line.}
+\item{showMedian}{Show the median response as a horizontal line on the
+waterfall plot and as a median trajectory on the spider plot.}
 
 \item{showCI}{Show confidence interval around median response.}
 
@@ -148,8 +155,9 @@ rescale data; only affects axis labeling.}
 \item{generateCopyReadyReport}{Generate publication-ready result sentences
 with statistical details}
 
-\item{showClinicalSignificance}{Display clinical significance
-interpretations for ORR and DCR}
+\item{showClinicalSignificance}{Display clinical significance context for
+ORR and DCR: the range of rates compatible with the data (exact confidence
+interval) and a sample-size note.}
 
 \item{showConfidenceIntervals}{Calculate and display exact binomial
 confidence intervals for ORR and DCR}
@@ -215,8 +223,9 @@ recorded burden (nadir), not against baseline. Categories are named CR, PR,
 SD and PD and the thresholds are adapted from RECIST v1.1, but this is NOT
 a RECIST v1.1 implementation: because it never sees individual lesions it
 cannot sum target lesions, detect a new lesion, or judge non-target
-progression, and it cannot apply the 4-week confirmation rule itself (you
-may supply your own confirmation column). If your data list each lesion
-separately, use the lesion-level RECIST v1.1 analysis. It will be available
-in upcoming releases.
+progression, and it cannot apply the 4-week confirmation rule (a
+confirmation column only adds markers to the plot; to count confirmed
+responses, supply confirmed categories through the category override). If
+your data list each lesion separately, use the lesion-level RECIST v1.1
+analysis. It will be available in upcoming releases.
 }

@@ -583,7 +583,9 @@ def check_i18n_braced_escape():
     print('  .() braced \\u{} escapes: %d sites (%d shipped)' % (len(hits), len(ship)))
 
 
-_FMT = re.compile(r'%(?:\d+\$)?[-+0#]*\d*(?:\.\d+)?[sdif]')
+# Conversions R's sprintf() accepts in these templates. The space flag and %o are left out on purpose:
+# prose such as "50% of cases" would otherwise read as a conversion.
+_FMT = re.compile(r'%(?:\d+\$)?[-+0#]*\d*(?:\.\d+)?[sdifeEgGxX]')
 _BAD_PCT = re.compile(r'%(?!(?:\d+\$)?[-+0#]*\d*(?:\.\d+)?[sdifeEgGxXo])')
 
 
@@ -605,6 +607,32 @@ def _po_entries(p):
     return [(i, s) for i, s in out if i and s]
 
 
+def _conversions_compatible(msgid, msgstr):
+    """sprintf() fills conversions in ORDER unless they carry %n$ markers. Without markers the
+    translation must keep the msgid's sequence of types; with markers, every %n$ must name an
+    argument of the same type and every argument must be used. (Comparing SORTED lists missed
+    tr.po reordering '%s ... %s ... %.2f' as '%s ... %.2f ... %s', which put a string on %.2f:
+    ihcheterogeneity failed on every Turkish run, 2026-09-18 OncoPath release check C5.)"""
+    strip = lambda s: re.sub('%%', '', s)
+    src = _FMT.findall(strip(msgid))
+    dst = _FMT.findall(strip(msgstr))
+    kind = lambda c: c[-1].replace('i', 'd')
+    # %s prints any argument (R converts numbers), so only a non-%s slot must match its argument.
+    fits = lambda arg, slot: kind(slot) == 's' or kind(arg) == kind(slot)
+    marker = lambda c: re.match(r'%(\d+)\$', c)
+    if not any(marker(c) for c in dst):
+        return len(src) == len(dst) and all(fits(a, b) for a, b in zip(src, dst))
+    if not all(marker(c) for c in dst):
+        return False    # R allows mixing, but which argument an unnumbered slot takes is easy to misread
+    used = set()
+    for c in dst:
+        n = int(marker(c).group(1))
+        if n < 1 or n > len(src) or not fits(src[n - 1], c):
+            return False
+        used.add(n)
+    return used == set(range(1, len(src) + 1))
+
+
 def check_i18n_po_formats():
     """A translated sprintf template must keep the msgid's conversions. tr.po rendered "50%%" as
     "%%%50", which leaves "%50'" - sprintf() stops with "unrecognised format specification" in
@@ -615,7 +643,7 @@ def check_i18n_po_formats():
             if not (_FMT.search(msgid) or '%%' in msgid):
                 continue
             strip = lambda s: re.sub('%%', '', s)
-            if (sorted(_FMT.findall(strip(msgid))) != sorted(_FMT.findall(strip(msgstr)))
+            if (not _conversions_compatible(msgid, msgstr)
                     or bool(_BAD_PCT.search(strip(msgstr))) != bool(_BAD_PCT.search(strip(msgid)))):
                 bad.append('%s: %s' % (os.path.basename(p), msgid[:50]))
     if bad:

@@ -406,10 +406,30 @@ test_that("report sentences translate as whole sentences", {
     dp$.getInterpretationText(96, 50, 1.9, NaN)
   )
   ip <- ih$.__enclos_env__$private
+  # A partial metrics list (as before) and full ones that reach the per-region,
+  # material-bias, equivalence and ICC branches of the copy-ready builder.
+  bias_row <- function(name, pooled, rel, material, equivalent, constant = FALSE)
+    list(name = name, pooled = pooled, mean_diff = rel / 2, rel = rel, ci = c(rel / 2 - 1, rel / 2 + 1),
+         rel_ci = c(rel - 2, rel + 2), rel_ci90 = c(rel - 1.5, rel + 1.5), loa = c(-8, 9), p_holm = 0.002,
+         adjusted = TRUE, material = material, equivalent = equivalent, constant = constant,
+         comparator = "reference")
   for (ref in c(TRUE, FALSE)) for (r in c(0.95, 0.82, 0.72, 0.4)) {
     m <- list(has_reference = ref, overall_corr = r, mean_cv = 12, bias_p = 0.2,
               n_cases = 30, n_biopsies = 4)
     outputs <- c(outputs, ip$.generateReportSentences(m, 20, 0.90))
+    for (rows in list(
+      list(bias_row("b1", FALSE, -12, TRUE, FALSE), bias_row("b2", FALSE, 9, TRUE, FALSE), bias_row(NA, TRUE, -1, FALSE, FALSE)),
+      list(bias_row(NA, TRUE, 7, TRUE, FALSE, constant = TRUE)),
+      list(bias_row("b1", FALSE, 1, FALSE, TRUE), bias_row("b2", FALSE, 2, FALSE, FALSE)))) {
+      full <- c(m, list(icc = 0.81, icc_lower = 0.7, icc_upper = 0.9, icc_method = "icc", icc_n = 28,
+                        icc_dropped = if (ref) "b4 (n = 3)" else character(0),
+                        overall_ci = c(r - 0.1, min(r + 0.03, 0.99)), verdict_corr = r - 0.05,
+                        ref_corr = if (ref) c(b1 = r, b2 = r - 0.05) else NULL, min_ref_name = "b2",
+                        bias_rows = if (ref) rows else list(),
+                        bias_material = ref && any(vapply(rows, function(x) x$material, TRUE)),
+                        bias_equivalent = FALSE, reference_constant = FALSE))
+      outputs <- c(outputs, ip$.generateReportSentences(full, 20, 0.90))
+    }
   }
   expect_true(all(grepl("\u00ab", outputs)))                       # the pseudo-catalog was used
   expect_equal(grep("\u00ab[^\u00bb]*\u00ab", outputs, value = TRUE), character(0))   # nothing spliced

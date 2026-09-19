@@ -3171,6 +3171,12 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 assessment$c_threshold <- c_threshold
 
                 # Check for NA and NULL before comparison
+                # TODO (correctness): direction-blind verdict. abs() makes a WORSE new system
+                # "clinically significant", and lr_p (line ~3151) is "new staging adds to the
+                # original", which is significant for a worse system carrying any extra factor.
+                # Repro (2026-09-19, n=3000): C old 0.728 vs new 0.696 -> "RECOMMEND ADOPTION",
+                # Confidence: High. Require c_improvement >= c_threshold (and the paired C-index
+                # CI lower bound > 0); lr_p < 0.05 also ignores the confidenceLevel option.
                 assessment$clinically_significant <- tryCatch(
                     {
                         if (!is.null(c_improvement) && length(c_improvement) == 1 && !is.na(c_improvement)) {
@@ -3266,6 +3272,10 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     recommendation$confidence <- "Low"
                     recommendation$rationale <- "While statistically significant, the improvement is too small to be clinically meaningful."
                 } else {
+                    # TODO (correctness): a non-significant result is reported as "DO NOT ADOPT",
+                    # Confidence: High (repro: n=120, p=0.849). This branch also catches lr_p and
+                    # c_improvement both NA, i.e. the tests failed. Absence of evidence: report
+                    # "INCONCLUSIVE" with low confidence, and a separate row when the tests did not run.
                     recommendation$primary <- "DO NOT ADOPT"
                     recommendation$confidence <- "High"
                     recommendation$rationale <- "New staging system does not provide meaningful improvement over existing system."

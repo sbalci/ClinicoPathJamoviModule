@@ -4,6 +4,7 @@
 #' @name waterfallClass
 #' @importFrom R6 R6Class
 #' @importFrom withr local_seed
+#' @import jmvcore
 #' @return An \code{R6} class generator object for the \code{waterfallClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "waterfallClass",

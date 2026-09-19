@@ -23,7 +23,7 @@
 | `correlation_threshold` | UI Control `correlation_threshold` | `self$options$correlation_threshold` | Output item / Table |
 | `show_variability_plots` | UI Control `show_variability_plots` | `self$options$show_variability_plots` | Output item / Table |
 | `variance_components` | UI Control `variance_components` | `self$options$variance_components` | Output item / Table |
-| `power_analysis` | UI Control `power_analysis` | `self$options$power_analysis` | Output item / Table |
+| `sample_size_planning` | UI Control `sample_size_planning` | `self$options$sample_size_planning` | Output item / Table |
 | `generate_recommendations` | UI Control `generate_recommendations` | `self$options$generate_recommendations` | Output item / Table |
 | `showSummary` | UI Control `showSummary` | `self$options$showSummary` | Output item / Table |
 | `showGlossary` | UI Control `showGlossary` | `self$options$showGlossary` | Output item / Table |

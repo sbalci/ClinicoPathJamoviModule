@@ -57,11 +57,17 @@ test_that("ihcheterogeneity handles inter-regional analysis", {
         biopsy3 = "ki67_region3"
     )
 
-    # `wholesection` is not provided: the bias table carries a single
-    # explanatory row saying bias analysis needs a reference
+    # `wholesection` is not provided: since 2026-09-18 each region is compared with
+    # the mean of the other regions (two regions reading 27% apart were otherwise
+    # reported as agreeing)
     bias <- results$samplingbiastable$asDF
-    expect_equal(nrow(bias), 1)
-    expect_match(bias$clinical_impact[1], "requires a reference")
+    expect_equal(nrow(bias), 3)
+    expect_true(all(grepl("vs mean of the other regions", bias$comparison, fixed = TRUE)))
+    reg <- sample_data[, c("ki67_region1", "ki67_region2", "ki67_region3")]
+    reg <- reg[rowSums(!is.na(reg)) >= 2, ]          # usable cases: at least 2 regions
+    others <- rowMeans(reg[, 2:3], na.rm = TRUE)
+    ok <- !is.na(reg$ki67_region1) & is.finite(others)
+    expect_equal(bias$mean_diff[1], mean(reg$ki67_region1[ok] - others[ok]), tolerance = 1e-10)
 })
 
 

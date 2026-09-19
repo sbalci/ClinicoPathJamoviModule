@@ -65,7 +65,7 @@ tests_passed <- tests_passed + 2
 # Test 6: Conditional output visibility
 cat("\nTest 6: Conditional output visibility...\n")
 conditional_outputs <- list(
-  "poweranalysistable" = "power_analysis",
+  "samplesizetable" = "sample_size_planning",
   "spatialanalysistable" = "spatial_id",
   "summary" = "showSummary",
   "glossary" = "showGlossary"

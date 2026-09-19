@@ -135,7 +135,7 @@ test_that("a material systematic bias vetoes the adequacy verdict", {
     verdict <- function(d) {
         txt <- gsub("<[^>]+>", " ", run_ihc(d)$interpretation$content)
         regmatches(txt, regexpr(
-          "(AGREEMENT THRESHOLDS MET|MODERATE SAMPLING|INADEQUATE SAMPLING|NOT ADEQUATE FOR SUBSTITUTION|INSUFFICIENT DATA)", txt))
+          "(AGREEMENT THRESHOLDS MET, NOT CONFIRMED|AGREEMENT THRESHOLDS MET|MODERATE SAMPLING|INADEQUATE SAMPLING|NOT ADEQUATE FOR SUBSTITUTION|INSUFFICIENT DATA)", txt))
     }
     # Correlation and CV thresholds alone declared this "ADEQUATE SAMPLING ...
     # suitable for clinical use" while the bias table reported p < 1e-13.
@@ -158,27 +158,21 @@ test_that("copy-ready text makes no claim the analysis did not support", {
     }
 })
 
-test_that("power analysis uses the number of complete pairs", {
+test_that("sample-size planning uses the number of complete cases", {
     set.seed(1); n <- 40
     whole <- rnorm(n, 50, 10)
     d <- data.frame(whole = whole, b1 = whole + rnorm(n, 0, 5), b2 = whole + rnorm(n, 0, 5))
     d$whole[1:20] <- NA          # half the references missing
 
-    pt <- run_ihc(d, power_analysis = TRUE)$poweranalysistable$asDF
-    small <- pt[pt$scenario == "Small Effect (r=0.1)", ]
-
-    # n must be the 20 complete pairs, not the 40 rows. The SE carries the
-    # 1.06 Spearman variance inflation on every row (the analysis tests
-    # Spearman correlations throughout), not only on the observed-effect row.
-    z <- 0.5 * log(1.1 / 0.9)
-    se_z <- sqrt(1.06 / (20 - 3))
-    expect_equal(small$power[1],
-                 pnorm(z / se_z - qnorm(0.975)) + pnorm(-z / se_z - qnorm(0.975)),
-                 tolerance = 1e-6)
-
-    # observed-effect power must not be sold as evidence of adequacy
-    obs <- pt[pt$scenario == "Observed Effect Size", ]
-    expect_match(obs$recommendation[1], "not evidence of adequacy")
+    # 2026-09-18: the power table for H0 rho = 0 was replaced by ICC precision
+    # (Bonett 2002). The expected CI width at the current n must use the 20
+    # complete cases, not the 40 rows.
+    pt <- run_ihc(d, sample_size_planning = TRUE)$samplesizetable$asDF
+    row <- pt[abs(pt$planning_icc - 0.75) < 1e-12, ]
+    k <- 3; rho <- 0.75
+    q <- 8 * qnorm(0.975)^2 * (1 - rho)^2 * (1 + (k - 1) * rho)^2 / (k * (k - 1))
+    expect_equal(row$width_current, sqrt(q / (20 - 1)), tolerance = 1e-10)
+    expect_false(any(grepl("power", pt$scenario, ignore.case = TRUE)))
 })
 
 test_that("spatial heterogeneity measures within-case, not between-patient, spread", {
@@ -233,7 +227,8 @@ test_that("Levene's test for compartment differences actually reports a result",
     # oneway.test()$parameter is c(num df, denom df); passing the length-2
     # vector made addRow() throw inside a tryCatch, so this row ALWAYS said
     # "Could not compute".
-    expect_equal(lev$df[1], 2)   # 3 compartments - 1
+    expect_equal(lev$df1[1], 2)   # 3 compartments - 1
+    expect_equal(lev$df2[1], 9)   # 12 cases - 3 compartments
     expect_true(is.finite(lev$statistic[1]))
     expect_true(lev$p_value[1] >= 0 && lev$p_value[1] <= 1)
     expect_false(grepl("Could not compute", lev$interpretation[1]))
@@ -264,17 +259,20 @@ test_that("compartment Kruskal-Wallis uses one per-case summary value, not poole
     spatial_id = "spatial_region",
     compareCompartments = TRUE, compartmentTests = TRUE)
   tests <- res$compartmentTests$asDF
-  kw <- tests[grep("Kruskal", tests$test_type), , drop = FALSE]
+  kw <- tests[grep("per-case means", tests$test_type), , drop = FALSE]
   expect_equal(nrow(kw), 1)
 
   # independent reference: per-case mean of (reference + regions), one value
-  # per case, compared across compartments. Mirror the module's rule that a
-  # compartment needs at least 2 cases to enter the comparison.
+  # per case, compared across compartments. Mirror the module's rules: a case
+  # is analysed when it has a reference value and at least one region, and a
+  # compartment needs at least 3 such cases (one minimum in every compartment
+  # table since 2026-09-18).
   case_means <- rowMeans(cbind(d$ki67_wholesection, d$ki67_region1, d$ki67_region2),
                          na.rm = TRUE)
-  ok <- !is.na(d$spatial_region) & is.finite(case_means)
-  grp <- d$spatial_region[ok]
-  keep <- grp %in% names(which(table(grp) >= 2))
+  ok <- !is.na(d$spatial_region) & !is.na(d$ki67_wholesection) &
+        (!is.na(d$ki67_region1) | !is.na(d$ki67_region2))
+  grp <- as.character(d$spatial_region[ok])
+  keep <- grp %in% names(which(table(grp) >= 3))
   ref <- kruskal.test(case_means[ok][keep] ~ factor(grp[keep]))
   expect_equal(unname(kw$statistic), unname(ref$statistic), tolerance = 1e-6)
   expect_equal(kw$p_value, ref$p.value, tolerance = 1e-8)
@@ -343,7 +341,11 @@ test_that("the variability plot does not error when no case has two values to co
     d <- data.frame(b1 = c(10, 20, 30, 40, 50, 60), b2 = NA_real_)
     o <- ClinicoPath:::ihcheterogeneityOptions$new(biopsy1 = "b1", biopsy2 = "b2",
                                                   show_variability_plots = TRUE)
-    an <- ClinicoPath:::ihcheterogeneityClass$new(options = o, data = d); an$run()
+    an <- ClinicoPath:::ihcheterogeneityClass$new(options = o, data = d)
+    # Since 2026-09-18 the gate counts cases with two regions, so .run() rejects
+    # these data; a state saved by an older version can still reach the renderer.
+    expect_error(an$run(), "At least 5 complete cases")
+    an$results$variabilityplot$setState(list(whole_section = NULL, biopsy_data = d, cv_floor = 0))
     grDevices::png(tempfile(fileext = ".png")); on.exit(grDevices::dev.off(), add = TRUE)
     expect_false(an$.__enclos_env__$private$.variabilityplot(
         an$results$variabilityplot, ggtheme = ggplot2::theme_minimal(), theme = list()))

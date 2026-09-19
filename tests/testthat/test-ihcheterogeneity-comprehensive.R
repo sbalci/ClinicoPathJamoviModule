@@ -187,7 +187,7 @@ test_that("ihcheterogeneity comprehensive analysis mode works", {
       biopsy3 = "ki67_region3",
       analysis_type = "comprehensive",
       variance_components = TRUE,
-      power_analysis = TRUE,
+      sample_size_planning = TRUE,
       show_variability_plots = TRUE
     )
   }, NA)
@@ -440,10 +440,10 @@ test_that("ihcheterogeneity power analysis works", {
     wholesection = "ki67_wholesection",
     biopsy1 = "ki67_region1",
     biopsy2 = "ki67_region2",
-    power_analysis = TRUE
+    sample_size_planning = TRUE
   )
 
-  expect_true(result$poweranalysistable$visible)
+  expect_true(result$samplesizetable$visible)
 })
 
 test_that("ihcheterogeneity generates clinical recommendations", {
@@ -526,7 +526,7 @@ test_that("ihcheterogeneity works with all features enabled", {
       correlation_threshold = 0.80,
       show_variability_plots = TRUE,
       variance_components = TRUE,
-      power_analysis = TRUE,
+      sample_size_planning = TRUE,
       generate_recommendations = TRUE,
       showSummary = TRUE,
       showGlossary = TRUE
@@ -587,7 +587,7 @@ test_that("ihcheterogeneity results have expected structure", {
   expect_true(exists("samplingbiastable", result))
   expect_true(exists("variancetable", result))
   expect_true(exists("spatialanalysistable", result))
-  expect_true(exists("poweranalysistable", result))
+  expect_true(exists("samplesizetable", result))
 })
 
 # ============================================================================

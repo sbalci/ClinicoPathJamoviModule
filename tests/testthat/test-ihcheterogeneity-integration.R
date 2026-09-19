@@ -64,7 +64,7 @@ test_that("ihcheterogeneity workflow: basic → comprehensive analysis", {
     spatial_id = "spatial_id",
     analysis_type = "comprehensive",
     variance_components = TRUE,
-    power_analysis = TRUE,
+    sample_size_planning = TRUE,
     generate_recommendations = TRUE
   )
 
@@ -181,7 +181,7 @@ test_that("ihcheterogeneity workflow: Ki67 quality assessment", {
     correlation_threshold = 0.75,
     show_variability_plots = TRUE,
     variance_components = TRUE,
-    power_analysis = TRUE,
+    sample_size_planning = TRUE,
     generate_recommendations = TRUE,
     showSummary = TRUE
   )

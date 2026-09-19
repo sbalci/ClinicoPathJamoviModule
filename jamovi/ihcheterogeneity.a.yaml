@@ -6,6 +6,26 @@ menuSubgroup: IHC Analysis
 version: '1.0.81'
 jas: '1.2'
 
+description:
+    main: >
+        Quantifies how well regional IHC measurements (biopsies, cores, fields) represent a case.
+        With a reference measurement (whole section, hotspot or overall score) it reports the
+        Spearman correlation of each region with the reference, the absolute-agreement ICC(2,1),
+        the per-case coefficient of variation, and, for each region, the mean difference from the
+        reference with its 95 percent CI and Bland-Altman limits of agreement. Without a reference
+        it compares the regions with one another. Each difference is judged against a margin set
+        by the user (bias_margin, default 5 percent of the comparison mean): ruled out when its
+        90 percent CI lies inside the margin (two one-sided tests), shown to be material when a
+        Bonferroni-adjusted CI lies entirely beyond it, and inconclusive otherwise. Optional
+        variance components, sample-size planning for ICC precision (Bonett 2002) and
+        comparisons between spatial compartments.
+    R:
+        dontrun: false
+        usage: |
+            # data <- read.csv("ihc_heterogeneity.csv")
+            # ihcheterogeneity(data = data, wholesection = "ki67_wholesection",
+            #                  biopsy1 = "ki67_region1", biopsy2 = "ki67_region2")
+
 options:
     - name: data
       type: Data
@@ -26,7 +46,7 @@ options:
             Example: Ki67 proliferation index (0-100 percent), ER H-score (0-300), PR percentage (0-100 percent).
       default: NULL
     - name: biopsy1
-      title: Regional Measurement 1 (Required)
+      title: Regional Measurement 1
       type: Variable
       default: NULL
       suggested:
@@ -84,7 +104,7 @@ options:
         - numeric
       description:
           R: >
-            additional simulated biopsy measurements
+            Further regional measurements, any number, analysed like Regional Measurements 1 to 4.
       default: NULL
 
     - name: spatial_id
@@ -96,7 +116,11 @@ options:
         - factor
       description:
           R: >
-            identifier for spatial regions or tissue areas (e.g., Central/Invasive, Preinvasive/Invasive)
+            Identifier for spatial regions or tissue areas (e.g., Central/Invasive,
+            Preinvasive/Invasive). Compartments are listed in the level order of the variable;
+            cases without an identifier are left out of the compartment tables. In R, convert a
+            haven-labelled code column with haven::as_factor() first, or the codes are shown
+            instead of the labels.
       default: NULL
 
     - name: compareCompartments
@@ -105,8 +129,9 @@ options:
       default: false
       description:
           R: >
-            Perform statistical comparison of heterogeneity patterns between spatial compartments.
-            Requires spatial_id variable. Compares ICC, CV, and bias across compartments.
+            Compares the ICC, the mean per-case CV and, when a reference is supplied, the mean
+            bias between spatial compartments. Requires the Spatial Region ID variable;
+            compartments need at least 3 cases.
 
     - name: compartmentTests
       title: Compartment comparison tests
@@ -114,8 +139,10 @@ options:
       default: false
       description:
           R: >
-            Perform statistical tests to determine if heterogeneity differs significantly between compartments.
-            Uses Levene's test for variance equality and Kruskal-Wallis for distributional differences.
+            Tests whether heterogeneity differs between compartments: Kruskal-Wallis test on the
+            per-case CV (is one compartment more heterogeneous?), Brown-Forsythe test on the spread
+            of per-case CVs, and Kruskal-Wallis test on the per-case mean biomarker level.
+            Compartments need at least 3 cases.
 
     - name: analysis_type
       title: Analysis focus
@@ -146,11 +173,12 @@ options:
         - name: stratified
           title: 'Stratified Sampling'
         - name: unknown
-          title: 'Unknown/Mixed'
+          title: 'Not specified'
       default: unknown
       description:
           R: >
-            biopsy sampling strategy used
+            How the regions were chosen. Recorded for reporting only: it changes no computation,
+            and systematic or stratified sampling adds a note on how to read the estimates.
 
     - name: cv_threshold
       title: CV Threshold for Acceptable Variability
@@ -160,10 +188,9 @@ options:
       default: 20.0
       description:
           R: >
-            Coefficient of variation threshold for acceptable sampling variability.
-            Typical clinical values: 15-25 percent for immunohistochemistry (Ki67, ER, PR),
-            10-20 percent for molecular assays, 20-30 percent for heterogeneous markers (HER2, PD-L1).
-            Lower values indicate more stringent quality requirements.
+            Largest acceptable mean per-case coefficient of variation, in percent. The CV is graded
+            low at or below half of this value, moderate up to it and high above it. Choose it for
+            your marker and scoring method before looking at the results.
 
     - name: correlation_threshold
       title: Minimum acceptable correlation
@@ -173,10 +200,23 @@ options:
       default: 0.80
       description:
           R: >
-            Minimum Spearman correlation between biopsy and whole section measurements.
-            Clinical guidelines: >=0.80 excellent agreement, >=0.70 good agreement,
-            >=0.60 moderate agreement, <0.60 poor agreement.
-            Higher values indicate better representativeness of biopsy samples.
+            Smallest acceptable Spearman correlation. With a reference, every region must meet it on
+            its own (the lowest regional correlation is graded); without one, the mean correlation
+            between regions is graded. Choose it before looking at the results.
+
+    - name: bias_margin
+      title: Systematic difference margin (%)
+      type: Number
+      min: 0.5
+      max: 50.0
+      default: 5.0
+      description:
+          R: >
+            Largest systematic difference, as a percentage of the comparison mean (the reference,
+            or the other regions), that is still clinically acceptable. A difference is ruled out
+            when its 90 percent CI lies inside the margin (two one-sided tests), and shown to be
+            material when a Bonferroni-adjusted CI lies entirely beyond it; otherwise it is
+            inconclusive. Choose it before looking at the results.
 
     - name: show_variability_plots
       title: Variability plots
@@ -184,7 +224,9 @@ options:
       default: false
       description:
           R: >
-            display plots showing sampling variability
+            Show the regional-measurement, per-case CV and spatial plots. They are always shown
+            under the Variance and Comprehensive focuses (Comprehensive is the default), so this
+            option adds them under the Reproducibility focus.
 
     - name: variance_components
       title: Variance component analysis
@@ -192,15 +234,20 @@ options:
       default: false
       description:
           R: >
-            perform variance component decomposition
+            Two-way random-effects decomposition into between-case, within-case and method
+            variance. Always shown under the Variance and Comprehensive focuses (Comprehensive is
+            the default), so this option adds it under the Reproducibility focus.
 
-    - name: power_analysis
-      title: Power analysis
+    - name: sample_size_planning
+      title: Sample size for ICC precision
       type: Bool
       default: false
       description:
           R: >
-            perform power analysis for sample size recommendations
+            Number of cases needed to estimate the ICC with a 95 percent CI of width 0.20 or 0.10
+            (Bonett 2002), at planning ICCs of 0.75 and 0.90 and at the observed ICC, for the
+            number of measurements per case in this analysis. Always shown under the
+            Comprehensive focus.
 
     - name: generate_recommendations
       title: Clinical recommendations
@@ -208,7 +255,8 @@ options:
       default: false
       description:
           R: >
-            provide recommendations for optimal heterogeneity assessment strategy
+            Recommendations on regions per case, calibration of systematic differences and
+            quality control, derived from the results of this analysis.
 
     - name: showSummary
       title: Plain-language summary

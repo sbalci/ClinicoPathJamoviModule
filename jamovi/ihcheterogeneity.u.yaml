@@ -16,7 +16,7 @@ children:
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Regional Measurement 1 (Required)
+        label: Regional Measurement 1
         children:
           - type: VariablesListBox
             name: biopsy1
@@ -84,11 +84,15 @@ children:
         name: correlation_threshold
         format: number
         label: Correlation threshold
+      - type: TextBox
+        name: bias_margin
+        format: number
+        label: Systematic difference margin (%)
   - type: CollapseBox
     label: Additional Analyses
     children:
       - type: Label
-        label: The Comprehensive focus always includes plots, variance components and power analysis; the Variance focus includes plots and variance components. Use these toggles to add them under other focuses.
+        label: The Comprehensive focus always includes plots, variance components and sample-size planning; the Variance focus includes plots and variance components. Use these toggles to add them under other focuses.
       - type: CheckBox
         name: show_variability_plots
         label: Variability plots
@@ -96,8 +100,8 @@ children:
         name: variance_components
         label: Variance components analysis
       - type: CheckBox
-        name: power_analysis
-        label: Power analysis
+        name: sample_size_planning
+        label: Sample size for ICC precision
       - type: CheckBox
         name: generate_recommendations
         label: Clinical recommendations

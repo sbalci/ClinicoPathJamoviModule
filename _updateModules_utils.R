@@ -611,6 +611,13 @@ add_configured_module_imports <- function(module_dir, packages) {
 #
 # Called before prepare(), this drops any analyses: entry that has neither a
 # jamovi/<name>.a.yaml nor an R/<name>.b.R in the target module.
+#
+# An emptied list is written as `analyses: []`. A bare `analyses:` is YAML null,
+# and the jamovi compiler then dies with "packageInfo.analyses is not iterable"
+# before it can add the analyses routed to the module - on EVERY later run, since
+# prepare() cannot rewrite the file it failed to read. That is how JamoviTest
+# became uninstallable (2026-09-18): emptied while no analysis was routed there,
+# then unbuildable once waterfall and ihcheterogeneity were.
 prune_orphan_analyses <- function(module_dir) {
   zero <- file.path(module_dir, "jamovi", "0000.yaml")
   if (!file.exists(zero)) return(invisible(0L))
@@ -627,7 +634,13 @@ prune_orphan_analyses <- function(module_dir) {
 
   starts <- which(grepl("^  - ", lines))
   starts <- starts[starts > start & starts < end]
-  if (!length(starts)) return(invisible(0L))
+  if (!length(starts)) {
+    # left bare by an earlier run: repair it so prepare() can read the file
+    lines[start] <- sub("analyses:\\s*$", "analyses: []", lines[start])
+    writeLines(lines, zero)
+    cat("  \U0001F9F9 Repaired an empty analyses: list in 0000.yaml (null -> [])\n")
+    return(invisible(0L))
+  }
   bounds <- c(starts, end)
 
   keep <- lines[seq_len(start)]
@@ -646,7 +659,10 @@ prune_orphan_analyses <- function(module_dir) {
        tolower(paste0(nm, ".b.R")) %in% avail_r)
     if (isTRUE(has_src)) keep <- c(keep, block) else dropped <- c(dropped, nm)
   }
-  keep <- c(keep, lines[end:length(lines)])
+  if (length(keep) == start) keep[start] <- sub("analyses:\\s*$", "analyses: []", keep[start])
+  # end is length + 1 when analyses: is the last key; end:length would then count
+  # DOWN and append a literal "NA" line (unparseable YAML).
+  if (end <= length(lines)) keep <- c(keep, lines[end:length(lines)])
 
   if (length(dropped)) {
     writeLines(keep, zero)
@@ -734,7 +750,9 @@ run_child <- function(dir, code, step) {
     c("--vanilla", "-e", shQuote(sprintf('Sys.unsetenv("ELECTRON_RUN_AS_NODE"); setwd(%s); %s', deparse(dir), code))),
     stdout = TRUE, stderr = TRUE))
   status <- attr(out, "status") %||% 0L
-  if (status != 0L || any(grepl("Unable to compile|^Error|^\\s*\\^+\\s*$", out)))
+  # ^\w*Error also catches the jamovi compiler's "TypeError: packageInfo.analyses is not
+  # iterable", which exits 0: the pipeline used to document and install a half-built module.
+  if (status != 0L || any(grepl("Unable to compile|^\\w*Error|^\\s*\\^+\\s*$", out)))
     stop(step, " failed (exit ", status, "):\n", paste(utils::tail(out, 25), collapse = "\n"), call. = FALSE)
   invisible(out)
 }

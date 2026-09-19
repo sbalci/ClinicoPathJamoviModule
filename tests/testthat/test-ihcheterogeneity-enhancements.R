@@ -22,7 +22,7 @@ test_that("escapeVar handles variables with special characters", {
   expect_true(!is.null(result))
 })
 
-test_that("ICC falls back to mean correlation when psych's requirements are unmet", {
+test_that("a small cohort is rejected, and a constant region still yields a real ICC", {
   # 3 cases is below the deliberate 5-case minimum: the analysis rejects
   small_data <- data.frame(
     whole = c(50, 55, 60),
@@ -40,10 +40,10 @@ test_that("ICC falls back to mean correlation when psych's requirements are unme
     "At least 5 complete cases"
   )
 
-  # The genuine fallback path: enough cases, but a zero-variance region makes
-  # the ICC unestimable -> the table must label the value as a correlation,
-  # NOT an ICC, and carry the explanatory note.
-  set.seed(7)
+  # A zero-variance region is a measurement that cannot tell the cases apart:
+  # the absolute-agreement ICC is defined (and low). Until 2026-09-18 the module
+  # replaced it with a mean Spearman correlation; it is now computed and checked
+  # against psych, and the constant region is named in the correlation note.
   fb_data <- data.frame(
     whole = c(50, 55, 60, 45, 52, 58),
     reg1  = rep(50, 6),                       # zero variance
@@ -54,32 +54,22 @@ test_that("ICC falls back to mean correlation when psych's requirements are unme
     biopsy1 = "reg1", biopsy2 = "reg2"
   )
   repro <- res$reproducibilitytable$asDF
-  icc_row <- repro[grep("ICC", repro$metric), , drop = FALSE]
-  expect_true(nrow(icc_row) == 1)
-  expect_match(icc_row$metric, "not estimable")
+  icc_row <- repro[grepl("absolute agreement", repro$metric), , drop = FALSE]
+  expect_equal(nrow(icc_row), 1)
+  expect_equal(icc_row$value, psych::ICC(as.matrix(fb_data), lmer = FALSE)$results$ICC[2], tolerance = 1e-8)
+  expect_false(any(grepl("Mean correlation", repro$metric)))
   notes <- vapply(res$reproducibilitytable$notes, function(n) n$note, character(1))
-  expect_true(any(grepl("NOT an ICC", notes)))
+  expect_true(any(grepl("same value in every case are not defined: reg1", notes, fixed = TRUE)))
 })
 
-test_that("psych package messaging works correctly", {
-  # Mock missing psych package
-  if (requireNamespace("psych", quietly = TRUE)) {
-    skip("psych package is installed, skipping missing package test")
-  }
-
-  test_data <- read.csv(system.file("data", "ihc_heterogeneity.csv",
-                                    package = "ClinicoPath"))
-
-  result <- ihcheterogeneity(
-    data = test_data,
-    wholesection = "ki67_wholesection",
-    biopsy1 = "ki67_region1",
-    biopsy2 = "ki67_region2"
-  )
-
-  # Check for note about missing psych package
-  notes <- result$interpretation$notes
-  expect_true(any(grepl("psych", notes, ignore.case = TRUE)))
+test_that("the ICC is computed without the psych package", {
+  # 2026-09-18: ICC(2,1)/ICC(3,1) come from closed-form mean squares (psych::ICC
+  # fitted an n-level aov and took 73 s at n = 2000). There is no
+  # "psych not available" path any more, so no such note can appear.
+  src <- testthat::test_path("..", "..", "R", "ihcheterogeneity.b.R")
+  skip_if_not(file.exists(src))
+  code <- sub("#.*$", "", readLines(src, warn = FALSE))
+  expect_false(any(grepl("psych::", code, fixed = TRUE)))
 })
 
 test_that("reference-based vs inter-regional analysis modes work", {
@@ -155,11 +145,14 @@ test_that("analysis type changes behavior", {
     analysis_type = "reproducibility"
   )
 
-  # Different analysis types should produce different outputs
-  expect_false(identical(
-    result_comp$interpretation$content,
-    result_repro$interpretation$content
-  ))
+  # The focus decides which additional tables are computed and shown (it no
+  # longer adds a note to the interpretation - the Comprehensive note listed
+  # modules that had not run).
+  expect_true(result_comp$variancetable$visible)
+  expect_false(result_repro$variancetable$visible)
+  expect_true(result_comp$samplesizetable$visible)
+  expect_false(result_repro$samplesizetable$visible)
+  expect_gt(result_comp$samplesizetable$rowCount, 0)
 })
 
 test_that("threshold parameters affect interpretation", {

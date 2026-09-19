@@ -181,6 +181,10 @@ testthat::test_that("plan: a module whose last analysis left has every managed f
   capture.output(res <- plan_env$run_module(mp, reg, list(build = TRUE, install = TRUE)))
   testthat::expect_identical(res$status, "EMPTY")
   testthat::expect_false(any(grepl("name: aa", readLines(file.path(d, "jamovi", "0000.yaml")))))
+  # The emptied list must stay a LIST: a bare "analyses:" is null, and the jamovi compiler
+  # crashed on it ("packageInfo.analyses is not iterable") once analyses were routed back.
+  zero <- yaml::read_yaml(file.path(d, "jamovi", "0000.yaml"))
+  testthat::expect_true(is.list(zero$analyses) && length(zero$analyses) == 0)
   testthat::expect_false(file.exists(file.path(d, "R", "aa.b.R")))
   testthat::expect_true(file.exists(file.path(d, "R", "zzz_imports.R")))
 })
@@ -251,4 +255,19 @@ testthat::test_that("apply: writes and prunes the plan, drops a stale Collate, e
   testthat::expect_true(all(df$action == "same"))
   changes <- plan_env$.analysis_changes(plan_env$diff_module(mp, reg))
   testthat::expect_length(changes$added, 0)
+})
+
+testthat::test_that("prune: a bare analyses: left by an earlier run is repaired to an empty list", {
+  utils_path <- testthat::test_path("..", "..", "_updateModules_utils.R")
+  testthat::skip_if_not(file.exists(utils_path))
+  env <- new.env(parent = globalenv())
+  sys.source(utils_path, envir = env)
+  d <- file.path(tempfile("jt"), "JamoviTest")
+  write_tree(d, list("jamovi/0000.yaml" = c("---", "name: JamoviTest", "version: 1.0.0", "analyses:",
+                                             "usesNative: true", "...")))
+  testthat::expect_null(yaml::read_yaml(file.path(d, "jamovi", "0000.yaml"))$analyses)
+  capture.output(env$prune_orphan_analyses(d))
+  zero <- yaml::read_yaml(file.path(d, "jamovi", "0000.yaml"))
+  testthat::expect_true(is.list(zero$analyses) && length(zero$analyses) == 0)
+  testthat::expect_identical(zero$usesNative, TRUE)
 })

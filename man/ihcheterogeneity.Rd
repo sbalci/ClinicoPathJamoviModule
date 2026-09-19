@@ -19,9 +19,10 @@ ihcheterogeneity(
   sampling_strategy = "unknown",
   cv_threshold = 20,
   correlation_threshold = 0.8,
+  bias_margin = 5,
   show_variability_plots = FALSE,
   variance_components = FALSE,
-  power_analysis = FALSE,
+  sample_size_planning = FALSE,
   generate_recommendations = FALSE,
   showSummary = FALSE,
   showGlossary = FALSE,
@@ -50,48 +51,70 @@ analysis}
 
 \item{biopsy4}{Fourth tissue region biomarker measurement}
 
-\item{biopsies}{additional simulated biopsy measurements}
+\item{biopsies}{Further regional measurements, any number, analysed like
+Regional Measurements 1 to 4.}
 
-\item{spatial_id}{identifier for spatial regions or tissue areas (e.g.,
-Central/Invasive, Preinvasive/Invasive)}
+\item{spatial_id}{Identifier for spatial regions or tissue areas (e.g.,
+Central/Invasive, Preinvasive/Invasive). Compartments are listed in the
+level order of the variable; cases without an identifier are left out of
+the compartment tables. In R, convert a haven-labelled code column with
+haven::as_factor() first, or the codes are shown instead of the labels.}
 
-\item{compareCompartments}{Perform statistical comparison of heterogeneity
-patterns between spatial compartments. Requires spatial_id variable.
-Compares ICC, CV, and bias across compartments.}
+\item{compareCompartments}{Compares the ICC, the mean per-case CV and, when
+a reference is supplied, the mean bias between spatial compartments.
+Requires the Spatial Region ID variable; compartments need at least 3
+cases.}
 
-\item{compartmentTests}{Perform statistical tests to determine if
-heterogeneity differs significantly between compartments. Uses Levene's
-test for variance equality and Kruskal-Wallis for distributional
-differences.}
+\item{compartmentTests}{Tests whether heterogeneity differs between
+compartments: Kruskal-Wallis test on the per-case CV (is one compartment
+more heterogeneous?), Brown-Forsythe test on the spread of per-case CVs,
+and Kruskal-Wallis test on the per-case mean biomarker level. Compartments
+need at least 3 cases.}
 
 \item{analysis_type}{Primary focus of the heterogeneity analysis. (The
 former 'bias' level was merged into 'reproducibility': the two were
 computationally identical - the bias table is always computed when a
 reference is supplied.)}
 
-\item{sampling_strategy}{biopsy sampling strategy used}
+\item{sampling_strategy}{How the regions were chosen. Recorded for
+reporting only: it changes no computation, and systematic or stratified
+sampling adds a note on how to read the estimates.}
 
-\item{cv_threshold}{Coefficient of variation threshold for acceptable
-sampling variability. Typical clinical values: 15-25 percent for
-immunohistochemistry (Ki67, ER, PR), 10-20 percent for molecular assays,
-20-30 percent for heterogeneous markers (HER2, PD-L1). Lower values
-indicate more stringent quality requirements.}
+\item{cv_threshold}{Largest acceptable mean per-case coefficient of
+variation, in percent. The CV is graded low at or below half of this value,
+moderate up to it and high above it. Choose it for your marker and scoring
+method before looking at the results.}
 
-\item{correlation_threshold}{Minimum Spearman correlation between biopsy
-and whole section measurements. Clinical guidelines: >=0.80 excellent
-agreement, >=0.70 good agreement, >=0.60 moderate agreement, <0.60 poor
-agreement. Higher values indicate better representativeness of biopsy
-samples.}
+\item{correlation_threshold}{Smallest acceptable Spearman correlation. With
+a reference, every region must meet it on its own (the lowest regional
+correlation is graded); without one, the mean correlation between regions
+is graded. Choose it before looking at the results.}
 
-\item{show_variability_plots}{display plots showing sampling variability}
+\item{bias_margin}{Largest systematic difference, as a percentage of the
+comparison mean (the reference, or the other regions), that is still
+clinically acceptable. A difference is ruled out when its 90 percent CI
+lies inside the margin (two one-sided tests), and shown to be material when
+a Bonferroni-adjusted CI lies entirely beyond it; otherwise it is
+inconclusive. Choose it before looking at the results.}
 
-\item{variance_components}{perform variance component decomposition}
+\item{show_variability_plots}{Show the regional-measurement, per-case CV
+and spatial plots. They are always shown under the Variance and
+Comprehensive focuses (Comprehensive is the default), so this option adds
+them under the Reproducibility focus.}
 
-\item{power_analysis}{perform power analysis for sample size
-recommendations}
+\item{variance_components}{Two-way random-effects decomposition into
+between-case, within-case and method variance. Always shown under the
+Variance and Comprehensive focuses (Comprehensive is the default), so this
+option adds it under the Reproducibility focus.}
 
-\item{generate_recommendations}{provide recommendations for optimal
-heterogeneity assessment strategy}
+\item{sample_size_planning}{Number of cases needed to estimate the ICC with
+a 95 percent CI of width 0.20 or 0.10 (Bonett 2002), at planning ICCs of
+0.75 and 0.90 and at the observed ICC, for the number of measurements per
+case in this analysis. Always shown under the Comprehensive focus.}
+
+\item{generate_recommendations}{Recommendations on regions per case,
+calibration of systematic differences and quality control, derived from the
+results of this analysis.}
 
 \item{showSummary}{Display natural-language summary of heterogeneity
 analysis results}
@@ -118,7 +141,7 @@ A results object containing:
 \code{results$reproducibilitytable} \tab \tab \tab \tab \tab Correlation and reliability metrics \cr
 \code{results$samplingbiastable} \tab \tab \tab \tab \tab Systematic bias assessment between methods \cr
 \code{results$variancetable} \tab \tab \tab \tab \tab Sources of measurement variability \cr
-\code{results$poweranalysistable} \tab \tab \tab \tab \tab Sample size recommendations and power calculations \cr
+\code{results$samplesizetable} \tab \tab \tab \tab \tab Cases needed to estimate the ICC with a chosen 95 percent CI width (Bonett 2002) \cr
 \code{results$spatialanalysistable} \tab \tab \tab \tab \tab Variability across spatial regions \cr
 \code{results$compartmentComparison} \tab \tab \tab \tab \tab Statistical comparison of heterogeneity metrics between compartments \cr
 \code{results$compartmentTests} \tab \tab \tab \tab \tab Formal statistical tests comparing heterogeneity across compartments \cr
@@ -134,5 +157,23 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$reproducibilitytable)}
 }
 \description{
-IHC Heterogeneity Analysis
+Quantifies how well regional IHC measurements (biopsies, cores, fields)
+represent a case. With a reference measurement (whole section, hotspot or
+overall score) it reports the Spearman correlation of each region with the
+reference, the absolute-agreement ICC(2,1), the per-case coefficient of
+variation, and, for each region, the mean difference from the reference
+with its 95 percent CI and Bland-Altman limits of agreement. Without a
+reference it compares the regions with one another. Each difference is
+judged against a margin set by the user (bias_margin, default 5 percent of
+the comparison mean): ruled out when its 90 percent CI lies inside the
+margin (two one-sided tests), shown to be material when a
+Bonferroni-adjusted CI lies entirely beyond it, and inconclusive otherwise.
+Optional variance components, sample-size planning for ICC precision
+(Bonett 2002) and comparisons between spatial compartments.
+}
+\examples{
+# data <- read.csv("ihc_heterogeneity.csv")
+# ihcheterogeneity(data = data, wholesection = "ki67_wholesection",
+#                  biopsy1 = "ki67_region1", biopsy2 = "ki67_region2")
+
 }

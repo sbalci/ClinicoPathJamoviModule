@@ -21,7 +21,7 @@ items:
         - biopsies
         - spatial_id
         - analysis_type
-        - power_analysis
+        - sample_size_planning
 
     - name: interpretation
       title: Clinical Interpretation and Analysis Summary
@@ -37,6 +37,7 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
         - sampling_strategy
         - generate_recommendations
@@ -56,6 +57,7 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
 
     - name: assumptions
@@ -73,6 +75,7 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
 
     - name: summary
@@ -90,6 +93,7 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
 
     - name: glossary
@@ -112,6 +116,7 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
       columns:
         - name: metric
@@ -147,21 +152,45 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
       columns:
         - name: comparison
           title: 'Comparison'
           type: text
+        - name: n
+          title: 'N'
+          type: integer
         - name: mean_diff
-          title: 'Mean Difference'
+          title: 'Mean Difference (Region - Reference)'
+          type: number
+          format: zto
+        - name: ci_lower
+          title: 'Lower'
+          superTitle: '95% CI'
+          type: number
+          format: zto
+        - name: ci_upper
+          title: 'Upper'
+          superTitle: '95% CI'
+          type: number
+          format: zto
+        - name: loa_lower
+          title: 'Lower'
+          superTitle: '95% Limits of Agreement'
+          type: number
+          format: zto
+        - name: loa_upper
+          title: 'Upper'
+          superTitle: '95% Limits of Agreement'
           type: number
           format: zto
         - name: p_value
-          title: 'P-value'
+          title: 'p-value'
           type: number
           format: zto,pvalue
         - name: effect_size
-          title: 'Effect Size (Hedges'' g)'
+          title: 'Hedges'' g (paired)'
           type: number
           format: zto
         - name: clinical_impact
@@ -183,6 +212,7 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
       columns:
         - name: component
@@ -200,11 +230,11 @@ items:
           title: 'Contribution to Total Variance'
           type: text
 
-    - name: poweranalysistable
-      title: Power Analysis Results
+    - name: samplesizetable
+      title: Sample Size for ICC Precision
       type: Table
-      visible: (power_analysis || analysis_type:comprehensive)
-      description: Sample size recommendations and power calculations
+      visible: (sample_size_planning || analysis_type:comprehensive)
+      description: Cases needed to estimate the ICC with a chosen 95 percent CI width (Bonett 2002)
       clearWith:
         - wholesection
         - biopsy1
@@ -215,25 +245,28 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
       columns:
         - name: scenario
-          title: 'Analysis Scenario'
+          title: 'Scenario'
           type: text
-        - name: effect_size
-          title: 'Expected Effect Size'
+        - name: planning_icc
+          title: 'Planning ICC'
           type: number
           format: zto
-        - name: power
-          title: 'Statistical Power'
+        - name: width_current
+          title: 'Expected CI Width (current n)'
           type: number
-          format: pc
-        - name: required_n
-          title: 'Required Sample Size'
+          format: zto
+        - name: n_w20
+          title: 'Width 0.20'
+          superTitle: 'Cases Needed'
           type: integer
-        - name: recommendation
-          title: 'Recommendation'
-          type: text
+        - name: n_w10
+          title: 'Width 0.10'
+          superTitle: 'Cases Needed'
+          type: integer
 
     - name: spatialanalysistable
       title: Spatial Heterogeneity Analysis
@@ -250,6 +283,7 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
       columns:
         - name: region
@@ -285,6 +319,7 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
       columns:
         - name: metric
@@ -324,6 +359,7 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
       columns:
         - name: test_type
@@ -333,8 +369,11 @@ items:
           title: 'Statistic'
           type: number
           format: zto
-        - name: df
-          title: 'DF'
+        - name: df1
+          title: 'df1'
+          type: integer
+        - name: df2
+          title: 'df2'
           type: integer
         - name: p_value
           title: 'p-value'
@@ -361,6 +400,7 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
       renderFun: .biopsyplot
 
@@ -381,6 +421,7 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
       renderFun: .variabilityplot
 
@@ -401,12 +442,17 @@ items:
         - spatial_id
         - cv_threshold
         - correlation_threshold
+        - bias_margin
         - analysis_type
       renderFun: .spatialplot
 
 
 refs:
     - ClinicoPathJamoviModule
-    - psych
-    - devtools
+    - Koo2016
+    - McGraw1996
+    - BlandAltman1986
+    - BonettWright2000
+    - Schuirmann1987
+    - Bonett2002
 ...

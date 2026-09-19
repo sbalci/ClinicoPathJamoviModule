@@ -2329,6 +2329,7 @@ stagemigrationPart1 <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Overall Assessment
                 overall <- interpretation$overall_assessment
+                # TODO (UX): the literal "+" renders a decline as "+-0.032 (-4.4%)"; use "%+.3f".
                 table$addRow(rowKey = "c_index_interp", values = list(
                     Metric = "C-index Improvement",
                     Value = sprintf("+%.3f (%.1f%%)", overall$c_improvement, overall$c_improvement_pct),

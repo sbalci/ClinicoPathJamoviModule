@@ -2349,12 +2349,12 @@ msgstr ""
 "etkinleştirin."
 
 #: R/ihcheterogeneity.b.R
-msgid "%.0f%% CV (threshold/2)"
-msgstr "%%%.0f CV (eşik/2)"
+msgid "%s%% CV (threshold/2)"
+msgstr "%%%s CV (eşik/2)"
 
 #: R/ihcheterogeneity.b.R
-msgid "%.0f%% CV threshold"
-msgstr "%%%.0f CV eşiği"
+msgid "%s%% CV threshold"
+msgstr "%%%s CV eşiği"
 
 #: R/nogoldstandard.b.R
 msgid ""
@@ -2449,27 +2449,23 @@ msgstr "Eksik ölçüm setine sahip %d vaka hariç tutuldu."
 
 #: R/ihcheterogeneity.b.R
 msgid "%d cases analyzed with %d regional measurement each"
-msgstr "Her biri %d bölgesel ölçüm içeren %d vaka analiz edildi"
+msgstr "Her biri %2$d bölgesel ölçüm içeren %1$d vaka analiz edildi"
 
 #: R/ihcheterogeneity.b.R
 msgid ""
 "%d cases analyzed with %d regional measurement each plus a reference "
 "measurement"
-msgstr ""
-"Her biri %d bölgesel ölçüm artı bir referans ölçüm içeren %d vaka analiz "
-"edildi"
+msgstr "Her biri %2$d bölgesel ölçüm artı bir referans ölçüm içeren %1$d vaka analiz edildi"
 
 #: R/ihcheterogeneity.b.R
 msgid "%d cases analyzed with %d regional measurements each"
-msgstr "Her biri %d bölgesel ölçüm içeren %d vaka analiz edildi"
+msgstr "Her biri %2$d bölgesel ölçüm içeren %1$d vaka analiz edildi"
 
 #: R/ihcheterogeneity.b.R
 msgid ""
 "%d cases analyzed with %d regional measurements each plus a reference "
 "measurement"
-msgstr ""
-"Her biri %d bölgesel ölçüm artı bir referans ölçüm içeren %d vaka analiz "
-"edildi"
+msgstr "Her biri %2$d bölgesel ölçüm artı bir referans ölçüm içeren %1$d vaka analiz edildi"
 
 #: R/chisqposttest.b.R
 msgid ""
@@ -11210,10 +11206,7 @@ msgid ""
 "A zero-cell correction (%s) was applied to %d study/studies (%s). Corrected "
 "counts are used by all analyses and plots; the Individual Study Results "
 "table shows the raw counts."
-msgstr ""
-"%d çalışmaya (%s) sıfır hücre düzeltmesi (%s) uygulandı. Düzeltilmiş "
-"sayımlar tüm analizler ve grafikler tarafından kullanılır; Bireysel Çalışma "
-"Sonuçları tablosu ham sayımları gösterir."
+msgstr "%2$d çalışmaya (%3$s) sıfır hücre düzeltmesi (%1$s) uygulandı. Düzeltilmiş sayımlar tüm analizler ve grafikler tarafından kullanılır; Bireysel Çalışma Sonuçları tablosu ham sayımları gösterir."
 
 #: stereology/results/groupComparison.columns.title
 msgid "Aa (Mean)"
@@ -72386,8 +72379,8 @@ msgid "High"
 msgstr "Yüksek"
 
 #: R/ihcheterogeneity.b.R
-msgid "High (>%.0f%%)"
-msgstr "Yüksek (>%%%.0f)"
+msgid "High (>%s%%)"
+msgstr "Yüksek (>%%%s)"
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -74978,9 +74971,7 @@ msgstr "IHC Heterojenlik Analizi Raporu"
 msgid ""
 "IHC heterogeneity analysis was performed on %d cases with %d regional "
 "measurements each."
-msgstr ""
-"Her biri %d bölgesel ölçüme sahip %d vaka üzerinde IHC heterojenlik analizi "
-"gerçekleştirildi."
+msgstr "Her biri %2$d bölgesel ölçüme sahip %1$d vaka üzerinde IHC heterojenlik analizi gerçekleştirildi."
 
 #: package/analyses/ihcimmune.title ihcimmune/options.title ihcimmune/ui.title
 #: ihcimmune/results.title
@@ -81650,8 +81641,8 @@ msgid "Kruskal-Wallis Test (Distribution)"
 msgstr "Kruskal-Wallis Testi (Dağılım)"
 
 #: R/ihcheterogeneity.b.R
-msgid "Kruskal-Wallis Test (Per-Case Means)"
-msgstr "Kruskal-Wallis Testi (Vaka Başına Ortalamalar)"
+msgid "Kruskal-Wallis test (per-case means)"
+msgstr "Kruskal-Wallis testi (vaka başına ortalamalar)"
 
 #: R/nonparametric.b.R
 msgid ""
@@ -85241,8 +85232,8 @@ msgid "Low"
 msgstr "Düşük"
 
 #: R/ihcheterogeneity.b.R
-msgid "Low (≤%.0f%%)"
-msgstr "Düşük (≤%%%.0f)"
+msgid "Low (≤%s%%)"
+msgstr "Düşük (≤%%%s)"
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -90228,12 +90219,7 @@ msgid ""
 "parameter(s) (%d residual degrees of freedom). The usual recommendation is "
 "at least 10 studies per covariate, so estimates may be unstable and "
 "confidence intervals unreliable. Report this as exploratory only."
-msgstr ""
-"%d model parametresine katkıda bulunan bir ortak değişken ile %d çalışma "
-"üzerinde meta-regresyon (%d artık serbestlik derecesi). Olağan öneri ortak "
-"değişken başına en az 10 çalışmadır, bu nedenle tahminler kararsız ve güven "
-"aralıkları güvenilmez olabilir. Bunu yalnızca keşif amaçlı olarak "
-"raporlayın."
+msgstr "%2$d model parametresine katkıda bulunan bir ortak değişken ile %1$d çalışma üzerinde meta-regresyon (%3$d artık serbestlik derecesi). Olağan öneri ortak değişken başına en az 10 çalışmadır, bu nedenle tahminler kararsız ve güven aralıkları güvenilmez olabilir. Bunu yalnızca keşif amaçlı olarak raporlayın."
 
 #: metaanalysis/results/metaRegressionPlot.title
 msgid "Meta-Regression Plot"
@@ -94748,8 +94734,8 @@ msgid "Moderate"
 msgstr "Orta"
 
 #: R/ihcheterogeneity.b.R
-msgid "Moderate (%.0f-%.0f%%)"
-msgstr "Orta (%%%.0f-%%%.0f)"
+msgid "Moderate (%s-%s%%)"
+msgstr "Orta (%%%s-%%%s)"
 
 #: R/ihcheterogeneity.b.R
 msgid "Moderate (5-15%)"
@@ -111228,11 +111214,7 @@ msgid ""
 "courses and clinical outcomes. The study included %d patients with a %s of "
 "%.1f %s; observed durations ranged from %.1f to %.1f %s. Total person-time "
 "was %.1f %s."
-msgstr ""
-"Hasta zaman çizelgeleri, tedavi süreçlerini ve klinik sonuçları "
-"görselleştirmek için yüzücü grafikleri kullanılarak analiz edildi. Çalışmaya"
-" %.1f %s %s değerine sahip %d hasta dahil edildi; gözlenen süreler %.1f ila "
-"%.1f %s arasında değişti. Toplam kişi-zamanı %.1f %s idi."
+msgstr "Hasta zaman çizelgeleri, tedavi süreçlerini ve klinik sonuçları görselleştirmek için yüzücü grafikleri kullanılarak analiz edildi. Çalışmaya %3$.1f %4$s %2$s değerine sahip %1$d hasta dahil edildi; gözlenen süreler %5$.1f ila %6$.1f %7$s arasında değişti. Toplam kişi-zamanı %8$.1f %9$s idi."
 
 #: R/riverplot.b.R
 msgid ""
@@ -125858,8 +125840,8 @@ msgid "Regional Level"
 msgstr ""
 
 #: ihcheterogeneity/options/biopsy1.title ihcheterogeneity/ui[0][1].label
-msgid "Regional Measurement 1 (Required)"
-msgstr "Bölgesel Ölçüm 1 (Gerekli)"
+msgid "Regional Measurement 1"
+msgstr "Bölgesel Ölçüm 1"
 
 #: ihcheterogeneity/options/biopsy2.title ihcheterogeneity/ui[0][2].label
 msgid "Regional Measurement 2 (Optional)"
@@ -141671,12 +141653,12 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Spearman correlation = %s (Good agreement with %s at your %.2f threshold)"
-msgstr "Spearman korelasyonu = %s (%.2f eşiğinizde %s ile iyi uyum)"
+msgstr "Spearman korelasyonu = %1$s (%3$.2f eşiğinizde %2$s ile iyi uyum)"
 
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Spearman correlation = %s (Limited agreement with %s at your %.2f threshold)"
-msgstr "Spearman korelasyonu = %s (%.2f eşiğinizde %s ile sınırlı uyum)"
+msgstr "Spearman korelasyonu = %1$s (%3$.2f eşiğinizde %2$s ile sınırlı uyum)"
 
 #: pathologyagreement/options/correlation_method/spearman.title
 msgid "Spearman only - for ordinal or non-normal data"
@@ -146220,9 +146202,7 @@ msgstr "Çalışma tanımlayıcısı"
 msgid ""
 "Study included %d patients with %d timeline observations. Median observed "
 "duration was %.1f %s (range: %.1f to %.1f %s)."
-msgstr ""
-"Çalışmaya %d zaman çizelgesi gözlemiyle %d hasta dahil edildi. Medyan "
-"gözlenen süre %.1f %s idi (aralık: %.1f ila %.1f %s)."
+msgstr "Çalışmaya %2$d zaman çizelgesi gözlemiyle %1$d hasta dahil edildi. Medyan gözlenen süre %3$.1f %4$s idi (aralık: %5$.1f ila %6$.1f %7$s)."
 
 #: diagnosticmeta/ui[0][0][0].label
 msgid "Study Names (Required)"
@@ -163868,10 +163848,7 @@ msgstr ""
 msgid ""
 "Two-way random-effects decomposition (value = case + method + error) on %d "
 "cases measured by %d methods; components sum to the total variance."
-msgstr ""
-"%d yöntemle ölçülen %d vaka üzerinde iki yönlü rastgele etkiler ayrıştırması"
-" (değer = vaka + yöntem + hata); bileşenlerin toplamı toplam varyansa "
-"eşittir."
+msgstr "%2$d yöntemle ölçülen %1$d vaka üzerinde iki yönlü rastgele etkiler ayrıştırması (değer = vaka + yöntem + hata); bileşenlerin toplamı toplam varyansa eşittir."
 
 #: R/agreement.b.R
 msgid "Two-way variance decomposition of disagreement"
@@ -171100,10 +171077,7 @@ msgid ""
 "We analyzed <strong>%d tissue samples</strong> to understand how well "
 "measurements from <strong>%d different regions</strong> represent biomarker "
 "expression."
-msgstr ""
-"<strong>%d farklı bölgeden</strong> alınan ölçümlerin biyobelirteç "
-"ekspresyonunu ne kadar iyi temsil ettiğini anlamak için <strong>%d doku "
-"örneğini</strong> analiz ettik."
+msgstr "<strong>%2$d farklı bölgeden</strong> alınan ölçümlerin biyobelirteç ekspresyonunu ne kadar iyi temsil ettiğini anlamak için <strong>%1$d doku örneğini</strong> analiz ettik."
 
 #: R/jjpiestats.b.R
 msgid ""
@@ -174401,10 +174375,7 @@ msgid ""
 "Zero-cell correction applied (%s) to %d of %d studies (%s). Results should "
 "be interpreted with caution as corrections can introduce bias, especially in"
 " large studies."
-msgstr ""
-"%d / %d çalışmaya (%s) sıfır hücre düzeltmesi (%s) uygulandı. Düzeltmeler "
-"özellikle büyük çalışmalarda yanlılığa yol açabileceğinden sonuçlar dikkatle"
-" yorumlanmalıdır."
+msgstr "%2$d / %3$d çalışmaya (%4$s) sıfır hücre düzeltmesi (%1$s) uygulandı. Düzeltmeler özellikle büyük çalışmalarda yanlılığa yol açabileceğinden sonuçlar dikkatle yorumlanmalıdır."
 
 #: diagnosticmeta/options/zero_cell_correction.title
 msgid "Zero-cell correction method"

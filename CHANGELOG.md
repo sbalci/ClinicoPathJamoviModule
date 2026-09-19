@@ -5,6 +5,86 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-19 — `stagemigration` verdict; a tool reported "not installed" that was only off PATH
+
+### A worse staging system was recommended for adoption
+
+- **Failure mode:** `.assessSignificance()` called the C-index change "clinically significant" by `abs(delta)`, and
+  took "statistically significant" from the nested LR test "new staging adds to the original", which is significant
+  for a worse system that carries any extra factor. Simulated n=3000, C 0.728 (old) vs 0.696 (new): "RECOMMEND
+  ADOPTION", Confidence: High. The null branch printed "DO NOT ADOPT", Confidence: High for n=120, p=0.849, and also
+  whenever both tests failed (NA). The 2026-09-10 release review fixed the LR test itself and passed the verdict.
+- **Detection signal:** two synthetic scenarios run end to end that checked the VERDICT row, not the statistics
+  feeding it (one with a known worse new system, one small null cohort).
+- **Prevention rule:** same lesson as the `ihcheterogeneity` entry below. A verdict is signed: never `abs()` a
+  difference that decides "better". A non-significant result is "inconclusive", never a high-confidence "no", and
+  a test that did not run must not fall into any verdict branch. Every verdict branch gets a scenario test, including
+  one where the new method is truly worse. Filed as TODOs in `stagemigration.b.R`; not fixed yet.
+
+### "codex is not installed" - it was, just not on Claude Code's PATH
+
+- **Failure mode:** the `codex` MCP server failed with ENOENT and I told the user codex needed installing. It was in
+  `~/.local/bin`, which (like `/opt/homebrew/bin` and `/usr/local/bin`) the VS Code-launched Claude Code process never
+  had: its PATH was `/usr/bin:/bin:/usr/sbin:/sbin` plus plugin dirs, because `~/.zshrc`/`~/.zprofile` never ran.
+  Separately, codex 0.155.1 removed `codex mcp-server` (the word is now read as a TUI prompt: "stdin is not a
+  terminal"), so the configured server could not start even with the right path.
+- **Detection signal:** the user's `where codex` in their own terminal.
+- **Prevention rule:** ENOENT from an MCP server or plugin means "not on THIS process's PATH", not "not installed":
+  check `echo $PATH` and `zsh -lic 'command -v X'` before saying a tool is missing. PATH is now set in `env.PATH` of
+  `~/.claude/settings.json` (and this project's `.claude/settings.local.json`, which replaces it and keeps
+  `.venv/bin` first). After a CLI upgrade, probe the configured subcommand, not only `--version`.
+
+## 2026-09-18 — reviewing my own `ihcheterogeneity` rules: significance is not materiality
+
+- **Failure mode:** my first fix judged a systematic difference "material" when its point estimate exceeded 5% and
+  its p-value against ZERO was < 0.05, and "ruled out" only when the whole 95% CI fitted the margin. Simulated: a
+  truly 3% (non-material) offset was vetoed in up to 35% of studies - more often at larger n - while an unbiased method
+  almost never reached the green verdict at usual study sizes. Two further own choices failed the same way: grading
+  the LOWEST of k per-region correlations (the minimum of k equally good regions falls as k grows, so sampling more
+  cores worsened the verdict), and grading a single-region RMS error against the per-case CV threshold (different
+  scales: "above your threshold" beside "no case above your threshold"). Each passed my own tests.
+- **Detection signal:** a second independent review that SIMULATED verdict frequencies over a grid of n, k, noise and
+  true bias instead of checking single examples.
+- **Prevention rule:** a clinical decision rule must be judged by its operating characteristics, not by examples.
+  Materiality and equivalence are questions about a MARGIN: equivalence = 90% CI inside it (TOST, Schuirmann 1987),
+  materiality = an adjusted CI entirely beyond it, anything else is inconclusive and says so with the estimate. Never
+  grade an order statistic (minimum/maximum) against a fixed threshold; grade the pooled estimate and flag a unit only
+  when its CI excludes the threshold. Compare a quantity only with a threshold defined on the same scale.
+
+## 2026-09-18 — JamoviTest could not be built: the updater emptied its manifest into a crash
+
+- **Failure mode:** while no analysis was routed to JamoviTest, `prune_orphan_analyses()` removed every entry from
+  its `jamovi/0000.yaml` and left a bare `analyses:` (YAML null). When waterfall and ihcheterogeneity were routed
+  there, the jamovi compiler died with `TypeError: packageInfo.analyses is not iterable` after writing one `.h.R`;
+  prepare() cannot repair a file it fails to read, so every later run failed the same way. `run_child()` treated
+  the step as successful (its regex matched `^Error`, not `TypeError`), so the pipeline went on to a module with no
+  NAMESPACE and the install failed. Separately, neither shipped analysis declared `@import jmvcore`, so the module
+  had no jmvcore import and every `.()` would have been unresolved at run time.
+- **Detection signal:** "cannot install test module"; reproduced by running prepare() on a copy of JamoviTest; the
+  installed-namespace smoke check (`tools/submodule_smoke.R`) reported `UNRESOLVED . in 56 function(s)`.
+- **Prevention rule:** never leave an empty YAML key where a consumer expects a list - write `[]`. A child-process
+  step is failed by any `^\w*Error` line, not only `^Error`. Every analysis file declares the imports it needs
+  (`@import jmvcore` for `.()`), instead of relying on another analysis in the same module to bring them in.
+
+## 2026-09-18 — `ihcheterogeneity`: a bias veto that averaged the bias away, and a gate that sorted away C5
+
+- **Failure mode:** (1) the "no material systematic bias" verdict tested only the MEAN of the regions against the
+  reference, so an invasive front over-reading by 11% and a centre under-reading by 11% cancelled, and every panel said
+  "no systematic bias"; an exact constant offset (p undefined) escaped the veto entirely. (2) The minimum-case gate
+  counted rows, so a reference scored in 3 of 30 cases produced a full verdict with no small-sample notice. (3) The
+  Turkish catalogue reordered `%s ... %s ... %.2f` without `%n$` markers, so the analysis failed on every Turkish run,
+  and `tools/release_gate.py` could not see it: it compared SORTED conversion lists, which are equal for a reordering.
+  (4) While fixing, a backslash-u escape for the greater-or-equal sign typed into an R string through the Write/Edit
+  tools reached the file as the literal non-ASCII character, which R CMD check rejects.
+- **Detection signal:** the OncoPath release check (I00/I01, I06-I08, C5) with independent recomputation per region;
+  for the gate, running the corrected check on the pre-fix catalogue (old check: 0 of 5 flagged; new: 5 of 5). For
+  (4), `grep -nP "[^\x00-\x7F]" R/<file>.b.R` after writing.
+- **Prevention rule:** a veto must be evaluated on the unit a clinician substitutes (each region), not on an average
+  that lets errors cancel; decide materiality on size (share of the reference mean) AND evidence (Holm-adjusted p, or an
+  exact constant offset). Gate on the unit the statistic uses (cases with a reference and a region), and report that n
+  everywhere. A format check must compare conversions IN ORDER (or by `%n$` argument), never as a multiset. After
+  writing an R file with a tool, grep it for non-ASCII before parsing.
+
 ## 2026-09-18 — reviewing my own `waterfall` fix: three majors the fix introduced or missed
 
 - **Failure mode:** the first fix passed 431/431 tests, yet an independent review found (1) exact-boundary progression

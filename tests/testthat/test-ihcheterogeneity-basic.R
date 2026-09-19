@@ -207,7 +207,7 @@ test_that("ihcheterogeneity handles power analysis", {
     wholesection = "wholesection",
     biopsy1 = "biopsy1",
     biopsy2 = "biopsy2",
-    power_analysis = TRUE
+    sample_size_planning = TRUE
   )
 
   expect_s3_class(result, "ihcheterogeneityResults")

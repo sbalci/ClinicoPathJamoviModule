@@ -37,7 +37,7 @@
 | `correlation_threshold` | `Number` | `0.8` | Minimum Acceptable Correlation |
 | `show_variability_plots` | `Bool` | `FALSE` | Variability plots |
 | `variance_components` | `Bool` | `FALSE` | Variance component analysis |
-| `power_analysis` | `Bool` | `FALSE` | Power analysis |
+| `sample_size_planning` | `Bool` | `FALSE` | Sample size for ICC precision (Bonett 2002) |
 | `generate_recommendations` | `Bool` | `FALSE` | Clinical recommendations |
 | `showSummary` | `Bool` | `FALSE` | Plain-language summary |
 | `showGlossary` | `Bool` | `FALSE` | Statistical glossary |

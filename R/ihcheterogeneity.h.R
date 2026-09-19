@@ -19,9 +19,10 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             sampling_strategy = "unknown",
             cv_threshold = 20,
             correlation_threshold = 0.8,
+            bias_margin = 5,
             show_variability_plots = FALSE,
             variance_components = FALSE,
-            power_analysis = FALSE,
+            sample_size_planning = FALSE,
             generate_recommendations = FALSE,
             showSummary = FALSE,
             showGlossary = FALSE,
@@ -127,6 +128,12 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 min=0.5,
                 max=0.99,
                 default=0.8)
+            private$..bias_margin <- jmvcore::OptionNumber$new(
+                "bias_margin",
+                bias_margin,
+                min=0.5,
+                max=50,
+                default=5)
             private$..show_variability_plots <- jmvcore::OptionBool$new(
                 "show_variability_plots",
                 show_variability_plots,
@@ -135,9 +142,9 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 "variance_components",
                 variance_components,
                 default=FALSE)
-            private$..power_analysis <- jmvcore::OptionBool$new(
-                "power_analysis",
-                power_analysis,
+            private$..sample_size_planning <- jmvcore::OptionBool$new(
+                "sample_size_planning",
+                sample_size_planning,
                 default=FALSE)
             private$..generate_recommendations <- jmvcore::OptionBool$new(
                 "generate_recommendations",
@@ -173,9 +180,10 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..sampling_strategy)
             self$.addOption(private$..cv_threshold)
             self$.addOption(private$..correlation_threshold)
+            self$.addOption(private$..bias_margin)
             self$.addOption(private$..show_variability_plots)
             self$.addOption(private$..variance_components)
-            self$.addOption(private$..power_analysis)
+            self$.addOption(private$..sample_size_planning)
             self$.addOption(private$..generate_recommendations)
             self$.addOption(private$..showSummary)
             self$.addOption(private$..showGlossary)
@@ -196,9 +204,10 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         sampling_strategy = function() private$..sampling_strategy$value,
         cv_threshold = function() private$..cv_threshold$value,
         correlation_threshold = function() private$..correlation_threshold$value,
+        bias_margin = function() private$..bias_margin$value,
         show_variability_plots = function() private$..show_variability_plots$value,
         variance_components = function() private$..variance_components$value,
-        power_analysis = function() private$..power_analysis$value,
+        sample_size_planning = function() private$..sample_size_planning$value,
         generate_recommendations = function() private$..generate_recommendations$value,
         showSummary = function() private$..showSummary$value,
         showGlossary = function() private$..showGlossary$value,
@@ -218,9 +227,10 @@ ihcheterogeneityOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..sampling_strategy = NA,
         ..cv_threshold = NA,
         ..correlation_threshold = NA,
+        ..bias_margin = NA,
         ..show_variability_plots = NA,
         ..variance_components = NA,
-        ..power_analysis = NA,
+        ..sample_size_planning = NA,
         ..generate_recommendations = NA,
         ..showSummary = NA,
         ..showGlossary = NA,
@@ -242,7 +252,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         reproducibilitytable = function() private$.items[["reproducibilitytable"]],
         samplingbiastable = function() private$.items[["samplingbiastable"]],
         variancetable = function() private$.items[["variancetable"]],
-        poweranalysistable = function() private$.items[["poweranalysistable"]],
+        samplesizetable = function() private$.items[["samplesizetable"]],
         spatialanalysistable = function() private$.items[["spatialanalysistable"]],
         compartmentComparison = function() private$.items[["compartmentComparison"]],
         compartmentTests = function() private$.items[["compartmentTests"]],
@@ -258,8 +268,12 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="IHC Heterogeneity Analysis",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "psych",
-                    "devtools"))
+                    "Koo2016",
+                    "McGraw1996",
+                    "BlandAltman1986",
+                    "BonettWright2000",
+                    "Schuirmann1987",
+                    "Bonett2002"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -277,7 +291,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "biopsies",
                     "spatial_id",
                     "analysis_type",
-                    "power_analysis")))
+                    "sample_size_planning")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -293,6 +307,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type",
                     "sampling_strategy",
                     "generate_recommendations")))
@@ -311,6 +326,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -327,6 +343,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -343,6 +360,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -363,6 +381,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -402,6 +421,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -409,18 +429,46 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `title`="Comparison", 
                         `type`="text"),
                     list(
+                        `name`="n", 
+                        `title`="N", 
+                        `type`="integer"),
+                    list(
                         `name`="mean_diff", 
-                        `title`="Mean Difference", 
+                        `title`="Mean Difference (Region - Reference)", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="loa_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% Limits of Agreement", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="loa_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% Limits of Agreement", 
                         `type`="number", 
                         `format`="zto"),
                     list(
                         `name`="p_value", 
-                        `title`="P-value", 
+                        `title`="p-value", 
                         `type`="number", 
                         `format`="zto,pvalue"),
                     list(
                         `name`="effect_size", 
-                        `title`="Effect Size (Hedges' g)", 
+                        `title`="Hedges' g (paired)", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -442,6 +490,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -464,9 +513,9 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
-                name="poweranalysistable",
-                title="Power Analysis Results",
-                visible="(power_analysis || analysis_type:comprehensive)",
+                name="samplesizetable",
+                title="Sample Size for ICC Precision",
+                visible="(sample_size_planning || analysis_type:comprehensive)",
                 clearWith=list(
                     "wholesection",
                     "biopsy1",
@@ -477,30 +526,33 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
                         `name`="scenario", 
-                        `title`="Analysis Scenario", 
+                        `title`="Scenario", 
                         `type`="text"),
                     list(
-                        `name`="effect_size", 
-                        `title`="Expected Effect Size", 
+                        `name`="planning_icc", 
+                        `title`="Planning ICC", 
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="power", 
-                        `title`="Statistical Power", 
+                        `name`="width_current", 
+                        `title`="Expected CI Width (current n)", 
                         `type`="number", 
-                        `format`="pc"),
+                        `format`="zto"),
                     list(
-                        `name`="required_n", 
-                        `title`="Required Sample Size", 
+                        `name`="n_w20", 
+                        `title`="Width 0.20", 
+                        `superTitle`="Cases Needed", 
                         `type`="integer"),
                     list(
-                        `name`="recommendation", 
-                        `title`="Recommendation", 
-                        `type`="text"))))
+                        `name`="n_w10", 
+                        `title`="Width 0.10", 
+                        `superTitle`="Cases Needed", 
+                        `type`="integer"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="spatialanalysistable",
@@ -516,6 +568,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -555,6 +608,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -599,6 +653,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type"),
                 columns=list(
                     list(
@@ -611,8 +666,12 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="df", 
-                        `title`="DF", 
+                        `name`="df1", 
+                        `title`="df1", 
+                        `type`="integer"),
+                    list(
+                        `name`="df2", 
+                        `title`="df2", 
                         `type`="integer"),
                     list(
                         `name`="p_value", 
@@ -640,6 +699,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type"),
                 renderFun=".biopsyplot"))
             self$add(jmvcore::Image$new(
@@ -659,6 +719,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type"),
                 renderFun=".variabilityplot"))
             self$add(jmvcore::Image$new(
@@ -678,6 +739,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "spatial_id",
                     "cv_threshold",
                     "correlation_threshold",
+                    "bias_margin",
                     "analysis_type"),
                 renderFun=".spatialplot"))}))
 
@@ -704,7 +766,26 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 
 #' IHC Heterogeneity Analysis
 #'
+#' Quantifies how well regional IHC measurements (biopsies, cores, fields) 
+#' represent a case. With a reference measurement (whole section, hotspot or 
+#' overall score) it reports the Spearman correlation of each region with the 
+#' reference, the absolute-agreement ICC(2,1), the per-case coefficient of 
+#' variation, and, for each region, the mean difference from the reference 
+#' with its 95 percent CI and Bland-Altman limits of agreement. Without a 
+#' reference it compares the regions with one another. Each difference is 
+#' judged against a margin set by the user (bias_margin, default 5 percent of 
+#' the comparison mean): ruled out when its 90 percent CI lies inside the 
+#' margin (two one-sided tests), shown to be material when a 
+#' Bonferroni-adjusted CI lies entirely beyond it, and inconclusive otherwise. 
+#' Optional variance components, sample-size planning for ICC precision 
+#' (Bonett 2002) and comparisons between spatial compartments.
 #' 
+#'
+#' @examples
+#' # data <- read.csv("ihc_heterogeneity.csv")
+#' # ihcheterogeneity(data = data, wholesection = "ki67_wholesection",
+#' #                  biopsy1 = "ki67_region1", biopsy2 = "ki67_region2")
+#'
 #' @param data the data as a data frame
 #' @param wholesection Optional reference measurement for comparison with
 #'   regional measurements. Can be whole section average, hotspot area, or
@@ -719,37 +800,58 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   analysis
 #' @param biopsy3 Third tissue region biomarker measurement
 #' @param biopsy4 Fourth tissue region biomarker measurement
-#' @param biopsies additional simulated biopsy measurements
-#' @param spatial_id identifier for spatial regions or tissue areas (e.g.,
-#'   Central/Invasive, Preinvasive/Invasive)
-#' @param compareCompartments Perform statistical comparison of heterogeneity
-#'   patterns between spatial compartments. Requires spatial_id variable.
-#'   Compares ICC, CV, and bias across compartments.
-#' @param compartmentTests Perform statistical tests to determine if
-#'   heterogeneity differs significantly between compartments. Uses Levene's
-#'   test for variance equality and Kruskal-Wallis for distributional
-#'   differences.
+#' @param biopsies Further regional measurements, any number, analysed like
+#'   Regional Measurements 1 to 4.
+#' @param spatial_id Identifier for spatial regions or tissue areas (e.g.,
+#'   Central/Invasive, Preinvasive/Invasive). Compartments are listed in the
+#'   level order of the variable; cases without an identifier are left out of
+#'   the compartment tables. In R, convert a haven-labelled code column with
+#'   haven::as_factor() first, or the codes are shown instead of the labels.
+#' @param compareCompartments Compares the ICC, the mean per-case CV and, when
+#'   a reference is supplied, the mean bias between spatial compartments.
+#'   Requires the Spatial Region ID variable; compartments need at least 3
+#'   cases.
+#' @param compartmentTests Tests whether heterogeneity differs between
+#'   compartments: Kruskal-Wallis test on the per-case CV (is one compartment
+#'   more heterogeneous?), Brown-Forsythe test on the spread of per-case CVs,
+#'   and Kruskal-Wallis test on the per-case mean biomarker level. Compartments
+#'   need at least 3 cases.
 #' @param analysis_type Primary focus of the heterogeneity analysis. (The
 #'   former 'bias' level was merged into 'reproducibility': the two were
 #'   computationally identical - the bias table is always computed when a
 #'   reference is supplied.)
-#' @param sampling_strategy biopsy sampling strategy used
-#' @param cv_threshold Coefficient of variation threshold for acceptable
-#'   sampling variability. Typical clinical values: 15-25 percent for
-#'   immunohistochemistry (Ki67, ER, PR), 10-20 percent for molecular assays,
-#'   20-30 percent for heterogeneous markers (HER2, PD-L1). Lower values
-#'   indicate more stringent quality requirements.
-#' @param correlation_threshold Minimum Spearman correlation between biopsy
-#'   and whole section measurements. Clinical guidelines: >=0.80 excellent
-#'   agreement, >=0.70 good agreement, >=0.60 moderate agreement, <0.60 poor
-#'   agreement. Higher values indicate better representativeness of biopsy
-#'   samples.
-#' @param show_variability_plots display plots showing sampling variability
-#' @param variance_components perform variance component decomposition
-#' @param power_analysis perform power analysis for sample size
-#'   recommendations
-#' @param generate_recommendations provide recommendations for optimal
-#'   heterogeneity assessment strategy
+#' @param sampling_strategy How the regions were chosen. Recorded for
+#'   reporting only: it changes no computation, and systematic or stratified
+#'   sampling adds a note on how to read the estimates.
+#' @param cv_threshold Largest acceptable mean per-case coefficient of
+#'   variation, in percent. The CV is graded low at or below half of this value,
+#'   moderate up to it and high above it. Choose it for your marker and scoring
+#'   method before looking at the results.
+#' @param correlation_threshold Smallest acceptable Spearman correlation. With
+#'   a reference, every region must meet it on its own (the lowest regional
+#'   correlation is graded); without one, the mean correlation between regions
+#'   is graded. Choose it before looking at the results.
+#' @param bias_margin Largest systematic difference, as a percentage of the
+#'   comparison mean (the reference, or the other regions), that is still
+#'   clinically acceptable. A difference is ruled out when its 90 percent CI
+#'   lies inside the margin (two one-sided tests), and shown to be material when
+#'   a Bonferroni-adjusted CI lies entirely beyond it; otherwise it is
+#'   inconclusive. Choose it before looking at the results.
+#' @param show_variability_plots Show the regional-measurement, per-case CV
+#'   and spatial plots. They are always shown under the Variance and
+#'   Comprehensive focuses (Comprehensive is the default), so this option adds
+#'   them under the Reproducibility focus.
+#' @param variance_components Two-way random-effects decomposition into
+#'   between-case, within-case and method variance. Always shown under the
+#'   Variance and Comprehensive focuses (Comprehensive is the default), so this
+#'   option adds it under the Reproducibility focus.
+#' @param sample_size_planning Number of cases needed to estimate the ICC with
+#'   a 95 percent CI of width 0.20 or 0.10 (Bonett 2002), at planning ICCs of
+#'   0.75 and 0.90 and at the observed ICC, for the number of measurements per
+#'   case in this analysis. Always shown under the Comprehensive focus.
+#' @param generate_recommendations Recommendations on regions per case,
+#'   calibration of systematic differences and quality control, derived from the
+#'   results of this analysis.
 #' @param showSummary Display natural-language summary of heterogeneity
 #'   analysis results
 #' @param showGlossary Display definitions of statistical terms (ICC, CV,
@@ -770,7 +872,7 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   \code{results$reproducibilitytable} \tab \tab \tab \tab \tab Correlation and reliability metrics \cr
 #'   \code{results$samplingbiastable} \tab \tab \tab \tab \tab Systematic bias assessment between methods \cr
 #'   \code{results$variancetable} \tab \tab \tab \tab \tab Sources of measurement variability \cr
-#'   \code{results$poweranalysistable} \tab \tab \tab \tab \tab Sample size recommendations and power calculations \cr
+#'   \code{results$samplesizetable} \tab \tab \tab \tab \tab Cases needed to estimate the ICC with a chosen 95 percent CI width (Bonett 2002) \cr
 #'   \code{results$spatialanalysistable} \tab \tab \tab \tab \tab Variability across spatial regions \cr
 #'   \code{results$compartmentComparison} \tab \tab \tab \tab \tab Statistical comparison of heterogeneity metrics between compartments \cr
 #'   \code{results$compartmentTests} \tab \tab \tab \tab \tab Formal statistical tests comparing heterogeneity across compartments \cr
@@ -801,9 +903,10 @@ ihcheterogeneity <- function(
     sampling_strategy = "unknown",
     cv_threshold = 20,
     correlation_threshold = 0.8,
+    bias_margin = 5,
     show_variability_plots = FALSE,
     variance_components = FALSE,
-    power_analysis = FALSE,
+    sample_size_planning = FALSE,
     generate_recommendations = FALSE,
     showSummary = FALSE,
     showGlossary = FALSE,
@@ -847,9 +950,10 @@ ihcheterogeneity <- function(
         sampling_strategy = sampling_strategy,
         cv_threshold = cv_threshold,
         correlation_threshold = correlation_threshold,
+        bias_margin = bias_margin,
         show_variability_plots = show_variability_plots,
         variance_components = variance_components,
-        power_analysis = power_analysis,
+        sample_size_planning = sample_size_planning,
         generate_recommendations = generate_recommendations,
         showSummary = showSummary,
         showGlossary = showGlossary,

@@ -117,7 +117,7 @@ bias_result <- ihcheterogeneity(
   biopsy2 = "biopsy2",
   biopsy3 = "biopsy3",
   biopsy4 = "biopsy4",
-  analysis_type = "bias",
+  analysis_type = "reproducibility",   # the former "bias" focus was merged into it
   sampling_strategy = "systematic",
   show_variability_plots = TRUE
 )
@@ -136,7 +136,7 @@ variance_result <- ihcheterogeneity(
   analysis_type = "variability",
   variance_components = TRUE,
   cv_threshold = 20.0,
-  power_analysis = TRUE,
+  sample_size_planning = TRUE,
   generate_recommendations = TRUE
 )
 
@@ -177,7 +177,7 @@ high_hetero_result <- ihcheterogeneity(
   cv_threshold = 30.0,
   correlation_threshold = 0.70,
   variance_components = TRUE,
-  power_analysis = TRUE,
+  sample_size_planning = TRUE,
   generate_recommendations = TRUE,
   showSummary = TRUE
 )
@@ -207,7 +207,7 @@ comprehensive_result <- ihcheterogeneity(
   # Display options
   show_variability_plots = TRUE,
   variance_components = TRUE,
-  power_analysis = TRUE,
+  sample_size_planning = TRUE,
   generate_recommendations = TRUE,
   showSummary = TRUE,
   showGlossary = TRUE
@@ -288,7 +288,7 @@ workflow_a <- ihcheterogeneity(
   biopsy1 = "biopsy1",
   biopsy2 = "biopsy2",
   biopsy3 = "biopsy3",
-  analysis_type = "bias",
+  analysis_type = "reproducibility",   # the former "bias" focus was merged into it
   correlation_threshold = 0.80,
   generate_recommendations = TRUE
 )
@@ -310,7 +310,7 @@ workflow_b <- ihcheterogeneity(
   biopsy4 = "biopsy4",
   analysis_type = "variability",
   variance_components = TRUE,
-  power_analysis = TRUE,
+  sample_size_planning = TRUE,
   generate_recommendations = TRUE
 )
 

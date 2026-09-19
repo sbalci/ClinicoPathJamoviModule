@@ -54,7 +54,7 @@ test_that("ihcheterogeneity handles all analysis options combined", {
     correlation_threshold = 0.80,
     show_variability_plots = TRUE,
     variance_components = TRUE,
-    power_analysis = TRUE,
+    sample_size_planning = TRUE,
     generate_recommendations = TRUE,
     showSummary = TRUE,
     showGlossary = TRUE
