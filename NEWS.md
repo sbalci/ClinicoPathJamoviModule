@@ -21,7 +21,19 @@
   now computes the Kaplan-Meier ratio S(t)/S(s). `pcacox`: sparse PCA fitted the Cox model on the loadings
   instead of the scores, and the bootstrap optimism-corrected C-index used 1 - C. `sparsegrouplasso`:
   percentage columns showed 3333%. `competingsurvival`: error messages printed a literal `{}` instead of the
-  count. `psychopdaROC`: explicit NULL guard on a saved plot state.
+  count. `psychopdaROC`: explicit NULL guard on a saved plot state. `curemodels`: the non-mixture
+  cure fraction was flexsurvcure's logit-scale theta (an intercept-only model reported -0.90; it is
+  0.29), shape and scale were shown on the log scale, and `predictors` is optional again; the smcure
+  mixture model, which cannot be fitted without a covariate, now says so instead of failing with
+  "subscript out of bounds". `stagemigration`: the copy-ready report aborted the whole analysis
+  whenever the interpretation held more than one recommendation line (R >= 4.3), and the
+  integrated-AUC bootstrap computed timeROC's O(n^2) influence functions it never used (over 40
+  minutes at n = 2100, now under a minute).
+  `distributionfit`: the analysis could not be created (a custom `initialize()` passed arguments its
+  base class does not take), its R function had no `data` argument, and the Weibull hazard shape was
+  read from log(shape) and compared with 1, so shapes between 1 and e were called "Decreasing".
+  `classification`: two random-forest table columns used capitalised types (`Text`, `Number`), which
+  the current jamovi compiler turns into a results element instead of a column.
 - **Datasets.** 681 datasets had no help page (R CMD check: undocumented data sets). Each now has one,
   generated from the data itself by `tools/document_datasets.R` into `R/data-datasets.R`: variables with
   type, range or levels and missing counts, the analysis that uses it and the `data-raw/` script that writes

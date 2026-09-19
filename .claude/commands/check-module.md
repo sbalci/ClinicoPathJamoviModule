@@ -36,6 +36,7 @@ usage: /check-module [module] [--batch] [--auto-discover] [--functions=func1,fun
 # Unified Module Quality Checker with Auto-Discovery
 
 **Consult:** `vignettes/jamovi_module_patterns_guide.md` for correct patterns when evaluating functions.
+Dev setup (jamovi app, jmvtools, jmvcore): [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
 
 You are an expert jamovi module developer performing systematic quality assessment across multiple functions.
 
@@ -125,6 +126,7 @@ failure count is an UPPER BOUND — only 11 of 37 reproduced per-file, so re-run
 survivors by calling the wrapper directly; (3) differential runs are what catch library-default
 truncation (UpSetR `nsets = 5` silently dropped venn's 6th/7th set) — no schema check can see it;
 (4) one R process per agent: 14 concurrent package loads drove load average past 60 and cost ~25 min each.
+Since jamovi 28.3: a `type: Text` inside a Table's `columns:` (e.g. classification.r.yaml) is a column type, not a `Text` result item; parse the YAML, don't grep (release_gate.py check_min_app skips columns).
 
 ## Check Profiles
 
@@ -163,6 +165,7 @@ truncation (UpSetR `nsets = 5` silently dropped venn's 6th/7th set) — no schem
   - No used-but-unimported bare symbols: every infix operator (`%>%`, `%||%`, …) and unqualified call must resolve from the module's own `NAMESPACE` — `Imports:` alone puts nothing in scope (guide §19)
   - UI label conventions (action-verb→noun, sentence-case controls); named-HTML-symbol-entities → Unicode
   - No orphaned non-analysis source files shipped in the build
+  - `minApp` covers the jamovi 28.3 features: a `type: File` option or `type: Text` result needs `minApp: 28.3.0` in `jamovi/0000.yaml` (module-wide; the maintainer's release decision). Run `python3 tools/release_gate.py` (`--root ../<sibling>` for a submodule): a `check_min_app` FAIL blocks release; its `mode: vector` WARN is advisory. See [Version Gating: minApp](../../vignettes/jamovi_module_patterns_guide.md#version-gating-minapp)
 - **Time:** ~10 minutes per function
 
 ## Auto-Discovery Algorithm

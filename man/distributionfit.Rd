@@ -5,6 +5,7 @@
 \title{Distribution Selection and Goodness-of-Fit}
 \usage{
 distributionfit(
+  data,
   elapsedtime,
   outcome,
   explanatory,
@@ -33,6 +34,8 @@ distributionfit(
 )
 }
 \arguments{
+\item{data}{the data as a data frame}
+
 \item{elapsedtime}{Time to event or censoring}
 
 \item{outcome}{Event indicator (1 = event, 0 = censored)}

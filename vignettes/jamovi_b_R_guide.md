@@ -2,6 +2,8 @@
 
 This document provides an exhaustive guide to writing `.b.R` files for jamovi module development. The `.b.R` file is the computational core of your analysis, containing all the R code that performs calculations, data processing, and result generation.
 
+> **Setup:** installing jamovi 28.3+, jmvtools and the current jmvcore (needed for `File`, `Text` and vector images) is covered in [jamovi_module_patterns_guide.md → Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
+
 ## Table of Contents
 
 1. [Introduction: Architecture and Role](#1-introduction-architecture-and-role)
@@ -387,6 +389,8 @@ status_column <- self$data[[self$options$statusVariable]]
 group_column <- self$data[[self$options$groupVariable]]
 ```
 
+A user-selected side file (a lexicon, a reference table) does not arrive through `self$data`: it comes through a `File` option (jamovi 28.3+). See [Reading a `File` Option](#reading-a-file-option-jamovi-283).
+
 ### Data Validation and Quality Assessment
 
 ```R
@@ -642,7 +646,8 @@ color_scheme <- self$options$colorScheme %||% "default"
     options <- self$options
     issues <- list()
     
-    # Required options check
+    # Required options check (not for File options: their value is a list,
+    # so test is.null() / length() == 0 instead - see "Reading a File Option")
     required_options <- c("outcome", "timeVariable")
     missing_options <- sapply(required_options, function(opt) {
         is.null(options[[opt]]) || options[[opt]] == ""
@@ -753,6 +758,56 @@ color_scheme <- self$options$colorScheme %||% "default"
 }
 ```
 
+### Reading a `File` Option (jamovi 28.3+)
+
+A `File` option is the sanctioned way for an analysis to consume a user-supplied file. It replaces the old hack of a `String` option holding a path, which does not work on jamovi cloud and relies on deprecated Electron features. Schema: [jamovi_a_yaml_guide.md → `File`](jamovi_a_yaml_guide.md#file-jamovi-283). It needs jamovi 28.3 and a module-wide `minApp: 28.3.0` decision: see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images).
+
+| Declaration | Unset | Set |
+|---|---|---|
+| single | `NULL` | `list(path=, filename=)` |
+| `multiple: true` | `list()` | a list of `list(path=, filename=)` entries |
+
+`path` is a copy in the session temp dir; `filename` is the user's original name.
+
+- jamovi checks the path before `.run()` and rejects a missing file with `The file '<filename>' needs to be re-selected` (also when an `.omv` is reopened without the file). No backend `file.exists()` check is needed. The file is stored inside the `.omv` when the analysis is saved.
+- The generic required-option check `is.null(x) || x == ""` breaks on a File value (a list). Test `is.null(f)` (single) or `length(f) == 0` (multiple); loop a multiple option with `for (f in self$options$refs)`.
+- **The file is untrusted input.** `extensions:` only filters the file browser; R does not enforce it (a `.xlsx` passed to a `[csv, txt]` option is accepted), so validate format, columns and size yourself. Never `source()`, `eval()`, `parse()`, `readRDS()` or `load()` it; prefer plain-text readers. `filename` is user-controlled text: `htmltools::htmlEscape()` it for Html, [`.mdEscape()`](#text-content-population-jamovi-283) it for Text.
+- Add the File option to the `clearWith:` of every result that depends on the file. Image state gets only the small plot-ready data derived from the file, never the file contents.
+
+```R
+.readLexicon = function() {
+    f <- self$options$lexicon
+    if (is.null(f))
+        return(NULL)                      # nothing selected yet: not an error
+    # extensions: in .a.yaml only filters the file browser; R does not enforce it
+    if ( ! grepl("\\.(csv|txt)$", f$filename, ignore.case = TRUE))
+        jmvcore::reject(.("The lexicon must be a .csv or .txt file"))
+    if (file.size(f$path) > 5e6)
+        jmvcore::reject(.("The lexicon file is larger than 5 MB"))
+    # wrap only the third-party reader; never wrap jmvcore::reject()
+    lex <- tryCatch(
+        utils::read.csv(f$path, stringsAsFactors = FALSE),
+        error = function(e) NULL)
+    if (is.null(lex) || ! all(c("term", "score") %in% names(lex)))
+        jmvcore::reject(.("The lexicon needs 'term' and 'score' columns"))
+    lex
+}
+```
+
+**Testing.** From plain R pass a path string (a character vector for `multiple`; `filename` becomes `basename(path)`) or `list(path=, filename=)`. CRAN jmvcore has no `OptionFile`, so guard the test ([install the current jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore) to run it):
+
+```R
+test_that("lexicon is read from the File option", {
+    skip_if_not(exists("OptionFile", envir = asNamespace("jmvcore"), inherits = FALSE),
+                "needs jmvcore with OptionFile (install from jamovi/jamovi main)")
+    lexPath <- tempfile(fileext = ".csv")
+    utils::write.csv(data.frame(term = c("good", "bad"), score = c(1, -1)),
+                     lexPath, row.names = FALSE)
+    res <- myanalysis(data = df, lexicon = lexPath)   # hypothetical analysis
+    expect_match(res$summary$content, "2 terms")
+})
+```
+
 ## 6. Results Population Patterns
 
 ### Table Population
@@ -835,6 +890,8 @@ Populating tables defined in `.r.yaml`:
 
 ### HTML Content Population
 
+> **Narrative text belongs in `Text`, not Html.** The official jamovi guidance: "For narrative or explanatory text, prefer Text, which supports basic inline formatting without the overhead and inconsistency of hand-rolled HTML." A summary like `.generateSummaryHtml()` below becomes a `Text` result ([Text Content Population](#text-content-population-jamovi-283)) once the module's `minApp` is 28.3.0; Text has no headings (raw `<h4>` is stripped and a markdown heading is flattened to a plain paragraph), so write a heading as a `**bold**` line. Keep Html for what Text cannot express (tables, code blocks) and follow the theme-safe rules in `jamovi_library_review_guide.md`.
+
 ```R
 .populateHtmlResults = function(analysis_results) {
     # Summary interpretation
@@ -902,6 +959,36 @@ Populating tables defined in `.r.yaml`:
 }
 ```
 
+### Text Content Population (jamovi 28.3+)
+
+A `Text` result renders a small markdown subset (schema, supported markdown and tag whitelist: [jamovi_r_yaml_guide.md → `Text`](jamovi_r_yaml_guide.md#text-jamovi-283)). It needs jamovi 28.3 and the module-wide `minApp` decision in [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images). How it compares with Notice, `setNote()` and Html: [jamovi_notices_guide.md](jamovi_notices_guide.md#which-text-renderer-notice-setnote-html-or-text).
+
+Every user-supplied string (variable names, level labels, filenames) goes through this helper before it enters Text content:
+
+```R
+# Backslash-escape every ASCII punctuation character so user-supplied text
+# (variable names, level labels, filenames) renders literally in a Text result.
+# Verified against marked 18 (the jamovi Text renderer): *, _, ~, [..](..), <tags>,
+# #, list markers, backticks and autolinks all stay literal.
+.mdEscape = function(x) gsub("([!-/:-@\\[-`{-~])", "\\\\\\1", x, perl = TRUE)
+```
+
+Fill with one string built by `jmvcore::format()` (named placeholders without underscores, not `sprintf()`), keeping the markdown markers inside the whole-sentence `.()` msgid. `lex` comes from [`.readLexicon()`](#reading-a-file-option-jamovi-283); return early first (`if (is.null(lex)) return()`) because it is `NULL` until a file is selected:
+
+```R
+self$results$summary$setContent(jmvcore::format(
+    .("**Lexicon:** {file} with {n} terms."),
+    file = private$.mdEscape(self$options$lexicon$filename),
+    n = nrow(lex)))
+```
+
+- **Always pass one character string.** Anything else is `capture.output()`'d: `setContent(1:3)` shows `[1] 1 2 3`.
+- Paragraphs split on a blank line (`"\n\n"`); a single `\n` does not break the line.
+- `*` and `_` are markdown syntax: `5.2*` or `p < .001**` get swallowed into italics or bold. Write `\*` in markdown, i.e. `"\\*"` inside an R string literal.
+- Raw HTML is stripped, so Text is XSS-safe, but unescaped user strings can still inject formatting or links (GFM autolinks turn `http://...`, `www.x.com`, `a@b.org` into links). That is what `.mdEscape()` prevents.
+- HTML entities (`&mdash;`, `&nbsp;`, `&#8212;`) are not decoded (only `&lt; &gt; &amp; &quot; &#39;`) and render literally: write the real character as a `\uXXXX` escape in R source.
+- **Testing:** `$content` returns the raw markdown (assert on the `**` markers and `\*` escapes); `isFilled()` is FALSE for `""`. Guard the test like the [File test](#reading-a-file-option-jamovi-283), with `"Text"` in place of `"OptionFile"`.
+
 ### Plot State Management
 
 ```R
@@ -950,6 +1037,8 @@ Populating tables defined in `.r.yaml`:
     }
 }
 ```
+
+`mode: vector` on an Image in `.r.yaml` (jamovi 28.3+) renders it as SVG, crisper on hi-res screens, with no renderer change. Set it statically in `.r.yaml` (not via `image$setMode()`) and avoid it for plots with many marks (scatter, QQ, large KM curves, big heatmaps): see [Rendering Mode](jamovi_plots_guide.md#rendering-mode-raster-vs-vector-jamovi-283).
 
 ## 7. Helper Functions and Code Organization
 
@@ -2135,6 +2224,10 @@ advancedSurvivalClass <- if (requireNamespace('jmvcore', quietly = TRUE))
 }
 ```
 
+#### Testing File and Text Analyses
+
+Under CRAN jmvcore, tests of an analysis whose `.h.R` uses `OptionFile` or `Text` fail with `'OptionFile' is not an exported object from 'namespace:jmvcore'`. Install the current jmvcore ([Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore)) and skip-guard those tests ([example](#reading-a-file-option-jamovi-283); policy: [Testing Under CRAN jmvcore](jamovi_module_patterns_guide.md#testing-under-cran-jmvcore)).
+
 ## 15. Best Practices
 
 ### Code Quality Standards
@@ -2206,5 +2299,36 @@ advancedSurvivalClass <- if (requireNamespace('jmvcore', quietly = TRUE))
     return(private$.combineChunkResults(results))
 }
 ```
+
+#### Issue: `'OptionFile' is not an exported object from 'namespace:jmvcore'`
+
+**Symptoms:**
+- `devtools::load_all()` succeeds, but running the analysis from R (testthat, the R wrapper, examples in `R CMD check`) fails with this message (or the same for `'Text'`)
+- The analysis runs inside jamovi 28.3, which bundles its own jmvcore
+
+**Solutions:**
+1. The generated `.h.R` uses a jamovi 28.3 type but the dev R library has the CRAN jmvcore. CRAN and GitHub builds are both labelled 2.7.38, so `packageVersion()` cannot tell them apart
+2. Install the current jmvcore: [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore)
+3. Check with `exists("OptionFile", envir = asNamespace("jmvcore"), inherits = FALSE)`
+4. Skip-guard tests that must also run under CRAN jmvcore ([§14](#testing-file-and-text-analyses))
+
+#### Issue: Text Turned Italic/Bold or Became a Link
+
+**Symptoms:**
+- Asterisks vanish from `5.2*` or `p < .001**` and the text around them turns italic or bold
+- A URL, `www.` host or e-mail address in user-supplied text becomes a link
+
+**Solutions:**
+1. `Text` results are markdown (GFM, with autolinks). Escape a literal `*` in your own strings as `"\\*"` in the R string literal
+2. Pass every user-supplied string through `.mdEscape()` ([§6](#text-content-population-jamovi-283))
+
+#### Issue: "The file ... needs to be re-selected"
+
+**Symptoms:**
+- The analysis shows `The file '<filename>' needs to be re-selected` instead of results, e.g. when an `.omv` is reopened without the file
+
+**Solutions:**
+1. jamovi's option check (before `.run()`) found no file at the `File` option's path. The user re-selects the file; no backend change is needed
+2. In tests, write the file (e.g. to a `tempfile()`) before passing its path to the option
 
 This comprehensive guide provides the foundation for implementing sophisticated, reliable, and maintainable `.b.R` files in jamovi modules. The patterns and examples demonstrate best practices for clinical research applications while ensuring robust error handling and optimal performance.

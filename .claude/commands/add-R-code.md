@@ -78,6 +78,7 @@ This command sets up the infrastructure for `.generateRCode()` in a jamovi analy
    - Build analysis-specific R code using `sprintf()` to inject parameters
    - Use upstream packages (stats, MASS, mixOmics, ggplot2, etc.)
    - Follow the pattern from `variablebiplot.b.R` (lines 1090-1424) for a complete example
+   - A `type: File` option (jamovi 28.3+) appears in the code by `self$options$<x>$filename` (`deparse()`-quoted), never `$path` (a session temp copy), as `asSource()` does; with `multiple: true`, use `vapply(self$options$<x>, function(f) f$filename, character(1))`; keep `rCode` as `Html`, since `Text` has no code blocks
 
 4. **Update the call in `.run()`**:
    - Match the parameters you defined

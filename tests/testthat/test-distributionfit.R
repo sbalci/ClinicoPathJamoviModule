@@ -60,3 +60,14 @@ test_that('distributionfit analysis works', {
   expect_true(file.exists(omv_path))
 })
 
+
+test_that("the analysis constructs and reads the Weibull shape on its natural scale", {
+  # A custom initialize() passed arguments distributionfitBase does not take, so the class
+  # could never be created; and .getHazardShape() compared log(shape) with 1.
+  set.seed(3); t <- rweibull(400, shape = 1.6, scale = 20)
+  expect_no_error(ClinicoPath:::distributionfitClass$new(
+    options = ClinicoPath:::distributionfitOptions$new(), data = data.frame(t = t)))
+  m <- flexsurv::flexsurvreg(survival::Surv(t, rep(1, 400)) ~ 1, dist = "weibull")
+  f <- ClinicoPath:::distributionfitClass$private_methods$.getHazardShape
+  expect_equal(f("weibull", m), "Increasing")   # log(1.67) = 0.51 < 1 used to read "Decreasing"
+})

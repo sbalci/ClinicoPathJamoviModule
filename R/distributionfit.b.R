@@ -557,7 +557,9 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (dist_name == "exponential") {
                 return("Constant")
             } else if (dist_name == "weibull") {
-                shape_param <- model$res.t["shape", "est"]
+                # res, not res.t: res.t holds log(shape), which was compared with 1, so any
+                # shape between 1 and e (increasing hazard) was called "Decreasing".
+                shape_param <- model$res["shape", "est"]
                 if (shape_param < 1) {
                     return("Decreasing")
                 } else if (shape_param > 1) {
@@ -688,21 +690,8 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             self$results$methodExplanation$setContent(explanation_text)
         }
-    ),
-    
-    public = list(
-        
-        initialize = function(options, data = NULL, datasetId = "", analysisId = "", revision = 0) {
-            super$initialize(
-                options = options,
-                data = data,
-                datasetId = datasetId,
-                analysisId = analysisId,
-                revision = revision,
-                pause = NULL,
-                completeWhenFilled = FALSE,
-                requiresMissings = FALSE
-            )
-        }
     )
+    # (A custom public initialize() passed pause/completeWhenFilled/requiresMissings to
+    # distributionfitBase, whose initialize() does not take them, so the analysis could
+    # never be constructed. The generated base already passes them to jmvcore.)
 )

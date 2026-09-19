@@ -17,7 +17,10 @@ reviewer against this project's submodules:
 | `jamovi-library-audit/2026-09-16 <Module>.md` (×4) | OncoPath, ClinicoPathDescriptives, jjstatsplot, meddecide (round 4) | 2026-09-16 |
 
 Every rule below is something the reviewer *actually raised*, on real files, with
-severity attached. Nothing here is speculative.
+severity attached. Nothing here is speculative. The only exception is the few items
+marked **anticipatory**: they cover the jamovi 28.3 features (File option, Text result,
+Image `mode: vector`), come from the release and dev.jamovi.org, and have not been
+raised by the reviewer yet.
 
 ---
 
@@ -48,7 +51,7 @@ severity attached. Nothing here is speculative.
 ## 1. The pre-submission checklist
 
 Run these before asking for a library review. Each one maps to a finding that was
-actually raised.
+actually raised, except item 10 (anticipatory).
 
 ```bash
 # 1. Render functions that read image$state without a NULL guard        [MEDIUM]
@@ -88,7 +91,14 @@ Rscript --vanilla tools/submodule_smoke.R ../<Module>   # installed namespace of
 python3 tools/release_gate.py      # FAIL lines block; read every WARN for shipped analyses
 python3 tools/release_gate.py --root ../<Module>   # the same checks on the tree the reviewer reads
 
-# 10. Everything still compiles
+# 10. jamovi 28.3 features vs module-wide minApp                        [anticipatory]
+grep -n '^minApp' jamovi/0000.yaml          # File option / Text result => must be >= 28.3.0
+grep -nE 'type: (File|Text) *$|mode: vector' jamovi/*.a.yaml jamovi/*.r.yaml
+#    a `type: Text` table COLUMN is not a Text result (false hit); release_gate.py
+#    check_min_app (run in item 9) skips columns, FAILs File/Text under minApp < 28.3.0
+#    and WARNs on mode: vector
+
+# 11. Everything still compiles
 Rscript -e 'Sys.unsetenv("ELECTRON_RUN_AS_NODE"); jmvtools::prepare(".")'
 ```
 
@@ -107,6 +117,11 @@ Plus the cheap metadata gates the reviewer checks first:
 - Every `renderFun:` resolves to a real `function(image, ...)` method.
 - No committed build artifacts (`*.tar.gz`, `*.jmo`).
 - `compilerMode: tame` on every `.u.yaml`.
+- *(anticipatory)* A `type: File` option or `type: Text` result needs `minApp: 28.3.0` in
+  `jamovi/0000.yaml`. `minApp` is module-wide, so raising it locks every jamovi 28.2-or-older
+  user out of the whole module: a deliberate release decision, never a side effect. Setup,
+  gating and testing: [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)
+  and [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
 - `NEWS.md` has a heading for the exact `DESCRIPTION` version. `_updateModules.R` rewrites
   `Version:` on every regeneration and never writes `NEWS.md`, so after each regeneration the
   submodule's changelog is one release behind until a person writes it (2026-09-16 OncoPath).
@@ -320,6 +335,11 @@ at round 4). `theme_safe_html.py` cannot see coloured text on a translucent tint
 You cannot fix this by declaring a `Notice` in `.r.yaml` — see
 [section 13](#13-the-type-notice-trap).
 
+*(anticipatory)* What you can do from jamovi 28.3: move plain narrative with no severity to a
+`type: Text` element (module-wide `minApp: 28.3.0`, see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp)).
+The Text sanitizer strips style attributes and every tag outside its whitelist, so a module
+cannot add CSS to it ([renderer table](jamovi_notices_guide.md#which-text-renderer-notice-setnote-html-or-text)).
+
 ---
 
 ## 5. Rule: `setVisible(FALSE)` is not an error mechanism
@@ -371,6 +391,7 @@ message beside it is the fix.
 | Element depends on several options | `visible: (a \|\| b)` in `.r.yaml` |
 | Fatal, user must change something | `jmvcore::reject(.("..."), code = "...")` |
 | Non-fatal warning, rest of output still valid | An always-visible `Html` notice element |
+| Explanatory / narrative text, no severity *(anticipatory)* | A `type: Text` element (jamovi 28.3+, module-wide `minApp: 28.3.0`); otherwise the `Html` element |
 | Deliberate methodological guard (e.g. no post-hoc when omnibus n.s.) | Hide it **and** explain why — this one is fine |
 | Onboarding / welcome panel before variables are chosen | `setVisible()` is fine — this is option state |
 
@@ -502,6 +523,11 @@ change. See `reference_nonascii_conversion_pitfalls`.
 
 - `gsub("&nbsp;", " ", x)` — code that *strips* entities is correct as it stands.
 - `htmltools::htmlEscape()` output — it produces only the structural five.
+
+*(anticipatory)* A `type: Text` element (jamovi 28.3+) decodes only `&lt; &gt; &amp; &quot; &#39;`:
+named **and** numeric entities (`&mdash;`, `&#8212;`) show literally, so the numeric-entity caveat
+does not apply there. `&apos;`, safe in Html, is not decoded either; use `&#39;` or a plain apostrophe. Use `\uXXXX`. Text escapes differently too: markdown-escape user text
+([`.mdEscape`](jamovi_b_R_guide.md#text-content-population-jamovi-283)), not `htmlEscape()`.
 
 ---
 
@@ -826,13 +852,13 @@ exist. It fails at runtime instead of at compile time.
 |---|---|
 | Fatal validation error | `jmvcore::reject(.("..."), code = "...")` |
 | Non-fatal warning shown inline | `type: Html` element + theme-safe styling ([section 4](#4-rule-html-output-must-be-theme-safe)) |
+| Narrative / explanatory text, no severity *(anticipatory)* | `type: Text` (jamovi 28.3+, module-wide `minApp: 28.3.0`); module cannot add CSS |
 | Dynamic notice | `jmvcore::Notice` **only** if you are not inserting it with `insert()` — see below |
 
 **Do not use `self$results$insert(999, notice)` with a `jmvcore::Notice`.** Notice
 objects hold function references that jamovi's protobuf layer cannot serialize;
-the symptom is `attempt to apply non-function`. See
-`docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md` and `R/waterfall.b.R` for the
-conversion pattern.
+the symptom is `attempt to apply non-function`. See `R/waterfall.b.R`
+(`.addNotice()` / `.renderNotices()`) for the conversion pattern.
 
 **Re-check this section when jmvtools updates.** The moment the compiler enum
 gains `Notice`, declarative notices become the right answer for every hand-styled
@@ -850,6 +876,12 @@ jmvtools::prepare(".")
 **Re-verified 2026-09-17** (jmvtools 28.3, jmvcore 2.7.38) on a clone of OncoPath: `type: Notice`
 still fails the schema; `type: Notification` compiles and `<fn>Results$new()` then fails with
 *attempt to apply non-function*.
+
+**Re-checked 2026-09-19 against jmvtools 28.3.1 (schema read, `prepare()` not re-run):** the
+installed `resultsschema.yaml` enum is now `Table, Group, Array, Image, Preformatted, Text, Html,
+Svg, State, Property, Output, Notification, Action`. Still no `Notice`, so the REJECTED comment
+below stays valid. `Svg` exists upstream but is undocumented: do not use it yet
+([Exists Upstream, Not Yet Documented](jamovi_module_patterns_guide.md#exists-upstream-not-yet-documented)).
 
 ### Say so in the code
 
@@ -1269,4 +1301,12 @@ extra attached.
 - `vignettes/jamovi_i18n_guide.md` — translatable strings
 - `vignettes/jamovi_r_yaml_guide.md` — valid result element types
 - `tools/theme_safe_html.py` — the theme-safety transform
-- `docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md` — Notice → Html migration
+- `R/waterfall.b.R` — reference Notice → Html conversion (`.addNotice()` / `.renderNotices()`)
+- jamovi 28.3 features (anticipatory):
+  [install jmvtools/jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore),
+  [minApp gating](jamovi_module_patterns_guide.md#version-gating-minapp),
+  [`File` option](jamovi_a_yaml_guide.md#file-jamovi-283),
+  [reading it safely](jamovi_b_R_guide.md#reading-a-file-option-jamovi-283),
+  [`Text` result](jamovi_r_yaml_guide.md#text-jamovi-283),
+  [`mode: vector`](jamovi_plots_guide.md#rendering-mode-raster-vs-vector-jamovi-283),
+  [renderer table](jamovi_notices_guide.md#which-text-renderer-notice-setnote-html-or-text)

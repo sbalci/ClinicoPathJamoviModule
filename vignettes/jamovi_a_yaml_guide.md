@@ -136,6 +136,10 @@ options:
 - **Current Standard**: `'1.2'`
 - **Example**: `jas: '1.2'`
 
+#### Minimum jamovi version (not an `.a.yaml` key)
+
+The minimum app version is set once per module by `minApp:` in `jamovi/0000.yaml`, not per analysis. For the [`File`](#file-jamovi-283) option and [`Text`](jamovi_r_yaml_guide.md#text-jamovi-283) results the official docs say to declare `minApp: 28.3.0` so jamovi prevents installation on older versions; the compiler does not enforce it. Raising it locks every older jamovi user out of the whole module, so it is a deliberate release decision: see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp).
+
 ### Documentation Properties
 
 #### `description` (Recommended)
@@ -186,7 +190,7 @@ options:
 
 ### Universal Option Properties
 
-These properties can be used with any option type:
+These properties can be used with any option type, except that not every type accepts `default` (see below):
 
 #### `name` (Required)
 
@@ -222,6 +226,7 @@ description:
 - **Type**: Varies by option type
 - **Purpose**: Default value when analysis is first loaded
 - **Example**: `default: true` (for Bool), `default: 0.05` (for Number)
+- **Not every type takes one**: `Level` and `File` have no `default:` property, and the compiler rejects one. A `Level` is therefore always a required argument of the generated R wrapper; a `File` gets `= NULL` in the wrapper automatically; in `.b.R` an unset File option reads `NULL` (`list()` when `multiple: true`). See [`File`](#file-jamovi-283).
 
 ---
 
@@ -373,6 +378,7 @@ Short text input field.
 
 - `default: ""` - Usually empty string
 - Best for short labels, titles, custom text
+- Not for a file the analysis reads: use [`File`](#file-jamovi-283)
 
 ### Boolean Types
 
@@ -477,6 +483,52 @@ Creates new columns in the dataset.
 - No additional properties needed
 - User specifies name for new variable
 - Analysis can write results to this column
+
+### File Input Types
+
+#### `File` (jamovi 28.3+)
+
+The user picks a file (a lexicon, stimulus list or reference table) that the analysis reads alongside the dataset. This is jamovi's sanctioned way for analyses to consume files. It replaces String options holding a path, which do not work on jamovi cloud and relied on deprecated Electron features (legacy in-repo example: `trainingFile` in `jamovi/ihcpredict.a.yaml`). (jamovi 28.3+; module-wide `minApp: 28.3.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images).)
+
+```yaml
+- name: lexicon
+  title: Lexicon
+  type: File
+  extensions:
+    - csv
+    - txt
+```
+
+**Properties**:
+
+- `name`, `title`, `hidden`, `description` - as for other options
+- `extensions` - array of extensions **without the dot** (at least one, unique). It only filters the file browser
+- `multiple` - `true` lets the user pick several files
+- **No `default:`** - the schema has no default property, so writing one is a compiler error
+
+**Generated code**: the R wrapper gives a File option `= NULL` automatically (as it gives Action `= FALSE`), and the header builds `jmvcore::OptionFile$new("lexicon", lexicon, extensions=list("csv","txt"))`, adding `multiple=TRUE` when set.
+
+**Value in R** (`self$options$lexicon`):
+
+| Option | Unset | Set |
+| --- | --- | --- |
+| single file | `NULL` | `list(path = , filename = )` |
+| `multiple: true` | `list()` | a list of `list(path = , filename = )` entries |
+
+`path` is a copy of the file in the session temp directory; `filename` is the user's original file name.
+
+- From plain R (tests, the wrapper) pass a path string (a character vector for `multiple: true`) or `list(path = , filename = )`.
+- A path that does not exist is rejected at option check, before `.run()`: `The file '<filename>' needs to be re-selected`. The same message appears when an `.omv` is reopened without the file.
+- When the analysis is saved, the file is stored inside the `.omv`.
+- Syntax mode / `asSource()` emits only the bare filename (`lexicon = "x.csv"`), never the session path; unset emits `lexicon = NULL`.
+
+**Backend rules** (the file is untrusted input):
+
+- `extensions` is not enforced in R: a `.xlsx` passed to a `[csv, txt]` option is accepted. Validate format, columns and size in `.b.R`.
+- Never `source()`, `eval()`, `parse()`, `readRDS()` or `load()` the file; prefer plain-text readers.
+- `filename` is user-controlled text: escape it before it goes into Html, and markdown-escape it before it goes into a Text result (helper: [Text Content Population](jamovi_b_R_guide.md#text-content-population-jamovi-283)).
+
+Read pattern: [Reading a `File` Option](jamovi_b_R_guide.md#reading-a-file-option-jamovi-283). UI control: [`FileSelector`](jamovi_u_yaml_guide.md#fileselector). Tests under CRAN jmvcore: [Testing Under CRAN jmvcore](jamovi_module_patterns_guide.md#testing-under-cran-jmvcore).
 
 ---
 
@@ -1116,6 +1168,12 @@ name: myanalysis    # ✓ Correct
       title: Median
   default: mean        # ✗ Should be array
   default: [mean]      # ✓ Correct
+
+# Problem: default on a File option
+- name: lexicon
+  type: File
+  default: NULL      # ✗ compiler error - File has no default property
+                     # ✓ omit it; the wrapper gets lexicon = NULL automatically
 ```
 
 ### Validation Tools
@@ -1139,6 +1197,8 @@ library(YourModule)
 # Check if analysis loads
 jmv::YourModule::youranalysis(data = data.frame())
 ```
+
+Setup (jamovi app, jmvtools and jmvcore): [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore). Analyses with `File` options or `Text` results fail under CRAN jmvcore: see [Testing Under CRAN jmvcore](jamovi_module_patterns_guide.md#testing-under-cran-jmvcore).
 
 ---
 

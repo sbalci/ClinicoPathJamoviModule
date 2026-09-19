@@ -158,6 +158,7 @@ $ARGUMENTS(data = data1, option1 = "value1", option2 = "value2")
 - **Datasets table** listing all datasets used with N, key features, and primary use
 - **One section per feature category** with subsections for basic/advanced usage
 - **Every `.a.yaml` option** demonstrated in at least one code chunk
+- **`File` option or `Text` result (jamovi 28.3+):** CRAN jmvcore lacks these classes and the call errors, so the setup chunk sets `has283 <- exists("OptionFile", envir = asNamespace("jmvcore"), inherits = FALSE)` (`"Text"` when there is no File option) and every chunk calling the analysis gets `eval = has283`. Demonstrate a `File` option by writing a small file to `tempfile()` in the chunk and passing its path. Setup: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore)
 - **Realistic function calls** using actual parameter names from `.a.yaml`
 - **Edge case section** demonstrating small samples, missing data, boundary conditions
 - **Named code chunks** (e.g., `{r basic-example}`) for easy navigation

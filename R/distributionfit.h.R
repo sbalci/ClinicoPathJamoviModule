@@ -35,7 +35,7 @@ distributionfitOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             super$initialize(
                 package="ClinicoPath",
                 name="distributionfit",
-                requiresData=FALSE,
+                requiresData=TRUE,
                 ...)
 
             private$..elapsedtime <- jmvcore::OptionVariable$new(
@@ -458,12 +458,13 @@ distributionfitBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 pause = NULL,
                 completeWhenFilled = FALSE,
                 requiresMissings = FALSE,
-                weightsSupport = 'na')
+                weightsSupport = 'auto')
         }))
 
 #' Distribution Selection and Goodness-of-Fit
 #'
 #' 
+#' @param data the data as a data frame
 #' @param elapsedtime Time to event or censoring
 #' @param outcome Event indicator (1 = event, 0 = censored)
 #' @param explanatory Explanatory variables for modeling
@@ -513,6 +514,7 @@ distributionfitBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'
 #' @export
 distributionfit <- function(
+    data,
     elapsedtime,
     outcome,
     explanatory,
@@ -545,6 +547,13 @@ distributionfit <- function(
     if ( ! missing(elapsedtime)) elapsedtime <- jmvcore::resolveQuo(jmvcore::enquo(elapsedtime))
     if ( ! missing(outcome)) outcome <- jmvcore::resolveQuo(jmvcore::enquo(outcome))
     if ( ! missing(explanatory)) explanatory <- jmvcore::resolveQuo(jmvcore::enquo(explanatory))
+    if (missing(data))
+        data <- jmvcore::marshalData(
+            parent.frame(),
+            `if`( ! missing(elapsedtime), elapsedtime, NULL),
+            `if`( ! missing(outcome), outcome, NULL),
+            `if`( ! missing(explanatory), explanatory, NULL))
+
 
     options <- distributionfitOptions$new(
         elapsedtime = elapsedtime,

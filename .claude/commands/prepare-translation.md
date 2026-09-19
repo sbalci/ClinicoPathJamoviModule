@@ -18,7 +18,7 @@ output_file: i18n-plans/$ARGUMENTS-$ARG_target_lang-translation-plan.md
 # Internationalization (i18n) Preparation & Translation Plan
 
 **Consult:** `vignettes/jamovi_i18n_guide.md` for comprehensive i18n patterns and best practices.
-**Official source:** jamovi "Module Translation" tutorial — https://dev.jamovi.org/tutorial/tuts0204-translation/ (jmvtools/compiler commands below were verified against jmvtools 28.3 / jamovi-compiler `i18n.js`).
+**Official source:** jamovi "Module Translation" tutorial — https://dev.jamovi.org/tutorial/tuts0204-translation/ (jmvtools/compiler commands below were verified against jmvtools 28.3 / jamovi-compiler `i18n.js`; the current release is jmvtools 28.3.1 — install: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore)).
 
 **Why jamovi has its own system:** R's built-in translation cannot change language "on the fly" within one R process, so jamovi ships its own catalog-based lookup instead of gettext at the R level.
 
@@ -250,6 +250,24 @@ makeSSString <- function(sstype, self) {
 
 Quick audit for this trap: any `.(` inside a top-level `function(` in `R/SANITIZED_FN.b.R` that has no `self` formal argument.
 
+### 2.8 Text results (markdown, jamovi 28.3+)
+
+A `type: Text` item renders a markdown subset ([`Text`](../../vignettes/jamovi_r_yaml_guide.md#text-jamovi-283)), so its strings are markdown source:
+
+- Wrap `setContent()` templates in `.()` and fill them with `jmvcore::format()` named placeholders (no underscores in placeholder names), not `sprintf()`. A static `content:` in `.r.yaml` is translated and extracted into `catalog.pot` like other YAML strings.
+- Markdown markers are part of the msgid (`**bold**`, `*italic*`, `- ` list items, blank-line paragraphs, `\*` escapes); the msgstr must keep the same markers. How a backslash escape appears in `.po` is unverified: check the `i18nUpdate()` output.
+- Escape only the user-controlled values passed to placeholders (variable names, level labels, filenames) with `.mdEscape()` ([Text Content Population](../../vignettes/jamovi_b_R_guide.md#text-content-population-jamovi-283)), never the translated template.
+- No HTML entities in a Text msgid (rendered literally); write the character as a `\uXXXX` escape.
+- Never put a markdown link after a space inside `.()`: jmvcore's Translator splits on the unanchored ` [..]` pattern of §4, so an untranslated `.("See [docs](https://x.org)")` displays only `See`, and `python3 tools/release_gate.py` (check_i18n_bracket) FAILs it. The §4 grep misses it because the string does not end in `]`. Pass the link through a placeholder.
+- A `File` option's `title` is a YAML string and already extracted; never wrap `$filename` in `.()`.
+
+```r
+self$results$summary$setContent(jmvcore::format(
+    .("**Lexicon:** {file} with {n} terms."),
+    file = private$.mdEscape(self$options$lexicon$filename),
+    n = nrow(lex)))
+```
+
 ---
 
 ## 3) Extraction & Update commands
@@ -341,6 +359,7 @@ False Discovery Rate (FDR) → Yanlış Keşif Oranı (YKO)
 - Verify all user-visible strings in R backend files are wrapped with `` `.` `` (YAML strings need nothing).
 - No translatable string has leading/trailing whitespace; no fragment-and-`format()` assembly.
 - Every non-R6 helper that calls `.()` takes `self` as a parameter and every caller passes it.
+- Text-item strings (2.8): msgid and msgstr carry the same markdown markers and `\*` escapes, no HTML entities, user values escaped via placeholders.
 - Confirm the NAMESPACE imports the translation helper `.` (`importFrom(jmvcore, .)` or `import(jmvcore)`).
 - `jmvtools::i18nUpdate()` ran cleanly and the `jamovi/i18n/` diff contains only SANITIZED_FN-related changes.
 - Ensure all known YAML files exist; suggest creation if missing.

@@ -27,6 +27,8 @@ Actions in jamovi allow an analysis to:
 - Enable interactive data workflows
 - Facilitate multi-stage analysis pipelines
 
+Actions send data *out*. For the reverse direction, where the user supplies a file (a CSV lexicon, a reference table) for the analysis to read, use a `type: File` option (jamovi 28.3+), not an Action: see [`File`](jamovi_a_yaml_guide.md#file-jamovi-283).
+
 ### Key Capabilities
 
 Actions enable you to:
@@ -122,6 +124,8 @@ Currently, jamovi supports only one action type:
 - **`open`**: Opens a new dataset in a new window/tab (or browser tab in web version)
 
 **Note**: The `action` field in `.a.yaml` must be set to `"open"` - this is currently the only supported value. Future jamovi versions may introduce additional action types.
+
+**Not yet:** upstream jmvcore gained an `openExternal` Action (2026-09-19). It is unreleased and undocumented; do not use it until jamovi documents it ([Exists Upstream, Not Yet Documented](jamovi_module_patterns_guide.md#exists-upstream-not-yet-documented)).
 
 ### Basic Example
 
@@ -1042,6 +1046,8 @@ safeFileWrite <- function(data, filepath, format = "csv") {
 ```
 
 ## 7. Version Compatibility
+
+> **Not a template for the jamovi 28.3 features.** An Action can degrade at run time (`is.null(option$perform)` below). A `File` option or `Text` result cannot: the generated `.h.R` constructs them, so under a jmvcore without those classes (the copy bundled with jamovi 28.2 and older, or the CRAN build in R-side tests) the analysis fails before `.b.R` runs. Their gate is `minApp: 28.3.0` in `jamovi/0000.yaml`, and `minApp` is module-wide: see [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp).
 
 ### Supporting Multiple jamovi Versions
 

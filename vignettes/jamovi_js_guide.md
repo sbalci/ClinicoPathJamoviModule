@@ -980,6 +980,7 @@ events:
 | Recursive event calls | Use flags or value comparison |
 | Performance issues | Throttle expensive calculations |
 | Desktop version issues | Test with portable jamovi installation |
+| Reading a user's file from JS/Electron, or a String option holding a path | Use a `type: File` option (jamovi 28.3+, module-wide `minApp: 28.3.0`); the old hacks fail on jamovi cloud and rely on deprecated Electron features. See [`File`](jamovi_a_yaml_guide.md#file-jamovi-283) |
 
 ## Summary
 

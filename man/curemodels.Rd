@@ -8,7 +8,7 @@ curemodels(
   data,
   time,
   status,
-  predictors,
+  predictors = NULL,
   model_type = "mixture",
   smcure_model_type = "ph",
   cure_link = "logit",
@@ -34,7 +34,8 @@ curemodels(
 
 \item{status}{Event status variable}
 
-\item{predictors}{Predictor variables for the model}
+\item{predictors}{Predictor variables for the model (optional: without them
+the model estimates the cure fraction of the whole cohort)}
 
 \item{model_type}{Type of cure model: mixture (smcure), non-mixture
 (flexsurvcure), cuRe, npcure, or all}

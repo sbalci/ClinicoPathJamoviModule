@@ -620,11 +620,11 @@ classificationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                                 list(
                                     `name`="type", 
                                     `title`="Type", 
-                                    `type`="Text"),
+                                    `type`="text"),
                                 list(
                                     `name`="classif", 
                                     `title`="Classification", 
-                                    `type`="Number"))))}))$new(options=options))
+                                    `type`="number"))))}))$new(options=options))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text",

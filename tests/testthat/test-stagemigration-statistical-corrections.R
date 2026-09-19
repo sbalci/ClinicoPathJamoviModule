@@ -883,3 +883,16 @@ testthat::test_that("RMST, SME and the glossary run without the advanced block",
     for (call in c(".calculateRMSTMetrics", ".populateRMSTAnalysis", ".calculateStageMigrationEffect", ".populateStageMigrationEffect", ".populateAbbreviationGlossary"))
         testthat::expect_true(grepl(call, body, fixed = TRUE), info = call)
 })
+
+test_that("the copy-ready report accepts several recommendation lines", {
+  # grepl() over a multi-line recommendation inside && failed with
+  # "'length = 4' in coercion to 'logical(1)'" (R >= 4.3) and aborted the whole analysis.
+  d <- data.frame(o = factor(rep(c("I", "II"), 20)), n = factor(rep(c("I", "II"), 20)),
+                  t = rexp(40), e = rbinom(40, 1, 0.5))
+  o <- ClinicoPath:::stagemigrationOptions$new(oldStage = "o", newStage = "n", survivalTime = "t",
+                                               event = "e", eventLevel = "1", generateCopyReadyReport = TRUE)
+  an <- ClinicoPath:::stagemigrationClass$new(options = o, data = d)
+  rec <- c("Keep monitoring", "We recommend implementation of the new system", "x", "y")
+  expect_no_error(an$.__enclos_env__$private$.generateCopyReadyReport(
+    list(clinical_interpretation = list(recommendation = rec))))
+})

@@ -171,7 +171,8 @@ Comprehensive guides are available in `vignettes/`:
    - State management for plots (serialization solutions)
    - Formula building patterns
    - Syntax generation (asSource methods)
-   - Output patterns (Preformatted, Tables, Plots, HTML)
+   - Output patterns (Preformatted, Tables, Plots, HTML, Text)
+   - jamovi 28.3 features (File option, Text result, vector images), `minApp` gating, and installing current jmvtools/jmvcore
    - Best practices and common pitfalls
    - Reference examples from jmvbaseR
 
@@ -376,7 +377,7 @@ Commands that trigger this: `/check-function`, `/check-function-full`, `/review-
 
 **Critical Issue:** Using `insert(999, notice)` with `jmvcore::Notice` objects causes serialization errors because Notice objects contain function references that cannot be serialized by jamovi's protobuf system.
 
-**Solution:** Convert Notice objects to HTML output items. See comprehensive guide: `docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md`
+**Solution:** Convert Notice objects to HTML output items. See `vignettes/jamovi_notices_guide.md` (the older `docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md` no longer exists). Narrative prose that is not a notice can be a `type: Text` result (markdown, jamovi 28.3+) — see the renderer table in that guide.
 
 **Status (as of 2025-12-28):**
 - ✅ **Converted:** `R/waterfall.b.R` (complete reference implementation)
@@ -402,8 +403,8 @@ See `R/waterfall.b.R` for complete working example.
   - "Context low" or "Context window exceeded" or "Error: File content (40897 tokens) exceeds maximum allowed tokens (25000). Please use offset and limit parameters to read specific portions of the file, or use the GrepTool to search for specific content."
 - in .u.yaml Label is not allowed to have the additional property "visible"
 - in .u.yaml description is not allowed
-- in .a.yaml type: Level is not allowed to have default (verified: 163/163 Level options in this module carry none). Because it can never have a default, a Level is ALWAYS a required argument of the generated R wrapper. Which types do/don't take a `default:`, and which accept NULL, is tabulated in `.claude/skills/release-review-function/SKILL.md`
-- official jamovi documentation is here './development-documentations-dev.jamovi.org-master' (an old snapshot: its options reference covers only Data, Bool, Integer, Number, List, Variable, Variables — silence there about a newer type is not permission)
+- in .a.yaml type: Level is not allowed to have default (verified: 163/163 Level options in this module carry none). Because it can never have a default, a Level is ALWAYS a required argument of the generated R wrapper. Which types do/don't take a `default:`, and which accept NULL, is tabulated in `.claude/skills/release-review-function/SKILL.md`. `type: File` (jamovi 28.3+) takes no `default:` either, but the compiler gives its wrapper argument `= NULL` (unset = `NULL`, or `list()` with `multiple: true`).
+- official jamovi documentation is here './development-documentations-dev.jamovi.org-master' (an old snapshot: its options reference covers only Data, Bool, Integer, Number, List, Variable, Variables — silence there about a newer type is not permission). Exception: `api_option-file.md` and `api_text.md` were vendored from upstream on 2026-09-19 (the jamovi 28.3 `File` option and `Text` result); the live docs are at <https://dev.jamovi.org>
 - README.md is overwritten. make changes in README.Rmd
 - errors or warnings with jmvtools::prepare() means that the module cannot function in jamovi. there should be no errors.
 - private$.checkpoint() is internal jamovi function we do not define it
@@ -420,6 +421,8 @@ See `R/waterfall.b.R` for complete working example.
   collapsed like HTML whitespace. No other HTML is honored. This is distinct from `jmvcore::Notice` content (which
   should avoid HTML). Source: jamovi dev Slack (Damian Dropmann / jonathon). See
   `vignettes/jamovi_tables_guide.md` → "Formatting Notes (Limited HTML)" and `vignettes/jamovi_notices_guide.md`.
+  A third renderer, the `type: Text` result (jamovi 28.3+), takes Markdown; `vignettes/jamovi_notices_guide.md` →
+  "Which Text Renderer? Notice, setNote, Html or Text" compares all of them.
 - you are an expert R-package and jamovi developer. you are an expert in biostatistics working with pathologists and clinicians.
 critically evaluate functions. is it mathematically and statistically accurate? is it ready to be used by clinicians and pathologists? is it ready for release?
 - The error "attempt to apply non-function" during serialization was caused by using jmvcore::Notice objects that
@@ -428,6 +431,12 @@ critically evaluate functions. is it mathematically and statistically accurate? 
 - jmvtools::check() only locates jamovi program bin file location. it does not check anything regarding module structure or code.
 - jmvtools DESCRIPTION dependencies: a package may now be listed in BOTH `Imports` and `Remotes`. The current jmvtools suppresses the CRAN-mirror download of an import when that package also appears in `Remotes`, installing it only from the remote (previously it tried CRAN first then the remote — redundant, or a failure when the package isn't on CRAN). Intended design: `Imports` *declares* the dependency, `Remotes` says *where to find* it. There's no functional install difference today if a dependency is only in `Remotes`, but list every real run-time dependency in `Imports` anyway (the reviewer "claudia" encourages it); add a `Remotes:` entry only for packages not on CRAN. See `vignettes/jamovi_module_patterns_guide.md` → "DESCRIPTION: Dependencies".
 - A submodule resolves names ONLY from its own namespace: its `R/` definitions, the always-attached base packages (`base`/`stats`/`utils`/`graphics`/`grDevices`/`methods`/`datasets`), and whatever its `NAMESPACE` imports. A **bare symbol** — `%>%` above all, and any other infix operator — needs `#' @importFrom magrittr %>%` in that module's `R/zzz_imports.R` **and** the package in `Imports:`. `Imports:` alone puts nothing in scope. `devtools::load_all()` and any interactive `library(dplyr)` hide the failure, and `R CMD check` reports only a NOTE ("no visible global function definition"), so it reaches the user as `could not find function "%>%"`. Found by the 2026-09-16 OncoPath audit: `waterfall` could not run at all. Two generator traps caused it — a `prune_imports` entry in `_updateModules_config.yaml` strips the package from the generated `DESCRIPTION`, and the since-retired `r_symbol_files` copied *named symbols*, so a roxygen-only re-export block never travelled (helpers now ship as whole files). Guarded by the bare-symbol test in `_updateModules_test_dependency_guard.R` and by `Rscript --vanilla tools/submodule_smoke.R <sibling repo>` (installed namespace). Always `--vanilla`: `~/.Rprofile` attaches magrittr in every sibling repo (the umbrella's own `.Rprofile` shadows it), so a plain `Rscript` passes there. See `vignettes/jamovi_library_review_guide.md` §19; audit work: the `library-audit` skill.
+- **jamovi 28.3 features: `File` option, `Text` result, Image `mode: vector`** (jamovi 28.3 / jmvtools 28.3.1, 2026-09-18). Full reference and install steps: `vignettes/jamovi_module_patterns_guide.md` → "jamovi 28.3 Features (File, Text, Vector Images)". Install: `install.packages("jmvtools", repos = "https://repo.jamovi.org")` plus the jamovi app ≥ 28.3; for R-side dev/tests, `remotes::install_github("jamovi/jamovi", subdir = "jmvcore")` (jamovi bundles its own jmvcore at runtime; revert with `install.packages("jmvcore")`). Traps:
+  1. CRAN jmvcore and the jamovi/GitHub build are **both labelled 2.7.38**, and only the latter has `OptionFile`/`Text`. With the CRAN build, load_all, tests and R CMD check fail with `'OptionFile' is not an exported object`. Test for the class, not the version: `exists("OptionFile", envir = asNamespace("jmvcore"), inherits = FALSE)`. Tests carry that as `skip_if_not()`.
+  2. File and Text need `minApp: 28.3.0` in `jamovi/0000.yaml`. That is **module-wide** and locks jamovi ≤ 28.2 users out of the whole submodule, so ask before raising it. The updater never touches minApp, and `python3 tools/release_gate.py [--root ../<sibling>]` fails a module that uses them without it.
+  3. `extensions:` only filters the file browser; R does not enforce it. Validate the file in `.b.R`, and never `source`/`eval`/`readRDS` it.
+  4. Text is Markdown (marked, GFM). `*`, `_`, `[..](..)` and bare URLs in user strings get formatted, so escape them with `.mdEscape` from `vignettes/jamovi_b_R_guide.md`. HTML entities are not decoded.
+  5. `mode: vector` (SVG) is only for bounded-mark plots, never scatter/QQ/jitter.
 
 
 

@@ -2,6 +2,7 @@
 
 **Source:** Analysis of jmvbaseR example module and ClinicoPath implementations
 **Date:** 2025-01-17
+**Last Updated:** 2026-09-19
 **Purpose:** Document key implementation patterns for jamovi module development
 
 ---
@@ -9,15 +10,20 @@
 ## Table of Contents
 
 1. [Module Structure](#module-structure)
-2. [Four-File Architecture](#four-file-architecture)
-3. [Data Handling Patterns](#data-handling-patterns)
-4. [State Management](#state-management)
-5. [Formula Building](#formula-building)
-6. [Syntax Generation (.asSource)](#syntax-generation)
-7. [Output Patterns](#output-patterns)
-8. [Best Practices](#best-practices)
+2. [jamovi 28.3 Features (File, Text, Vector Images)](#jamovi-283-features-file-text-vector-images) (incl. [installing jmvtools and jmvcore](#installing-current-jmvtools-and-jmvcore))
+3. [Four-File Architecture](#four-file-architecture)
+4. [Data Handling Patterns](#data-handling-patterns)
+5. [State Management](#state-management)
+6. [Formula Building](#formula-building)
+7. [Syntax Generation (.asSource)](#syntax-generation-assource)
+8. [Output Patterns](#output-patterns)
+9. [Best Practices](#best-practices)
 
 ---
+
+**Setting up or updating a dev machine?** Install jamovi 28.3+, jmvtools 28.3.1+ and
+the current jmvcore as in
+[Installing Current jmvtools and jmvcore](#installing-current-jmvtools-and-jmvcore).
 
 > **Before a library submission, read `vignettes/jamovi_library_review_guide.md`.**
 > It distils five real jamovi library audit reports into a pre-submission
@@ -79,6 +85,8 @@ analyses:
 - `ns`: Namespace for all analyses
 - `analyses`: List of functions available in menu
 - `menuGroup` / `menuSubgroup`: Menu organization
+- `minApp`: minimum jamovi version, **module-wide**. `File` options and `Text` results
+  need `28.3.0`; see [Version Gating: minApp](#version-gating-minapp) before raising it.
 
 ### DESCRIPTION: Dependencies (`Imports` vs `Remotes`)
 
@@ -153,6 +161,128 @@ default branch cannot silently change what a build pulls in.
 
 ---
 
+## jamovi 28.3 Features (File, Text, Vector Images)
+
+jamovi 28.3 and jmvtools 28.3.1 (released 2026-09-18) add a file option, a markdown text
+result and vector (SVG) plot rendering. The official pages are on
+[dev.jamovi.org](https://dev.jamovi.org); the local snapshot
+`./development-documentations-dev.jamovi.org-master` is older, except `api_option-file.md`
+and `api_text.md`, which were vendored from upstream on 2026-09-19; silence elsewhere in it
+is not permission.
+
+| Feature | Declared in | R side | Canonical guide |
+|---------|-------------|--------|-----------------|
+| `File` option | `.a.yaml` `type: File`; the compiler adds a `FileSelector` to `.u.yaml` | `self$options$x` is `NULL` or `list(path=, filename=)`; with `multiple: true`, `list()` when unset, else a list of those | [`File`](jamovi_a_yaml_guide.md#file-jamovi-283), [Reading a `File` Option](jamovi_b_R_guide.md#reading-a-file-option-jamovi-283) |
+| `Text` result | `.r.yaml` `type: Text` | `self$results$x$setContent(<one string>)`, rendered as a markdown subset | [`Text`](jamovi_r_yaml_guide.md#text-jamovi-283), [Text Content Population](jamovi_b_R_guide.md#text-content-population-jamovi-283) |
+| Vector image | `.r.yaml` Image `mode: vector` | nothing: the engine renders with `grDevices::svg()` | [Rendering Mode](jamovi_plots_guide.md#rendering-mode-raster-vs-vector-jamovi-283) |
+
+- **`File`** is, in the jamovi lead developer's words, "the new sanctioned way for analyses
+  to consume files". It replaces the old hack of a `String` option holding a path, which
+  does not work on jamovi cloud and relies on deprecated Electron features that held back
+  jamovi's Electron update (e.g. a `String` option titled 'Training Data File (CSV)').
+- **`Text`**: "For narrative or explanatory text, prefer Text, which supports basic inline
+  formatting without the overhead and inconsistency of hand-rolled HTML" (dev docs). Which
+  renderer fits which content:
+  [Which Text Renderer?](jamovi_notices_guide.md#which-text-renderer-notice-setnote-html-or-text)
+- **`mode: vector`** suits bounded-mark plots only; many-mark plots make SVGs of many MB.
+
+### Installing Current jmvtools and jmvcore
+
+Three pieces, installed separately:
+
+| Piece | Role | Source |
+|-------|------|--------|
+| jamovi app 28.3+ | Runs modules; bundles its own jmvcore at runtime (modules never ship it) | <https://www.jamovi.org/download.html> |
+| jmvtools 28.3.1+ | The compiler (`prepare()`, `install()`); `check()` only locates the app and reports its version | `https://repo.jamovi.org` |
+| jmvcore | The dev R library's copy, used by `devtools::load_all()`, testthat and `R CMD check` | [jamovi/jamovi, `main`, `jmvcore/`](https://github.com/jamovi/jamovi/tree/main/jmvcore) |
+
+```r
+# 1. jamovi app 28.3 or newer: https://www.jamovi.org/download.html
+# 2. jmvtools (compiler) 28.3.1 or newer
+install.packages("jmvtools", repos = "https://repo.jamovi.org")
+packageVersion("jmvtools")        # >= 28.3.1
+jmvtools::check()                 # locates the jamovi app and reports its version
+# 3. jmvcore for R-side development and tests (jamovi bundles its own copy at runtime)
+remotes::install_github("jamovi/jamovi", subdir = "jmvcore")
+# check the classes, not the version: CRAN and GitHub builds are both labelled 2.7.38
+exists("OptionFile", envir = asNamespace("jmvcore"), inherits = FALSE)   # TRUE
+# revert to the CRAN build: install.packages("jmvcore")
+```
+
+Without `remotes`, a sparse clone fetches only `jmvcore/`:
+
+```sh
+git clone --depth 1 --filter=blob:none --sparse https://github.com/jamovi/jamovi.git
+cd jamovi && git sparse-checkout set jmvcore
+R CMD INSTALL jmvcore
+```
+
+**Same-label trap.** CRAN jmvcore and the jmvcore bundled with jamovi 28.3 are both
+labelled 2.7.38, but only the bundled/GitHub build exports `OptionFile`, `Text` and `Svg`.
+`packageVersion()` cannot tell them apart; test for the class as above. The GitHub `main`
+build is a superset of what jamovi 28.3.0 bundles.
+
+**DESCRIPTION stays as it is:** keep `Imports: jmvcore` with no version requirement (no
+CRAN release has these classes yet), and do not add jmvcore to `Remotes`.
+
+### Version Gating: minApp
+
+For both `File` and `Text` the dev docs say: "Available in jamovi 28.3 and newer. Declare
+minApp: 28.3.0 in 0000.yaml so jamovi prevents installation on older versions." They say
+nothing about `mode: vector`.
+
+- **Module-wide.** `minApp` lives in `jamovi/0000.yaml`; raising it for one analysis locks
+  every jamovi ≤ 28.2 user out of the whole module. It is a deliberate release decision the
+  maintainer approves, per module: raise it in the same change that ships that module's
+  first `File` or `Text` analysis. Module build scripts should not rewrite `minApp`; edit
+  each module's `jamovi/0000.yaml` deliberately.
+- **The compiler does not enforce it.** `prepare()` emits `File`, `Text` and `mode:`
+  whatever `minApp` says. With a low `minApp` the module installs on an old jamovi and the
+  analysis fails there.
+- **`prepare()` needs a new enough app.** It refuses when `minApp` exceeds the installed
+  jamovi: `This module requires a newer version of jamovi (minApp: 28.3.0 > 28.2.0)`.
+  Install jamovi 28.3 first.
+- **Gate:** `python3 tools/release_gate.py` (`check_min_app()`) FAILs when any
+  `jamovi/*.a.yaml` declares `type: File` or any `*.r.yaml` declares a `type: Text` result
+  (table columns of `type: Text` are skipped) while `minApp` < 28.3.0. It only WARNs on an
+  Image with `mode: vector` under `minApp` < 28.3.0, because its behaviour in an older app
+  is unverified. For a submodule: `--root ../<sibling>`.
+
+### Testing Under CRAN jmvcore
+
+- Under CRAN jmvcore, a module whose generated `.h.R` uses the new types fails with
+  `'OptionFile' is not an exported object from 'namespace:jmvcore'` (the same for `Text`).
+  Develop against the GitHub build (above), and guard tests that may still meet the CRAN
+  build:
+
+  ```r
+  skip_if_not(exists("OptionFile", envir = asNamespace("jmvcore"), inherits = FALSE),
+              "needs jmvcore with OptionFile (install from jamovi/jamovi main)")
+  ```
+
+  Use `"Text"` instead of `"OptionFile"` for a `Text` result.
+- `mode: vector` is silently ignored (raster) under CRAN jmvcore, so a test cannot see it
+  there.
+- From plain R, a `File` option takes a path string (a character vector with
+  `multiple: true`) or `list(path=, filename=)`, and a `Text` result's `$content` is the raw
+  markdown. Details: [`File`](jamovi_a_yaml_guide.md#file-jamovi-283),
+  [`Text`](jamovi_r_yaml_guide.md#text-jamovi-283).
+
+### Exists Upstream, Not Yet Documented
+
+These exist upstream but have no documentation yet. Do not use them:
+
+- `type: Svg` results element.
+- `Action` results with `'openExternal'` (jmvcore 2026-09-19, unreleased).
+- The jmvtools install target `--home docker:<container>`.
+
+The jmvtools 28.3.1 results schema accepts `Table`, `Group`, `Array`, `Image`,
+`Preformatted`, `Text`, `Html`, `Svg`, `State`, `Property`, `Output`, `Notification` and
+`Action`: still no `Notice` (see the `type: Notice` trap in
+`jamovi_library_review_guide.md`).
+
+---
+
 ## Four-File Architecture
 
 Every jamovi analysis consists of **4 core files**:
@@ -218,6 +348,9 @@ options:
 - `Bool` - Checkbox
 - `Number` - Numeric input
 - `String` - Text input
+- `File` - User-selected file(s), jamovi 28.3+; takes no `default:`. See
+  [`File`](jamovi_a_yaml_guide.md#file-jamovi-283) (module-wide `minApp: 28.3.0` -
+  [Version Gating](#version-gating-minapp))
 
 ### 2. Backend Implementation (.b.R)
 
@@ -249,7 +382,8 @@ functionClass <- R6::R6Class(
 
 ### 3. Results Definition (.r.yaml)
 
-Defines **outputs** (tables, plots, HTML).
+Defines **outputs** (tables, plots, HTML, markdown `Text` - jamovi 28.3+, see
+[Pattern 5](#pattern-5-text-markdown-jamovi-283)).
 
 **Example (Empty for Preformatted):**
 
@@ -351,6 +485,8 @@ children:
 - `LayoutBox` - Container for grouping
 - `CollapseBox` - Collapsible section
 - `TargetLayoutBox` - Drop target for variables
+- `FileSelector` - File picker for a `File` option; the compiler generates it. See
+  [`FileSelector`](jamovi_u_yaml_guide.md#fileselector)
 
 ---
 
@@ -652,6 +788,9 @@ Controls which options appear in generated syntax.
 }
 ```
 
+A `File` option needs no custom handling: syntax mode emits only the bare filename
+(`lexicon = "x.csv"`), never the session path, and `lexicon = NULL` when unset.
+
 ### Helper Method: `.asArgs()`
 
 Combines all options into argument string.
@@ -772,6 +911,12 @@ items:
         - color_palette
 ```
 
+Adding `mode: vector` (jamovi 28.3+) renders an SVG (via `grDevices::svg()`) instead of the
+default raster image: crisper on hi-res screens,
+but only for bounded-mark plots (forest, bar, flow diagram). Never for scatter, QQ, large KM
+or big heatmaps, where the SVG grows to many MB. See
+[Rendering Mode](jamovi_plots_guide.md#rendering-mode-raster-vs-vector-jamovi-283).
+
 **Implement in .b.R:**
 
 ```r
@@ -802,6 +947,10 @@ items:
 
 ### Pattern 4: HTML Content
 
+For narrative or explanatory text, prefer `Text` (Pattern 5), as the official dev docs
+advise. If you keep `Html`, any inline `style=` like the one below must follow the
+theme-safe rules in `jamovi_library_review_guide.md`.
+
 ```r
 .run = function() {
     html_content <- "<div style='...'>
@@ -812,6 +961,32 @@ items:
     self$results$dataInfo$setContent(html_content)
 }
 ```
+
+### Pattern 5: Text (Markdown, jamovi 28.3+)
+
+Module-wide `minApp: 28.3.0` - see [Version Gating](#version-gating-minapp).
+
+```yaml
+- name: summary            # .r.yaml
+  title: Summary
+  type: Text
+```
+
+```r
+self$results$summary$setContent(jmvcore::format(
+    .("**Lexicon:** {file} with {n} terms."),
+    file = private$.mdEscape(self$options$lexicon$filename),
+    n = nrow(lex)))
+```
+
+- Pass one string: other values are `capture.output()`'d (`setContent(1:3)` shows `[1] 1 2 3`).
+- A blank line (`\n\n`) starts a paragraph; a single `\n` does not break. No headings,
+  tables or code blocks.
+- `*` and `_` are markup (`5.2*` or `p < .001**` can pair with a later `*`/`**` and swallow
+  the text between them into italics/bold): escape a literal one as `"\\*"` in an R
+  string, pass user text through `.mdEscape()`, and write real characters, not HTML
+  entities. The helper and the rest of the pitfalls:
+  [Text Content Population](jamovi_b_R_guide.md#text-content-population-jamovi-283).
 
 ---
 
@@ -840,6 +1015,12 @@ items:
 ❌ **DON'T:**
 - Assume data types (always convert)
 - Use `data$columnName` directly (column names may have spaces)
+- Read side files through a `String` option holding a path: it fails on jamovi cloud. Use
+  `type: File` (jamovi 28.3+)
+- Trust a `File` option: `extensions:` only filters the file browser. Validate format,
+  columns and size, never `source()`/`eval()`/`parse()`/`readRDS()`/`load()` the file, and
+  escape `filename` before display. See
+  [Reading a `File` Option](jamovi_b_R_guide.md#reading-a-file-option-jamovi-283)
 
 ### 3. State Management
 
@@ -869,7 +1050,8 @@ items:
 
 ✅ **DO:**
 - Use descriptive option names
-- Provide defaults for all options
+- Provide a `default:` for every option type that accepts one (`Level` and `File` take
+  none; the compiler rejects it, and the generated wrapper gives `File` `= NULL`)
 - Document options in `.a.yaml` descriptions
 - List all options in `clearWith` for dependent results
 
@@ -920,7 +1102,9 @@ items:
 ## References
 
 - **jmvbaseR Example Module:** `/Users/serdarbalci/Documents/GitHub/jmvbaseR`
-- **jamovi Developer Documentation:** `./vignettes/dev.jamovi.org-master`
+- **jamovi Developer Documentation:** `./development-documentations-dev.jamovi.org-master`
+  (an old snapshot; only `api_option-file.md` and `api_text.md` cover jamovi 28.3, and the
+  live docs are at [dev.jamovi.org](https://dev.jamovi.org))
 - **ClinicoPath Examples:** This repository
 
 ---

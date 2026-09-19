@@ -9,6 +9,11 @@ menuTitle: Distribution Selection and Goodness-of-Fit
 menuSubtitle: Automated parametric distribution selection with model adequacy testing
 
 options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
     - name: elapsedtime
       title: "Time Variable"
       type: Variable

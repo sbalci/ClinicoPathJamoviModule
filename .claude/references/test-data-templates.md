@@ -192,3 +192,72 @@ test_that("{function} handles variables with special characters", {
   expect_no_error(result)
 })
 ```
+
+### File Options and Text Results
+
+**File:** `tests/testthat/test-{function}-file-text.R`
+
+For an analysis with a `type: File` option or a `type: Text` result (jamovi 28.3+). Shown with the guide
+example (File option `lexicon`, `extensions: [csv, txt]`; Text result `summary`; backend
+`.readLexicon()` and `.mdEscape()` from `vignettes/jamovi_b_R_guide.md`); rename to the analysis's own
+options and messages. Setup: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
+Use `"Text"` in the skip guard when the analysis has a Text result but no File option.
+
+```r
+library(testthat)
+library(ClinicoPath)
+
+# Under CRAN jmvcore the whole wrapper errors, so guard the file
+skip_if_not(exists("OptionFile", envir = asNamespace("jmvcore"), inherits = FALSE),
+            "needs jmvcore with OptionFile (install from jamovi/jamovi main)")
+
+data({function}_test, package = "ClinicoPath")
+
+# the file is written inside the test; no fixture is shipped
+writeLexicon <- function(df, ext = ".csv") {
+  path <- tempfile(fileext = ext)
+  utils::write.csv(df, path, row.names = FALSE)
+  path
+}
+goodLex <- data.frame(term = c("good", "bad"), score = c(1, -1))
+
+test_that("{function} runs with the File option unset", {
+  # unset = NULL (list() with multiple: true); the backend must not treat it as an error
+  expect_no_error({function}(data = {function}_test, ...))
+})
+
+test_that("{function} reads the file (path string or list(path=, filename=))", {
+  lexPath <- writeLexicon(goodLex)
+  expect_no_error({function}(data = {function}_test, ..., lexicon = lexPath))
+  res <- {function}(data = {function}_test, ...,
+                    lexicon = list(path = lexPath, filename = "my_lexicon.csv"))
+  txt <- res$summary$content                  # raw markdown
+  expect_type(txt, "character")
+  expect_length(txt, 1)
+  expect_match(txt, "2 terms", fixed = TRUE)
+  # user-controlled filename is markdown-escaped (b_R guide .mdEscape)
+  expect_match(txt, "my\\_lexicon\\.csv", fixed = TRUE)
+  expect_false(grepl("&mdash;", txt, fixed = TRUE))
+  # syntax mode shows the bare filename, never the session path
+  src <- res$analysis$asSource()
+  expect_match(src, 'lexicon = "my_lexicon.csv"', fixed = TRUE)
+  expect_false(grepl(dirname(lexPath), src, fixed = TRUE))
+})
+
+test_that("{function} rejects a missing, wrong-type or malformed file", {
+  # nonexistent path: jmvcore's option check, before .run()
+  expect_error({function}(data = {function}_test, ...,
+                          lexicon = file.path(tempdir(), "absent.csv")),
+               "needs to be re-selected")
+  # extensions: is NOT enforced in R, so the backend must reject this itself
+  expect_error({function}(data = {function}_test, ...,
+                          lexicon = writeLexicon(goodLex, ".xlsx")),
+               "must be a .csv or .txt file", fixed = TRUE)
+  # right extension, wrong content
+  expect_error({function}(data = {function}_test, ...,
+                          lexicon = writeLexicon(data.frame(x = 1:3))),
+               "'term' and 'score' columns", fixed = TRUE)
+})
+```
+
+With `multiple: true`, pass a character vector of paths (or a list of `list(path=, filename=)`).

@@ -382,6 +382,17 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     return()
                 }
 
+                # smcure's latency part is a Cox model: with no covariate it indexes an
+                # empty design matrix ("subscript out of bounds").
+                if (length(predictors) == 0) {
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = .("Predictor required for the mixture cure model"),
+                        content = .("The semi-parametric mixture cure model (smcure) needs at least one predictor, because its latency part is a Cox model. Add a predictor, or choose the non-mixture model to estimate the cure fraction of the whole cohort.")
+                    )
+                    return()
+                }
+
                 # Build formulas using jmvcore::composeTerm for formula safety
                 if (length(predictors) > 0) {
                     escaped_predictors <- sapply(predictors, jmvcore::composeTerm)
@@ -904,10 +915,12 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             results_table <- self$results$modelTable
 
-            # FIX C4: Use model$res.t for parameter estimates
-            # model$res.t is a matrix with columns: est, L95%, U95%
-            # (and optionally se)
-            res_matrix <- model$res.t
+            # model$res holds the parameters on their natural scale (theta = cure
+            # probability, shape/scale > 0); model$res.t on flexsurv's transformed
+            # scale (logit theta, log shape, log scale). res.t was shown as if natural:
+            # an intercept-only model reported a cure fraction of -0.90 (logit 0.29).
+            res_matrix <- model$res
+            base_pars <- tryCatch(model$dlist$pars, error = function(e) NULL)
 
             if (!is.null(res_matrix) && nrow(res_matrix) > 0) {
                 param_names <- rownames(res_matrix)
@@ -918,7 +931,10 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ci_hi <- res_matrix[i, "U95%"]
                     # SE may or may not be present
                     se_val <- if ("se" %in% colnames(res_matrix)) res_matrix[i, "se"] else NA_real_
-                    z_val <- if (!is.na(se_val) && se_val > 0) est_val / se_val else NA_real_
+                    # A Wald test against 0 means something only for covariate effects
+                    # (identical on both scales), not for theta, shape or scale.
+                    is_base <- param_names[i] %in% base_pars
+                    z_val <- if (!is_base && !is.na(se_val) && se_val > 0) est_val / se_val else NA_real_
                     p_val <- if (!is.na(z_val)) 2 * (1 - pnorm(abs(z_val))) else NA_real_
 
                     results_table$addRow(rowKey = paste0("nm_", i), values = list(
@@ -945,7 +961,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 theta_lo <- res_matrix["theta", "L95%"]
                 theta_hi <- res_matrix["theta", "U95%"]
 
-                # theta is on probability scale for flexsurvcure
+                # theta from model$res is the cure probability
                 cure_fraction <- theta_est
                 cure_ci_lower <- theta_lo
                 cure_ci_upper <- theta_hi

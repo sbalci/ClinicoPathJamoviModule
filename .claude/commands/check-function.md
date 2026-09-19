@@ -221,15 +221,25 @@ External sources (if available and check_external=true):
 1) **Args Wiring (.a.yaml ↔ .b.R)**
    - Map every option: `.a.yaml` → `self$options$*` usage in `.b.R` (no unused options).
    - Enforce defaults; remove hardcoded constants.
+   - A `type: File` option takes no `default:` (compiler error). It reads `NULL` when unset, else `list(path =, filename =)`;
+     with `multiple: true` it reads `list()` when unset, else a list of such entries. The backend guards
+     `NULL` (`length(x) == 0` for `multiple: true`), reads `$path`, and
+     validates format/columns/size itself (`extensions:` only filters the file browser):
+     [Reading a `File` Option](../../vignettes/jamovi_b_R_guide.md#reading-a-file-option-jamovi-283).
    - If `defaults_false=true`, set all checkbox defaults to `false` and verify logic still computes.
 
 2) **Outputs Wiring (.r.yaml ↔ .b.R)**
    - Ensure each output has a setter (`setContent()`, `setRow()`, `addColumn()`, `setState()` + renderer) and visibility rules are honored.
+   - A `type: Text` item gets `setContent()` with ONE character string (anything else is `capture.output()`'d:
+     `setContent(1:3)` shows `[1] 1 2 3`). An `Image` with `mode: vector` must be a bounded-mark plot.
    - Emit a table of UNPOPULATED items with exact fixes.
 
 3) **Variable Safety**
    - Implement/verify `escapeVariableNames` logic when `apply_escape_vars=true`.
    - Add tests for variables with spaces, punctuation, Unicode.
+   - User-controlled strings (variable names, level labels, a File option's `filename`) are markdown-escaped
+     when written into a `Text` item ([`.mdEscape`](../../vignettes/jamovi_b_R_guide.md#text-content-population-jamovi-283);
+     `_` and `*` otherwise turn into italics/bold) and HTML-escaped when written into `Html`.
 
 4) **Labelled Logic Parity**
    - When `align_labelled_logic=true`, mirror handling used in `oddsratio` (label display, level ordering, NA handling) and document diffs.
@@ -242,12 +252,15 @@ External sources (if available and check_external=true):
 
 7) **Welcome/Intro Styling**
    - When `style_welcome=true`, add decisionpanel-style intro (HTML/markdown) visible when no variables are selected.
+     The snippet below stays `type: Html` (its `<h3>` heading would be flattened by `Text`); a plain-paragraph
+     intro may be `type: Text` once the module has `minApp: 28.3.0`.
 
 8) **Validation & Errors**
    - Validate required vars; handle empty data and missing values; surface friendly errors.
 
 9) **Post-Change Checks**
-   - If `run_prepare=true`, run `jmvtools::prepare()` and report.
+   - If `run_prepare=true`, run `jmvtools::prepare()` and report. Toolchain setup (jamovi 28.3, jmvtools, jmvcore):
+     [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
    - If `run_document=true`, run `devtools::document()` and report.
 
 10) **Test Data & Layout**
@@ -314,6 +327,9 @@ self$results$welcome$setContent("<div class='jmv-welcome'><h3>Start by selecting
 - [ ] All outputs populated
 - [ ] All checkboxes default false
 - [ ] Empty dataset handling
+- [ ] `type: File` option: unset (`NULL`), valid file, and a wrong-extension/malformed file rejected by the
+      backend; File/Text tests skip when jmvcore lacks the class
+      ([Testing Under CRAN jmvcore](../../vignettes/jamovi_module_patterns_guide.md#testing-under-cran-jmvcore))
 - [ ] prepare()/document() pass cleanly
 
 ---
@@ -333,6 +349,7 @@ grep -n "^\s*warning(" R/<fn>.b.R      # jamovi never shows R warnings to the us
 grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set belongs in .init()
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
+grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide minApp: 28.3.0 (Text table columns are false hits); vector = bounded-mark plots only
 python3 tools/release_gate.py          # requiresData, CollapseBox Title Case, refs, .() " [..]"/\u{}/padding, translation %-specifiers, notice title colours (FAIL = blocking)
 Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contract.R")'
 ```
@@ -370,6 +387,13 @@ Checklist:
       commented out or removed.
 - [ ] **Do not add `type: Notice` to `.r.yaml`** — it is not in the compiler enum and
       `jmvtools::prepare()` fails on it. `type: Notification` compiles but breaks at runtime.
+- [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.3.0`** in
+      `jamovi/0000.yaml`; `python3 tools/release_gate.py` fails otherwise. minApp is
+      module-wide (jamovi 28.2 and older can no longer install any of the module), so raising
+      it is a release decision — ask first. Image `mode: vector` only on bounded-mark plots
+      (forest, bar, flow diagram, nomogram), never scatter/QQ/jitter/large KM/heatmap. Setup
+      and gating: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore),
+      [Version Gating: minApp](../../vignettes/jamovi_module_patterns_guide.md#version-gating-minapp).
 
 ## Related Commands
 

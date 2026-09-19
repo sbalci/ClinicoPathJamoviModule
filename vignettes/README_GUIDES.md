@@ -4,6 +4,9 @@
 
 This directory contains comprehensive guides for jamovi module development in the ClinicoPath project.
 
+**Setting up a dev machine?** Install jamovi 28.3+, jmvtools 28.3.1+ and the current jmvcore:
+[`jamovi_module_patterns_guide.md` → Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
+
 ---
 
 ## Primary Guide (START HERE)
@@ -17,22 +20,26 @@ This directory contains comprehensive guides for jamovi module development in th
 - Starting a new jamovi analysis
 - Understanding module structure
 - Declaring package dependencies (DESCRIPTION `Imports` vs `Remotes`)
+- Installing current jamovi, jmvtools and jmvcore
+- jamovi 28.3 features (`File` option, `Text` result, `mode: vector` images), `minApp`
+  gating, testing under CRAN jmvcore
 - Data handling and state management
 - Formula building for statistical models
 - Plot rendering and state serialization
-- Output patterns (tables, plots, HTML, preformatted)
+- Output patterns (tables, plots, HTML, Text, preformatted)
 - Best practices and common pitfalls
 
 **Contents:**
 1. Module Structure & 4-File Architecture (incl. DESCRIPTION `Imports`/`Remotes`)
-2. Data Handling Patterns (jmvcore functions)
-3. State Management (why & how)
-4. State Serialization Solutions (tibble → list fixes)
-5. Formula Building (from jmvbaseR)
-6. Syntax Generation (.asSource methods)
-7. Output Patterns (4 types)
-8. Best Practices (DO/DON'T lists)
-9. jmvcore Function Reference
+2. jamovi 28.3 Features: installing jmvtools/jmvcore, `minApp` gating, testing under CRAN jmvcore
+3. Data Handling Patterns (jmvcore functions)
+4. State Management (why & how)
+5. State Serialization Solutions (tibble → list fixes)
+6. Formula Building (from jmvbaseR)
+7. Syntax Generation (.asSource methods)
+8. Output Patterns (5 types)
+9. Best Practices (DO/DON'T lists)
+10. jmvcore Function Reference
 
 ---
 
@@ -62,7 +69,7 @@ jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18
 10. Every package used must be declared — including base packages
 11. Dead code must not reference a schema that no longer exists
 12. UI label conventions
-13. **The `type: Notice` trap** — it does not compile; re-test after every jmvtools upgrade
+13. **The `type: Notice` trap** — it does not compile (still absent from the jmvtools 28.3.1 results schema); re-test after every jmvtools upgrade
 14. Encoding review findings as tests
 
 **Tooling that goes with it:**
@@ -82,6 +89,7 @@ jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18
 - Descriptions for R and jamovi
 - Variable selectors
 - List options
+- `File` option (jamovi 28.3+): no default, `extensions` is a browser filter only
 
 #### `jamovi_b_R_guide.md` - Backend Implementation (.b.R)
 - R6 class structure
@@ -89,15 +97,19 @@ jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18
 - Private vs public methods
 - Helper function patterns
 - Data access patterns
+- Reading a `File` option (validation, untrusted input)
+- `Text` content: `setContent()`, markdown escaping (`.mdEscape()`)
 
 #### `jamovi_r_yaml_guide.md` - Results Definition (.r.yaml)
-- Output types (Table, Image, Html, Preformatted)
+- Output types (Table, Image, Html, Text, Preformatted)
+- `Text` result (jamovi 28.3+): keys, markdown subset, escaping, testing
 - Column definitions
 - clearWith dependencies
 - Visibility rules
 
 #### `jamovi_u_yaml_guide.md` - User Interface (.u.yaml)
 - UI control types
+- `FileSelector` (generated for `File` options)
 - Layout organization
 - VariableSupplier patterns
 - Enable/visible conditions
@@ -117,6 +129,7 @@ jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18
 - ggtheme integration
 - State serialization for plots
 - Multiple plot types
+- `mode: vector` (SVG, jamovi 28.3+): when to use it and when not
 
 #### `jamovi_notices_guide.md` - User Notices
 - jmvcore::Notice API
@@ -124,6 +137,7 @@ jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18
 - Positioning strategies
 - Single-line content requirement
 - Clinical profile notices
+- Which text renderer: Notice, `setNote`, Html or Text
 
 #### `jamovi_formula_guide.md` - Statistical Formulas
 - Building R formulas from options
@@ -171,6 +185,9 @@ jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18
 ### Workflow
 
 ```
+0. Setting up or updating the toolchain (jamovi, jmvtools, jmvcore)?
+   → Read: jamovi_module_patterns_guide.md > Installing Current jmvtools and jmvcore
+
 1. Starting new analysis?
    → Read: jamovi_module_patterns_guide.md (overview)
    → Then: jamovi_a_yaml_guide.md + jamovi_u_yaml_guide.md (define interface)
@@ -212,6 +229,14 @@ jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18
 | Translations not appearing | `jamovi_i18n_guide.md` | Troubleshooting |
 | Strings not being extracted to .po | `jamovi_i18n_guide.md` | Marking Strings |
 | `self` scope issues with `.()` | `jamovi_i18n_guide.md` | Advanced Patterns |
+| Installing/updating jamovi, jmvtools, jmvcore | `jamovi_module_patterns_guide.md` | [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore) |
+| `'OptionFile'` / `'Text' is not an exported object from 'namespace:jmvcore'` | `jamovi_module_patterns_guide.md` | [Testing Under CRAN jmvcore](jamovi_module_patterns_guide.md#testing-under-cran-jmvcore) |
+| `prepare()`: "This module requires a newer version of jamovi (minApp ...)" | `jamovi_module_patterns_guide.md` | [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp) |
+| Analysis must read a user file (CSV/TXT) | `jamovi_b_R_guide.md` | [Reading a `File` Option](jamovi_b_R_guide.md#reading-a-file-option-jamovi-283) |
+| "The file '...' needs to be re-selected" | `jamovi_a_yaml_guide.md` | [`File` (jamovi 28.3+)](jamovi_a_yaml_guide.md#file-jamovi-283) |
+| Narrative text: Html or Text? | `jamovi_notices_guide.md` | [Which Text Renderer?](jamovi_notices_guide.md#which-text-renderer-notice-setnote-html-or-text) |
+| Asterisks or underscores vanish in `Text` output | `jamovi_b_R_guide.md` | [Text Content Population](jamovi_b_R_guide.md#text-content-population-jamovi-283) |
+| Plot blurry on hi-res screens / SVG output huge | `jamovi_plots_guide.md` | [Rendering Mode](jamovi_plots_guide.md#rendering-mode-raster-vs-vector-jamovi-283) |
 
 ---
 
@@ -268,13 +293,16 @@ New guides should follow this structure:
 ## References
 
 - **jmvbaseR Example Module:** `/Users/serdarbalci/Documents/GitHub/jmvbaseR`
-- **Official jamovi Documentation:** `./dev.jamovi.org-master/`
+- **Official jamovi Documentation:** `./development-documentations-dev.jamovi.org-master/`
+  (an old snapshot; only `api_option-file.md` and `api_text.md` cover jamovi 28.3, and the
+  live docs are at [dev.jamovi.org](https://dev.jamovi.org))
 - **ClinicoPath Examples:** This repository (`R/*.b.R`, `jamovi/*.yaml`)
 
 ---
 
-**Last Updated:** 2026-06-22
+**Last Updated:** 2026-09-19
 
 **Recent additions:**
+- 2026-09-19: jamovi 28.3 / jmvtools 28.3.1 - `File` option, `Text` result (markdown), Image `mode: vector`; installing current jmvtools and jmvcore, `minApp` gating and CRAN-jmvcore test guards (see `jamovi_module_patterns_guide.md` → "jamovi 28.3 Features")
 - 2026-06-22: Documented jmvtools DESCRIPTION `Imports`/`Remotes` behavior - a package may now appear in both fields; jmvtools suppresses the CRAN-mirror download of an import when it also appears in `Remotes` (see `jamovi_module_patterns_guide.md` → "DESCRIPTION: Dependencies")
 - 2026-01-31: Added `jamovi_i18n_guide.md` - Comprehensive internationalization guide

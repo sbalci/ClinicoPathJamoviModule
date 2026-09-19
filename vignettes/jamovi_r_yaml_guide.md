@@ -22,7 +22,7 @@ This is the definitive, comprehensive guide to writing `.r.yaml` files for devel
 
 The `.r.yaml` file serves as the **results definition** for a jamovi analysis, acting as a blueprint that specifies:
 
-- **Output Structure**: What types of results will be displayed (tables, plots, HTML content)
+- **Output Structure**: What types of results will be displayed (tables, plots, HTML content, Markdown text)
 - **Table Schemas**: Column definitions, data types, and formatting for all tables
 - **Plot Specifications**: Dimensions, rendering functions, and display conditions for graphics
 - **Content Organization**: How results are grouped and presented to users
@@ -140,7 +140,7 @@ These properties can be used with any result element type:
 #### `type` (Required)
 - **Type**: String
 - **Purpose**: Specifies the result element type
-- **Common Types**: `Table`, `Image`, `Html`, `Preformatted`, `Output`, `Group`
+- **Common Types**: `Table`, `Image`, `Html`, `Text` (jamovi 28.3+), `Preformatted`, `Output`, `Group`
 
 #### `visible` (Optional)
 - **Type**: Boolean or condition string
@@ -178,16 +178,22 @@ These properties can be used with any result element type:
 ### The complete list of valid `type:` values
 
 The jamovi compiler validates `.r.yaml` against a fixed enum. Anything else is a
-hard compile failure. As of **jamovi-compiler 0.3.5** (shipped with jmvtools 28.3):
+hard compile failure. In **jmvtools 28.3.1** (released with jamovi 28.3):
 
 ```
-Table   Group   Array   Image   Preformatted   Html
+Table   Group   Array   Image   Preformatted   Text   Html   Svg
 State   Property   Output   Notification   Action
 ```
 
+The jamovi 28.3 additions:
+
+- **`Text`** — Markdown prose. Needs jamovi 28.3+ (and, for R-side tests, a
+  jmvcore that exports `Text`); see [`Text`](#text-jamovi-283).
+- **`Svg`** — in the schema enum and upstream, but undocumented. Do not use it yet (see [Exists Upstream, Not Yet Documented](jamovi_module_patterns_guide.md#exists-upstream-not-yet-documented)).
+
 Two traps in that list:
 
-- **`Notice` is NOT valid**, despite being the obvious home for warnings and the
+- **`Notice` is NOT valid** (still absent in 28.3.1), despite being the obvious home for warnings and the
   thing the jamovi library reviewer recommends. `jmvtools::prepare()` fails with
   `results.items[0].type is not one of enum values: ...`. jamovi's protobuf
   defines `ResultsNotice` and `compiler.js` has a `Notice` branch, but the schema
@@ -245,17 +251,82 @@ Renders rich HTML content with full formatting capability.
       - variables
 ```
 
-**Use Cases**:
-- Instructions and help text
-- Formatted analysis summaries
-- Complex narrative results
+**Use Cases** (content that needs real HTML structure):
+- Tables built by gt, gtsummary or kableExtra
+- Styled inline notice panels (`jamovi_notices_guide.md` §13.2)
 - Custom formatted statistical output
+
+For narrative or explanatory text (instructions, summaries, interpretation), the
+official jamovi dev docs say: *"For narrative or explanatory text, prefer Text,
+which supports basic inline formatting without the overhead and inconsistency of
+hand-rolled HTML."* `Text` needs jamovi 28.3+ and a module-wide `minApp: 28.3.0`,
+so existing Html narrative stays Html until the module deliberately raises
+`minApp` — see [`Text`](#text-jamovi-283).
 
 **R Implementation Access**:
 ```r
 # In your .b.R file
 self$results$summaryText$setContent(html_content)
 ```
+
+#### `Text` (jamovi 28.3+)
+Renders one string as a small subset of Markdown, sanitized by the jamovi client.
+
+> **Availability:** jamovi 28.3+; module-wide `minApp: 28.3.0`; for R-side
+> development and tests, a jmvcore that exports `Text` — see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)
+> and [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
+
+```yaml
+- name: summary
+  title: Summary
+  type: Text
+```
+
+**Keys**: `name`, `type`, `title`, `description`, `content`, `visible`,
+`clearWith`, `refs` — no others. A static `content:` is translated and is
+extracted by the i18n compiler.
+
+**Filling it**: `self$results$summary$setContent(txt)` with **one** character
+string. Non-character input is `capture.output()`'d, so `setContent(1:3)` shows
+`[1] 1 2 3`. Build translatable text with `jmvcore::format()` named placeholders
+(no underscores in placeholder names), not `sprintf()`. The fill pattern and the
+`.mdEscape` helper live in
+[Text Content Population](jamovi_b_R_guide.md#text-content-population-jamovi-283).
+
+**What renders** (marked with GFM, `breaks: false`, then a sanitizer):
+- Paragraphs split on a blank line (`\n\n`); a single `\n` does not break the line.
+- `**bold**`, `*italic*`, `~~strike~~`, `- item` / `1. item` lists.
+- Links `[text](url)` with `http`, `https`, `mailto` or `tel` only.
+- Kept raw tags: `b`/`strong`, `em`/`i`, `s`/`strike`/`del`, `sub`/`sup`, `a`, `ol`/`ul`/`li`.
+  Any other HTML is stripped, so `Text` is XSS-safe.
+- Headings and blockquotes are flattened to plain paragraphs; code blocks,
+  tables and images are not supported.
+
+**Escaping traps**:
+- `*` and `_` are Markdown syntax: `5.2*` or `p < .001**` get swallowed into
+  italics/bold. Escape as `\*` in Markdown, i.e. `"p < .001\\*\\*"` in an R
+  string literal. Any ASCII punctuation can be backslash-escaped.
+- HTML entities (`&mdash;`, `&nbsp;`, `&#8212;`) are **not** decoded (only
+  `&lt; &gt; &amp; &quot; &#39;` are). Write the real character, as a `\uXXXX`
+  escape in R source: `"\u2014"`.
+- User-supplied strings (variable names, level labels, filenames) can inject
+  formatting or links — GFM autolinks turn `http://...`, `www.x.com` and
+  `a@b.org` into links. Pass them through `.mdEscape` before inserting them.
+
+**Testing**: `$content` returns the raw Markdown (testthat sees the `**`
+markers); `isFilled()` is `FALSE` for `""`; the R console print strips HTML
+tags but keeps the Markdown markers. Under CRAN jmvcore the class does not
+exist, so guard the tests:
+
+```r
+skip_if_not(exists("Text", envir = asNamespace("jmvcore"), inherits = FALSE),
+            "needs jmvcore with Text (install from jamovi/jamovi main)")
+```
+
+**Not the table column type**: a column's `type: text` (lowercase, see
+[Column Data Types](#column-data-types)) formats one cell; `type: Text` is a
+whole results element. For how `Text` compares with `setNote()`, `Notice` and
+`Html`, see [Which Text Renderer?](jamovi_notices_guide.md#which-text-renderer-notice-setnote-html-or-text).
 
 #### `Preformatted`
 Displays plain text with preserved formatting and monospace font.
@@ -327,6 +398,7 @@ For plots, graphs, and other visual outputs.
 - `height`: Plot height in pixels  
 - `renderFun`: R function name that generates the plot
 - `requiresData`: `true` makes jamovi re-read the dataset before the renderer runs outside `.run()` (resize, `.omv` reopen, export). Set it **only** when the renderer, or a `private$` helper it calls, reads `self$data`; omit it (default `FALSE`) when it draws from `image$state`. See `jamovi_library_review_guide.md` §15
+- `mode` (jamovi 28.3+): `raster` (default) or `vector` (rendered with `grDevices::svg()`; crisper on high-resolution screens). Bounded-mark plots only — a scatter, QQ or large KM plot becomes a multi-MB SVG. Set it statically here. See [Rendering Mode: raster vs vector](jamovi_plots_guide.md#rendering-mode-raster-vs-vector-jamovi-283)
 
 #### `Output`
 Creates new variables in the original dataset.
@@ -600,6 +672,7 @@ items:
     # Instructions/Overview
     - name: overview
       title: Analysis Overview
+      # narrative: prefer type: Text once the module sets minApp: 28.3.0 (see #text-jamovi-283)
       type: Html
       visible: (showInstructions)
       
@@ -931,6 +1004,7 @@ items:
     # 1. Overview/Instructions (if needed)
     - name: instructions
       title: Analysis Guide
+      # narrative: prefer type: Text once the module sets minApp: 28.3.0 (see #text-jamovi-283)
       type: Html
       visible: (showInstructions)
       
@@ -1153,6 +1227,13 @@ self$results$summaryText$setContent(
      <p>This analysis included <strong>500</strong> subjects...</p>"
 )
 ```
+
+#### Text Content (jamovi 28.3+)
+
+Fill a `Text` element with one Markdown string. The pattern (with `.mdEscape` for
+user-supplied names) is in
+[Text Content Population](jamovi_b_R_guide.md#text-content-population-jamovi-283);
+escaping rules are in [`Text`](#text-jamovi-283).
 
 ### Error Handling and Validation
 
@@ -1673,6 +1754,8 @@ This comprehensive guide provides everything needed to create professional, well
 
 - [Official jamovi Results Definition Documentation](https://dev.jamovi.org/api_results-definition.html)
 - [jamovi Results Elements Documentation](https://dev.jamovi.org/api_results-elements.html)
+- [jamovi 28.3 Features (File, Text, Vector Images)](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images) — including [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore)
+- [Rendering Mode: raster vs vector](jamovi_plots_guide.md#rendering-mode-raster-vs-vector-jamovi-283)
 - [ClinicoPath Module Examples](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/jamovi)
 
 ### Next Steps

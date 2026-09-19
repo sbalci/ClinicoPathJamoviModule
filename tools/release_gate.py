@@ -670,13 +670,52 @@ def check_notice_title_colour():
     print('  notice title colours: %d renderers (%d shipped)' % (len(hits), len(ship)))
 
 
+def _uses_28_3(node, name=None):
+    """(name, feature) for each File option, Text result and vector Image in a yaml tree; an Array
+    template is named after its Array. Table columns may also say `type: Text` (a cell type, not
+    the 28.3 element), so columns are skipped."""
+    if isinstance(node, dict):
+        name = node.get('name') or name
+        if node.get('type') in ('File', 'Text'):
+            yield name, node['type']
+        elif node.get('type') == 'Image' and node.get('mode') == 'vector':
+            yield name, 'mode: vector'
+        for k, v in node.items():
+            if k != 'columns':
+                yield from _uses_28_3(v, name)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _uses_28_3(v, name)
+
+
+def check_min_app():
+    """File options and Text results exist from jamovi 28.3: older apps bundle a jmvcore without
+    OptionFile/Text, yet the compiler emits them whatever minApp says, so the module installs there
+    and the analysis fails. The official docs ask for minApp: 28.3.0 (module-wide) for both. They
+    say nothing about mode: vector, which older jmvcore ignores - advisory only."""
+    min_app = str((load('jamovi/0000.yaml') or {}).get('minApp', ''))
+    old = tuple(int(x) for x in re.findall(r'\d+', min_app)[:3]) < (28, 3, 0)
+    uses = [(os.path.basename(p), n, f)
+            for p in sorted(glob.glob('jamovi/*.a.yaml') + glob.glob('jamovi/*.r.yaml'))
+            for n, f in _uses_28_3(_safe_yaml(p))]
+    need = ['%s %s (%s)' % u for u in uses if u[2] != 'mode: vector']
+    vec = ['%s %s' % u[:2] for u in uses if u[2] == 'mode: vector']
+    if old and need:
+        FAIL.append('%d File/Text uses need minApp: 28.3.0 in jamovi/0000.yaml (is %s): %s'
+                    % (len(need), min_app or 'unset', ', '.join(cap(need))))
+    if old and vec:
+        WARN.append('%d Image mode: vector under minApp %s (behaviour on jamovi < 28.3 unverified): %s'
+                    % (len(vec), min_app or 'unset', ', '.join(cap(vec))))
+    print('  jamovi 28.3 features: %d File/Text, %d vector images; minApp %s' % (len(need), len(vec), min_app))
+
+
 if __name__ == '__main__':
     print('RELEASE GATE  %s\n' % ROOT)
     for fn in (check_versions, check_news, check_license, check_refs, check_clearwith, check_renderfun,
                check_artifacts, check_tame, check_visible_bang, check_entities,
                check_requires_data, check_render_private_state, check_bare_set_seed, check_unused_imports, check_collapsebox_titlecase, check_i18n_padding,
                check_i18n_catalog_scope, check_i18n_bracket, check_i18n_braced_escape,
-               check_i18n_po_formats, check_notice_title_colour):
+               check_i18n_po_formats, check_notice_title_colour, check_min_app):
         try:
             fn()
         except Exception as e:

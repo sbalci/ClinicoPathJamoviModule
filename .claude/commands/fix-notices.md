@@ -68,7 +68,7 @@ Audit `R/SANITIZED_FN.b.R` for missing/weak **jamovi Notices** and propose **min
 5. **Generate patches** (unified diff) that:
    - Insert `jmvcore::Notice$new(...)` with deterministic, unique names
    - Add `self$results$insert(1|mid|999, notice)` calls
-   - Never remove or downgrade existing Html results; Html blocks remain the place for rich, multi-line explanations, while notices act as concise, single-line banners pointing to them
+   - Never remove or downgrade existing Html results; Html blocks (or, in a module with `minApp: 28.3.0`, a `type: Text` result) hold rich, multi-line explanations, while notices act as concise, single-line banners pointing to them
    - Keep code idempotent by guarding with minimal helper blocks if needed
 6. If `apply=true`, write the patches; otherwise, emit patch text only. Patches **must not** introduce newline characters inside `notice$setContent()` strings.
 
@@ -82,8 +82,8 @@ Audit `R/SANITIZED_FN.b.R` for missing/weak **jamovi Notices** and propose **min
 - Notices must be **plain text only** (no HTML markup).
 - Notices are currently **single-line only**: do not include `\n` or any other newline characters inside `notice$setContent()`.
 - Keep messages specific, numeric where possible, and actionable, but compact enough to fit on one line. If you need a “bullet-like” structure, emulate it within one string using separators such as ` • `, commas, or semicolons.
-- Do **not** delete or replace existing Html results. Keep Html outputs for detailed, multi-line explanations and use notices as concise, single-line banners that reference or summarize those Html sections.
-- **Symbols in notice/Html text use literal UTF-8, not named HTML entities.** Write `±`, `≥`, `≤`, `×`, `≈`, `β`, `θ`, `α`, `µ`, `→` — not `&plusmn;`, `&ge;`, `&le;`, `&times;`, `&asymp;`, `&beta;`, … . Named entities render literally after an upcoming jamovi fix and don't survive Word/PDF export. (Structural `&lt;`/`&gt;`/`&amp;`/`&quot;`/`&nbsp;` inside literal HTML are fine.)
+- Do **not** delete or replace existing Html results unasked. Keep Html outputs for detailed, multi-line explanations and use notices as concise, single-line banners that reference or summarize those Html sections. For new narrative prose in a module with `minApp: 28.3.0`, prefer a `type: Text` result (markdown: bold, italic, lists, links, `<sub>`/`<sup>`; paragraphs split on a blank line). Notices stay notices. Which markup each renderer takes: [Which Text Renderer?](../../vignettes/jamovi_notices_guide.md#which-text-renderer-notice-setnote-html-or-text).
+- **Symbols in notice/Html text use literal UTF-8, not named HTML entities.** Write `±`, `≥`, `≤`, `×`, `≈`, `β`, `θ`, `α`, `µ`, `→` — not `&plusmn;`, `&ge;`, `&le;`, `&times;`, `&asymp;`, `&beta;`, … . Named entities render literally after an upcoming jamovi fix and don't survive Word/PDF export. (Structural `&lt;`/`&gt;`/`&amp;`/`&quot;` inside literal HTML are fine; a non-breaking space is `\u00a0`.) A `Text` result decodes only `&lt;`/`&gt;`/`&amp;`/`&quot;`/`&#39;`; `&nbsp;` and every other entity show literally, so write the character itself as a `\uXXXX` escape in R source.
 - **Prefer `jmvcore::reject()` over hand-rolled red-HTML error panels for FATAL validation** (missing required inputs, insufficient data) — jamovi renders a clean analysis-level error. Reserve red-HTML/notice panels for *partial* failures where other outputs still populate (there `reject()` would wrongly halt everything).
 
 ## Patch templates
@@ -170,6 +170,7 @@ grep -n "^\s*warning(" R/<fn>.b.R      # jamovi never shows R warnings to the us
 grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set belongs in .init()
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
+grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide minApp: 28.3.0 (Text table columns are false hits); vector = bounded-mark plots only
 python3 tools/release_gate.py          # requiresData, CollapseBox Title Case, refs, .() " [..]"/\u{}/padding, translation %-specifiers, notice title colours (FAIL = blocking)
 Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contract.R")'
 ```
@@ -207,6 +208,13 @@ Checklist:
       commented out or removed.
 - [ ] **Do not add `type: Notice` to `.r.yaml`** — it is not in the compiler enum and
       `jmvtools::prepare()` fails on it. `type: Notification` compiles but breaks at runtime.
+- [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.3.0`** in
+      `jamovi/0000.yaml`; `python3 tools/release_gate.py` fails otherwise. minApp is
+      module-wide (jamovi 28.2 and older can no longer install any of the module), so raising
+      it is a release decision — ask first. Image `mode: vector` only on bounded-mark plots
+      (forest, bar, flow diagram, nomogram), never scatter/QQ/jitter/large KM/heatmap. Setup
+      and gating: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore),
+      [Version Gating: minApp](../../vignettes/jamovi_module_patterns_guide.md#version-gating-minapp).
 
 ## Post‑patch checklist
 - [ ] ERROR at top for fatal conditions

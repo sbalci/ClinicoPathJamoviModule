@@ -39,7 +39,7 @@ You are an expert jamovi module developer, biostatistician, and technical writer
 
 - `jamovi/$ARGUMENTS.a.yaml` — **Analysis definition** (options/arguments)
 - `R/$ARGUMENTS.b.R` — **Backend implementation** (how options are used, where results are produced)
-- `jamovi/$ARGUMENTS.r.yaml` — **Results definition** (tables, images, HTML outputs, columns)
+- `jamovi/$ARGUMENTS.r.yaml` — **Results definition** (tables, images, Html and Text outputs, columns)
 - `jamovi/$ARGUMENTS.u.yaml` — **User interface** (controls, bindings to options)
 
 If a file is missing, note it explicitly and proceed with partial documentation.
@@ -72,7 +72,7 @@ When `--docs=all` (default), generate all four. Otherwise, generate only the spe
 
 1. Explain **how the interface works**: which `.u.yaml` control **binds** to which `.a.yaml` option, including labels, defaults, constraints, and visibility conditions.
 2. Describe **how changing an `.a.yaml` option** affects logic in `.b.R` (where it is accessed via `self$options$...`, how it gates computations, and affects results).
-3. Map **how results flow** from `.b.R` into `.r.yaml` outputs (tables/images/HTML), including column schemas and visibility rules.
+3. Map **how results flow** from `.b.R` into `.r.yaml` outputs (tables/images/Html/Text), including column schemas and visibility rules.
 4. Produce **diagrams** (Mermaid) to visualize UI→Options→Backend→Results and execution sequences.
 5. Create a **testing checklist** with concrete test scenarios, datasets, and complete option coverage.
 6. Create an **executable vignette** demonstrating every feature with real function calls.
@@ -82,12 +82,12 @@ When `--docs=all` (default), generate all four. Otherwise, generate only the spe
 
 ## What to Analyze
 
-- In **`.u.yaml`**, list each control: its type (checkbox, combo, text, number, variable selector, etc.), label, and **which `.a.yaml` option** it sets. Include any enable/disable/visibility conditions.
+- In **`.u.yaml`**, list each control: its type (checkbox, combo, text, number, variable selector, file selector, etc.), label, and **which `.a.yaml` option** it sets. Include any enable/disable/visibility conditions.
 - In **`.a.yaml`**, list options: names, types, defaults, allowed values/constraints, and **downstream effects**.
 - In **`.b.R`**, find `self$options$<name>` references. For each:
   - Describe **where it's used**, conditional branches, and functions called.
   - Identify **result population calls** such as `self$results$<out>$setXxx(...)`, `setContent`, `setNotes`, `setRow`, `setVisible`, etc.
-- In **`.r.yaml`**, enumerate outputs (tables/images/html): ids, titles, descriptions, visibility conditions, **column schemas** for tables, and any footnotes/notes.
+- In **`.r.yaml`**, enumerate outputs (tables/images/html/text, plus each Image's `mode`: raster default or vector): ids, titles, descriptions, visibility conditions, **column schemas** for tables, and any footnotes/notes.
 - In **`data/`** and **`data-raw/`**, identify available test datasets for this function.
 
 ---
@@ -150,6 +150,7 @@ List each option with:
 - **Name** / **Type** / **Default**
 - **Description** (from `.a.yaml` if present; otherwise infer)
 - **Downstream Effects** (how it's used in `.b.R`)
+- For a `type: File` option (jamovi 28.3+): `extensions` (a file-browser filter only; say what the backend validates), `multiple`, Default "none" (`NULL` when unset, `list()` with `multiple`), and the R value `list(path=, filename=)`. See [`File`](../../vignettes/jamovi_a_yaml_guide.md#file-jamovi-283)
 
 ### 4. Backend Usage (.b.R)
 
@@ -163,7 +164,7 @@ Include minimal code excerpts (short snippets) when helpful.
 
 ### 5. Results Definition (.r.yaml)
 
-- **Outputs**: id, type (Table/Image/Html), title
+- **Outputs**: id, type (Table/Image [raster or vector]/Html/Text/Preformatted), title
 - **Visibility**: conditions
 - **Schema** (for tables): columns, keys, types, notes
 - **Population Entry Points**: where `.b.R` writes into these outputs
@@ -284,6 +285,10 @@ For full templates and structure specifications for Documents 2-4, read `.claude
 - **Document 4** (Comprehensive Vignette) → `vignettes/{module}-$ARGUMENTS-comprehensive.Rmd`
 
 Follow existing examples: `agreement_documentation.md`, `testing_agreement.md`, `meddecide-enhancedroc-comprehensive.Rmd`.
+
+If the analysis has a `type: File` option or a `type: Text` result, the vignette's calls need a jmvcore
+that has those classes: guard those chunks (rule in the templates file; setup:
+[Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore)).
 
 ---
 

@@ -123336,6 +123336,10 @@ msgstr "tahmin edici eksik"
 msgid "Predictor Positive Level"
 msgstr "Belirteç Pozitif Düzeyi"
 
+#: R/curemodels.b.R
+msgid "Predictor required for the mixture cure model"
+msgstr "Karma kür modeli için öngörücü gerekli"
+
 #: continuousrelationship/options/predictor.title
 #: continuousrelationship/ui[0][1].label
 #: jpps/options/predictor_var.title
@@ -161143,6 +161147,17 @@ msgstr ""
 "Seçilen değişkenlerle Schoenfeld artıkları tanılaması hesaplanamadı. Bu, "
 "tanılamanın mevcut olmadığını gösterir; orantılı hazard varsayımının "
 "sağlandığını kanıtlamaz."
+
+#: R/curemodels.b.R
+msgid ""
+"The semi-parametric mixture cure model (smcure) needs at least one "
+"predictor, because its latency part is a Cox model. Add a predictor, or "
+"choose the non-mixture model to estimate the cure fraction of the whole "
+"cohort."
+msgstr ""
+"Yarı parametrik karma kür modeli (smcure) en az bir öngörücü gerektirir, çünkü "
+"latans bileşeni bir Cox modelidir. Bir öngörücü ekleyiniz ya da tüm kohortun "
+"kür oranını tahmin etmek için karma olmayan modeli seçiniz."
 
 #: R/psychopdaROC.b.R
 msgid ""

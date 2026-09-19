@@ -83,6 +83,46 @@ Every plot in jamovi is defined as an `Image` type item in the `.r.yaml` file:
 | `height` | integer | Plot height in pixels | 300 |
 | `visible` | boolean/condition | Visibility condition | true |
 | `requiresData` | boolean | Re-read the dataset before this renderer runs outside `.run()` (resize, `.omv` reopen, export). Set **only** if the renderer reaches `self$data` — see [below](#mandatory-requiresdata-matches-what-the-renderer-reads) | false |
+| `mode` | string | `raster`, or `vector` to render SVG (jamovi 28.3+). Bounded-mark plots only — see [Rendering Mode](#rendering-mode-raster-vs-vector-jamovi-283) | `raster` |
+
+### Rendering Mode: raster vs vector (jamovi 28.3+)
+
+`mode: vector` makes the engine render the image with `grDevices::svg()` to an
+`.svg` instead of a raster image, which is crisper on high-resolution screens.
+The default is `raster`.
+
+```yaml
+- name: forest
+  title: Forest Plot
+  type: Image
+  width: 500
+  height: 400
+  renderFun: .forestPlot
+  mode: vector
+```
+
+An SVG stores every mark, so a plot with many marks grows to many MB. If the
+number of drawn marks grows with the number of rows, keep `raster`.
+
+| Keep `raster` (many marks) | `vector` is suitable (bounded marks) |
+|---|---|
+| scatter, QQ, jitter/raincloud points | forest plots |
+| large KM curves with many censor ticks | bar charts |
+| big heatmaps | decision-tree / flow diagrams |
+| alluvials with many flows | nomograms, small line charts |
+
+- **Set it statically in `.r.yaml`.** `mode` is not serialized; it is read from
+  the Image object at render time. `image$setMode('vector'|'raster')` exists, but
+  whether a runtime switch survives a resize or `.omv` re-render is unverified,
+  so do not switch it per dataset.
+- **Testing:** under CRAN jmvcore `mode` is silently ignored (the plot renders
+  raster, no error), so tests run against it cannot show vector output.
+  Check it in jamovi 28.3 — see
+  [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
+- **Older jamovi:** behaviour inside a jamovi < 28.3 app is unverified.
+  `python3 tools/release_gate.py` warns when a module below `minApp: 28.3.0`
+  uses `mode: vector`; see
+  [Version Gating: minApp](jamovi_module_patterns_guide.md#version-gating-minapp).
 
 ### Dynamic Titles with Variables
 
@@ -1325,6 +1365,7 @@ validateFactorVariable <- function(data, var_name, min_levels = 2) {
 2. **Memory Management**: Clean up large objects when done
 3. **Caching**: Cache expensive computations when possible
 4. **Sampling**: Use data sampling for large datasets in visualization
+5. **Rendering Mode**: Keep the default `raster` for any plot whose mark count grows with n; use `mode: vector` only for bounded-mark plots (see [Rendering Mode](#rendering-mode-raster-vs-vector-jamovi-283))
 
 ### Accessibility and Usability
 
@@ -1431,6 +1472,18 @@ ggplot2::stat_density_2d_filled()
 # or
 ggplot2::geom_hex()
 ```
+
+#### Issue: Huge SVG, Blurry Plot, or `mode: vector` Has No Effect
+
+- **Huge or slow plot:** a many-mark plot has `mode: vector`. Remove `mode`
+  (back to `raster`).
+- **Blurry on a high-resolution screen:** a bounded-mark plot (forest, bar,
+  flow diagram) can use `mode: vector` (jamovi 28.3+).
+- **`mode: vector` has no effect:** the R session's jmvcore is the CRAN build
+  (testthat and `load_all()` use whatever is in the dev library), which silently
+  ignores `mode`. Check in jamovi 28.3.
+
+See [Rendering Mode](#rendering-mode-raster-vs-vector-jamovi-283).
 
 #### Issue: State Not Persisting
 

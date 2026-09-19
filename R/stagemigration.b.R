@@ -950,7 +950,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     '<h4 style="color: #dc3545; margin-top: 0;">', t$recommendation_header, "</h4>",
                     '<p style="line-height: 1.6; color: inherit; font-weight: 600;">',
                     "Based on the statistical validation and clinical assessment, we recommend ",
-                    if (!is.null(results$clinical_interpretation) && grepl("recommend.*implementation", results$clinical_interpretation$recommendation %||% "", ignore.case = TRUE)) {
+                    # recommendation can hold several lines; any() keeps && scalar (R >= 4.3 errors on a longer operand)
+                    if (!is.null(results$clinical_interpretation) && any(grepl("recommend.*implementation", results$clinical_interpretation$recommendation %||% "", ignore.case = TRUE))) {
                         "implementation of the revised staging system in clinical practice."
                     } else {
                         "careful consideration of the revised staging system with additional validation if needed."

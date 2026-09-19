@@ -106,6 +106,7 @@ Already covered in `formula` — `composeTerm`/`composeTerms`/`stringifyTerm`/`d
 - `marshalFormula` / `marshalData` — these are for analyses that accept a user-typed formula option (rare in this codebase). Mention only if you actually see a formula option in `.a.yaml`.
 - `toB64` / `fromB64` — only relevant when emitting R code that references variables with non-syntactic names. Mention only if the function already does manual encoding.
 - Anything under `.h.R` — that's generated; never edit.
+- `Html` narrative → `type: Text`, a path-holding `String` option → `type: File`, or an Image → `mode: vector`: these are jamovi 28.3 schema changes (File/Text also need a module-wide `minApp`), not drop-in helper swaps, so they are out of scope here — see [jamovi 28.3 Features](../../vignettes/jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images).
 
 ---
 

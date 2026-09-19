@@ -121,8 +121,10 @@ for (i in seq_along(required_pkgs)) {
 
 ### 2.1 Basic Mixture Cure Model
 
-The simplest case: estimate the overall cure fraction without covariates. The
-mixture cure model decomposes the survival function as:
+The simplest mixture model has one covariate. The mixture cure model (smcure) needs at least
+one, because its latency part is a Cox model; for the cure fraction of the whole cohort without
+covariates, use the non-mixture model (Section 3). The mixture cure model decomposes the
+survival function as:
 
 S(t) = pi + (1 - pi) * S_u(t)
 
@@ -133,6 +135,7 @@ curemodels(
   data = curemodels_test,
   time = "FollowUpMonths",
   status = "Recurrence",
+  predictors = "Treatment",
   model_type = "mixture"
 )
 ```
@@ -287,6 +290,7 @@ curemodels(
   data = curemodels_test,
   time = "FollowUpMonths",
   status = "Recurrence",
+  predictors = "Treatment",
   model_type = "mixture",
   cure_threshold = 60
 )
@@ -300,6 +304,7 @@ curemodels(
   data = curemodels_test,
   time = "FollowUpMonths",
   status = "Recurrence",
+  predictors = "Treatment",
   model_type = "mixture",
   cure_threshold = 120
 )
@@ -315,6 +320,7 @@ curemodels(
   data = curemodels_test,
   time = "FollowUpMonths",
   status = "Recurrence",
+  predictors = "Treatment",
   model_type = "mixture",
   sensitivity_analysis = TRUE,
   cure_threshold = 60
@@ -447,6 +453,10 @@ curemodels(
 
 ### 9.1 No Predictors (Intercept-Only Model)
 
+The mixture cure model cannot be fitted without a covariate, so this call stops with a message
+that says so and points to the non-mixture model, which estimates the cure fraction of the whole
+cohort.
+
 ```{r edge-no-predictors}
 curemodels(
   data = curemodels_test,
@@ -504,11 +514,12 @@ curemodels(
   data = small_data,
   time = "FollowUpMonths",
   status = "Recurrence",
+  predictors = "Treatment",
   model_type = "mixture"
 )
 ```
 
-Expect warnings about small sample size or potential convergence issues.
+The analysis needs at least 30 complete cases; with 20 it stops with a message saying so.
 
 ---
 

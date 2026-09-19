@@ -35,6 +35,7 @@ Function: **`$ARGUMENTS`**
 > **jamovi library-acceptance checks** (the automated library reviewer flags these — include them):
 > - **UI labels**: checkbox `title:`/`label:` describe the thing, not the action (drop leading `Show`/`Enable`/`Include`/`Export`/`Generate`); sentence-case individual controls, Title Case only for group/section headings; advanced options in a collapsed `CollapseBox`; VariableSupplier near the top.
 > - **Rendering correctness**: named HTML symbol entities in `.b.R` output (`&plusmn;`, `&ge;`, `&times;`, `&beta;`…) → literal UTF-8 (`±`, `≥`, `×`, `β`). Keep structural `&lt;`/`&gt;`/`&amp;`/`&quot;`/`&nbsp;`.
+> - *(anticipatory)* **Narrative & file elements (jamovi 28.3+)**: plain narrative (summary, report sentence) prefers a `type: Text` result over hand-rolled Html once the module has `minApp: 28.3.0`; there user-controlled names are markdown-escaped and a literal `*` in statistics is `"\\*"` in the R string ([`Text`](../../vignettes/jamovi_r_yaml_guide.md#text-jamovi-283)). A `type: File` option is untrusted input: never `source()`/`eval()` it; validate format, columns and size in R ([Reading a `File` Option](../../vignettes/jamovi_b_R_guide.md#reading-a-file-option-jamovi-283)).
 > - **i18n fragments**: no `paste0`-glued `.()` fragments, no leading/trailing space inside `.()` — one complete sentence per `.()` with `{}` placeholders via `jmvcore::format()`.
 > - **Dead code**: `if (FALSE)` blocks or half-wired removed options (reading `self$options$X` for an X no longer in `.a.yaml`); debug scaffolding shipped.
 > - **Citations**: `refs:` keys resolve in `00refs.yaml` (no undefined/case-mismatch/empty-author). Run `/update-refs <fn> --validate`.
@@ -178,6 +179,7 @@ grep -n "^\s*warning(" R/<fn>.b.R      # jamovi never shows R warnings to the us
 grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set belongs in .init()
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
+grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide minApp: 28.3.0 (Text table columns are false hits); vector = bounded-mark plots only
 python3 tools/release_gate.py          # requiresData, CollapseBox Title Case, refs, .() " [..]"/\u{}/padding, translation %-specifiers, notice title colours (FAIL = blocking)
 Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contract.R")'
 ```
@@ -215,6 +217,13 @@ Checklist:
       commented out or removed.
 - [ ] **Do not add `type: Notice` to `.r.yaml`** — it is not in the compiler enum and
       `jmvtools::prepare()` fails on it. `type: Notification` compiles but breaks at runtime.
+- [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.3.0`** in
+      `jamovi/0000.yaml`; `python3 tools/release_gate.py` fails otherwise. minApp is
+      module-wide (jamovi 28.2 and older can no longer install any of the module), so raising
+      it is a release decision — ask first. Image `mode: vector` only on bounded-mark plots
+      (forest, bar, flow diagram, nomogram), never scatter/QQ/jitter/large KM/heatmap. Setup
+      and gating: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore),
+      [Version Gating: minApp](../../vignettes/jamovi_module_patterns_guide.md#version-gating-minapp).
 
 ### Documentation & UX
 
@@ -233,6 +242,7 @@ Checklist:
 - Memory efficiency
 - Large dataset handling
 - Optimization opportunities
+- An `Image` with `mode: vector` only on bounded-mark plots (forest, bar, flow diagram, nomogram); a scatter, QQ, jitter/raincloud, large KM or big heatmap becomes a multi-MB SVG — keep the default raster
 
 ### Mathematical & Statistical Correctness
 
@@ -422,6 +432,7 @@ none is attributable to a single function; raise them in a package-level CRAN pa
 - Add an **About this analysis** panel that briefly explains what the function does, when to use it, inputs required, and typical outputs (with links to docs).
 - Add a **Caveats & assumptions** panel that lists assumptions, data requirements (e.g., expected counts, proportional hazards), and common pitfalls; surface contextual warnings if violated.
 - Provide a **How to use** checklist (variables → options → run → interpret), and, if possible, a mini example with mock numbers.
+- In a module with `minApp: 28.3.0`, the Summary box and report sentences can be `type: Text` results (markdown); panels that need headings or tables stay Html. See [`Text`](../../vignettes/jamovi_r_yaml_guide.md#text-jamovi-283).
 
 #### SPECIFIC RECOMMENDATIONS
 
@@ -508,6 +519,10 @@ children:
             name: showExplanations
             label: "Show Explanations (educational notes)"
 ```
+
+The example below uses Html, which works at any `minApp`. With `minApp: 28.3.0`, `report` and `summary`
+can be `type: Text`; `setContent()` then reads the string as markdown, so escape a literal `*` (`"\\*"`) and
+markdown-escape `g1`/`g2` ([`.mdEscape`](../../vignettes/jamovi_b_R_guide.md#text-content-population-jamovi-283)).
 
 ```yaml
 # .r.yaml (report sentences)

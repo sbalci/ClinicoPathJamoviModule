@@ -65,6 +65,7 @@ Notices are integrated into the jamovi results framework:
 - R console debugging (use `cat()` or `message()`)
 - Logging (use proper logging frameworks)
 - Progress indicators (use different mechanisms)
+- Narrative text with no severity, such as a summary or an interpretation. Use a `type: Text` result (jamovi 28.3+; see [Which Text Renderer?](#which-text-renderer-notice-setnote-html-or-text))
 
 ### Quick Reference: Common Patterns
 
@@ -488,6 +489,8 @@ sprintf(
 
 #### Line Breaks and Structure
 
+> Project rule: Notice content allows no newlines. These examples predate it; see [Which Text Renderer?](#which-text-renderer-notice-setnote-html-or-text).
+
 ```r
 # Single-line notice
 notice$setContent('Analysis completed successfully.')
@@ -578,6 +581,21 @@ table$setNote("multiline", "Complete-case analysis.\n\nCIs use profile likelihoo
 
 Any other HTML (links, lists, headings, `<br>`, colours) is not in the allow-list. See
 the [tables guide](jamovi_tables_guide.md) for the full footnote pattern.
+
+#### Which Text Renderer? Notice, setNote, Html or Text
+
+Four renderers, four different rules. Pick by what the text is for:
+
+| Renderer | Where | Format honoured | Newlines | Escaping | Use for |
+|---|---|---|---|---|---|
+| `jmvcore::Notice` | `.b.R`, `notice$setContent()` | plain text; avoid HTML | not supported (project rule) | none; no HTML | severity messages (ERROR / WARNING / INFO); never `insert(999, notice)` ([13.1](#131-type-notice-does-not-compile-in-ryaml)) |
+| `table$setNote()` | `.b.R`, on a table | HTML allow-list: `i`/`em`, `b`/`strong`, `sub`, `sup` | `\n\n` = paragraph; single `\n` collapsed | (unverified) HTML-escape user text | footnotes on a table |
+| `type: Html` | `.r.yaml` + `setContent()` | full HTML | HTML rules (`<p>`, `<br>`) | `htmltools::htmlEscape()`; only five named entities ([13.3](#133-only-five-named-html-entities-are-safe)) | severity-styled panels; must be theme-safe ([13.2](#132-html-output-must-be-theme-safe)) |
+| `type: Text` | `.r.yaml` + `setContent()` | Markdown subset: `**bold**`, `*italic*`, `~~strike~~`, `[link](url)`, `-` / `1.` lists, `<sub>`/`<sup>` | `\n\n` = paragraph; single `\n` does not break | markdown-escape user text ([`.mdEscape`](jamovi_b_R_guide.md#text-content-population-jamovi-283)); decodes only `&lt; &gt; &amp; &quot; &#39;`; write other characters as `\uXXXX` | narrative, summaries, interpretation |
+
+- dev.jamovi.org: "For narrative or explanatory text, prefer Text, which supports basic inline formatting without the overhead and inconsistency of hand-rolled HTML." The Text sanitizer strips style attributes and every tag outside its whitelist, so a module cannot add CSS to it.
+- Text is a declared `.r.yaml` element holding a plain string, not an inserted `jmvcore::Notice` object (.omv round-trip unverified). It is jamovi 28.3+ (module-wide `minApp: 28.3.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)).
+- Full reference (keys, markdown subset, `*`/`_` escaping, testing): [`Text` in the r.yaml guide](jamovi_r_yaml_guide.md#text-jamovi-283).
 
 ### Internationalization Support
 
@@ -2856,6 +2874,10 @@ Unable to compile 'nt.r.yaml':
 	Table,Group,Array,Image,Preformatted,Html,State,Property,Output,Notification,Action
 ```
 
+**Re-checked for jmvtools 28.3.1 (schema read, `prepare()` not re-run):** the enum adds `Text`
+and `Svg`; still no `Notice`. Record: [library review guide §13](jamovi_library_review_guide.md#13-the-type-notice-trap);
+toolchain: [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
+
 The compiler's `schemas/resultsschema.yaml` enum has no `Notice`, even though
 `compiler.js` has a `Notice` branch in `sourcifyResults` and jamovi's protobuf
 defines `ResultsNotice` with `NoticeType {ERROR=0, STRONG_WARNING=1, WARNING=2,
@@ -2892,7 +2914,7 @@ Until then:
 
 `insert()` with a `jmvcore::Notice` raises `attempt to apply non-function`: Notice
 objects hold function references that jamovi's protobuf layer cannot serialize.
-See `docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md` and `R/waterfall.b.R`.
+See `R/waterfall.b.R` (`.addNotice()` / `.renderNotices()`) for the conversion pattern.
 
 Also note `jmvcore::NoticeType` is `ERROR = 0`, `STRONG_WARNING = 1`,
 `WARNING = 2`, `INFO = 3`. Hand-written `switch()` mappings in `.addNotice()`
@@ -2970,6 +2992,10 @@ value no longer matches the hex pattern it looks for).
 - **Say why there is no native notice.** Above a hand-rolled `.addNotice()`, leave the REJECTED
   comment from `jamovi_library_review_guide.md` §13 — the reviewer suggests `type: Notice` every
   round because nothing in the code says it does not compile.
+- **No panel needs no theme work.** Plain narrative with no severity can go in a `type: Text`
+  element (jamovi 28.3+). The Text sanitizer strips style attributes and every tag outside its
+  whitelist, so a module cannot add CSS to it. See
+  [Which Text Renderer?](#which-text-renderer-notice-setnote-html-or-text).
 
 ### 13.3 Only five named HTML entities are safe
 
@@ -3011,6 +3037,11 @@ HTML *numeric* entities (`&#x2192;`) — numeric entities are part of the HTML s
 and are unaffected by the named-entity change.
 
 Code that *strips* entities — `gsub("&nbsp;", " ", x)` — is correct as it stands.
+
+A `type: Text` element (jamovi 28.3+) differs: it decodes only `&lt; &gt; &amp; &quot; &#39;`.
+`&apos;`, safe in Html, is not decoded either; use `&#39;` or a plain apostrophe.
+`&mdash;`, `&nbsp;` and even numeric `&#8212;` show literally, so the numeric-entity
+workaround above does not apply there. Always use the `\uXXXX` escape.
 
 ### 13.4 `warning()` is invisible to your users
 

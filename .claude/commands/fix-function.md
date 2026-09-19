@@ -88,6 +88,19 @@ Issue Focus: **$ARGUMENTS** (if specified)
 3. **Explain the Solution** - Why this fix resolves the issue
 4. **Prevent Recurrence** - How to avoid similar issues in future
 
+### Known jamovi 28.3 symptoms
+
+Diagnose, then apply the fix from the linked section; don't improvise one.
+
+| Symptom | Where the fix lives |
+|---|---|
+| `'OptionFile' is not an exported object from 'namespace:jmvcore'` (or `'Text'`) under `load_all()`/testthat/`R CMD check` | [b_R §16](../../vignettes/jamovi_b_R_guide.md#16-troubleshooting-guide) (not a code bug: dev library has CRAN jmvcore); install: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore) |
+| `prepare()`: `This module requires a newer version of jamovi (minApp: 28.3.0 > ...)` | [Version Gating: minApp](../../vignettes/jamovi_module_patterns_guide.md#version-gating-minapp) |
+| `The file '<filename>' needs to be re-selected` | [b_R §16](../../vignettes/jamovi_b_R_guide.md#16-troubleshooting-guide) |
+| `Text` item shows `[1] ...`, or `*`/`_` vanish into italic/bold, or `&mdash;` appears literally | [`Text`](../../vignettes/jamovi_r_yaml_guide.md#text-jamovi-283), [b_R §16](../../vignettes/jamovi_b_R_guide.md#16-troubleshooting-guide) |
+| Huge or slow plot, or `mode: vector` has no effect | [Rendering Mode](../../vignettes/jamovi_plots_guide.md#rendering-mode-raster-vs-vector-jamovi-283) |
+| File/Text analysis fails on a user's older jamovi | `minApp` too low: [Version Gating: minApp](../../vignettes/jamovi_module_patterns_guide.md#version-gating-minapp) (module-wide; maintainer's decision) |
+
 ## Response Format
 
 ### 🔧 FUNCTION FIXES: `$ARGUMENTS`

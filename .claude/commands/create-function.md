@@ -76,6 +76,7 @@ Your choice [1-7]:
 ☐ Paired/matched data
 ☐ Multiple groups
 ☐ Covariates/adjustment variables
+☐ A user-supplied file (lexicon, lookup table) → `type: File` option (jamovi 28.3+) — needs module-wide `minApp: 28.3.0`; ask before choosing
 
 Select all that apply [space to toggle, enter when done]:
 ```
@@ -87,7 +88,7 @@ Select all that apply [space to toggle, enter when done]:
 1. Statistical table (estimates, CIs, p-values)
 2. Plot/graph
 3. Both table and plot
-4. HTML report
+4. Text summary (markdown; needs module-wide `minApp: 28.3.0`) or Html report
 5. Multiple outputs (will configure later)
 
 Your choice [1-5]:
@@ -211,6 +212,7 @@ grep -n "^\s*warning(" R/<fn>.b.R      # jamovi never shows R warnings to the us
 grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set belongs in .init()
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
+grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide minApp: 28.3.0 (Text table columns are false hits); vector = bounded-mark plots only
 python3 tools/release_gate.py          # requiresData contract, CollapseBox Title Case, refs (FAIL = blocking)
 Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contract.R")'
 ```
@@ -248,6 +250,13 @@ Checklist:
       commented out or removed.
 - [ ] **Do not add `type: Notice` to `.r.yaml`** — it is not in the compiler enum and
       `jmvtools::prepare()` fails on it. `type: Notification` compiles but breaks at runtime.
+- [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.3.0`** in
+      `jamovi/0000.yaml`; `python3 tools/release_gate.py` fails otherwise. minApp is
+      module-wide (jamovi 28.2 and older can no longer install any of the module), so raising
+      it is a release decision — ask first. Image `mode: vector` only on bounded-mark plots
+      (forest, bar, flow diagram, nomogram), never scatter/QQ/jitter/large KM/heatmap. Setup
+      and gating: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore),
+      [Version Gating: minApp](../../vignettes/jamovi_module_patterns_guide.md#version-gating-minapp).
 
 ## Response Format
 
@@ -419,6 +428,19 @@ $ARGUMENTSClass <- R6::R6Class(
 
 #### 🔧 **SETUP COMMANDS**
 
+**Toolchain (once per machine):** the jamovi app 28.3 or newer from
+<https://www.jamovi.org/download.html>, then:
+
+```r
+install.packages("jmvtools", repos = "https://repo.jamovi.org")
+remotes::install_github("jamovi/jamovi", subdir = "jmvcore")
+exists("OptionFile", envir = asNamespace("jmvcore"), inherits = FALSE)   # TRUE
+```
+
+CRAN jmvcore carries the same version label but lacks `OptionFile`/`Text`, so check the class,
+not `packageVersion()`. `prepare()` refuses to run when `minApp` is newer than the installed app.
+Details, sparse-clone alternative and revert: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
+
 **Create Files:**
 ```bash
 # Commands to create all files
@@ -440,6 +462,16 @@ data('histopathology')
 result <- $ARGUMENTS(data = histopathology, ...)
 ```
 
+A `type: File` option takes a path string from R (write a fixture to `tempfile(fileext = ".csv")`
+in the test) or `list(path =, filename =)`. Under CRAN jmvcore the generated header fails with
+"'OptionFile' is not an exported object from 'namespace:jmvcore'", so File/Text tests start with
+(use `"Text"` in place of `"OptionFile"` for a Text result):
+
+```r
+skip_if_not(exists("OptionFile", envir = asNamespace("jmvcore"), inherits = FALSE),
+            "needs jmvcore with OptionFile (install from jamovi/jamovi main)")
+```
+
 #### ✅ **QUALITY CHECKLIST**
 
 **Architecture:**
@@ -453,6 +485,10 @@ result <- $ARGUMENTS(data = histopathology, ...)
 - [ ] All .r.yaml outputs populated
 - [ ] UI elements match options
 - [ ] Help text informative
+- [ ] `type: File` option: `NULL` handled; format, columns and size validated in R (`extensions:` only
+      filters the file browser); never `source()`d/`eval()`d ([Reading a `File` Option](../../vignettes/jamovi_b_R_guide.md#reading-a-file-option-jamovi-283))
+- [ ] `type: Text` result: one string per `setContent()`; user-controlled names markdown-escaped
+      ([Text Content Population](../../vignettes/jamovi_b_R_guide.md#text-content-population-jamovi-283))
 
 **User Experience:**
 - [ ] TODO content helpful

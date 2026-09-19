@@ -278,3 +278,26 @@ test_that("curemodels result has all expected outputs", {
                 info = paste("Missing output:", comp))
   }
 })
+
+test_that("the non-mixture cure fraction is on the probability scale (flexsurvcure res, not res.t)", {
+  skip_if_not_installed("flexsurvcure")
+  data("curemodels_test", package = "ClinicoPath", envir = environment())
+  res <- curemodels(data = curemodels_test, time = "FollowUpMonths", status = "Recurrence",
+                    model_type = "nonmixture")
+  cure <- res$cureTable$asDF
+  ref <- flexsurvcure::flexsurvcure(survival::Surv(FollowUpMonths, Recurrence) ~ 1,
+                                    data = curemodels_test, dist = "weibullPH", mixture = FALSE)
+  expect_equal(cure$cure_fraction, unname(ref$res["theta", "est"]), tolerance = 1e-3)
+  expect_true(cure$cure_fraction > 0 && cure$cure_fraction < 1)   # was -0.90 (logit scale)
+  expect_equal(c(cure$cure_ci_lower, cure$cure_ci_upper),
+               unname(ref$res["theta", c("L95%", "U95%")]), tolerance = 1e-3)
+})
+
+test_that("an intercept-only mixture cure model explains that smcure needs a predictor", {
+  skip_if_not_installed("smcure")
+  data("curemodels_test", package = "ClinicoPath", envir = environment())
+  res <- curemodels(data = curemodels_test, time = "FollowUpMonths", status = "Recurrence",
+                    model_type = "mixture")
+  expect_match(res$errors$content, "needs at least one predictor", fixed = TRUE)
+  expect_false(grepl("subscript out of bounds", res$warnings$content, fixed = TRUE))
+})

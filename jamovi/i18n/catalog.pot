@@ -117847,6 +117847,10 @@ msgstr ""
 msgid "Predictor Positive Level"
 msgstr ""
 
+#: R/curemodels.b.R
+msgid "Predictor required for the mixture cure model"
+msgstr ""
+
 #: continuousrelationship/options/predictor.title
 #: continuousrelationship/ui[0][1].label
 #: jpps/options/predictor_var.title
@@ -153513,6 +153517,14 @@ msgid ""
 "The selected-variable Schoenfeld-residual diagnostic could not be computed. "
 "This is an unavailable diagnostic, not evidence that proportional hazards "
 "holds."
+msgstr ""
+
+#: R/curemodels.b.R
+msgid ""
+"The semi-parametric mixture cure model (smcure) needs at least one "
+"predictor, because its latency part is a Cox model. Add a predictor, or "
+"choose the non-mixture model to estimate the cure fraction of the whole "
+"cohort."
 msgstr ""
 
 #: R/psychopdaROC.b.R

@@ -40,7 +40,10 @@ examples:
 
 # Comprehensive Test Data Generator for Jamovi Functions
 
-**Consult:** `vignettes/jamovi_a_yaml_guide.md` for option types when auto-detecting data requirements.
+**Consult:** `vignettes/jamovi_a_yaml_guide.md` for option types when auto-detecting data requirements
+(`type: File`: [`File`](../../vignettes/jamovi_a_yaml_guide.md#file-jamovi-283)). Tests of `File`/`Text`
+analyses need a jmvcore that has those classes: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore),
+[Testing Under CRAN jmvcore](../../vignettes/jamovi_module_patterns_guide.md#testing-under-cran-jmvcore).
 
 Generate realistic test datasets in multiple formats (RDA, CSV, Excel, OMV) with corresponding:
 - Data preparation scripts (`data-raw/`)
@@ -103,11 +106,25 @@ project/
 
 For complete code templates (survival data, diagnostic data, basic tests, argument tests, edge case tests), read `.claude/references/test-data-templates.md`.
 
+An analysis with a `type: File` option or a `type: Text` result uses the template "File Options and
+Text Results" there: the file is written to a `tempfile()` inside the test (no fixture shipped), and the
+test file starts with the skip guard, because under CRAN jmvcore the whole wrapper errors, not just the
+`File` argument:
+
+```r
+skip_if_not(exists("OptionFile", envir = asNamespace("jmvcore"), inherits = FALSE),
+            "needs jmvcore with OptionFile (install from jamovi/jamovi main)")
+```
+
+(use `"Text"` instead of `"OptionFile"` for Text results).
+
 ## Auto-Detection Algorithm
 
 ```
 1. Read jamovi/{function_name}.a.yaml
 2. Parse all options with type: Variable or Variables
+   (type: File → the test writes a small file in one of its `extensions` to a
+   tempfile(), plus a malformed and a wrong-extension variant; see templates)
 3. Infer data type from option names:
    - time + event → survival data
    - outcome + predictors → diagnostic/regression
@@ -216,6 +233,8 @@ Generated test files automatically check:
 - ✅ All argument combinations
 - ✅ Data type handling
 - ✅ Missing data handling
+- ✅ `File` option: unset (`NULL`), valid file, nonexistent path (`needs to be re-selected`), wrong extension or malformed content rejected by the backend (R does not enforce `extensions:`)
+- ✅ `Text` result: one string in `$content`, asserted as raw markdown
 
 Run tests with:
 ```bash

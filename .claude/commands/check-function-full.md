@@ -94,7 +94,7 @@ External sources (if available and `check_external=true`):
 
 2. **Output Population (.r.yaml ↔ .b.R)**
    - All .r.yaml outputs populated in .b.R via `self$results$[outputname]`
-   - Data structures match definitions (Table/Image/Html)
+   - Data structures match definitions (Table/Image/Html/Text/Preformatted)
    - Column schemas align between definition and implementation
    - **Declared-but-never-populated** items (no setter anywhere) → dead schema, remove or wire
    - **Computed-but-permanently-invisible** items (`visible: false`, populated, but no `setVisible(TRUE)` / `visible: (opt)`) → wasted compute the user never sees
@@ -130,12 +130,16 @@ External sources (if available and `check_external=true`):
    - Compare the resulting `self$results` contents (tables, figures, html) and any side effects (e.g., column schemas, test selection, filtering).
    - Mark an argument **NON-EFFECTIVE** if no observable change occurs in results or visible logic paths.
    - Pay special attention to flags that gate computation (e.g., `assume_equal_var`, `paired`, `use_bootstrap`), thresholds, and choice selectors.
+   - A `type: File` option gets three runs: unset (`NULL`), a valid fixture (path string or `list(path =, filename =)`),
+     and a wrong-extension or malformed file, which the backend must reject (R does not enforce `extensions:`).
+     A nonexistent path never reaches `.run()`: the option check stops it with `The file '<filename>' needs to be re-selected`.
 
 8. **Output Population Verification (Programmatic)**
    - Crosswalk **every** item in `.r.yaml` to the corresponding setter in `.b.R`:
      - `Html` → `setContent()`, `setVisible()`
      - `Table` → `setRow()`, `addColumn()`, `setNote()`
-     - `Image`/`Plot` → `setState()` + renderer function
+     - `Image`/`Plot` → `setState()` + renderer function; `mode: vector` only on a bounded-mark plot (a scatter, QQ, jitter, large KM, big heatmap or many-flow alluvial becomes a multi-MB SVG)
+     - `Text` → `setContent()` with ONE markdown string: `*`/`_` in statistics escaped, user-controlled names markdown-escaped, no HTML entities
    - Confirm visibility rules (`visible`, `clearWith`, `refs`) and that conditional panels appear only when enabled.
    - Flag an output **UNPOPULATED** if there is no setter call or if it is always hidden.
 
@@ -210,7 +214,7 @@ self$results$insert(999, ok)
 
 
 > **Current limitation & co-existence with Html outputs:**  
-> Notices are currently **single-line only** and cannot contain line breaks. For rich, multi-line explanations, keep using your existing Html results (e.g., summary paragraphs, detailed interpretation blocks) **in addition to** Notices. Use Notices as concise, single-line banners (errors, strong warnings, key info) that point to the more detailed Html content instead of trying to replace it.
+> Notices are currently **single-line only** and cannot contain line breaks. For rich, multi-line explanations, keep using your existing Html results (e.g., summary paragraphs, detailed interpretation blocks) **in addition to** Notices. New narrative prose in a module with `minApp: 28.3.0` prefers a `type: Text` result (markdown; the jamovi dev docs: "For narrative or explanatory text, prefer Text") — see [`Text`](../../vignettes/jamovi_r_yaml_guide.md#text-jamovi-283); Html stays for headings, tables and other structure Text cannot render. Use Notices as concise, single-line banners (errors, strong warnings, key info) that point to the more detailed Html/Text content instead of trying to replace it.
 
 ---
 
@@ -374,6 +378,7 @@ grep -n "^\s*warning(" R/<fn>.b.R      # jamovi never shows R warnings to the us
 grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set belongs in .init()
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
+grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide minApp: 28.3.0 (Text table columns are false hits); vector = bounded-mark plots only
 python3 tools/release_gate.py          # requiresData contract, CollapseBox Title Case, refs (FAIL = blocking)
 Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contract.R")'
 ```
@@ -411,6 +416,13 @@ Checklist:
       commented out or removed.
 - [ ] **Do not add `type: Notice` to `.r.yaml`** — it is not in the compiler enum and
       `jmvtools::prepare()` fails on it. `type: Notification` compiles but breaks at runtime.
+- [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.3.0`** in
+      `jamovi/0000.yaml`; `python3 tools/release_gate.py` fails otherwise. minApp is
+      module-wide (jamovi 28.2 and older can no longer install any of the module), so raising
+      it is a release decision — ask first. Image `mode: vector` only on bounded-mark plots
+      (forest, bar, flow diagram, nomogram), never scatter/QQ/jitter/large KM/heatmap. Setup
+      and gating: [Installing Current jmvtools and jmvcore](../../vignettes/jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore),
+      [Version Gating: minApp](../../vignettes/jamovi_module_patterns_guide.md#version-gating-minapp).
 
 ## Related Commands
 

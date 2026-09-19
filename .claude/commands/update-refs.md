@@ -89,7 +89,7 @@ jamovi/00refs.yaml
 
 **Item-Level vs Top-Level References:**
 
-- Individual items (tables, plots) in `.r.yaml` files may have their own `refs:` field (e.g., `refs: glmnet`)
+- Individual items (tables, plots, Html and `Text` items) in `.r.yaml` files may have their own `refs:` field (e.g., `refs: glmnet`); `--validate` counts these as USED keys too
 - There is also a **top-level `refs:` section** at the end of the file (before `...`)
 - **DO NOT remove or modify item-level refs** - they are intentional and specific to that output item
 - This tool only manages the **top-level `refs:` section**

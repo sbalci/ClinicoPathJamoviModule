@@ -155,6 +155,8 @@ For categorical data, labels, and string content:
 - Text descriptions and notes
 - Formatted statistical results as strings
 
+Not to be confused with `type: Text` (capital T), the separate jamovi 28.3+ results element for Markdown prose — see [`Text`](jamovi_r_yaml_guide.md#text-jamovi-283).
+
 ##### `integer` Type
 For whole numbers and count data:
 
@@ -889,9 +891,17 @@ table$setNote("multiline", paste0(
 ))
 ```
 
-> **Note vs Notice:** this limited-HTML support applies to table footnotes set with
-> `setNote()`. It is distinct from `jmvcore::Notice` content - see the
-> [notices guide](jamovi_notices_guide.md) for those rules.
+This limited-HTML support applies only to table footnotes set with `setNote()`.
+`jmvcore::Notice` content is plain text, and a `type: Text` element (jamovi 28.3+) is
+Markdown; all four renderers are compared in
+[Which Text Renderer?](jamovi_notices_guide.md#which-text-renderer-notice-setnote-html-or-text).
+
+A note moved into `Text` must be escaped, because `*` and `_` are Markdown syntax there:
+
+```r
+table$setNote("sig", "* p < .05; ** p < .01")                    # setNote: literal
+self$results$summary$setContent("\\* p < .05; \\*\\* p < .01")  # Text: escaped
+```
 
 ### Dynamic Column Addition
 
@@ -1151,6 +1161,12 @@ For complex formatting beyond standard tables, use `Html` result type:
   type: Html
   visible: true
 ```
+
+`Html` is the right home for gt/gtsummary/kableExtra tables. For narrative or
+explanatory text about a table (interpretation, methods summary), the official jamovi
+dev docs say to prefer `type: Text` over hand-rolled HTML - see
+[`Text`](jamovi_r_yaml_guide.md#text-jamovi-283) (jamovi 28.3+; module-wide
+`minApp: 28.3.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)).
 
 ### Integration with R Table Packages
 
@@ -2678,7 +2694,7 @@ This comprehensive guide provides everything needed to create professional, soph
 After mastering table creation, explore:
 - Integration with plot generation for comprehensive results
 - Advanced conditional logic for sophisticated user interfaces
-- Custom HTML styling for branded presentation
+- `Text` results for narrative interpretation alongside tables (jamovi 28.3+)
 - Performance optimization for large-scale analyses
 
 This guide establishes the foundation for creating professional, reliable tables that effectively communicate statistical results in clinical and research contexts. The patterns and practices outlined here scale from simple descriptive tables to complex multi-dimensional analyses, ensuring your jamovi modules provide users with clear, actionable insights.

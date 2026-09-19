@@ -148,7 +148,7 @@ children:
 
 #### 2. Input Components
 - **Purpose**: Allow user input and selection
-- **Examples**: `ComboBox`, `CheckBox`, `TextBox`, `VariablesListBox`
+- **Examples**: `ComboBox`, `CheckBox`, `TextBox`, `VariablesListBox`, `FileSelector` (jamovi 28.3+)
 
 #### 3. Display Components
 - **Purpose**: Provide information and labels
@@ -321,6 +321,21 @@ Level selection for `Level` options from `.a.yaml`.
 - `name`: Must match a `Level` option in `.a.yaml`
 - `enable`: Usually conditional on variable selection
 
+#### `FileSelector`
+File picker for `File` options from `.a.yaml` (jamovi 28.3+; module-wide `minApp: 28.3.0` - see [jamovi 28.3 Features](jamovi_module_patterns_guide.md#jamovi-283-features-file-text-vector-images)).
+
+```yaml
+- type: FileSelector
+  name: lexicon
+```
+
+**Properties**:
+- `name`: Must match a `File` option in `.a.yaml`
+- `label`, `enable`, `events` and the grid properties (`cell`, `stretchFactor`, ...)
+- No `extensions` or `multiple` here: both are set on the `.a.yaml` option
+
+**R Integration**: value shape, the re-select message and backend validation are in the [`.a.yaml` `File` reference](jamovi_a_yaml_guide.md#file-jamovi-283). `extensions` only filters the file browser; the backend must still validate the file.
+
 ### Display Components
 
 #### `Label`
@@ -409,7 +424,8 @@ an action on the dataset. `Add test pattern to data` is accurate and should stay
 - Everything else goes in `CollapseBox` groups with `collapsed: true`.
 - `margin: large` throughout.
 - Every control type must match its option type: `Bool` → `CheckBox`, `List` →
-  `ComboBox` / `RadioButton`, `Variables` → `VariablesListBox`, and so on.
+  `ComboBox` / `RadioButton`, `Variables` → `VariablesListBox`, `File` →
+  `FileSelector`, and so on.
 
 ### Two schema traps
 
@@ -429,7 +445,9 @@ file when it does. `tame` protects the structure, not your comments or key order
 
 An `.a.yaml` option with no UI element gets **re-injected as a stray top-level
 `LayoutBox`** — so deleting a control from `.u.yaml` without deleting the option
-does not stick.
+does not stick. A newly added `File` option arrives this way, as
+`- type: FileSelector` inside such a `LayoutBox`; move it into its panel section
+after `prepare()`.
 
 ---
 
@@ -1050,6 +1068,10 @@ Choose UI components that match data types and user expectations:
 # Variable selection -> VariablesListBox
 - type: VariablesListBox
   name: covariates
+
+# File options -> FileSelector (jamovi 28.3+)
+- type: FileSelector
+  name: lexicon
 ```
 
 #### 6. Performance and Responsiveness
@@ -1709,6 +1731,8 @@ SummaryTables ships a trailing `CollapseBox` that lets users export the rendered
 
 **Security note:** validate the `path` value before writing - restrict to known directories or use `tools::file_path_sans_ext()` + a controlled extension. See `feedback_skip_approval_prompt_when_clean.md` for related guidance.
 
+**Reading a file is different:** this String `path` + `TextBox` pattern is for *writing* an export. To read a user-supplied file, do not use a String path option: use a `type: File` option with a [`FileSelector`](#fileselector) (jamovi 28.3+), the sanctioned way for analyses to consume files. String options holding a path to read from do not work on jamovi cloud and relied on deprecated Electron features. See [`File`](jamovi_a_yaml_guide.md#file-jamovi-283).
+
 ---
 
 ### 12.7 `Supplier` + `format: term` + `transferAction: interactions` (Model Builder)
@@ -1816,6 +1840,7 @@ Small details that lift the perceived polish of SummaryTables:
 | `RadioButton` | `optionName` + `optionPart` | mutually exclusive sub-panels |
 | `VariableSupplier` | `persistentItems: false` | reset on dataset change |
 | `LayoutBox` | `cell: { column: N, row: M }` | side-by-side columns |
+| `FileSelector` | bound to `type: File` option (`extensions` / `multiple` set in `.a.yaml`) | file picker; jamovi 28.3+ (module `minApp: 28.3.0`) |
 
 ---
 
@@ -1835,6 +1860,7 @@ This comprehensive guide provides everything needed to create professional, user
 - [jamovi Basic UI Design](https://dev.jamovi.org/ui-basic-design.html)
 - [jamovi Advanced UI Design](https://dev.jamovi.org/ui-advanced-design.html)
 - [jamovi Advanced UI Customization](https://dev.jamovi.org/ui-advanced-customisation.html)
+- [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore) - needed to compile and test jamovi 28.3 controls such as `FileSelector`
 - [ClinicoPath Module Examples](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/jamovi)
 
 ### Next Steps

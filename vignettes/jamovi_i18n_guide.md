@@ -104,8 +104,8 @@ A blanket `import(jmvcore)` in NAMESPACE (ClinicoPath's current setup) also expo
 ### Automatic vs Manual Translation
 
 **Automatically Translated (no `.()` needed):**
-- Strings in `.a.yaml` (analysis options)
-- Strings in `.r.yaml` (results definitions)
+- Strings in `.a.yaml` (analysis options). A `type: File` option's `title:` is extracted like any other; its `extensions:` are not.
+- Strings in `.r.yaml` (results definitions), including the static `content:` of a `type: Text` result (jamovi 28.3+): it is extracted and translated at run time. Text written with `setContent()` in `.b.R` still needs `.()` ([7.6](#76-markdown-in-text-results-jamovi-283)).
 - Strings in `.u.yaml` (user interface)
 
 **Require Manual Marking with `.()`:**
@@ -360,6 +360,8 @@ Because the failure only fires on the branch that reaches the helper, it is data
 ## 4. Translation Workflow with jmvtools
 
 ### 4.1 Initial Setup
+
+Install jmvtools (and, for R-side tests, jmvcore) first: [Installing Current jmvtools and jmvcore](jamovi_module_patterns_guide.md#installing-current-jmvtools-and-jmvcore).
 
 **Step 1: Add NAMESPACE import**
 ```r
@@ -908,6 +910,32 @@ html <- jmvcore::format(template, list(
     message = .('Results are shown below.')
 ))
 ```
+
+For narrative text such as this summary, jamovi 28.3+ offers a `type: Text` result instead (module-wide `minApp: 28.3.0`): see [7.6](#76-markdown-in-text-results-jamovi-283).
+
+### 7.6 Markdown in `Text` Results (jamovi 28.3+)
+
+A `type: Text` result renders a Markdown subset ([r.yaml guide](jamovi_r_yaml_guide.md#text-jamovi-283)),
+so its formatting markers sit inside the msgid:
+
+```r
+self$results$summary$setContent(jmvcore::format(
+    .("**Lexicon:** {file} with {n} terms."),
+    file = private$.mdEscape(self$options$lexicon$filename),
+    n = nrow(lex)))
+```
+
+1. **Layout stays outside `.()`**, as in [5.1b](#51b-library-review-findings-on--usage): join
+   paragraphs with `"\n\n"` and build list lines in R.
+2. **Translators keep the markers.** `**`, `*` and backslash escapes must survive
+   translation, paired and unchanged; review the `tr.po` diff. How a backslash escape appears in
+   a `.po` file is unverified, so spot-check after `i18nUpdate()`.
+3. **Escape only the user-supplied values.** Variable names, level labels and filenames go through
+   [`.mdEscape()`](jamovi_b_R_guide.md#text-content-population-jamovi-283) as placeholder values.
+   Never pass a translatable string to `.mdEscape()`: it would escape your own markers.
+4. **No link after a space inside `.()`.** ` [text](url)` is the ` [..]` pattern of
+   [11.7](#117-text-after---silently-disappears); pass the whole link as a placeholder value.
+5. **No entities.** Text decodes none of `&mdash;`/`&#8212;`; write `\uXXXX` (never `\u{XXXX}`).
 
 ---
 
@@ -1568,6 +1596,8 @@ if (n == 1) {
 
 **Not only at the end.** jmvcore's run-time regex `"(.*) \\[(.*)\\]"` is not anchored: when a string has no catalog entry, any ` [` followed later by `]` cuts the text at the space. `"(specificity [[APPROX]] 100% or model unstable)."` displayed as `"(specificity"` in every language without a catalog (2026-09-16 OncoPath). The compiler's extraction regex *is* end-anchored, so the catalog looks fine and only the screen is wrong. Write `≈` as `\u2248` and a CI as `95% CI %s to %s`. `python3 tools/release_gate.py` `check_i18n_bracket` FAILs on any shipped `.()` string containing ` [..]`; to test every literal at once, `identical(jmvcore::Options$new()$translate(s), s)` (that Options object has no catalog).
 
+The same cut hits a Markdown link `[text](url)` inside a `.()` string destined for a `type: Text` result when a space precedes `[`: keep links in a placeholder ([7.6](#76-markdown-in-text-results-jamovi-283) rule 4).
+
 ### 11.7b A Module Ships Another Module's Catalog
 
 **Symptom:** `jamovi/i18n/*.po` and `inst/i18n/*.json` are megabytes, full of msgids for analyses the module does not have (2026-09-16 OncoPath: 31,690 msgids, 7.3 MB json, 1,499 used).
@@ -1720,6 +1750,7 @@ myFunc <- function(data, self) {
 - [ ] No leading/trailing spaces in strings
 - [ ] Complete phrases, not fragments
 - [ ] Placeholders use `{name}` format
+- [ ] `Text` results: layout, list markers and links outside `.()`; user values markdown-escaped ([7.6](#76-markdown-in-text-results-jamovi-283))
 - [ ] Catalogs generated (en.po, tr.po)
 - [ ] Translations complete (no empty msgstr)
 - [ ] Module rebuilt with `jmvtools::prepare()`
