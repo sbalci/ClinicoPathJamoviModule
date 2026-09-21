@@ -2305,13 +2305,32 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 private$.generateAboutAnalysis()
 
             # Enhanced instructions with comprehensive guidance
-            if (is.null(self$options$patientID) ||
-                is.null(self$options$startTime) ||
-                is.null(self$options$endTime)) {
+            n_required <- sum(!vapply(
+                list(self$options$patientID, self$options$startTime, self$options$endTime),
+                is.null, logical(1)))
 
-                # ERROR notice for missing required variables
-                private$.addNotice('ERROR', .("Missing required variables"),
-                    .("Patient ID, Start Time, and End Time are required to generate a swimmer plot. Please select all three variables in the Core Data Variables section."))
+            if (n_required < 3L) {
+                # Setting up an analysis is not an error. An analysis the user has just opened
+                # has nothing assigned yet, and one that is half filled in is simply not
+                # finished - in both cases the answer is guidance, not a red ERROR telling
+                # them they did something wrong. Nothing assigned: the instructions panel
+                # below already names the three variables and what each is for, so it speaks
+                # for itself. Partly assigned: say which boxes are still empty, as a NOTE.
+                #
+                # Each sentence is a whole translatable unit joined with paste(), the pattern
+                # the report builders use, rather than splicing variable names into a
+                # template - a spliced noun phrase cannot be inflected correctly in Turkish.
+                if (n_required > 0L) {
+                    still_empty <- c(
+                        if (is.null(self$options$patientID)) .("Patient ID is still empty."),
+                        if (is.null(self$options$startTime)) .("Start Time is still empty."),
+                        if (is.null(self$options$endTime))   .("End Time is still empty.")
+                    )
+                    private$.addNotice('INFO', .("Keep going - a few variables to add"),
+                        paste(c(still_empty,
+                                .("Fill them in under Core Data Variables and the plot will appear.")),
+                              collapse = " "))
+                }
 
                 # Keep detailed HTML guidance
                 instructions <- private$.generateInstructions()

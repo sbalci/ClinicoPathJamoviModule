@@ -180760,3 +180760,23 @@ msgstr ""
 #: contTables/results/chiSq.title
 msgid "χ² Tests"
 msgstr ""
+
+#: R/swimmerplot.b.R
+msgid "Keep going - a few variables to add"
+msgstr "Devam edin - eklenecek birkaç değişken var"
+
+#: R/swimmerplot.b.R
+msgid "Patient ID is still empty."
+msgstr "Hasta Kimliği hâlâ boş."
+
+#: R/swimmerplot.b.R
+msgid "Start Time is still empty."
+msgstr "Başlangıç Zamanı hâlâ boş."
+
+#: R/swimmerplot.b.R
+msgid "End Time is still empty."
+msgstr "Bitiş Zamanı hâlâ boş."
+
+#: R/swimmerplot.b.R
+msgid "Fill them in under Core Data Variables and the plot will appear."
+msgstr "Bunları Temel Veri Değişkenleri bölümünde doldurduğunuzda grafik görünecektir."

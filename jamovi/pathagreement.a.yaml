@@ -4,7 +4,7 @@ title: Pathology Interrater Reliability
 menuGroup: OncoPathT
 menuSubgroup: Agreement
 menuSubtitle: Agreement on Categorical and Ordinal Data
-version: '0.2.0'
+version: '1.0.82'
 jas: '1.2'
 
 description:

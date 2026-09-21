@@ -1478,3 +1478,62 @@ test_that("the syntax pane quotes a hostile variable name", {
   asrc <- grep("deparse\\(val\\)", src, value = TRUE)
   expect_length(asrc, 1)
 })
+
+# A freshly opened swimmerplot showed "ERROR: Missing required variables" before the user had
+# touched anything, because the guard fired whenever ANY of the three required variables was
+# NULL -- which includes the all-NULL state an analysis starts in. The instructions panel
+# already lists the three and explains each, so on an empty analysis the error was pure noise
+# telling the user they had made a mistake they had not yet had the chance to make.
+test_that("an untouched swimmerplot shows guidance, not an error", {
+    d <- data.frame(id = paste0("P", 1:6), st = rep(0, 6), en = c(4, 7, 3, 9, 5, 6),
+                    stringsAsFactors = FALSE)
+    run <- function(...) {
+        o <- ClinicoPath:::swimmerplotOptions$new(...)
+        an <- ClinicoPath:::swimmerplotClass$new(options = o, data = d); an$run(); an$results
+    }
+    err <- function(r) {
+        x <- r$notices$content
+        if (is.null(x)) "" else x
+    }
+
+    # None of the three required variables assigned: the welcome state. Instructions yes,
+    # error no. A non-required variable is assigned only to get past jmvcore's harness: with
+    # NOTHING selected, readDataset() picks zero columns and init() dies with
+    # "invalid 'row.names' length" before .run() is ever reached. jamovi's own engine hands
+    # the analysis the dataset and does reach .run(), which is why the bug was visible there
+    # and not here. n_required is still 0, so this exercises the same branch.
+    fresh <- run(sortVariable = "id")
+    expect_false(grepl("Missing required variables", err(fresh), fixed = TRUE))
+    expect_true(nzchar(fresh$instructions$content))
+    expect_match(fresh$instructions$content, "Required Variables", fixed = TRUE)
+
+    # Half-filled in is not an error either - setting an analysis up never is. The user gets
+    # a NOTE naming the boxes still empty, and never the word ERROR.
+    partials <- list(
+        list(opts = list(patientID = "id"),
+             empty = c("Start Time is still empty.", "End Time is still empty."),
+             filled = "Patient ID is still empty."),
+        list(opts = list(patientID = "id", startTime = "st"),
+             empty = "End Time is still empty.",
+             filled = "Start Time is still empty."),
+        list(opts = list(startTime = "st", endTime = "en"),
+             empty = "Patient ID is still empty.",
+             filled = "End Time is still empty.")
+    )
+    for (p in partials) {
+        r <- do.call(run, p$opts)
+        txt <- err(r)
+        expect_false(grepl("ERROR", txt, fixed = TRUE))
+        expect_match(txt, "NOTE", fixed = TRUE)
+        # names exactly the boxes that are still empty, and no others
+        for (s in p$empty)  expect_match(txt, s, fixed = TRUE)
+        expect_false(grepl(p$filled, txt, fixed = TRUE))
+        expect_match(txt, "Fill them in under Core Data Variables", fixed = TRUE)
+        expect_true(nzchar(r$instructions$content))
+    }
+
+    # all three assigned: no notice at all, the analysis proceeds
+    done <- run(patientID = "id", startTime = "st", endTime = "en")
+    expect_false(grepl("ERROR", err(done), fixed = TRUE))
+    expect_false(grepl("is still empty", err(done), fixed = TRUE))
+})
