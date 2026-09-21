@@ -10,7 +10,7 @@ stage: 0
 compilerMode: tame
 children:
   - type: CollapseBox
-    label: Worked examples (demonstration only)
+    label: Worked Examples (Demonstration Only)
     collapsed: false
     children:
       - type: ComboBox

@@ -4,7 +4,7 @@ title: Medical Decision Calculator
 menuGroup: meddecide
 menuSubgroup: Decision Calculators
 menuSubtitle: Sensitivity, Specificity, PPV, NPV, ...
-version: '1.0.81'
+version: '1.0.83'
 jas: '1.2'
 
 description:
@@ -22,11 +22,11 @@ description:
         usage: |
             # Illustrative examples only; these are not clinical guides.
             result1 <- decisioncalculator(
-              TP = 90, FN = 10, TN = 80, FP = 20
+              TP = 90, FN = 20, TN = 80, FP = 30
             )
 
             result2 <- decisioncalculator(
-              TP = 90, FN = 10, TN = 80, FP = 20,
+              TP = 90, FN = 20, TN = 80, FP = 30,
               ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
             )
 
@@ -36,6 +36,7 @@ options:
       title: 'True Positive (TP)'
       type: Number
       default: 90
+      min: 0
       description:
           ui: >
             Number of reference-positive cases with a positive test result.
@@ -46,6 +47,7 @@ options:
       title: 'True Negative (TN)'
       type: Number
       default: 80
+      min: 0
       description:
           ui: >
             Number of reference-negative cases with a negative test result.
@@ -56,6 +58,7 @@ options:
       title: 'False Positive (FP)'
       type: Number
       default: 30
+      min: 0
       description:
           ui: >
             Number of reference-negative cases with a positive test result.
@@ -66,6 +69,7 @@ options:
       title: 'False Negative (FN)'
       type: Number
       default: 20
+      min: 0
       description:
           ui: >
             Number of reference-positive cases with a negative test result.
@@ -204,6 +208,7 @@ options:
       title: 'TP (Cut-off 1)'
       type: Number
       default: 100
+      min: 0
       description:
           ui: Reference-positive participants testing positive in illustrative scenario 1.
           R: True-positive frequency for illustrative scenario 1.
@@ -212,6 +217,7 @@ options:
       title: 'FP (Cut-off 1)'
       type: Number
       default: 40
+      min: 0
       description:
           ui: Reference-negative participants testing positive in illustrative scenario 1.
           R: False-positive frequency for illustrative scenario 1.
@@ -220,6 +226,7 @@ options:
       title: 'TN (Cut-off 1)'
       type: Number
       default: 70
+      min: 0
       description:
           ui: Reference-negative participants testing negative in illustrative scenario 1.
           R: True-negative frequency for illustrative scenario 1.
@@ -228,6 +235,7 @@ options:
       title: 'FN (Cut-off 1)'
       type: Number
       default: 10
+      min: 0
       description:
           ui: Reference-positive participants testing negative in illustrative scenario 1.
           R: False-negative frequency for illustrative scenario 1.
@@ -246,6 +254,7 @@ options:
       title: 'TP (Cut-off 2)'
       type: Number
       default: 80
+      min: 0
       description:
           ui: Reference-positive participants testing positive in illustrative scenario 2.
           R: True-positive frequency for illustrative scenario 2.
@@ -254,6 +263,7 @@ options:
       title: 'FP (Cut-off 2)'
       type: Number
       default: 15
+      min: 0
       description:
           ui: Reference-negative participants testing positive in illustrative scenario 2.
           R: False-positive frequency for illustrative scenario 2.
@@ -262,6 +272,7 @@ options:
       title: 'TN (Cut-off 2)'
       type: Number
       default: 95
+      min: 0
       description:
           ui: Reference-negative participants testing negative in illustrative scenario 2.
           R: True-negative frequency for illustrative scenario 2.
@@ -270,6 +281,7 @@ options:
       title: 'FN (Cut-off 2)'
       type: Number
       default: 30
+      min: 0
       description:
           ui: Reference-positive participants testing negative in illustrative scenario 2.
           R: False-negative frequency for illustrative scenario 2.

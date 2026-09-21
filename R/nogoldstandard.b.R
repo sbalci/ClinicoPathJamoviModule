@@ -48,6 +48,28 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 as.integer((as.double(seed) + as.double(offset)) %% .Machine$integer.max)
             },
 
+            # The .a.yaml option TITLES, so notices can name a choice the way the
+            # drop-down does. Splicing the raw enum key showed the user internal
+            # snake_case ("latent_class", "any_positive") in every locale.
+            .methodLabel = function(m) {
+                switch(as.character(m),
+                    latent_class = .("Latent Class Analysis"),
+                    composite    = .("Composite Reference (strict majority)"),
+                    all_positive = .("All Tests Positive"),
+                    any_positive = .("Any Test Positive"),
+                    bayesian     = .("Penalized EM (MAP-like; fixed priors; 3+ tests)"),
+                    as.character(m))
+            },
+            .presetLabel = function(p) {
+                switch(as.character(p),
+                    none                  = .("No example"),
+                    diagnostic_validation = .("Diagnostic Test Validation (example)"),
+                    pathology_agreement   = .("Pathologist Agreement (example)"),
+                    tumor_markers         = .("Tumor Marker Evaluation (example)"),
+                    screening_evaluation  = .("Screening Test Assessment (example)"),
+                    as.character(p))
+            },
+
             .diag = function(...) {
                 if (!isTRUE(self$options$verbose) || isTRUE(private$.diagSuppressed))
                     return(invisible(NULL))
@@ -86,15 +108,21 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 notice_types <- vapply(private$.noticeList, `[[`, character(1), "type")
                 notice_order <- order(unname(severity[notice_types]), na.last = TRUE)
 
+                # WRONG BEFORE: the severity word was a hard-coded English literal, so every
+                # line of the Important Information panel opened in English even when its
+                # body was translated -- and the severity marker is what a skimming reader
+                # triages on. Built once here so `.()` is not called inside the vapply.
+                labels <- c(
+                    ERROR          = .("ERROR"),
+                    STRONG_WARNING = .("STRONG WARNING"),
+                    WARNING        = .("WARNING"),
+                    INFO           = .("INFO")
+                )
+
                 blocks <- vapply(private$.noticeList[notice_order], function(notice) {
-                    prefix <- switch(notice$type,
-                        ERROR          = "ERROR: ",
-                        STRONG_WARNING = "STRONG WARNING: ",
-                        WARNING        = "WARNING: ",
-                        INFO           = "INFO: ",
-                        "INFO: "
-                    )
-                    paste0(prefix, notice$title, ": ", notice$content)
+                    prefix <- if (!is.null(notice$type) && notice$type %in% names(labels))
+                        labels[[notice$type]] else labels[["INFO"]]
+                    paste0(prefix, ": ", notice$title, ": ", notice$content)
                 }, character(1))
 
                 self$results$notices$setContent(paste(blocks, collapse = "\n"))
@@ -200,8 +228,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 if (sum(configured) < 2) {
                     self$results$instructions$setVisible(TRUE)
+                    # clinical_summary carries `visible: (showSummary)` in the .r.yaml;
+                    # calling setVisible() here re-implemented that binding imperatively and
+                    # would silently override any future edit to the expression. Clearing the
+                    # content is enough.
                     self$results$clinical_summary$setContent("")
-                    self$results$clinical_summary$setVisible(FALSE)
 
                     # Get method-specific content
                     method_info <- private$.getMethodSpecificContent()
@@ -236,7 +267,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                 "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4caf50; color: inherit;'>",
                                 "<h4 style='color: inherit; margin-top: 0;'> ", .("Active Illustrative Example"), "</h4>",
                                 "<p><strong>", .("Example only:"), "</strong> ", .("This scenario is illustrative, does not change settings, and is not a clinical guide or validated recommendation."), "</p>",
-                                "<p><strong>", .("Scenario"), ":</strong> ", self$options$clinicalPreset, "</p>",
+                                # was the raw enum key, e.g. "tumor_markers"
+                                "<p><strong>", .("Scenario"), ":</strong> ", private$.presetLabel(self$options$clinicalPreset), "</p>",
                                 "<p><strong>", .("Description"), ":</strong> ", private$.preset_info$description, "</p>",
                                 "<p><strong>", .("Example context"), ":</strong> ", private$.preset_info$guidance, "</p>",
                                 "<p><strong>", .("Example method"), ":</strong> ", private$.preset_info$method, "</p>",
@@ -253,7 +285,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 } else {
                     # Hide instructions when analysis can proceed
                     self$results$instructions$setVisible(FALSE)
-                    self$results$clinical_summary$setVisible(isTRUE(self$options$showSummary))
+                    # `visible: (showSummary)` in the .r.yaml already does this.
                     return(FALSE) # Analysis ready
                 }
             },
@@ -433,15 +465,17 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 if (n_after < n_before) {
                     private$.addNotice(
                         "WARNING",
-                        sprintf("Excluded %d case(s) with missing test results", n_before - n_after),
-                        sprintf("This analysis uses the %d of %d cases (%.1f%%) with a result recorded for every selected test. All displayed estimates use these complete cases. If the probability of a missing result is related to an unobserved test result or latent class, the estimates can be biased.",
+                        # Was raw English: the msgid must be the literal, so wrap the
+                        # sprintf FORMAT and interpolate outside it.
+                        sprintf(.("Excluded %d case(s) with missing test results"), n_before - n_after),
+                        sprintf(.("This analysis uses the %1$d of %2$d cases (%3$.1f%%) with a result recorded for every selected test. All displayed estimates use these complete cases. If the probability of a missing result is related to an unobserved test result or latent class, the estimates can be biased."),
                                 n_after, n_before, 100 * n_after / n_before)
                     )
                 } else {
                     private$.addNotice(
                         "INFO",
-                        sprintf("Analysing %d cases", n_after),
-                        sprintf("All %d cases have a result for every selected test.", n_after)
+                        sprintf(.("Analysing %d cases"), n_after),
+                        sprintf(.("All %d cases have a result for every selected test."), n_after)
                     )
                 }
 
@@ -460,7 +494,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 private$.checkpoint() # Before data conversion
 
                 # Clinical assumption checking
-                private$.validateClinicalAssumptions(test_data, tests, self$options$method)
+                private$.validateClinicalAssumptions(test_data, tests, self$options$method,
+                                                    test_levels)
 
                 # Convert to binary format for analysis
                 binary_data <- data.frame(matrix(nrow = nrow(test_data), ncol = length(tests)))
@@ -508,6 +543,27 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                             )
                         )
                     }
+                } else if (!is.null(results) && is.finite(results$prevalence) &&
+                           !is.null(results$data)) {
+                    # MISSING BEFORE: the extreme-proportion caution was gated on the two
+                    # latent methods only. The three rule-based methods compute every
+                    # displayed percentage on exactly these two counts, so they become
+                    # unstable at the same boundaries -- and nothing told the reader that
+                    # the denominator behind a "99% specificity" was six patients.
+                    # Report the counts themselves: they ARE the denominators used below.
+                    n_rule <- nrow(results$data)
+                    n_rule_pos <- round(n_rule * results$prevalence)
+                    n_rule_neg <- n_rule - n_rule_pos
+                    if (n_rule_pos < 10 || n_rule_neg < 10) {
+                        private$.addNotice(
+                            "STRONG_WARNING",
+                            .("Reference rule splits the sample very unevenly"),
+                            .fmt(
+                                .("Of {n} analyzed cases, {npos} meet the selected reference rule and {nneg} do not. Every percentage in the table below is computed on one of these two counts, so with fewer than about 10 cases on a side the estimate and its interval are driven by a handful of patients and should not be read as a stable value."),
+                                n = n_rule, npos = n_rule_pos, nneg = n_rule_neg
+                            )
+                        )
+                    }
                 }
 
                 # .runBayesian returns a `converged` flag and .runLCA warns only via
@@ -517,8 +573,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 if (isFALSE(results$converged)) {
                     private$.addNotice(
                         "STRONG_WARNING",
-                        "The estimation did not converge",
-                        sprintf("The EM algorithm reached its iteration limit (%s) without the parameter estimates settling. The sensitivities and specificities below are wherever the algorithm happened to stop, not a fitted solution, and should not be reported. Try a different method, or check whether the tests are nearly perfectly agreeing or nearly independent of one another.",
+                        # This is the notice that tells the user the estimates below are
+                        # not a solution. It was English-only in every locale; wrapped now.
+                        .("The estimation did not converge"),
+                        sprintf(.("The EM algorithm reached its iteration limit (%s) without the parameter estimates settling. The sensitivities and specificities below are wherever the algorithm happened to stop, not a fitted solution, and should not be reported. Try a different method, or check whether the tests are nearly perfectly agreeing or nearly independent of one another."),
                                 if (is.null(results$iterations)) "100" else as.character(results$iterations))
                     )
                 }
@@ -575,7 +633,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Store agreement matrix for plotting
-                self$results$agreement_plot$setVisible(TRUE)
+                # (agreement_plot has no `visible:` binding, so it is visible by default;
+                # the setVisible(TRUE) that stood here was a no-op.)
                 self$results$agreement_plot$setState(list(
                     agreement_matrix = agreement_matrix,
                     tests = unlist(tests)
@@ -698,9 +757,15 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 table$setNote(
                     "ci_provenance",
                     if (isTRUE(self$options$bootstrap))
-                        sprintf(jmvcore::.("%.0f%% intervals are bootstrap percentile intervals from %d resamples of the cases, refitting the model on each. Seed: %s."),
+                        sprintf(jmvcore::.("%1$.0f%% intervals are bootstrap percentile intervals from %2$d resamples of the cases, refitting the model on each. Seed: %3$s."),
+                                # WRONG BEFORE: this printed the RAW option while the note
+                                # directly above it on the same table printed
+                                # private$.seedValue() -- the value withr::local_seed actually
+                                # received. `seed` has no min:, so seed = -7 gave "Seed: -7"
+                                # here and "Random seed: 2147483640" one line up, and the
+                                # published seed did not reproduce the intervals.
                                 conf_pct, self$options$nboot,
-                                if (is.null(self$options$seed)) "0" else as.character(self$options$seed))
+                                base::format(private$.seedValue()))
                     else if (self$options$method %in% c("latent_class", "bayesian"))
                         sprintf(jmvcore::.("%.0f%% confidence intervals are not reported for latent-model response probabilities without bootstrap refitting. Ordinary binomial intervals omit uncertainty from estimating the latent classes and can be substantially too narrow. Enable Bootstrap CI to obtain intervals."),
                                 conf_pct)
@@ -734,14 +799,19 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 composite_two <- identical(meth, "composite") && length(tests) == 2
                 if (composite_two) meth <- "all_positive"
                 if (identical(meth, "all_positive") || identical(meth, "any_positive")) {
-                    rule <- if (identical(meth, "all_positive"))
-                        "every test is positive" else "at least one test is positive"
+                    # WRONG BEFORE: the rule description ("every test is positive") and
+                    # the metric-pair name ("Sensitivity and NPV") were hardcoded ENGLISH
+                    # fragments spliced through %s into a translated format, so the clause
+                    # naming which metrics are meaningless stayed English in every locale.
+                    # The format also carried two unordered %s with no %n$ markers. Both
+                    # branches are now complete, independently translatable sentences.
                     private$.addNotice(
                         "STRONG_WARNING",
                         .("This method cannot estimate accuracy"),
-                        sprintf(jmvcore::.("The reference rule is defined as \"%s\", so each test is compared against a rule built from its own result. %s are therefore fixed at 100%% by construction on every dataset and are left blank rather than reported as findings. The remaining values are also affected by this circularity and describe agreement with the rule, not diagnostic accuracy."),
-                                rule,
-                                if (identical(meth, "all_positive")) "Sensitivity and NPV" else "Specificity and PPV")
+                        if (identical(meth, "all_positive"))
+                            .("The reference rule is defined as \"every test is positive\", so each test is compared against a rule built from its own result. Sensitivity and NPV are therefore fixed at 100% by construction on every dataset and are left blank rather than reported as findings. The remaining values are also affected by this circularity and describe agreement with the rule, not diagnostic accuracy.")
+                        else
+                            .("The reference rule is defined as \"at least one test is positive\", so each test is compared against a rule built from its own result. Specificity and PPV are therefore fixed at 100% by construction on every dataset and are left blank rather than reported as findings. The remaining values are also affected by this circularity and describe agreement with the rule, not diagnostic accuracy.")
                     )
                     table$setNote(
                         "incorporation",
@@ -848,7 +918,15 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 y <- model$y
                 if (is.null(y) || nrow(y) == 0) return()
-                var_cols <- intersect(names(y), unlist(tests))
+                # WRONG BEFORE: matched on names(model$y). poLCA builds model$y with
+                # as.data.frame() on the cbind response matrix, which runs make.names() on
+                # the column names, while model$probs keeps the names the user selected.
+                # Any test named non-syntactically ("HPV DNA", "p16+/p53", "Grade 2/3")
+                # therefore never matched, var_cols came up short and the whole
+                # bivariate-residual panel returned silently empty -- so the
+                # conditional-independence assumption looked checked when it was not.
+                # model$probs carries the original names, so match on those.
+                var_cols <- intersect(names(model$probs), unlist(tests))
                 if (length(var_cols) < 2) return()
 
                 THRESHOLD <- stats::qchisq(0.95, df = 1)   # 3.841
@@ -860,9 +938,12 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         b <- var_cols[j]
                         bvr <- private$.bivariateResidual(model, a, b)
                         if (!is.finite(bvr)) next
-                        pair <- paste(a, "vs", b)
+                        # rowKey stays language-independent; the displayed label was a
+                        # bare English "vs" spliced between the two test names.
+                        pair_key <- paste(a, "vs", b)
+                        pair <- jmvcore::format(.("{a} vs {b}"), a = a, b = b)
                         if (bvr > THRESHOLD) flagged <- c(flagged, pair)
-                        if (!is.null(table)) table$addRow(rowKey = pair, values = list(
+                        if (!is.null(table)) table$addRow(rowKey = pair_key, values = list(
                             pair = pair,
                             bvr = bvr,
                             verdict = if (bvr > THRESHOLD)
@@ -892,8 +973,17 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # higher-order patterns and can understate pairwise residuals. Construct
                 # the complete 2 x 2 expected margin directly from the fitted model.
                 if (is.null(model$y) || is.null(model$probs) || is.null(model$P) ||
-                    !a %in% names(model$y) || !b %in% names(model$y) ||
                     !a %in% names(model$probs) || !b %in% names(model$probs)) {
+                    return(NA_real_)
+                }
+
+                # model$y's names are make.names()-mangled copies of model$probs' names and
+                # sit in the same order, so `model$y[[a]]` was NULL for any non-syntactic
+                # test name. Index model$y positionally instead of by name.
+                ia <- match(a, names(model$probs))
+                ib <- match(b, names(model$probs))
+                if (is.na(ia) || is.na(ib) ||
+                    ia > ncol(model$y) || ib > ncol(model$y)) {
                     return(NA_real_)
                 }
 
@@ -907,8 +997,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 observed <- table(
-                    factor(as.character(model$y[[a]]), levels = colnames(probs_a)),
-                    factor(as.character(model$y[[b]]), levels = colnames(probs_b))
+                    factor(as.character(model$y[[ia]]), levels = colnames(probs_a)),
+                    factor(as.character(model$y[[ib]]), levels = colnames(probs_b))
                 )
                 n_obs <- sum(observed)
                 if (n_obs <= 0) return(NA_real_)
@@ -958,11 +1048,22 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Add each available statistic to table
+                # Add each available statistic to table.
+                # WRONG BEFORE: the displayed label WAS the English list name, so this
+                # table's row labels stayed English inside an otherwise-translated result
+                # tree. rowKey keeps the stable English key; only the label is translated.
                 for (name in names(fit_stats)) {
                     if (!is.null(fit_stats[[name]])) {
+                        label <- switch(name,
+                            "BIC"                = .("BIC"),
+                            "AIC"                = .("AIC"),
+                            "Log-Likelihood"     = .("Log-Likelihood"),
+                            "G-squared"          = .("G-squared"),
+                            "Chi-squared"        = .("Chi-squared"),
+                            "Degrees of Freedom" = .("Degrees of Freedom"),
+                            name)
                         table$addRow(rowKey = name, values = list(
-                            statistic = name,
+                            statistic = label,
                             value = fit_stats[[name]]
                         ))
                     }
@@ -1201,6 +1302,22 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # Calculate prevalence
                 prevalence <- mean(composite, na.rm = TRUE)
 
+                # With no case on one side of the majority rule every metric on that side
+                # has a zero denominator. .runAllPositive/.runAnyPositive already return NA
+                # there; composite alone printed the literal NaN. Say why once, here.
+                n_rule_pos <- sum(composite, na.rm = TRUE)
+                n_rule_neg <- sum(!composite, na.rm = TRUE)
+                if (n_rule_pos == 0 || n_rule_neg == 0) {
+                    private$.addNotice(
+                        "STRONG_WARNING",
+                        .("Majority rule has an empty group"),
+                        if (n_rule_pos == 0)
+                            .("No case in the analyzed data meets the strict-majority rule, so there is no rule-positive group. The positive-response probability cannot be computed from an empty denominator and is left blank rather than reported.")
+                        else
+                            .("Every case in the analyzed data meets the strict-majority rule, so there is no rule-negative group. The negative-response probability cannot be computed from an empty denominator and is left blank rather than reported.")
+                    )
+                }
+
                 # Calculate metrics for each test
                 sensitivities <- numeric(ncol(binary_data))
                 specificities <- numeric(ncol(binary_data))
@@ -1212,8 +1329,12 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     fp <- sum(test_result & !composite, na.rm = TRUE)
                     fn <- sum(!test_result & composite, na.rm = TRUE)
 
-                    sensitivities[i] <- tp / (tp + fn)
-                    specificities[i] <- tn / (tn + fp)
+                    # WRONG BEFORE: bare tp/(tp+fn). With an empty rule group this is
+                    # 0/0 = NaN, which jamovi prints literally as "NaN". The two sibling
+                    # rule estimators already guard the identical expression; match them
+                    # and pass NA_real_ so the cell renders empty.
+                    sensitivities[i] <- if ((tp + fn) > 0) tp / (tp + fn) else NA_real_
+                    specificities[i] <- if ((tn + fp) > 0) tn / (tn + fp) else NA_real_
                 }
 
                 return(list(
@@ -1259,8 +1380,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 private$.addNotice(
                     "WARNING",
-                    "Fixed priors used by penalized EM",
-                    sprintf("Prevalence uses a uniform Beta(%g, %g) prior. Sensitivity and specificity each use a Beta(%g, %g) prior, which has mean %.2f and increases toward 1, so it pulls both estimates upward -- in MAP terms it adds one pseudo-positive result to every test. With a small sample this prior, not your data, may be driving the numbers below. These are penalised-likelihood (MAP) point estimates from an EM algorithm, not draws from a posterior, so the intervals shown are not credible intervals.",
+                    .("Fixed priors used by penalized EM"),
+                    sprintf(.("Prevalence uses a uniform Beta(%1$g, %2$g) prior. Sensitivity and specificity each use a Beta(%3$g, %4$g) prior, which has mean %5$.2f and increases toward 1, so it pulls both estimates upward -- in MAP terms it adds one pseudo-positive result to every test. With a small sample this prior, not your data, may be driving the numbers below. These are penalised-likelihood (MAP) point estimates from an EM algorithm, not draws from a posterior, so the intervals shown are not credible intervals."),
                             alpha_prev, beta_prev, alpha_sens, beta_sens,
                             alpha_sens / (alpha_sens + beta_sens))
                 )
@@ -1412,12 +1533,16 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 if (length(unstable) > 0) {
                     private$.addNotice(
                         "STRONG_WARNING",
-                        "Parameters not estimable",
-                        sprintf("The fitted prevalence is %.4f, so the model implies fewer than one %s case in this sample. %s cannot be estimated from it and %s left blank -- the algorithm would otherwise return a value pinned at its boundary by the prior rather than by your data.",
-                                prevalence,
-                                if ("sensitivity" %in% unstable) "diseased" else "non-diseased",
-                                paste(tools::toTitleCase(unstable), collapse = " and "),
-                                if (length(unstable) > 1) "have been" else "has been")
+                        .("Parameters not estimable"),
+                        if (length(unstable) > 1)
+                            sprintf(.("The fitted prevalence is %.4f, so the model implies fewer than one diseased case and fewer than one non-diseased case in this sample. Neither sensitivity nor specificity can be estimated from it and both have been left blank -- the algorithm would otherwise return values pinned at their boundary by the prior rather than by your data."),
+                                    prevalence)
+                        else if (identical(unstable, "sensitivity"))
+                            sprintf(.("The fitted prevalence is %.4f, so the model implies fewer than one diseased case in this sample. Sensitivity cannot be estimated from it and has been left blank -- the algorithm would otherwise return a value pinned at its boundary by the prior rather than by your data."),
+                                    prevalence)
+                        else
+                            sprintf(.("The fitted prevalence is %.4f, so the model implies fewer than one non-diseased case in this sample. Specificity cannot be estimated from it and has been left blank -- the algorithm would otherwise return a value pinned at its boundary by the prior rather than by your data."),
+                                    prevalence)
                     )
                 }
 
@@ -1523,8 +1648,13 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 # Scope the bootstrap RNG so running the analysis never changes the
                 # caller's random-number stream.
                 withr::local_seed(seed_val)
-                # Draw every resample up front so nothing downstream can disturb the stream.
-                idx <- matrix(sample.int(n, n * nboot, replace = TRUE), nrow = nboot, byrow = TRUE)
+                # The resample indices used to be materialised up front as one n x nboot
+                # integer matrix -- 190 MB at n = 5000, nboot = 10000, held for the whole
+                # loop on top of the per-replicate data copies, which could exhaust memory
+                # before the first fit. Drawing one resample per iteration from the same
+                # seeded stream is bit-identical (every estimator scopes its own RNG with
+                # withr, so nothing downstream consumes from this stream) and allocates n
+                # integers instead of n * nboot. Verified identical for n = 7, nboot = 5.
 
                 # Replicates reuse the main estimators; keep their per-fit diagnostics and
                 # warnings out of the output. Failures are summarized once below.
@@ -1544,7 +1674,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 for (b in seq_len(nboot)) {
                     if (b %% 25 == 1) private$.checkpoint(flush = FALSE)
-                    boot_data <- data[idx[b, ], , drop = FALSE]
+                    boot_data <- data[sample.int(n, n, replace = TRUE), , drop = FALSE]
 
                     boot_result <- tryCatch({
                         if (method == "latent_class") {
@@ -1562,7 +1692,17 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         } else {
                             NULL
                         }
-                    }, error = function(e) NULL)
+                    }, error = function(e) {
+                        # WRONG BEFORE: a catch-all handler. private$.checkpoint() signals a
+                        # jamovi restart request as an error carrying code = "restart"
+                        # (jmvcore::createError("restarting", "restart")), and BOTH .runLCA
+                        # and .runBayesian checkpoint inside this region. Every cancelled run
+                        # was therefore swallowed, counted as a fitting failure, and the loop
+                        # ran on for up to nboot more replicates -- minutes for latent_class.
+                        # Re-raise the restart; only genuine fit failures fall through.
+                        if (identical(e$code, "restart")) stop(e)
+                        NULL
+                    })
 
                     if (is.null(boot_result) || isFALSE(boot_result$converged)) {
                         error_count <- error_count + 1L
@@ -1582,8 +1722,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 if (error_count > 0) {
                     private$.addNotice(
                         "WARNING",
-                        "Some bootstrap replicates failed",
-                        sprintf("%d of %d bootstrap resamples (%.0f%%) could not be fitted and were discarded. The intervals below are based on the remaining %d. A high failure rate usually means the resamples are too small or too sparse to support the model.",
+                        .("Some bootstrap replicates failed"),
+                        sprintf(.("%1$d of %2$d bootstrap resamples (%3$.0f%%) could not be fitted and were discarded. The intervals below are based on the remaining %4$d. A high failure rate usually means the resamples are too small or too sparse to support the model."),
                                 error_count, nboot, 100 * error_count / nboot, nboot - error_count)
                     )
                 }
@@ -1664,7 +1804,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                             axes = FALSE,
                             xlab = "",
                             ylab = "",
-                            main = "Test Agreement Matrix",
+                            main = .("Test Agreement Matrix"),
                             col = colors,
                             zlim = c(0, 1)
                         )
@@ -1700,7 +1840,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         legend(length(tests) + 0.5, length(tests) / 2,
                             legend = legend_labels,
                             fill = legend_colors,
-                            title = "Agreement",
+                            title = .("Agreement"),
                             bty = "n", # No box around legend
                             cex = 1.1,
                             y.intersp = 1.2,
@@ -1721,9 +1861,9 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                             {
                                 plot(0, 0,
                                     type = "n", xlim = c(0, 1), ylim = c(0, 1),
-                                    xlab = "", ylab = "", main = "Test Agreement"
+                                    xlab = "", ylab = "", main = .("Test Agreement")
                                 )
-                                text(0.5, 0.5, "Agreement data available but plotting failed",
+                                text(0.5, 0.5, .("Agreement data available but plotting failed"),
                                     cex = 1.2, col = "red"
                                 )
                                 return(TRUE)
@@ -1735,7 +1875,9 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     }
                 )
             },
-            .plot_ggplot = function(image, ggtheme, theme, ...) {
+            # ggtheme/theme default to NULL: the renderer guards on ggtheme, and forcing a
+            # missing promise would error rather than fall back.
+            .plot_ggplot = function(image, ggtheme = NULL, theme = NULL, ...) {
                 # Get state
                 state <- image$state
                 if (is.null(state) || is.null(state$agreement_matrix) || is.null(state$tests)) {
@@ -1783,7 +1925,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                 size = 4, fontface = "bold"
                             ) +
                             ggplot2::scale_fill_viridis_c(
-                                name = "Agreement",
+                                name = .("Agreement"),
                                 option = "viridis",
                                 begin = 0,
                                 end = 1,
@@ -1792,11 +1934,16 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                             ) +
                             ggplot2::scale_color_manual(values = c("white", "black"), guide = "none") +
                             ggplot2::labs(
-                                title = "Test Agreement Matrix",
+                                title = .("Test Agreement Matrix"),
                                 x = NULL,
                                 y = NULL
                             ) +
-                            ggplot2::theme_minimal() +
+                            # WRONG BEFORE: theme_minimal() was hard-coded and the ggtheme
+                            # parameter was accepted and never used, so this was the one
+                            # figure in a jamovi document that ignored the global theme. A
+                            # ggtheme is a COMPLETE theme and replaces what precedes it, so
+                            # it goes here -- before the tweaks below, which must survive.
+                            (if (is.null(ggtheme)) ggplot2::theme_minimal() else ggtheme) +
                             ggplot2::theme(
                                 axis.text = ggplot2::element_text(size = 11, face = "bold"),
                                 axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
@@ -1851,7 +1998,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     }
                 )
             },
-            .validateClinicalAssumptions = function(data, tests, method) {
+            .validateClinicalAssumptions = function(data, tests, method, test_levels) {
                 n_obs <- nrow(data)
                 n_tests <- length(tests)
 
@@ -1859,7 +2006,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 if (method == "latent_class" && n_obs < 100) {
                     private$.addNotice(
                         "STRONG_WARNING",
-                        "LCA Sample Size",
+                        .("LCA Sample Size"),
                         .fmt(
                             .("The latent-class analysis has N = {n}. N < 100 is a general stability warning, not a clinical adequacy threshold; precision also depends on class balance, response patterns, and the number of tests. Inspect bootstrap intervals and convergence, and consider collecting more observations."),
                             n = n_obs
@@ -1870,7 +2017,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 if (method == "bayesian" && n_obs < 50) {
                     private$.addNotice(
                         "STRONG_WARNING",
-                        "Penalized EM Sample Size",
+                        .("Penalized EM Sample Size"),
                         .fmt(
                             .("The penalized-EM analysis has N = {n}. N < 50 is a general stability warning, not a clinical adequacy threshold; fixed priors may have substantial influence. Inspect bootstrap intervals and consider collecting more observations."),
                             n = n_obs
@@ -1878,30 +2025,49 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Check test result distributions
+                # Check test result distributions.
+                #
+                # WRONG BEFORE: both warnings were computed from table(data[[test_name]]),
+                # the RAW factor distribution. Nothing downstream ever sees those
+                # categories: every estimate uses only the dichotomy `var == pos_level`.
+                # A three-tier marker (negative / equivocal / positive) with 5 equivocal
+                # cases therefore fired "extremely imbalanced: the minority category is
+                # 1.3% of observations" on every run, naming a tier the analysis has
+                # already merged into 'negative'. Worse, jmvcore::naOmit does not drop
+                # unused levels, so a level emptied by complete-case filtering gave a zero
+                # count and made both warnings fire unconditionally at "0.0%".
+                # Judge the split the model actually sees: positive vs not-positive.
                 for (i in seq_along(tests)) {
                     test_name <- tests[[i]]
-                    test_values <- table(data[[test_name]])
+                    pos_level <- test_levels[[i]]
+                    is_pos <- data[[test_name]] == pos_level
+                    n_pos <- sum(is_pos, na.rm = TRUE)
+                    n_neg <- sum(!is_pos, na.rm = TRUE)
+                    n_tot <- n_pos + n_neg
+                    if (n_tot == 0) next
+                    test_values <- c(n_pos, n_neg)
 
                     if (any(test_values < 5)) {
                         private$.addNotice(
                             "WARNING",
-                            "Small Test Categories",
+                            .("Small Test Categories"),
                             .fmt(
-                                .("Test '{test}' has a category with fewer than 5 observations. Estimates may be unstable. Combine categories only when substantively defensible."),
-                                test = test_name
+                                .("Test '{test}' has fewer than 5 cases on one side of the positive/not-positive split the analysis uses ({npos} positive, {nneg} not positive). Estimates may be unstable."),
+                                test = test_name,
+                                npos = n_pos,
+                                nneg = n_neg
                             )
                         )
                     }
 
                     # Check for extreme imbalances
-                    min_prop <- min(test_values) / sum(test_values)
+                    min_prop <- min(test_values) / n_tot
                     if (min_prop < 0.05) {
                         private$.addNotice(
                             "WARNING",
-                            "Extreme Test Imbalance",
+                            .("Extreme Test Imbalance"),
                             .fmt(
-                                .("Test '{test}' is extremely imbalanced: the minority category is {percentage}% of observations. This may destabilize parameter estimation."),
+                                .("Test '{test}' is extremely imbalanced on the positive/not-positive split the analysis uses: the smaller side is {percentage}% of observations. This may destabilize parameter estimation."),
                                 test = test_name,
                                 percentage = base::format(round(min_prop * 100, 1), nsmall = 1)
                             )
@@ -1914,7 +2080,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     # checking this earlier in .run now, but good to keep as message if we relax allow
                     private$.addNotice(
                         "WARNING",
-                        "LCA Under-Identified",
+                        .("LCA Under-Identified"),
                         .("LCA with only 2 tests is under-identified.")
                     )
                 }
@@ -1931,7 +2097,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$verbose) {
                     private$.addNotice(
                         "INFO",
-                        "Clinical Validation",
+                        .("Clinical Validation"),
                         .fmt(
                             .("Analysis diagnostics: {tests} tests analyzed with N = {n} using method '{method}'."),
                             tests = n_tests,
@@ -2060,26 +2226,39 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                 alpha = self$options$alpha)
                     diffs <- character(0)
                     if (!identical(cur$method, preset_config$method))
-                        diffs <- c(diffs, sprintf("Analysis method: currently \"%s\", example \"%s\"",
-                                                  cur$method, preset_config$method))
+                        # WRONG BEFORE: spliced the raw enum keys, and used two unordered
+                        # %s that a translator could not reorder. Named placeholders can be
+                        # reordered; the values are now the drop-down labels.
+                        diffs <- c(diffs, .fmt(.("Analysis method: currently \"{current}\", example \"{example}\""),
+                                               current = private$.methodLabel(cur$method),
+                                               example = private$.methodLabel(preset_config$method)))
                     if (!identical(cur$bootstrap, isTRUE(preset_config$bootstrap)))
-                        diffs <- c(diffs, sprintf("Bootstrap confidence intervals: currently %s, example %s",
-                                                  if (cur$bootstrap) "on" else "off",
-                                                  if (isTRUE(preset_config$bootstrap)) "on" else "off"))
+                        # The branch is only reached when the two differ, so two complete
+                        # sentences replace the on/off fragments spliced through %s.
+                        diffs <- c(diffs, if (cur$bootstrap)
+                                       .("Bootstrap confidence intervals: currently on, example off")
+                                   else
+                                       .("Bootstrap confidence intervals: currently off, example on"))
                     if (!isTRUE(all.equal(cur$nboot, preset_config$nboot)))
-                        diffs <- c(diffs, sprintf("Bootstrap samples: currently %g, example %g",
-                                                  cur$nboot, preset_config$nboot))
+                        # two unordered conversions -> named placeholders
+                        diffs <- c(diffs, .fmt(.("Bootstrap samples: currently {current}, example {example}"),
+                                               current = base::format(cur$nboot),
+                                               example = base::format(preset_config$nboot)))
 
                     private$.addNotice(
                         if (length(diffs) > 0) "WARNING" else "INFO",
-                        sprintf("Illustrative example: %s", gsub("_", " ", preset)),
+                        # was gsub("_", " ", preset), i.e. the internal key
+                        .fmt(.("Illustrative example: {preset}"),
+                             preset = private$.presetLabel(preset)),
                         if (length(diffs) > 0)
-                            sprintf("Example only -- not clinical guidance. %s %s This example does not change settings. For comparison, its example settings differ as follows: %s.",
-                                    preset_config$description, preset_config$guidance,
-                                    paste(diffs, collapse = "; "))
+                            .fmt(.("Example only -- not clinical guidance. {description} {guidance} This example does not change settings. For comparison, its example settings differ as follows: {diffs}."),
+                                 description = preset_config$description,
+                                 guidance = preset_config$guidance,
+                                 diffs = paste(diffs, collapse = "; "))
                         else
-                            sprintf("Example only -- not clinical guidance. %s %s Current settings happen to match this illustrative example.",
-                                    preset_config$description, preset_config$guidance)
+                            .fmt(.("Example only -- not clinical guidance. {description} {guidance} Current settings happen to match this illustrative example."),
+                                 description = preset_config$description,
+                                 guidance = preset_config$guidance)
                     )
                 }
             },
@@ -2235,7 +2414,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         )
 
                         table$addRow(rowKey = paste0(test1, "_", test2), values = list(
-                            test_pair = paste0(test1, " vs ", test2),
+                            # was a bare English "vs" spliced between two test names
+                            test_pair = jmvcore::format(.("{a} vs {b}"), a = test1, b = test2),
                             kappa = res$kappa,
                             p_value = res$p_value,
                             agreement = res$agreement

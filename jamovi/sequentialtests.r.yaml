@@ -23,6 +23,19 @@ items:
       title: 'Summary (Plain Language)'
       type: Html
       visible: (show_explanation)
+      clearWith:
+        - preset
+        - test1_name
+        - test1_sens
+        - test1_spec
+        - test1_cost
+        - test2_name
+        - test2_sens
+        - test2_spec
+        - test2_cost
+        - strategy
+        - prevalence
+        - population_size
 
     - name: summary_table
       title: 'Summary of Testing Strategy'
@@ -61,6 +74,19 @@ items:
         - name: nnt
           title: 'Number Needed to Screen'
           type: integer
+      clearWith:
+        - preset
+        - test1_name
+        - test1_sens
+        - test1_spec
+        - test1_cost
+        - test2_name
+        - test2_sens
+        - test2_spec
+        - test2_cost
+        - strategy
+        - prevalence
+        - population_size
 
     - name: individual_tests_table
       title: 'Individual Test Performance'
@@ -92,6 +118,19 @@ items:
         - name: nlr
           title: 'Negative LR'
           type: number
+      clearWith:
+        - preset
+        - test1_name
+        - test1_sens
+        - test1_spec
+        - test1_cost
+        - test2_name
+        - test2_sens
+        - test2_spec
+        - test2_cost
+        - strategy
+        - prevalence
+        - population_size
 
     - name: population_flow_table
       title: 'Population Flow Analysis'
@@ -174,11 +213,37 @@ items:
       title: 'Explanation'
       type: Html
       visible: (show_explanation)
+      clearWith:
+        - preset
+        - test1_name
+        - test1_sens
+        - test1_spec
+        - test1_cost
+        - test2_name
+        - test2_sens
+        - test2_spec
+        - test2_cost
+        - strategy
+        - prevalence
+        - population_size
 
     - name: formulas_text
       title: 'Formulas Used'
       type: Html
       visible: (show_formulas)
+      clearWith:
+        - preset
+        - test1_name
+        - test1_sens
+        - test1_spec
+        - test1_cost
+        - test2_name
+        - test2_sens
+        - test2_spec
+        - test2_cost
+        - strategy
+        - prevalence
+        - population_size
 
     - name: plot_flow_diagram
       title: 'Testing Strategy Flow Diagram'
@@ -187,6 +252,19 @@ items:
       height: 400
       renderFun: .plot_flow_diagram
       visible: (show_plots)
+      clearWith:
+        - preset
+        - test1_name
+        - test1_sens
+        - test1_spec
+        - test1_cost
+        - test2_name
+        - test2_sens
+        - test2_spec
+        - test2_cost
+        - strategy
+        - prevalence
+        - population_size
 
     - name: plot_performance
       title: 'Test Performance Comparison'
@@ -195,6 +273,19 @@ items:
       height: 400
       renderFun: .plot_performance
       visible: (show_plots)
+      clearWith:
+        - preset
+        - test1_name
+        - test1_sens
+        - test1_spec
+        - test1_cost
+        - test2_name
+        - test2_sens
+        - test2_spec
+        - test2_cost
+        - strategy
+        - prevalence
+        - population_size
 
     - name: plot_probability
       title: 'Probability Transformation'
@@ -203,6 +294,19 @@ items:
       height: 400
       renderFun: .plot_probability
       visible: (show_plots)
+      clearWith:
+        - preset
+        - test1_name
+        - test1_sens
+        - test1_spec
+        - test1_cost
+        - test2_name
+        - test2_sens
+        - test2_spec
+        - test2_cost
+        - strategy
+        - prevalence
+        - population_size
 
     - name: plot_population_flow
       title: 'Population Flow Visualization'
@@ -211,6 +315,19 @@ items:
       height: 400
       renderFun: .plot_population_flow
       visible: (show_plots)
+      clearWith:
+        - preset
+        - test1_name
+        - test1_sens
+        - test1_spec
+        - test1_cost
+        - test2_name
+        - test2_sens
+        - test2_spec
+        - test2_cost
+        - strategy
+        - prevalence
+        - population_size
 
     - name: plot_sensitivity_analysis
       title: 'Sensitivity Analysis: PPV/NPV vs Prevalence'
@@ -219,11 +336,37 @@ items:
       height: 400
       renderFun: .plot_sensitivity_analysis
       visible: (show_plots)
+      clearWith:
+        - preset
+        - test1_name
+        - test1_sens
+        - test1_spec
+        - test1_cost
+        - test2_name
+        - test2_sens
+        - test2_spec
+        - test2_cost
+        - strategy
+        - prevalence
+        - population_size
 
     - name: clinical_guidance
       title: 'Strategy Notes and Teaching Examples'
       type: Html
       visible: (show_explanation)
+      clearWith:
+        - preset
+        - test1_name
+        - test1_sens
+        - test1_spec
+        - test1_cost
+        - test2_name
+        - test2_sens
+        - test2_spec
+        - test2_cost
+        - strategy
+        - prevalence
+        - population_size
 
 
 refs:

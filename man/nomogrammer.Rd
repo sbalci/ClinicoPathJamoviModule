@@ -13,7 +13,11 @@ nomogrammer(
   Detail = FALSE,
   NullLine = FALSE,
   LabelSize = (14/5),
-  Verbose = FALSE
+  Verbose = FALSE,
+  Theme = NULL,
+  Title = "Fagan Nomogram",
+  PriorLabel = "Prior\\nProb.\\n(\%)",
+  PosteriorLabel = "Posterior\\nProb.\\n(\%)"
 )
 }
 \arguments{
@@ -42,6 +46,17 @@ through LR = 1 to illustrate an uninformative test.}
 Default is 14/5 ~= 2.8.}
 
 \item{Verbose}{Logical. If TRUE, prints diagnostic metrics to the console.}
+
+\item{Theme}{A ggplot2 theme object used as the base theme, for example jamovi's global
+\code{ggtheme}. The nomogram's own structural theme (hidden x axis, no grid, no legend)
+is layered on top of it, so the layout is preserved. Defaults to \code{theme_bw()}.}
+
+\item{Title}{Character. Plot title. Callers inside a jamovi analysis pass a translated
+string; this function is file-level, so it cannot translate one itself.}
+
+\item{PriorLabel}{Character. Name of the left (prior probability) axis.}
+
+\item{PosteriorLabel}{Character. Name of the right (posterior probability) axis.}
 }
 \value{
 A ggplot2 object containing the Fagan nomogram. The plot shows:

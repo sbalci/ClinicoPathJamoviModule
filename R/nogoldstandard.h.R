@@ -232,9 +232,7 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "poLCA",
-                    "irr",
-                    "tools",
-                    "vcd"))
+                    "irr"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",

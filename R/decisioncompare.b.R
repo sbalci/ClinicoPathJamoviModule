@@ -51,41 +51,44 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 value
             },
 
-            .escapeVar = function(x) {
-                if (is.null(x) || length(x) == 0) {
-                    return(x)
-                }
-                make.names(gsub("[^A-Za-z0-9_. -]", "_", as.character(x)))
-            },
-
-            # Ensure that requested positive level exists in data
+            # Ensure that requested positive level exists in data.
+            # The user's column name is shown RAW. .escapeVar() used to run
+            # make.names(gsub("[^A-Za-z0-9_. -]", "_", x)) over it first, which rewrote
+            # "Golden Standart" as "Golden.Standart" and destroyed any non-ASCII name
+            # (Turkish "Sonuc" with a cedilla became "Sonu__"), so the one message whose
+            # job is to point at the offending variable named a variable that does not
+            # exist in the dataset. The escaping was also redundant: .renderNotices()
+            # passes every title and content through .safeHtmlOutput().
             .assertLevelExists = function(x, level, var_name, test_name = NULL) {
                 if (is.null(level) || level == "") {
-                    missing_for <- ifelse(is.null(test_name),
-                        private$.escapeVar(var_name),
-                        paste(private$.escapeVar(var_name), "(", private$.escapeVar(test_name), ")")
-                    )
+                    missing_for <- if (is.null(test_name)) var_name
+                        else paste0(test_name, " (", var_name, ")")
 
+                    # i18n: the msgid must be a literal, so the variable name is
+                    # interpolated outside it via a jmvcore::format placeholder.
                     private$.addNotice(
                         type = "ERROR",
-                        title = "Missing Positive Level",
-                        content = paste0("No positive level supplied for ", missing_for, ". Please select the level that represents a positive result in the variable selection panel.")
+                        title = jmvcore::.("Missing Positive Level"),
+                        content = .fmt(jmvcore::.("No positive level supplied for {target}. Please select the level that represents a positive result in the variable selection panel."),
+                            target = missing_for)
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
                 if (!level %in% levels(x)) {
-                    label <- ifelse(is.null(test_name),
-                        private$.escapeVar(var_name),
-                        paste0(private$.escapeVar(test_name), " (", private$.escapeVar(var_name), ")")
-                    )
+                    label <- if (is.null(test_name)) var_name
+                        else paste0(test_name, " (", var_name, ")")
 
+                    # Placeholder names must not prefix one another (jmvcore::format
+                    # partial-matches), hence `available` rather than `levels`.
                     private$.addNotice(
                         type = "ERROR",
-                        title = "Invalid Positive Level",
-                        content = paste0('The positive level "', level, '" was not found in ', label, ". Check spelling and capitalisation. Available levels: ", paste(levels(x), collapse = ", "), ".")
+                        title = jmvcore::.("Invalid Positive Level"),
+                        content = .fmt(jmvcore::.("The positive level \"{chosen}\" was not found in {target}. Check spelling and capitalisation. Available levels: {available}."),
+                            chosen = level, target = label,
+                            available = paste(levels(x), collapse = ", "))
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
             },
 
@@ -111,8 +114,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     if (isTRUE(warn)) {
                         private$.addNotice(
                             type = "WARNING",
-                            title = "Metric Unavailable",
-                            content = .fmt("Unable to compute {metric} for {test}: denominator is zero. The result is set to NA.",
+                            title = jmvcore::.("Metric Unavailable"),
+                            content = .fmt(jmvcore::.("Unable to compute {metric} for {test}: denominator is zero. The result is set to NA."),
                                 metric = metric_label, test = test_label
                             )
                         )
@@ -211,8 +214,19 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Names of tests tied for best, if any (set by .findBestTest)
             .best_test_tied = NULL,
 
-            # Add a notice to the collection
+            # Add a notice to the collection.
+            # .findBestTest() is reached independently from three display toggles
+            # (Summary, Report sentence, Descriptive report), so the identical "Tied
+            # Descriptive Ranking" warning was appended two or three times in a row and
+            # read as three separate problems. An identical (type, title, content)
+            # triple is the same message; keep the first.
             .addNotice = function(type, title, content) {
+                for (existing in private$.noticeList) {
+                    if (identical(existing$type, type) &&
+                        identical(existing$title, title) &&
+                        identical(existing$content, content))
+                        return(invisible(NULL))
+                }
                 private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                     type = type,
                     title = title,
@@ -228,10 +242,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 # Map notice types to colors and icons
                 typeStyles <- list(
-                    ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
-                    STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
-                    WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
-                    INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
+                    ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", icon = ""),
+                    STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", icon = ""),
+                    WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", icon = ""),
+                    INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", icon = "")
                 )
 
                 html <- "<div style='margin: 10px 0;'>"
@@ -244,7 +258,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         "<div style='background-color: ", style$bgcolor, "; ",
                         "border-left: 4px solid ", style$border, "; ",
                         "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                        "<strong style='color: ", style$color, ";'>",
+                        "<strong>",
                         style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
                         "<span style='color: inherit;'>", private$.safeHtmlOutput(notice$content), "</span>",
                         "</div>"
@@ -379,20 +393,31 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                         private$.addNotice(
                             type = "INFO",
-                            title = "Analysis Completed Successfully",
-                            content = paste0(
-                                n_tests, " diagnostic tests compared among ", n_cases,
-                                " selected rows. Per-test available determinate denominators: ",
-                                analyzed_text, ". Paired comparisons use only rows determinate for both tests and the reference standard."
+                            title = jmvcore::.("Analysis Completed Successfully"),
+                            content = .fmt(jmvcore::.("{tests} diagnostic tests compared among {rows} selected rows. Per-test available determinate denominators: {denominators}. Paired comparisons use only rows determinate for both tests and the reference standard."),
+                                tests = n_tests, rows = n_cases, denominators = analyzed_text
                             )
                         )
                     },
                     error = function(e) {
+                        # A .checkpoint() restart is CONTROL FLOW, not a failure. It arrives
+                        # here as an error carrying code = "restart" and fires often during a
+                        # long run, so it must leave before anything is rendered -- otherwise
+                        # every restart serializes the whole notices panel and then throws the
+                        # run away that was about to be restarted anyway.
+                        if (identical(e$code, "restart"))
+                            stop(e)
                         # Render collected notices (including validation ERROR notices)
                         # BEFORE re-throwing, otherwise the detailed, actionable notice
                         # HTML is discarded and the user sees only the bare error string.
                         private$.renderNotices()
-                        # Re-throw the original error without wrapping
+                        # stop(conditionMessage(e)) rebuilds a bare simpleError and throws the
+                        # condition's class and $code away, so re-raise anything carrying a
+                        # $code untouched. NOTE: a plain jmvcore::reject() called WITHOUT
+                        # code= has $code NULL, exactly like stop() -- it falls through to the
+                        # message path below, which preserves the message the user sees.
+                        if (!is.null(e$code))
+                            stop(e)
                         stop(conditionMessage(e), call. = FALSE)
                     }
                 )
@@ -428,10 +453,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (is.null(self$data) || nrow(self$data) == 0) {
                     private$.addNotice(
                         type = "ERROR",
-                        title = "No Data Provided",
-                        content = "No data provided for analysis. Please ensure your dataset contains data. Load a dataset with diagnostic test variables and a gold standard reference."
+                        title = jmvcore::.("No Data Provided"),
+                        content = jmvcore::.("No data provided for analysis. Please ensure your dataset contains data. Load a dataset with diagnostic test variables and a gold standard reference.")
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
                 selected_tests <- private$.getTestVariables()
@@ -439,28 +464,27 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     duplicates <- unique(selected_tests[duplicated(selected_tests)])
                     private$.addNotice(
                         type = "ERROR",
-                        title = "Duplicate Test Variables",
-                        content = paste0(
-                            "Each test slot must contain a different variable. Remove the duplicate selection(s): ",
-                            paste(duplicates, collapse = ", "), "."
+                        title = jmvcore::.("Duplicate Test Variables"),
+                        content = .fmt(jmvcore::.("Each test slot must contain a different variable. Remove the duplicate selection(s): {duplicates}."),
+                            duplicates = paste(duplicates, collapse = ", ")
                         )
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
                 if (!is.null(self$options$gold) && self$options$gold %in% selected_tests) {
                     private$.addNotice(
                         type = "ERROR",
-                        title = "Reference Reused as a Test",
-                        content = "The gold-standard variable cannot also occupy a test slot. Select a different variable for each test."
+                        title = jmvcore::.("Reference Reused as a Test"),
+                        content = jmvcore::.("The gold-standard variable cannot also occupy a test slot. Select a different variable for each test.")
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
                 # Validate that positive levels are specified for selected tests
                 test_positive_pairs <- list(
-                    list(test = self$options$test1, positive = self$options$test1Positive, name = "Test 1"),
-                    list(test = self$options$test2, positive = self$options$test2Positive, name = "Test 2"),
-                    list(test = self$options$test3, positive = self$options$test3Positive, name = "Test 3")
+                    list(test = self$options$test1, positive = self$options$test1Positive, name = jmvcore::.("Test 1")),
+                    list(test = self$options$test2, positive = self$options$test2Positive, name = jmvcore::.("Test 2")),
+                    list(test = self$options$test3, positive = self$options$test3Positive, name = jmvcore::.("Test 3"))
                 )
 
                 missing_positives <- character(0)
@@ -475,38 +499,40 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (length(missing_positives) > 0) {
                     private$.addNotice(
                         type = "ERROR",
-                        title = "Missing Positive Levels",
-                        content = paste0("Please specify positive levels for: ", paste(missing_positives, collapse = ", "), ". Use the level selector in the variable panel to choose which level represents a positive test result.")
+                        title = jmvcore::.("Missing Positive Levels"),
+                        content = .fmt(jmvcore::.("Please specify positive levels for: {slots}. Use the level selector in the variable panel to choose which level represents a positive test result."),
+                            slots = paste(missing_positives, collapse = ", "))
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
                 # Validate prevalence setting
                 if (self$options$pp && (self$options$pprob <= 0 || self$options$pprob >= 1)) {
                     private$.addNotice(
                         type = "ERROR",
-                        title = "Invalid Prevalence Value",
-                        content = paste0("Prior probability must be between 0 and 1 (exclusive). Current value: ", self$options$pprob, ". Enter a decimal value like 0.15 for 15% prevalence.")
+                        title = jmvcore::.("Invalid Prevalence Value"),
+                        content = .fmt(jmvcore::.("Prior probability must be between 0 and 1 (exclusive). Current value: {value}. Enter a decimal value like 0.15 for 15% prevalence."),
+                            value = self$options$pprob)
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
                 # Check for conflicting options
                 if (self$options$pp && self$options$ci) {
                     private$.addNotice(
                         type = "ERROR",
-                        title = "Conflicting Options",
-                        content = 'Prior probability and confidence intervals cannot both be enabled. Please disable either "Prior Probability" or "95% CI" option. Use CI for sample-based estimates or custom prevalence for population-based PPV/NPV.'
+                        title = jmvcore::.("Conflicting Options"),
+                        content = jmvcore::.("Prior probability and confidence intervals cannot both be enabled. Please disable either the \"Prior Probability\" or the \"95% CI\" option. Use CI for sample-based estimates or custom prevalence for population-based PPV/NPV.")
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
                 # Inform user about prevalence source
                 if (self$options$pp) {
                     private$.addNotice(
                         type = "INFO",
-                        title = "Prevalence Source",
-                        content = "PPV/NPV will be calculated using the supplied population prevalence (pp=TRUE). Confidence intervals are unavailable in this mode."
+                        title = jmvcore::.("Prevalence Source"),
+                        content = jmvcore::.("PPV/NPV will be calculated using the supplied population prevalence (pp=TRUE). Confidence intervals are unavailable in this mode.")
                     )
                 }
             },
@@ -520,10 +546,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (is.null(goldVariable) || goldVariable == "") {
                     private$.addNotice(
                         type = "ERROR",
-                        title = "No Gold Standard",
-                        content = "Gold standard variable must be specified. Select a reference test variable that represents the true disease status."
+                        title = jmvcore::.("No Gold Standard"),
+                        content = jmvcore::.("Gold standard variable must be specified. Select a reference test variable that represents the true disease status.")
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
                 # Get test variables
@@ -532,10 +558,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (length(testVariables) == 0) {
                     private$.addNotice(
                         type = "ERROR",
-                        title = "No Test Variables",
-                        content = "At least one test variable must be specified. Select diagnostic test variables to compare against the gold standard."
+                        title = jmvcore::.("No Test Variables"),
+                        content = jmvcore::.("At least one test variable must be specified. Select diagnostic test variables to compare against the gold standard.")
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
                 # Keep every selected row aligned. Standalone metrics use available
@@ -550,10 +576,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (nrow(mydata) == 0) {
                     private$.addNotice(
                         type = "ERROR",
-                        title = "No Data",
-                        content = "The dataset contains no rows to analyze."
+                        title = jmvcore::.("No Data"),
+                        content = jmvcore::.("The dataset contains no rows to analyze.")
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
                 # Convert to factor and validate positive level
@@ -568,10 +594,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     )
                     private$.addNotice(
                         type = "WARNING",
-                        title = "Available-Case Missing-Data Handling",
-                        content = paste0(
-                            "Missing values were retained for transparent, test-specific handling (",
-                            missing_text, "). Each standalone test uses rows observed for that test and the reference standard; paired comparisons use rows observed for both tests and the reference standard. Missing stratifier values affect only subgroup results. Report this handling and assess whether missingness could bias accuracy estimates (STARD 2015)."
+                        title = jmvcore::.("Available-Case Missing-Data Handling"),
+                        content = .fmt(jmvcore::.("Missing values were retained for transparent, test-specific handling ({counts}). Each standalone test uses rows observed for that test and the reference standard; paired comparisons use rows observed for both tests and the reference standard. Missing stratifier values affect only subgroup results. Report this handling and assess whether missingness could bias accuracy estimates (STARD 2015)."),
+                            counts = missing_text
                         )
                     )
                 }
@@ -579,14 +604,16 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # Sample-size notices use the observed reference-standard denominator.
                 n_gold_observed <- sum(!is.na(mydata[[goldVariable]]))
                 if (n_gold_observed < 50) {
-                    notice_type <- if (n_gold_observed < 30) "STRONG_WARNING" else "WARNING"
-                    severity <- if (n_gold_observed < 30) "Very Small" else "Small"
-
+                    very_small <- n_gold_observed < 30
+                    # Two complete sentences rather than splicing a translated adjective
+                    # into an English frame: word order differs between languages.
                     private$.addNotice(
-                        type = notice_type,
-                        title = paste0(severity, " Sample Size"),
-                        content = paste0(severity, " observed reference-standard sample (n=", n_gold_observed,
-                            "). Confidence intervals may be wide and estimates unstable, especially when either gold-standard class is sparse. Interpret the interval widths and class-specific denominators; no universal sample-size cutoff guarantees adequate precision.")
+                        type = if (very_small) "STRONG_WARNING" else "WARNING",
+                        title = if (very_small) jmvcore::.("Very Small Sample Size") else jmvcore::.("Small Sample Size"),
+                        content = if (very_small)
+                            .fmt(jmvcore::.("Very small observed reference-standard sample (n={n}). Confidence intervals may be wide and estimates unstable, especially when either gold-standard class is sparse. Interpret the interval widths and class-specific denominators; no universal sample-size cutoff guarantees adequate precision."), n = n_gold_observed)
+                        else
+                            .fmt(jmvcore::.("Small observed reference-standard sample (n={n}). Confidence intervals may be wide and estimates unstable, especially when either gold-standard class is sparse. Interpret the interval widths and class-specific denominators; no universal sample-size cutoff guarantees adequate precision."), n = n_gold_observed)
                     )
                 }
 
@@ -597,8 +624,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (!is.na(prevalence) && (prevalence < 0.05 || prevalence > 0.95)) {
                     private$.addNotice(
                         type = "STRONG_WARNING",
-                        title = "Extreme Disease Prevalence",
-                        content = paste0("Extreme disease prevalence among observed reference results: ", round(prevalence * 100, 1), "% (", n_diseased, "/", n_gold_observed, " cases). PPV and NPV are highly sensitive to prevalence and may not generalize to populations with different disease rates. Sensitivity and specificity can also vary across settings and case mix.")
+                        title = jmvcore::.("Extreme Disease Prevalence"),
+                        content = .fmt(jmvcore::.("Extreme disease prevalence among observed reference results: {pct}% ({diseased}/{observed} cases). PPV and NPV are highly sensitive to prevalence and may not generalize to populations with different disease rates. Sensitivity and specificity can also vary across settings and case mix."),
+                            pct = round(prevalence * 100, 1), diseased = n_diseased, observed = n_gold_observed)
                     )
                 }
 
@@ -654,9 +682,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     table_name <- paste0("cTable", i)
                     if (table_name %in% names(self$results)) {
                         cTable <- self$results[[table_name]]
-                        cTable$addRow(rowKey = "Test Positive", values = list(newtest = "Test Positive"))
-                        cTable$addRow(rowKey = "Test Negative", values = list(newtest = "Test Negative"))
-                        cTable$addRow(rowKey = "Total", values = list(newtest = "Total"))
+                        # Displayed labels are translated; the rowKeys stay English so
+                        # .populateContingencyTable()'s setRow() calls keep matching.
+                        cTable$addRow(rowKey = "Test Positive", values = list(newtest = jmvcore::.("Test Positive")))
+                        cTable$addRow(rowKey = "Test Negative", values = list(newtest = jmvcore::.("Test Negative")))
+                        cTable$addRow(rowKey = "Total", values = list(newtest = jmvcore::.("Total")))
                     }
                 }
             },
@@ -680,10 +710,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         html_table <- knitr::kable(
                             cross_tab,
                             format = "html",
-                            caption = paste(
-                                "Cross-tabulation of",
-                                private$.safeHtmlOutput(test_var), "and",
-                                private$.safeHtmlOutput(goldVariable)
+                            caption = .fmt(jmvcore::.("Cross-tabulation of {test} and {gold}"),
+                                test = private$.safeHtmlOutput(test_var),
+                                gold = private$.safeHtmlOutput(goldVariable)
                             )
                         )
                         html_tables <- paste(html_tables, html_table, "<br><br>")
@@ -737,16 +766,35 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 testPositives <- private$.getTestPositives()
                 testNegatives <- private$.getTestNegatives()
 
+                # cTable<i>/epirTable<i> are gated in .r.yaml on SLOT test<i>
+                # (visible: (length(test2) > 0) and so on), so the table index must be
+                # the slot the variable came from -- NOT its position in the compacted
+                # testVariables vector, which skips empty slots. With Test 1 empty the
+                # two indexings disagreed by one and test 3's 2x2 and CIs were written
+                # under the static heading "Test 2 - Recoded Data" while "Test 3" stayed
+                # blank. Duplicate selections are already rejected in .validateInputs(),
+                # so match() is unambiguous here.
+                slotVariables <- vapply(1:3, function(k) {
+                    v <- private$.opt(paste0("test", k))
+                    if (is.null(v) || length(v) == 0) NA_character_ else as.character(v)[1]
+                }, character(1))
+
                 test_results <- list()
 
                 for (i in seq_along(testVariables)) {
+                    # Each test rebuilds a 2x2, its metrics and (optionally) an epiR CI
+                    # table; without a checkpoint jamovi cannot interrupt or show progress.
+                    private$.checkpoint()
+
                     testVariable <- testVariables[i]
                     testPLevel <- testPositives[[testVariable]]
+                    slot_index <- match(testVariable, slotVariables)
+                    if (is.na(slot_index)) slot_index <- i
 
                     # Process individual test. The negative levels are optional and
                     # only consulted when excludeIndeterminate is enabled.
                     result <- private$.processSingleTest(
-                        mydata, testVariable, testPLevel, goldVariable, goldPLevel, i,
+                        mydata, testVariable, testPLevel, goldVariable, goldPLevel, slot_index,
                         testNLevel = testNegatives[[testVariable]],
                         goldNLevel = private$.opt("goldNegative")
                     )
@@ -762,7 +810,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                           testNLevel = NULL, goldNLevel = NULL) {
                 test_values <- forcats::as_factor(mydata[[testVariable]])
                 gold_values <- forcats::as_factor(mydata[[goldVariable]])
-                private$.assertLevelExists(test_values, testPLevel, testVariable, testVariable)
+                # The SLOT label, not the variable name a second time: passing
+                # testVariable as both arguments produced the doubled "VAR (VAR)" in
+                # every level error.
+                test_label <- sprintf(jmvcore::.("Test %d"), test_index)
+                private$.assertLevelExists(test_values, testPLevel, testVariable, test_label)
 
                 validate_negative <- function(values, positive, negative, variable, label = NULL) {
                     if (is.null(negative)) return(invisible(NULL))
@@ -770,14 +822,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     if (identical(negative, positive)) {
                         private$.addNotice(
                             type = "ERROR",
-                            title = "Identical Positive and Negative Levels",
-                            content = paste0("Positive and negative levels for ", variable,
-                                ' are both "', positive, '". Choose two different levels.')
+                            title = jmvcore::.("Identical Positive and Negative Levels"),
+                            content = .fmt(jmvcore::.("Positive and negative levels for {variable} are both \"{chosen}\". Choose two different levels."),
+                                variable = variable, chosen = positive)
                         )
-                        stop("Validation failed", call. = FALSE)
+                        stop(jmvcore::.("Validation failed"), call. = FALSE)
                     }
                 }
-                validate_negative(test_values, testPLevel, testNLevel, testVariable, testVariable)
+                validate_negative(test_values, testPLevel, testNLevel, testVariable, test_label)
                 validate_negative(gold_values, goldPLevel, goldNLevel, goldVariable)
 
                 exclude <- isTRUE(self$options$excludeIndeterminate)
@@ -806,11 +858,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (exclude && n_analyzed == 0) {
                     private$.addNotice(
                         type = "ERROR",
-                        title = "No Determinate Cases",
-                        content = paste0("No cases remain for ", testVariable,
-                            " after applying the selected positive and negative levels.")
+                        title = jmvcore::.("No Determinate Cases"),
+                        content = .fmt(jmvcore::.("No cases remain for {test} after applying the selected positive and negative levels."),
+                            test = testVariable)
                     )
-                    stop("Validation failed", call. = FALSE)
+                    stop(jmvcore::.("Validation failed"), call. = FALSE)
                 }
 
                 if (length(test_levels) > 2 || length(gold_levels) > 2) {
@@ -821,29 +873,26 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     if (exclude && length(missing_negative) > 0) {
                         private$.addNotice(
                             type = "STRONG_WARNING",
-                            title = "Negative Level Required for Exclusion",
-                            content = paste0(
-                                "Indeterminate exclusion cannot be applied to ",
-                                paste(unique(missing_negative), collapse = " and "),
-                                " until a negative level is selected. Its non-positive levels are currently combined as Negative."
+                            title = jmvcore::.("Negative Level Required for Exclusion"),
+                            content = .fmt(jmvcore::.("Indeterminate exclusion cannot be applied to {variables} until a negative level is selected. Its non-positive levels are currently combined as Negative."),
+                                variables = paste(unique(missing_negative), collapse = ", ")
                             )
                         )
                     } else if (exclude && n_excluded > 0) {
                         private$.addNotice(
                             type = "INFO",
-                            title = "Indeterminate Results Excluded",
-                            content = paste0(
-                                testVariable, ": excluded ", n_excluded, " of ", n_total,
-                                " rows (", round(100 * n_excluded / n_total, 1),
-                                "%). Accuracy estimates are conditional on a determinate result; the exclusion count and rate are reported in the tables."
+                            title = jmvcore::.("Indeterminate Results Excluded"),
+                            content = .fmt(jmvcore::.("{test}: excluded {excluded} of {total} rows ({pct}%). Accuracy estimates are conditional on a determinate result; the exclusion count and rate are reported in the tables."),
+                                test = testVariable, excluded = n_excluded, total = n_total,
+                                pct = round(100 * n_excluded / n_total, 1)
                             )
                         )
                     } else if (!exclude) {
                         private$.addNotice(
                             type = "STRONG_WARNING",
-                            title = "Multi-Level Results Combined",
-                            content = paste0(
-                                testVariable, " or its reference standard has more than two levels. Only the selected positive level is Positive; all other levels are combined as Negative. This may bias estimates when those levels include equivocal results."
+                            title = jmvcore::.("Multi-Level Results Combined"),
+                            content = .fmt(jmvcore::.("{test} or its reference standard has more than two levels. Only the selected positive level is Positive; all other levels are combined as Negative. This may bias estimates when those levels include equivocal results."),
+                                test = testVariable
                             )
                         )
                     }
@@ -852,10 +901,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (n_missing > 0) {
                     private$.addNotice(
                         type = "INFO",
-                        title = "Missing Results Excluded Per Test",
-                        content = paste0(
-                            testVariable, ": ", n_missing, " of ", n_total,
-                            " rows lacked this test result or the reference result and were excluded only from analyses requiring those values."
+                        title = jmvcore::.("Missing Results Excluded Per Test"),
+                        content = .fmt(jmvcore::.("{test}: {missing} of {total} rows lacked this test result or the reference result and were excluded only from analyses requiring those values."),
+                            test = testVariable, missing = n_missing, total = n_total
                         )
                     )
                 }
@@ -868,6 +916,22 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 FP <- conf_table["Positive", "Negative"]
                 FN <- conf_table["Negative", "Positive"]
                 TN <- conf_table["Negative", "Negative"]
+
+                # A comfortable total N can still rest on a tiny gold-standard class.
+                # The sample-size notice keys on the TOTAL observed reference denominator
+                # and the prevalence notice on overall prevalence, so n=120 with 9
+                # diseased passed both in silence while the printed sensitivity rested on
+                # 9 patients. Disclose the two class denominators.
+                n_gold_pos <- TP + FN
+                n_gold_neg <- TN + FP
+                if (min(n_gold_pos, n_gold_neg) < 30) {
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = jmvcore::.("Sparse Reference-Standard Class"),
+                        content = .fmt(jmvcore::.("{test}: sensitivity rests on {positives} reference-positive cases and specificity on {negatives} reference-negative cases. A percentage computed on a denominator this small is far less precise than the overall analyzed N suggests. Enable the 95% CI option and read the interval before quoting either figure."),
+                            test = testVariable, positives = n_gold_pos, negatives = n_gold_neg)
+                    )
+                }
 
                 # Calculate basic metrics
                 metrics <- private$.calculateDiagnosticMetrics(TP, FP, FN, TN, testVariable)
@@ -909,9 +973,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 rate <- function(x, n, metric) {
                     private$.computeRate(x, n, metric, test_label, warn = add_notices)
                 }
-                Sens <- rate(TP, DiseaseP, "sensitivity")
-                Spec <- rate(TN, DiseaseN, "specificity")
-                AccurT <- rate(TP + TN, TotalPop, "accuracy")
+                Sens <- rate(TP, DiseaseP, jmvcore::.("sensitivity"))
+                Spec <- rate(TN, DiseaseN, jmvcore::.("specificity"))
+                AccurT <- rate(TP + TN, TotalPop, jmvcore::.("accuracy"))
 
                 # Calculate PPV and NPV based on prevalence setting
                 if (self$options$pp && !is.na(self$options$pprob)) {
@@ -923,65 +987,84 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     } else {
                         denom_ppv <- (Sens * PriorProb) + ((1 - Spec) * (1 - PriorProb))
                         denom_npv <- ((1 - Sens) * PriorProb) + (Spec * (1 - PriorProb))
-                        PPV <- rate(Sens * PriorProb, denom_ppv, "positive predictive value")
-                        NPV <- rate(Spec * (1 - PriorProb), denom_npv, "negative predictive value")
+                        PPV <- rate(Sens * PriorProb, denom_ppv, jmvcore::.("positive predictive value"))
+                        NPV <- rate(Spec * (1 - PriorProb), denom_npv, jmvcore::.("negative predictive value"))
                     }
                 } else {
                     # Use sample-based calculation
-                    PPV <- rate(TP, TestP, "positive predictive value")
-                    NPV <- rate(TN, TestN, "negative predictive value")
-                    PriorProb <- rate(DiseaseP, TotalPop, "prevalence")
+                    PPV <- rate(TP, TestP, jmvcore::.("positive predictive value"))
+                    NPV <- rate(TN, TestN, jmvcore::.("negative predictive value"))
+                    PriorProb <- rate(DiseaseP, TotalPop, jmvcore::.("prevalence"))
                 }
 
-                # Likelihood ratios with stability handling
-                spec_is_one <- !is.na(Spec) && abs(Spec - 1) < sqrt(.Machine$double.eps)
-                spec_is_zero <- !is.na(Spec) && abs(Spec - 0) < sqrt(.Machine$double.eps)
-
-                # Apply continuity correction for LR stability only; do not alter reported counts
+                # Likelihood ratios.
+                # The 0.5 continuity correction belongs ONLY to the ratio whose
+                # denominator is empty: LR+ = Sens/(1-Spec) is undefined only when
+                # FP == 0, LR- = (1-Sens)/Spec only when TN == 0. The previous code
+                # corrected BOTH ratios whenever ANY of the four cells was zero, so a
+                # zero FN (a stain that caught every tumour) or a zero TP shifted a
+                # perfectly well defined LR toward the null: TP=50, FP=5, FN=0, TN=45
+                # printed LR+ = 9.18 for an exact LR+ of 10.00, which also downgraded
+                # the interpretation row from "Strong" to "Moderate positive evidence",
+                # and TP=0, FP=3, FN=10, TN=80 printed LR+ = 1.09 for an exact 0.00.
+                # It also made the printed LR+ irreproducible from the Sens and Spec
+                # printed beside it, which come from the raw counts.
                 zero_cells <- any(c(TP, FP, FN, TN) == 0)
-                if (zero_cells && isTRUE(add_notices)) {
-                    private$.addNotice(
-                        type = "INFO",
-                        title = "Zero Cell Continuity Correction",
-                        content = paste0("Zero cell detected for ", test_label, ". LR+/LR- computed with a ", private$ZERO_CELL_CONTINUITY, " continuity correction to avoid infinite/undefined values; interpret cautiously.")
-                    )
+                cc <- private$ZERO_CELL_CONTINUITY
+                Sens_cc <- (TP + cc) / (TP + FN + 2 * cc)
+                Spec_cc <- (TN + cc) / (TN + FP + 2 * cc)
+                lrp_corrected <- !is.na(Sens) && !is.na(Spec) && FP == 0
+                lrn_corrected <- !is.na(Sens) && !is.na(Spec) && TN == 0
 
-                    TP_cc <- TP + private$ZERO_CELL_CONTINUITY
-                    FP_cc <- FP + private$ZERO_CELL_CONTINUITY
-                    FN_cc <- FN + private$ZERO_CELL_CONTINUITY
-                    TN_cc <- TN + private$ZERO_CELL_CONTINUITY
-                } else {
-                    TP_cc <- TP
-                    FP_cc <- FP
-                    FN_cc <- FN
-                    TN_cc <- TN
-                }
-
-                # When a zero cell is present the continuity correction is applied and the
-                # LR is computed from the corrected counts (a large finite value), consistent
-                # with the "continuity correction applied" INFO notice. Only report Inf when
-                # no correction was applied (spec_is_one/zero always co-occur with a zero cell,
-                # so in practice the corrected finite LR is used).
                 LRP <- if (is.na(Sens) || is.na(Spec)) {
                     NA_real_
-                } else if (spec_is_one && !zero_cells) {
-                    Inf
+                } else if (lrp_corrected) {
+                    Sens_cc / (1 - Spec_cc)
                 } else {
-                    rate(TP_cc / (TP_cc + FN_cc), 1 - (TN_cc / (TN_cc + FP_cc)), "positive likelihood ratio")
+                    rate(Sens, 1 - Spec, jmvcore::.("positive likelihood ratio"))
                 }
                 LRN <- if (is.na(Sens) || is.na(Spec)) {
                     NA_real_
-                } else if (spec_is_zero && !zero_cells) {
-                    Inf
+                } else if (lrn_corrected) {
+                    (1 - Sens_cc) / Spec_cc
                 } else {
-                    rate(1 - (TP_cc / (TP_cc + FN_cc)), TN_cc / (TN_cc + FP_cc), "negative likelihood ratio")
+                    rate(1 - Sens, Spec, jmvcore::.("negative likelihood ratio"))
+                }
+
+                lr_corrected <- isTRUE(lrp_corrected) || isTRUE(lrn_corrected)
+                if (lr_corrected && isTRUE(add_notices)) {
+                    # Name the ratio that was corrected and the value it produced: the
+                    # old notice said only that "a correction was applied" and gave no
+                    # number, so a reviewer recomputing from the printed 2x2 got a
+                    # different figure with nothing to explain the gap.
+                    corrected_label <- if (isTRUE(lrp_corrected) && isTRUE(lrn_corrected))
+                        jmvcore::.("LR+ and LR-")
+                    else if (isTRUE(lrp_corrected))
+                        jmvcore::.("LR+")
+                    else
+                        jmvcore::.("LR-")
+                    # sprintf, not format(): this package @imports jmvcore, whose
+                    # format() masks base::format() inside the namespace.
+                    corrected_value <- paste(
+                        sprintf("%.3f", c(if (isTRUE(lrp_corrected)) LRP, if (isTRUE(lrn_corrected)) LRN)),
+                        collapse = ", ")
+                    private$.addNotice(
+                        type = "INFO",
+                        title = jmvcore::.("Zero Cell Continuity Correction"),
+                        content = .fmt(jmvcore::.("{test}: {ratio} would be undefined because the cell in its denominator is empty, so it was computed after adding {correction} to all four cells of the 2x2, giving {shown}. Every other statistic in the same row, including the likelihood ratio that was not affected, uses the raw counts. Interpret the corrected value cautiously."),
+                            test = test_label, ratio = corrected_label,
+                            correction = cc, shown = corrected_value)
+                    )
                 }
 
                 return(list(
                     Sens = Sens, Spec = Spec, AccurT = AccurT,
                     PPV = PPV, NPV = NPV, LRP = LRP, LRN = LRN,
                     PriorProb = PriorProb,
-                    zero_cells = zero_cells
+                    zero_cells = zero_cells,
+                    lr_corrected = lr_corrected,
+                    lrp_corrected = isTRUE(lrp_corrected),
+                    lrn_corrected = isTRUE(lrn_corrected)
                 ))
             },
 
@@ -1019,7 +1102,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     if (self$options$fnote) {
                         private$.addContingencyTableFootnotes(cTable)
                         if (any(c(TP, FP, FN, TN) == 0)) {
-                            cTable$addFootnote(rowKey = "Total", col = "Total", "Zero cell detected; LR+/LR- computed with continuity correction (0.5). Interpret cautiously.")
+                            # The correction is no longer applied to both ratios on any
+                            # zero cell, so this footnote must no longer claim it was.
+                            cTable$addFootnote(rowKey = "Total", col = "Total", jmvcore::.("Zero cell detected. A 0.5 continuity correction is applied only to a likelihood ratio whose own denominator cell is empty (FP = 0 for LR+, TN = 0 for LR-); every other statistic uses these raw counts. Interpret cautiously."))
                         }
                     }
                 }
@@ -1040,7 +1125,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 comparisonTable$deleteRows()
                 comparisonTable$setNote(
                     "interpretation_scope",
-                    "Qualitative performance labels are illustrative summaries of the observed sample only. They are not clinical guides, validated decision rules, or recommendations for patient care."
+                    jmvcore::.("Qualitative performance labels are illustrative summaries of the observed sample only. They are not clinical guides, validated decision rules, or recommendations for patient care.")
                 )
 
                 for (test_index in seq_along(test_results)) {
@@ -1052,7 +1137,6 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     # same punctuation or normalize to the same R name.
                     row_key <- paste0("test_", test_index)
 
-                    prevalence_note <- if (self$options$pp) " (population prevalence)" else " (sample prevalence)"
 
                     comparisonTable$addRow(
                         rowKey = row_key,
@@ -1071,13 +1155,27 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         )
                     )
 
+                    if (isTRUE(metrics$lrp_corrected) || isTRUE(metrics$lrn_corrected)) {
+                        # Always shown, independent of the footnote option: this cell was
+                        # computed by a different rule from the counts in the 2x2.
+                        corrected_cols <- c(if (isTRUE(metrics$lrp_corrected)) "LRP",
+                                            if (isTRUE(metrics$lrn_corrected)) "LRN")
+                        for (col in corrected_cols)
+                            comparisonTable$addFootnote(
+                                rowKey = row_key, col = col,
+                                .fmt(jmvcore::.("Denominator cell empty; computed after adding {correction} to all four cells of the 2x2. Not reproducible from the sensitivity and specificity in this row, which use the raw counts."),
+                                    correction = private$ZERO_CELL_CONTINUITY)
+                            )
+                    }
+
                     # Add clinical interpretation
                     clinical_interpretation <- private$.generateClinicalInterpretation(metrics)
                     comparisonTable$addFormat(rowKey = row_key, col = "test", format = jmvcore::Cell.BEGIN_GROUP)
                     comparisonTable$addRow(
                         rowKey = paste0(row_key, "_interp"),
                         values = list(
-                            test = paste0("  \u{2192} ", clinical_interpretation, ifelse(metrics$zero_cells, " (zero cell; LR may be unstable)", "")),
+                            test = paste0("  \u{2192} ", clinical_interpretation,
+                                if (isTRUE(metrics$zero_cells)) paste0(" ", jmvcore::.("(zero cell; LR may be unstable)")) else ""),
                             n = "", excluded = "", excludedRate = "",
                             Sens = "", Spec = "", AccurT = "", PPV = "", NPV = "", LRP = "", LRN = ""
                         )
@@ -1087,13 +1185,21 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     # Add footnotes if requested
                     if (self$options$fnote) {
                         private$.addComparisonTableFootnotes(comparisonTable, row_key)
+                        # Two complete alternative sentences; the previous form spliced a
+                        # parenthetical fragment into an English frame ("PPV uses" + frag).
                         comparisonTable$addFootnote(
                             rowKey = row_key, col = "PPV",
-                            paste0("PPV uses", prevalence_note, ".")
+                            if (self$options$pp)
+                                jmvcore::.("PPV uses the supplied population prevalence.")
+                            else
+                                jmvcore::.("PPV uses the prevalence observed in this sample.")
                         )
                         comparisonTable$addFootnote(
                             rowKey = row_key, col = "NPV",
-                            paste0("NPV uses", prevalence_note, ".")
+                            if (self$options$pp)
+                                jmvcore::.("NPV uses the supplied population prevalence.")
+                            else
+                                jmvcore::.("NPV uses the prevalence observed in this sample.")
                         )
                     }
                 }
@@ -1145,23 +1251,24 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 # Update table note to reflect CI method
                 method_label <- switch(ci_method,
-                    wilson = "Wilson score",
-                    logit = "Logit",
-                    exact = "Clopper-Pearson (exact)",
-                    "Wilson score"
+                    wilson = jmvcore::.("Wilson score"),
+                    logit = jmvcore::.("Logit"),
+                    exact = jmvcore::.("Clopper-Pearson (exact)"),
+                    jmvcore::.("Wilson score")
                 )
+                # Each piece is a complete sentence with its own msgid; the separators
+                # live outside the msgids so no translation carries trailing padding.
                 criterion_note <- if (use_criterion) {
-                    paste0(
-                        "User-requested minimum OPA criterion: ", self$options$niMargin,
-                        "%. 'Criterion met' means the lower confidence bound exceeds this descriptive threshold. "
-                    )
+                    .fmt(jmvcore::.("User-requested minimum OPA criterion: {pct}%. 'Criterion met' means the lower confidence bound exceeds this descriptive threshold."),
+                        pct = self$options$niMargin)
                 } else {
-                    "No minimum OPA criterion was requested. "
+                    jmvcore::.("No minimum OPA criterion was requested.")
                 }
-                opaTable$setNote("note", paste0(
-                    "OPA = (TP + TN) / analyzed N. ", method_label,
-                    " 95% confidence intervals. ", criterion_note,
-                    "Any criterion is descriptive, not a noninferiority analysis against a comparator, regulatory guidance, or clinical guidance. OPA does not correct for chance agreement and should not be used alone to characterize diagnostic performance."
+                opaTable$setNote("note", paste(
+                    .fmt(jmvcore::.("OPA = (TP + TN) / analyzed N. {method} 95% confidence intervals."),
+                        method = method_label),
+                    criterion_note,
+                    jmvcore::.("Any criterion is descriptive, not a noninferiority analysis against a comparator, regulatory guidance, or clinical guidance. OPA does not correct for chance agreement and should not be used alone to characterize diagnostic performance.")
                 ))
 
                 for (test_index in seq_along(test_results)) {
@@ -1173,13 +1280,13 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     ci <- private$.proportionCI(concordant, total, method = ci_method)
 
                     criterion_result <- if (!use_criterion) {
-                        "Not requested"
+                        jmvcore::.("Not requested")
                     } else if (is.na(ci$lower)) {
-                        "N/A"
+                        jmvcore::.("N/A")
                     } else if (ci$lower > opa_criterion) {
-                        "Yes"
+                        jmvcore::.("Yes")
                     } else {
-                        "No"
+                        jmvcore::.("No")
                     }
 
                     opaTable$addRow(
@@ -1214,16 +1321,19 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (n_missing_stratum > 0) {
                     private$.addNotice(
                         type = "INFO",
-                        title = "Missing Stratifier Values",
-                        content = paste0(
-                            n_missing_stratum, " row(s) have no value for ", strat_var,
-                            ". They remain in overall per-test results but are omitted from subgroup rows."
+                        title = jmvcore::.("Missing Stratifier Values"),
+                        content = .fmt(jmvcore::.("{rows} row(s) have no value for {variable}. They remain in overall per-test results but are omitted from subgroup rows."),
+                            rows = n_missing_stratum, variable = strat_var
                         )
                     )
                 }
 
                 row_idx <- 0
                 for (stratum in strata) {
+                    # One 2x2 plus a full metric set per test per stratum; checkpoint so a
+                    # many-level stratifier stays interruptible.
+                    private$.checkpoint()
+
                     stratum_idx <- !is.na(stratum_values) & stratum_values == stratum
                     n_stratum <- sum(stratum_idx)
                     if (n_stratum == 0) next
@@ -1245,7 +1355,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         total <- TP + FP + FN + TN
                         metrics <- private$.calculateDiagnosticMetrics(
                             TP, FP, FN, TN,
-                            paste(tv, "in", stratum),
+                            .fmt(jmvcore::.("{test} in {stratum}"), test = tv, stratum = stratum),
                             add_notices = FALSE
                         )
                         opa_val <- if (total > 0) (TP + TN) / total else NA_real_
@@ -1272,8 +1382,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (row_idx == 0) {
                     private$.addNotice(
                         type = "WARNING",
-                        title = "Stratification Empty",
-                        content = paste0("No analyzable cases were found in any observed stratum of '", strat_var, "'. Check subgroup values and test/reference availability.")
+                        title = jmvcore::.("Stratification Empty"),
+                        content = .fmt(jmvcore::.("No analyzable cases were found in any observed stratum of '{variable}'. Check subgroup values and test/reference availability."),
+                            variable = strat_var)
                     )
                 }
             },
@@ -1292,30 +1403,30 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # class has zero cases), which would otherwise crash with "missing value
                 # where TRUE/FALSE needed".
                 if (isTRUE(sens_pct >= 95 && spec_pct >= 95)) {
-                    interpretations <- c(interpretations, "High sensitivity and high specificity in this sample (both >=95%)")
+                    interpretations <- c(interpretations, jmvcore::.("High sensitivity and high specificity in this sample (both >=95%)"))
                 } else if (isTRUE(sens_pct >= 95)) {
-                    interpretations <- c(interpretations, "High sensitivity (>=95%): few false negatives in this sample")
+                    interpretations <- c(interpretations, jmvcore::.("High sensitivity (>=95%): few false negatives in this sample"))
                 } else if (isTRUE(spec_pct >= 95)) {
-                    interpretations <- c(interpretations, "High specificity (>=95%): few false positives in this sample")
+                    interpretations <- c(interpretations, jmvcore::.("High specificity (>=95%): few false positives in this sample"))
                 } else if (isTRUE(sens_pct >= 85 && spec_pct >= 85)) {
-                    interpretations <- c(interpretations, "Moderately high sensitivity and specificity in this sample (both >=85%)")
+                    interpretations <- c(interpretations, jmvcore::.("Moderately high sensitivity and specificity in this sample (both >=85%)"))
                 } else if (isTRUE(sens_pct >= 85)) {
-                    interpretations <- c(interpretations, "Moderately high sensitivity (>=85%) in this sample")
+                    interpretations <- c(interpretations, jmvcore::.("Moderately high sensitivity (>=85%) in this sample"))
                 } else if (isTRUE(spec_pct >= 85)) {
-                    interpretations <- c(interpretations, "Moderately high specificity (>=85%) in this sample")
+                    interpretations <- c(interpretations, jmvcore::.("Moderately high specificity (>=85%) in this sample"))
                 }
 
                 # Add likelihood ratio interpretation
                 if (!is.na(lrp) && lrp >= 10) {
-                    interpretations <- c(interpretations, "Strong positive evidence")
+                    interpretations <- c(interpretations, jmvcore::.("Strong positive evidence"))
                 } else if (!is.na(lrp) && lrp >= 5) {
-                    interpretations <- c(interpretations, "Moderate positive evidence")
+                    interpretations <- c(interpretations, jmvcore::.("Moderate positive evidence"))
                 }
 
                 if (!is.na(lrn) && lrn <= 0.1) {
-                    interpretations <- c(interpretations, "Strong negative evidence")
+                    interpretations <- c(interpretations, jmvcore::.("Strong negative evidence"))
                 } else if (!is.na(lrn) && lrn <= 0.2) {
-                    interpretations <- c(interpretations, "Moderate negative evidence")
+                    interpretations <- c(interpretations, jmvcore::.("Moderate negative evidence"))
                 }
 
                 # Combine interpretations or provide fallback. The fallback also fires when
@@ -1324,18 +1435,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (length(interpretations) > 0) {
                     return(paste(interpretations, collapse = "; "))
                 } else if (is.na(sens_pct) || is.na(spec_pct)) {
-                    return(paste0(
-                        "Sensitivity and/or specificity could not be computed here: one gold-standard class has no cases, ",
-                        "so that rate has an empty denominator and is reported as blank rather than as a low value. ",
-                        "The 2x2 counts behind this row are in the Recoded Data table for this test"
-                    ))
+                    return(jmvcore::.("Sensitivity and/or specificity could not be computed here: one gold-standard class has no cases, so that rate has an empty denominator and is reported as blank rather than as a low value. The 2x2 counts behind this row are in the Recoded Data table for this test"))
                 } else {
-                    return(paste0(
-                        "In this sample neither sensitivity nor specificity reached 85%, and neither likelihood ratio ",
-                        "reached LR+ >= 5 or LR- <= 0.2. That describes these counts at this operating point, not the ",
-                        "test in general; the Confidence Intervals table for this test (95% CI option) shows how ",
-                        "precisely each rate is pinned down by this many cases"
-                    ))
+                    return(jmvcore::.("In this sample neither sensitivity nor specificity reached 85%, and neither likelihood ratio reached LR+ >= 5 or LR- <= 0.2. That describes these counts at this operating point, not the test in general; the Confidence Intervals table for this test (95% CI option) shows how precisely each rate is pinned down by this many cases"))
                 }
             },
 
@@ -1343,19 +1445,19 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             .addComparisonTableFootnotes = function(comparisonTable, test_name) {
                 comparisonTable$addFootnote(
                     rowKey = test_name, col = "Sens",
-                    "Sensitivity = TP/(TP+FN) = Probability of positive test among diseased"
+                    jmvcore::.("Sensitivity = TP/(TP+FN) = Probability of positive test among diseased")
                 )
                 comparisonTable$addFootnote(
                     rowKey = test_name, col = "Spec",
-                    "Specificity = TN/(TN+FP) = Probability of negative test among healthy"
+                    jmvcore::.("Specificity = TN/(TN+FP) = Probability of negative test among healthy")
                 )
                 comparisonTable$addFootnote(
                     rowKey = test_name, col = "PPV",
-                    "Positive Predictive Value = TP/(TP+FP) = Probability of disease when test is positive"
+                    jmvcore::.("Positive Predictive Value = TP/(TP+FP) = Probability of disease when test is positive")
                 )
                 comparisonTable$addFootnote(
                     rowKey = test_name, col = "NPV",
-                    "Negative Predictive Value = TN/(TN+FN) = Probability of being healthy when test is negative"
+                    jmvcore::.("Negative Predictive Value = TN/(TN+FN) = Probability of being healthy when test is negative")
                 )
             },
 
@@ -1369,8 +1471,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     if (!requireNamespace("epiR", quietly = TRUE)) {
                         private$.addNotice(
                             type = "ERROR",
-                            title = "Missing epiR Package",
-                            content = 'epiR package is required for confidence intervals. Install with install.packages("epiR"). Or disable "95% CI" option.'
+                            title = jmvcore::.("Missing epiR Package"),
+                            content = jmvcore::.("The epiR package is required for confidence intervals. Install it with install.packages(\"epiR\"), or disable the \"95% CI\" option.")
                         )
                         return()
                     }
@@ -1385,6 +1487,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     # Map epiR statistic codes to display labels. Keying on the `statistic`
                     # code (not row position) keeps labels correct even if epiR changes the
                     # order or length of its summary output.
+
+                    # epi.tests() fits the full statistic set; checkpoint before it so the
+                    # per-test CI pass stays interruptible.
+                    private$.checkpoint()
 
                     tryCatch(
                         {
@@ -1418,13 +1524,13 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         },
                         error = function(e) {
                             n_sample <- sum(conf_table)
-                            enhanced_msg <- .fmt("Could not calculate confidence intervals for {test} (n={n}). This may be due to insufficient sample size or extreme values. Error: {error}",
+                            enhanced_msg <- .fmt(jmvcore::.("Could not calculate confidence intervals for {test} (n={n}). This may be due to insufficient sample size or extreme values. Error: {error}"),
                                 test = testVariable, n = n_sample, error = conditionMessage(e)
                             )
                             # Surface the failure so the empty CI table is not silent.
                             private$.addNotice(
                                 type = "WARNING",
-                                title = "Confidence Intervals Unavailable",
+                                title = jmvcore::.("Confidence Intervals Unavailable"),
                                 content = enhanced_msg
                             )
                         }
@@ -1440,6 +1546,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 mcnemarTable$deleteRows()
                 diffTable$deleteRows()
 
+                # This caveat used to live only inside the showExplanations HTML panel, so a
+                # clinician who read the table alone saw a p-value with no hint of what it
+                # does and does not test. It belongs on the table that carries the p-value.
+                mcnemarTable$setNote(
+                    "mcnemar_scope",
+                    jmvcore::.("McNemar's test compares overall accuracy only: it does not separately test whether sensitivity or specificity differ between the tests. Overall accuracy depends on disease prevalence, so two tests with a non-significant McNemar result here can still differ in their sensitivity/specificity balance. Read the per-metric contrasts in the Differences with 95% Confidence Intervals table alongside this p-value.")
+                )
+
                 test_names <- names(test_results)
                 n_tests <- length(test_names)
 
@@ -1454,13 +1568,16 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 # Calculate p-value adjustment for multiple comparisons
                 # Use Holm-Bonferroni method (less conservative than Bonferroni)
-                p_values <- numeric(n_comparisons)
+                p_values <- rep(NA_real_, n_comparisons)
                 comparison_names <- character(n_comparisons)
 
                 # First pass: compute each McNemar test once and cache it (avoids
                 # recomputing the table/test in the display pass below).
                 mcnemar_cache <- vector("list", n_comparisons)
                 for (i in seq_along(test_pairs)) {
+                    # One McNemar / exact binomial test per pair.
+                    private$.checkpoint()
+
                     pair <- test_pairs[[i]]
                     test1 <- pair[1]
                     test2 <- pair[2]
@@ -1468,11 +1585,59 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                     mc <- private$.computeMcNemar(test_results, test1, test2)
                     mcnemar_cache[[i]] <- mc
-                    p_values[i] <- if (is.null(mc)) 1 else mc$result$p.value
+                    # A pair that cannot be tested must NOT enter p.adjust(): padding it
+                    # with a synthetic p = 1 raised m from 2 to 3 and over-corrected the
+                    # comparisons that could be computed (a raw p = 0.02 was reported as
+                    # 0.06 and read as "no significant difference"). The pair is also
+                    # dropped from the table with no row, so disclose it here.
+                    if (is.null(mc)) {
+                        private$.addNotice(
+                            type = "WARNING",
+                            title = jmvcore::.("Pairwise Comparison Not Computed"),
+                            content = .fmt(jmvcore::.("{comparison} could not be tested: no case has a determinate result for both tests and the reference standard, or the paired table was empty. This pair has no row in the McNemar table, and it was excluded from the multiplicity correction so that the remaining comparisons are not over-corrected."),
+                                comparison = comparison_names[i])
+                        )
+                    } else {
+                        p_values[i] <- mc$result$p.value
+                    }
                 }
 
-                # Apply Holm-Bonferroni correction
-                p_adjusted <- stats::p.adjust(p_values, method = "holm")
+                # Holm-Bonferroni over the comparisons that were actually computed.
+                computable <- !is.na(p_values)
+                n_effective <- sum(computable)
+                p_adjusted <- rep(NA_real_, n_comparisons)
+                if (n_effective > 0)
+                    p_adjusted[computable] <- stats::p.adjust(p_values[computable], method = "holm")
+
+                # With a single comparison Holm returns the raw p-value unchanged, so the
+                # "(Holm-Bonferroni corrected)" label asserted an adjustment that was
+                # never made -- and contradicted the glossary, which says the correction
+                # applies from three tests. Label it only when m > 1.
+                holm_applied <- n_effective > 1
+
+                # The p-values are adjusted for multiplicity and the paired Newcombe
+                # intervals in diffTable are not; nothing said so, and the two panels can
+                # therefore appear to contradict each other.
+                if (holm_applied) {
+                    mcnemarTable$setNote(
+                        "mcnemar_multiplicity",
+                        .fmt(jmvcore::.("The p-values in this table are Holm-Bonferroni adjusted across the {comparisons} pairwise comparisons that could be computed. The confidence intervals in the Differences with 95% Confidence Intervals table are not adjusted for multiplicity, so an adjusted p above 0.05 can sit beside an interval that excludes zero."),
+                            comparisons = n_effective)
+                    )
+                    diffTable$setNote(
+                        "diff_multiplicity",
+                        jmvcore::.("Each interval is an ordinary 95% interval for a single comparison and is not adjusted for multiplicity, whereas the p-values in the McNemar table are Holm-Bonferroni adjusted.")
+                    )
+                } else if (n_effective == 1) {
+                    mcnemarTable$setNote(
+                        "mcnemar_multiplicity",
+                        jmvcore::.("Only one pairwise comparison was computed, so no multiplicity adjustment applies and the p-value shown is the unadjusted one.")
+                    )
+                    diffTable$setNote(
+                        "diff_multiplicity",
+                        jmvcore::.("Only one pairwise comparison was computed, so neither this interval nor the McNemar p-value is adjusted for multiplicity.")
+                    )
+                }
 
                 # Record whether any comparison reached significance (for honest report
                 # wording in the always-visible clinical summary panel).
@@ -1484,6 +1649,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 # Second pass: populate table with adjusted p-values, reusing cached tests
                 for (i in seq_along(test_pairs)) {
+                    # .calculateDifferences() runs three paired Newcombe intervals per pair.
+                    private$.checkpoint()
+
                     pair <- test_pairs[[i]]
                     test1 <- pair[1]
                     test2 <- pair[2]
@@ -1492,7 +1660,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     # McNemar's test with adjusted p-value (cached from first pass)
                     private$.performMcNemarTest(
                         test_results, test1, test2, comparison_name,
-                        mcnemarTable, p_adjusted[i], cached = mcnemar_cache[[i]]
+                        mcnemarTable, p_adjusted[i], cached = mcnemar_cache[[i]],
+                        holm_applied = holm_applied
                     )
 
                     # Confidence intervals for differences
@@ -1504,6 +1673,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Perform Cochran's Q test for 3+ tests (global test)
             # CRITICAL: Compare CORRECTNESS relative to gold standard, not raw positivity rates
             .performCochranQ = function(test_results, mcnemarTable) {
+                # Builds an n x k correctness matrix over the whole cohort before the
+                # statistic; checkpoint before that work rather than after it.
+                private$.checkpoint()
+
                 tryCatch(
                     {
                         # Extract test results and gold standard
@@ -1522,6 +1695,14 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                         valid_idx <- complete.cases(all_tests_matrix) & !is.na(gold)
                         if (sum(valid_idx) == 0) {
+                            # Returning silently left the Summary and Manuscript-Ready
+                            # panels containing nothing but their headings, which reads
+                            # as a broken module rather than uninformative data.
+                            private$.addNotice(
+                                type = "INFO",
+                                title = jmvcore::.("Global Test Not Computed"),
+                                content = jmvcore::.("Cochran's Q was not computed: no case has a determinate result for all three tests and the reference standard. The pairwise comparisons below each use their own complete cases.")
+                            )
                             return()
                         }
 
@@ -1539,7 +1720,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         denominator <- k * sum(Ri) - sum(Ri^2)
 
                         if (denominator == 0) {
-                            return() # All tests identical
+                            # Every subject was classified the same way by all three
+                            # tests, so the statistic has no within-subject variation to
+                            # work with. Uninformative data, not a failure -- say so.
+                            private$.addNotice(
+                                type = "INFO",
+                                title = jmvcore::.("Global Test Not Computed"),
+                                content = jmvcore::.("Cochran's Q is undefined for these data: every case was classified identically by all three tests (all correct, or all incorrect), leaving no discordance for the statistic to use. This means the data cannot separate the tests, not that the analysis failed.")
+                            )
+                            return()
                         }
 
                         Q <- (k - 1) * numerator / denominator
@@ -1549,18 +1738,18 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         private$.cochran_pvalue <- p_value
 
                         interpretation <- dplyr::case_when(
-                            p_value < 0.001 ~ "Highly significant overall difference among tests (p<0.001)",
-                            p_value < 0.01 ~ "Significant overall difference among tests (p<0.01)",
-                            p_value < 0.05 ~ "Statistically significant overall difference among tests (p<0.05)",
-                            TRUE ~ "No significant overall difference detected among tests (p>=0.05); this does not establish that the tests perform equally"
+                            p_value < 0.001 ~ jmvcore::.("Highly significant overall difference among tests (p<0.001)"),
+                            p_value < 0.01 ~ jmvcore::.("Significant overall difference among tests (p<0.01)"),
+                            p_value < 0.05 ~ jmvcore::.("Statistically significant overall difference among tests (p<0.05)"),
+                            TRUE ~ jmvcore::.("No significant overall difference detected among tests (p>=0.05); this does not establish that the tests perform equally")
                         )
 
                         mcnemarTable$addRow(
                             rowKey = "cochran_q_global",
                             values = list(
-                                comparison = sprintf("Overall (%d tests)", n_tests),
+                                comparison = sprintf(jmvcore::.("Overall (%d tests)"), n_tests),
                                 n = n,
-                                method = "Cochran's Q",
+                                method = jmvcore::.("Cochran's Q"),
                                 stat = Q,
                                 df = df,
                                 p = p_value,
@@ -1572,14 +1761,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             mcnemarTable$addFootnote(
                                 rowKey = "cochran_q_global",
                                 col = "interpretation",
-                                paste0(
-                                    "Cochran's Q is a single test of whether the tests differ in accuracy anywhere among them. ",
-                                    "It did not reach p < 0.05 here, which means these data did not separate the tests, not that ",
-                                    "the tests agree. The per-pair rows in this table are exploratory in that situation: read them ",
-                                    "alongside the paired differences and their 95% confidence intervals in the ",
-                                    "Differences with 95% Confidence Intervals table, which show how large a real difference ",
-                                    "is still compatible with this sample."
-                                )
+                                jmvcore::.("Cochran's Q is a single test of whether the tests differ in accuracy anywhere among them. It did not reach p < 0.05 here, which means these data did not separate the tests, not that the tests agree. The per-pair rows in this table are exploratory in that situation: read them alongside the paired differences and their 95% confidence intervals in the Differences with 95% Confidence Intervals table, which show how large a real difference is still compatible with this sample.")
                             )
                         }
                     },
@@ -1589,23 +1771,27 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         mcnemarTable$addRow(
                             rowKey = "cochran_q_error",
                             values = list(
-                                comparison = sprintf("Overall (%d tests) - ERROR", n_tests),
+                                comparison = sprintf(jmvcore::.("Overall (%d tests) - ERROR"), n_tests),
                                 n = NA,
-                                method = "Cochran's Q",
+                                method = jmvcore::.("Cochran's Q"),
                                 stat = NA,
                                 df = NA,
                                 p = NA,
-                                interpretation = sprintf(
-                                    " Could not calculate: %s. Check that all tests have valid paired data.",
+                                # Leading separator kept OUTSIDE the msgid: padding inside a
+                                # msgid is routinely lost in translation.
+                                interpretation = paste0(" ", sprintf(
+                                    jmvcore::.("Could not calculate: %s. Check that all tests have valid paired data."),
                                     error_msg
-                                )
+                                ))
                             )
                         )
 
-                        # Add warning footnote
+                        # setNote(key, note): the first argument is the KEY, and `symbol`
+                        # is not a parameter -- the old call passed the message as the key
+                        # with no note and raised from inside this error handler.
                         mcnemarTable$setNote(
-                            "Cochran's Q test failed. Pairwise comparisons may still be valid but should be interpreted cautiously.",
-                            symbol = ""
+                            "cochran_q_failed",
+                            jmvcore::.("Cochran's Q test failed. Pairwise comparisons may still be valid but should be interpreted cautiously.")
                         )
                     }
                 )
@@ -1655,11 +1841,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                 statistic = NA_real_,
                                 parameter = NA_integer_,
                                 p.value = p_value,
-                                method = "Exact binomial McNemar"
+                                method = jmvcore::.("Exact binomial McNemar")
                             )
                         } else {
                             mcnemar_result <- stats::mcnemar.test(mcnemar_table, correct = TRUE)
-                            mcnemar_result$method <- "McNemar chi-squared (continuity corrected)"
+                            mcnemar_result$method <- jmvcore::.("McNemar chi-squared (continuity corrected)")
                         }
                         list(
                             result = mcnemar_result,
@@ -1676,7 +1862,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             # Perform McNemar's test with clinical interpretation
             # CRITICAL: Compare CORRECTNESS relative to gold standard, not raw positivity rates
-            .performMcNemarTest = function(test_results, test1, test2, comparison_name, mcnemarTable, p_adjusted = NULL, cached = NULL) {
+            .performMcNemarTest = function(test_results, test1, test2, comparison_name, mcnemarTable, p_adjusted = NULL, cached = NULL, holm_applied = FALSE) {
                 test1_results <- test_results[[test1]]$test_results
                 test2_results <- test_results[[test2]]$test_results
                 gold_results <- test_results[[test1]]$gold_reference # Same for both tests
@@ -1701,19 +1887,21 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         n_discordant <- n_b + n_c
 
                         # Use adjusted p-value if provided, otherwise use raw p-value
-                        p_to_interpret <- if (!is.null(p_adjusted)) p_adjusted else mcnemar_result$p.value
+                        p_to_interpret <- if (!is.null(p_adjusted) && !is.na(p_adjusted)) p_adjusted else mcnemar_result$p.value
 
                         # Clinical interpretation of p-value (using constants)
                         interpretation <- dplyr::case_when(
-                            p_to_interpret < private$P_THRESHOLD_STRONG ~ "Highly significant difference (p<0.001)",
-                            p_to_interpret < 0.01 ~ "Significant difference (p<0.01)",
-                            p_to_interpret < private$P_THRESHOLD_SIGNIFICANT ~ "Statistically significant difference (p<0.05)",
-                            TRUE ~ "No significant difference detected at alpha = 0.05; this does not establish that the tests perform equally"
+                            p_to_interpret < private$P_THRESHOLD_STRONG ~ jmvcore::.("Highly significant difference (p<0.001)"),
+                            p_to_interpret < 0.01 ~ jmvcore::.("Significant difference (p<0.01)"),
+                            p_to_interpret < private$P_THRESHOLD_SIGNIFICANT ~ jmvcore::.("Statistically significant difference (p<0.05)"),
+                            TRUE ~ jmvcore::.("No significant difference detected at alpha = 0.05; this does not establish that the tests perform equally")
                         )
 
-                        # Add suffix to interpretation if adjusted
-                        if (!is.null(p_adjusted)) {
-                            interpretation <- paste0(interpretation, " (Holm-Bonferroni corrected)")
+                        # Add suffix to interpretation if adjusted. The separating space is
+                        # outside the msgid so translation cannot drop or duplicate it.
+                        # Claim the correction only when one was actually applied.
+                        if (isTRUE(holm_applied)) {
+                            interpretation <- paste0(interpretation, " ", jmvcore::.("(Holm-Bonferroni corrected)"))
                         }
 
                         mcnemarTable$addRow(
@@ -1735,7 +1923,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                 rowKey = comparison_name,
                                 col = "p",
                                 sprintf(
-                                    "Exact binomial inference was used because there were only %d discordant pairs; interpret the estimate with its paired confidence interval.",
+                                    jmvcore::.("Exact binomial inference was used because there were only %d discordant pairs; interpret the estimate with its paired confidence interval."),
                                     n_discordant
                                 )
                             )
@@ -1746,12 +1934,12 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         n2 <- length(test2_results)
                         comparison <- comparison_name
                         error <- conditionMessage(e)
-                        enhanced_msg <- .fmt("Could not perform McNemar's test for {comparison} (n1={n1}, n2={n2}). This may be due to insufficient discordant pairs or identical test results. Error: {error}",
+                        enhanced_msg <- .fmt(jmvcore::.("Could not perform McNemar's test for {comparison} (n1={n1}, n2={n2}). This may be due to insufficient discordant pairs or identical test results. Error: {error}"),
                             comparison = comparison, n1 = n1, n2 = n2, error = error
                         )
                         private$.addNotice(
                             type = "WARNING",
-                            title = "McNemar Test Unavailable",
+                            title = jmvcore::.("McNemar Test Unavailable"),
                             content = enhanced_msg
                         )
                     }
@@ -1777,8 +1965,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (sum(common_idx) == 0) {
                     private$.addNotice(
                         type = "WARNING",
-                        title = "Paired Difference Unavailable",
-                        content = .fmt("Unable to compute paired differences for {comparison}: no observations with complete data across both tests and the gold standard.",
+                        title = jmvcore::.("Paired Difference Unavailable"),
+                        content = .fmt(jmvcore::.("Unable to compute paired differences for {comparison}: no observations with complete data across both tests and the gold standard."),
                             comparison = comparison_name
                         )
                     )
@@ -1789,8 +1977,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     if (is.null(result)) {
                         private$.addNotice(
                             type = "WARNING",
-                            title = "Metric Difference Unavailable",
-                            content = .fmt("Unable to compute {metric} difference for {comparison}: insufficient paired data.",
+                            title = jmvcore::.("Metric Difference Unavailable"),
+                            content = .fmt(jmvcore::.("Unable to compute {metric} difference for {comparison}: insufficient paired data."),
                                 metric = metric_label, comparison = comparison_name
                             )
                         )
@@ -1907,7 +2095,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 # Fill vectors efficiently
                 row_idx <- 1
-                metrics <- c("Sensitivity", "Specificity", "PPV", "NPV")
+                metrics <- c(jmvcore::.("Sensitivity"), jmvcore::.("Specificity"),
+                             jmvcore::.("PPV"), jmvcore::.("NPV"))
                 metric_keys <- c("Sens", "Spec", "PPV", "NPV")
 
                 for (test_name in names(plotData)) {
@@ -1928,6 +2117,17 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 ))
             },
 
+            # Radar axis labels, translated once and shared by the data builder and the
+            # renderer. The sibling bar plot already translated the same metric names, so
+            # a Turkish session showed translated labels on one plot and bare English
+            # ones on the plot beside it. The renderer re-levels the factor, so both must
+            # use the SAME strings or every point would be dropped.
+            .radarMetricLabels = function() {
+                c(jmvcore::.("Sensitivity"), jmvcore::.("Specificity"), jmvcore::.("Accuracy"),
+                  jmvcore::.("PPV"), jmvcore::.("NPV"),
+                  jmvcore::.("LR+ Quality"), jmvcore::.("LR- Quality"))
+            },
+
             # Optimized radar plot data building with clinical scaling
             .buildRadarPlotData = function(plotData) {
                 if (is.null(plotData) || length(plotData) == 0) {
@@ -1945,14 +2145,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 values <- numeric(total_rows)
                 scaled_values <- numeric(total_rows)
 
-                # Define metrics and their processing
-                pct_metrics <- list(
-                    "Sensitivity" = "Sens",
-                    "Specificity" = "Spec",
-                    "Accuracy" = "AccurT",
-                    "PPV" = "PPV",
-                    "NPV" = "NPV"
-                )
+                # Metric keys stay English; the displayed labels are translated.
+                metric_labels <- private$.radarMetricLabels()
+                pct_keys <- c("Sens", "Spec", "AccurT", "PPV", "NPV")
 
                 row_idx <- 1
                 thresholds <- private$LR_CLINICAL_THRESHOLDS
@@ -1961,10 +2156,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     test_data <- plotData[[test_name]]
 
                     # Process percentage metrics (direct 0-100 scaling)
-                    for (metric_label in names(pct_metrics)) {
-                        metric_key <- pct_metrics[[metric_label]]
+                    for (mi in seq_along(pct_keys)) {
+                        metric_key <- pct_keys[mi]
                         test_names[row_idx] <- test_name
-                        metric_names[row_idx] <- metric_label
+                        metric_names[row_idx] <- metric_labels[mi]
                         values[row_idx] <- test_data[[metric_key]]
                         scaled_values[row_idx] <- test_data[[metric_key]] * 100
                         row_idx <- row_idx + 1
@@ -1975,7 +2170,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     lrp_scaled <- private$.scaleLikelihoodRatioPositive(lrp_value, thresholds)
 
                     test_names[row_idx] <- test_name
-                    metric_names[row_idx] <- "LR+ Quality"
+                    metric_names[row_idx] <- metric_labels[6]
                     values[row_idx] <- lrp_value
                     scaled_values[row_idx] <- lrp_scaled
                     row_idx <- row_idx + 1
@@ -1985,7 +2180,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     lrn_scaled <- private$.scaleLikelihoodRatioNegative(lrn_value, thresholds)
 
                     test_names[row_idx] <- test_name
-                    metric_names[row_idx] <- "LR- Quality"
+                    metric_names[row_idx] <- metric_labels[7]
                     values[row_idx] <- lrn_value
                     scaled_values[row_idx] <- lrn_scaled
                     row_idx <- row_idx + 1
@@ -1993,12 +2188,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 df <- data.frame(
                     test = test_names,
-                    metric = factor(metric_names,
-                        levels = c(
-                            "Sensitivity", "Specificity", "Accuracy",
-                            "PPV", "NPV", "LR+ Quality", "LR- Quality"
-                        )
-                    ),
+                    metric = factor(metric_names, levels = metric_labels),
                     value = values,
                     scaled_value = scaled_values,
                     stringsAsFactors = FALSE
@@ -2062,18 +2252,21 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # Create comprehensive HTML report
                 report_html <- paste0(
                     '<div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">',
-                    '<h2 style="color: inherit; border-bottom: 2px solid #3498db;"> Descriptive Performance Summary</h2>',
+                    '<h2 style="color: inherit; border-bottom: 2px solid #3498db;"> ',
+                    jmvcore::.("Descriptive Performance Summary"), "</h2>",
                     results_section,
-                    '<h3 style="color: inherit; margin-top: 30px;"> Report Sentences</h3>',
+                    '<h3 style="color: inherit; margin-top: 30px;"> ',
+                    jmvcore::.("Report Sentences"), "</h3>",
                     '<div style="background-color: rgba(138, 155, 172, 0.06); padding: 15px; border-left: 4px solid #28a745; margin: 15px 0; color: inherit;">',
-                    '<h4 style="margin-top: 0;">Methods Section:</h4>',
+                    '<h4 style="margin-top: 0;">', jmvcore::.("Methods Section:"), "</h4>",
                     '<p style="font-style: italic; line-height: 1.6;">', methods_section, "</p>",
                     "</div>",
                     '<div style="background-color: rgba(33, 149, 188, 0.1); padding: 15px; border-left: 4px solid #3498db; margin: 15px 0; color: inherit;">',
-                    '<h4 style="margin-top: 0;">Results Section:</h4>',
+                    '<h4 style="margin-top: 0;">', jmvcore::.("Results Section:"), "</h4>",
                     '<p style="font-style: italic; line-height: 1.6;">', results_section, "</p>",
                     "</div>",
-                    '<h3 style="color: inherit; margin-top: 30px;"> Performance Summary</h3>',
+                    '<h3 style="color: inherit; margin-top: 30px;"> ',
+                    jmvcore::.("Performance Summary"), "</h3>",
                     clinical_recommendations,
                     "</div>"
                 )
@@ -2100,11 +2293,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (length(tied) > 1) {
                     private$.addNotice(
                         type = "WARNING",
-                        title = "Tied Descriptive Ranking",
-                        content = paste0(
-                            paste(tied, collapse = " and "),
-                            " had identical observed balanced accuracy. ", tied[1],
-                            " appears first only because it was selected first; this descriptive tie is not a clinical recommendation."
+                        title = jmvcore::.("Tied Descriptive Ranking"),
+                        content = .fmt(jmvcore::.("{tests} had identical observed balanced accuracy. {first} appears first only because it was selected first; this descriptive tie is not a clinical recommendation."),
+                            tests = paste(tied, collapse = ", "), first = tied[1]
                         )
                     )
                 }
@@ -2120,19 +2311,21 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 analyzed_n <- vapply(test_results, function(x) x$n_analyzed, integer(1))
                 safe_analyzed_names <- private$.safeHtmlOutput(names(analyzed_n))
                 denominator_text <- if (length(unique(analyzed_n)) == 1) {
-                    sprintf("Each test had %d determinate results.", analyzed_n[1])
+                    sprintf(jmvcore::.("Each test had %d determinate results."), analyzed_n[1])
                 } else {
-                    paste0("Determinate denominators were ",
-                        paste0(safe_analyzed_names, " n=", analyzed_n, collapse = "; "), ".")
+                    .fmt(jmvcore::.("Determinate denominators were {denominators}."),
+                        denominators = paste0(safe_analyzed_names, " n=", analyzed_n, collapse = "; "))
                 }
 
+                # Each %s slot receives a COMPLETE sentence (or a list of names), never an
+                # English grammar fragment, so a translator can reorder the frame freely.
                 methods <- sprintf(
-                    "We compared the diagnostic performance of %s tests (%s) against the reference standard using diagnostic accuracy analysis. The dataset contained %d selected rows. %s Standalone estimates used available reference/test pairs, and paired comparisons used common determinate rows. Performance metrics included sensitivity, specificity, positive and negative predictive values, likelihood ratios, and overall accuracy. %s",
+                    jmvcore::.("We compared the diagnostic performance of %1$s tests (%2$s) against the reference standard using diagnostic accuracy analysis. The dataset contained %3$d selected rows. %4$s Standalone estimates used available reference/test pairs, and paired comparisons used common determinate rows. Performance metrics included sensitivity, specificity, positive and negative predictive values, likelihood ratios, and overall accuracy. %5$s"),
                     n_tests,
                     paste(private$.safeHtmlOutput(test_names), collapse = ", "),
                     n_cases,
                     denominator_text,
-                    if (n_tests >= 2 && self$options$statComp) "Paired comparisons used the common determinate rows. Diagnostic correctness was compared with McNemar's test, using an exact binomial p-value when fewer than 25 discordant pairs were available." else ""
+                    if (n_tests >= 2 && self$options$statComp) jmvcore::.("Paired comparisons used the common determinate rows. Diagnostic correctness was compared with McNemar's test, using an exact binomial p-value when fewer than 25 discordant pairs were available.") else ""
                 )
 
                 return(methods)
@@ -2141,11 +2334,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Generate results section with key findings
             .generateResultsSection = function(test_results, best_test, best_metrics) {
                 fmt_pct <- function(x) {
-                    if (length(x) != 1 || !is.finite(x)) return("not estimable")
+                    if (length(x) != 1 || !is.finite(x)) return(jmvcore::.("not estimable"))
                     sprintf("%.1f%%", x * 100)
                 }
                 fmt_number <- function(x) {
-                    if (length(x) != 1 || !is.finite(x)) return("not estimable")
+                    if (length(x) != 1 || !is.finite(x)) return(jmvcore::.("not estimable"))
                     sprintf("%.2f", x)
                 }
                 sens_pct <- fmt_pct(best_metrics$Sens)
@@ -2157,13 +2350,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # Report the ACTUAL statistical result (do not claim significance
                 # unconditionally). .any_significant_comparison is set in
                 # .performStatisticalComparisons from the McNemar/Cochran p-values.
+                # Sentences carry no leading space any more: padding inside a msgid is
+                # routinely lost in translation, so the pieces are joined below instead.
                 significance_note <- if (self$options$statComp && length(test_results) >= 2) {
                     if (isTRUE(private$.any_significant_comparison)) {
-                        " Statistical comparison (McNemar's/Cochran's test) revealed a statistically significant difference in test performance (detailed results in the comparison tables)."
+                        jmvcore::.("Statistical comparison (McNemar's/Cochran's test) revealed a statistically significant difference in test performance (detailed results in the comparison tables).")
                     } else if (isFALSE(private$.any_significant_comparison)) {
-                        " Statistical comparison (McNemar's/Cochran's test) did not reveal a statistically significant difference in test performance (detailed results in the comparison tables)."
+                        jmvcore::.("Statistical comparison (McNemar's/Cochran's test) did not reveal a statistically significant difference in test performance (detailed results in the comparison tables).")
                     } else {
-                        " Statistical comparisons between tests are reported in the comparison tables above."
+                        jmvcore::.("Statistical comparisons between tests are reported in the comparison tables above.")
                     }
                 } else {
                     ""
@@ -2178,7 +2373,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 fmt_ci <- function(x, n) {
                     ci <- private$.proportionCI(x, n, method = "exact")
                     if (is.na(ci$lower)) return("")
-                    sprintf(" (95%% CI: %.1f-%.1f%%)", ci$lower * 100, ci$upper * 100)
+                    # Separator outside the msgid.
+                    paste0(" ", sprintf(jmvcore::.("(95%% CI: %1$.1f-%2$.1f%%)"), ci$lower * 100, ci$upper * 100))
                 }
                 sens_ci <- fmt_ci(best$TP, best$TP + best$FN)
                 spec_ci <- fmt_ci(best$TN, best$TN + best$FP)
@@ -2189,7 +2385,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     self$options$statComp && isFALSE(private$.any_significant_comparison)
 
                 lead <- sprintf(
-                    "Among the tests evaluated, %s had the highest observed balanced accuracy; this is a descriptive ranking only and not evidence of superiority or a clinical recommendation",
+                    jmvcore::.("Among the tests evaluated, %s had the highest observed balanced accuracy; this is a descriptive ranking only and not evidence of superiority or a clinical recommendation."),
                     private$.safeHtmlOutput(best_test))
 
                 # PPV/NPV are prevalence-dependent, and when the user supplies a
@@ -2202,34 +2398,37 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 predictive_sentence <- if (use_pp) {
                     sprintf(
-                        "At the %.1f%% population prevalence supplied for this analysis, positive predictive value was %s and negative predictive value was %s; overall accuracy was %s at the prevalence of this sample. Predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate.",
+                        jmvcore::.("At the %1$.1f%% population prevalence supplied for this analysis, positive predictive value was %2$s and negative predictive value was %3$s; overall accuracy was %4$s at the prevalence of this sample. Predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
                         self$options$pprob * 100, ppv_pct, npv_pct, acc_pct)
-                } else {
-                    prev_label <- if (is.na(sample_prev_pct)) {
-                        "the disease prevalence observed in this sample"
-                    } else {
-                        sprintf("the %.1f%% disease prevalence observed in this sample", sample_prev_pct)
-                    }
+                } else if (is.na(sample_prev_pct)) {
+                    # Two complete alternative sentences rather than splicing a translated
+                    # noun phrase ("the X% prevalence observed...") into an English frame.
                     sprintf(
-                        "At %s, %s positive predictive value, %s negative predictive value, and %s overall accuracy were observed; predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate.",
-                        prev_label, ppv_pct, npv_pct, acc_pct)
+                        jmvcore::.("At the disease prevalence observed in this sample, %1$s positive predictive value, %2$s negative predictive value, and %3$s overall accuracy were observed; predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
+                        ppv_pct, npv_pct, acc_pct)
+                } else {
+                    sprintf(
+                        jmvcore::.("At the %1$.1f%% disease prevalence observed in this sample, %2$s positive predictive value, %3$s negative predictive value, and %4$s overall accuracy were observed; predictive values and accuracy change with prevalence and would need to be recomputed for a population with a different disease rate."),
+                        sample_prev_pct, ppv_pct, npv_pct, acc_pct)
                 }
 
-                results <- sprintf(
-                    "%s, with %s sensitivity%s and %s specificity%s. %s%s The likelihood ratio for positive results was %s and for negative results was %s.%s",
+                # Built from complete sentences joined by a space, instead of one frame
+                # that spliced a clause ("%s, with %s sensitivity...") no translator could
+                # reorder. nzchar() drops the optional pieces without leaving double spaces.
+                pieces <- c(
                     lead,
-                    sens_pct, sens_ci,
-                    spec_pct, spec_ci,
+                    sprintf(jmvcore::.("Sensitivity was %1$s%2$s and specificity was %3$s%4$s."),
+                        sens_pct, sens_ci, spec_pct, spec_ci),
                     predictive_sentence,
                     significance_note,
-                    fmt_number(best_metrics$LRP),
-                    fmt_number(best_metrics$LRN),
+                    sprintf(jmvcore::.("The likelihood ratio for positive results was %1$s and for negative results was %2$s."),
+                        fmt_number(best_metrics$LRP), fmt_number(best_metrics$LRN)),
                     if (indistinguishable)
-                        " Because the differences between tests were not statistically significant, this ranking reflects the observed sample and should not be reported as evidence that one test outperforms the others."
+                        jmvcore::.("Because the differences between tests were not statistically significant, this ranking reflects the observed sample and should not be reported as evidence that one test outperforms the others.")
                     else ""
                 )
 
-                return(results)
+                return(paste(pieces[nzchar(pieces)], collapse = " "))
             },
 
             # Summarise the highest-ranked test's measured performance. This panel
@@ -2242,48 +2441,40 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 recommendations <- '<div style="background-color: rgba(255, 202, 33, 0.23); padding: 15px; border-radius: 8px; color: inherit;">'
 
+                # The test name used to be pasted in front of a sentence fragment
+                # (" had high sensitivity..."), which no catalog can translate. Each branch
+                # is now one complete sentence with the name as its first %s.
                 if (isTRUE(sens_pct >= 95 && spec_pct >= 95)) {
                     recommendations <- paste0(
                         recommendations,
-                        "<p><strong>Measured performance:</strong> ", best_test_safe,
-                        sprintf(" had both high sensitivity (%.1f%%) and high specificity (%.1f%%) in this sample: few false negatives and few false positives.</p>", sens_pct, spec_pct)
+                        sprintf(jmvcore::.("<p><strong>Measured performance:</strong> %1$s had both high sensitivity (%2$.1f%%) and high specificity (%3$.1f%%) in this sample: few false negatives and few false positives.</p>"),
+                            best_test_safe, sens_pct, spec_pct)
                     )
                 } else if (isTRUE(sens_pct >= 95)) {
                     recommendations <- paste0(
                         recommendations,
-                        "<p><strong>Measured performance:</strong> ", best_test_safe,
-                        sprintf(" had high sensitivity (%.1f%%) but lower specificity (%.1f%%) in this sample: few false negatives, more false positives.</p>", sens_pct, spec_pct)
+                        sprintf(jmvcore::.("<p><strong>Measured performance:</strong> %1$s had high sensitivity (%2$.1f%%) but lower specificity (%3$.1f%%) in this sample: few false negatives, more false positives.</p>"),
+                            best_test_safe, sens_pct, spec_pct)
                     )
                 } else if (isTRUE(spec_pct >= 95)) {
                     recommendations <- paste0(
                         recommendations,
-                        "<p><strong>Measured performance:</strong> ", best_test_safe,
-                        sprintf(" had high specificity (%.1f%%) but lower sensitivity (%.1f%%) in this sample: few false positives, more false negatives.</p>", spec_pct, sens_pct)
+                        sprintf(jmvcore::.("<p><strong>Measured performance:</strong> %1$s had high specificity (%2$.1f%%) but lower sensitivity (%3$.1f%%) in this sample: few false positives, more false negatives.</p>"),
+                            best_test_safe, spec_pct, sens_pct)
                     )
                 } else if (is.na(sens_pct) || is.na(spec_pct)) {
                     # The isTRUE() guards above route NA metrics here. Do not state a
                     # numeric negative about a rate that has no denominator.
                     recommendations <- paste0(
                         recommendations,
-                        "<p><strong>Measured performance:</strong> sensitivity and/or specificity could not be computed for ",
-                        best_test_safe,
-                        " because one gold-standard class has no cases, so that rate has an empty denominator. ",
-                        "This test is named here only because the ranking had nothing else to compare; check the 2x2 counts in the ",
-                        "Recoded Data table before reading any other panel.</p>"
+                        sprintf(jmvcore::.("<p><strong>Measured performance:</strong> sensitivity and/or specificity could not be computed for %s because one gold-standard class has no cases, so that rate has an empty denominator. This test is named here only because the ranking had nothing else to compare; check the 2x2 counts in the Recoded Data table before reading any other panel.</p>"),
+                            best_test_safe)
                     )
                 } else {
                     recommendations <- paste0(
                         recommendations,
-                        "<p><strong>Measured performance:</strong> ", best_test_safe,
-                        sprintf(
-                            paste0(
-                                " reached neither 95%% sensitivity (%.1f%%) nor 95%% specificity (%.1f%%) in this sample, so at this ",
-                                "operating point it produces both false negatives and false positives at a rate you can read off the ",
-                                "Decision Test Comparison table. These are the rates observed in these particular cases, not a fixed ",
-                                "property of the test.</p>"
-                            ),
-                            sens_pct, spec_pct
-                        )
+                        sprintf(jmvcore::.("<p><strong>Measured performance:</strong> %1$s reached neither 95%% sensitivity (%2$.1f%%) nor 95%% specificity (%3$.1f%%) in this sample, so at this operating point it produces both false negatives and false positives at a rate you can read off the Decision Test Comparison table. These are the rates observed in these particular cases, not a fixed property of the test.</p>"),
+                            best_test_safe, sens_pct, spec_pct)
                     )
                 }
 
@@ -2295,11 +2486,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     recommendations <- paste0(
                         recommendations,
                         '<p style="background-color: rgba(216, 33, 50, 0.18); padding: 10px; border-radius: 4px; color: inherit;">',
-                        "<strong>Caution:</strong> No statistically significant difference was detected between the tests compared. ",
-                        best_test_safe, " is named here only because it had the highest observed balanced accuracy in this sample; the data neither establish ",
-                        "that it outperforms the others nor establish that the tests are equivalent, since a non-significant ",
-                        "result may simply reflect limited power. The confidence intervals above show how large a real ",
-                        "difference remains compatible with these data.</p>"
+                        sprintf(jmvcore::.("<strong>Caution:</strong> No statistically significant difference was detected between the tests compared. %s is named here only because it had the highest observed balanced accuracy in this sample; the data neither establish that it outperforms the others nor establish that the tests are equivalent, since a non-significant result may simply reflect limited power. The confidence intervals above show how large a real difference remains compatible with these data.</p>"),
+                            best_test_safe)
                     )
                 }
 
@@ -2308,12 +2496,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 # the prevalence of this sample.
                 recommendations <- paste0(
                     recommendations,
-                    "<p><strong>Scope of these estimates:</strong> PPV, NPV and overall accuracy all depend on disease prevalence. ",
+                    "<p><strong>", jmvcore::.("Scope of these estimates:"), "</strong> ",
+                    jmvcore::.("PPV, NPV and overall accuracy all depend on disease prevalence."), " ",
                     if (isTRUE(self$options$pp) && !is.na(self$options$pprob))
-                        "PPV and NPV were computed at the population prevalence you supplied; overall accuracy reflects the prevalence of this sample. "
+                        jmvcore::.("PPV and NPV were computed at the population prevalence you supplied; overall accuracy reflects the prevalence of this sample.")
                     else
-                        "They were all computed at the prevalence of this sample. ",
-                    "These estimates are apparent performance in this dataset and have not been externally validated.</p></div>"
+                        jmvcore::.("They were all computed at the prevalence of this sample."),
+                    " ",
+                    jmvcore::.("These estimates are apparent performance in this dataset and have not been externally validated."),
+                    "</p></div>"
                 )
 
                 return(recommendations)
@@ -2324,88 +2515,86 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 about_html <- paste0(
                     '<div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px;">',
                     '<h2 style="color: inherit; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px;">',
-                    " About Medical Decision Test Comparison</h2>",
+                    paste0(" ", jmvcore::.("About Medical Decision Test Comparison"), "</h2>"),
 
                     # What This Analysis Does
                     '<div style="background-color: rgba(33, 150, 243, 0.10); padding: 20px; border-radius: 10px; margin: 20px 0; color: inherit;">',
-                    '<h3 style="color: inherit; margin-top: 0;"> What This Analysis Does</h3>',
+                    paste0("<h3 style=\"color: inherit; margin-top: 0;\"> ", jmvcore::.("What This Analysis Does"), "</h3>"),
                     '<p style="line-height: 1.6; color: inherit;">',
-                    "This tool compares the diagnostic performance of multiple medical tests against a gold standard reference. ",
-                    "It systematically evaluates sensitivity, specificity, predictive values, likelihood ratios, and overall accuracy ",
-                    "to support transparent comparison of observed performance. It does not select a test for clinical use.",
+                    jmvcore::.("This tool compares the diagnostic performance of multiple medical tests against a gold standard reference. It systematically evaluates sensitivity, specificity, predictive values, likelihood ratios, and overall accuracy to support transparent comparison of observed performance. It does not select a test for clinical use."),
                     "</p>",
                     "</div>",
 
                     # When to Use
                     '<div style="background-color: rgba(114, 184, 33, 0.1); border: 1px solid #8bc34a; padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;">',
-                    '<h3 style="color: inherit; margin-top: 0;"> When to Use This Analysis</h3>',
+                    paste0("<h3 style=\"color: inherit; margin-top: 0;\"> ", jmvcore::.("When to Use This Analysis"), "</h3>"),
                     '<ul style="line-height: 1.8; color: inherit;">',
-                    "<li><strong>Test Validation:</strong> Comparing new diagnostic methods against established standards</li>",
-                    "<li><strong>Method Comparison:</strong> Describing and testing differences among paired tests</li>",
-                    "<li><strong>Clinical Research:</strong> Validating biomarkers, imaging techniques, or clinical assessments</li>",
-                    "<li><strong>Quality Assessment:</strong> Measuring agreement between different raters or methods</li>",
-                    "<li><strong>Protocol Development:</strong> Optimizing diagnostic workflows</li>",
+                    jmvcore::.("<li><strong>Test Validation:</strong> Comparing new diagnostic methods against established standards</li>"),
+                    jmvcore::.("<li><strong>Method Comparison:</strong> Describing and testing differences among paired tests</li>"),
+                    jmvcore::.("<li><strong>Clinical Research:</strong> Validating biomarkers, imaging techniques, or clinical assessments</li>"),
+                    jmvcore::.("<li><strong>Quality Assessment:</strong> Measuring agreement between different raters or methods</li>"),
+                    jmvcore::.("<li><strong>Protocol Development:</strong> Optimizing diagnostic workflows</li>"),
                     "</ul>",
                     "</div>",
 
                     # How to Use
                     '<div style="background-color: rgba(255, 169, 33, 0.14); border: 1px solid #ff9800; padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;">',
-                    '<h3 style="color: inherit; margin-top: 0;"> How to Use This Analysis</h3>',
+                    paste0("<h3 style=\"color: inherit; margin-top: 0;\"> ", jmvcore::.("How to Use This Analysis"), "</h3>"),
                     '<ol style="line-height: 1.8; color: inherit;">',
-                    "<li><strong>Select Gold Standard:</strong> Choose your most reliable reference test (e.g., biopsy, expert consensus)</li>",
-                    "<li><strong>Choose Tests to Compare:</strong> Select 2-3 diagnostic tests you want to evaluate</li>",
-                    '<li><strong>Define Positive Levels:</strong> Specify what constitutes a "positive" result for each test</li>',
-                    "<li><strong>Configure Options:</strong> Enable statistical comparisons, confidence intervals, or visualizations as needed</li>",
-                    "<li><strong>Run Analysis:</strong> Review estimates, denominators, exclusions, and statistical comparisons</li>",
-                    "<li><strong>Copy Report:</strong> Use the auto-generated sentences for your documentation</li>",
+                    jmvcore::.("<li><strong>Select Gold Standard:</strong> Choose your most reliable reference test (e.g., biopsy, expert consensus)</li>"),
+                    jmvcore::.("<li><strong>Choose Tests to Compare:</strong> Select 2-3 diagnostic tests you want to evaluate</li>"),
+                    jmvcore::.("<li><strong>Define Positive Levels:</strong> Specify what constitutes a \"positive\" result for each test</li>"),
+                    jmvcore::.("<li><strong>Configure Options:</strong> Enable statistical comparisons, confidence intervals, or visualizations as needed</li>"),
+                    jmvcore::.("<li><strong>Run Analysis:</strong> Review estimates, denominators, exclusions, and statistical comparisons</li>"),
+                    jmvcore::.("<li><strong>Copy Report:</strong> Use the auto-generated sentences for your documentation</li>"),
                     "</ol>",
                     "</div>",
 
                     # Key Metrics Explained
                     '<div style="background-color: rgba(153, 33, 170, 0.12); border: 1px solid #9c27b0; padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;">',
-                    '<h3 style="color: inherit; margin-top: 0;"> Key Metrics Explained</h3>',
+                    paste0("<h3 style=\"color: inherit; margin-top: 0;\"> ", jmvcore::.("Key Metrics Explained"), "</h3>"),
                     '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: inherit;">',
                     "<div>",
-                    "<p><strong>Sensitivity:</strong> Probability test is positive when disease present (rule-out ability)</p>",
-                    "<p><strong>Specificity:</strong> Probability test is negative when disease absent (rule-in ability)</p>",
-                    "<p><strong>PPV:</strong> Probability of disease when test positive</p>",
-                    "<p><strong>NPV:</strong> Probability of no disease when test negative</p>",
+                    jmvcore::.("<p><strong>Sensitivity:</strong> Probability test is positive when disease present (rule-out ability)</p>"),
+                    jmvcore::.("<p><strong>Specificity:</strong> Probability test is negative when disease absent (rule-in ability)</p>"),
+                    jmvcore::.("<p><strong>PPV:</strong> Probability of disease when test positive</p>"),
+                    jmvcore::.("<p><strong>NPV:</strong> Probability of no disease when test negative</p>"),
                     "</div>",
                     "<div>",
-                    "<p><strong>LR+:</strong> How much positive test increases odds of disease</p>",
-                    "<p><strong>LR-:</strong> How much negative test decreases odds of disease</p>",
-                    "<p><strong>Accuracy:</strong> Overall probability of correct classification</p>",
-                    "<p><strong>McNemar Test:</strong> Statistical comparison between paired tests</p>",
+                    jmvcore::.("<p><strong>LR+:</strong> How much positive test increases odds of disease</p>"),
+                    jmvcore::.("<p><strong>LR-:</strong> How much negative test decreases odds of disease</p>"),
+                    jmvcore::.("<p><strong>Accuracy:</strong> Overall probability of correct classification</p>"),
+                    jmvcore::.("<p><strong>McNemar Test:</strong> Statistical comparison between paired tests</p>"),
                     "</div>",
                     "</div>",
                     "</div>",
 
                     # Illustrative examples (not clinical guidance)
                     '<div style="background-color: rgba(33, 159, 33, 0.1); border: 1px solid #4caf50; padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;">',
-                    '<h3 style="color: inherit; margin-top: 0;"> Illustrative Interpretation Examples</h3>',
-                    "<p><strong>Important:</strong> These thresholds and use cases are examples only. They are not clinical guides, validated decision rules, or recommendations for patient care.</p>",
-                    "<p>The radar plot's LR scale uses familiar likelihood-ratio evidence categories described in the Users' Guides to the Medical Literature (Jaeschke et al., 1994) solely as an illustrative visualization. Appropriate thresholds and consequences depend on the clinical setting, population, harms, benefits, and decision pathway.</p>",
+                    paste0("<h3 style=\"color: inherit; margin-top: 0;\"> ", jmvcore::.("Illustrative Interpretation Examples"), "</h3>"),
+                    jmvcore::.("<p><strong>Important:</strong> These thresholds and use cases are examples only. They are not clinical guides, validated decision rules, or recommendations for patient care.</p>"),
+                    jmvcore::.("<p>The radar plot's LR scale uses familiar likelihood-ratio evidence categories described in the Users' Guides to the Medical Literature (Jaeschke et al., 1994) solely as an illustrative visualization. Appropriate thresholds and consequences depend on the clinical setting, population, harms, benefits, and decision pathway.</p>"),
                     '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: inherit;">',
                     "<div>",
-                    '<h4 style="margin-bottom: 5px;">Screening Tests (Rule-Out):</h4>',
-                    '<p style="margin-top: 0;">\u{2022} Example emphasis: sensitivity and NPV<br>\u{2022} Example threshold: 95%<br>\u{2022} Study-specific aim: reduce false negatives</p>',
+                    paste0("<h4 style=\"margin-bottom: 5px;\">", jmvcore::.("Screening Tests (Rule-Out):"), "</h4>"),
+                    paste0("<p style=\"margin-top: 0;\">", jmvcore::.("\u2022 Example emphasis: sensitivity and NPV<br>\u2022 Example threshold: 95%<br>\u2022 Study-specific aim: reduce false negatives"), "</p>"),
                     "</div>",
                     "<div>",
-                    '<h4 style="margin-bottom: 5px;">Confirmatory Tests (Rule-In):</h4>',
-                    '<p style="margin-top: 0;">\u{2022} Example emphasis: specificity and PPV<br>\u{2022} Example thresholds: 95% and 90%<br>\u{2022} Study-specific aim: reduce false positives</p>',
+                    paste0("<h4 style=\"margin-bottom: 5px;\">", jmvcore::.("Confirmatory Tests (Rule-In):"), "</h4>"),
+                    paste0("<p style=\"margin-top: 0;\">", jmvcore::.("\u2022 Example emphasis: specificity and PPV<br>\u2022 Example thresholds: 95% and 90%<br>\u2022 Study-specific aim: reduce false positives"), "</p>"),
                     "</div>",
                     "</div>",
                     "</div>",
 
                     # Assumptions and Limitations
                     '<div style="background-color: rgba(255, 203, 33, 0.14); border: 1px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0; color: inherit;">',
-                    '<h3 style="color: inherit; margin-top: 0;"> Important Assumptions & Limitations</h3>',
+                    paste0("<h3 style=\"color: inherit; margin-top: 0;\"> ", jmvcore::.("Important Assumptions & Limitations"), "</h3>"),
                     '<ul style="line-height: 1.6; color: inherit;">',
-                    "<li><strong>Gold Standard:</strong> Assumes your reference test is truly accurate</li>",
-                    "<li><strong>Sample Size:</strong> Results more reliable with larger, representative samples</li>",
-                    "<li><strong>Prevalence Dependency:</strong> PPV and NPV vary with disease prevalence</li>",
-                    "<li><strong>McNemar Test:</strong> Requires paired/matched data for statistical comparisons</li>",
-                    "<li><strong>Missing Data:</strong> Standalone estimates use available reference/test pairs; paired comparisons use common determinate rows. Missing-data handling and counts should be reported.</li>",
+                    jmvcore::.("<li><strong>Gold Standard:</strong> Assumes your reference test is truly accurate</li>"),
+                    jmvcore::.("<li><strong>Sample Size:</strong> Results more reliable with larger, representative samples</li>"),
+                    jmvcore::.("<li><strong>Prevalence Dependency:</strong> PPV and NPV vary with disease prevalence</li>"),
+                    jmvcore::.("<li><strong>McNemar Test:</strong> Requires paired/matched data for statistical comparisons</li>"),
+                    jmvcore::.("<li><strong>Missing Data:</strong> Standalone estimates use available reference/test pairs; paired comparisons use common determinate rows. Missing-data handling and counts should be reported.</li>"),
                     # Describe only the intervals this analysis actually renders.
                     # The per-test table is filtered to `ratiorows` above, which
                     # excludes lr.pos/lr.neg, and the LRP/LRN columns in
@@ -2413,7 +2602,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     # likelihood-ratio interval is displayed anywhere here. An
                     # earlier version of this sentence advertised Simel (1991) LR
                     # intervals that the analysis never computes or shows.
-                    "<li><strong>Confidence Intervals:</strong> The per-test CI tables report Clopper-Pearson exact intervals for the proportions (sensitivity, specificity, PPV, NPV, accuracy and prevalence), as computed by epiR::epi.tests() with its default settings. Likelihood ratios are reported as point estimates only, without confidence intervals. The Overall Percent Agreement (OPA) table uses the selected single-proportion method. Paired differences use Newcombe's method-10 score interval for correlated proportions.</li>",
+                    jmvcore::.("<li><strong>Confidence Intervals:</strong> The per-test CI tables report Clopper-Pearson exact intervals for the proportions (sensitivity, specificity, PPV, NPV, accuracy and prevalence), as computed by epiR::epi.tests() with its default settings. Likelihood ratios are reported as point estimates only, without confidence intervals. The Overall Percent Agreement (OPA) table uses the selected single-proportion method. Paired differences use Newcombe's method-10 score interval for correlated proportions.</li>"),
                     "</ul>",
                     "</div>",
                     "</div>"
@@ -2467,13 +2656,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (nrow(df) == 0)
                     return(FALSE)
 
-                # Ensure factor ordering for consistent radar plot
-                df$metric <- factor(df$metric,
-                    levels = c(
-                        "Sensitivity", "Specificity", "Accuracy",
-                        "PPV", "NPV", "LR+ Quality", "LR- Quality"
-                    )
-                )
+                # Ensure factor ordering for consistent radar plot. Same translated
+                # label vector the data builder used -- English literals here would drop
+                # every point in a translated session.
+                df$metric <- factor(df$metric, levels = private$.radarMetricLabels())
 
                 # Create radar plot using ggplot2
                 plot <- ggplot2::ggplot(df, ggplot2::aes(
@@ -2552,6 +2738,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 # Test rows
                 for (tv in testVariables) {
+                    # One row per case per test: O(n_cases) work for every test.
+                    private$.checkpoint()
+
                     test_binary <- encode(test_results[[tv]]$test_results)
                     test_sorted <- test_binary[sort_order]
 
@@ -2592,10 +2781,17 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     x = case_order, y = source, fill = factor(value)
                 )) +
                     ggplot2::geom_tile(color = "grey90", linewidth = 0.1) +
+                    # An UNNAMED labels vector is applied POSITIONALLY to the levels
+                    # present in the data, so whenever one of the three encoded values was
+                    # absent every label shifted onto the wrong colour -- black
+                    # (Positive) tiles were labelled "Negative". Named labels plus
+                    # explicit breaks bind each label to its value.
                     ggplot2::scale_fill_manual(
                         values = c("0" = "white", "1" = "black", "2" = "#f59e0b"),
-                        labels = c("Negative", "Positive", "Indeterminate / excluded"),
-                        name = "Result"
+                        breaks = c("0", "1", "2"),
+                        labels = c("0" = jmvcore::.("Negative"), "1" = jmvcore::.("Positive"),
+                                   "2" = jmvcore::.("Indeterminate / excluded")),
+                        name = jmvcore::.("Result")
                     ) +
                     ggplot2::labs(
                         title = jmvcore::.("Concordance Heatmap: Per-Case Test Results vs Gold Standard"),
@@ -2622,7 +2818,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 test_names <- names(test_results)
 
                 html <- "<div style='background-color: rgba(155, 155, 155, 0.06); border-left:4px solid #2196F3; padding:15px; margin:10px 0; color: inherit;'>"
-                html <- paste0(html, "<h4 style='margin-top:0;'> Summary</h4>")
+                html <- paste0(html, "<h4 style='margin-top:0;'> ", jmvcore::.("Summary"), "</h4>")
 
                 if (n_tests == 3) {
                     # Check if Cochran's Q was performed. The Cochran row's KEY is
@@ -2634,42 +2830,42 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     q_stat <- if (grepl("cochran", q_key, fixed = TRUE)) mcnemar_table$getCell(rowKey = q_row, col = "stat")$value else NA
                     q_p <- if (grepl("cochran", q_key, fixed = TRUE)) mcnemar_table$getCell(rowKey = q_row, col = "p")$value else NA
                     if (grepl("cochran", q_key, fixed = TRUE) && !is.na(q_stat) && !is.na(q_p)) {
+                        # Wrapped in .(), so the chi-squared escapes must be the 4-hex-digit
+                        # form: \u{XXXX} is resolved by R at parse time but stored literally in
+                        # the catalog, and the lookup could then never match.
                         html <- paste0(html, sprintf(
-                            "<p><b>Overall comparison:</b> Cochran's Q test (\u{03C7}\u{00B2} = %.2f, p = %.3f) ",
+                            paste0(jmvcore::.("<p><b>Overall comparison:</b> Cochran's Q test (\u03C7\u00B2 = %1$.2f, p = %2$.3f)"), " "),
                             q_stat, q_p
                         ))
 
                         if (q_p < private$P_THRESHOLD_SIGNIFICANT) {
                             html <- paste0(
                                 html,
-                    "<span style='color:inherit;'><b>found significant differences</b></span> ",
-                                "among the three tests. This means the tests do NOT perform equally - at least one differs significantly from the others.</p>"
+                    "<span style='color:inherit;'><b>", jmvcore::.("found significant differences"), "</b></span> ",
+                                jmvcore::.("among the three tests. This means the tests do NOT perform equally - at least one differs significantly from the others.</p>")
                             )
 
                             # Descriptive balanced-accuracy ranking; not a superiority test.
                             best_test <- private$.findBestTest(test_results)
                             best_acc <- test_results[[best_test]]$metrics$AccurT
 
+                            # One msgid per complete sentence, with the test name as %s
+                            # inside it, instead of a name pasted onto a bare predicate.
                             html <- paste0(html, sprintf(
-                                "<p><b>Descriptive interpretation:</b> <span style='color:inherit;'><b>%s</b></span> ",
-                                private$.safeHtmlOutput(best_test)
-                            ), sprintf(
-                                "had the highest observed balanced accuracy in this sample (overall accuracy %.1f%%). This descriptive ranking is not a superiority test or clinical recommendation. Review the pairwise comparisons above for inferential results.</p>",
-                                best_acc * 100
+                                jmvcore::.("<p><b>Descriptive interpretation:</b> <span style='color:inherit;'><b>%1$s</b></span> had the highest observed balanced accuracy in this sample (overall accuracy %2$.1f%%). This descriptive ranking is not a superiority test or clinical recommendation. Review the pairwise comparisons above for inferential results.</p>"),
+                                private$.safeHtmlOutput(best_test), best_acc * 100
                             ))
                         } else {
                             html <- paste0(
                                 html,
-                                "<span style='color:inherit;'><b>did not detect a significant difference</b></span> ",
-                                "among the three tests. This is not evidence that they perform equally: with this sample size a ",
-                                "clinically important accuracy difference could go undetected, and no test of one test against ",
-                                "another across a pre-specified equivalence margin was performed. (If requested, the criterion column in the ",
-                                "Overall Percent Agreement table compares each test with a user-specified descriptive OPA threshold; ",
-                                "it is not a noninferiority comparison between tests or clinical guidance.) The confidence intervals for the paired ",
-                                "differences in the Differences with 95% Confidence Intervals table show how large a difference ",
-                                "remains compatible with these data.</p>"
+                                "<span style='color:inherit;'><b>", jmvcore::.("did not detect a significant difference"), "</b></span> ",
+                                jmvcore::.("among the three tests. This is not evidence that they perform equally: with this sample size a clinically important accuracy difference could go undetected, and no test of one test against another across a pre-specified equivalence margin was performed. (If requested, the criterion column in the Overall Percent Agreement table compares each test with a user-specified descriptive OPA threshold; it is not a noninferiority comparison between tests or clinical guidance.) The confidence intervals for the paired differences in the Differences with 95% Confidence Intervals table show how large a difference remains compatible with these data.</p>")
                             )
                         }
+                    } else {
+                        # Without this the whole 3-test branch was skipped and the box was
+                        # emitted containing only its heading.
+                        html <- paste0(html, "<p>", jmvcore::.("The global Cochran's Q test could not be computed for these data; the reason is given in the Important Information panel. The pairwise comparisons and their confidence intervals in the tables above are unaffected."), "</p>")
                     }
                 } else if (n_tests == 2) {
                     # Extract McNemar results
@@ -2687,15 +2883,15 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         acc2 <- test_results[[test2_name]]$metrics$AccurT
 
                         html <- paste0(html, sprintf(
-                            "<p><b>Comparison:</b> %s (accuracy: %.1f%%) vs %s (accuracy: %.1f%%)</p>",
+                            jmvcore::.("<p><b>Comparison:</b> %1$s (accuracy: %2$.1f%%) vs %3$s (accuracy: %4$.1f%%)</p>"),
                             private$.safeHtmlOutput(test1_name), acc1 * 100,
                             private$.safeHtmlOutput(test2_name), acc2 * 100
                         ))
 
                         test_text <- if (is.na(mcn_stat)) {
-                            sprintf("<p><b>%s:</b> exact p = %.3f - ", mcn_method, mcn_p)
+                            paste0(sprintf(jmvcore::.("<p><b>%1$s:</b> exact p = %2$.3f"), mcn_method, mcn_p), " - ")
                         } else {
-                            sprintf("<p><b>%s:</b> \u{03C7}\u{00B2} = %.2f, p = %.3f - ", mcn_method, mcn_stat, mcn_p)
+                            paste0(sprintf(jmvcore::.("<p><b>%1$s:</b> \u03C7\u00B2 = %2$.2f, p = %3$.3f"), mcn_method, mcn_stat, mcn_p), " - ")
                         }
                         html <- paste0(html, test_text)
 
@@ -2706,7 +2902,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             more_accurate <- if (isTRUE(acc1 >= acc2)) test1_name else test2_name
                             less_accurate <- if (isTRUE(acc1 >= acc2)) test2_name else test1_name
                             html <- paste0(html, sprintf(
-                                "<span style='color:inherit;'><b>Significant difference detected.</b></span> %s classified significantly more cases correctly than %s (accuracy %.1f%% vs %.1f%%). McNemar's test compares overall correctness only; the two tests may still differ in the sensitivity/specificity balance.</p>",
+                                jmvcore::.("<span style='color:inherit;'><b>Significant difference detected.</b></span> %1$s classified significantly more cases correctly than %2$s (accuracy %3$.1f%% vs %4$.1f%%). McNemar's test compares overall correctness only; the two tests may still differ in the sensitivity/specificity balance.</p>"),
                                 private$.safeHtmlOutput(more_accurate),
                                 private$.safeHtmlOutput(less_accurate),
                                 max(acc1, acc2) * 100, min(acc1, acc2) * 100
@@ -2714,11 +2910,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         } else {
                             html <- paste0(
                                 html,
-                                "<span style='color:inherit;'><b>No significant difference detected.</b></span> ",
-                                "This is not evidence that the two tests are equivalent: McNemar's test uses only the discordant ",
-                                "pairs, so with few discordances it has little power to detect a real difference. Check the ",
-                                "confidence interval for the accuracy difference to see how large a difference remains ",
-                                "compatible with these data.</p>"
+                                "<span style='color:inherit;'><b>", jmvcore::.("No significant difference detected."), "</b></span> ",
+                                jmvcore::.("This is not evidence that the two tests are equivalent: McNemar's test uses only the discordant pairs, so with few discordances it has little power to detect a real difference. Check the confidence interval for the accuracy difference to see how large a difference remains compatible with these data.</p>")
                             )
                         }
                     }
@@ -2734,10 +2927,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 test_names <- names(test_results)
 
                 html <- "<div style='background-color: rgba(33, 33, 33, 0.07); padding:15px; border:1px solid #ccc; margin:10px 0; color: inherit;'>"
-                html <- paste0(html, "<h4 style='margin-top:0;'> Manuscript-Ready Report</h4>")
+                html <- paste0(html, "<h4 style='margin-top:0;'> ", jmvcore::.("Manuscript-Ready Report"), "</h4>")
                 html <- paste0(
                     html, "<p style='font-size:10pt; color:inherit; margin-bottom:10px;'>",
-                    "Copy and adapt to your manuscript. Verify all statistical values and add clinical context.</p>"
+                    jmvcore::.("Copy and adapt to your manuscript. Verify all statistical values and add clinical context."), "</p>"
                 )
 
                 html <- paste0(html, "<div style='background-color: rgba(255, 255, 255, 0.06); padding:12px; font-family:serif; font-size:11pt; line-height:1.8; color: inherit;'>")
@@ -2751,38 +2944,40 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     q_df <- if (grepl("cochran", q_key, fixed = TRUE)) mcnemar_table$getCell(rowKey = q_row, col = "df")$value else NA
                     q_p <- if (grepl("cochran", q_key, fixed = TRUE)) mcnemar_table$getCell(rowKey = q_row, col = "p")$value else NA
                     if (grepl("cochran", q_key, fixed = TRUE) && !is.na(q_stat) && !is.na(q_p)) {
-                        report <- sprintf(
-                            "Cochran's Q test %s a significant difference in diagnostic accuracy among the three tests (\u{03C7}\u{00B2}(%d) = %.2f, p = %.3f). ",
-                            if (q_p < private$P_THRESHOLD_SIGNIFICANT) "revealed" else "did not detect",
-                            q_df, q_stat, q_p
-                        )
+                        # Two complete sentences instead of splicing the verb ("revealed" /
+                        # "did not detect") through %s, which no language can reorder.
+                        report <- paste0(if (q_p < private$P_THRESHOLD_SIGNIFICANT)
+                            sprintf(jmvcore::.("Cochran's Q test revealed a significant difference in diagnostic accuracy among the three tests (\u03C7\u00B2(%1$d) = %2$.2f, p = %3$.3f)."),
+                                q_df, q_stat, q_p)
+                        else
+                            sprintf(jmvcore::.("Cochran's Q test did not detect a significant difference in diagnostic accuracy among the three tests (\u03C7\u00B2(%1$d) = %2$.2f, p = %3$.3f)."),
+                                q_df, q_stat, q_p), " ")
                         if (q_p >= private$P_THRESHOLD_SIGNIFICANT) {
                             report <- paste0(
                                 report,
-                                paste0(
-                                    "This does not establish that the tests perform equally; no test of one test against another ",
-                                    "across a pre-specified equivalence margin was performed. (If requested, the OPA criterion column compares each test ",
-                                    "with a user-specified descriptive threshold; it is not a noninferiority comparison between tests or clinical guidance.) "
-                                )
+                                paste0(jmvcore::.("This does not establish that the tests perform equally; no test of one test against another across a pre-specified equivalence margin was performed. (If requested, the OPA criterion column compares each test with a user-specified descriptive threshold; it is not a noninferiority comparison between tests or clinical guidance.)"), " ")
                             )
                         }
 
                         if (q_p < private$P_THRESHOLD_SIGNIFICANT) {
                             report <- paste0(
                                 report,
-                                "Post-hoc pairwise comparisons with Holm-Bonferroni correction were conducted to identify specific differences between tests. "
+                                jmvcore::.("Post-hoc pairwise comparisons with Holm-Bonferroni correction were conducted to identify specific differences between tests."), " "
                             )
 
                             # Descriptive balanced-accuracy ranking only.
                             best_test <- private$.findBestTest(test_results)
 
                             report <- paste0(report, sprintf(
-                                "%s had the highest observed balanced accuracy; this descriptive ranking was not tested as a superiority claim and is not a clinical recommendation.",
+                                jmvcore::.("%s had the highest observed balanced accuracy; this descriptive ranking was not tested as a superiority claim and is not a clinical recommendation."),
                                 private$.safeHtmlOutput(best_test)
                             ))
                         }
 
                         html <- paste0(html, report)
+                    } else {
+                        # Same empty-box failure as in .generateSummary().
+                        html <- paste0(html, jmvcore::.("The global Cochran's Q test could not be computed for these data; the reason is given in the Important Information panel. Report the pairwise comparisons and their confidence intervals instead."))
                     }
                 } else if (n_tests == 2) {
                     mcnemar_table <- self$results$mcnemarTable
@@ -2796,19 +2991,25 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         test1_name <- test_names[1]
                         test2_name <- test_names[2]
 
+                        # The verb was spliced through %s ("%s a significant difference");
+                        # each outcome now has its own complete sentence.
+                        significant <- isTRUE(mcn_p < private$P_THRESHOLD_SIGNIFICANT)
+                        name1 <- private$.safeHtmlOutput(test1_name)
+                        name2 <- private$.safeHtmlOutput(test2_name)
                         report <- if (is.na(mcn_stat)) {
-                            sprintf(
-                                "%s comparing %s and %s %s a significant difference in diagnostic accuracy (exact p = %.3f).",
-                                mcn_method, private$.safeHtmlOutput(test1_name), private$.safeHtmlOutput(test2_name),
-                                if (mcn_p < private$P_THRESHOLD_SIGNIFICANT) "showed" else "did not detect", mcn_p
-                            )
+                            if (significant)
+                                sprintf(jmvcore::.("%1$s comparing %2$s and %3$s showed a significant difference in diagnostic accuracy (exact p = %4$.3f)."),
+                                    mcn_method, name1, name2, mcn_p)
+                            else
+                                sprintf(jmvcore::.("%1$s comparing %2$s and %3$s did not detect a significant difference in diagnostic accuracy (exact p = %4$.3f)."),
+                                    mcn_method, name1, name2, mcn_p)
                         } else {
-                            sprintf(
-                                "%s comparing %s and %s %s a significant difference in diagnostic accuracy (\u{03C7}\u{00B2}(%d) = %.2f, p = %.3f).",
-                                mcn_method, private$.safeHtmlOutput(test1_name), private$.safeHtmlOutput(test2_name),
-                                if (mcn_p < private$P_THRESHOLD_SIGNIFICANT) "showed" else "did not detect",
-                                mcn_df, mcn_stat, mcn_p
-                            )
+                            if (significant)
+                                sprintf(jmvcore::.("%1$s comparing %2$s and %3$s showed a significant difference in diagnostic accuracy (\u03C7\u00B2(%4$d) = %5$.2f, p = %6$.3f)."),
+                                    mcn_method, name1, name2, mcn_df, mcn_stat, mcn_p)
+                            else
+                                sprintf(jmvcore::.("%1$s comparing %2$s and %3$s did not detect a significant difference in diagnostic accuracy (\u03C7\u00B2(%4$d) = %5$.2f, p = %6$.3f)."),
+                                    mcn_method, name1, name2, mcn_df, mcn_stat, mcn_p)
                         }
 
                         if (mcn_p < private$P_THRESHOLD_SIGNIFICANT) {
@@ -2819,16 +3020,16 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             more_accurate <- if (isTRUE(acc1 >= acc2)) test1_name else test2_name
                             less_accurate <- if (isTRUE(acc1 >= acc2)) test2_name else test1_name
 
-                            report <- paste0(report, sprintf(
-                                " %s classified significantly more cases correctly than %s (accuracy %.1f%% vs %.1f%%); McNemar's test compares overall correctness only.",
+                            report <- paste0(report, " ", sprintf(
+                                jmvcore::.("%1$s classified significantly more cases correctly than %2$s (accuracy %3$.1f%% vs %4$.1f%%); McNemar's test compares overall correctness only."),
                                 private$.safeHtmlOutput(more_accurate),
                                 private$.safeHtmlOutput(less_accurate),
                                 max(acc1, acc2) * 100, min(acc1, acc2) * 100
                             ))
                         } else {
                             report <- paste0(
-                                report,
-                                " A non-significant McNemar result does not establish that the two tests perform equally; the test uses only the discordant pairs and may lack power to detect a clinically important difference."
+                                report, " ",
+                                jmvcore::.("A non-significant McNemar result does not establish that the two tests perform equally; the test uses only the discordant pairs and may lack power to detect a clinically important difference.")
                             )
                         }
 
@@ -2845,94 +3046,94 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 html <- "<div style='font-family: Arial, sans-serif; line-height:1.6;'>"
 
                 # Glossary section
-                html <- paste0(html, "<h4 style='color:inherit; border-bottom:2px solid #3498db;'> Statistical Glossary</h4>")
+                html <- paste0(html, "<h4 style='color:inherit; border-bottom:2px solid #3498db;'> ", jmvcore::.("Statistical Glossary"), "</h4>")
                 html <- paste0(html, "<dl style='margin-left:15px;'>")
 
                 html <- paste0(
                     html,
-                    "<dt><b>McNemar's Test</b></dt>",
-                    "<dd style='margin-bottom:12px;'><strong>Compares diagnostic CORRECTNESS</strong> of two tests relative to the gold standard. Focuses on <i>discordant pairs</i> (cases where one test is correct and the other is wrong). Tests whether Test A correctly classifies significantly more/fewer cases than Test B. Appropriate for paired/matched data only. P < 0.05 indicates tests differ significantly in accuracy.</dd>"
+                    jmvcore::.("<dt><b>McNemar's Test</b></dt>"),
+                    paste0("<dd style='margin-bottom:12px;'>", jmvcore::.("<strong>Compares diagnostic CORRECTNESS</strong> of two tests relative to the gold standard. Focuses on <i>discordant pairs</i> (cases where one test is correct and the other is wrong). Tests whether Test A correctly classifies significantly more/fewer cases than Test B. Appropriate for paired/matched data only. P < 0.05 indicates tests differ significantly in accuracy."), "</dd>")
                 )
 
                 html <- paste0(
                     html,
-                    "<dt><b>Cochran's Q Test</b></dt>",
-                    "<dd style='margin-bottom:12px;'>Extension of McNemar's for 3+ tests. <strong>Tests whether diagnostic correctness differs</strong> among tests relative to the gold standard. If significant (p < 0.05), at least one test is significantly more/less accurate than the others. Proceed to pairwise comparisons with multiple comparison correction to identify which tests differ.</dd>"
+                    jmvcore::.("<dt><b>Cochran's Q Test</b></dt>"),
+                    paste0("<dd style='margin-bottom:12px;'>", jmvcore::.("Extension of McNemar's for 3+ tests. <strong>Tests whether diagnostic correctness differs</strong> among tests relative to the gold standard. If significant (p < 0.05), at least one test is significantly more/less accurate than the others. Proceed to pairwise comparisons with multiple comparison correction to identify which tests differ."), "</dd>")
                 )
 
                 html <- paste0(
                     html,
-                    "<dt><b>Holm-Bonferroni Correction</b></dt>",
-                    "<dd style='margin-bottom:12px;'>Adjusts p-values when making multiple comparisons to control Type I error (false positives). More powerful than standard Bonferroni correction. Applied automatically when comparing 3 tests.</dd>"
+                    jmvcore::.("<dt><b>Holm-Bonferroni Correction</b></dt>"),
+                    paste0("<dd style='margin-bottom:12px;'>", jmvcore::.("Adjusts p-values when making multiple comparisons to control Type I error (false positives). More powerful than standard Bonferroni correction. Applied automatically when comparing 3 tests."), "</dd>")
                 )
 
                 html <- paste0(
                     html,
-                    "<dt><b>Discordant Pairs</b></dt>",
-                    "<dd style='margin-bottom:12px;'><strong>Cases where Test A and Test B have different CORRECTNESS</strong> relative to the reference standard (e.g., Test A correct but Test B wrong, or vice versa). McNemar's test examines whether the imbalance between these discordant types is statistically significant. Exact inference is used automatically when fewer than 25 discordant pairs are available, but precision and power still depend on the number of discordant pairs.</dd>"
+                    jmvcore::.("<dt><b>Discordant Pairs</b></dt>"),
+                    paste0("<dd style='margin-bottom:12px;'>", jmvcore::.("<strong>Cases where Test A and Test B have different CORRECTNESS</strong> relative to the reference standard (e.g., Test A correct but Test B wrong, or vice versa). McNemar's test examines whether the imbalance between these discordant types is statistically significant. Exact inference is used automatically when fewer than 25 discordant pairs are available, but precision and power still depend on the number of discordant pairs."), "</dd>")
                 )
 
                 html <- paste0(
                     html,
                     "<dt><b>Sensitivity</b></dt>",
-                    "<dd style='margin-bottom:12px;'>Proportion of diseased cases correctly identified (True Positive Rate). High sensitivity means few false negatives. Important when missing disease is costly.</dd>"
+                    paste0("<dd style='margin-bottom:12px;'>", jmvcore::.("Proportion of diseased cases correctly identified (True Positive Rate). High sensitivity means few false negatives. Important when missing disease is costly."), "</dd>")
                 )
 
                 html <- paste0(
                     html,
                     "<dt><b>Specificity</b></dt>",
-                    "<dd style='margin-bottom:12px;'>Proportion of non-diseased cases correctly identified (True Negative Rate). High specificity means few false positives. Important when false alarms are problematic.</dd>"
+                    paste0("<dd style='margin-bottom:12px;'>", jmvcore::.("Proportion of non-diseased cases correctly identified (True Negative Rate). High specificity means few false positives. Important when false alarms are problematic."), "</dd>")
                 )
 
                 html <- paste0(
                     html,
-                    "<dt><b>PPV (Positive Predictive Value)</b></dt>",
-                    "<dd style='margin-bottom:12px;'>Probability that a positive test result truly indicates disease. Depends on disease prevalence - higher in populations with higher disease rates.</dd>"
+                    jmvcore::.("<dt><b>PPV (Positive Predictive Value)</b></dt>"),
+                    paste0("<dd style='margin-bottom:12px;'>", jmvcore::.("Probability that a positive test result truly indicates disease. Depends on disease prevalence - higher in populations with higher disease rates."), "</dd>")
                 )
 
                 html <- paste0(
                     html,
-                    "<dt><b>NPV (Negative Predictive Value)</b></dt>",
-                    "<dd style='margin-bottom:12px;'>Probability that a negative test result truly indicates absence of disease. Also depends on prevalence.</dd>"
+                    jmvcore::.("<dt><b>NPV (Negative Predictive Value)</b></dt>"),
+                    paste0("<dd style='margin-bottom:12px;'>", jmvcore::.("Probability that a negative test result truly indicates absence of disease. Also depends on prevalence."), "</dd>")
                 )
 
                 html <- paste0(html, "</dl>")
 
                 # Assumptions section
-                html <- paste0(html, "<h4 style='color:inherit; border-bottom:2px solid #3498db; margin-top:25px;'> Assumptions & Requirements</h4>")
+                html <- paste0(html, "<h4 style='color:inherit; border-bottom:2px solid #3498db; margin-top:25px;'> ", jmvcore::.("Assumptions & Requirements"), "</h4>")
                 html <- paste0(html, "<ul style='margin-left:15px;'>")
                 html <- paste0(
                     html,
-                    "<li><b>Paired Data:</b> All tests must be performed on the same patients/samples (not independent groups)</li>",
-                    "<li><b>Adequate Information:</b> Precision and power depend strongly on the number of discordant pairs</li>",
-                    "<li><b>Binary Recoding:</b> Each test is analyzed after positive/negative recoding; multilevel results require explicit handling when indeterminate values should be excluded</li>",
-                    "<li><b>Gold Standard:</b> Reference test must represent true disease status (e.g., biopsy, final diagnosis)</li>",
-                    "<li><b>Available Cases:</b> Standalone metrics use each test's observed reference/test pairs; paired comparisons use common determinate rows</li>"
+                    jmvcore::.("<li><b>Paired Data:</b> All tests must be performed on the same patients/samples (not independent groups)</li>"),
+                    jmvcore::.("<li><b>Adequate Information:</b> Precision and power depend strongly on the number of discordant pairs</li>"),
+                    jmvcore::.("<li><b>Binary Recoding:</b> Each test is analyzed after positive/negative recoding; multilevel results require explicit handling when indeterminate values should be excluded</li>"),
+                    jmvcore::.("<li><b>Gold Standard:</b> Reference test must represent true disease status (e.g., biopsy, final diagnosis)</li>"),
+                    jmvcore::.("<li><b>Available Cases:</b> Standalone metrics use each test's observed reference/test pairs; paired comparisons use common determinate rows</li>")
                 )
                 html <- paste0(html, "</ul>")
 
                 # When to use section
-                html <- paste0(html, "<h4 style='color:inherit; border-bottom:2px solid #3498db; margin-top:25px;'> When to Use This Analysis</h4>")
+                html <- paste0(html, "<h4 style='color:inherit; border-bottom:2px solid #3498db; margin-top:25px;'> ", jmvcore::.("When to Use This Analysis"), "</h4>")
                 html <- paste0(html, "<ul style='margin-left:15px;'>")
                 html <- paste0(
                     html,
-                    "<li>Comparing diagnostic accuracy of 2-3 tests performed on same patients</li>",
-                    "<li>Evaluating if a new test is significantly better/worse than standard test</li>",
-                    "<li>Optimizing test selection based on performance metrics</li>",
-                    "<li>Validating diagnostic tools in clinical or pathology practice</li>"
+                    jmvcore::.("<li>Comparing diagnostic accuracy of 2-3 tests performed on same patients</li>"),
+                    jmvcore::.("<li>Evaluating if a new test is significantly better/worse than standard test</li>"),
+                    jmvcore::.("<li>Optimizing test selection based on performance metrics</li>"),
+                    jmvcore::.("<li>Validating diagnostic tools in clinical or pathology practice</li>")
                 )
                 html <- paste0(html, "</ul>")
 
                 # Limitations section
-                html <- paste0(html, "<h4 style='color:inherit; border-bottom:2px solid #e74c3c; margin-top:25px;'> Limitations</h4>")
+                html <- paste0(html, "<h4 style='color:inherit; border-bottom:2px solid #e74c3c; margin-top:25px;'> ", jmvcore::.("Limitations"), "</h4>")
                 html <- paste0(html, "<ul style='margin-left:15px; color:inherit;'>")
                 html <- paste0(
                     html,
-                    "<li>McNemar's test compares overall accuracy only - does not separately test sensitivity vs specificity differences</li>",
-                    "<li>Requires paired observations - cannot compare tests performed on different patient groups</li>",
-                    "<li>This function cannot handle continuous test results directly for statistical comparison. For continuous diagnostic tests, please use the dedicated ROC (Receiver Operating Characteristic) analysis functions for comparing curves (e.g., DeLong's test).</li>",
-                    "<li>Small number of discordant pairs reduces statistical power and reliability</li>",
-                    "<li>P-values do not indicate clinical importance - consider effect sizes and practical implications</li>"
+                    jmvcore::.("<li>McNemar's test compares overall accuracy only - does not separately test sensitivity vs specificity differences</li>"),
+                    jmvcore::.("<li>Requires paired observations - cannot compare tests performed on different patient groups</li>"),
+                    jmvcore::.("<li>This function cannot handle continuous test results directly for statistical comparison. For continuous diagnostic tests, please use the dedicated ROC (Receiver Operating Characteristic) analysis functions for comparing curves (e.g., DeLong's test).</li>"),
+                    jmvcore::.("<li>Small number of discordant pairs reduces statistical power and reliability</li>"),
+                    jmvcore::.("<li>P-values do not indicate clinical importance - consider effect sizes and practical implications</li>")
                 )
                 html <- paste0(html, "</ul>")
 

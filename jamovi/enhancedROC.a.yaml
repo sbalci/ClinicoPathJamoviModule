@@ -4,7 +4,7 @@ title: Clinical ROC Analysis
 menuGroup: meddecide
 menuSubgroup: ROC
 menuSubtitle: "Clinical ROC analysis with diagnostic metrics and optimal cutoffs"
-version: '1.0.81'
+version: '1.0.83'
 jas: '1.2'
 
 description:
@@ -71,8 +71,15 @@ options:
             name: higher
           - title: 'Lower values indicate positive outcome'
             name: lower
-      default: auto
-      description: 'Direction of the predictor-outcome relationship'
+      default: higher
+      description: >
+        Direction of the predictor-outcome relationship. The default is "Higher values indicate
+        positive outcome" because it is a stated hypothesis rather than an estimate. "Auto" picks
+        the orientation that gives the larger AUC from the same data that supply the AUC, which
+        truncates the null distribution at 0.5 and biases every AUC upward (for n = 20 the AUC
+        expected under no association is about 0.59, not 0.50); it can also silently invert a
+        marker and report 0.825 where the un-inverted reading is 0.175. Use "Auto" only for
+        exploratory screening of markers whose direction is genuinely unknown, and say so.
 
     # Youden Index Options
     - name: youdenOptimization
@@ -139,17 +146,21 @@ options:
       default: bca
       description: 'Method for calculating bootstrap confidence intervals. BCa provides better coverage but requires more computation.'
 
-    - name: bootstrapCutoffCI
-      title: "Bootstrap CI for optimal cutoff"
-      type: Bool
-      default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate bootstrap confidence intervals for sensitivity and specificity at optimal cutoff'
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: bootstrapCutoffCI
+#       title: "Bootstrap CI for optimal cutoff"
+#       type: Bool
+#       default: false
+#       description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate bootstrap confidence intervals for sensitivity and specificity at optimal cutoff'
 
     - name: bootstrapPartialAUC
       title: "Bootstrap CI for partial AUC"
       type: Bool
       default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate bootstrap confidence intervals for partial AUC estimates'
+      description: >
+        Bootstrap confidence interval for the partial AUC, using the resample count, interval
+        type (BCa/percentile/basic) and stratification set above. The interval is for the raw
+        partial AUC on the chosen focus range, not for the McClish-normalised value.
 
     - name: stratifiedBootstrap
       title: "Stratified bootstrap"
@@ -507,31 +518,40 @@ options:
       title: "E/O ratio"
       type: Bool
       default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate Expected/Observed ratio for overall calibration assessment'
+      description: >
+        Expected/Observed ratio for overall calibration. Reported only when the predictor is
+        supplied as a probability in 0 to 1; when a logistic model has to be fitted here to get
+        probabilities the ratio is 1 by construction and the cell is left blank.
 
-    - name: namDagostino
-      title: "Nam-D'Agostino test"
-      type: Bool
-      default: false
-      description: "NOT YET IMPLEMENTED - selecting this produces no output. Perform Nam-D'Agostino calibration test (more powerful than H-L)"
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: namDagostino
+#       title: "Nam-D'Agostino test"
+#       type: Bool
+#       default: false
+#       description: "NOT YET IMPLEMENTED - selecting this produces no output. Perform Nam-D'Agostino calibration test (more powerful than H-L)"
 
-    - name: greenwoodNam
-      title: "Greenwood-Nam-D'Agostino test"
-      type: Bool
-      default: false
-      description: "NOT YET IMPLEMENTED - selecting this produces no output. Greenwood-Nam-D'Agostino test for survival model calibration"
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: greenwoodNam
+#       title: "Greenwood-Nam-D'Agostino test"
+#       type: Bool
+#       default: false
+#       description: "NOT YET IMPLEMENTED - selecting this produces no output. Greenwood-Nam-D'Agostino test for survival model calibration"
 
-    - name: calibrationBelt
-      title: "Calibration belt"
-      type: Bool
-      default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Display calibration belt showing uncertainty around calibration curve'
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: calibrationBelt
+#       title: "Calibration belt"
+#       type: Bool
+#       default: false
+#       description: 'NOT YET IMPLEMENTED - selecting this produces no output. Display calibration belt showing uncertainty around calibration curve'
 
     - name: calibrationDensity
       title: "Calibration density plot"
       type: Bool
       default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Show distribution of predicted probabilities as density overlay'
+      description: >
+        Overlay the distribution of predicted probabilities along the bottom of the calibration
+        plot, so a calibration point backed by two patients is not read like one backed by two
+        hundred. Skipped when there are fewer than 10 usable probabilities to smooth.
 
     # Multi-Class ROC Options
     - name: multiClassROC
@@ -560,7 +580,11 @@ options:
           - title: 'Weighted Average (by prevalence)'
             name: weighted
       default: macro
-      description: 'Method for averaging AUC across classes. Only the unweighted Macro Average is computed; Weighted Average (by prevalence) is NOT YET IMPLEMENTED - selecting it changes nothing, and the value reported stays the unweighted macro average of the One-vs-Rest AUCs (OVR strategy) or the Hand-Till pairwise AUC (OVO strategy)'
+      description: >
+        Method for averaging AUC across classes. Both averages are reported side by side for the
+        One-vs-Rest strategy: Macro weights every class equally, Weighted weights each class by
+        how many cases it contains. The One-vs-One (Hand-Till) strategy reports only its own
+        unweighted average over class pairs, which is what that statistic is defined as.
 
     # Time-Dependent ROC Options (NOT IMPLEMENTED - COMMENTED OUT)
     # - name: timeDependentROC
@@ -620,35 +644,44 @@ options:
     #   default: false
     #   description: 'Enable survival-specific ROC methods (requires time-to-event data)'
 
-    - name: harrellCIndex
-      title: "Harrell's C-index"
-      type: Bool
-      default: false
-      description: "NOT YET IMPLEMENTED - selecting this produces no output. Calculate Harrell's concordance index for time-to-event outcomes"
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+    # Triage 2026-09-21: on this analysis's BINARY, uncensored outcome Harrell's C is
+    # identical to the AUC already reported in the AUC Summary table, so implementing it
+    # would ship a relabelled duplicate. Left commented rather than implemented or deleted:
+    # it becomes real only if enhancedROC ever takes a time-to-event outcome.
+#     - name: harrellCIndex
+#       title: "Harrell's C-index"
+#       type: Bool
+#       default: false
+#       description: "NOT YET IMPLEMENTED - selecting this produces no output. Calculate Harrell's concordance index for time-to-event outcomes"
 
-    - name: unoCStatistic
-      title: "Uno's C-statistic"
-      type: Bool
-      default: false
-      description: "NOT YET IMPLEMENTED - selecting this produces no output. Calculate Uno's C-statistic (more robust to censoring)"
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: unoCStatistic
+#       title: "Uno's C-statistic"
+#       type: Bool
+#       default: false
+#       description: "NOT YET IMPLEMENTED - selecting this produces no output. Calculate Uno's C-statistic (more robust to censoring)"
 
-    - name: incidentDynamic
-      title: 'Incident/Dynamic AUC'
-      type: Bool
-      default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate incident/dynamic AUC (sensitivity for events at specific time)'
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: incidentDynamic
+#       title: 'Incident/Dynamic AUC'
+#       type: Bool
+#       default: false
+#       description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate incident/dynamic AUC (sensitivity for events at specific time)'
 
-    - name: cumulativeDynamic
-      title: 'Cumulative/Dynamic AUC'
-      type: Bool
-      default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate cumulative/dynamic AUC (sensitivity for events by specific time)'
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: cumulativeDynamic
+#       title: 'Cumulative/Dynamic AUC'
+#       type: Bool
+#       default: false
+#       description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate cumulative/dynamic AUC (sensitivity for events by specific time)'
 
-    - name: competingRisksConcordance
-      title: "Competing risks concordance"
-      type: Bool
-      default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate cause-specific concordance for competing risks'
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: competingRisksConcordance
+#       title: "Competing risks concordance"
+#       type: Bool
+#       default: false
+#       description: 'NOT YET IMPLEMENTED - selecting this produces no output. Calculate cause-specific concordance for competing risks'
 
     # Clinical Prediction Model Validation
     - name: internalValidation
@@ -670,41 +703,52 @@ options:
       default: bootstrap
       description: 'Method for internal validation'
 
-    - name: optimismCorrection
-      title: "Optimism correction"
-      type: Bool
-      default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Apply optimism correction to performance metrics'
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+    # Triage 2026-09-21: this duplicates the existing Internal Validation option with
+    # validationMethod = bootstrap, which already reports an optimism-corrected AUC under a
+    # clearer name. Left commented rather than wired as an alias, so there is one control
+    # for one analysis.
+#     - name: optimismCorrection
+#       title: "Optimism correction"
+#       type: Bool
+#       default: false
+#       description: 'NOT YET IMPLEMENTED - selecting this produces no output. Apply optimism correction to performance metrics'
 
-    - name: externalValidation
-      title: "External validation framework"
-      type: Bool
-      default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Enable external validation reporting framework'
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: externalValidation
+#       title: "External validation framework"
+#       type: Bool
+#       default: false
+#       description: 'NOT YET IMPLEMENTED - selecting this produces no output. Enable external validation reporting framework'
 
     - name: decisionImpactCurves
       title: "Decision impact curves"
       type: Bool
       default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Plot decision impact curves showing clinical consequences'
+      description: >
+        Plot the clinical impact curve: how many of 1000 tested patients would be called high
+        risk at each threshold probability, and how many of those actually have the event.
 
-    - name: netBenefitRegression
-      title: "Net benefit regression"
-      type: Bool
-      default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Model net benefit as function of threshold probabilities'
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: netBenefitRegression
+#       title: "Net benefit regression"
+#       type: Bool
+#       default: false
+#       description: 'NOT YET IMPLEMENTED - selecting this produces no output. Model net benefit as function of threshold probabilities'
 
-    - name: modelUpdating
-      title: "Model updating analysis"
-      type: Bool
-      default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Analyze need for model recalibration or updating'
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: modelUpdating
+#       title: "Model updating analysis"
+#       type: Bool
+#       default: false
+#       description: 'NOT YET IMPLEMENTED - selecting this produces no output. Analyze need for model recalibration or updating'
 
-    - name: transportability
-      title: "Transportability analysis"
-      type: Bool
-      default: false
-      description: 'NOT YET IMPLEMENTED - selecting this produces no output. Assess model transportability across populations'
+    # NOT IMPLEMENTED - commented out so jamovi does not offer a control that produces no output.
+#     - name: transportability
+#       title: "Transportability analysis"
+#       type: Bool
+#       default: false
+#       description: 'NOT YET IMPLEMENTED - selecting this produces no output. Assess model transportability across populations'
 
 # Advanced analyses removed - can be added in future versions if needed
     # - name: effectSizeAnalysis

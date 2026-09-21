@@ -126,17 +126,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     "</div>"
                 ))
 
-                # Control welcome message visibility programmatically
-                # Hide when all required options are set
-                has_gold <- !is.null(self$options$gold) && length(self$options$gold) > 0
-                has_newtest <- !is.null(self$options$newtest) && length(self$options$newtest) > 0
-                has_goldPositive <- !is.null(self$options$goldPositive) && length(self$options$goldPositive) > 0 && nchar(self$options$goldPositive) > 0
-                has_testPositive <- !is.null(self$options$testPositive) && length(self$options$testPositive) > 0 && nchar(self$options$testPositive) > 0
-
-                # Show welcome when NOT all options are set
-                # Logic: visible = !(gold && newtest && goldPositive && testPositive)
-                show_welcome <- !(has_gold && has_newtest && has_goldPositive && has_testPositive)
-                self$results$welcome$setVisible(show_welcome)
+                # No setVisible() here. `welcome` carries a declarative visible:
+                # expression in jamovi/decision.r.yaml, and an imperative call on every
+                # run silently overrode it -- editing the yaml expression had no effect,
+                # and the two spellings had already drifted apart. One mechanism only:
+                # the yaml binding.
             },
 
             # Initialize notice collection list
@@ -175,16 +169,23 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     return()
                 }
 
-                # Map notice types to colors and icons
+                # Map notice types to a tint, a border colour and a severity word
                 typeStyles <- list(
                     # Translucent rgba tints, not opaque pastels: they composite over
                     # either jamovi theme instead of painting a white block into the
                     # dark one. Same palette as the reference implementation in
                     # waterfall.b.R.
-                    ERROR = list(color = "#dc2626", bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", icon = ""),
-                    STRONG_WARNING = list(color = "#ea580c", bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", icon = ""),
-                    WARNING = list(color = "#ca8a04", bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", icon = ""),
-                    INFO = list(color = "#2563eb", bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", icon = "")
+                    #
+                    # `label` carries the severity in WORDS. The `color` field and the
+                    # coloured <strong> wrapper were removed (rightly -- an opaque hex is
+                    # not theme-safe) but nothing replaced the signal, leaving an ERROR
+                    # that explains why every table is empty looking like an INFO to any
+                    # reader, and identical to a STRONG_WARNING for a colour-blind one.
+                    # A word is theme-safe, translatable and legible at a glance.
+                    ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", label = .("Error")),
+                    STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", label = .("Important warning")),
+                    WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", label = .("Warning")),
+                    INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", label = .("Note"))
                 )
 
                 html <- "<div style='margin: 10px 0;'>"
@@ -196,8 +197,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         "<div style='background-color: ", style$bgcolor, "; ",
                         "border-left: 4px solid ", style$border, "; ",
                         "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                        "<strong style='color: ", style$color, ";'>",
-                        style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
+                        "<strong>",
+                        # No leading space: `style$icon, " "` with an empty icon emitted
+                        # one inside every <strong>.
+                        private$.safeHtmlOutput(style$label), ": ",
+                        private$.safeHtmlOutput(notice$title), "</strong><br>",
                         "<span style='color: inherit;'>", private$.safeHtmlOutput(notice$content), "</span>",
                         "</div>"
                     )
@@ -231,7 +235,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     private$.addNotice(
                         type = "ERROR",
                         title = .fmt(.("Insufficient data: {n} cases found"), n = nrow(self$data)),
-                        content = .("At least 4 cases are required for diagnostic test analysis. Each cell of the 2\u{00D7}2 table should have at least one observation.")
+                        content = .("At least 4 cases are required for diagnostic test analysis. Each cell of the 2\u00D72 table should have at least one observation.")
                     )
                     return(FALSE)
                 }
@@ -362,49 +366,6 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 return(TRUE)
             },
 
-            # Enhanced likelihood ratio validation with recovery
-            .validateLikelihoodRatios = function(lrp, lrn, sens, spec) {
-                issues <- character(0)
-
-                # Check LR+ validity
-                if (is.na(lrp) || !is.finite(lrp)) {
-                    if (is.na(sens) || is.na(spec)) {
-                        lrp <- NA_real_
-                    } else {
-                        lrp <- ifelse(spec == 0, Inf, sens / max(1 - spec, 0.001))
-                    }
-                    issues <- c(issues, .("LR+ recalculated due to invalid value"))
-                }
-                if (!is.na(lrp) && lrp <= 0) {
-                    if (!is.na(sens) && !is.na(spec)) {
-                        lrp <- max(0.01, sens / max(1 - spec, 0.001))
-                    } else {
-                        lrp <- NA_real_
-                    }
-                    issues <- c(issues, .("LR+ adjusted to positive value"))
-                }
-
-                # Check LR- validity
-                if (is.na(lrn) || !is.finite(lrn)) {
-                    if (is.na(sens) || is.na(spec)) {
-                        lrn <- NA_real_
-                    } else {
-                        lrn <- ifelse(sens == 1, 0, (1 - sens) / max(spec, 0.001))
-                    }
-                    issues <- c(issues, .("LR- recalculated due to invalid value"))
-                }
-                if (!is.na(lrn) && lrn < 0) {
-                    if (!is.na(sens) && !is.na(spec)) {
-                        lrn <- max(0.001, (1 - sens) / max(spec, 0.001))
-                    } else {
-                        lrn <- NA_real_
-                    }
-                    issues <- c(issues, .("LR- adjusted to positive value"))
-                }
-
-                list(lrp = lrp, lrn = lrn, issues = issues)
-            },
-
             # Prepare analysis data with efficient processing
             .prepareAnalysisData = function() {
                 # Get variable names efficiently
@@ -436,9 +397,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     subset_data$original_row_index <- seq_len(nrow(subset_data))
 
                 mydata <- jmvcore::naOmit(subset_data)
-                # Rows are dropped twice: here for missingness, and again below for
-                # levels that are neither the positive nor the negative level. The
-                # summary used to attribute both to "missing values".
+                # Rows are dropped three times: here for missingness, below for an
+                # explicit addNA() "missing" level, and later for levels that are neither
+                # the positive nor the negative one. .n_complete_cases is the baseline
+                # that .n_level_excluded is measured against, so it must be captured
+                # AFTER the explicit-NA drop (see below) -- capturing it here charged
+                # explicit-missing rows to level exclusion, and the Data Quality Summary
+                # then told the pathologist those cases had an unselected level while a
+                # WARNING notice on the same screen said they were explicitly missing.
                 private$.n_complete_cases <- nrow(mydata)
 
                 if (nrow(mydata) < nrow(self$data)) {
@@ -468,6 +434,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     mydata <- mydata[!explicit_na, , drop = FALSE]
                     mydata[[goldVar]] <- droplevels(mydata[[goldVar]])
                     mydata[[testVar]] <- droplevels(mydata[[testVar]])
+                    # Re-baseline: these rows are missingness, not level exclusion.
+                    private$.n_complete_cases <- nrow(mydata)
                 }
 
                 # Get actual levels for validation
@@ -971,6 +939,64 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         content = .("Statistical estimates may be unstable. Enable 95% confidence intervals: the exact (Clopper-Pearson) intervals shown there remain valid with small cells and will be wide enough to show it.")
                     )
                 }
+
+                # Total n says nothing about the denominators the two headline proportions
+                # actually rest on. table(test, gold) puts the gold-standard levels in the
+                # columns, positive first, so column 1 is the sensitivity denominator and
+                # column 2 the specificity denominator. An enriched series can pass the
+                # n >= 50 check and still estimate sensitivity from six patients.
+                disease_p <- sum(conf_table[, 1])
+                disease_n <- sum(conf_table[, 2])
+                if (disease_p < 10 || disease_n < 10) {
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = .fmt(.("Few cases in one arm: {dpos} disease-present and {dneg} disease-free"),
+                                     dpos = sprintf("%d", as.integer(disease_p)),
+                                     dneg = sprintf("%d", as.integer(disease_n))),
+                        content = .("Sensitivity is estimated from the disease-present cases only and specificity from the disease-free cases only, so these are the numbers that matter, not the total sample size. With fewer than ten cases in an arm one reclassified patient moves that proportion by more than ten percentage points. Report the 95% confidence intervals rather than the point estimates.")
+                    )
+                }
+            },
+
+            # Discrimination check.
+            #
+            # For a binary test the area under the ROC curve is (Sens + Spec) / 2, so
+            # Youden's index (Sens + Spec - 1) is 2*AUC - 1 and the usual AUC thresholds
+            # carry over directly. Nothing here used to fire at all: the only
+            # inverted-test language lived in .addClinicalBenchmarks() and
+            # .getDiagnosticInterpretation(), which render only into panels gated behind
+            # showClinicalInterpretation / showNaturalLanguage, both default false. A
+            # pathologist who had picked the wrong level as test-positive saw a fully
+            # populated table, a nomogram, and an empty Important Information pane.
+            .validateDiscrimination = function(sens, spec) {
+                if (is.na(sens) || is.na(spec)) return(invisible(NULL))
+
+                youden <- sens + spec - 1
+                auc <- (sens + spec) / 2
+
+                if (youden < 0) {
+                    private$.addNotice(
+                        type = "ERROR",
+                        title = .fmt(.("This test performs worse than chance (Youden's index {j}, equivalent AUC {auc})"),
+                                     j = sprintf("%.2f", youden), auc = sprintf("%.2f", auc)),
+                        content = .("Sensitivity plus specificity is below 1, so a positive result argues AGAINST disease and a negative result argues for it. The usual cause is that the level chosen under Test positive level is the wrong one; swapping it would give the mirror-image performance. Check the level selection before reading any number in these tables.")
+                    )
+                } else if (youden == 0) {
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = .("This test is uninformative (Youden's index 0.00, equivalent AUC 0.50)"),
+                        content = .("Sensitivity plus specificity is exactly 1, which is what a coin toss achieves. Both likelihood ratios equal 1 and the post-test probability equals the pre-test probability, whatever the result.")
+                    )
+                } else if (auc < 0.7) {
+                    private$.addNotice(
+                        type = "STRONG_WARNING",
+                        title = .fmt(.("Poor discrimination (Youden's index {j}, equivalent AUC {auc})"),
+                                     j = sprintf("%.2f", youden), auc = sprintf("%.2f", auc)),
+                        content = .("An equivalent area under the curve below 0.70 is conventionally read as poor discrimination. Confirm that the level chosen under Test positive level is the one you meant, then interpret the predictive values with care: at this level of discrimination they are driven mainly by prevalence.")
+                    )
+                }
+
+                invisible(NULL)
             },
 
             # Add clinical performance benchmarks for interpretation
@@ -1070,7 +1096,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Consolidated content generation for improved performance
             .generateAllContent = function(sens, spec, ppv, npv, lr_pos, lr_neg,
                                          prior_prob, total_pop, test_name, gold_name,
-                                         sens_ci = NULL, spec_ci = NULL) {
+                                         sens_ci = NULL, spec_ci = NULL,
+                                         continuity_used = FALSE) {
 
                 results <- list(
                     clinical_summary = "",
@@ -1179,6 +1206,23 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         spec = sprintf("%.1f%%", spec * 100)
                     )
                 })
+
+                # The likelihood ratio quoted in these two blocks comes from the
+                # Haldane-Anscombe corrected table whenever a cell is zero, while the
+                # sensitivity and specificity beside it come from the observed counts.
+                # The report block is explicitly labelled "Copy-Ready Clinical Report",
+                # so a sentence pairing "specificity 100.0%" with a finite likelihood
+                # ratio becomes a permanent claim in a manuscript unless the correction
+                # travels with it. Appended, not interpolated: feeding a translated
+                # sentence into a {placeholder} can hang jmvcore::format.
+                if (isTRUE(continuity_used)) {
+                    cc_sentence <- paste0(
+                        "<p style='margin: 0 15px 15px 15px; font-size: 13px; color: inherit;'><em>",
+                        private$.safeHtmlOutput(.("A cell of the 2x2 table was zero. Sensitivity, specificity and the predictive values above are computed from the observed counts; the likelihood ratios are computed from the Haldane-Anscombe corrected table (0.5 added to every cell), without which they would be undefined. Quote both facts together.")),
+                        "</em></p>")
+                    results$report_template <- paste0(results$report_template, cc_sentence)
+                    results$natural_summary <- paste0(results$natural_summary, cc_sentence)
+                }
 
                 return(results)
             }
@@ -1648,24 +1692,27 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Post-test probability calculations using Bayes' theorem.
                 #
-                # These MUST use the same proportions as the likelihood ratios and the
-                # Fagan nomogram. With a zero cell the LRs and the nomogram switch to the
-                # Haldane-Anscombe corrected table while these used the raw one, so the
-                # ratio table reported PPV 100.0% at a 10% prior beside a nomogram
-                # reporting 82.0% -- the same quantity, two numbers, one screen.
-                sens_bayes <- if (isTRUE(continuity_used)) TPc / (TPc + FNc) else Sens
-                spec_bayes <- if (isTRUE(continuity_used)) TNc / (TNc + FPc) else Spec
-
-                # PPV when using population prevalence
+                # WRONG BEFORE: with a zero cell these used the Haldane-Anscombe
+                # CORRECTED proportions while the Sensitivity/Specificity cells printed
+                # on the same row stayed on the OBSERVED counts, so a single row read
+                # "Sens 83.3% | Spec 100.0% | Prevalence 10.0% | PPV 77.3%" -- which
+                # cannot all be true at once, because a specificity of exactly 1 forces
+                # PPV = 1 at any prior.
+                #
+                # One row, one computation: sensitivity, specificity and the predictive
+                # values all come from the observed counts. The continuity correction is
+                # confined to LR+/LR-/DOR and to the Fagan nomogram (nomogrammer rejects
+                # a proportion of exactly 0 or 1 outright), and that is now stated in the
+                # notice and in the table note rather than left to be inferred.
                 PostTestProbDisease <- if (TestP > 0) {
-                    (PriorProb * sens_bayes) / ((PriorProb * sens_bayes) + ((1 - PriorProb) * (1 - spec_bayes)))
+                    (PriorProb * Sens) / ((PriorProb * Sens) + ((1 - PriorProb) * (1 - Spec)))
                 } else {
                     NA
                 }
 
                 # NPV when using population prevalence (1 - probability of disease given negative test)
                 PostTestProbHealthy <- if (TestN > 0) {
-                    ((1 - PriorProb) * spec_bayes) / (((1 - PriorProb) * spec_bayes) + (PriorProb * (1 - sens_bayes)))
+                    ((1 - PriorProb) * Spec) / (((1 - PriorProb) * Spec) + (PriorProb * (1 - Sens)))
                 } else {
                     NA
                 }
@@ -1700,27 +1747,21 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     }
                 }
 
-                # Enhanced likelihood ratio validation with recovery
-                lr_validation <- private$.validateLikelihoodRatios(LRP, LRN, Sens, Spec)
-                LRP <- lr_validation$lrp
-                LRN <- lr_validation$lrn
-                if (length(lr_validation$issues) > 0) {
-                    private$.addNotice(
-                        type = "INFO",
-                        title = .("Likelihood ratio adjustments applied"),
-                        # paste0: the issues are themselves translated strings, so a
-                        # {placeholder} could hang jmvcore::format, and a leading %s makes
-                        # an unorderable msgid in most target languages.
-                        content = paste0(paste(lr_validation$issues, collapse = "; "), ". ",
-                                         .("Results have been adjusted for statistical validity."))
-                    )
-                }
+                # .validateLikelihoodRatios() used to run here. It replaced a
+                # non-finite LR with a fabricated finite one (sens / max(1 - spec, 0.001),
+                # i.e. a silently invented number that looks exactly like a measured one)
+                # and announced it as an adjustment "for statistical validity". Every
+                # branch of it was also unreachable: a zero cell triggers the correction
+                # above, so 0 < sens_cc < 1 and 0 < spec_cc < 1 and both LRs are finite
+                # and positive; and the 2x2 structure check in .prepareAnalysisData()
+                # means Sens/Spec are never NA here. Deleted rather than left one guard
+                # relaxation away from printing an invented likelihood ratio.
 
                 if (continuity_used) {
                     private$.addNotice(
                         type = "INFO",
                         title = .("Continuity correction applied"),
-                        content = .("Zero cells detected; applied Haldane-Anscombe 0.5 continuity correction for LR/OR calculations (sensitivity/specificity still use observed counts).")
+                        content = .("A cell of the 2x2 table is zero. The positive and negative likelihood ratios, the diagnostic odds ratio and the Fagan nomogram are computed from the Haldane-Anscombe corrected table (0.5 added to every cell), because those quantities are undefined when a cell is empty. Sensitivity, specificity, accuracy and the predictive values are computed from the observed counts and are unchanged. The two sets therefore do not reconcile exactly: a finite likelihood ratio can sit beside a specificity of 100%.")
                     )
                 }
 
@@ -1770,8 +1811,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 PPV_report <- PPV
                 NPV_report <- NPV
                 if (isTRUE(pp)) {
-                    if (is.finite(PostTestProbDisease)) PPV_report <- PostTestProbDisease
-                    if (is.finite(PostTestProbHealthy)) NPV_report <- PostTestProbHealthy
+                    # NA, never the raw value, when Bayes' theorem is undefined here:
+                    # falling back to PPV printed a predictive value computed at the
+                    # SAMPLE prevalence inside a row whose Prevalence cell shows the
+                    # user's prior. jamovi renders NA as an empty cell; the note says why.
+                    PPV_report <- if (is.finite(PostTestProbDisease)) PostTestProbDisease else NA_real_
+                    NPV_report <- if (is.finite(PostTestProbHealthy)) PostTestProbHealthy else NA_real_
+                    if (!is.finite(PostTestProbDisease) || !is.finite(PostTestProbHealthy))
+                        ratioTable$setNote("prior_ppv_na", .("A predictive value is left blank where Bayes' theorem is undefined at this prior, which happens when no case can produce the corresponding test result in this sample."))
                     ratioTable$setNote("prior_ppv", .fmt(
                         .("Predictive values are computed by Bayes' theorem at the population prior of {prior} that you supplied, NOT at this sample's observed prevalence of {observed}. Sensitivity and specificity are unaffected by prevalence; PPV and NPV are not."),
                         prior = sprintf("%.1f%%", 100 * PriorProb),
@@ -1781,6 +1828,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         .("Predictive values are computed at this sample's observed prevalence of {prevalence}. If the sample was enriched or case-control, that prevalence is not the clinical one and these predictive values do not transfer - tick Known population prevalence under Population Prevalence Settings to obtain values for your setting."),
                         prevalence = sprintf("%.1f%%", 100 * PrevalenceD)))
                 }
+
+                # The likelihood ratios on this row come from a different table than the
+                # proportions beside them whenever a cell is zero. That has to be said on
+                # the table, not only in the notices pane: a reader who sees Spec 100.0%
+                # next to a finite LR+ will otherwise assume one of them is a typo.
+                if (isTRUE(continuity_used))
+                    ratioTable$setNote("continuity", .("A cell of the 2x2 table is zero. Sensitivity, specificity, accuracy and the predictive values are computed from the observed counts; the likelihood ratios are computed from the Haldane-Anscombe corrected table (0.5 added to every cell), because they are undefined when a cell is empty. A finite likelihood ratio beside a specificity of 100% reflects that correction, not the observed data."))
 
                 # Sample accuracy stays on the observed 2x2 even when a population
                 # prior is supplied -- it is a property of THIS sample's case mix, not a
@@ -1850,7 +1904,8 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                     content_results <- private$.generateAllContent(Sens, Spec, PPV_report, NPV_report, LRP, LRN,
                                                                   PriorProb, TotalPop, test_label, gold_label,
-                                                                  sens_ci = sens_ci, spec_ci = spec_ci)
+                                                                  sens_ci = sens_ci, spec_ci = spec_ci,
+                                                                  continuity_used = continuity_used)
                 }
 
                 # Populate content outputs based on user selections
@@ -1877,6 +1932,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # Detect misuse. Emits notices directly, so there is nothing to
                 # splice into an opt-in HTML panel any more.
                 private$.detectMisuse(conf_table, PrevalenceD, TotalPop)
+                private$.validateDiscrimination(Sens, Spec)
 
                 # Misclassified Cases Analysis and Output
                 tryCatch({
@@ -1891,6 +1947,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         private$.analyzeMisclassifiedCases(mydata, goldVariable, testVariable)
                     }
                 }, error = function(e) {
+                    # .analyzeMisclassifiedCases() calls private$.checkpoint() inside both
+                    # addRow loops, and .checkpoint() signals its restart by stop()ing with
+                    # a condition carrying code == "restart". Caught here it became a red
+                    # "Technical details: restarting" panel over half-filled tables, and the
+                    # restart never reached the engine, so the run also finished against the
+                    # options the user had just changed. Control flow, not a failure:
+                    # re-raise it before anything is rendered.
+                    if (identical(e$code, "restart")) stop(e)
                     private$.addNotice(
                         type = "ERROR",
                         title = .("Error in misclassified cases analysis"),
@@ -1925,8 +1989,22 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         self$results$epirTable_number$setRow(rowKey = key,
                             values = list(est = NA_real_, lower = NA_real_, upper = NA_real_))
 
+                    # With a population prior supplied, the main table's PPV/NPV are Bayes
+                    # values at that prior while these rows are exact binomial quantities
+                    # at the SAMPLE prevalence. Both are labelled "Positive predictive
+                    # value" and both render as percentages, so a reader will otherwise
+                    # quote the headline estimate with this interval - an interval that
+                    # does not contain it. setNote, not addFootnote: addFootnote only runs
+                    # when the off-by-default Explanatory footnotes box is ticked.
+                    if (isTRUE(self$options$pp))
+                        self$results$epirTable_ratio$setNote("pv_prevalence", .fmt(
+                            .("The predictive values in this table are computed at the prevalence observed in this sample ({observed}), not at the population prior of {prior} used for the predictive values in the main table above. The intervals here belong to these estimates, not to those. Sensitivity and specificity are unaffected by prevalence."),
+                            observed = sprintf("%.1f%%", 100 * PrevalenceD),
+                            prior = sprintf("%.1f%%", 100 * PriorProb)))
+
                     # epiR confidence intervals with error handling
                     epir_success <- FALSE
+                    epir_error_msg <- ""
                     epirresult_ratio <- NULL
                     epirresult_number <- NULL
                     epirresult_ratio_stats <- character(0)
@@ -1996,25 +2074,39 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                     epirresult_number <- epir_number
 
                                     epir_success <- nrow(epir_ratio) > 0 || nrow(epir_number) > 0
-                                } else {
-                                    # epiR package issue - silently skip, user won't see CI tables
-                                    # warning("epiR statistical detail did not include expected measures - confidence intervals not available")
                                 }
-                            } else {
-                                # epiR package issue - silently skip
-                                # warning("epiR detail is NULL or empty - confidence intervals not available")
+                                # No `else` branches any more: every way of not producing
+                                # intervals now falls through to the single notice below.
                             }
-                        } else {
-                            # epiR package issue - silently skip
-                            # warning("epiR returned NULL results - confidence intervals not available")
                         }
 
                     }, error = function(e) {
-                        # Handle epiR errors gracefully
-                        # epiR error - silently skip, CI table won't be populated
-                        # warning(paste("Error in epiR confidence interval calculation:", e$message))
-                        epir_success <- FALSE
+                        if (identical(e$code, "restart")) stop(e)
+                        # `<<-`, not `<-`: an assignment inside an error handler writes to
+                        # the HANDLER's frame, so the old `epir_success <- FALSE` here was
+                        # dead code and the message was thrown away with it.
+                        epir_success <<- FALSE
+                        epir_error_msg <<- conditionMessage(e)
                     })
+
+                    # The two CI tables are visible: (ci), so a failure left a pathologist
+                    # looking at nine statistic names with every numeric cell blank and
+                    # nothing on screen saying whether the intervals had failed or the data
+                    # was unsuitable. The three "silently skip" branches above said so in
+                    # comments; say it to the user instead.
+                    if (!epir_success) {
+                        private$.addNotice(
+                            type = "WARNING",
+                            title = .("95% confidence intervals could not be computed"),
+                            # paste0, not .fmt: an epiR message is arbitrary runtime text
+                            # and a stray brace in it would be re-scanned as a placeholder.
+                            content = if (nzchar(epir_error_msg))
+                                          paste0(.("The epiR package could not produce intervals for this table, so the two confidence-interval tables are empty."),
+                                                 " ", .("Reported reason"), ": ", epir_error_msg)
+                                      else
+                                          .("The epiR package returned no interval estimates for this table, so the two confidence-interval tables are empty. This usually means the 2x2 table is too sparse for the exact method.")
+                        )
+                    }
 
                     # Only populate tables if we have valid data
                     if (epir_success) {
@@ -2044,13 +2136,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
                                 add_ratio_note("pv.pos", "statsnames", .("Probability of disease given a positive test. Depends on prevalence, sensitivity and specificity."))
                                 add_ratio_note("pv.neg", "statsnames", .("Probability of being healthy given a negative test. Depends on prevalence, sensitivity and specificity."))
                                 add_ratio_note("se", "est", .("Confidence intervals for sensitivity, specificity, and predictive values are Clopper-Pearson exact intervals, computed as in epiR::epi.tests() with its default settings (method = \"exact\")."))
-                                if (isTRUE(self$options$pp)) {
-                                    # The main table reports PPV/NPV at the user's prior; these
-                                    # rows are exact binomial quantities from the observed table
-                                    # and cannot be moved to a different prevalence.
-                                    add_ratio_note("pv.pos", "est", .("This predictive value is computed at the observed sample prevalence, so it differs from the prior-adjusted value in the main table above."))
-                                    add_ratio_note("pv.neg", "est", .("This predictive value is computed at the observed sample prevalence, so it differs from the prior-adjusted value in the main table above."))
-                                }
+                                # The pv.pos/pv.neg prior-vs-sample disclosure used to live
+                                # here. It is now an unconditional setNote below: two
+                                # different numbers for "Positive predictive value" on one
+                                # screen cannot have their only explanation behind a
+                                # checkbox that is off by default (same reasoning as the
+                                # sample_accuracy note on ratioTable).
                             }
                         }
 
@@ -2206,13 +2297,20 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         ggplot2::geom_point(size = 3) +
                         ggplot2::scale_y_continuous(labels = function(x) sprintf("%.0f%%", x * 100),
                                                     limits = c(0, 1)) +
-                        ggplot2::scale_color_manual(values = c("Positive" = "#d32f2f", "Negative" = "#1976d2")) +
+                        # No scale_color_manual(): the hardcoded red/blue pair ignored the
+                        # user's global palette, and sitting before `+ ggtheme` it was dead
+                        # anyway. A jamovi ggtheme is a complete theme PLUS discrete
+                        # fill/colour scales built from jmvcore::colorPalette(n,
+                        # theme$palette), so letting it colour the two series is both the
+                        # global palette and less code.
                         ggplot2::labs(title = plot_title,
                                       subtitle = subtitle,
                                       y = .("Probability"),
                                       x = "",
                                       color = .("Test result")) +
-                        ggplot2::theme_minimal() +
+                        # theme_minimal() removed (replaced by ggtheme anyway); the tweaks
+                        # below must come AFTER ggtheme or they are silently dropped.
+                        ggtheme +
                         ggplot2::theme(legend.position = "bottom",
                                        plot.title = ggplot2::element_text(face = "bold"))
 
@@ -2231,7 +2329,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     Detail = TRUE,
                     NullLine = TRUE,
                     LabelSize = private$NOMOGRAM_LABEL_SIZE,
-                    Verbose = TRUE
+                    # FALSE: Verbose = TRUE cat()s a seven-line untranslated English
+                    # block to stdout on every render, resize and .omv reopen. The same
+                    # numbers are already drawn on the nomogram.
+                    Verbose = FALSE
                 )
 
                 print(plot1)

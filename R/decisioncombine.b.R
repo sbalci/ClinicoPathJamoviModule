@@ -18,6 +18,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             # .analyzeSinglePattern() calls and reported as ONE notice. Emitting per
             # pattern produced up to eleven near-identical banners in a 3-test analysis.
             .continuityPatterns = character(),
+            # Patterns whose LR+/LR- point estimate is determinate but whose delta-method
+            # SE collapses to exactly 0 (a structurally empty test margin), so the printed
+            # interval would be the point estimate repeated. Collected here and disclosed
+            # as ONE table note, for the same reason .continuityPatterns is.
+            .zeroSeIntervalPatterns = character(),
             # A results item that may not exist in the compiled .h.R yet. jmvcore raises
             # "'<name>' does not exist in this results element" rather than returning NULL,
             # so a bare self$results$combinationTableCIRatios would crash every run between
@@ -131,19 +136,30 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # fill reads correctly only against jamovi's light theme. Icons are \u{}
                 # escapes rather than HTML entities -- only the five structural entities
                 # survive Word/PDF export.
+                #
+                # Removing the per-severity title colour (the right theme-safety fix) left
+                # WARNING and STRONG_WARNING sharing an icon, a text colour and a near
+                # identical tint, with nothing naming the severity in words -- so "Extreme
+                # Disease Prevalence" was indistinguishable from a routine complete-case
+                # note. Prefix the title with a translated severity word: it survives every
+                # theme, Word/PDF export and greyscale printing, which no colour does.
                 type_styles <- list(
                     ERROR = list(
-                        color = "#dc2626", bgcolor = "rgba(220, 38, 38, 0.10)",
-                        border = "#fca5a5", icon = "\u{26D4}"),      # no-entry sign
+                        bgcolor = "rgba(220, 38, 38, 0.10)",
+                        border = "#fca5a5", icon = "\u{26D4}",       # no-entry sign
+                        label = .("Error")),
                     STRONG_WARNING = list(
-                        color = "#ea580c", bgcolor = "rgba(234, 88, 12, 0.10)",
-                        border = "#fdba74", icon = "\u{26A0}"),      # warning sign
+                        bgcolor = "rgba(234, 88, 12, 0.10)",
+                        border = "#fdba74", icon = "\u{26A0}",       # warning sign
+                        label = .("Serious warning")),
                     WARNING = list(
-                        color = "#ca8a04", bgcolor = "rgba(202, 138, 4, 0.12)",
-                        border = "#fde047", icon = "\u{26A0}"),
+                        bgcolor = "rgba(202, 138, 4, 0.12)",
+                        border = "#fde047", icon = "\u{26A0}",
+                        label = .("Warning")),
                     INFO = list(
-                        color = "#2563eb", bgcolor = "rgba(37, 99, 235, 0.08)",
-                        border = "#93c5fd", icon = "\u{2139}")       # info sign
+                        bgcolor = "rgba(37, 99, 235, 0.08)",
+                        border = "#93c5fd", icon = "\u{2139}",       # info sign
+                        label = .("Note"))
                 )
 
                 html <- '<div style="margin: 10px 0;">'
@@ -158,8 +174,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         "<div style='background-color: ", style$bgcolor, "; ",
                         "border-left: 4px solid ", style$border, "; ",
                         "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                        "<strong style='color: ", style$color, ";'>",
-                        style$icon, " ", jmvcore::htmlEscape(notice$title),
+                        "<strong>",
+                        style$icon, " ", jmvcore::htmlEscape(style$label), ": ",
+                        jmvcore::htmlEscape(notice$title),
                         "</strong><br>",
                         "<span style='color: inherit;'>",
                         jmvcore::htmlEscape(notice$content),
@@ -285,6 +302,23 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # ticks the ranking box and then hits a validation error was shown a blank row
                 # under the header "Highest-Ranked Rule". Same defect as crossTabTable; the
                 # populate method turns it back on, and both paths run on every .run().
+                # crossTabTable has exactly the same defect, and the comment above already
+                # named it: its setVisible() is reached only from .populateFrequencyTables(),
+                # which .run() calls only when showFrequency is TRUE. An imperative
+                # setVisible() permanently replaces the declarative visible: (showFrequency)
+                # binding, so the literal TRUE written on a previous run was never undone --
+                # unticking the box left an empty "Test Results Cross-Tabulation" header on
+                # screen, in the export and in the saved .omv. Reset here; the populate path
+                # turns it back on, and this method runs on every .run().
+                self$results$crossTabTable$setVisible(FALSE)
+                # A conditional note must not outlive the condition: without this, a run
+                # whose intervals are all estimable would still show the previous run's
+                # "interval left blank" footnote.
+                ratios_note_tbl <- private$.resultsItem("combinationTableCIRatios")
+                if (!is.null(ratios_note_tbl)) {
+                    ratios_note_tbl$setNote("nonestimable_ci", NULL)
+                }
+
                 self$results$recommendationTable$setVisible(FALSE)
                 self$results$recommendationTable$setRow(rowNo = 1, values = list(
                     pattern = NA_character_,
@@ -308,6 +342,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             .init = function() {
                 private$.noticeList <- list()
                 private$.continuityPatterns <- character()
+                private$.zeroSeIntervalPatterns <- character()
 
                 # Initialize fixed-structure tables for Test 1, 2, 3
                 for (i in seq_len(3L)) {
@@ -324,10 +359,18 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     statsTable$addRow(rowKey = "ppv", values = list(statistic = .("PPV")))
                     statsTable$addRow(rowKey = "npv", values = list(statistic = .("NPV")))
                 }
+
+                # The declarative visible: (showIndividual) on these Groups is inert (see
+                # .updateIndividualVisibility above), so without this call the three groups
+                # are visible between .init() and the first .run(): three empty "Test N
+                # Performance" panels of all-NA tables flash on screen, and are what the
+                # user looks at for the whole duration of a slow first run.
+                private$.updateIndividualVisibility()
             },
             .run = function() {
                 private$.noticeList <- list()
                 private$.continuityPatterns <- character()
+                private$.zeroSeIntervalPatterns <- character()
                 private$.clearDynamicResults()
                 private$.updateIndividualVisibility()
 
@@ -711,12 +754,12 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     one_class_message <- if (identical(
                         gold_levels_present[1], self$options$goldPositive)) {
                         .fmt(
-                            .('Every complete case has gold standard "{level}", so this sample contains no disease-absent cases. Specificity and NPV cannot be estimated and are reported as blank. Diagnostic accuracy assessment requires both diseased and non-diseased cases.'),
+                            .('Every complete case has gold standard "{level}", so this sample contains no disease-absent cases. Specificity and NPV cannot be estimated and are reported as blank, and so are LR+, LR- and the diagnostic odds ratio: each of those needs a specificity, and computing one from the continuity correction would report a number that reflects no patient. Diagnostic accuracy assessment requires both diseased and non-diseased cases.'),
                             level = gold_levels_present[1]
                         )
                     } else {
                         .fmt(
-                            .('Every complete case has gold standard "{level}", so this sample contains no disease-present cases. Sensitivity and PPV cannot be estimated and are reported as blank. Diagnostic accuracy assessment requires both diseased and non-diseased cases.'),
+                            .('Every complete case has gold standard "{level}", so this sample contains no disease-present cases. Sensitivity and PPV cannot be estimated and are reported as blank, and so are LR+, LR- and the diagnostic odds ratio: each of those needs a sensitivity, and computing one from the continuity correction would report a number that reflects no patient. Diagnostic accuracy assessment requires both diseased and non-diseased cases.'),
                             level = gold_levels_present[1]
                         )
                     }
@@ -1074,7 +1117,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 )
                 self$results$combinationTable$setNote(
                     "haldane",
-                    jmvcore::.("LR+, LR- and the diagnostic odds ratio are computed with a Haldane-Anscombe 0.5 continuity correction when a cell is zero, so they stay finite; sensitivity, specificity, PPV and NPV on the same row use the observed counts. The two therefore need not agree exactly at a zero cell. A pattern that no patient exhibits is left blank instead of corrected, because a likelihood ratio for a row containing no patients is undefined.")
+                    # The note must state the rule the code now applies: the correction is
+                    # also withheld when a DISEASE margin is structurally empty, and the
+                    # three ratios are blanked there rather than manufactured from the 0.5.
+                    jmvcore::.("LR+, LR- and the diagnostic odds ratio are computed with a Haldane-Anscombe 0.5 continuity correction when a cell is zero, so they stay finite; sensitivity, specificity, PPV and NPV on the same row use the observed counts. The two therefore need not agree exactly at a zero cell. The correction repairs a sampling zero, not a structural one, so it is withheld and the three ratios are left blank whenever a whole margin is empty: a pattern that no patient exhibits, and any sample in which every case is disease-present or every case is disease-absent.")
                 )
                 # sequentialtests warns about conditional independence in five places because
                 # it DERIVES combined performance from marginal sensitivity and specificity.
@@ -1124,6 +1170,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         row_type = .("Single test")
                     )
                     private$.emitContinuityNotice()
+                    private$.emitNonEstimableCINote()
                     private$.assessSparseCounts()
                     return()
                 }
@@ -1140,6 +1187,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     private$.addThreeTestStrategies(data_prep)
                 }
                 private$.emitContinuityNotice()
+                private$.emitNonEstimableCINote()
                 private$.assessSparseCounts()
             },
             .calcWilsonCI = function(x, n, conf.level = 0.95) {
@@ -1159,6 +1207,31 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 # Return bounds, constrained to [0, 1]
                 c(max(0, centre - half_width), min(1, centre + half_width))
+            },
+            .estimableSe = function(se) {
+                length(se) == 1L && is.finite(se) && se > 0
+            },
+            .emitNonEstimableCINote = function() {
+                # Always written, never left over: a conditional note set on a previous run
+                # would otherwise survive into a run where the condition no longer holds.
+                # setNote(key, NULL) removes it.
+                ratioTable <- private$.resultsItem("combinationTableCIRatios")
+                if (is.null(ratioTable)) {
+                    return()
+                }
+                patterns <- unique(private$.zeroSeIntervalPatterns)
+                if (length(patterns) == 0) {
+                    ratioTable$setNote("nonestimable_ci", NULL)
+                    return()
+                }
+                ratioTable$setNote(
+                    "nonestimable_ci",
+                    .fmt(
+                        jmvcore::.("The confidence interval is left blank for {n} row(s) ({patterns}) whose ratio is determinate but whose standard error is not estimable: the pattern has an empty test margin, so the delta-method standard error on the log scale is exactly zero and an interval computed from it would be zero-width. A zero-width interval would assert that the ratio is known exactly on a row carrying no information, so the point estimate is shown without one."),
+                        n = length(patterns),
+                        patterns = paste(patterns, collapse = ", ")
+                    )
+                )
             },
             .emitContinuityNotice = function() {
                 patterns <- unique(private$.continuityPatterns)
@@ -1274,7 +1347,16 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # fn + tn is then the whole sample. Adding 0.5 to every cell would manufacture
                 # a finite LR+ and diagnostic odds ratio out of a row containing no patients,
                 # and PPV is undefined there. Report those as blank rather than inventing them.
-                empty_margin <- (tp + fp) == 0 || (fn + tn) == 0
+                # The guard used to protect only the TEST margins. A DISEASE margin can be
+                # structurally empty too -- a one-class reference standard makes (fp + tn)
+                # or (tp + fn) zero in EVERY row -- and there the 0.5 correction fired and
+                # manufactured LR+ / LR- / DOR out of nothing: with tp=40, fp=0, fn=20, tn=0
+                # the row printed LR+ 1.33 [0.19, 9.50] and DOR 1.98, which are algebraically
+                # just 2 x sens_adj and tp_adj/fn_adj and reflect no non-diseased patient,
+                # because there are none. A continuity correction repairs a SAMPLING zero,
+                # not a structural one.
+                empty_margin <- (tp + fp) == 0 || (fn + tn) == 0 ||
+                    (tp + fn) == 0 || (fp + tn) == 0
                 use_continuity <- !empty_margin && any(c(tp, fp, fn, tn) == 0)
                 if (use_continuity) {
                     tp_adj <- tp + 0.5
@@ -1352,6 +1434,21 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     lr_neg <- NA_real_
                     dor <- NA_real_
                 }
+                # An empty DISEASE margin leaves sensitivity (or specificity) undefined, so
+                # all three ratios are undefined -- they cannot be read off a sample that
+                # contains only diseased or only non-diseased patients.
+                if ((tp + fn) == 0 || (fp + tn) == 0) {
+                    lr_pos <- NA_real_
+                    lr_neg <- NA_real_
+                    dor <- NA_real_
+                }
+                # Anything still non-finite is an undefined quantity, not a number: with
+                # tp = fp = fn = 0 and tn > 0, sens_adj was 0/0 and lr_neg reached addRow()
+                # as a literal "NaN" next to a correctly blank Sensitivity. jamovi renders
+                # NA as an empty cell but prints NaN and Inf verbatim.
+                if (!is.finite(lr_pos)) lr_pos <- NA_real_
+                if (!is.finite(lr_neg)) lr_neg <- NA_real_
+                if (!is.finite(dor)) dor <- NA_real_
 
                 # Add to main table
                 combTable <- self$results$combinationTable
@@ -1431,13 +1528,26 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 ))
 
                 # LR+ with CI (log-scale transformation for CI, using adjusted counts)
+                # .estimableSe(): the estimate being legitimate says nothing about the
+                # interval. On a structurally empty margin no correction is applied and the
+                # delta-method SE collapses to EXACTLY 0 -- tp=30, fp=20, fn=0, tn=0 gave
+                # se = sqrt(1/30 - 1/30 + 1/20 - 1/20) = 0 and printed LR+ 1.00 [1.00, 1.00],
+                # a claim of perfect precision on a row with no negative-test patients. A
+                # zero or non-finite SE means the interval is not estimable; blank it.
                 if (!is.na(lr_pos) && lr_pos > 0) {
                     log_lr_pos <- log(lr_pos)
                     # Standard SE for log(LR+) using adjusted counts
                     se_log_lr_pos <- sqrt((1 / tp_adj) - (1 / (tp_adj + fn_adj)) +
                         (1 / fp_adj) - (1 / (fp_adj + tn_adj)))
-                    lr_pos_lower <- exp(log_lr_pos - z_crit * se_log_lr_pos)
-                    lr_pos_upper <- exp(log_lr_pos + z_crit * se_log_lr_pos)
+                    if (private$.estimableSe(se_log_lr_pos)) {
+                        lr_pos_lower <- exp(log_lr_pos - z_crit * se_log_lr_pos)
+                        lr_pos_upper <- exp(log_lr_pos + z_crit * se_log_lr_pos)
+                    } else {
+                        lr_pos_lower <- NA_real_
+                        lr_pos_upper <- NA_real_
+                        private$.zeroSeIntervalPatterns <- c(
+                            private$.zeroSeIntervalPatterns, pattern_name)
+                    }
                 } else {
                     lr_pos_lower <- NA
                     lr_pos_upper <- NA
@@ -1456,8 +1566,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     # Standard SE for log(LR-) using adjusted counts
                     se_log_lr_neg <- sqrt((1 / fn_adj) - (1 / (tp_adj + fn_adj)) +
                         (1 / tn_adj) - (1 / (fp_adj + tn_adj)))
-                    lr_neg_lower <- exp(log_lr_neg - z_crit * se_log_lr_neg)
-                    lr_neg_upper <- exp(log_lr_neg + z_crit * se_log_lr_neg)
+                    if (private$.estimableSe(se_log_lr_neg)) {
+                        lr_neg_lower <- exp(log_lr_neg - z_crit * se_log_lr_neg)
+                        lr_neg_upper <- exp(log_lr_neg + z_crit * se_log_lr_neg)
+                    } else {
+                        lr_neg_lower <- NA_real_
+                        lr_neg_upper <- NA_real_
+                        private$.zeroSeIntervalPatterns <- c(
+                            private$.zeroSeIntervalPatterns, pattern_name)
+                    }
                 } else {
                     lr_neg_lower <- NA
                     lr_neg_upper <- NA
@@ -1475,8 +1592,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     log_dor <- log(dor)
                     # Approximate SE for log(DOR) using adjusted counts
                     se_log_dor <- sqrt(1 / tp_adj + 1 / fp_adj + 1 / fn_adj + 1 / tn_adj)
-                    dor_lower <- exp(log_dor - z_crit * se_log_dor)
-                    dor_upper <- exp(log_dor + z_crit * se_log_dor)
+                    if (private$.estimableSe(se_log_dor)) {
+                        dor_lower <- exp(log_dor - z_crit * se_log_dor)
+                        dor_upper <- exp(log_dor + z_crit * se_log_dor)
+                    } else {
+                        dor_lower <- NA_real_
+                        dor_upper <- NA_real_
+                        private$.zeroSeIntervalPatterns <- c(
+                            private$.zeroSeIntervalPatterns, pattern_name)
+                    }
                 } else {
                     dor_lower <- NA
                     dor_upper <- NA
@@ -1726,6 +1850,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # sample's group sizes, identical in every row, so the gate admits all rules
                 # or none. This is a guard against a degenerate sample, not a common path.
                 n_estimable <- nrow(candidates)
+                # Keep the PRE-filter frame: the "positive levels may be inverted" guard
+                # below asks whether every named strategy is at or below chance, and that
+                # question can only be answered before the youden > 0 cut removes them.
+                eligible <- candidates
                 candidates <- candidates[candidates$youden > 0, , drop = FALSE]
                 if (nrow(candidates) == 0) {
                     private$.addNotice(
@@ -1845,10 +1973,18 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # apply -- "call it positive when every test is negative" -- with nothing to
                 # flag it. The existing "no rule beats chance" notice names this failure mode
                 # but fires only when every J is exactly zero, so it cannot catch this.
+                #
+                # The second disjunct used to be evaluated on `candidates`, i.e. AFTER the
+                # youden > 0 cut -- so every surviving row had youden > 0 and
+                # all(youden <= 0) could only be TRUE on an empty selection, where
+                # any(named_rows) is FALSE. The condition could never fire, and exactly the
+                # case it was written for (a MIXED winner such as "+/-" with every named
+                # strategy at or below chance) passed silently. Ask it of `eligible`, the
+                # frame that still contains those rows.
                 winner_all_negative <- grepl("^-(/-)*$", best_pattern$pattern)
-                named_rows <- candidates$rowType %in% c(.("Strategy"), .("Single test"))
+                named_rows <- eligible$rowType %in% c(.("Strategy"), .("Single test"))
                 if (isTRUE(winner_all_negative) ||
-                    (any(named_rows) && all(candidates$youden[named_rows] <= 0))) {
+                    (any(named_rows) && all(eligible$youden[named_rows] <= 0))) {
                     private$.addNotice(
                         "STRONG_WARNING",
                         .("Positive Levels May Be Inverted"),
@@ -1984,7 +2120,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     ))
                 }
             },
-            .plotBarChart = function(image, ...) {
+            # ggtheme/theme added to the signature: they were being passed by jamovi
+            # into `...` and dropped, so this plot ignored the global theme/palette.
+            .plotBarChart = function(image, ggtheme = NULL, theme = NULL, ...) {
                 state <- image$state
                 if (!is.list(state) || !isTRUE(state$valid) || is.null(state$data)) {
                     return(FALSE)
@@ -2022,6 +2160,16 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
 
+                # A pattern row with an empty test margin legitimately carries NA for PPV or
+                # NPV. geom_bar() drops those rows itself and emits "Removed n rows
+                # containing missing values", which jamovi surfaces in Analysis Notes with no
+                # context and reads like a fault. Drop them here instead: the omission is
+                # correct and is already explained by the table footnote.
+                plot_data <- plot_data[is.finite(plot_data$Value), , drop = FALSE]
+                if (nrow(plot_data) == 0) {
+                    return(FALSE)
+                }
+
                 # Proportion metrics are bounded to [0, 1] and shown as percentages; unbounded
                 # metrics (Youden's J, LR+, LR-, DOR) must use a free auto scale, otherwise the
                 # fixed [0, 1] limit clips their bars to blank.
@@ -2039,8 +2187,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         # column name, which never passes through .() and so is untranslatable.
                         fill = .("Metric")
                     ) +
-                    ggplot2::theme_minimal() +
-                    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+                    # ggtheme LAST, then the tweak: a jamovi ggtheme is a complete theme plus
+                    # discrete fill/colour scales, so it replaces anything before it.
+                    # theme_minimal() was therefore dead and the rotation was being dropped.
+                    ggtheme +
+                    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1))
 
                 if (all_proportions) {
                     p <- p + ggplot2::scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1))
@@ -2049,7 +2200,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 print(p)
                 return(TRUE)
             },
-            .plotHeatmap = function(image, ...) {
+            # ggtheme/theme added to the signature: they were being passed by jamovi
+            # into `...` and dropped, so this plot ignored the global theme/palette.
+            .plotHeatmap = function(image, ggtheme = NULL, theme = NULL, ...) {
                 state <- image$state
                 if (!is.list(state) || !isTRUE(state$valid) || is.null(state$data)) {
                     return(FALSE)
@@ -2098,15 +2251,50 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 midpoint <- if (stat_filter %in% c("lrPos", "lrNeg", "dor")) 1
                             else if (identical(stat_filter, "youden")) 0
                             else 0.5
+
+                # The neutral pole and the "good" pole follow the jamovi theme; the warm pole
+                # stays hand-picked, because a diverging ramp needs a designed opposite and a
+                # categorical palette cannot supply one. Guarded: `theme` is absent in tests.
+                # theme defaults to NULL in the signature above, so these fallbacks are
+                # reachable. Without the default, `is.list(theme)` FORCED the missing promise
+                # and raised "argument \"theme\" is missing" instead of falling back -- the
+                # guard read as defensive but could only ever error.
+                #
+                # theme$color[[2]] is jmvcore::colorPalette(1, palette, "color") -- the first
+                # colour of the user's CATEGORICAL palette -- and a categorical palette has
+                # no designed opposite. Verified: it is #E63032 under Set1, #F09571 under
+                # RdBu, #FC9869 under Spectral and #F8837B under hadley, all warm, so the
+                # "good" pole collapsed onto the hardcoded warm-pink "bad" pole and a
+                # sensitivity of 0.05 read as the same colour family as 0.95; under
+                # iheartspss theme$color is c("#333333", "#333333"), making every
+                # high-performing tile near-black. A diverging scale needs a designed pair,
+                # so both poles are now fixed (the red/blue ends of ColorBrewer RdBu) and
+                # only the NEUTRAL midpoint follows the theme, where the theme's own panel
+                # fill is the right answer and is always light.
+                low_col  <- "#ef8a8a"
+                mid_col  <- if (is.list(theme) && length(theme$fill) > 0) theme$fill[[1]] else "#f7f7f7"
+                high_col <- "#74add1"
+
+                # The tile labels were drawn in a hardcoded near-black whatever was under
+                # them. Reproduce the fill scale_fill_gradient2() will build and pick a light
+                # or dark label per tile from its relative luminance (Rec. 709), so the value
+                # stays readable on any pole, including a future dark render surface.
+                label_values <- plot_data$Value
+                estimable <- is.finite(label_values)
+                tile_fill <- rep("#bebebe", length(label_values))   # ggplot's na.value grey
+                if (any(estimable)) {
+                    tile_fill[estimable] <- scales::div_gradient_pal(
+                        low_col, mid_col, high_col
+                    )(scales::rescale_mid(label_values[estimable], mid = midpoint))
+                }
+                luminance <- colSums(
+                    grDevices::col2rgb(tile_fill) / 255 * c(0.2126, 0.7152, 0.0722))
+                plot_data$LabelColour <- ifelse(luminance < 0.5, "#f5f5f5", "#1a1a1a")
+
                 p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Metric, y = pattern, fill = Value)) +
                     ggplot2::geom_tile() +
                     ggplot2::geom_text(
-                        ggplot2::aes(label = sprintf("%.2f", Value)),
-                        color = "#1a1a1a"
-                    ) +
-                    ggplot2::scale_fill_gradient2(
-                        low = "#ef8a8a", mid = "#f7f7f7", high = "#74add1",
-                        midpoint = midpoint
+                        ggplot2::aes(label = sprintf("%.2f", Value), color = LabelColour)
                     ) +
                     ggplot2::labs(
                         title = .("Performance Heatmap"),
@@ -2114,12 +2302,24 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         y = .("Pattern"),
                         fill = .("Value")
                     ) +
-                    ggplot2::theme_minimal()
+                    # theme_minimal() replaced by ggtheme. The continuous fill scale must come
+                    # AFTER ggtheme: ggtheme carries a DISCRETE fill scale that would replace
+                    # this one and then fail with "continuous value supplied to discrete scale".
+                    ggtheme +
+                    ggplot2::scale_fill_gradient2(
+                        low = low_col, mid = mid_col, high = high_col,
+                        midpoint = midpoint
+                    ) +
+                    # After ggtheme for the same reason as the fill scale: ggtheme carries a
+                    # discrete colour scale that would otherwise replace this one.
+                    ggplot2::scale_color_identity()
 
                 print(p)
                 return(TRUE)
             },
-            .plotForest = function(image, ...) {
+            # ggtheme/theme added to the signature: they were being passed by jamovi
+            # into `...` and dropped, so this plot ignored the global theme/palette.
+            .plotForest = function(image, ggtheme = NULL, theme = NULL, ...) {
                 state <- image$state
                 if (is.null(state)) {
                     return(FALSE)
@@ -2179,16 +2379,20 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         y = .("Pattern"),
                         colour = .("Statistic")
                     ) +
-                    ggplot2::theme_minimal() +
                     # Sensitivity lives on 0-1 while a diagnostic odds ratio can reach the
                     # hundreds. On the shared x-axis that facet_wrap() defaults to, every
                     # proportion facet collapsed into a sliver at the left edge.
-                    ggplot2::facet_wrap(~statistic, ncol = 1, scales = "free_x")
+                    ggplot2::facet_wrap(~statistic, ncol = 1, scales = "free_x") +
+                    # theme_minimal() replaced by ggtheme, which also supplies the discrete
+                    # colour scale from the user's global palette.
+                    ggtheme
 
                 print(p)
                 return(TRUE)
             },
-            .plotDecisionTree = function(image, ...) {
+            # ggtheme/theme added to the signature: they were being passed by jamovi
+            # into `...` and dropped, so this plot ignored the global theme/palette.
+            .plotDecisionTree = function(image, ggtheme = NULL, theme = NULL, ...) {
                 state <- image$state
                 if (!is.list(state) || !isTRUE(state$valid) || is.null(state$data)) {
                     return(FALSE)
@@ -2208,7 +2412,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                         size = .("Youden's J"),
                         colour = .("Pattern")
                     ) +
-                    ggplot2::theme_minimal()
+                    # theme_minimal() replaced by ggtheme (global theme + palette). The
+                    # continuous x/y scales above are position scales and survive it.
+                    ggtheme
 
                 print(p)
                 return(TRUE)

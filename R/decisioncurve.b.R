@@ -20,7 +20,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         .treatAllNB = NULL,
         .plotThinning = NULL,
         .plotData = NULL,
-        .clinicalImpactData = NULL,
+        # .clinicalImpactData removed: declared and reset but never assigned or read.
         .analysisData = NULL,
         .analysisOutcomes = NULL,
         .outcomePositive = NULL,
@@ -69,17 +69,12 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                  outcomePositive  = private$.outcomePositive)
         },
 
-        # ColorBrewer "Set1" has exactly nine colours; ggplot2 assigns NA past the ninth and
-        # the extra curves vanish with only a console warning, which jamovi never shows. Nine
-        # strategies is reachable: models plus Treat All, Treat None and a clinical rule. Fall
-        # back to viridis, which is generated for any n and is colour-blind safe.
-        .modelColourScale = function(plot_data) {
-            n <- length(unique(plot_data$model))
-            if (n <= 9)
-                ggplot2::scale_color_brewer(palette = "Set1")
-            else
-                ggplot2::scale_color_viridis_d(option = "turbo", end = 0.92)
-        },
+        # .modelColourScale() removed: it hardcoded ColorBrewer "Set1" (with a viridis
+        # fallback past nine strategies) and, being added BEFORE `+ ggtheme`, was overwritten
+        # anyway -- a jamovi ggtheme is a complete theme PLUS discrete fill/colour scales.
+        # Those scales call jmvcore::colorPalette(n, theme$palette), which ramps to any n, so
+        # simply letting ggtheme supply the colour scale both follows the user's global
+        # palette and keeps the >9-strategy guard the helper existed for.
 
         .plotImageNames = function() {
             c("dcaPlot", "clinicalImpactPlot", "interventionsAvoidedPlot",
@@ -143,6 +138,18 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # clinician reads as "not computable") beside the populated ones.
             models <- private$.parseModelNames()
             if (is.null(models) || length(models) == 0) return(invisible(NULL))
+            # ...and the clinical rule, which is a strategy column like any model.
+            # .run() keys the columns off names(private$.dcaResults), which gains the rule
+            # label after the model names, so scaffolding only the models here made the
+            # table visibly grow a column when the run finished -- the exact flicker this
+            # .init() scaffolding exists to remove. .ruleStrategyLabel() is the single
+            # source of that label, shared with .run(), so the two cannot disagree.
+            rule_label <- private$.ruleStrategyLabel()
+            # A label that collides with a model name is rejected by .run() with an ERROR,
+            # so do not scaffold a column that will never be filled.
+            if (!is.null(rule_label) &&
+                !tolower(rule_label) %in% tolower(c(models, "Treat All", "Treat None")))
+                models <- c(models, rule_label)
             tbl <- self$results$resultsTable
             cols <- private$.modelColumnNames(models)
             existing <- vapply(tbl$columns, function(c) c$name, character(1))
@@ -152,6 +159,20 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                               type = "number", format = "zto")
             }
             invisible(NULL)
+        },
+
+        # The label the clinical decision rule appears under, as a strategy, in the results
+        # table columns and in .dcaResults. Returns NULL when there is no rule to label.
+        # Both .init() (which scaffolds the columns) and .run() (which keys them off
+        # names(.dcaResults)) call this, so the two can never resolve a different label.
+        .ruleStrategyLabel = function() {
+            if (!isTRUE(self$options$clinicalDecisionRule)) return(NULL)
+            if (is.null(self$options$decisionRuleVar)) return(NULL)
+            lbl <- self$options$decisionRuleLabel
+            if (!is.null(lbl) && nzchar(trimws(lbl))) return(trimws(lbl))
+            rp <- self$options$decisionRulePositive
+            if (is.null(rp) || length(rp) != 1 || is.na(rp)) return(NULL)
+            .fmt(.('Clinical Rule ({level})'), level = rp)
         },
 
         # Which interval the plot draws. NULL-safe: the option is absent from the compiled
@@ -196,11 +217,23 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         # Add a notice to the collection
         .addNotice = function(type, title, content) {
+          # Drop an exact repeat. .parseSelectedThresholds() raises its warnings and is
+          # called from five separate .run()-path methods, so one unparseable entry in
+          # "Thresholds for table" printed the identical warning five times over and pushed
+          # the genuine clinical warnings above it off the visible area. Two notices equal
+          # in type, title AND content carry no information the first one did not.
+          for (existing in private$.noticeList) {
+            if (identical(existing$type, type) &&
+                identical(existing$title, title) &&
+                identical(existing$content, content))
+              return(invisible(NULL))
+          }
           private$.noticeList[[length(private$.noticeList) + 1]] <- list(
             type = type,
             title = title,
             content = content
           )
+          invisible(NULL)
         },
 
         # Render collected notices as HTML
@@ -211,10 +244,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
           # Map notice types to colors and icons
           typeStyles <- list(
-            ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
-            STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
-            WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
-            INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
+            ERROR = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", icon = ""),
+            STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", icon = ""),
+            WARNING = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", icon = ""),
+            INFO = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", icon = "")
           )
 
           html <- "<div style='margin: 10px 0;'>"
@@ -226,7 +259,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
               "<div style='background-color: ", style$bgcolor, "; ",
               "border-left: 4px solid ", style$border, "; ",
               "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-              "<strong style='color: ", style$color, ";'>",
+              "<strong>",
               style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
               "<span style='color: inherit;'>", private$.safeHtmlOutput(notice$content), "</span>",
               "</div>"
@@ -1003,7 +1036,6 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             private$.treatAllNB <- NULL
             private$.analysisData <- NULL
             private$.analysisOutcomes <- NULL
-            private$.clinicalImpactData <- NULL
 
             # ...and the IMAGE STATE with them. Clearing only the private fields is not enough
             # now that the renderers rehydrate from state: jamovi persists image state across
@@ -1138,6 +1170,22 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (self$options$clinicalDecisionRule && !is.null(self$options$decisionRuleVar)) {
                 rule_var <- self$options$decisionRuleVar
                 rule_positive <- self$options$decisionRulePositive
+            } else if (self$options$clinicalDecisionRule) {
+                # The feature was switched on with no variable to apply it to. Without this
+                # the rule branch is simply skipped and the run ends with the green
+                # "Analysis Complete" notice, so the clinician believes the rule is in the
+                # comparison when there is no rule curve, no rule band and no rule row.
+                private$.addNotice(
+                    type = "ERROR",
+                    title = .("Clinical Decision Rule Variable Required"),
+                    content = paste(
+                        .('"Clinical decision rule" is enabled but no rule variable has been selected.'),
+                        .('Drop a binary variable into "Clinical Decision Rule (binary)" and choose its positive level, or switch the option off.'),
+                        .('Nothing about the clinical rule is shown until then.')
+                    )
+                )
+                private$.renderNotices()
+                return()
             }
 
             # Get complete cases
@@ -1296,11 +1344,9 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     return()
                 }
 
-                rule_label <- self$options$decisionRuleLabel
-                if (is.null(rule_label) || !nzchar(trimws(rule_label))) {
-                    rule_label <- .fmt(.('Clinical Rule ({level})'), level = rule_positive)
-                }
-                rule_label <- trimws(rule_label)
+                # Same resolution as .init() uses to scaffold the table columns, by
+                # construction: one helper, two callers (see .ruleStrategyLabel).
+                rule_label <- private$.ruleStrategyLabel()
 
                 if (tolower(rule_label) %in% tolower(c(model_names, "Treat All", "Treat None"))) {
                     private$.addNotice(
@@ -1404,19 +1450,15 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     predictions, outcomes, thresholds, outcome_positive
                 )
                 
-                # Detailed results for specific calculations (fallback to individual calculations)
-                detailed_results <- list()
-                for (j in seq_along(thresholds)) {
-                    thresh <- thresholds[j]
-                    detailed_results[[j]] <- private$.calculateNetBenefit(
-                        predictions, outcomes, thresh, outcome_positive
-                    )
-                }
-
-                # Store results
+                # `detailed_results` removed. It repeated the whole vectorized sweep above
+                # one threshold at a time -- a second full O(n_thresholds x n) pass per model
+                # -- and nothing ever read it: it was only carried into .dcaResults, and from
+                # there into four of the five images' state, where it was the largest single
+                # item written to the .omv (~0.6 MB of the 1.2 MB state on a 5,000-row,
+                # 4-model, 99-threshold analysis). Tables that need a value at one exact
+                # threshold call .calculateModelAtThreshold(), which computes it on demand.
                 dca_results[[model_name]] <- list(
                     net_benefits = net_benefits,
-                    detailed_results = detailed_results,
                     thresholds = thresholds,
                     predictions = predictions
                 )
@@ -1481,16 +1523,14 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # Net benefit across thresholds
                 rule_net <- private$.calculateNetBenefitsVectorized(rule_pred, outcomes, thresholds, outcome_positive)
 
-                rule_detailed <- lapply(thresholds, function(thresh) {
-                    private$.calculateNetBenefit(rule_pred, outcomes, thresh, outcome_positive)
-                })
-
+                # `detailed_results`/`is_rule` removed: both were write-only (see the model
+                # loop above). `is_rule` in particular was present only on the rule entry and
+                # absent -- not FALSE -- on every model, so any future reader of it would have
+                # been wrong about every model.
                 dca_results[[rule_label]] <- list(
                     net_benefits = rule_net,
-                    detailed_results = rule_detailed,
                     thresholds = thresholds,
-                    predictions = rule_pred,
-                    is_rule = TRUE
+                    predictions = rule_pred
                 )
 
                 rule_plot_data <- data.frame(
@@ -1548,6 +1588,18 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             self$results$procedureNotes$setContent(procedure_notes)
 
+            # Warn once per run about "Thresholds for table" rows outside the analysed
+            # range. This used to be called only from .populateResultsTable(), so with the
+            # results table switched off the four other tables that consume the same list
+            # (cost-benefit, decision consequences, resource utilization, clinical impact)
+            # still showed out-of-range rows while the explanation written for exactly that
+            # case was never displayed.
+            if (self$options$showTable || self$options$costBenefitAnalysis ||
+                self$options$showDecisionConsequences || self$options$resourceUtilization ||
+                self$options$calculateClinicalImpact) {
+                private$.warnOnThresholdsOutsideRange(private$.parseSelectedThresholds())
+            }
+
             # Populate results table
             if (self$options$showTable) {
                 private$.populateResultsTable()
@@ -1568,9 +1620,23 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 private$.populateWeightedAUCTable()
             }
 
-            # Model comparison if requested
-            if (self$options$compareModels && length(model_vars) > 1) {
-                private$.performModelComparison()
+            # Model comparison if requested.
+            # The .r.yaml gates visibility on the checkbox alone, so with a single model the
+            # table is on screen but never populated. An empty jamovi table reads as "the
+            # computation failed", so say what is actually missing.
+            if (self$options$compareModels) {
+                if (length(model_vars) > 1) {
+                    private$.performModelComparison()
+                } else {
+                    private$.addNotice(
+                        type = "INFO",
+                        title = .("Model comparison needs two models"),
+                        content = paste(
+                            .('"Statistical comparison" is enabled but only one prediction model is selected, so the Exploratory Model Comparison table stays empty.'),
+                            .('Add a second model to compare.')
+                        )
+                    )
+                }
             }
             
             # Enhanced Analysis Options
@@ -1590,9 +1656,20 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 private$.populateResourceUtilizationTable()
             }
             
-            # Enhanced Model Comparison
-            if (self$options$multiModelComparison && length(model_vars) > 1) {
-                private$.performEnhancedModelComparison()
+            # Enhanced Model Comparison. Same visibility mismatch as compareModels above.
+            if (self$options$multiModelComparison) {
+                if (length(model_vars) > 1) {
+                    private$.performEnhancedModelComparison()
+                } else {
+                    private$.addNotice(
+                        type = "INFO",
+                        title = .("Pairwise comparison needs two models"),
+                        content = paste(
+                            .('"Enhanced pairwise comparison" is enabled but only one prediction model is selected, so the Exploratory Pairwise Model Comparison table stays empty.'),
+                            .('Add a second model to compare.')
+                        )
+                    )
+                }
             }
 
             # Generate clinical interpretation
@@ -1639,7 +1716,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
         .populateResultsTable = function() {
             selected_thresholds <- private$.parseSelectedThresholds()
-            private$.warnOnThresholdsOutsideRange(selected_thresholds)
+            # .warnOnThresholdsOutsideRange() moved to .run(); see the call there.
             results_table <- self$results$resultsTable
 
             # Clear existing rows
@@ -1875,6 +1952,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             pairs <- combn(model_names, 2, simplify = FALSE)
             rows <- list()
             capped <- FALSE
+            skipped <- character(0)
 
             for (pair in pairs) {
                 m1 <- pair[1]
@@ -1883,7 +1961,14 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 idx1 <- which(model_vars_map == m1)
                 idx2 <- which(model_vars_map == m2)
 
-                if (length(idx1) == 0 || length(idx2) == 0) next
+                # Derived strategies (the clinical decision rule) have no input column to
+                # resample. .performModelComparison() already records this omission; this
+                # table used to drop the pair silently, so the two panels on the same screen
+                # disagreed about which comparisons had been run.
+                if (length(idx1) == 0 || length(idx2) == 0) {
+                    skipped <- c(skipped, .fmt(.('{a} vs {b}'), a = m1, b = m2))
+                    next
+                }
                 var1 <- self$options$models[idx1]
                 var2 <- self$options$models[idx2]
                 pred1 <- analysis_data[[var1]]
@@ -1914,6 +1999,18 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     nb_difference_mean = mean_diff,
                     nb_difference_median = median_diff,
                     p_value = res_boot$nb$p_value
+                )
+            }
+
+            if (length(skipped) > 0) {
+                private$.addNotice(
+                    type = "INFO",
+                    title = .("Comparisons not tested"),
+                    content = paste(
+                        .fmt(.('{pairs} could not be bootstrap-tested because at least one side is a derived strategy rather than a predictor column, so it has no values to resample.'),
+                             pairs = paste(skipped, collapse = "; ")),
+                        .("Its curve is still shown in the plot.")
+                    )
                 )
             }
 
@@ -2363,7 +2460,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             item <- function(label, text) paste0("<li><strong>", label, ":</strong> ", text, "</li>")
 
             footnotes <- paste0(footnotes, item(.("Net Benefit Formula"),
-                .("NB = (TP/n) - (FP/n) \u{00D7} pt/(1-pt), where pt is the threshold probability.")))
+                .("NB = (TP/n) - (FP/n) \u00D7 pt/(1-pt), where pt is the threshold probability.")))
             footnotes <- paste0(footnotes, item(.("Reference Strategies"),
                 .("'Treat All' assumes all patients receive the intervention; 'Treat None' assumes no intervention.")))
             footnotes <- paste0(footnotes, item(.("Threshold Probability"),
@@ -2460,11 +2557,20 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 .fmt(.('Curve drawn from {to} of {from} computed points for rendering speed; tables and statistics use all of them.'),
                      to = private$.plotThinning$to, from = private$.plotThinning$from)
 
+            # Are the reference strategies redrawn dashed further down? If so they must be
+            # left OUT of the base layer: it used to draw every row solid and the dashed
+            # layer was then painted on top of identical solid lines in the same colour, so
+            # in the default plotStyle the dashed convention never actually took effect.
+            dash_references <- self$options$plotStyle %in% c("standard", "detailed")
+            is_reference <- plot_data$model %in% c("Treat All", "Treat None")
+
             # Create base plot with optimized aesthetics
             p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = threshold, y = net_benefit, color = model)) +
                 # linewidth, not size: `size` for lines was deprecated in ggplot2 3.4.0 and emits a
                 # deprecation warning into jamovi's Analysis Notes on every render.
-                ggplot2::geom_line(linewidth = if(n_models > max_models_threshold) 0.8 else 1) +
+                ggplot2::geom_line(
+                    data = if (dash_references) plot_data[!is_reference, , drop = FALSE] else plot_data,
+                    linewidth = if(n_models > max_models_threshold) 0.8 else 1) +
                 ggplot2::labs(
                     title = .("Decision Curve Analysis"),
                     x = .("Threshold Probability"),
@@ -2488,19 +2594,29 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 if (!hi_col %in% names(model_data)) model_data[[hi_col]] <- NA_real_
                 model_data <- model_data[!is.na(model_data[[lo_col]]) & !is.na(model_data[[hi_col]]), ]
                 if (nrow(model_data) > 0) {
+                    # The band description moves to the caption and the fill legend is
+                    # dropped. geom_ribbon's fill = model built a SECOND legend listing the
+                    # same model names as the colour legend; giving it its own title through
+                    # labs(fill=) is precisely what stopped ggplot2 merging the two, and the
+                    # pair disagreed (only the colour one lists Treat All/Treat None). On a
+                    # four-strategy plot the legend strip measured 3.38 cm wide with both and
+                    # 2.74 cm with this fix. The caption names the band ACTUALLY drawn -
+                    # `band` is the same value that chose lo_col/hi_col above.
+                    band_text <- if (band == "simultaneous")
+                        .fmt(.('Shaded: {level}% simultaneous band'), level = sprintf("%.0f", self$options$ciLevel * 100))
+                    else
+                        .fmt(.('Shaded: {level}% pointwise CI'), level = sprintf("%.0f", self$options$ciLevel * 100))
                     p <- p + ggplot2::geom_ribbon(
                         data = model_data,
                         ggplot2::aes(ymin = .data[[lo_col]], ymax = .data[[hi_col]], fill = model),
                         alpha = 0.2, color = NA
                     ) +
-                    ggplot2::labs(fill = if (band == "simultaneous")
-                        .fmt(.('{level}% simultaneous band'), level = sprintf("%.0f", self$options$ciLevel * 100))
-                    else
-                        .fmt(.('{level}% pointwise CI'), level = sprintf("%.0f", self$options$ciLevel * 100)),
-                        # the bands are bootstrap intervals: name the seed that drew them
-                        caption = paste(c(caption, jmvcore::format(.("Random seed: {seed}"),
+                    ggplot2::guides(fill = "none") +
+                    # the bands are bootstrap intervals: name the seed that drew them
+                    ggplot2::labs(caption = paste(c(caption, band_text,
+                        jmvcore::format(.("Random seed: {seed}"),
                             seed = if (is.null(self$options$seed) || is.na(self$options$seed)) 42 else self$options$seed)),
-                            collapse = " "))
+                        collapse = " "))
                 }
             }
 
@@ -2532,9 +2648,10 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
 
             # Style reference lines differently
-            if (self$options$plotStyle == "standard" || self$options$plotStyle == "detailed") {
-                # Make treat all/none lines dashed
-                treat_lines <- plot_data[plot_data$model %in% c("Treat All", "Treat None"), ]
+            if (dash_references) {
+                # Make treat all/none lines dashed. These rows were excluded from the base
+                # layer above, so this REPLACES them rather than overprinting them.
+                treat_lines <- plot_data[is_reference, , drop = FALSE]
                 if (nrow(treat_lines) > 0) {
                     p <- p + ggplot2::geom_line(
                         data = treat_lines,
@@ -2670,9 +2787,16 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     fill = .("Outcome Type")
                 ) +
                 ggplot2::scale_x_discrete(labels = function(x) paste0(as.numeric(x) * 100, "%")) +
-                ggplot2::scale_fill_manual(values = fill_values) +
+                ggtheme +
+                # AFTER ggtheme: a jamovi ggtheme is a COMPLETE theme and replaces every
+                # earlier theme() call, so this rotation was silently dropped and the
+                # percentage x-labels overlapped. Same ordering as .plotNetBenefit above.
                 ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
-                ggtheme
+                # Also after ggtheme, and for the same reason: green/red here is not
+                # decoration but the meaning of the two bar segments (benefit vs harm), so it
+                # is a deliberate override of the global palette. Before ggtheme it was dead,
+                # and the legend was titled with the raw column name "outcome_type".
+                ggplot2::scale_fill_manual(values = fill_values)
 
             print(p)
             return(TRUE)
@@ -2788,8 +2912,16 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # when a model actually runs off the bottom.
             y_floor <- -0.2
             y_ceiling <- 1.05
+            # Reference strategies are excluded from this caption. Treat None has NB = 0 by
+            # definition, so its RU is (0 - nb_baseline)/(prevalence - nb_baseline), which is
+            # large and negative at every threshold below the prevalence: at prevalence 0.20
+            # and t = 0.05 it is -3.75. Since the default range starts at 5%, the caption
+            # fired on essentially every run and named a reference strategy as a model,
+            # which is both wrong and loud enough to stop the warning being read at all.
             below_view <- plot_data[
-                !is.na(plot_data$relative_utility) & plot_data$relative_utility < y_floor, ]
+                !is.na(plot_data$relative_utility) &
+                    plot_data$relative_utility < y_floor &
+                    !plot_data$model %in% c("Treat All", "Treat None"), ]
             off_view_models <- unique(below_view$model)
 
             plot_caption <- if (length(off_view_models) > 0) {
@@ -2802,13 +2934,13 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             plot <- ggplot2::ggplot(plot_data,
                         ggplot2::aes(x = threshold, y = relative_utility, color = model)) +
                 ggplot2::geom_line(linewidth = 1) +
-                private$.modelColourScale(plot_data) +
                 ggplot2::labs(title = .("Relative Utility Curve"),
                      x = .("Threshold Probability"),
                      y = .("Relative Utility (vs best default strategy)"),
                      color = .("Model"),
                      caption = plot_caption) +
-                ggplot2::theme_minimal() +
+                # theme_minimal() removed: it sat before `+ ggtheme`, which replaces every
+                # earlier theme, so it was dead code that only hid the global theme.
                 ggtheme +
                 ggplot2::coord_cartesian(ylim = c(y_floor, y_ceiling))
 
@@ -2835,14 +2967,13 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # linewidth, not size: `size` for lines was deprecated in ggplot2 3.4.0 and
                 # emits a deprecation warning on every render.
                 ggplot2::geom_line(linewidth = 1) +
-                private$.modelColourScale(plot_data) +
                 ggplot2::labs(title = .("Standardized Net Benefit"),
                      subtitle = .("Net benefit divided by outcome prevalence (dimensionless)"),
                      x = .("Threshold Probability"),
                      y = .("Standardized Net Benefit (NB / Prevalence)"),
                      color = .("Model"),
                      caption = .("A value of 1 corresponds to the maximum net benefit of perfect classification; values are not counts per 100 patients.")) +
-                ggplot2::theme_minimal() +
+                # theme_minimal() removed: dead code before `+ ggtheme` (see above).
                 ggtheme
 
             # Same y-zoom as .plotDCA and .plotRelativeUtility. Dividing by the prevalence

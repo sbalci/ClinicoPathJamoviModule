@@ -38,6 +38,18 @@ items:
         - name: nlr
           title: 'Negative LR'
           type: number
+      clearWith:
+        - preset
+        - test1_name
+        - test2_name
+        - test1_sens
+        - test1_spec
+        - test2_sens
+        - test2_spec
+        - indep
+        - cond_dep_pos
+        - cond_dep_neg
+        - prevalence
 
     - name:  cotestResultsTable
       title: 'Co-Testing Results'
@@ -57,6 +69,18 @@ items:
         - name: orValue
           title: 'Post-test Odds'
           type: number
+      clearWith:
+        - preset
+        - test1_name
+        - test2_name
+        - test1_sens
+        - test1_spec
+        - test2_sens
+        - test2_spec
+        - indep
+        - cond_dep_pos
+        - cond_dep_neg
+        - prevalence
 
     - name:  dependenceInfo
       title: 'Test Dependence'

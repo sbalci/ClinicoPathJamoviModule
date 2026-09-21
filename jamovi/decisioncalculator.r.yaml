@@ -201,6 +201,7 @@ items:
         - name: f1Score
           title: 'F1 Score'
           type: number
+          format: pc
         - name: mcc
           title: 'Matthews Correlation'
           type: number
@@ -398,22 +399,6 @@ items:
           - fp2
           - tn2
           - fn2
-
-
-    # - name: plot2
-    #   title: 'Fagan nomogram'
-    #   type: Image
-    #   width:  600
-    #   height: 450
-    #   renderFun: .plot2
-    #   requiresData: true
-    #   visible: (fagan)
-    #   clearWith:
-    #       - pp
-    #       - pprob
-    #       - fagan
-    #   refs:
-    #       - Fagan
 
 refs:
     - ClinicoPathJamoviModule

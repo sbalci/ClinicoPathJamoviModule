@@ -158,7 +158,7 @@ children:
                   column: 1
                 children:
                   - type: Label
-                    label: "Disease Present"
+                    label: "Reference positive"
                     style: list-inline
                   - type: TextBox
                     name: tp1
@@ -174,7 +174,7 @@ children:
                   column: 2
                 children:
                   - type: Label
-                    label: "Disease Absent"
+                    label: "Reference negative"
                     style: list-inline
                   - type: TextBox
                     name: fp1
@@ -207,7 +207,7 @@ children:
                   column: 1
                 children:
                   - type: Label
-                    label: "Disease Present"
+                    label: "Reference positive"
                     style: list-inline
                   - type: TextBox
                     name: tp2
@@ -223,7 +223,7 @@ children:
                   column: 2
                 children:
                   - type: Label
-                    label: "Disease Absent"
+                    label: "Reference negative"
                     style: list-inline
                   - type: TextBox
                     name: fp2

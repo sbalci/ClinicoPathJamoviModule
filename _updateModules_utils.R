@@ -884,17 +884,12 @@ install_module_verified <- function(module_dir, pkg) {
   invisible(newest)
 }
 
-# pkgdown renders every root .md and fails on dev notes with invalid YAML; hide them.
+# One implementation of the site build: the module's own _build_site.R hides the
+# root dev notes and applies the release-version gate, so a four-part development
+# version builds no site here either (Rscript _build_site.R --force to preview).
 build_module_site <- function(module_dir) {
   if (!file.exists(file.path(module_dir, "_pkgdown.yml"))) return(invisible(FALSE))
-  old <- setwd(module_dir)
-  on.exit(setwd(old), add = TRUE)
-  dev <- intersect(c("AGENTS.md", "CLAUDE.md", "GEMINI.md", "TODO.md"), list.files())
-  stash <- tempfile("pkgdown-dev-")
-  dir.create(stash)
-  file.rename(dev, file.path(stash, dev))
-  on.exit(file.rename(file.path(stash, dev), dev), add = TRUE)
-  pkgdown::build_site(lazy = TRUE)
+  run_child(module_dir, 'source("_build_site.R")', "site")
   invisible(TRUE)
 }
 

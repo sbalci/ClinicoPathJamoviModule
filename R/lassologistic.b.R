@@ -32,11 +32,18 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
 
+                # Severity must not be carried by the border colour ALONE. The
+                # rgba tints are theme-safe, but the previous restyling also dropped
+                # the coloured title, leaving a pale 4px stripe as the only cue - so
+                # a fatal ERROR and the routine "Analysis Complete" INFO read as two
+                # identical grey boxes, and identically so for a red-green colour
+                # deficient reader. The severity word is spelled out instead: it
+                # survives any theme and any form of colour blindness.
                 typeStyles <- list(
-                    ERROR          = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5"),
-                    STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74"),
-                    WARNING        = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047"),
-                    INFO           = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd")
+                    ERROR          = list(bgcolor = "rgba(220, 38, 38, 0.10)", border = "#fca5a5", label = .("Error")),
+                    STRONG_WARNING = list(bgcolor = "rgba(234, 88, 12, 0.10)", border = "#fdba74", label = .("Serious warning")),
+                    WARNING        = list(bgcolor = "rgba(202, 138, 4, 0.12)", border = "#fde047", label = .("Warning")),
+                    INFO           = list(bgcolor = "rgba(37, 99, 235, 0.08)", border = "#93c5fd", label = .("Information"))
                 )
 
                 html <- "<div style='margin: 10px 0;'>"
@@ -48,7 +55,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "<div style='background-color: ", style$bgcolor, "; ",
                         "border-left: 4px solid ", style$border, "; ",
                         "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                        "<strong style='color: ", style$color, ";'>",
+                        "<strong>",
+                        jmvcore::htmlEscape(style$label), ": ",
                         jmvcore::htmlEscape(notice$title), "</strong><br>",
                         "<span style='color: inherit;'>",
                         jmvcore::htmlEscape(notice$content), "</span>",
@@ -127,9 +135,12 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 if (!requireNamespace("glmnet", quietly = TRUE)) {
+                    # Was the only raw untranslated panel in an otherwise fully
+                    # translated file: a non-English user hit an English-only wall.
                     self$results$todo$setContent(paste0(
-                        "<div class='alert alert-danger'><h4>Missing Dependency</h4>",
-                        "<p>Package 'glmnet' is required. Install with: install.packages('glmnet')</p></div>"
+                        "<div class='alert alert-danger'><h4>", .("Missing Dependency"), "</h4>",
+                        "<p>", .("Package 'glmnet' is required. Install with: install.packages('glmnet')"),
+                        "</p></div>"
                     ))
                     return()
                 }
@@ -159,6 +170,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 if (!is.null(self$results$predictions) && !is.null(self$data) && nrow(self$data) > 0) {
+                    # setRowNums BEFORE setValues. An Output column given a bare vector is
+                    # written positionally -- value i lands in spreadsheet row i -- so under an
+                    # active jamovi row filter self$data is a SUBSET and every prediction is
+                    # saved against the wrong patient. Same pattern as decision.b.R:2304.
+                    self$results$predictions$setRowNums(rownames(self$data))
                     self$results$predictions$setValues(rep(NA_real_, nrow(self$data)))
                 }
             },
@@ -214,46 +230,64 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # ── 1. Clean data ──────────────────────────────────────────────
                 data <- tryCatch(private$.cleanData(), error = function(e) {
+                    # A .checkpoint() restart is CONTROL FLOW, not a failure: it
+                    # arrives here as an error carrying code = "restart" and must
+                    # leave before anything is rendered.
+                    if (identical(e$code, "restart")) stop(e)
                     msg_html <- jmvcore::htmlEscape(e$message)
                     self$results$todo$setContent(paste0(
-                        "<div class='alert alert-danger'><h4>Data Error</h4><p>", msg_html, "</p></div>"
+                        "<div class='alert alert-danger'><h4>", .("Data Error"), "</h4><p>",
+                        msg_html, "</p></div>"
                     ))
                     private$.addNotice(
                         "ERROR", .("Data Error"),
                         sprintf(.("Data preparation failed: %s"), e$message)
                     )
                     private$.renderNotices()
-                    return(NULL)
+                    # .cleanData() refuses through jmvcore::reject(), which is a plain
+                    # simpleError. Swallowing it made .run() return NORMALLY, so jamovi
+                    # never entered its error state and the user saw the refusal box
+                    # sitting above nineteen fully-titled, completely blank result rows
+                    # - it read as a partial computation rather than a refusal.
+                    # Notices are rendered first (they carry the actionable detail),
+                    # then the condition is re-raised untouched so its class and $code
+                    # survive.
+                    stop(e)
                 })
-                if (is.null(data)) {
-                    return()
-                }
 
                 self$results$todo$setContent("")
 
                 # ── 2. Suitability assessment ──────────────────────────────────
-                if (self$options$suitabilityCheck) {
-                    private$.suitabilityAssessment(data)
-                }
+                # Always run. Every sample-adequacy warning this analysis produces
+                # (events-per-variable, sample size, class balance, collinearity)
+                # used to live behind the checkbox, so a user who unticked it to
+                # shorten the output got a full fit on 8 events across 12 predictors
+                # - EPV 0.67 - with not one warning anywhere on screen. The option
+                # now controls only the HTML panel (see .suitabilityAssessment);
+                # the notices fire unconditionally.
+                private$.suitabilityAssessment(data)
 
                 private$.checkpoint()
 
                 # ── 3. Fit LASSO model ─────────────────────────────────────────
                 fit_result <- tryCatch(private$.fitLasso(data), error = function(e) {
+                    # Same two rules as the .cleanData() handler above: a checkpoint
+                    # restart leaves first, and a jmvcore::reject() refusal must reach
+                    # jamovi's error state instead of being downgraded to a normal
+                    # return with blank tables underneath it.
+                    if (identical(e$code, "restart")) stop(e)
                     msg_html <- jmvcore::htmlEscape(e$message)
                     self$results$todo$setContent(paste0(
-                        "<div class='alert alert-danger'><h4>Model Fitting Error</h4><p>", msg_html, "</p></div>"
+                        "<div class='alert alert-danger'><h4>", .("Model Fitting Error"), "</h4><p>",
+                        msg_html, "</p></div>"
                     ))
                     private$.addNotice(
                         "ERROR", .("Model Fitting Error"),
                         sprintf(.("LASSO model fitting failed: %s"), e$message)
                     )
                     private$.renderNotices()
-                    return(NULL)
+                    stop(e)
                 })
-                if (is.null(fit_result)) {
-                    return()
-                }
 
                 # ── Notice: no variables selected ──────────────────────────────
                 if (length(fit_result$selected) == 0) {
@@ -298,7 +332,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "WARNING",
                         .("Cases excluded from the analysis"),
                         sprintf(
-                            .("%d of %d cases (%.1f%%) were excluded%s; the analysis uses the remaining %d cases.%s"),
+                            .("%1$d of %2$d cases (%3$.1f%%) were excluded%4$s; the analysis uses the remaining %5$d cases.%6$s"),
                             data$n_excluded, data$n_total,
                             100 * data$n_excluded / data$n_total, breakdown, data$n, advice)
                     )
@@ -311,7 +345,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "WARNING",
                         .("Constant predictors removed"),
                         sprintf(
-                            .("%d selected variable(s) had the same value in every case and were removed before fitting: %s. A constant carries no information and cannot be penalised or selected. %d variables remain and are shown as Variables analysed."),
+                            .("%1$d selected variable(s) had the same value in every case and were removed before fitting: %2$s. A constant carries no information and cannot be penalised or selected. %3$d variables remain and are shown as Variables analysed."),
                             data$n_dropped_constant,
                             paste(data$dropped_constant, collapse = ", "), data$n_vars)
                     )
@@ -343,6 +377,10 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (!is.null(self$results$predictions)) {
                     pred_full <- rep(NA_real_, nrow(self$data))
                     pred_full[data$complete_idx] <- fit_result$probabilities
+                    # setRowNums BEFORE setValues -- pred_full is positional over the FILTERED
+                    # self$data, so without the row identities a filtered run writes each
+                    # patient's predicted probability onto a different patient.
+                    self$results$predictions$setRowNums(rownames(self$data))
                     self$results$predictions$setValues(pred_full)
                 }
 
@@ -367,7 +405,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 private$.addNotice(
                     "INFO", .("Analysis Complete"),
                     sprintf(
-                        .("Penalized logistic regression completed: %d/%d model terms selected using the %s penalty with the %s lambda (N=%d, %d events)."),
+                        .("Penalized logistic regression completed: %1$d/%2$d model terms selected using the %3$s penalty with the %4$s lambda (N=%5$d, %6$d events)."),
                         n_sel, data$p, private$.penaltyLabel(), private$.lambdaLabel(), data$n, data$n_events
                     )
                 )
@@ -413,7 +451,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         event_level <- as.character(outcome_level_opt)
                         if (!event_level %in% observed_levels) {
                             jmvcore::reject(sprintf(
-                                .("Specified event level '%s' not found in the outcome variable. Observed levels: %s."),
+                                .("Specified event level '%1$s' not found in the outcome variable. Observed levels: %2$s."),
                                 event_level, paste(observed_levels, collapse = ", ")
                             ))
                         }
@@ -422,7 +460,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         private$.addNotice(
                             "WARNING", .("Non-Binary Outcome"),
                             sprintf(
-                                .("Outcome has %d observed levels; only '%s' (event) vs '%s' (reference) are modeled. Cases in other levels are excluded."),
+                                .("Outcome has %1$d observed levels; only '%2$s' (event) vs '%3$s' (reference) are modeled. Cases in other levels are excluded."),
                                 length(observed_levels), event_level, setdiff(observed_levels, event_level)[1]
                             )
                         )
@@ -442,7 +480,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         event_level_num <- suppressWarnings(as.numeric(outcome_level_opt))
                         if (is.na(event_level_num) || !event_level_num %in% observed_levels) {
                             jmvcore::reject(sprintf(
-                                .("Specified event level '%s' not found in the outcome variable. Observed values: %s."),
+                                .("Specified event level '%1$s' not found in the outcome variable. Observed values: %2$s."),
                                 as.character(outcome_level_opt), paste(observed_levels, collapse = ", ")
                             ))
                         }
@@ -455,7 +493,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         private$.addNotice(
                             "WARNING", .("Non-Binary Outcome"),
                             sprintf(
-                                .("Outcome has %d distinct numeric values; only %s (event) vs %s (reference) are modeled. Other cases are excluded."),
+                                .("Outcome has %1$d distinct numeric values; only %2$s (event) vs %3$s (reference) are modeled. Other cases are excluded."),
                                 length(observed_levels), as.character(event_level_num),
                                 as.character(setdiff(observed_levels, event_level_num)[1])
                             )
@@ -662,12 +700,12 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (data$p <= data$n / 5) {
                     checks$p <- list(
                         status = "green", label = .("Predictor count"),
-                        detail = sprintf(.("p = %d predictors, n/p = %.1f (good ratio)"), data$p, data$n / data$p)
+                        detail = sprintf(.("p = %1$d predictors, n/p = %2$.1f (good ratio)"), data$p, data$n / data$p)
                     )
                 } else {
                     checks$p <- list(
                         status = "yellow", label = .("Predictor count"),
-                        detail = sprintf(.("p = %d predictors, n/p = %.1f (regularization essential)"), data$p, data$n / data$p)
+                        detail = sprintf(.("p = %1$d predictors, n/p = %2$.1f (regularization essential)"), data$p, data$n / data$p)
                     )
                 }
 
@@ -724,7 +762,9 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     paste(rows, collapse = ""),
                     "</tbody></table>"
                 )
-                self$results$suitabilityReport$setContent(html)
+                # Only the PANEL is optional; the notices below always fire.
+                if (isTRUE(self$options$suitabilityCheck))
+                    self$results$suitabilityReport$setContent(html)
 
                 # Surface critical suitability issues as Notices
                 if (n_red > 0) {
@@ -735,7 +775,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.addNotice(
                         "STRONG_WARNING", .("Data Suitability"),
                         sprintf(
-                            .("Data suitability: %d major concern(s) detected (%s). Results may be unreliable; consider reducing predictors or collecting more data."),
+                            .("Data suitability: %1$d major concern(s) detected (%2$s). Results may be unreliable; consider reducing predictors or collecting more data."),
                             n_red, red_items
                         )
                     )
@@ -793,7 +833,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.addNotice(
                         "WARNING", .("Cross-validation folds reduced"),
                         sprintf(
-                            .("%d folds were requested but only %d could be used: stratified cross-validation cannot create more folds than there are cases in the smaller outcome class (%d). Fewer folds mean a noisier lambda; a larger or better-balanced sample is the real remedy."),
+                            .("%1$d folds were requested but only %2$d could be used: stratified cross-validation cannot create more folds than there are cases in the smaller outcome class (%3$d). Fewer folds mean a noisier lambda; a larger or better-balanced sample is the real remedy."),
                             nfolds_requested, nfolds, min_class)
                     )
                 }
@@ -1173,16 +1213,23 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         if (is.na(auc_val)) .("AUC could not be computed")
                         else if (perfect) .("Perfect in-sample separation - see note")
                         else if (auc_val >= 0.9) .("Excellent") else if (auc_val >= 0.8) .("Good")
-                        else if (auc_val >= 0.7) .("Acceptable") else .("Poor")
+                        else if (auc_val >= 0.7) .("Acceptable")
+                        # "Poor" graded 0.68 and 0.41 identically. An AUC below 0.5
+                        # is not merely weak: the model ranks cases the wrong way
+                        # round, and the reader must be told which of the two it is.
+                        else if (auc_val >= 0.5) .("Poor")
+                        else .("Worse than chance - ranking is inverted")
                     ),
-                    threshold = list(sprintf("%.3f", optimal_threshold), .("Youden index")),
-                    accuracy = list(sprintf("%.3f", accuracy), ""),
-                    sensitivity = list(sprintf("%.3f", sensitivity), ""),
-                    specificity = list(sprintf("%.3f", specificity), ""),
-                    precision = list(sprintf("%.3f", precision), ""),
-                    f1 = list(sprintf("%.3f", f1), ""),
+                    # .fmtNum, not sprintf: precision and f1 are NA_real_ when the
+                    # model predicts no positives, and sprintf would print "NA".
+                    threshold = list(private$.fmtNum(optimal_threshold), .("Youden index")),
+                    accuracy = list(private$.fmtNum(accuracy), ""),
+                    sensitivity = list(private$.fmtNum(sensitivity), ""),
+                    specificity = list(private$.fmtNum(specificity), ""),
+                    precision = list(private$.fmtNum(precision), ""),
+                    f1 = list(private$.fmtNum(f1), ""),
                     brier = list(
-                        sprintf("%.4f", brier),
+                        private$.fmtNum(brier, 4),
                         {
                             # The Brier score is an OVERALL accuracy score, not a
                             # calibration measure, and its scale is driven by outcome
@@ -1250,7 +1297,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.addNotice(
                         "STRONG_WARNING", .("Perfect Apparent Separation"),
                         sprintf(
-                            .("Apparent AUC = %.3f with N = %d: the model separates the two classes completely on the data it was fitted to. This is an in-sample artefact far more often than a real effect, the reported confidence interval collapses to a point rather than showing precision, and the coefficients are unstable. Enable bootstrap validation and validate externally before drawing any conclusion."),
+                            .("Apparent AUC = %1$.3f with N = %2$d: the model separates the two classes completely on the data it was fitted to. This is an in-sample artefact far more often than a real effect, the reported confidence interval collapses to a point rather than showing precision, and the coefficients are unstable. Enable bootstrap validation and validate externally before drawing any conclusion."),
                             auc_val, data$n)
                     )
                 }
@@ -1263,19 +1310,41 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.addNotice(
                         "STRONG_WARNING", .("Possible Overfitting"),
                         sprintf(
-                            .("Apparent AUC = %.3f with N = %d: likely overfitted. Enable bootstrap validation for corrected estimate."),
+                            .("Apparent AUC = %1$.3f with N = %2$d: likely overfitted. Enable bootstrap validation for corrected estimate."),
                             auc_val, data$n
                         )
                     )
                 }
 
-                if (!is.na(auc_val) && auc_val < 0.7) {
+                # Discrimination below the clinically usable threshold is a
+                # STRONG_WARNING, not a plain WARNING, and an AUC below chance is an
+                # ERROR: a 0.41 model used to carry exactly the same yellow weight as
+                # a merely weak 0.68 one, with nothing saying the ranking is inverted.
+                if (!is.na(auc_val) && auc_val < 0.5) {
                     private$.addNotice(
-                        "WARNING", .("Poor Discrimination"),
+                        "ERROR", .("Discrimination Worse Than Chance"),
                         sprintf(
-                            .("AUC = %.3f indicates poor discrimination. Consider adding more informative predictors or using a different model."),
+                            .("AUC = %.3f is BELOW 0.500, so the model ranks cases the wrong way round: patients it scores high are less likely to have the event than patients it scores low. Do not read the odds ratios as they stand. Check that the event level is the one you intended, then treat these predictors as carrying no usable signal at this sample size."),
                             auc_val
                         )
+                    )
+                } else if (!is.na(auc_val) && auc_val < 0.7) {
+                    private$.addNotice(
+                        "STRONG_WARNING", .("Poor Discrimination"),
+                        sprintf(
+                            .("AUC = %.3f indicates poor discrimination and is below the level generally regarded as clinically usable. Consider adding more informative predictors or using a different model."),
+                            auc_val
+                        )
+                    )
+                }
+
+                # Precision and F1 are NA (blank cells above), not zero, when the
+                # model makes no positive predictions. Say so once rather than
+                # leaving two unexplained empty cells.
+                if (is.na(precision)) {
+                    table$setNote(
+                        "precision_undefined",
+                        .("Precision (PPV) and the F1 score are left blank because this model predicts no positive cases at the chosen threshold, which makes both quantities undefined rather than zero.")
                     )
                 }
             },
@@ -1395,6 +1464,17 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (is.null(v)) default else v
             },
 
+            # ── Format a metric into a `type: text` cell ────────────────────
+            # sprintf("%.3f", NA_real_) returns the literal string "NA", which in a
+            # text column reads as a computation failure rather than the blank cell
+            # jamovi renders for a genuinely undefined quantity. Precision and F1 are
+            # deliberately NA when the model makes no positive predictions, so every
+            # metric goes through this.
+            .fmtNum = function(x, digits = 3) {
+                if (length(x) != 1 || !is.finite(x)) return("")
+                sprintf(paste0("%.", digits, "f"), x)
+            },
+
             # ── Probabilities from a glmnet fit, under ONE selection rule ───
             #
             # Both .fitLasso and .bootstrapValidation go through this, so the
@@ -1503,14 +1583,28 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         return(list(binary = FALSE, cut = NA_real_, cut_raw = NA_real_))
                     v <- data$X[, var_col]
                     v <- v[!is.na(v)]
-                    if (length(unique(v)) == 2)
-                        return(list(binary = TRUE, cut = NA_real_, cut_raw = NA_real_))
 
                     ctr <- if (!is.null(data$X_center) && var_col %in% names(data$X_center))
                         data$X_center[[var_col]] else 0
                     sdv <- if (!is.null(data$X_sd) && var_col %in% names(data$X_sd))
                         data$X_sd[[var_col]] else 1
                     if (!is.finite(sdv) || sdv == 0) sdv <- 1
+
+                    if (length(unique(v)) == 2) {
+                        # Two distinct values is NOT proof of a present/absent factor.
+                        # model.matrix names a factor's dummy <variable><level>, so a
+                        # design-matrix column whose name IS one of the source
+                        # predictors came from a numeric measurement - ki67_pct or
+                        # age_years that happens to take two values in this cohort.
+                        # Printing "present" for those leaves the clinician with no
+                        # threshold to apply to a new patient, which is exactly what
+                        # .scoreCriteria exists to prevent. Carry the scoring value on
+                        # the ORIGINAL scale so the criterion can state it.
+                        dummy <- !(var_col %in% data$explanatory_vars)
+                        present_raw <- max(v) * sdv + ctr
+                        return(list(binary = TRUE, dummy = dummy, cut = NA_real_,
+                                    cut_raw = present_raw))
+                    }
 
                     cut_z <- NA_real_
                     if (identical(method, "manual") && var_col %in% names(manual)) {
@@ -1566,7 +1660,13 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 vapply(seq_along(variables), function(i) {
                     ci <- cuts[[i]]
                     if (is.null(ci) || is.na(ci$binary)) return(NA_character_)
-                    if (isTRUE(ci$binary)) return(.("present"))
+                    if (isTRUE(ci$binary)) {
+                        # A factor dummy is genuinely present/absent; a two-valued
+                        # NUMERIC needs the value that earns the points printed,
+                        # because that is the rule .computeTotalScores applies.
+                        if (isTRUE(ci$dummy) || !is.finite(ci$cut_raw)) return(.("present"))
+                        return(sprintf(.("= %s"), base::format(round(ci$cut_raw, 3), trim = TRUE)))
+                    }
                     sprintf(.("> %s"), base::format(round(ci$cut_raw, 3), trim = TRUE))
                 }, character(1), USE.NAMES = FALSE)
             },
@@ -1619,8 +1719,14 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 sens <- tp / max(tp + fn, 1)
                 spec <- sum(pred == 0 & y == 0) / max(sum(y == 0), 1)
                 acc <- mean(pred == y)
-                prec <- if (tp + fp > 0) tp / (tp + fp) else 0
-                f1 <- if (prec + sens > 0) 2 * prec * sens / (prec + sens) else 0
+                # NA, not 0. Undefined is not "perfectly bad": .populatePerformance
+                # already gets this right for the same two quantities, and the
+                # else-0 branches printed 0.000 in the Scoring System Performance
+                # table while the identical row of the Classification Performance
+                # table directly above it was blank for the same condition.
+                prec <- if (tp + fp > 0) tp / (tp + fp) else NA_real_
+                f1 <- if (!is.na(prec) && prec + sens > 0)
+                    2 * prec * sens / (prec + sens) else NA_real_
 
                 auc_val <- NA
                 tryCatch(
@@ -1745,9 +1851,13 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 fellback <- attr(cuts, "fellback")
                 if (identical(private$.opt("scoreCutMethod", "median"), "manual") &&
                     !is.null(fellback) && length(fellback) > 0) {
+                    # htmlEscape: setNote honours a small HTML allow-list, so a column
+                    # literally named "<b>Ki-67" turned the rest of the footnote bold
+                    # and dropped its own name out of it - from the one note whose
+                    # whole job is to say WHICH predictor fell back.
                     table$setNote("manual_fallback", sprintf(
                         .("No manual cut point was supplied for: %s. These fell back to the sample median. Enter them as 'variable=value' pairs (for example 'ki67=20, age=65') to use established clinical thresholds."),
-                        paste(fellback, collapse = ", ")))
+                        jmvcore::htmlEscape(paste(fellback, collapse = ", "))))
                 }
                 cut_label <- private$.scoreCutLabel()
                 table$setNote("criterion_note", sprintf(.("Award a factor's points when the patient meets its criterion. Continuous predictors are cut at %s. The Odds Ratio column is the penalized odds ratio for MEETING that criterion (present vs absent, or above vs below the cut), which is the contrast the points represent - so points and odds ratios are on the same footing here. A cut derived from this dataset (median, mean, tertile or quartile) is not an externally established clinical threshold and will differ in another cohort; supplying manual cut points from the literature is what makes a score portable. The score has not been validated outside these data."), cut_label))
@@ -1784,15 +1894,18 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "compare" = .("Schneeweiss (primary)"),
                         as.character(method)
                     ),
-                    auc = sprintf("%.3f", perf$auc),
+                    # .fmtNum, not sprintf: an NA metric (AUC when pROC is missing,
+                    # precision/F1 when the score makes no positive calls) printed as
+                    # the literal string "NA" instead of an empty cell.
+                    auc = private$.fmtNum(perf$auc),
                     cutoff = as.character(perf$cutoff),
-                    accuracy = sprintf("%.3f", perf$accuracy),
-                    sensitivity = sprintf("%.3f", perf$sensitivity),
-                    specificity = sprintf("%.3f", perf$specificity),
-                    precision = sprintf("%.3f", perf$precision),
-                    f1 = sprintf("%.3f", perf$f1),
-                    mean_pos = sprintf("%.2f", perf$mean_pos),
-                    mean_neg = sprintf("%.2f", perf$mean_neg),
+                    accuracy = private$.fmtNum(perf$accuracy),
+                    sensitivity = private$.fmtNum(perf$sensitivity),
+                    specificity = private$.fmtNum(perf$specificity),
+                    precision = private$.fmtNum(perf$precision),
+                    f1 = private$.fmtNum(perf$f1),
+                    mean_pos = private$.fmtNum(perf$mean_pos, 2),
+                    mean_neg = private$.fmtNum(perf$mean_neg, 2),
                     range = sprintf("%d to %d", perf$range[1], perf$range[2])
                 )
 
@@ -1812,6 +1925,42 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "apparent",
                     .("These figures are APPARENT (in-sample) and optimistic twice over: the points were derived from a model fitted to this dataset, and the score cutoff was chosen to maximise the Youden index on the same rows. They are not an estimate of how the score would perform on new patients. Enable bootstrap validation for an optimism-corrected estimate of the model, and validate any score externally before clinical use.")
                 )
+
+                # ── Degenerate score guard ─────────────────────────────────
+                # .evaluateScore searches Youden over `total_scores >= cutoff` only.
+                # At the LOWEST score every case is called positive, giving Youden
+                # exactly 0; for a reversed or uninformative score every other cutoff
+                # scores below that, so best_cutoff stays at the minimum. The table
+                # then reads "Sensitivity 1.000, Specificity 0.000" - which looks like
+                # an outstandingly sensitive score - the lookup table labels EVERY row
+                # "High risk" (s >= min score is always true), and the Clinical
+                # Interpretation panel still asserts that higher scores mean higher
+                # risk. .populatePerformance guards the identical failure for the
+                # model; the score had no guard at all.
+                score_min <- suppressWarnings(min(total_scores, na.rm = TRUE))
+                # Youden at the lowest cutoff is identically 0, so a score with any
+                # discriminating cut point always beats it; best_cutoff == min means
+                # nothing did. (A constant score lands here too, which is correct.)
+                cutoff_collapsed <- is.finite(score_min) && isTRUE(perf$cutoff <= score_min)
+                score_inverted <- !is.na(perf$auc) && perf$auc < 0.5
+                if (cutoff_collapsed || score_inverted) {
+                    reason <- if (score_inverted)
+                        sprintf(.("The score's AUC is %.3f, below 0.500: higher total scores are associated with FEWER events, so this score runs backwards."), perf$auc)
+                    else
+                        .("No cut point separated the two groups, so the search settled on the lowest possible total score, which classifies every patient as positive.")
+                    perf_table$setNote("score_degenerate", sprintf(
+                        .("This scoring system does not discriminate. %s A sensitivity of 1.000 with a specificity of 0.000 here is an artefact of calling every patient positive, not evidence of a sensitive score, and the risk groups in the Score-to-Probability Lookup table are not meaningful. Do not publish or apply this score."),
+                        reason))
+                    self$results$lookupTable$setNote("score_degenerate", sprintf(
+                        .("The score cut point is degenerate: %s Every row's risk group below is therefore unreliable."),
+                        reason))
+                    private$.addNotice(
+                        "STRONG_WARNING", .("Scoring System Does Not Discriminate"),
+                        sprintf(
+                            .("%s The Scoring System Performance figures and the High/Low risk labels in the lookup table are artefacts of a collapsed cut point, not measurements of a working score."),
+                            reason)
+                    )
+                }
 
                 # ── Method comparison (when compare mode selected) ──────────
                 if (method == "compare") {
@@ -2007,7 +2156,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 n_ok <- sum(!is.na(optimism_auc) | !is.na(optimism_brier) | !is.na(optimism_slope))
                 if (n_ok < B) {
                     table$setNote("boot_n", sprintf(
-                        .("%d of %d bootstrap replicates completed; %d failed (typically a resample with too few events to fit) and were excluded. The optimism correction is based on the %d successful replicates."),
+                        .("%1$d of %2$d bootstrap replicates completed; %3$d failed (typically a resample with too few events to fit) and were excluded. The optimism correction is based on the %4$d successful replicates."),
                         n_ok, B, B - n_ok, n_ok))
                 }
                 if (n_ok < 20) {
@@ -2033,7 +2182,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     table$setNote(
                         "optimism_warning",
                         sprintf(
-                            .("Optimism = %.3f indicates overfitting. The corrected AUC (%.3f) is a more realistic estimate of future performance."),
+                            .("Optimism = %1$.3f indicates overfitting. The corrected AUC (%2$.3f) is a more realistic estimate of future performance."),
                             mean_optimism_auc, corrected_auc
                         )
                     )
@@ -2049,7 +2198,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     table$setNote(
                         "below_chance",
                         sprintf(
-                            .("The corrected AUC (%.3f) is below 0.500. This is a real result, not an error: the bootstrap replicates fit models that pick up chance associations, so the optimism (%.3f) exceeds what the model actually achieves. Read it as evidence that these predictors carry no usable signal at this sample size - the model performs no better than, and by this estimate slightly worse than, guessing."),
+                            .("The corrected AUC (%1$.3f) is below 0.500. This is a real result, not an error: the bootstrap replicates fit models that pick up chance associations, so the optimism (%2$.3f) exceeds what the model actually achieves. Read it as evidence that these predictors carry no usable signal at this sample size - the model performs no better than, and by this estimate slightly worse than, guessing."),
                             corrected_auc, mean_optimism_auc)
                     )
                 }
@@ -2096,7 +2245,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
                 if (n_show < nrow(imp_df)) {
                     table$setNote("truncated", sprintf(
-                        .("Showing the %d highest-ranked of %d model terms; the remaining terms have smaller maximum coefficients along the path."),
+                        .("Showing the %1$d highest-ranked of %2$d model terms; the remaining terms have smaller maximum coefficients along the path."),
                         n_show, nrow(imp_df)))
                 }
 
@@ -2164,7 +2313,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         error = function(e) {
                             table$setNote("refit_failed_sel", sprintf(
                                 .("The unpenalized refit on the LASSO-selected variables could not be fitted (%s), so its row is omitted."),
-                                conditionMessage(e)))
+                                jmvcore::htmlEscape(conditionMessage(e))))
                         }
                     )
                 }
@@ -2195,7 +2344,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     error = function(e) {
                         table$setNote("refit_failed_all", sprintf(
                             .("The unpenalized refit on all candidate variables could not be fitted (%s), so its row is omitted."),
-                            conditionMessage(e)))
+                            jmvcore::htmlEscape(conditionMessage(e))))
                     }
                 )
 
@@ -2287,22 +2436,32 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     cvlo   = state$cvlo
                 )
 
+                # Okabe-Ito hues. The previous red points / blue line / GREEN line
+                # is the classic deuteranopia confusion: ~8% of men could not tell
+                # the lambda.min line from the lambda.1se line, and the subtitle
+                # naming the colours was the only key. Blue and orange separate for
+                # every common form of colour deficiency, and the different dash
+                # patterns carry the distinction even in greyscale.
+                col_min  <- "#0072B2"  # blue
+                col_1se  <- "#D55E00"  # vermillion
                 p <- ggplot2::ggplot(cv_data, ggplot2::aes(x = log(lambda), y = cvm)) +
-                    ggplot2::geom_point(color = "red", size = 0.8) +
+                    ggplot2::geom_point(color = "#CC79A7", size = 0.8) +
                     ggplot2::geom_errorbar(ggplot2::aes(ymin = cvlo, ymax = cvup),
                         color = "darkgrey", width = 0.02
                     ) +
                     ggplot2::geom_vline(
                         xintercept = log(state$lambda_min),
-                        linetype = "dashed", color = "blue"
+                        linetype = "dashed", color = col_min
                     ) +
                     ggplot2::geom_vline(
                         xintercept = log(state$lambda_1se),
-                        linetype = "dashed", color = "green"
+                        linetype = "dotted", color = col_1se
                     ) +
                     ggplot2::labs(
                         title = .("Cross-Validation for LASSO Logistic Regression"),
-                        subtitle = .("Blue: lambda.min, Green: lambda.1se"),
+                        # The subtitle is the plot's only key, so it must name what
+                        # is actually drawn - it still said "Green: lambda.1se".
+                        subtitle = .("Blue dashed: lambda.min; orange dotted: lambda.1se"),
                         x = .("Log Lambda"),
                         y = .("Binomial Deviance")
                     ) +
@@ -2317,10 +2476,15 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return(FALSE)
                 }
 
+                # The legend TITLE was translated while its two entries were raw
+                # English literals, so a Turkish session got "Yon: Positive/Negative".
+                lbl_pos <- .("Positive")
+                lbl_neg <- .("Negative")
                 df <- data.frame(
                     variable    = factor(state$var_names, levels = state$var_names),
                     coefficient = state$coef_values,
-                    direction   = ifelse(state$coef_values > 0, "Positive", "Negative")
+                    direction   = ifelse(state$coef_values > 0, lbl_pos, lbl_neg),
+                    stringsAsFactors = FALSE
                 )
 
                 # Name the scale being drawn. Without this the axis reads
@@ -2337,13 +2501,21 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 p <- ggplot2::ggplot(df, ggplot2::aes(x = variable, y = coefficient, fill = direction)) +
                     ggplot2::geom_col() +
                     ggplot2::coord_flip() +
-                    ggplot2::scale_fill_manual(values = c("Positive" = "#E74C3C", "Negative" = "#2E86C1")) +
                     ggplot2::labs(
                         title = .("LASSO Logistic Regression Coefficients"),
                         subtitle = sub_lab,
                         x = "", y = y_lab, fill = .("Direction")
                     ) +
-                    ggtheme
+                    ggtheme +
+                    # AFTER ggtheme, not before. A jamovi ggtheme is a complete theme
+                    # PLUS its own discrete fill/colour scales, so anything added
+                    # ahead of it is silently replaced (and ggplot2 prints "Scale for
+                    # fill is already present" on every render). The bars are sorted
+                    # by |coefficient| with no sign on the axis, so colour is the ONLY
+                    # cue for direction - losing this scale left the legend saying
+                    # Positive/Negative beside arbitrary palette colours.
+                    ggplot2::scale_fill_manual(
+                        values = stats::setNames(c("#D55E00", "#0072B2"), c(lbl_pos, lbl_neg)))
                 print(p)
                 TRUE
             },
@@ -2367,17 +2539,35 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # table that just said "CI not estimable" contradicts it.
                 if (!is.null(ci_obj) && is.finite(ci_obj[1]) && ci_obj[1] >= 1) ci_obj <- NULL
 
+                # This is a BASE-graphics renderer, so `ggtheme` cannot reach it and
+                # the theme has to be applied through par(). Without this the axes,
+                # tick labels, axis titles, the main title and the legend text all
+                # drew in R's default black onto the dark background jamovi sets from
+                # the user's theme - an invisible scale around a visible blue curve.
+                # theme is read through tryCatch so a missing promise cannot force an
+                # error here (same guard as benford.b.R:1346).
+                fg <- tryCatch(theme$color[[1]], error = function(e) NULL)
+                if (is.null(fg) || length(fg) != 1 || is.na(fg) || !nzchar(fg))
+                    fg <- par("fg")
+                op <- par(fg = fg, col = fg, col.axis = fg, col.lab = fg,
+                          col.main = fg, col.sub = fg)
+                on.exit(par(op), add = TRUE)
+
                 # pROC::plot.roc explicitly: in the umbrella package spatstat.explore also
                 # registers a plot.roc S3 method and wins the dispatch, so a bare plot() on a
                 # pROC object died with "Argument 'x' is not of class 'fv'".
                 pROC::plot.roc(roc_obj,
                     main = sprintf(.("ROC Curve (AUC = %s)"), auc_val),
-                    col = "#2E86C1", lwd = 2, print.auc = FALSE
+                    col = "#0072B2", lwd = 2, print.auc = FALSE
                 )
                 if (!is.null(ci_obj)) {
                     legend("bottomright",
-                        legend = sprintf("AUC = %s (95%% CI: %.3f-%.3f)", auc_val, ci_obj[1], ci_obj[3]),
-                        col = "#2E86C1", lwd = 2, bty = "n"
+                        # Was the one unwrapped string in an otherwise translated
+                        # renderer. Positional %n$ markers because a translator must
+                        # be able to reorder three conversions.
+                        legend = sprintf(.("AUC = %1$s (95%% CI: %2$.3f-%3$.3f)"),
+                                         auc_val, ci_obj[1], ci_obj[3]),
+                        col = "#0072B2", lwd = 2, bty = "n", text.col = fg
                     )
                 }
                 abline(a = 0, b = 1, lty = 2, col = "gray50")
@@ -2405,7 +2595,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Copy-ready report sentence (complete phrase; placeholders filled from results)
                 report <- sprintf(
-                    .("%s logistic regression with %s lambda selection and %d-fold cross-validation was applied to %d candidate variables (%d model terms after dummy coding) in %d patients (%d events, %d non-events). %d term(s) were retained: %s."),
+                    .("%1$s logistic regression with %2$s lambda selection and %3$d-fold cross-validation was applied to %4$d candidate variables (%5$d model terms after dummy coding) in %6$d patients (%7$d events, %8$d non-events). %9$d term(s) were retained: %10$s."),
                     penalty_name, private$.lambdaLabel(), fit$nfolds, data$n_vars, data$p, data$n,
                     data$n_events, data$n_nonevents, n_sel, top_vars
                 )

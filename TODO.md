@@ -5801,3 +5801,98 @@ analysis scores lower as a candidate.
       Both unshipped. Use `jmvcore::Notice` or the notices→HTML helper.
 - [ ] 79 unused `Imports:` at the umbrella level; several heavy (`sf`, `spatstat`, `shiny`, `MCMCglmm`).
 - [ ] 59 dead citations and 16 missing `url:` in `jamovi/00refs.yaml`.
+
+## meddecide release check (2026-09-21: `/check-module meddecide --profile release`)
+
+Full report: `quality-reports/meddecide-check-module-20260921/REPORT.md`.
+All 15 production analyses. Fixes applied umbrella-side; regression guards in
+`tests/testthat/test-zzz-meddecide-release-20260921.R` (115 assertions, verified to fail
+against pre-fix source).
+
+**Fixed this pass**
+- [x] `lassologistic` / `agreement`: Output columns written positionally — a row filter saved every
+      prediction and every consensus/level-of-agreement label onto a different patient.
+      `setRowNums(rownames(...))` at lassologistic:166,354 and agreement:8253,8494.
+- [x] `psychopdaROC`: 5 pROC paths were not one-vs-rest — `setdiff(...)[1]` kept one other level and
+      pROC silently dropped the rest. Measured 60 of 90 rows used and AUC reported as 1.0000 vs 0.9728.
+      One `private$.ovrResponse()` helper now used at all five.
+- [x] `psychopdaROC`: `getCell()` returns a Cell object; the Fixed Sens/Spec ROC plot crashed on every draw.
+- [x] `agreement`: ICC sample size was a Wald form carrying Walter (1998)'s citation — n=9 where
+      Walter gives n=23. Replaced with the log transform + an ICC=1 guard.
+- [x] `psychopdaROC`: catch-all `tryCatch` swallowed 6 `jmvcore::reject()` calls, then ran the fallback
+      on the same invalid input while claiming pROC. Rejects tagged + re-raised; note names the real path.
+- [x] Fabricated statistics: bootstrap AUC 0.5 for single-class resamples; precision/recall/F1 `0` for
+      undefined. Both now NA with disclosure.
+- [x] `agreement`: mean r / mean rho now Fisher-z averaged (r=(.30,.95): .625 → .790).
+- [x] 51 `.()` msgids with braced `\u{XXXX}` escapes → `\uXXXX` (agreement 4, decision 1, decisioncurve 1,
+      enhancedROC 20, sequentialtests 25).
+- [x] 7 `tr.po` templates reordered conversions without `%n$` — the ROC narrative *errored* in Turkish.
+- [x] Notice panels theme-safe in all 6 files (opaque pastel fill + fixed title hue).
+- [x] 32 `format: zto` on unbounded columns (a glucose cutpoint rendered `126.0000000`).
+- [x] `clearWith` on 10 blinking items (sequentialtests 8, cotest 2); forest-plot + Bayesian-trace
+      `addItem` guarded; decisioncurve `ggtheme` ordering; 54 lines of dead YAML.
+- [x] `2026-09-16 meddecide.md` audit: 15 findings / 0 responses → 10 done, 2 partial, 3 deferred, 0 open.
+
+**USER — blocked on you**
+- [ ] `Rscript _updateModules.R meddecide` was **held**: the tree had unrelated in-flight edits
+      (`_build_site.R`, `.Rbuildignore`, `_updateModules_utils.R`, `new_version` 1.0.82.07→1.0.83).
+      Until it runs, the shipped module still fails the gate on 4 malformed `format: zto;pvalue`
+      tokens in `enhancedROC.r.yaml` and lacks the `psychopdaROC` `is.null(st)` guard.
+- [ ] After regeneration: `jmvtools::i18nUpdate()` (133 stale msgids) + a `NEWS.md` heading.
+- [ ] Run the 96 testthat files against an `R CMD INSTALL` of the working tree, not `load_all()`.
+
+**Decisions needed**
+- [ ] `enhancedROC` ships 20 live checkboxes that compute nothing (b.R:487-506), all confirmed tickable.
+      Removing them means removing the `.a.yaml` options too — `prepare()` re-adds any control whose
+      option survives — which breaks saved `.omv`.
+- [ ] `enhancedROC` `direction: auto` vs `psychopdaROC` `>=`: same data → AUC 0.825 vs 0.175. Fitting
+      direction to the data biases every AUC upward (null ≈0.593 at n=20). psychopdaROC's fixed
+      direction is defensible; the fix is one line at `enhancedROC.a.yaml:74` and changes saved results.
+- [ ] `agreement`: ~19 `error = function(e) NULL` handlers still blank a displayed value with no notice
+      (Shapiro-Wilk especially — blank reads as "normality fine"). The file's own TODO line list has drifted.
+- [ ] i18n coverage: `cotest` 0/193 and `kappaSizeCI` 0/119 `.()` wraps; `nogoldstandard` leaves its
+      non-convergence warning in English; `agreement` splices ~102 English phrases into translated sentences.
+
+### meddecide round 2 — "fix detected issues" (2026-09-21, same day)
+
+Report: `quality-reports/meddecide-check-module-20260921/REPORT.md` (Round 2 section).
+24 agents across two orchestrated runs + a hand-repair pass on what adversarial verify caught.
+
+- [x] **enhancedROC 20 dead options triaged.** 5 implemented (`eoRatio`, `calibrationDensity`,
+      `decisionImpactCurves`, `bootstrapPartialAUC`, `multiClassAveraging`); 14 commented out in
+      BOTH `.a.yaml` and `.u.yaml` with the reason inline. `eoRatio` returns NA when the predictor
+      is not already a probability — the fitted glm forces E/O ≡ 1.000, which would have told every
+      user their marker was perfectly calibrated on no evidence.
+      `harrellCIndex` (= the AUC on a binary outcome) and `optimismCorrection`
+      (= internalValidation + bootstrap) are duplicates: commented, not implemented, not deleted.
+      The `unimplemented` accumulator and its WARNING are gone — required, because
+      `self$options$<name>` RAISES for an option that no longer exists.
+- [x] **`direction` default `auto` → `higher`** (`enhancedROC.a.yaml:74`); `auto` still offered,
+      description now states the upward bias. enhancedROC and psychopdaROC agree by default.
+- [x] agreement: Kendall's W df (19 → the real 16), Fleiss CI provenance, consensus tie-break no
+      longer alphabetical, BCa order-independence, PABAK `q` from scale levels, computed
+      Bhapkar/Stuart-Maxwell df, nominal factors rejected, pairwise-complete pairwise stats,
+      NSA reachable, ~9 silent handlers disclosed.
+- [x] decisioncompare: catch-all tryCatch no longer downgrades `reject()`; restart leaves before
+      notices serialize; `.checkpoint()` added (there were zero in 2,945 lines); McNemar caveat on
+      the table.
+- [x] psychopdaROC: 5 renderers apply ggtheme; Wald → Wilson bands; evidence ratio de-Bayesified.
+- [x] i18n: cotest 0→130, kappaSizeCI 0→69, decisioncompare 39→312, agreement +183,
+      nogoldstandard +33, enhancedROC +23, psychopdaROC +23 `.()` wraps. 0 trap hits after.
+- [x] `.gofCells()` de-duplicated into `R/utils-kappasize.R`; updater resolves and ships it.
+- [x] **Adversarial verify caught 2 criticals the fixes INTRODUCED** — both "a CI belonging to a
+      different statistic than the estimate it decorates": the subgroup table (unweighted kappa2
+      estimate + weighted CI) and the inter-rater row (Scott's pi labelled Fleiss' κ with a Cohen's
+      kappa CI). Both repaired. Also: a Wilson band still captioned "normal-approximation"; a BCa
+      "fix" that was still order-dependent while its note claimed otherwise; a `theme` guard that
+      could only ever error; 13 untranslated red-banner strings.
+- [x] Round-1 omission of mine: the Fisher-z switch on mean r / mean ρ now carries a table note.
+
+**USER — still blocked on you (unchanged)**
+- [ ] `Rscript _updateModules.R meddecide` still HELD — the tree still carries unrelated in-flight
+      work (`_build_site.R`, `.Rbuildignore`, `_updateModules_utils.R`, `new_version`).
+      Nothing above reaches users until it runs; the shipped module still fails the gate.
+- [ ] After regeneration: `jmvtools::i18nUpdate()` (182 stale msgids now) + a `NEWS.md` heading.
+- [ ] Run the 96 testthat files against an `R CMD INSTALL` of the working tree.
+- [ ] Review the 5 newly implemented enhancedROC analyses on real data before release — they are
+      new user-visible statistics, not repairs.

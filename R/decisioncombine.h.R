@@ -238,7 +238,6 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "wilson1927",
                     "youden1950",
                     "haldane1956",
-                    "epiR",
                     "forcats"))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -808,7 +807,16 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="notices",
                 title="Notices",
-                visible=TRUE))}))
+                visible=TRUE,
+                clearWith=list(
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive")))}))
 
 decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncombineBase",

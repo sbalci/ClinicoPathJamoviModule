@@ -54,7 +54,7 @@ items:
     #   visible: (od)
 
     - name: rawContingency
-      title: Raw Contingency Table
+      title: Analysed Contingency Table
       type: Table
       visible: (od)
       rows: 0
@@ -80,7 +80,7 @@ items:
         - testNegative
 
     - name: rawCounts
-      title: Raw Combination Counts
+      title: Analysed Combination Counts
       type: Table
       visible: (od)
       rows: 0

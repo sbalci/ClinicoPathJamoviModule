@@ -131,11 +131,11 @@ examples are illustrative only and are not clinical guides.
 \donttest{
 # Illustrative examples only; these are not clinical guides.
 result1 <- decisioncalculator(
-  TP = 90, FN = 10, TN = 80, FP = 20
+  TP = 90, FN = 20, TN = 80, FP = 30
 )
 
 result2 <- decisioncalculator(
-  TP = 90, FN = 10, TN = 80, FP = 20,
+  TP = 90, FN = 20, TN = 80, FP = 30,
   ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
 )
 }

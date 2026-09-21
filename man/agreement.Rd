@@ -963,7 +963,6 @@ A results object containing:
 \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$about} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalUseCases} \tab \tab \tab \tab \tab a html \cr
-\code{results$computedVariablesHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$loaTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$loaDetailTable} \tab \tab \tab \tab \tab a table \cr

@@ -55,6 +55,10 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - kappaSize
+    # The Notes panel attributes the method to "(Rotondi and Donner)"; both source
+    # papers must be citable from the output, as in kappaSizeCI / kappaSizeFixedN.
+    - rotondiDonnerKappaCI
+    - donnerEliasziwKappaGOF
 
 
 ...

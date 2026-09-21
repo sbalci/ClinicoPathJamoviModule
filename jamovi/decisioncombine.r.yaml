@@ -439,6 +439,7 @@ items:
       title: Notices
       type: Html
       visible: true
+      clearWith: *analysisInputs
 
 refs:
     - ClinicoPathJamoviModule
@@ -446,6 +447,5 @@ refs:
     - wilson1927
     - youden1950
     - haldane1956
-    - epiR
     - forcats
 ...

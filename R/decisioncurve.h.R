@@ -593,28 +593,23 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="interventions_per_100", 
                         `title`="Projected Interventions", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="true_positives_per_100", 
                         `title`="Projected True Positives", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="false_positives_per_100", 
                         `title`="Projected False Positives", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="interventions_avoided", 
                         `title`="Projected Net Interventions Avoided vs Treat All", 
-                        `type`="number", 
-                        `format`="zto"),
+                        `type`="number"),
                     list(
                         `name`="number_needed_to_screen", 
                         `title`="Patients Screened per True Positive", 
-                        `type`="number", 
-                        `format`="zto")),
+                        `type`="number")),
                 clearWith=list(
                     "outcome",
                     "outcomePositive",
@@ -678,7 +673,11 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "thresholdRange",
                     "thresholdMin",
                     "thresholdMax",
-                    "thresholdStep")))
+                    "thresholdStep",
+                    "clinicalDecisionRule",
+                    "decisionRuleVar",
+                    "decisionRulePositive",
+                    "decisionRuleLabel")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="weightedAUCTable",
@@ -990,7 +989,11 @@ decisioncurveResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "bootReps",
                     "ciLevel",
                     "seed",
-                    "modelNames")))
+                    "modelNames",
+                    "clinicalDecisionRule",
+                    "decisionRuleVar",
+                    "decisionRulePositive",
+                    "decisionRuleLabel")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="resourceUtilizationTable",

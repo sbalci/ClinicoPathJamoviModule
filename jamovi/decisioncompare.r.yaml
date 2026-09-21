@@ -585,6 +585,12 @@ items:
           - niMargin
           - ciMethod
           - stratify
+          # .findBestTest() emits the "Tied Descriptive Ranking" notice and is reached
+          # ONLY from these three display toggles, so they belong in this item's
+          # clearWith too.
+          - showSummary
+          - showReportSentence
+          - showDescriptiveReport
 
 refs:
     - ClinicoPathJamoviModule

@@ -849,3 +849,67 @@ test_that("fixed-row tables across meddecide are scaffolded before .run()", {
                    testPositive = "Positive", od = TRUE)
   expect_identical(dc("rawContingency"), c("test_pos", "test_neg", "total"))
 })
+
+
+# library-audit 2026-09-16 meddecide [LOW] PARTIAL: the fragment/whitespace finding named six sites -
+#   three severity prefixes ("ERROR: "), a leading-space NNT sentence and two leading-comma clauses.
+#   All six are fixed, and the sweep behind them covers three adjacent classes that are invisible in
+#   English and to every behaviour test: a braced \u{XXXX} inside a .() (the compiler stores the escape
+#   literally, so the msgid can never match), a msgid containing " [..]" (jmvcore's Translator cuts the
+#   string off there when untranslated), and a template with two or more sprintf conversions and no %n$
+#   (unreorderable, and the shape that made sprintf() raise in Turkish). This asserts the class, not the
+#   six sites, so a later edit cannot reintroduce it under a different name.
+test_that("no meddecide msgid is a fragment, carries padding, or cannot be reordered", {
+  root <- audit_source_root()
+  analyses <- c(
+    "agreement", "cotest", "decision", "decisioncalculator", "decisioncombine",
+    "decisioncompare", "decisioncurve", "enhancedROC", "kappaSizeCI", "kappaSizeFixedN",
+    "kappaSizePower", "lassologistic", "nogoldstandard", "psychopdaROC", "sequentialtests"
+  )
+  files <- file.path(root, "R", paste0(analyses, ".b.R"))
+  files <- files[file.exists(files)]
+  skip_if(length(files) == 0, "meddecide backends not present in this tree")
+
+  pad <- ctx <- braced <- unordered <- character(0)
+
+  for (f in files) {
+    src <- readLines(f, warn = FALSE)
+    code <- src[!grepl("^\\s*#", src)]
+    tag <- basename(f)
+
+    # a separator inside the msgid: leading space/comma/semicolon/colon, or a trailing space
+    hit <- grep('\\.\\(\\s*"(?:[\\s,;:])', code, perl = TRUE)
+    if (length(hit)) pad <- c(pad, paste0(tag, ":", hit))
+    hit <- grep('\\.\\(\\s*"[^"\n]*\\s"\\s*[,)]', code)
+    if (length(hit)) pad <- c(pad, paste0(tag, ":", hit))
+
+    # " [..]" anywhere in a msgid - the Translator splits on it and drops the remainder
+    hit <- grep('\\.\\(\\s*"(?:[^"\\\\]|\\\\.)* \\[[^"]*\\]', code, perl = TRUE)
+    if (length(hit)) ctx <- c(ctx, paste0(tag, ":", hit))
+
+    # \u{XXXX} inside a .() - resolved by R at parse time, stored literally in the catalog
+    hit <- grep('\\.\\(\\s*"[^"]*\\\\u\\{', code)
+    if (length(hit)) braced <- c(braced, paste0(tag, ":", hit))
+
+    # two or more sprintf conversions with no positional markers
+    lits <- regmatches(code, gregexpr('\\.\\(\\s*"(?:[^"\\\\]|\\\\.)*"', code, perl = TRUE))
+    for (i in seq_along(lits)) {
+      for (lit in lits[[i]]) {
+        body <- sub('^\\.\\(\\s*"', "", sub('"$', "", lit))
+        segs <- strsplit(body, "%%", fixed = TRUE)[[1]]
+        convs <- unlist(regmatches(
+          segs,
+          gregexpr("%(\\d+\\$)?[-+0# ]*(\\*|\\d+)?(\\.\\d+)?[sdifeEgGxX]", segs, perl = TRUE)
+        ))
+        if (length(convs) >= 2 && !any(grepl("\\$", convs))) {
+          unordered <- c(unordered, paste0(tag, ":", i))
+        }
+      }
+    }
+  }
+
+  expect_equal(pad, character(0))
+  expect_equal(ctx, character(0))
+  expect_equal(braced, character(0))
+  expect_equal(unordered, character(0))
+})

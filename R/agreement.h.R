@@ -1478,7 +1478,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         summary = function() private$.items[["summary"]],
         about = function() private$.items[["about"]],
         clinicalUseCases = function() private$.items[["clinicalUseCases"]],
-        computedVariablesHeading = function() private$.items[["computedVariablesHeading"]],
         consensusTable = function() private$.items[["consensusTable"]],
         loaTable = function() private$.items[["loaTable"]],
         loaDetailTable = function() private$.items[["loaDetailTable"]],
@@ -3411,7 +3410,11 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Summary",
                 visible="(showSummary)",
                 clearWith=list(
-                    "showSummary")))
+                    "showSummary",
+                    "vars",
+                    "wght",
+                    "exct",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -3426,15 +3429,6 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(showAbout)",
                 clearWith=list(
                     "showAbout")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="computedVariablesHeading",
-                title="Computed Variables",
-                visible="(consensusVar || (loaVariable && loaOutput))",
-                clearWith=list(
-                    "consensusVar",
-                    "loaVariable",
-                    "loaOutput")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="consensusTable",
@@ -3505,7 +3499,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="case_id", 
                         `title`="Case", 
-                        `type`="integer"),
+                        `type`="text"),
                     list(
                         `name`="loa_category", 
                         `title`="LoA Category", 
@@ -4554,7 +4548,6 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalUseCases} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$computedVariablesHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$consensusTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$loaTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$loaDetailTable} \tab \tab \tab \tab \tab a table \cr

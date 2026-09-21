@@ -248,7 +248,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rawContingency",
-                title="Raw Contingency Table",
+                title="Analysed Contingency Table",
                 visible="(od)",
                 rows=0,
                 columns=list(
@@ -278,7 +278,7 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Table$new(
                 options=options,
                 name="rawCounts",
-                title="Raw Combination Counts",
+                title="Analysed Combination Counts",
                 visible="(od)",
                 rows=0,
                 columns=list(

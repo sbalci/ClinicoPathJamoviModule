@@ -111,7 +111,9 @@ kappaSizePowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Power Approach for the Number of Subjects Required",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "kappaSize"))
+                    "kappaSize",
+                    "rotondiDonnerKappaCI",
+                    "donnerEliasziwKappaGOF"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",

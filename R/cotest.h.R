@@ -215,7 +215,19 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="nlr", 
                         `title`="Negative LR", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test2_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test2_sens",
+                    "test2_spec",
+                    "indep",
+                    "cond_dep_pos",
+                    "cond_dep_neg",
+                    "prevalence")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cotestResultsTable",
@@ -238,7 +250,19 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="orValue", 
                         `title`="Post-test Odds", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "preset",
+                    "test1_name",
+                    "test2_name",
+                    "test1_sens",
+                    "test1_spec",
+                    "test2_sens",
+                    "test2_spec",
+                    "indep",
+                    "cond_dep_pos",
+                    "cond_dep_neg",
+                    "prevalence")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dependenceInfo",

@@ -118,10 +118,12 @@ estimates applicable to the intended population before interpreting
 results.
 
 This analysis is particularly useful for:
-• Exploring how diagnostic strategies behave under explicit assumptions
-• Comparing hypothetical test sequences for teaching or planning
-• Understanding trade-offs between sensitivity and specificity
-• Illustrating expected testing volume and cost under user-supplied
+\itemize{
+\item Exploring how diagnostic strategies behave under explicit assumptions
+\item Comparing hypothetical test sequences for teaching or planning
+\item Understanding trade-offs between sensitivity and specificity
+\item Illustrating expected testing volume and cost under user-supplied
 assumptions
-• Teaching sequential testing concepts and Bayesian probability
+\item Teaching sequential testing concepts and Bayesian probability
+}
 }

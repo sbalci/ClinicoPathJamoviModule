@@ -4,7 +4,7 @@ title: Confidence Interval Approach for the Number of Subjects Required
 menuGroup: Power #meddecide
 menuSubgroup: Power Analysis by meddecide 
 menuSubtitle: Find sample size based on Kappa confidence
-version: '1.0.81'
+version: '1.0.83'
 jas: '1.2'
 
 
@@ -45,48 +45,6 @@ options:
               Number of outcome levels (categories) of the rated variable.
           R: >
               Number of outcome levels (categories) of the rated variable.
-
-
-    # - name: outcome
-    #   title: Number of outcome level
-    #   type: List
-    #   options:
-    #   - name: "2"
-    #     title: "2"
-    #   - name: "3"
-    #     title: "3"
-    #   - name: "4"
-    #     title: "4"
-    #   - name: "5"
-    #     title: "5"
-    #   default: "2"
-    #
-    #   u.yaml
-    #
-    # children:
-    #   - type: Label
-    #     label: Number of outcome level
-    #     children:
-    #       - type: RadioButton
-    #         name: outcome_2
-    #         optionName: outcome
-    #         optionPart: "2"
-    #         label: "2"
-    #       - type: RadioButton
-    #         name: outcome_3
-    #         optionName: outcome
-    #         optionPart: "3"
-    #         label: "3"
-    #       - type: RadioButton
-    #         name: outcome_4
-    #         optionName: outcome
-    #         optionPart: "4"
-    #         label: "4"
-    #       - type: RadioButton
-    #         name: outcome_5
-    #         optionName: outcome
-    #         optionPart: "5"
-    #         label: "5"
 
 
     - name: citype

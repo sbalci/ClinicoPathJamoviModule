@@ -40,19 +40,23 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..TP <- jmvcore::OptionNumber$new(
                 "TP",
                 TP,
-                default=90)
+                default=90,
+                min=0)
             private$..TN <- jmvcore::OptionNumber$new(
                 "TN",
                 TN,
-                default=80)
+                default=80,
+                min=0)
             private$..FP <- jmvcore::OptionNumber$new(
                 "FP",
                 FP,
-                default=30)
+                default=30,
+                min=0)
             private$..FN <- jmvcore::OptionNumber$new(
                 "FN",
                 FN,
-                default=20)
+                default=20,
+                min=0)
             private$..pp <- jmvcore::OptionBool$new(
                 "pp",
                 pp,
@@ -102,19 +106,23 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..tp1 <- jmvcore::OptionNumber$new(
                 "tp1",
                 tp1,
-                default=100)
+                default=100,
+                min=0)
             private$..fp1 <- jmvcore::OptionNumber$new(
                 "fp1",
                 fp1,
-                default=40)
+                default=40,
+                min=0)
             private$..tn1 <- jmvcore::OptionNumber$new(
                 "tn1",
                 tn1,
-                default=70)
+                default=70,
+                min=0)
             private$..fn1 <- jmvcore::OptionNumber$new(
                 "fn1",
                 fn1,
-                default=10)
+                default=10,
+                min=0)
             private$..cutoff2 <- jmvcore::OptionString$new(
                 "cutoff2",
                 cutoff2,
@@ -122,19 +130,23 @@ decisioncalculatorOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             private$..tp2 <- jmvcore::OptionNumber$new(
                 "tp2",
                 tp2,
-                default=80)
+                default=80,
+                min=0)
             private$..fp2 <- jmvcore::OptionNumber$new(
                 "fp2",
                 fp2,
-                default=15)
+                default=15,
+                min=0)
             private$..tn2 <- jmvcore::OptionNumber$new(
                 "tn2",
                 tn2,
-                default=95)
+                default=95,
+                min=0)
             private$..fn2 <- jmvcore::OptionNumber$new(
                 "fn2",
                 fn2,
-                default=30)
+                default=30,
+                min=0)
 
             self$.addOption(private$..TP)
             self$.addOption(private$..TN)
@@ -485,7 +497,8 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     list(
                         `name`="f1Score", 
                         `title`="F1 Score", 
-                        `type`="number"),
+                        `type`="number", 
+                        `format`="pc"),
                     list(
                         `name`="mcc", 
                         `title`="Matthews Correlation", 
@@ -710,11 +723,11 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' \donttest{
 #' # Illustrative examples only; these are not clinical guides.
 #' result1 <- decisioncalculator(
-#'   TP = 90, FN = 10, TN = 80, FP = 20
+#'   TP = 90, FN = 20, TN = 80, FP = 30
 #' )
 #'
 #' result2 <- decisioncalculator(
-#'   TP = 90, FN = 10, TN = 80, FP = 20,
+#'   TP = 90, FN = 20, TN = 80, FP = 30,
 #'   ci = TRUE, pp = TRUE, pprob = 0.15, fagan = TRUE
 #' )
 #'}

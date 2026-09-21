@@ -1092,7 +1092,10 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "useOpaCriterion",
                     "niMargin",
                     "ciMethod",
-                    "stratify")))}))
+                    "stratify",
+                    "showSummary",
+                    "showReportSentence",
+                    "showDescriptiveReport")))}))
 
 decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "decisioncompareBase",

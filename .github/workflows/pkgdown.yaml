@@ -88,6 +88,12 @@ jobs:
           extra-packages: any::pkgdown, local::.
           needs: website
 
+      # pkgdown renders every root .md into a site page (pkgdown:::package_mds);
+      # these are developer notes, not documentation. Same list as _build_site.R.
+      # The runner's checkout is disposable, so deleting them is safe.
+      - name: Drop developer notes
+        run: rm -f CLAUDE.md AGENTS.md GEMINI.md TODO*.md sonograph_log.md
+
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
@@ -96,6 +102,6 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          clean: false
+          clean: true
           branch: gh-pages
           folder: docs

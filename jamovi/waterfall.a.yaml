@@ -4,7 +4,7 @@ title: 'Treatment Response: Patient-Level Burden'
 menuGroup: OncoPath
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Waterfall and SpiderPlot: One burden value per patient or visit'
-version: '1.0.82'
+version: '1.0.83'
 jas: '1.2'
 
 description:

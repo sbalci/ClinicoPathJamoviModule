@@ -27,28 +27,10 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                  values = suppressWarnings(as.numeric(trimws(toks))))
         },
 
-        # Expected probability of every goodness-of-fit cell at agreement rho. kappaSize's
-        # FixedN* engines find the lower bound by walking rho down from kappa0 in steps of 0.001
-        # until the chi-square sum over AGREEMENT PATTERNS -- (n P_j(kappa0) - n P_j(rho))^2 /
-        # (n P_j(rho)) -- crosses qchisq(1 - 2 alpha, 1). The expected counts in the
-        # denominator are the cells at rho = kappaL, so that is where sparseness matters, and a
-        # rho at which any cell is negative is outside the common-correlation model altogether.
-        # Same closed forms as R/kappaSizePower.b.R:.gofCells (binomial form for a binary
-        # outcome; Dirichlet-multinomial product for 3-5 categories), verified against every
-        # FixedN* .CalcIT for raters 2-6 to 1e-11.
-        .gofCells = function(outcome, raters, props, rho) {
-            if (outcome == 2) {
-                p <- props[1]
-                j <- 0:raters
-                choose(raters, j) * p^j * (1 - p)^(raters - j) * (1 - rho) +
-                    rho * ifelse(j == raters, p, ifelse(j == 0, 1 - p, 0))
-            } else {
-                i <- seq_len(raters) - 1
-                agree <- vapply(props, function(pj)
-                    prod((pj * (1 - rho) + i * rho) / ((1 - rho) + i * rho)), numeric(1))
-                c(1 - sum(agree), agree)
-            }
-        },
+        # The goodness-of-fit cell probabilities now live in R/utils-kappasize.R
+        # (kappaSizeGofCells) -- the identical closed form used to be copied into all
+        # three kappaSize backends. See that file for the derivation and for which
+        # agreement level each engine evaluates the cells at.
 
         # Preformatted panes do not wrap; wrap at render time so translated text wraps too.
         .wrap = function(x, width = 78) paste(strwrap(x, width = width), collapse = "\n"),
@@ -90,7 +72,7 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         bound = private$.fmtBound(kappaL_val))))
             }
 
-            # Sparse goodness-of-fit cells (see .gofCells), judged by Cochran's rule: no expected
+            # Sparse goodness-of-fit cells (see kappaSizeGofCells), judged by Cochran's rule: no expected
             # count below 1 and at most one cell in five below 5. A bare "any cell < 5" flagged
             # the default design with four raters on one cell of 1.85 and so fired on nearly
             # every multi-rater study, hiding the cases that matter (six raters: 1.08 and 0.11).
@@ -113,7 +95,16 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 .("It answers 'given the subjects I have, how little agreement am I still unable to rule out?' - the mirror image of the sample-size question; every kappa below the bound is excluded."),
                 .("kappaSize searches downward in steps of 0.001 and reports the first value rejected, so the bound is conservative by at most 0.001 and its third decimal is the search resolution, not estimation precision."),
                 .("This is the bound the study reaches if the agreement it observes lands exactly on kappa0. Roughly half of such studies will observe less agreement than anticipated and end with a lower bound below the figure shown, so read it as a planning expectation rather than a guarantee."),
-                .("Note that kappa0 here is the agreement you anticipate observing, not a null hypothesis value as it is in kappaSizePower."))
+                .("Note that kappa0 here is the agreement you anticipate observing, not a null hypothesis value as it is in kappaSizePower."),
+                # The engine prints its own "expected cell count is less than five" line into
+                # the Analysis result pane, in almost the same words as the Sparse categories
+                # block above but from a DIFFERENT and looser check - kappaSize inspects the
+                # category prevalences you typed (for a binary design, only the prevalence of
+                # the finding, because FixedNBinary keeps props[1] alone), not the
+                # agreement-pattern cells the chi-square divides by. The two can and do
+                # disagree, so say which is which rather than leaving the reader to guess
+                # whether they are seeing one problem or two.
+                .("If the Analysis result panel also prints 'At least one expected cell count is less than five', that is a separate and looser check: kappaSize applies it to the outcome category prevalences you entered (for a binary outcome, to the prevalence of the finding alone). The Sparse categories warning above is the check that matters for the bound, because it is on the agreement-pattern cells the chi-square actually divides by, and those empty out long before any category prevalence does. Seeing one warning without the other is expected."))
 
             paste0(warn, info)
         },
@@ -266,9 +257,30 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Neither is a lower limit for kappa; a "< -1" check catches only the second.
             kappaL_val <- suppressWarnings(as.numeric(result$kappaL))
             has_bound  <- length(kappaL_val) == 1 && is.finite(kappaL_val)
-            cells <- if (has_bound) private$.gofCells(outcome, raters, props4, kappaL_val)
+            cells <- if (has_bound) kappaSizeGofCells(outcome, raters, props4, kappaL_val)
                      else NA_real_
-            if (!has_bound || !all(is.finite(cells)) || any(cells < 0))
+
+            # `any(cells < 0)` alone is BLIND for a 3-5 category outcome. There each
+            # "all raters agree on category j" cell is a PRODUCT of `raters` factors
+            # (p_j (1 - rho) + i rho) / ((1 - rho) + i rho), i = 0..raters-1, so when the
+            # bound runs far enough negative that an EVEN number of numerator factors flips
+            # sign the product comes back POSITIVE and the out-of-model design sails through
+            # (verified: outcome 5, raters 3, props 0.01/0.02/0.02/0.05/0.90, n 11,
+            # kappa0 0.01, alpha 0.001 -> kappaL -0.704, every cell positive and summing to
+            # 1; and outcome 3, raters 3, props 0.05/0.15/0.80, n 15, kappa0 0.05,
+            # alpha 0.001 -> kappaL -0.079). Test the FACTORS, not the product. For rho >= 0
+            # every factor is a sum of non-negative terms, so this can only reject a bound
+            # that is already negative (checked over 20,000 random rho >= 0 designs: zero
+            # rejections). The binary cells are sums, not products, so they expose the
+            # violation directly and need no extra test.
+            in_model <- if (!has_bound || outcome == 2) has_bound else {
+                i <- seq_len(raters) - 1
+                all((1 - kappaL_val) + i * kappaL_val > 0) &&
+                    all(outer(props4, i,
+                              function(p, k) p * (1 - kappaL_val) + k * kappaL_val) >= 0)
+            }
+
+            if (!has_bound || !all(is.finite(cells)) || any(cells < 0) || !in_model)
                 jmvcore::reject(
                     .fmt(
                         .("The calculation did not converge to a usable answer: the search returned {bound}, which is below the lowest agreement the model allows for these prevalences (every agreement pattern must keep a non-negative probability). With this combination of sample size, anticipated kappa and category prevalences the large-sample approximation breaks down. Increase N, use a less extreme prevalence, or raise the significance level."),

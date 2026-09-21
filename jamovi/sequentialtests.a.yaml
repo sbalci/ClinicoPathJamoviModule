@@ -4,7 +4,7 @@ title: Sequential Testing Analysis
 menuGroup: meddecide
 menuSubgroup: Decision Calculators
 menuSubtitle: Sequential Test Analysis
-version: '1.0.81'
+version: '1.0.83'
 jas: '1.2'
 
 description:
@@ -19,11 +19,11 @@ description:
         estimates applicable to the intended population before interpreting results.
 
         This analysis is particularly useful for:
-        • Exploring how diagnostic strategies behave under explicit assumptions
-        • Comparing hypothetical test sequences for teaching or planning
-        • Understanding trade-offs between sensitivity and specificity
-        • Illustrating expected testing volume and cost under user-supplied assumptions
-        • Teaching sequential testing concepts and Bayesian probability
+        - Exploring how diagnostic strategies behave under explicit assumptions
+        - Comparing hypothetical test sequences for teaching or planning
+        - Understanding trade-offs between sensitivity and specificity
+        - Illustrating expected testing volume and cost under user-supplied assumptions
+        - Teaching sequential testing concepts and Bayesian probability
 
 options:
     # Teaching examples

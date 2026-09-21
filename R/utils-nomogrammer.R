@@ -21,6 +21,13 @@
 #' @param LabelSize Numeric. Controls the size of text labels on the plot.
 #'   Default is 14/5 ~= 2.8.
 #' @param Verbose Logical. If TRUE, prints diagnostic metrics to the console.
+#' @param Theme A ggplot2 theme object used as the base theme, for example jamovi's global
+#'   \code{ggtheme}. The nomogram's own structural theme (hidden x axis, no grid, no legend)
+#'   is layered on top of it, so the layout is preserved. Defaults to \code{theme_bw()}.
+#' @param Title Character. Plot title. Callers inside a jamovi analysis pass a translated
+#'   string; this function is file-level, so it cannot translate one itself.
+#' @param PriorLabel Character. Name of the left (prior probability) axis.
+#' @param PosteriorLabel Character. Name of the right (posterior probability) axis.
 #'
 #' @details
 #' The Fagan nomogram visually represents Bayes' theorem for diagnostic testing:
@@ -94,7 +101,11 @@ nomogrammer <- function(Prevalence,
                         Detail = FALSE,
                         NullLine = FALSE,
                         LabelSize = (14/5),
-                        Verbose = FALSE) {
+                        Verbose = FALSE,
+                        Theme = NULL,
+                        Title = "Fagan Nomogram",
+                        PriorLabel = "Prior\nProb.\n(%)",
+                        PosteriorLabel = "Posterior\nProb.\n(%)") {
 
     ######################################
     ########## Helper Functions ##########
@@ -269,8 +280,24 @@ nomogrammer <- function(Prevalence,
     ########## Plotting Setup   ##########
     ######################################
 
-    # Set plotting theme
-    theme_nomogram <- theme_bw() +
+    # Set plotting theme. A caller may supply a base theme (jamovi's global ggtheme); the
+    # structural tweaks below are applied AFTER it, because a complete theme replaces whatever
+    # came before it and would otherwise bring back the x axis, the grid and the legend.
+    # jamovi hands a renderer `ggtheme`, which is NOT a theme object: jmvcore returns a
+    # LIST whose first element is the theme and whose remaining elements (when present) are
+    # discrete colour/fill scales. `inherits(Theme, "theme")` is therefore FALSE for every
+    # built-in jamovi theme, so the previous guard always fell through to theme_bw() and the
+    # nomogram stayed a white rectangle on the dark pane - the exact defect it claimed to fix.
+    # Take only the theme element: the palette scales would collide with this figure's own
+    # scale_colour_manual() for the positive/negative rules.
+    base_theme <- if (inherits(Theme, "theme")) {
+        Theme
+    } else if (is.list(Theme) && length(Theme) > 0 && inherits(Theme[[1]], "theme")) {
+        Theme[[1]]
+    } else {
+        theme_bw()
+    }
+    theme_nomogram <- base_theme +
         theme(
             axis.text.x = element_blank(),
             axis.ticks.x = element_blank(),
@@ -350,16 +377,16 @@ nomogrammer <- function(Prevalence,
             limits = rescale,
             breaks = -rescale_x_breaks,
             labels = ticks_prob,
-            name = "Prior\nProb.\n(%)",
+            name = PriorLabel,
             sec.axis = sec_axis(
                 transform = ~ .,
-                name = "Posterior\nProb.\n(%)",
+                name = PosteriorLabel,
                 labels = ticks_prob,
                 breaks = ticks_logodds
             )
         ) +
         scale_color_manual(values = c("pos" = "red", "neg" = "blue")) +
-        ggtitle("Fagan Nomogram") +
+        ggtitle(Title) +
         theme_nomogram
 
     ######################################

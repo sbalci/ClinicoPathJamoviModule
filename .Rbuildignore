@@ -191,7 +191,7 @@
 # =============================================================================
 # Development directories
 # =============================================================================
-^development-LLM/
+^development-LLM
 ^development-diagrams/
 ^development-documentations-dev\.jamovi\.org-master/
 ^development-ideas/
@@ -235,3 +235,13 @@
 ^jamovi_modules$
 ^MERGED_NEEDS_TESTING\.md$
 ^backlog\.json$
+^_build_site\.R$
+
+# LLM / agent tooling and developer notes -- never part of the package tarball
+^\.claude/
+^\.agents/
+^CLAUDE.*\.md$
+^AGENTS\.md$
+^GEMINI\.md$
+^TODO.*\.md$
+^sonograph_log\.md$
