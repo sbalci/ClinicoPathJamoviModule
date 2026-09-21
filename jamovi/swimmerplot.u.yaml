@@ -208,6 +208,7 @@ children:
                 name: plotTheme
               - type: ComboBox
                 name: colorPalette
+                enable: (responseVar)
               - type: CheckBox
                 name: showLegend
               - type: TextBox

@@ -210,6 +210,16 @@ items:
           title: 'Hedges'' g (paired)'
           type: number
           format: zto
+        - name: slope
+          title: 'Slope'
+          superTitle: 'Proportional Bias'
+          type: number
+          format: zto
+        - name: slope_p
+          title: 'p-value'
+          superTitle: 'Proportional Bias'
+          type: number
+          format: zto,pvalue
         - name: clinical_impact
           title: 'Clinical Impact'
           type: text
@@ -453,4 +463,5 @@ refs:
     - Schuirmann1987
     - Bonett2002
     - BlandAltman1999
+    - MacKinnonWhite1985
 ...

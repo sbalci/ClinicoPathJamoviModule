@@ -46,6 +46,458 @@
   `waterfall` sentences; every template was checked with R's `sprintf()` and both analyses were run in
   Turkish with every output switched on.
 
+## Unreleased — swimmerplot: numbers that disagreed with each other (module 1.0.81.01)
+
+- **Person-time could be catastrophically wrong when a start column and an end column had different
+  date types.** A plain date start with a date-time end reported 104,106,728 months of person-time next
+  to a correct mean duration of 2.5 months, with no error. Every duration is now measured on one scale.
+- **Milestones falling outside a patient's own timeline are now reported.** In the module's own example
+  data, 13 of 49 milestone values sit after the patient's end date; they were drawn past the end of the
+  lane and folded into the Milestone Event Summary median with nothing said. They are still shown - a
+  progression recorded after the last follow-up visit is real - but now counted and explained.
+- **The group comparison no longer reports "0 of 19 responded (0.0%)" for a response variable it has
+  just refused to score.** It applies the same RECIST check the response rates use.
+- **A grouping variable that is really a continuous measurement is now flagged.** Selecting one
+  produced a silent 24-group comparison in which every group read "1 of 1 responded". Patients dropped
+  because they have no value in the grouping variable are now reported too.
+- **An odds ratio of infinity keeps the half of its interval that exists.** A zero cell used to discard
+  the whole interval, including a lower bound of 1.20 - the part that carried the evidence.
+- **The "follow-up over 10 years" plausibility check now works in weeks and years**, not only days and
+  months. Under years, the same data previously published a median follow-up of 332.0 years in silence.
+- **Timeline Data export now shows the patients at the TOP of the figure.** It was taking them from the
+  bottom, so with the default longest-first sorting the 100 longest-followed patients were the ones
+  omitted - while the note claimed the order matched the plot.
+- **Several tables could not be reconciled with each other and now explain themselves**: Mean Duration
+  against Total Person-Time (they differ whenever a patient has a treatment gap), person-time rows that
+  sum to less than the total (patients with no recorded response), the event-marker percentage (over
+  markers, not patients), and the follow-up density (over person-time, not mean duration).
+- **"Most common response" now counts patients with no recorded response** and says so when there is a
+  tie; it previously reported "CR (37.5%)" beside a row reading "No recorded response (5/8) 62.5%".
+- **Copy-ready manuscript text** no longer says "1 patients" and now carries the small-sample caveat
+  that until now only appeared in the notices panel.
+- **Large cohorts are much faster.** A 10,000-patient dataset went from about 92 seconds to under 4.
+  Saved .omv files are smaller too.
+- Turkish: the glossary defined "OYO" for objective response rate while every table printed "ORR"; both
+  now use ORR. The date-format and follow-up explanations no longer mix English into Turkish sentences.
+
+## Unreleased — swimmerplot: one place to look for warnings (module 1.0.81.01)
+
+- **Every warning now appears in the same panel.** Three of them did not: the "cells below 5" caution
+  on the group comparison, the note explaining why Median/Protocol reference lines are withheld on an
+  absolute axis, and the data-quality messages about episodes and missing responses each had their own
+  box elsewhere on the page. Someone reading the notices panel to see what was wrong with their
+  analysis could miss all three.
+- **"Strong warning" now says so.** A caution that your results may be unreliable — a sample too small
+  to interpret as more than exploratory — printed with the same "WARNING:" label as a note that one
+  milestone date could not be read. It now reads "STRONG WARNING:", translated in every language the
+  module already ships.
+- **The response rate rows always account for every patient now.** Two ways they did not: editing the
+  data so the last SD patient was gone left an "SD Rate" row showing its old value (rates added to
+  125%), and a response recorded literally as "missing" collided internally with the "No recorded
+  response" row, so those patients lost their row entirely (rates added to 62.5%). Both contradicted
+  the note underneath promising the counts add to the total.
+- **A failed re-run no longer shows the previous run's tables.** Change something in the spreadsheet
+  that makes the data invalid and you got the error message sitting above a full set of results from
+  before the edit.
+- **The worked example in `inst/examples/swimmerplot_example.R` runs.** Nearly every call in it used
+  argument names the analysis does not have (`milestone1`, `sortBy`, `plotTitle` and a dozen more) and
+  several impossible option values, so it failed immediately for anyone who tried it.
+- **Better citations.** The exact binomial intervals behind ORR and DCR now cite Clopper & Pearson
+  (1934), the reverse Kaplan-Meier cites the `survival` package alongside Schemper & Smith, and the
+  references are attached to the specific tables that use them rather than only to the analysis.
+- Five option descriptions were corrected where they described how the analysis used to behave — the
+  colour palette does not colour groups, reference lines are withheld on an absolute axis, the timeline
+  export shows at most 500 patients, and a Sort variable overrides Sort order.
+
+## Unreleased — swimmerplot: RECIST wording, intervals and readability (module 1.0.81.01)
+
+- **The Clinical Glossary now states RECIST 1.1 correctly.** Progressive Disease read only ">=20%
+  increase in sum of target lesion diameters"; the definition also requires that the increase be
+  measured against the smallest sum recorded on study (the nadir) and be at least 5 mm in absolute
+  terms, and that any new lesion is progression regardless. Stable Disease named no reference point,
+  and Complete Response omitted the under-10 mm lymph-node rule. The panel now says that Partial
+  Response is measured against baseline while SD and PD are measured against the nadir, that the
+  category shown is the patient's best overall response across target, non-target and new lesions, and
+  cites Eisenhauer et al. 2009.
+- **The median follow-up confidence interval is no longer thrown away when its upper limit is not
+  reached** - which, with a reverse Kaplan-Meier, is the usual case. "28 (95% CI 22 - NA)" showed as an
+  empty cell; it now reads "22.00 - NR". The copy-ready manuscript sentence carries the interval too.
+- **Person-time by best response carries the caveat it needs.** A patient can only be recorded as a
+  responder by living long enough to be assessed, so responders accumulate longer follow-up whatever
+  the treatment does (guarantee-time bias). The table now says so and points to a landmark or
+  time-dependent analysis. "Follow-up Density" is also flagged as exactly 100 divided by the Mean Time
+  beside it, not additional information.
+- **The Instructions, Glossary and About panels are readable in the dark theme.** Twenty headings and
+  paragraphs used fixed colours that fall below the accessibility contrast floor against a dark
+  background.
+- **The time unit now translates.** Sentences were translated while the unit inside them stayed in
+  English ("aylar" vs "months").
+- **Saved .omv files are smaller and reopen faster.** The plot was storing a per-patient table and an
+  interpretation that nothing drew from - about 1.5 MB for a 10 000-patient dataset.
+
+## Unreleased — swimmerplot: error messages that point at the real problem (module 1.0.81.01)
+
+- **Dates entered with Time Input Type on "Raw Values" are now identified as such.** Formats the
+  detector does not recognise - "1/5/2023", "15.01.2023" - used to produce "No valid data rows ... end
+  times are >= start times", a message about ordering for data that contains no numbers at all. The
+  error now quotes one of the values and tells you to switch to Date/Time.
+- **In Date/Time mode, a value the chosen Date Format cannot read is reported separately from a blank
+  one**, and the message names the format. Both used to read "missing start or end time".
+- **Dates on a raw timeline now raise an error.** The analysis had already stopped, but the only notice
+  said "Time units" while every summary value came out blank.
+- **Timeline Data export no longer freezes large cohorts.** Building that table costs jamovi about 33
+  seconds for 1000 rows and grows quadratically - 2000 patients added over two minutes to every run. It
+  now shows the first 500 patients and says so; the plot, the statistics and every other table continue
+  to use the whole cohort.
+
+## Unreleased — swimmerplot: the figure now matches the tables (module 1.0.81.01)
+
+- **Lane colours use the same response labels the tables report.** They were taken from the raw column,
+  so a dataset writing "complete response", "Complete Response" and "CR" showed three colours and three
+  legend entries for one category. The legend is also ordered clinically (CR, PR, SD, PD, NE) instead of
+  alphabetically, which used to place PD between PR and SD.
+- **"High Contrast" no longer replaces the plot with the simplified version** when the response variable
+  has more than eight categories. The palette has eight colours; beyond that the plot now uses Viridis
+  and says so. The palette control is disabled when no response variable is selected, where it had no
+  effect.
+- **Patients are now listed top-down in the order you chose.** Every sort order was drawn upside down -
+  "Duration (Longest First)" put the longest lane at the bottom. Sorting by Patient ID also ordered
+  1, 10, 2, 20, 3; numeric IDs now sort numerically.
+- **The status arrow is explained on the figure itself**, in a caption that travels with an exported
+  image. It is also described correctly everywhere: an arrow marks a patient censored or still at risk
+  at the data cutoff, which is not the same as still on treatment.
+
+## Unreleased — swimmerplot: the analysis checkboxes now do what they say (module 1.0.81.01)
+
+- **Objective Response Rate and Disease Control Rate follow "Response analysis"**, not "Person-time
+  analysis". Turning person-time off used to remove the response rates as well - the headline numbers of
+  the analysis - while leaving a person-time paragraph in the Clinical Interpretation with no table
+  behind it. Both now appear and disappear with the option that names them.
+- **Turning "Response analysis" off now stops the response output.** The ORR/DCR group comparison tests
+  went on reporting p-values, and person-time was still broken down by CR/PR/SD/PD.
+- **Tables are no longer shown empty without explanation.** Person-time by response, milestones, event
+  markers and the group comparison now appear only when the variables they need are selected, and where
+  the data itself cannot support them - one group, no recorded responses, no usable milestone value -
+  the table carries a note saying so.
+- **The group comparison no longer invents response rates** when no response variable is selected. It
+  reported "A: 0 of 4 responded (0.0%)" for data that records no responses at all.
+
+## Unreleased — swimmerplot: things that were being dropped without a word (module 1.0.81.01)
+
+- **Event markers that fall outside a patient's timeline are now reported.** They were removed from the
+  plot and from the Event Marker Summary, and the summary's percentages were then calculated over what
+  was left - so ten events with three deaths recorded after the last follow-up line printed as "Scan 4
+  (80%), Toxicity 1 (20%)" with no Death row. A warning gives the number and the reason, and says the
+  table describes only the markers that remain.
+- **The data-quality panel now counts patients rather than rows.** With more than one row per patient it
+  reported things like "6 duplicate patient IDs" and "6 patients with missing response data (50.0%)"
+  directly above a summary showing six patients with every response classified. Follow-up length is a
+  patient's whole span, a response counts as missing only when the patient has none on any row, and each
+  message states its denominator.
+- **Milestones that are ignored now say so.** A milestone above "Maximum milestones" was skipped
+  silently; a milestone with an empty name was skipped even though a variable was chosen (it now takes
+  the variable's name); and two milestones sharing a name were merged into one row (they are now told
+  apart by their variable).
+- **Choosing a Sort Variable says that it overrides Sort Order**, instead of leaving three different
+  Sort Order settings producing the same picture.
+
+## Unreleased — swimmerplot: a display switch that moved the statistics (module 1.0.81.01)
+
+**Milestone and event "Median Time" values change** where Time Display was set to "Absolute (use actual
+start times)" and patients start at different points. They were axis positions, not times from the
+patient's start: five patients starting at 0/10/20/30/40 whose surgery was about 3 months in were
+reported as a median of 22 months (range 3-41). The same timeline entered as dates always gave 3. Every
+display mode now reports time from each patient's own start, which is what the column meant, and the two
+columns are retitled "Median Time from Start" and "Time Range from Start". A patient with more than one
+episode is measured from the earliest, not from whichever episode the file happened to list first.
+
+- **Median and Protocol reference lines are no longer drawn on an absolute axis.** They measure a
+  duration from each patient's start, so on a study-time axis they landed wherever that number happened
+  to fall - lanes spanning 100 to 256 got a "Median: 12.5" line off the left-hand end. This was already
+  the behaviour for date axes; raw numeric times were missing it, and nothing was said. A note now
+  explains it and points at Time Display, and the lines still appear whenever every patient starts at
+  the same time.
+- **Total person-time and follow-up no longer depend on Time Display.** With dates and end-of-month
+  cycles, the same data gave 3.98 months in relative mode and 4.02 in absolute; 4.02 is the calendar
+  answer and is what both now report.
+
+## Unreleased — swimmerplot: follow-up that depends on row order, and a label that said the opposite (module 1.0.81.01)
+
+- **A patient's censoring status was read from the last row in the file**, not from their latest episode. The
+  ongoing-treatment arrow was already drawn at the latest end time, so position and status could disagree for
+  anyone with more than one episode - and re-sorting the same data changed the median follow-up. All three
+  places that made this decision now share one rule, and the result matches `survival::survfit` computed
+  from latest-episode statuses.
+- **Patients with no censoring value were silently counted as completed follow-up.** `NA` failed the
+  "censored" test, so they entered the reverse Kaplan-Meier as events and dragged the median down. They are
+  now excluded and the exclusion is reported.
+- **"No censoring information" appeared even when a censoring variable was supplied** and every value was
+  understood - the reversed curve simply never reaches 50%, or nobody was censored. The row now says
+  "reverse Kaplan-Meier not estimable", and the estimator's explanation of which of the two happened is
+  shown beside it instead of being computed and thrown away.
+- **An unreadable Custom Reference Date is no longer discarded in silence.** It fell through to the same
+  fallback as an empty box, so the reference line moved to somewhere you did not choose. The warning names
+  the Date Format that was applied - the usual cause is an ISO date entered against dmy data.
+
+## Unreleased — swimmerplot: the odds ratio now says which way it points (module 1.0.81.01)
+
+- **The group-comparison odds ratio named no direction.** It printed as a bare `OR = 1.30`, and the 2x2 it
+  came from was built by `table()` on the group as plain text - so the rows were ordered alphabetically and
+  **renaming a group could invert the estimate**. A reader had no way to tell whether the odds favoured the
+  first group or the second. It now reads `OR (B vs A) = 13.25, 95% CI 1.31 to 239.40`: the comparison is
+  named, the table is built in the order you set on the factor, and the interval that `fisher.test` was
+  already computing is no longer discarded.
+- **Per-group counts sit beside the test** (`A: 2 of 10 responded (20.0%); B: 8 of 10 responded (80.0%)`),
+  so the test can be checked against the rates above it instead of taken on trust.
+- **The small-cell warning no longer appears when no test was run.** It read the cell counts off any
+  contingency table that had been built, so a cohort where no comparison was possible still warned about
+  "cells with counts below 5".
+- **A group table that cannot be tested now says so.** Where every patient in the comparison had the same
+  outcome, the table was simply empty - or quietly missing one of its two rows - with nothing to explain it.
+
+## Unreleased — swimmerplot: one denominator for response, and a best response that respects progression (module 1.0.81.01)
+
+**Reported response rates change. They can only fall or stay the same.** If you published an ORR from an
+earlier version it was computed over a subset and was equal or higher; the release note below says why.
+
+- **ORR and DCR now divide by every patient in the analysis.** They divided by the CR/PR/SD/PD "evaluable"
+  subset, so patients recorded NE or with no response were dropped. RECIST 1.1 section 4.9.1 is explicit:
+  *"Trial conclusions should be based on the response rate for all eligible (or all treated) patients and
+  should not be based on a selected 'evaluable' subset."* NE is one of the five outcomes a patient can be
+  assigned, not an exclusion. On a 12-patient cohort with 2 NE and 1 missing response, ORR moves from 44.4%
+  (4/9) to 33.3% (4/12) and DCR from 77.8% to 58.3%; the confidence interval is now computed over the same
+  denominator as the estimate it accompanies. The evaluable-subset figure is still available, labelled.
+- **The whole page now uses that one denominator.** It previously used five: the per-category rates divided
+  by 11, the ORR by 9, the Fisher group test by 11, the headline "Study included 12 patients" by 12, and a
+  validation message by the number of episode rows. Each summary row now carries its own count as `n/N`, so
+  the numbers can be reconciled by hand rather than trusted.
+- **A response recorded after progression no longer becomes the best overall response.** Four patients who
+  each progressed and were then recorded CR or SD were reported as ORR 50% / DCR 100%; the RECIST rule takes
+  the best assessment up to and including the first PD, which makes both 0%. The truncation is ordered by
+  episode start time, so it no longer depends on the order rows happen to appear in the file.
+
+Not changed, deliberately: response confirmation and a minimum duration for stable disease. This analysis
+has no assessment-date semantics, so either would be a silent assumption of exactly the kind being removed.
+
+## Unreleased — swimmerplot: a crash and a halved follow-up (module 1.0.81.01)
+
+First pass of `/check-function swimmerplot --profile release`. Two defects fixed; the analysis is **not**
+release-ready and 44 audit findings remain open (recorded in TODO.md).
+
+- **One missing censoring value could kill the whole analysis.** Above 1000 rows the fast aggregation path
+  gave a patient with no censoring or group value an untyped `NA`, which data.table refuses to mix with the
+  other patients' numbers. The result was no plot, no tables, and data.table's internal message
+  ("Column 6 of result for group 2 is type 'double' but expecting type 'logical'") shown to the user. One
+  patient with a blank cell in a 1001-row dataset was enough. The row filter checks the patient id and the
+  two times but never the censoring column, so nothing upstream removed it.
+- **Censoring coded 1 / 2 was read as "everything is an event".** That is `survival::Surv`'s own convention
+  (1 = censored, 2 = event), and the analysis turned every non-zero value into an event: the reverse
+  Kaplan-Meier was dropped in favour of "observed durations; no censoring information" and the median
+  follow-up came out about half its true value, with no warning. On the audit's ten-patient example it now
+  returns 30 under both codings, matching `survival::survfit`.
+- **The censoring convention is now stated rather than assumed.** Whichever way the column is read, a notice
+  says so ("0 = censored, 1 = event", or for 1/2 data the survival convention plus how to recode if that is
+  wrong). Reading this column is a guess, and getting it backwards halves the reported follow-up.
+
+## Unreleased — diagnosticmeta: the findings the earlier passes deferred (module 1.0.81.01)
+
+`/fix-function diagnosticmeta --apply`, clearing eight of the findings the release-profile run had filed
+rather than fixed. Two of them change what a clinician reads.
+
+- **The copy-ready summary carried two point estimates and nothing else.** The one block a user pastes into a
+  manuscript said "pooled sensitivity of 81.7% and specificity of 89.2%" while a strong warning about a
+  55-94% prediction interval sat unread in the notices panel. It now carries both confidence intervals, the
+  confidence level, and the prediction interval when one exists.
+- **Accuracy bands were stated as clinical clearance.** "Your pooled sensitivity ... is classified as *good*
+  for screening purposes" is a fitness-for-use verdict that no meta-analysis of accuracy alone can give - it
+  depends on prevalence and on what each error costs. The eight band sentences now name the band on the
+  conventional 90/80/70 scale and say plainly that this is a descriptive convention, not a judgement about
+  fitness for screening or confirmation.
+- **Sparse data now raises the caveat it deserves.** The bivariate model approximates the logit pair as
+  normal, which is biased with tiny cells; published comparisons against a binomial mixed model differ by
+  several percentage points on such data. A warning fires when a quarter or more of the studies have a cell
+  of 0 or 1 - calibrated so it stays silent on ordinary data, where cells of 2-4 are common.
+- **The meta-regression table said what scale it was on.** Coefficients are on the logit scale and were
+  unlabelled, so an intercept of 95.26 read like a percentage; for a categorical covariate the reference
+  level was never named. Both are now stated, and metafor's confidence interval - already computed at the
+  user's level - is reported instead of leaving the reader to combine an estimate and a standard error with
+  the right reference distribution.
+- **The pooled table now states its scope**: the confidence level, the number of studies, and the number of
+  participants with and without the target condition.
+- Heterogeneity and proportional-hazards rows are built in `.init()` and filled with `setRow()`, so the
+  tables no longer appear empty and visibly restructure on every run; a margin that cannot be fitted leaves
+  blank cells instead of disappearing.
+- The forest-plot explanation claimed "higher on the Y-axis = higher study estimate". Rows are ordered by
+  each study's *mean* of sensitivity and specificity, so a study keeps the same row in both panels - useful,
+  but not what the text said.
+- The funnel-plot explanation could appear without the funnel plot (the plot needs publication bias switched
+  on as well); two translated nouns spliced into sentences became whole sentences per branch.
+
+**A trap worth recording.** The first attempt at the copy-ready summary read `private$.pooled_spec_pi`, a
+field an earlier pass in this same session had deleted as write-only. Reading a field that does not exist on
+an R6 private environment yields `NULL`, and `sprintf()` with a zero-length argument returns `character(0)`
+rather than erroring - which propagated through the panel's final `sprintf` and blanked the entire Analysis
+Summary with nothing in the log. Caught by bisecting against the previous file, not by any error.
+
+## Unreleased — diagnosticmeta review of the audit fixes (module 1.0.81.01)
+
+`/review-function diagnosticmeta`. A six-lens adversarial review of the audit fix pass, each finding put to a
+skeptic. Nine survived, and most were introduced by that pass.
+
+- **The funnel plot could take itself down.** Six readers on one set of slides gives every study the same
+  effective sample size, the regression slope is aliased, and the coefficient matrix has one row. The test
+  path guarded that; the renderer, which has no error handler, indexed row 2 anyway and the whole figure
+  failed with `subscript out of bounds`.
+- **"Both are effectively zero" was printed when only one was.** The guard is an AND over the two
+  between-study variances, so a fit with tau-squared 1.21 on sensitivity and 3.9e-18 on the false-positive
+  rate - the routine picture when specificity is pinned near 1 - printed both values and then declared the
+  studies consistent with a single common pair. It now names which component is zero and says to read the
+  other.
+- **A below-chance proportional-hazards area told the user to check their data entry.** It is model misfit
+  (theta > 1 puts the Lehmann curve under the diagonal), not a swapped column, and the convergence retry
+  shipped in the same release routes ordinary high-sensitivity data into it. Downgraded from ERROR to a
+  strong warning that says the pooled estimates are unaffected and points at the bivariate model.
+- **`Method of Moments` is multivariate DerSimonian-Laird**, passed straight to the bivariate model through
+  mvmeta - so the option help added in the audit pass, which said DL "is not offered there", was wrong.
+- **Zwinderman & Bossuyt 2008 is about pooling likelihood ratios**, not about the univariate I-squared; that
+  claim now cites the Cochrane DTA Handbook, which was already in the reference list.
+- The prediction-region note claimed the printed interval is always the conservative one. It is the wider one
+  only below about eight studies; from there up the region is.
+- The funnel plot printed Deeks' t and p with no hint that the table beside it had called the same numbers
+  descriptive; ticking only the funnel plot without publication bias still gave a blank pane with no notice;
+  a note claimed two meta-regression models "were fitted" when both had bailed out; and a dead
+  `setNote("disabled")` wrote to a table the same option hides.
+- Panels now clear their content when unticked. jmvcore restores Html content unconditionally, so a panel
+  ticked once kept its HTML in the results and in every later save.
+
+**A correction to the previous entry.** It said a stale "disabled by user option" footnote survived a
+re-tick. That mechanism does not exist: `setNote()` defaults to `init = TRUE` and jmvcore restores a note
+only `if (!note$init)`. The `clearWith` line added there is still right, for a different reason -
+`Table$fromProtoBuf` returns early only when a `clearWith` option changed, so without it the hidden table
+kept the previous fit's **cells**.
+
+## Unreleased — diagnosticmeta deep audit (module 1.0.81.01)
+
+`/check-function-full diagnosticmeta`, a report-only audit followed by a fix pass. The statistics were already
+right - pooled estimates, heterogeneity and Deeks' test reproduce `mada` 0.5.12 and `metafor` 5.2.1 to
+0.00e+00 - so everything here is about what the analysis showed, hid, or said.
+
+**Two defects a clinician would hit by unticking one checkbox**
+
+- Unticking **Bivariate random-effects model** and reticking it left the footnote *"Bivariate analysis disabled
+  by user option"* sitting under genuine pooled sensitivity and specificity, and saved it into the `.omv`. The
+  note was written to the hidden table and nothing ever rewrote it, because `bivariate_analysis` was missing
+  from that table's `clearWith`.
+- With that box unticked and everything else at its default, the results pane was **completely empty** - every
+  item hidden, and the instructions panel hidden the moment the variables were assigned. There is now a notice
+  saying how many studies were read and which box to tick.
+
+**Said less, or said it wrong**
+
+- Three or four studies were pooled with no caution at all. The Reitsma model estimates five parameters from
+  them; a three-study example returned 85.7% (79.2-90.4) looking entirely confident. Fewer than five studies
+  now raises a strong warning.
+- The `zero_cell_correction` help was silent on the publication-bias path, which behaves differently: under
+  `none` a zero cell survives to Deeks' test, so it and the funnel plot correct **every** study and withhold
+  the verdict past a quarter zero-cell studies, while the other three settings leave no zero cell and always
+  give a verdict. (A first draft of this note said the setting was ignored there, which an adversarial check
+  proved false.)
+- The `method` help warned that DerSimonian-Laird is inappropriate without saying that choosing "Method of
+  Moments" gives exactly that in the heterogeneity and meta-regression tables, where it is the right estimator.
+- `confidence_level` said "meta-analysis results"; it drives the pooled intervals, the likelihood ratios, the
+  prediction interval, the per-study Wilson intervals and both SROC regions.
+- A failed meta-regression put `metafor`'s bare sentence in the notices panel with nothing around it.
+- Five methods named in the output - Deeks/Macaskill & Irwig, Zwinderman & Bossuyt, Riley et al., Sweeting et
+  al., Holling et al. - had no bibliography entry to click through to. They now do.
+
+**Did work nobody could see**
+
+- About 31 KB of HTML - the methodology panel, the clinical interpretation and the three plot explanations,
+  plus the analysis summary - was built on every run and written into every saved `.omv` whether or not the
+  boxes that reveal them were ticked. The four `show_*` options did not appear in the backend at all. They do
+  now, and nothing is built when they are off.
+- `.run()` had no `private$.checkpoint()` anywhere: 200 studies with everything enabled froze the UI for about
+  four seconds with no way to cancel. Six checkpoints now sit between the expensive fits, outside the `tryCatch`
+  blocks (the checkpoint restart is error-class, so a handler would swallow it).
+- The Notices panel rendered as an empty titled box on every clean run.
+- Removed, with no behaviour change: an unreachable `method` fallback (jmvcore rejects an invalid key first),
+  the whole `.validateStudyData` method (its study-count branch was unreachable behind an earlier `reject()`
+  and its only other statement was overwritten nine lines later), a data cache that `.run()` invalidated before
+  its single use, an unused return field, an unused local, a write-only field and an unused parameter on three
+  methods.
+- Note keys were built from translated labels, so in a Turkish session they became `small_sample_duyarlilik`.
+
+## Unreleased — diagnosticmeta release review (module 1.0.81.01)
+
+`/check-function diagnosticmeta --profile release`, fixing 29 of the 40 findings from the 2026-09-18
+OncoPath audit. Every fix carries a regression test in
+`tests/testthat/test-diagnosticmeta-release-fixes.R`; 10 of its 11 test blocks fail on the previous backend.
+
+**Wrong numbers, silently**
+
+- Counts typed as **Nominal** in jamovi were read as their factor level codes, not as counts. A dataset
+  whose 2x2 columns were nominal reported pooled sensitivity 59.0% / specificity 50.0% where the same
+  numbers typed as continuous give 85.8% / 89.4%, and the per-study table showed level indices instead of
+  the counts. All four cells now go through `jmvcore::toNumeric()`.
+- **Deeks' test** applied its 0.5 continuity correction only to the studies with a zero cell - the small,
+  near-perfect ones, which sit at one end of the regression - so the correction itself produced funnel
+  asymmetry. On null data where no study was ever discarded, the test claimed asymmetry in 66.7% of
+  meta-analyses (nominal 5%). The correction now goes on every study, and no verdict is reported at all
+  when more than a quarter of the studies have a zero cell. The same null simulation now gives 0.0%, and
+  2.0% at the 36%-zero-cell configuration that previously gave 14%.
+- The **HSROC (Holling proportional-hazards) model** reported the last iterate of an unfinished
+  optimisation as a fit: mada::phm only warns when it hits its 100-iteration limit, and that warning was
+  caught and the model refitted at the same limit with warnings suppressed. On a 6-study set this reported
+  theta 0.056 / AUC 0.947 where the converged fit gives theta 1.574 / AUC 0.389. It is now refitted with a
+  5000-iteration budget, the retry is disclosed, and a non-converged fit raises a strong warning.
+- **"Substantial between-study heterogeneity"** was decided by the WIDTH of the prediction interval, which
+  is wide at small k because of the t quantile on k-2 df. Three identical studies (Q = 0, I2 = 0,
+  tau-squared = 0) were reported as "studies differ more than sampling error explains". The warning now
+  requires the estimated between-study variance to dominate the interval; when it does not, the note says
+  the width comes from the study count instead.
+- The **sensitivity/specificity correlation** was printed from two variance components that were
+  numerically zero (6e-11 and 7e-10) - a ratio of rounding residues that read as "-0.54 ... suggests a
+  threshold effect" where metafor gave +0.21 with an interval covering -1 to 1. It is now withheld below a
+  variance of 1e-4 with an explanation.
+- The **SROC curve** was drawn from FPR 0.01 to 0.99 whatever the studies covered (74 of 99 points outside
+  the observed range on the bundled data). It is now evaluated inside the observed range only, matching
+  mada's own `plot.reitsma(extrapolate = FALSE)`. The chance diagonal that the guidance panel describes is
+  now actually drawn.
+- **Fixed effects** silently removed every heterogeneity safeguard: no prediction interval, no SROC
+  prediction region, no heterogeneity warning, a forest plot whose pooled diamond had no error bars while
+  the table beside it showed an interval, and notes still directing the reader to the prediction interval.
+  All four are fixed, and the method now announces what it assumes and what it does not produce.
+- The **meta-regression degrees-of-freedom guard** ran before each margin dropped its own zero-cell
+  studies, so a saturated model still reached metafor and its raw error text ("Number of parameters to be
+  estimated is larger than the number of observations") reached the user as a notice. The guard is now
+  per margin, and its note quotes that margin's study count and df.
+
+**Silent changes to the study set, now disclosed**
+
+- Studies excluded from the meta-regression for a missing covariate.
+- Zero-cell studies: the 0.5 correction reaches the bivariate model, while the univariate heterogeneity and
+  meta-regression models exclude those studies instead. The option help said the opposite.
+- Non-integer counts are excluded with a warning; all-fractional and proportion-valued input is rejected
+  with a specific message instead of a generic "fewer than 3 studies".
+- Duplicate and missing study identifiers are made unique and reported.
+
+**Interpretation corrected**
+
+- The two interpretation panels equated a significant Deeks test with publication bias. Per the Cochrane
+  DTA Handbook (ch. 10), asymmetry has several explanations - threshold, spectrum, chance - and the panels
+  now say so and tell the reader to look for a clinical explanation first.
+- The verdict now names the alpha it used (0.05; some DTA implementations use 0.10), and the power caveat
+  matches the verdict it accompanies rather than only covering non-significance.
+- The funnel plot carries its own regression line and the test's t, df and p, so plot and test can be read
+  together.
+- Deeks' test on studies that all have the same effective sample size reported a raw "subscript out of
+  bounds"; it now says the test is not estimable and why.
+
+**Known limitation.** The SROC prediction region keeps mada's large-sample radius while the prediction
+interval in the table uses t on k-2 df, so at small k the region's marginal span is narrower than the
+printed interval. The two are different objects and the note now says so; changing the region's radius
+would break parity with mada's own `plot.reitsma(predict = TRUE)`.
+
 ## Unreleased — ihcheterogeneity release review (module 1.0.81.01)
 
 - `ihcheterogeneity`: `/check-function --profile release` passes after the 2026-09-18
@@ -76,6 +528,30 @@
   and the glossary, which now explains the verdicts. Tables and plots clear only on the options they
   read. The help page has a runnable example; `ihcheterogeneity_test.rda` ships to OncoPath and
   JamoviTest for it.
+- `ihcheterogeneity` (`/review-function` follow-up and `/release-review-function`): **a difference
+  that changes with the level (proportional bias) is now checked.** A region that compressed the
+  scale (+6 points at 45%, -6 at 85%) had a mean difference of about 0 and was reported as
+  "AGREEMENT THRESHOLDS MET"; it now reads "AGREEMENT THRESHOLDS MET, NOT CONFIRMED" with both ends
+  named. The Sampling Bias table has a slope and its p-value (heteroscedasticity-robust HC3 errors,
+  MacKinnon & White 1985), each difference regressed on the reference value (without a reference, on
+  the case mean of the regions). When the slope is shown (p below 0.05 divided by the number of
+  comparisons), the difference is also judged at the 5th and 95th percentiles of the level, and it is
+  ruled out only if it lies within the margin at both. A slope never makes a difference material:
+  with one reading per method it cannot be told from measurement error in the reference or a deviation
+  the regions share (regression to the mean). The release review found that comparing each region
+  along the mean of the other regions, the first design, made unbiased regions MATERIAL in up to 32% of
+  simulated studies when the regions shared a site effect, and let a sparse second region shrink the
+  check to a few cases.
+- `ihcheterogeneity`: **the graded CV is now the within-case CV**, the root mean square of the
+  per-case CVs, in the table, the spatial table and plot and the compartment comparison. The plain
+  mean read a true 15% as 11.8% with two values per case, and about 6% low with five, so designs
+  with fewer regions passed the CV threshold more easily. CVs read higher than before: by a few
+  percent on the bundled datasets, but up to about twice as high where the measurement error does not
+  grow with the level and many cases are low (the root mean square weights those cases more). The
+  median is shown as a descriptive value and no longer excuses a CV above the threshold. "Met" texts
+  now claim only the average difference and whether a level dependence was detected, and name any
+  comparison that could not be checked. The Spatial Region ID help says one row per case, and the
+  correlation-threshold help now says which correlation is graded.
 
 ## Unreleased — pathsampling release review (analysis 1.0.0 -> 2.0.0)
 

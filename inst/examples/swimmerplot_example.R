@@ -46,14 +46,14 @@ milestone_plot <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Response",
-  milestone1 = "TreatmentStart",
-  milestone1_name = "Treatment",
-  milestone2 = "FirstAssessment",
-  milestone2_name = "First Assessment",
-  milestone3 = "BestResponse",
-  milestone3_name = "Best Response",
-  milestone4 = "Progression",
-  milestone4_name = "Progression"
+  milestone1Date = "TreatmentStart",
+  milestone1Name = "Treatment",
+  milestone2Date = "FirstAssessment",
+  milestone2Name = "First Assessment",
+  milestone3Date = "BestResponse",
+  milestone3Name = "Best Response",
+  milestone4Date = "Progression",
+  milestone4Name = "Progression"
 )
 
 # ───────────────────────────────────────────────────────────
@@ -70,22 +70,21 @@ immuno_plot <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Response",
-  milestone1 = "ImmunotherapyStart",
-  milestone1_name = "IO Initiation",
-  milestone2 = "FirstResponse",
-  milestone2_name = "First Response (8-12 wk)",
-  milestone3 = "ConfirmedResponse",
-  milestone3_name = "Confirmed Response (12-16 wk)",
+  milestone1Date = "ImmunotherapyStart",
+  milestone1Name = "IO Initiation",
+  milestone2Date = "FirstResponse",
+  milestone2Name = "First Response (8-12 wk)",
+  milestone3Date = "ConfirmedResponse",
+  milestone3Name = "Confirmed Response (12-16 wk)",
+  showEventMarkers = TRUE,
   eventVar = "irAE",
   eventTimeVar = "irAE_Time",
   groupVar = "PDL1_Status",
   censorVar = "Censored",
-  sortBy = "duration",
-  colorPalette = "Set2",
-  showReferenceLine = TRUE,
-  referenceLineValue = 180,
-  plotTitle = "Immunotherapy Trial: Patient Follow-up",
-  xAxisTitle = "Time (Days)",
+  sortOrder = "duration_desc",
+  colorPalette = "default",
+  referenceLines = "custom",
+  customReferenceTime = 180,
   timeUnit = "days"
 )
 
@@ -103,21 +102,20 @@ surgery_plot <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Outcome",
-  milestone1 = "SurgeryDate",
-  milestone1_name = "Surgery",
-  milestone2 = "Discharge",
-  milestone2_name = "Hospital Discharge",
-  milestone3 = "FirstVisit",
-  milestone3_name = "First Follow-up Visit",
-  milestone4 = "ComplicationDate",
-  milestone4_name = "Complication Onset",
+  milestone1Date = "SurgeryDate",
+  milestone1Name = "Surgery",
+  milestone2Date = "Discharge",
+  milestone2Name = "Hospital Discharge",
+  milestone3Date = "FirstVisit",
+  milestone3Name = "First Follow-up Visit",
+  milestone4Date = "ComplicationDate",
+  milestone4Name = "Complication Onset",
+  showEventMarkers = TRUE,
   eventVar = "ComplicationType",
   eventTimeVar = "ComplicationDate",
   groupVar = "SurgeryType",
-  sortBy = "duration",
-  colorPalette = "Dark2",
-  plotTitle = "Surgical Outcomes: Postoperative Timeline",
-  xAxisTitle = "Days Post-Surgery"
+  sortOrder = "duration_desc",
+  colorPalette = "contrast"
 )
 
 # ───────────────────────────────────────────────────────────
@@ -134,24 +132,23 @@ comparison_plot <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Response",
-  milestone1 = "TreatmentStart",
-  milestone1_name = "Treatment Initiation",
-  milestone2 = "FirstAssessment",
-  milestone2_name = "8-Week Assessment",
-  milestone3 = "BestResponse",
-  milestone3_name = "Best Response",
-  milestone4 = "Progression",
-  milestone4_name = "Disease Progression",
+  milestone1Date = "TreatmentStart",
+  milestone1Name = "Treatment Initiation",
+  milestone2Date = "FirstAssessment",
+  milestone2Name = "8-Week Assessment",
+  milestone3Date = "BestResponse",
+  milestone3Name = "Best Response",
+  milestone4Date = "Progression",
+  milestone4Name = "Disease Progression",
+  showEventMarkers = TRUE,
   eventVar = "AdverseEvent",
   eventTimeVar = "EventTime",
   groupVar = "Group",
   censorVar = "Censored",
-  sortBy = "duration",
-  colorPalette = "Set1",
-  showReferenceLine = TRUE,
-  referenceLineValue = 180,
-  plotTitle = "Phase III Trial: Experimental vs Control",
-  xAxisTitle = "Time from Enrollment (Days)",
+  sortOrder = "duration_desc",
+  colorPalette = "contrast",
+  referenceLines = "custom",
+  customReferenceTime = 180,
   showLegend = TRUE
 )
 
@@ -169,24 +166,23 @@ complete_timeline <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Response",
-  milestone1 = "Diagnosis",
-  milestone1_name = "Diagnosis",
-  milestone2 = "Surgery",
-  milestone2_name = "Surgical Resection",
-  milestone3 = "ChemoStart",
-  milestone3_name = "Adjuvant Chemo",
-  milestone4 = "Recurrence",
-  milestone4_name = "Disease Recurrence",
-  milestone5 = "Death",
-  milestone5_name = "Death",
+  milestone1Date = "Diagnosis",
+  milestone1Name = "Diagnosis",
+  milestone2Date = "Surgery",
+  milestone2Name = "Surgical Resection",
+  milestone3Date = "ChemoStart",
+  milestone3Name = "Adjuvant Chemo",
+  milestone4Date = "Recurrence",
+  milestone4Name = "Disease Recurrence",
+  milestone5Date = "Death",
+  milestone5Name = "Death",
+  showEventMarkers = TRUE,
   eventVar = "EventType",
   eventTimeVar = "EventTime",
   groupVar = "Stage",
   censorVar = "Censored",
-  sortBy = "response",
+  sortOrder = "response",
   colorPalette = "viridis",
-  plotTitle = "Complete Disease Course Timeline",
-  xAxisTitle = "Time (Days)",
   showLegend = TRUE
 )
 
@@ -204,15 +200,14 @@ events_plot <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Response",
-  milestone1 = "TreatmentStart",
-  milestone1_name = "Treatment Start",
+  milestone1Date = "TreatmentStart",
+  milestone1Name = "Treatment Start",
+  showEventMarkers = TRUE,
   eventVar = "Event1_Type",
   eventTimeVar = "Event1_Time",
   groupVar = "TreatmentLine",
-  sortBy = "none",
-  colorPalette = "Accent",
-  plotTitle = "Treatment-Related Events Timeline",
-  xAxisTitle = "Days from Treatment Start"
+  sortOrder = "patient_id",
+  colorPalette = "viridis"
 )
 
 # ───────────────────────────────────────────────────────────
@@ -226,13 +221,11 @@ weeks_plot <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Response",
-  milestone1 = "TreatmentStart",
-  milestone1_name = "Treatment",
-  milestone2 = "FirstAssessment",
-  milestone2_name = "Assessment",
-  timeUnit = "weeks",
-  plotTitle = "Clinical Trial Timeline",
-  xAxisTitle = "Time (Weeks)"
+  milestone1Date = "TreatmentStart",
+  milestone1Name = "Treatment",
+  milestone2Date = "FirstAssessment",
+  milestone2Name = "Assessment",
+  timeUnit = "weeks"
 )
 
 # Display timeline in months
@@ -242,9 +235,7 @@ months_plot <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Response",
-  timeUnit = "months",
-  plotTitle = "Long-term Follow-up",
-  xAxisTitle = "Time (Months)"
+  timeUnit = "months"
 )
 
 # ───────────────────────────────────────────────────────────
@@ -258,26 +249,24 @@ publication_plot <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Response",
-  milestone1 = "TreatmentStart",
-  milestone1_name = "Treatment Initiation",
-  milestone2 = "FirstAssessment",
-  milestone2_name = "First Response Assessment",
-  milestone3 = "BestResponse",
-  milestone3_name = "Best Overall Response",
-  milestone4 = "Progression",
-  milestone4_name = "Disease Progression",
+  milestone1Date = "TreatmentStart",
+  milestone1Name = "Treatment Initiation",
+  milestone2Date = "FirstAssessment",
+  milestone2Name = "First Response Assessment",
+  milestone3Date = "BestResponse",
+  milestone3Name = "Best Overall Response",
+  milestone4Date = "Progression",
+  milestone4Name = "Disease Progression",
+  showEventMarkers = TRUE,
   eventVar = "AdverseEvent",
   eventTimeVar = "EventTime",
   censorVar = "Censored",
   groupVar = "TreatmentArm",
-  sortBy = "duration",
-  colorPalette = "Set2",
-  plotTitle = "Phase II Clinical Trial: Patient Follow-up Timeline",
-  xAxisTitle = "Time Since Enrollment (Days)",
-  yAxisTitle = "Patient Identifier",
+  sortOrder = "duration_desc",
+  colorPalette = "default",
   showLegend = TRUE,
-  showReferenceLine = TRUE,
-  referenceLineValue = 180,
+  referenceLines = "custom",
+  customReferenceTime = 180,
   timeUnit = "days"
 )
 
@@ -288,25 +277,29 @@ publication_plot <- swimmerplot(
 # Load data with actual dates
 data(swimmerplot_dates)
 
-# Timeline using date formats
+# Timeline using the REAL date columns. The dataset also carries numeric
+# StartTime/EndTime day offsets; this example deliberately uses the Date columns
+# with timeType = "datetime", which is what dateFormat applies to. (It used to
+# pass timeType = "raw" and the numeric *_Days milestones, so every line about
+# date handling was describing something the call never did.)
 dates_plot <- swimmerplot(
   data = swimmerplot_dates,
   patientID = "PatientID",
-  startTime = "StartTime",
-  endTime = "EndTime",
+  startTime = "EnrollmentDate",
+  endTime = "LastVisitDate",
   responseVar = "Response",
-  milestone1 = "Milestone1_Days",
-  milestone1_name = "Treatment Start",
-  milestone2 = "Milestone2_Days",
-  milestone2_name = "First Response",
-  milestone3 = "Milestone3_Days",
-  milestone3_name = "Progression",
+  milestone1Date = "TreatmentStartDate",
+  milestone1Name = "Treatment Start",
+  milestone2Date = "FirstResponseDate",
+  milestone2Name = "First Response",
+  milestone3Date = "ProgressionDate",
+  milestone3Name = "Progression",
   groupVar = "Cohort",
   censorVar = "Censored",
-  timeType = "raw",
-  dateFormat = "YYYY-MM-DD",
-  sortBy = "duration",
-  plotTitle = "Cohort Study Timeline"
+  timeType = "datetime",
+  dateFormat = "ymd",
+  timeUnit = "days",
+  timeDisplay = "relative"
 )
 
 # ───────────────────────────────────────────────────────────
@@ -320,8 +313,7 @@ sorted_duration <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Response",
-  sortBy = "duration",
-  plotTitle = "Sorted by Duration"
+  sortOrder = "duration_desc"
 )
 
 # Sort by response category
@@ -331,19 +323,17 @@ sorted_response <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Response",
-  sortBy = "response",
-  plotTitle = "Sorted by Response (CR/PR/SD/PD)"
+  sortOrder = "response"
 )
 
-# No sorting (original order)
+# Ordered by patient ID (there is no 'unsorted' option; patients are always ordered)
 no_sort <- swimmerplot(
   data = swimmerplot_test,
   patientID = "PatientID",
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Response",
-  sortBy = "none",
-  plotTitle = "Original Patient Order"
+  sortOrder = "patient_id"
 )
 
 # ───────────────────────────────────────────────────────────
@@ -380,7 +370,7 @@ no_sort <- swimmerplot(
 # 1. Color Coding:
 #    - Use intuitive colors (green for CR/PR, red for PD)
 #    - Consistent color palette across related plots
-#    - Consider colorblind-friendly palettes (viridis, Set2)
+#    - Consider colorblind-friendly palettes (viridis, contrast)
 
 # 2. Milestone Selection:
 #    - Limit to 3-5 most clinically relevant events
@@ -395,7 +385,7 @@ no_sort <- swimmerplot(
 # 4. Sorting Strategy:
 #    - Duration: Shows range of follow-up times
 #    - Response: Groups patients by outcome
-#    - None: Preserves enrollment order or patient ID sequence
+#    - Patient ID: orders by identifier, numerically when every ID is a number
 
 # 5. Reference Lines:
 #    - Mark clinically significant timepoints (e.g., 6 months)
@@ -426,18 +416,17 @@ if (nrow(long_responders) > 0) {
     startTime = "StartTime",
     endTime = "EndTime",
     responseVar = "Response",
-    milestone1 = "ImmunotherapyStart",
-    milestone1_name = "IO Start",
-    milestone2 = "FirstResponse",
-    milestone2_name = "First Response",
-    milestone3 = "ConfirmedResponse",
-    milestone3_name = "Confirmed",
+    milestone1Date = "ImmunotherapyStart",
+    milestone1Name = "IO Start",
+    milestone2Date = "FirstResponse",
+    milestone2Name = "First Response",
+    milestone3Date = "ConfirmedResponse",
+    milestone3Name = "Confirmed",
+    showEventMarkers = TRUE,
     eventVar = "irAE",
     eventTimeVar = "irAE_Time",
     groupVar = "PDL1_Status",
-    timeUnit = "months",
-    plotTitle = "Durable Responders (>12 Months)",
-    xAxisTitle = "Time (Months)"
+    timeUnit = "months"
   )
 }
 
@@ -451,20 +440,19 @@ surgery_timeline <- swimmerplot(
   startTime = "StartTime",
   endTime = "EndTime",
   responseVar = "Outcome",
-  milestone1 = "SurgeryDate",
-  milestone1_name = "Surgery",
-  milestone2 = "Discharge",
-  milestone2_name = "Discharge",
-  milestone3 = "FirstVisit",
-  milestone3_name = "Follow-up",
+  milestone1Date = "SurgeryDate",
+  milestone1Name = "Surgery",
+  milestone2Date = "Discharge",
+  milestone2Name = "Discharge",
+  milestone3Date = "FirstVisit",
+  milestone3Name = "Follow-up",
+  showEventMarkers = TRUE,
   eventVar = "ComplicationType",
   eventTimeVar = "ComplicationDate",
   groupVar = "ASA_Score",
-  sortBy = "duration",
-  showReferenceLine = TRUE,
-  referenceLineValue = 30,
-  plotTitle = "30-Day Postoperative Outcomes",
-  xAxisTitle = "Days Post-Surgery"
+  sortOrder = "duration_desc",
+  referenceLines = "custom",
+  customReferenceTime = 30
 )
 
 # Use Case 3: Treatment Sequencing
@@ -482,11 +470,11 @@ if (nrow(multi_line) > 0) {
     startTime = "StartTime",
     endTime = "EndTime",
     responseVar = "Response",
+    showEventMarkers = TRUE,
     eventVar = "Event1_Type",
     eventTimeVar = "Event1_Time",
     groupVar = "TreatmentLine",
-    sortBy = "duration",
-    plotTitle = "Later-Line Therapy Outcomes"
+    sortOrder = "duration_desc"
   )
 }
 
@@ -499,13 +487,12 @@ ae_timeline <- swimmerplot(
   patientID = "PatientID",
   startTime = "StartTime",
   endTime = "EndTime",
+  showEventMarkers = TRUE,
   eventVar = "AdverseEvent",
   eventTimeVar = "EventTime",
   groupVar = "TreatmentArm",
-  sortBy = "none",
-  colorPalette = "Pastel1",
-  plotTitle = "Adverse Event Timeline by Treatment Arm",
-  xAxisTitle = "Days from Treatment Start"
+  sortOrder = "patient_id",
+  colorPalette = "monochrome"
 )
 
 # ───────────────────────────────────────────────────────────

@@ -84,11 +84,15 @@ metareg_categorical <- diagnosticmeta(
 )
 
 # ───────────────────────────────────────────────────────────
-# Example 5: HSROC Analysis
+# Example 5: Proportional-Hazards SROC Analysis
 # ───────────────────────────────────────────────────────────
 
-# Hierarchical summary ROC analysis
-hsroc_result <- diagnosticmeta(
+# Holling proportional-hazards SROC model (mada::phm): relates sensitivity (p)
+# and false-positive rate (u) through u^theta = p, reporting theta as the
+# accuracy parameter and tau-squared as between-study variation. It is NOT the
+# Rutter-Gatsonis HSROC model. The SROC curve itself comes from the bivariate
+# model, not from this table.
+phm_result <- diagnosticmeta(
   data = diagnosticmeta_test,
   study = "study",
   true_positives = "true_positives",
@@ -123,7 +127,11 @@ pubbias_result <- diagnosticmeta(
 # Load data with zero cells
 data(diagnosticmeta_test_zeros)
 
-# Method 1: Model-based (recommended)
+# Method 1: Default (recommended) - no correction to the data itself.
+#   The bivariate model still adds +0.5 to studies with a zero cell at fitting
+#   time (mada's "single" correction), while the univariate heterogeneity and
+#   meta-regression models exclude those studies instead, so they rest on fewer
+#   studies. Both are disclosed in the output.
 zero_none <- diagnosticmeta(
   data = diagnosticmeta_test_zeros,
   study = "study",
@@ -134,7 +142,8 @@ zero_none <- diagnosticmeta(
   zero_cell_correction = "none"
 )
 
-# Method 2: Constant correction (+0.5 to all cells)
+# Method 2: +0.5 to all four cells of the studies that CONTAIN a zero cell
+#   (studies without a zero cell are left untouched), applied before any analysis
 zero_constant <- diagnosticmeta(
   data = diagnosticmeta_test_zeros,
   study = "study",
@@ -143,6 +152,73 @@ zero_constant <- diagnosticmeta(
   false_negatives = "false_negatives",
   true_negatives = "true_negatives",
   zero_cell_correction = "constant"
+)
+
+# Method 3: +0.5 to the zero cells only (the non-zero cells of the same study
+#   keep their observed counts)
+zero_cells_only <- diagnosticmeta(
+  data = diagnosticmeta_test_zeros,
+  study = "study",
+  true_positives = "true_positives",
+  false_positives = "false_positives",
+  false_negatives = "false_negatives",
+  true_negatives = "true_negatives",
+  zero_cell_correction = "zero_cells"
+)
+
+# Method 4: +1/N to all cells of the affected studies, N = that study's total
+#   sample size (a smaller nudge in large studies than a flat +0.5)
+zero_reciprocal <- diagnosticmeta(
+  data = diagnosticmeta_test_zeros,
+  study = "study",
+  true_positives = "true_positives",
+  false_positives = "false_positives",
+  false_negatives = "false_negatives",
+  true_negatives = "true_negatives",
+  zero_cell_correction = "reciprocal_n"
+)
+
+# ───────────────────────────────────────────────────────────
+# Example 7b: Zero Cells in Deeks' Test and the Funnel Plot
+# ───────────────────────────────────────────────────────────
+
+# Deeks' test and the funnel plot see the data AFTER zero_cell_correction has
+# been applied. If a zero cell still remains at that point - which happens only
+# under the default "none" - they both add +0.5 to EVERY study, not just the
+# affected ones. Why uniformly? Correcting only the affected studies shrinks
+# their log DOR while leaving the rest alone, and those studies are the small,
+# near-perfect ones at the low effective-sample-size end of the regression,
+# which builds a size-related trend into the test's own outcome variable. The
+# table note states how many studies had a zero cell.
+#
+# "constant", "zero_cells" and "reciprocal_n" each leave no zero cell, so this
+# uniform step never fires under them and a verdict is always reported.
+deeks_with_zeros <- diagnosticmeta(
+  data = diagnosticmeta_test_zeros,
+  study = "study",
+  true_positives = "true_positives",
+  false_positives = "false_positives",
+  false_negatives = "false_negatives",
+  true_negatives = "true_negatives",
+  zero_cell_correction = "none",  # the only setting that leaves zeros for Deeks' own +0.5
+  publication_bias = TRUE,
+  funnel_plot = TRUE
+)
+
+# Under "none", past a quarter of studies with a zero cell, that correction alone
+# produces "significant" asymmetry far more often than 5% of the time even when
+# nothing is missing, so no verdict is reported: the interpretation column reads
+# "Not interpretable: too many zero cells" and the statistic is descriptive only.
+# (Choose any other correction and the share the test sees is zero, so a verdict
+# is given - compare the two runs below.)
+deeks_many_zeros <- diagnosticmeta(
+  data = head(diagnosticmeta_test_zeros, 10),  # 5 of these 10 have a zero cell
+  study = "study",
+  true_positives = "true_positives",
+  false_positives = "false_positives",
+  false_negatives = "false_negatives",
+  true_negatives = "true_negatives",
+  publication_bias = TRUE
 )
 
 # ───────────────────────────────────────────────────────────
@@ -355,8 +431,10 @@ publication_ready <- diagnosticmeta(
 #   - I² > 75%: High heterogeneity (explore with meta-regression)
 
 # Publication Bias: Tendency to publish positive results
-#   - Deeks' test p < 0.05: Suggests publication bias
-#   - Funnel plot asymmetry: Visual check for bias
+#   - Deeks' test p < 0.05: Funnel-plot asymmetry, which can come from publication
+#     bias, between-study heterogeneity, or a threshold effect - not bias by itself
+#   - p >= 0.05 does not rule bias out; the test is underpowered below 10 studies
+#   - Funnel plot asymmetry: Visual check, on the same log DOR vs 1/sqrt(ESS) axes
 
 # ───────────────────────────────────────────────────────────
 # Tips for Pathologists
@@ -368,7 +446,9 @@ publication_ready <- diagnosticmeta(
 #    - Explore covariates (imaging type, tissue type, staining)
 
 # 2. For biomarker diagnostic accuracy:
-#    - Compare across different thresholds (HSROC)
+#    - For threshold variation, read the SROC curve (sroc_plot, bivariate model);
+#      hsroc_analysis adds the Holling proportional-hazards accuracy summary,
+#      which is not a Rutter-Gatsonis HSROC threshold/accuracy table
 #    - Check publication bias (small studies may be selective)
 #    - Consider meta-regression for protocol differences
 

@@ -112,6 +112,7 @@ refs:
         doi: 10.1177/096228029900800204
         url: "https://pubmed.ncbi.nlm.nih.gov/10501650/"
 
+
     BonettWright2000:
         type: article
         author: "Bonett, D. G., & Wright, T. A."
@@ -212,6 +213,18 @@ refs:
         publisher: "[R package]. Retrieved from https://github.com/sbalci/ClinicoPathJamoviModule"
         doi: 10.17605/OSF.IO/9SZUD
         url: "https://www.serdarbalci.com/ClinicoPathJamoviModule/"
+
+    ClopperPearson1934:
+        type: article
+        author: "Clopper, C. J., & Pearson, E. S."
+        year: 1934
+        title: The Use of Confidence or Fiducial Limits Illustrated in the Case of the Binomial
+        publisher: Biometrika
+        volume: 26
+        issue: 4
+        pages: 404-413
+        doi: 10.1093/biomet/26.4.404
+        url: "https://doi.org/10.1093/biomet/26.4.404"
 
     CochraneDTAHandbook2023:
         type: book
@@ -330,6 +343,19 @@ refs:
         pages: 168-169
         doi: 10.1136/bmj.329.7458.168
         url: "https://doi.org/10.1136/bmj.329.7458.168"
+
+    DeeksMacaskillIrwig2005:
+        type: article
+        author: "Deeks, J. J., Macaskill, P., & Irwig, L."
+        year: 2005
+        title: The performance of tests of publication bias and other sample size effects in systematic reviews of diagnostic test accuracy was assessed
+        publisher: Journal of Clinical Epidemiology
+        volume: 58
+        issue: 9
+        pages: 882-893
+        doi: 10.1016/j.jclinepi.2005.01.016
+        pmid: 16085191
+        url: "https://doi.org/10.1016/j.jclinepi.2005.01.016"
 
     DerSimonian1986:
         type: article
@@ -585,6 +611,18 @@ refs:
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=Hmisc"
         url: "https://CRAN.R-project.org/package=Hmisc"
 
+    HollingBoehningBoehning2012:
+        type: article
+        author: "Holling, H., Böhning, W., & Böhning, D."
+        year: 2012
+        title: "Meta-analysis of diagnostic studies based upon SROC-curves: a mixed model approach using the Lehmann family"
+        publisher: Statistical Modelling
+        volume: 12
+        issue: 4
+        pages: 347-375
+        doi: 10.1177/1471082X1201200403
+        url: "https://doi.org/10.1177/1471082X1201200403"
+
     Hothorn2006:
         type: article
         author: "Hothorn, T., Hornik, K., & Zeileis, A."
@@ -737,6 +775,18 @@ refs:
         title: "MASS: Support Functions and Datasets for Venables and Ripley's MASS"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=MASS"
         url: "https://CRAN.R-project.org/package=MASS"
+
+    MacKinnonWhite1985:
+        type: article
+        author: "MacKinnon, J. G., & White, H."
+        year: 1985
+        title: Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties
+        publisher: Journal of Econometrics
+        volume: 29
+        issue: 3
+        pages: 305-325
+        doi: 10.1016/0304-4076(85)90158-7
+        url: "https://doi.org/10.1016/0304-4076(85)90158-7"
 
     MandelBetensky2008:
         type: article
@@ -992,6 +1042,18 @@ refs:
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=ResourceSelection"
         url: "https://CRAN.R-project.org/package=ResourceSelection"
 
+    RileyHigginsDeeks2011:
+        type: article
+        author: "Riley, R. D., Higgins, J. P. T., & Deeks, J. J."
+        year: 2011
+        title: Interpretation of random effects meta-analyses
+        publisher: BMJ
+        volume: 342
+        pages: d549
+        doi: 10.1136/bmj.d549
+        pmid: 21310794
+        url: "https://doi.org/10.1136/bmj.d549"
+
     RoystonParmar2013:
         type: article
         author: "Royston, P., & Parmar, M. K. B."
@@ -1171,6 +1233,20 @@ refs:
         doi: 10.1093/bioinformatics/btq140
         url: "https://doi.org/10.1093/bioinformatics/btq140"
 
+    SweetingSuttonLambert2004:
+        type: article
+        author: "Sweeting, M. J., Sutton, A. J., & Lambert, P. C."
+        year: 2004
+        title: "What to add to nothing? Use and avoidance of continuity corrections in meta-analysis of sparse data"
+        publisher: Statistics in Medicine
+        volume: 23
+        issue: 9
+        pages: 1351-1375
+        doi: 10.1002/sim.1761
+        pmid: 15116347
+        note: "Erratum: Statistics in Medicine 2006;25(15):2700, doi 10.1002/sim.2536"
+        url: "https://doi.org/10.1002/sim.1761"
+
     Taylor2018PostSelection:
         type: article
         author: "Taylor, J., & Tibshirani, R."
@@ -1265,6 +1341,19 @@ refs:
         title: "WRS2: R package"
         publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=WRS2"
         url: "https://CRAN.R-project.org/package=WRS2"
+
+    ZwindermanBossuyt2008:
+        type: article
+        author: "Zwinderman, A. H., & Bossuyt, P. M."
+        year: 2008
+        title: We should not pool diagnostic likelihood ratios in systematic reviews
+        publisher: Statistics in Medicine
+        volume: 27
+        issue: 5
+        pages: 687-697
+        doi: 10.1002/sim.2992
+        pmid: 17611957
+        url: "https://doi.org/10.1002/sim.2992"
 
     afex:
         type: software

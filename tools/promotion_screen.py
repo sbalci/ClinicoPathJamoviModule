@@ -65,6 +65,36 @@ def vignette_hits(name):
         return 0
 
 
+# Conventions an analysis must satisfy to be PROMOTED, not merely to exist. Every one of these is a
+# release_gate.py check that FAILs once the menuGroup loses its D/P/T suffix, so a high count here
+# is an audit finding already written and waiting. See vignettes/jamovi_library_review_guide.md
+# section 24; the classes are sections 20-23 plus the older state/requiresData rules.
+_FMT_OK = re.compile(r'^(zto|pvalue|pc|log10|(dp|sf|pc):\d+)$')
+_FAKE_SE = re.compile(r'(?<![\w.$])((?:\w*_)?(?:se|sd|std_?err|stderr|variance|sigma))\s*(?:<-|=(?!=))\s*'
+                      r'-?\d+(?:\.\d+)?\s*(?:#[^\n]*)?$', re.M)
+_VERB = re.compile(r"^\s+title:\s*['\"]?(Show|Display|Enable|Include|Add|Perform|Calculate|Compute|"
+                   r"Generate|Plot|Run|Use|Apply)\b", re.M)
+_HEAVY_STATE = re.compile(r'setState\s*\(\s*(?:list\s*\()?\s*[^)]{0,200}?'
+                          r'(?<![\w.])(fit|model|zph|roc|survfit|coxph|cph)\s*[=)]')
+
+
+def conventions(name, src, a, r):
+    """Count promotion blockers. Each is cheap, falsifiable, and mechanical - no judgement."""
+    fmt = 0
+    for m in re.finditer(r"^\s*format:\s*['\"]?([^'\"#\n]+?)['\"]?\s*$", r, re.M):
+        if any(not _FMT_OK.match(t.strip()) for t in m.group(1).split(',')):
+            fmt += 1
+    return dict(
+        fmt=fmt,                                        # section 21
+        fake=len(_FAKE_SE.findall(src)),                # section 20
+        rx=len(re.findall(r'(?:sub|gsub|grepl?)\s*\(\s*paste0?\s*\(\s*["\']\^?["\']\s*,', src)),  # section 22
+        verb=len(_VERB.findall(a)),                     # section 12
+        state=len(_HEAVY_STATE.findall(src)),           # section 17
+        nockpt=len(re.findall(r'\bfor\s*\([^)]*\bin\b[^)]*\b(?:boot|perm|sim|fold)\w*', src, re.I))
+                 - min(len(re.findall(r'private\$\.checkpoint\(', src)), 99) > 0,
+    )
+
+
 def score_one(name, with_git=True):
     b = os.path.join(R, name + '.b.R')
     src = read(b)
@@ -90,6 +120,11 @@ def score_one(name, with_git=True):
     debt = len(re.findall(r'\b(TODO|FIXME)\b', src))
     vign = vignette_hits(name)
     commits = git_commits(b) if with_git else 0
+    conv = conventions(name, src, a, r)
+    # weighted by how badly each reads in an audit report, not by how many there are
+    conv_penalty = (min(conv['fmt'] / 10.0, 1.0) * 1.0 + min(conv['fake'], 3) * 1.5 +
+                    min(conv['rx'], 3) * 0.5 + min(conv['verb'] / 15.0, 1.0) * 0.75 +
+                    min(conv['state'], 3) * 0.75 + (0.5 if conv['nockpt'] else 0.0))
 
     # deliberately blunt: each signal contributes a small, comparable amount
     score = (
@@ -101,11 +136,14 @@ def score_one(name, with_git=True):
         min(refs / 3.0, 1.0) * 1.0 +         # cites literature
         min(i18n / 50.0, 1.0) * 0.5 +        # translation-ready
         min(commits / 10.0, 1.0) * 0.5 -     # settled
-        min(debt / 5.0, 1.0) * 1.0           # open debt
+        min(debt / 5.0, 1.0) * 1.0 -         # open debt
+        conv_penalty                          # promotion blockers (section 24)
     )
     return dict(name=name, group=menu_group(name), loc=loc, computes=computes,
                 wired=round(wired, 2), declared=len(declared), tests=ntests,
                 vignettes=vign, refs=refs, i18n=i18n, debt=debt, commits=commits,
+                conv=conv, conv_penalty=round(conv_penalty, 2),
+                blockers=sum(v if isinstance(v, int) else int(v) for v in conv.values()),
                 score=round(score, 2))
 
 

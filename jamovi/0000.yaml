@@ -149,7 +149,7 @@ analyses:
   - title: 'Treatment Response: Patient-Level Burden'
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPathT
+    menuGroup: OncoPath
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: 'Treatment Response: Patient-Level Burden'
     description: >
@@ -2459,7 +2459,7 @@ analyses:
     name: ihcheterogeneity
     ns: ClinicoPath
     category: analyses
-    menuGroup: OncoPathT
+    menuGroup: OncoPath
     menuTitle: IHC Heterogeneity Analysis
     menuSubgroup: IHC Analysis
     description: >

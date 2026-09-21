@@ -199,7 +199,7 @@ items:
                 - name: p_value
                   title: 'p-value'
                   type: number
-                  format: zto;pvalue
+                  format: zto,pvalue
                 - name: result
                   title: 'Result'
                   type: text
@@ -241,7 +241,7 @@ items:
                 - name: p_value
                   title: 'p-value'
                   type: number
-                  format: zto;pvalue
+                  format: zto,pvalue
                 - name: effect_size
                   title: 'Effect Size'
                   type: number
@@ -273,7 +273,7 @@ items:
                 - name: p_value
                   title: 'p-value'
                   type: number
-                  format: zto;pvalue
+                  format: zto,pvalue
                 - name: conclusion
                   title: 'Statistical Conclusion'
                   type: text
@@ -870,7 +870,7 @@ items:
                 - name: p_value
                   title: 'p-value'
                   type: number
-                  format: zto;pvalue
+                  format: zto,pvalue
                 - name: n_groups
                   title: 'Groups'
                   type: integer

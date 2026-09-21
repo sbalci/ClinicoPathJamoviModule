@@ -1,3 +1,5 @@
+#' @importFrom jmvcore .
+
 timeupdatedsurvivalClass <- R6::R6Class(
     "timeupdatedsurvivalClass",
     inherit = timeupdatedsurvivalBase,
@@ -77,6 +79,11 @@ timeupdatedsurvivalClass <- R6::R6Class(
                     survivalEsts <- private$.calculateTimeUpdatedSurvival(results$model, timePoints, data)
                     if (!is.null(survivalEsts)) {
                         private$.populateSurvivalEstimates(survivalEsts)
+                    } else {
+                        self$results$survivalEstimates$setNote(
+                            "no_estimates",
+                            .("Survival probabilities could not be obtained from this model at the requested time points, so no estimates are shown.")
+                        )
                     }
                     
                     # Goodness-of-fit tests
@@ -478,52 +485,67 @@ timeupdatedsurvivalClass <- R6::R6Class(
             tryCatch({
                 survivalEsts <- data.frame()
                 
+                # Every branch below either reads the estimate and its standard error out
+                # of the fitted model, or reports no standard error at all. A time point
+                # the model cannot answer for is skipped rather than filled in: the
+                # earlier code substituted a survival of 0.5 and a standard error of 0.05
+                # on five of six paths, which rendered as a real-looking interval.
+                se_unavailable <- FALSE
+                
                 for (t in timePoints) {
-                    # Calculate survival probability at time t
+                    survival_prob <- NA_real_
+                    se <- NA_real_
+                    
                     if ("timereg" %in% class(model)) {
-                        # timereg models - extract from cumulative estimates
-                        if (!is.null(model$cum)) {
+                        # Aalen-type models carry the cumulative baseline hazard in column
+                        # 2 of $cum and its variance in the same column of $var.cum.
+                        # S(t) = exp(-H(t)), so by the delta method se(S) = S * se(H).
+                        if (!is.null(model$cum) && nrow(model$cum) > 0 && ncol(model$cum) >= 2) {
                             time_idx <- which.min(abs(model$cum[, 1] - t))
-                            if (length(time_idx) > 0) {
-                                # Estimate survival probability (simplified approach)
-                                survival_prob <- exp(-model$cum[time_idx, 2])  # Assuming cumulative hazard in column 2
-                                se <- 0.05  # Placeholder
-                            } else {
-                                survival_prob <- 0.5
-                                se <- 0.05
+                            cum_hazard <- model$cum[time_idx, 2]
+                            survival_prob <- exp(-cum_hazard)
+                            if (!is.null(model$var.cum) && ncol(model$var.cum) >= 2) {
+                                var_hazard <- model$var.cum[time_idx, 2]
+                                if (is.finite(var_hazard) && var_hazard >= 0)
+                                    se <- survival_prob * sqrt(var_hazard)
                             }
-                        } else {
-                            survival_prob <- 0.5
-                            se <- 0.05
                         }
                     } else if ("coxph" %in% class(model)) {
-                        # Cox model - use survfit
+                        # survfit() reports std.err on the cumulative-hazard scale, i.e.
+                        # the standard error of -log(S), so it has to be rescaled before
+                        # it can be used on the survival scale.
                         sf <- survival::survfit(model)
                         time_idx <- which.min(abs(sf$time - t))
                         if (length(time_idx) > 0 && time_idx <= length(sf$surv)) {
                             survival_prob <- sf$surv[time_idx]
-                            se <- sf$std.err[time_idx]
-                        } else {
-                            survival_prob <- 0.5
-                            se <- 0.05
+                            if (!is.null(sf$std.err) && time_idx <= length(sf$std.err))
+                                se <- survival_prob * sf$std.err[time_idx]
                         }
                     } else if ("survreg" %in% class(model)) {
-                        # Parametric model - predict survival
-                        pred <- predict(model, type = "quantile", p = 0.5)
-                        survival_prob <- ifelse(t < median(pred, na.rm = TRUE), 0.7, 0.3)
-                        se <- 0.05
-                    } else {
-                        survival_prob <- 0.5
-                        se <- 0.05
+                        # Survival at the mean linear predictor, from the fitted
+                        # distribution. survreg supplies no standard error for this.
+                        lp <- mean(predict(model, type = "lp"), na.rm = TRUE)
+                        if (is.finite(lp))
+                            survival_prob <- 1 - survival::psurvreg(
+                                t, mean = lp, scale = model$scale, distribution = model$dist)
                     }
                     
-                    # Confidence intervals
-                    ci_level <- self$options$confidenceLevel
-                    z_crit <- qnorm(1 - (1 - ci_level) / 2)
-                    lower <- max(0, survival_prob - z_crit * se)
-                    upper <- min(1, survival_prob + z_crit * se)
+                    if (!is.finite(survival_prob))
+                        next
                     
-                    # Hazard rate (simplified estimation)
+                    # Confidence intervals, only where the model supplied a standard error
+                    lower <- NA_real_
+                    upper <- NA_real_
+                    if (is.finite(se)) {
+                        ci_level <- self$options$confidenceLevel
+                        z_crit <- qnorm(1 - (1 - ci_level) / 2)
+                        lower <- max(0, survival_prob - z_crit * se)
+                        upper <- min(1, survival_prob + z_crit * se)
+                    } else {
+                        se_unavailable <- TRUE
+                    }
+                    
+                    # Average hazard rate over (0, t], implied by S(t)
                     hazard <- -log(survival_prob) / t
                     
                     survivalEsts <- rbind(survivalEsts, data.frame(
@@ -536,6 +558,11 @@ timeupdatedsurvivalClass <- R6::R6Class(
                         stringsAsFactors = FALSE
                     ))
                 }
+                
+                if (nrow(survivalEsts) == 0)
+                    return(NULL)
+                
+                attr(survivalEsts, "se_unavailable") <- se_unavailable
                 
                 return(survivalEsts)
                 
@@ -704,6 +731,12 @@ timeupdatedsurvivalClass <- R6::R6Class(
                     hazard = survivalEsts$hazard[i]
                 ))
             }
+            
+            if (isTRUE(attr(survivalEsts, "se_unavailable")))
+                table$setNote(
+                    "no_se",
+                    .("Standard errors and confidence intervals are not available for this model type; the survival probabilities are shown without them.")
+                )
         },
 
         .populateGoodnessOfFit = function(gofResults) {

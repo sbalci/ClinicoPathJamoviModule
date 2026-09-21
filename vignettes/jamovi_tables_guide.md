@@ -190,6 +190,77 @@ For continuous numerical data:
 
 ### Column Formatting Options
 
+#### The token grammar — read this before writing any `format:`
+
+`format:` is a **comma-separated list of exact tokens**. Both sides of jamovi parse it
+the same way, and both do exact membership on the split result:
+
+```r
+# jmvcore, Column$initialize
+private$.format <- strsplit(format, ",", fixed = TRUE)[[1]]
+# ... and then, in .measure() and .cellForPrint():
+zto <- ("zto" %in% private$.format)
+```
+
+```js
+// jamovi client, results renderer
+let w = []; if (I !== "") w = I.split(",");
+... w.includes("zto") ... w.includes("pvalue") ... w.includes("pc") ... w.includes("log10")
+```
+
+The complete valid set:
+
+| token | effect |
+|---|---|
+| `zto` | value is bounded 0–1: strip the leading zero, never use scientific notation |
+| `pvalue` | render as a p-value (`< .001` below the displayed precision) |
+| `pc` | render as a percentage |
+| `log10` | the stored value is a log10; exponentiate before display |
+| `dp:N` | N decimal places |
+| `sf:N` | N significant figures |
+
+Anything else is **dropped in silence**. There is no error, no warning, and no visible
+difference in the `.r.yaml` — the column simply renders unformatted, and it will look
+plausible enough that nobody notices.
+
+**A separator that is not a comma is the trap.** `zto:4` reads like "zto with 4
+decimal places". It is one token, spelled `zto:4`, and `"zto" %in% "zto:4"` is `FALSE`:
+
+```r
+for (f in c("zto", "zto,pvalue", "zto,dp:4", "zto:4", "zto3", "zto;pvalue", "zto,p:.3")) {
+  toks <- strsplit(f, ",", fixed = TRUE)[[1]]
+  cat(sprintf("%-12s -> [%s]  zto=%s pvalue=%s\n", f, paste(toks, collapse = "|"),
+      "zto" %in% toks, "pvalue" %in% toks))
+}
+# zto          -> [zto]           zto=TRUE  pvalue=FALSE
+# zto,pvalue   -> [zto|pvalue]    zto=TRUE  pvalue=TRUE     <- correct
+# zto,dp:4     -> [zto|dp:4]      zto=TRUE  pvalue=FALSE    <- correct
+# zto:4        -> [zto:4]         zto=FALSE pvalue=FALSE    <- zto lost
+# zto3         -> [zto3]          zto=FALSE pvalue=FALSE    <- zto lost
+# zto;pvalue   -> [zto;pvalue]    zto=FALSE pvalue=FALSE    <- BOTH lost
+# zto,p:.3     -> [zto|p:.3]      zto=TRUE  pvalue=FALSE    <- p-value lost
+```
+
+| written | what jamovi sees | meant |
+|---|---|---|
+| `zto:4` | one unknown token | `zto,dp:4` |
+| `zto3` | one unknown token | `zto,dp:3` |
+| `zto(3)` | one unknown token | `zto,dp:3` |
+| `zto;pvalue` | one unknown token | `zto,pvalue` |
+| `zto:pvalue` | one unknown token | `zto,pvalue` |
+| `zto,p:.3` | `zto` kept, `p:.3` unknown | `zto,pvalue,dp:3` |
+| `currency` / `proportion` / `percent` | unknown | `pc` (there is no currency token) |
+
+This cost this module 519 columns before anyone noticed, because the rest of this
+section documented the tokens without ever naming the separator. `python3
+tools/release_gate.py` now runs `check_column_formats` over every `.r.yaml` and fails
+on a shipped analysis.
+
+**Prefer letting the user's setting win.** Decimals come from the number-format
+preference the user sets once in jamovi and expects everywhere; `dp:N` overrides it for
+that column. Use it where the precision is intrinsic to the quantity (a count of
+digits in a lab value), not to make a table look tidy.
+
 #### Number Format Patterns
 
 ##### `zto` - Standard Decimal Format

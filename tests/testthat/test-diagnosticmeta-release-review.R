@@ -37,8 +37,9 @@ test_that("Deeks' test follows Deeks' own specification", {
   expect_equal(pb$p_value[1],   cf[2, 4], tolerance = 1e-8)
 
   # the ESS bug reported "No significant asymmetry" on this strongly
-  # asymmetric data, with the statistic's sign reversed
-  expect_match(pb$interpretation[1], "Significant asymmetry")
+  # asymmetric data, with the statistic's sign reversed. The verdict now names
+  # the alpha it used (the DTA convention is split between 0.05 and 0.10).
+  expect_match(pb$interpretation[1], "^Asymmetry detected \\(p < 0.05\\)$")
   expect_lt(pb$statistic[1], 0)
 })
 

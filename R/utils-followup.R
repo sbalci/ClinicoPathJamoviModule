@@ -87,10 +87,17 @@
 #' @keywords internal
 .medianFollowUp <- function(time, censored, conf_level = 0.95) {
 
-    fallback <- function(reason, n_total = 0L, n_censored = 0L) {
+    # `reason` is raw English and several callers paste it onto a translated
+    # sentence, so a non-English user gets half a sentence in each language.
+    # `.()` cannot be used here - this is a file-level helper with no `self`, and
+    # jmvcore's translator resolves `self` from the calling frame - so the code
+    # is returned instead and the R6 caller picks the translated wording.
+    # `reason` stays for the eight other analyses that already read it.
+    fallback <- function(reason, n_total = 0L, n_censored = 0L, code = "other") {
         list(value = suppressWarnings(stats::median(time, na.rm = TRUE)),
              ci_lower = NA_real_, ci_upper = NA_real_,
              reverse = FALSE, method = "observed_median", reason = reason,
+             reason_code = code,
              n_total = n_total, n_censored = n_censored)
     }
 
@@ -117,7 +124,7 @@
     if (n_total == 0L)
         return(fallback("no usable (finite, non-negative) times were available"))
     if (n_censored == 0L)
-        return(fallback(paste0(
+        return(fallback(code = "no_censoring", paste0(
             "no subject was censored, so the reversed curve has no events and ",
             "never reaches 50%. Every subject was observed to the terminal ",
             "outcome, so the observed times ARE the complete follow-up"),
@@ -144,7 +151,7 @@
     }
     m <- pick("^median$")
     if (length(m) != 1L || is.na(m))
-        return(fallback(paste0(
+        return(fallback(code = "never_reaches_50", paste0(
             "the reversed Kaplan-Meier curve never falls to 50%, so its median ",
             "is undefined. This depends on WHEN subjects were still under ",
             "observation, not merely how many: here ", n_censored, " of ",
@@ -155,7 +162,7 @@
 
     list(value = m,
          ci_lower = pick("LCL|lower"), ci_upper = pick("UCL|upper"),
-         reverse = TRUE, method = "reverse_km", reason = "",
+         reverse = TRUE, method = "reverse_km", reason = "", reason_code = "",
          n_total = n_total, n_censored = n_censored)
 }
 

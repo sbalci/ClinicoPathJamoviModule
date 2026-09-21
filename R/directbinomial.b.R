@@ -1,3 +1,5 @@
+#' @importFrom jmvcore .
+
 directbinomialClass <- R6::R6Class(
     "directbinomialClass", 
     inherit = directbinomialBase,
@@ -268,31 +270,30 @@ directbinomialClass <- R6::R6Class(
             tryCatch({
                 cif_results <- list()
                 
+                # A cumulative incidence from timereg::comp.risk is defined only for a
+                # specific covariate profile, and this analysis never asks the user for
+                # one, so there is no model-based prediction to report. The previous code
+                # emitted a fixed 0.1 with a fixed standard error of 0.02 at every time
+                # point, which produced identical plausible-looking intervals regardless
+                # of the data. Show the requested time points with empty estimates.
                 for (i in seq_along(prediction_times)) {
-                    t <- prediction_times[i]
-                    
-                    # Get cumulative incidence at time t
-                    # This is a simplified approach - in practice, you'd use predict methods
-                    cif_estimate <- 0.1  # Placeholder - would calculate from model
-                    cif_se <- 0.02       # Placeholder - would calculate from model
-                    
-                    conf_level <- as.numeric(self$options$conf)
-                    z_critical <- qnorm(1 - (1 - conf_level) / 2)
-                    
                     cif_results[[i]] <- data.frame(
-                        time = t,
-                        cif = cif_estimate,
-                        se = cif_se,
-                        lower = max(0, cif_estimate - z_critical * cif_se),
-                        upper = min(1, cif_estimate + z_critical * cif_se),
-                        interpretation = ifelse(cif_estimate < 0.1, "Low risk",
-                                               ifelse(cif_estimate < 0.3, "Moderate risk", "High risk")),
+                        time = prediction_times[i],
+                        cif = NA_real_,
+                        se = NA_real_,
+                        lower = NA_real_,
+                        upper = NA_real_,
+                        interpretation = NA_character_,
                         stringsAsFactors = FALSE
                     )
                 }
                 
                 cif_data <- do.call(rbind, cif_results)
                 self$results$cumulativeIncidenceTable$setData(cif_data)
+                self$results$cumulativeIncidenceTable$setNote(
+                    "no_prediction",
+                    .("Cumulative incidence predictions are not available. A prediction from this model requires a specific set of covariate values, which this analysis does not collect, so no estimate or confidence interval can be computed. The covariate effects above are estimated from your data.")
+                )
                 
             }, error = function(e) {
                 # Handle prediction errors silently

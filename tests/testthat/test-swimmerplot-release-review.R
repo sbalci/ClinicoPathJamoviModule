@@ -304,9 +304,9 @@ test_that("excluded rows are disclosed, with counts and reasons", {
     txt <- res$notices$content
     expect_match(txt, "Rows excluded from analysis")
     expect_match(txt, "3 of 5 rows were excluded")
-    expect_match(txt, "missing patient ID")
-    expect_match(txt, "missing start or end time")
-    expect_match(txt, "end time precedes the start time")
+    expect_match(txt, "had no patient ID")
+    expect_match(txt, "had no start or end time")
+    expect_match(txt, "end time before the start time")
 })
 
 # ═══════════════════════════════════════════════════════════
@@ -470,12 +470,15 @@ test_that("no ongoing-treatment arrow is invented without a censoring variable",
 
     no_cens <- ClinicoPath::swimmerplot(data = df, patientID = "id",
         startTime = "st", endTime = "en", timeType = "raw", timeDisplay = "absolute")
-    expect_match(no_cens$notices$content, "Ongoing-treatment arrows not drawn")
+    # (Title reworded to "Status arrows" - the arrow marks censored / still at
+    # risk, which is not the same as still on treatment, and the glossary and
+    # plot caption already said so.)
+    expect_match(no_cens$notices$content, "Status arrows not drawn")
 
     with_cens <- ClinicoPath::swimmerplot(data = df, patientID = "id",
         startTime = "st", endTime = "en", censorVar = "cs",
         timeType = "raw", timeDisplay = "absolute")
-    expect_false(grepl("Ongoing-treatment arrows not drawn", with_cens$notices$content))
+    expect_false(grepl("Status arrows not drawn", with_cens$notices$content))
 })
 
 test_that("datetime multi-episode data is invariant to timeDisplay", {
@@ -638,14 +641,22 @@ test_that("ORR/DCR use the RECIST-evaluable denominator with matching CIs and di
                                   showCopyReady = TRUE)
     am <- r$advancedMetrics$asDF
     orr <- am[grepl("Objective Response Rate", am$metric_name), ]
-    ci <- stats::binom.test(4, 8)$conf.int * 100
-    expect_equal(orr$metric_value, 50)   # 4/8 evaluable, not 4/10
+    # DENOMINATOR CHANGED 2026-09-20. This test previously asserted 4/8 - the
+    # CR/PR/SD/PD "evaluable" subset - which RECIST 1.1 section 4.9.1 forbids as
+    # the basis for a reported rate: "Trial conclusions should be based on the
+    # response rate for all eligible (or all treated) patients and should not be
+    # based on a selected 'evaluable' subset." NE is one of the five assigned
+    # outcomes, not an exclusion, so the NE patient and the unrecognised-label
+    # patient stay in the denominator as non-responders: 4/10, not 4/8.
+    ci <- stats::binom.test(4, 10)$conf.int * 100
+    expect_equal(orr$metric_value, 40)
     expect_equal(orr$confidence_interval, sprintf("%.1f - %.1f", ci[1], ci[2]))
     nt <- paste(r$notices$content, collapse = "")
-    expect_match(nt, "excluded from the ORR and DCR denominators")
+    expect_match(nt, "computed over all 10 patients")
     # copy-ready text agrees and contains no literal placeholders
     cr <- gsub("<[^>]+>", " ", paste(r$copyReadyReport$content, collapse = ""))
-    expect_match(cr, "50.0% \\(4/8 RECIST-evaluable")
+    expect_match(cr, "40.0% \\(4/10 patients")
+    expect_false(grepl("RECIST-evaluable", cr))
     expect_false(grepl("\\{orr", cr))
 })
 
@@ -691,11 +702,16 @@ test_that("Fisher label omits the odds ratio when it does not exist", {
   lab3 <- three$groupComparisonTest$asDF$test_statistic
   expect_true(length(lab3) >= 1)
   expect_false(any(grepl("NA", lab3, fixed = TRUE)))
-  expect_false(any(grepl("OR =", lab3, fixed = TRUE)))
+  expect_false(any(grepl("OR (", lab3, fixed = TRUE)))
 
   two <- suppressWarnings(swimmerplot(data = mk(c("A", "B")), patientID = "id",
     startTime = "start", endTime = "end", responseVar = "resp", groupVar = "grp"))
-  expect_true(all(grepl("OR = [0-9]", two$groupComparisonTest$asDF$test_statistic)))
+  # The label now names the direction of the comparison and carries the
+  # interval fisher.test computes: "OR (B vs A) = 1.30, 95% CI 0.12 to 14.20".
+  # It used to be a bare "OR = 1.30", which a reader could read backwards.
+  lab2 <- two$groupComparisonTest$asDF$test_statistic
+  expect_true(all(grepl("OR \\(B vs A\\) = [0-9]", lab2)))
+  expect_true(all(grepl("95% CI", lab2, fixed = TRUE)))
 })
 
 test_that("the summary export does not carry the same mean under two names", {
@@ -724,5 +740,11 @@ test_that("the large-data path returns the same group labels as the standard pat
   lab_small <- small$groupComparisonTest$asDF$test_statistic
   expect_equal(length(lab_big), length(lab_small))
   # both are 2x2 designs (level Z is unused), so both carry an odds ratio
-  expect_true(all(grepl("OR = ", lab_big, fixed = TRUE)))
+  # Both paths must name the same direction and produce the same point
+  # estimates. The confidence intervals legitimately differ - this compares a
+  # 1200-patient run against a 120-patient run, so the larger one is tighter.
+  expect_true(all(grepl("OR (B vs A) = ", lab_big, fixed = TRUE)))
+  expect_true(all(grepl("OR (B vs A) = ", lab_small, fixed = TRUE)))
+  or_of <- function(x) sub(".*OR \\(B vs A\\) = ([0-9.]+).*", "\\1", x)
+  expect_equal(or_of(lab_big), or_of(lab_small))
 })

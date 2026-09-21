@@ -4073,6 +4073,34 @@ lintr bug-set clean, all gates clean; 3-agent adversarial verification):
       longer says "simulated biopsy samples"; UI label/enable touches.
 - [ ] i18n: 10 `.()` wraps in ~2550 lines - needs its own /prepare-translation
       pass (po catalogs also still index the removed 'bias' level title).
+Review 2026-09-19 (/review-function, then "apply action items"): proportional-bias check
+(HC3 slope on an error-free level, judged at the 5th/95th percentiles), root-mean-square
+within-case CV, spatial_id "one row per case", release-gate %n$ false positive - done.
+Follow-ups (not done; the OncoPath library audit forbids TODO comments in the .b.R):
+- [ ] Image state: the full analysed matrix is saved in all three image states (3x in the
+      .omv). Only biopsyplot draws every value; variabilityplot needs (case mean, CV) and
+      spatialplot one row per compartment.
+- [ ] Optional clinical cut-off option: judge the fitted difference and category concordance
+      at the user's cut-offs (ER 1%/10%, Ki67 20%/30%) - where a pathologist acts.
+- [ ] Regression-based limits of agreement when the slope is shown (Bland & Altman 1999 s3.2).
+Release review 2026-09-19 (/release-review-function): the level check is now block-only everywhere and
+regresses on the reference (other-regions level dropped: shared site effects made unbiased regions MATERIAL,
+sparse regions shrank the check). Follow-ups:
+- [ ] Design question: the 5th/95th-percentile rule leaves a small cluster of large low-end discrepancies
+      (e.g. 4 ER-low cases reading +10 points) unjudged; a clinical cut-off option would cover it.
+- [ ] Cosmetic: when the 5th and 95th percentiles of the level are equal (>90% ties), the impact cell prints
+      the same point twice ("+0.0 at 100.0, +0.0 at 100.0").
+- [ ] Known trade-off: with a reference noisier than the regions, the reference-level slope (regression to the
+      mean) withholds "met" more often as n grows (a2_k1_repro.R: loss 27 pp at n = 90, 84 pp at n = 300).
+      Conservative, documented in the table note; revisit only with replicate readings.
+- [ ] Manual: reopen a saved 1.0.81 .omv with a Spatial Region ID in jamovi - the spatial plot recomputes the
+      root-mean-square CV from its state while the saved table may keep the old plain mean until re-run.
+- [ ] Sibling analyses (out of scope here): agreement (R/agreement.b.R:8078), digitalvalidation
+      (R/digitalvalidation.b.R:214), pathologyagreement (R/pathologyagreement.b.R:434) regress the difference on
+      the pair mean with OLS errors and call p < 0.05 "significant proportional bias"; methodcomparison
+      (R/methodcomparison.b.R:582) uses a correlation; pathologyagreement:443 states the direction whatever the
+      slope's sign. Same artefacts as found here (pair-mean regression to the mean, OLS under level-proportional
+      error) - review each with /review-function.
 - [ ] Restore menuGroup: OncoPath after GUI testing (currently OncoPathT).
 
 ## kappaSize family — filed from the kappaSizePower release review (2026-08-23)
@@ -5001,3 +5029,775 @@ Results: test-update-modules-dependency-guard 34/0, test-oncopath-library-audit 
 - [ ] Pre-existing failures (identical on HEAD): test-nomogrammer.R 7+1 err; test-outcomeorganizer-audit-2026-09.R "few-events warning ... missing values"
 
 Results: plan tests 32/32; updater dependency-guard 19/19; naming lint 11/11; 21 touched suites 1,420 expectations (only the 2 pre-existing failures). Routing identical to legacy for all 6 modules; helper sets identical to the old r_files for jj/md/js/CPD. Split files' parse trees identical to the originals; umbrella NAMESPACE unchanged after document(). Sandbox (APFS clones): idempotent second run; injected failures stop at verify/build with exit 1.
+
+## diagnosticmeta release review — remaining before release (2026-09-20)
+
+Verdict: **ready after the specified actions**. Statistics independently verified against `mada` 0.5.12 and
+`metafor` 5.2.1 to 0.00e+00; all 23 options wired end to end; 359 assertions across 10 files, 0 failures.
+
+- [ ] **USER: `jmvtools::prepare()` then `devtools::document()`.** Two option descriptions - `method` and
+      `confidence_level` - are newer in `jamovi/diagnosticmeta.a.yaml` than in the generated
+      `R/diagnosticmeta.h.R` and `man/diagnosticmeta.Rd`. The `.r.yaml` `clearWith` addition
+      (`bivariate_analysis`) and the five new `refs:` keys are also not yet compiled, so **those two fixes are
+      not active in jamovi until this runs**. (The retracted false sentence about the publication-bias path
+      never reached the generated files - checked.)
+- [ ] **USER: `jmvtools::i18nUpdate()`.** 61 of 238 msgids in the backend are absent from
+      `jamovi/i18n/catalog.pot`; 12 of those carry two or more conversion specifiers and need `%n$` or
+      order-preserving translation. Verified today: a Turkish run of six configurations produces no error and
+      no stray format specifier, and untranslated strings fall back to English cleanly - but a Turkish user
+      currently sees a mix (titles translated, the reworded bodies English).
+- [ ] **USER: move `menuGroup` back from `OncoPathT` to `OncoPath`**, then re-run `_updateModules.R`.
+      `../JamoviTest/R/diagnosticmeta.b.R` is stale relative to the umbrella; OncoPath ships no copy while
+      the analysis is routed away.
+- [ ] **Manual check in the jamovi app** (cannot be done from R): untick and retick *Bivariate
+      random-effects model* and confirm the table refreshes rather than showing the previous fit's cells;
+      reopen a saved `.omv` and resize the SROC and funnel plots.
+- [ ] `.a.yaml` `version:` is still `1.0.81` although the analysis changed materially today. The updater owns
+      this field (`test-oncopath-library-audit.R` enforces it), so it must not be hand-bumped - but the
+      release should carry a bump.
+- [ ] Module-wide, not this analysis: `compilerMode: tame` is absent from `jamovi/0000.yaml`, and 222 of 390
+      `.b.R` files use bare `ggplot2::aes()` column names that are not in `utils::globalVariables()`
+      (diagnosticmeta contributes 9). Both are package-level CRAN/library-review items.
+
+## diagnosticmeta deep audit — what the fix pass left (2026-09-20)
+
+`/check-function-full diagnosticmeta` fixed everything it found except the items below. The audit itself
+found no wrong numbers: pooled estimates, heterogeneity and Deeks' test reproduce `mada` 0.5.12 and
+`metafor` 5.2.1 to 0.00e+00.
+
+- [ ] **Three bare `{ ... }` blocks** in `.performPHMSROCAnalysis`, `.performHeterogeneityAnalysis` and
+      `.performPublicationBiasAssessment` - leftovers from removed `requireNamespace()` wrappers whose guards
+      were hoisted. They add a full indent level to roughly 550 lines. Deliberately NOT removed: reindenting
+      that much would bury the behavioural diff of this pass. Do it alone, as a whitespace-only commit.
+- [ ] **`jmvtools::i18nUpdate()` has not run since this session's two passes.** Counted, not estimated:
+      `R/diagnosticmeta.b.R` has 237 msgids, 57 of which are absent from `jamovi/i18n/catalog.pot`, and 55 of
+      those 57 were added by the release pass and this audit pass. Turkish falls back to English for them, with
+      no runtime risk today (every msgid that IS translated passes the sprintf-compatibility check, including
+      the two GT00 zero-cell sites, which use positional `%n$`). **12 of the 55 carry two or more conversion
+      specifiers**, so when they are translated the translator must either keep the order or use `%n$` -
+      that is the failure mode that killed `ihcheterogeneity` in Turkish. Check those twelve specifically
+      after the catalog is regenerated. The Turkish coverage claim in `vignettes/testing_diagnosticmeta.md`
+      stays qualified until this runs.
+- [ ] **`.r.yaml` and `.a.yaml` changes need `jmvtools::prepare()`** before they take effect: the
+      `bivariate_analysis` addition to `bivariateresults.clearWith` and the five new `refs:` keys live in the
+      generated `.h.R`/`0000.yaml`, which this pass did not touch. The guard for it is a source-level
+      assertion in `test-diagnosticmeta-audit-fixes.R`, not a runtime test.
+- [ ] **`.u.yaml` grouping**: `show_individual_studies` sits under Analysis Options, `show_plot_explanations`
+      under Visualization Options, and the other three display toggles under Reporting Options - three homes
+      for one family. Left alone because moving controls between panels is a UI change users will notice.
+- [ ] Manual check in the jamovi app: untick and retick **Bivariate random-effects model** and confirm the
+      "disabled by user option" footnote is gone (needs `prepare()` first), and reopen a saved `.omv` to
+      confirm the gated panels come back when their boxes are ticked.
+
+## diagnosticmeta release review — findings NOT fixed (2026-09-20)
+
+**Update 2026-09-20 (`/fix-function diagnosticmeta --apply`): every D-finding in this section is now
+closed.** D15 turned out to have been addressed by an earlier pass (the panel's lead-in already disowns
+the bands and points to the prediction region) and D26 by the disclosure added in the audit pass; the
+other nine were fixed here. Each carries a regression test in
+`tests/testthat/test-diagnosticmeta-audit-fixes.R`; six of the new blocks fail on the pre-fix backend.
+The three `USER:` items below are unchanged and still required.
+
+
+29 of the 40 findings from the 2026-09-18 OncoPath audit were fixed (see NEWS, and
+`tests/testthat/test-diagnosticmeta-release-fixes.R`). These eleven remain open; none is a wrong number, all
+are presentation or interpretation defects. Evidence for each is in
+`quality-reports/oncopath-release-2026-09-18/findings.json`.
+
+- [x] D15 (moderate) The Clinical Interpretation panel contradicts the analysis's own I-squared guidance
+      (the bivariate note disowns the univariate I-squared; the panel then grades it into bands)
+- [x] D16 (moderate) The copy-ready summary and the summary headline give point estimates with no CI, no
+      prediction interval and no k - the one block a user pastes into a manuscript
+- [x] D17 (moderate) Accuracy bands are stated as fitness-for-use verdicts ("good for screening purposes"),
+      which no meta-analysis of accuracy alone can support (needs prevalence and the cost of each error)
+- [x] D22 (moderate) The normal-approximation Reitsma model is biased with sparse or zero-cell data; no
+      exact-binomial alternative is offered and no caveat is given
+- [x] D28 (moderate) Meta-regression table: unlabelled logit scale, no reference category named, no CI, and
+      the intercept row reads like a covariate effect
+- [x] D29 (moderate) Pooled results table does not state the confidence level, the number of studies or the
+      number of participants
+- [x] D30 (minor) Heterogeneity and PHM tables build their fixed row sets in `.run()` with
+      `deleteRows()` + `addRow()`; per the repo convention those belong in `.init()`
+- [x] D31 (minor) Measure names are spliced into translatable sentences (`sprintf(.("%s meta-regression..."),
+      measure)`) - the splice is not on the DEFERRED list, so word order is wrong in some languages.
+      Note: this pass ADDED four such sites in `fit_meta_regression` (D12 fix); fix them together
+- [x] D33 (minor) Forest-plot explanation says "Higher on Y-axis = higher study estimate" while rows are
+      ordered by the mean of sensitivity and specificity
+- [x] D34 (minor) Plot explanation panels describe forest and funnel features that are not drawn
+- [x] D35 (minor) Panels refer to output that is not shown (funnel explanation with no funnel plot; the
+      basic summary points to tables that are switched off)
+
+Also open, from this pass rather than the audit:
+
+- [ ] `jmvtools::i18nUpdate()` has not been run since these fixes: roughly 40 new or changed msgids in
+      `R/diagnosticmeta.b.R` are not in `jamovi/i18n/catalog.pot` or `tr.po`, and 51 pre-existing ones were
+      already missing. Turkish output falls back to English for them (no runtime error - all 233 msgids that
+      ARE translated pass the sprintf-compatibility check, including the two GT00 zero-cell sites, which use
+      positional `%n$`)
+- [ ] `menuGroup: OncoPathT` - move back to `OncoPath` and regenerate OncoPath when testing is finished
+- [ ] Manual check in the jamovi app: reopen a saved `.omv` and resize the SROC and funnel plots (the funnel
+      renderer now fits its own regression line from state; the SROC curve is clipped at `.run()` time)
+
+## swimmerplot — `/check-function --profile release`, 2026-09-20
+
+**Verdict: NOT release-ready.** The 2026-09-18 audit filed 49 findings (S00-S48). A five-way triage
+against the current file this session found **47 still open**; S46/S47 (the ggplot2 `size=` deprecation)
+had been fixed earlier. This pass fixed the critical one and the worst of the censoring cluster and left
+the rest — 44 findings — open. They are listed below so the next pass does not re-triage them.
+
+**Fixed and verified this pass** (regression tests in `tests/testthat/test-swimmerplot-check-fixes.R`,
+all three blocks fail on the pre-fix file):
+
+- [x] **S00 (critical)** — above 1000 rows the data.table fast path seeded `censor_value`/`group_value`
+      with a bare logical `NA`, so one patient with a missing censor or group value killed the ENTIRE
+      analysis: no plot, no tables, and the user saw data.table's internal message
+      "Column 6 of result for group 2 is type 'double' but expecting type 'logical'". Reproduced exactly,
+      then fixed with a typed NA (`x[NA_integer_]`). `response_value` was already `NA_character_`, which is
+      why a missing response never triggered it.
+- [x] **S05 (major)** — censoring coded 1/2 (survival::Surv's convention) was read as ALL events: the
+      reverse Kaplan-Meier was abandoned and the median follow-up came out ~50% low in silence. Both
+      codings now return 30 on the audit's 10-patient example, matching `survival::survfit` exactly.
+- [x] **S04 (partial)** — the 1/2 half is fixed and the inferred convention is now disclosed in a notice
+      (0/1 and 1/2 each say which value was read as the event). **Still open:** a Yes/No or TRUE/FALSE
+      column whose semantics are inverted (an 'Ongoing' flag where Yes means still on treatment) is still
+      read with the wrong polarity — that needs the user to state the meaning, not a better guess.
+
+**Update — response-rate cluster closed (2026-09-20).** S01, S02, S06, S20 and S38 are fixed and
+carry regression tests in `test-swimmerplot-check-fixes.R` (all three new blocks fail on the pre-fix file).
+The denominator decision, taken from RECIST 1.1 section 4.9.1 read verbatim from the guideline PDF:
+
+- **ORR/DCR now divide by every patient in the analysis**, not by the CR/PR/SD/PD "evaluable" subset. NE,
+  unrecognised labels and unrecorded responses stay in the denominator as non-responders. On the audit's
+  12-patient cohort ORR went 44.4% (4/9) to 33.3% (4/12) and DCR 77.8% to 58.3%. **Rates can only fall or
+  stay equal — a user who published a number from an earlier version will find it lower.**
+- Per-category rows, the Fisher group test and the copy-ready sentence now use that same denominator, and
+  each summary row carries its own `n/N` so the page can be reconstructed by hand (printed percentages round
+  independently and need not sum to exactly 100; the counts do).
+- Best overall response stops at the first PD, ordered by episode start time. Four patients who all
+  progressed before a later CR/SD went from ORR 50% / DCR 100% to 0% / 0%.
+- Deliberately NOT done, recorded as decisions: response confirmation and an SD minimum duration (this
+  analysis has no assessment-date semantics, so either would be a silent assumption), and an iRECIST option.
+
+**Update — group-comparison cluster closed (2026-09-20).** S08, S09, S10, S11, S12, S24 and S34 fixed,
+with regression tests in `test-swimmerplot-check-fixes.R` (all three new blocks fail on the pre-fix file):
+
+- The odds ratio **names its direction and carries its interval**: `OR (B vs A) = 13.25, 95% CI 1.31 to
+  239.40`. It was a bare `OR = 1.30` built by `table()` on a CHARACTER group, so the rows sorted
+  alphabetically and renaming a group inverted the estimate; `fisher.test`'s own CI was computed and thrown
+  away. The 2x2 is now built on the user's factor level order with a fixed outcome-column orientation. The
+  direction was verified numerically rather than reasoned: with rows = groups and columns = (non-responder,
+  responder), `fisher.test` estimates row 2 relative to row 1.
+- Per-group counts (`A: 2 of 10 responded (20.0%)`) now sit beside the test, so it can be checked against
+  the rates above it.
+- S08/S09 were closed by the denominator work: the test and the reported ORR now use the same rule (all
+  patients with a group; NE, unrecognised and unrecorded responses are non-responders).
+- The low-cell warning only describes a test that actually ran, and a table that cannot be tested says why
+  instead of appearing empty. A degenerate 2x2 (every patient a responder, or none) is now screened out
+  rather than running a meaningless test - a case the fixed column orientation would otherwise have created.
+
+**Update — censoring / follow-up cluster closed (2026-09-20).** S03, S04, S07, S14, S17, S18 and S19
+fixed, with regression tests in `test-swimmerplot-check-fixes.R` (all four new blocks fail on the pre-fix
+file; the first fixture had to be rebuilt because its two patients shared a follow-up time, which made
+swapping their statuses symmetric and the test vacuous):
+
+- **Status now comes from the patient's LATEST episode**, not the last row in the file. It was read with
+  `tail()`/`[length()]` in storage order while the arrow's POSITION already used `which.max(end_time)` - so
+  re-sorting the same rows moved both the arrows and the reverse-KM median. One helper now serves all three
+  sites, and the result matches `survival::survfit` computed from latest-episode statuses.
+- **A patient with no censoring value is excluded from the reverse KM**, not counted as a completed
+  follow-up. `status %in% "censored"` is FALSE for `NA`, so `as.numeric()` silently made them events and
+  biased the median downward; neither existing check counted them. The exclusion is now stated.
+- **"No censoring information" is no longer shown when a censoring variable was supplied.** Where every
+  value classified and the reversed curve simply never reaches 50%, the row reads "reverse Kaplan-Meier not
+  estimable" and the estimator's own `reason` - which had no consumer anywhere in the module - is displayed
+  beside it. S03 and S19 are the same defect from different angles and are closed together.
+- **An unreadable Custom Reference Date is reported.** It fell through to the same silent offset fallback as
+  an empty box, so the reference line was drawn somewhere the user never asked for. The notice names the
+  Date Format that was applied, which is what makes an ISO string against dmy data fail.
+- S04's numeric half (1/2 coding) closed earlier; its remaining half - a Yes/No or TRUE/FALSE "Ongoing"
+  flag read with inverted polarity - stays open below, because it needs the user to state the meaning.
+
+**Update — display-mode cluster closed (2026-09-20).** S13, S16, S28, S29 and S48 fixed, with three
+regression blocks in `test-swimmerplot-check-fixes.R` (all three fail on the pre-fix file):
+
+- **Milestone and event times are measured from each patient's own start in every display mode.** The
+  tables converted the plot's x coordinate straight to a number, so with "Absolute (use actual start
+  times)" a "Median Time" was a study-time POSITION: five patients starting 0/10/20/30/40 whose surgery
+  was ~3 months in published 22 (range 3-41) instead of 3 (range 1-4), while the identical timeline
+  entered as dates gave 3 in both modes. One rule now covers all four modes - subtract each patient's
+  SMALLEST start_time in whatever coordinate system start_time currently uses, which is a no-op under
+  Relative. That also retires the `match()` lookup, which re-based a patient's episode-1 milestone on
+  whichever episode the file listed first. The two columns are retitled "… from Start".
+- **Median and protocol reference lines are withheld on an absolute axis, and the note says why.** The
+  suppression was gated on date scales alone, so raw times with Relative off drew "Median: 12.5" off the
+  left-hand end of lanes spanning study time 100-256, and protocol lines at 3/6/9/12/18/24 before any
+  patient existed - silently, with the validation note hidden. The predicate is now "does x measure
+  duration", which keeps the lines when every patient starts at the same time (there the absolute axis
+  IS the duration axis).
+- **Person-time and follow-up no longer move with the display mode.** Under Relative the times had
+  already been rewritten as durations measured from the patient's anchor, and a calendar month measured
+  from the anchor is not the same length as one measured from the episode's own start; end-of-month
+  cycles summed to 3.98 months relative against 4.02 absolute (calendar answer 4.0207). Both estimators
+  now work from the original Date/POSIXct values whenever the relative conversion kept them.
+
+Out of scope, filed here: `patient_data$segment_duration` (set from `.getDurations()` in
+`.summarizeByPatient`, then dropped again ~150 lines later) has no reader anywhere - `.getDurations` has
+exactly one caller and its result is never used. Dead weight, safe to delete in a cleanup pass.
+
+**Update — silent-loss cluster closed (2026-09-20).** S15, S30, S33 and S44 fixed, with three regression
+blocks in `test-swimmerplot-check-fixes.R`. Every one of the file's 19 blocks now fails against the
+committed backend and passes against the working copy, so no block in this session's work is vacuous.
+
+- **Event markers outside a patient's window are reported, not just deleted.** They disappeared from the
+  plot AND the event table, and the table's percentages were then taken over the survivors: 10 events
+  with three Deaths after the last end and one scan before the first start printed "Scan 4 (80%),
+  Toxicity 1 (20%)" with no Death row at all. Recording a death after follow-up ends is the normal way
+  a death is recorded, so the notice names that case specifically and scopes the table to what remains.
+- **The validation panel counts patients.** Every check in `.validateClinicalData` counted rows while
+  saying "patients" - six patients on two lines each were told "6 duplicate patient IDs" and "6 patients
+  with missing response data (50.0%)" beside a summary that classified all six. Follow-up length is now
+  a patient's whole span, a response is missing only when none of that patient's rows has one, and the
+  <3-per-category hint tabulates the same best response every other table uses. Each message names its
+  denominator ("for 1 of 3 patients"), which also settles the plural.
+- **Three silent ways to lose a milestone are disclosed.** A slot above "Maximum milestones" was never
+  reached; a blank name skipped a slot that had a variable; two slots sharing a name collapsed into one
+  row, so two different 10-event columns read as one "Surgery" of 20. Labels are now resolved once
+  before the loop: blank falls back to the variable name, collisions are qualified with it, and each
+  case adds a notice.
+- **Sort Variable silently beat Sort Order.** duration_desc, duration_asc and patient_id all produced an
+  identical picture. The precedence is unchanged; it is now stated when the two disagree.
+
+**Update — option-control cluster closed (2026-09-20).** S21, S22 and S23 fixed, with two regression
+blocks in `test-swimmerplot-check-fixes.R`. All 21 blocks in that file fail against the committed backend.
+
+- **Each option now controls what its label says.** ORR and DCR required BOTH "Person-time analysis" and
+  "Response analysis", so unticking person-time deleted the headline response rates - while the
+  interpretation kept a "Person-Time Analysis: Total person-time ..." paragraph for a table that no
+  longer existed. In the other direction, unticking "Response analysis" left the ORR/DCR Fisher tests
+  reporting p-values and person-time still broken down by response. Each family is gated by the option
+  that names it, in `.advancedMetricLabels`, `.updateAdvancedMetrics`, `.updatePersonTimeTable`,
+  `.updateGroupComparisonTests` and `.generateInterpretationOutput`.
+- **A visible, empty table says why.** `personTimeTable` and `milestoneTable` were empty and unexplained
+  in the DEFAULT configuration. `visible:` now requires the variable each table needs
+  (`showEventMarkers && eventVar`, any `milestoneNDate`, `groupVar && responseVar && responseAnalysis`,
+  `personTimeAnalysis && responseAnalysis && responseVar`, and `advancedMetrics` on either family), and
+  every data-driven early return sets a note giving the reason.
+- **The group test asks the option, not the column.** `.summarizeByPatient` always emits a `response`
+  column - all NA when no variable was chosen - so the column test passed and the table published
+  "A: 0 of 4 responded" for data that records no responses at all.
+
+Needs `jmvtools::prepare()` before it reaches the GUI: the five `visible:` expressions and
+`groupComparisonTest`'s `clearWith` are uncompiled. The backend gating is independent of them, which is
+why the R-side tests pass either way.
+
+**Update — figure cluster closed (2026-09-20).** S26, S27, S31 and S45 fixed, with four regression
+blocks in `test-swimmerplot-check-fixes.R`. All 25 blocks in that file fail against the committed backend.
+
+- **Lanes are coloured by the normalised response label.** They used the RAW factor while every table
+  tabulated the normalised one, so a file mixing "complete response", "Complete Response" and "CR" drew
+  six colours and six legend keys for the three rows the summary reported. A `response_label` column is
+  built once in `.validateAndProcessData`, ordered CR, PR, SD, PD, NE then anything else - clinically,
+  not alphabetically, which had put PD between PR and SD.
+- **High Contrast no longer destroys the plot above 8 categories.** `scale_color_manual()` with 8 fixed
+  values ERRORS at build time when the data has more levels, and the renderer's catch-all turned that
+  into the simplified fallback - the whole swimmer plot replaced, silently. Those cases now use Viridis
+  and say so. The `.u.yaml` also disables the palette control when no response variable is selected,
+  where it did nothing at all.
+- **The y axis reads in the sort order, from the top.** ggplot places factor level 1 at the BOTTOM, so
+  all four sort orders were upside down: "Duration (Longest First)" put the longest lane last. Patient
+  ID also sorted lexicographically (1 10 2 20 3) and now sorts numerically when every ID is a number.
+- **The status arrow explains itself.** ggswim's arrow layer maps no aesthetic, so it produces no legend
+  key; the only explanation lived in a glossary panel that is hidden by default and does not travel with
+  an exported image. A caption is drawn whenever arrows are, and every description now says "censored /
+  still at risk at the data cutoff" rather than "ongoing treatment" - any censored or alive status draws
+  one.
+
+Not done, and deliberately: `sortOrder` could carry `enable: (!sortVariable)` in the `.u.yaml`, but
+negating a Variable option in the binding grammar is unverified here and the INFO notice already states
+the precedence.
+
+**Update — diagnostics and cost closed (2026-09-20).** S25 and S32 fixed, with two regression blocks in
+`test-swimmerplot-check-fixes.R`. All 27 blocks in that file fail against the committed backend and none
+passes, so nothing in this session's work is vacuous.
+
+- **A parsing failure names its cause.** The raw-mode date sniffer knows only YYYY-MM-DD, NN/NN/YYYY and
+  YYYY/NN/NN, and only looks at the first three start values, so "1/5/2023" and "15.01.2023" fell
+  through to `as.numeric()`, became NA, and died in the validity filter as "end times are >= start
+  times" - an ordering message for data containing no numbers at all. Raw mode now counts values that
+  were non-blank before the conversion and NA after, quotes one of them, and says to switch to
+  Date/Time. Datetime mode separates "the cell was empty" from "this Date Format cannot read it" and
+  names the format. And the date-detected branch, which stops the analysis, now adds an ERROR notice -
+  previously the only notice on the page was "Time units" while every value came out NA.
+- **The timeline export is bounded.** jmvcore's `addRow()` is quadratic in the rows already present:
+  measured on a bare Table, 250 rows cost 2.1 s, 500 cost 8.3 s and 1000 cost 32.9 s, with the values
+  themselves free (`setRow` on pre-added rows is identical, so there is no cheaper Table API). A
+  2000-patient cohort spent 135 s of every run inside that loop. The on-screen export now stops at 500
+  patients and says so, naming the full cohort size and that everything else uses all of it.
+
+**Update — clinical wording and presentation closed (2026-09-20).** S36, S37, S41, S42, S43, S35, S39
+and S40 fixed, with six regression blocks in `test-swimmerplot-check-fixes.R`. All 33 blocks in that
+file fail against the committed backend and none passes.
+
+- **The glossary states RECIST 1.1.** PD read ">=20% increase in sum of target lesion diameters" - no
+  nadir reference, no 5 mm absolute increase, no new lesions, all three of which section 4.3.1 requires.
+  SD named no reference point and CR omitted the <10 mm short-axis node rule. The panel now also says
+  that PR is measured against BASELINE while SD and PD are measured against the nadir, that the category
+  shown is the best overall response over target, non-target and new lesions, and cites Eisenhauer 2009.
+- **A half-reached follow-up interval is kept.** The CI cell was blanked whenever EITHER bound was NA,
+  and with a reverse Kaplan-Meier the upper bound routinely is not reached: survfit's "28 (95% CI 22 -
+  NA)" printed as an empty cell, discarding the useful half. `.followUpCIText()` prints "22.00 - NR",
+  and the copy-ready sentence now carries the interval it had always computed and dropped.
+- **Person-time by response is labelled for what it is.** Follow-up Density is exactly 100/Mean Time in
+  the same row, which the note now says, and splitting follow-up by BEST response is the textbook
+  guarantee-time bias, which nothing warned about. The note names it and points at a landmark or
+  time-dependent analysis.
+- **The static panels are theme-safe.** 20 headings and paragraphs carried fixed hues measuring 1.73:1
+  to 2.58:1 against the dark background - under WCAG's 4.5:1 floor. Hue is kept only in borders and
+  translucent tints.
+- **The time unit is translated.** `self$options$timeUnit` is the option key, spliced into 16 translated
+  sentences, so each one translated while the unit stayed English - the failure only a non-English user
+  sees. `.timeUnitWord()` serves display; lubridate keeps the key. Markup is also out of all five msgids
+  that carried it.
+- **The plot state carries only what the renderer draws from.** It held the whole `stats` list, with a
+  row per patient in `patient_summary`, plus `interpretation`, which no renderer reads: 0.30 MB at 2000
+  patients, written into every .omv and read back on every resize. Now 0.13 MB and four scalars.
+
+**All 49 audit findings are closed.**
+
+**Still open — 0 findings.** Severity counts from the audit:
+
+*major (15)*
+
+- [x] S01 — Headline ORR/DCR (Advanced Metrics and copy-ready manuscript text) use a 'RECIST-evaluable' subset, which RECIST 1.1 section 4.9.1 says conclusions must not be based on
+- [x] S02 — Best overall response counts responses recorded after progression
+- [x] S03 — Follow-up row says 'no censoring information' when a censoring variable was supplied, and the fallback reason is thrown away
+- [x] S04 — Censoring/status coding is guessed: 1/2 coding and Yes/No or TRUE/FALSE 'ongoing' flags silently give wrong arrows and a wrong median follow-up
+- [x] S06 — Three different response denominators in one output: summary rates, the ORR row and the Fisher tests do not reconcile
+- [x] S07 — A Custom Reference Date that cannot be parsed silently falls back to 'earliest start + Custom Reference Time', including the description's own example format
+- [x] S08 — Fisher ORR/DCR group test uses a different denominator than the ORR/DCR it sits beside
+- [x] S09 — The group comparison Fisher tests count NE and unrecognised responses as non-responders, while the reported ORR/DCR exclude them
+- [x] S10 — Group-comparison odds ratio: direction fixed alphabetically and never stated, no CI, no per-group rates, so Drug 70% vs Placebo 10% prints 'OR = 0.06'
+- [x] S11 — Group-comparison odds ratio has no reference group, no CI, and flips with group names
+- [x] S12 — Fisher odds ratio is printed without its direction
+- [x] S13 — Milestone and event 'Median Time' change meaning with the display mode
+- [x] S14 — Per-patient censoring status depends on row order, not on the latest episode
+- [x] S15 — Event markers outside a patient's start-end window are dropped from the plot and the event table without any notice
+- [x] S16 — In raw mode, switching timeDisplay to 'absolute' turns the milestone and event 'Median Time' into a raw axis position
+
+*moderate (18)*
+
+- [x] S17 — Missing censoring status is silently treated as a terminal event in reverse KM
+- [x] S18 — Median follow-up fallback says 'no censoring information' when a recognised censoring variable was supplied, and the computed reason is never shown
+- [x] S19 — A supplied censoring variable is labelled 'no censoring information' when reverse KM is not estimable, and the reason is hidden
+- [x] S20 — Summary '<X> Rate (%)' rows use a different denominator from ORR/DCR
+- [x] S21 — Person-time and response options do not control what their labels say
+- [x] S22 — Group Comparison, Person-Time and Milestone tables can be visible but empty with no explanation, including in the default configuration
+- [x] S23 — Unchecking 'Response analysis' still reports ORR/DCR Fisher tests and person-time by response
+- [x] S24 — Low-cell Fisher warning appears when no Fisher test was run
+- [x] S25 — Timeline Data export takes 34 s at 1000 patients and 135 s at 2000 (quadratic growth)
+- [x] S26 — Lane colours use raw response labels while every table uses normalised labels, so one category gets several colours
+- [x] S27 — 'High Contrast' palette with more than 8 response categories replaces the whole plot with the simplified fallback
+- [x] S28 — Raw times with absolute display: Median and Protocol reference lines are drawn at duration values on the absolute study-time axis
+- [x] S29 — Median/protocol reference lines are placed at duration values on a raw absolute axis
+- [x] S30 — Data-quality messages count rows as 'patients': multi-episode data reports '6 patients with missing response (50%)' when none are missing
+- [x] S31 — Sort orders read in reverse top-to-bottom, and Patient ID sorting is lexicographic
+- [x] S32 — Unrecognised date text in raw mode, and unparseable dates in datetime mode, get error messages that point to the wrong cause
+- [x] S33 — Milestone and sort options are silently truncated, skipped or overridden
+- [x] S34 — Group-comparison table is shown but empty, or quietly drops the ORR row, with no explanation
+
+*minor (12)*
+
+- [x] S35 — Fixed text hues in the Instructions, Glossary and About panels are unreadable in one of the two themes
+- [x] S36 — Clinical glossary misstates RECIST 1.1 PD (and CR/SD) definitions
+- [x] S37 — Glossary PD definition is incomplete against RECIST 1.1
+- [x] S38 — Summary 'CR/PR/... Rate (%)' rows use all patients as denominator, contradicting the ORR row and the notice on the same page
+- [x] S39 — i18n: untranslated option key spliced into every translated sentence; HTML inside 5 msgids
+- [x] S40 — Plot state carries the per-patient summary and other data the renderer never reads
+- [x] S41 — Person-time by best response: 'Follow-up Density' is exactly 100/Mean Time, and there is no guarantee-time (responder-vs-non-responder) caveat
+- [x] S42 — The median follow-up CI is blanked when its upper limit is not reached, and the copy-ready text never reports it
+- [x] S43 — Reverse-KM CI is dropped when its upper bound is not reached
+- [x] S44 — Validation panel counts rows but reports them as patients
+- [x] S45 — Arrows have no legend key and are described as 'ongoing treatment' although any censored/alive status triggers them
+- [x] S48 — Datetime person-time still shifts with timeDisplay
+
+Evidence for every one is in `quality-reports/oncopath-release-2026-09-18/findings.json`; the location
+line numbers are stale, so re-locate by content.
+
+### swimmerplot — post-audit fixes (2026-09-21)
+
+The `/check-function-full` pass raised five findings (F1-F5); a five-agent research round then found
+six more and corrected one of mine. All applied, 38 regression blocks now fail against HEAD and none
+passes.
+
+- [ ] **F1 withdrawn, and it was my error.** I bumped `.a.yaml version` to 1.0.82 on the generic rule
+      "bump when the analysis changes materially". This repo enforces a stricter invariant instead -
+      `test-oncopath-library-audit.R:47` asserts every OncoPath analysis version equals the first three
+      components of `DESCRIPTION: Version` (1.0.81.01). The bump turned that test red, so it is reverted.
+      The version moves with the PACKAGE release, not per analysis; `_updateModules_config.yaml` already
+      names `1.0.82.06` as the next target, so this rides along with that bump.
+- [x] **F2** citations. **My audit was wrong**: I reported "zero citations" because my crosswalk only
+      inspected per-item `refs` and never looked at the document root - `swimmerplot.r.yaml` already
+      carried six analysis-level keys. The real gap was narrower and is now closed: `survival` added at
+      analysis level (it is reached only through the shared helper `R/utils-followup.R`, so a package
+      scan of the `.b.R` misses it), a new `ClopperPearson1934` entry in `00refs.yaml` for the exact
+      binomial intervals (every field verified against Crossref), and item-level `refs:` on the five
+      items that actually report a method - plot, summary, advancedMetrics, groupComparisonTest,
+      copyReadyReport. The other 13 items stay ref-free deliberately.
+- [x] **F3** `STRONG_WARNING` printed as `WARNING: `, so the level had no effect in the output. Now
+      `STRONG WARNING: `, matching the two siblings that already distinguish it. `": "` is composed
+      OUTSIDE `.()` because the bare words are existing msgids already translated (HATA / GÜÇLÜ UYARI /
+      UYARI / NOT) - putting the colon inside would have minted new msgids shipping with empty msgstrs.
+- [x] **F4** `advancedMetrics` accumulated duplicate rows on repeated `.init()`. The `rowCount == 0`
+      guard used four lines above for `summary` would have been the WRONG fix: this row set is
+      option-dependent, and `.run()` fills it with `setRow()`, which REJECTS a missing key - a frozen
+      set would abort the analysis rather than merely duplicate rows. `deleteRows()` before the loop
+      instead. (An agent read jmvcore's source and the jamovi engine binary to confirm the engine never
+      re-enters `.init()`, so this was latent, not live.)
+- [x] **F5** three severity channels collapsed into one. `warningNotice` and `validationReport` are
+      **retired from the schema**; the Fisher low-cell warning, the absolute-axis reference-line note,
+      the custom-reference note and the data-quality block all go through `.addNotice()` now. Side
+      effect worth having: **no `setVisible(FALSE)` remains in the file**, so that house rule now holds
+      by construction rather than by review.
+- [x] **C1** `inst/examples/swimmerplot_example.R` - the SHIPPED example - used 15 argument names that
+      do not exist (`milestone1`, `sortBy`, `plotTitle`, `showReferenceLine`, ...) across 19 calls, so
+      essentially every call died with "unused argument". Worse than the agent reported: it also passed
+      six invalid enum values (`colorPalette = "Set2"`, `dateFormat = "YYYY-MM-DD"`). The whole file now
+      executes end to end.
+- [x] **C2** the `.run()` reset cleared 4 items; the other 9 were cleared inside their own `.update*()`
+      methods, which all run AFTER the four validation early-returns. A spreadsheet edit that breaks
+      validation changes no option, so `clearWith` never fires and the error appeared above the previous
+      run's fully-populated tables.
+- [x] **C3** `summary` never pruned a response row whose category had disappeared. Measured: deleting
+      the last SD patient left a stale "SD Rate (2/8)" row with its old value and **the rates summed to
+      125%**, contradicting the table's own footnote promising the counts add to the denominator.
+- [x] **C5** five `.a.yaml` option descriptions documented behaviour that the last two sessions changed
+      (colorPalette claimed to colour groups, referenceLines silent about being withheld on an absolute
+      axis, exportTimeline silent about the 500-patient cap, sortVariable silent about overriding Sort
+      order, sortOrder silent about being ignored).
+- [x] **C6** the missing-variable block in `.init()` was dead: `.run()` blanks `.noticeList` and
+      `instructions` and then re-creates both verbatim, and jamovi always calls `.run()` after `.init()`.
+- [x] **C8** `interpretation` switches its follow-up estimator on the censoring classification exactly
+      as `copyReadyReport` does, but only `copyReadyReport` listed `censorVar` in `clearWith`.
+- [ ] **C7 declined** (recorded, not done). Hiding `milestoneTable` when every assigned slot sits above
+      `maxMilestones` would mean re-introducing `setVisible(FALSE)`, which F5 just eliminated. That state
+      is already explained twice - an INFO notice naming the slot and the cap, and the table's own empty
+      note pointing at it.
+**Adversarial verification changed four of these.** Six agents were told to REFUTE the applied fixes;
+five came back refuted and the regression sweep came back MAJOR. What that bought:
+
+- **C3 shipped a NEW bug in the same class it fixed.** A response level literally spelled `missing`
+  produces the key `response_missing` - exactly the key the no-response row used - so the category row
+  was added and then silently overwritten. Measured: three patients had no row at all and the rates
+  summed to **62.5%**. The no-response row now uses `no_recorded_response`, which `paste0("response_",
+  x)` cannot produce.
+- **C3's pruning branch was redundant and fired on every run.** `.resetSummaryTable()` at the top of
+  `.run()` already leaves only the five fixed rows, so `present` was always empty, the branch always
+  fired, and it threw away the five rows it had just been handed. Removed. My regression test passed
+  only because it called `.updateSummaryTable()` directly, bypassing `.run()` - it now exercises the
+  production path.
+- **F4's unconditional `deleteRows()` had its own failure mode.** jmvcore's `Table$deleteRows()` clears
+  `.rowKeys` and `.rowCount` but NOT `.rowNames`, so rebuilding to an EMPTY set leaves phantom row names
+  that `Table$fromProtoBuf` indexes out of bounds. Now rebuild-if-different, so `deleteRows()` never runs
+  on the repeat path at all.
+- **The `.run()` blanking loop called `setRow()` on rows that may not exist.** When a selected column is
+  missing from a reopened `.omv`, `Analysis$init()` rejects before `.init()` runs, `run()` skips init on
+  the error status, and the loop then hit an empty table: "Table$setRow(): rowKey 'median_followup' not
+  found", which masks the real cause. Guarded.
+- **I had reverted a standing i18n fix.** Splitting `.("<p><strong>Error:</strong> {message}</p>")` into
+  `"<p><strong>", .("Error:"), "</strong> "` is precisely what `test-oncopath-library-audit.R:122-123`
+  exists to prevent: the house rule is that `.()` wraps a COMPLETE sentence, which outranks the
+  "no markup in a msgid" preference that motivated the split. Restored at both sites, and my own S39 test
+  - which asserted the opposite - was narrowed to catch FRAGMENTS rather than any markup.
+- **C1 was worse than the audit said.** Beyond 15 invalid argument names it also passed six impossible
+  enum values, and eight calls supplied `eventVar`/`eventTimeVar` without `showEventMarkers = TRUE`, so
+  "Adverse Event Timeline" rendered a plot with zero events. Example 11, titled "Date/Time Format
+  Handling", passed `timeType = "raw"` with numeric day columns and never touched the dataset's real
+  date columns. All fixed; the file executes and a new test validates names, levels and the event flag.
+
+**Before you run `_updateModules.R`, read this.** All four OncoPath analyses are currently routed to
+`OncoPathT`, so OncoPath plans to **0 analyses** and the updater would DELETE eight files from the
+sibling - the whole swimmerplot analysis plus the shared `R/utils.R` and `R/utils-followup.R`
+(verified with `--dry-run`). Move `swimmerplot` and `diagnosticmeta` back to `menuGroup: OncoPath`
+first. The three remaining failures in `test-oncopath-library-audit.R` are this same routing and clear
+with it.
+
+- [ ] **OncoPath catalog:** the four severity prefixes (ERROR / STRONG WARNING / WARNING / NOTE) are
+      translated in the umbrella `jamovi/i18n/tr.po` but absent from `../OncoPath/jamovi/i18n/tr.po`, so
+      until `jmvtools::i18nUpdate()` runs there a Turkish user sees an English prefix on a translated
+      title. One new msgid also needs translating: "Small cell counts in Fisher's exact test".
+
+- [ ] **Module-wide follow-up, out of scope here:** 32 of the 34 analyses with a notice renderer collapse
+      `STRONG_WARNING` into `"WARNING: "`, exactly as swimmerplot did. Only `jjbarstats` and
+      `nogoldstandard` distinguish it. Worth one sweep.
+
+### swimmerplot — /review-function findings, fixed (2026-09-21)
+
+A five-lens review (statistics vs reference implementations, clinical, i18n, architecture, lint) with
+every non-minor finding handed to a separate agent told to refute it: **23 findings, 23 held**. All are
+now fixed. 180 blocks / 519 assertions pass; the 7 new blocks all fail against the pre-fix snapshot.
+
+**Correctness**
+- [x] **Mixed `Date` + `POSIXct` destroyed person-time.** `.asNumericTime()` returned each class's own
+      raw epoch unit - DAYS for Date, SECONDS for POSIXct - and all six call sites compare a start
+      against an end. Measured **104,106,728 months reported beside a correct Mean Duration of 2.5**;
+      truth is 5. `.getDurations`/`.calculateFollowUp` build a lubridate interval on the originals and
+      were immune, which is why only one number looked wrong. One scale (epoch seconds) everywhere.
+- [x] **Milestones were never checked against the patient's window.** The event path filters and says
+      what it dropped; this one never compared a milestone to the timeline. In the module's OWN
+      `swimmerplot_test`, **13 of 49** milestone values fall outside it - drawn floating past the end of
+      the lane and pooled into the summary median. Markers are kept (a progression after the last
+      follow-up line is real) and the reader is now told, with a per-label breakdown.
+- [x] **The group comparison printed "0 of 19 responded (0.0%)" for a non-RECIST response**, directly
+      contradicting the warning above it that said rates "have been omitted rather than reported as 0%".
+      It now applies the same `.responseRates()` guard `.updateAdvancedMetrics` uses.
+- [x] **A continuous grouping variable ran silently.** A time column produced a 24-group Fisher test,
+      every group "1 of 1 responded". Now a STRONG_WARNING when groups exceed 10 or any has n < 2, and
+      patients dropped for a missing group value are disclosed (the note said "over all 24 patients"
+      while the ORR above covered 30).
+- [x] **An odds ratio of Inf lost its whole interval.** `!all(is.finite(ci))` discarded a finite lower
+      bound of 1.20 - the half carrying the evidence. Each bound is formatted independently now, the
+      same pattern `.followUpCIText` already used for the reverse-KM median.
+- [x] **The implausibility guard covered only days and months**, so weeks and years skipped it
+      entirely: the same data under `years` published "median follow-up 332.0 years" with no notice.
+- [x] **The capped export shipped the wrong 500 patients** - my own fix from the previous session.
+      `.applySorting` sets levels to `rev(ordered_ids)` because ggplot draws level 1 at the BOTTOM, so
+      `per_patient[1:500]` took the plot's bottom 500: with the default `duration_desc` that is the 500
+      SHORTEST timelines, and **the 100 longest-followed patients were the ones dropped**, under a note
+      claiming the order matched the plot.
+
+**Reconciliation and disclosure** - all verified cases where two numbers on one page disagreed
+- [x] Summary table: Mean Duration and Total Person-Time are on different definitions (9.33 x 3 = 28
+      against a reported 22 on a gapped fixture) and the table carried no note at all unless a response
+      variable was selected. It now always carries units and the definition difference.
+- [x] Person-Time table rows summed to 50 against a reported 60; the missing patients had no recorded
+      response and were named nowhere. Disclosed with the figures.
+- [x] "Follow-up Density" interpretation claimed `100 / mean duration`; it divides by mean PERSON-TIME
+      (27% apart when patients have gaps).
+- [x] Event Marker "Percentage" divides by event RECORDS, not patients - one patient with three markers
+      made "80%" out of 2 of 3 patients. Denominator and unit now named.
+- [x] A notice promised an evaluable-subset rate "reported beside it"; `orr_evaluable`/`dcr_evaluable`
+      were computed and read by nothing. The figures are now printed in the notice itself.
+- [x] "Most common response" ignored patients with no recorded response (3 CR + 5 NA read "CR 37.5%"
+      beside a summary row saying "No recorded response 62.5") and broke ties silently. Both fixed.
+- [x] Copy-ready text said "1 patients" and carried no small-sample caveat, under a heading offering it
+      for direct use in a manuscript.
+- [x] The status arrow was "ongoing treatment" in three notices and "censored / still at risk" in the
+      glossary and plot caption. One name everywhere.
+- [x] The reverse-KM interval is survfit's default `conf.type="log"`, never stated, in a column that
+      also carries Clopper-Pearson intervals. Named, with the log-log difference called out.
+
+**Performance** - `n = 10 000` went from **91.6 s to 3.7 s**
+- [x] The data.table fast path split its own finished one-row-per-patient aggregate into n one-row
+      tables purely so the shared `bind_rows()` could reassemble them - 70% of the whole run.
+- [x] `segment_duration` was computed for every row and read by nothing; removing it orphaned
+      `.getDurations()`, which is gone too.
+- [x] The plot state carried 10 patient_data columns where the renderer reads 4 (2609 KB -> 337 KB at
+      5000 patients), plus a `colorPalette` field nothing read.
+- [x] `.normalizeResponse` was driven element-by-element over every row at four sites (0.93 s vs
+      0.010 s per 40 000 values); vectorised.
+- [x] ERROR notices rendered LAST, under routine NOTEs. Sorted by severity.
+- [x] The catch-all `tryCatch` left a fully-populated Summary table beside its red error box. The
+      handler now blanks what it may have written.
+
+**i18n**
+- [x] `R/utils-followup.R` has 72 string literals and zero `.()`, and its English `reason` was pasted
+      onto a translated sentence. It cannot call `.()` (a file-level helper has no `self`), so it now
+      returns a `reason_code` and the R6 caller picks the translated wording. `reason` is kept, so the
+      **8 other analyses** that read it are unaffected.
+- [x] The raw `dateFormat` key ("ymd") was spliced into three translated sentences while the control
+      the user is sent to shows "YYYY-MM-DD" - the class `.timeUnitWord()` already fixed for timeUnit.
+- [x] Four exclusion reasons were verb-less fragments glued with "; " inside another sentence's
+      parenthesis; now complete sentences.
+- [x] Two notice titles ended in a colon, rendering "WARNING: ...:".
+- [x] Turkish: the glossary defined **OYO** for ORR while every table printed **ORR**. Made consistent
+      on the English abbreviation, which is what Turkish oncology writing uses - **say if you prefer
+      OYO and I will switch all of them instead.** Also `Odds Oranı (OO)` -> `(OR)`.
+
+**Not fixed, deliberately**
+- [ ] `private$.checkpoint()` is still absent. The review measured 43-116 s runs, but the data.table fix
+      took `n = 10 000` to 3.7 s, so the case is much weaker - and every candidate site sits inside the
+      catch-all `tryCatch`, which would swallow the restart (it is an error-class condition). Worth
+      doing together with narrowing that tryCatch, which is its own change.
+- [ ] **85 of 341 msgids are in no catalog** (94 against the shipping OncoPath one) - the text the last
+      three sessions wrote. At pure defaults, 21 of 96 strings reaching a Turkish user are English,
+      including the notice severity headers. This needs `jmvtools::i18nUpdate()`, below.
+- [ ] `release_gate.py` computes only `catalog - used`, never `used - catalog`, which is exactly why
+      those 85 pass at "0 blocking". Two-line addition to `check_i18n_catalog_scope`.
+
+### swimmerplot — release review (2026-09-21): READY AFTER MINOR ACTIONS
+
+Gate results for promotion out of `OncoPathT`:
+- `tools/promotion_screen.py`: **swimmerplot debt = 0**, and it ranks **1st of 40** candidates
+  (score 14.45, wired 1.00, 21 test files, 9 vignettes, 6 refs). Nothing it carries would fail the
+  gate on promotion.
+- `release_gate.py`: 1 blocking module-wide, and swimmerplot is **not** in it - the FAIL names 23
+  shipped Images in advancedraincloud / jjdotchart / jjdotplotstats / jjsegmentedtotalbar /
+  multisurvival / oddsratio / singlearm.
+- §21 column formats: `pc` and `zto,pvalue`, both valid comma-separated tokens.
+- §22 user column name as regex: 5 `grepl` sites, all with HARDCODED patterns and user data only
+  ever as the target - clean.
+- §20 fabricated statistics: none in swimmerplot.
+- 6c case/naming: wrapper calls `swimmerplotClass` and `.b.R` defines it; no case-only duplicate
+  paths; no Collate field to drift.
+- `tools/ui_harness/render_ui.sh swimmerplot`: renders, `placeholder present = false`,
+  `errors = undefined` (no `.events.js`, so the harness is valid here).
+- Data flow: 42/42 options read and present in `.u.yaml`; 16/16 result items written; 0 dangling
+  `clearWith`; `renderFun: .plot` resolves.
+
+- [x] **§23 plot colours** - the one rule swimmerplot did not follow. `ggtheme` is a parameter of
+      `.plot()` and was discarded, and no palette came from `jmvcore::colorPalette(n, theme$palette)`.
+      Added a `jamovi (follow global)` level to `colorPalette` and wired it, threading `theme`
+      into `.createGgswimPlot()`. **Default unchanged.** Note: no other analysis in this module uses
+      `jmvcore::colorPalette` - swimmerplot is the first.
+- [ ] **This change is INACTIVE until you run `jmvtools::prepare()`.** The compiled
+      `R/swimmerplot.h.R` still carries the four-level enum, so `colorPalette = "jamovi"` is rejected
+      by `options$check()` at run time. The regression test for it **skips with that exact reason and
+      activates itself** once the header is regenerated - so re-run the suite after `prepare()`.
+- [ ] `ggtheme` is still not applied to the plot. That is arguably deliberate: `plotTheme` offers
+      ggswim's purpose-built themes and honouring jamovi's global theme instead would change every
+      existing figure. Left as a decision for you rather than changed silently.
+
+### swimmerplot — security audit (2026-09-21)
+
+No code-execution vector. Categories A (runtime evaluation), B (string-built calls), C (formula
+construction), E (filesystem/process) and F (deserialization) returned **zero matches**. The only
+formula in the call graph is the literal `Surv(time_u, cens_u) ~ 1`; there is no `eval`, no
+`parse(text=)`, no `system`, no `readRDS`, and no `type: File` option.
+
+**Verified against the jamovi client, not assumed:** the notices panel is `type: Preformatted`, and
+the client renders it with `this.$syntax.innerText = e` - `innerText`, not `innerHTML`. So the six
+free-text and column-name sources that reach the notices panel are **not** an injection surface, and
+the long-standing code comment claiming exactly that is now evidence-backed.
+
+- [x] **CRITICAL (not a security issue, found incidentally): the analysis was completely broken.**
+      Five `.r.yaml` `visible:` expressions I wrote earlier this session used a `Variable` option bare
+      inside `&&`/`||`. A `.r.yaml` `visible:` is evaluated **in R by jmvcore**, where a Variable is a
+      CHARACTER string, so `TRUE && "col"` raises *invalid 'y' type in 'x && y'* and every run halted
+      with "Could not resolve". It was inert while `R/swimmerplot.h.R` was stale; your
+      `jmvtools::prepare()` at 09:44 compiled it in and broke the analysis. Fixed with
+      `length(var) > 0`, the form ~90 working analyses use and not one departs from. **The trap:** I
+      validated the pattern against a `.u.yaml` `enable:` precedent, but `.u.yaml` bindings are parsed
+      by the CLIENT-side JavaScript evaluator - a different engine with different rules.
+- [x] **LOW - group level names reached a table note and the test-statistic cell unescaped.** jamovi
+      renders string cells with `renderMode = "rich"` and notes through a markup parser honouring
+      `i/em/b/strong/sub/sup`, so a level named `<b>Arm A</b>` rendered bold. Formatting injection,
+      not XSS - the allow-list excludes `script`/`img`. Escaped with `jmvcore::htmlEscape`, matching
+      the 12 other `setNote` sites in this module.
+- [x] **LOW - my third finding was backwards, and the audit corrected it.** I flagged the `deparse()`
+      special-case in `.asSource()` as a mixed-style smell. Measured on a column named `weird"name`:
+      `.sourcifyOption()` emits `responseVar = weird"name` (unbalanced quote - the exact bug the
+      pattern catalog describes), while `deparse()` emits `responseVar = "weird\"name"`. The
+      divergence IS the fix; it is now commented so nobody unifies it back into the broken helper.
+
+Three regression tests added. The visible-expression one guards the whole CLASS - it evaluates every
+`visible:` in the `.r.yaml` with each Variable set and unset and asserts a length-1 logical - and it
+fails on the old form (verified by reverting one expression).
+
+### swimmerplot — after your prepare() + document() (2026-09-21)
+
+Verified post-regeneration: **184 blocks, 554 assertions, 0 failed, 0 errors**, one skip (the
+pre-existing `00refs.yaml` DOI defect). `release_gate.py` **0 blocking**; `promotion_screen.py`
+swimmerplot **debt 0, rank 1 of 40**; contract test passes; library audit down to the 3 `OncoPathT`
+routing failures.
+
+- [x] The five repaired `visible:` expressions are compiled in and the analysis runs again.
+- [x] The **jamovi (follow global) palette is now live and verified** - its regression test
+      self-activated on regeneration and passes, confirming lane colours track `theme$palette`
+      (jmv and spss give different colours; a NULL theme still renders). §23 is closed, not pending.
+- [x] One test guard had to be widened: the compiler emits the enum as an `OptionList` block, so
+      `"jamovi"` lands several lines BELOW the line naming the option, and a one-line grep never
+      matched. It now scans the block.
+- [x] **The adversarial payload run found three more cells of the escaping class the first pass
+      missed** - the milestone name (a free-text option), the event label and the response label all
+      reached table cells raw. Escaped at the TABLE boundary only: the same strings label the plot,
+      where an entity would render as visible `&lt;` text. Verified both ways - a milestone named
+      `Surgery & Biopsy <2cm>` stays literal in the figure and appears escaped in the table.
+
+This is the argument for the audit's "run the adversarial CSV after any HTML fix" step: the first
+escaping pass fixed the site I had reasoned about and missed three the payload found immediately.
+
+### swimmerplot — actions only you can run
+
+- [ ] `jmvtools::prepare()` — the `.a.yaml`, `.r.yaml` and `.u.yaml` changes are uncompiled: the censor
+      variable's description, five tightened `visible:` expressions, two retitled columns
+      (`Median Time from Start`, `Time Range from Start`), `groupComparisonTest`'s `clearWith`, and
+      `enable: (responseVar)` on the palette control — plus, from this round, `version: 1.0.82`, five
+      item-level `refs:`, `survival` at analysis level, `censorVar` on `interpretation`'s `clearWith`,
+      five rewritten option descriptions, and the **deletion of the `warningNotice` and
+      `validationReport` items**. Until it runs, the compiled `R/swimmerplot.h.R` still DECLARES those
+      two items — nothing writes to them any more, so they render empty and hidden, but they do not
+      disappear from the module until you regenerate.
+- [ ] `devtools::document()` after that.
+- [ ] `jmvtools::i18nUpdate()` — this pass added roughly 40 new msgids, and the release gate now reports
+      62 catalogue entries with no source in this module (25 before). Translate the new Turkish strings.
+- [ ] Open a saved `.omv` and resize the plot. The renderer contract is unit-tested, but reopening a
+      saved file and re-rendering from the slimmed state is the one path only the app exercises.
+- [ ] `menuGroup: OncoPathT` — this pass routed swimmerplot to JamoviTest; move it back to `OncoPath`
+      when the work is finished.
+
+## External-audit cross-learning — what the gate now blocks (2026-09-21)
+
+From reading the jamovi library reviewer's audits of four OTHER modules (MetaJam, snowRMM,
+CompositeSEM, jYS) and checking every finding class against this codebase. Rules are written up
+as `vignettes/jamovi_library_review_guide.md` §20–§24; `tools/release_gate.py` enforces them.
+
+### DONE — 9 shipped renderers that drew from a `private$` field only `.run()` fills
+
+`check_render_private_state` was WARN-only and is now FAIL. All nine are fixed; the gate reports
+0 shipped. Regression guard: `tests/testthat/test-zzz-export-path-render-state.R` (18 assertions),
+which goes through `Analysis$.createImage()` — the call the engine makes. `image$.render()` takes
+a different path and CANNOT show this class of bug.
+
+Verified by reverting both HIGH files to HEAD and re-running: `draw_via_engine()` returned FALSE
+(the blank export, reproduced) and the subtitle was NULL; TRUE and present after the fix.
+
+- [x] `jjdotchart:plot`, `:plot2` — validity published into `image$state` (open HIGH, closed)
+- [x] `jjdotplotstats:plot`, `:plot2` — validity + subtitle/caption expressions into state.
+      Measured first: a statsExpressions subtitle is an ordinary `call`, ~0.9 KB. (open HIGH, closed)
+- [x] `multisurvival:plot_adj` — `.adjustedEstimandNote()` is now pure and takes `has_competing`;
+      the flag travels in the `plot_adj` state. Was mislabelling a Fine-Gray curve as
+      cause-specific survival on export.
+- [x] `advancedraincloud:plot` — p-value annotation bundled into state (was silently dropped),
+      with back-compat for `.omv` files holding the old bare-data.frame state
+- [x] `jjsegmentedtotalbar:plot` — read the private field BEFORE state (backwards); preset now
+      travels too, so an exported figure no longer reverts to raw option values
+- [x] `oddsratio:plot_nomogram`, `statsplot2:plot` — both were ALREADY correct (they rebuild when
+      the cache is empty, which is the export path). The `is.null()` was on a local rather than
+      the field, which `check_render_private_state` cannot see. Equivalent one-line rewrites,
+      no behaviour change.
+
+NOT in this list and deliberately so: the 14 `.eventRecode` reads in `survival.b.R` / `singlearm.b.R`
+are safe — `isTRUE(state$has_competing) || isTRUE(private$.eventRecode$...)` consults state first.
+The gate recognises that pattern (§3, "A `private$` field as a *fallback*"); removing the rule
+re-flags exactly those 14, so it is load-bearing rather than a convenience.
+
+### Promotion debt — would FAIL the moment a `menuGroup` loses its D/P/T suffix
+
+Not live defects; they ship the day someone promotes the analysis (§24). Counts print at the end
+of every gate run. `tools/promotion_screen.py` folds them into its ranking, so a debt-carrying
+analysis scores lower as a candidate.
+
+- [ ] 513 malformed `format:` columns — worst: `betabinomialdiagnostic` 43, `hierarchicalbayes` 42,
+      `metaanalysis` 31, `flexrstpm2` 31, `timeupdatesurvival` 27, `decisiongraph` 27
+- [ ] 190 renderers reading a `private$` cache
+- [ ] 47 heavy `setState()` payloads (fitted object or dataset)
+- [ ] ~30 methods with a fabricated statistic. `treatmentoptim.b.R` `.compareTreatments` is the
+      worst and needs deleting rather than blanking: it writes `statistical_difference =
+      "p = 0.032 (significant)"`, `"65%"` etc. as invented narrative. `.getExampleDrugInteractions`,
+      `.optimizeDoses`, `.assessSafety` in the same file are the same shape.
+- [ ] ~1,479 action-verb / Title-Case control labels (§12) — sweep at promotion, not before
+
+### Not started
+
+- [ ] **Palette (§23).** `jmvcore::colorPalette(n, theme$palette)` is used 0 times; 50 palette
+      options across 21 shipped analyses, and 765 renderers already take `theme`. Agreed approach:
+      add a "jamovi (follow global)" choice to each picker and wire the renderer, KEEPING each
+      analysis's current default so no existing plot changes colour. `R/venn.b.R:1719` (direct
+      `RColorBrewer::brewer.pal.info` indexing) is the first site to convert.
+- [ ] 124 `setNote()` calls carry >260 chars of tutorial prose — worst `decisioncombine.b.R:1066`
+      (1,017 chars), `checkdata.b.R:1493` (771). jYS was told to move these to documentation.
+- [ ] `R/timedependentdca.b.R:120,155` and `R/screeningcalculator.b.R:81,107` hand-build jamovi's
+      private `jmv-results-notice*` / `jmv-results-item` CSS classes (MetaJam MEDIUM analogue).
+      Both unshipped. Use `jmvcore::Notice` or the notices→HTML helper.
+- [ ] 79 unused `Imports:` at the umbrella level; several heavy (`sf`, `spatstat`, `shiny`, `MCMCglmm`).
+- [ ] 59 dead citations and 16 missing `url:` in `jamovi/00refs.yaml`.

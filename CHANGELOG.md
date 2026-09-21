@@ -5,6 +5,807 @@ prevents them. Newest first. Release notes for users live in `NEWS.md`.
 
 ---
 
+## 2026-09-20 — routing an analysis out of a module took its imports with it
+
+`Rscript _updateModules.R` stopped OncoPath at verify: `called but not resolvable from the
+namespace: . (swimmerplot-html.R)`.
+
+- **Failure mode:** `#' @importFrom jmvcore .` was never on `swimmerplot.b.R`. OncoPath got the
+  import from `waterfall.b.R`, which carried the tag for the whole module. Suffixing waterfall's
+  and ihcheterogeneity's `menuGroup` with `T` (the documented JamoviTest dev routing) left
+  swimmerplot as OncoPath's only analysis, and the module namespace lost `.` — so every `.()`
+  call in `swimmerplot-html.R` and `swimmerplot.b.R` would have died at run time with
+  `could not find function "."`. Same class as the 2026-09-16 `%>%` audit: a bare symbol
+  resolves only from the module's own namespace or its imports, and `Imports:` alone puts
+  nothing in scope.
+- **Detection signal:** the dependency guard in `verify_module()` — the only check that sees it.
+  `devtools::load_all()`, the umbrella test suite and `R CMD check` all pass, because the
+  umbrella namespace has `.` from twenty other `.b.R` files.
+- **Prevention rule:** the `@importFrom` tag belongs on the file whose analysis uses the symbol,
+  not on whichever sibling happens to ship alongside it today. Module membership is temporary —
+  the `T`/`P`/`D` menuGroup suffixes move analyses between modules on a whim, and each move
+  silently re-computes what the target namespace imports. Before trusting a module's namespace,
+  run `Rscript --vanilla tools/submodule_smoke.R <sibling repo>`: it checks the *installed*
+  namespace, which is the only place this shows up.
+
+---
+
+## 2026-09-21 — `swimmerplot`: what adversarial verification actually caught
+
+Six agents were asked to REFUTE the twelve fixes rather than confirm them. Five refuted, and the
+regression sweep came back major. Every one of the following was found by that pass, not by me.
+
+### A fix can ship the very bug it is fixing, in a new spelling
+
+- **Failure mode:** the fix for "a stale response row survives and the rates sum to 125%" introduced
+  "a response category called `missing` collides with the no-response row and the rates sum to 62.5%".
+  Both are the same defect - a row key that is not unique - and I wrote the second while fixing the
+  first, because I reused `paste0("response_", x)` without asking what `x` could be.
+- **Prevention rule:** when a key is built by concatenating a user-supplied string onto a prefix, ask
+  what user value reproduces a reserved key. The fix is a sentinel the concatenation cannot generate,
+  not a longer prefix.
+
+### Two mechanisms for one invariant means one of them is dead
+
+- **Failure mode:** I added a reset at the top of `.run()` AND a prune inside `.updateSummaryTable()`,
+  for the same guarantee. The reset runs first and always, so the prune's "has anything gone stale?"
+  test was always true, and it rebuilt the five rows it had just been given on every single run. My
+  regression test passed only because it called the method directly and skipped the reset.
+- **Prevention rule:** after adding a guarantee in one place, re-derive whether the other place can
+  still observe the state it was written for. And when a test has to bypass the normal entry point to
+  exercise the code it covers, that is evidence the code is unreachable, not evidence of good isolation.
+
+### The obvious idempotent operation is not always safe
+
+- **Failure mode:** `deleteRows()` before a rebuild loop looks perfectly idempotent. jmvcore's
+  implementation clears `.rowKeys` and `.rowCount` but leaves `.rowNames` untouched, so rebuilding to
+  an EMPTY set leaves phantom row names with no keys, and `fromProtoBuf` indexes out of bounds.
+- **Prevention rule:** read the library method you are relying on for idempotence. Here the answer was
+  to not call it at all on the common path - compare the current key set to the wanted one and rebuild
+  only on a difference, which also removes the cost from every repeat.
+
+### A house rule beats a general principle, and a test is where the house rule lives
+
+- **Failure mode:** I split a translated string to get markup out of the message catalog - a good
+  general principle - and thereby reverted a fix that a standing test exists to protect. This module's
+  rule is that `.()` wraps a COMPLETE sentence; a whole-sentence template with markup and a `{message}`
+  placeholder satisfies it, and a two-word fragment plus loose tags does not. Worse, I had written my
+  own test asserting the opposite, so the repo contained two tests that could not both pass.
+- **Prevention rule:** before applying a general principle to a repo, grep the test suite for the thing
+  you are about to change. If a test names the exact string, that test is the specification. And when
+  two of your own tests disagree, the older one guarding a documented reviewer finding wins.
+
+### Auditing names is not auditing effects
+
+- **Failure mode:** I validated the example script's argument NAMES against the schema, declared it
+  fixed, and shipped a file where eight calls still rendered nothing because they supplied an event
+  variable without the boolean that switches event markers on - under headings promising an adverse-event
+  timeline. The names were all real. A separate example titled "Date/Time Format Handling" passed
+  `timeType = "raw"` and numeric columns, never touching the dataset's actual dates.
+- **Prevention rule:** for examples, "it parses" and "the arguments exist" are the weakest checks
+  available. Execute the file and assert on the OUTPUT - that events exist, that the dates path ran -
+  because an example's job is to demonstrate an effect, not to survive argument matching.
+
+## 2026-09-21 — `swimmerplot`: what a five-lens review found that three fix passes did not
+
+23 findings, 23 held under adversarial verification. The three previous passes had closed 60 findings
+in the same file. What made these different is worth recording.
+
+### A helper that returns "the natural unit" is a trap the moment two callers differ
+
+- **Failure mode:** `.asNumericTime()` returned each class's own epoch unit - days for `Date`, seconds
+  for `POSIXct`. Every one of its six callers compares a start against an end, so a `Date` start with a
+  `POSIXct` end compared 18262 against 1583020800. Person-time came out 104,106,728 months beside a
+  correct mean duration of 2.5, silently, because the two neighbouring estimators build a
+  `lubridate::interval` on the original objects and are immune.
+- **Prevention rule:** a conversion helper feeding comparisons must return ONE scale, not each input's
+  preferred one. And when two functions compute related quantities by different routes, feed them the
+  same normalised input - the fact that only one of them was wrong is what made this invisible.
+
+### Two code paths doing the same job, only one of them defensive
+
+- **Failure mode:** `.processEventMarkers` filters markers to the patient's window and raises a notice
+  naming what it dropped. `.processMilestones`, written for the same kind of data, never compared a
+  milestone to the timeline at all - and the module's own test dataset has 13 of 49 outside it.
+- **Prevention rule:** when two sibling paths handle the same shape of input, diff their guards, not
+  just their outputs. The asymmetry is the finding; neither path looks wrong on its own.
+
+### A fix can be correct and still ship the wrong rows
+
+- **Failure mode:** I capped an export at 500 rows and wrote a note saying "in the order the plot uses".
+  Both true in isolation - but `.applySorting` reverses the factor levels because ggplot draws level 1
+  at the bottom, so `[1:500]` took the plot's BOTTOM 500. With the default longest-first sort, the 100
+  longest-followed patients were exactly the ones dropped.
+- **Prevention rule:** when you truncate an ordered collection, assert which END you kept against the
+  thing the user sees, not against the data structure. One `identical(export, head(rev(levels), 500))`
+  would have caught it the day it was written.
+
+### Reconciliation is a property of the page, not of a function
+
+- **Failure mode:** six separate findings were all the same shape - two numbers on one screen that
+  cannot both be right under one reading. Mean Duration times n against Total Person-Time. Person-time
+  rows summing to less than the total. "Most common response CR (37.5%)" above "No recorded response
+  62.5%". A group note printing 0% beside a warning saying rates were withheld. Every individual
+  function was correct.
+- **Prevention rule:** review the rendered OUTPUT as a reader, not the functions as an author. Add the
+  arithmetic check a sceptical clinician would do - do the rates sum, do the rows add to the total, does
+  the prose agree with the table - because no unit test on a single method can fail for this.
+
+### The expensive line is rarely where you would look
+
+- **Failure mode:** a data.table fast path, added for speed, split its own finished one-row-per-patient
+  aggregate into n one-row tables so that a shared `bind_rows()` could put them back together. That was
+  70% of every large run; 10,000 patients took 92 seconds.
+- **Prevention rule:** profile before optimising and after adding a "fast path" - and be suspicious of
+  any code that converts a result into the shape a later shared step expects. The fix was deleting one
+  line and guarding another.
+
+## 2026-09-21 — `swimmerplot`: auditing the audit
+
+### A crosswalk that checks one level of a document proves nothing about the others
+
+- **Failure mode:** I reported "zero citations" for an analysis that had six. My check walked
+  `items[*].refs` and the `.a.yaml` root, and never looked at the `.r.yaml` document root, where the
+  analysis-level `refs:` block actually lives. The finding survived because the output said `refs=0`
+  for all 18 items, which is true and irrelevant. An independent reader found it in minutes.
+- **Prevention rule:** when a schema allows a key at more than one level, enumerate the levels before
+  concluding it is absent anywhere. And state the shape of the check in the finding itself — "no item
+  carries refs" is a claim I could have falsified; "zero citations" is the one I could not, because it
+  hid the assumption.
+
+### The guard that fits the neighbouring block is not automatically the right guard
+
+- **Failure mode:** `advancedMetrics` accumulated duplicate rows because it lacked the `rowCount == 0`
+  guard that `summary` has four lines above it. The obvious fix — copy the guard — would have been
+  worse than the bug: `summary` has five fixed rows, while `advancedMetrics` has 0, 2, 4 or 6 depending
+  on two options, and `.run()` fills them with `setRow()`, which *rejects* a missing key. A frozen row
+  set would abort the analysis instead of merely duplicating rows.
+- **Prevention rule:** before copying a guard from adjacent code, ask what invariant it protects and
+  whether this data has the same one. "Fixed set" and "option-dependent set" need different mechanisms
+  — `rowCount == 0` for one, `deleteRows()` for the other.
+
+### Retiring a channel is cheaper than keeping two in agreement
+
+- **Failure mode:** severity messages lived in three places — the notices panel, an `Html` item toggled
+  with `setVisible`, and the instructions panel. Each had its own reset path, and the notices panel
+  never mentioned the other two. The narrow fix is to emit the missing warnings in both places; that
+  leaves two reset paths and two chances to drift.
+- **Prevention rule:** when the same category of content has two homes, delete a home rather than
+  synchronising them. Here it also removed every `setVisible(FALSE)` from the file, so the house rule
+  that it must never signal failure is now satisfied by construction instead of by review.
+
+### An example nobody runs is not documentation
+
+- **Failure mode:** the shipped worked example called the analysis 19 times, and 17 of those calls
+  passed argument names that have never existed — plus six impossible enum values. It had drifted
+  through at least one option rename with nothing to catch it, because no test executes it.
+- **Prevention rule:** validate example scripts against the generated wrapper signature, not by eye —
+  option names and enum LEVELS both. The cheapest version is a parse of every `fn(...)` call in
+  `inst/examples/` against the `.a.yaml`; the honest version executes the file.
+
+## 2026-09-20 — `swimmerplot`: the last mile is still the product
+
+### A definition that is 80% right is a definition that is wrong
+
+- **Failure mode:** the glossary said PD is a ">=20% increase in sum of target lesion diameters". Every
+  word is in RECIST 1.1 - and the definition is still wrong, because it omits the nadir as reference,
+  the 5 mm absolute minimum and new lesions. A reader who knows RECIST sees nothing amiss; a reader who
+  does not now has a rule that misclassifies patients. SD had the same shape, and PR and SD/PD use
+  DIFFERENT references, which the panel never mentioned.
+- **Prevention rule:** for any clinical definition shown to users, quote the source section and check
+  each clause against it, including the reference point. Then cite it in the panel, so the next reader
+  can do the same check in ten seconds instead of trusting the paraphrase.
+
+### "Missing" and "not reached" are different facts
+
+- **Failure mode:** the follow-up CI was formatted only when BOTH bounds were non-NA. For a reverse
+  Kaplan-Meier the upper bound usually is not reached, so the common case printed nothing and the lower
+  bound - the informative half - was destroyed by a guard written for "no interval at all".
+- **Prevention rule:** an NA in a statistical result is a value with a meaning, and the meaning differs
+  by position. Format each bound separately and give the unreached one its conventional name ("NR"),
+  rather than testing the pair and discarding both.
+
+### A number that is a function of its neighbour is noise, and a stratification can be a bias
+
+- **Failure mode:** "Follow-up Density" is 100/Mean Time in the same row - a second column presenting
+  one column's information as if it were a finding. Worse, the table splits follow-up by BEST overall
+  response, which a patient can only earn by surviving to be assessed: the textbook guarantee-time bias,
+  presented without a word of caution in a clinical tool.
+- **Prevention rule:** before adding a derived column, check whether it is invertible from one already
+  present; if it is, it needs a reason to exist beyond convenience. And any table that stratifies
+  outcome by a post-baseline achievement needs the bias named on the table, not in documentation.
+
+### The option key is not the word
+
+- **Failure mode:** `self$options$timeUnit` - "months" - was interpolated into sixteen translated
+  sentences. Each sentence was translated and each unit stayed English, which is invisible in
+  development and to every English-speaking reviewer.
+- **Prevention rule:** an enum key that reaches a user-visible string needs a `switch()` of translated
+  words. The generic form: anything crossing from configuration into prose gets translated at that
+  boundary, and the raw key continues on to the library that needs it.
+
+## 2026-09-20 — `swimmerplot`: measure the library before designing around it
+
+### The error the user sees is the one thrown last, not the one that matters
+
+- **Failure mode:** text that is not a number became `NA` in `as.numeric()`, the NA rows were removed by
+  a validity filter three steps later, and the filter reported what IT knew: "end times are >= start
+  times". Every layer behaved correctly and the user was told to check an ordering that was never the
+  problem. The same shape appeared twice more - unparseable dates reported as "missing", and a
+  stop-the-analysis branch whose only notice was "Time units".
+- **Prevention rule:** diagnose at the conversion, where the original value is still in hand, and quote
+  it. A coercion that can produce NA is a place where information is destroyed; count what it destroyed
+  before moving on. Downstream a missing value has no history, and any message built from it will be
+  about the wrong thing.
+
+### Benchmark the API before you redesign around it
+
+- **Failure mode:** a 2000-patient export took 135 s. The tempting conclusion is that the loop or the
+  values are expensive. Timing a BARE jmvcore Table showed 250/500/1000 `addRow()` calls costing
+  2.1/8.3/32.9 s with no values at all - quadratic, in the library, and `setRow` on pre-added rows is
+  identical. That ruled out three "optimisations" that would have changed nothing.
+- **Prevention rule:** before optimising code that calls a framework in a loop, time the framework call
+  on its own with the work removed. Here it turned an open-ended performance project into a five-line
+  cap, and it is the same measurement that justifies the cap to the user.
+
+## 2026-09-20 — `swimmerplot`: the figure is an output too
+
+### Normalising in the consumers instead of at the source
+
+- **Failure mode:** five different places called `.normalizeResponse()` on the way into a table, and the
+  plot - which never called it - was left colouring by the raw factor. The result was a figure whose
+  legend disagreed with every table beside it, in a way no table-level test could catch.
+- **Prevention rule:** normalise once, where the column is created, and give the normalised form its own
+  name. If several consumers each normalise for themselves, the one that forgets is invisible, and the
+  cost of finding it is a visual diff.
+
+### A catch-all around a renderer hides the error it was written for
+
+- **Failure mode:** `scale_color_manual()` with 8 values throws at build time on 9+ levels. The renderer
+  wrapped plot construction in a fallback, so the user got the simplified plot with no message - the
+  option they had just chosen destroyed the figure and reported success. The audit found it only by
+  calling `ggplot_build()` directly.
+- **Prevention rule:** a fallback that swallows an exception must record what it swallowed, and a fixed
+  palette must be checked against the data's cardinality before it is applied, not after. When testing a
+  renderer, build the plot - returning TRUE proves nothing, since that is exactly what the fallback does.
+
+### Sorting is not the same as displaying
+
+- **Failure mode:** `.sortPatients()` computed a correct order and set it as the factor levels. ggplot
+  puts level 1 at the BOTTOM of a discrete y axis, so all four sort orders were displayed upside down
+  for as long as the feature has existed. Every unit test of the ordering passed, because the ordering
+  was right.
+- **Prevention rule:** when an ordering exists to be looked at, assert it on the rendered axis labels,
+  not on the data structure. `rev(panel_params$y$get_labels())` gives top-to-bottom, which is what the
+  reader sees and what the option promises.
+
+## 2026-09-20 — `swimmerplot`: one option, one thing
+
+### A shared gate couples features that have nothing to do with each other
+
+- **Failure mode:** `.advancedMetricLabels()` opened with `if (!personTimeAnalysis) return(character(0))`
+  and then appended ORR and DCR inside it. Written that way the coupling is invisible - the response
+  rates are right there under a `responseAnalysis` test - but the outer guard had already decided. Two
+  unrelated features shared one switch, and the interpretation text was gated separately again, so the
+  page could describe a table it had just suppressed.
+- **Prevention rule:** an early `return()` at the top of a function that serves more than one feature is
+  a coupling, not a guard. Give each family its own predicate (`want_pt`, `want_resp`), and check that
+  every consumer of a feature - table rows, table population, interpretation paragraph, syntax - is
+  gated on the same one. The test is a truth table over the options, not a single happy path.
+
+### Ask the option, not the data structure
+
+- **Failure mode:** the group test guarded on `"response" %in% names(patient_summary)`. But
+  `.summarizeByPatient()` always emits that column, filled with NA when no response variable was chosen,
+  so the guard never fired and the table published "A: 0 of 4 responded (0.0%)" for data that records no
+  responses whatsoever. The structure said yes; the user had said no.
+- **Prevention rule:** to find out what the user asked for, read `self$options`. A column's presence
+  answers a different question - whether a code path upstream created it - and helper functions that
+  build a fixed schema make the two answers diverge silently.
+
+### An empty result needs a reason, not just an absence
+
+- **Failure mode:** five `return()` statements ended `.updateGroupComparisonTests`,
+  `.updateMilestoneTable` and `.updateEventMarkerTable` early, leaving a visible table with zero rows.
+  In the DEFAULT configuration two of them were empty on every run. A reader cannot distinguish
+  "nothing to report" from "this is broken".
+- **Prevention rule:** pair `visible:` with the reason the item can be empty. Option-driven emptiness
+  belongs in the `visible:` expression, where jamovi hides the item without a run; data-driven emptiness
+  belongs in a table note written at the point of the `return()`, where the reason is still in scope.
+
+## 2026-09-20 — `swimmerplot`: a filter without a count is a silent data loss
+
+### Every filter needs a counter on the other side
+
+- **Failure mode:** three separate places removed data and said nothing - events outside a patient's
+  window, milestone slots above "Maximum milestones", and milestone slots with a blank name. Each read
+  as correct defensive code in isolation. What made them bugs is that the surviving rows were then used
+  as the denominator, so an event table with three Deaths deleted reported "Scan 4 (80%)".
+- **Prevention rule:** when you write a `keep <- ...` filter, write the count of `!keep` in the same
+  commit, with the reasons broken out. If the filtered result feeds a percentage, the disclosure also
+  has to say which denominator the percentage uses. A filter is a claim about the data; an uncounted
+  filter is an unfalsifiable one.
+
+### "Patients" in a message is a unit, and units have to be checked
+
+- **Failure mode:** `.validateClinicalData` ran `sum(is.na(response))`, `length(duplicated(id))` and
+  `which(durations > limit)` over a frame with one row per EPISODE, then printed every count as
+  "patients". Beside it the summary table counted patients properly, so the page contradicted itself in
+  the default configuration for any longitudinal dataset - which is what a swimmer plot is for.
+- **Prevention rule:** in multi-row-per-subject data, treat every `nrow()`, `sum(is.na(...))` and
+  `duplicated()` as a unit error until proven otherwise. Making each message name its denominator
+  ("for 1 of 3 patients") is the cheap fix that makes the next one self-evident, and it disposes of the
+  "1 patients" plural at the same time.
+
+### Resolve identity once, before the loop
+
+- **Failure mode:** the milestone loop took the slot's label from `self$options[[name_opt]]` at three
+  different points inside the body. That made a blank name a skip condition rather than a fallback, and
+  made two slots sharing a name indistinguishable by construction - the table grouped on the label.
+- **Prevention rule:** compute the identity of each item (its key, its label) once before iterating, in
+  code that can see all the items at the same time. Collisions and blanks are only visible from there;
+  inside the loop each iteration looks perfectly reasonable.
+
+## 2026-09-20 — `swimmerplot` display modes: a coordinate is not a statistic
+
+### The same number means different things in different coordinate systems
+
+- **Failure mode:** milestone and event tables called `as.numeric()` on the value the plot draws at. In
+  relative mode that value is a duration and the table was right; in absolute mode it is a position on
+  the study-time axis and the table published it as "Median Time". Nothing in the code was obviously
+  wrong - each half was correct about its own coordinate system, and only the pair was a bug.
+- **Prevention rule:** when a quantity is reused for drawing and for reporting, name the coordinate
+  system in the conversion function and convert once, there. The invariance test is the cheap oracle:
+  the same data in every display mode must give the same statistic, and a hand-computed reference says
+  which one. Here it also exposed that dates and raw numbers had silently disagreed for years.
+
+### A guard written for one special case was really about a general property
+
+- **Failure mode:** median/protocol reference lines were suppressed `if (is_date_scale)`. The author was
+  right that date axes cannot carry a duration line, but the actual property is "does this axis measure
+  duration from each patient's own start" - which raw absolute times also fail, and which equal start
+  times satisfy even in absolute mode. Two thirds of the truth table were wrong.
+- **Prevention rule:** when a guard names a data TYPE, ask what property of that type it is standing in
+  for, then test the property. `is_date_scale` became `.isDurationAxis()`, and the case it had been
+  over-rejecting (everyone starts at 0) came back for free.
+
+### Converting to a unit and then subtracting is not the same as subtracting and then converting
+
+- **Failure mode:** relative display rewrites each time as `time_length(interval(anchor, t), "months")`.
+  Person-time then subtracted two of those. But a calendar month measured from the anchor is not the
+  same length as one measured from the episode's own start, so the identical dataset reported 3.98
+  months relative and 4.02 absolute - and an earlier fix in the same function had already patched one
+  symptom of this without finding the cause.
+- **Prevention rule:** calendar arithmetic does not distribute over subtraction. Keep the original
+  Date/POSIXct values and measure the interval you actually want; convert to a unit last, once. When a
+  display option can change a reported number, that is the whole bug - test the invariance directly
+  rather than the number.
+
+## 2026-09-20 — `swimmerplot` follow-up: the answer depended on how the file was sorted
+
+### Two sites deciding the same thing, one of them by row order
+
+- **Failure mode:** a patient's censoring status was read with `tail(...)` / `[length(...)]` - the last row
+  in storage order - while the arrow marking that same patient's ongoing treatment was positioned with
+  `which.max(end_time)`. For anyone with more than one episode the two could disagree, and re-sorting the
+  identical rows changed the median follow-up. Three sites made this decision (arrow, data.table summary,
+  base summary) and each had its own spelling of it.
+- **Prevention rule:** when the same fact is derived in more than one place, the duplication is the bug
+  before any individual line is. Extract one helper and route every site through it, even when only one of
+  them is visibly wrong - the others are the next report. The test that proves it is a permutation test:
+  same rows, different order, same answer.
+
+### A vacuous test passes for the same reason the bug hides
+
+- **Failure mode:** my first regression test gave its two patients identical follow-up times, so swapping
+  their statuses was a symmetry and the test passed against the *unfixed* file. It looked like a green
+  guard and guarded nothing.
+- **Prevention rule:** run every new regression test against the pre-fix file before believing it. When it
+  passes there, the fixture is degenerate, not the fix redundant - here the two ends had to differ (12 and
+  20) so the correct and incorrect rules give different numbers (16 vs 15).
+
+### `NA` fails the positive test, so it silently joins the other arm
+
+- **Failure mode:** `status %in% "censored"` is `FALSE` for a missing value, and `as.numeric()` of that
+  turned every patient with no censoring value into a completed event in the reverse Kaplan-Meier, biasing
+  the median down. Two separate validity checks ran over the same column and neither counted them.
+- **Prevention rule:** a two-arm classification needs three arms in the code. Test for each arm explicitly
+  and route what matches neither to an exclusion you report, rather than letting a `FALSE` decide it.
+
+### A computed explanation with no consumer is a bug that has already been diagnosed
+
+- **Failure mode:** the follow-up estimator returned a `reason` field explaining which of two things had
+  gone wrong ("nobody censored" vs "the curve never reaches 50%"). Nothing anywhere read it, and the label
+  said "no censoring information" - which was not true, since the user had supplied a censoring variable
+  and every value in it was understood.
+- **Prevention rule:** grep every field a helper returns for a consumer. A field with none is either dead
+  weight to delete or, as here, an answer the user needed and never saw.
+
+## 2026-09-20 — `swimmerplot` group comparison: an effect size with no direction is not a result
+
+### Determine an orientation empirically; do not reason about it
+
+- **Failure mode:** the reported odds ratio named neither group. Fixing that meant knowing which way R's
+  `fisher.test` points on a table of rows = groups, columns = (non-responder, responder). Rather than reason
+  it out, I built a table with a known 8/10-vs-2/10 asymmetry and compared the returned estimate against both
+  candidate hand-computed ratios. It is row 2 relative to row 1.
+- **Prevention rule:** for any library function whose output has an orientation - odds ratios, differences,
+  contrasts, reference levels - determine it with a deliberately asymmetric fixture before writing the label.
+  A label that names the direction is worse than no label if the direction is wrong.
+
+### A fixed orientation creates cases that the loose version hid
+
+- **Failure mode:** forcing the outcome column to `factor(levels = c(FALSE, TRUE))` - necessary so the table
+  always has a known shape - meant a cohort where every patient responded now produced a 2-column table with
+  one empty column, passing the old `ncol >= 2` guard and running a meaningless test (p = 1, OR 0 or Inf).
+  Previously `table()` returned one column and the guard rejected it by accident.
+- **Prevention rule:** when you replace an implicit guard with an explicit shape, re-derive what the guard
+  was actually excluding. Here the real condition is "both outcomes and both groups are represented", which
+  now has its own predicate rather than being a side effect of how `table()` drops empty levels.
+
+### Test assertions about strings break on improvements to those strings
+
+- **Failure mode:** two existing tests matched `"OR = "` literally and failed the moment the label gained its
+  direction, although the behaviour had strictly improved. A third failure was mine: I asserted a 1200-patient
+  run and a 120-patient run produce identical labels, which is false and should be - the larger sample gives a
+  tighter confidence interval.
+- **Prevention rule:** assert the guarantee, not the rendering. Match the direction and the presence of an
+  interval; compare point estimates across code paths, never whole formatted strings whose content legitimately
+  depends on n. And when a reciprocal is checked against a 2-dp label, size the tolerance to the rounding
+  (1/13.25 = 0.0755 prints as 0.08 - a 6% gap that means nothing).
+
+## 2026-09-20 — `swimmerplot` response rates: count the denominators before fixing any of them
+
+### Reconcile ALL the denominators, or you have only moved the inconsistency
+
+- **Failure mode:** one results page reported response with five different denominators — per-category rates
+  over the non-missing patients, ORR/DCR over the CR/PR/SD/PD subset, the Fisher test over a third cohort,
+  "Study included N patients" over everyone, and a validation percentage over episode ROWS labelled
+  "patients". The audit named three; an exhaustive site map found five.
+- **Prevention rule:** before changing a denominator, enumerate every site that prints a count, a percentage
+  or an N derived from the same concept — including the narrative sentences and the export. Fixing the three
+  that print a *rate* would have left "Study included 12 patients ... ORR 33.3% (4/12)" beside a validation
+  warning quoting a percentage of episodes. The cheap way to make a page auditable afterwards is to print
+  `n/N` in each row label; then a reader reconciles it by addition instead of by trusting the software.
+
+### Read the standard, do not recall it
+
+- **Failure mode:** the previous pass had deliberately chosen the "evaluable" denominator and written a test
+  to pin it. RECIST 1.1 section 4.9.1 says the opposite in as many words: conclusions "should not be based
+  on a selected 'evaluable' subset", and NE is one of the five assigned outcomes rather than an exclusion.
+- **Detection signal:** a reviewer fetched the guideline PDF and quoted the paragraph, rather than relying on
+  recollection of common practice.
+- **Prevention rule:** when a statistical default rests on a published standard, quote the standard verbatim
+  in the code comment and in the test. A test that pins a deliberate-but-wrong choice is harder to overturn
+  than no test, because the next engineer reads it as settled.
+
+### Printed percentages do not have to add up, and should not be asked to
+
+- **Failure mode:** after re-basing the rates, CR 16.7% + PR 16.7% = 33.4% sat beside an ORR of 33.3%. Each
+  percentage is rounded independently; nothing is wrong, but a reader cannot tell that from the page.
+- **Prevention rule:** never promise additivity of rounded percentages. Print the counts, and say in the note
+  that the percentages round independently while the counts reconcile.
+
+### A rank function cannot honour a time rule it was never given the times for
+
+- **Failure mode:** best-overall-response took a bare vector of labels and picked the best rank, so an
+  assessment recorded after progression won. Adding "stop at the first PD" required passing the episode
+  times as well — without them the truncation would have depended on row order, which is the same class of
+  defect in a new place.
+- **Prevention rule:** when a rule is temporal ("up to progression", "the latest", "first after baseline"),
+  the function implementing it must receive the ordering key as an argument. If it cannot, it is not
+  implementing the rule, it is implementing row order.
+
+## 2026-09-20 — `swimmerplot`: an untyped NA, and a convention read backwards
+
+### `NA` is logical, and data.table will not mix it with your numbers
+
+- **Failure mode:** a `by=` aggregation seeded a per-group value with bare `NA`. Every group whose source
+  values were all missing returned logical; every other group returned double. data.table rejects that with
+  "Column 6 of result for group 2 is type 'double' but expecting type 'logical'", the outer handler turned it
+  into "Error in Swimmer Plot Analysis", and the user got an empty results pane. One blank cell in a
+  1001-row dataset did it; at 999 rows the slow path ran and nothing happened.
+- **Detection signal:** the audit's own reproduction, re-run this session. Note the end-to-end call did NOT
+  throw — the error was caught and rendered as a notice — so a test that only asserts "no R error" passes
+  while the analysis produces nothing. The test written here asserts the plot state EXISTS.
+- **Prevention rule:** inside a data.table `j` expression, every sentinel must carry the column's type:
+  `x[NA_integer_]`, `NA_character_`, `NA_real_` — never bare `NA`. The giveaway in this file was that the
+  response sentinel was already `NA_character_` and never crashed, while its two neighbours were not.
+
+### Never infer which value means "event" without saying so
+
+- **Failure mode:** the censoring classifier sent every non-zero number to "event". A column coded 1/2 —
+  `survival::Surv`'s own convention — therefore contained no censored patients at all, so the reverse
+  Kaplan-Meier was abandoned, the median follow-up was computed from observed durations instead, and it came
+  out about half the true value. Nothing was printed. Yes/No and TRUE/FALSE "ongoing" flags have the same
+  hazard with the opposite polarity.
+- **Detection signal:** comparing the module's median follow-up against `survival::survfit` on the same ten
+  patients under both codings: 30 vs 15.
+- **Prevention rule:** 0/1 is the only numeric coding that may be assumed silently. Recognise {1,2} as the
+  survival convention explicitly, and DISCLOSE whichever reading was used — a follow-up figure that halves
+  when the coding is misread is not something to leave to inference. Where the polarity genuinely cannot be
+  known (an "Ongoing" flag), ask the user rather than guessing better.
+
+## 2026-09-20 — `diagnosticmeta` deferred findings: a zero-length value is not an error
+
+### `sprintf()` with a zero-length argument returns `character(0)` and takes the whole panel with it
+
+- **Failure mode:** a new sentence in the Analysis Summary read `private$.pooled_spec_pi`, a private field
+  that an earlier pass **in the same session** had deleted as write-only. R6 returns `NULL` for a field that
+  is not there, `sprintf()` given a zero-length argument returns `character(0)` without warning, that value
+  flowed into the panel's final `sprintf`, and `setContent(character(0))` wrote nothing. The Analysis Summary
+  went from 3,783 characters to 0 with no error, no warning and no notice - the analysis looked like it had
+  simply chosen not to render that panel.
+- **Detection signal:** a verification script that measured the panel's character count, then a bisect of the
+  working file against the previous saved copy. Nothing in the test suite caught it, because no test asserted
+  the summary was non-empty.
+- **Prevention rule:** deleting a write-only field is safe only until someone writes the reader. When a later
+  change needs a value that was removed, restore the field rather than reaching for whatever is in scope —
+  and guard every element a `sprintf` interpolates, not just the one the branch tests. The generalisable
+  check: a panel whose content can vanish deserves a test that asserts its length, not only its wording.
+
+### A source-scraping test pins syntax, so a legitimate refactor breaks it
+
+- **Failure mode:** a test asserted the meta-regression error handler by regex-matching the exact
+  `sprintf(.("%s meta-regression failed"), measure)` spelling. Splitting that title into two whole sentences
+  for translation — a required i18n fix — broke the test although the behaviour was unchanged and improved.
+- **Prevention rule:** when the only way to test a defensive path is to read the source, assert the CONTENT
+  it must contain (the framing sentence, the newline strip), never the call shape. State in the comment that
+  it is a source assertion and why the runtime path is unreachable.
+
+### `format(x, big.mark = ",")` silently does nothing in this package
+
+- **Failure mode:** a new note printed "1789 participants" instead of "1,789". The package imports jmvcore,
+  whose `format()` masks `base::format()` and ignores `big.mark` — no error, just an unformatted number.
+- **Detection signal:** the regression test written alongside the fix asserted the formatted string and failed.
+- **Prevention rule:** always write `base::format()` for number formatting in this codebase. This is the
+  second time the masking has bitten; the test that caught it existed only because the fix was written with
+  its assertion at the same time.
+
+### Fixing a finding can reopen one the same session closed
+
+- **Observation, not a failure:** removing the write-only `.pooled_spec_pi` was correct when nothing read it,
+  and restoring it was correct once the copy-ready summary needed both margins. The lesson is not "do not
+  clean up" — it is that a cleanup and a feature landing in the same session interact, so re-run the full
+  suite after each batch rather than at the end.
+
+## 2026-09-20 — reviewing the fix pass: most of the new defects were in the fixes
+
+Six review lenses over the audit-fix diff, each finding put to a skeptic. Nine survived; seven were
+introduced by the fix pass itself. The lesson is not "review your work" - it is what kind of defect a
+fix pass produces.
+
+### A guard applied at one of two identical sites
+
+- **Failure mode:** the aliased-slope crash (`cf[2, 3]` on a one-row coefficient matrix) was found, fixed
+  and commented on the publication-bias test path. The funnel renderer refits the same model on the same
+  data and was left indexing row 2 - and unlike the test path it has no `tryCatch`, so the whole plot died.
+- **Prevention rule:** when a fix is "guard this indexing", grep for the *expression being guarded*
+  (`summary(...)$coefficients`, the same `lm` call) across the file before declaring it fixed. A defect
+  found on one path is a defect on every path that recomputes the same thing.
+
+### Text written for the common case, applied by a guard built for the general one
+
+- **Failure mode:** `estimable <- all(diag(Psi)[1:2] > 1e-4)` is correct for deciding whether a
+  *correlation* is identifiable - it needs both components. The `else` text was written as if `all()` meant
+  "both are zero", so a mixed fit (tau-squared 1.21 and 3.9e-18) printed both numbers and then said the
+  studies were consistent with a single common pair.
+- **Prevention rule:** when a boolean guard is an `all()` or an `any()`, read the else-branch prose against
+  the *other* way the guard can be false. `all(x > k)` being FALSE does not mean `all(x <= k)`.
+
+### A fix that changes which code paths are reachable changes which messages are reachable
+
+- **Failure mode:** the HSROC convergence retry made the model converge where it previously stopped early.
+  The converged fit legitimately returns theta > 1 on some data, which routes into an ERROR notice reading
+  "the pooled test performs worse than chance. Check the TP/FP/FN/TN column assignment." That advice was
+  always wrong, but it was nearly unreachable before and became routine after.
+- **Separately:** moving the meta-regression df guard per-margin turned two `return()`s into `return(NULL)`s,
+  so a note saying two models "were fitted" became reachable with zero rows in the table.
+- **Prevention rule:** after a fix that makes a previously-failing path succeed (or a previously-aborting
+  guard continue), enumerate the messages downstream of it and re-read each one. A message that was
+  effectively dead is unreviewed text.
+
+### Do not write documentation from the mental model that produced the code
+
+- **Failure mode:** the audit pass added option help saying DerSimonian-Laird "is not offered" for the
+  bivariate model. `mm` is passed verbatim to `mada::reitsma`, and mvmeta's `mm` **is** multivariate DL. The
+  sentence came from knowing that `.metaforMethod()` maps `mm` to DL for the univariate tables, and stopped
+  there. A second sentence in the same pass claimed the publication-bias path ignores the zero-cell setting,
+  which a different verifier disproved by running it.
+- **Prevention rule:** every sentence of option help is a claim about a call chain. Follow the option value
+  to the function that consumes it, and read that function's documentation, before writing what it does.
+
+### Citation drift: a reference attached to the sentence it sits near, not the claim it supports
+
+- **Failure mode:** "a univariate I-squared does not describe the bivariate model (Zwinderman & Bossuyt
+  2008)" - that paper is titled "We should not pool diagnostic likelihood ratios in systematic reviews" and
+  is about likelihood ratios throughout.
+- **Prevention rule:** when adding a bibliography entry for an in-text citation, read the abstract against
+  the sentence it is attached to. The reference being real, correctly formatted and about the right field is
+  not the same as it supporting the claim.
+
+### A test that passes before and after the fix must say so in its own comment
+
+- **Failure mode:** of the five tests written for these fixes, four fail on the pre-fix code and one does
+  not - the panel-clearing defect is only reachable across runs inside jamovi, because each `run()` from R
+  starts with a fresh results object. Left unlabelled, that test reads as a regression guard it is not.
+- **Prevention rule:** run every new test against the pre-fix file, and write the outcome into the test's
+  own comment - "NO-REGRESSION GUARD, not a fail-before test", with the reason.
+
+## 2026-09-20 — `diagnosticmeta` deep audit: the defects were all in what the analysis said, not what it computed
+
+### A note set under a condition, with its option absent from `clearWith`, goes stale
+
+- **Failure mode:** `setNote("disabled", "Bivariate analysis disabled by user option")` was written to a hidden
+  table when the analysis was switched off. jamovi keeps results between runs and `setNote` has no "unset", so
+  reticking the box left that footnote under real pooled estimates - and saved it into the `.omv`. The enabled
+  branch never touched that key, and `bivariate_analysis` was not in the item's `clearWith`.
+- **Detection signal:** a delegated inventory of all 65 `setNote` calls, each classified conditional or
+  unconditional and cross-referenced against its item's `clearWith` list. One of 65 was wrong.
+- **Prevention rule:** for every `setNote` whose gate is an option, that option must be in the item's
+  `clearWith`, or the else-branch must rewrite the same key. The same file already got this right for its
+  `notices` item, which lists all six analysis toggles - so "the other list does it" is not evidence.
+
+### Every result item gated by an option means "all options off" is a reachable state with no output
+
+- **Failure mode:** unticking the one option that is on by default hid every result item; the instructions
+  panel had already been hidden imperatively when the variables were assigned. A valid dataset showed a
+  completely empty results pane with nothing to explain it.
+- **Detection signal:** a coverage question asked of the message inventory - "what happens when nothing is
+  switched on?" - rather than any test.
+- **Prevention rule:** when every result item has a `visible:` gate, enumerate the all-off state and make sure
+  something still speaks. An imperative `setVisible(FALSE)` on a welcome panel makes this worse, because the
+  panel that would have explained the empty pane is exactly the one that was hidden.
+
+### Verify a documentation sentence by running it, not by reading the code that inspired it
+
+- **Failure mode:** the fix pass added a sentence to the `zero_cell_correction` help saying the setting "does
+  not govern the publication-bias path: Deeks' test and the funnel plot apply their own correction of 0.5 to
+  every study whenever any study has a zero cell". False. Those routines receive the data *after* the user's
+  correction has been applied, so under `constant`/`zero_cells`/`reciprocal_n` no zero cell survives, the
+  uniform step never fires and a verdict is always given. The sentence was true only of the default.
+- **Detection signal:** an adversarial verifier re-derived the claim from the call chain and refused the
+  edit; a four-way run over the four correction settings then showed verdicts differing exactly as it said.
+- **Prevention rule:** a sentence about behaviour is a claim to be executed. Before writing "X ignores Y",
+  run X under every value of Y and read the output. This applies hardest to text written from a code comment -
+  the comment described the intent of one branch, not the reachable behaviour of the feature.
+
+### Hidden output still costs: `visible:` hides a panel, it does not skip the work
+
+- **Failure mode:** four `show_*` options appeared nowhere in the backend - they existed only as `.r.yaml`
+  `visible:` expressions. The 31 KB of HTML behind them was built on every run and serialized into every saved
+  `.omv`, ticked or not.
+- **Detection signal:** a differential run over every option showed those four changing nothing in the results
+  object, which looked like "non-effective option" until the panels turned out to be populated either way.
+- **Prevention rule:** declarative `visible:` is the right way to control the pane, but the generator still
+  needs its own guard. And the audit corollary: an option that changes nothing in a differential run is either
+  dead or visibility-only - distinguish the two before reporting either.
+
+### Deleting a helper is safe only once you have checked what its side effects were
+
+- **Failure mode:** `.generateSummary()` looked like a pure HTML builder and was a natural thing to gate on
+  `show_analysis_summary`. It also set a zero-cell disclosure note on the bivariate table, which is shown
+  regardless - so gating it would have silently dropped a disclosure.
+- **Detection signal:** grepping the function body for `self$results$` before gating the call, which found one
+  `setNote` 58 lines above the `setContent`.
+- **Prevention rule:** before gating or deleting a function, grep its body for every write to shared state -
+  `self$results$`, `private$.` - not just its return value. Hoist the side effect first, then gate.
+
+### `private$.checkpoint()` belongs outside every `tryCatch(error = )`
+
+- **Failure mode:** the analysis had no checkpoints at all; 200 studies froze the UI for about four seconds.
+  The obvious placement - inside each `if (option) { tryCatch({ fit }) }` - would have been worse than none,
+  because the checkpoint restart is error-class and the handler would have swallowed it.
+- **Prevention rule:** put the checkpoint before the guarded block, never inside it, and assert the placement
+  in a test that reads the source (the line after each checkpoint must be blank or a comment).
+
+## 2026-09-20 — `diagnosticmeta` release review: a correction that created the effect it tested for
+
+### A continuity correction applied only where it is needed is a covariate
+
+- **Failure mode:** Deeks' test regresses the log diagnostic odds ratio on 1/sqrt(effective sample size). Zero cells
+  make that outcome infinite, so the code added 0.5 to the studies that had one. Those are the small, near-perfect
+  studies - one end of the regression - so the correction shrank the outcome exactly where the predictor is largest.
+  On null data, with no study ever discarded, the module claimed funnel asymmetry in 66.7% of meta-analyses against
+  a nominal 5%.
+- **Detection signal:** 400-run null simulations across a grid of true sensitivities, comparing three correction
+  strategies. Correcting every study halved the error, but no strategy fixed it: at 80% zero-cell studies the
+  uniform correction still rejected 42% of the time, dropping the affected studies rejected 15% at 39%.
+- **Prevention rule:** a correction that touches only some rows is a covariate; check whether it is correlated with
+  the analysis's own predictor. When simulation shows that no repair restores the nominal rate, withhold the verdict
+  in that regime instead of shipping the number with a caveat. Report the threshold you measured, not one you
+  assumed - here, at or under a quarter of studies corrected the test behaves, past 40% it does not.
+
+### A wide interval is not evidence of heterogeneity
+
+- **Failure mode:** the "substantial between-study heterogeneity" warning and the summary sentence fired whenever the
+  prediction interval spanned more than 30 points. That interval is built from the between-study variance AND the
+  uncertainty of the pooled mean, inflated by t on k-2 df; at k = 4, t = 4.30. Three identical studies, with Q = 0,
+  I-squared = 0 and tau-squared = 0, were reported as "studies differ more than sampling error explains".
+- **Detection signal:** an audit lens ran identical and homogeneous study sets through the real class and compared
+  the module's claim with metafor's Q and I-squared on the same data.
+- **Prevention rule:** trigger a heterogeneity claim on the estimated between-study variance, not on the width of
+  anything. A useful gate is the share Psi/(Sig+Psi): it is near 0 when the width is small-k noise. And report a
+  correlation between two variance components only when both are estimable - below about 1e-4 on the logit scale it
+  is the ratio of two rounding residues, and it will happily read -0.54 where an independent fit gives +0.21.
+
+### A convergence warning that is caught and then suppressed is a silent wrong answer
+
+- **Failure mode:** `mada::phm()` only WARNS ("Reached maximum number of iterations!") when it exhausts its
+  100-iteration budget. The handler caught that warning and refitted the same model with `suppressWarnings()` at the
+  same limit, so the last iterate was presented as a fit: theta 0.056 / AUC 0.947 where the converged fit gives
+  1.574 / 0.389.
+- **Detection signal:** refitting the audit's example with l = 100, 1000, 5000 and 20000 and comparing.
+- **Prevention rule:** never answer a warning by re-running the same call with warnings off. Either change what the
+  warning is about (here, the iteration budget) or surface it. `withCallingHandlers` with a muffle restart lets you
+  detect a specific warning without aborting the call - `tryCatch(warning=)` throws away the result you already had.
+
+### A prior review's decision lives in a test; do not overturn it in passing
+
+- **Failure mode:** fixing "the prediction region is tighter than the prediction interval" by switching the region's
+  radius from chi-squared to F broke `test-diagnosticmeta-release-review.R`, which pins the region to mada's own
+  `plot.reitsma(predict = TRUE)` construction - a parity decision an earlier review had made deliberately.
+- **Detection signal:** the existing suite, immediately.
+- **Prevention rule:** when a failing test encodes a deliberate choice rather than an accident, treat it as a
+  constraint on the fix, not as a test to update. The contradiction was removable by disclosure (say the region is
+  the joint version at the large-sample radius and the interval the conservative marginal one), which keeps parity.
+
+## 2026-09-19 — `ihcheterogeneity` release review: the "error-free" level was not error-free
+
+### A simulation that only tests the design's own assumption cannot refute it
+
+- **Failure mode:** the proportional-bias check compared each region along the mean of the OTHER regions and let
+  that slope make a row MATERIAL, on the assumption that the other regions share no error with either reading. The
+  first design review simulated only nulls that satisfy that assumption. Regions from the same needle pass, block or
+  staining run share a case-level deviation u that the whole section lacks; then cov(d, level) = var(u) and unbiased
+  regions were called MATERIAL (with "calibrate with a slope" advice) in 13% of studies at n = 300 and 32% at n = 600.
+  A sparse second region also shrank the check to 7 of 40 cases and turned a withheld verdict green.
+- **Detection signal:** a red-team of the release-review plan added nulls that break the assumption (shared site
+  effect, clipping at the scale limits) and asked for n beyond the usual sizes; the simulation lens and two skeptics
+  per finding confirmed it through the real class.
+- **Prevention rule:** for any statistic that is only valid under an untestable independence assumption, simulate at
+  least one null that violates it and run to large n (an artefact grows in significance, not in size). With one
+  reading per method, let such a slope only withhold a green verdict, never assert a defect.
+
+### A skill's generic advice conflicted with this repo's version invariant
+
+- **Failure mode:** following the release-review skill ("bump the analysis `version:` when it changes materially"),
+  I set `jamovi/ihcheterogeneity.a.yaml` to 1.0.82. `test-oncopath-library-audit.R` failed: `_updateModules.R`
+  writes the first three components of the package version into every analysis `version:`, and the test enforces it.
+- **Detection signal:** running the OncoPath library-audit test with the analysis suites.
+- **Prevention rule:** never hand-edit an analysis `version:` here; the package version (updater `new_version`)
+  versions every shipped copy.
+
+---
+
+## 2026-09-19 — `ihcheterogeneity` proportional bias: my first design would have invented bias
+
+### Regressing a difference on a level that shares an error with it builds in a slope
+
+- **Failure mode:** the review found a region that compresses the scale (mean difference ~0) passing as
+  "AGREEMENT THRESHOLDS MET". My fix regressed region minus reference on the REFERENCE, with OLS standard errors.
+  A base-R simulation by an independent reviewer showed it would call unbiased regions MATERIAL in up to 99.9% of
+  studies with a hotspot-like reference (artefact slope -s_ref^2 / var(ref)), and that OLS errors flagged a slope in
+  33-48% of studies when the error grows with the level, as IHC error does.
+- **Detection signal:** a design-review workflow with a simulation lens (null scenarios with realistic reference
+  error and multiplicative error), BEFORE the code was written; a second adversarial review then found that a
+  block-only slope still drove "calibrate with a slope" advice (a regression-to-the-mean artefact in 57-83% of runs).
+- **Prevention rule:** for any Bland-Altman / method-comparison slope, the level must share no measurement error with
+  either reading (here: the mean of the OTHER regions); where no such level exists, a slope may only block "ruled
+  out", never support a claim. Use HC3 errors. Simulate the null with unequal and level-proportional error before
+  shipping a new test statistic.
+
+### A TODO comment broke the library-audit rule
+
+- **Failure mode:** the review filed three inline `# TODO` comments in `R/ihcheterogeneity.b.R`, following the
+  standing "file out-of-scope items as TODOs" habit. `test-oncopath-library-audit.R` requires that OncoPath analyses
+  carry no TODO comments.
+- **Detection signal:** running the OncoPath library-audit test beside the analysis's own suites.
+- **Prevention rule:** for analyses shipped to OncoPath (and any module audited by the jamovi library reviewer),
+  file follow-ups in `TODO.md`, not as inline TODOs; run `test-oncopath-library-audit.R` with the analysis suites.
+
+---
+
 ## 2026-09-19 — function check of my own `ihcheterogeneity` fix: a new option left an old constant behind
 
 ### The margin I added did not reach the column that grades the same difference

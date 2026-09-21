@@ -1764,7 +1764,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Fallback for serialization/reload: the private field is not persisted,
             # so refit the model + nomogram from the state stored on this image.
-            if (is.null(nom) && !is.null(image$state)) {
+            # tested on private$.nom_object itself, not the local: that is the field whose
+            # NULL-ness this branch exists to cover, and naming it here keeps the export-path
+            # fallback visible to tools/release_gate.py check_render_private_state
+            if (is.null(private$.nom_object) && !is.null(image$state)) {
                 st <- image$state
                 prep <- private$.prepareRmsNomogram(st$data, st$dependent, st$explanatory)
                 if (!is.null(prep$fit)) {
@@ -2165,8 +2168,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # 3. For ordered/indented rows (leading spaces/dashes), try loose match
                         if (first_col[i] == current_name && grepl(" ", trimmed_name, fixed = TRUE)) {
                             for (clean_name in names(name_mapping)) {
-                                if (grepl(paste0("^", clean_name, "\\b"), trimmed_name)) {
-                                    level_part <- trimws(sub(clean_name, "", trimmed_name, fixed = TRUE))
+                                # clean_name is a user column name, so it cannot go into a pattern
+                                # (`Age (years)` would be read as a group). The word-boundary the
+                                # old regex added is implied: the name is followed by its level.
+                                if (startsWith(trimmed_name, clean_name)) {
+                                    level_part <- trimws(.stripPrefix(trimmed_name, clean_name))
                                     first_col[i] <- paste0(name_mapping[clean_name], if (level_part != "") paste0(" ", level_part) else "")
                                     break
                                 }

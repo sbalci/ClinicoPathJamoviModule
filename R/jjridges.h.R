@@ -709,12 +709,12 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="p_value", 
                         `title`="P-value", 
                         `type`="number", 
-                        `format`="zto,dp:4,p"),
+                        `format`="zto,dp:4,pvalue"),
                     list(
                         `name`="p_adjusted", 
                         `title`="P-adj", 
                         `type`="number", 
-                        `format`="zto,dp:4,p"),
+                        `format`="zto,dp:4,pvalue"),
                     list(
                         `name`="effect_size", 
                         `title`="Effect Size", 

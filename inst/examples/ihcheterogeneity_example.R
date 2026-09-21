@@ -402,8 +402,9 @@ workflow_d <- ihcheterogeneity(
 # 2. Biomarker(s) assessed
 # 3. Measurement scale (%, H-score, intensity)
 # 4. ICC with 95% CI
-# 5. Mean CV with range
-# 6. Spearman correlation (if reference available)
+# 5. Within-case CV (root mean square of the per-case CVs) with range
+# 6. Spearman correlation (if reference available); for proportional bias, the slope
+#    and the difference at both ends of the range
 # 7. Number/percentage of cases exceeding CV threshold
 # 8. Clinical interpretation of heterogeneity impact
 # 9. Recommendations for sampling strategy

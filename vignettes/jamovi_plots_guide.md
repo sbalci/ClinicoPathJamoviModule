@@ -1367,9 +1367,46 @@ validateFactorVariable <- function(data, var_name, min_levels = 2) {
 4. **Sampling**: Use data sampling for large datasets in visualization
 5. **Rendering Mode**: Keep the default `raster` for any plot whose mark count grows with n; use `mode: vector` only for bounded-mark plots (see [Rendering Mode](#rendering-mode-raster-vs-vector-jamovi-283))
 
+### MANDATORY: offer jamovi's global palette
+
+The user sets a plot palette once in jamovi's preferences and expects a document's
+plots to agree — across analyses and across modules. `theme` is already a parameter of
+every render function, so honouring it costs one line:
+
+```r
+.plot = function(image, ggtheme, theme, ...) {
+    st <- image$state
+    if (is.null(st)) return(FALSE)
+
+    pal <- if (identical(self$options$color_palette, 'jamovi'))
+               jmvcore::colorPalette(n = nlevels(st$group), pal = theme$palette)
+           else
+               <the named palette the user picked>
+
+    ggplot2::ggplot(st, ggplot2::aes(x, y, fill = group)) +
+        ggplot2::geom_col() +
+        ggplot2::scale_fill_manual(values = pal) +
+        ggtheme                     # AFTER the scales - see below
+}
+```
+
+Add a `jamovi (follow global)` choice to every palette option. A named palette the user
+deliberately selects is a legitimate override; the rule is that jamovi's own palette must
+be *reachable*. This module had 159 palette options and used `theme$palette` zero times.
+
+Two traps that bite together:
+
+- `ggtheme` **replaces** earlier `theme()` and `scale_*_manual()` calls. Apply your scales
+  first, then `ggtheme`, then any tweaks after it.
+- `jmvcore::colorPalette(n, pal, type)` takes `type = "fill"` or `"color"`; ask for the one
+  matching the scale you are building.
+
+See `vignettes/jamovi_library_review_guide.md` §23.
+
 ### Accessibility and Usability
 
-1. **Color Schemes**: Use colorblind-friendly palettes
+1. **Color Schemes**: Use colorblind-friendly palettes — `jmvcore::colorPalette()` already
+   returns one, which is another reason to route through it
 2. **Font Sizes**: Ensure readability across different screen sizes
 3. **Legend Placement**: Position legends for optimal space usage
 4. **Error Messages**: Provide helpful error messages to users

@@ -81,6 +81,10 @@ docs/SECURITY/
 
 jamovi-library-audit/
 
+# Scratch landing zone for playbook/report drafts before they are installed
+# into .claude/commands/ or committed elsewhere.
+Claude outputs/
+
 /MERGED_NEEDS_TESTING.md
 /backlog.json
 pony-tail-audit/
@@ -101,3 +105,5 @@ tests/testthat/_problems/
 docs/audit/
 quality-reports/
 literature/*-local.md
+development-ideas/
+development-scripts/

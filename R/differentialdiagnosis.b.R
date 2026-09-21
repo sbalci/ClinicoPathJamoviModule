@@ -1,3 +1,5 @@
+#' @importFrom jmvcore .
+
 differentialdiagnosisClass <- R6::R6Class(
     "differentialdiagnosisClass",
     inherit = differentialdiagnosisBase,
@@ -179,6 +181,10 @@ differentialdiagnosisClass <- R6::R6Class(
                 diagnosis <- differential_diagnoses[[i]]
                 diagnosisTable$addRow(rowKey = paste0("dx_", i), values = diagnosis)
             }
+            diagnosisTable$setNote(
+                "no_ci",
+                .("Confidence intervals are not available: these probabilities come from a built-in illustrative diagnosis list, not from your data, so no interval can be estimated.")
+            )
         },
 
         .performLikelihoodRatioAnalysis = function() {
@@ -594,11 +600,11 @@ differentialdiagnosisClass <- R6::R6Class(
             lr_pos <- likelihood
             lr_neg <- 1 / likelihood
             
-            # Generate confidence interval
-            se <- 0.12
-            ci_lower <- posterior - 1.96 * se
-            ci_upper <- posterior + 1.96 * se
-            ci <- paste0("(", round(max(0, ci_lower), 3), ", ", round(min(1, ci_upper), 3), ")")
+            # No confidence interval. The posterior above is not estimated from the
+            # user's data (see the stub TODO on .getDiagnosisDatabase), so there is no
+            # sampling distribution to build an interval from. Leave the cell empty
+            # rather than show an interval with no basis in the data.
+            ci <- NULL
             
             # Generate recommendation
             if (posterior > 0.7) {

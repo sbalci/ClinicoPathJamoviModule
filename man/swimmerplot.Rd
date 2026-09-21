@@ -63,11 +63,12 @@ information.}
 \item{responseVar}{Optional variable for response types (e.g., CR, PR, SD,
 PD) to color lanes.}
 
-\item{censorVar}{Optional variable indicating censoring status for ongoing
-treatment arrows. Use 0/FALSE/"censored"/"alive" for ongoing patients
-(shows arrow), or 1/TRUE/"event"/"dead" for completed follow-up (no arrow).
-Without a censoring variable no arrows are drawn and an information notice
-says so.}
+\item{censorVar}{Optional variable giving each patient's status. A censored
+/ still-at-risk value draws a status arrow at the end of that patient's
+lane and is also what the reverse Kaplan-Meier median follow-up uses. Use
+0/FALSE/"censored"/"alive" for ongoing patients (shows arrow), or
+1/TRUE/"event"/"dead" for completed follow-up (no arrow). Without a
+censoring variable no arrows are drawn and an information notice says so.}
 
 \item{groupVar}{Optional grouping variable for comparing response rates
 between patient groups (e.g., treatment arms, disease subtypes). When
@@ -122,15 +123,21 @@ if not specified).}
 
 \item{plotTheme}{Visual theme for the swimmer plot.}
 
-\item{colorPalette}{Select color palette for response categories and
-groups. Colorblind Safe uses perceptually uniform colors distinguishable by
-all color vision types. High Contrast is optimized for projectors and
-printing. Monochrome ensures clarity in grayscale publications.}
+\item{colorPalette}{Select the color palette for the response categories
+that color the lanes; it has no effect unless a Response/Status variable is
+selected, and the grouping variable is never used for color. Colorblind
+Safe uses perceptually uniform colors distinguishable by all color vision
+types. High Contrast is optimized for projectors and printing, and gives
+way to Colorblind Safe above its eight colors. Monochrome ensures clarity
+in grayscale publications.}
 
 \item{showLegend}{Whether to display the plot legend.}
 
 \item{referenceLines}{Add reference time lines to the plot for clinical
-context.}
+context. Median and Protocol lines measure a duration from each patient's
+own start, so they are drawn only where the axis measures duration: with
+Time display set to Absolute and patients starting at different times they
+are omitted and a note explains why.}
 
 \item{customReferenceTime}{Custom time point to mark with a reference line
 (only used when Reference Lines is set to Custom).}
@@ -140,10 +147,14 @@ provide a calendar date (e.g., 2023-06-01) to draw a custom reference line.
 If left blank, the Custom Reference Time is used as an offset from the
 earliest start date.}
 
-\item{sortVariable}{Optional variable to sort patient timelines (defaults
-to duration-based sorting).}
+\item{sortVariable}{Optional variable to sort patient timelines. When one
+is selected it overrides the Sort order setting; leave it empty to sort by
+duration, patient ID or response.}
 
-\item{sortOrder}{How to order patients in the visualization.}
+\item{sortOrder}{How to order patients in the visualization, read from the
+top of the plot down. Ignored while a Sort by variable is selected.
+Response Type falls back to duration order when no Response/Status variable
+is supplied.}
 
 \item{showInterpretation}{Whether to display automated clinical
 interpretation of the timeline data.}
@@ -163,7 +174,10 @@ clinical reports.}
 \item{showAbout}{Display information about when and how to use swimmer plot
 analysis.}
 
-\item{exportTimeline}{Export processed timeline data for external analysis.}
+\item{exportTimeline}{Export processed timeline data for external analysis.
+The on-screen table shows at most the first 500 patients, because building
+it is slow for large cohorts; the plot, the statistics and every other
+table continue to use the whole cohort.}
 
 \item{exportSummary}{Export comprehensive summary statistics and clinical
 metrics.}
@@ -172,7 +186,6 @@ metrics.}
 A results object containing:
 \tabular{llllll}{
 \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
-\code{results$warningNotice} \tab \tab \tab \tab \tab a html \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
@@ -183,7 +196,6 @@ A results object containing:
 \code{results$timelineData} \tab \tab \tab \tab \tab a table \cr
 \code{results$summaryData} \tab \tab \tab \tab \tab a table \cr
 \code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
-\code{results$validationReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$advancedMetrics} \tab \tab \tab \tab \tab a table \cr
 \code{results$groupComparisonTest} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinicalGlossary} \tab \tab \tab \tab \tab a html \cr

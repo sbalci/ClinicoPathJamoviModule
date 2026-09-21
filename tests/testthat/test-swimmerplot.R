@@ -153,7 +153,7 @@ test_that("swimmerplot handles invalid data gracefully", {
     # The exact behavior depends on the implementation, but it shouldn't be a valid plot
     # For example, we can check if the plot object has any data layers
 
-    # A more robust test would be to check the content of the instructions or validationReport
+    # A more robust test would be to check the content of the instructions or notices panel
     # However, this requires the function to return the results object even on error
 
     # For now, let's just check that it doesn't crash
@@ -248,7 +248,13 @@ test_that("best response selection uses oncology hierarchy", {
         PatientID = c("P1", "P1", "P1", "P2", "P2"),
         StartTime = c(0, 10, 20, 0, 10),
         EndTime = c(10, 20, 30, 10, 20),
-        Response = c("SD", "PR", "PD", "PD", "CR"),  # P1 best=PR, P2 best=CR
+        # P1: SD -> PR -> PD, so the best response before progression is PR.
+        # P2: PD -> CR. Under RECIST 1.1 an assessment recorded AFTER
+        # progression does not contribute to the best overall response, so P2's
+        # BOR is PD, not CR. This test previously asserted CR, encoding the
+        # defect fixed on 2026-09-20 (four patients who all progressed first
+        # were reported as ORR 50% / DCR 100%).
+        Response = c("SD", "PR", "PD", "PD", "CR"),  # P1 best=PR, P2 best=PD
         stringsAsFactors = FALSE
     )
 
@@ -279,8 +285,10 @@ test_that("best response selection uses oncology hierarchy", {
     # (the function may return all input rows, not aggregated)
     expect_true("PR" %in% toupper(as.character(p1_data$response)),
                  info = "P1 should have PR response (better than SD and PD)")
-    expect_true("CR" %in% toupper(as.character(p2_data$response)),
-                 info = "P2 should have CR response (better than PD)")
+    expect_true("PD" %in% toupper(as.character(p2_data$response)),
+                 info = "P2 progressed first, so the later CR does not count toward BOR")
+    expect_false("CR" %in% toupper(as.character(p2_data$response)),
+                 info = "a post-progression CR must not be reported as the best response")
 })
 
 test_that("ORR and DCR are calculated from best responses", {

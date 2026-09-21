@@ -1,6 +1,8 @@
 #' @importFrom ggplot2 ggplot geom_text aes xlim ylim theme_void geom_ribbon geom_line geom_abline
 #' @importFrom ggplot2 labs theme_minimal theme element_text geom_area facet_wrap scale_fill_manual
 
+#' @importFrom jmvcore .
+
 hierarchicalbayesClass <- R6::R6Class(
     "hierarchicalbayesClass",
     inherit = hierarchicalbayesBase,
@@ -522,17 +524,24 @@ hierarchicalbayesClass <- R6::R6Class(
         .populateCorrelationAnalysis = function(correlation) {
             corr_table <- self$results$correlationAnalysis
             
-            # Simplified correlation analysis
-            corr_se <- 0.15 # Simplified standard error
-            
+            # `correlation` is the observed Pearson correlation of the study-level
+            # logits, so it is computed from the data. The posterior SD, the credible
+            # interval and P(rho > 0) are not: they require MCMC draws, and this
+            # implementation does not run a sampler. They were previously derived from a
+            # fixed standard error of 0.15, which made them look like posterior summaries
+            # while carrying no information about the studies. Leave them empty instead.
             corr_table$addRow(rowKey = "sens_spec_corr", values = list(
                 correlation_type = "Sensitivity-Specificity",
                 posterior_mean = correlation,
-                posterior_sd = corr_se,
-                credible_lower = max(-1, correlation - 1.96 * corr_se),
-                credible_upper = min(1, correlation + 1.96 * corr_se),
-                prob_positive = ifelse(correlation > 0, 0.8, 0.2) # Simplified
+                posterior_sd = NULL,
+                credible_lower = NULL,
+                credible_upper = NULL,
+                prob_positive = NULL
             ))
+            corr_table$setNote(
+                "no_posterior",
+                .("Only the observed correlation between study-level sensitivity and specificity is shown. The posterior standard deviation, the credible interval and the probability that the correlation is positive require posterior samples, which this model does not draw.")
+            )
         },
         
         .populateConvergenceDiagnostics = function() {

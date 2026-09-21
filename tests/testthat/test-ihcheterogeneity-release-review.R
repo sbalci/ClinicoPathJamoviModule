@@ -116,11 +116,11 @@ test_that("one CV definition is used by the table and the narrative", {
     res <- run_ihc(d, generate_recommendations = TRUE)
     tab <- res$reproducibilitytable$asDF
 
-    cv_row <- tab[grepl("Coefficient of Variation", tab$metric), ]
+    cv_row <- tab[grepl("Within-case CV", tab$metric), ]
     expect_equal(nrow(cv_row), 1)
 
     txt <- gsub("<[^>]+>", " ", res$interpretation$content)
-    prose_cv <- as.numeric(sub(".*Mean CV = ([0-9.]+)%.*", "\\1", txt))
+    prose_cv <- as.numeric(sub(".*Within-case CV = ([0-9.]+)%.*", "\\1", txt))
 
     # The table used regional columns only while the narrative folded in the
     # reference, so the two disagreed on the same screen (23.19 vs 20.0).
@@ -298,7 +298,7 @@ test_that("the removed 'bias' focus level errors clearly", {
   expect_error(run_ihc(clean_data(), analysis_type = "bias"))
 })
 
-test_that("every panel grades the mean CV with the same user-threshold bands", {
+test_that("every panel grades the within-case CV with the same user-threshold bands", {
   d <- read.csv("../../data/ihc_heterogeneity.csv")
   grade_word <- function(x) regmatches(x, regexpr("Low|Moderate|High", x))
   for (thr in c(5, 20, 50)) {
@@ -307,9 +307,9 @@ test_that("every panel grades the mean CV with the same user-threshold bands", {
       biopsy1 = "ki67_region1", biopsy2 = "ki67_region2",
       cv_threshold = thr, showSummary = TRUE)
     tab <- res$reproducibilitytable$asDF
-    tab_word <- grade_word(tab$interpretation[grepl("Coefficient of Variation", tab$metric)])
+    tab_word <- grade_word(tab$interpretation[grepl("Within-case CV", tab$metric)])
     interp <- gsub("<[^>]+>", " ", res$interpretation$content)
-    key_word <- grade_word(regmatches(interp, regexpr("Mean CV = [0-9.]+% \\([A-Za-z]+ variability", interp)))
+    key_word <- grade_word(regmatches(interp, regexpr("Within-case CV = [0-9.]+% \\([A-Za-z]+ variability", interp)))
     summ <- gsub("<[^>]+>", " ", res$summary$content)
     summ_word <- grade_word(regmatches(summ, regexpr("Variability: *[A-Za-z]+", summ)))
     expect_equal(key_word, tab_word, info = paste("Key Findings vs table at thr", thr))

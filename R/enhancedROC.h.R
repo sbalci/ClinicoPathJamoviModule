@@ -1036,7 +1036,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `name`="p_value", 
                                     `title`="p-value", 
                                     `type`="number", 
-                                    `format`="zto;pvalue"),
+                                    `format`="zto,pvalue"),
                                 list(
                                     `name`="result", 
                                     `title`="Result", 
@@ -1083,7 +1083,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `name`="p_value", 
                                     `title`="p-value", 
                                     `type`="number", 
-                                    `format`="zto;pvalue"),
+                                    `format`="zto,pvalue"),
                                 list(
                                     `name`="effect_size", 
                                     `title`="Effect Size", 
@@ -1117,7 +1117,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `name`="p_value", 
                                     `title`="p-value", 
                                     `type`="number", 
-                                    `format`="zto;pvalue"),
+                                    `format`="zto,pvalue"),
                                 list(
                                     `name`="conclusion", 
                                     `title`="Statistical Conclusion", 
@@ -1743,7 +1743,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                     `name`="p_value", 
                                     `title`="p-value", 
                                     `type`="number", 
-                                    `format`="zto;pvalue"),
+                                    `format`="zto,pvalue"),
                                 list(
                                     `name`="n_groups", 
                                     `title`="Groups", 

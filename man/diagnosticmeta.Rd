@@ -59,17 +59,37 @@ I-squared and Q statistics}
 \item{publication_bias}{Assess publication bias using Deeks' funnel plot
 test}
 
-\item{confidence_level}{Confidence level for meta-analysis results}
+\item{confidence_level}{Confidence level for all intervals: the pooled
+estimates and likelihood ratios, the prediction interval for a future
+study, the per-study Wilson intervals, and the confidence and prediction
+regions on the SROC plot.}
 
-\item{method}{Method for meta-analysis estimation (Note DerSimonian-Laird
-is not appropriate for bivariate diagnostic meta-analysis)}
+\item{method}{Estimator for the between-study variance. REML is
+recommended. The bivariate model uses this method directly; the univariate
+heterogeneity and meta-regression models map it to the metafor equivalent,
+so 'Method of Moments' gives DerSimonian-Laird and 'Variance components'
+gives the Hedges estimator in those two tables. 'Method of Moments' is the
+multivariate extension of DerSimonian-Laird (via mvmeta), so choosing it
+gives a DerSimonian-Laird-type estimator in the bivariate model as well;
+REML is preferred for diagnostic accuracy data because the moment
+estimators are non-iterative and truncate negative variance components to
+zero.}
 
 \item{zero_cell_correction}{Method for handling zero cells in 2x2 tables.
 'none' (recommended) applies no correction to the data itself; the
-normal-approximation models still add 0.5 to studies with a zero cell at
-fitting time (mada's 'single' correction), which is disclosed in the
-output. 'constant' adds 0.5 to all four cells of affected studies before
-any analysis. 'zero_cells' adds 0.5 only to the zero cells themselves.
+bivariate model still adds 0.5 to studies with a zero cell at fitting time
+(mada's 'single' correction), while the univariate heterogeneity and
+meta-regression models exclude those studies instead, so they rest on fewer
+studies. Both are disclosed in the output. Under 'none' the
+publication-bias path behaves differently from the rest: because a zero
+cell survives to that point, Deeks' test and the funnel plot add 0.5 to
+EVERY study, not only the affected ones (correcting only the affected
+studies would build a size-related trend into the test's own outcome
+variable), and no asymmetry verdict is reported at all when more than a
+quarter of the studies have a zero cell. The other three settings leave no
+zero cell, so neither of those steps applies and a verdict is always given.
+'constant' adds 0.5 to all four cells of affected studies before any
+analysis. 'zero_cells' adds 0.5 only to the zero cells themselves.
 'reciprocal_n' adds 1/N to all cells of affected studies, where N is the
 study's total sample size. (The former option keys 'treatment_arm' and
 'empirical' were renamed: they did not implement the procedures those names

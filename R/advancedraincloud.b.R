@@ -577,8 +577,14 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 # serialization failure can never break the run - the private field remains
                 # the fallback source in .plot().
                 private$.analysis_data <- analysis_data
+                # The p-value annotation has to TRAVEL WITH THE STATE. .add_p_values() used to
+                # read private$.comparison_results, which only .run() fills; on the export path
+                # jmvcore renders without calling .run(), so it was NULL and the annotation was
+                # dropped in silence - the exported figure lost its p-value with no error.
+                # comparison_results is a one-row stats list, so this costs nothing.
                 tryCatch(
-                    self$results$plot$setState(analysis_data),
+                    self$results$plot$setState(list(data = analysis_data,
+                                                    comparison = private$.comparison_results)),
                     error = function(e) NULL
                 )
             },
@@ -589,7 +595,16 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
-                analysis_data <- if (!is.null(image$state)) image$state else private$.analysis_data
+                # State was a bare data.frame before the comparison stats were added to it;
+                # an .omv saved by that build still restores one, so accept both shapes.
+                st <- image$state
+                analysis_data <- if (is.data.frame(st)) st
+                                 else if (!is.null(st)) st$data
+                                 else private$.analysis_data
+                # Deliberately no private$ fallback: on the export path it is NULL anyway, so
+                # it would only hide the state dependency. A legacy bare-data.frame state simply
+                # has no comparison stats, and .add_p_values() skips the annotation on NULL.
+                comparison_stats <- if (is.data.frame(st) || is.null(st)) NULL else st$comparison
                 y_var <- self$options$y_var
                 x_var <- self$options$x_var
                 fill_var <- self$options$fill_var
@@ -1129,7 +1144,8 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
 
                 # Add p-values if requested and comparisons were made
                 if (self$options$p_value_position != "none" && self$options$show_comparisons) {
-                    p <- private$.add_p_values(p, analysis_data, y_var, x_var, self$options$p_value_position)
+                    p <- private$.add_p_values(p, analysis_data, y_var, x_var,
+                                               self$options$p_value_position, comparison_stats)
                 }
 
                 # Add labels
@@ -2109,8 +2125,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
 
                 return(html)
             },
-            .add_p_values = function(p, data, y_var, x_var, position) {
-                stats <- private$.comparison_results
+            .add_p_values = function(p, data, y_var, x_var, position, stats = NULL) {
                 if (is.null(stats) || is.null(position) || position == "none") {
                     return(p)
                 }

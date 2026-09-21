@@ -191,6 +191,18 @@ test_that("ggswim is selectively imported from a reproducible revision", {
   expect_false(grepl("@import ggswim", swimmer_source, fixed = TRUE))
 })
 
+test_that("the jmvcore .() translator is imported by the file set that uses it", {
+  skip_if_no_oncopath_source()
+  # `.` resolves only from the module's own namespace or its imports -- Imports:
+  # jmvcore puts nothing in scope, exactly like `%>%`. The umbrella hides it: some
+  # other .b.R always carries the tag. OncoPath does not, since waterfall (which did
+  # carry it) moved to JamoviTest and left swimmerplot alone in the module.
+  sources <- c(read_oncopath("R", "swimmerplot.b.R"),
+               read_oncopath("R", "swimmerplot-html.R"))
+  expect_true(any(grepl("(^|[^A-Za-z0-9._$@])\\.\\(", sources)))
+  expect_true(any(grepl("@importFrom jmvcore\\b[^\n]*(\\s|,)\\.(\\s|$)", sources)))
+})
+
 test_that("standalone OncoPath metadata is internally consistent", {
   skip_if_no_oncopath_source()
   package <- read.dcf(oncopath_file("DESCRIPTION"), fields = "Package")[[1]]
@@ -237,7 +249,14 @@ test_that("diagnostic models honor estimator choices and zero-cell guards", {
     meta_regression = TRUE,
     confidence_level = 90,
     method = "fixed",
-    zero_cell_correction = "none"
+    zero_cell_correction = "none",
+    # These three panels are only built when their own option is ticked
+    # (2026-09-20: they used to be built unconditionally, about 31 KB of HTML
+    # written into every .omv whether or not anyone could see it). The symbol
+    # assertions below read their content, so the boxes have to be ticked.
+    show_interpretation = TRUE,
+    show_methodology = TRUE,
+    show_plot_explanations = TRUE
   )
 
   phm <- as.data.frame(result$hsrocresults)
@@ -261,6 +280,10 @@ test_that("diagnostic models honor estimator choices and zero-cell guards", {
     result$about$content,
     result$funnelplot_explanation$content
   )
+  # Assert the panels are populated BEFORE asserting what is in them: an option-gated
+  # panel returns "", which silently satisfies the "&#" check and turns the two symbol
+  # checks into cryptic failures that name the symbol rather than the empty panel.
+  expect_true(all(nzchar(symbol_outputs)))
   expect_true(any(grepl(intToUtf8(0x2265), symbol_outputs, fixed = TRUE)))
   expect_true(any(grepl(intToUtf8(0x00D7), symbol_outputs, fixed = TRUE)))
   expect_false(any(grepl("&#", symbol_outputs, fixed = TRUE)))
@@ -413,14 +436,22 @@ test_that("report sentences translate as whole sentences", {
          rel_ci = c(rel - 2, rel + 2), rel_ci90 = c(rel - 1.5, rel + 1.5), loa = c(-8, 9), p_holm = 0.002,
          adjusted = TRUE, material = material, equivalent = equivalent, constant = constant,
          comparator = "reference")
+  # a difference shown to change with the level (proportional bias), material or not
+  level_row <- function(name, material)
+    modifyList(bias_row(name, FALSE, 1, material, FALSE),
+               list(prop_shown = TRUE, material_ok = TRUE, mean_material = FALSE, margin_abs = 2.5, ref_mean = 50,
+                    prop = list(fit = c(3, -4), ends = c(25, 75), slope = -0.14, p = 0.001),
+                    end_ci90 = rbind(c(1, 5), c(-6, -2))))
   for (ref in c(TRUE, FALSE)) for (r in c(0.95, 0.82, 0.72, 0.4)) {
-    m <- list(has_reference = ref, overall_corr = r, mean_cv = 12, bias_p = 0.2,
+    m <- list(has_reference = ref, overall_corr = r, within_cv = 12, bias_p = 0.2,
               n_cases = 30, n_biopsies = 4)
     outputs <- c(outputs, ip$.generateReportSentences(m, 20, 0.90))
     for (rows in list(
       list(bias_row("b1", FALSE, -12, TRUE, FALSE), bias_row("b2", FALSE, 9, TRUE, FALSE), bias_row(NA, TRUE, -1, FALSE, FALSE)),
       list(bias_row(NA, TRUE, 7, TRUE, FALSE, constant = TRUE)),
-      list(bias_row("b1", FALSE, 1, FALSE, TRUE), bias_row("b2", FALSE, 2, FALSE, FALSE)))) {
+      list(bias_row("b1", FALSE, 1, FALSE, TRUE), bias_row("b2", FALSE, 2, FALSE, FALSE)),
+      list(level_row("b3", TRUE), bias_row("b1", FALSE, -12, TRUE, FALSE)),
+      list(level_row("b3", FALSE), bias_row("b1", FALSE, 1, FALSE, TRUE)))) {
       full <- c(m, list(icc = 0.81, icc_lower = 0.7, icc_upper = 0.9, icc_method = "icc", icc_n = 28,
                         icc_dropped = if (ref) "b4 (n = 3)" else character(0),
                         overall_ci = c(r - 0.1, min(r + 0.03, 0.99)), verdict_corr = r - 0.05,
@@ -428,7 +459,8 @@ test_that("report sentences translate as whole sentences", {
                         bias_rows = if (ref) rows else list(),
                         bias_material = ref && any(vapply(rows, function(x) x$material, TRUE)),
                         bias_equivalent = FALSE, reference_constant = FALSE))
-      outputs <- c(outputs, ip$.generateReportSentences(full, 20, 0.90))
+      outputs <- c(outputs, ip$.generateReportSentences(full, 20, 0.90),
+                   ip$.generateRecommendations(full, 20))
     }
   }
   expect_true(all(grepl("\u00ab", outputs)))                       # the pseudo-catalog was used

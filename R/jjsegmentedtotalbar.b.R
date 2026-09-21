@@ -41,6 +41,11 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         .processed_data = NULL,
         .composition_data = NULL,
         .preset_config = NULL,
+        # The preset .displayOpt() actually resolves against. .run() sets it alongside
+        # .preset_config; .plot() overwrites it from image$state for the duration of one
+        # render, because on the export path .run() never ran and every private$ field
+        # holds its initial value.
+        .renderPreset = NULL,
         # Rows actually analysed, after missing-value handling. This is the only
         # defensible "N" - the summed Value Variable is a quantity, not a count of
         # cases, unless the input happens to be pre-aggregated frequencies.
@@ -105,7 +110,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         # cosmetic, so this cannot change any reported number.
         .displayOpt = function(name) {
             user_value <- self$options[[name]]
-            cfg <- private$.preset_config
+            cfg <- private$.renderPreset
             if (is.null(cfg) || is.null(cfg[[name]]))
                 return(user_value)
             if (identical(user_value, private$.presetDefaults[[name]]))
@@ -282,7 +287,15 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # on option changes and survives reopening a saved .omv (which renders
             # without re-running .run(), leaving private$.processed_data NULL).
             if (!is.null(private$.processed_data)) {
-                self$results$plot$setState(as.data.frame(private$.processed_data))
+                # The preset has to TRAVEL WITH THE STATE too. .displayOpt() read
+                # private$.preset_config, which only .run() fills, so on the export path the
+                # four preset-driven display options (palette, chart style, percentage
+                # display and its format) silently reverted to the raw option values and the
+                # exported figure did not match the one on screen. The config is a short
+                # named list of cosmetic settings.
+                self$results$plot$setState(list(
+                    data = as.data.frame(private$.processed_data),
+                    preset = private$.preset_config))
             }
 
             # Create the plot (will be handled by .plot method called by jamovi)
@@ -993,10 +1006,17 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 return()
             }
 
-            df <- private$.processed_data
-            # Fall back to serialized state (e.g. reopened .omv renders without .run())
-            if (is.null(df)) df <- image$state
+            # State first, and state only: it is the one source that exists on the export
+            # path, where .run() never ran and every private$ field holds its initial value.
+            # Older .omv files stored a bare data.frame here, so accept both shapes.
+            st <- image$state
+            df <- if (is.data.frame(st)) st else st$data
             if (is.null(df) || nrow(df) == 0) return()
+            # hand the renderer's preset to .displayOpt() for the rest of this call
+            prev_preset <- private$.renderPreset
+            if (!is.data.frame(st) && !is.null(st$preset))
+                private$.renderPreset <- st$preset
+            on.exit(private$.renderPreset <- prev_preset, add = TRUE)
 
             # Route to appropriate plot type
             if (self$options$plot_type == "flerlage") {
@@ -1346,6 +1366,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 # Clear any stale cached config so a prior preset does not leak
                 # into a subsequent custom run on a reused R6 instance.
                 private$.preset_config <- NULL
+                private$.renderPreset <- NULL
                 return()
             }
             
@@ -1405,6 +1426,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             
             if (preset %in% names(preset_configs)) {
                 private$.preset_config <- preset_configs[[preset]]
+                private$.renderPreset <- private$.preset_config
             }
         },
         

@@ -1498,10 +1498,10 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # .run() already built the figure (and quoted its statistics);
                 # rebuild only when this render has no run behind it (a resize
                 # after reload, or a run that returned early).
-                plot <- private$.cached_plot
-                if (is.null(plot)) {
-                    plot <- private$.generatePlot(analysis_info, prepared_data)
-                }
+                plot <- if (is.null(private$.cached_plot))
+                            private$.generatePlot(analysis_info, prepared_data)
+                        else
+                            private$.cached_plot
                 
                 # Apply the host theme jamovi hands the renderer. This dispatcher
                 # builds the plot in ~8 different branches, so it is applied once

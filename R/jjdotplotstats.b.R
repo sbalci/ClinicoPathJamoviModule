@@ -33,6 +33,33 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .captionCache = NULL,
         # Why bfmessage could not be honoured, so .run() can say so.
         .captionUnavailable = NULL,
+
+        # Private fields die with the analysis instance. jmvcore restores results from disk
+        # and renders without calling .run() (right-click > Export...), so on that path
+        # .inputsValid holds its FALSE initial value and both renderers return before drawing
+        # - a blank exported image - while the two expression caches come back NULL and the
+        # figure silently loses its subtitle and Bayes-factor caption. image$state is part of
+        # the serialised results, so publish all three there. They are small: a
+        # statsExpressions subtitle is an ordinary `call`, ~0.9 KB serialised (measured).
+        .publishRenderState = function() {
+            st <- list(valid = isTRUE(private$.inputsValid),
+                       subtitle = private$.subtitleCache,
+                       caption = private$.captionCache)
+            for (nm in c("plot", "plot2")) {
+                img <- self$results[[nm]]
+                if (!is.null(img)) img$setState(st)
+            }
+        },
+
+        # image$state is the ONLY source, deliberately. .run() publishes it before any
+        # render can happen in-session, and on the export path it is all that exists - so a
+        # private$ fallback would add a code path that never runs and would hide the very
+        # dependency this is here to remove. A NULL state means .run() did not get far
+        # enough to validate, and not drawing is then correct.
+        .renderState = function(image) {
+            st <- image$state
+            if (is.null(st)) list(valid = FALSE) else st
+        },
         # Fallback for the user-facing "Random seed" option.
         #
         # statsExpressions bootstraps the effect-size CI for the nonparametric
@@ -1020,6 +1047,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Pre-process data and options for performance with enhanced validation
                 private$.inputsValid <- FALSE
+                private$.publishRenderState()
                 tryCatch({
                     mydata <- private$.prepareData()
                     options_data <- private$.prepareOptions()
@@ -1029,6 +1057,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # duplicate when a Split-By variable makes both plots render,
                     # nor accumulate on plot-only re-renders such as resizing.
                     private$.inputsValid <- private$.validateInputs()
+                    private$.publishRenderState()
 
                     # Describe the analysis; do NOT claim it succeeded. .run()
                     # finishes before a single pixel is drawn, so the old
@@ -1062,6 +1091,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             mydata, options_data$group, options_data$dep, options_data)
                         private$.captionCache <- private$.captionExpr(
                             mydata, options_data$group, options_data$dep, options_data)
+                        # republish now the caches are settled: the earlier call recorded
+                        # validity while both were still NULL
+                        private$.publishRenderState()
 
                         # The statsExpressions takeover is what makes the effect
                         # size selector work; say so when it could not be used.
@@ -1128,7 +1160,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot = function(image, ggtheme, theme, ...) {
             # Inputs are validated once in .run(); the render path only reads the
             # cached result so validation notices are not re-emitted per render. ----
-            if (!isTRUE(private$.inputsValid))
+            rs <- private$.renderState(image)
+            if (!isTRUE(rs$valid))
                 return()
 
             # Use cached data and options for performance ----
@@ -1145,8 +1178,8 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # effsize.type is inert in ggstatsplot 1.0.0, so the subtitle is
             # computed through statsExpressions in .run() and switched off here
             # when the takeover succeeded.
-            sub_expr <- private$.subtitleCache
-            cap_expr <- private$.captionCache
+            sub_expr <- rs$subtitle
+            cap_expr <- rs$caption
 
             plot <- tryCatch({
                 p <- withr::with_seed(private$.seed(),
@@ -1204,7 +1237,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot2 = function(image, ggtheme, theme, ...) {
             # Inputs are validated once in .run(); the render path only reads the
             # cached result. The Split-By variable must also be present. ----
-            if (!isTRUE(private$.inputsValid) || is.null(self$options$grvar))
+            if (!isTRUE(private$.renderState(image)$valid) || is.null(self$options$grvar))
                 return()
 
             # Use cached data and options for performance ----

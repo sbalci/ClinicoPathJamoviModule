@@ -155,3 +155,32 @@ NULL
 # ============================================================================
 # BOOTSTRAP UTILITIES
 # ============================================================================
+
+
+# ============================================================================
+# USER-SUPPLIED NAMES IN STRING OPERATIONS
+# ============================================================================
+
+#' Strip a literal prefix from a string
+#'
+#' A user's column or level name is not a regular expression. `Age (years)`,
+#' `BMI-1`, `A+B` and `Grade 2/3` are all ordinary jamovi column names, and
+#' pasting one into a pattern makes the engine read `(` as a group, `+` as a
+#' quantifier and `.` as a wildcard - so the strip either fails or removes the
+#' wrong text, silently corrupting a label in the results.
+#'
+#' `sub(paste0("^", name), "", x)` is the shape to avoid. This does the same job
+#' with no regex at all.
+#'
+#' @param x character vector to strip from.
+#' @param prefix literal prefix; elements of `x` that do not start with it are
+#'   returned unchanged.
+#' @return `x` with `prefix` removed from the front of each element that has it.
+#' @noRd
+.stripPrefix <- function(x, prefix) {
+    if (length(prefix) != 1L || is.na(prefix) || !nzchar(prefix))
+        return(x)
+    hit <- !is.na(x) & startsWith(x, prefix)
+    x[hit] <- substring(x[hit], nchar(prefix) + 1L)
+    x
+}

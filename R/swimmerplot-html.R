@@ -13,11 +13,11 @@
 swimmerplot_instructions_html <- function(self) {
     paste0(
         "<div style='background-color: rgba(33, 181, 248, 0.14); padding: 20px; border-radius: 8px; margin: 10px 0; color: inherit;'>",
-        "<h3 style='color: #0277bd; margin-top: 0;'>", .("Swimmer Plot Analysis"), "</h3>",
+        "<h3 style='color: inherit; margin-top: 0;'>", .("Swimmer Plot Analysis"), "</h3>",
         "<p>", .("Create comprehensive swimmer plots for visualizing patient timelines, treatments, and clinical events using the advanced ggswim package."), "</p>",
 
         "<div style='margin: 15px 0;'>",
-        "<h4 style='color: #0288d1; margin: 10px 0 5px 0;'>", .("Required Variables:"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Required Variables:"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
         "<li><strong>", .("Patient ID:"), "</strong> ", .("Unique identifier for each patient"), "</li>",
         "<li><strong>", .("Start Time:"), "</strong> ", .("Treatment/observation start time"), "</li>",
@@ -26,7 +26,7 @@ swimmerplot_instructions_html <- function(self) {
         "</div>",
 
         "<div style='margin: 15px 0;'>",
-        "<h4 style='color: #0288d1; margin: 10px 0 5px 0;'>", .("Enhanced Features:"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Enhanced Features:"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
         "<li><strong>", .("Complete ggswim Integration:"), "</strong> ", .("Professional clinical visualization"), "</li>",
         "<li><strong>", .("Milestone Support:"), "</strong> ", .("Track key clinical events (surgery, progression, etc.)"), "</li>",
@@ -38,18 +38,18 @@ swimmerplot_instructions_html <- function(self) {
         "</div>",
 
         "<div style='margin: 15px 0;'>",
-        "<h4 style='color: #0288d1; margin: 10px 0 5px 0;'>", .("Visualization Options:"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Visualization Options:"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
         "<li><strong>", .("Swim Lanes:"), "</strong> ", .("Horizontal patient timelines with response coloring"), "</li>",
         "<li><strong>", .("Event Markers:"), "</strong> ", .("Custom glyphs for clinical events"), "</li>",
-        "<li><strong>", .("Status Arrows:"), "</strong> ", .("Ongoing treatment indicators"), "</li>",
+        "<li><strong>", .("Status Arrows:"), "</strong> ", .("Mark patients still at risk (censored / alive) at the data cutoff"), "</li>",
         "<li><strong>", .("Reference Lines:"), "</strong> ", .("Protocol times, median values, custom timepoints"), "</li>",
         "<li><strong>", .("Clinical Themes:"), "</strong> ", .("Professional styling for publications"), "</li>",
         "</ul>",
         "</div>",
 
         "<div style='margin: 15px 0;'>",
-        "<h4 style='color: #0288d1; margin: 10px 0 5px 0;'>", .("Data Formats Supported:"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Data Formats Supported:"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
         "<li><strong>", .("Raw Numeric:"), "</strong> ", .("Days, weeks, months from treatment start"), "</li>",
         "<li><strong>", .("Date/Time:"), "</strong> ", .("Actual calendar dates with multiple format support"), "</li>",
@@ -59,12 +59,12 @@ swimmerplot_instructions_html <- function(self) {
         "</div>",
 
         "<div style='background-color: rgba(255, 169, 33, 0.14); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-        "<p style='margin: 0; color: #f57c00;'><strong>", .("Clinical Research Applications:"), "</strong> ",
+        "<p style='margin: 0; color: inherit;'><strong>", .("Clinical Research Applications:"), "</strong> ",
         .("Ideal for oncology trials, treatment response visualization, progression tracking, and regulatory submissions."), "</p>",
         "</div>",
 
         "<div style='background-color: rgba(153, 33, 170, 0.12); padding: 10px; border-radius: 5px; margin: 10px 0; color: inherit;'>",
-        "<p style='margin: 0; color: #7b1fa2;'><strong>", .("Enhanced Features:"), "</strong> ",
+        "<p style='margin: 0; color: inherit;'><strong>", .("Enhanced Features:"), "</strong> ",
         .("Complete ggswim package integration with swim lanes, event markers, status arrows, and professional clinical themes for maximum flexibility and publication-ready output."), "</p>",
         "</div>",
 
@@ -76,20 +76,21 @@ swimmerplot_instructions_html <- function(self) {
 swimmerplot_glossary_html <- function(self) {
     paste0(
         "<div style='background-color: rgba(138, 155, 172, 0.06); padding: 20px; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif; color: inherit;'>",
-        "<h3 style='color: #007bff; margin-top: 0;'>", .("Clinical Glossary"), "</h3>",
+        "<h3 style='color: inherit; margin-top: 0;'>", .("Clinical Glossary"), "</h3>",
 
         "<div style='margin: 10px 0;'>",
-        "<h4 style='color: #0056b3; margin: 10px 0 5px 0;'>", .("Response Categories"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Response Categories"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px;'>",
-        "<li><strong>", .("CR (Complete Response):"), "</strong> ", .("Complete disappearance of all target lesions"), "</li>",
-        "<li><strong>", .("PR (Partial Response):"), "</strong> ", .("\u226530% decrease in sum of target lesion diameters"), "</li>",
-        "<li><strong>", .("SD (Stable Disease):"), "</strong> ", .("Neither sufficient shrinkage for PR nor sufficient increase for PD"), "</li>",
-        "<li><strong>", .("PD (Progressive Disease):"), "</strong> ", .("\u226520% increase in sum of target lesion diameters"), "</li>",
+        "<li><strong>", .("CR (Complete Response):"), "</strong> ", .("Disappearance of all target lesions. Any pathological lymph node must have shrunk to under 10 mm in short axis."), "</li>",
+        "<li><strong>", .("PR (Partial Response):"), "</strong> ", .("\u226530% decrease in the sum of target lesion diameters, taking the BASELINE sum as reference."), "</li>",
+        "<li><strong>", .("SD (Stable Disease):"), "</strong> ", .("Neither enough shrinkage for PR nor enough increase for PD, taking the smallest sum recorded on study (the nadir) as reference."), "</li>",
+        "<li><strong>", .("PD (Progressive Disease):"), "</strong> ", .("\u226520% increase in the sum of target lesion diameters over the smallest sum recorded on study (the nadir), AND an absolute increase of at least 5 mm; or the appearance of any new lesion."), "</li>",
         "</ul>",
+        "<p style='margin: 5px 0; font-size: 0.95em;'>", .("Definitions follow RECIST 1.1 (Eisenhauer et al., Eur J Cancer 2009;45:228-247, section 4.3.1). Note that PR is measured against the baseline sum while SD and PD are measured against the nadir. The category shown for a patient is their best overall response, which RECIST assigns from target lesions, non-target lesions and new lesions together - not from the target-lesion sum alone."), "</p>",
         "</div>",
 
         "<div style='margin: 10px 0;'>",
-        "<h4 style='color: #0056b3; margin: 10px 0 5px 0;'>", .("Clinical Metrics"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Clinical Metrics"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px;'>",
         "<li><strong>", .("ORR (Objective Response Rate):"), "</strong> ", .("Proportion of patients with CR or PR"), "</li>",
         "<li><strong>", .("DCR (Disease Control Rate):"), "</strong> ", .("Proportion of patients with CR, PR, or SD"), "</li>",
@@ -100,7 +101,7 @@ swimmerplot_glossary_html <- function(self) {
         "</div>",
 
         "<div style='margin: 10px 0;'>",
-        "<h4 style='color: #0056b3; margin: 10px 0 5px 0;'>", .("Statistical Terms"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Statistical Terms"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px;'>",
         "<li><strong>", .("95% CI (Confidence Interval):"), "</strong> ", .("Range of values compatible with the observed data; over repeated studies, 95% of such intervals contain the true population parameter. For response rates, exact binomial CIs are used for accuracy with small sample sizes."), "</li>",
         "<li><strong>", .("Fisher's Exact Test:"), "</strong> ", .("Statistical test for comparing categorical outcomes (like response rates) between groups. Used to determine if response rates differ significantly between patient groups. Does not require large sample sizes and is valid for small cell counts."), "</li>",
@@ -110,12 +111,12 @@ swimmerplot_glossary_html <- function(self) {
         "</div>",
 
         "<div style='margin: 10px 0;'>",
-        "<h4 style='color: #0056b3; margin: 10px 0 5px 0;'>", .("Timeline Elements"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Timeline Elements"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px;'>",
         "<li><strong>", .("Swim Lanes:"), "</strong> ", .("Horizontal bars representing individual patient treatment courses"), "</li>",
         "<li><strong>", .("Milestones:"), "</strong> ", .("Key clinical events (surgery, assessment, progression)"), "</li>",
         "<li><strong>", .("Event Markers:"), "</strong> ", .("Specific events occurring during treatment"), "</li>",
-        "<li><strong>", .("Status Arrows:"), "</strong> ", .("Indicate ongoing treatment at data cutoff"), "</li>",
+        "<li><strong>", .("Status Arrows:"), "</strong> ", .("Drawn for every patient whose status is censored / still at risk at the data cutoff - not only for patients still on treatment"), "</li>",
         "</ul>",
         "</div>",
 
@@ -127,17 +128,17 @@ swimmerplot_glossary_html <- function(self) {
 swimmerplot_about_html <- function(self) {
     paste0(
         "<div style='background-color: rgba(255, 202, 33, 0.23); padding: 20px; border-left: 4px solid #ffc107; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif; color: inherit;'>",
-        "<h3 style='color: #856404; margin-top: 0;'>", .("About Swimmer Plot Analysis"), "</h3>",
+        "<h3 style='color: inherit; margin-top: 0;'>", .("About Swimmer Plot Analysis"), "</h3>",
 
         "<div style='margin: 15px 0;'>",
-        "<h4 style='color: #856404; margin: 10px 0 5px 0;'>", .("What is a Swimmer Plot?"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("What is a Swimmer Plot?"), "</h4>",
         "<p style='margin: 5px 0; line-height: 1.6;'>",
         .("Swimmer plots are timeline visualizations that display individual patient treatment courses, clinical events, and outcomes in a single comprehensive graph. Each horizontal 'swim lane' represents one patient's journey through treatment."),
         "</p>",
         "</div>",
 
         "<div style='margin: 15px 0;'>",
-        "<h4 style='color: #856404; margin: 10px 0 5px 0;'>", .("When to Use Swimmer Plots"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("When to Use Swimmer Plots"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
         "<li>", .("Clinical trial data visualization and regulatory submissions"), "</li>",
         "<li>", .("Treatment response assessment and duration analysis"), "</li>",
@@ -148,7 +149,7 @@ swimmerplot_about_html <- function(self) {
         "</div>",
 
         "<div style='margin: 15px 0;'>",
-        "<h4 style='color: #856404; margin: 10px 0 5px 0;'>", .("Required Data"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Required Data"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
         "<li><strong>", .("Patient ID:"), "</strong> ", .("Unique identifier for each patient"), "</li>",
         "<li><strong>", .("Start Time:"), "</strong> ", .("Treatment or observation start date/time"), "</li>",
@@ -159,7 +160,7 @@ swimmerplot_about_html <- function(self) {
         "</div>",
 
         "<div style='margin: 15px 0;'>",
-        "<h4 style='color: #856404; margin: 10px 0 5px 0;'>", .("Key Assumptions"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Key Assumptions"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
         "<li>", .("Each row represents one patient episode or treatment course"), "</li>",
         "<li>", .("Time variables are either numeric (days/months) or valid date formats"), "</li>",
@@ -170,17 +171,17 @@ swimmerplot_about_html <- function(self) {
         "</div>",
 
         "<div style='margin: 15px 0;'>",
-        "<h4 style='color: #856404; margin: 10px 0 5px 0;'>", .("Output Interpretation"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Output Interpretation"), "</h4>",
         "<p style='margin: 5px 0; line-height: 1.6;'>",
         .("The swimmer plot displays individual patient timelines with optional color coding for response categories. Milestone markers show key events, and summary statistics provide overall study metrics including person-time analysis and response rates."),
         "</p>",
         "</div>",
 
         "<div style='margin: 15px 0;'>",
-        "<h4 style='color: #856404; margin: 10px 0 5px 0;'>", .("Important Considerations for Regulatory Documentation"), "</h4>",
+        "<h4 style='color: inherit; margin: 10px 0 5px 0;'>", .("Important Considerations for Regulatory Documentation"), "</h4>",
         "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
         "<li><strong>", .("Event Markers:"), "</strong> ", .("Drawn with print-safe geometric symbols that render correctly in PDF/Word exports and regulatory documents."), "</li>",
-        "<li><strong>", .("Censoring Variable:"), "</strong> ", .("Provide an explicit censoring/status variable for accurate ongoing treatment arrows and reverse Kaplan-Meier median follow-up calculation."), "</li>",
+        "<li><strong>", .("Censoring Variable:"), "</strong> ", .("Provide an explicit censoring/status variable for accurate status arrows and reverse Kaplan-Meier median follow-up calculation."), "</li>",
         "<li><strong>", .("Response Categories:"), "</strong> ", .("Use standard abbreviations (CR, PR, SD, PD) for consistency, though case-insensitive matching is supported."), "</li>",
         "</ul>",
         "</div>",
@@ -204,7 +205,7 @@ swimmerplot_mismatch_guidance_html <- function(self, safe_examples) {
         "<div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>",
 
         "<div style='background-color: rgba(88, 88, 88, 0.06); border: 2px solid #d63384; padding: 20px; margin-bottom: 20px; color: inherit;'>",
-        "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: #d63384;'>", .("Data Type Mismatch"), "</h2>",
+        "<h2 style='margin: 0 0 10px 0; font-size: 20px; color: inherit;'>", .("Data Type Mismatch"), "</h2>",
         "<p style='margin: 0; font-size: 14px; color: inherit;'>",
         .("You selected Date/Time input type, but your data contains numeric values."),
         "</p>",

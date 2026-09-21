@@ -25,11 +25,6 @@ items:
           - timeType
           - dateFormat
 
-    - name: warningNotice
-      title: ""
-      type: Html
-      visible: false
-
     - name: instructions
       title: "Instructions"
       type: Html
@@ -40,6 +35,7 @@ items:
       width: 900
       height: 600
       renderFun: .plot
+      refs: [ggswim]
       clearWith:
           - maxMilestones
           - patientID
@@ -78,6 +74,7 @@ items:
     - name: summary
       title: "Timeline Summary Statistics"
       type: Table
+      refs: [recist]
       rows: 0
       columns:
           - name: metric
@@ -114,13 +111,14 @@ items:
           - timeUnit
           - timeDisplay
           - showInterpretation
+          - censorVar
           - personTimeAnalysis
           - responseAnalysis
 
     - name: personTimeTable
       title: "Person-Time Analysis"
       type: Table
-      visible: (personTimeAnalysis)
+      visible: (personTimeAnalysis && responseAnalysis && length(responseVar) > 0)
       rows: 0
       columns:
           - name: response_type
@@ -152,6 +150,7 @@ items:
     - name: milestoneTable
       title: "Milestone Event Summary"
       type: Table
+      visible: (length(milestone1Date) > 0 || length(milestone2Date) > 0 || length(milestone3Date) > 0 || length(milestone4Date) > 0 || length(milestone5Date) > 0)
       rows: 0
       columns:
           - name: milestone_name
@@ -161,10 +160,10 @@ items:
             title: "Events"
             type: integer
           - name: median_time
-            title: "Median Time"
+            title: "Median Time from Start"
             type: number
           - name: time_range
-            title: "Time Range"
+            title: "Time Range from Start"
             type: text
       clearWith:
           - maxMilestones
@@ -191,7 +190,7 @@ items:
     - name: eventMarkerTable
       title: "Event Marker Summary"
       type: Table
-      visible: (showEventMarkers)
+      visible: (showEventMarkers && length(eventVar) > 0)
       rows: 0
       columns:
           - name: event_type
@@ -205,7 +204,7 @@ items:
             type: number
             format: pc
           - name: median_time
-            title: "Median Time"
+            title: "Median Time from Start"
             type: number
       clearWith:
           - showEventMarkers
@@ -290,15 +289,11 @@ items:
           - exportTimeline
           - exportSummary
 
-    - name: validationReport
-      title: "Data Validation Report"
-      type: Html
-      visible: false  # Only shown when there are validation issues
-
     - name: advancedMetrics
       title: "Advanced Clinical Metrics"
       type: Table
-      visible: (personTimeAnalysis)
+      visible: (personTimeAnalysis || (responseAnalysis && length(responseVar) > 0))
+      refs: [SchemperSmith1996, survival, recist, ClopperPearson1934]
       rows: 0
       columns:
           - name: metric_name
@@ -332,7 +327,8 @@ items:
     - name: groupComparisonTest
       title: "Group Comparison Statistical Tests"
       type: Table
-      visible: (groupVar)
+      visible: (length(groupVar) > 0 && length(responseVar) > 0 && responseAnalysis)
+      refs: [agresti2013]
       rows: 0
       columns:
           - name: comparison
@@ -355,6 +351,7 @@ items:
           - timeType
           - responseVar
           - groupVar
+          - responseAnalysis
 
     - name: clinicalGlossary
       title: "Clinical Glossary"
@@ -366,6 +363,7 @@ items:
       title: "Copy-Ready Manuscript Text"
       type: Html
       visible: (showCopyReady)
+      refs: [SchemperSmith1996, ClopperPearson1934, recist]
       clearWith:
           - patientID
           - startTime
@@ -392,6 +390,7 @@ refs:
     - ggswim
     - recist
     - SchemperSmith1996
+    - survival
     - data.table
     - lubridate
 ...

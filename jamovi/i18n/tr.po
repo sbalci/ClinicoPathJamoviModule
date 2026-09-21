@@ -10460,6 +10460,16 @@ msgid ""
 "width of about {suggested} gives roughly 30 bins."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"A blank slope means that no level check was possible: fewer than 5 cases or "
+"5 distinct levels (an ordinal score has no meaningful slope), or the same "
+"difference in every case."
+msgstr ""
+"Boş bir eğim, düzey kontrolünün mümkün olmadığı anlamına gelir: 5'ten az "
+"vaka veya 5'ten az farklı düzey (sıralı bir skorun anlamlı bir eğimi yoktur) "
+"ya da her vakada aynı fark."
+
 #: R/chisqposttest.b.R
 msgid "A bootstrap confidence interval could not be computed"
 msgstr ""
@@ -10588,6 +10598,18 @@ msgstr ""
 "yuvarlama, tercih edilen değerler veya farklı girilmiş bir kayıt alt kümesi. "
 "Aşağıdaki baştaki basamak aralık listesi hangi basamak kombinasyonlarının "
 "bunu taşıdığını gösterir."
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"A difference between two measurements that changes with the level of the "
+"marker - for example a biopsy that reads higher than the whole section in "
+"low cases and lower in high cases. An average difference can hide it, and a "
+"fixed correction cannot remove it."
+msgstr ""
+"Belirtecin düzeyine göre değişen, iki ölçüm arasındaki bir fark; örneğin "
+"düşük vakalarda tüm kesitten daha yüksek, yüksek vakalarda daha düşük okuyan "
+"bir biyopsi. Ortalama bir fark bunu gizleyebilir ve sabit bir düzeltme bunu "
+"gideremez."
 
 #: R/decisiongraph.b.R
 msgid ""
@@ -11289,11 +11311,13 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"A systematic difference is present, and averaging more regions does not "
-"remove an offset. Address the systematic difference first."
+"A systematic difference is present, and averaging more regions removes "
+"neither an offset nor a difference that changes with the level. Address the "
+"systematic difference first."
 msgstr ""
-"Sistematik bir fark mevcuttur ve daha fazla bölgenin ortalamasını almak bir "
-"sapmayı ortadan kaldırmaz. Önce sistematik farkı giderin."
+"Sistematik bir fark mevcuttur ve daha fazla bölgenin ortalamasını almak ne "
+"bir sapmayı ne de düzeye göre değişen bir farkı ortadan kaldırır. Önce "
+"sistematik farkı giderin."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -11304,6 +11328,26 @@ msgstr ""
 "Sistematik bir fark ne dışlandı ne de gösterildi: '%s' bölgesi karşılaştırma "
 "ortalamasına göre tahminen %%%s farklıdır (%%90 GA %%%s ila %%%s); %%%s "
 "marjı içinde uyum için %%90 GA'nın tamamının bu marjın içinde olması gerekir."
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"A systematic difference was neither ruled out nor shown: the difference "
+"between region '%s' and its comparison changes with the level, an estimated "
+"%s at a level of %s (90%% CI %s to %s) and %s at %s (90%% CI %s to %s); "
+"agreement within the ±%s margin needs both CIs inside it."
+msgstr ""
+"Sistematik bir fark ne dışlandı ne de gösterildi: '%s' bölgesi ile "
+"karşılaştırması arasındaki fark düzeye göre değişiyor; tahmini fark %s, "
+"düzey %s (%%90 GA %s ila %s) ve fark %s, düzey %s (%%90 GA %s ila %s); ±%s "
+"marjı içinde uyum için her iki GA'nın da marjın içinde olması gerekir."
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"A systematic difference was neither ruled out nor shown: the difference "
+"between the mean of all regions and the reference changes with the level, an "
+"estimated %s at a level of %s (90%% CI %s to %s) and %s at %s (90%% CI %s to "
+"%s); agreement within the ±%s margin needs both CIs inside it."
+msgstr "Sistematik bir fark ne dışlandı ne de gösterildi: tüm bölgelerin ortalaması ile referans arasındaki fark düzeye göre değişiyor; tahmini fark %s, düzey %s (%%90 GA %s ila %s) ve fark %s, düzey %s (%%90 GA %s ila %s); ±%s marjı içinde uyum için her iki GA'nın da marjın içinde olması gerekir."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -30102,6 +30146,26 @@ msgstr ""
 msgid "Changes Exceeding MID (N)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Changes with the level: %s at %s (90%% CI %s to %s), %s at %s (90%% CI %s to "
+"%s); inconclusive at the ±%s margin"
+msgstr ""
+"Düzeye göre değişiyor: fark %s, düzey %s (%%90 GA %s ila %s); fark %s, düzey "
+"%s (%%90 GA %s ila %s); ±%s marjında belirsiz"
+
+#: R/ihcheterogeneity.b.R
+msgid "Changes with the level: %s at %s, %s at %s"
+msgstr "Düzeye göre değişiyor: fark %s, düzey %s; fark %s, düzey %s"
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Changes with the level: %s at %s, %s at %s (margin ±%s); ruled out, both "
+"90%% CIs within the margin"
+msgstr ""
+"Düzeye göre değişiyor: fark %s, düzey %s; fark %s, düzey %s (marj ±%s); "
+"dışlandı, her iki %%90 GA da marjın içinde"
+
 #: consortdiagram/options/text_width.description.ui
 msgid "Character width for text wrapping in boxes."
 msgstr ""
@@ -35315,11 +35379,12 @@ msgstr "Vakaya göre varyasyon katsayısı"
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Coefficient of variation per case (SD / mean of the case's measurements), "
-"averaged over cases; cases whose mean is near zero are left out."
+"combined over cases as a root mean square (the within-case CV); cases whose "
+"mean is near zero are left out."
 msgstr ""
 "Vaka başına varyasyon katsayısı (SD / vakanın ölçümlerinin ortalaması), "
-"vakalar üzerinden ortalaması alınarak; ortalaması sıfıra yakın vakalar "
-"dışarıda bırakılır."
+"vakalar üzerinden karesel ortalama olarak birleştirilir (vaka içi CV); "
+"ortalaması sıfıra yakın vakalar dışarıda bırakılır."
 
 #: samplingerror/options/biologicalVarianceCV.description
 msgid ""
@@ -49547,7 +49612,7 @@ msgstr "DCR (Hastalık Kontrol Oranı - Doğrulanmamış):"
 
 #: R/swimmerplot-html.R
 msgid "DCR (Disease Control Rate):"
-msgstr "HKO (Hastalık Kontrol Oranı):"
+msgstr "DCR (Hastalık Kontrol Oranı):"
 
 #: swimmerplot/options/dateFormat/dmy.title
 msgid "DD-MM-YYYY"
@@ -51375,6 +51440,10 @@ msgstr ""
 #: R/decisioncombine.b.R
 msgid "Descriptive Youden ranking"
 msgstr "Betimsel Youden sıralaması"
+
+#: R/ihcheterogeneity.b.R
+msgid "Descriptive, robust to a few extreme cases; not graded"
+msgstr "Tanımlayıcı, az sayıda uç vakaya karşı dayanıklı; derecelendirilmez"
 
 #: decisioncalculator/options/multiplecuts.description.ui
 msgid ""
@@ -53631,7 +53700,7 @@ msgstr "Hastalık Kontrol Oranı (CR+PR+SD)"
 #: R/swimmerplot.b.R
 #: R/waterfall.b.R
 msgid "Disease Control Rate (DCR)"
-msgstr "Hastalık Kontrol Oranı (HKO)"
+msgstr "Hastalık Kontrol Oranı (DCR)"
 
 #: R/waterfall.b.R
 msgid "Disease Control Rate (DCR):"
@@ -74507,12 +74576,13 @@ msgstr "Heterojenlik Düzeyi"
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Heterogeneity level grades the mean per-case CV against your %1$s%% "
-"threshold: Low at or below %2$s%%, Moderate up to %1$s%%, High above it."
+"Heterogeneity level grades the within-case CV (root mean square over the "
+"compartment's cases) against your %1$s%% threshold: Low at or below %2$s%%, "
+"Moderate up to %1$s%%, High above it."
 msgstr ""
-"Heterojenlik düzeyi, vaka başına ortalama CV'yi %%%1$s eşiğinize göre "
-"derecelendirir: Düşük: %%%2$s veya altı, Orta: %%%1$s değerine kadar, "
-"Yüksek: bunun üzerinde."
+"Heterojenlik düzeyi, vaka içi CV'yi (kompartmanın vakaları üzerinden karesel "
+"ortalama) %%%1$s eşiğinize göre derecelendirir: Düşük: %%%2$s veya altı, "
+"Orta: %%%1$s değerine kadar, Yüksek: bunun üzerinde."
 
 #: treatmentmeta/results/heterogeneity.columns.title
 msgid "Heterogeneity Measure"
@@ -91318,14 +91388,6 @@ msgstr ""
 msgid "Mean Clustering Index"
 msgstr ""
 
-#: R/ihcheterogeneity.b.R
-msgid "Mean Coefficient of Variation (%) - between regions"
-msgstr "Ortalama Varyasyon Katsayısı (%) - bölgeler arası"
-
-#: R/ihcheterogeneity.b.R
-msgid "Mean Coefficient of Variation (%) - region vs reference"
-msgstr "Ortalama Varyasyon Katsayısı (%) - bölge ve referans"
-
 #: ihccluster/results/reproducibilityStats.columns.title
 msgid "Mean Cohen Kappa"
 msgstr ""
@@ -91341,22 +91403,6 @@ msgstr ""
 #: costeffectiveness/results/strategySummary.columns.title
 msgid "Mean Cost"
 msgstr ""
-
-#: R/ihcheterogeneity.b.R
-msgid "Mean CV (%)"
-msgstr "Ortalama CV (%)"
-
-#: R/ihcheterogeneity.b.R
-msgid "Mean CV = %s%% (High variability)"
-msgstr "Ortalama CV = %%%s (Yüksek değişkenlik)"
-
-#: R/ihcheterogeneity.b.R
-msgid "Mean CV = %s%% (Low variability)"
-msgstr "Ortalama CV = %%%s (Düşük değişkenlik)"
-
-#: R/ihcheterogeneity.b.R
-msgid "Mean CV = %s%% (Moderate variability)"
-msgstr "Ortalama CV = %%%s (Orta değişkenlik)"
 
 #: treeadvanced/results/clinicalimportance.columns.title
 msgid "Mean Decrease Gini"
@@ -102337,6 +102383,14 @@ msgstr ""
 "Kompartmanlar arasında vaka başına CV yayılımında fark tespit edilmedi; bu "
 "onların aynı olduğunu kanıtlamaz"
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"No difference that changes with the level was detected; this does not show "
+"that there is none."
+msgstr ""
+"Düzeye göre değişen bir fark saptanmadı; bu, böyle bir farkın olmadığını "
+"göstermez."
+
 #: R/jjdotplotstats.b.R
 msgid ""
 "No distributional assumption. The test compares ranks, so it answers whether "
@@ -104760,6 +104814,12 @@ msgstr ""
 #: R/categorize.b.R
 msgid "Not categorized"
 msgstr "Kategorize edilmedi"
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Not checked for a difference that changes with the level (too few cases or "
+"distinct values): %s."
+msgstr "Düzeye göre değişen bir fark açısından kontrol edilmedi (vaka veya farklı değer sayısı çok az): %s."
 
 #: R/checkdata.b.R
 msgid "Not computable"
@@ -107863,7 +107923,7 @@ msgstr ""
 
 #: R/swimmerplot-html.R
 msgid "Odds Ratio (OR):"
-msgstr "Odds Oranı (OO):"
+msgstr "Odds Oranı (OR):"
 
 #: R/oddsratio.b.R
 msgid "Odds ratio analysis completed successfully."
@@ -109869,10 +109929,12 @@ msgstr ""
 "genel skor); referans yoksa en az iki bölgesel ölçüm seçiniz."
 
 #: R/ihcheterogeneity.b.R
-msgid "Optionally add a Spatial Region ID for compartment analysis."
+msgid ""
+"Optionally add a Spatial Region ID: the compartment each case was sampled "
+"from, with one row per case."
 msgstr ""
-"Kompartman analizi için isteğe bağlı olarak bir Uzamsal Bölge Kimliği "
-"ekleyiniz."
+"İsteğe bağlı olarak bir Uzamsal Bölge Kimliği ekleyiniz: her vakanın "
+"örneklendiği kompartman; her vaka için bir satır."
 
 #: R/decisioncalculator.b.R
 msgid ""
@@ -110422,7 +110484,7 @@ msgstr "ORR (Objektif Yanıt Oranı - Doğrulanmamış):"
 
 #: R/swimmerplot-html.R
 msgid "ORR (Objective Response Rate):"
-msgstr "OYO (Objektif Yanıt Oranı):"
+msgstr "ORR (Objektif Yanıt Oranı):"
 
 #: R/waterfall.b.R
 msgid ""
@@ -112012,19 +112074,19 @@ msgstr "Genel:"
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Overall: region(s) %s are systematically offset from the reference and "
-"cannot replace it without calibration."
-msgstr ""
-"Genel: %s adlı bölge(ler) referanstan sistematik olarak sapmaktadır ve "
-"kalibrasyon olmadan referansın yerine kullanılamaz."
-
-#: R/ihcheterogeneity.b.R
-msgid ""
 "Overall: region(s) %s differ systematically from the other regions, so the "
 "regions cannot be used interchangeably without calibration."
 msgstr ""
 "Genel: %s adlı bölge(ler) diğer bölgelerden sistematik olarak farklıdır, bu "
 "nedenle bölgeler kalibrasyon olmadan birbirinin yerine kullanılamaz."
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Overall: region(s) %s differ systematically from the reference and cannot "
+"replace it without calibration."
+msgstr ""
+"Genel: %s adlı bölge(ler) referanstan sistematik olarak farklıdır ve "
+"kalibrasyon olmadan referansın yerine kullanılamaz."
 
 #: R/ihcheterogeneity.b.R
 msgid "Overall: the data were not sufficient to judge agreement."
@@ -115902,10 +115964,14 @@ msgid "Per-Case Counts"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Per-case CV = SD / mean of that case's measurements, averaged over cases."
+msgid ""
+"Per-case CV = SD / mean of that case's measurements. The within-case CV is "
+"their root mean square, which unlike their plain average does not fall when "
+"a case has fewer measurements; the median is descriptive and not graded."
 msgstr ""
-"Vaka başına CV = o vakanın ölçümlerinin SD / ortalama oranı; vakalar "
-"üzerinden ortalaması alınır."
+"Vaka başına CV = o vakanın ölçümlerinin SD / ortalama oranı. Vaka içi CV "
+"bunların karesel ortalamasıdır; basit ortalamanın aksine, bir vakanın ölçüm "
+"sayısı azaldığında düşmez. Medyan tanımlayıcıdır ve derecelendirilmez."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -125433,6 +125499,10 @@ msgstr "Yanıt veren veya kararlı hastalığı olanların oranı"
 msgid "Proportional Baseline Functions"
 msgstr ""
 
+#: ihcheterogeneity/results/samplingbiastable.columns.superTitle
+msgid "Proportional Bias"
+msgstr "Orantısal Yanlılık"
+
 #: agreement/results/blandAltmanStats.columns.title
 msgid "Proportional Bias (p)"
 msgstr "Orantısal Yanlılık (p)"
@@ -125440,6 +125510,10 @@ msgstr "Orantısal Yanlılık (p)"
 #: agreement/options/proportionalBias.title
 msgid "Proportional bias test"
 msgstr "Orantısal yanlılık testi"
+
+#: R/ihcheterogeneity.b.R
+msgid "Proportional bias:"
+msgstr "Orantısal yanlılık:"
 
 #: R/lassocox.b.R
 #: flexrstpm2/options/scale/hazard.title
@@ -130315,22 +130389,23 @@ msgstr "Bölgesel Ölçüm 4 (İsteğe Bağlı)"
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Regional measurements agree with one another in this dataset (correlation ≥ "
-"%s, CV ≤ %s%%), and every systematic difference between regions was shown to "
-"lie within the %s%% margin (90%% CI)."
+"%s, CV ≤ %s%%), and the average difference of every comparison between "
+"regions was shown to lie within the %s%% margin (90%% CI)."
 msgstr ""
 "Bölgesel ölçümler bu veri setinde birbiriyle uyumludur (korelasyon ≥ %s, CV "
-"≤ %%%s) ve bölgeler arasındaki her sistematik farkın %%%s marjı içinde "
-"kaldığı gösterilmiştir (%%90 GA)."
+"≤ %%%s) ve bölgeler arasındaki her karşılaştırmanın ortalama farkının %%%s "
+"marjı içinde kaldığı gösterilmiştir (%%90 GA)."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Regional measurements agree with the reference measurement in this dataset "
-"(correlation ≥ %s, CV ≤ %s%%), and every systematic difference was shown to "
-"lie within the %s%% margin (90%% CI)."
+"(correlation ≥ %s, CV ≤ %s%%), and the average difference of every "
+"comparison with the reference was shown to lie within the %s%% margin (90%% "
+"CI)."
 msgstr ""
 "Bölgesel ölçümler bu veri setinde referans ölçümü ile uyumludur (korelasyon "
-"≥ %s, CV ≤ %%%s) ve her sistematik farkın %%%s marjı içinde kaldığı "
-"gösterilmiştir (%%90 GA)."
+"≥ %s, CV ≤ %%%s) ve referansla her karşılaştırmanın ortalama farkının %%%s "
+"marjı içinde kaldığı gösterilmiştir (%%90 GA)."
 
 #: ihcheterogeneity/results/biopsyplot.title
 msgid "Regional Measurements Comparison"
@@ -134191,10 +134266,6 @@ msgid ""
 "clinical measurements."
 msgstr ""
 
-#: R/ihcheterogeneity.b.R
-msgid "Robust to a few extreme cases"
-msgstr "Az sayıda uç vakaya karşı dayanıklı"
-
 #: R/checkdata.b.R
 msgid "Robust to non-normality"
 msgstr ""
@@ -136051,25 +136122,25 @@ msgid "Sampling variability could not be estimated."
 msgstr "Örnekleme değişkenliği tahmin edilemedi."
 
 #: R/ihcheterogeneity.b.R
-msgid "Sampling variability was high (mean CV = %s%%)."
-msgstr "Örnekleme değişkenliği yüksekti (ortalama CV = %%%s)."
+msgid "Sampling variability was high (within-case CV = %s%%)."
+msgstr "Örnekleme değişkenliği yüksekti (vaka içi CV = %%%s)."
 
 #: R/ihcheterogeneity.b.R
-msgid "Sampling variability was low (mean CV = %s%%)."
-msgstr "Örnekleme değişkenliği düşüktü (ortalama CV = %%%s)."
+msgid "Sampling variability was low (within-case CV = %s%%)."
+msgstr "Örnekleme değişkenliği düşüktü (vaka içi CV = %%%s)."
 
 #: R/ihcheterogeneity.b.R
-msgid "Sampling variability was moderate (mean CV = %s%%)."
-msgstr "Örnekleme değişkenliği orta düzeydeydi (ortalama CV = %%%s)."
+msgid "Sampling variability was moderate (within-case CV = %s%%)."
+msgstr "Örnekleme değişkenliği orta düzeydeydi (vaka içi CV = %%%s)."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Sampling variability was quantified using the per-case coefficient of "
-"variation (CV), averaged across cases; cases whose mean was near zero were "
-"left out."
+"Sampling variability was quantified as the within-case coefficient of "
+"variation (CV), the root mean square of the per-case CVs; cases whose mean "
+"was near zero were left out."
 msgstr ""
-"Örnekleme değişkenliği, vakalar üzerinden ortalaması alınan vaka başına "
-"varyasyon katsayısı (CV) kullanılarak ölçüldü; ortalaması sıfıra yakın olan "
+"Örnekleme değişkenliği, vaka başına CV'lerin karesel ortalaması olan vaka "
+"içi varyasyon katsayısı (CV) olarak ölçüldü; ortalaması sıfıra yakın olan "
 "vakalar dışarıda bırakıldı."
 
 #: R/ihcheterogeneity.b.R
@@ -137173,14 +137244,16 @@ msgstr ""
 msgid ""
 "SD divided by the mean, times 100, for one case's measurements. This "
 "analysis grades it against the CV threshold you set: low at or below half "
-"the threshold, moderate within it, high above it. It is unstable when the "
-"mean is near zero, so such cases are left out."
+"the threshold, moderate within it, high above it. The within-case CV "
+"combines the cases as a root mean square. It is unstable when the mean is "
+"near zero, so such cases are left out."
 msgstr ""
 "Bir vakanın ölçümleri için standart sapmanın (SD) ortalamaya bölünüp 100 ile "
 "çarpılmasıyla elde edilir. Bu analiz onu belirlediğiniz CV eşiğine göre "
 "derecelendirir: eşiğin yarısı veya altında düşük, eşik dahilinde orta, "
-"eşiğin üzerinde yüksek. Ortalama sıfıra yakın olduğunda kararsızdır, bu "
-"nedenle bu tür vakalar dışarıda bırakılır."
+"eşiğin üzerinde yüksek. Vaka içi CV, vakaları karesel ortalama olarak "
+"birleştirir. Ortalama sıfıra yakın olduğunda kararsızdır, bu nedenle bu tür "
+"vakalar dışarıda bırakılır."
 
 #: entropyanalysis/results/summaryTable.columns.title
 #: entropyanalysis/results/entropyTable.columns.title
@@ -144884,10 +144957,11 @@ msgid "Slight agreement"
 msgstr ""
 
 #: dynamicprediction/results/trajectoryParameters.columns.title
+#: ihcheterogeneity/results/samplingbiastable.columns.title
 #: labcontrolcharts/results/trendAnalysis.columns.title
 #: methodcomparison/results/regressionComparison.columns.title
 msgid "Slope"
-msgstr ""
+msgstr "Eğim"
 
 #: stagemigration/results/calibrationAnalysis.columns.title
 msgid "Slope 95% CI Lower"
@@ -144896,6 +144970,36 @@ msgstr ""
 #: stagemigration/results/calibrationAnalysis.columns.title
 msgid "Slope 95% CI Upper"
 msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Slope of the difference on the case mean of all regions, with "
+"heteroscedasticity-robust (HC3) standard errors; p is unadjusted. Unequal "
+"measurement error between regions can produce a slope, so here a slope can "
+"stop a difference from being ruled out but never shows it to be material. "
+"When p is below 0.05 divided by the number of comparisons, the difference is "
+"also judged at the 5th and 95th percentiles of that level (Bland & Altman "
+"1999)."
+msgstr ""
+"Farkın tüm bölgelerin vaka ortalamasına göre eğimi, heteroskedastisiteye "
+"dayanıklı (HC3) standart hatalarla; p düzeltilmemiştir. Bölgeler arasındaki "
+"eşit olmayan ölçüm hatası bir eğim oluşturabilir; bu nedenle burada bir eğim "
+"bir farkın dışlanmasını engelleyebilir, ancak farkın önemli olduğunu asla "
+"göstermez. p, 0.05'in karşılaştırma sayısına bölümünden küçük olduğunda "
+"fark, bu düzeyin 5. ve 95. persentillerinde de değerlendirilir (Bland & "
+"Altman 1999)."
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Slope of the difference on the reference value, with "
+"heteroscedasticity-robust (HC3) standard errors; p is unadjusted. "
+"Measurement error in the reference alone makes the difference appear to fall "
+"as the reference rises (regression to the mean), so a slope can stop a "
+"difference from being ruled out but never shows it to be material. When p is "
+"below 0.05 divided by the number of comparisons, the difference is also "
+"judged at the 5th and 95th percentiles of the reference (Bland & Altman "
+"1999)."
+msgstr "Farkın referans değerine göre eğimi, heteroskedastisiteye dayanıklı (HC3) standart hatalarla; p düzeltilmemiştir. Referanstaki ölçüm hatası tek başına, referans yükseldikçe farkın düşüyormuş gibi görünmesine yol açar (ortalamaya gerileme); bu nedenle bir eğim bir farkın dışlanmasını engelleyebilir, ancak farkın önemli olduğunu asla göstermez. p, 0.05'in karşılaştırma sayısına bölümünden küçük olduğunda fark, referansın 5. ve 95. persentillerinde de değerlendirilir (Bland & Altman 1999)."
 
 #: pheval/results/residualAnalysis.columns.title
 msgid "Slope p-value"
@@ -157688,15 +157792,17 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"The correlation and CV thresholds you set are met and every systematic "
-"difference was shown to lie within your margin (90% CI inside it). If the "
-"thresholds are met but a difference was not ruled out, the verdict is 'met, "
-"not confirmed'."
+"The correlation and CV thresholds you set are met and the average difference "
+"of every comparison was shown to lie within your margin (90% CI inside it); "
+"a difference that changes with the level must also lie within it at both "
+"ends of the range. If the thresholds are met but a difference was not ruled "
+"out, the verdict is 'met, not confirmed'."
 msgstr ""
-"Belirlediğiniz korelasyon ve CV eşikleri karşılanmıştır ve her sistematik "
-"farkın marjınız içinde kaldığı gösterilmiştir (%90 GA marjın içinde). "
-"Eşikler karşılanmış ancak bir fark dışlanamamışsa sonuç 'karşılandı, "
-"doğrulanmadı' olur."
+"Belirlediğiniz korelasyon ve CV eşikleri karşılanmıştır ve her "
+"karşılaştırmanın ortalama farkının marjınız içinde kaldığı gösterilmiştir "
+"(%90 GA marjın içinde); düzeye göre değişen bir fark da aralığın her iki "
+"ucunda marjın içinde olmalıdır. Eşikler karşılanmış ancak bir fark "
+"dışlanamamışsa sonuç 'karşılandı, doğrulanmadı' olur."
 
 #: R/diagnosticmeta.b.R
 msgid ""
@@ -159452,14 +159558,6 @@ msgstr ""
 "referanstan %%%s marjından daha fazla sapmaktadır; Klinik Değerlendirme "
 "bölümüne bakınız."
 
-#: R/ihcheterogeneity.b.R
-msgid ""
-"The mean per-case CV exceeds your threshold, so averaging more than one "
-"region per case is worth considering."
-msgstr ""
-"Ortalama vaka başına CV eşiğinizi aşmaktadır; bu nedenle vaka başına birden "
-"fazla bölgenin ortalamasının alınması değerlendirilmeye değerdir."
-
 #: R/lollipop.b.R
 msgid ""
 "The mean reference line is the unweighted mean of the {groups} plotted group "
@@ -159507,14 +159605,6 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid "The measurements show no variability, so the ICC is not defined."
 msgstr "Ölçümler hiç değişkenlik göstermediğinden ICC tanımlı değildir."
-
-#: R/ihcheterogeneity.b.R
-msgid ""
-"The median per-case CV is %s%%, within your threshold: the mean is raised by "
-"a minority of cases."
-msgstr ""
-"Medyan vaka başına CV %%%s olup eşiğiniz dahilindedir: ortalama, vakaların "
-"bir azınlığı tarafından yükseltilmektedir."
 
 #: R/survivalcont.b.R
 msgid "The median survival time for patients with {group} was {median} {time_unit}."
@@ -160911,22 +161001,22 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The sampling approach met the predefined correlation and CV criteria, and "
-"every systematic difference between regions was shown to lie within the %s%% "
-"margin."
+"the average difference of every comparison between regions was shown to lie "
+"within the %s%% margin."
 msgstr ""
 "Örnekleme yaklaşımı önceden tanımlanmış korelasyon ve CV kriterlerini "
-"karşıladı ve bölgeler arasındaki her sistematik farkın %%%s marjı içinde "
-"kaldığı gösterildi."
+"karşıladı ve bölgeler arasındaki her karşılaştırmanın ortalama farkının %%%s "
+"marjı içinde kaldığı gösterildi."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The sampling approach met the predefined correlation and CV criteria, and "
-"every systematic difference from the reference was shown to lie within the "
-"%s%% margin."
+"the average difference of every comparison with the reference was shown to "
+"lie within the %s%% margin."
 msgstr ""
 "Örnekleme yaklaşımı önceden tanımlanmış korelasyon ve CV kriterlerini "
-"karşıladı ve referanstan her sistematik farkın %%%s marjı içinde kaldığı "
-"gösterildi."
+"karşıladı ve referansla her karşılaştırmanın ortalama farkının %%%s marjı "
+"içinde kaldığı gösterildi."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
@@ -161155,9 +161245,9 @@ msgid ""
 "choose the non-mixture model to estimate the cure fraction of the whole "
 "cohort."
 msgstr ""
-"Yarı parametrik karma kür modeli (smcure) en az bir öngörücü gerektirir, çünkü "
-"latans bileşeni bir Cox modelidir. Bir öngörücü ekleyiniz ya da tüm kohortun "
-"kür oranını tahmin etmek için karma olmayan modeli seçiniz."
+"Yarı parametrik karma kür modeli (smcure) en az bir öngörücü gerektirir, "
+"çünkü latans bileşeni bir Cox modelidir. Bir öngörücü ekleyiniz ya da tüm "
+"kohortun kür oranını tahmin etmek için karma olmayan modeli seçiniz."
 
 #: R/psychopdaROC.b.R
 msgid ""
@@ -162007,6 +162097,14 @@ msgid ""
 "The Wilcoxon signed-rank test assesses paired differences and assumes a "
 "symmetric difference distribution for a location-shift interpretation."
 msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"The within-case CV exceeds your threshold, so averaging more than one region "
+"per case is worth considering."
+msgstr ""
+"Vaka içi CV eşiğinizi aşmaktadır; bu nedenle vaka başına birden fazla "
+"bölgenin ortalamasının alınması değerlendirilmeye değerdir."
 
 #: R/jjwithinstats.b.R
 msgid "The within-subjects plot could not be created: {error}"
@@ -173677,26 +173775,26 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Variability between measurements was high in this dataset (mean CV above "
-"your configured %s%% threshold)."
+"Variability between measurements was high in this dataset (within-case CV "
+"above your configured %s%% threshold)."
 msgstr ""
-"Bu veri setinde ölçümler arasındaki değişkenlik yüksekti (ortalama CV, "
+"Bu veri setinde ölçümler arasındaki değişkenlik yüksekti (vaka içi CV, "
 "yapılandırdığınız %%%s eşiğinin üzerinde)."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Variability between measurements was low in this dataset (mean CV at or "
-"below %s%%, half your configured threshold)."
+"Variability between measurements was low in this dataset (within-case CV at "
+"or below %s%%, half your configured threshold)."
 msgstr ""
-"Bu veri setinde ölçümler arasındaki değişkenlik düşüktü (ortalama CV %%%s "
+"Bu veri setinde ölçümler arasındaki değişkenlik düşüktü (vaka içi CV %%%s "
 "veya altında; yapılandırdığınız eşiğin yarısı)."
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Variability between measurements was moderate in this dataset (mean CV "
-"within your configured %s%% threshold)."
+"Variability between measurements was moderate in this dataset (within-case "
+"CV within your configured %s%% threshold)."
 msgstr ""
-"Bu veri setinde ölçümler arasındaki değişkenlik orta düzeydeydi (ortalama "
+"Bu veri setinde ölçümler arasındaki değişkenlik orta düzeydeydi (vaka içi "
 "CV, yapılandırdığınız %%%s eşiği dahilinde)."
 
 #: R/ihcheterogeneity.b.R
@@ -178202,10 +178300,48 @@ msgstr ""
 "varyansı yoktur, bu nedenle p-değeri veya etki büyüklüğü raporlanmaz; "
 "sapmanın kendisi kesindir."
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Where the slope was shown, the limits of agreement, which assume a "
+"difference that does not change with the level, are too wide in the middle "
+"of the range and too narrow at its ends."
+msgstr ""
+"Eğimin gösterildiği yerlerde, düzeye göre değişmeyen bir fark varsayan uyum "
+"sınırları aralığın ortasında fazla geniş, uçlarında ise fazla dardır."
+
 #: advancedbarplot/options/legend_position.description.jamovi
 #: jjsegmentedtotalbar/options/legend_position.description.jamovi
 msgid "Where to place the legend."
 msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Whether a difference changed with the level (proportional bias) was assessed "
+"by regressing it on the case mean of all regions, with "
+"heteroscedasticity-robust standard errors (Bland & Altman 1999); where the "
+"slope differed from zero (p below 0.05 divided by the number of "
+"comparisons), the difference was also judged at the 5th and 95th percentiles "
+"of that level, and a difference that changed with the level was not "
+"considered ruled out."
+msgstr "Farkın düzeye göre değişip değişmediği (orantısal yanlılık), fark tüm bölgelerin vaka ortalamasına göre heteroskedastisiteye dayanıklı standart hatalarla regrese edilerek değerlendirildi (Bland & Altman 1999); eğimin sıfırdan farklı olduğu durumlarda (p, 0.05'in karşılaştırma sayısına bölümünden küçük), fark bu düzeyin 5. ve 95. persentillerinde de değerlendirildi ve düzeye göre değişen bir fark dışlanmış sayılmadı."
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Whether a difference changed with the level (proportional bias) was assessed "
+"by regressing it on the reference value, with heteroscedasticity-robust "
+"standard errors (Bland & Altman 1999); where the slope differed from zero (p "
+"below 0.05 divided by the number of comparisons), the difference was also "
+"judged at the 5th and 95th percentiles of the reference, and a difference "
+"that changed with the level was not considered ruled out."
+msgstr "Farkın düzeye göre değişip değişmediği (orantısal yanlılık), fark referans değerine göre heteroskedastisiteye dayanıklı standart hatalarla regrese edilerek değerlendirildi (Bland & Altman 1999); eğimin sıfırdan farklı olduğu durumlarda (p, 0.05'in karşılaştırma sayısına bölümünden küçük), fark referansın 5. ve 95. persentillerinde de değerlendirildi ve düzeye göre değişen bir fark dışlanmış sayılmadı."
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Whether a difference changes with the level was not assessed (too few cases "
+"or distinct values)."
+msgstr ""
+"Farkın düzeye göre değişip değişmediği değerlendirilmedi (vaka veya farklı "
+"değer sayısı çok az)."
 
 #: advancedbarplot/options/orientation.description.jamovi
 #: jjsegmentedtotalbar/options/orientation.description.jamovi
@@ -179082,6 +179218,30 @@ msgstr ""
 #: ihcadvanced/results/optimalKResults.columns.title
 msgid "Within SS"
 msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV (%)"
+msgstr "Vaka içi CV (%)"
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV (%) - between regions"
+msgstr "Vaka içi CV (%) - bölgeler arası"
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV (%) - region vs reference"
+msgstr "Vaka içi CV (%) - bölge ve referans"
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV = %s%% (High variability)"
+msgstr "Vaka içi CV = %%%s (Yüksek değişkenlik)"
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV = %s%% (Low variability)"
+msgstr "Vaka içi CV = %%%s (Düşük değişkenlik)"
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV = %s%% (Moderate variability)"
+msgstr "Vaka içi CV = %%%s (Orta değişkenlik)"
 
 #: R/ihcheterogeneity.b.R
 msgid "Within-Case Variance (Sampling)"

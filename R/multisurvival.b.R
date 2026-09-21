@@ -3778,6 +3778,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Always set state so the renderer can show a diagnostic message if needed
         # (returning FALSE from an Image render function yields a blank image in jamovi).
         image8 <- self$results$plot8
+        # state-payload: survminer::ggcoxzph() needs the cox.zph itself, and the residual matrix
+        # it carries IS what the plot draws - extracting x/y/table/transform saves only 20%
+        # (measured with length(serialize(x, NULL)): 465 KB vs 372 KB at n = 20,000, 5.4 KB vs
+        # 4.3 KB at n = 200). Unlike a coxph fit, a cox.zph carries no model frame or call.
         image8$setState(zph)
 
       }
@@ -5040,7 +5044,12 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       invisible(NULL)
     }
     ,
-    .adjustedEstimandNote = function(method) {
+    # `has_competing` is supplied by the caller, never looked up here. .plot_adj() runs on the
+    # export path where .run() never executed, so private$.eventRecode is NULL and
+    # .isCompetingRisk() would fall through to the options-only test that the comment above it
+    # warns against - silently mislabelling a Fine-Gray curve as cause-specific survival.
+    # In .run() the caller passes the live value; in a renderer it comes off image$state.
+    .adjustedEstimandNote = function(method, has_competing = FALSE) {
       base <- switch(
         method,
         "average" = .("Estimand: survival standardised over the observed patients - every patient is set to the stated level in turn and the model-predicted curves are averaged (g-computation). Confidence intervals require bootstrapping and are left blank."),
@@ -5048,7 +5057,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         "single" = .("Estimand: one curve for the whole cohort with each patient at their own covariate values; the adjustment variable is not varied. Confidence intervals require bootstrapping and are left blank."),
         .("Estimand: model-based adjusted survival.")
       )
-      if (private$.isCompetingRisk()) {
+      if (isTRUE(has_competing)) {
         base <- paste(
           base,
           .("The fitted model is Fine-Gray; the displayed probability is cumulative incidence (1 minus subdistribution survival), not cause-specific survival."))
@@ -5160,12 +5169,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         })
 
         self$results$adjustedSurvTableSummary$setContent(
-          paste(c(summaries, private$.adjustedEstimandNote(method)), collapse = "<br><br>"))
+          paste(c(summaries, private$.adjustedEstimandNote(method, private$.isCompetingRisk())),
+                collapse = "<br><br>"))
       } else {
         self$results$adjustedSurvTableSummary$setContent("")
       }
 
-      self$results$adjustedSurvTable$setNote("estimand", private$.adjustedEstimandNote(method))
+      self$results$adjustedSurvTable$setNote("estimand",
+        private$.adjustedEstimandNote(method, private$.isCompetingRisk()))
       self$results$adjustedSurvTable$setNote(
         "counts",
         .("Observed at risk and observed events are counts in the data, not properties of the adjusted curve."))
@@ -5191,6 +5202,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         is_finegray <- !is.null(cox_model$weights) &&
           private$.isCompetingRisk(cleaneddata)
+        # carried in the state so .plot_adj() can label the estimand on the export path,
+        # where private$.eventRecode is NULL
+        has_competing <- private$.isCompetingRisk(cleaneddata)
         # The SAME estimator object the adjusted tables use, so the curve moves with
         # ac_method; for Fine-Gray the renderer turns it into cumulative incidence.
         curves <- private$.adjustedCurveData(cox_model, cleaneddata$cleanData,
@@ -5203,7 +5217,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               .("The adjusted cumulative-incidence curve could not be computed from the Fine-Gray model."))
           return(NULL)   # standard branch: refused, notice already emitted
         }
-        list(curves = as.data.frame(curves), finegray = is_finegray)
+        list(curves = as.data.frame(curves), finegray = is_finegray,
+             has_competing = has_competing)
       },
 
       .plot_adj = function(image_plot_adj, ggtheme, theme, ...) {
@@ -5259,7 +5274,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               colour = self$options$adjexplanatory,
               title = .fmt(.("Adjusted Cumulative Incidence for {variable}"),
                                       variable = self$options$adjexplanatory),
-              subtitle = private$.adjustedEstimandNote(self$options$ac_method),
+              subtitle = private$.adjustedEstimandNote(self$options$ac_method,
+                                                       isTRUE(plotData$has_competing)),
               caption = .("Cumulative incidence, not 1 - Kaplan-Meier: competing events are accounted for.")) +
             ggplot2::theme_bw() +
             ggplot2::theme(plot.caption = ggplot2::element_text(hjust = 0, size = 8))
@@ -5299,7 +5315,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             fill = self$options$adjexplanatory,
             title = .fmt(.("Adjusted Survival Curves for {variable}"),
                                     variable = self$options$adjexplanatory),
-            subtitle = private$.adjustedEstimandNote(method)) +
+            subtitle = private$.adjustedEstimandNote(method,
+                                                     isTRUE(plotData$has_competing))) +
           ggplot2::theme_bw() +
           ggplot2::theme(plot.subtitle = ggplot2::element_text(size = 8),
                          plot.caption = ggplot2::element_text(hjust = 0, size = 8))
@@ -5472,11 +5489,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           .("This median is the time when the adjusted cumulative incidence of the event of interest reaches 50%.")
         else
           .("The median survival time is when adjusted survival reaches 50%."),
-        private$.adjustedEstimandNote(method)
+        private$.adjustedEstimandNote(method, private$.isCompetingRisk())
       )
 
       self$results$adjustedMedianSummary$setContent(paste(medianSummary, collapse = "<br><br>"))
-      medianTable$setNote("estimand", private$.adjustedEstimandNote(method))
+      medianTable$setNote("estimand", private$.adjustedEstimandNote(method, private$.isCompetingRisk()))
       medianTable$setNote(
         "counts",
         .("Records and observed events are counts in the data, not properties of the adjusted curve."))

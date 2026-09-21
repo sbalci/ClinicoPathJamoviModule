@@ -350,7 +350,9 @@ grep -n "addRow(rowKey" R/<fn>.b.R     # a fixed / option-determined row set bel
 grep -n "visible: *( *!" jamovi/<fn>.r.yaml   # a leading "!" is silently ALWAYS VISIBLE
 grep -nE '\.\(\s*"[[:space:],;:.]|\.\(\s*"[^"]*[[:space:]]"\s*[,)]' R/<fn>.b.R   # separator/padding inside .()
 grep -nE '^\s*(type: *(File|Text)|mode: *vector)\s*$' jamovi/<fn>.a.yaml jamovi/<fn>.r.yaml; grep -n '^minApp' jamovi/0000.yaml   # File/Text need module-wide minApp: 28.3.0 (Text table columns are false hits); vector = bounded-mark plots only
-python3 tools/release_gate.py          # requiresData, CollapseBox Title Case, refs, .() " [..]"/\u{}/padding, translation %-specifiers, notice title colours (FAIL = blocking)
+python3 tools/release_gate.py          # requiresData, CollapseBox Title Case, refs, .() " [..]"/\u{}/padding, translation %-specifiers, notice title colours, column format tokens, fabricated statistics (FAIL = blocking)
+grep -n "format:" jamovi/<fn>.r.yaml   # comma-separated zto|pvalue|pc|log10|dp:N|sf:N ONLY - "zto:4" is one unknown token and is dropped in silence
+grep -nE '(grepl?|sub|gsub|regexpr)\(' R/<fn>.b.R   # a pattern built from a user column name needs fixed = TRUE / startsWith() / .stripPrefix()
 Rscript -e 'testthat::test_file("tests/testthat/test-zzz-results-rendering-contract.R")'
 ```
 
@@ -385,6 +387,16 @@ Checklist:
       matches the `.a.yaml` title.
 - [ ] No option, result, or `ui.<name>` in `.events.js` refers to a schema entry that is
       commented out or removed.
+- [ ] Every `.r.yaml` column `format:` is comma-separated tokens from `zto | pvalue | pc |
+      log10 | dp:N | sf:N`. `zto:4`, `zto3` and `zto;pvalue` are each ONE unknown token, so
+      jamovi silently drops the formatting — 519 columns in this module had it (§21). Grammar
+      and rewrites: `vignettes/jamovi_tables_guide.md` → *The token grammar*. Prefer no `dp:`
+      at all: decimals are the user's global preference.
+- [ ] No user column name or level label is pasted into a `grep`/`grepl`/`sub`/`gsub`/`regexpr`
+      pattern. `Age (years)`, `BMI-1` and `A+B` are read as a group, a quantifier and a
+      wildcard, so the match fails or hits the wrong thing and a result label is corrupted.
+      Use `fixed = TRUE`, `startsWith()`/`endsWith()`, or `.stripPrefix(x, prefix)` from
+      `R/utils.R`; `jmvcore::composeTerm()` only when the target is a model term (§22).
 - [ ] **Do not add `type: Notice` to `.r.yaml`** — it is not in the compiler enum and
       `jmvtools::prepare()` fails on it. `type: Notification` compiles but breaks at runtime.
 - [ ] **A `type: File` option or `type: Text` result needs `minApp: 28.3.0`** in

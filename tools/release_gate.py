@@ -22,6 +22,10 @@ def cap(xs, n=10):
 
 
 FAIL, WARN = [], []
+# Per-check count of hits in analyses that do NOT ship (menuGroup suffixed D/P/T). A shipped hit
+# fails the gate; an unshipped one is promotion debt, and tools/promotion_screen.py reads these
+# counts (--json) so an analysis carrying them scores lower as a promotion candidate.
+UNSHIPPED = {}
 
 
 def load(p):
@@ -324,14 +328,27 @@ def check_render_private_state():
             reads = set(_READ_PRIVATE.findall(traced)) - set(body)
             if d.get('requiresData') is True or re.search(r'image\$state|\bstate\$|\bst\$', traced):
                 ok |= {f for f in reads if re.search(r'is\.null\(\s*private\$' + re.escape(f) + r'\b', traced)}
+                # A read that sits in the SAME boolean expression as a state read is a fallback,
+                # not a dependency: on the export path state answers and the NULL field is never
+                # reached. R/survival.b.R:582 is the house example --
+                #   isTRUE(state$has_competing) || isTRUE(private$.eventRecode$has_competing)
+                # Distinct from a bare `if (!isTRUE(private$.inputsValid)) return()` (jjdotchart),
+                # where the private field is the SOLE gate and export renders blank.
+                ok |= {f for f in reads
+                       if re.search(r'(?:image\$state|\bstate\$)[^\n]{0,120}(?:\|\||&&)\s*\n?[^\n]{0,80}'
+                                    r'private\$' + re.escape(f) + r'\b', traced)
+                       or re.search(r'private\$' + re.escape(f) +
+                                    r'\b[^\n]{0,120}(?:\|\||&&)\s*\n?[^\n]{0,80}(?:image\$state|\bstate\$)', traced)
+}
             ok |= set(re.findall(r'#\s*render-state:\s*(\.[A-Za-z_][\w.]*)', ''.join(raw_body.get(f, '') for f in seen)))
             bad = sorted((reads & run_set) - ok)
             if bad:
                 hits.append((name, '%s:%s (%s)' % (name, iname, ', '.join(bad))))
     ship = sorted(x for n, x in hits if _shipped(n))
     if ship:
-        WARN.append('%d shipped Image(s) draw from private$ fields only .run() fills - blank or incomplete on '
+        FAIL.append('%d shipped Image(s) draw from private$ fields only .run() fills - blank or incomplete on '
                     'export / .omv reopen: %s' % (len(ship), '; '.join(cap(ship))))
+    UNSHIPPED['render_private_state'] = len(hits) - len(ship)
     print('  renderer private$ state: %d images (%d shipped)' % (len(hits), len(ship)))
 
 
@@ -614,12 +631,19 @@ def _conversions_compatible(msgid, msgstr):
     tr.po reordering '%s ... %s ... %.2f' as '%s ... %.2f ... %s', which put a string on %.2f:
     ihcheterogeneity failed on every Turkish run, 2026-09-18 OncoPath release check C5.)"""
     strip = lambda s: re.sub('%%', '', s)
+    marker = lambda c: re.match(r'%(\d+)\$', c)
     src = _FMT.findall(strip(msgid))
+    # src = the ARGUMENTS the msgid takes. A numbered msgid may reuse one ('%1$s ... %2$s ... %1$s'
+    # takes 2), so count distinct markers - counting occurrences flagged every correct translation.
+    if src and all(marker(c) for c in src):
+        by_n = {}
+        for c in src:
+            by_n.setdefault(int(marker(c).group(1)), c)
+        src = [by_n.get(n) for n in range(1, max(by_n) + 1)]
     dst = _FMT.findall(strip(msgstr))
     kind = lambda c: c[-1].replace('i', 'd')
     # %s prints any argument (R converts numbers), so only a non-%s slot must match its argument.
-    fits = lambda arg, slot: kind(slot) == 's' or kind(arg) == kind(slot)
-    marker = lambda c: re.match(r'%(\d+)\$', c)
+    fits = lambda arg, slot: arg is not None and (kind(slot) == 's' or kind(arg) == kind(slot))
     if not any(marker(c) for c in dst):
         return len(src) == len(dst) and all(fits(a, b) for a, b in zip(src, dst))
     if not all(marker(c) for c in dst):
@@ -631,6 +655,14 @@ def _conversions_compatible(msgid, msgstr):
             return False
         used.add(n)
     return used == set(range(1, len(src) + 1))
+
+
+# The ihcheterogeneity spatial note: msgid reuses %1$s, Turkish puts % before the number.
+assert _conversions_compatible('grades %1$s%%: Low %2$s%%, up to %1$s%%', 'eşik %%%1$s: %%%2$s, %%%1$s')
+assert _conversions_compatible('%1$s and %2$s', '%2$s ve %1$s')
+assert not _conversions_compatible('%1$s and %2$s', '%1$s ve %1$s')        # argument 2 never used
+assert not _conversions_compatible('%s at %.2f', '%.2f ile %s')             # reordered without markers
+assert not _conversions_compatible('%1$s, %1$s', '%s, %s')                  # 1 argument, 2 slots
 
 
 def check_i18n_po_formats():
@@ -668,6 +700,151 @@ def check_notice_title_colour():
         WARN.append('%d notice renderers give titles a fixed colour (unreadable on the dark theme): %s'
                     % (len(ship), ', '.join(cap(ship))))
     print('  notice title colours: %d renderers (%d shipped)' % (len(hits), len(ship)))
+
+
+# jmvcore Column$initialize does `strsplit(format, ",", fixed = TRUE)` and then tests membership
+# with `"zto" %in% private$.format`; the jamovi client does `w = I.split(",")` and `w.includes("zto")`.
+# Both sides are therefore comma-separated and EXACT-match, over this set only.
+_FMT_TOKENS = re.compile(r'^(zto|pvalue|pc|log10|(dp|sf|pc):\d+)$')
+_FMT_LINE = re.compile(r'^\s*format:\s*[\'"]?([^\'"#\n]+?)[\'"]?\s*$', re.M)
+
+
+def check_column_formats():
+    """A `format:` token jamovi does not recognise is dropped in silence - no error, no warning, the
+    column just renders unformatted. `format: zto:4` splits to the single token "zto:4", so `zto` is
+    never seen and the leading-zero/no-scientific-notation behaviour is lost. Valid tokens are
+    zto, pvalue, pc, log10, dp:N, sf:N, separated by commas and nothing else. Verify with:
+      strsplit("zto:4", ",", fixed = TRUE)[[1]]        # "zto:4"  -> "zto" %in% . is FALSE"""
+    hits = []
+    for p in sorted(glob.glob('jamovi/*.r.yaml')):
+        name = os.path.basename(p)[:-7]
+        for i, line in enumerate(open(p, encoding='utf-8', errors='replace'), 1):
+            m = _FMT_LINE.match(line)
+            if not m:
+                continue
+            bad = [t for t in m.group(1).split(',') if not _FMT_TOKENS.match(t.strip())]
+            if bad:
+                hits.append((name, '%s:%d %s' % (os.path.basename(p), i, m.group(1).strip())))
+    ship = sorted(x for n, x in hits if _shipped(n))
+    if ship:
+        FAIL.append('%d shipped column(s) declare a format: jamovi cannot parse, so the formatting is '
+                    'silently dropped (tokens are comma-separated; zto|pvalue|pc|log10|dp:N|sf:N): %s'
+                    % (len(ship), ', '.join(cap(ship))))
+    UNSHIPPED['column_formats'] = len(hits) - len(ship)
+    print('  column format tokens: %d malformed (%d shipped)' % (len(hits), len(ship)))
+
+
+# a literal assigned to a name that reads as an uncertainty, e.g. `se <- 0.1`, `corr_se = 0.15`
+# `se <- 0.12`, `cif_se <- 0.02  # Placeholder` - a trailing comment must not hide it
+_FAKE_SE = re.compile(r'(?<![\w.$])((?:\w*_)?(?:se|sd|std_?err|stderr|variance|sigma))\s*(?:<-|=(?!=))\s*'
+                      r'-?\d+(?:\.\d+)?\s*(?:#[^\n]*)?$', re.M)
+# a constant is only harmless until something builds an interval out of it
+_INTERVAL = re.compile(r'1\.96|qnorm\s*\(|qt\s*\(|\bci_(?:lower|upper|low|high)\b')
+# "placeholder" also means a {} slot in a format string and "simplified" often describes a layout,
+# so the word alone is far too noisy: require a numeric literal being assigned on the same line or
+# the next one, which is what an actual stand-in value looks like. "approximation" is deliberately
+# NOT a marker - it is ordinary statistics vocabulary, and the two sites it flagged (enhancedROC
+# .runROCAnalysis, psychopdaROC .calculateBayesianROC) were careful notes telling the user a method
+# is asymptotic, i.e. exactly the honesty this check exists to encourage.
+_FAKE_MARK = re.compile(r'#[^\n]*\b(placeholder|simplified|for demonstration|would calculate|'
+                        r'fake|dummy value|made up)\b[^\n]*\n?'
+                        r'(?:[^\n]*\n)?', re.I)
+_NUM_ASSIGN = re.compile(r'(?<![\w.$])[\w.]+\s*(?:<-|=(?!=))\s*-?\d+(?:\.\d+)?\b')
+_SHOWS = re.compile(r'\$(?:addRow|setRow|setValue|setContent|setValues)\s*\(')
+# The sharpest form, and invisible to the numeric rule: a result written as a STRING, e.g.
+# `statistical_difference = "p = 0.032 (significant)"` (R/treatmentoptim.b.R:494). Fields that
+# DESCRIBE a threshold rather than report a result are excluded - a plot `subtitle` reading
+# "Dashed lines at p = 0.05" and a `decision_criterion` of "HR < 0.8 with p < 0.025" are both fine.
+_FAKE_STR = re.compile(r'(?<![\w.$])(?!\w*(?:title|label|caption|criterion|note|legend|msg|text|desc_)\b)'
+                       r'(\w+)\s*=\s*"[^"\n]*\bp\s*[=<>]\s*0\.\d+', re.I)
+
+
+def check_fabricated_stats():
+    """A constant standing in for a quantity the model did not produce is the worst thing a
+    statistics module can ship: `se <- 0.1` pushed through `+- 1.96 * se` renders a confidence
+    interval that looks real and means nothing (2026-09-16 CompositeSEM [HIGH]). The D/P/T menuGroup
+    convention is what keeps these out of the library today - this makes that mechanical, so a
+    menuGroup rename cannot promote fabricated numbers. Flags a literal assigned to an se/sd/variance
+    name, and a placeholder comment, when the same method also writes to a result."""
+    hits = []
+    for p in sorted(glob.glob('R/*.b.R')):
+        src = open(p, encoding='utf-8', errors='replace').read()
+        heads = list(_FUNC_HEAD.finditer(src))
+        for i, h in enumerate(heads):
+            body = src[h.end(): heads[i + 1].start() if i + 1 < len(heads) else len(src)]
+            # A helper that computes the interval is as damning as the method that prints it -
+            # R/differentialdiagnosis.b.R:598 does `se <- 0.12` two lines above `posterior +- 1.96 * se`
+            # and never touches a results object itself.
+            shows = bool(_SHOWS.search(body) or _INTERVAL.search(body))
+            if not shows:
+                continue                      # nothing here reaches the user, directly or via a caller
+            why = [m.group(1) for m in _FAKE_SE.finditer(body)]
+            why += [m.group(1) for m in _FAKE_STR.finditer(re.sub(r'#[^\n]*', '', body))]
+            why += sorted({m.group(1).lower() for m in _FAKE_MARK.finditer(body)
+                           if _NUM_ASSIGN.search(m.group(0))})
+            if why:
+                hits.append((p, '%s::%s (%s)' % (os.path.basename(p), h.group(1) or h.group(2),
+                                                 ', '.join(sorted(set(why))[:3]))))
+    ship = sorted(x for p, x in hits if _file_shipped(p))
+    if ship:
+        FAIL.append('%d shipped method(s) put a hard-coded constant or an acknowledged placeholder into a '
+                    'displayed result - a user cannot tell it from a computed number: %s'
+                    % (len(ship), '; '.join(cap(ship))))
+    UNSHIPPED['fabricated_stats'] = len(hits) - len(ship)
+    print('  fabricated statistics: %d methods (%d shipped)' % (len(hits), len(ship)))
+
+
+# a fitted model or a whole dataset named in a setState() payload
+_HEAVY_NAME = (r'fit|model|models|zph|roc|survfit|coxph|cph|glmnet|rf|object|'
+               r'cleandata|cleanData|mydata|dataset|[\w.]*(?:_fit|_model|Fit|Model)')
+# `list(fit = cox_fit, ...)` - a heavy value bound to a state key
+_HEAVY = re.compile(r'(?<![\w.])(%s)\s*=(?!=)' % _HEAVY_NAME)
+# `setState(zph)` / `setState(cox_fit)` - the whole payload IS the object, no key at all
+_HEAVY_BARE = re.compile(r'^\s*(%s)\s*$' % _HEAVY_NAME)
+
+
+def check_state_payload():
+    """image$setState() is serialised into the .omv, so whatever goes in there is copied into every
+    saved file and grows with the user's data. A coxph carries linear predictors and residuals of
+    length n; a cox.zph carries the residual matrix; a pROC roc carries both input vectors. State
+    holds the handful of numbers the plot draws - see CLAUDE.md and jamovi_plots_guide.md section 3.
+    Checked with: length(serialize(x, NULL))."""
+    hits, waived = [], []
+    for p in sorted(glob.glob('R/*.b.R')):
+        src = open(p, encoding='utf-8', errors='replace').read()
+        for m in re.finditer(r'setState\s*\(', src):
+            depth, j = 1, m.end()
+            while j < len(src) and depth:                     # balanced-paren payload
+                depth += (src[j] == '(') - (src[j] == ')')
+                j += 1
+            payload = src[m.end(): j - 1]
+            # An object the plotting function itself requires, where extracting the drawing data
+            # saves little, is a real exception - but it has to be measured and written down:
+            #   # state-payload: <why>  (measure with length(serialize(x, NULL)))
+            # placed on the setState line or the two above it.
+            start = m.start()                     # the comment block immediately above this call
+            for _ in range(8):
+                nl = src.rfind('\n', 0, start)
+                if nl < 0 or not src[nl + 1: start].lstrip().startswith(('#', 'image', 'self$')):
+                    break
+                start = nl
+            if re.search(r'#\s*state-payload:', src[start: j]):
+                waived.append(os.path.basename(p))
+                continue
+            names = sorted({h.group(1) for h in _HEAVY.finditer(payload)})
+            bare = _HEAVY_BARE.match(payload)
+            if bare:
+                names = sorted(set(names) | {bare.group(1)})
+            if names:
+                line = src.count('\n', 0, m.start()) + 1
+                hits.append((p, '%s:%d (%s)' % (os.path.basename(p), line, ', '.join(names[:3]))))
+    ship = sorted(x for p, x in hits if _file_shipped(p))
+    if ship:
+        FAIL.append('%d shipped setState() payload(s) name a fitted object or a dataset; state is saved into '
+                    'the .omv, so store the values the plot draws instead: %s' % (len(ship), '; '.join(cap(ship))))
+    UNSHIPPED['state_payload'] = len(hits) - len(ship)
+    print('  heavy setState payloads: %d sites (%d shipped, %d waived)'
+          % (len(hits), len(ship), len(waived)))
 
 
 def _uses_28_3(node, name=None):
@@ -715,7 +892,8 @@ if __name__ == '__main__':
                check_artifacts, check_tame, check_visible_bang, check_entities,
                check_requires_data, check_render_private_state, check_bare_set_seed, check_unused_imports, check_collapsebox_titlecase, check_i18n_padding,
                check_i18n_catalog_scope, check_i18n_bracket, check_i18n_braced_escape,
-               check_i18n_po_formats, check_notice_title_colour, check_min_app):
+               check_i18n_po_formats, check_notice_title_colour, check_min_app,
+               check_column_formats, check_fabricated_stats, check_state_payload):
         try:
             fn()
         except Exception as e:
@@ -725,5 +903,9 @@ if __name__ == '__main__':
         print('  WARN  %s' % w)
     for f in FAIL:
         print('  FAIL  %s' % f)
+    debt = sum(UNSHIPPED.values())
+    if debt:
+        print('\n  promotion debt (unshipped analyses, would FAIL if promoted): %s'
+              % ', '.join('%s %d' % kv for kv in sorted(UNSHIPPED.items()) if kv[1]))
     print('\n%d blocking, %d advisory' % (len(FAIL), len(WARN)))
     sys.exit(1 if FAIL else 0)

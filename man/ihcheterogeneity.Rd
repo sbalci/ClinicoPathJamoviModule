@@ -54,16 +54,18 @@ analysis}
 \item{biopsies}{Further regional measurements, any number, analysed like
 Regional Measurements 1 to 4.}
 
-\item{spatial_id}{Identifier for spatial regions or tissue areas (e.g.,
-Central/Invasive, Preinvasive/Invasive). Compartments are listed in the
-level order of the variable; cases without an identifier are left out of
-the compartment tables. In R, convert a haven-labelled code column with
-haven::as_factor() first, or the codes are shown instead of the labels.}
+\item{spatial_id}{The compartment each case was sampled from (e.g.,
+Central/Invasive, Preinvasive/Invasive): one row per case, one compartment
+per case. Data with one row per case and compartment count each case once
+per row, as if they were different patients, which overstates the sample
+and narrows every interval. Compartments are listed in the level order of
+the variable; cases without an identifier are left out of the compartment
+tables. In R, convert a haven-labelled code column with haven::as_factor()
+first, or the codes are shown instead of the labels.}
 
-\item{compareCompartments}{Compares the ICC, the mean per-case CV and, when
-a reference is supplied, the mean bias between spatial compartments.
-Requires the Spatial Region ID variable; compartments need at least 3
-cases.}
+\item{compareCompartments}{Compares the ICC, the within-case CV and, when a
+reference is supplied, the mean bias between spatial compartments. Requires
+the Spatial Region ID variable; compartments need at least 3 cases.}
 
 \item{compartmentTests}{Tests whether heterogeneity differs between
 compartments: Kruskal-Wallis test on the per-case CV (is one compartment
@@ -80,22 +82,27 @@ reference is supplied.)}
 reporting only: it changes no computation, and systematic or stratified
 sampling adds a note on how to read the estimates.}
 
-\item{cv_threshold}{Largest acceptable mean per-case coefficient of
-variation, in percent. The CV is graded low at or below half of this value,
-moderate up to it and high above it. Choose it for your marker and scoring
-method before looking at the results.}
+\item{cv_threshold}{Largest acceptable within-case coefficient of variation
+(the root mean square of the per-case CVs), in percent. The CV is graded
+low at or below half of this value, moderate up to it and high above it.
+Choose it for your marker and scoring method before looking at the results.}
 
 \item{correlation_threshold}{Smallest acceptable Spearman correlation. With
-a reference, every region must meet it on its own (the lowest regional
-correlation is graded); without one, the mean correlation between regions
-is graded. Choose it before looking at the results.}
+a reference, the mean correlation of the regions with the reference is
+graded, unless a region is shown to fall below the threshold (its upper 95
+percent limit below it), in which case that region is graded; without a
+reference, the mean correlation between regions is graded. Choose it before
+looking at the results.}
 
 \item{bias_margin}{Largest systematic difference, as a percentage of the
 comparison mean (the reference, or the other regions), that is still
 clinically acceptable. A difference is ruled out when its 90 percent CI
 lies inside the margin (two one-sided tests), and shown to be material when
 a Bonferroni-adjusted CI lies entirely beyond it; otherwise it is
-inconclusive. Choose it before looking at the results.}
+inconclusive. A difference shown to change with the level (proportional
+bias) is also judged at the 5th and 95th percentiles of the level, and is
+ruled out only when both ends lie inside the margin. Choose it before
+looking at the results.}
 
 \item{show_variability_plots}{Show the regional-measurement, per-case CV
 and spatial plots. They are always shown under the Variance and

@@ -304,7 +304,7 @@ test_that("compartments skipped for size are named, with one minimum everywhere 
 
 # ── H. CV (I15, I16, I36) ─────────────────────────────────────────────────────
 
-test_that("near-zero cases do not dominate the mean CV and exclusions are counted (I15, I16)", {
+test_that("near-zero cases do not dominate the within-case CV and exclusions are counted (I15, I16)", {
     set.seed(7); n <- 20; hi <- runif(n, 20, 60)
     d_hi <- data.frame(whole = round(hi, 1), b1 = round(hi * (1 + rnorm(n, 0, .04)), 1),
                        b2 = round(hi * (1 + rnorm(n, 0, .04)), 1))
@@ -312,13 +312,13 @@ test_that("near-zero cases do not dominate the mean CV and exclusions are counte
                   data.frame(whole = 0, b1 = 0, b2 = 0))           # one all-zero case: exact agreement
     tab <- ihc(d_lo, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")$reproducibilitytable
     df <- tab$asDF
-    cv_mean <- df$value[grepl("Mean Coefficient of Variation", df$metric)]
+    cv_mean <- df$value[grepl("Within-case CV", df$metric)]
     # Floor = 2% of the 95th percentile of all values; every case below it is left
     # out whatever its spread (review R03: keeping only the all-zero case selected
     # on the outcome).
     m <- as.matrix(d_lo); floor_v <- 0.02 * quantile(abs(m), 0.95, names = FALSE)
     case_cv <- ifelse(rowMeans(m) < floor_v, NA, apply(m, 1, sd) / rowMeans(m) * 100)
-    expect_equal(cv_mean, mean(case_cv, na.rm = TRUE), tolerance = 1e-10)
+    expect_equal(cv_mean, sqrt(mean(case_cv^2, na.rm = TRUE)), tolerance = 1e-10)
     expect_lt(cv_mean, 10)
     expect_match(note_text(tab), "5 case(s) whose mean", fixed = TRUE)
     expect_match(note_text(tab), "1 of them had identical", fixed = TRUE)
@@ -506,8 +506,8 @@ test_that("near-zero cases are excluded whether or not they agree exactly (R03)"
     a <- rbind(base, data.frame(whole = rep(0, 12), b1 = rep(0, 12), b2 = rep(0, 12)))
     b <- rbind(base, data.frame(whole = rep(0, 12), b1 = rep(0.1, 12), b2 = rep(0, 12)))
     cv_of <- function(d) { df <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")$reproducibilitytable$asDF
-                           df$value[grepl("Mean Coefficient of Variation", df$metric)] }
-    hand <- mean(apply(as.matrix(base), 1, sd) / rowMeans(as.matrix(base)) * 100)
+                           df$value[grepl("Within-case CV", df$metric)] }
+    hand <- sqrt(mean((apply(as.matrix(base), 1, sd) / rowMeans(as.matrix(base)) * 100)^2))
     expect_equal(cv_of(a), hand, tolerance = 1e-8)
     expect_equal(cv_of(b), hand, tolerance = 1e-8)
 })
@@ -676,7 +676,7 @@ test_that("compartment CV bands are compared with each other compartment (R09, R
     d <- data.frame(whole = w, b1 = w * (1 + rnorm(n, 0, s)), b2 = w * (1 + rnorm(n, 0, s)), comp = comp)
     cc <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", spatial_id = "comp",
               compareCompartments = TRUE)$compartmentComparison$asDF
-    cvr <- cc[cc$metric == "Mean CV (%)", ]
+    cvr <- cc[cc$metric == "Within-case CV (%)", ]
     expect_equal(cvr$comparison[cvr$compartment == "A"], "Lower CV band than C")
     expect_equal(cvr$comparison[cvr$compartment == "B"], "Lower CV band than C")
     expect_equal(cvr$comparison[cvr$compartment == "C"], "Higher CV band than A, B")
@@ -712,7 +712,8 @@ test_that("the spatial plot does not print 'CV: NA%' (R31)", {
 
 test_that("a 3% offset is never 'material' and is ruled out once the 90% CI fits the margin (S02, S03)", {
     set.seed(21); n <- 150; w <- runif(n, 20, 80)
-    d <- data.frame(whole = w, b1 = w * 1.03 * (1 + rnorm(n, 0, 0.04)), b2 = w * 1.03 * (1 + rnorm(n, 0, 0.04)))
+    # An ADDITIVE offset of 3% of the mean: the difference does not change with the level.
+    d <- data.frame(whole = w, b1 = w + 0.03 * mean(w) + rnorm(n, 0, 2), b2 = w + 0.03 * mean(w) + rnorm(n, 0, 2))
     for (b in c("b1", "b2")) {
         dd <- d[[b]] - w
         ci90 <- (mean(dd) + c(-1, 1) * qt(0.95, n - 1) * sd(dd) / sqrt(n)) / mean(w) * 100
@@ -721,11 +722,16 @@ test_that("a 3% offset is never 'material' and is ruled out once the 90% CI fits
     }
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")
     expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET")
+    # A 3% SCALING changes with the level: about 2.3 points at the top of the range
+    # against a 2.5-point margin (5% of the mean). It is still never material.
+    dm <- data.frame(whole = w, b1 = w * 1.03 * (1 + rnorm(n, 0, 0.04)), b2 = w * 1.03 * (1 + rnorm(n, 0, 0.04)))
+    expect_false(verdict_of(ihc(dm, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2")) == "NOT ADEQUATE FOR SUBSTITUTION")
 })
 
 test_that("the margin is the user's choice (S03)", {
     set.seed(22); n <- 80; w <- runif(n, 20, 80)
-    d <- data.frame(whole = w, b1 = w * 1.07 * (1 + rnorm(n, 0, 0.03)))
+    # an additive offset of 7% of the mean (a 7% SCALING would change with the level)
+    d <- data.frame(whole = w, b1 = w + 0.07 * mean(w) + rnorm(n, 0, 1.5))
     dd <- d$b1 - w
     ci90 <- (mean(dd) + c(-1, 1) * qt(0.95, n - 1) * sd(dd) / sqrt(n)) / mean(w) * 100
     expect_true(min(ci90) > 5 && max(ci90) < 10)
@@ -758,7 +764,11 @@ test_that("the summary reports the weakest region and makes no variance claim un
 
 test_that("a region that cannot be assessed blocks the green verdict and is named (S06, S14)", {
     set.seed(24); n <- 60; w <- runif(n, 20, 80)
-    d <- data.frame(whole = w, b1 = w + rnorm(n, 0, 1), b2 = w + rnorm(n, 0, 1), b3 = 50)
+    # b3 is measured in 3 cases: too few for a correlation. (A constant b3 used to
+    # stand in here; it now counts as a region that reads 50 whatever the case,
+    # which the level check shows to be NOT ADEQUATE.)
+    d <- data.frame(whole = w, b1 = w + rnorm(n, 0, 1), b2 = w + rnorm(n, 0, 1),
+                    b3 = c(w[1:3] + rnorm(3, 0, 1), rep(NA, n - 3)))
     res <- ihc(d, wholesection = "whole", biopsy1 = "b1", biopsy2 = "b2", biopsy3 = "b3")
     expect_equal(verdict_of(res), "AGREEMENT THRESHOLDS MET, NOT CONFIRMED")
     expect_match(txt(res$interpretation$content), "Not assessed (too few paired values or the same value in every case): 'b3'", fixed = TRUE)
@@ -804,9 +814,11 @@ test_that("an all-zero marker gets a truthful CV note, no 'robust' label and no 
 # Function check (2026-09-19): findings FC1-FC17, RC1-RC14
 # ═══════════════════════════════════════════════════════════
 
+# Additive offsets: the difference does not change with the level, so every
+# Clinical Impact cell is the average-difference text.
 margin_data <- function() {
     set.seed(22); n <- 80; w <- runif(n, 20, 80)
-    data.frame(whole = w, b1 = w * 1.07 * (1 + rnorm(n, 0, 0.03)), b2 = w * (1 + rnorm(n, 0, 0.05)))
+    data.frame(whole = w, b1 = w + 0.07 * mean(w) + rnorm(n, 0, 1.5), b2 = w + rnorm(n, 0, 2.5))
 }
 
 test_that("Clinical Impact states the zone at the user's margin with the 90% CI the rule reads (FC2, RC1)", {

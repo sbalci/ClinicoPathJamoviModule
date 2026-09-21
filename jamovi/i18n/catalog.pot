@@ -9416,6 +9416,13 @@ msgid ""
 "width of about {suggested} gives roughly 30 bins."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"A blank slope means that no level check was possible: fewer than 5 cases or "
+"5 distinct levels (an ordinal score has no meaningful slope), or the same "
+"difference in every case."
+msgstr ""
+
 #: R/chisqposttest.b.R
 msgid "A bootstrap confidence interval could not be computed"
 msgstr ""
@@ -9525,6 +9532,14 @@ msgid ""
 "chi-square test, is the pattern a localized cause produces: systematic "
 "rounding, preferred values, or a subset of records entered differently. The "
 "leading-digit bin listing below shows which digit combinations carry it."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"A difference between two measurements that changes with the level of the "
+"marker - for example a biopsy that reads higher than the whole section in "
+"low cases and lower in high cases. An average difference can hide it, and a "
+"fixed correction cannot remove it."
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -10079,8 +10094,9 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"A systematic difference is present, and averaging more regions does not "
-"remove an offset. Address the systematic difference first."
+"A systematic difference is present, and averaging more regions removes "
+"neither an offset nor a difference that changes with the level. Address the "
+"systematic difference first."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -10088,6 +10104,22 @@ msgid ""
 "A systematic difference was neither ruled out nor shown: region '%s' differs "
 "by an estimated %s%% of the comparison mean (90%% CI %s%% to %s%%); "
 "agreement within the %s%% margin needs the whole 90%% CI inside it."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"A systematic difference was neither ruled out nor shown: the difference "
+"between region '%s' and its comparison changes with the level, an estimated "
+"%s at a level of %s (90%% CI %s to %s) and %s at %s (90%% CI %s to %s); "
+"agreement within the ±%s margin needs both CIs inside it."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"A systematic difference was neither ruled out nor shown: the difference "
+"between the mean of all regions and the reference changes with the level, an "
+"estimated %s at a level of %s (90%% CI %s to %s) and %s at %s (90%% CI %s to "
+"%s); agreement within the ±%s margin needs both CIs inside it."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -28224,6 +28256,22 @@ msgstr ""
 msgid "Changes Exceeding MID (N)"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Changes with the level: %s at %s (90%% CI %s to %s), %s at %s (90%% CI %s to "
+"%s); inconclusive at the ±%s margin"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Changes with the level: %s at %s, %s at %s"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Changes with the level: %s at %s, %s at %s (margin ±%s); ruled out, both "
+"90%% CIs within the margin"
+msgstr ""
+
 #: consortdiagram/options/text_width.description.ui
 msgid "Character width for text wrapping in boxes."
 msgstr ""
@@ -33332,7 +33380,8 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Coefficient of variation per case (SD / mean of the case's measurements), "
-"averaged over cases; cases whose mean is near zero are left out."
+"combined over cases as a root mean square (the within-case CV); cases whose "
+"mean is near zero are left out."
 msgstr ""
 
 #: samplingerror/options/biologicalVarianceCV.description
@@ -48836,6 +48885,10 @@ msgstr "Descriptive yield band"
 
 #: R/decisioncombine.b.R
 msgid "Descriptive Youden ranking"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Descriptive, robust to a few extreme cases; not graded"
 msgstr ""
 
 #: decisioncalculator/options/multiplecuts.description.ui
@@ -71067,8 +71120,9 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Heterogeneity level grades the mean per-case CV against your %1$s%% "
-"threshold: Low at or below %2$s%%, Moderate up to %1$s%%, High above it."
+"Heterogeneity level grades the within-case CV (root mean square over the "
+"compartment's cases) against your %1$s%% threshold: Low at or below %2$s%%, "
+"Moderate up to %1$s%%, High above it."
 msgstr ""
 
 #: treatmentmeta/results/heterogeneity.columns.title
@@ -87276,14 +87330,6 @@ msgstr ""
 msgid "Mean Clustering Index"
 msgstr ""
 
-#: R/ihcheterogeneity.b.R
-msgid "Mean Coefficient of Variation (%) - between regions"
-msgstr ""
-
-#: R/ihcheterogeneity.b.R
-msgid "Mean Coefficient of Variation (%) - region vs reference"
-msgstr ""
-
 #: ihccluster/results/reproducibilityStats.columns.title
 msgid "Mean Cohen Kappa"
 msgstr ""
@@ -87298,22 +87344,6 @@ msgstr ""
 
 #: costeffectiveness/results/strategySummary.columns.title
 msgid "Mean Cost"
-msgstr ""
-
-#: R/ihcheterogeneity.b.R
-msgid "Mean CV (%)"
-msgstr ""
-
-#: R/ihcheterogeneity.b.R
-msgid "Mean CV = %s%% (High variability)"
-msgstr ""
-
-#: R/ihcheterogeneity.b.R
-msgid "Mean CV = %s%% (Low variability)"
-msgstr ""
-
-#: R/ihcheterogeneity.b.R
-msgid "Mean CV = %s%% (Moderate variability)"
 msgstr ""
 
 #: treeadvanced/results/clinicalimportance.columns.title
@@ -97921,6 +97951,12 @@ msgid ""
 "detected; this does not establish that they are the same"
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"No difference that changes with the level was detected; this does not show "
+"that there is none."
+msgstr ""
+
 #: R/jjdotplotstats.b.R
 msgid ""
 "No distributional assumption. The test compares ranks, so it answers whether "
@@ -100133,6 +100169,12 @@ msgstr ""
 
 #: R/categorize.b.R
 msgid "Not categorized"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Not checked for a difference that changes with the level (too few cases or "
+"distinct values): %s."
 msgstr ""
 
 #: R/checkdata.b.R
@@ -104880,7 +104922,9 @@ msgid ""
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Optionally add a Spatial Region ID for compartment analysis."
+msgid ""
+"Optionally add a Spatial Region ID: the compartment each case was sampled "
+"from, with one row per case."
 msgstr ""
 
 #: R/decisioncalculator.b.R
@@ -106919,14 +106963,14 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Overall: region(s) %s are systematically offset from the reference and "
-"cannot replace it without calibration."
+"Overall: region(s) %s differ systematically from the other regions, so the "
+"regions cannot be used interchangeably without calibration."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Overall: region(s) %s differ systematically from the other regions, so the "
-"regions cannot be used interchangeably without calibration."
+"Overall: region(s) %s differ systematically from the reference and cannot "
+"replace it without calibration."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -110698,7 +110742,10 @@ msgid "Per-Case Counts"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Per-case CV = SD / mean of that case's measurements, averaged over cases."
+msgid ""
+"Per-case CV = SD / mean of that case's measurements. The within-case CV is "
+"their root mean square, which unlike their plain average does not fall when "
+"a case has fewer measurements; the median is descriptive and not graded."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -119868,12 +119915,20 @@ msgstr ""
 msgid "Proportional Baseline Functions"
 msgstr ""
 
+#: ihcheterogeneity/results/samplingbiastable.columns.superTitle
+msgid "Proportional Bias"
+msgstr ""
+
 #: agreement/results/blandAltmanStats.columns.title
 msgid "Proportional Bias (p)"
 msgstr ""
 
 #: agreement/options/proportionalBias.title
 msgid "Proportional bias test"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Proportional bias:"
 msgstr ""
 
 #: R/lassocox.b.R
@@ -124597,15 +124652,16 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Regional measurements agree with one another in this dataset (correlation ≥ "
-"%s, CV ≤ %s%%), and every systematic difference between regions was shown to "
-"lie within the %s%% margin (90%% CI)."
+"%s, CV ≤ %s%%), and the average difference of every comparison between "
+"regions was shown to lie within the %s%% margin (90%% CI)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
 "Regional measurements agree with the reference measurement in this dataset "
-"(correlation ≥ %s, CV ≤ %s%%), and every systematic difference was shown to "
-"lie within the %s%% margin (90%% CI)."
+"(correlation ≥ %s, CV ≤ %s%%), and the average difference of every "
+"comparison with the reference was shown to lie within the %s%% margin (90%% "
+"CI)."
 msgstr ""
 
 #: ihcheterogeneity/results/biopsyplot.title
@@ -128334,10 +128390,6 @@ msgid ""
 "clinical measurements."
 msgstr ""
 
-#: R/ihcheterogeneity.b.R
-msgid "Robust to a few extreme cases"
-msgstr ""
-
 #: R/checkdata.b.R
 msgid "Robust to non-normality"
 msgstr ""
@@ -130087,22 +130139,22 @@ msgid "Sampling variability could not be estimated."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Sampling variability was high (mean CV = %s%%)."
+msgid "Sampling variability was high (within-case CV = %s%%)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Sampling variability was low (mean CV = %s%%)."
+msgid "Sampling variability was low (within-case CV = %s%%)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
-msgid "Sampling variability was moderate (mean CV = %s%%)."
+msgid "Sampling variability was moderate (within-case CV = %s%%)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Sampling variability was quantified using the per-case coefficient of "
-"variation (CV), averaged across cases; cases whose mean was near zero were "
-"left out."
+"Sampling variability was quantified as the within-case coefficient of "
+"variation (CV), the root mean square of the per-case CVs; cases whose mean "
+"was near zero were left out."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -131162,8 +131214,9 @@ msgstr ""
 msgid ""
 "SD divided by the mean, times 100, for one case's measurements. This "
 "analysis grades it against the CV threshold you set: low at or below half "
-"the threshold, moderate within it, high above it. It is unstable when the "
-"mean is near zero, so such cases are left out."
+"the threshold, moderate within it, high above it. The within-case CV "
+"combines the cases as a root mean square. It is unstable when the mean is "
+"near zero, so such cases are left out."
 msgstr ""
 
 #: entropyanalysis/results/summaryTable.columns.title
@@ -138612,6 +138665,7 @@ msgid "Slight agreement"
 msgstr ""
 
 #: dynamicprediction/results/trajectoryParameters.columns.title
+#: ihcheterogeneity/results/samplingbiastable.columns.title
 #: labcontrolcharts/results/trendAnalysis.columns.title
 #: methodcomparison/results/regressionComparison.columns.title
 msgid "Slope"
@@ -138623,6 +138677,29 @@ msgstr ""
 
 #: stagemigration/results/calibrationAnalysis.columns.title
 msgid "Slope 95% CI Upper"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Slope of the difference on the case mean of all regions, with "
+"heteroscedasticity-robust (HC3) standard errors; p is unadjusted. Unequal "
+"measurement error between regions can produce a slope, so here a slope can "
+"stop a difference from being ruled out but never shows it to be material. "
+"When p is below 0.05 divided by the number of comparisons, the difference is "
+"also judged at the 5th and 95th percentiles of that level (Bland & Altman "
+"1999)."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Slope of the difference on the reference value, with "
+"heteroscedasticity-robust (HC3) standard errors; p is unadjusted. "
+"Measurement error in the reference alone makes the difference appear to fall "
+"as the reference rises (regression to the mean), so a slope can stop a "
+"difference from being ruled out but never shows it to be material. When p is "
+"below 0.05 divided by the number of comparisons, the difference is also "
+"judged at the 5th and 95th percentiles of the reference (Bland & Altman "
+"1999)."
 msgstr ""
 
 #: pheval/results/residualAnalysis.columns.title
@@ -150845,10 +150922,11 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"The correlation and CV thresholds you set are met and every systematic "
-"difference was shown to lie within your margin (90% CI inside it). If the "
-"thresholds are met but a difference was not ruled out, the verdict is 'met, "
-"not confirmed'."
+"The correlation and CV thresholds you set are met and the average difference "
+"of every comparison was shown to lie within your margin (90% CI inside it); "
+"a difference that changes with the level must also lie within it at both "
+"ends of the range. If the thresholds are met but a difference was not ruled "
+"out, the verdict is 'met, not confirmed'."
 msgstr ""
 
 #: R/diagnosticmeta.b.R
@@ -152207,12 +152285,6 @@ msgid ""
 "Clinical Assessment."
 msgstr ""
 
-#: R/ihcheterogeneity.b.R
-msgid ""
-"The mean per-case CV exceeds your threshold, so averaging more than one "
-"region per case is worth considering."
-msgstr ""
-
 #: R/lollipop.b.R
 msgid ""
 "The mean reference line is the unweighted mean of the {groups} plotted group "
@@ -152249,12 +152321,6 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid "The measurements show no variability, so the ICC is not defined."
-msgstr ""
-
-#: R/ihcheterogeneity.b.R
-msgid ""
-"The median per-case CV is %s%%, within your threshold: the mean is raised by "
-"a minority of cases."
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -153333,15 +153399,15 @@ msgstr ""
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The sampling approach met the predefined correlation and CV criteria, and "
-"every systematic difference between regions was shown to lie within the %s%% "
-"margin."
+"the average difference of every comparison between regions was shown to lie "
+"within the %s%% margin."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
 "The sampling approach met the predefined correlation and CV criteria, and "
-"every systematic difference from the reference was shown to lie within the "
-"%s%% margin."
+"the average difference of every comparison with the reference was shown to "
+"lie within the %s%% margin."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -154189,6 +154255,12 @@ msgstr ""
 msgid ""
 "The Wilcoxon signed-rank test assesses paired differences and assumes a "
 "symmetric difference distribution for a location-shift interpretation."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"The within-case CV exceeds your threshold, so averaging more than one region "
+"per case is worth considering."
 msgstr ""
 
 #: R/jjwithinstats.b.R
@@ -165167,20 +165239,20 @@ msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Variability between measurements was high in this dataset (mean CV above "
-"your configured %s%% threshold)."
+"Variability between measurements was high in this dataset (within-case CV "
+"above your configured %s%% threshold)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Variability between measurements was low in this dataset (mean CV at or "
-"below %s%%, half your configured threshold)."
+"Variability between measurements was low in this dataset (within-case CV at "
+"or below %s%%, half your configured threshold)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
 msgid ""
-"Variability between measurements was moderate in this dataset (mean CV "
-"within your configured %s%% threshold)."
+"Variability between measurements was moderate in this dataset (within-case "
+"CV within your configured %s%% threshold)."
 msgstr ""
 
 #: R/ihcheterogeneity.b.R
@@ -169504,9 +169576,43 @@ msgid ""
 "exact."
 msgstr ""
 
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Where the slope was shown, the limits of agreement, which assume a "
+"difference that does not change with the level, are too wide in the middle "
+"of the range and too narrow at its ends."
+msgstr ""
+
 #: advancedbarplot/options/legend_position.description.jamovi
 #: jjsegmentedtotalbar/options/legend_position.description.jamovi
 msgid "Where to place the legend."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Whether a difference changed with the level (proportional bias) was assessed "
+"by regressing it on the case mean of all regions, with "
+"heteroscedasticity-robust standard errors (Bland & Altman 1999); where the "
+"slope differed from zero (p below 0.05 divided by the number of "
+"comparisons), the difference was also judged at the 5th and 95th percentiles "
+"of that level, and a difference that changed with the level was not "
+"considered ruled out."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Whether a difference changed with the level (proportional bias) was assessed "
+"by regressing it on the reference value, with heteroscedasticity-robust "
+"standard errors (Bland & Altman 1999); where the slope differed from zero (p "
+"below 0.05 divided by the number of comparisons), the difference was also "
+"judged at the 5th and 95th percentiles of the reference, and a difference "
+"that changed with the level was not considered ruled out."
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid ""
+"Whether a difference changes with the level was not assessed (too few cases "
+"or distinct values)."
 msgstr ""
 
 #: advancedbarplot/options/orientation.description.jamovi
@@ -170279,6 +170385,30 @@ msgstr ""
 
 #: ihcadvanced/results/optimalKResults.columns.title
 msgid "Within SS"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV (%)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV (%) - between regions"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV (%) - region vs reference"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV = %s%% (High variability)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV = %s%% (Low variability)"
+msgstr ""
+
+#: R/ihcheterogeneity.b.R
+msgid "Within-case CV = %s%% (Moderate variability)"
 msgstr ""
 
 #: R/ihcheterogeneity.b.R

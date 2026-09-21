@@ -62,6 +62,7 @@ items:
           - confidence_level
           - method
           - zero_cell_correction
+          - bivariate_analysis
       columns:
         - name: parameter
           title: Parameter
@@ -183,6 +184,16 @@ items:
           title: Std. Error
           type: number
           format: zto
+        - name: ci_lower
+          title: Lower
+          type: number
+          format: zto
+          superTitle: Confidence interval
+        - name: ci_upper
+          title: Upper
+          type: number
+          format: zto
+          superTitle: Confidence interval
         - name: z_value
           title: Test Statistic
           type: number
@@ -350,12 +361,17 @@ items:
     - name: funnelplot_explanation
       title: Funnel Plot Explanation
       type: Html
-      visible: (show_plot_explanations && funnel_plot)
+      visible: (show_plot_explanations && funnel_plot && publication_bias)
 
 refs:
     - ClinicoPathJamoviModule
     - mada
     - metafor
     - CochraneDTAHandbook2023
+    - DeeksMacaskillIrwig2005
+    - ZwindermanBossuyt2008
+    - RileyHigginsDeeks2011
+    - SweetingSuttonLambert2004
+    - HollingBoehningBoehning2012
 
 ...

@@ -45,6 +45,11 @@ raised by the reviewer yet.
 17. [Rule: image state holds drawing data, not models or datasets](#17-rule-image-state-holds-drawing-data-not-models-or-datasets)
 18. [Why round 3 still found things: how rules decay](#18-why-round-3-still-found-things-how-rules-decay)
 19. [Rule: a bare symbol must be importable from the submodule's own namespace](#19-rule-a-bare-symbol-must-be-importable-from-the-submodules-own-namespace)
+20. [Rule: a displayed statistic is computed, never defaulted](#20-rule-a-displayed-statistic-is-computed-never-defaulted)
+21. [Rule: column `format:` tokens are comma-separated and exact](#21-rule-column-format-tokens-are-comma-separated-and-exact)
+22. [Rule: a user's column name is not a regular expression](#22-rule-a-users-column-name-is-not-a-regular-expression)
+23. [Rule: plot colours come from jamovi's palette](#23-rule-plot-colours-come-from-jamovis-palette)
+24. [Where the debt actually lives: promotion, not release](#24-where-the-debt-actually-lives-promotion-not-release)
 
 ---
 
@@ -226,6 +231,40 @@ if (is.null(df) || nrow(df) == 0)
 
 (That was the `decisioncompare` finding: `.buildBarPlotData()` correctly returned
 an empty frame, and the renderer crashed on it anyway.)
+
+### A `private$` field as a *fallback* is fine; as the *only* gate it is not
+
+`.run()` fills `private$` fields; the export path never calls `.run()`. So the
+question is never "does this renderer touch a `private$` field" but "can it still
+answer when that field is `NULL`".
+
+Safe — state is consulted first, and the private field only refines the answer
+(`R/survival.b.R:582`):
+
+```r
+isTRUE(state$has_competing) ||
+    isTRUE(private$.eventRecode$has_competing) ||
+    (isTRUE(self$options$multievent) && identical(self$options$analysistype, "compete"))
+```
+
+Broken — the private field is the sole gate, so on export it holds its initial
+value and the renderer returns before drawing anything (`R/jjdotchart.b.R:459`,
+a HIGH finding):
+
+```r
+if (!isTRUE(private$.inputsValid)) return()
+```
+
+Also broken, and harder to see: a helper that *could* read state but is called
+without it. `multisurvival`'s `.isCompetingRisk(state = NULL)` has the safe shape
+above, but `.plot_adj` reaches it through `.adjustedEstimandNote()`, which calls
+`private$.isCompetingRisk()` with no argument — so on export the guard silently
+degrades to the options-only test the comment right above it warns against. Trace
+the *call*, not just the definition.
+
+`check_render_private_state` in `tools/release_gate.py` knows the first pattern
+and FAILs on the other two. Where the safety is real but indirect, mark it
+`# render-state: <field>` rather than reshaping the code to satisfy a regex.
 
 ---
 
@@ -1310,3 +1349,252 @@ extra attached.
   [`Text` result](jamovi_r_yaml_guide.md#text-jamovi-283),
   [`mode: vector`](jamovi_plots_guide.md#rendering-mode-raster-vs-vector-jamovi-283),
   [renderer table](jamovi_notices_guide.md#which-text-renderer-notice-setnote-html-or-text)
+
+---
+
+## 20. Rule: a displayed statistic is computed, never defaulted
+
+### Why
+
+The 2026-09-16 CompositeSEM audit opened with this:
+
+> When bootstrapping is off, `cSEM::summarize()` reports `Std_err` as `NA` for
+> every path, so both `se1` and `se3` silently fall back to the literal constant
+> `0.1`. […] A user who enables moderation without bootstrapping gets a table full
+> of plausible-looking significance tests that have no basis in the data.
+
+That is the worst failure a statistics module can have, because it is invisible.
+A crash gets reported. A wrong number gets published. Nothing on the screen
+distinguishes a standard error the model produced from one someone typed, and the
+user has no way to find out.
+
+We had twelve of them. All in `D`/`P` menuGroups, so none reached a user — but
+the containment was a naming convention, nothing more:
+
+```r
+# R/hierarchicalbayes.b.R:526
+corr_se <- 0.15  # Simplified standard error
+# ... which then drives credible_lower, credible_upper, and
+#     prob_positive <- ifelse(correlation > 0, 0.8, 0.2)
+
+# R/treatmentoptim.b.R:396-397
+response <- base_response + rnorm(1, 0, 0.05)   # the POINT ESTIMATE is random
+se       <- 0.08                                 # and so is its interval
+```
+
+The sharpest form hides in a string, where no numeric check can see it:
+
+```r
+# R/treatmentoptim.b.R:494 - a p-value with no test behind it
+statistical_difference = "p = 0.032 (significant)",
+# R/imagingcorrelation.b.R:1174
+description = "Moderate correlation between enhancement pattern and histologic grade (r=0.58, p=0.003)"
+```
+
+A *threshold* written into a label is fine and is not this — a plot subtitle reading
+"Dashed lines at p = 0.05", or a `decision_criterion` of "HR < 0.8 with p < 0.025",
+describes the design rather than reporting a result.
+
+### The rule
+
+A number a user can see is either computed from their data or it is absent.
+There is no third option.
+
+When the quantity genuinely is not available — a model class that does not report
+an SE, a method that needs bootstrapping the user turned off:
+
+1. Leave the cell `NULL`. `addRow()`/`setRow()` render an empty cell, which reads
+   correctly as "not available".
+2. Say why, once, in a `setNote()` on that table or a `jmvcore::Notice`:
+   *"Confidence intervals require bootstrapping; enable it under Estimation."*
+3. If a whole column is only meaningful under some option, gate it:
+   `visible: (useBootstrap)` in the `.r.yaml`.
+
+Never `else 0.1`. Never `# Placeholder` feeding `qnorm()`. If a draft analysis
+needs stand-in numbers to develop against, that is what the `D` menuGroup is for
+— and say so at the top of the file the way `R/populationhealth.b.R:30-55` does,
+which inventories its own fabrication and ends `DO NOT promote to production menu`.
+
+### Enforce it
+
+```bash
+python3 tools/release_gate.py     # check_fabricated_stats
+```
+
+It flags a literal assigned to an `se`/`sd`/`std_err`/`variance`/`sigma` name, and
+placeholder comments, in any method that also writes to a result. Shipped hits
+FAIL. Unshipped hits are counted as promotion debt (§24) — so a `menuGroup`
+rename can no longer quietly promote invented numbers.
+
+---
+
+## 21. Rule: column `format:` tokens are comma-separated and exact
+
+### Why
+
+`format: zto:4` looks like "zto, to 4 decimal places". It is one token spelled
+`zto:4`, and jamovi has never heard of it — so the column renders with no `zto`
+formatting at all. Nothing warns you. The `.r.yaml` compiles, the analysis runs,
+and the table just looks slightly wrong in a way nobody traces back to a colon.
+
+Both sides of jamovi split on a comma and then test exact membership — jmvcore's
+`Column$initialize` does `strsplit(format, ",", fixed = TRUE)` and the client does
+`I.split(",")` followed by `w.includes("zto")`. We had **519** columns declaring a
+format jamovi could not parse, 447 of them in the `zto:N` family, because the
+tables guide documented the tokens and never named the separator.
+
+### The rule
+
+Valid tokens, comma-separated, nothing else: `zto`, `pvalue`, `pc`, `log10`,
+`dp:N`, `sf:N`.
+
+```yaml
+format: zto,pvalue      # correct
+format: zto,dp:4        # correct
+format: zto:4           # WRONG - one unknown token, zto is lost
+format: zto;pvalue      # WRONG - one unknown token, both are lost
+format: zto,p:.3        # WRONG - zto survives, the p-value format does not
+```
+
+The full grammar, the runnable proof and the table of wrong-to-right rewrites are
+in `vignettes/jamovi_tables_guide.md` → *The token grammar*.
+
+Prefer no `dp:` at all where you can. Decimals come from the number-format
+preference the user sets once in jamovi and expects every module to honour; `dp:N`
+takes that column out of their control.
+
+### Enforce it
+
+```bash
+python3 tools/release_gate.py     # check_column_formats
+```
+
+---
+
+## 22. Rule: a user's column name is not a regular expression
+
+### Why
+
+Users name columns `Age (years)`, `BMI-1`, `A+B`, `Grade 2/3`. Paste one of those
+into a pattern and the regex engine reads the parentheses as a group, the `+` as a
+quantifier and the `.` as a wildcard. The match then fails, or — worse — succeeds
+against the wrong thing, and a label in the results is silently corrupted.
+
+The 2026-09-16 CompositeSEM audit found it in equation lookup. We had it in
+`survival`, where the level name stripped off a Cox term builds the HR table's row
+label, and in the RMST table's `Group` column:
+
+```r
+# R/survival.b.R:5879 - myfactor is a user column name
+level_name <- sub(paste0("^", myfactor), "", term_name)
+
+# R/survival.b.R:1454
+gsub(paste0(myfactor, "="), "", names(km_fit$strata))
+```
+
+`R/oddsratio.b.R` is the instructive one: line 2168 pastes a name into a pattern,
+and line **2169** — the very next line — passes `fixed = TRUE`. The discipline was
+there. It just wasn't applied one line up, which is what an automated check is for.
+
+### The rule
+
+When a user-supplied name goes into `grep`/`grepl`/`sub`/`gsub`/`regexpr`:
+
+- matching a literal → `fixed = TRUE`;
+- testing a prefix → `startsWith()` / `endsWith()`, which are not regex at all;
+- building a model term → `jmvcore::composeTerm()`, which back-ticks for you.
+
+Formula construction in this module is already clean — 125 files use
+`composeTerm`/`composeTerms`/`composeFormula` and no raw column name reaches a
+formula. Pattern matching is the gap.
+
+Related and distinct: `composeTerm()` output is **not** a `data[[...]]` key. It
+returns a backtick-quoted string, so the lookup yields `NULL`. Use the raw name to
+index a data frame and the composed name only inside formula text.
+
+---
+
+## 23. Rule: plot colours come from jamovi's palette
+
+### Why
+
+A user sets a colour palette once in jamovi's preferences and expects a document's
+plots to agree. The 2026-09-21 jYS audit:
+
+> jamovi carries a plot palette and a results number format that the user sets
+> once and expects everywhere. Seven analyses offer their own Brewer palette
+> combobox, so a document's plots can disagree with each other and with every
+> other module's.
+
+We are further from this than jYS was: `theme$palette` and `jmvcore::colorPalette`
+appear **zero** times in `R/`, while 765 render functions already receive `theme`
+in their signature and 159 palette-picker options exist across the module.
+`ggtheme` is honoured in 253 files, so we respect the theme and ignore only the
+palette.
+
+### The rule
+
+`theme` is already a parameter of every render function. Use it:
+
+```r
+.plot = function(image, ggtheme, theme, ...) {
+    st <- image$state
+    if (is.null(st)) return(FALSE)
+
+    pal <- if (identical(self$options$color_palette, 'jamovi'))
+               jmvcore::colorPalette(n = nlevels(st$group), pal = theme$palette)
+           else
+               <the named palette the user picked>
+
+    ggplot(st, aes(x, y, fill = group)) + geom_col() +
+        scale_fill_manual(values = pal) + ggtheme
+}
+```
+
+Offer `jamovi (follow global)` as a choice in every palette option. A named
+palette a user deliberately selects is a legitimate override — the rule is that
+jamovi's own palette must be *reachable*, not that custom palettes are forbidden.
+
+Remember §17's companion trap: `ggtheme` **replaces** earlier `theme()` and
+`scale_*_manual()` calls, so apply your scales and then `ggtheme`, and add any
+tweaks after it.
+
+---
+
+## 24. Where the debt actually lives: promotion, not release
+
+§18 explained how rules decay between audit rounds. Round 4 showed a second
+mechanism, and it is the bigger one.
+
+Checking every class in this guide across all 390 analyses, sorted by whether the
+analysis ships (a production `menuGroup`) or not (`D` draft / `P` pending /
+`T` JamoviTest):
+
+| Class | Shipped | Unshipped |
+|---|---:|---:|
+| Malformed `format:` tokens (§21) | 6 | 513 |
+| Fabricated statistics (§20) | 0 | 12 |
+| Action-verb / Title-Case labels (§12) | 97 | 1,479 |
+| Renderer reads a `private$` cache (§3, §15) | 23 | 190 |
+| Fitted object or dataset in state (§17) | 1 | 46 |
+| Long loop with no `.checkpoint()` | 17 | 96 |
+
+The shipped column is small **because the audits swept it**. The unshipped column
+has never been swept, and none of it is inert: an analysis is promoted by editing
+one line — `menuGroup: SurvivalD` → `menuGroup: Survival` — after which
+`_updateModules.R` ships it and every defect it carries.
+
+That is how five of the eight OncoPath findings in round 4 arose: they came out of
+our own earlier remediation, travelling into the library with the code.
+
+### The rule
+
+**A sweep fixes the analyses that exist. A gate fixes the ones that don't yet.**
+Every rule in this guide should end in a `release_gate.py` check that FAILs on a
+shipped hit and *counts* an unshipped one. Those counts print as
+`promotion debt` at the end of a gate run, and `tools/promotion_screen.py` folds
+them into its ranking, so an analysis carrying this debt scores lower as a
+promotion candidate.
+
+Before moving any analysis out of a `D`/`P`/`T` group, run the gate and clear its
+hits first. Promotion is a release.

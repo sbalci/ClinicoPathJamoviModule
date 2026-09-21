@@ -22,6 +22,21 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .noticeList = list(),
         .inputsValid = FALSE,
+
+        # Mirror of .inputsValid into every Image's state. Private fields die with the
+        # analysis instance; image$state is serialised into the .omv and survives.
+        # image$state is the ONLY source, deliberately. .run() publishes it before any
+        # render can happen in-session, and on the export path it is all that exists - so a
+        # private$ fallback would add a code path that never runs and would hide the very
+        # dependency this is here to remove.
+        .validHere = function(image) isTRUE(image$state),
+
+        .publishValidity = function(valid) {
+            for (nm in c("plot", "plot2")) {
+                img <- self$results[[nm]]
+                if (!is.null(img)) img$setState(isTRUE(valid))
+            }
+        },
         .prepared = NULL,
         .tab = NULL,
 
@@ -333,6 +348,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
             private$.clearNotices()
             private$.inputsValid <- FALSE
+            private$.publishValidity(FALSE)
             private$.prepared <- NULL
             private$.tab <- NULL
 
@@ -362,6 +378,12 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (!private$.validate(prep)) return()
             private$.inputsValid <- TRUE
+            # The flag has to TRAVEL WITH THE STATE. jmvcore restores results from disk and
+            # renders without ever calling .run() (right-click > Export...), so on that path
+            # private$.inputsValid still holds its FALSE initial value and the renderers below
+            # would return before drawing anything - a blank exported image. .validate() raises
+            # notices, so re-running it in a renderer is not an option; publish the verdict.
+            private$.publishValidity(TRUE)
 
             tab <- private$.groupTable(prep$data)
             private$.fillTable(tab)
@@ -456,7 +478,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .plot = function(image, ggtheme, theme, ...) {
-            if (!isTRUE(private$.inputsValid)) return()
+            if (!private$.validHere(image)) return()
             prep <- private$.prepareData()
             if (is.null(prep)) return()
 
@@ -488,7 +510,7 @@ jjdotchartClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .plot2 = function(image, ggtheme, theme, ...) {
-            if (!isTRUE(private$.inputsValid) || is.null(self$options$grvar)) return()
+            if (!private$.validHere(image) || is.null(self$options$grvar)) return()
             prep <- private$.prepareData()
             if (is.null(prep)) return()
 

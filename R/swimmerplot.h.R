@@ -267,6 +267,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "colorPalette",
                 colorPalette,
                 options=list(
+                    "jamovi",
                     "default",
                     "viridis",
                     "contrast",
@@ -476,7 +477,6 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     inherit = jmvcore::Group,
     active = list(
         notices = function() private$.items[["notices"]],
-        warningNotice = function() private$.items[["warningNotice"]],
         instructions = function() private$.items[["instructions"]],
         plot = function() private$.items[["plot"]],
         summary = function() private$.items[["summary"]],
@@ -487,7 +487,6 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         timelineData = function() private$.items[["timelineData"]],
         summaryData = function() private$.items[["summaryData"]],
         exportInfo = function() private$.items[["exportInfo"]],
-        validationReport = function() private$.items[["validationReport"]],
         advancedMetrics = function() private$.items[["advancedMetrics"]],
         groupComparisonTest = function() private$.items[["groupComparisonTest"]],
         clinicalGlossary = function() private$.items[["clinicalGlossary"]],
@@ -505,6 +504,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "ggswim",
                     "recist",
                     "SchemperSmith1996",
+                    "survival",
                     "data.table",
                     "lubridate"))
             self$add(jmvcore::Preformatted$new(
@@ -528,11 +528,6 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "dateFormat")))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="warningNotice",
-                title="",
-                visible=FALSE))
-            self$add(jmvcore::Html$new(
-                options=options,
                 name="instructions",
                 title="Instructions"))
             self$add(jmvcore::Image$new(
@@ -542,6 +537,8 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 width=900,
                 height=600,
                 renderFun=".plot",
+                refs=list(
+                    "ggswim"),
                 clearWith=list(
                     "maxMilestones",
                     "patientID",
@@ -580,6 +577,8 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="summary",
                 title="Timeline Summary Statistics",
+                refs=list(
+                    "recist"),
                 rows=0,
                 columns=list(
                     list(
@@ -616,13 +615,14 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "timeUnit",
                     "timeDisplay",
                     "showInterpretation",
+                    "censorVar",
                     "personTimeAnalysis",
                     "responseAnalysis")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="personTimeTable",
                 title="Person-Time Analysis",
-                visible="(personTimeAnalysis)",
+                visible="(personTimeAnalysis && responseAnalysis && length(responseVar) > 0)",
                 rows=0,
                 columns=list(
                     list(
@@ -659,6 +659,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="milestoneTable",
                 title="Milestone Event Summary",
+                visible="(length(milestone1Date) > 0 || length(milestone2Date) > 0 || length(milestone3Date) > 0 || length(milestone4Date) > 0 || length(milestone5Date) > 0)",
                 rows=0,
                 columns=list(
                     list(
@@ -671,11 +672,11 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `type`="integer"),
                     list(
                         `name`="median_time", 
-                        `title`="Median Time", 
+                        `title`="Median Time from Start", 
                         `type`="number"),
                     list(
                         `name`="time_range", 
-                        `title`="Time Range", 
+                        `title`="Time Range from Start", 
                         `type`="text")),
                 clearWith=list(
                     "maxMilestones",
@@ -700,7 +701,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="eventMarkerTable",
                 title="Event Marker Summary",
-                visible="(showEventMarkers)",
+                visible="(showEventMarkers && length(eventVar) > 0)",
                 rows=0,
                 columns=list(
                     list(
@@ -718,7 +719,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `format`="pc"),
                     list(
                         `name`="median_time", 
-                        `title`="Median Time", 
+                        `title`="Median Time from Start", 
                         `type`="number")),
                 clearWith=list(
                     "showEventMarkers",
@@ -803,16 +804,16 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 clearWith=list(
                     "exportTimeline",
                     "exportSummary")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="validationReport",
-                title="Data Validation Report",
-                visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="advancedMetrics",
                 title="Advanced Clinical Metrics",
-                visible="(personTimeAnalysis)",
+                visible="(personTimeAnalysis || (responseAnalysis && length(responseVar) > 0))",
+                refs=list(
+                    "SchemperSmith1996",
+                    "survival",
+                    "recist",
+                    "ClopperPearson1934"),
                 rows=0,
                 columns=list(
                     list(
@@ -851,7 +852,9 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="groupComparisonTest",
                 title="Group Comparison Statistical Tests",
-                visible="(groupVar)",
+                visible="(length(groupVar) > 0 && length(responseVar) > 0 && responseAnalysis)",
+                refs=list(
+                    "agresti2013"),
                 rows=0,
                 columns=list(
                     list(
@@ -877,7 +880,8 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "endTime",
                     "timeType",
                     "responseVar",
-                    "groupVar")))
+                    "groupVar",
+                    "responseAnalysis")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalGlossary",
@@ -889,6 +893,10 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 name="copyReadyReport",
                 title="Copy-Ready Manuscript Text",
                 visible="(showCopyReady)",
+                refs=list(
+                    "SchemperSmith1996",
+                    "ClopperPearson1934",
+                    "recist"),
                 clearWith=list(
                     "patientID",
                     "startTime",
@@ -943,11 +951,12 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param endTime Time/date when observation/treatment ended.
 #' @param responseVar Optional variable for response types (e.g., CR, PR, SD,
 #'   PD) to color lanes.
-#' @param censorVar Optional variable indicating censoring status for ongoing
-#'   treatment arrows. Use 0/FALSE/"censored"/"alive" for ongoing patients
-#'   (shows arrow), or 1/TRUE/"event"/"dead" for completed follow-up (no arrow).
-#'   Without a censoring variable no arrows are drawn and an information notice
-#'   says so.
+#' @param censorVar Optional variable giving each patient's status. A censored
+#'   / still-at-risk value draws a status arrow at the end of that patient's
+#'   lane and is also what the reverse Kaplan-Meier median follow-up uses. Use
+#'   0/FALSE/"censored"/"alive" for ongoing patients (shows arrow), or
+#'   1/TRUE/"event"/"dead" for completed follow-up (no arrow). Without a
+#'   censoring variable no arrows are drawn and an information notice says so.
 #' @param groupVar Optional grouping variable for comparing response rates
 #'   between patient groups (e.g., treatment arms, disease subtypes). When
 #'   specified, Fisher's exact tests compare ORR and DCR between groups. Lane
@@ -979,22 +988,32 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param laneWidth Width/thickness of patient timeline lanes.
 #' @param markerSize Size of event markers and milestone markers.
 #' @param plotTheme Visual theme for the swimmer plot.
-#' @param colorPalette Select color palette for response categories and
-#'   groups. Colorblind Safe uses perceptually uniform colors distinguishable by
-#'   all color vision types. High Contrast is optimized for projectors and
-#'   printing. Monochrome ensures clarity in grayscale publications.
+#' @param colorPalette Select the color palette for the response categories
+#'   that color the lanes; it has no effect unless a Response/Status variable is
+#'   selected, and the grouping variable is never used for color. Colorblind
+#'   Safe uses perceptually uniform colors distinguishable by all color vision
+#'   types. High Contrast is optimized for projectors and printing, and gives
+#'   way to Colorblind Safe above its eight colors. Monochrome ensures clarity
+#'   in grayscale publications.
 #' @param showLegend Whether to display the plot legend.
 #' @param referenceLines Add reference time lines to the plot for clinical
-#'   context.
+#'   context. Median and Protocol lines measure a duration from each patient's
+#'   own start, so they are drawn only where the axis measures duration: with
+#'   Time display set to Absolute and patients starting at different times they
+#'   are omitted and a note explains why.
 #' @param customReferenceTime Custom time point to mark with a reference line
 #'   (only used when Reference Lines is set to Custom).
 #' @param customReferenceDate When using Date/Time with Absolute display,
 #'   provide a calendar date (e.g., 2023-06-01) to draw a custom reference line.
 #'   If left blank, the Custom Reference Time is used as an offset from the
 #'   earliest start date.
-#' @param sortVariable Optional variable to sort patient timelines (defaults
-#'   to duration-based sorting).
-#' @param sortOrder How to order patients in the visualization.
+#' @param sortVariable Optional variable to sort patient timelines. When one
+#'   is selected it overrides the Sort order setting; leave it empty to sort by
+#'   duration, patient ID or response.
+#' @param sortOrder How to order patients in the visualization, read from the
+#'   top of the plot down. Ignored while a Sort by variable is selected.
+#'   Response Type falls back to duration order when no Response/Status variable
+#'   is supplied.
 #' @param showInterpretation Whether to display automated clinical
 #'   interpretation of the timeline data.
 #' @param personTimeAnalysis Whether to include epidemiological person-time
@@ -1008,12 +1027,14 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showAbout Display information about when and how to use swimmer plot
 #'   analysis.
 #' @param exportTimeline Export processed timeline data for external analysis.
+#'   The on-screen table shows at most the first 500 patients, because building
+#'   it is slow for large cohorts; the plot, the statistics and every other
+#'   table continue to use the whole cohort.
 #' @param exportSummary Export comprehensive summary statistics and clinical
 #'   metrics.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$warningNotice} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
@@ -1024,7 +1045,6 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$timelineData} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$summaryData} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$exportInfo} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$validationReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$advancedMetrics} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$groupComparisonTest} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinicalGlossary} \tab \tab \tab \tab \tab a html \cr

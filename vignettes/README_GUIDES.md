@@ -49,12 +49,17 @@ This directory contains comprehensive guides for jamovi module development in th
 
 **Created:** 2026-08-20
 **Source:** The real audit reports in `jamovi-library-audit/` (ClinicoPathDescriptives,
-jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18, 2026-09-15 and 2026-09-16)
+jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18, 2026-09-15 and 2026-09-16),
+plus the same reviewer's audits of four OTHER modules — MetaJam, snowRMM, CompositeSEM and jYS
+(2026-09-15 to 2026-09-21) — which is where §20–§23 come from. Reading an audit of someone else's
+module is the cheapest way to find a class of defect before it is found in ours.
 
 **Use this guide for:**
 - The pre-submission checklist (runnable commands, one per finding class)
-- The thirteen findings that recur across modules, and why each round's still came back (§18)
+- The findings that recur across modules, and why each round's still came back (§18)
 - Knowing which fixes the reviewer treats as MEDIUM/HIGH vs. polish
+- **Promoting an analysis out of a `D`/`P`/`T` menuGroup (§24)** — promotion is a release, and
+  the debt lives there, not in the shipped surface
 
 **Contents:**
 1. Pre-submission checklist
@@ -71,11 +76,28 @@ jsurvival, meddecide, OncoPath, jjstatsplot — rounds 2026-07-13, 2026-08-17/18
 12. UI label conventions
 13. **The `type: Notice` trap** — it does not compile (still absent from the jmvtools 28.3.1 results schema); re-test after every jmvtools upgrade
 14. Encoding review findings as tests
+15. `requiresData` is a contract with `self$data` at render time
+16. Never wrap `jmvcore::reject()` in a catch-all `tryCatch`
+17. Image state holds drawing data, not models or datasets
+18. Why round 3 still found things: how rules decay
+19. A bare symbol must be importable from the submodule's own namespace
+20. **A displayed statistic is computed, never defaulted** — no literal SE, no `rnorm()` estimate, no `# Placeholder` reaching a shown column
+21. **Column `format:` tokens are comma-separated and exact** — `zto:4` is one unknown token and jamovi drops it in silence (cost us 519 columns)
+22. **A user's column name is not a regular expression** — `.stripPrefix()` / `startsWith()` / `fixed = TRUE`
+23. **Plot colours come from jamovi's palette** — `jmvcore::colorPalette(n, theme$palette)`
+24. **Where the debt actually lives: promotion, not release**
 
 **Tooling that goes with it:**
 - `tools/check_state_guards.py` — exits 1 on any unguarded `image$state` read
 - `tools/theme_safe_html.py` — the dark-theme transform (idempotent; `--apply` to write)
 - `tests/testthat/test-zzz-results-rendering-contract.R` — the same rules as tests
+- `tests/testthat/test-zzz-column-formats.R` — §21 as a test; fails on a shipped malformed
+  `format:` and reports the unshipped count as promotion debt
+- `tools/release_gate.py` — every rule that can be mechanised; FAILs on a shipped hit and prints
+  the rest as `promotion debt`. New: `check_column_formats` (§21), `check_fabricated_stats` (§20),
+  `check_state_payload` (§17, with a measured `# state-payload:` waiver)
+- `tools/promotion_screen.py` — ranks the 331 dev/test analyses; its `conventions` penalty is the
+  §24 debt, so an analysis carrying it scores lower as a promotion candidate
 
 ---
 

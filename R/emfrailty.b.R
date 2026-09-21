@@ -556,31 +556,57 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
         },
         
+        # The frailty variance is the theta that coxph()'s penalised fit converged on;
+        # it lives in the history entry for the frailty() term. Returns NULL - never a
+        # stand-in constant - when the fitted object does not carry one. coxph reports no
+        # standard error for theta: it is a profile-likelihood estimate, not a scored
+        # parameter, so callers leave the SE cell empty.
+        .frailtyVariance = function(model) {
+            if (is.null(model$history) || length(model$history) == 0)
+                return(NULL)
+            theta <- model$history[[1]]$theta
+            if (is.numeric(theta) && length(theta) == 1 && is.finite(theta))
+                return(theta)
+            NULL
+        },
+        
         .populateFrailtyAnalysisTable = function(model, frailtyInfo) {
             
             table <- self$results$frailtyAnalysis
             
-            # Frailty variance (simplified implementation)
-            frailty_variance <- 1.0  # Placeholder
-            frailty_se <- 0.2
+            frailty_variance <- private$.frailtyVariance(model)
+            
+            if (is.null(frailty_variance)) {
+                table$setNote(
+                    "no_variance",
+                    .("The fitted model did not report a frailty variance, so the clustering summaries below cannot be computed.")
+                )
+                return()
+            }
+            
+            # Kendall's tau has this closed form only for the gamma frailty; for any
+            # other distribution it is left empty rather than reported from the wrong
+            # formula.
+            kendall_tau <- if (identical(self$options$frailty_distribution, "gamma"))
+                frailty_variance / (frailty_variance + 2) else NULL
             
             rows <- list(
                 list(
                     parameter = "Frailty variance",
                     estimate = frailty_variance,
-                    se = frailty_se,
+                    se = NULL,
                     interpretation = paste("Variance of", self$options$frailty_distribution, "frailty distribution")
                 ),
                 list(
                     parameter = "Frailty standard deviation",
                     estimate = sqrt(frailty_variance),
-                    se = frailty_se / (2 * sqrt(frailty_variance)),
+                    se = NULL,
                     interpretation = "Standard deviation of frailty distribution"
                 ),
                 list(
                     parameter = "Kendall's tau",
-                    estimate = frailty_variance / (frailty_variance + 2),
-                    se = NA,
+                    estimate = kendall_tau,
+                    se = NULL,
                     interpretation = "Measure of clustering effect"
                 )
             )
@@ -588,6 +614,11 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             for (row in rows) {
                 table$addRow(rowKey = row$parameter, values = row)
             }
+            
+            table$setNote(
+                "no_se",
+                .("Standard errors are not available for these quantities: the frailty variance is estimated by profile likelihood, which does not produce one.")
+            )
         },
         
         .populateConvergenceInfoTable = function(convergenceInfo) {
@@ -704,8 +735,10 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             table <- self$results$heterogeneityAnalysis
             
-            # Heterogeneity measures
-            frailty_variance <- 1.0  # Simplified
+            # Same variance the frailty table reports, read off the fitted model. It used
+            # to be a hard-coded 1.0, which also made the median hazard ratio below a
+            # constant (2.43) no matter what the data showed.
+            frailty_variance <- private$.frailtyVariance(model)
             
             rows <- list(
                 list(
@@ -715,7 +748,8 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ),
                 list(
                     measure = "Median hazard ratio",
-                    value = exp(sqrt(frailty_variance * 2 * log(2))),
+                    value = if (is.null(frailty_variance)) NULL
+                            else exp(sqrt(frailty_variance * 2 * log(2))),
                     interpretation = "Ratio between 75th and 25th percentiles"
                 ),
                 list(
@@ -724,6 +758,12 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     interpretation = "Total number of frailty groups"
                 )
             )
+            
+            if (is.null(frailty_variance))
+                table$setNote(
+                    "no_variance",
+                    .("The fitted model did not report a frailty variance, so the heterogeneity measures that depend on it are left blank.")
+                )
             
             for (row in rows) {
                 table$addRow(rowKey = row$measure, values = row)

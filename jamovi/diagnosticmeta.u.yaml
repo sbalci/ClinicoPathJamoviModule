@@ -11,7 +11,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: Study Names (Required)
+            label: Study identifier (required)
             fitToGrid: true
           - type: VariablesListBox
             name: study
@@ -61,7 +61,7 @@ children:
       - type: TargetLayoutBox
         children:
           - type: Label
-            label: Meta-Regression Variable (Optional)
+            label: Meta-regression covariate (optional)
             fitToGrid: true
           - type: VariablesListBox
             name: covariate
@@ -89,7 +89,7 @@ children:
                 label: Heterogeneity assessment (study variability)
               - type: CheckBox
                 name: meta_regression
-                label: Meta-regression (explore covariate effects)
+                label: Meta-regression (covariate effects)
                 enable: (covariate)
               - type: CheckBox
                 name: publication_bias

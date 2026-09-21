@@ -1,3 +1,5 @@
+#' @importFrom jmvcore .
+
 treatmentoptimClass <- R6::R6Class(
     "treatmentoptimClass",
     inherit = treatmentoptimBase,
@@ -33,7 +35,8 @@ treatmentoptimClass <- R6::R6Class(
             # TODO (stub): RELEASE-BLOCKING - this analysis is a non-functional placeholder that
             #   presents FABRICATED / hardcoded output as personalized clinical decision support.
             #   None of the sub-analyses use the patient data:
-            #     - .predictTreatmentResponse (L347): rnorm()-fabricated response/risk/benefit; patient_data ignored.
+            #     - .predictTreatmentResponse: FIXED - no longer fabricates response/risk/benefit;
+            #       it now returns nothing and the table shows empty cells with a note.
             #     - .getTreatmentDatabase (L327): hardcoded fake treatments ("Standard Therapy A" …).
             #     - .getExampleDrugInteractions (L382) + .analyzeActualMedications (L421, explicit Placeholder):
             #       hardcoded "Warfarin + Aspirin" etc. shown as the patient's interactions.
@@ -205,6 +208,10 @@ treatmentoptimClass <- R6::R6Class(
             for (row in table_data) {
                 treatmentTable$addRow(rowKey = row$treatment_option, values = row)
             }
+            treatmentTable$setNote(
+                "no_prediction",
+                .("Predicted response, risk and benefit scores are not available: no outcome model is fitted, so nothing can be estimated from your data. Only the treatment list and its evidence level are shown.")
+            )
         },
 
         .performDrugInteractionScreening = function() {
@@ -364,50 +371,17 @@ treatmentoptimClass <- R6::R6Class(
         },
 
         .predictTreatmentResponse = function(treatment, patient_data) {
-            # Simulate treatment response prediction
-            # In real implementation, this would use trained ML models
-            # Save/restore the global RNG so the local set.seed() below stays local and does not
-            # break reproducibility of any other analysis in the same jamovi session. (Moot once
-            # .predictTreatmentResponse is replaced with a real model - see the stub TODO in .run.)
-            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
-                get(".Random.seed", envir = .GlobalEnv) else NULL
-            on.exit({
-                if (is.null(old_seed)) {
-                    if (exists(".Random.seed", envir = .GlobalEnv))
-                        rm(".Random.seed", envir = .GlobalEnv)
-                } else {
-                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
-                }
-            }, add = TRUE)
-            set.seed(42)  # For reproducible results within this call only
-            
-            base_response <- switch(treatment,
-                "Standard Therapy A" = 0.65,
-                "Targeted Therapy B" = 0.72,
-                "Immunotherapy C" = 0.58,
-                "Combination Therapy D" = 0.69,
-                0.60
-            )
-            
-            # Add some variability based on patient characteristics
-            response <- base_response + rnorm(1, 0, 0.05)
-            response <- max(0, min(1, response))  # Bound between 0 and 1
-            
-            # Generate confidence interval
-            se <- 0.08
-            ci_lower <- response - 1.96 * se
-            ci_upper <- response + 1.96 * se
-            ci <- paste0("(", round(ci_lower, 3), ", ", round(ci_upper, 3), ")")
-            
-            # Generate risk and benefit scores
-            risk <- max(0, min(1, 0.3 + rnorm(1, 0, 0.1)))
-            benefit <- response
-            
+            # No response model is fitted. The previous implementation drew the point
+            # estimate itself from rnorm() around a hard-coded per-treatment constant and
+            # paired it with a fixed standard error of 0.08, so every number below was
+            # invented and none of them used `patient_data`. Until a real predictive model
+            # is wired in (see the stub TODO in .run), return nothing and let jamovi render
+            # empty cells - an empty cell reads as "not available", an invented one does not.
             list(
-                response = round(response, 3),
-                ci = ci,
-                risk = round(risk, 3),
-                benefit = round(benefit, 3)
+                response = NULL,
+                ci = NULL,
+                risk = NULL,
+                benefit = NULL
             )
         },
 

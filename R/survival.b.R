@@ -1451,7 +1451,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     rmst_values <- rmst_summary$table[, "rmean"]
                     rmst_se <- rmst_summary$table[, "se(rmean)"]
                     rmst_table <- data.frame(
-                        Group = gsub(paste0(myfactor, "="), "", names(km_fit$strata)),
+                        Group = .stripPrefix(names(km_fit$strata), paste0(myfactor, "=")),
                         RMST = round(rmst_values, 2),
                         SE = round(rmst_se, 2),
                         Tau = rep(round(tau, 1), length(km_fit$strata)),
@@ -1914,7 +1914,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 pval <- coefs[i, 5]
                                 pval_str <- if (pval < 0.001) "<0.001" else sprintf("%.3f", pval)
                                 formatted_hr <- sprintf("%s (%s-%s, p=%s)", hr, lower, upper, pval_str)
-                                level_name <- sub(paste0("^", var), "", term_name)
+                                level_name <- .stripPrefix(term_name, var)
                                 # Overwrite univariable HR column.
                                 #
                                 # finalfit prints the variable name only on the
@@ -2546,8 +2546,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                "Kaplan-Meier estimates beyond the last observation are extrapolation, ",
                                "not estimates, and would be shown with no patients still at risk."),
                         paste(dropped, collapse = ", "),
-                        paste(sprintf("%s = %.1f", gsub(paste0("^", myfactor, "="), "",
-                                                        names(strata_max)),
+                        paste(sprintf("%s = %.1f",
+                                      .stripPrefix(names(strata_max), paste0(myfactor, "=")),
                                       as.numeric(strata_max)), collapse = "; "),
                         self$options$timetypeoutput)), collapse = " ")
 
@@ -5876,7 +5876,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                         # Parse variable and level from coefficient name
                         var_name <- myfactor
-                        level_name <- sub(paste0("^", myfactor), "", term_name)
+                        level_name <- .stripPrefix(term_name, myfactor)
 
                         ageTable$addRow(rowKey = i, values = list(
                             variable = var_name,
@@ -6130,7 +6130,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     for (i in seq_len(nrow(coefs))) {
                         term_name <- rownames(coefs)[i]
                         var_name <- myfactor
-                        level_name <- sub(paste0("^", myfactor), "", term_name)
+                        level_name <- .stripPrefix(term_name, myfactor)
 
                         ageTable$addRow(rowKey = i, values = list(
                             variable = var_name,

@@ -1,5 +1,12 @@
 .datatable.aware <- TRUE
 
+# jmvcore's `.()` translator is a BARE SYMBOL: listing jmvcore in Imports: puts
+# nothing in scope, so the @importFrom tag below has to travel with the analysis.
+# swimmerplot is OncoPath's only analysis now that waterfall moved to JamoviTest,
+# and waterfall.b.R was the file that used to carry the tag for that module --
+# without it swimmerplot-html.R dies with `could not find function "."` in the
+# installed module (2026-09-20; same class as the 2026-09-16 %>% audit).
+
 #' @title Swimmer Plot
 #' @description 
 #' Comprehensive swimmer plot function with full ggswim integration.
@@ -13,6 +20,7 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom ggswim geom_swim_lane geom_swim_marker scale_marker_discrete geom_swim_arrow theme_ggswim theme_ggswim_dark
 #' @importFrom data.table as.data.table
+#' @importFrom jmvcore .
 #' @return An \code{R6} class generator object for the \code{swimmerplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
@@ -24,6 +32,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # notices (project convention:
         # notice content must be plain text). ====
         .noticeList = list(),
+        # Which numeric censoring convention the data turned out to use, so the
+        # run can state the assumption instead of making it silently.
+        .censor_coding = NULL,
 
         .addNotice = function(type, title, content) {
             # Skip exact duplicates: shared helpers (.responseRates) run once per
@@ -49,12 +60,35 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
-            blocks <- vapply(private$.noticeList, function(notice) {
+            # STRONG_WARNING must not print as a plain "WARNING: " too, or the level
+            # has no effect: a clinician cannot tell "n = 3 patients, treat as
+            # exploratory" from "a milestone date could not be parsed". The two
+            # analyses here that already distinguish them (jjbarstats,
+            # nogoldstandard) print "STRONG WARNING: ", so that is what this uses.
+            #
+            # ": " is composed OUTSIDE .(): the bare words are existing msgids, already
+            # translated in the UMBRELLA catalog (HATA / GUCLU UYARI / UYARI / NOT),
+            # whereas ".(\"ERROR: \")" would mint a new msgid shipping with an empty
+            # msgstr. The submodule catalogs do not carry them yet, so until
+            # jmvtools::i18nUpdate() runs there a non-English user sees an English
+            # prefix on a translated title. Hoisted out of the closure so the .()
+            # calls evaluate in this method's frame.
+            prefix_error   <- paste0(.("ERROR"), ": ")
+            prefix_strong  <- paste0(.("STRONG WARNING"), ": ")
+            prefix_warning <- paste0(.("WARNING"), ": ")
+            prefix_note    <- paste0(.("NOTE"), ": ")
+            # Most severe first. The list is in insertion order, which put a
+            # fatal ERROR underneath three routine NOTEs; the prefix work gave
+            # the levels distinct names but not distinct positions.
+            sev <- vapply(private$.noticeList, function(n) n$type, "")
+            ordered <- private$.noticeList[order(match(
+                sev, c("ERROR", "STRONG_WARNING", "WARNING", "INFO")))]
+            blocks <- vapply(ordered, function(notice) {
                 prefix <- switch(notice$type,
-                    ERROR          = "ERROR: ",
-                    STRONG_WARNING = "WARNING: ",
-                    WARNING        = "WARNING: ",
-                    INFO           = "NOTE: ",
+                    ERROR          = prefix_error,
+                    STRONG_WARNING = prefix_strong,
+                    WARNING        = prefix_warning,
+                    INFO           = prefix_note,
                     "")
                 paste0(prefix, notice$title, "\n", notice$content)
             }, character(1))
@@ -92,6 +126,25 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             else patient_data$original_start
         },
 
+        # Does x measure duration from each patient's own start?
+        #
+        # A median or protocol reference line is a DURATION, so it can only be
+        # drawn on an axis that measures one. Date scales were already excluded;
+        # raw numeric times with Relative off were not, and the line was drawn
+        # silently at the wrong place - lanes spanning study time 100-256 got a
+        # "Median: 12.5" line off the left-hand end, and protocol lines at
+        # 3/6/9/12/18/24 landed before any patient existed. Equal start times are
+        # the exception: there the absolute axis IS the duration axis.
+        .isDurationAxis = function(patient_data) {
+            if (inherits(patient_data$start_time, c("Date", "POSIXct", "POSIXlt")))
+                return(FALSE)
+            if (!identical(self$options$timeDisplay, "absolute"))
+                return(TRUE)
+            s <- suppressWarnings(as.numeric(patient_data$start_time))
+            s <- s[is.finite(s)]
+            length(s) == 0 || isTRUE(all.equal(min(s), max(s)))
+        },
+
         # Single source of truth for ORR/DCR.
         #
         # ORR and DCR are defined only for RECIST-coded responses. When the
@@ -101,7 +154,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # The guard lived only in .updateAdvancedMetrics, so the copy-ready
         # manuscript text went on asserting 0.0% in the same output that the
         # metrics table refused to make the claim in. Both call this now.
-        .responseRates = function(response_counts) {
+        .responseRates = function(response_counts, n_patients = NULL) {
             if (is.null(response_counts)) return(NULL)
 
             nm <- names(response_counts)
@@ -109,34 +162,57 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             recist_n <- sum(response_counts[nm %in% c("CR", "PR", "SD", "PD")])
             n_excluded <- total - recist_n
 
-            if (!is.finite(total) || total <= 0 || recist_n == 0) {
-                return(list(evaluable = FALSE, n = total, n_evaluable = 0L,
-                            n_excluded = n_excluded,
-                            orr_count = NA_integer_, dcr_count = NA_integer_,
-                            orr = NA_real_, dcr = NA_real_))
-            }
+            # Everyone in the analysis, including patients whose response is
+            # missing entirely (they have no row in `response_counts`).
+            n_all <- if (is.null(n_patients) || !is.finite(n_patients) ||
+                         n_patients < total) total else n_patients
+            n_missing <- n_all - total
 
-            # RECIST-evaluable denominator (CR/PR/SD/PD), matching the module's
-            # waterfall analysis. NE and unrecognised labels previously sat in
-            # the denominator UNDISCLOSED, deflating both rates and their exact
-            # binomial CIs whenever codings were mixed.
-            if (n_excluded > 0) {
-                private$.addNotice(
-                    "WARNING",
-                    .("Non-RECIST responses excluded from ORR/DCR"),
-                    sprintf(
-                        .("%d of %d patients have a response that is not CR/PR/SD/PD (e.g. NE or an unrecognised label) and are excluded from the ORR and DCR denominators. Rates below are computed over the %d RECIST-evaluable patients."),
-                        n_excluded, total, recist_n))
+            if (!is.finite(total) || total <= 0 || recist_n == 0) {
+                return(list(evaluable = FALSE, n = total, n_all = n_all,
+                            n_evaluable = 0L, n_excluded = n_excluded,
+                            n_missing = n_missing,
+                            orr_count = NA_integer_, dcr_count = NA_integer_,
+                            orr = NA_real_, dcr = NA_real_,
+                            orr_evaluable = NA_real_, dcr_evaluable = NA_real_))
             }
 
             orr_count <- sum(response_counts[nm %in% c("CR", "PR")])
             dcr_count <- sum(response_counts[nm %in% c("CR", "PR", "SD")])
 
-            list(evaluable = TRUE, n = total, n_evaluable = recist_n,
-                 n_excluded = n_excluded,
+            # DENOMINATOR: every patient in the analysis.
+            #
+            # RECIST 1.1 section 4.9.1 is explicit: "Trial conclusions should be
+            # based on the response rate for all eligible (or all treated)
+            # patients and should not be based on a selected 'evaluable'
+            # subset." NE is not an exclusion - it is one of the five outcomes a
+            # patient can be assigned, and such patients count as non-responders.
+            #
+            # This analysis previously divided by the CR/PR/SD/PD subset, so on
+            # a 12-patient cohort with 2 NE and 1 missing response it reported
+            # ORR 44.4% (4/9) where the RECIST-conformant figure is 33.3%
+            # (4/12) - and the same page showed per-category rates over 11 and a
+            # Fisher test over 11. The evaluable-subset rate is still returned,
+            # but as a labelled secondary, never as "the" ORR.
+            if (n_excluded > 0 || n_missing > 0) {
+                private$.addNotice(
+                    "INFO",
+                    .("How ORR and DCR are counted"),
+                    sprintf(
+                        .("ORR and DCR are computed over all %d patients, as RECIST 1.1 section 4.9.1 requires: %d with a response that is not CR/PR/SD/PD (for example NE) and %d with no recorded response count as non-responders rather than being dropped. Over the %d CR/PR/SD/PD patients alone the rates would be ORR %.1f%% and DCR %.1f%%; those are per-protocol figures and are not what the tables report."),
+                        n_all, n_excluded, n_missing, recist_n,
+                        if (recist_n > 0) orr_count / recist_n * 100 else NA_real_,
+                        if (recist_n > 0) dcr_count / recist_n * 100 else NA_real_))
+            }
+
+            list(evaluable = TRUE, n = total, n_all = n_all,
+                 n_evaluable = recist_n, n_excluded = n_excluded,
+                 n_missing = n_missing,
                  orr_count = orr_count, dcr_count = dcr_count,
-                 orr = orr_count / recist_n * 100,
-                 dcr = dcr_count / recist_n * 100)
+                 orr = orr_count / n_all * 100,
+                 dcr = dcr_count / n_all * 100,
+                 orr_evaluable = orr_count / recist_n * 100,
+                 dcr_evaluable = dcr_count / recist_n * 100)
         },
 
         # TRUE when the first few non-missing values look like ISO calendar
@@ -257,63 +333,89 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # filtered and disclosed by .validateAndProcessData BEFORE this
             # function runs, so such branches could never fire.)
 
+            # EVERY check below is about patients, so it counts patients.
+            #
+            # They used to count ROWS while saying "patients", and a swimmer plot
+            # is multi-row per patient by construction: six patients on two lines
+            # each, with the response recorded on line one, were reported as
+            # "6 duplicate patient IDs" and "6 patients with missing response data
+            # (50.0%)" on the same page where the summary classified all six and
+            # showed none missing. A patient's follow-up is likewise their whole
+            # span, not one episode.
+            pid <- as.character(patient_data$patient_id)
+            by_patient <- function(f) vapply(split(seq_along(pid), pid), f, 0)
+            n_patients <- length(unique(pid))
+            spans <- by_patient(function(ix) {
+                d <- durations[ix]
+                d <- d[is.finite(d)]
+                if (length(d) == 0) NA_real_ else sum(d)
+            })
+
             # Check for extremely long follow-up periods
-            if (self$options$timeUnit == "days") {
-                long_followup <- which(durations > 3650) # >10 years
-                if (length(long_followup) > 0) {
+            # 10 years expressed in the selected unit. weeks and years had no arm,
+            # so is.finite() was FALSE and the whole check was skipped: the same
+            # data under timeUnit="years" published "median follow-up 332.0 years"
+            # with no plausibility notice at all.
+            long_limit <- switch(self$options$timeUnit,
+                                 days = 3650, weeks = 522, months = 120, years = 10,
+                                 NA_real_)
+            if (is.finite(long_limit)) {
+                n_long <- sum(spans > long_limit, na.rm = TRUE)
+                if (n_long > 0) {
                     warnings <- append(warnings, sprintf(
-                        .("Found %d patients with follow-up >10 years. Consider checking data accuracy or using different time units."),
-                        length(long_followup)
-                    ))
-                }
-            } else if (self$options$timeUnit == "months") {
-                long_followup <- which(durations > 120) # >10 years
-                if (length(long_followup) > 0) {
-                    warnings <- append(warnings, sprintf(
-                        .("Found %d patients with follow-up >10 years in months. Consider data validation."),
-                        length(long_followup)
+                        .("Total follow-up exceeds 10 years for %d of %d patients. Consider checking data accuracy or using different time units."),
+                        n_long, n_patients
                     ))
                 }
             }
 
             # Check for zero-duration events
-            zero_durations <- which(durations == 0)
-            if (length(zero_durations) > 0) {
+            n_zero <- sum(spans == 0, na.rm = TRUE)
+            if (n_zero > 0) {
                 warnings <- append(warnings, sprintf(
-                    .("Found %d patients with zero follow-up time. These may represent same-day events."),
-                    length(zero_durations)
+                    .("Zero follow-up time for %d of %d patients. These may represent same-day events."),
+                    n_zero, n_patients
                 ))
             }
 
-            # Check for duplicate patient IDs (potential data issue)
-            duplicate_ids <- patient_data$patient_id[duplicated(patient_data$patient_id)]
-            if (length(duplicate_ids) > 0) {
+            # Multiple episodes per patient
+            n_multi <- sum(by_patient(function(ix) length(ix)) > 1)
+            if (n_multi > 0) {
                 warnings <- append(warnings, sprintf(
-                    .("Found %d duplicate patient IDs. Multiple episodes per patient detected - this is normal for longitudinal data."),
-                    length(duplicate_ids)
+                    .("Multiple episodes recorded for %d of %d patients. This is normal for longitudinal data."),
+                    n_multi, n_patients
                 ))
             }
 
             # Response variable validation
             if ("response" %in% names(patient_data)) {
-                missing_response <- sum(is.na(patient_data$response))
+                # A patient is missing a response only when NONE of their rows has
+                # one; a blank follow-up line is not a missing response.
+                missing_response <- sum(by_patient(
+                    function(ix) all(is.na(patient_data$response[ix]))))
                 if (missing_response > 0) {
                     warnings <- append(warnings, sprintf(
-                        .("Found %d patients with missing response data (%.1f%% of total)."),
-                        missing_response,
-                        missing_response / nrow(patient_data) * 100
+                        .("No response recorded for %d of %d patients (%.1f%%)."),
+                        missing_response, n_patients,
+                        missing_response / max(n_patients, 1) * 100
                     ))
                 }
 
-                # Check for unusual response patterns
-                response_counts <- table(patient_data$response, useNA = "no")
-                if (length(response_counts) > 0) {
-                    min_category <- min(response_counts)
-                    if (min_category < 3) {
-                        warnings <- append(warnings,
-                            .("Some response categories have <3 patients. Consider grouping categories for meaningful analysis.")
-                        )
-                    }
+                # Check for unusual response patterns. Tabulated on the same best
+                # response every other table uses, so the panel cannot contradict
+                # the summary it sits above.
+                best <- vapply(split(seq_along(pid), pid), function(ix) {
+                    keep <- ix[!is.na(patient_data$response[ix])]
+                    if (length(keep) == 0) return(NA_character_)
+                    private$.normalizeResponse(private$.getBestResponse(
+                        as.character(patient_data$response[keep]),
+                        patient_data$start_time[keep]))
+                }, "")
+                response_counts <- table(best, useNA = "no")
+                if (length(response_counts) > 0 && min(response_counts) < 3) {
+                    warnings <- append(warnings,
+                        .("Some response categories have <3 patients. Consider grouping categories for meaningful analysis.")
+                    )
                 }
             }
             
@@ -363,7 +465,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (self$options$timeType != "datetime") {
                 private$.addNotice("INFO", .("Time units"), sprintf(
                     .("Raw start and end values are taken as already expressed in %s; no conversion is applied."),
-                    self$options$timeUnit))
+                    private$.timeUnitWord()))
             }
             if (self$options$timeType == "datetime") {
                 start_parsed <- private$.parseDatesWithClinicalContext(
@@ -396,8 +498,16 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     return(list(error = TRUE, message = .fmt(.("End time parsing: {message}"), message = end_parsed$message)))
                 }
                 
+                # Remember what was blank BEFORE parsing, so the exclusion
+                # notice can tell "the cell was empty" from "the cell held
+                # something this Date Format cannot read" - both used to be
+                # reported as "missing start or end time".
+                pre_missing <- is.na(patient_data$start_time) | is.na(patient_data$end_time) |
+                               !nzchar(trimws(as.character(patient_data$start_time))) |
+                               !nzchar(trimws(as.character(patient_data$end_time)))
                 patient_data$start_time <- start_parsed$value
                 patient_data$end_time <- end_parsed$value
+                attr(patient_data, "pre_missing") <- pre_missing
 
                 # A wrong Date Format choice parses to all-NA WITHOUT an error
                 # (lubridate returns NA), and the rows then died in the validity
@@ -406,7 +516,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (all(is.na(patient_data$start_time)) || all(is.na(patient_data$end_time))) {
                     return(list(error = TRUE, message = .fmt(
                         .("None of the start/end values could be parsed as dates with the selected Date Format ({fmt}). Choose the format that matches how your dates are written (e.g. 2023-01-15 needs YYYY-MM-DD)."),
-                        fmt = self$options$dateFormat)))
+                        fmt = private$.dateFormatWord())))
                 }
 
                 # Handle relative vs absolute time display, anchored PER PATIENT
@@ -461,8 +571,40 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     ))
                 } else {
                     # Raw numeric processing with robust conversion
-                    patient_data$start_time <- suppressWarnings(as.numeric(as.character(patient_data$start_time)))
-                    patient_data$end_time <- suppressWarnings(as.numeric(as.character(patient_data$end_time)))
+                    raw_start <- as.character(patient_data$start_time)
+                    raw_end   <- as.character(patient_data$end_time)
+                    # Same bookkeeping as the datetime branch: what was blank
+                    # before the conversion, so the exclusion notice can tell an
+                    # empty cell from one holding text.
+                    attr(patient_data, "pre_missing") <-
+                        is.na(raw_start) | is.na(raw_end) |
+                        !nzchar(trimws(raw_start)) | !nzchar(trimws(raw_end))
+                    patient_data$start_time <- suppressWarnings(as.numeric(raw_start))
+                    patient_data$end_time <- suppressWarnings(as.numeric(raw_end))
+
+                    # Name the actual cause. The date sniffer above only knows
+                    # YYYY-MM-DD, NN/NN/YYYY and YYYY/NN/NN, and only looks at
+                    # the first three start values, so "1/5/2023" or
+                    # "15.01.2023" fell through to as.numeric(), became NA, and
+                    # died in the validity filter as "end times are >= start
+                    # times" - a message about an ordering problem for data that
+                    # contains no numbers at all.
+                    lost <- function(raw, num) sum(!is.na(raw) & nzchar(trimws(raw)) & is.na(num))
+                    n_nan <- lost(raw_start, patient_data$start_time) +
+                             lost(raw_end, patient_data$end_time)
+                    if (n_nan > 0) {
+                        bad <- c(raw_start[!is.na(raw_start) & nzchar(trimws(raw_start)) &
+                                           is.na(patient_data$start_time)],
+                                 raw_end[!is.na(raw_end) & nzchar(trimws(raw_end)) &
+                                         is.na(patient_data$end_time)])
+                        if (all(is.na(patient_data$start_time)) || all(is.na(patient_data$end_time)))
+                            return(list(error = TRUE, message = sprintf(
+                                .("None of the start/end values are numbers (for example '%s'). Time Input Type is set to Raw Values, which expects a number of %s. If these are calendar dates, switch Time Input Type to Date/Time and choose the matching Date Format."),
+                                as.character(bad[1]), private$.timeUnitWord())))
+                        private$.addNotice("WARNING", .("Values that are not numbers"), sprintf(
+                            .("%d start/end values are not numbers (for example '%s') and those rows are excluded. Time Input Type is set to Raw Values; if these are calendar dates, switch it to Date/Time."),
+                            n_nan, as.character(bad[1])))
+                    }
 
                     # Handle relative vs absolute time display.
                     #
@@ -488,6 +630,19 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Add response/status variable if provided
             if (!is.null(self$options$responseVar)) {
                 patient_data$response <- as.factor(df[[self$options$responseVar]])
+
+                # A second, NORMALISED column for the figure. The lanes were
+                # coloured by the raw factor while every table tabulated the
+                # normalised label, so a file mixing "complete response",
+                # "Complete Response" and "CR" drew three different colours and
+                # three legend keys for the one row the summary called "CR".
+                # Ordered clinically (CR, PR, SD, PD, NE, then anything else)
+                # rather than alphabetically, which interleaved PD between PR
+                # and SD in the legend.
+                lab <- private$.normalizeResponses(patient_data$response)
+                known <- c("CR", "PR", "SD", "PD", "NE")
+                lvls <- c(known[known %in% lab], sort(unique(lab[!lab %in% known & !is.na(lab)])))
+                patient_data$response_label <- factor(lab, levels = lvls)
             }
 
             # Add censoring/event status variable if provided
@@ -530,22 +685,40 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                                    !is.na(patient_data$end_time) &
                                    patient_data$end_time < patient_data$start_time)
 
+                # Each reason is a COMPLETE sentence, appended after the summary
+                # sentence rather than glued with "; " inside its parenthesis.
+                # The old shape handed a translator four verb-less fragments and
+                # a container with a %s hole, which Turkish word order cannot be
+                # arranged around (guide section 5.2).
                 reasons <- character(0)
                 if (n_bad_id > 0)
-                    reasons <- c(reasons, sprintf(.("%d with a missing patient ID"), n_bad_id))
-                if (n_bad_time > 0)
-                    reasons <- c(reasons, sprintf(.("%d with a missing start or end time"), n_bad_time))
+                    reasons <- c(reasons, sprintf(.("%d had no patient ID."), n_bad_id))
+                if (n_bad_time > 0) {
+                    pre <- attr(patient_data, "pre_missing")
+                    bad_time <- !is.na(patient_data$patient_id) &
+                                (is.na(patient_data$start_time) | is.na(patient_data$end_time))
+                    n_unparsed <- if (is.null(pre)) 0L else sum(bad_time & !pre)
+                    n_empty <- n_bad_time - n_unparsed
+                    if (n_empty > 0)
+                        reasons <- c(reasons, sprintf(.("%d had no start or end time."), n_empty))
+                    if (n_unparsed > 0)
+                        reasons <- c(reasons, if (identical(self$options$timeType, "datetime"))
+                            sprintf(
+                                .("%d had a start or end that could not be read with the selected Date Format (%s)."),
+                                n_unparsed, private$.dateFormatWord())
+                            else sprintf(
+                                .("%d had a start or end that is not a number."), n_unparsed))
+                }
                 if (n_bad_order > 0)
-                    reasons <- c(reasons, sprintf(.("%d where the end time precedes the start time"), n_bad_order))
+                    reasons <- c(reasons, sprintf(.("%d had an end time before the start time."), n_bad_order))
 
                 private$.addNotice(
                     "WARNING",
                     .("Rows excluded from analysis"),
-                    sprintf(
-                        .("%d of %d rows were excluded before analysis (%s). All counts, rates and person-time below are based on the remaining %d rows."),
-                        n_dropped, length(valid_rows),
-                        paste(reasons, collapse = "; "), sum(valid_rows)
-                    )
+                    paste(c(sprintf(
+                        .("%d of %d rows were excluded before analysis. All counts, rates and person-time below are based on the remaining %d rows."),
+                        n_dropped, length(valid_rows), sum(valid_rows)),
+                        reasons), collapse = " ")
                 )
             }
 
@@ -591,14 +764,67 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             patient_data <- patient_data[
                 !duplicated(as.character(patient_data$patient_id)), , drop = FALSE]
             
-            for (i in 1:self$options$maxMilestones) {
-                name_opt <- paste0("milestone", i, "Name")
+            # Resolve one label per slot BEFORE the loop, and say what is being
+            # ignored. Three ways to lose an assigned milestone without a word:
+            # "Maximum milestones" below the slot number simply never reaches it;
+            # a blank name skipped the slot even though a variable was chosen;
+            # and two slots sharing a name collapsed into one table row, so two
+            # different columns of 10 events read as one "Surgery" of 20.
+            n_slots <- 5
+            assigned <- vapply(seq_len(n_slots), function(i)
+                !is.null(self$options[[paste0("milestone", i, "Date")]]), TRUE)
+            slot_names <- vapply(seq_len(n_slots), function(i) {
+                nm <- self$options[[paste0("milestone", i, "Name")]]
+                if (is.null(nm)) "" else trimws(as.character(nm))
+            }, "")
+            slot_vars <- vapply(seq_len(n_slots), function(i) {
+                v <- self$options[[paste0("milestone", i, "Date")]]
+                if (is.null(v)) "" else as.character(v)
+            }, "")
+
+            # A blank name falls back to the variable's own name.
+            blank <- assigned & !nzchar(slot_names)
+            slot_names[blank] <- slot_vars[blank]
+
+            # Colliding names are qualified by the variable they came from.
+            labels <- slot_names
+            dup <- assigned & nzchar(slot_names) &
+                   slot_names %in% slot_names[assigned][duplicated(slot_names[assigned])]
+            labels[dup] <- paste0(slot_names[dup], " (", slot_vars[dup], ")")
+
+            max_ms <- self$options$maxMilestones
+            ignored <- which(assigned & seq_len(n_slots) > max_ms)
+            if (length(ignored) > 0) {
+                private$.addNotice(
+                    "INFO",
+                    .("Milestone slots not shown"),
+                    sprintf(
+                        .("Milestone slot(s) %s have a variable assigned but 'Maximum milestones' is set to %d, so they are not shown. Raise it to include them."),
+                        paste(ignored, collapse = ", "), max_ms))
+            }
+            if (any(blank)) {
+                private$.addNotice(
+                    "INFO",
+                    .("Milestone name taken from the variable"),
+                    sprintf(
+                        .("Milestone slot(s) %s have no name, so the variable name is used instead."),
+                        paste(which(blank), collapse = ", ")))
+            }
+            if (any(dup)) {
+                private$.addNotice(
+                    "INFO",
+                    .("Milestone names repeated"),
+                    sprintf(
+                        .("Milestone slot(s) %s share a name, so each is labelled with the variable it came from to keep them apart in the summary."),
+                        paste(which(dup), collapse = ", ")))
+            }
+
+            for (i in 1:max_ms) {
                 date_opt <- paste0("milestone", i, "Date")
-                
-                if (!is.null(self$options[[date_opt]]) && 
-                    !is.null(self$options[[name_opt]]) && 
-                    self$options[[name_opt]] != "") {
-                    
+                milestone_label <- labels[i]
+
+                if (!is.null(self$options[[date_opt]]) && nzchar(milestone_label)) {
+
                     milestone_dates <- self$data[[self$options[[date_opt]]]]
 
                     # Realign to the validated patient table BY PATIENT ID,
@@ -637,7 +863,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                                 .("Milestone dates could not be parsed"),
                                 sprintf(
                                     .("Milestone '%s' was skipped. %s"),
-                                    self$options[[name_opt]],
+                                    milestone_label,
                                     as.character(parsed_dates$message)))
                             next
                         }
@@ -670,7 +896,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                                 .("Milestone skipped: calendar dates on a numeric timeline"),
                                 sprintf(
                                     .("Milestone '%s' contains calendar dates, but the timeline uses raw numeric times, so these dates cannot be placed on the time axis. The milestone was skipped. Switch Time Input Type to Date/Time (or supply numeric milestone times) to show it."),
-                                    self$options[[name_opt]]))
+                                    milestone_label))
                             next
                         }
 
@@ -693,7 +919,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         temp_milestone <- data.frame(
                             patient_id = patient_data$patient_id[1:max_length],
                             time = milestone_dates[1:max_length],
-                            label = self$options[[name_opt]],
+                            label = milestone_label,
                             milestone_type = paste0("milestone_", i),
                             stringsAsFactors = FALSE
                         )
@@ -717,6 +943,42 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 }
             }
             
+            # Milestones outside the patient's own window, disclosed the same way
+            # event markers already are.
+            #
+            # .processEventMarkers filters to [earliest start, latest end] and
+            # names what it dropped; this path never compared a milestone to the
+            # timeline at all. In the module's own swimmerplot_test that is not
+            # hypothetical: 6 of 19 Progression values and 7 of 30 BestResponse
+            # values fall AFTER the patient's end time (PT004 ends at 103 with
+            # Progression 274), so the figure drew triangles floating past the
+            # end of the lane and the Milestone Event Summary pooled them into
+            # its median. The markers are kept - a progression recorded after the
+            # last follow-up line is real - but the reader is told.
+            if (nrow(milestone_data) > 0 && nrow(patient_data) > 0) {
+                pid_chr <- as.character(patient_data$patient_id)
+                win_lo <- tapply(private$.asNumericTime(patient_data$start_time),
+                                 pid_chr, min, na.rm = TRUE)
+                win_hi <- tapply(private$.asNumericTime(patient_data$end_time),
+                                 pid_chr, max, na.rm = TRUE)
+                ms_t  <- private$.asNumericTime(milestone_data$time)
+                ms_lo <- win_lo[as.character(milestone_data$patient_id)]
+                ms_hi <- win_hi[as.character(milestone_data$patient_id)]
+                outside <- !is.na(ms_t) & !is.na(ms_lo) & !is.na(ms_hi) &
+                           (ms_t < ms_lo | ms_t > ms_hi)
+                if (any(outside)) {
+                    by_label <- table(as.character(milestone_data$label)[outside])
+                    private$.addNotice(
+                        "WARNING",
+                        .("Milestones outside the patient timeline"),
+                        sprintf(
+                            .("%d of %d milestone values fall outside the patient's own start-to-end window (%s). They are still drawn and still counted in the Milestone Event Summary, so its median and range include times the timeline does not cover. Check that the milestone variable is measured on the same clock as Start Time and End Time."),
+                            sum(outside), length(outside),
+                            paste(sprintf("%s: %d", names(by_label), as.integer(by_label)),
+                                  collapse = "; ")))
+                }
+            }
+
             return(milestone_data)
         },
         
@@ -737,9 +999,24 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # disagree with the estimator for multi-episode patients.
                 pid <- as.character(patient_data$patient_id)
                 status <- private$.classifyCensoring(patient_data$censor_status)
-                ongoing_by_pt <- vapply(split(status, pid), function(s) {
-                    s <- s[!is.na(s)]
-                    length(s) > 0 && identical(s[length(s)], "censored")
+
+                # State the convention that was inferred. Reading a censoring
+                # column is a guess about which value means "event", and getting
+                # it backwards halves the median follow-up; the user has to be
+                # able to see which way it was read.
+                if (identical(private$.censor_coding, "surv12")) {
+                    private$.addNotice("WARNING", .("Censoring coded 1/2"), sprintf(
+                        .("The censoring variable '%s' contains only the values 1 and 2, so it was read using the survival package's convention: 1 = censored (still at risk), 2 = event. If your data instead codes 1 as the event, recode it to 0 = censored and 1 = event, because every follow-up figure below depends on which way round this is."),
+                        self$options$censorVar))
+                } else if (identical(private$.censor_coding, "zero_one")) {
+                    private$.addNotice("INFO", .("Censoring coding"), sprintf(
+                        .("The censoring variable '%s' was read as 0 = censored (still at risk), 1 = event."),
+                        self$options$censorVar))
+                }
+
+                ongoing_by_pt <- vapply(split(seq_along(status), pid), function(ix) {
+                    identical(private$.valueAtLastEpisode(status[ix], end_numeric[ix]),
+                              "censored")
                 }, logical(1))
 
                 idx_max <- vapply(split(seq_along(end_numeric), pid), function(ix) {
@@ -766,8 +1043,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # with the longest follow-up is very often the one who died last.
                 private$.addNotice(
                     "INFO",
-                    .("Ongoing-treatment arrows not drawn"),
-                    .("Ongoing-status arrows require a censoring/event status variable. Without one, whether a patient was still on treatment at data cutoff cannot be determined from the timeline alone, so no arrows are drawn. Supply a censoring variable (0/FALSE/no/censored/alive for ongoing, 1/TRUE/yes/event/dead for completed) to show them.")
+                    .("Status arrows not drawn"),
+                    .("Status arrows mark patients who were censored / still at risk at the data cutoff, which requires a censoring/event status variable. Without one that cannot be determined from the timeline alone, so no arrows are drawn. Supply a censoring variable (0/FALSE/no/censored/alive for still at risk, 1/TRUE/yes/event/dead for completed) to show them.")
                 )
                 return(NULL)
             }
@@ -925,6 +1202,43 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         keep <- !is.na(ev_t) & !is.na(event_data$label) &
                                 !is.na(ev_lo) & !is.na(ev_hi) &
                                 ev_t >= ev_lo & ev_t <= ev_hi
+
+                        # Say what was discarded. A death recorded after the last
+                        # follow-up line ends - which is the normal way a death is
+                        # recorded - fell outside the window, vanished from the
+                        # plot AND from the event table, and the table's
+                        # percentages were then computed over the survivors only:
+                        # 10 events became "Scan 4 (80%), Toxicity 1 (20%)" with
+                        # all three Deaths gone and nothing said.
+                        n_drop <- sum(!keep)
+                        if (n_drop > 0) {
+                            reasons <- character(0)
+                            n_no_time  <- sum(is.na(ev_t))
+                            n_no_label <- sum(!is.na(ev_t) & is.na(event_data$label))
+                            n_no_pt    <- sum(!is.na(ev_t) & !is.na(event_data$label) &
+                                              (is.na(ev_lo) | is.na(ev_hi)))
+                            inwin      <- !is.na(ev_t) & !is.na(event_data$label) &
+                                          !is.na(ev_lo) & !is.na(ev_hi)
+                            n_before   <- sum(inwin & ev_t < ev_lo)
+                            n_after    <- sum(inwin & ev_t > ev_hi)
+                            if (n_no_time > 0)
+                                reasons <- c(reasons, sprintf(.("%d with no event time"), n_no_time))
+                            if (n_no_label > 0)
+                                reasons <- c(reasons, sprintf(.("%d with no event type"), n_no_label))
+                            if (n_no_pt > 0)
+                                reasons <- c(reasons, sprintf(.("%d for patients not in the analysis"), n_no_pt))
+                            if (n_before > 0)
+                                reasons <- c(reasons, sprintf(.("%d before the patient's first start"), n_before))
+                            if (n_after > 0)
+                                reasons <- c(reasons, sprintf(.("%d after the patient's last end"), n_after))
+                            private$.addNotice(
+                                "WARNING",
+                                .("Event markers outside the patient timeline"),
+                                sprintf(
+                                    .("%d of %d event markers are not shown (%s). The Event Marker Summary counts and percentages below describe only the %d markers that fall inside a patient's timeline. Events recorded after follow-up ends, such as death, need an end time that covers them."),
+                                    n_drop, length(keep), paste(reasons, collapse = "; "), sum(keep)))
+                        }
+
                         event_data <- event_data[keep, c("patient_id", "time", "label"), drop = FALSE]
                     }
                 }
@@ -933,38 +1247,43 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             return(event_data)
         },
 
-        # Convert event or milestone times into numeric durations in the selected unit
+        # Convert event or milestone times into numeric durations in the selected unit.
+        #
+        # ALWAYS measured from the patient's own earliest start, whatever the axis
+        # shows. `time` arrives in the plot's coordinates, so with Relative off it
+        # is a study-time POSITION: five patients starting 0/10/20/30/40 whose
+        # surgery is 3 months in each published a "Median Time" of 22 instead of 3,
+        # and the same data entered as dates gave 3 in both display modes. A median
+        # axis position is not a statistic.
+        #
+        # One rule covers all four modes: subtract each patient's smallest
+        # start_time in whatever coordinate system start_time currently uses
+        # (zeroed under Relative, so the subtraction is a no-op there). The
+        # SMALLEST, not the first row - match() re-based a patient's episode-1
+        # milestone on whichever episode the file happened to list first.
         .convertTimesToNumeric = function(times, patient_ids, patient_data, unit = self$options$timeUnit) {
-            if (!inherits(times, c("Date", "POSIXct", "POSIXlt"))) {
-                return(suppressWarnings(as.numeric(times)))
-            }
-
-            patient_lookup <- data.frame(
-                patient_id = as.character(patient_data$patient_id),
-                start_time = patient_data$start_time,
-                stringsAsFactors = FALSE
-            )
-
             ids_chr <- as.character(patient_ids)
-            start_vals <- patient_lookup$start_time[match(ids_chr, patient_lookup$patient_id)]
+            anchor_idx <- private$.patientAnchorIndex(
+                patient_data$patient_id, patient_data$start_time)
+            first_of <- !duplicated(as.character(patient_data$patient_id))
+            anchors <- patient_data$start_time[anchor_idx][first_of]
+            names(anchors) <- as.character(patient_data$patient_id)[first_of]
+            start_vals <- anchors[ids_chr]
 
-            if (!inherits(start_vals, c("Date", "POSIXct", "POSIXlt"))) {
-                return(suppressWarnings(as.numeric(times)))
-            }
-
-            intervals <- suppressWarnings(lubridate::interval(start_vals, times))
-            suppressWarnings(lubridate::time_length(intervals, unit = unit))
-        },
-
-        # Helper to obtain numeric durations between start and end times (per row)
-        .getDurations = function(patient_data, unit = self$options$timeUnit) {
-            if (inherits(patient_data$start_time, c("Date", "POSIXct", "POSIXlt"))) {
-                intervals <- suppressWarnings(lubridate::interval(patient_data$start_time, patient_data$end_time))
+            if (inherits(times, c("Date", "POSIXct", "POSIXlt"))) {
+                if (!inherits(start_vals, c("Date", "POSIXct", "POSIXlt")))
+                    return(suppressWarnings(as.numeric(times)))
+                intervals <- suppressWarnings(lubridate::interval(start_vals, times))
                 return(suppressWarnings(lubridate::time_length(intervals, unit = unit)))
             }
 
-            as.numeric(patient_data$end_time - patient_data$start_time)
+            times_num <- suppressWarnings(as.numeric(times))
+            start_num <- suppressWarnings(as.numeric(start_vals))
+            if (length(start_num) != length(times_num) || all(is.na(start_num)))
+                return(times_num)
+            times_num - ifelse(is.na(start_num), 0, start_num)
         },
+
 
         # Summarise timelines at the patient level to avoid double counting
         .summarizeByPatient = function(patient_data) {
@@ -979,7 +1298,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 ))
             }
 
-            patient_data$segment_duration <- private$.getDurations(patient_data)
 
             # Performance optimization: Use data.table for large datasets (>1000 rows)
             use_fast_path <- nrow(patient_data) > 1000 && requireNamespace("data.table", quietly = TRUE)
@@ -990,13 +1308,18 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 # Group by patient and aggregate
                 summary_list <- dt[, {
-                    follow_up <- private$.calculateFollowUp(start_time, end_time)
-                    person_time <- private$.mergeIntervalsAndSum(start_time, end_time)
+                    ct <- private$.calendarTimes(
+                        start_time, end_time,
+                        if ("original_start" %in% names(.SD)) original_start else NULL,
+                        if ("original_end" %in% names(.SD)) original_end else NULL)
+                    follow_up <- private$.calculateFollowUp(ct$start, ct$end)
+                    person_time <- private$.mergeIntervalsAndSum(ct$start, ct$end)
                     if (is.na(person_time) || !is.finite(person_time)) person_time <- follow_up
 
                     response_value <- NA_character_
                     if ("response" %in% names(.SD)) {
-                        non_missing <- as.character(response[!is.na(response)])
+                        keep_resp <- !is.na(response)
+                        non_missing <- as.character(response[keep_resp])
                         if (length(non_missing) > 0) {
                             # Normalise here so every consumer agrees. .getBestResponse
                             # returns the ORIGINAL string, .calculateSummaryStats
@@ -1005,23 +1328,35 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             # "complete response" became three rows of n=1 that
                             # contradicted every other table on the page.
                             response_value <- private$.normalizeResponse(
-                                private$.getBestResponse(non_missing))
+                                private$.getBestResponse(non_missing,
+                                                         start_time[keep_resp]))
                         }
                     }
 
+                    # The NA sentinel must carry the COLUMN's type, not logical.
+                    # data.table requires every group to return the same column
+                    # type, so a patient whose censor value is entirely missing
+                    # used to contribute a logical NA beside other patients'
+                    # doubles and the whole analysis died with "Column 6 of
+                    # result for group 2 is type 'double' but expecting type
+                    # 'logical'" - no plot, no tables, and a message from
+                    # data.table's internals. `x[NA_integer_]` is a typed NA of
+                    # x's own type and works for numeric, integer, character and
+                    # factor alike. `response_value` above was already correct,
+                    # which is why a missing response never triggered it.
                     censor_value <- NA
                     if ("censor_status" %in% names(.SD)) {
-                        censor_last <- censor_status[!is.na(censor_status)]
-                        if (length(censor_last) > 0) censor_value <- tail(censor_last, 1)
+                        censor_value <- private$.valueAtLastEpisode(censor_status, end_time)
                     }
 
-                    group_value <- NA
+                    group_value <- NA_character_
                     if ("patient_group" %in% names(.SD)) {
                         group_first <- patient_group[!is.na(patient_group)]
                         # as.character: the base path returns character, and a
                         # factor here kept NA-dropped levels alive in the Fisher
                         # contingency tables above 1000 rows.
                         if (length(group_first) > 0) group_value <- as.character(group_first[1])
+                        # else: NA_character_ from above, matching as.character()
                     }
 
                     list(
@@ -1047,28 +1382,39 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (all(is.na(summary_list$patient_group)))
                     summary_list[, patient_group := NULL]
 
-                summary_list <- split(summary_list, summary_list$patient_id)
+                # NOT split() here. The j-expression above has already produced
+                # exactly one row per patient; splitting it into n one-row
+                # data.tables so the shared bind_rows() below can reassemble them
+                # cost 70% of the whole run (Rprof, 10 000 patients: bind_rows
+                # 14.31 s of 20.48 s), and it is superlinear because
+                # .applySorting has already made patient_id a factor with one
+                # level per patient. Hand the finished table straight on.
+                summary_list <- as.data.frame(summary_list)
             } else {
                 # Standard path with base R (works for all dataset sizes)
                 split_data <- split(patient_data, patient_data$patient_id)
 
                 summary_list <- lapply(split_data, function(df) {
-                    follow_up <- private$.calculateFollowUp(df$start_time, df$end_time)
+                    ct <- private$.calendarTimes(df$start_time, df$end_time,
+                                                 df$original_start, df$original_end)
+                    follow_up <- private$.calculateFollowUp(ct$start, ct$end)
 
                     # Calculate person-time by merging overlapping intervals to avoid double-counting
                     # This ensures unique observation time is counted
-                    person_time <- private$.mergeIntervalsAndSum(df$start_time, df$end_time)
+                    person_time <- private$.mergeIntervalsAndSum(ct$start, ct$end)
                     if (is.na(person_time) || !is.finite(person_time)) person_time <- follow_up
 
                 # Get BEST response for ORR/DCR calculation (clinical standard in oncology)
                 # Hierarchy: CR > PR > SD > PD > NE/Other
                 response_value <- NA_character_
                 if ("response" %in% names(df)) {
-                    non_missing <- as.character(df$response[!is.na(df$response)])
+                    keep_resp <- !is.na(df$response)
+                    non_missing <- as.character(df$response[keep_resp])
                     if (length(non_missing) > 0) {
                         # Normalised at the source - see the data.table path above.
                         response_value <- private$.normalizeResponse(
-                            private$.getBestResponse(non_missing))
+                            private$.getBestResponse(non_missing,
+                                                     df$start_time[keep_resp]))
                     }
                 }
 
@@ -1078,7 +1424,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     non_missing_censor <- df$censor_status[!is.na(df$censor_status)]
                     if (length(non_missing_censor) > 0) {
                         # Use the last non-missing censor status
-                        censor_value <- non_missing_censor[length(non_missing_censor)]
+                        censor_value <- private$.valueAtLastEpisode(df$censor_status, df$end_time)
                     }
                 }
 
@@ -1120,8 +1466,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 })
             }  # End of if/else for performance optimization
 
-            patient_data$segment_duration <- NULL
-            dplyr::bind_rows(summary_list)
+            # The base path still returns a list of per-patient rows; the fast
+            # path is already a data.frame.
+            if (is.data.frame(summary_list)) summary_list else dplyr::bind_rows(summary_list)
         },
 
         # Merge overlapping time intervals and sum unique observation time
@@ -1193,13 +1540,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # total person-time then shifted (14.92 vs 15.00 months on a
                 # two-episode test) purely from toggling timeDisplay, which is a
                 # display option and must not move a reported statistic.
-                epoch_secs <- if (inherits(start_times, "Date") ||
-                                  inherits(end_times, "Date")) 86400 else 1
-
-                seg_start <- as.POSIXct(merged_starts * epoch_secs,
-                                        origin = "1970-01-01", tz = "UTC")
-                seg_end   <- as.POSIXct(merged_ends * epoch_secs,
-                                        origin = "1970-01-01", tz = "UTC")
+                # .asNumericTime() now returns epoch seconds for every time
+                # class, so no per-class rescaling is needed (and a mixed
+                # Date/POSIXct pair can no longer pick the wrong one).
+                seg_start <- as.POSIXct(merged_starts, origin = "1970-01-01", tz = "UTC")
+                seg_end   <- as.POSIXct(merged_ends, origin = "1970-01-01", tz = "UTC")
 
                 total_time <- sum(lubridate::time_length(
                     lubridate::interval(seg_start, seg_end),
@@ -1226,14 +1571,39 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
         # Get best response based on oncology hierarchy
         # CR (Complete Response) > PR (Partial Response) > SD (Stable Disease) > PD (Progressive Disease) > Other
-        .getBestResponse = function(responses) {
+        .getBestResponse = function(responses, order_by = NULL) {
             if (length(responses) == 0) return(NA_character_)
 
             syn <- private$.responseSynonymMap()
             # Rank of each standard abbreviation (lower rank = better response)
             response_rank <- c("CR" = 1, "PR" = 2, "SD" = 3, "PD" = 4, "NE" = 5)
 
+            # RECIST 1.1: the best overall response is the best assessment
+            # recorded from the start of treatment UNTIL progression. An
+            # assessment made after the disease has progressed does not
+            # contribute to it. Without this, four patients who each progressed
+            # in their first episode and were then recorded CR or SD in a second
+            # episode were reported as ORR 50% / DCR 100% when the correct
+            # answer is 0% / 0%.
+            #
+            # `order_by` carries each assessment's time so the sequence is
+            # chronological rather than whatever order the rows arrived in.
+            # Without it the truncation would depend on row order, which is the
+            # same class of defect.
+            if (!is.null(order_by) && length(order_by) == length(responses)) {
+                ord <- order(order_by, na.last = TRUE)
+                responses <- responses[ord]
+            }
+
             responses_lower <- tolower(trimws(responses))
+
+            std_all <- unname(syn[responses_lower])
+            pd_at <- which(!is.na(std_all) & std_all == "PD")
+            if (length(pd_at) > 0) {
+                keep <- seq_len(pd_at[1])
+                responses <- responses[keep]
+                responses_lower <- responses_lower[keep]
+            }
 
             # Find the best (lowest ranked) response
             best_rank <- Inf
@@ -1259,6 +1629,18 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # Normalize response category to standard abbreviation
         # Handles case-insensitive matching for clinical response categories
         # Returns: "CR", "PR", "SD", "PD", "NE", or the original value if unrecognized
+        # Vectorised form. The scalar version below is driven element-by-element
+        # over every row or patient at four sites; measured over 40 000 values
+        # that costs 0.93 s against 0.010 s for one vectorised lookup.
+        .normalizeResponses = function(x) {
+            x <- as.character(x)
+            syn <- private$.responseSynonymMap()
+            out <- unname(syn[tolower(trimws(x))])
+            keep <- is.na(out)
+            out[keep] <- x[keep]
+            out
+        },
+
         .normalizeResponse = function(response_str) {
             if (is.na(response_str) || length(response_str) == 0) return(response_str)
 
@@ -1293,10 +1675,39 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             end_max - start_min
         },
 
+        # The values follow-up and person-time must be measured on.
+        #
+        # Under "Relative (all start from 0)" start_time/end_time have already been
+        # rewritten as durations measured FROM THE PATIENT'S ANCHOR, and a calendar
+        # month measured from the anchor is not the same length as one measured from
+        # the episode's own start, so subtracting two of them drifts. The same
+        # dataset reported 3.98 months of person-time relative and 4.02 absolute
+        # (calendar answer 4.0207). timeDisplay decides what the axis shows; it must
+        # not move a reported statistic. Both estimators therefore work from the
+        # original Date/POSIXct values whenever the relative conversion kept them.
+        .calendarTimes = function(start_times, end_times, original_start, original_end) {
+            if (!is.null(original_start) && !is.null(original_end) &&
+                inherits(original_start, c("Date", "POSIXct", "POSIXlt")))
+                return(list(start = original_start, end = original_end))
+            list(start = start_times, end = end_times)
+        },
+
         # Convert time-like objects to numeric for comparisons
+        # Every time class on ONE scale: epoch seconds.
+        #
+        # This used to return each class's own raw epoch unit - DAYS for Date,
+        # SECONDS for POSIXct - and every caller compares a start against an end
+        # (.mergeIntervalsAndSum, the event-marker window filter, the sort
+        # durations, the export columns). A Date start with a POSIXct end
+        # therefore compared 18262 against 1583020800: measured, Total
+        # Person-Time came out 104,106,728 months beside a correct Mean Duration
+        # of 2.5, silently, because .calculateFollowUp builds a
+        # lubridate::interval on the original objects and are immune. Nothing
+        # here is ever compared against an external day-scale constant, so one
+        # common scale is safe for all six call sites.
         .asNumericTime = function(x) {
             if (inherits(x, "Date")) {
-                return(as.numeric(x))
+                return(as.numeric(x) * 86400)
             }
             if (inherits(x, c("POSIXct", "POSIXlt"))) {
                 return(as.numeric(x))
@@ -1394,12 +1805,35 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # ongoing - previously only the all-unrecognised case said anything.
             raw_vals <- patient_summary$censor_status[valid_idx]
             n_unrec <- sum(is.na(status) & !is.na(raw_vals))
+
+            # A patient with NO censoring value at all is a different case from
+            # an unrecognised one, and it used to be counted by neither check:
+            # `status %in% "censored"` is FALSE for NA, so as.numeric() made
+            # them 0 - a terminal event - which drags the reverse Kaplan-Meier
+            # median downward exactly as if they had completed follow-up. They
+            # are excluded from the estimate instead, and the exclusion is said
+            # out loud.
+            n_missing_status <- sum(is.na(raw_vals))
+            if (n_missing_status > 0) {
+                private$.addNotice(
+                    "WARNING",
+                    .("Censoring status missing for some patients"),
+                    sprintf(
+                        .("%d of %d patients have no censoring/event value. They are excluded from the reverse Kaplan-Meier median follow-up rather than counted as completed follow-up, which would bias it downward. Their timelines are still drawn, without a status arrow."),
+                        n_missing_status, length(status)))
+                keep_status <- !is.na(raw_vals)
+                fu <- fu[keep_status]
+                status <- status[keep_status]
+                raw_vals <- raw_vals[keep_status]
+                if (length(fu) == 0) return(none)
+                observed <- list(value = stats::median(fu), method = "observed")
+            }
             if (n_unrec > 0 && !all(is.na(status))) {
                 private$.addNotice(
                     "WARNING",
                     .("Some censoring values not recognised"),
                     sprintf(
-                        .("%d of %d censoring/event values could not be interpreted; those patients are treated as completed follow-up (events) in the reverse Kaplan-Meier estimate and receive no ongoing-treatment arrow. Use 0/FALSE/no/censored/alive for ongoing and 1/TRUE/yes/event/dead for completed."),
+                        .("%d of %d censoring/event values could not be interpreted; those patients are treated as completed follow-up (events) in the reverse Kaplan-Meier estimate and receive no status arrow. Use 0/FALSE/no/censored/alive for ongoing and 1/TRUE/yes/event/dead for completed."),
                         n_unrec, length(status)))
             }
 
@@ -1419,17 +1853,43 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # 50%) and reports why. Only the status CLASSIFICATION above is
             # specific to this analysis, so only that stays here.
             mfu <- .medianFollowUp(fu, as.numeric(status %in% "censored"))
-            if (!isTRUE(mfu$reverse))
-                return(c(observed, list(reason = mfu$reason)))
+            if (!isTRUE(mfu$reverse)) {
+                # The censoring variable WAS supplied and every value WAS
+                # classified - the reverse curve simply never reaches 50%, or no
+                # patient was censored. Labelling that "no censoring
+                # information" told the reader the opposite of what happened,
+                # and mfu$reason, which says which of the two it was, had no
+                # consumer anywhere in the module.
+                return(list(value = observed$value, method = "not_estimable",
+                            reason = mfu$reason %||% "",
+                            reason_code = mfu$reason_code %||% ""))
+            }
 
             list(value = mfu$value, method = "reverse_km",
                  ci_lower = mfu$ci_lower, ci_upper = mfu$ci_upper,
-                 n_total = mfu$n_total, n_censored = mfu$n_censored, reason = "")
+                 n_total = mfu$n_total, n_censored = mfu$n_censored,
+                 reason = "", reason_code = "")
         },
 
         # Map a censoring/event status value to "censored", "event", or NA.
         # Shared by median follow-up and the ongoing-status arrows so the two
         # cannot disagree about what a given coding means.
+        # A patient's status is whatever was true at their LAST episode, which
+        # is the one with the greatest end time - not whichever row the file
+        # happened to list last. Reading it by row order meant re-sorting the
+        # same data changed the ongoing-treatment arrows and the reverse
+        # Kaplan-Meier median follow-up, while the arrow's POSITION was already
+        # (correctly) taken from which.max(end_time). Returns a typed NA when
+        # the patient has no non-missing value at all.
+        .valueAtLastEpisode = function(values, times) {
+            keep <- !is.na(values)
+            if (!any(keep)) return(values[NA_integer_])
+            v <- values[keep]
+            t <- if (length(times) == length(values)) times[keep] else rep(NA_real_, length(v))
+            if (all(is.na(t))) return(v[length(v)])
+            v[which.max(t)]
+        },
+
         .classifyCensoring = function(x) {
             v <- tolower(trimws(as.character(x)))
             num <- suppressWarnings(as.numeric(v))
@@ -1440,8 +1900,28 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             out[v %in% c("1", "true", "t", "yes", "y", "event", "dead", "died",
                          "death", "progressed", "progression", "completed")] <- "event"
 
-            out[is.na(out) & !is.na(num) & num == 0] <- "censored"
-            out[is.na(out) & !is.na(num) & num != 0] <- "event"
+            # Numeric coding. 0/1 is the documented default and the only one
+            # this analysis may assume silently.
+            #
+            # {1, 2} is survival::Surv's convention (1 = censored, 2 = event).
+            # The old rule sent every non-zero value to "event", so a 1/2 column
+            # became ALL events: no arrows were drawn, the reverse Kaplan-Meier
+            # was abandoned for "observed durations; no censoring information",
+            # and the reported median follow-up came out about half the true
+            # value with nothing said. Recognise that coding and record it, so
+            # the run can disclose the assumption it made.
+            obs <- num[!is.na(num)]
+            surv_coding <- length(obs) > 0 && all(obs %in% c(1, 2)) && any(obs == 2)
+            if (surv_coding) {
+                out[!is.na(num) & num == 1] <- "censored"
+                out[!is.na(num) & num == 2] <- "event"
+                private$.censor_coding <- "surv12"
+            } else {
+                out[is.na(out) & !is.na(num) & num == 0] <- "censored"
+                out[is.na(out) & !is.na(num) & num != 0] <- "event"
+                if (length(obs) > 0 && all(obs %in% c(0, 1)))
+                    private$.censor_coding <- "zero_one"
+            }
             out[is.na(v)] <- NA_character_
             out
         },
@@ -1478,6 +1958,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 median_followup_ci_lower = median_fu_res$ci_lower %||% NA_real_,
                 median_followup_ci_upper = median_fu_res$ci_upper %||% NA_real_,
                 median_followup_reason = median_fu_res$reason %||% "",
+                median_followup_reason_code = median_fu_res$reason_code %||% "",
                 median_duration = if (length(valid_follow_up) > 0) stats::median(valid_follow_up) else NA_real_,
                 mean_duration = if (length(valid_follow_up) > 0) mean(valid_follow_up) else NA_real_,
                 sd_duration = if (length(valid_follow_up) > 1) stats::sd(valid_follow_up) else NA_real_,
@@ -1496,17 +1977,31 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (self$options$responseAnalysis && "response" %in% names(patient_summary)) {
                 # Normalize response categories to standard abbreviations (CR, PR, SD, PD)
                 # This ensures case-insensitive matching and handles various input formats
-                normalized_responses <- sapply(patient_summary$response, private$.normalizeResponse, USE.NAMES = FALSE)
+                normalized_responses <- private$.normalizeResponses(patient_summary$response)
 
                 response_summary <- table(normalized_responses, useNA = "no")
                 if (length(response_summary) > 0) {
-                    response_pct <- prop.table(response_summary) * 100
+                    # Percentages over EVERY patient in the analysis, the same
+                    # denominator ORR and DCR use. These rows used to divide by
+                    # the patients who had any recorded response, so on a
+                    # 12-patient cohort with one missing response they were x/11
+                    # while the ORR beside them was x/9 and the Fisher test
+                    # below them used yet another n. A reader could not add the
+                    # rows up or reconcile them with anything else on the page.
+                    n_all_patients <- nrow(patient_summary)
+                    response_pct <- response_summary / n_all_patients * 100
 
                     stats$response_counts <- as.numeric(response_summary)
                     names(stats$response_counts) <- names(response_summary)
 
                     stats$response_percentages <- as.numeric(response_pct)
                     names(stats$response_percentages) <- names(response_pct)
+
+                    # The patients with no recorded response at all are the
+                    # remainder; carry them so the rows account for everyone.
+                    stats$n_response_missing <- n_all_patients - sum(response_summary)
+                    stats$response_counts_named <- response_summary
+                    stats$response_denominator <- n_all_patients
                 }
             }
 
@@ -1529,31 +2024,47 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 stats$n_patients,
                 stats$n_observations,
                 stats$median_duration,
-                self$options$timeUnit,
+                private$.timeUnitWord(),
                 stats$min_duration,
                 stats$max_duration,
-                self$options$timeUnit
+                private$.timeUnitWord()
             )
             
             # Person-time analysis
             interpretation$person_time <- sprintf(
                 .("Total person-time: %.1f %s. Average follow-up per patient: %.1f %s."),
                 stats$total_person_time,
-                self$options$timeUnit,
+                private$.timeUnitWord(),
                 stats$mean_follow_up,
-                self$options$timeUnit
+                private$.timeUnitWord()
             )
             
             # Response interpretation if available
             if (!is.null(stats$response_counts)) {
-                best_response <- names(stats$response_counts)[which.max(stats$response_counts)]
-                best_pct <- stats$response_percentages[[best_response]]
+                # which.max() silently takes the FIRST of a tie, in whatever
+                # order the table happens to be in, and the tally ignored
+                # patients with no recorded response entirely - so 3 CR and 5 NA
+                # read "Most common response was CR (37.5%)" beside a summary row
+                # saying "No recorded response (5/8) 62.5". Count the
+                # no-response group as its own category and name a tie.
+                counts <- stats$response_counts
+                if (isTRUE(stats$n_response_missing > 0))
+                    counts <- c(counts,
+                                stats::setNames(stats$n_response_missing,
+                                                .("no recorded response")))
+                top <- names(counts)[counts == max(counts)]
+                denom <- if (!is.null(stats$response_denominator))
+                    stats$response_denominator else sum(counts)
+                best_pct <- max(counts) / denom * 100
 
-                interpretation$response <- sprintf(
-                    .("Most common response was %s (%.1f%% of patients)."),
-                    htmltools::htmlEscape(best_response),
-                    best_pct
-                )
+                interpretation$response <- if (length(top) > 1)
+                    sprintf(
+                        .("Most common response was a tie between %s, each in %.1f%% of patients."),
+                        htmltools::htmlEscape(paste(top, collapse = ", ")), best_pct)
+                else
+                    sprintf(
+                        .("Most common response was %s (%.1f%% of patients)."),
+                        htmltools::htmlEscape(top), best_pct)
             }
             
             return(interpretation)
@@ -1582,20 +2093,91 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 method %||% "observed",
                 reverse_km = .("Median Follow-up Time (reverse Kaplan-Meier)"),
                 unrecognised = .("Median Follow-up Time (observed durations; censoring not recognised)"),
+                not_estimable = .("Median Follow-up Time (observed durations; reverse Kaplan-Meier not estimable)"),
                 .("Median Follow-up Time (observed durations; no censoring information)")
             )
+        },
+
+        # The time unit as a WORD, for text people read.
+        #
+        # `self$options$timeUnit` is the option KEY - "months", "days" - and it
+        # was spliced straight into two dozen translated sentences through %s
+        # and {unit}. Every one of those sentences translated while the unit
+        # stayed in English, which is the failure mode only a non-English user
+        # ever sees. lubridate still gets the key; this is for display only.
+        # The date format as the DROPDOWN shows it, for text people read.
+        #
+        # self$options$dateFormat is the option key ("ymd"), and three translated
+        # sentences spliced it in raw while telling the user to check a control
+        # labelled "YYYY-MM-DD". lubridate still gets the key; this is display
+        # only, exactly like .timeUnitWord() below.
+        .dateFormatWord = function(fmt = self$options$dateFormat) {
+            switch(as.character(fmt),
+                ymdhms = "YYYY-MM-DD HH:MM:SS",
+                ymd = "YYYY-MM-DD",
+                ydm = "YYYY-DD-MM",
+                mdy = "MM-DD-YYYY",
+                myd = "MM-YYYY-DD",
+                dmy = "DD-MM-YYYY",
+                dym = "DD-YYYY-MM",
+                as.character(fmt))
+        },
+
+        .timeUnitWord = function(unit = self$options$timeUnit) {
+            switch(as.character(unit),
+                days = .("days"),
+                weeks = .("weeks"),
+                months = .("months"),
+                years = .("years"),
+                as.character(unit))
+        },
+
+        # The translated form of .medianFollowUp()'s fallback reason.
+        #
+        # The shared helper R/utils-followup.R cannot call .() - it is a
+        # file-level function with no `self`, and jmvcore's translator reads
+        # `self` from the calling frame - so it returns a code and the sentence
+        # is chosen here. Falls back to the helper's English prose for any code
+        # this method does not know, so a new code degrades rather than vanishes.
+        .followUpReasonText = function(code, fallback_text = "") {
+            switch(as.character(code),
+                no_censoring = .("No patient was censored, so the reversed curve has no events and never reaches 50%. Every patient was observed to the terminal outcome, so the observed times are the complete follow-up."),
+                never_reaches_50 = .("The reversed Kaplan-Meier curve never falls to 50%, so its median is undefined. That depends on WHEN patients were still under observation, not merely how many: a few censored late can make the median estimable while many censored early cannot."),
+                fallback_text)
+        },
+
+        # Format the reverse-KM confidence interval.
+        #
+        # The whole interval used to be dropped whenever either bound was NA,
+        # and with a reverse Kaplan-Meier the UPPER bound routinely is: the
+        # reversed curve often never falls far enough for its upper confidence
+        # limit to be reached. survfit reported "18 (95% CI 12 - NA)" and the
+        # module showed an empty cell, throwing away a lower bound that is the
+        # useful half. "NR" (not reached) is the manuscript convention.
+        .followUpCIText = function(lower, upper) {
+            lower <- suppressWarnings(as.numeric(lower %||% NA_real_))
+            upper <- suppressWarnings(as.numeric(upper %||% NA_real_))
+            if (!is.finite(lower) && !is.finite(upper)) return(NA_character_)
+            fmt <- function(x, nr) if (is.finite(x)) sprintf("%.2f", x) else nr
+            paste(fmt(lower, .("NE")), "-", fmt(upper, .("NR")))
         },
 
         # The follow-up estimator is known only in .run(); .init() labels that row
         # with the one the options imply (reverse KM needs a censoring variable).
         .advancedMetricLabels = function() {
-            if (!isTRUE(self$options$personTimeAnalysis)) return(character(0))
-            labels <- c(
-                median_followup = private$.medianFollowUpLabel(
-                    if (is.null(self$options$censorVar)) "observed" else "reverse_km"),
-                iqr = .("Interquartile Range (observed durations)"),
-                person_time = .("Total Study Person-Time"),
-                followup_density = .("Follow-up Density"))
+            # ORR and DCR belong to "Response analysis", not to "Person-time
+            # analysis". They used to require BOTH, so unticking person-time
+            # removed the response rates as well - the headline numbers of the
+            # analysis - while leaving a person-time paragraph in the
+            # interpretation that no longer had a table behind it.
+            labels <- character(0)
+            if (isTRUE(self$options$personTimeAnalysis))
+                labels <- c(
+                    median_followup = private$.medianFollowUpLabel(
+                        if (is.null(self$options$censorVar)) "observed" else "reverse_km"),
+                    iqr = .("Interquartile Range (observed durations)"),
+                    person_time = .("Total Study Person-Time"),
+                    followup_density = .("Follow-up Density"))
             if (isTRUE(self$options$responseAnalysis) && !is.null(self$options$responseVar))
                 labels <- c(labels,
                     orr = .("Objective Response Rate (ORR)"),
@@ -1605,43 +2187,73 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
         # Apply clinical preset configurations with context
 
-        .init = function() {
-            # Initialize instructions when no variables selected
-            if (is.null(self$options$patientID) ||
-                is.null(self$options$startTime) ||
-                is.null(self$options$endTime)) {
-
-                # ERROR notice for missing required variables
-                private$.addNotice('ERROR', .("Missing required variables"),
-                    .("Patient ID, Start Time, and End Time are required to generate a swimmer plot. Please select all three variables in the Core Data Variables section."))
-
-                # Keep detailed HTML guidance
-                instructions <- private$.generateInstructions()
-                self$results$instructions$setContent(instructions)
-            }
-
-            # Fixed row structure for the summary table: the same five metrics on
-            # every run. Only the values are computed, so .updateSummaryTable()
-            # fills them with setRow(). The response-rate rows that follow them
-            # depend on the levels actually present and stay in .run().
-            # ("Mean Follow-up" was dropped: it was the identical statistic as
-            # "Mean Duration" printed twice under two clinical names.)
-            summary_metrics <- c(
+        # The five fixed summary rows, in order. Factored out of .init() so that
+        # .updateSummaryTable() can rebuild them when it has to prune a stale
+        # response row, and so the labels are re-emitted every run rather than
+        # surviving from whichever language .init() first ran in.
+        # ("Mean Follow-up" was dropped: it was the identical statistic as
+        # "Mean Duration" printed twice under two clinical names.)
+        .summaryMetricLabels = function() {
+            c(
                 .("Number of Patients"),
                 .("Total Observations"),
                 .("Median Duration (observed)"),
                 .("Mean Duration"),
                 .("Total Person-Time")
             )
+        },
+
+        # Put the summary table back to its .init() state: the five fixed rows with
+        # no values, and no response rows at all. Called at the top of every run so
+        # an aborted run cannot leave last run's numbers under an error message,
+        # and by .updateSummaryTable() when the set of response categories changes.
+        .resetSummaryTable = function() {
+            tbl <- self$results$summary
+            labs <- private$.summaryMetricLabels()
+            tbl$deleteRows()
+            for (i in seq_along(labs))
+                tbl$addRow(rowKey = i, values = list(metric = labs[i], value = NA_real_))
+        },
+
+        .init = function() {
+            # (The missing-variable ERROR notice and the instructions panel used to
+            # be raised here too. .run() blanks .noticeList and `instructions` at
+            # its top and then re-creates both verbatim, and jamovi always calls
+            # .run() after .init(), so that copy could never reach the user.)
+
+            # Only the values are computed in .run(), which fills them with
+            # setRow(); the response-rate rows that follow depend on the levels
+            # actually present and are managed by .updateSummaryTable().
+            summary_metrics <- private$.summaryMetricLabels()
             if (self$results$summary$rowCount == 0)
                 for (i in seq_along(summary_metrics))
                     self$results$summary$addRow(
                         rowKey = i, values = list(metric = summary_metrics[i]))
 
+            # Unlike the summary block above, this row set is NOT fixed:
+            # .advancedMetricLabels() returns 0, 2, 4 or 6 keys depending on
+            # personTimeAnalysis and responseAnalysis. A "rowCount == 0" guard
+            # copied from above would freeze whichever set was built first, and
+            # .run() fills these with setRow(), which REJECTS a missing key - so a
+            # frozen set would abort the analysis rather than merely duplicate
+            # rows. An unconditional addRow loop is wrong too: addRow accepts
+            # duplicate keys silently, so a second .init() doubled the table.
+            #
+            # Rebuild only when the set actually differs. An unconditional
+            # deleteRows() would do, except that jmvcore's Table$deleteRows()
+            # clears .rowKeys and .rowCount but NOT .rowNames: rebuilding to an
+            # EMPTY set then leaves phantom row names with no keys, which
+            # Table$fromProtoBuf indexes out of bounds. Comparing first means
+            # deleteRows() never runs on the path that repeats an identical set.
             advanced_labels <- private$.advancedMetricLabels()
-            for (key in names(advanced_labels))
-                self$results$advancedMetrics$addRow(rowKey = key,
-                    values = list(metric_name = advanced_labels[[key]]))
+            want <- names(advanced_labels)
+            have <- as.character(unlist(self$results$advancedMetrics$rowKeys))
+            if (!identical(have, as.character(want))) {
+                self$results$advancedMetrics$deleteRows()
+                for (key in want)
+                    self$results$advancedMetrics$addRow(rowKey = key,
+                        values = list(metric_name = advanced_labels[[key]]))
+            }
         },
 
         .run = function() {
@@ -1651,26 +2263,38 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             private$.noticeList <- list()
             private$.renderNotices()
 
-            # Reset stale HTML notice outputs so content from a previous run does not
-            # linger after the triggering condition (low Fisher cell counts, absolute-date
-            # reference lines, an earlier validation error in `instructions`) has
-            # cleared. None of these items has a clearWith rule that covers every
-            # trigger.
-            self$results$warningNotice$setContent('')
-            self$results$warningNotice$setVisible(FALSE)
-            self$results$validationReport$setContent('')
-            self$results$validationReport$setVisible(FALSE)
+            # `instructions` has no clearWith rule covering every trigger, so an
+            # earlier run's guidance would otherwise linger. Severity messages no
+            # longer live here or in a second Html item - they all go through
+            # .addNotice(), which the .noticeList reset above already clears.
             self$results$instructions$setContent('')
+
+            # Clear every repopulated output too. Each .update*() starts with its
+            # own deleteRows(), but those all run AFTER the four early returns
+            # below, so a run that aborts on validation used to leave the previous
+            # run's tables and prose sitting under the error. clearWith does not
+            # cover it: editing a cell in the spreadsheet changes no option.
+            for (tbl in c("personTimeTable", "milestoneTable", "eventMarkerTable",
+                          "groupComparisonTest", "timelineData", "summaryData"))
+                self$results[[tbl]]$deleteRows()
+            self$results$interpretation$setContent('')
+            self$results$copyReadyReport$setContent('')
+
+            # summary keeps its five scaffolded rows (setRow rejects a missing key)
+            # but must not keep their values, nor any response row from last time.
+            private$.resetSummaryTable()
 
             # advancedMetrics rows are scaffolded in .init(), and jamovi can restore
             # a previous run's values into them. Blank them here, so an early
             # return or error below leaves empty cells, not the last numbers.
             advanced_labels <- private$.advancedMetricLabels()
+            scaffolded <- as.character(unlist(self$results$advancedMetrics$rowKeys))
             for (key in names(advanced_labels))
-                self$results$advancedMetrics$setRow(rowKey = key, values = list(
-                    metric_name = advanced_labels[[key]], metric_value = NA_real_,
-                    confidence_interval = NA_character_, metric_unit = NA_character_,
-                    clinical_interpretation = NA_character_))
+                if (key %in% scaffolded)
+                    self$results$advancedMetrics$setRow(rowKey = key, values = list(
+                        metric_name = advanced_labels[[key]], metric_value = NA_real_,
+                        confidence_interval = NA_character_, metric_unit = NA_character_,
+                        clinical_interpretation = NA_character_))
 
             # Static educational panels: populate whenever requested, BEFORE any
             # early return - previously an incomplete selection or a validation
@@ -1730,6 +2354,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     # (body in R/swimmerplot-html.R)
                     date_guidance <- swimmerplot_date_guidance_html(self, safe_format, safe_examples_date)
                     self$results$instructions$setContent(date_guidance)
+                    # The analysis stops here. Without this the only notice on
+                    # the page was "Time units", and every summary value came
+                    # out NA with nothing saying why.
+                    private$.addNotice("ERROR", .("Dates found on a raw numeric timeline"), sprintf(
+                        .("The start/end variables look like calendar dates (%s), but Time Input Type is set to Raw Values, so no timeline could be built. Switch Time Input Type to Date/Time and choose the matching Date Format."),
+                        as.character(validation_result$format %||% "")))
+                    private$.renderNotices()
                     return()  # Stop here, don't process further
                 }
 
@@ -1778,42 +2409,49 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 # Note: Auto-detection warning removed since we now stop analysis
                 # when dates are detected and ask user to configure manually
 
-                if (length(warning_messages) > 0) {
-                    warning_msg <- paste0(
-                        "<div style='color: inherit; background-color: rgba(255, 203, 33, 0.14); padding: 15px; border: 1px solid #ffc107; border-radius: 5px; margin: 10px;'>",
-                        "<h4>", .("Analysis Information"), "</h4>",
-                        "<ul>",
-                        paste0("<li>", warning_messages, "</li>", collapse = ""),
-                        "</ul>",
-                        "</div>"
-                    )
-                    self$results$instructions$setContent(warning_msg)
-                }
-                # Show note if absolute datetime with unsupported reference lines
+                # One notice, not one per message: .addNotice() dedupes only on an
+                # exact (type, title, content) match, so four messages under the
+                # same title would print as four separate "NOTE: Analysis
+                # Information" blocks.
+                if (length(warning_messages) > 0)
+                    private$.addNotice("INFO", .("Analysis Information"),
+                        paste(warning_messages, collapse = "\n"))
+                # Show note if an absolute axis makes a duration reference line meaningless.
+                # This used to be gated on dates alone, so raw numeric times with
+                # Relative off drew the median and protocol lines at duration
+                # values on a study-time axis and said nothing.
                 is_date_scale <- inherits(patient_data$start_time, c("Date", "POSIXct"))
+                if (!private$.isDurationAxis(patient_data) &&
+                    self$options$referenceLines %in% c("median", "protocol")) {
+                    advice <- if (is_date_scale)
+                        .("Use 'Custom Time' with 'Custom Reference Date' or a time offset instead.")
+                    else
+                        .("Switch Time Display to 'Relative (all start from 0)' to show them, or use 'Custom Time'.")
+                    private$.addNotice("WARNING",
+                        .("Reference lines on an absolute axis"),
+                        paste(.("Median/Protocol reference lines measure a duration from each patient's own start, so they cannot be placed on an absolute axis where patients begin at different points."),
+                              advice))
+                }
                 if (is_date_scale && identical(self$options$timeDisplay, "absolute")) {
-                    if (self$options$referenceLines %in% c("median", "protocol")) {
-                        note_html <- paste0(
-                            "<div style='background-color: rgba(255, 203, 33, 0.14); border:1px solid #f0c36d; color: inherit; padding:12px; border-radius:6px; margin:10px 0;'>",
-                            "<strong>", .("Reference lines on absolute dates:"), "</strong> ",
-                            .("Median/Protocol reference lines are not shown for absolute date scales because patient timelines start on different calendar dates."),
-                            " ", .("Use 'Custom Time' with 'Custom Reference Date' or a time offset instead."),
-                            "</div>"
-                        )
-                        self$results$validationReport$setContent(note_html)
-                        try(self$results$validationReport$setVisible(TRUE), silent = TRUE)
-                    } else if (self$options$referenceLines %in% c("custom")) {
+                    if (self$options$referenceLines %in% c("custom")) {
                         # If custom selected but no date provided, we fall back to offset; inform the user once
                         cref_str <- tryCatch(self$options$customReferenceDate, error = function(e) NULL)
-                        if (is.null(cref_str) || nchar(trimws(as.character(cref_str))) == 0) {
-                            note_html <- paste0(
-                                "<div style='background-color: rgba(33, 159, 43, 0.1); border:1px solid #a5d6a7; color: inherit; padding:12px; border-radius:6px; margin:10px 0;'>",
-                                "<strong>", .("Custom reference in absolute mode:"), "</strong> ",
-                                .("No 'Custom Reference Date' provided; using 'Custom Reference Time' as an offset from the earliest start date."),
-                                "</div>"
-                            )
-                            self$results$validationReport$setContent(note_html)
-                            try(self$results$validationReport$setVisible(TRUE), silent = TRUE)
+                        cref_blank <- is.null(cref_str) || nchar(trimws(as.character(cref_str))) == 0
+                        if (cref_blank) {
+                            private$.addNotice("INFO",
+                                .("Custom reference in absolute mode"),
+                                .("No 'Custom Reference Date' provided; using 'Custom Reference Time' as an offset from the earliest start date."))
+                        } else if (is.null(private$.parseCustomReferenceDate(cref_str))) {
+                            # A date that cannot be parsed used to fall through to
+                            # the same silent offset fallback as an EMPTY box, so
+                            # the reference line was drawn somewhere the user did
+                            # not ask for and nothing said the date had been
+                            # discarded. It is parsed with the Date Format chosen
+                            # for the data, so an ISO string against dmy data
+                            # fails - which is why the format is named here.
+                            private$.addNotice("WARNING", .("Custom reference date not understood"), sprintf(
+                                .("The Custom Reference Date '%s' could not be read using the selected Date Format (%s), so it was ignored and the reference line falls back to Custom Reference Time measured from the earliest start date. Enter the date in the same format as your data, or clear the box to use the offset deliberately."),
+                                as.character(cref_str), private$.dateFormatWord()))
                         }
                     }
                 }
@@ -1849,19 +2487,37 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 private$.updateExportData(patient_data, milestone_data, event_data, stats)
                 
                 # Prepare plot data with all enhancements
+                # Keep the state to what the renderer actually draws from.
+                # It carried the whole `stats` list - including
+                # `patient_summary`, a row per patient - and `interpretation`,
+                # which no renderer has ever read: 0.30 MB at 2000 patients and
+                # 1.51 MB at 10000, saved into every .omv and re-read on every
+                # resize. The renderer uses exactly these four scalars.
+                # Only the columns the renderer draws from. .createGgswimPlot and
+                # .addReferenceLines read patient_id, start_time, end_time and
+                # response_label; the other six (original_start, original_end,
+                # anchor_start, response, censor_status, patient_group) were 42%
+                # of patient_data - 785 KB at 10 000 patients - written into
+                # every .omv and re-read on every resize.
+                plot_cols <- intersect(
+                    c("patient_id", "start_time", "end_time", "response_label", "response"),
+                    names(patient_data))
                 plot_state <- list(
-                    patient_data = patient_data,
+                    patient_data = patient_data[, plot_cols, drop = FALSE],
                     milestone_data = milestone_data,
                     event_data = event_data,
                     arrow_data = arrow_data,
-                    stats = stats,
-                    interpretation = interpretation,
+                    stats = list(
+                        n_patients = stats$n_patients,
+                        median_duration = stats$median_duration,
+                        max_duration = stats$max_duration,
+                        total_person_time = stats$total_person_time
+                    ),
                     options = list(
                         timeUnit = self$options$timeUnit,
                         laneWidth = self$options$laneWidth,
                         markerSize = self$options$markerSize,
                         theme = self$options$plotTheme,
-                        colorPalette = self$options$colorPalette,
                         showLegend = self$options$showLegend,
                         referenceLines = self$options$referenceLines,
                         customReferenceTime = self$options$customReferenceTime
@@ -1869,6 +2525,18 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 )
                 
                 self$results$plot$setState(plot_state)
+
+                # The renderer silently swaps High Contrast for viridis above 8
+                # categories; say so here, where a notice can still be rendered.
+                if (identical(self$options$colorPalette, "contrast") &&
+                    "response_label" %in% names(patient_data)) {
+                    n_lvl <- length(unique(stats::na.omit(
+                        as.character(patient_data$response_label))))
+                    if (n_lvl > 8)
+                        private$.addNotice("INFO", .("Palette changed"), sprintf(
+                            .("The High Contrast palette provides 8 colours and the response variable has %d categories, so the plot uses the Viridis palette instead. Group the response categories to keep High Contrast."),
+                            n_lvl))
+                }
                 
                 # Generate clinical interpretation if requested
                 if (self$options$showInterpretation) {
@@ -1882,6 +2550,19 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 }
 
             }, error = function(e) {
+                # Blank whatever was already written before the failure. One
+                # tryCatch wraps ~250 lines from validation to the copy-ready
+                # report, so a failure partway through left the Summary table
+                # fully populated with real numbers sitting beside a red error
+                # box, with nothing saying those numbers come from a run that did
+                # not finish. Same reset the top of .run() performs.
+                for (tbl in c("personTimeTable", "milestoneTable", "eventMarkerTable",
+                              "groupComparisonTest", "timelineData", "summaryData"))
+                    try(self$results[[tbl]]$deleteRows(), silent = TRUE)
+                try(self$results$interpretation$setContent(''), silent = TRUE)
+                try(self$results$copyReadyReport$setContent(''), silent = TRUE)
+                try(private$.resetSummaryTable(), silent = TRUE)
+
                 error_msg <- paste(
                     "<div style='color: red; padding: 10px; border: 1px solid red; border-radius: 5px;'>",
                     "<h4>", .("Error in Swimmer Plot Analysis"), "</h4>",
@@ -1926,6 +2607,24 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             summary_table$setRow(rowKey = 4L, values = list(value = round(stats$mean_duration, 2)))
             summary_table$setRow(rowKey = 5L, values = list(value = round(stats$total_person_time, 2)))
 
+            # This table has one Value column carrying counts, durations and
+            # percentages, and it used to have no note at all unless a response
+            # variable was selected - so a reader could not tell whether 249 was
+            # days or months. It also prints Mean Duration and Total Person-Time
+            # three rows apart on DIFFERENT definitions (9.33 x 3 = 28 against a
+            # reported 22 on a gapped fixture), which nothing reconciled.
+            summary_table$setNote("units", .fmt(
+                .("Durations and person-time are in {unit}; rate rows are percentages. Mean Duration spans each patient's first start to last end, so it includes any gaps between episodes, while Total Person-Time is the union of the episodes themselves and excludes them - the two therefore differ whenever a patient has a treatment gap."),
+                unit = private$.timeUnitWord()))
+
+            # Response rows are appended fresh each run: .resetSummaryTable(), called
+            # at the top of .run(), leaves only the five fixed rows, so a category
+            # that disappeared from the data cannot survive into this run. (It used
+            # to: the rows were appended once and thereafter setRow()'d with nothing
+            # ever removing one, so deleting the last SD patient left a stale "SD
+            # Rate (2/8)" row and the rates summed to 125%, contradicting the
+            # footnote below that promises the counts add to the denominator.)
+
             # Add response statistics if available. These rows are appended, so
             # re-set a key a previous run already created rather than adding it
             # twice; a changed responseVar clears the table via clearWith.
@@ -1933,7 +2632,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 for (response in names(stats$response_counts)) {
                     row_key <- paste0("response_", response)
                     row_values <- list(
-                        metric = .fmt(.("{response} Rate (%)"), response = response),
+                        metric = .fmt(.("{response} Rate ({n}/{N})"),
+                                      response = response,
+                                      n = stats$response_counts[[response]],
+                                      N = stats$response_denominator),
                         value = round(stats$response_percentages[[response]], 1)
                     )
                     if (any(vapply(summary_table$rowKeys, identical, logical(1), row_key)))
@@ -1941,6 +2643,30 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     else
                         summary_table$addRow(rowKey = row_key, values = row_values)
                 }
+
+                # Every rate above divides by all patients, so the patients with
+                # no recorded response are the remainder. Showing them is what
+                # lets a reader add the rows to 100% and see the denominator.
+                if (isTRUE(stats$n_response_missing > 0)) {
+                    miss_values <- list(
+                        metric = .fmt(.("No recorded response ({n}/{N})"),
+                                      n = stats$n_response_missing,
+                                      N = stats$response_denominator),
+                        value = round(stats$n_response_missing /
+                                      stats$response_denominator * 100, 1))
+                    # NOT "response_<x>": a response level literally spelled
+                    # "missing" produces exactly that key, and this row then
+                    # overwrote the category's own row.
+                    if (any(vapply(summary_table$rowKeys, identical, logical(1), "no_recorded_response")))
+                        summary_table$setRow(rowKey = "no_recorded_response", values = miss_values)
+                    else
+                        summary_table$addRow(rowKey = "no_recorded_response", values = miss_values)
+                }
+
+                # Name the denominator once, beside the rows that use it.
+                summary_table$setNote("response_denominator", sprintf(
+                    .("Each row shows the count over all %d patients in the analysis, the same denominator as the Objective and Disease Control Rates. RECIST 1.1 section 4.9.1 requires rates over every patient rather than over a selected evaluable subset, so patients recorded as NE, with an unrecognised label, or with no response at all remain in the denominator and count as non-responders. The percentages are each rounded independently, so they need not add to exactly 100; the counts do."),
+                    stats$response_denominator))
             }
         },
         
@@ -1950,7 +2676,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # so a run whose data no longer supports the table kept stale rows.
             self$results$personTimeTable$deleteRows()
 
+            # This table is person-time BY BEST RESPONSE, so it needs both
+            # options. With "Response analysis" off it went on printing CR/PR/
+            # SD/PD rows for the analysis the user had switched off.
             if (!self$options$personTimeAnalysis) return()
+            if (!isTRUE(self$options$responseAnalysis)) return()
 
             patient_summary <- stats$patient_summary
             if (is.null(patient_summary)) {
@@ -1959,8 +2689,15 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             if (!"response" %in% names(patient_summary)) return()
 
+            n_all_pt <- nrow(patient_summary)
+            pt_all <- sum(patient_summary$person_time, na.rm = TRUE)
             patient_summary <- patient_summary[!is.na(patient_summary$response), , drop = FALSE]
-            if (nrow(patient_summary) == 0) return()
+            n_excl_pt <- n_all_pt - nrow(patient_summary)
+            if (nrow(patient_summary) == 0) {
+                self$results$personTimeTable$setNote("empty",
+                    .("No person-time by response to show: no patient in the analysis has a recorded response."))
+                return()
+            }
 
             person_time_data <- patient_summary %>%
                 dplyr::group_by(response) %>%
@@ -1977,16 +2714,34 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             for (i in seq_len(nrow(person_time_data))) {
                 self$results$personTimeTable$addRow(rowKey = i, values = list(
-                    response_type = as.character(person_time_data$response[i]),
+                    response_type = jmvcore::htmlEscape(as.character(person_time_data$response[i])),
                     n_patients = person_time_data$n_patients[i],
                     total_time = round(person_time_data$total_time[i], 2),
                     mean_time = round(person_time_data$mean_time[i], 2),
                     incidence_rate = round(person_time_data$followup_density[i], 3)
                 ))
             }
+            # The rows sum to less than Total Person-Time whenever a patient has no
+            # recorded response, and nothing said so: a 6-patient fixture summed
+            # to 50 against a reported 60. The summary table was given a
+            # "No recorded response" row for exactly this reason; this one gets
+            # the figure in a note instead, because it is keyed by response.
+            if (n_excl_pt > 0)
+                self$results$personTimeTable$setNote("excluded", .fmt(
+                    .("{n} of {N} patients have no recorded response and are not shown here, so these rows sum to {shown} of the {total} {unit} of total person-time reported in the summary."),
+                    n = n_excl_pt, N = n_all_pt,
+                    shown = round(sum(patient_summary$person_time, na.rm = TRUE), 2),
+                    total = round(pt_all, 2), unit = private$.timeUnitWord()))
+
             self$results$personTimeTable$setNote("density", .fmt(
-                .("Follow-up density = patients per 100 {unit} of person-time (a descriptive measure, not an event rate). Times are in {unit}."),
-                unit = self$options$timeUnit))
+                .("Follow-up density = patients per 100 {unit} of person-time (a descriptive measure, not an event rate). It is exactly 100 divided by Mean Time in the same row, so it carries no information beyond that column. Times are in {unit}."),
+                unit = private$.timeUnitWord()))
+            # Guarantee-time bias. Splitting follow-up by BEST response is the
+            # textbook case: a patient must survive long enough to be assessed
+            # as a responder, so responders have longer follow-up by
+            # construction, whatever the treatment does.
+            self$results$personTimeTable$setNote("guarantee_time",
+                .("Descriptive only. Time is split by BEST overall response, which a patient can only achieve by living long enough to be assessed, so responders accumulate more follow-up by construction (guarantee-time bias). These rows must not be read as a survival benefit of responding: use a landmark analysis or treat response as a time-dependent covariate."))
         },
         
         # Milestone table population
@@ -1994,7 +2749,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Clear FIRST so an empty-input run does not keep stale rows
             self$results$milestoneTable$deleteRows()
 
-            if (nrow(milestone_data) == 0) return()
+            # The table is visible as soon as a milestone variable is chosen, so
+            # an empty one has to say why instead of sitting there blank.
+            if (nrow(milestone_data) == 0) {
+                self$results$milestoneTable$setNote("empty",
+                    .("No milestones to summarise. The milestone variable has no usable value for any patient in the analysis, or every milestone slot was skipped - see the notices above."))
+                return()
+            }
 
             milestone_numeric <- private$.convertTimesToNumeric(
                 milestone_data$time,
@@ -2006,7 +2767,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 dplyr::mutate(time_numeric = milestone_numeric) %>%
                 dplyr::filter(!is.na(time_numeric))
 
-            if (nrow(milestone_stats_data) == 0) return()
+            if (nrow(milestone_stats_data) == 0) {
+                self$results$milestoneTable$setNote("empty",
+                    .("No milestones to summarise: none of the milestone values could be converted to a time on this timeline."))
+                return()
+            }
 
             # Calculate milestone statistics
             milestone_stats <- milestone_stats_data %>%
@@ -2021,14 +2786,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 dplyr::mutate(
                     time_range = paste0(
                         round(min_time, 1), " - ", round(max_time, 1), " ", 
-                        self$options$timeUnit
+                        private$.timeUnitWord()
                     )
                 )
             
             # Populate the table
             for (i in seq_len(nrow(milestone_stats))) {
                 self$results$milestoneTable$addRow(rowKey = i, values = list(
-                    milestone_name = milestone_stats$label[i],
+                    milestone_name = jmvcore::htmlEscape(as.character(milestone_stats$label[i])),
                     n_events = milestone_stats$n_events[i],
                     median_time = round(milestone_stats$median_time[i], 2),
                     time_range = milestone_stats$time_range[i]
@@ -2041,7 +2806,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Clear FIRST so an empty-input run does not keep stale rows
             self$results$eventMarkerTable$deleteRows()
 
-            if (!self$options$showEventMarkers || is.null(event_data) || nrow(event_data) == 0) return()
+            if (!self$options$showEventMarkers) return()
+            if (is.null(event_data) || nrow(event_data) == 0) {
+                self$results$eventMarkerTable$setNote("empty",
+                    .("No event markers to summarise. Either no event type/time variable is selected, or none of the events falls inside a patient's timeline - see the notices above."))
+                return()
+            }
 
             event_numeric <- private$.convertTimesToNumeric(
                 event_data$time,
@@ -2053,9 +2823,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 dplyr::mutate(time_numeric = event_numeric) %>%
                 dplyr::filter(!is.na(time_numeric))
 
-            if (nrow(event_stats_data) == 0) return()
+            if (nrow(event_stats_data) == 0) {
+                self$results$eventMarkerTable$setNote("empty",
+                    .("No event markers to summarise: none of the event times could be converted to a time on this timeline."))
+                return()
+            }
 
             total_events <- nrow(event_stats_data)
+            n_pat_ev <- length(unique(as.character(event_stats_data$patient_id)))
 
             # Calculate event statistics
             event_stats <- event_stats_data %>%
@@ -2072,19 +2847,34 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Populate the table
             for (i in seq_len(nrow(event_stats))) {
                 self$results$eventMarkerTable$addRow(rowKey = i, values = list(
-                    event_type = event_stats$label[i],
+                    event_type = jmvcore::htmlEscape(as.character(event_stats$label[i])),
                     n_events = event_stats$n_events[i],
                     percent = event_stats$percent[i],
                     median_time = round(event_stats$median_time[i], 2)
                 ))
             }
+
+            # The percentage divides by event RECORDS, not patients, so one
+            # patient contributing three markers dominates it: a 3-patient
+            # fixture where 2 of 3 ever had an AE printed "80%". Name the
+            # denominator, and the unit for the median column, which the
+            # milestone table already prints in its own range column.
+            self$results$eventMarkerTable$setNote("denominator", .fmt(
+                .("Percentages are over the {n} event markers shown, not over the {p} patients who have one or the {N} patients in the analysis - a patient with several markers counts several times. Median Time is measured from each patient's own start, in {unit}."),
+                n = total_events, p = n_pat_ev,
+                N = if (!is.null(patient_data)) length(unique(as.character(patient_data$patient_id))) else n_pat_ev,
+                unit = private$.timeUnitWord()))
         },
         
         # Advanced metrics table population
         .updateAdvancedMetrics = function(patient_data, stats) {
-            # The rows exist only when the option is on (.init()) and were blanked
-            # at the start of .run(), so there is nothing to clear here.
-            if (!self$options$personTimeAnalysis) return()
+            # The rows exist only when the matching option is on (.init()) and
+            # were blanked at the start of .run(), so there is nothing to clear
+            # here. Each family is gated by the option that names it.
+            want_pt <- isTRUE(self$options$personTimeAnalysis)
+            want_resp <- isTRUE(self$options$responseAnalysis) &&
+                         !is.null(self$options$responseVar)
+            if (!want_pt && !want_resp) return()
 
             patient_summary <- stats$patient_summary
             if (is.null(patient_summary)) {
@@ -2094,50 +2884,57 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             n_patients_summary <- nrow(patient_summary)
 
             # Calculate advanced clinical metrics
-            metrics <- list(
+            metrics <- if (!want_pt) list() else list(
                 list(
                     key = "median_followup",
                     value = round(stats$median_followup_km, 2),
-                    ci = if (!is.na(stats$median_followup_ci_lower %||% NA_real_) &&
-                             !is.na(stats$median_followup_ci_upper %||% NA_real_))
-                        sprintf("%.2f - %.2f", stats$median_followup_ci_lower,
-                                stats$median_followup_ci_upper) else NA_character_,
-                    unit = self$options$timeUnit,
+                    ci = private$.followUpCIText(stats$median_followup_ci_lower,
+                                                 stats$median_followup_ci_upper),
+                    unit = private$.timeUnitWord(),
                     interpretation = if (identical(stats$median_followup_method, "reverse_km"))
-                        .("Reverse Kaplan-Meier estimate (Schemper & Smith 1996): event and censoring roles are swapped, so this estimates how long patients would have been observed. The plain median of observed durations is the median time to event-or-censoring and understates follow-up when events are common.")
+                        .("Reverse Kaplan-Meier estimate (Schemper & Smith 1996): event and censoring roles are swapped, so this estimates how long patients would have been observed. The plain median of observed durations is the median time to event-or-censoring and understates follow-up when events are common. The interval is survfit's default log transformation, not the log-log (Brookmeyer-Crowley) interval some trial reports use; the two differ materially with heavy censoring. Response-rate rows in this column instead carry exact binomial (Clopper-Pearson) intervals.")
                     else
-                        .("Plain median of the observed durations, because the reverse Kaplan-Meier estimate was not available. Read it as the median time to event-or-censoring, not as the length of follow-up.")
+                        # The estimator already records WHY it fell back - no
+                        # patient censored, or the reversed curve never reaching
+                        # 50%. That string previously had no consumer anywhere
+                        # in the module, so the user saw the fallback without
+                        # ever being told which of the two had happened.
+                        paste(
+                            .("Plain median of the observed durations, because the reverse Kaplan-Meier estimate was not available. Read it as the median time to event-or-censoring, not as the length of follow-up."),
+                            private$.followUpReasonText(
+                                stats$median_followup_reason_code %||% "",
+                                stats$median_followup_reason %||% ""))
                 ),
                 list(
                     key = "iqr",
                     value = round(stats$q3_duration - stats$q1_duration, 2),
                     ci = NA_character_,
-                    unit = self$options$timeUnit,
+                    unit = private$.timeUnitWord(),
                     interpretation = .("Middle 50% of follow-up duration range")
                 ),
                 list(
                     key = "person_time",
                     value = round(stats$total_person_time, 2),
                     ci = NA_character_,
-                    unit = sprintf(.("%s (cumulative)"), self$options$timeUnit),
+                    unit = sprintf(.("%s (cumulative)"), private$.timeUnitWord()),
                     interpretation = .("Total observation time across all patients")
                 ),
                 list(
                     key = "followup_density",
                     value = if (isTRUE(stats$total_person_time > 0)) round(n_patients_summary / stats$total_person_time * 100, 3) else NA_real_,
                     ci = NA_character_,
-                    unit = sprintf(.("per 100 %s"), self$options$timeUnit),
-                    interpretation = .("Number of patients per 100 units of observation time (descriptive metric)")
+                    unit = sprintf(.("per 100 %s"), private$.timeUnitWord()),
+                    interpretation = .("Number of patients per 100 units of observation time, i.e. 100 divided by the mean person-time per patient. It is not an event rate. Note it divides by person-time (the union of treatment episodes), not by Mean Duration, which spans first start to last end and so includes any gaps.")
                 )
             )
             
             # Add response-specific metrics if available
-            if (!is.null(stats$response_counts)) {
+            if (want_resp && !is.null(stats$response_counts)) {
                 response_counts <- stats$response_counts
                 total_responses <- sum(response_counts)
 
                 if (total_responses > 0) {
-                    rates <- private$.responseRates(response_counts)
+                    rates <- private$.responseRates(response_counts, n_patients_summary)
 
                     if (!rates$evaluable) {
                         private$.addNotice(
@@ -2154,7 +2951,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     # SAME denominator as the point estimates (RECIST-evaluable):
                     # computing the CI over all responses while the rate used the
                     # evaluable count printed an estimate outside its own interval.
-                    n_eval <- rates$n_evaluable
+                    n_eval <- rates$n_all
 
                     # Calculate exact binomial 95% confidence intervals
                     orr_ci <- NA_character_
@@ -2222,40 +3019,182 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
 
         # Group comparison statistical tests (Fisher's exact for ORR/DCR)
+        # Build the 2x2 with a FIXED orientation: rows are the groups in the
+        # user's own factor order, columns are (non-responder, responder).
+        # table() on a character vector sorted the groups alphabetically, so
+        # renaming a group could invert the odds ratio, and nothing on screen
+        # said which way it pointed.
+        .groupContingency = function(group, flag, levels_order) {
+            g <- factor(as.character(group), levels = levels_order)
+            f <- factor(flag, levels = c(FALSE, TRUE))
+            table(g, f)
+        },
+
+        # R's fisher.test() on such a table estimates the odds of the TRUE
+        # column in ROW 2 relative to ROW 1 (verified numerically), so the label
+        # names row 2 first. It also carries the interval fisher.test already
+        # computed and this table used to discard.
+        # A 2x2 whose outcome column is entirely empty - every patient a
+        # responder, or none - carries no information: fisher.test returns
+        # p = 1 and an odds ratio of 0 or Inf. Forcing both columns to exist
+        # (so the orientation is fixed) means that case must be screened here
+        # rather than falling out of table() having one column.
+        .groupTableIsTestable = function(tab) {
+            !is.null(tab) && nrow(tab) >= 2 && ncol(tab) == 2 &&
+                all(rowSums(tab) > 0) && all(colSums(tab) > 0)
+        },
+
+        .groupTestStatistic = function(tab, test) {
+            if (is.null(test$estimate) || nrow(tab) != 2)
+                return(.("Fisher's exact test"))
+            lv <- rownames(tab)
+            ci <- test$conf.int
+            est <- unname(test$estimate)
+            # A zero cell sends the odds ratio (and one interval bound) to Inf,
+            # and the whole interval used to be discarded - throwing away the
+            # finite bound, which is the half carrying the evidence. A DCR row
+            # read "OR = Inf" with no interval while fisher.test had returned
+            # (1.20, Inf). .followUpCIText solved this for the reverse-KM median;
+            # format each bound independently here too.
+            fmt <- function(x) if (is.finite(x)) sprintf("%.2f", x) else .("NR")
+            est_txt <- if (is.finite(est)) sprintf("%.2f", est) else .("not estimable (a zero cell)")
+            # Level names come from the user's data and this string is a table
+            # CELL, which jamovi renders with renderMode = "rich".
+            g2 <- jmvcore::htmlEscape(lv[2]); g1 <- jmvcore::htmlEscape(lv[1])
+            if (is.null(ci) || !any(is.finite(ci)))
+                return(sprintf(.("Fisher's exact test, OR (%s vs %s) = %s"),
+                               g2, g1, est_txt))
+            sprintf(.("Fisher's exact test, OR (%s vs %s) = %s, 95%% CI %s to %s"),
+                    g2, g1, est_txt, fmt(ci[1]), fmt(ci[2]))
+        },
+
         .updateGroupComparisonTests = function(patient_data, stats) {
             # Clear FIRST so a run without a group variable does not keep stale rows
             self$results$groupComparisonTest$deleteRows()
 
             if (is.null(self$options$groupVar)) return()
 
+            # "Response analysis" off used to leave these ORR/DCR Fisher tests
+            # running and reporting p-values for the analysis the user had just
+            # switched off.
+            if (!isTRUE(self$options$responseAnalysis)) return()
+
+            # Every abandonment below says why. The table is visible whenever a
+            # group variable is chosen, so a bare return() left an empty table
+            # on the page with nothing to explain it.
+            explain <- function(msg) {
+                self$results$groupComparisonTest$setNote("not_run", msg)
+                invisible(NULL)
+            }
+
             # Need patient_summary with both response and group
             patient_summary <- stats$patient_summary
             if (is.null(patient_summary)) return()
 
             # Check if we have both response and group data
-            if (!"response" %in% names(patient_summary) || !"patient_group" %in% names(patient_summary)) return()
-
-            # Remove rows with missing response or group
-            df <- patient_summary[!is.na(patient_summary$response) & !is.na(patient_summary$patient_group), ]
-            if (nrow(df) == 0) return()
-
-            # Normalize responses (should already be normalized, but ensure consistency)
-            df$response <- sapply(df$response, private$.normalizeResponse, USE.NAMES = FALSE)
-
-            # Get unique groups
-            groups <- unique(df$patient_group)
-            if (length(groups) < 2) {
-                # No comparison possible with <2 groups
+            # Ask the OPTION, not the column: .summarizeByPatient always emits a
+            # `response` column, all NA when no variable was chosen, so the
+            # column test passed and the table went on to publish a denominator
+            # note reading "A: 0 of 4 responded" for data that records no
+            # responses at all.
+            if (is.null(self$options$responseVar) ||
+                !"response" %in% names(patient_summary)) {
+                explain(.("No comparison was run: the group tests compare objective response and disease control between groups, and no Response/Status variable is selected."))
                 return()
             }
+            if (!"patient_group" %in% names(patient_summary)) return()
+
+            # Keep every patient who has a GROUP. A patient with no recorded
+            # response is a non-responder, not an exclusion - `NA %in% c("CR",
+            # "PR")` is FALSE, so they land in the non-responder column by
+            # construction. Dropping them made this test divide by a different
+            # cohort from the ORR printed above it: on the audit's 12-patient
+            # example the odds ratio came from n = 11 while the ORR came from
+            # n = 9, and neither matched the 12 in "Study included 12 patients".
+            df <- patient_summary[!is.na(patient_summary$patient_group), ]
+            if (nrow(df) == 0) {
+                explain(.("No comparison was run: no patient has a value in the group variable."))
+                return()
+            }
+
+            # A4: patients with no group value are dropped here. The missing-
+            # censoring path discloses its exclusions; this one did not, so the
+            # note could say "over all 24 patients" while the ORR above was over
+            # 30, with nothing connecting the two.
+            n_no_group <- sum(is.na(patient_summary$patient_group))
+            if (n_no_group > 0)
+                private$.addNotice("WARNING", .("Patients excluded from the group comparison"), sprintf(
+                    .("%d of %d patients have no value in the grouping variable and are excluded from this comparison only. The response rates reported above still cover all %d patients, so the two denominators differ."),
+                    n_no_group, nrow(patient_summary), nrow(patient_summary)))
+
+            # A3: the same RECIST guard .updateAdvancedMetrics uses. Without it
+            # this table published "Arm A: 0 of 19 responded (0.0%)" for a
+            # response variable the notices panel had just refused to score,
+            # directly contradicting the warning printed above it.
+            if (!is.null(stats$response_counts)) {
+                rates_chk <- private$.responseRates(stats$response_counts, nrow(df))
+                if (!is.null(rates_chk) && !isTRUE(rates_chk$evaluable)) {
+                    explain(.("No comparison was run: objective response and disease control are defined only for RECIST-coded responses (CR, PR, SD, PD), and none of the values in the response variable could be recognised as one. Recode the response variable to compare groups."))
+                    return()
+                }
+            }
+
+            # Normalize responses (should already be normalized, but ensure consistency)
+            df$response <- private$.normalizeResponses(df$response)
+
+            # The user's own factor order, not alphabetical. patient_data keeps
+            # the factor made when the variable was read; the per-patient
+            # summary flattened it to character.
+            levels_order <- if (!is.null(patient_data) &&
+                                "patient_group" %in% names(patient_data) &&
+                                is.factor(patient_data$patient_group))
+                levels(patient_data$patient_group)
+            else sort(unique(as.character(df$patient_group)))
+            levels_order <- levels_order[levels_order %in% as.character(df$patient_group)]
+
+            groups <- levels_order
+            if (length(groups) < 2) {
+                explain(sprintf(
+                    .("No comparison was run: Fisher's exact test needs at least two groups and the group variable has %d in these data."),
+                    length(groups)))
+                return()
+            }
+
+            # A4: a grouping variable with one level per patient is almost always
+            # a continuous column chosen by mistake - the option permits numeric,
+            # and a continuous time column produced a silent 24-group Fisher test
+            # in which every group read "1 of 1 responded". Say so rather than
+            # publishing a p-value for it.
+            grp_n <- vapply(groups, function(g) sum(as.character(df$patient_group) == g), 0L)
+            if (length(groups) > 10 || any(grp_n < 2))
+                private$.addNotice("STRONG_WARNING", .("Grouping variable may not be categorical"), sprintf(
+                    .("The grouping variable splits %d patients into %d groups, %d of which contain a single patient. A comparison across that many tiny groups has almost no power and is usually a sign that a continuous variable was selected by mistake. Choose a variable with a small number of clinically meaningful categories."),
+                    nrow(df), length(groups), sum(grp_n < 2)))
+
+            # Per-group counts, so the reader can see the cohort the test used
+            # and check it against the rates above. Without these the odds ratio
+            # was a bare number with no way to tell which group did better.
+            per_group <- vapply(levels_order, function(g) {
+                inb <- as.character(df$patient_group) == g
+                resp <- sum(df$response[inb] %in% c("CR", "PR"))
+                sprintf(.("%s: %d of %d responded (%.1f%%)"),
+                        jmvcore::htmlEscape(g), resp, sum(inb),
+                        if (sum(inb) > 0) resp / sum(inb) * 100 else NA_real_)
+            }, character(1))
+            self$results$groupComparisonTest$setNote("denominator", paste(
+                sprintf(
+                    .("Rates are over all %d patients in the comparison who have a group value, split by group below: not-evaluable, unrecognised and unrecorded responses count as non-responders, the same rule the Objective Response Rate uses. This is what lets the test and the rate above it be read together."),
+                    nrow(df)),
+                sprintf(.("Objective response by group - %s."), paste(per_group, collapse = "; "))))
 
             # Perform Fisher's exact test for ORR (CR + PR vs others)
             orr_contingency <- tryCatch({
                 df$responder <- df$response %in% c("CR", "PR")
-                table(df$patient_group, df$responder)
+                private$.groupContingency(df$patient_group, df$responder, levels_order)
             }, error = function(e) NULL)
 
-            if (!is.null(orr_contingency) && nrow(orr_contingency) >= 2 && ncol(orr_contingency) >= 2) {
+            orr_ran <- FALSE
+            if (private$.groupTableIsTestable(orr_contingency)) {
                 orr_test <- tryCatch({
                     fisher.test(orr_contingency)
                 }, error = function(e) NULL)
@@ -2271,23 +3210,22 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         comparison = .("Objective Response Rate (ORR)"),
                         # fisher.test() returns an odds ratio only for a 2x2 table;
                         # with 3+ groups this printed "OR = NA".
-                        test_statistic = if (!is.null(orr_test$estimate))
-                            sprintf(.("Fisher's exact test, OR = %.2f"), orr_test$estimate)
-                        else
-                            .("Fisher's exact test"),
+                        test_statistic = private$.groupTestStatistic(orr_contingency, orr_test),
                         p_value = orr_test$p.value,
                         interpretation = orr_interpretation
                     ))
+                    orr_ran <- TRUE
                 }
             }
 
             # Perform Fisher's exact test for DCR (CR + PR + SD vs others)
             dcr_contingency <- tryCatch({
                 df$disease_control <- df$response %in% c("CR", "PR", "SD")
-                table(df$patient_group, df$disease_control)
+                private$.groupContingency(df$patient_group, df$disease_control, levels_order)
             }, error = function(e) NULL)
 
-            if (!is.null(dcr_contingency) && nrow(dcr_contingency) >= 2 && ncol(dcr_contingency) >= 2) {
+            dcr_ran <- FALSE
+            if (private$.groupTableIsTestable(dcr_contingency)) {
                 dcr_test <- tryCatch({
                     fisher.test(dcr_contingency)
                 }, error = function(e) NULL)
@@ -2301,13 +3239,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                     self$results$groupComparisonTest$addRow(rowKey = 2, values = list(
                         comparison = .("Disease Control Rate (DCR)"),
-                        test_statistic = if (!is.null(dcr_test$estimate))
-                            sprintf(.("Fisher's exact test, OR = %.2f"), dcr_test$estimate)
-                        else
-                            .("Fisher's exact test"),
+                        test_statistic = private$.groupTestStatistic(dcr_contingency, dcr_test),
                         p_value = dcr_test$p.value,
                         interpretation = dcr_interpretation
                     ))
+                    dcr_ran <- TRUE
                 }
             }
 
@@ -2316,25 +3252,35 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     .("Two Fisher's exact tests (ORR and DCR) are reported with unadjusted p-values; interpret them jointly rather than as independent evidence."))
             }
 
-            # Check for low cell counts in contingency tables
-            min_cell_orr <- if (!is.null(orr_contingency)) min(orr_contingency) else NA
-            min_cell_dcr <- if (!is.null(dcr_contingency)) min(dcr_contingency) else NA
+            # S34: a table that is visible and empty, or missing one of its two
+            # rows, must say why rather than leaving the reader to guess.
+            if (!orr_ran && !dcr_ran) {
+                self$results$groupComparisonTest$setNote("not_testable",
+                    .("No group comparison could be run. Fisher's exact test needs at least two groups and both outcomes present: here every patient in the comparison had the same outcome (all responders or none, and likewise for disease control), so there is nothing to compare. The per-group counts are in the note above."))
+            } else if (!orr_ran) {
+                self$results$groupComparisonTest$setNote("orr_not_testable",
+                    .("The objective-response row is absent because every patient in the comparison had the same response status - all responders or none - so Fisher's exact test has nothing to compare on that outcome."))
+            } else if (!dcr_ran) {
+                self$results$groupComparisonTest$setNote("dcr_not_testable",
+                    .("The disease-control row is absent because every patient in the comparison had the same disease-control status, so Fisher's exact test has nothing to compare on that outcome."))
+            }
+
+            # S24: only warn about the cells of a test that was actually
+            # reported. This used to read min() off any contingency table that
+            # had been built, so a run with no test at all still showed
+            # "Fisher exact test has cells with counts below 5".
+            min_cell_orr <- if (orr_ran) min(orr_contingency) else NA
+            min_cell_dcr <- if (dcr_ran) min(dcr_contingency) else NA
             min_cells <- c(min_cell_orr, min_cell_dcr)
             # min(c(NA, NA), na.rm = TRUE) is Inf plus an R warning.
             min_cell <- if (all(is.na(min_cells))) NA else min(min_cells, na.rm = TRUE)
 
             if (!is.na(min_cell) && min_cell < 5) {
-                # REPLACED Notice with HTML to prevent serialization errors
-                warning_html <- paste0(
-                    "<div style='background-color: rgba(255, 202, 33, 0.23);border-left:4px solid #ffc107;padding:12px;margin:10px 0;font-family:Arial,sans-serif; color: inherit;'>",
-                    "<strong style='color: inherit;'>", .("Warning:"), "</strong> ",
+                private$.addNotice("WARNING",
+                    .("Small cell counts in Fisher's exact test"),
                     sprintf(
                         .("Fisher exact test has cells with counts below 5 (minimum cell count = %d). The test remains valid, but interpret p-values cautiously with small cell counts. Consider grouping categories or collecting more data."),
-                        min_cell),
-                    "</div>"
-                )
-                self$results$warningNotice$setContent(warning_html)
-                self$results$warningNotice$setVisible(TRUE)
+                        min_cell))
             }
         },
 
@@ -2351,6 +3297,18 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 per_patient <- stats$patient_summary
                 if (!is.null(per_patient) && nrow(per_patient) > 0) {
+                    # Put the rows in the order the FIGURE reads, top first.
+                    # .applySorting sets levels to rev(unique(ordered_ids))
+                    # because ggplot draws level 1 at the bottom, so taking
+                    # per_patient[1:500] took the plot's BOTTOM 500 - with the
+                    # default duration_desc that is the 500 SHORTEST timelines,
+                    # and the 100 longest-followed patients were the ones
+                    # dropped, under a note claiming the order matched the plot.
+                    if (is.factor(patient_data$patient_id)) {
+                        top_down <- rev(levels(patient_data$patient_id))
+                        ord <- order(match(as.character(per_patient$patient_id), top_down))
+                        per_patient <- per_patient[ord, , drop = FALSE]
+                    }
                     has_response <- "response" %in% names(per_patient)
 
                     # Absolute-date timelines used to export Start/End as raw
@@ -2369,13 +3327,22 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         tbl$setNote("scale", .fmt(
                             .("Start/End are offsets from the earliest start date ({origin}), in {unit}; Duration is in {unit}."),
                             origin = format(origin, "%Y-%m-%d"),
-                            unit = self$options$timeUnit))
+                            unit = private$.timeUnitWord()))
                     } else {
                         st_exp <- private$.asNumericTime(per_patient$start_time)
                         en_exp <- private$.asNumericTime(per_patient$end_time)
                     }
 
-                    for (i in seq_len(nrow(per_patient))) {
+                    # jmvcore's addRow() is quadratic in the number of rows
+                    # already in the table - measured on a bare Table, 250 rows
+                    # take 2.1 s, 500 take 8.3 s and 1000 take 32.9 s, with the
+                    # values themselves costing nothing. A 2000-patient cohort
+                    # spent 135 s of every run inside this loop. There is no
+                    # cheaper Table API (setRow on pre-added rows is identical),
+                    # so the on-screen export is capped and the cap is stated.
+                    export_cap <- 500L
+                    n_export <- min(nrow(per_patient), export_cap)
+                    for (i in seq_len(n_export)) {
                         tbl$addRow(rowKey = i, values = list(
                             patient_id = as.character(per_patient$patient_id[i]),
                             start_time = st_exp[i],
@@ -2385,6 +3352,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                                 as.character(per_patient$response[i]) else ""
                         ))
                     }
+                    if (nrow(per_patient) > export_cap)
+                        tbl$setNote("capped", sprintf(
+                            .("Showing the first %d of %d patients, in the order the plot uses. Building this table is slow for large cohorts, so it is capped. The plot, the statistics and every other table use all %d patients."),
+                            n_export, nrow(per_patient), nrow(per_patient)))
                 }
             }
 
@@ -2433,8 +3404,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     "<h4>", .("Export Information"), "</h4>",
                     "<p>", .("Data has been exported to the following outputs:"), "</p>",
                     "<ul>",
-                    if (self$options$exportTimeline) paste0("<li>", .("<strong>Timeline Data:</strong> Complete patient timeline dataset with processed variables"), "</li>") else "",
-                    if (self$options$exportSummary) paste0("<li>", .("<strong>Summary Statistics:</strong> Comprehensive summary metrics and clinical indicators"), "</li>") else "",
+                    if (self$options$exportTimeline) paste0("<li><strong>", .("Timeline Data:"), "</strong> ", .("Complete patient timeline dataset with processed variables"), "</li>") else "",
+                    if (self$options$exportSummary) paste0("<li><strong>", .("Summary Statistics:"), "</strong> ", .("Comprehensive summary metrics and clinical indicators"), "</li>") else "",
                     "</ul>",
                     "<p><em>", .("Note: Exported data can be accessed through the Output panel and used for external analysis."), "</em></p>",
                     "</div>"
@@ -2451,10 +3422,17 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "<h5 style='color: inherit;'>", .("Timeline Analysis:"), "</h5>",
                 "<p>", interpretation$timeline, "</p>",
                 "</div>",
-                "<div style='margin: 10px 0;'>",
-                "<h5 style='color: inherit;'>", .("Person-Time Analysis:"), "</h5>",
-                "<p>", interpretation$person_time, "</p>",
-                "</div>"
+                # Unticking "Person-time analysis" removed the table but left
+                # this paragraph, so the interpretation went on quoting a total
+                # person-time that no longer appeared anywhere on the page.
+                if (isTRUE(self$options$personTimeAnalysis) &&
+                    !is.null(interpretation$person_time))
+                    paste0(
+                        "<div style='margin: 10px 0;'>",
+                        "<h5 style='color: inherit;'>", .("Person-Time Analysis:"), "</h5>",
+                        "<p>", interpretation$person_time, "</p>",
+                        "</div>")
+                else ""
             )
 
             if (self$options$responseAnalysis && !is.null(interpretation$response)) {
@@ -2484,7 +3462,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             
             tryCatch({
                 # Create enhanced ggswim plot
-                p <- private$.createGgswimPlot(patient_data, milestone_data, event_data, arrow_data, opts, stats)
+                p <- private$.createGgswimPlot(patient_data, milestone_data, event_data, arrow_data, opts, stats, theme)
                 
                 print(p)
                 return(TRUE)
@@ -2505,7 +3483,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             })
         },
         
-        .createGgswimPlot = function(patient_data, milestone_data, event_data, arrow_data, opts, stats) {
+        .createGgswimPlot = function(patient_data, milestone_data, event_data, arrow_data, opts, stats, theme = NULL) {
             # Check if ggswim is available
             if (!requireNamespace("ggswim", quietly = TRUE)) {
                 return(private$.createFallbackPlot(patient_data, milestone_data, event_data, opts, stats,
@@ -2514,6 +3492,12 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # Create base plot with swim lanes
             p <- ggplot2::ggplot()
+
+            # Colour by the NORMALISED label so the figure's legend and the
+            # tables name the same categories (see .validateAndProcessData).
+            # Older saved states carry only `response`.
+            if ("response_label" %in% names(patient_data))
+                patient_data$response <- patient_data$response_label
 
             # Add swim lanes with enhanced styling and error boundary
             if ("response" %in% names(patient_data)) {
@@ -2661,16 +3645,42 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # Apply color palette (colorblind-safe options)
             if (!is.null(self$options$colorPalette) && self$options$colorPalette != "default") {
-                if (self$options$colorPalette == "viridis") {
+                if (self$options$colorPalette == "jamovi") {
+                    # Library-review rule: offer the global jamovi palette so a
+                    # figure matches the rest of the user's output. `theme` is a
+                    # parameter of every render function and carries the palette
+                    # the user chose in jamovi's preferences; fall back to "jmv"
+                    # when a caller (a test harness) passes none.
+                    pal <- if (!is.null(theme)) theme$palette else NULL
+                    n_lv <- if ("response" %in% names(patient_data))
+                        length(unique(stats::na.omit(as.character(patient_data$response)))) else 1L
+                    cols <- jmvcore::colorPalette(max(n_lv, 1L), pal %||% "jmv", "color")
+                    p <- p + ggplot2::scale_color_manual(values = unname(cols))
+                    p <- p + ggplot2::scale_fill_manual(values = unname(cols))
+                } else if (self$options$colorPalette == "viridis") {
                     # Viridis palette - perceptually uniform and colorblind-safe
                     p <- p + ggplot2::scale_color_viridis_d(option = "D", end = 0.9)
                     p <- p + ggplot2::scale_fill_viridis_d(option = "D", end = 0.9)
                 } else if (self$options$colorPalette == "contrast") {
-                    # High contrast palette (Okabe-Ito colorblind-safe palette)
+                    # High contrast palette (Okabe-Ito colorblind-safe palette).
+                    # It has exactly 8 colours, and a manual scale ERRORS when
+                    # the data has more levels ("Insufficient values in manual
+                    # scale") - the error was caught by the renderer's fallback,
+                    # so choosing High Contrast with 9+ response categories
+                    # silently replaced the whole swimmer plot with the
+                    # simplified one. Hand those cases to viridis, which
+                    # generates as many colours as are needed.
                     contrast_colors <- c("#000000", "#E69F00", "#56B4E9", "#009E73",
                                         "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-                    p <- p + ggplot2::scale_color_manual(values = contrast_colors)
-                    p <- p + ggplot2::scale_fill_manual(values = contrast_colors)
+                    n_lvl <- if ("response" %in% names(patient_data))
+                        length(unique(stats::na.omit(as.character(patient_data$response)))) else 0
+                    if (n_lvl > length(contrast_colors)) {
+                        p <- p + ggplot2::scale_color_viridis_d(option = "D", end = 0.9)
+                        p <- p + ggplot2::scale_fill_viridis_d(option = "D", end = 0.9)
+                    } else {
+                        p <- p + ggplot2::scale_color_manual(values = contrast_colors)
+                        p <- p + ggplot2::scale_fill_manual(values = contrast_colors)
+                    }
                 } else if (self$options$colorPalette == "monochrome") {
                     # Monochrome with varying shades for grayscale publications
                     p <- p + ggplot2::scale_color_grey(start = 0.2, end = 0.8)
@@ -2680,14 +3690,23 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # Add labels with clinical context
             is_date_scale <- inherits(patient_data$start_time, c("Date", "POSIXct"))
-            x_label <- if (is_date_scale) .("Date") else .fmt(.("Time ({unit})"), unit = self$options$timeUnit)
+            x_label <- if (is_date_scale) .("Date") else .fmt(.("Time ({unit})"), unit = private$.timeUnitWord(opts$timeUnit))
             p <- p + ggplot2::labs(
                 title = .("Patient Timeline Analysis"),
                 subtitle = sprintf(.("N=%d patients | Median duration: %.1f %s | Total person-time: %.1f %s"),
-                                 stats$n_patients, stats$median_duration, self$options$timeUnit,
-                                 stats$total_person_time, self$options$timeUnit),
+                                 stats$n_patients, stats$median_duration, private$.timeUnitWord(opts$timeUnit),
+                                 stats$total_person_time, private$.timeUnitWord(opts$timeUnit)),
                 x = x_label,
-                y = .("Patient ID")
+                y = .("Patient ID"),
+                # ggswim's arrow layer maps no aesthetic, so it never produces a
+                # legend key: the reader saw green arrows with nothing naming
+                # them, and the only explanation lived in a glossary panel that
+                # is hidden by default and does not travel with an exported
+                # image. It is also not "still on treatment" - ANY censored or
+                # still-at-risk status draws one.
+                caption = if (!is.null(arrow_data) && nrow(arrow_data) > 0)
+                    .("Arrow: patient still at risk (censored / alive) at the data cutoff.")
+                else NULL
             )
             
             # Legend handling
@@ -2700,8 +3719,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         
         .addReferenceLines = function(p, opts, stats, patient_data) {
             is_date_scale <- inherits(patient_data$start_time, c("Date", "POSIXct"))
+            duration_axis <- private$.isDurationAxis(patient_data)
             if (opts$referenceLines == "median") {
-                if (!is_date_scale) {
+                if (duration_axis) {
                     p <- p + ggplot2::geom_vline(
                         xintercept = stats$median_duration,
                         linetype = "dashed",
@@ -2720,7 +3740,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     )
                 }
             } else if (opts$referenceLines == "protocol") {
-                if (!is_date_scale) {
+                if (duration_axis) {
                     protocol_times <- private$.getProtocolReferenceTimes(stats$max_duration, opts$timeUnit)
                     if (length(protocol_times) > 0) {
                         for (t in protocol_times) {
@@ -2803,15 +3823,30 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 map <- stats::setNames(tmp$sort_val, tmp$patient_id)
                 key <- unname(map[as.character(patient_data$patient_id)])
                 ord <- order(key, na.last = TRUE, method = "auto")
+
+                # A Sort Variable wins over Sort Order, which is reasonable but
+                # was invisible: duration_desc, duration_asc and patient_id all
+                # produced the identical picture and nothing said why.
+                if (!identical(self$options$sortOrder, "duration_desc")) {
+                    private$.addNotice(
+                        "INFO",
+                        .("Sort order overridden"),
+                        sprintf(
+                            .("Patients are ordered by the Sort Variable '%s'. The Sort Order setting is not applied while a Sort Variable is selected; clear it to sort by duration, patient ID or response."),
+                            sv))
+                }
             } else if (self$options$sortOrder == "patient_id") {
-                ord <- order(patient_data$patient_id, method = "auto")
+                # Numeric-looking IDs sort numerically. Plain order() is
+                # lexicographic, so 1, 2, 3, 10, 20 came out "1 10 2 20 3".
+                ids <- as.character(patient_data$patient_id)
+                num <- suppressWarnings(as.numeric(ids))
+                ord <- if (!any(is.na(num) & !is.na(ids)))
+                    order(num, method = "auto") else order(ids, method = "auto")
             } else if (self$options$sortOrder == "response" && "response" %in% names(patient_data)) {
                 # Clinical hierarchy (CR > PR > SD > PD > NE), not alphabetical
                 # factor order, which interleaved PD between PR and SD.
-                rank <- match(
-                    vapply(as.character(patient_data$response),
-                           private$.normalizeResponse, character(1), USE.NAMES = FALSE),
-                    c("CR", "PR", "SD", "PD", "NE"))
+                rank <- match(private$.normalizeResponses(patient_data$response),
+                              c("CR", "PR", "SD", "PD", "NE"))
                 ord <- order(rank, patient_data$patient_id, na.last = TRUE, method = "auto")
             } else {
                 if (self$options$sortOrder == "response") {
@@ -2826,8 +3861,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 ord <- order(sort_durations, decreasing = dec, method = "auto")
             }
 
+            # ggplot puts factor level 1 at the BOTTOM of a discrete y axis, so
+            # the levels are reversed here: "Duration (Longest First)" now reads
+            # longest-first from the TOP, which is how every reader scans a
+            # swimmer plot. Before this, all four sort orders were shown upside
+            # down.
             ordered_ids <- as.character(patient_data$patient_id[ord])
-            patient_data$patient_id <- factor(as.character(patient_data$patient_id), levels = unique(ordered_ids))
+            patient_data$patient_id <- factor(as.character(patient_data$patient_id),
+                                              levels = rev(unique(ordered_ids)))
             patient_data
         },
         
@@ -2962,27 +4003,46 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 .("median observed follow-up duration")
             )
 
+            # The interval belongs in the pasted sentence too - it was computed,
+            # shown in the table and then dropped from the text people actually
+            # publish.
+            fu_ci <- if (identical(fu_method, "reverse_km"))
+                private$.followUpCIText(stats$median_followup_ci_lower,
+                                        stats$median_followup_ci_upper) else NA_character_
+            fu_value_text <- if (!is.na(fu_ci))
+                sprintf(.("%.1f %s (95%% CI %s)"), fu_value, private$.timeUnitWord(), fu_ci)
+                else sprintf("%.1f %s", fu_value, private$.timeUnitWord())
+
+            # "1 patients" appeared in text offered for direct use in a
+            # manuscript. Two complete alternatives rather than a bare %d, so a
+            # translator can inflect each properly.
+            n_pat_text <- if (isTRUE(stats$n_patients == 1)) .("1 patient")
+                          else sprintf(.("%d patients"), stats$n_patients)
+
             basic_text <- sprintf(
-                .("Patient timelines were analyzed using swimmer plots to visualize treatment courses and clinical outcomes. The study included %d patients with a %s of %.1f %s; observed durations ranged from %.1f to %.1f %s. Total person-time was %.1f %s."),
-                stats$n_patients,
+                .("Patient timelines were analyzed using swimmer plots to visualize treatment courses and clinical outcomes. The study included %s with a %s of %s; observed durations ranged from %.1f to %.1f %s. Total person-time was %.1f %s."),
+                n_pat_text,
                 fu_label,
-                fu_value,
-                self$options$timeUnit,
+                fu_value_text,
                 stats$min_duration,
                 stats$max_duration,
-                self$options$timeUnit,
+                private$.timeUnitWord(),
                 stats$total_person_time,
-                self$options$timeUnit
+                private$.timeUnitWord()
             )
 
             # Add response analysis if available
             response_text <- ""
             if (self$options$responseAnalysis && "response" %in% names(patient_data) && !is.null(stats$response_counts)) {
-                rates <- private$.responseRates(stats$response_counts)
-                # RECIST-evaluable denominator throughout - the same one the
-                # point estimates use, so the pasted sentence cannot quote a
-                # rate and an interval computed over different cohorts.
-                n_eval <- rates$n_evaluable
+                rates <- private$.responseRates(stats$response_counts, stats$n_patients)
+                # All patients in the analysis - the same denominator the
+                # point estimates and their intervals use, so the pasted
+                # sentence cannot quote a rate and an interval computed over
+                # different cohorts. RECIST 1.1 section 4.9.1 requires the rate
+                # over every patient, not over an evaluable subset; this
+                # sentence used to say "4/9 RECIST-evaluable patients" for a
+                # 12-patient cohort.
+                n_eval <- rates$n_all
                 orr_count <- rates$orr_count
                 orr_pct <- rates$orr
                 dcr_count <- rates$dcr_count
@@ -3020,7 +4080,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     # sentence used to paste literal "{orr_n}"/"{orr_ci}" into
                     # manuscripts.
                     sprintf(
-                        .("Response evaluation showed an objective response rate (ORR) of %.1f%% (%d/%d RECIST-evaluable patients%s) and a disease control rate (DCR) of %.1f%% (%d/%d RECIST-evaluable patients%s)."),
+                        .("Response evaluation showed an objective response rate (ORR) of %.1f%% (%d/%d patients%s) and a disease control rate (DCR) of %.1f%% (%d/%d patients%s). Rates are over all patients analysed, with not-evaluable and unrecorded responses counted as non-responders (RECIST 1.1 section 4.9.1)."),
                         orr_pct, orr_count, n_eval, orr_ci_text,
                         dcr_pct, dcr_count, n_eval, dcr_ci_text)
                 }
@@ -3029,7 +4089,15 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Methodology note
             methods_text <- .("Timeline visualization was created using the ggswim package.")
 
-            full_text <- paste(Filter(nzchar, c(basic_text, response_text, methods_text)), collapse = " ")
+            # The small-sample STRONG WARNING lives in the notices panel and does
+            # not travel with text the user copies into a manuscript, so an n=1
+            # cohort produced "ORR 100.0% (1/1 patients; 95% CI 2.5%-100.0%)"
+            # under the heading "formatted for direct use". Carry the caveat.
+            caveat_text <- if (isTRUE(stats$n_patients < 10))
+                sprintf(.("With only %d patients these estimates are exploratory: the confidence intervals are wide and the rates should not be read as precise."),
+                        stats$n_patients) else ""
+
+            full_text <- paste(Filter(nzchar, c(basic_text, response_text, methods_text, caveat_text)), collapse = " ")
 
             copy_ready_html <- paste0(
                 "<div style='background-color: rgba(33, 159, 33, 0.1); padding: 20px; border-left: 4px solid #28a745; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif; color: inherit;'>",
@@ -3042,7 +4110,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "</div>",
                 "<div style='margin-top: 15px; padding: 10px; background-color: rgba(33, 163, 188, 0.21); border-radius: 4px; border: 1px dashed #0c5460; color: inherit;'>",
                 "<p style='margin: 0; font-size: 0.85em; color: inherit;'>",
-                .("<strong>Usage:</strong> This text is formatted for direct use in manuscripts and clinical reports. Copy and paste into your document and adjust as needed for your specific requirements."),
+                "<strong>", .("Usage:"), "</strong> ",
+                .("This text is formatted for direct use in manuscripts and clinical reports. Copy and paste into your document and adjust as needed for your specific requirements."),
                 "</p>",
                 "</div>",
                 "</div>"
@@ -3082,6 +4151,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             for (option in private$.options$options) {
                 if (option$name == 'data')
                     next
+                # Variables go through deparse(), NOT .sourcifyOption(), and that
+                # divergence is deliberate - do not "unify" it. Measured on a
+                # column named  weird"name :
+                #   .sourcifyOption -> responseVar = weird"name    (unbalanced quote)
+                #   deparse         -> responseVar = "weird\"name"  (correct)
+                # .sourcifyOption does not quote a Variable value at all, so any
+                # name containing a quote, a backslash or a space produces a
+                # syntax-pane snippet the user cannot paste back.
                 if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
                     val <- option$value
                     if (!is.null(val) && length(val) > 0)
