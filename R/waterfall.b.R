@@ -1070,15 +1070,21 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         return(validated_df)
       },
 
-      .generateGroupColors = function(group_levels, color_scheme) {
+      .generateGroupColors = function(group_levels, color_scheme, theme = NULL) {
         # Generate colors for group-based coloring
         # @param group_levels: unique levels/groups to assign colors
-        # @param color_scheme: "colorful", "jamovi", "classic", "colorblind", etc.
+        # @param color_scheme: "colorful", "jamovi", "classic", "vivid", "colorblind", etc.
+        # @param theme: jamovi document theme (only "jamovi" consults it)
         # @return: named vector of colors
 
         n_groups <- length(group_levels)
 
-        if (color_scheme == "colorful") {
+        if (color_scheme == "jamovi") {
+          # Follow the document's global palette. "jamovi" used to mean a fixed RColorBrewer
+          # Set2 here, which was indistinguishable from the fall-through below; the name now
+          # carries its usual meaning across this module.
+          colors <- jmvcore::colorPalette(n_groups, theme$palette %||% "jmv")
+        } else if (color_scheme == "colorful") {
           # Use rainbow colors for better distinction
           colors <- rainbow(n_groups)
         } else if (color_scheme == "colorblind") {
@@ -1089,13 +1095,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           } else {
             # Fall back to colorblind-safe qualitative palette for more groups
             colors <- grDevices::hcl.colors(n_groups, palette = "Cividis")
-          }
-        } else if (color_scheme == "jamovi") {
-          # Use jamovi-style colors (RColorBrewer Set2)
-          if (n_groups <= 8) {
-            colors <- RColorBrewer::brewer.pal(max(3, n_groups), "Set2")
-          } else {
-            colors <- rainbow(n_groups)
           }
         } else {
           # Classic/default style (RColorBrewer Dark2 or Set2)
@@ -2691,7 +2690,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (useGroupColoring) {
           # Generate distinct colors for groups using reusable method
           group_levels <- unique(df$patient_group)
-          colors <- private$.generateGroupColors(group_levels, plotData$options$colorScheme)
+          colors <- private$.generateGroupColors(group_levels, plotData$options$colorScheme, theme)
           fill_var <- "patient_group"
           legend_name <- .("Patient Group")
         } else {
@@ -2699,8 +2698,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           colors <- switch(plotData$options$colorScheme,
             "simple" = simpleColors,
             "colorblind" = colorblindColors,
-            "jamovi" = recistColors,
             "recist" = recistColors,
+            "jamovi" = stats::setNames(
+              jmvcore::colorPalette(5, theme$palette %||% "jmv"),
+              c("CR", "PR", "SD", "PD", "NA")
+            ),
             recistColors  # default fallback
           )
           fill_var <- "recist_category"
@@ -2718,6 +2720,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             width = plotData$options$barWidth,
             alpha = plotData$options$barAlpha
           ) +
+          # ggtheme is a COMPLETE theme plus discrete fill/colour scales, so it
+          # replaces anything added before it. It must come BEFORE the palette
+          # below or the clinical RECIST colours are silently discarded.
+          ggtheme +
           ggplot2::scale_fill_manual(
             name = legend_name,
             values = colors,
@@ -2871,11 +2877,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           p <- p + ggplot2::labs(caption = .("Bootstrap CI for the median could not be computed."))
         }
 
-        # Add theme
-        if (plotData$options$colorScheme == "jamovi") {
-          p <- p + ggtheme
-        }
-
+        # Theme tweaks (ggtheme itself was applied with the base plot above).
         p <- p +
           ggplot2::theme(
             axis.text.x = ggplot2::element_blank(),
@@ -3020,7 +3022,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (useGroupColoring) {
           # Group-based coloring using reusable method
           group_levels <- unique(df$patient_group)
-          line_colors <- private$.generateGroupColors(group_levels, spiderColorScheme)
+          line_colors <- private$.generateGroupColors(group_levels, spiderColorScheme, theme)
           point_colors <- line_colors  # Use same colors for lines and points
           
           # Create the spider plot with group coloring
@@ -3048,6 +3050,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               color = "black",
               alpha = 0.8
             ) +
+            # ggtheme carries discrete fill/colour scales, so it must precede the
+            # palette below (see .waterfallplot).
+            ggtheme +
             # Define colors
             ggplot2::scale_color_manual(
               name = .("Patient Group"),
@@ -3070,9 +3075,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # Colorblind-safe responder colors
           responder_colors <- switch(spiderColorScheme,
             "classic" = c("Non-responder" = "#e66101", "Responder" = "#1b9e77"),  # orange vs teal
-            "jamovi" = c("Non-responder" = "#d95f02", "Responder" = "#7570b3"),  # orange vs purple
+            "vivid" = c("Non-responder" = "#d95f02", "Responder" = "#7570b3"),  # orange vs purple
             "colorblind" = c("Non-responder" = "#CC79A7", "Responder" = "#009E73"),  # Okabe-Ito reddish purple vs bluish green
             "colorful" = c("Non-responder" = "#e66101", "Responder" = "#1b9e77"),  # same as classic for responder status
+            "jamovi" = stats::setNames(
+              rev(jmvcore::colorPalette(2, theme$palette %||% "jmv")),
+              c("Non-responder", "Responder")
+            ),
             c("Non-responder" = "#e66101", "Responder" = "#1b9e77")  # default fallback
           )
 
@@ -3099,6 +3108,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               shape = 21,
               color = "black"
             ) +
+            ggtheme +
             # Define colors for response categories
             ggplot2::scale_fill_manual(
               name = .("Response Status"),
@@ -3156,8 +3166,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           }
         }
 
-        # Add theme
-        p <- p + ggtheme +
+        # Theme tweaks (ggtheme itself was applied with the base plot above).
+        p <- p +
           ggplot2::theme(
             legend.position = "right",
             panel.grid.minor = ggplot2::element_blank(),

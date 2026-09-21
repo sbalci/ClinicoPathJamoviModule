@@ -26,7 +26,7 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showCI = FALSE,
             minResponseForLabel = 50,
             colorBy = "recist",
-            colorScheme = "jamovi",
+            colorScheme = "recist",
             barAlpha = 1,
             barWidth = 0.7,
             showWaterfallPlot = TRUE,
@@ -179,12 +179,12 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "colorScheme",
                 colorScheme,
                 options=list(
-                    "jamovi",
                     "recist",
                     "simple",
                     "colorful",
-                    "colorblind"),
-                default="jamovi")
+                    "colorblind",
+                    "jamovi"),
+                default="recist")
             private$..barAlpha <- jmvcore::OptionNumber$new(
                 "barAlpha",
                 barAlpha,
@@ -217,9 +217,10 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 spiderColorScheme,
                 options=list(
                     "classic",
-                    "jamovi",
+                    "vivid",
                     "colorful",
-                    "colorblind"),
+                    "colorblind",
+                    "jamovi"),
                 default="classic")
             private$..timeUnitLabel <- jmvcore::OptionList$new(
                 "timeUnitLabel",
@@ -831,7 +832,7 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "waterfall",
-                version = c(1,0,81),
+                version = c(1,0,82),
                 options = options,
                 results = waterfallResults$new(options=options),
                 data = data,
@@ -930,7 +931,11 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param colorBy Coloring method: RECIST categories or patient groups
 #'   (requires Group Variable).
 #' @param colorScheme Color scheme for waterfall plot. 'Colorful' provides
-#'   distinct colors for group-based coloring.
+#'   distinct colors for group-based coloring; 'jamovi (follow global)' takes
+#'   its colours from the palette set in jamovi's preferences, so the figure
+#'   matches every other plot in the document. The former 'jamovi' choice drew
+#'   the RECIST colours and was identical to 'RECIST'; it was removed in favour
+#'   of that name.
 #' @param barAlpha Transparency of bars in waterfall plot.
 #' @param barWidth Width of bars in waterfall plot.
 #' @param showWaterfallPlot Display the waterfall plot showing best response
@@ -1016,7 +1021,7 @@ waterfall <- function(
     showCI = FALSE,
     minResponseForLabel = 50,
     colorBy = "recist",
-    colorScheme = "jamovi",
+    colorScheme = "recist",
     barAlpha = 1,
     barWidth = 0.7,
     showWaterfallPlot = TRUE,

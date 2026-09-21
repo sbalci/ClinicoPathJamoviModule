@@ -4,7 +4,7 @@ title: 'Treatment Response: Patient-Level Burden'
 menuGroup: OncoPath
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'One burden value per patient or visit'
-version: '1.0.81'
+version: '1.0.82'
 jas: '1.2'
 
 description:
@@ -348,8 +348,6 @@ options:
       title: Color scheme
       type: List
       options:
-        - title: jamovi
-          name: jamovi
         - title: RECIST (teal/purple/magenta/orange)
           name: recist
         - title: Simple (teal response, orange progression)
@@ -358,12 +356,19 @@ options:
           name: colorful
         - title: Colorblind-Safe (Okabe-Ito)
           name: colorblind
-      default: jamovi
+        - title: jamovi (follow global)
+          name: jamovi
+      default: recist
       description:
           R: >
-            Color scheme for waterfall plot. 'Colorful' provides distinct colors for group-based coloring.
+            Color scheme for waterfall plot. 'Colorful' provides distinct colors for group-based coloring;
+            'jamovi (follow global)' takes its colours from the palette set in jamovi's preferences, so the
+            figure matches every other plot in the document. The former 'jamovi' choice drew the RECIST
+            colours and was identical to 'RECIST'; it was removed in favour of that name.
           jamovi: >
-            Color scheme for waterfall plot. 'Colorful' provides distinct colors for group-based coloring.
+            Color scheme for waterfall plot. 'Colorful' provides distinct colors for group-based coloring;
+            'jamovi (follow global)' takes its colours from the palette set in jamovi's preferences, so the
+            figure matches every other plot in the document.
 
 
     - name: barAlpha
@@ -433,12 +438,14 @@ options:
       options:
         - title: Classic (teal/orange)
           name: classic
-        - title: jamovi Theme
-          name: jamovi
+        - title: Vivid (orange/purple)
+          name: vivid
         - title: Colorful (for groups)
           name: colorful
         - title: Colorblind-Safe (Okabe-Ito)
           name: colorblind
+        - title: jamovi (follow global)
+          name: jamovi
       default: classic
       description:
           R: >

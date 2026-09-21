@@ -121,7 +121,10 @@ if not specified).}
 
 \item{markerSize}{Size of event markers and milestone markers.}
 
-\item{plotTheme}{Visual theme for the swimmer plot.}
+\item{plotTheme}{Visual theme for the swimmer plot. "jamovi (follow
+global)" uses the plot theme selected in jamovi's preferences, so the
+figure matches every other plot in the document; the ggswim themes are a
+deliberate swimmer-plot look and remain the default.}
 
 \item{colorPalette}{Select the color palette for the response categories
 that color the lanes; it has no effect unless a Response/Status variable is

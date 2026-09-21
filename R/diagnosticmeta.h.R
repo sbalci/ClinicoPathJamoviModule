@@ -168,7 +168,8 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "colorblind_safe",
                     "high_contrast",
                     "viridis",
-                    "plasma"),
+                    "plasma",
+                    "jamovi"),
                 default="standard")
             private$..show_plot_explanations <- jmvcore::OptionBool$new(
                 "show_plot_explanations",
@@ -691,7 +692,7 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "diagnosticmeta",
-                version = c(1,0,81),
+                version = c(1,0,82),
                 options = options,
                 results = diagnosticmetaResults$new(options=options),
                 data = data,

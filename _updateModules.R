@@ -54,7 +54,22 @@ local({
     cat("\nPLAN ERRORS -- nothing was written:\n", paste0("  ", plan$errors, collapse = "\n"), "\n", sep = "")
     return(finish(1L))
   }
+  # The analysis version that every shipped .a.yaml should carry (jamovi wants x.y.z).
+  shipped_a_yaml <- planned_analysis_yaml(plan)
+  analysis_version <- paste(strsplit(cfg$new_version, ".", fixed = TRUE)[[1]][1:3], collapse = ".")
+
   if (dry_run) {
+    if (length(shipped_a_yaml)) {
+      stale <- Filter(function(f) {
+        l <- readLines(f, warn = FALSE)
+        hit <- grep("^version:", l)
+        length(hit) && !identical(trimws(l[hit[1]]), paste0("version: '", analysis_version, "'"))
+      }, shipped_a_yaml)
+      cat("\nAnalysis versions: ", length(stale), " of ", length(shipped_a_yaml),
+          " shipped umbrella .a.yaml would be set to '", analysis_version, "'\n", sep = "")
+      if (length(stale))
+        cat(paste0("  ", basename(stale), collapse = "\n"), "\n", sep = "")
+    }
     print_run_summary(plan, diffs, dry_run = TRUE)
     return(finish(0L))
   }
@@ -65,6 +80,25 @@ local({
   if (isTRUE(cfg$ClinicoPath)) {
     cat("\nUmbrella: version", cfg$new_version, "date", cfg$new_date, "\n")
     set_module_version(U, cfg$new_version, cfg$new_date)
+  }
+
+  # Bump the analysis version in the umbrella's OWN .a.yaml for the analyses that ship, BEFORE
+  # run_module() copies them, so the umbrella source and every submodule copy carry the same x.y.z.
+  # Deliberately NOT gated on cfg$ClinicoPath: that flag only says whether the umbrella package is
+  # itself versioned and built, while every submodule's DESCRIPTION is set to new_version either
+  # way. Gating here is what let OncoPath ship DESCRIPTION 1.0.82.07 beside four .a.yaml still
+  # claiming 1.0.81, which its own library-audit test fails on.
+  # Analyses that ship to no module keep their own versions -- the umbrella carries hundreds of
+  # drafts whose numbers are deliberately their own.
+  if (length(shipped_a_yaml)) {
+    bumped <- set_analysis_versions(shipped_a_yaml, cfg$new_version)
+    cat("\nAnalysis version ", analysis_version, ": ", length(bumped), " of ",
+        length(shipped_a_yaml), " shipped umbrella .a.yaml updated\n", sep = "")
+    # Each module regenerates its own headers during the build below, but the umbrella's do not:
+    # R/<name>.h.R carries the analysis version too (version = c(1,0,81)), so it is now stale here.
+    if (length(bumped) && !isTRUE(cfg$ClinicoPath))
+      cat("  umbrella R/*.h.R still carry the old version -- run jmvtools::prepare(\".\") ",
+          "in the umbrella when convenient\n", sep = "")
   }
 
   all_dirs <- vapply(reg$modules, function(m) m$directory, "")

@@ -26,7 +26,7 @@ waterfall(
   showCI = FALSE,
   minResponseForLabel = 50,
   colorBy = "recist",
-  colorScheme = "jamovi",
+  colorScheme = "recist",
   barAlpha = 1,
   barWidth = 0.7,
   showWaterfallPlot = TRUE,
@@ -131,7 +131,11 @@ displayed.}
 (requires Group Variable).}
 
 \item{colorScheme}{Color scheme for waterfall plot. 'Colorful' provides
-distinct colors for group-based coloring.}
+distinct colors for group-based coloring; 'jamovi (follow global)' takes
+its colours from the palette set in jamovi's preferences, so the figure
+matches every other plot in the document. The former 'jamovi' choice drew
+the RECIST colours and was identical to 'RECIST'; it was removed in favour
+of that name.}
 
 \item{barAlpha}{Transparency of bars in waterfall plot.}
 

@@ -271,3 +271,64 @@ testthat::test_that("prune: a bare analyses: left by an earlier run is repaired 
   testthat::expect_true(is.list(zero$analyses) && length(zero$analyses) == 0)
   testthat::expect_identical(zero$usesNative, TRUE)
 })
+
+# set_analysis_versions(): OncoPath shipped DESCRIPTION 1.0.82.07 beside four .a.yaml still
+# claiming 1.0.81, which its own library-audit test fails on. The updater now rewrites the
+# umbrella .a.yaml for the analyses that ship -- and ONLY those, because the umbrella also
+# carries hundreds of drafts whose versions are deliberately their own.
+testthat::test_that("set_analysis_versions rewrites only the .a.yaml it is handed", {
+  utils_path <- testthat::test_path("..", "..", "_updateModules_utils.R")
+  testthat::skip_if_not(file.exists(utils_path))
+  env <- new.env(parent = globalenv())
+  sys.source(utils_path, envir = env)
+
+  d <- tempfile("av"); dir.create(d)
+  mk <- function(n, v) {
+    p <- file.path(d, paste0(n, ".a.yaml"))
+    writeLines(c("---", paste0("name: ", n), "title: X",
+                 paste0("version: '", v, "'"), "jas: '1.2'"), p)
+    p
+  }
+  stale <- mk("shipped_stale", "1.0.81")
+  fresh <- mk("shipped_fresh", "1.0.82")
+  draft <- mk("draft_only", "1.0.0")
+
+  changed <- env$set_analysis_versions(c(stale, fresh), "1.0.82.07")
+
+  ver <- function(p) grep("^version:", readLines(p, warn = FALSE), value = TRUE)
+  # x.y.z: jamovi rejects a 4-component analysis version
+  testthat::expect_identical(ver(stale), "version: '1.0.82'")
+  # already correct -> rewritten identically, so not reported as changed
+  testthat::expect_identical(ver(fresh), "version: '1.0.82'")
+  testthat::expect_identical(basename(changed), "shipped_stale.a.yaml")
+  # never handed in, so never touched
+  testthat::expect_identical(ver(draft), "version: '1.0.0'")
+  # nothing but the version line moves
+  testthat::expect_identical(readLines(stale, warn = FALSE)[c(1, 2, 3, 5)],
+                             c("---", "name: shipped_stale", "title: X", "jas: '1.2'"))
+  # idempotent, and a path that does not exist is skipped rather than erroring
+  testthat::expect_length(env$set_analysis_versions(c(stale, fresh), "1.0.82.07"), 0)
+  testthat::expect_length(env$set_analysis_versions(file.path(d, "absent.a.yaml"), "1.0.82.07"), 0)
+})
+
+testthat::test_that("planned_analysis_yaml returns the umbrella .a.yaml sources that ship", {
+  utils_path <- testthat::test_path("..", "..", "_updateModules_utils.R")
+  testthat::skip_if_not(file.exists(utils_path))
+  env <- new.env(parent = globalenv())
+  sys.source(utils_path, envir = env)
+
+  plan <- list(modules = list(
+    list(files = data.frame(
+      src  = c("/U/jamovi/a.a.yaml", "/U/R/a.b.R", "/U/jamovi/a.r.yaml"),
+      dest = c("jamovi/a.a.yaml", "R/a.b.R", "jamovi/a.r.yaml"),
+      stringsAsFactors = FALSE)),
+    # the same analysis shipped to a second module must not be listed twice
+    list(files = data.frame(
+      src  = c("/U/jamovi/a.a.yaml", "/U/jamovi/b.a.yaml"),
+      dest = c("jamovi/a.a.yaml", "jamovi/b.a.yaml"),
+      stringsAsFactors = FALSE)),
+    list(files = NULL)))
+
+  testthat::expect_identical(env$planned_analysis_yaml(plan),
+                             c("/U/jamovi/a.a.yaml", "/U/jamovi/b.a.yaml"))
+})

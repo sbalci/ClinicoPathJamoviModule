@@ -3462,7 +3462,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             
             tryCatch({
                 # Create enhanced ggswim plot
-                p <- private$.createGgswimPlot(patient_data, milestone_data, event_data, arrow_data, opts, stats, theme)
+                p <- private$.createGgswimPlot(patient_data, milestone_data, event_data, arrow_data, opts, stats, theme, ggtheme)
                 
                 print(p)
                 return(TRUE)
@@ -3483,7 +3483,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             })
         },
         
-        .createGgswimPlot = function(patient_data, milestone_data, event_data, arrow_data, opts, stats, theme = NULL) {
+        .createGgswimPlot = function(patient_data, milestone_data, event_data, arrow_data, opts, stats, theme = NULL, ggtheme = NULL) {
             # Check if ggswim is available
             if (!requireNamespace("ggswim", quietly = TRUE)) {
                 return(private$.createFallbackPlot(patient_data, milestone_data, event_data, opts, stats,
@@ -3634,8 +3634,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 p <- private$.addReferenceLines(p, opts, stats, patient_data)
             }
             
-            # Apply theme and styling
-            if (opts$theme == "ggswim") {
+            # Apply theme and styling. "jamovi" follows the theme the user chose
+            # in jamovi's preferences (dark UI -> dark plot), like every other
+            # module's plot; it must be added BEFORE the palette scales below,
+            # because ggtheme is a complete theme PLUS discrete fill/colour
+            # scales and silently discards anything added before it.
+            if (identical(opts$theme, "jamovi") && !is.null(ggtheme)) {
+                p <- p + ggtheme
+            } else if (opts$theme == "ggswim") {
                 p <- p + ggswim::theme_ggswim()
             } else if (opts$theme == "ggswim_dark") {
                 p <- p + ggswim::theme_ggswim_dark()

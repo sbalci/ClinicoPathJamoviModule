@@ -3,7 +3,7 @@ name: diagnosticmeta
 title: Diagnostic Test Meta-Analysis for Pathology
 menuGroup: OncoPath
 menuSubgroup: Meta-Analysis
-version: '1.0.81'
+version: '1.0.82'
 jas: '1.2'
 
 description:
@@ -243,6 +243,8 @@ options:
             title: Viridis (Blue-Purple)
           - name: 'plasma'
             title: Plasma (Purple-Pink)
+          - name: 'jamovi'
+            title: jamovi (follow global)
       default: standard
       description:
           R: Color palette for all plots - choose color-blind safe options for accessibility

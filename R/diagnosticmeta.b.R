@@ -167,9 +167,25 @@ diagnosticmetaClass <- R6::R6Class(
             text
         },
 
-        # Helper function to get color palette for accessibility
-        .getColorPalette = function() {
+        # Helper function to get color palette for accessibility.
+        # `theme` is the jamovi theme object handed to every render function;
+        # only the "jamovi" choice consults it, so the accessibility palettes
+        # (colorblind_safe, high_contrast) are never overridden by a document
+        # theme.
+        .getColorPalette = function(theme = NULL) {
             palette_option <- self$options$color_palette %||% "standard"
+
+            if (identical(palette_option, "jamovi")) {
+                pal <- try(jmvcore::colorPalette(4, theme$palette %||% "jmv", "color"),
+                           silent = TRUE)
+                if (!inherits(pal, "try-error") && length(pal) >= 4)
+                    return(list(
+                        primary      = pal[1],
+                        secondary    = pal[2],
+                        tertiary     = pal[3],
+                        study_points = pal[4]
+                    ))
+            }
 
             switch(palette_option,
                 "standard" = list(
@@ -2320,7 +2336,7 @@ diagnosticmetaClass <- R6::R6Class(
                 plot_data <- rbind(sens_data, spec_data)
 
                 # Get color palette for accessibility
-                colors <- private$.getColorPalette()
+                colors <- private$.getColorPalette(theme)
 
                 # Add pooled estimates as diamond (standard meta-analysis
                 # convention). Pooled point + CIs come from the serialized state
@@ -2638,7 +2654,7 @@ diagnosticmetaClass <- R6::R6Class(
                 meta_data$n <- meta_data$tp + meta_data$fn + meta_data$fp + meta_data$tn
 
                 # Get color palette for accessibility
-                colors <- private$.getColorPalette()
+                colors <- private$.getColorPalette(theme)
 
                 # Base plot: individual study points sized by sample size
                 p <- ggplot2::ggplot(meta_data, ggplot2::aes(x = fpr, y = sens)) +
@@ -2792,7 +2808,7 @@ diagnosticmetaClass <- R6::R6Class(
                 meta_data$inv_root_ess <- 1 / sqrt(meta_data$ess)
 
                 # Get color palette for accessibility
-                colors <- private$.getColorPalette()
+                colors <- private$.getColorPalette(theme)
 
                 # The plot is read together with the test, so it carries the test:
                 # the fitted regression line is the slope the p-value refers to.

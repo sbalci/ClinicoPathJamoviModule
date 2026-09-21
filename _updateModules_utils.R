@@ -709,6 +709,41 @@ set_module_version <- function(module_dir, version, date) {
   invisible(TRUE)
 }
 
+# Write the analysis version into a set of jamovi/<name>.a.yaml files.
+#
+# jamovi requires the analysis version to be x.y.z, so it is the first THREE components of the
+# package version (1.0.82.07 -> 1.0.82). Each submodule's library-audit test asserts that every
+# shipped .a.yaml agrees with that module's DESCRIPTION, and OncoPath failed it: DESCRIPTION had
+# moved to 1.0.82.07 while all four .a.yaml still said 1.0.81.
+#
+# The caller passes ONLY the umbrella .a.yaml files that are actually copied to a submodule. The
+# umbrella also carries several hundred draft/pending analyses whose versions are deliberately
+# their own (129 sit at 1.0.0, 63 at 0.0.31), and a blanket rewrite would destroy that.
+#
+# Rewriting the umbrella SOURCE rather than each copy is what keeps the two in step: the copy is
+# byte-for-byte, so one edit fixes the umbrella and every submodule at once.
+set_analysis_versions <- function(a_yaml_files, version) {
+  v <- paste(strsplit(version, ".", fixed = TRUE)[[1]][1:3], collapse = ".")
+  changed <- character()
+  for (f in unique(a_yaml_files)) {
+    if (!file.exists(f)) next
+    l <- readLines(f, warn = FALSE)
+    hit <- grep("^version:", l)
+    if (!length(hit)) next
+    l[hit] <- paste0("version: '", v, "'")
+    if (isTRUE(.write_if_changed(l, f))) changed <- c(changed, f)
+  }
+  changed
+}
+
+# The umbrella .a.yaml files that ship to at least one submodule, from a computed plan.
+planned_analysis_yaml <- function(plan) {
+  unique(unlist(lapply(plan$modules, function(mp) {
+    if (is.null(mp$files)) return(character())
+    mp$files$src[grepl("\\.a\\.yaml$", mp$files$dest)]
+  }), use.names = FALSE))
+}
+
 apply_distribution_plan <- function(mp, reg, other_module_dirs = character()) {
   dir <- mp$dir
   for (p in mp$delete) {
@@ -971,7 +1006,10 @@ print_run_summary <- function(plan, diffs, results = NULL, dry_run = FALSE) {
   agepyramid = "Age Pyramid", benford = "Benford Analysis", checkdata = "Data Quality Check",
   dataquality = "Data Quality", reportcat = "Categorical Variables Report",
   summarydata = "Continuous Variables Summary", treatmentResponse = "Treatment Response",
-  tableone = "Table One", swimmerplot = "Swimmer Plot", waterfall = "Treatment Response Waterfall")
+  tableone = "Table One", swimmerplot = "Swimmer Plot", waterfall = "Treatment Response Waterfall",
+  # Without an entry here the fallback is tools::toTitleCase(), which produces
+  # "Diagnosticmeta" / "Ihcheterogeneity" in jamovi's dataset browser.
+  diagnosticmeta = "Diagnostic Test Meta-Analysis", ihcheterogeneity = "IHC Heterogeneity")
 
 .omv_stem <- function(omv) sub("_(test|sample|example|basic|raw|longitudinal|percentage|data)([_.].*)?$", "",
                               sub("\\.omv$", "", omv))

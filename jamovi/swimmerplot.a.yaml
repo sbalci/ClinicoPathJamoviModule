@@ -3,7 +3,7 @@ name: swimmerplot
 title: "Swimmer Plot"
 menuGroup: OncoPath
 menuSubgroup: Patient Follow-Up Plots
-version: '1.0.81'
+version: '1.0.82'
 jas: '1.2'
 
 description:
@@ -328,6 +328,8 @@ options:
       title: "Plot theme"
       type: List
       options:
+        - title: "jamovi (follow global)"
+          name: jamovi
         - title: "ggswim (Light)"
           name: ggswim
         - title: "ggswim (Dark)"
@@ -337,7 +339,10 @@ options:
       default: ggswim
       description:
           R: >
-            Visual theme for the swimmer plot.
+            Visual theme for the swimmer plot. "jamovi (follow global)" uses the
+            plot theme selected in jamovi's preferences, so the figure matches
+            every other plot in the document; the ggswim themes are a deliberate
+            swimmer-plot look and remain the default.
 
     - name: colorPalette
       title: "Color palette"

@@ -245,13 +245,19 @@ modules:
       # with no importFrom anywhere `waterfall` could not run in jamovi at all
       # (2026-09-16 OncoPath audit, CRITICAL). A bare infix operator is not put
       # in scope by Imports: alone -- R/zzz_imports.R carries the importFrom tag.
+    # One example dataset per shipped analysis, sized to demonstrate it, plus `histopathology`
+    # (250 x 38), the umbrella's omnibus dataset: no OncoPath analysis references it, but it is
+    # kept deliberately as a general-purpose frame for users exploring the module.
     data_files:
-      - "histopathology.rda"
-      - "waterfall_percentage_basic.rda"
-      - "waterfall_raw_longitudinal.rda"
-      - "diagnostic_studies.rda"
-      - "swimmerplot_sample.rda"
-      - "ihcheterogeneity_test.rda"   # the ihcheterogeneity help example
+      - "histopathology.rda"                  # general-purpose demo frame (kept by request)
+      - "waterfall_percentage_basic.rda"      # waterfall, percentage input
+      - "waterfall_raw_longitudinal.rda"      # waterfall, raw input + spider plot
+      - "swimmerplot_sample.rda"              # swimmerplot, with milestones and events
+      - "ihcheterogeneity_test.rda"           # ihcheterogeneity help example, incl. spatial_id
+      - "diagnostic_studies.rda"              # diagnosticmeta, 5 studies (vignette anchor)
+      - "diagnosticmeta_test_categorical.rda" # diagnosticmeta, 20 studies + imaging_modality:
+                                              # enough for heterogeneity and meta-regression,
+                                              # which 5 studies cannot support
   JamoviTest:
     directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
     toggle: "TEST"          # enabled by the top-level TEST switch

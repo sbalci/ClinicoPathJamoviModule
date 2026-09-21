@@ -1,6 +1,35 @@
 # ClinicoPath News
 
 
+## Unreleased — plot themes and palettes (module 1.0.81.01)
+
+- **BREAKING — `waterfall` colour scheme names.** `colorScheme` declared two levels that both read as
+  "jamovi": `jamovi` (which drew the RECIST colours, byte-identical to `recist`) and `global` (follow
+  the document palette). The duplicate is removed, `recist` is now the default, and `global` is renamed
+  to `jamovi`, so the name means what it means in every other palette option in this module. **The
+  default rendering does not change** — the removed level drew the RECIST colours too — but a saved
+  `.omv` that explicitly selected `jamovi` now follows the document palette instead of drawing RECIST,
+  and must be switched to `recist` to restore it. `spiderColorScheme` likewise renames its old `jamovi`
+  (orange/purple) to `vivid` and its `global` to `jamovi`; its `classic` default is unchanged.
+- **`waterfall` plots lost their colours on the default setting.** jamovi's `ggtheme` is a complete
+  theme *plus* discrete fill and colour scales, so anything added before it is silently discarded. Both
+  renderers built `scale_fill_manual()` first and applied `ggtheme` afterwards, and only when
+  `colorScheme == "jamovi"` — which was the default. The RECIST palette was therefore replaced by
+  jamovi's generic pastels (`#0000FF #4DA6FF #FFA500 #FF0000` rendered as
+  `#A6C4F1 #F0CD8C #88C38B #C5C5C5`), while every other scheme silently skipped the user's theme
+  entirely. `ggtheme` is now applied unconditionally and before the scales, so a plot follows the
+  document theme *and* keeps its clinical colours.
+- **Plots follow jamovi's global palette.** `waterfall`, `swimmerplot` and `diagnosticmeta` renderers
+  accepted jamovi's `theme` argument and ignored it, so a report could carry two colour systems. Each
+  palette option now offers "jamovi (follow global)", resolved through `jmvcore::colorPalette()`;
+  `swimmerplot`'s `plotTheme` gains the same choice. Accessibility palettes (Okabe-Ito, high contrast)
+  remain deliberate overrides and are never overridden by a document theme.
+- **Module updater keeps analysis versions in step.** `_updateModules.R` now writes the analysis version
+  into the umbrella's own `jamovi/*.a.yaml` for the analyses that ship, before copying them, so the
+  umbrella and every submodule carry the same `x.y.z`. Previously only each submodule's `DESCRIPTION`
+  was bumped, which let OncoPath ship `1.0.82.07` beside four `.a.yaml` still claiming `1.0.81` and fail
+  its own library-audit test. Analyses that ship nowhere keep their own versions.
+
 ## Unreleased — articles, dataset documentation and Turkish catalog (module 1.0.81.01)
 
 - **Articles.** 53 generated `*-comprehensive.Rmd` stubs were deleted: each loaded a package that does not

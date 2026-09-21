@@ -259,6 +259,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "plotTheme",
                 plotTheme,
                 options=list(
+                    "jamovi",
                     "ggswim",
                     "ggswim_dark",
                     "minimal"),
@@ -924,7 +925,7 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "swimmerplot",
-                version = c(1,0,81),
+                version = c(1,0,82),
                 options = options,
                 results = swimmerplotResults$new(options=options),
                 data = data,
@@ -987,7 +988,10 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   if not specified).
 #' @param laneWidth Width/thickness of patient timeline lanes.
 #' @param markerSize Size of event markers and milestone markers.
-#' @param plotTheme Visual theme for the swimmer plot.
+#' @param plotTheme Visual theme for the swimmer plot. "jamovi (follow
+#'   global)" uses the plot theme selected in jamovi's preferences, so the
+#'   figure matches every other plot in the document; the ggswim themes are a
+#'   deliberate swimmer-plot look and remain the default.
 #' @param colorPalette Select the color palette for the response categories
 #'   that color the lanes; it has no effect unless a Response/Status variable is
 #'   selected, and the grouping variable is never used for color. Colorblind
