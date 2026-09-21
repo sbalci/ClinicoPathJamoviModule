@@ -1037,3 +1037,76 @@ test_that("the help-page example runs", {
     res <- eval(parse(text = code))
     expect_gt(nrow(res$samplingbiastable$asDF), 0)
 })
+
+# The three "Additional Analyses" checkboxes are ADDITIVE on top of the analysis focus:
+# every backend gate reads `self$options$<flag> || analysis_type %in% (...)`. Under the default
+# focus (comprehensive) the right-hand side is already TRUE, so ticking or unticking them cannot
+# change anything -- reported from the UI as "checking it does not change the analysis". The
+# behaviour is correct; what was missing is that the .u.yaml did not say so, leaving three live
+# checkboxes that silently did nothing. They now carry `enable:` bindings, and this test pins
+# both halves: the semantics, and the bindings that must keep matching them.
+test_that("Additional Analyses toggles are inert under a focus that already includes them", {
+    d <- clean(30)
+    run <- function(...) {
+        o <- ClinicoPath:::ihcheterogeneityOptions$new(wholesection = "whole", biopsy1 = "b1",
+                                                       biopsy2 = "b2", ...)
+        an <- ClinicoPath:::ihcheterogeneityClass$new(options = o, data = d); an$run(); an$results
+    }
+
+    # comprehensive forces all three on: the flags make no difference either way
+    for (flags in list(list(), list(show_variability_plots = TRUE, variance_components = TRUE,
+                                    sample_size_planning = TRUE))) {
+        r <- do.call(run, c(list(analysis_type = "comprehensive"), flags))
+        expect_true(r$variabilityplot$visible)
+        expect_true(r$variancetable$visible)
+        expect_true(r$samplesizetable$visible)
+    }
+
+    # variability forces plots and variance components, but NOT sample-size planning
+    r <- run(analysis_type = "variability")
+    expect_true(r$variabilityplot$visible)
+    expect_true(r$variancetable$visible)
+    expect_false(r$samplesizetable$visible)
+    expect_true(run(analysis_type = "variability", sample_size_planning = TRUE)$samplesizetable$visible)
+
+    # reproducibility forces none: here the three flags are the only thing that turns them on
+    r <- run(analysis_type = "reproducibility")
+    expect_false(r$variabilityplot$visible)
+    expect_false(r$variancetable$visible)
+    expect_false(r$samplesizetable$visible)
+    expect_true(run(analysis_type = "reproducibility", show_variability_plots = TRUE)$variabilityplot$visible)
+    expect_true(run(analysis_type = "reproducibility", variance_components = TRUE)$variancetable$visible)
+    expect_true(run(analysis_type = "reproducibility", sample_size_planning = TRUE)$samplesizetable$visible)
+})
+
+test_that("the Additional Analyses checkboxes are disabled exactly when the focus forces them", {
+    uy <- testthat::test_path("..", "..", "jamovi", "ihcheterogeneity.u.yaml")
+    skip_if_not(file.exists(uy), "u.yaml not available in the installed test context")
+    enable_of <- function(node, want) {
+        if (is.list(node)) {
+            if (identical(node$type, "CheckBox") && identical(node$name, want)) return(node$enable)
+            for (x in node) { got <- enable_of(x, want); if (!is.null(got)) return(got) }
+        }
+        NULL
+    }
+    u <- yaml::read_yaml(uy)
+    # must mirror the backend gates at R/ihcheterogeneity.b.R:574, 585-588, 739, 811, 818, 1546
+    expect_identical(enable_of(u, "show_variability_plots"),
+                     "(!analysis_type:variability && !analysis_type:comprehensive)")
+    expect_identical(enable_of(u, "variance_components"),
+                     "(!analysis_type:variability && !analysis_type:comprehensive)")
+    expect_identical(enable_of(u, "sample_size_planning"),
+                     "(!analysis_type:comprehensive)")
+
+    # and the label must fit the options panel: the old one was 205 characters and was cut off
+    lbl <- NULL
+    find_lbl <- function(n) {
+        if (is.list(n)) {
+            if (identical(n$label, "Additional Analyses") && !is.null(n$children))
+                for (c in n$children) if (identical(c$type, "Label")) lbl <<- c$label
+            for (x in n) find_lbl(x)
+        }
+    }
+    find_lbl(u)
+    expect_true(!is.null(lbl) && nchar(lbl) <= 85)
+})

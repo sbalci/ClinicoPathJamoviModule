@@ -95,16 +95,19 @@ children:
     label: Additional Analyses
     children:
       - type: Label
-        label: The Comprehensive focus always includes plots, variance components and sample-size planning; the Variance focus includes plots and variance components. Use these toggles to add them under other focuses.
+        label: Greyed out when the analysis focus above already includes them.
       - type: CheckBox
         name: show_variability_plots
         label: Variability plots
+        enable: (!analysis_type:variability && !analysis_type:comprehensive)
       - type: CheckBox
         name: variance_components
         label: Variance component analysis
+        enable: (!analysis_type:variability && !analysis_type:comprehensive)
       - type: CheckBox
         name: sample_size_planning
         label: Sample size for ICC precision
+        enable: (!analysis_type:comprehensive)
   - type: CollapseBox
     label: Output Options
     collapsed: true
